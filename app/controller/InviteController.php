@@ -57,6 +57,9 @@ final class InviteController
             $raw = (string)(file_get_contents('php://input') ?: '');
             /** @var array<string, mixed>|null $input */
             $input = json_decode($raw, true);
+            if (!is_array($input) && !empty($_POST)) {
+                $input = $_POST;
+            }
             if (!is_array($input)) {
                 http_response_code(400);
                 echo json_encode(['status' => 'error', 'message' => 'Invalid JSON payload.']);
@@ -88,7 +91,8 @@ final class InviteController
             }
 
             $lineageScope = trim((string)($input['lineage_scope'] ?? ''));
-            $isBirthLineage = ($lineageScope === 'maternal' || $lineageScope === 'birth' || ($primaryCode !== '' && $familyCode !== $primaryCode));
+            $isMaternalLineage = ($lineageScope === 'maternal');
+            $isBirthLineage = ($isMaternalLineage || $lineageScope === 'birth' || ($primaryCode !== '' && $familyCode !== $primaryCode));
             $familySurname = trim((string)($input['family_surname'] ?? ''));
 
             $type = in_array($input['type'] ?? '', ['organogram', 'onboarding', 'family_invite', 'referral'], true)
@@ -97,7 +101,7 @@ final class InviteController
 
             $meta = [
                 'invited_by'    => $userId,
-                'lineage_scope' => $isBirthLineage ? 'maternal' : 'primary',
+                'lineage_scope' => $isMaternalLineage ? 'maternal' : ($isBirthLineage ? 'birth' : 'primary'),
             ];
             if (!empty($input['first_name'])) {
                 $meta['first_name'] = trim((string)$input['first_name']);
@@ -115,22 +119,36 @@ final class InviteController
             $token     = InviteTokenService::create($familyCode, $meta, $type);
             $inviteUrl = InviteTokenService::getRegisterUrl($token);
 
-            // Generate ready-to-share WhatsApp link with lineage-aware copy (marital vs. birth)
+            // Generate ready-to-share WhatsApp link with lineage-aware copy (marital vs. birth vs. maternal)
             $firstName = trim((string)($input['first_name'] ?? ''));
             $lastName  = trim((string)($input['last_name'] ?? ''));
             $relativeName = trim($firstName . ' ' . $lastName);
-            $treeLabel = $isBirthLineage
-                ? ($familySurname !== '' ? "our {$familySurname} Birth Family Tree" : 'our Birth Family Tree')
-                : ($familySurname !== '' ? "our {$familySurname} Family Tree" : 'our Family Tree');
 
-            $whatsappMessage = !empty($relativeName)
-                ? "👋 Hello {$relativeName}! I have reserved your branch on {$treeLabel} on FamilyPlatform (Family Code: #{$familyCode}). Tap here to claim your spot and connect with our family:\n" . $inviteUrl
-                : "👋 Hello! You have been invited to connect with {$treeLabel} on FamilyPlatform (Family Code: #{$familyCode}). Tap here to claim your branch:\n" . $inviteUrl;
+            if ($isMaternalLineage) {
+                if ($familyCode === $primaryCode) {
+                    $treeLabel = $familySurname !== '' ? "our {$familySurname} Family Tree (Maternal Lineage)" : 'our Maternal Family Lineage';
+                    $whatsappMessage = !empty($relativeName)
+                        ? "👋 Hello {$relativeName}! I have reserved your branch on {$treeLabel} on FamilyPlatform. Tap here to claim your spot and connect with our family:\n" . $inviteUrl
+                        : "👋 Hello! You have been invited to connect with {$treeLabel} on FamilyPlatform. Tap here to claim your branch:\n" . $inviteUrl;
+                } else {
+                    $treeLabel = $familySurname !== '' ? "our {$familySurname} Birth Family Tree" : 'our Maternal Birth Family Tree';
+                    $whatsappMessage = !empty($relativeName)
+                        ? "👋 Hello {$relativeName}! I have reserved your branch on {$treeLabel} on FamilyPlatform (Family Code: #{$familyCode}). Tap here to claim your spot and connect with our family:\n" . $inviteUrl
+                        : "👋 Hello! You have been invited to connect with {$treeLabel} on FamilyPlatform (Family Code: #{$familyCode}). Tap here to claim your branch:\n" . $inviteUrl;
+                }
+            } else {
+                $treeLabel = $isBirthLineage
+                    ? ($familySurname !== '' ? "our {$familySurname} Birth Family Tree" : 'our Birth Family Tree')
+                    : ($familySurname !== '' ? "our {$familySurname} Family Tree" : 'our Family Tree');
+
+                $whatsappMessage = !empty($relativeName)
+                    ? "👋 Hello {$relativeName}! I have reserved your branch on {$treeLabel} on FamilyPlatform (Family Code: #{$familyCode}). Tap here to claim your spot and connect with our family:\n" . $inviteUrl
+                    : "👋 Hello! You have been invited to connect with {$treeLabel} on FamilyPlatform (Family Code: #{$familyCode}). Tap here to claim your branch:\n" . $inviteUrl;
+            }
 
             $whatsappShareUrl = 'https://api.whatsapp.com/send?text=' . rawurlencode($whatsappMessage);
 
-            header('Content-Type: application/json');
-            echo json_encode([
+            msgSuccess(200, [
                 'status'             => 'success',
                 'invite_url'         => $inviteUrl,
                 'whatsapp_share_url' => $whatsappShareUrl,
@@ -182,6 +200,13 @@ final class InviteController
                 return;
             }
 
+            $tokenFamCode = trim((string)($data['family_code'] ?? ''));
+            if (empty($_SESSION['manager_id']) && $tokenFamCode !== '' && !BaseController::sessionSharesFamily($tokenFamCode)) {
+                http_response_code(403);
+                echo json_encode(['status' => 'error', 'message' => 'Access denied to this family invite token.']);
+                return;
+            }
+
             $inviteUrl = InviteTokenService::getRegisterUrl($token);
 
             // Construct QR-code URL with safe URL parameter encoding
@@ -195,8 +220,8 @@ final class InviteController
             ];
 
             header('Content-Type: application/json');
-            $jsonResponse = json_encode($response);
-            echo htmlspecialchars((string)$jsonResponse, ENT_QUOTES, 'UTF-8');
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response with HEX flags
+            echo json_encode($response, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES);
 
         } catch (\Throwable $e) {
             error_log('[InviteController::qrCode] ' . $e->getMessage());

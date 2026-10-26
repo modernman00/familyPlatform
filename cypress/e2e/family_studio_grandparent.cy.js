@@ -84,7 +84,7 @@ describe('Family Studio - Add Grandparent', () => {
                 cy.get('#studioAddRelativeModal').should('not.be.visible');
             });
 
-            cy.get('#group-gen-minus1 .relative-name').then(($names) => {
+            cy.get('#group-gen-minus1 > .row > .relative-card-container .relative-name').then(($names) => {
                 const parentNamesBefore = [...$names].map((el) => el.textContent.trim());
 
                 cy.contains('.add-card-title', 'Add Grandparent').click();

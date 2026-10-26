@@ -304,6 +304,22 @@ final class Register extends Db
 
                 $dbConnection->commit();
 
+                // Record creator in family_codes when founding a new family code
+                if (!$joiningViaInvitation && !empty($cleanData['famCode'])) {
+                    try {
+                        $normCode = \App\services\FamilyCodeRenameService::normalise((string)$cleanData['famCode']);
+                        if ($normCode !== '') {
+                            $stmtRegCode = $dbConnection->prepare(
+                                "INSERT INTO family_codes (code, kind, created_by) VALUES (?, 'primary', ?)
+                                 ON DUPLICATE KEY UPDATE created_by = IF(created_by IS NULL OR created_by = '', VALUES(created_by), created_by)"
+                            );
+                            $stmtRegCode->execute([$normCode, (string)$cleanData['id']]);
+                        }
+                    } catch (\Throwable $regCodeEx) {
+                        error_log('[Register.php] family_codes creator record warning: ' . $regCodeEx->getMessage());
+                    }
+                }
+
                 // Immediate Auto-Claim & Tree Node initialization
                 try {
                     $claimNodeId = !empty($input['claim_node']) ? (int)$input['claim_node'] : null;

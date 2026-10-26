@@ -97,6 +97,60 @@ final class Organogram extends SingleCustomerData
             $children = $this->fetchRelationsData($idStr, 'children', 'children');
             $siblingChildren = ($siblings !== null) ? $this->getSiblingChildren($siblings) : null;
 
+            // Resolve Maternal Lineage Metadata (Mother maiden surname & mother birth family code)
+            $motherMaidenSurname = '';
+            $motherBirthFamCode = '';
+            $paternalSurname = $maritalSurname;
+
+            $ofStmt = Db::connect2()->prepare('SELECT maiden_name, otherFamCode FROM otherFamily WHERE id = ? ORDER BY no ASC LIMIT 1');
+            $ofStmt->execute([$idStr]);
+            $ofRow = $ofStmt->fetch(\PDO::FETCH_ASSOC);
+            if ($ofRow) {
+                $motherMaidenSurname = trim((string)($ofRow['maiden_name'] ?? ''));
+                if (!empty($ofRow['otherFamCode'])) {
+                    $motherBirthFamCode = strtoupper(trim((string)$ofRow['otherFamCode']));
+                }
+            }
+
+            $mNodeStmt = Db::connect2()->prepare("
+                SELECT id, user_id, first_name, last_name, maiden_name 
+                FROM family_nodes 
+                WHERE family_code = ? AND (bio = 'Mother' OR (generation_level = -1 AND gender = 'Female')) 
+                ORDER BY id ASC LIMIT 1
+            ");
+            $mNodeStmt->execute([$familyCode]);
+            $motherNode = $mNodeStmt->fetch(\PDO::FETCH_ASSOC);
+            if ($motherNode) {
+                if ($motherMaidenSurname === '' && !empty($motherNode['maiden_name'])) {
+                    $motherMaidenSurname = trim((string)$motherNode['maiden_name']);
+                }
+                if (!empty($motherNode['user_id']) && $motherBirthFamCode === '') {
+                    try {
+                        $mBf = (new \App\services\BirthFamilyCodeService(Db::connect2()))->status((string)$motherNode['user_id']);
+                        if (!empty($mBf['code']) && $mBf['state'] === 'active') {
+                            $motherBirthFamCode = strtoupper(trim((string)$mBf['code']));
+                        }
+                    } catch (\Throwable) {}
+                }
+            }
+
+            if ($motherMaidenSurname === '') {
+                $mgpStmt = Db::connect2()->prepare("
+                    SELECT last_name FROM family_nodes 
+                    WHERE family_code = ? AND generation_level = -2 AND last_name <> '' AND last_name <> ? 
+                    ORDER BY id ASC LIMIT 1
+                ");
+                $mgpStmt->execute([$familyCode, $paternalSurname]);
+                $mgpLast = trim((string)($mgpStmt->fetchColumn() ?: ''));
+                if ($mgpLast !== '') {
+                    $motherMaidenSurname = $mgpLast;
+                }
+            }
+
+            $graphData['motherMaidenSurname'] = $motherMaidenSurname;
+            $graphData['motherBirthFamCode'] = $motherBirthFamCode;
+            $graphData['paternalSurname'] = $paternalSurname;
+
             $orgData = [
                 'spouse' => $spouse[0] ?? null,
                 'father' => $father[0] ?? null,
@@ -125,7 +179,14 @@ final class Organogram extends SingleCustomerData
                 'primaryFamCode',
                 'maternalFamCode',
                 'maritalSurname',
-                'maidenSurname'
+                'maidenSurname',
+                'motherMaidenSurname',
+                'motherBirthFamCode',
+                'paternalSurname',
+                'motherMaidenSurname',
+                'motherBirthFamCode',
+                'paternalSurname',
+                'motherNode'
             ));
         } catch (\Throwable $th) {
             showError($th);
@@ -204,6 +265,60 @@ final class Organogram extends SingleCustomerData
             $mother = $this->fetchRelationsData($idStr, 'otherFamily', 'mother');
             $siblings = $this->fetchRelationsData($idStr, 'sibling', 'sibling');
             $children = $this->fetchRelationsData($idStr, 'children', 'children');
+
+            // Resolve Maternal Lineage Metadata for Studio
+            $motherMaidenSurname = '';
+            $motherBirthFamCode = '';
+            $paternalSurname = $maritalSurname;
+
+            $ofStmt = Db::connect2()->prepare('SELECT maiden_name, otherFamCode FROM otherFamily WHERE id = ? ORDER BY no ASC LIMIT 1');
+            $ofStmt->execute([$idStr]);
+            $ofRow = $ofStmt->fetch(\PDO::FETCH_ASSOC);
+            if ($ofRow) {
+                $motherMaidenSurname = trim((string)($ofRow['maiden_name'] ?? ''));
+                if (!empty($ofRow['otherFamCode'])) {
+                    $motherBirthFamCode = strtoupper(trim((string)$ofRow['otherFamCode']));
+                }
+            }
+
+            $mNodeStmt = Db::connect2()->prepare("
+                SELECT id, user_id, first_name, last_name, maiden_name 
+                FROM family_nodes 
+                WHERE family_code = ? AND (bio = 'Mother' OR (generation_level = -1 AND gender = 'Female')) 
+                ORDER BY id ASC LIMIT 1
+            ");
+            $mNodeStmt->execute([$familyCode]);
+            $mNodeRow = $mNodeStmt->fetch(\PDO::FETCH_ASSOC);
+            if ($mNodeRow) {
+                if ($motherMaidenSurname === '' && !empty($mNodeRow['maiden_name'])) {
+                    $motherMaidenSurname = trim((string)$mNodeRow['maiden_name']);
+                }
+                if (!empty($mNodeRow['user_id']) && $motherBirthFamCode === '') {
+                    try {
+                        $mBf = (new \App\services\BirthFamilyCodeService(Db::connect2()))->status((string)$mNodeRow['user_id']);
+                        if (!empty($mBf['code']) && $mBf['state'] === 'active') {
+                            $motherBirthFamCode = strtoupper(trim((string)$mBf['code']));
+                        }
+                    } catch (\Throwable) {}
+                }
+            }
+
+            if ($motherMaidenSurname === '') {
+                $mgpStmt = Db::connect2()->prepare("
+                    SELECT last_name FROM family_nodes 
+                    WHERE family_code = ? AND generation_level = -2 AND last_name <> '' AND last_name <> ? 
+                    ORDER BY id ASC LIMIT 1
+                ");
+                $mgpStmt->execute([$familyCode, $paternalSurname]);
+                $mgpLast = trim((string)($mgpStmt->fetchColumn() ?: ''));
+                if ($mgpLast !== '') {
+                    $motherMaidenSurname = $mgpLast;
+                }
+            }
+
+            $graphData['motherMaidenSurname'] = $motherMaidenSurname;
+            $graphData['motherBirthFamCode'] = $motherBirthFamCode;
+            $graphData['paternalSurname'] = $paternalSurname;
 
             $nodes = $graphData['nodes'] ?? [];
             $unions = $graphData['unions'] ?? [];
@@ -325,7 +440,10 @@ final class Organogram extends SingleCustomerData
                 'primaryFamCode',
                 'maternalFamCode',
                 'maritalSurname',
-                'maidenSurname'
+                'maidenSurname',
+                'motherMaidenSurname',
+                'motherBirthFamCode',
+                'paternalSurname'
             ));
         } catch (\Throwable $th) {
             showError($th);
@@ -884,10 +1002,13 @@ final class Organogram extends SingleCustomerData
 
         $db = Db::connect2();
 
-        // 1. Fast-path check: if family already has valid unions, no healing required
+        // 1. Fast-path check: if family already has valid unions, check for orphaned elders before returning
         $checkUnions = $db->prepare("SELECT COUNT(*) FROM family_unions WHERE family_code = ?");
         $checkUnions->execute([$familyCode]);
-        if ((int)$checkUnions->fetchColumn() > 0) {
+        $hasExistingUnions = ((int)$checkUnions->fetchColumn() > 0);
+
+        if ($hasExistingUnions) {
+            $this->healOrphanedElders($db, $familyCode);
             return;
         }
 
@@ -982,6 +1103,88 @@ final class Organogram extends SingleCustomerData
             foreach ($gen1Children as $ch) {
                 $insChild->execute([$rootUnionId, (int)$ch['id']]);
             }
+        }
+
+        $this->healOrphanedElders($db, $familyCode);
+    }
+
+    /**
+     * Self-heals orphaned generation -2 (grandparent) nodes that lack unions or parent-child connections.
+     */
+    private function healOrphanedElders(\PDO $db, string $familyCode): void
+    {
+        try {
+            $orphanedStmt = $db->prepare("
+                SELECT fn.* FROM family_nodes fn
+                LEFT JOIN family_unions fu ON (fu.partner_1_id = fn.id OR fu.partner_2_id = fn.id) AND fu.family_code = fn.family_code
+                LEFT JOIN family_node_children fnc ON fnc.child_id = fn.id
+                WHERE fn.family_code = ? AND fn.generation_level = -2 AND fu.id IS NULL AND fnc.id IS NULL
+            ");
+            $orphanedStmt->execute([$familyCode]);
+            $orphans = $orphanedStmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            if (empty($orphans)) {
+                return;
+            }
+
+            $parentsStmt = $db->prepare("SELECT * FROM family_nodes WHERE family_code = ? AND generation_level = -1 ORDER BY id ASC");
+            $parentsStmt->execute([$familyCode]);
+            $parents = $parentsStmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $fNode = null;
+            $mNode = null;
+            foreach ($parents as $p) {
+                if (strtolower((string)($p['gender'] ?? '')) === 'female' && !$mNode) {
+                    $mNode = $p;
+                } elseif (strtolower((string)($p['gender'] ?? '')) === 'male' && !$fNode) {
+                    $fNode = $p;
+                }
+            }
+
+            foreach ($orphans as $elder) {
+                $elderLast = strtoupper(trim((string)($elder['last_name'] ?? '')));
+                $paternalLast = strtoupper(trim((string)($fNode['last_name'] ?? '')));
+
+                $targetParent = null;
+                if ($mNode && ($elderLast !== '' && $elderLast !== $paternalLast)) {
+                    $targetParent = $mNode;
+                } elseif ($fNode) {
+                    $targetParent = $fNode;
+                } elseif ($mNode) {
+                    $targetParent = $mNode;
+                }
+
+                if ($targetParent) {
+                    $elderId = (int)$elder['id'];
+                    $targetParentId = (int)$targetParent['id'];
+
+                    $chkU = $db->prepare("
+                        SELECT u.id FROM family_unions u
+                        JOIN family_node_children c ON c.union_id = u.id
+                        WHERE c.child_id = ? AND u.family_code = ? LIMIT 1
+                    ");
+                    $chkU->execute([$targetParentId, $familyCode]);
+                    $existingUId = (int)$chkU->fetchColumn();
+
+                    if ($existingUId > 0) {
+                        $updPartner = $db->prepare("
+                            UPDATE family_unions 
+                            SET partner_2_id = CASE WHEN partner_1_id <> ? AND (partner_2_id = partner_1_id OR partner_2_id IS NULL) THEN ? ELSE partner_2_id END
+                            WHERE id = ?
+                        ");
+                        $updPartner->execute([$elderId, $elderId, $existingUId]);
+                    } else {
+                        $insU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'married', 1)");
+                        $insU->execute([$familyCode, $elderId, $elderId]);
+                        $newUId = (int)$db->lastInsertId();
+
+                        $insC = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
+                        $insC->execute([$newUId, $targetParentId]);
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            error_log('[Organogram::healOrphanedElders] warning: ' . $e->getMessage());
         }
     }
 

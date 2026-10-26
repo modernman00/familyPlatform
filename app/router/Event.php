@@ -19,6 +19,19 @@ $router->map('PUT', '/member/profilePage/event/[i:eventNo]', 'App\controller\mem
 
 $router->map('DELETE', '/member/profilePage/event/[i:eventNo]', 'App\controller\members\Event@deleteEvent', 'delete_event');
 
+// 3-GEAR PARTYPLATFORM STUDIO ESCALATION & SSO HANDOFF (author only)
+$router->map('POST', '/member/profilePage/event/[i:eventNo]/upgrade-party', 'App\controller\members\Event@upgradeToPartyPlatform', 'upgrade_event_party');
+$router->map('POST', '/member/ProfilePage/event/[i:eventNo]/upgrade-party', 'App\controller\members\Event@upgradeToPartyPlatform', 'upgrade_event_party_alt');
+
+$router->map('GET', '/member/profilePage/event/[i:eventNo]/party-sso', 'App\controller\members\Event@partyStudioSso', 'event_party_sso');
+$router->map('GET', '/member/ProfilePage/event/[i:eventNo]/party-sso', 'App\controller\members\Event@partyStudioSso', 'event_party_sso_alt');
+$router->map('GET', '/member/profilePage/event/[i:eventNo]/party-sso/', 'App\controller\members\Event@partyStudioSso', 'event_party_sso_slash');
+$router->map('GET', '/member/ProfilePage/event/[i:eventNo]/party-sso/', 'App\controller\members\Event@partyStudioSso', 'event_party_sso_alt_slash');
+
+// 3-MONTH INTERACTIVE SCHEDULE MODAL ENDPOINT
+$router->map('GET', '/member/events/upcoming3Months', 'App\controller\members\Event@getUpcoming3MonthsEvents', 'upcoming_events_3months');
+
+
 
 
 

@@ -34,6 +34,7 @@ final class FamilyAiHubTest extends TestCase
         $routerFile = dirname(__DIR__, 2) . '/app/router/profile_page.php';
         $content = file_get_contents($routerFile);
         $this->assertNotFalse($content);
+        $this->assertStringContainsString("'/family/fun-place'", $content);
         $this->assertStringContainsString("'/family/ai-hub'", $content);
         $this->assertStringContainsString('FamilyAiHubController@index', $content);
     }
@@ -87,7 +88,7 @@ final class FamilyAiHubTest extends TestCase
         $this->assertIsString($output);
         $this->assertStringNotContainsString('Something went wrong on our end', $output);
         $this->assertStringNotContainsString('Server Error', $output);
-        $this->assertStringContainsString('AI Family Hub', $output);
+        $this->assertStringContainsString('The Fun Place; Judge Yommy', $output);
     }
 
     public function test_generate_trivia_executes_without_undefined_method_error(): void
@@ -176,5 +177,79 @@ final class FamilyAiHubTest extends TestCase
         $this->assertTrue($data['success'], 'arbitrateDispute must succeed: ' . ($data['error'] ?? ''));
         $this->assertNotEmpty($data['verdict'], 'arbitrateDispute must return verdict');
         $this->assertNotEmpty($data['compromise_action_plan'], 'arbitrateDispute must return action plan');
+    }
+
+    public function test_judge_yommy_complex_dispute_lifecycle_with_third_party_peacemaker(): void
+    {
+        $pdo = Db::connect2();
+        
+        // Clean any existing test fixtures
+        $del = $pdo->prepare("DELETE FROM personal WHERE id IN ('TEST_USER_PEACEMAKER', 'TEST_USER_SIBLING_A', 'TEST_USER_SIBLING_B')");
+        $del->execute();
+
+        // Setup test users in FAMTEST
+        $ins = $pdo->prepare("INSERT INTO personal (id, firstName, lastName, famCode) VALUES (?, ?, ?, 'FAMTEST')");
+        $ins->execute(['TEST_USER_PEACEMAKER', 'Parent', 'Test']);
+        $ins->execute(['TEST_USER_SIBLING_A', 'SiblingA', 'Test']);
+        $ins->execute(['TEST_USER_SIBLING_B', 'SiblingB', 'Test']);
+
+        $service = new \App\services\JudgeYommyTribunalService();
+
+        // 1. Third-party peacemaker files a dispute for SiblingA and SiblingB
+        $fileResult = $service->fileDispute(
+            famCode: 'FAMTEST',
+            initiatorId: 'TEST_USER_PEACEMAKER',
+            isThirdParty: true,
+            partyAId: 'TEST_USER_SIBLING_A',
+            partyBId: 'TEST_USER_SIBLING_B',
+            witnessIds: [],
+            title: 'Borrowing Car & Fuel Replacement',
+            category: 'borrowed_property',
+            grievance: 'SiblingA and SiblingB have been arguing constantly over who pays for fuel after using the shared car.'
+        );
+
+        $this->assertTrue($fileResult['success'], 'Dispute filing must succeed');
+        $disputeId = $fileResult['dispute_id'];
+        $this->assertNotEmpty($disputeId);
+
+        // 2. SiblingA (Party A) submits their testimony
+        $stmtARes = $service->submitStatement(
+            disputeId: $disputeId,
+            userId: 'TEST_USER_SIBLING_A',
+            statement: 'I put in £30 on Tuesday and returned it with half a tank, but then found it completely empty on Friday!'
+        );
+        $this->assertTrue($stmtARes['success']);
+
+        // 3. SiblingB (Party B) submits their counter-statement
+        $stmtBRes = $service->submitStatement(
+            disputeId: $disputeId,
+            userId: 'TEST_USER_SIBLING_B',
+            statement: 'I had an emergency interview across town and promised to refill on Saturday morning before being accused.'
+        );
+        $this->assertTrue($stmtBRes['success']);
+        $this->assertTrue($stmtBRes['is_ready']);
+
+        // 4. Adjudicate with Judge Yommy
+        $verdict = $service->adjudicate($disputeId);
+        $this->assertTrue($verdict['success']);
+        $this->assertNotEmpty($verdict['verdict_title']);
+        $this->assertNotEmpty($verdict['finding_of_fact']);
+        $this->assertNotEmpty($verdict['reconciliatory_bridge']);
+        $this->assertNotEmpty($verdict['restorative_action_plan']);
+        $this->assertNotEmpty($verdict['yommy_wisdom']);
+
+        // Verify status is resolved in database
+        $check = $pdo->prepare("SELECT status, verdict_title FROM family_disputes WHERE id = ?");
+        $check->execute([$disputeId]);
+        $row = $check->fetch(\PDO::FETCH_ASSOC);
+        $this->assertSame('resolved', $row['status']);
+
+        // Clean up test data
+        $cleanDispute = $pdo->prepare("DELETE FROM family_disputes WHERE id = ?");
+        $cleanDispute->execute([$disputeId]);
+        $cleanStatements = $pdo->prepare("DELETE FROM family_dispute_statements WHERE dispute_id = ?");
+        $cleanStatements->execute([$disputeId]);
+        $delUsers = $pdo->prepare("DELETE FROM personal WHERE id IN ('TEST_USER_PEACEMAKER', 'TEST_USER_SIBLING_A', 'TEST_USER_SIBLING_B')");
+        $delUsers->execute();
     }
 }

@@ -75,13 +75,14 @@ final class NotificationOrchestrator
             $senderName = is_scalar($metadata['sender_name'] ?? null) ? (string)$metadata['sender_name'] : 'Family Platform';
             $resolvedActionUrl = $actionUrl !== '' ? $actionUrl : '/profilePage';
 
+            $notifType = !empty($metadata['type']) && is_scalar($metadata['type']) ? ucfirst((string)$metadata['type']) : ucfirst($category);
+
             // Check if CentralOrchestrator already inserted a row into notification for this dispatch
             $updateStmt = $db->prepare("
                 UPDATE notification 
-                SET action_url = ?, sender_name = ?, sender_id = ?
+                SET action_url = ?, sender_name = ?, sender_id = ?, notification_type = ?
                 WHERE receiver_id = ? 
                   AND (notification_name = ? OR notification_content = ?)
-                  AND (action_url IS NULL OR action_url = '')
                   AND created_at >= (NOW() - INTERVAL 10 SECOND)
                 ORDER BY no DESC 
                 LIMIT 1
@@ -90,6 +91,7 @@ final class NotificationOrchestrator
                 $resolvedActionUrl,
                 $senderName,
                 $senderId,
+                $notifType,
                 $userId,
                 strip_tags($title),
                 strip_tags($body)
@@ -101,12 +103,13 @@ final class NotificationOrchestrator
                     (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
                     VALUES (?, ?, ?, ?, ?, ?, ?, 'new', NOW())
                 ");
+                $notifType = !empty($metadata['type']) && is_scalar($metadata['type']) ? ucfirst((string)$metadata['type']) : ucfirst($category);
                 $stmt->execute([
                     $senderId,
                     $userId,
                     $senderName,
                     strip_tags($title),
-                    ucfirst($category),
+                    $notifType,
                     strip_tags($body),
                     $resolvedActionUrl
                 ]);
@@ -128,6 +131,19 @@ final class NotificationOrchestrator
             );
         } catch (\Throwable $e) {
             error_log('[NotificationOrchestrator] WebPush dispatch failed: ' . $e->getMessage());
+        }
+
+        // Broadcast real-time notification badge event to user private channel
+        try {
+            $pusher = \App\classes\Pusher::pusher();
+            if ($pusher !== null) {
+                $pusher->trigger("private-user-{$userId}", 'new-notification', [
+                    'title' => $title,
+                    'action_url' => $actionUrl,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            error_log('[NotificationOrchestrator] Pusher real-time dispatch warning: ' . $e->getMessage());
         }
 
         return $notifId;

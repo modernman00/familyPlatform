@@ -31,6 +31,7 @@ foreach(($eventData ?? []) as $event) {
 
 <!-- Mobile Highlights & Upcoming Events Horizontal Tray (Facebook Mobile UX) -->
 <div class="mobile-highlights-container d-lg-none mb-4" 
+     id="mobileMemoriesMilestones"
      x-data="mobileHighlightsTray({{ json_encode($enrichedEvents) }})"
      x-init="initTray()"
      x-cloak
@@ -43,9 +44,14 @@ foreach(($eventData ?? []) as $event) {
             </span>
             <span class="text-muted small fw-medium" style="font-size: 0.78rem;">Memories, Events &amp; Milestones</span>
         </div>
-        <a href="/profilePage#eventHeader" class="text-decoration-none small text-primary fw-bold" style="font-size: 0.78rem;">
-            See All <i class="bi bi-chevron-right"></i>
-        </a>
+        <button type="button" 
+                class="btn btn-link text-decoration-none small text-primary fw-bold p-0 d-inline-flex align-items-center gap-1 border-0 bg-transparent flex-shrink-0" 
+                style="font-size: 0.78rem; min-height: 44px; min-width: 44px; justify-content: flex-end; white-space: nowrap;"
+                data-bs-toggle="modal" 
+                data-bs-target="#allUpcomingEventsModal"
+                aria-label="See all scheduled family events for the next 3 months">
+            <span>See All</span> <i class="bi bi-chevron-right"></i>
+        </button>
     </div>
 
     <!-- Horizontal Swipe Carousel -->
@@ -55,6 +61,7 @@ foreach(($eventData ?? []) as $event) {
         <!-- 1. Nostalgia Memory Flashback Card -->
         <template x-if="memories.length > 0">
             <div class="highlight-card flex-shrink-0 p-3 rounded-4 shadow-sm position-relative overflow-hidden"
+                 id="mobileMemoriesCard"
                  style="width: 280px; scroll-snap-align: start; background: linear-gradient(135deg, rgba(184,32,44, 0.12) 0%, rgba(236, 72, 153, 0.12) 100%); border: 1px solid rgba(184,32,44, 0.25);">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="badge rounded-pill px-2.5 py-1 fw-bold text-white d-inline-flex align-items-center gap-1 shadow-sm"
@@ -92,12 +99,13 @@ foreach(($eventData ?? []) as $event) {
         <!-- 2. Upcoming Milestones Cards (Birthdays & Anniversaries) -->
         <template x-for="(milestone, idx) in milestones" :key="'ms-' + idx">
             <div class="highlight-card flex-shrink-0 p-3 rounded-4 shadow-sm position-relative"
+                 id="mobileMilestonesCard"
                  style="width: 250px; scroll-snap-align: start; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%); border: 1px solid rgba(245, 158, 11, 0.25);">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="badge rounded-pill px-2.5 py-1 fw-bold text-dark bg-warning bg-gradient shadow-sm" style="font-size: 0.72rem;">
+                    <span class="badge rounded-pill px-2.5 py-1 fw-bold text-dark bg-warning bg-gradient shadow-sm" style="font-size: 0.75rem;">
                         <i class="bi bi-cake2-fill me-1"></i> Milestone
                     </span>
-                    <span class="badge rounded-pill bg-light text-dark fw-semibold" style="font-size: 0.7rem;" x-text="milestone.days_until_label || 'Upcoming'"></span>
+                    <span class="badge rounded-pill bg-light text-dark fw-semibold" style="font-size: 0.75rem;" x-text="milestone.days_until_label || 'Upcoming'"></span>
                 </div>
 
                 <div class="d-flex align-items-center gap-2.5 mb-2">
@@ -105,13 +113,13 @@ foreach(($eventData ?? []) as $event) {
                         <img :src="'/resources/images/profile/' + milestone.profileImg" class="rounded-circle shadow-sm" style="width: 38px; height: 38px; object-fit: cover;" alt="Avatar">
                     </template>
                     <div class="overflow-hidden">
-                        <h6 class="fw-bold mb-0 text-truncate" style="font-size: 0.88rem; color: var(--text-color, #1f2937);" x-text="milestone.title"></h6>
-                        <p class="text-muted small mb-0 text-truncate" style="font-size: 0.75rem;" x-text="milestone.subtitle"></p>
+                        <h6 class="fw-bold mb-0 text-truncate" style="font-size: 0.95rem; color: var(--text-color, #1f2937);" x-text="milestone.title"></h6>
+                        <p class="mb-0 text-truncate" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569); line-height: 1.4;" x-text="milestone.subtitle"></p>
                     </div>
                 </div>
 
                 <div class="pt-2 border-top border-light-subtle d-flex justify-content-end">
-                    <button type="button" class="btn btn-sm btn-outline-warning text-dark rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem; min-height: 36px;" data-bs-toggle="modal" data-bs-target="#postModal">
+                    <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-bold text-white shadow-sm" style="font-size: 0.875rem; min-height: 44px; background: #a31621; color: #ffffff !important; border: none;" data-bs-toggle="modal" data-bs-target="#postModal">
                         🎉 Wish Birthday
                     </button>
                 </div>
@@ -123,25 +131,25 @@ foreach(($eventData ?? []) as $event) {
             <div class="highlight-card flex-shrink-0 p-3 rounded-4 shadow-sm position-relative"
                  style="width: 250px; scroll-snap-align: start; background: linear-gradient(135deg, rgba(163,22,33, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%); border: 1px solid rgba(163,22,33, 0.2);">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="badge rounded-pill px-2.5 py-1 fw-bold text-white bg-primary bg-gradient shadow-sm" style="font-size: 0.72rem;">
+                    <span class="badge rounded-pill px-2.5 py-1 fw-bold text-white bg-primary bg-gradient shadow-sm" style="font-size: 0.75rem;">
                         <i class="bi bi-calendar-event me-1"></i> Event
                     </span>
-                    <span class="badge rounded-pill px-2 py-1 fw-bold" style="font-size: 0.72rem; background: #f5dede; color: #8a1019;" x-text="event.dateDifference"></span>
+                    <span class="badge rounded-pill px-2 py-1 fw-bold" style="font-size: 0.75rem; background: #f5dede; color: #8a1019;" x-text="event.dateDifference"></span>
                 </div>
 
-                <h6 class="fw-bold mb-1 text-truncate" style="font-size: 0.88rem; color: var(--text-color, #1f2937);" x-text="event.eventName"></h6>
+                <h6 class="fw-bold mb-1 text-truncate" style="font-size: 0.95rem; color: var(--text-color, #1f2937);" x-text="event.eventName"></h6>
 
-                <div class="d-flex align-items-center mb-1 text-muted small" style="font-size: 0.78rem;">
+                <div class="d-flex align-items-center mb-1" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569);">
                     <i class="bi bi-clock me-1 text-primary"></i>
                     <span x-text="event.eventDate"></span>
                 </div>
-                <div class="d-flex align-items-center mb-2 text-muted small" style="font-size: 0.78rem;">
+                <div class="d-flex align-items-center mb-2" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569);">
                     <i class="bi bi-geo-alt me-1 text-danger"></i>
                     <span class="text-truncate" x-text="event.eventType"></span>
                 </div>
 
                 <div class="pt-2 border-top border-light-subtle d-flex justify-content-end">
-                    <a href="/profilePage#eventHeader" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem; min-height: 36px;">
+                    <a href="/profilePage#eventHeader" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 fw-bold shadow-xs d-inline-flex align-items-center justify-content-center" style="font-size: 0.85rem; min-height: 44px;">
                         View Event
                     </a>
                 </div>
@@ -207,7 +215,7 @@ if (typeof window.mobileHighlightsTray !== 'function') {
                 const author = memory.fullName ? ` — ${memory.fullName}` : '';
                 const quote = memory.postMessage ? `"${memory.postMessage.trim()}"` : '';
                 const origin = window.location.origin || '';
-                const link = memory.post_no ? `${origin}/profilePage#post${memory.post_no}` : `${origin}/profilePage`;
+                const link = memory.post_no ? `${origin}/profilePage?post_no=${memory.post_no}#post${memory.post_no}` : `${origin}/profilePage`;
                 let text = `✨ [Family Memory Flashback — ${yearsAgo}]${author}\n\n${quote}\n\n🔗 ${link}`;
                 if (text.length > 700) {
                     text = text.slice(0, 690) + '...\n\n🔗 ' + link;

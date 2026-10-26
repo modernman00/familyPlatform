@@ -97,22 +97,88 @@ export function profileFeed(opts = {}) {
             window.filterByFamilyHashtag = (tag) => {
                 this.filterByHashtag(tag);
             };
+
+            // Deep-link listener for in-page hash changes
+            window.addEventListener('hashchange', () => this.scrollToHashPost());
         },
 
-        // Jump to (and briefly highlight) the post referenced by a #postNNN link
-        // (e.g. from an email/push notification). Posts render asynchronously, so the
-        // browser's own hash-scroll-on-load never finds the element in time.
+        // Jump to (and briefly highlight) the post or comment referenced by a #postNNN or #commentNNN link
+        // or ?post_no=NNN query param (e.g. from an email/push notification). Posts and comments render
+        // asynchronously, so browser native hash scroll never finds the element in time.
         scrollToHashPost() {
-            const hash = window.location.hash;
-            if (!hash || !hash.startsWith('#post')) return;
+            let targetId = '';
+            let isComment = false;
 
-            this.$nextTick(() => {
-                const target = document.getElementById(hash.slice(1));
-                if (!target) return;
-                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                target.classList.add('highlighted-post');
-                setTimeout(() => target.classList.remove('highlighted-post'), 2500);
-            });
+            // 1. Check window.location.hash
+            const rawHash = (window.location.hash || '').replace(/^[#?]+/, '');
+            if (rawHash) {
+                if (rawHash.startsWith('post-') || rawHash.startsWith('post')) {
+                    const num = rawHash.replace(/\D/g, '');
+                    if (num) targetId = 'post' + num;
+                } else if (rawHash.startsWith('comment-') || rawHash.startsWith('comment')) {
+                    const num = rawHash.replace(/\D/g, '');
+                    if (num) {
+                        targetId = 'comment' + num;
+                        isComment = true;
+                    }
+                }
+            }
+
+            // 2. Fallback to query parameters (?post_no=NNN, ?comment_no=NNN)
+            if (!targetId && window.location.search) {
+                try {
+                    const params = new URLSearchParams(window.location.search);
+                    const commentNo = params.get('comment_no') || params.get('comment');
+                    const postNo = params.get('post_no') || params.get('post');
+                    if (commentNo && /^\d+$/.test(commentNo)) {
+                        targetId = 'comment' + commentNo;
+                        isComment = true;
+                    } else if (postNo && /^\d+$/.test(postNo)) {
+                        targetId = 'post' + postNo;
+                    }
+                } catch (e) {
+                    console.warn('[Feed] Search param parse error:', e);
+                }
+            }
+
+            if (!targetId) return;
+
+            // 3. If targeting a comment, ensure its thread is expanded if collapsed
+            if (isComment) {
+                const cNo = parseInt(targetId.replace('comment', ''), 10);
+                if (cNo && Array.isArray(this.posts)) {
+                    for (const p of this.posts) {
+                        if (Array.isArray(p.comments)) {
+                            const found = p.comments.find(c => parseInt(c.comment_no, 10) === cNo);
+                            if (found) {
+                                const rootNo = found.parent_comment_no ? String(found.parent_comment_no) : String(found.comment_no);
+                                this.threadExpanded[rootNo] = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 4. Polling loop with timeout up to 3 seconds (30 attempts @ 100ms)
+            let attempts = 0;
+            const maxAttempts = 30;
+            const interval = setInterval(() => {
+                attempts++;
+                const target = document.getElementById(targetId)
+                    || document.querySelector(`[data-id="${targetId}"]`)
+                    || (isComment ? document.querySelector(`[data-comment-no="${targetId.replace('comment', '')}"]`) : null);
+
+                if (target) {
+                    clearInterval(interval);
+                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const highlightClass = isComment ? 'highlighted-comment' : 'highlighted-post';
+                    target.classList.add(highlightClass);
+                    setTimeout(() => target.classList.remove(highlightClass), 2500);
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(interval);
+                }
+            }, 100);
         },
 
         async fetchPosts(options = {}) {
@@ -861,7 +927,7 @@ export function profileFeed(opts = {}) {
                 await axios.delete(`/comment/${commentNo}`, this.csrfOptions);
                 const post = this.posts.find(p => String(p.post_no) === String(postNo));
                 if (post) {
-                    post.comments = post.comments.filter(c => String(c.comment_no) !== String(commentNo));
+                    post.comments = post.comments.filter(c => String(c.comment_no) !== String(commentNo) && String(c.parent_comment_no || '') !== String(commentNo));
                 }
             } catch (err) {
                 console.error('Failed to delete comment:', err);
@@ -1431,6 +1497,23 @@ export function profileFeed(opts = {}) {
 
                 const channel = this.pusher.subscribe(`private-family-${famCode}`);
 
+                // Real-time notifications: subscribe to user-specific private channel & family channel
+                const userSlug = (this.currentUserId || localStorage.getItem('requesterId') || '').toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+                if (userSlug) {
+                    try {
+                        const userChannel = this.pusher.subscribe(`private-user-${userSlug}`);
+                        userChannel.bind('new-notification', (data) => {
+                            window.dispatchEvent(new CustomEvent('pwa:notification-received', { detail: data }));
+                        });
+                    } catch (e) {
+                        console.warn('[feedComponent] userChannel subscribe error:', e);
+                    }
+                }
+
+                channel.bind('new-notification', (data) => {
+                    window.dispatchEvent(new CustomEvent('pwa:notification-received', { detail: data }));
+                });
+
                 channel.bind('new-post', (data) => {
                     if (Array.isArray(data)) {
                         data.forEach(item => {
@@ -1478,7 +1561,7 @@ export function profileFeed(opts = {}) {
                 channel.bind('delete-comment', (data) => {
                     const post = this.posts.find(p => String(p.post_no) === String(data?.postNo));
                     if (post) {
-                        post.comments = post.comments.filter(c => String(c.comment_no) !== String(data?.commentNo));
+                        post.comments = post.comments.filter(c => String(c.comment_no) !== String(data?.commentNo) && String(c.parent_comment_no || '') !== String(data?.commentNo));
                     }
                 });
                 channel.bind('update-comment', (data) => {
@@ -1540,7 +1623,7 @@ export function profileFeed(opts = {}) {
         async sharePostToSocialMedia(post) {
             const author = post.fullName || 'Family Member';
             const caption = post.postMessage || post.displayMessage || 'Family Memory on FamilyPlatform';
-            const postUrl = window.location.origin + '/profilePage#post' + post.post_no;
+            const postUrl = window.location.origin + '/profilePage?post_no=' + post.post_no + '#post' + post.post_no;
             const title = `${author}'s Family Memory — FamilyPlatform`;
 
             // If Web Share API is available (Mobile iOS / Android / Desktop Safari/Chrome)

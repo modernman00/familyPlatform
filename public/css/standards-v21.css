@@ -362,8 +362,11 @@ img, video { max-width: 100%; height: auto; }
   .sidebar-column .card:hover { transform: none; }
 }
 
-/* Profile quick actions: one icon colour so the stack reads as a single, calm family */
-.profile-column .btn > i[class*="text-"] { color: var(--brand-primary) !important; }
+/* Profile quick actions: preserve semantic icon accents while keeping balanced button surfaces */
+.profile-column .btn {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 
 /* Public pages: balanced headlines, and a container that never hugs the screen edge */
 h1, h2, .hero-title { text-wrap: balance; }
@@ -421,6 +424,353 @@ body.dark-mode,
   background: var(--cta-bg) !important;
   border-color: var(--cta-bg) !important;
   color: #fff !important;
+}
+
+/* ── v2.5 Multi-Tier Button Hierarchy (60-30-10 & WCAG AA Enforced) ── */
+/* Tier 1: Primary Brand CTAs (10% High-Energy Crimson Accent) */
+.btn-primary,
+.btn-brand,
+.btn-action,
+.btn-tour-next,
+.stitch-submit,
+.submitPost,
+.cta-btn {
+  background: var(--cta-bg, #a31621) !important;
+  background-color: var(--cta-bg, #a31621) !important;
+  border-color: var(--cta-bg, #a31621) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(163, 22, 33, 0.2);
+}
+
+.btn-primary:hover,
+.btn-brand:hover,
+.btn-action:hover,
+.btn-tour-next:hover,
+.stitch-submit:hover,
+.submitPost:hover,
+.cta-btn:hover {
+  background: var(--cta-bg-hover, #8a1019) !important;
+  background-color: var(--cta-bg-hover, #8a1019) !important;
+  border-color: var(--cta-bg-hover, #8a1019) !important;
+  color: #ffffff !important;
+}
+
+/* Tier 2: Outline Primary & Brand Outline Buttons (Crisp Crimson Border + Soft Tint) */
+.btn-outline-primary,
+.btn-brand-outline {
+  background-color: rgba(163, 22, 33, 0.04) !important;
+  border: 1.5px solid var(--brand-primary, #a31621) !important;
+  color: var(--brand-primary, #a31621) !important;
+  font-weight: 600;
+}
+
+.btn-outline-primary:hover,
+.btn-brand-outline:hover {
+  background-color: var(--brand-primary, #a31621) !important;
+  border-color: var(--brand-primary, #a31621) !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .btn-outline-primary,
+[data-bs-theme="dark"] .btn-outline-primary,
+body.dark-mode .btn-brand-outline,
+[data-bs-theme="dark"] .btn-brand-outline {
+  background-color: rgba(239, 107, 115, 0.1) !important;
+  border-color: #ef6b73 !important;
+  color: #f8b4b9 !important;
+}
+
+body.dark-mode .btn-outline-primary:hover,
+[data-bs-theme="dark"] .btn-outline-primary:hover,
+body.dark-mode .btn-brand-outline:hover,
+[data-bs-theme="dark"] .btn-brand-outline:hover {
+  background-color: #a31621 !important;
+  border-color: #b8202c !important;
+  color: #ffffff !important;
+}
+
+/* Tier 3: Secondary, Surface & Neutral Tonal Buttons (30% Structural Contrast) */
+.btn-secondary {
+  background-color: #475569 !important;
+  border-color: #475569 !important;
+  color: #ffffff !important;
+}
+
+.btn-secondary:hover {
+  background-color: #334155 !important;
+  border-color: #334155 !important;
+  color: #ffffff !important;
+}
+
+.btn-outline-secondary,
+.btn-outline-dark {
+  background-color: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #1e293b !important;
+  font-weight: 600;
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-dark:hover {
+  background-color: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+
+body.dark-mode .btn-outline-secondary,
+[data-bs-theme="dark"] .btn-outline-secondary,
+body.dark-mode .btn-outline-dark,
+[data-bs-theme="dark"] .btn-outline-dark {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+  border-color: #475569 !important;
+  color: #e2e8f0 !important;
+}
+
+body.dark-mode .btn-outline-secondary:hover,
+[data-bs-theme="dark"] .btn-outline-secondary:hover,
+body.dark-mode .btn-outline-dark:hover,
+[data-bs-theme="dark"] .btn-outline-dark:hover {
+  background-color: #334155 !important;
+  border-color: #64748b !important;
+  color: #ffffff !important;
+}
+
+/* Surface Action & Light Buttons (.btn-light, .btn-surface-action) */
+.btn-light,
+.btn-surface-action {
+  background-color: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+  font-weight: 600;
+  transition: all var(--motion-fast) var(--ease);
+}
+
+.btn-light:hover,
+.btn-surface-action:hover {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
+}
+
+body.dark-mode .btn-light,
+[data-bs-theme="dark"] .btn-light,
+body.dark-mode .btn-surface-action,
+[data-bs-theme="dark"] .btn-surface-action {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .btn-light:hover,
+[data-bs-theme="dark"] .btn-light:hover,
+body.dark-mode .btn-surface-action:hover,
+[data-bs-theme="dark"] .btn-surface-action:hover {
+  background-color: #334155 !important;
+  border-color: #475569 !important;
+  color: #ffffff !important;
+}
+
+/* Semantic Status Buttons (Success / WhatsApp, Danger, Warning, Info) */
+.btn-success {
+  background-color: #059669 !important;
+  border-color: #059669 !important;
+  color: #ffffff !important;
+}
+
+.btn-success:hover {
+  background-color: #047857 !important;
+  border-color: #047857 !important;
+  color: #ffffff !important;
+}
+
+.btn-danger {
+  background-color: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+.btn-danger:hover {
+  background-color: #b91c1c !important;
+  border-color: #b91c1c !important;
+  color: #ffffff !important;
+}
+
+.btn-warning {
+  background-color: #f59e0b !important;
+  border-color: #d97706 !important;
+  color: #0f172a !important;
+  font-weight: 700;
+}
+
+.btn-warning:hover {
+  background-color: #d97706 !important;
+  border-color: #b45309 !important;
+  color: #ffffff !important;
+}
+
+/* Tier 4: Post Composer Quick-Action Pills & Heritage Action Cards */
+.composer-quick-action {
+  background-color: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  color: #1e293b !important;
+  padding: 8px 10px !important;
+  min-height: 44px;
+  white-space: nowrap;
+  transition: all var(--motion-fast) var(--ease);
+}
+
+.composer-quick-action span {
+  color: #1e293b !important;
+}
+
+.composer-quick-action:hover,
+.composer-quick-action:focus-visible {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+.composer-quick-action.then-now-cta {
+  background: linear-gradient(135deg, #fbefef 0%, #fce7e9 100%) !important;
+  border: 1px solid rgba(163, 22, 33, 0.25) !important;
+  color: #8a1019 !important;
+}
+
+.composer-quick-action.then-now-cta i,
+.composer-quick-action.then-now-cta span {
+  color: #8a1019 !important;
+}
+
+.composer-quick-action.then-now-cta:hover {
+  background: linear-gradient(135deg, #f7d9dc 0%, #f5cbd0 100%) !important;
+  border-color: rgba(163, 22, 33, 0.4) !important;
+}
+
+body.dark-mode .composer-quick-action,
+[data-bs-theme="dark"] .composer-quick-action {
+  background-color: rgba(30, 41, 59, 0.85) !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .composer-quick-action span,
+[data-bs-theme="dark"] .composer-quick-action span {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .composer-quick-action:hover,
+[data-bs-theme="dark"] .composer-quick-action:hover {
+  background-color: #334155 !important;
+  border-color: #475569 !important;
+}
+
+body.dark-mode .composer-quick-action.then-now-cta,
+[data-bs-theme="dark"] .composer-quick-action.then-now-cta {
+  background: rgba(163, 22, 33, 0.22) !important;
+  border-color: rgba(239, 107, 115, 0.4) !important;
+  color: #fecdd3 !important;
+}
+
+body.dark-mode .composer-quick-action.then-now-cta i,
+[data-bs-theme="dark"] .composer-quick-action.then-now-cta i,
+body.dark-mode .composer-quick-action.then-now-cta span,
+[data-bs-theme="dark"] .composer-quick-action.then-now-cta span {
+  color: #fecdd3 !important;
+}
+
+/* Right Sidebar Heritage Action Tiles */
+.heritage-action-tile {
+  background-color: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  color: #0f172a !important;
+  transition: all var(--motion-fast) var(--ease);
+}
+
+.heritage-action-tile:hover {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+body.dark-mode .heritage-action-tile,
+[data-bs-theme="dark"] .heritage-action-tile {
+  background-color: rgba(15, 23, 42, 0.6) !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .heritage-action-tile:hover,
+[data-bs-theme="dark"] .heritage-action-tile:hover {
+  background-color: #334155 !important;
+  border-color: #475569 !important;
+}
+body.dark-mode .heritage-action-tile .tile-title,
+[data-bs-theme="dark"] .heritage-action-tile .tile-title {
+  color: #f8fafc !important;
+}
+body.dark-mode .heritage-action-tile .tile-subtitle,
+[data-bs-theme="dark"] .heritage-action-tile .tile-subtitle {
+  color: #94a3b8 !important;
+}
+
+/* Explicit exclusions: Navbar utility capsules & text links NEVER get white-on-white */
+#mainNavbar #langMenu {
+  background: var(--card-bg, #ffffff) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  color: #1e293b !important;
+}
+
+#mainNavbar .btn-user-stitch {
+  background: rgba(241, 245, 249, 0.9) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  color: #1e293b !important;
+}
+
+#mainNavbar .btn-icon-stitch {
+  background: transparent !important;
+  border: none !important;
+  color: #64748b !important;
+}
+
+body.dark-mode #mainNavbar #langMenu,
+[data-bs-theme="dark"] #mainNavbar #langMenu {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode #mainNavbar .btn-user-stitch,
+[data-bs-theme="dark"] #mainNavbar .btn-user-stitch {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode #mainNavbar .btn-icon-stitch,
+[data-bs-theme="dark"] #mainNavbar .btn-icon-stitch {
+  color: #cbd5e1 !important;
+}
+
+.btn-link {
+  background: transparent !important;
+  border: none !important;
+  color: var(--brand-primary, #a31621) !important;
+}
+
+/* ── Subtitle Legibility Invariant: Minimum 14px (--text-sm) & WCAG AA Contrast ── */
+.page-subtitle,
+.section-subtitle,
+.card-subtitle,
+.widget-subtitle {
+  font-size: var(--text-sm) !important;
+  color: var(--text-muted-aa) !important;
+  line-height: 1.5 !important;
 }
 
 .btn-primary:hover, .btn-primary:focus-visible,

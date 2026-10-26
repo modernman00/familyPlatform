@@ -28,9 +28,13 @@
 
 @php
     $baseUrl = rtrim((string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: ($_ENV['MIX_APP_URL2'] ?? getenv('MIX_APP_URL2') ?: 'https://familyplatform.test')), '/');
+    $eventNo = !empty($data['eventNo'] ?? ($data['no'] ?? null)) ? (int)($data['eventNo'] ?? $data['no']) : null;
+    $eventUrl = $eventNo 
+        ? "{$baseUrl}/profilePage#linkNotification{$eventNo}" 
+        : "{$baseUrl}/profilePage#eventHeader";
 @endphp
 
 <div style="text-align: center;">
-    <a href="{{ $baseUrl }}/member/ProfilePage" style="background-color: #a31621; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">View Event Details</a>
+    <a href="{{ $eventUrl }}" style="background-color: #a31621; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">View Event Details</a>
 </div>
 @endsection

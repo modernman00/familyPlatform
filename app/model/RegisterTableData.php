@@ -83,11 +83,12 @@ final class RegisterTableData {
         ];
 
         if (!empty($cleanPostData['famCode'])) {
+            $status = $cleanPostData['familyStatus'] ?? 'pending';
             $tables['user_families'] = [
                 'user_id' => $cleanPostData['id'] ?? null,
                 'family_code' => $cleanPostData['famCode'],
-                'status' => $cleanPostData['familyStatus'] ?? 'pending',
-                'role' => 'member'
+                'status' => $status,
+                'role' => $status === 'approved' ? 'admin' : 'member'
             ];
         }
 

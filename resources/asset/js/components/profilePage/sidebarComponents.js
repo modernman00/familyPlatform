@@ -166,6 +166,68 @@ export function upcomingEvents(initialEvents) {
             if (event) Object.assign(event, updated);
         },
 
+        async upgradeToParty(event, domEvent) {
+            if (!event?.no || event.isUpgradingParty) return;
+            event.isUpgradingParty = true;
+            const btn = domEvent?.currentTarget;
+            if (btn && window.ScoreTenantSpinner?.start) {
+                window.ScoreTenantSpinner.start(btn);
+            }
+
+            try {
+                const token = getCsrfToken();
+                const payload = new URLSearchParams();
+                if (token) payload.append('token', token);
+
+                const res = await axios.post(`/member/profilePage/event/${event.no}/upgrade-party`, payload, {
+                    ...csrfOptions,
+                    headers: {
+                        'X-CSRF-Token': token,
+                        'X-XSRF-TOKEN': token,
+                    }
+                });
+
+                const bridgeData = res?.data?.token || {};
+                Object.assign(event, {
+                    party_event_id: bridgeData.party_event_id || event.party_event_id,
+                    party_event_slug: bridgeData.party_event_slug || event.party_event_slug,
+                    party_rsvp_url: bridgeData.party_rsvp_url || event.party_rsvp_url,
+                    party_card_url: bridgeData.party_card_url || event.party_card_url,
+                    party_sync_status: 'synced',
+                    isUpgradingParty: false,
+                });
+
+                const seededCount = Number(bridgeData.seeded_prospects_count || 0);
+                const result = await Swal.fire({
+                    icon: 'success',
+                    title: 'PartyPlatform Studio Ready!',
+                    html: `Your event is now live on PartyPlatform Studio${seededCount > 0 ? ` with <strong>${seededCount} family relatives</strong> pre-loaded into Guest Builder by kinship tier` : ''}.`,
+                    showCancelButton: true,
+                    confirmButtonColor: '#a31621',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Open Party Studio ↗',
+                    cancelButtonText: 'Stay Here'
+                });
+
+                if (result.isConfirmed) {
+                    window.open(`/member/profilePage/event/${event.no}/party-sso`, '_blank', 'noopener');
+                }
+            } catch (err) {
+                console.error('Failed to upgrade event to PartyPlatform Studio:', err);
+                event.isUpgradingParty = false;
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Studio Sync Failed',
+                    text: err?.response?.data?.message || 'Could not connect to PartyPlatform Studio. Please try again.',
+                    confirmButtonColor: '#a31621'
+                });
+            } finally {
+                if (btn && window.ScoreTenantSpinner?.stop) {
+                    window.ScoreTenantSpinner.stop(btn);
+                }
+            }
+        },
+
         initPusher() {
             try {
                 const key = document.querySelector('meta[name="pusher-key"]')?.getAttribute('content')

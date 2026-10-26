@@ -100,7 +100,11 @@ final class RouteDispatch
 
                 $VerifyJWT = SignIn::verify();
                 if (!\is_array($VerifyJWT) || empty($VerifyJWT['id'])) {
-                    throw new NotFoundException('Error Request_2');
+                    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                        throw new UnauthorisedException("Unauthorized");
+                    }
+                    redirect('login');
+                    return;
                 }
                 $id = checkInput($VerifyJWT['id']);
                 $_SESSION['id'] = $id;

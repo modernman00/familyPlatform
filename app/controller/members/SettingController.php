@@ -715,6 +715,7 @@ final class SettingController extends BaseController
                             $mLast  = !empty($motherLastName) ? $motherLastName : '';
                             $mEmail = trim((string)($_POST['mother_email'] ?? ''));
                             $mMobile = trim((string)($_POST['mother_mobile'] ?? ''));
+                            $mMaiden = trim((string)($_POST['mother_maiden'] ?? ($_POST['maiden_name'] ?? '')));
 
                             if ($pUnionRow && !empty($pUnionRow['union_id'])) {
                                 $existingUnionId = (int)$pUnionRow['union_id'];
@@ -732,8 +733,8 @@ final class SettingController extends BaseController
                                     }
 
                                     if ($p2Id > 0 && !empty($motherFullName)) {
-                                        $updM = $db->prepare("UPDATE family_nodes SET is_placeholder = 0, first_name = ?, last_name = ?, email = COALESCE(NULLIF(?, ''), email), mobile = COALESCE(NULLIF(?, ''), mobile) WHERE id = ?");
-                                        $updM->execute([$mFirst, $mLast, !empty($mEmail) ? $mEmail : null, !empty($mMobile) ? $mMobile : null, $p2Id]);
+                                        $updM = $db->prepare("UPDATE family_nodes SET is_placeholder = 0, first_name = ?, last_name = ?, maiden_name = COALESCE(NULLIF(?, ''), maiden_name), email = COALESCE(NULLIF(?, ''), email), mobile = COALESCE(NULLIF(?, ''), mobile) WHERE id = ?");
+                                        $updM->execute([$mFirst, $mLast, !empty($mMaiden) ? $mMaiden : null, !empty($mEmail) ? $mEmail : null, !empty($mMobile) ? $mMobile : null, $p2Id]);
                                     }
                                 }
                             } else {
@@ -741,8 +742,8 @@ final class SettingController extends BaseController
                                 $insF->execute([$familyCode, $fFirst, $fLast, $genLevel - 1, !empty($fEmail) ? $fEmail : null, !empty($fMobile) ? $fMobile : null, empty($fatherFullName) ? 1 : 0]);
                                 $fId = (int)$db->lastInsertId();
 
-                                $insM = $db->prepare("INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, email, mobile, is_placeholder) VALUES (?, ?, ?, 'Female', ?, '/resources/images/profile/avatarF.png', 'Mother', ?, ?, ?)");
-                                $insM->execute([$familyCode, $mFirst, $mLast, $genLevel - 1, !empty($mEmail) ? $mEmail : null, !empty($mMobile) ? $mMobile : null, empty($motherFullName) ? 1 : 0]);
+                                $insM = $db->prepare("INSERT INTO family_nodes (family_code, first_name, last_name, maiden_name, gender, generation_level, avatar_url, bio, email, mobile, is_placeholder) VALUES (?, ?, ?, ?, 'Female', ?, '/resources/images/profile/avatarF.png', 'Mother', ?, ?, ?)");
+                                $insM->execute([$familyCode, $mFirst, $mLast, !empty($mMaiden) ? $mMaiden : null, $genLevel - 1, !empty($mEmail) ? $mEmail : null, !empty($mMobile) ? $mMobile : null, empty($motherFullName) ? 1 : 0]);
                                 $mId = (int)$db->lastInsertId();
 
                                 $insU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'married', 1)");

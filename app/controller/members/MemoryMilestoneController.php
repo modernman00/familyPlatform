@@ -41,6 +41,11 @@ final class MemoryMilestoneController
             $memories = $this->memoryService->getNostalgiaMemories($userId, (array)$famCodes);
             $milestones = $this->memoryService->getUpcomingMilestones($userId, (array)$famCodes, 7);
 
+            // Automatically dispatch in-app and WebPush PWA notifications for today's flashbacks and milestones
+            if (!empty($memories) || !empty($milestones)) {
+                $this->memoryService->dispatchDailyMemoriesAndMilestonesForUser($userId, (array)$famCodes);
+            }
+
             http_response_code(200);
             header('Content-Type: application/json');
             echo json_encode([

@@ -250,6 +250,24 @@
                             </select>
                             <small id="eventFrequency_error" class="text-danger ps-2"></small>
                         </div>
+
+                        <!-- 3-Gear PartyPlatform Studio Escalation Toggle (deliberately no name="" attribute so FormHelper.massValidate() ignores it) -->
+                        <div class="mt-3 p-3 rounded-3" id="partyPlatformToggleCard" style="background: linear-gradient(135deg, rgba(163, 22, 33, 0.06) 0%, rgba(245, 158, 11, 0.08) 100%); border: 1px solid rgba(163, 22, 33, 0.2);">
+                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                <div>
+                                    <label for="enablePartyPlatformToggle" class="fw-bold mb-0 d-flex align-items-center gap-1" style="font-size: 0.85rem; color: var(--text-main, #0f172a); cursor: pointer;">
+                                        <span>✨ Plan with PartyPlatform Studio</span>
+                                        <span class="badge rounded-pill" style="background-color: #a31621; color: #ffffff; font-size: 0.65rem;">Smart Sync</span>
+                                    </label>
+                                    <p class="text-muted mb-0 mt-1" style="font-size: 0.76rem; line-height: 1.35;">
+                                        Automatically pre-load your Family Tree into Guest Builder with smart kinship tiers, interactive RSVP pages, QR check-in &amp; group celebration cards.
+                                    </p>
+                                </div>
+                                <div class="form-check form-switch m-0 ps-0 d-flex align-items-center" style="min-width: 44px; min-height: 44px; justify-content: flex-end;">
+                                    <input class="form-check-input m-0" type="checkbox" role="switch" id="enablePartyPlatformToggle" style="width: 2.5rem; height: 1.35rem; cursor: pointer;" aria-label="Plan with PartyPlatform Studio">
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <input type="hidden" name="token" value="{{ $token }}">

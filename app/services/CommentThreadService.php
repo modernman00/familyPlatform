@@ -96,7 +96,8 @@ final class CommentThreadService
         string $authorName,
         string $postNo,
         array $mentionedIds,
-        ?string $parentAuthorId
+        ?string $parentAuthorId,
+        ?int $commentNo = null
     ): array {
         $targets = [];
         if ($parentAuthorId !== null && $parentAuthorId !== '') {
@@ -107,7 +108,15 @@ final class CommentThreadService
         }
         unset($targets[$authorId]);
 
-        $url = (getenv('MIX_APP_URL') ?: '') . "/profilePage?#post{$postNo}";
+        $cleanPostNo = (int) $postNo;
+        $baseUrl = rtrim((string) (getenv('APP_URL') ?: (getenv('MIX_APP_URL') ?: '')), '/');
+        $base = $baseUrl !== '' ? $baseUrl : '';
+        if ($commentNo) {
+            $cleanCommentNo = (int) $commentNo;
+            $url = "{$base}/profilePage?post_no={$cleanPostNo}&comment_no={$cleanCommentNo}#comment{$cleanCommentNo}";
+        } else {
+            $url = "{$base}/profilePage?post_no={$cleanPostNo}#post{$cleanPostNo}";
+        }
         $notified = [];
 
         foreach ($targets as $targetId => $message) {

@@ -46,6 +46,7 @@
        /recaptcha/enterprise/pat. Member pages don't call grecaptcha, so it's removed. --}}
   <link rel="stylesheet" href="/public/css/main.css?v={{ assetVersion('css/main.css') }}">
   <link rel="stylesheet" href="/public/css/standards-v21.css?v={{ assetVersion('css/standards-v21.css') }}">
+  <link rel="stylesheet" href="/public/css/profile-photo-viewer.css?v={{ assetVersion('css/profile-photo-viewer.css') }}">
   @stack('styles')
 </head>
 
@@ -64,6 +65,7 @@
        from prefetch cache before the parser gets here) always finds this markup. --}}
   @includeIf('member.modals.editProfile')
   @includeIf('member.modals.recommendModal')
+  @includeIf('components.profilePhotoViewer')
 
   <!-- Mobile PWA Bottom Tab Navigation (Native App Parity) -->
   @include('layouts.bottom_nav')
@@ -80,6 +82,7 @@
   <script nonce="{{ $nonce }}" src="/public/js/pwa-install.js?v=1.0.0"></script>
   <script nonce="{{ $nonce }}" src="/public/js/pwa-notifications.js?v=1.0.0" defer></script>
   <script nonce="{{ $nonce }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>
+  <script nonce="{{ $nonce }}" src="/public/js/profilePhotoViewer.js?v={{ assetVersion('js/profilePhotoViewer.js') }}" defer></script>
 
   @include('component.submitSpinner')
   @include('partials.pwa-register')

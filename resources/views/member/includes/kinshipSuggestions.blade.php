@@ -18,14 +18,14 @@
                 </div>
                 <div>
                     <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem; letter-spacing: -0.01em;">Suggested Kin &amp; In-Laws</h6>
-                    <span class="text-muted" style="font-size: 0.75rem;">People you may know</span>
+                    <span class="d-block" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569); line-height: 1.4;">People you may know</span>
                 </div>
             </div>
-            <span class="badge rounded-pill bg-light text-primary border" style="font-size: 0.7rem; font-weight: 700;">Kinship Radar</span>
+            <span class="badge rounded-pill bg-light text-primary border" style="font-size: 0.75rem; font-weight: 700;">Kinship Radar</span>
         </div>
 
         @if(empty($suggestedKin))
-            <div class="text-center text-muted py-3" id="kinshipEmptyState" style="font-size: 0.82rem;">
+            <div class="text-center text-muted py-3" id="kinshipEmptyState" style="font-size: 0.875rem;">
                 <i class="bi bi-check2-circle text-success d-block mb-2" style="font-size: 1.5rem;"></i>
                 You're connected to all nearby kin. We'll surface new suggestions as your family network grows.
             </div>
@@ -46,27 +46,27 @@
                         <div class="d-flex align-items-center gap-2" style="min-width: 0; flex: 1;">
                             <img src="{{ $kinAvatar }}" alt="{{ $kinName }}" class="rounded-circle border flex-shrink-0" width="44" height="44" style="object-fit: cover;">
                             <div class="text-truncate" style="min-width: 0; flex: 1;">
-                                <a href="/organogram/{{ $kinId }}" class="fw-bold text-dark text-decoration-none d-block text-truncate" title="{{ $kinName }}" style="font-size: 0.9rem;">{{ $kinName }}</a>
+                                <a href="/organogram/{{ $kinId }}" class="fw-bold text-dark text-decoration-none d-block text-truncate" title="{{ $kinName }}" style="font-size: 0.95rem;">{{ $kinName }}</a>
                                 <div class="d-flex align-items-center gap-1 mt-1 flex-wrap">
-                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-0" style="font-size: 0.65rem; font-weight: 700;">{{ $score }}% Match</span>
-                                    <span class="text-secondary small fw-bold" style="font-size: 0.72rem;">• {{ $kinType }}</span>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-0.5" style="font-size: 0.75rem; font-weight: 700;">{{ $score }}% Match</span>
+                                    <span class="text-secondary fw-semibold" style="font-size: 0.8125rem;">• {{ $kinType }}</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Dismiss Button (Top Right) -->
                         <button type="button" class="btn btn-sm btn-link text-muted p-0 text-decoration-none btn-dismiss-kin flex-shrink-0" data-user-id="{{ $kinId }}" title="Dismiss suggestion" style="line-height: 1; margin-top: 2px;">
-                            <i class="bi bi-x-lg" style="font-size: 0.8rem;"></i>
+                            <i class="bi bi-x-lg" style="font-size: 0.85rem;"></i>
                         </button>
                     </div>
 
                     <!-- Primary Reason Badge / Info -->
-                    <div class="text-muted small mb-3 ps-1" style="font-size: 0.72rem; line-height: 1.3;">
+                    <div class="mb-3 ps-1" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569); line-height: 1.4;">
                         <i class="bi bi-diagram-2 text-warning me-1"></i> {{ $primaryReason }}
                     </div>
 
                     <!-- Connect Action Button (Full Width, never overlaps) -->
-                    <button type="button" class="btn btn-primary btn-sm rounded-pill w-100 fw-bold btn-connect-kin d-flex align-items-center justify-content-center gap-1 shadow-sm" data-user-id="{{ $kinId }}" style="font-size: 0.78rem; padding: 6px 12px; transition: all 0.2s ease;">
+                    <button type="button" class="btn btn-primary btn-sm rounded-pill w-100 fw-bold btn-connect-kin d-flex align-items-center justify-content-center gap-1 shadow-sm" data-user-id="{{ $kinId }}" style="font-size: 0.875rem; min-height: 44px; padding: 8px 14px; color: #ffffff !important; background-color: var(--brand-primary, #a31621); transition: all 0.2s ease;">
                         <i class="bi bi-person-plus-fill"></i> Connect
                     </button>
                 </div>

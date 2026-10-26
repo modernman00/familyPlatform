@@ -99,7 +99,7 @@ final class FamilyCodeRenameService
         return $current;
     }
 
-    /** The user who created the code: registry creator, else the earliest approved admin. */
+    /** The user who created the code: registry creator, else earliest approved admin, else earliest active primary member. */
     public function creatorOf(string $code): string
     {
         $clean = self::normalise($code);
@@ -120,7 +120,48 @@ final class FamilyCodeRenameService
         );
         $stmt->execute([$clean]);
         $first = $stmt->fetchColumn();
-        return is_string($first) ? $first : '';
+        if (is_string($first) && $first !== '') {
+            $this->healCreatorRecord($clean, $first);
+            return $first;
+        }
+
+        // Legacy/backfilled primary codes where created_by was NULL and all user_families rows defaulted to 'member':
+        // resolve the earliest live registrant whose primary family code is $clean.
+        $stmtFounder = $this->pdo->prepare(
+            "SELECT p.id
+             FROM personal p
+             JOIN account a ON a.id = p.id AND a.deleted_at IS NULL
+             WHERE UPPER(TRIM(REPLACE(p.famCode, '#', ''))) = ?
+             ORDER BY p.no ASC LIMIT 1"
+        );
+        $stmtFounder->execute([$clean]);
+        $founder = $stmtFounder->fetchColumn();
+        if (is_string($founder) && $founder !== '') {
+            $this->healCreatorRecord($clean, $founder);
+            return $founder;
+        }
+
+        return '';
+    }
+
+    /** Persist resolved founder into family_codes and user_families so future lookups are O(1). */
+    private function healCreatorRecord(string $cleanCode, string $userId): void
+    {
+        if (in_array($cleanCode, self::RESERVED_CODES, true)) {
+            return;
+        }
+        try {
+            $this->pdo->prepare(
+                "INSERT INTO family_codes (code, kind, created_by) VALUES (?, 'primary', ?)
+                 ON DUPLICATE KEY UPDATE created_by = IF(created_by IS NULL OR created_by = '', VALUES(created_by), created_by)"
+            )->execute([$cleanCode, $userId]);
+            $this->pdo->prepare(
+                "UPDATE user_families SET role = 'admin'
+                 WHERE user_id = ? AND UPPER(TRIM(REPLACE(family_code, '#', ''))) = ? AND status = 'approved'"
+            )->execute([$userId, $cleanCode]);
+        } catch (\Throwable) {
+            // Best-effort self-heal; never block read paths
+        }
     }
 
     /**
@@ -291,7 +332,7 @@ final class FamilyCodeRenameService
                 $userId,
                 'Family code vote',
                 "{$name} wants to change our family code to #{$new}. Cast your vote - it changes for everyone if more of us vote yes than no.",
-                '/profilePage?#post' . $postNo,
+                '/profilePage?post_no=' . $postNo . '#post' . $postNo,
                 "code-rename-vote-{$requestId}"
             );
         }

@@ -98,4 +98,25 @@ describe('Button Sleekness, Modernity and Mobile Touch Ergonomics', () => {
 
         cy.screenshot('button_landing_mobile');
     });
+
+    it('verifies submit and icon buttons show strictly spinner without Processing text and recover cleanly', () => {
+        cy.visit('/login');
+        cy.window().then((win) => {
+            expect(win.FamilyPlatformSpinner).to.exist;
+            const btn = win.document.querySelector('.stitch-submit');
+            expect(btn).to.exist;
+            
+            // Trigger spinner
+            win.FamilyPlatformSpinner.start(btn);
+            expect(btn.getAttribute('aria-busy')).to.equal('true');
+            expect(btn.querySelector('.st-spinner-border')).to.exist;
+            expect(btn.innerText.trim()).to.not.include('Processing');
+            expect(btn.innerText.trim()).to.equal('');
+            
+            // Stop spinner
+            win.FamilyPlatformSpinner.stop(btn);
+            expect(btn.getAttribute('aria-busy')).to.be.null;
+            expect(btn.querySelector('.st-spinner-border')).to.be.null;
+        });
+    });
 });

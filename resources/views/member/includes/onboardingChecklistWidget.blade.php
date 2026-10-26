@@ -59,7 +59,7 @@
     <div class="card-body px-4 pt-3 pb-4">
         <div class="d-flex flex-column gap-2.5">
             
-            <!-- Step 1: Explore Family Tree -->
+            <!-- Step 1: Build Living Family Tree -->
             <div class="p-3 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2 transition-all"
                  :style="state.steps?.explore_tree?.done ? 'background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(52, 211, 153, 0.35);' : 'background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(255, 255, 255, 0.12);'">
                 <div class="d-flex align-items-center gap-3 min-w-0">
@@ -69,19 +69,19 @@
                     </div>
                     <div>
                         <div class="fw-bold text-white" style="font-size: 0.9rem;" :class="{'text-decoration-line-through text-white-50': state.steps?.explore_tree?.done}">
-                            1. Explore Your Family Tree
+                            1. Build Your Living Family Tree
                         </div>
                         <div class="text-white-50 small" style="font-size: 0.78rem;">
-                            View generations, organogram nodes, and family branches.
+                            Add parents and siblings to preserve family heritage, connect generations, and auto-track kinship.
                         </div>
                     </div>
                 </div>
                 <template x-if="!state.steps?.explore_tree?.done">
                     <a href="/organogram?mode=canvas" 
-                       class="btn btn-sm btn-light rounded-pill px-3 fw-bold text-primary shadow-sm"
-                       style="font-size: 0.78rem; min-height: 32px;"
+                       class="btn btn-sm btn-warning rounded-pill px-3 fw-bold text-dark shadow-sm d-inline-flex align-items-center gap-1"
+                       style="font-size: 0.78rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;"
                        @click="markStep('explore_tree')">
-                        Open Tree <i class="bi bi-arrow-right ms-1"></i>
+                        Build Tree <i class="bi bi-arrow-right ms-1"></i>
                     </a>
                 </template>
                 <template x-if="state.steps?.explore_tree?.done">

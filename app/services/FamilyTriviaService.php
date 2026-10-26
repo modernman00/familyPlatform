@@ -164,7 +164,7 @@ final class FamilyTriviaService
     ): void {
         $cleanFam = strtoupper(trim(str_replace('#', '', $familyCode)));
         $featuredUid = !empty($triviaData['featured_user_id']) ? (string)$triviaData['featured_user_id'] : '';
-        $postUrl = '/profilePage#post' . $postNo;
+        $postUrl = '/profilePage?post_no=' . $postNo . '#post' . $postNo;
 
         // 1. Featured Member Spotlight Notification (In-App & OS WebPush)
         if ($featuredUid !== '') {

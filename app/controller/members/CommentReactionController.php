@@ -146,6 +146,47 @@ final class CommentReactionController
         \error_log('[CommentReactionController] Pusher broadcast warning: ' . $pusherEx->getMessage());
       }
 
+      // Notify comment author when a new reaction is added
+      if ($action === 'added') {
+        try {
+          $cStmt = $pdo->prepare("SELECT id FROM comment WHERE comment_no = ? LIMIT 1");
+          $cStmt->execute([$commentNo]);
+          $commentAuthorId = (string)$cStmt->fetchColumn();
+
+          if ($commentAuthorId !== '' && $commentAuthorId !== $userId) {
+            $reactorName = trim(($_SESSION['fName'] ?? '') . ' ' . ($_SESSION['lName'] ?? ''));
+            if ($reactorName === '') {
+              $reactorName = 'A family member';
+            }
+            $targetUrl = "/profilePage?post_no={$postNo}&comment_no={$commentNo}#comment{$commentNo}";
+            $notifMsg = "{$reactorName} reacted with {$reactionType} to your comment";
+
+            $nStmt = $pdo->prepare("
+              INSERT INTO notification 
+              (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+              VALUES (?, ?, ?, 'Comment Reaction', 'Comment', ?, ?, 'new', NOW())
+            ");
+            $nStmt->execute([
+              $userId,
+              $commentAuthorId,
+              $reactorName,
+              $notifMsg,
+              $targetUrl
+            ]);
+
+            PushNotificationClass::sendPushNotification(
+              userId: $commentAuthorId,
+              message: $notifMsg,
+              url: $targetUrl,
+              title: '💬 Comment Reaction',
+              tag: 'comment-reaction-' . $commentNo
+            );
+          }
+        } catch (\Throwable $reactNotifEx) {
+          \error_log('[CommentReactionController notif warning] ' . $reactNotifEx->getMessage());
+        }
+      }
+
       \msgSuccess(200, ['status' => 'success', 'counts' => $counts, 'action' => $action]);
 
     } catch (\Throwable $e) {

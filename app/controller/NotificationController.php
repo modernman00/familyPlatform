@@ -17,19 +17,7 @@ final class NotificationController extends Select
      */
     public static function index()
     {
-        try {
-            $query = Select::formAndMatchQuery(selection: 'SELECT_ALL', table: 'notification', orderBy: 'ORDER BY created_at DESC, no DESC', limit: 'LIMIT 15');
-            $result = Select::selectFn2($query);
-
-            // Call msgSuccess after returning the result
-            msgSuccess(200, $result);
-
-            return $result;
-        } catch (\Exception $e) {
-            // Handle errors or log them
-            showError($e);
-            return null;
-        }
+        return self::notificationById();
     }
 
     /**
@@ -53,6 +41,18 @@ final class NotificationController extends Select
 
             $approvals = self::getPendingApprovalNotifications($userId);
             $receivers = self::sessionReceiverIds($userId);
+
+            // Trigger idempotent daily check for memories & milestones notifications (at most once per day per session)
+            $todayKey = 'memories_notif_checked_' . date('Y-m-d');
+            if (empty($_SESSION[$todayKey])) {
+                $_SESSION[$todayKey] = true;
+                try {
+                    $memoryService = new \App\services\MemoryMilestoneService();
+                    $primaryFam = is_string($_SESSION['famCode'] ?? null) ? $_SESSION['famCode'] : '';
+                    $codes = $_SESSION['famCodes'] ?? ($primaryFam !== '' ? [$primaryFam] : []);
+                    $memoryService->dispatchDailyMemoriesAndMilestonesForUser($userId, (array)$codes);
+                } catch (\Throwable) {}
+            }
 
             // Read-only: drop the session lock so this does not block the profile
             // page's other concurrent AJAX calls sharing the same session file.
@@ -92,6 +92,19 @@ final class NotificationController extends Select
 
             $approvals = self::getPendingApprovalNotifications($userId);
             $receivers = self::sessionReceiverIds($userId);
+
+            // Trigger idempotent daily check for memories & milestones notifications (at most once per day per session)
+            $todayKey = 'memories_notif_checked_' . date('Y-m-d');
+            if (empty($_SESSION[$todayKey])) {
+                $_SESSION[$todayKey] = true;
+                try {
+                    $memoryService = new \App\services\MemoryMilestoneService();
+                    $primaryFam = is_string($_SESSION['famCode'] ?? null) ? $_SESSION['famCode'] : '';
+                    $codes = $_SESSION['famCodes'] ?? ($primaryFam !== '' ? [$primaryFam] : []);
+                    $memoryService->dispatchDailyMemoriesAndMilestonesForUser($userId, (array)$codes);
+                } catch (\Throwable) {}
+            }
+
             \releaseSessionLock();
 
             $placeholders = implode(',', array_fill(0, count($receivers), '?'));
@@ -215,7 +228,12 @@ final class NotificationController extends Select
                             return '/profilePage#linkNotification' . $payload['event_no'];
                         }
                         if (!empty($payload['post_no'])) {
-                            return '/profilePage#post' . $payload['post_no'];
+                            $pNo = (int)$payload['post_no'];
+                            if (!empty($payload['comment_no'])) {
+                                $cNo = (int)$payload['comment_no'];
+                                return "/profilePage?post_no={$pNo}&comment_no={$cNo}#comment{$cNo}";
+                            }
+                            return "/profilePage?post_no={$pNo}#post{$pNo}";
                         }
                     }
                 }
@@ -224,11 +242,19 @@ final class NotificationController extends Select
             // Non-blocking fallback
         }
 
-        // 3. Events: Party, Birthday, Wedding, Anniversary, House Warming, Meeting, Reunion, etc.
+        // 3. Memories & Milestones ("On This Day" flashbacks & family milestone celebrations)
+        if (strcasecmp($type, 'Memories') === 0 || strcasecmp($type, 'Milestones') === 0
+            || stripos($name, 'Flashback') !== false || stripos($name, 'Memory') !== false
+            || (stripos($name, 'Milestone') !== false && stripos($name, 'Event') === false)
+            || stripos($content, 'flashback') !== false || stripos($content, 'cherished family memory') !== false || stripos($content, 'memory from') !== false) {
+            return '/profilePage#memoriesCard';
+        }
+
+        // 4. Events: Party, Birthday, Wedding, Anniversary, House Warming, Meeting, Reunion, etc.
         $eventTypes = [
             'Party', 'Birthday', 'Wedding', 'Anniversary', 'House Warming', 'House_warming',
             'Remembrance', 'Barbecue', 'Education', 'Naming', 'Meeting', 'Reunion',
-            'Holidays', 'Milestones', 'Others', 'Event'
+            'Holidays', 'Others', 'Event'
         ];
         $isEvent = in_array($type, $eventTypes, true)
             || stripos($name, 'Event') !== false
@@ -252,8 +278,34 @@ final class NotificationController extends Select
             return '/profilePage#eventHeader';
         }
 
-        // 4. Posts and Post Tags
-        if (strcasecmp($type, 'Post') === 0 || strcasecmp($type, 'Post Tag') === 0 || stripos($name, 'update') !== false || stripos($content, 'tagged you') !== false) {
+        // 5. Reels
+        if (strcasecmp($type, 'Reel') === 0 || stripos($content, 'reel') !== false || stripos($name, 'reel') !== false || stripos($content, 'video') !== false) {
+            if (!empty($notif['action_url']) && is_string($notif['action_url']) && str_contains($notif['action_url'], '/reels')) {
+                return $notif['action_url'];
+            }
+            return '/reels';
+        }
+
+        // 6. Family Announcements
+        if (strcasecmp($type, 'Announcement') === 0 || stripos($name, 'announcement') !== false || stripos($content, 'announcement') !== false) {
+            return '/profilePage#familyAnnouncementsCard';
+        }
+
+        // 7. Family Journal / Chronicles
+        if (strcasecmp($type, 'Journal') === 0 || strcasecmp($type, 'Chronicle') === 0 || stripos($content, 'chronicle') !== false || stripos($name, 'chronicle') !== false || stripos($content, 'journal') !== false) {
+            if (!empty($notif['action_url']) && is_string($notif['action_url']) && str_contains($notif['action_url'], '/familyJournal')) {
+                return $notif['action_url'];
+            }
+            return '/familyJournal';
+        }
+
+        // 8. Time Capsules
+        if (strcasecmp($type, 'Capsule') === 0 || stripos($name, 'Time Capsule') !== false || stripos($content, 'time capsule') !== false) {
+            return '/profilePage#timeCapsuleCard';
+        }
+
+        // 9. Posts, Comments and Post Tags
+        if (strcasecmp($type, 'Post') === 0 || strcasecmp($type, 'Post Tag') === 0 || strcasecmp($type, 'Comment') === 0 || stripos($name, 'update') !== false || stripos($content, 'tagged you') !== false || stripos($content, 'comment') !== false || stripos($content, 'replied') !== false) {
             try {
                 $db = \Src\Db::connect2();
                 if ($senderId !== '' && $userId !== '') {
@@ -261,14 +313,25 @@ final class NotificationController extends Select
                     $stmt->execute([$userId, $senderId]);
                     $postNo = $stmt->fetchColumn();
                     if ($postNo) {
-                        return '/profilePage#post' . $postNo;
+                        return '/profilePage?post_no=' . (int)$postNo . '#post' . (int)$postNo;
                     }
 
-                    $stmt = $db->prepare("SELECT post_no FROM post WHERE id = ? ORDER BY created_at DESC LIMIT 1");
+                    $stmt = $db->prepare("SELECT post_no, comment_no FROM comment WHERE id = ? ORDER BY comment_no DESC LIMIT 1");
+                    $stmt->execute([$senderId]);
+                    $commentRow = $stmt->fetch(\PDO::FETCH_ASSOC);
+                    if ($commentRow && !empty($commentRow['post_no'])) {
+                        $pNo = (int)$commentRow['post_no'];
+                        $cNo = (int)($commentRow['comment_no'] ?? 0);
+                        return $cNo > 0 
+                            ? "/profilePage?post_no={$pNo}&comment_no={$cNo}#comment{$cNo}" 
+                            : "/profilePage?post_no={$pNo}#post{$pNo}";
+                    }
+
+                    $stmt = $db->prepare("SELECT post_no FROM post WHERE id = ? ORDER BY post_no DESC LIMIT 1");
                     $stmt->execute([$senderId]);
                     $postNo = $stmt->fetchColumn();
                     if ($postNo) {
-                        return '/profilePage#post' . $postNo;
+                        return '/profilePage?post_no=' . (int)$postNo . '#post' . (int)$postNo;
                     }
                 }
             } catch (\Throwable) {}
@@ -297,11 +360,6 @@ final class NotificationController extends Select
         // 8. Lineage / Family Tree / Dynasty Milestones / Onboarding
         if (strcasecmp($type, 'onboarding') === 0 || strcasecmp($type, 'Lineage') === 0 || stripos($content, 'family tree') !== false || stripos($content, 'family branch') !== false || stripos($content, 'dynasty') !== false) {
             return '/organogram/' . ($userId !== '' ? $userId : '') . '?mode=canvas';
-        }
-
-        // 9. Reels
-        if (stripos($content, 'reel') !== false || stripos($name, 'reel') !== false || stripos($content, 'video') !== false) {
-            return '/reels';
         }
 
         return '/profilePage';
@@ -650,6 +708,17 @@ final class NotificationController extends Select
     {
         try {
             $rawBody = (string)file_get_contents('php://input');
+            $pusherSecret = trim((string)($_ENV['PUSHER_APP_SECRET'] ?? getenv('PUSHER_APP_SECRET') ?: ''));
+            if ($pusherSecret !== '') {
+                $signature = trim((string)($_SERVER['HTTP_X_PUSHER_SIGNATURE'] ?? ''));
+                $expectedSig = hash_hmac('sha256', $rawBody, $pusherSecret);
+                if ($signature === '' || !hash_equals($expectedSig, $signature)) {
+                    http_response_code(401);
+                    echo json_encode(['error' => 'Invalid webhook signature']);
+                    return;
+                }
+            }
+
             $data = json_decode($rawBody, true);
 
             if (!is_array($data) || empty($data['events']) || !is_array($data['events'])) {

@@ -46,13 +46,13 @@ final class FamilyDigestService
             "SELECT p.post_no, pp.question
              FROM post p
              JOIN post_polls pp ON pp.post_no = p.post_no
-             WHERE p.postFamCode = ?
+             WHERE (p.postFamCode = ? OR REPLACE(p.postFamCode, '#', '') = REPLACE(?, '#', ''))
                AND p.postMessage LIKE '%Weekly Family Trivia%'
                AND p.date_created >= DATE_SUB(NOW(), INTERVAL 7 DAY)
              ORDER BY p.post_no DESC
              LIMIT 1"
         );
-        $stmt->execute([$familyCode]);
+        $stmt->execute([$familyCode, $familyCode]);
         /** @var array<string, mixed>|false $triviaRow */
         $triviaRow = $stmt->fetch(PDO::FETCH_ASSOC);
 

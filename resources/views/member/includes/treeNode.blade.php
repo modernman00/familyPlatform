@@ -28,10 +28,12 @@
    data-registered="{{ empty($dataDB['email']) && empty($dataDB['id']) ? 'false' : 'true' }}" 
    data-familycode="{{ $data['famCode'] ?? ($data['familyCode'] ?? '') }}"
    data-personid="{{ $dataDB['id'] ?? '' }}"
+   data-mobile="{{ $dataDB['mobile'] ?? '' }}"
    data-deceased="{{ $isDeceased ? '1' : '0' }}">
     
     {{-- Data for modal & slide-out dossier --}}
     <span class="node-email" data-id="{{ $dataDB['email'] ?? '' }}"></span>
+    <span class="node-mobile" data-id="{{ $dataDB['mobile'] ?? '' }}"></span>
     <span class="node-id" data-id="{{ $dataDB['id'] ?? '' }}"></span>
     <span class="node-img" data-id="{{ $img }}"></span>
     <span class="node-fullName" data-id="{{ $displayName }}"></span>
@@ -48,6 +50,10 @@
             <i class="bi bi-gender-{{ strtolower($genderClass) }}"></i>
         @endif
     </span>
+
+    @if($isDeceased)
+        <span class="node-deceased-badge"><i class="bi bi-flower1 text-warning"></i> In Memory</span>
+    @endif
 
     <div class="profile-image-container">
         <img src="{{ $img }}" alt="{{ $displayName }}" class="profile-image" loading="lazy">

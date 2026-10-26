@@ -36,7 +36,7 @@
                       <span class="d-inline-flex align-items-center">
                         <a :href="'/member/profilePage?id=' + tag.user_id" class="fw-semibold text-dark text-decoration-none" style="text-decoration: underline;" x-text="tag.fullName"></a>
                         <template x-if="tag.kinship && tag.kinship !== 'Family Member' && tag.kinship !== 'Relative' && tag.kinship !== 'You'">
-                          <span class="badge rounded-pill bg-light text-muted border px-1.5 py-0.5 ms-0.5" style="font-size: 0.65rem;" x-text="tag.kinship"></span>
+                          <span class="badge rounded-pill bg-light text-muted border px-2 py-0.5 ms-0.5" style="font-size: 0.75rem; font-weight: 600;" x-text="tag.kinship"></span>
                         </template>
                       </span>
                     </template>
@@ -56,7 +56,7 @@
                               <span class="small fw-medium" x-text="tag.fullName"></span>
                             </div>
                             <template x-if="tag.kinship && tag.kinship !== 'Family Member' && tag.kinship !== 'Relative' && tag.kinship !== 'You'">
-                              <span class="badge rounded-pill bg-light text-muted border px-1.5 py-0.5 ms-1" style="font-size: 0.65rem;" x-text="tag.kinship"></span>
+                              <span class="badge rounded-pill bg-light text-muted border px-2 py-0.5 ms-1" style="font-size: 0.75rem; font-weight: 600;" x-text="tag.kinship"></span>
                             </template>
                           </a>
                         </li>
@@ -542,7 +542,7 @@
     <!-- Comments List -->
     <div class="d-flex flex-column gap-2">
       <template x-for="c in threadedComments(post)" :key="c.comment_no">
-        <div class="d-flex align-items-start gap-2" :style="isReply(post, c) ? 'margin-left: 2.25rem;' : ''" :data-reply="isReply(post, c) ? 'true' : 'false'">
+        <div class="d-flex align-items-start gap-2" :id="'comment' + c.comment_no" :class="'comment' + c.comment_no" :data-comment-no="c.comment_no" :style="isReply(post, c) ? 'margin-left: 2.25rem;' : ''" :data-reply="isReply(post, c) ? 'true' : 'false'">
           <img :src="c.profileImg" alt="Avatar" class="rounded-circle" width="32" height="32" style="object-fit: cover; margin-top: 2px;">
           <div class="flex-grow-1">
             <!-- Comment Bubble -->
@@ -630,7 +630,7 @@
                 <button type="button" class="text-muted" style="background:none; border:none; font-size:0.78rem; cursor:pointer; padding:0;" @click="startEditComment(c)">Edit</button>
               </template>
               <template x-if="canModerateComment(post, c)">
-                <button type="button" class="text-muted" style="background:none; border:none; font-size:0.78rem; cursor:pointer; padding:0;" @click="deleteComment(post.post_no, c.comment_no)">Delete</button>
+                <button type="button" class="text-muted" style="background:none; border:none; font-size:0.78rem; cursor:pointer; padding: 2px 4px; min-height: 32px; display: inline-flex; align-items: center;" :title="canEditComment(c) ? 'Delete your comment' : 'Delete comment from your post'" @click="deleteComment(post.post_no, c.comment_no)">Delete</button>
               </template>
             </div>
           </div>

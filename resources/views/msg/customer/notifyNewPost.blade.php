@@ -6,7 +6,8 @@
 @section('content')
 @php
     $baseUrl = rtrim((string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: ($_ENV['MIX_APP_URL2'] ?? getenv('MIX_APP_URL2') ?: 'https://familyplatform.test')), '/');
-    $postUrl = $data['url'] ?? ($baseUrl . '/member/profilePage');
+    $postNo = !empty($data['post_no']) ? (int)$data['post_no'] : null;
+    $postUrl = !empty($data['url']) ? $data['url'] : ($baseUrl . '/profilePage' . ($postNo ? '?post_no=' . $postNo . '#post' . $postNo : ''));
 @endphp
 <p style="margin-bottom: 20px;">
     Hi <strong>{{ $data['firstName'] ?? 'there' }}</strong>,

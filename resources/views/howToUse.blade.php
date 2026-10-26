@@ -105,7 +105,8 @@
               <li class="mb-2">Click on any relative's card on the family tree canvas.</li>
               <li class="mb-2">Click <strong>"Record / Upload Voice Capsule"</strong> in the slide-out dossier.</li>
               <li class="mb-2">Record oral histories, lullabies, ancestral blessings, or life advice.</li>
-              <li>Recordings are encrypted and streamable exclusively by authenticated family members.</li>
+              <li class="mb-2">Recordings are encrypted and streamable exclusively by authenticated family members.</li>
+              <li><strong>Honouring Deceased Ancestors:</strong> Relatives marked as deceased are respectfully distinguished with a 🕊️ In Memory banner, silver/slate ribbons, grayscale portraits, and lifespan dates across the Canvas Tree, Pedigree Outline, and Radial Fan Chart.</li>
             </ol>
           </div>
         </div>
@@ -382,13 +383,126 @@
             </div>
 
             <p class="lead text-secondary">
-              Members can preserve rich family chronicles with the built-in AI Story Assistant at <strong>Family Journal</strong>, broadcast urgent family notices, and explore public heritage articles on our <a href="/blogs" class="fw-bold text-decoration-none" style="color: #7a0e16;">Public Blog</a>.
+              Members can preserve rich family chronicles with the built-in AI Story Assistant at <strong>Family Journal</strong>, post short-form video memories in <strong>Family Reels</strong>, broadcast urgent family notices, and explore public heritage articles on our <a href="/blogs" class="fw-bold text-decoration-none" style="color: #7a0e16;">Public Blog</a>.
             </p>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <div class="p-3 rounded-3 bg-light border h-100">
+                  <h6 class="fw-bold text-dark"><i class="bi bi-trash3 text-danger me-2"></i>Author Deletion Rights</h6>
+                  <p class="small text-muted mb-0">
+                    You have complete control over your content. You can delete your own posts, reels, and comments at any time with a single tap.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="p-3 rounded-3 bg-light border h-100">
+                  <h6 class="fw-bold text-dark"><i class="bi bi-shield-check text-primary me-2"></i>Account Holder Moderation</h6>
+                  <p class="small text-muted mb-0">
+                    As the creator of a post or reel, you maintain full moderation authority to remove any undesired, inappropriate, or sensitive comments left on your content.
+                  </p>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="p-3 rounded-3 bg-light border">
+                  <h6 class="fw-bold text-dark"><i class="bi bi-chat-heart text-danger me-2"></i>Reels Comments Parity &amp; Interactive Features</h6>
+                  <p class="small text-muted mb-0">
+                    Comments on <strong>Family Reels</strong> enjoy full functional parity with standard post comments: organise discussions into <strong>1-level threaded replies</strong>, attach vibrant animated stickers from our curated <strong>Family GIF</strong> catalogue, react with emotional emoji pickers (Like, Love, Haha, Wow, Sad, Angry), and edit your own comments inline with instant preview.
+                  </p>
+                </div>
+              </div>
+            </div>
 
             <div class="p-3 rounded-3 bg-light border">
               <p class="small text-muted mb-0">
                 Read public insights on <a href="/blogs" class="fw-semibold">FamilyPlatform Blog</a>, or craft private member journals within your family enclave.
               </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 11: 3-Gear PartyPlatform Event Studio & Kinship Guest Sync -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(163,22,33, 0.12); color: #a31621;">
+                <i class="bi bi-stars fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">11. 3-Gear PartyPlatform Event Studio &amp; Family Tree Guest Sync</h3>
+                <span class="badge" style="background: #a31621; color: #fff;">Ecosystem Bridge</span>
+              </div>
+            </div>
+
+            <p class="lead text-secondary">
+              Organise everything from quiet birthday reminders to 300-guest family reunions and weddings using our seamless 3-Gear integration with <strong>PartyPlatform Studio</strong>.
+            </p>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge text-white mb-2" style="background: #64748b;">Gear 1: Native Reminder</span>
+                  <h6 class="fw-bold text-dark">Instant Calendar Dates</h6>
+                  <p class="small text-muted mb-0">Create simple birthdays, memorials, and recurring dates in seconds with automated 7-day, 1-day, and same-day family notifications.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-warning text-dark mb-2">Gear 2: Interactive Hub</span>
+                  <h6 class="fw-bold text-dark">RSVPs &amp; Celebration Cards</h6>
+                  <p class="small text-muted mb-0">Switch on <strong>"Plan with PartyPlatform Studio"</strong> (or click <strong>"Enable RSVPs &amp; Party Studio"</strong> on any existing event) to unlock 1-tap RSVP tracking and digital group celebration cards right in your sidebar.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge text-white mb-2" style="background: #a31621;">Gear 3: Full Event Studio</span>
+                  <h6 class="fw-bold text-dark">Smart Kinship Guest Sync</h6>
+                  <p class="small text-muted mb-0">Click <strong>"Manage Studio ↗"</strong> for passwordless Single Sign-On into PartyPlatform with your Family Tree automatically pre-loaded into Guest Builder by kinship tier (Close Family, Family, and Extended Family).</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 12: The Fun Place & Judge Yommy Court of Family Harmony -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(123, 3, 252, 0.12); color: #7b03fc;">
+                <i class="bi bi-hammer fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">12. The Fun Place &amp; Judge Yommy Court of Family Harmony</h3>
+                <span class="badge text-white" style="background: #7b03fc;">Kinship Reconciliation</span>
+              </div>
+            </div>
+
+            <p class="lead text-secondary">
+              FamilyPlatform features <strong>The Fun Place; Judge Yommy</strong> &mdash; a dedicated domestic sanctuary for non-punitive, empathetic, firm, and reconciliatory dispute settlement across all generations.
+            </p>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge text-white mb-2" style="background: #7b03fc;">Direct Dispute Hearing</span>
+                  <h6 class="fw-bold text-dark">Party A vs. Party B</h6>
+                  <p class="small text-muted mb-0">File an issue directly against a family member regarding chores, boundaries, borrowed items, or communication. Party B receives an instant in-app and push notification to present their perspective.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-warning text-dark mb-2">🕊️ Peacemaker Mediation</span>
+                  <h6 class="fw-bold text-dark">Third-Party Initiation</h6>
+                  <p class="small text-muted mb-0">When two family members are feuding, any concerned relative (parent, sibling, or elder) can initiate a reconciliatory hearing as a neutral peacemaker to heal kinship friction.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-success text-white mb-2">Sealed Reconciliatory Decree</span>
+                  <h6 class="fw-bold text-dark">Fair, Firm &amp; Restorative</h6>
+                  <p class="small text-muted mb-0">Once statements and eyewitness testimonies are gathered, Judge Yommy seals a binding family decree with an objective Finding of Fact, a Reconciliatory Bridge, and a balanced Action Plan.</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

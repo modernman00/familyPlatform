@@ -24,7 +24,12 @@ foreach(($eventData ?? []) as $event) {
         'eventType' => $event['eventType'],
         'eventDescription' => $event['eventDescription'] ?? '',
         'eventFrequency' => $event['eventFrequency'] ?? '',
-        'dateDifference' => $dateDifference
+        'dateDifference' => $dateDifference,
+        'party_event_id' => $event['party_event_id'] ?? null,
+        'party_event_slug' => $event['party_event_slug'] ?? null,
+        'party_rsvp_url' => $event['party_rsvp_url'] ?? null,
+        'party_card_url' => $event['party_card_url'] ?? null,
+        'party_sync_status' => $event['party_sync_status'] ?? 'none',
     ];
 }
 @endphp
@@ -54,13 +59,20 @@ foreach(($eventData ?? []) as $event) {
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px; background-color: var(--card-bg);">
         <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-start pt-4 pb-2 px-4" id="eventHeader">
             <div>
-                <h5 class="mb-0 fw-bold" style="color: var(--text-color); font-size: 1.05rem;">Upcoming Events</h5>
-                <p class="text-muted small mb-0" style="font-size: 0.8rem;">Family gatherings, birthdays & milestones.</p>
-                <div class="text-muted mt-1" style="font-size: 0.75rem;">
+                <h5 class="mb-0 fw-bold" style="color: var(--text-color); font-size: 1.15rem;">Upcoming Events</h5>
+                <p class="mb-0" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569); line-height: 1.5;">Family gatherings, birthdays &amp; milestones.</p>
+                <div class="mt-1" style="font-size: 0.8125rem; color: var(--text-muted-aa, #475569);">
                     <i class="bi bi-globe me-1 text-primary"></i> <span class="user-tz-name">Local Time</span>
                 </div>
             </div>
-            <a href="/profilePage#eventHeader" class="text-decoration-none mt-1" style="color: var(--primary-color); font-weight: 600; font-size: 0.85rem;">See All <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i></a>
+            <button type="button" 
+                    class="btn btn-link text-decoration-none mt-1 p-0 d-inline-flex align-items-center gap-1 border-0 bg-transparent flex-shrink-0" 
+                    style="color: var(--primary-color); font-weight: 600; font-size: 0.875rem; min-height: 44px; min-width: 44px; justify-content: flex-end; white-space: nowrap;"
+                    data-bs-toggle="modal" 
+                    data-bs-target="#allUpcomingEventsModal"
+                    aria-label="See all scheduled family events for the next 3 months">
+                <span>See All</span> <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i>
+            </button>
         </div>
 
         <div class="card-body eventList px-4" id="eventList">
@@ -71,10 +83,10 @@ foreach(($eventData ?? []) as $event) {
                         <i class="bi bi-calendar-event fs-3"></i>
                     </div>
                     <h6 class="fw-bold mb-1" style="color: var(--text-color); font-size: 0.95rem;">No Upcoming Events</h6>
-                    <p class="text-muted small mb-3" style="font-size: 0.82rem; line-height: 1.45;">
+                    <p class="mb-3" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569); line-height: 1.45;">
                         Looks like the calendar is clear. Why not plan the next family gathering or reunion?
                     </p>
-                    <button type="button" class="btn btn-sm text-white rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#createEventModal" style="background-color: var(--primary-color); border: none; font-size: 0.82rem;">
+                    <button type="button" class="btn btn-sm text-white rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#createEventModal" style="background-color: var(--primary-color, #a31621); color: #ffffff !important; border: none; font-size: 0.875rem; min-height: 44px;">
                         <i class="bi bi-plus-circle-fill me-1 text-warning"></i> Create Event
                     </button>
                 </div>
@@ -88,19 +100,73 @@ foreach(($eventData ?? []) as $event) {
                             <div class="p-3 rounded-3" style="background-color: var(--hover-color); border: 1px solid var(--border-color); border-radius: 14px;">
                                 <div class="d-flex flex-column">
                                     <div class="d-flex justify-content-between align-items-start mb-1">
-                                        <h6 class="fw-bold mb-0 text-truncate" style="color: var(--text-color); font-size: 0.9rem;" x-text="event.eventName"></h6>
-                                        <span class="badge rounded-pill px-2 py-1 fw-bold" style="background: var(--secondary-color); color: #8a1019; font-size: 0.72rem;" x-text="event.dateDifference"></span>
+                                        <h6 class="fw-bold mb-0 text-truncate" style="color: var(--text-color); font-size: 0.95rem;" x-text="event.eventName"></h6>
+                                        <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--secondary-color); color: #8a1019; font-size: 0.75rem;" x-text="event.dateDifference"></span>
                                     </div>
                                     
-                                    <div class="d-flex align-items-center mb-1 text-muted" style="font-size: 0.82rem;">
+                                    <div class="d-flex align-items-center mb-1" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569);">
                                         <i class="bi bi-calendar3 me-2 text-primary"></i>
                                         <span x-text="event.eventDate"></span>
                                     </div>
                                     
-                                    <div class="d-flex align-items-center mb-2 text-muted" style="font-size: 0.82rem;">
-                                        <i class="bi bi-geo-alt me-2 text-danger"></i>
-                                        <span x-text="event.eventType"></span>
+                                    <div class="d-flex align-items-center justify-content-between mb-2" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569);">
+                                        <div>
+                                            <i class="bi bi-geo-alt me-2 text-danger"></i>
+                                            <span x-text="event.eventType"></span>
+                                        </div>
+                                        <template x-if="event.party_rsvp_url">
+                                            <span class="badge rounded-pill px-2 py-1" style="background: rgba(163, 22, 33, 0.1); color: #a31621; font-size: 0.75rem; font-weight: 700;">
+                                                ✨ Party Studio
+                                            </span>
+                                        </template>
                                     </div>
+
+                                    <!-- Gear 2 & Gear 3 PartyPlatform Action Bar -->
+                                    <template x-if="event.party_rsvp_url">
+                                        <div class="d-flex flex-wrap gap-2 mt-1 mb-2 pt-2 border-top">
+                                            <a :href="event.party_rsvp_url" target="_blank" rel="noopener noreferrer"
+                                               class="btn btn-sm rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1"
+                                               style="background-color: var(--primary-color, #a31621); color: #ffffff !important; font-size: 0.85rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;"
+                                               title="Open Interactive RSVP &amp; Event Hub">
+                                                <i class="bi bi-ticket-perforated-fill text-warning"></i> RSVP &amp; Hub
+                                            </a>
+
+                                            <template x-if="event.party_card_url && ['Birthday', 'Anniversary', 'Wedding', 'Graduation', 'Party', 'Reunion'].includes(event.eventType)">
+                                                <a :href="event.party_card_url" target="_blank" rel="noopener noreferrer"
+                                                   class="btn btn-sm rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1"
+                                                   style="background-color: #fbefef; color: #8a1019 !important; border: 1px solid rgba(163, 22, 33, 0.25); font-size: 0.85rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;"
+                                                   title="Sign the Family Celebration Card">
+                                                    <i class="bi bi-envelope-paper-heart-fill"></i> Sign Card
+                                                </a>
+                                            </template>
+
+                                            <template x-if="isOwnEvent(event)">
+                                                <a :href="'/member/profilePage/event/' + event.no + '/party-sso'" target="_blank" rel="noopener noreferrer"
+                                                   class="btn btn-sm rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1"
+                                                   style="background-color: #0f172a; color: #ffffff !important; font-size: 0.85rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;"
+                                                   title="Launch Full PartyPlatform Event Studio (Single Sign-On)">
+                                                    <i class="bi bi-stars text-warning"></i> Manage Studio ↗
+                                                </a>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="!event.party_rsvp_url && isOwnEvent(event)">
+                                        <div class="mt-1 mb-2 pt-2 border-top">
+                                            <button type="button"
+                                                    class="btn btn-sm rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1 w-100 justify-content-center"
+                                                    style="background: linear-gradient(135deg, #a31621 0%, #8a1019 100%); color: #ffffff !important; border: 1px solid #7a0e16; font-size: 0.875rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;"
+                                                    :disabled="event.isUpgradingParty"
+                                                    @click="upgradeToParty(event, $event)">
+                                                <template x-if="!event.isUpgradingParty">
+                                                    <span><i class="bi bi-stars me-1"></i> Enable RSVPs &amp; Party Studio</span>
+                                                </template>
+                                                <template x-if="event.isUpgradingParty">
+                                                    <span><span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Syncing Family Tree...</span>
+                                                </template>
+                                            </button>
+                                        </div>
+                                    </template>
 
                                     <template x-if="isOwnEvent(event)">
                                         <div class="d-flex gap-2 mt-1 border-top pt-2">
@@ -130,8 +196,8 @@ foreach(($eventData ?? []) as $event) {
         </div>
         <h1 class="display-4 fw-bold mb-0 text-white" style="letter-spacing: -0.02em;">{{ $totalFamilyMembers ?? 0 }}</h1>
         <p class="mb-3 text-white-50" style="font-size: 0.95rem;">Connected Members</p>
-        <button class="btn btn-light rounded-pill fw-bold mx-auto px-4 py-2 text-primary shadow-sm" style="font-size: 0.85rem;" onclick="window.location.href='/allMembers'">
-            <i class="bi bi-arrow-right-circle-fill me-1"></i> View Directory
+        <button class="btn rounded-pill fw-bold mx-auto px-4 py-2 shadow-sm d-inline-flex align-items-center justify-content-center" style="font-size: 0.85rem; min-height: 44px; background-color: #ffffff !important; color: #8a1019 !important; border: 1px solid rgba(255,255,255,0.9) !important;" onclick="window.location.href='/allMembers'">
+            <i class="bi bi-arrow-right-circle-fill me-1.5" style="color: #a31621;"></i> View Directory
         </button>
     </div>
 </div>

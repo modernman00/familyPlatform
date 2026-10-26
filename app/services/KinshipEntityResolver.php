@@ -673,6 +673,46 @@ final class KinshipEntityResolver
 
             $db->commit();
 
+            // Notify family members that user has claimed their branch on the tree
+            try {
+                $claimantName = trim("{$cleanFirst} {$cleanLast}");
+                if ($claimantName === '') {
+                    $claimantName = 'A family member';
+                }
+                $members = \App\model\AllMembersData::AllMembersEmailByFamCode($familyCode, $userId);
+                $treeUrl = "/organogram/{$userId}?mode=canvas";
+                $notifMsg = "🌳 {$claimantName} claimed their spot on our Family Tree!";
+                $stmt = $db->prepare("
+                    INSERT INTO notification 
+                    (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                    VALUES (?, ?, ?, 'Family Tree Connected', 'Lineage', ?, ?, 'new', NOW())
+                ");
+                foreach ($members as $m) {
+                    $mId = (string)($m['id'] ?? '');
+                    if ($mId === '' || $mId === $userId) {
+                        continue;
+                    }
+                    try {
+                        $stmt->execute([
+                            $userId,
+                            $mId,
+                            $claimantName,
+                            $notifMsg,
+                            $treeUrl
+                        ]);
+                        \App\classes\PushNotificationClass::sendPushNotification(
+                            userId: $mId,
+                            message: $notifMsg,
+                            url: $treeUrl,
+                            title: '🌳 Family Tree Connected',
+                            tag: 'tree-claim-' . $targetNodeId
+                        );
+                    } catch (\Throwable) {}
+                }
+            } catch (\Throwable $treeEx) {
+                error_log('[KinshipEntityResolver::claimAndMergeNode notif warning] ' . $treeEx->getMessage());
+            }
+
             if (session_status() === PHP_SESSION_ACTIVE) {
                 unset($_SESSION['dismissed_claim_node_' . $targetNodeId]);
             }

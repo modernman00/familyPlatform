@@ -48,7 +48,7 @@ final class FamilyCodeRenameTest extends TestCase
         $this->pdo->prepare("DELETE FROM family_nodes WHERE family_code IN ($codeMarks)")->execute($this->codes);
 
         foreach ($this->userIds as $id) {
-            foreach (['contact' => 'id', 'personal' => 'id', 'account' => 'id', 'otherFamily' => 'id', 'user_families' => 'user_id', 'family_nodes' => 'user_id'] as $table => $col) {
+            foreach (['contact' => 'id', 'personal' => 'id', 'account' => 'id', 'otherFamily' => 'id', 'code_mgt' => 'id', 'user_families' => 'user_id', 'family_nodes' => 'user_id'] as $table => $col) {
                 $this->pdo->prepare("DELETE FROM {$table} WHERE {$col} = ?")->execute([$id]);
             }
             $this->pdo->prepare("DELETE FROM notification WHERE receiver_id = ? AND sender_id = 'system'")->execute([$id]);
@@ -135,6 +135,58 @@ final class FamilyCodeRenameTest extends TestCase
 
         $this->expectDomainError(403, fn () => $this->service->propose($family['ids'][1], $this->newCode()));
         $this->assertSame($family['code'], $this->famCodeOf($family['ids'][1]));
+    }
+
+    public function testLegacyBackfilledCodeResolvesEarliestFounderAndSelfHeals(): void
+    {
+        $code = $this->newCode();
+        $founder = $this->makeUser($code)['id'];
+        $second = $this->makeUser($code)['id'];
+
+        // Simulate pre-RFC-0005 registration & backfill: created_by is NULL and both rows have role='member'
+        $this->pdo->prepare('INSERT INTO family_codes (code, kind, created_by) VALUES (?, "primary", NULL)')->execute([$code]);
+        $this->pdo->prepare('INSERT INTO user_families (user_id, family_code, status, role) VALUES (?, ?, "approved", "member")')->execute([$founder, $code]);
+        $this->pdo->prepare('INSERT INTO user_families (user_id, family_code, status, role) VALUES (?, ?, "approved", "member")')->execute([$second, $code]);
+
+        // Second member is still rejected with 403
+        $this->expectDomainError(403, fn () => $this->service->propose($second, $this->newCode()));
+
+        // Founder is recognised and self-healed into family_codes.created_by and user_families.role='admin'
+        $status = $this->service->statusFor($founder);
+        $this->assertTrue($status['is_creator']);
+        $this->assertTrue($status['can_propose']);
+        $this->assertSame(1, $this->countRows('SELECT COUNT(*) FROM family_codes WHERE code = ? AND created_by = ?', [$code, $founder]));
+        $this->assertSame(1, $this->countRows('SELECT COUNT(*) FROM user_families WHERE user_id = ? AND family_code = ? AND role = "admin"', [$founder, $code]));
+    }
+
+    public function testRegistrationAndSoloBranchOutRecordCreatorRole(): void
+    {
+        $founderTables = \App\model\RegisterTableData::createRegisterTable([
+            'id' => 'TEST_FOUNDER',
+            'firstName' => 'Ada',
+            'lastName' => 'Lovelace',
+            'famCode' => 'LOVE1234',
+            'familyStatus' => 'approved',
+        ]);
+        $this->assertSame('admin', $founderTables['user_families']['role'] ?? null);
+
+        $inviteeTables = \App\model\RegisterTableData::createRegisterTable([
+            'id' => 'TEST_INVITEE',
+            'firstName' => 'Charles',
+            'lastName' => 'Babbage',
+            'famCode' => 'LOVE1234',
+            'familyStatus' => 'pending',
+        ]);
+        $this->assertSame('member', $inviteeTables['user_families']['role'] ?? null);
+
+        // Solo branch-out records created_by in family_codes
+        $soloUser = $this->makeUser('TEMP123')['id'];
+        $approvalSvc = new \App\service\FamilyCodeApprovalService($this->pdo);
+        $assignedCode = $approvalSvc->switchUserToSoloFamily($soloUser, 'Babbage', ['firstName' => 'Charles', 'lastName' => 'Babbage']);
+        $this->codes[] = $assignedCode;
+
+        $this->assertSame($soloUser, $this->service->creatorOf($assignedCode));
+        $this->assertTrue($this->service->statusFor($soloUser)['can_propose']);
     }
 
     public function testProposalOpensAPollAndChangesNothingYet(): void

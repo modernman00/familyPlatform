@@ -538,13 +538,13 @@
         },
         {
             num: 5,
-            title: "Stage 5: Multi-Branch Family Events & Milestone Reminders",
+            title: "Stage 5: 3-Gear Family Events, PartyPlatform Studio Escalation & Kinship Guest Sync",
             route: "/events",
-            desc: "Coordinate family reunions, anniversaries, weddings, and birthdays with automated reminders, map directions, and interactive RSVP tracking across family branches.",
-            controller: "Reunion Organizer & Event Lead",
+            desc: "Organise family reunions, anniversaries, weddings, and birthdays using a progressive 3-Gear architecture: Gear 1 provides fast native reminders and a comprehensive 3-month interactive schedule modal activated via 'See All' with category filters, monthly chapters, and 1-click calendar exports (.ics / Google Calendar); Gear 2 embeds interactive RSVP hubs and group celebration cards directly in the Upcoming Events sidebar; Gear 3 launches the full PartyPlatform Event Studio via one-click Single Sign-On, automatically pre-loading your Family Tree into Guest Builder tiered by kinship closeness (Close Family, Family, Extended Family) for capacity planning, table seating, QR check-in, and contribution registries.",
+            controller: "Reunion Organiser & Event Studio Lead",
             state: "MOMENT_PUBLISHED \u2192 EVENT_COORDINATED",
-            db: "Reunion Schedule & Attendance Records",
-            compliance: "Event Privacy & Secure Calendar Feeds"
+            db: "Reunion Schedule, Kinship Guest Tiers & Studio Sync Records",
+            compliance: "Cross-Platform Cryptographic Handoff & Family Event Privacy"
         },
         {
             num: 6,

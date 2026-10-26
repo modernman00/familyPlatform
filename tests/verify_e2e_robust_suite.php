@@ -274,6 +274,108 @@ runJourney("E2E Kinship Token: Cryptographic Family Join Token & Expiration Inva
     }
 });
 
+// ------------------------------------------------------------------------------
+// JOURNEY 6: 3-Gear PartyPlatform Event Studio Bridge, Kinship Guest Sync & Adversarial BOLA Guard
+// ------------------------------------------------------------------------------
+runJourney("E2E PartyPlatform Bridge: Kinship Tier Mapping, S2S Provisioning & BOLA Neutralisation", function() {
+    if (!defined('TESTING_ENV')) {
+        define('TESTING_ENV', true);
+    }
+
+    // 1. Verify Kinship-to-GuestPriority mapping across nuclear, collateral, and extended relatives
+    $closeTier = \App\services\PartyPlatformBridgeService::mapKinshipToGuestPriority('parent', 1, 'Father');
+    $familyTier = \App\services\PartyPlatformBridgeService::mapKinshipToGuestPriority('cousin', 4, '1st Cousin');
+    $extendedTier = \App\services\PartyPlatformBridgeService::mapKinshipToGuestPriority('extended', 6, '2nd Cousin once removed');
+
+    if ($closeTier['guest_category'] !== 'Close Family' || $closeTier['closeness'] !== 5 || $closeTier['always_invite'] !== 1) {
+        throw new \Exception("Nuclear kinship mapping failed for Father.");
+    }
+    if ($familyTier['guest_category'] !== 'Family' || $familyTier['closeness'] !== 4) {
+        throw new \Exception("Collateral kinship mapping failed for 1st Cousin.");
+    }
+    if ($extendedTier['guest_category'] !== 'Extended Family' || $extendedTier['closeness'] !== 3) {
+        throw new \Exception("Extended kinship mapping failed for 2nd Cousin once removed.");
+    }
+
+    // 2. Seed ephemeral family & event, provision on PartyPlatform, verify idempotency and BOLA protection
+    $pdo = \Src\Db::connect2();
+    $famCode = 'E2E_PARTY_FAM_' . bin2hex(random_bytes(3));
+    $rivalFamCode = 'E2E_RIVAL_FAM_' . bin2hex(random_bytes(3));
+    $hostId = 'e2e_host_' . bin2hex(random_bytes(4));
+    $siblingId = 'e2e_sib_' . bin2hex(random_bytes(4));
+    $rivalId = 'e2e_rival_' . bin2hex(random_bytes(4));
+    $eventNo = 0;
+
+    try {
+        $insAcct = $pdo->prepare("INSERT INTO account (id, email, password, status, type, token_version) VALUES (?, ?, ?, 'active', 'user', 1)");
+        $insAcct->execute([$hostId, $hostId . '@familyplatform.test', password_hash('TestPass123!', PASSWORD_BCRYPT)]);
+        $insAcct->execute([$siblingId, $siblingId . '@familyplatform.test', password_hash('TestPass123!', PASSWORD_BCRYPT)]);
+        $insAcct->execute([$rivalId, $rivalId . '@familyplatform.test', password_hash('TestPass123!', PASSWORD_BCRYPT)]);
+
+        $insPersonal = $pdo->prepare("INSERT INTO personal (id, firstName, lastName, famCode, gender) VALUES (?, ?, ?, ?, ?)");
+        $insPersonal->execute([$hostId, 'Wally', 'Olaogun', $famCode, 'Male']);
+        $insPersonal->execute([$siblingId, 'Femi', 'Olaogun', $famCode, 'Male']);
+        $insPersonal->execute([$rivalId, 'Intruder', 'Rival', $rivalFamCode, 'Male']);
+
+        $insEvent = $pdo->prepare("INSERT INTO events (id, eventCode, eventName, eventDate, eventType, eventDescription, eventFrequency) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $insEvent->execute([$hostId, $famCode, 'Olaogun Dynasty Reunion', date('Y-m-d', strtotime('+14 days')), 'Reunion', 'Annual family gathering', 'Annually']);
+        $eventNo = (int) $pdo->lastInsertId();
+
+        // Adversarial BOLA Test (Dr. Viktor Kovács & Marcus PoC #1): Rival user attempts to upgrade event
+        $_SESSION['id'] = $rivalId;
+        $_SESSION['famCode'] = $rivalFamCode;
+        $_SESSION['token'] = 'e2e_csrf_tok';
+        $_POST['token'] = 'e2e_csrf_tok';
+        $_SERVER['HTTP_X_CSRF_TOKEN'] = 'e2e_csrf_tok';
+
+        ob_start();
+        \App\controller\members\Event::upgradeToPartyPlatform($eventNo);
+        ob_end_clean();
+
+        $chk = $pdo->prepare("SELECT party_event_id, party_sync_status FROM events WHERE no = ?");
+        $chk->execute([$eventNo]);
+        $rowAfterAttack = $chk->fetch(\PDO::FETCH_ASSOC);
+        if (!empty($rowAfterAttack['party_event_id'])) {
+            throw new \Exception("CRITICAL SECURITY BREACH: Cross-family BOLA attack succeeded on upgradeToPartyPlatform!");
+        }
+
+        // Legitimate Host Provisioning & Kinship Prospect Seeding
+        $bridgeResult = \App\services\PartyPlatformBridgeService::provisionAndLinkEvent($eventNo, $hostId, $famCode);
+        if (empty($bridgeResult['party_event_id']) || !str_contains($bridgeResult['party_rsvp_url'], '/e/')) {
+            throw new \Exception("PartyPlatformBridgeService failed to return valid party_event_id and RSVP URL.");
+        }
+
+        // Idempotency check
+        $secondResult = \App\services\PartyPlatformBridgeService::provisionAndLinkEvent($eventNo, $hostId, $famCode);
+        if ($secondResult['party_event_id'] !== $bridgeResult['party_event_id']) {
+            throw new \Exception("PartyPlatformBridgeService provisioning is not idempotent.");
+        }
+
+        // Verify that a host with no real email is blocked with ValidationException instead of creating a .local phantom account
+        $updNoEmail = $pdo->prepare("UPDATE account SET email = '' WHERE id = ?");
+        $updNoEmail->execute([$siblingId]);
+        unset($_SESSION['email'], $_SESSION['auth']['email']);
+        $blockedMissingEmail = false;
+        try {
+            \App\services\PartyPlatformBridgeService::provisionAndLinkEvent($eventNo, $siblingId, $famCode);
+        } catch (\Src\Exceptions\ValidationException $ve) {
+            $blockedMissingEmail = str_contains($ve->getMessage(), 'Account Settings');
+        }
+        if (!$blockedMissingEmail) {
+            throw new \Exception("Missing-email host was not blocked from provisioning a .local phantom account.");
+        }
+    } finally {
+        if ($eventNo > 0) {
+            $delEv = $pdo->prepare("DELETE FROM events WHERE no = ?");
+            $delEv->execute([$eventNo]);
+        }
+        $delP = $pdo->prepare("DELETE FROM personal WHERE id IN (?, ?, ?)");
+        $delP->execute([$hostId, $siblingId, $rivalId]);
+        $delA = $pdo->prepare("DELETE FROM account WHERE id IN (?, ?, ?)");
+        $delA->execute([$hostId, $siblingId, $rivalId]);
+    }
+});
+
 echo "\n=================================================================\n";
 if ($failed === 0) {
     echo "🏆 ALL {$passed} E2E ROBUST USER JOURNEYS PASSED CLEANLY!\n";

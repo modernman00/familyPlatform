@@ -516,13 +516,18 @@
                         <div>
                             <div class="d-flex align-items-start gap-3">
                                 <div class="relative-avatar-wrapper">
-                                    <img src="{{ $fatherNode['avatar_url'] ?? '/resources/images/profile/avatarM.png' }}" alt="Father" class="relative-avatar">
-                                    <span class="avatar-online-dot"></span>
+                                    <img src="{{ $fatherNode['avatar_url'] ?? '/resources/images/profile/avatarM.png' }}" alt="Father" class="relative-avatar" style="{{ !empty($fatherNode['is_deceased']) ? 'filter: grayscale(100%);' : '' }}">
+                                    @if(empty($fatherNode['is_deceased']))
+                                        <span class="avatar-online-dot"></span>
+                                    @endif
                                 </div>
                                 <div class="flex-grow-1 overflow-hidden">
                                     <span class="role-chip role-chip-parent">
                                         <i class="bi bi-person-fill"></i> Father
                                     </span>
+                                    @if(!empty($fatherNode['is_deceased']))
+                                        <span class="badge bg-secondary ms-1" style="font-size: 0.7rem;"><i class="bi bi-flower1"></i> Deceased</span>
+                                    @endif
                                     <h4 class="relative-name text-truncate">{{ ucwords(strtolower($fatherNode['first_name'] . ' ' . $fatherNode['last_name'])) }}</h4>
                                     <div class="relative-subtext text-truncate">{{ $fatherNode['email'] ?: 'No email on record' }}</div>
                                 </div>
@@ -578,13 +583,18 @@
                         <div>
                             <div class="d-flex align-items-start gap-3">
                                 <div class="relative-avatar-wrapper">
-                                    <img src="{{ $motherNode['avatar_url'] ?? '/resources/images/profile/avatarF.png' }}" alt="Mother" class="relative-avatar">
-                                    <span class="avatar-online-dot"></span>
+                                    <img src="{{ $motherNode['avatar_url'] ?? '/resources/images/profile/avatarF.png' }}" alt="Mother" class="relative-avatar" style="{{ !empty($motherNode['is_deceased']) ? 'filter: grayscale(100%);' : '' }}">
+                                    @if(empty($motherNode['is_deceased']))
+                                        <span class="avatar-online-dot"></span>
+                                    @endif
                                 </div>
                                 <div class="flex-grow-1 overflow-hidden">
                                     <span class="role-chip role-chip-parent">
                                         <i class="bi bi-person-fill"></i> Mother
                                     </span>
+                                    @if(!empty($motherNode['is_deceased']))
+                                        <span class="badge bg-secondary ms-1" style="font-size: 0.7rem;"><i class="bi bi-flower1"></i> Deceased</span>
+                                    @endif
                                     <h4 class="relative-name text-truncate">{{ ucwords(strtolower($motherNode['first_name'] . ' ' . $motherNode['last_name'])) }}</h4>
                                     <div class="text-primary fw-semibold small card-maiden-name {{ empty($motherNode['maiden_name']) ? 'd-none' : '' }}">
                                         @if(!empty($motherNode['maiden_name']))
@@ -754,14 +764,19 @@
                         <div>
                             <div class="d-flex align-items-start gap-3">
                                 <div class="relative-avatar-wrapper">
-                                    <img src="{{ $member['avatar_url'] ?? '/resources/images/profile/avatarM.png' }}" alt="Relative" class="relative-avatar">
-                                    <span class="avatar-online-dot"></span>
+                                    <img src="{{ $member['avatar_url'] ?? '/resources/images/profile/avatarM.png' }}" alt="Relative" class="relative-avatar" style="{{ !empty($member['is_deceased']) ? 'filter: grayscale(100%);' : '' }}">
+                                    @if(empty($member['is_deceased']))
+                                        <span class="avatar-online-dot"></span>
+                                    @endif
                                 </div>
                                 <div class="flex-grow-1 overflow-hidden">
                                     <span class="role-chip {{ $isPartner ? 'role-chip-partner' : 'role-chip-sibling' }}">
                                         <i class="bi {{ $isPartner ? 'bi-heart-fill' : 'bi-people-fill' }}"></i>
                                         {{ $isPartner ? 'Partner / Spouse' : 'Sibling' }}
                                     </span>
+                                    @if(!empty($member['is_deceased']))
+                                        <span class="badge bg-secondary ms-1" style="font-size: 0.7rem;"><i class="bi bi-flower1"></i> Deceased</span>
+                                    @endif
                                     <h4 class="relative-name text-truncate">{{ ucwords(strtolower($member['first_name'] . ' ' . $member['last_name'])) }}</h4>
                                     <div class="text-primary fw-semibold small card-maiden-name {{ empty($member['maiden_name']) ? 'd-none' : '' }}">
                                         @if(!empty($member['maiden_name']))
@@ -836,13 +851,18 @@
                         <div>
                             <div class="d-flex align-items-start gap-3">
                                 <div class="relative-avatar-wrapper">
-                                    <img src="{{ $child['avatar_url'] ?? '/resources/images/profile/avatarM.png' }}" alt="Child" class="relative-avatar">
-                                    <span class="avatar-online-dot"></span>
+                                    <img src="{{ $child['avatar_url'] ?? '/resources/images/profile/avatarM.png' }}" alt="Child" class="relative-avatar" style="{{ !empty($child['is_deceased']) ? 'filter: grayscale(100%);' : '' }}">
+                                    @if(empty($child['is_deceased']))
+                                        <span class="avatar-online-dot"></span>
+                                    @endif
                                 </div>
                                 <div class="flex-grow-1 overflow-hidden">
                                     <span class="role-chip role-chip-child">
                                         <i class="bi bi-emoji-smile-fill"></i> Child
                                     </span>
+                                    @if(!empty($child['is_deceased']))
+                                        <span class="badge bg-secondary ms-1" style="font-size: 0.7rem;"><i class="bi bi-flower1"></i> Deceased</span>
+                                    @endif
                                     <h4 class="relative-name text-truncate">{{ ucwords(strtolower($child['first_name'] . ' ' . $child['last_name'])) }}</h4>
                                     <div class="relative-subtext text-truncate">{{ $child['email'] ?: 'No email on record' }}</div>
                                 </div>
@@ -1167,7 +1187,7 @@
                         <input type="hidden" name="rel_mode" id="studioParentsMode" value="parents">
                         <input type="hidden" name="lineage_scope" class="studio-lineage-scope-input" value="{{ $activeLineageScope ?? 'primary' }}">
                         <input type="hidden" name="lineage_code" class="studio-lineage-code-input" value="{{ ($activeLineageScope ?? 'primary') === 'maternal' ? ($maternalFamCode ?? '') : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}">
-                        <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-people-fill me-2"></i><span id="studioParentsHeading">Parents Details</span></h6>
+                        <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-people-fill me-2"></i><span id="studioParentsHeading">Parents Details</span> <span id="studioParentsLineageBadge" class="badge ms-2 d-none"></span></h6>
                         <div class="mb-3 d-none" id="studioGrandSideWrap">
                             <label class="form-label small fw-semibold">Whose parents are these?</label>
                             <select id="studioGrandSide" class="form-select">
@@ -1326,6 +1346,37 @@
     const studioActiveLineageScope = '{{ $activeLineageScope ?? 'primary' }}';
     const studioMaritalSurname = '{{ $maritalSurname ?? ($data['lastName'] ?? '') }}';
     const studioMaidenSurname = '{{ $maidenSurname ?? '' }}';
+    const studioMotherMaidenSurname = '{{ addslashes($motherMaidenSurname ?? '') }}';
+    const studioMotherBirthFamCode = '{{ addslashes($motherBirthFamCode ?? '') }}';
+    const studioPaternalSurname = '{{ addslashes($paternalSurname ?? ($data['lastName'] ?? '')) }}';
+
+    window.syncStudioGrandparentsContext = function() {
+        const sel = document.getElementById('studioGrandSide');
+        if (!sel) return;
+        const opt = sel.options[sel.selectedIndex];
+        const isMaternalGrand = opt && opt.textContent.toLowerCase().includes('maternal');
+        const fatherLastInput = document.querySelector('#studioParentsForm input[name="father_last_name"]');
+        const motherLastInput = document.querySelector('#studioParentsForm input[name="mother_last_name"]');
+        const heading = document.getElementById('studioParentsHeading');
+        const badge = document.getElementById('studioParentsLineageBadge');
+
+        if (heading) heading.textContent = 'Grandparents Details';
+        if (badge) {
+            badge.classList.remove('d-none');
+            badge.className = isMaternalGrand ? 'badge bg-info text-dark ms-2' : 'badge bg-secondary ms-2';
+            badge.textContent = isMaternalGrand ? 'Maternal Lineage' : 'Paternal Lineage';
+        }
+
+        if (isMaternalGrand) {
+            const maternalSurname = studioMotherMaidenSurname || 'Maternal';
+            if (fatherLastInput && !fatherLastInput.value) fatherLastInput.placeholder = maternalSurname;
+            if (motherLastInput && !motherLastInput.value) motherLastInput.placeholder = maternalSurname;
+        } else {
+            const paternalSurname = studioPaternalSurname || 'Paternal';
+            if (fatherLastInput && !fatherLastInput.value) fatherLastInput.placeholder = paternalSurname;
+            if (motherLastInput && !motherLastInput.value) motherLastInput.placeholder = paternalSurname;
+        }
+    };
 
     window.syncStudioLineageScope = function(scopeVal) {
         const isMaternal = (scopeVal === 'maternal');
@@ -1333,6 +1384,8 @@
         const activeSurname = isMaternal
             ? (studioMaidenSurname || studioBirthCode || '')
             : (studioMaritalSurname || studioPrimaryCode || '');
+        const isMaleOrUnmarried = !studioHasBirthFamily;
+        const primaryCodeLabel = isMaleOrUnmarried ? 'Birth / Paternal Tree' : 'Marital / Household Tree';
 
         document.querySelectorAll('input[name="studio_lineage_scope_radio"]').forEach(r => {
             r.checked = (r.value === (isMaternal ? 'maternal' : 'primary'));
@@ -1353,7 +1406,7 @@
         if (helpEl) {
             helpEl.innerHTML = isMaternal
                 ? `Adding to your <strong>Birth / Maiden Family (#${activeCode})</strong> so your parents and birth siblings connect directly to your ${activeSurname ? activeSurname + ' ' : ''}birth lineage.`
-                : `Adding to your <strong>Marital / Household Tree (#${activeCode})</strong>. Switch to Birth / Maiden Family when adding your own parents or birth siblings.`;
+                : `Adding to your <strong>${primaryCodeLabel} (#${activeCode})</strong>. Switch to Birth / Maiden Family when adding your own parents or birth siblings.`;
         }
 
         // Update surname placeholders & button labels to match Marital vs Birth family context
@@ -1424,6 +1477,9 @@
             });
             const side = document.getElementById('studioGrandSide');
             form.querySelector('[name=base_node_id]').value = isGrand ? (side?.value || '') : '{{ $rootNodeId ?? 1 }}';
+            if (isGrand && window.syncStudioGrandparentsContext) {
+                window.syncStudioGrandparentsContext();
+            }
             document.getElementById('studioStep2-parents').classList.remove('d-none');
         }
 
@@ -1740,6 +1796,7 @@
     });
 
     function createStudioCardHtml(node, role, roleBadgeClass, roleIcon) {
+        const isDeceased = Boolean(node.is_deceased);
         const fullName = toTitleCase((node.first_name + ' ' + (node.last_name || '')).trim());
         const maidenHtml = node.maiden_name ? `<div class="text-primary fw-semibold small card-maiden-name">née ${toTitleCase(node.maiden_name)}</div>` : `<div class="text-primary fw-semibold small card-maiden-name d-none"></div>`;
         const emailHtml = node.email ? `<div class="relative-subtext text-truncate">${node.email}</div>` : `<div class="relative-subtext text-truncate">No email on record</div>`;
@@ -1749,17 +1806,18 @@
 
         return `
         <div class="col-md-6 col-lg-4 relative-card-container" id="relative-card-node-${node.id}" data-name="${fullName.toLowerCase()}">
-            <div class="relative-card flash-updated">
+            <div class="relative-card flash-updated ${isDeceased ? 'border-secondary' : ''}">
                 <div>
                     <div class="d-flex align-items-start gap-3">
                         <div class="relative-avatar-wrapper">
-                            <img src="${avatarUrl}" alt="${fullName}" class="relative-avatar">
-                            <span class="avatar-online-dot"></span>
+                            <img src="${avatarUrl}" alt="${fullName}" class="relative-avatar" style="${isDeceased ? 'filter: grayscale(100%);' : ''}">
+                            ${!isDeceased ? '<span class="avatar-online-dot"></span>' : ''}
                         </div>
                         <div class="flex-grow-1 overflow-hidden">
                             <span class="role-chip ${roleBadgeClass}">
                                 <i class="bi ${roleIcon}"></i> ${toTitleCase(role)}
                             </span>
+                            ${isDeceased ? '<span class="badge bg-secondary ms-1" style="font-size: 0.7rem;"><i class="bi bi-flower1"></i> Deceased</span>' : ''}
                             <h4 class="relative-name text-truncate">${fullName}</h4>
                             ${maidenHtml}
                             ${emailHtml}
@@ -1892,6 +1950,7 @@
 
     document.getElementById('studioGrandSide')?.addEventListener('change', function() {
         document.querySelector('#studioParentsForm [name=base_node_id]').value = this.value;
+        if (window.syncStudioGrandparentsContext) window.syncStudioGrandparentsContext();
     });
 
     document.getElementById('studioParentsForm')?.addEventListener('submit', function(e) {

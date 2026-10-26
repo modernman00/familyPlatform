@@ -293,6 +293,16 @@
       </div>
     </div>
 
+    @if(($_GET['notice'] ?? '') === 'email_required_for_party_studio')
+      <div class="alert alert-warning d-flex align-items-center gap-3 mb-4 rounded-3 shadow-sm" role="alert">
+        <i class="bi bi-envelope-exclamation-fill fs-4 text-warning"></i>
+        <div>
+          <strong>Email Address Required for PartyPlatform Studio:</strong>
+          Please add a valid email address to your profile below so your PartyPlatform host account and RSVP notifications can be linked.
+        </div>
+      </div>
+    @endif
+
     <div class="row gx-4">
       <!-- Sidebar Navigation -->
       <div class="col-lg-3 mb-4">
@@ -1020,7 +1030,7 @@
                         It passes if more members vote yes than no (at least one besides you must vote) when voting closes on {{ date('j M Y', strtotime((string)$crOpen['expires_at'])) }}, or straight away if over half the family says yes.
                       </div>
                       <div class="d-flex flex-wrap gap-2">
-                        <a class="btn btn-primary rounded-pill px-4 fw-semibold" style="min-height:44px;" href="/profilePage?#post{{ (int)$crOpen['post_no'] }}">
+                        <a class="btn btn-primary rounded-pill px-4 fw-semibold" style="min-height:44px;" href="/profilePage?post_no={{ (int)$crOpen['post_no'] }}#post{{ (int)$crOpen['post_no'] }}">
                           <i class="bi bi-box-arrow-up-right me-1"></i> Go to the vote
                         </a>
                         @if(($crOpen['requested_by'] ?? '') === (string)($accountData['id'] ?? ''))

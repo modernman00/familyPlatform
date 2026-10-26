@@ -79,14 +79,33 @@
 
   var recentTexts = {};
   function trackRecentText(msg) {
+    if (window.FamilyPlatformSpinner && typeof window.FamilyPlatformSpinner.stopAll === 'function') {
+      window.FamilyPlatformSpinner.stopAll();
+    }
     if (!msg) return;
     recentTexts[msg] = true;
     setTimeout(function() { delete recentTexts[msg]; }, 4000);
   }
 
+  // Hook into direct Swal.fire calls to always release busy spinning buttons
+  function hookSwalFire() {
+    if (typeof Swal !== 'undefined' && Swal.fire && !Swal._fp_btn_hooked) {
+      var origFire = Swal.fire;
+      Swal.fire = function() {
+        if (window.FamilyPlatformSpinner && typeof window.FamilyPlatformSpinner.stopAll === 'function') {
+          window.FamilyPlatformSpinner.stopAll();
+        }
+        return origFire.apply(this, arguments);
+      };
+      Swal._fp_btn_hooked = true;
+    }
+  }
+  hookSwalFire();
+
   // Toast instance
   function getToast() {
     if (typeof Swal === 'undefined') return null;
+    hookSwalFire();
     return Swal.mixin({
       toast: true,
       position: 'top-end',
@@ -94,6 +113,9 @@
       timer: 3500,
       timerProgressBar: true,
       didOpen: function(t) {
+        if (window.FamilyPlatformSpinner && typeof window.FamilyPlatformSpinner.stopAll === 'function') {
+          window.FamilyPlatformSpinner.stopAll();
+        }
         t.addEventListener('mouseenter', Swal.stopTimer);
         t.addEventListener('mouseleave', Swal.resumeTimer);
       }

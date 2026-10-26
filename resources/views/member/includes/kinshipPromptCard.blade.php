@@ -25,11 +25,11 @@
                         RECOMMENDED
                     </span>
                     <h5 class="fw-bold mb-0 text-white" style="font-size: 1.12rem; letter-spacing: -0.01em;">
-                        Build Your Inner Circle: Invite Your Family
+                        Preserve Your Family Roots: Build Your Tree
                     </h5>
                 </div>
                 <p class="text-white-50 small mb-3" style="font-size: 0.86rem; line-height: 1.45; max-width: 580px;">
-                    Have you added your parents, siblings, or children? Invite them directly from your phone contacts or WhatsApp to explore your shared family tree and preserve cherished memories.
+                    Connecting your parents, siblings, and children locks in your family's oral history, unlocks automatic kinship recognition, and gives younger generations a permanent map of their roots.
                 </p>
 
                 <!-- Actions -->

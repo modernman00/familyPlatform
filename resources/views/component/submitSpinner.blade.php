@@ -6,15 +6,17 @@
 <style>
   .st-spinner-border {
     display: inline-block;
-    width: 1rem;
-    height: 1rem;
-    vertical-align: -0.125em;
+    width: 1.15em;
+    height: 1.15em;
+    vertical-align: -0.15em;
     border: 0.18em solid currentColor;
     border-right-color: transparent !important;
     border-radius: 50%;
     -webkit-animation: st-spinner-spin 0.75s linear infinite;
     animation: st-spinner-spin 0.75s linear infinite;
     flex-shrink: 0;
+    box-sizing: border-box;
+    margin: 0 auto;
   }
   @-webkit-keyframes st-spinner-spin {
     100% { -webkit-transform: rotate(360deg); }
@@ -37,23 +39,35 @@
 
   var FamilyPlatformSpinner = {
     activeButtons: new WeakMap(),
+    activeSet: new Set(),
 
-    start: function(btn, customText) {
+    start: function(btn) {
       if (!btn || btn.getAttribute('aria-busy') === 'true') return;
 
       var originalHtml = btn.innerHTML;
       var originalWidth = btn.offsetWidth ? (btn.offsetWidth + 'px') : '';
+      var originalHeight = btn.offsetHeight ? (btn.offsetHeight + 'px') : '';
 
       FamilyPlatformSpinner.activeButtons.set(btn, {
         html: originalHtml,
         width: originalWidth,
+        height: originalHeight,
         isInput: btn.tagName === 'INPUT'
       });
+      FamilyPlatformSpinner.activeSet.add(btn);
+
+      // DOM dataset backup for unlinked recovery
+      btn.dataset.stOrigHtml = originalHtml;
+      if (originalWidth) btn.dataset.stOrigWidth = originalWidth;
+      if (originalHeight) btn.dataset.stOrigHeight = originalHeight;
 
       btn.setAttribute('aria-busy', 'true');
       btn.style.pointerEvents = 'none';
       if (originalWidth) {
         btn.style.minWidth = originalWidth;
+      }
+      if (originalHeight) {
+        btn.style.minHeight = originalHeight;
       }
 
       // Bulma is-loading support
@@ -61,48 +75,87 @@
         btn.classList.add('is-loading');
       }
 
-      var rawText = (btn.innerText || btn.textContent || btn.value || (btn.innerHTML ? btn.innerHTML.replace(/<[^>]*>?/gm, '') : '') || '').trim();
-
+      // Modern minimal tactile spinner: NO "Processing..." text, strictly the spinning indicator
       if (btn.tagName === 'INPUT') {
-        btn.value = customText || 'Processing...';
+        btn.dataset.stOrigVal = btn.value;
+        btn.value = '';
       } else {
-        var spinnerText = customText || (rawText ? ' ' + rawText : ' Processing...');
-        btn.innerHTML = '<span class="st-spinner-border me-2" role="status" aria-hidden="true"></span>' + spinnerText;
+        btn.innerHTML = '<span class="st-spinner-border" role="status" aria-label="Loading" aria-hidden="true"></span>';
       }
 
-      // Watchdog auto-recovery (15s) in case network drops or asynchronous action fails
+      // Watchdog auto-recovery (6s) in case network drops or asynchronous action completes silently
       setTimeout(function() {
         if (btn.getAttribute('aria-busy') === 'true') {
           FamilyPlatformSpinner.stop(btn);
         }
-      }, 15000);
+      }, 6000);
     },
 
     stop: function(btn) {
       if (!btn) return;
       var data = FamilyPlatformSpinner.activeButtons.get(btn);
+      var backupHtml = btn.dataset.stOrigHtml;
+
       if (data) {
         if (data.isInput) {
-          btn.value = data.html || 'Submit';
+          btn.value = btn.dataset.stOrigVal || data.html || 'Submit';
         } else {
           btn.innerHTML = data.html;
         }
         FamilyPlatformSpinner.activeButtons.delete(btn);
+      } else if (backupHtml !== undefined) {
+        if (btn.tagName === 'INPUT') {
+          btn.value = btn.dataset.stOrigVal || backupHtml || 'Submit';
+        } else {
+          btn.innerHTML = backupHtml;
+        }
       }
+
+      FamilyPlatformSpinner.activeSet.delete(btn);
+      delete btn.dataset.stOrigHtml;
+      delete btn.dataset.stOrigWidth;
+      delete btn.dataset.stOrigHeight;
+      delete btn.dataset.stOrigVal;
+
       btn.removeAttribute('aria-busy');
       btn.style.pointerEvents = '';
       btn.style.minWidth = '';
+      btn.style.minHeight = '';
       btn.disabled = false;
+
       if (btn.classList.contains('button')) {
         btn.classList.remove('is-loading');
       }
+      if (btn.hasAttribute('data-mmlib-loading')) {
+        btn.removeAttribute('data-mmlib-loading');
+        btn.removeAttribute('data-original-html');
+        btn.removeAttribute('data-original-disabled');
+      }
     },
 
-    stopAll: function() {
+    stopAll: function(container) {
+      if (container && typeof container.querySelectorAll === 'function') {
+        var scoped = container.querySelectorAll('[aria-busy="true"]');
+        scoped.forEach(function(b) { FamilyPlatformSpinner.stop(b); });
+        return;
+      }
       var busyButtons = document.querySelectorAll('[aria-busy="true"]');
       busyButtons.forEach(function(b) {
         FamilyPlatformSpinner.stop(b);
       });
+      if (FamilyPlatformSpinner.activeSet) {
+        FamilyPlatformSpinner.activeSet.forEach(function(b) {
+          FamilyPlatformSpinner.stop(b);
+        });
+        FamilyPlatformSpinner.activeSet.clear();
+      }
+    },
+
+    getActiveButtons: function() {
+      if (!FamilyPlatformSpinner.activeSet || FamilyPlatformSpinner.activeSet.size === 0) {
+        return Array.from(document.querySelectorAll('[aria-busy="true"]'));
+      }
+      return Array.from(FamilyPlatformSpinner.activeSet);
     },
 
     findSubmitButton: function(form, submitter) {
@@ -161,9 +214,71 @@
     FamilyPlatformSpinner.start(target);
   }, false);
 
-  // 3. Reset buttons when user navigates back using browser history cache
+  // 3. Automated XMLHttpRequest interceptor (Catches Axios, jQuery, and native XHR)
+  if (typeof window.XMLHttpRequest !== 'undefined' && !window._fp_xhr_intercepted) {
+    window._fp_xhr_intercepted = true;
+    var origXhrSend = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.send = function() {
+      var xhr = this;
+      var active = FamilyPlatformSpinner.getActiveButtons();
+      if (active.length > 0) {
+        xhr._fp_tracked_buttons = active;
+      }
+      xhr.addEventListener('loadend', function() {
+        if (xhr._fp_tracked_buttons && xhr._fp_tracked_buttons.length > 0) {
+          setTimeout(function() {
+            xhr._fp_tracked_buttons.forEach(function(b) {
+              FamilyPlatformSpinner.stop(b);
+            });
+          }, 80);
+        }
+      });
+      return origXhrSend.apply(xhr, arguments);
+    };
+  }
+
+  // 4. Automated Fetch API interceptor
+  if (typeof window.fetch === 'function' && !window._fp_fetch_intercepted) {
+    window._fp_fetch_intercepted = true;
+    var origFetch = window.fetch;
+    window.fetch = function() {
+      var active = FamilyPlatformSpinner.getActiveButtons();
+      var promise = origFetch.apply(this, arguments);
+      if (active.length > 0) {
+        promise.finally(function() {
+          setTimeout(function() {
+            active.forEach(function(b) {
+              FamilyPlatformSpinner.stop(b);
+            });
+          }, 80);
+        });
+      }
+      return promise;
+    };
+  }
+
+  // 5. Reset buttons when user navigates back using browser history cache (BFCache)
   window.addEventListener('pageshow', function() {
     FamilyPlatformSpinner.stopAll();
+  });
+
+  // 6. Reset buttons when a modal closes or is dismissed
+  document.addEventListener('hidden.bs.modal', function(e) {
+    FamilyPlatformSpinner.stopAll(e.target);
+  });
+
+  // 7. Reset buttons on form reset
+  document.addEventListener('reset', function(e) {
+    if (e.target && e.target.tagName === 'FORM') {
+      FamilyPlatformSpinner.stopAll(e.target);
+    }
+  }, true);
+
+  // 8. Reset buttons on custom application lifecycle completion events
+  ['post-created', 'post-updated', 'comment-created', 'reel-updated', 'event-created'].forEach(function(evt) {
+    window.addEventListener(evt, function() {
+      FamilyPlatformSpinner.stopAll();
+    });
   });
 })();
 </script>

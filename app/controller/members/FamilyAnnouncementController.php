@@ -5,7 +5,10 @@ namespace App\controller\members;
 
 use App\controller\BaseController;
 use App\model\FamilyAnnouncement;
+use App\model\AllMembersData;
+use App\classes\PushNotificationClass;
 use Src\CheckToken;
+use Src\Db;
 use Src\SelectFn;
 use Src\functionality\SignIn;
 use Src\Exceptions\ForbiddenException;
@@ -96,6 +99,61 @@ final class FamilyAnnouncementController extends BaseController
             ];
 
             $newId = FamilyAnnouncement::createAnnouncement($announcementData);
+
+            // Dispatch in-app and push notifications to all family members
+            try {
+                $authorName = trim(($_SESSION['fName'] ?? '') . ' ' . ($_SESSION['lName'] ?? ''));
+                if ($authorName === '') {
+                    $userRow = SelectFn::selectOneRow('personal', 'id', $this->userId);
+                    $authorName = trim(($userRow['firstName'] ?? '') . ' ' . ($userRow['lastName'] ?? ''));
+                }
+                if ($authorName === '') {
+                    $authorName = 'Family Leader';
+                }
+
+                $members = AllMembersData::AllMembersEmailByFamCode($this->famCode, $this->userId);
+                $actionUrl = '/profilePage#familyAnnouncementsCard';
+                $snippet = mb_substr($message, 0, 80);
+                $notifTitle = "📢 Announcement: " . htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+                $notifMsg = "{$authorName}: \"{$snippet}\"";
+
+                $db = Db::connect2();
+                $stmt = $db->prepare("
+                    INSERT INTO notification 
+                    (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                    VALUES (?, ?, ?, ?, 'Announcement', ?, ?, 'new', NOW())
+                ");
+
+                foreach ($members as $member) {
+                    $targetId = (string)($member['id'] ?? '');
+                    if ($targetId === '' || $targetId === $this->userId) {
+                        continue;
+                    }
+
+                    try {
+                        $stmt->execute([
+                            $this->userId,
+                            $targetId,
+                            $authorName,
+                            $notifTitle,
+                            $notifMsg,
+                            $actionUrl
+                        ]);
+                    } catch (\Throwable) {}
+
+                    try {
+                        PushNotificationClass::sendPushNotification(
+                            userId: $targetId,
+                            message: $notifMsg,
+                            url: $actionUrl,
+                            title: $notifTitle,
+                            tag: 'announcement-' . $newId
+                        );
+                    } catch (\Throwable) {}
+                }
+            } catch (\Throwable $notifEx) {
+                error_log('[FamilyAnnouncementController::store notif warning] ' . $notifEx->getMessage());
+            }
 
             // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response with json_encode and application/json header
             echo json_encode([

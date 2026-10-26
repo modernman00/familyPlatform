@@ -349,7 +349,39 @@ body {
 }
 
 .tree-node.deceased {
-    border-bottom: 3px solid var(--deceased-color);
+    border: 1.5px solid #94a3b8;
+    border-bottom: 4px solid var(--deceased-color);
+    background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+    position: relative;
+}
+
+.tree-node.deceased .profile-image {
+    filter: grayscale(100%);
+    opacity: 0.9;
+}
+
+.node-deceased-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: #334155;
+    color: #f8fafc;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+    border: 1px solid #64748b;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    z-index: 2;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .tree-node.deceased {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    border-color: rgba(148, 163, 184, 0.45);
+    border-bottom-color: #64748b;
 }
 
 /* Avatar Container */
@@ -378,8 +410,8 @@ body {
     font-weight: 800;
     display: block;
     margin-bottom: 2px;
-    color: var(--text-muted);
-    font-size: 10px;
+    color: var(--text-muted, #475569);
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.06em;
 }
@@ -387,7 +419,7 @@ body {
 .node-name {
     font-weight: 700;
     display: block;
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text-color);
     margin-bottom: 2px;
     white-space: nowrap;
@@ -396,10 +428,10 @@ body {
 }
 
 .node-relation {
-    font-size: 11px;
-    color: var(--text-muted);
+    font-size: 13px;
+    color: var(--text-color, #1e293b);
     display: block;
-    font-weight: 500;
+    font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -534,7 +566,7 @@ body {
 .legend-spouse { background: var(--spouse-color); }
 .family-legend { flex-direction: column; align-items: stretch; gap: 10px; max-width: min(100%, 980px); }
 .family-legend .legend-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 22px; }
-.legend-heading { font-size: 0.68rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; opacity: .6; min-width: 88px; text-align: right; }
+.legend-heading { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; opacity: .85; min-width: 88px; text-align: right; }
 .legend-line { width: 34px; height: 10px; flex: none; }
 .legend-chip { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; font-weight: 800; flex: none; }
 .legend-chip-member { background: #a31621; color: #fff; border: 1.5px solid #fff; }
@@ -1103,11 +1135,32 @@ body.dark-mode .fab-dock-btn {
 }
 
 .pedigree-deceased-pill {
-    font-size: 0.68rem;
-    background: #e2e8f0;
-    color: #475569;
-    padding: 2px 6px;
-    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: #334155;
+    color: #f8fafc;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid #64748b;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pedigree-deceased-card {
+    background: rgba(30, 41, 59, 0.6) !important;
+    border: 1.5px dashed rgba(148, 163, 184, 0.45) !important;
+}
+
+.pedigree-avatar-deceased {
+    filter: grayscale(100%);
+    border: 2px solid #94a3b8 !important;
+}
+
+.card-status-deceased {
+    background: rgba(100, 116, 139, 0.25) !important;
+    color: #e2e8f0 !important;
+    border: 1px solid #94a3b8 !important;
 }
 
 body.dark-mode .pedigree-generation-card {
@@ -1719,6 +1772,18 @@ body[data-page-id="organogram"] .tree-container {
     gap: 6px;
     font-size: 0.82rem;
     color: #94a3b8;
+}
+
+.card-contact-link {
+    transition: color 0.15s ease, filter 0.15s ease;
+    word-break: break-all;
+    display: inline-flex;
+    align-items: center;
+}
+
+.card-contact-link:hover {
+    text-decoration: underline !important;
+    filter: brightness(1.25);
 }
 
 /* Claim Spot Viral Section */

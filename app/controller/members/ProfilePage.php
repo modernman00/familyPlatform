@@ -521,7 +521,8 @@ final class ProfilePage extends ProcessImg
                     authorName: (string) $newInput['fullName'],
                     postNo: (string) ($_POST['post_no'] ?? ''),
                     text: (string) ($_POST['comment'] ?? ''),
-                    parentAuthorId: $thread['parentAuthorId'] ?? null
+                    parentAuthorId: $thread['parentAuthorId'] ?? null,
+                    commentNo: (int) $result
                 );
 
                 $commentData = [
@@ -555,7 +556,8 @@ final class ProfilePage extends ProcessImg
         string $authorName,
         string $postNo,
         string $text,
-        ?string $parentAuthorId
+        ?string $parentAuthorId,
+        ?int $commentNo = null
     ): void {
         try {
             $famCode = (string) (Post::postByNo($postNo)['postFamCode'] ?? '');
@@ -567,7 +569,8 @@ final class ProfilePage extends ProcessImg
                 $authorName,
                 $postNo,
                 $mentioned,
-                $parentAuthorId
+                $parentAuthorId,
+                $commentNo
             );
         } catch (\Throwable $e) {
             error_log('[ProfilePage] reply/mention notify failed: ' . $e->getMessage());
@@ -726,8 +729,42 @@ final class ProfilePage extends ProcessImg
                 throw new Exception("Image name not provided");
             }
 
-            $imageName = checkInput((string)$input['imageName']);
+            // Sanitise and strip any directory traversal attempts
+            $rawName = basename((string)$input['imageName']);
+            $imageName = checkInput($rawName);
             $imageName = is_string($imageName) ? $imageName : '';
+
+            if (empty($imageName)) {
+                throw new Exception("Invalid image name provided");
+            }
+
+            // Identify source file location from post gallery storage
+            $postDir = 'resources/images/post/';
+            $fallbackPostDir = 'public/img/post/';
+            $sourcePath = file_exists($postDir . $imageName) 
+                ? $postDir . $imageName 
+                : (file_exists($fallbackPostDir . $imageName) ? $fallbackPostDir . $imageName : null);
+
+            $profileDir = 'resources/images/profile/';
+            $publicProfileDir = 'public/img/profile/';
+
+            // Ensure destination profile directories exist
+            if (!is_dir($profileDir)) {
+                @mkdir($profileDir, 0755, true);
+            }
+            if (is_dir('public/img') && !is_dir($publicProfileDir)) {
+                @mkdir($publicProfileDir, 0755, true);
+            }
+
+            // If image is found in post directory, copy it over to profile storage
+            if ($sourcePath && file_exists($sourcePath)) {
+                @copy($sourcePath, $profileDir . $imageName);
+                if (is_dir($publicProfileDir)) {
+                    @copy($sourcePath, $publicProfileDir . $imageName);
+                }
+            } elseif (!file_exists($profileDir . $imageName)) {
+                throw new Exception("Selected image file could not be found on the server");
+            }
 
             $updateProfilePic = new \Src\Update('profilePics');
             $result = $updateProfilePic->updateTable(
@@ -739,6 +776,7 @@ final class ProfilePage extends ProcessImg
 
             if ($result) {
                 $_SESSION['img'] = $imageName;
+                $_SESSION['profilePics'] = $imageName;
                 msgSuccess(200, "Profile picture updated successfully");
             } else {
                 throw new Exception("Failed to update profile picture in database");

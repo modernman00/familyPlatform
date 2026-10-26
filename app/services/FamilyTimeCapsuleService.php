@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\services;
 
 use App\controller\BaseController;
+use App\classes\PushNotificationClass;
+use App\model\AllMembersData;
 use Src\Db;
 use PDO;
 
@@ -175,8 +177,55 @@ final class FamilyTimeCapsuleService
         }
 
         $upStmt = $db->prepare('UPDATE family_time_capsules SET is_unlocked = 1, unlocked_at = NOW() WHERE id = ?');
+        $notifStmt = $db->prepare("
+            INSERT INTO notification 
+            (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+            VALUES ('system', ?, 'Family Platform Vault', '⏳ Time Capsule Unlocked!', 'Capsule', ?, '/profilePage#timeCapsuleCard', 'new', NOW())
+        ");
+
         foreach ($due as $capsule) {
-            $upStmt->execute([(int)$capsule['id']]);
+            $capsuleId = (int)$capsule['id'];
+            $upStmt->execute([$capsuleId]);
+
+            $creatorId = (string)($capsule['creator_id'] ?? '');
+            $title = (string)($capsule['title'] ?? 'Milestone Memory');
+            $famCode = (string)($capsule['family_code'] ?? '');
+            $msg = "A family time capsule has unlocked today: \"{$title}\"! View it now in your family vault.";
+
+            if ($creatorId !== '') {
+                try {
+                    $notifStmt->execute([$creatorId, $msg]);
+                    PushNotificationClass::sendPushNotification(
+                        userId: $creatorId,
+                        message: $msg,
+                        url: '/profilePage#timeCapsuleCard',
+                        title: '⏳ Time Capsule Unlocked!',
+                        tag: 'capsule-' . $capsuleId
+                    );
+                } catch (\Throwable) {}
+            }
+
+            if ($famCode !== '') {
+                try {
+                    $members = AllMembersData::AllMembersEmailByFamCode($famCode, $creatorId !== '' ? $creatorId : null);
+                    foreach ($members as $m) {
+                        $mId = (string)($m['id'] ?? '');
+                        if ($mId === '' || $mId === $creatorId) {
+                            continue;
+                        }
+                        try {
+                            $notifStmt->execute([$mId, $msg]);
+                            PushNotificationClass::sendPushNotification(
+                                userId: $mId,
+                                message: $msg,
+                                url: '/profilePage#timeCapsuleCard',
+                                title: '⏳ Time Capsule Unlocked!',
+                                tag: 'capsule-' . $capsuleId
+                            );
+                        } catch (\Throwable) {}
+                    }
+                } catch (\Throwable) {}
+            }
         }
 
         return $count;

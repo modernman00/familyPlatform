@@ -52,8 +52,8 @@ class OnboardingService
         $steps = [
             'explore_tree' => [
                 'key' => 'explore_tree',
-                'title' => 'Explore Your Family Tree',
-                'description' => 'View your living lineage, branches, and connections on the interactive organogram.',
+                'title' => 'Build Your Living Family Tree',
+                'description' => 'Add your parents and siblings to preserve your family roots, connect generations, and unlock automatic relationship tracking.',
                 'done' => $treeExplored,
                 'action_url' => '/organogram',
                 'icon' => 'bi-diagram-3-fill',
@@ -116,7 +116,7 @@ class OnboardingService
      */
     public function completeStep(string $userId, string $stepKey): array
     {
-        $validSteps = ['explore_tree', 'invite_family', 'post_memory'];
+        $validSteps = ['explore_tree', 'build_tree', 'invite_family', 'post_memory'];
         if (!in_array($stepKey, $validSteps, true)) {
             return ['status' => 'error', 'message' => 'Invalid onboarding step', 'step' => $stepKey];
         }
@@ -124,6 +124,11 @@ class OnboardingService
         // Store step completion flag in session and audit log
         if (session_status() === PHP_SESSION_ACTIVE) {
             $_SESSION['onboarding_step_' . $stepKey] = true;
+            if ($stepKey === 'build_tree') {
+                $_SESSION['onboarding_step_explore_tree'] = true;
+            } elseif ($stepKey === 'explore_tree') {
+                $_SESSION['onboarding_step_build_tree'] = true;
+            }
         }
 
         return [

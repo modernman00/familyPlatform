@@ -1,0 +1,467 @@
+/**
+ * Profile Photo Viewer (Facebook-Style Lightbox)
+ * Global Design Standards v2.1 Compliant (en-GB)
+ *
+ * Immersive, 60fps hardware-accelerated profile photo expansion with
+ * backdrop blur, touch-drag dismiss, HD zoom, and owner edit action.
+ */
+
+:root {
+    --pf-backdrop: rgba(0, 0, 0, 0.92);
+    --pf-surface: rgba(255, 255, 255, 0.1);
+    --pf-surface-hover: rgba(255, 255, 255, 0.18);
+    --pf-border: rgba(255, 255, 255, 0.16);
+    --pf-text: #ffffff;
+    --pf-text-muted: rgba(255, 255, 255, 0.72);
+    --pf-tap-min: 44px;
+}
+
+/* -------------------------------------------------------------
+ * 1. Interactive Affordance on Profile Avatars
+ * ------------------------------------------------------------- */
+.profile-avatar-interactive,
+[data-profile-expand="true"],
+.avatar.profileImg {
+    cursor: pointer !important;
+    position: relative;
+    transition: transform var(--motion-base, 250ms) var(--ease, cubic-bezier(0.16, 1, 0.3, 1)),
+                box-shadow var(--motion-base, 250ms) var(--ease, cubic-bezier(0.16, 1, 0.3, 1)),
+                filter var(--motion-base, 250ms) var(--ease, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.avatar-container {
+    cursor: pointer;
+}
+
+.profile-avatar-interactive:hover,
+[data-profile-expand="true"]:hover,
+.avatar.profileImg:hover {
+    transform: scale(1.04) translateY(-1px);
+    box-shadow: 0 0 0 3px rgba(163, 22, 33, 0.35), 0 8px 24px rgba(0, 0, 0, 0.22) !important;
+    filter: brightness(1.03);
+}
+
+.profile-avatar-interactive:active,
+[data-profile-expand="true"]:active,
+.avatar.profileImg:active {
+    transform: scale(0.98);
+}
+
+/* Subtle magnifying glass badge overlay on avatar hover */
+.avatar-container .avatar-zoom-cue {
+    position: absolute;
+    bottom: 2px;
+    right: calc(50% - 50px);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand-primary, #a31621), #8a1019);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: 2px solid #ffffff;
+    opacity: 0.95;
+    pointer-events: none;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.avatar-container:hover .avatar-zoom-cue {
+    transform: scale(1.12);
+    opacity: 1;
+}
+
+/* -------------------------------------------------------------
+ * 2. Fullscreen Lightbox Overlay & Backdrop
+ * ------------------------------------------------------------- */
+.pf-viewer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10050;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--pf-backdrop);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    opacity: 0;
+    transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    overscroll-behavior: contain;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.pf-viewer-overlay.pf-active {
+    display: flex;
+    opacity: 1;
+}
+
+/* -------------------------------------------------------------
+ * 3. Header Bar (User Info & Action Controls)
+ * ------------------------------------------------------------- */
+.pf-viewer-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0) 100%);
+    z-index: 10;
+    pointer-events: auto;
+}
+
+.pf-viewer-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: calc(100% - 180px);
+}
+
+.pf-viewer-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+}
+
+.pf-viewer-meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.pf-viewer-name {
+    color: var(--pf-text);
+    font-size: var(--text-base, 1rem);
+    font-weight: 700;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.01em;
+}
+
+.pf-viewer-subtitle {
+    color: var(--pf-text-muted);
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pf-viewer-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.pf-action-btn {
+    min-width: var(--pf-tap-min);
+    min-height: var(--pf-tap-min);
+    padding: 8px 12px;
+    border-radius: 50%;
+    background: var(--pf-surface);
+    border: 1px solid var(--pf-border);
+    color: var(--pf-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: background-color 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+    text-decoration: none;
+    touch-action: manipulation;
+}
+
+.pf-action-btn:hover {
+    background: var(--pf-surface-hover);
+    border-color: rgba(255, 255, 255, 0.32);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.pf-action-btn:active {
+    transform: scale(0.96);
+}
+
+.pf-action-btn:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+}
+
+.pf-close-btn {
+    background: rgba(255, 255, 255, 0.15);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.pf-close-btn:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+/* -------------------------------------------------------------
+ * 4. Image Stage & Responsive Expansion Canvas
+ * ------------------------------------------------------------- */
+.pf-viewer-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 72px 16px 84px 16px;
+    box-sizing: border-box;
+    cursor: zoom-out;
+}
+
+.pf-image-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-width: min(92vw, 680px);
+    max-height: min(80vh, 680px);
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.4);
+    overflow: hidden;
+    cursor: default;
+    transform: scale(0.88);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.25s ease-out;
+    will-change: transform, opacity;
+}
+
+.pf-viewer-overlay.pf-active .pf-image-wrapper {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.pf-main-image {
+    display: block;
+    max-width: min(92vw, 680px);
+    max-height: min(80vh, 680px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 18px;
+    cursor: zoom-in;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+/* Zoomed in mode (HD view) */
+.pf-main-image.pf-zoomed {
+    transform: scale(1.6);
+    cursor: zoom-out;
+}
+
+/* Image loading spinner */
+.pf-loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: rgba(15, 23, 42, 0.6);
+    color: var(--pf-text-muted);
+    font-size: var(--text-sm, 0.875rem);
+    font-weight: 500;
+    z-index: 2;
+    transition: opacity 0.2s ease;
+}
+
+.pf-loader.pf-hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.pf-spinner-ring {
+    width: 36px;
+    height: 36px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: pfSpin 0.75s linear infinite;
+}
+
+@keyframes pfSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* -------------------------------------------------------------
+ * 5. Bottom Navigation & Action Bar
+ * ------------------------------------------------------------- */
+.pf-viewer-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    min-height: 76px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0) 100%);
+    z-index: 10;
+    pointer-events: auto;
+}
+
+.pf-footer-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 9999px;
+    padding: 6px 14px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.pf-btn-edit-photo {
+    min-height: var(--pf-tap-min);
+    padding: 8px 18px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, var(--brand-primary, #a31621), #8a1019);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff !important;
+    font-size: var(--text-sm, 0.875rem);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(163, 22, 33, 0.4);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.pf-btn-edit-photo:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(163, 22, 33, 0.55);
+    filter: brightness(1.06);
+    color: #ffffff !important;
+}
+
+.pf-btn-edit-photo:active {
+    transform: scale(0.97);
+}
+
+.pf-btn-share {
+    min-height: var(--pf-tap-min);
+    padding: 8px 14px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-size: var(--text-sm, 0.875rem);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: background-color 0.18s ease, transform 0.18s ease;
+    white-space: nowrap;
+}
+
+.pf-btn-share:hover {
+    background: rgba(255, 255, 255, 0.22);
+    transform: translateY(-1px);
+}
+
+.pf-btn-share:active {
+    transform: scale(0.97);
+}
+
+/* -------------------------------------------------------------
+ * 6. Mobile & Accessibility Adjustments
+ * ------------------------------------------------------------- */
+@media (max-width: 576px) {
+    .pf-viewer-header {
+        padding: 0 12px;
+        height: 60px;
+    }
+
+    .pf-viewer-user {
+        max-width: calc(100% - 130px);
+        gap: 8px;
+    }
+
+    .pf-viewer-thumb {
+        width: 32px;
+        height: 32px;
+    }
+
+    .pf-viewer-name {
+        font-size: 0.92rem;
+    }
+
+    .pf-viewer-subtitle {
+        font-size: 0.7rem;
+    }
+
+    .pf-viewer-stage {
+        padding: 64px 8px 84px 8px;
+    }
+
+    .pf-image-wrapper {
+        max-width: 95vw;
+        max-height: 75vh;
+        border-radius: 14px;
+    }
+
+    .pf-main-image {
+        max-width: 95vw;
+        max-height: 75vh;
+        border-radius: 14px;
+    }
+
+    .pf-viewer-footer {
+        padding: 8px 12px;
+        min-height: 64px;
+    }
+
+    .pf-footer-pill {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        border-radius: 14px;
+    }
+
+    .pf-btn-edit-photo {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pf-viewer-overlay,
+    .pf-image-wrapper,
+    .pf-main-image,
+    .pf-action-btn,
+    .profile-avatar-interactive {
+        transition: none !important;
+        animation: none !important;
+    }
+}

@@ -363,7 +363,7 @@ class AllMembersData extends InnerJoin
     public static function getAllEventData(): array
     {
         try {
-            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventDescription, personal.firstName, personal.lastName, personal.famCode 
+            $query = "SELECT events.no, events.id, events.eventCode, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventDescription, events.party_event_id, events.party_event_slug, events.party_rsvp_url, events.party_card_url, events.party_sync_status, personal.firstName, personal.lastName, personal.famCode 
             FROM events 
             INNER JOIN personal ON events.id = personal.id 
             WHERE events.eventDate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
@@ -387,7 +387,7 @@ class AllMembersData extends InnerJoin
     public static function getEventDataByNo(array|string|null $eventNo): array
     {
         try {
-            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency,  events.eventDescription, personal.firstName, personal.lastName, personal.famCode
+            $query = "SELECT events.no, events.id, events.eventCode, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventDescription, events.party_event_id, events.party_event_slug, events.party_rsvp_url, events.party_card_url, events.party_sync_status, personal.firstName, personal.lastName, personal.famCode
         FROM events 
         INNER JOIN personal ON events.id = personal.id 
         WHERE (events.no = :eventNo)
@@ -423,19 +423,70 @@ class AllMembersData extends InnerJoin
             }
 
             $inPlaceholders = implode(',', array_fill(0, count($cleanedCodes), '?'));
-            $query = "SELECT events.no, events.id, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventDescription, personal.firstName, personal.lastName, personal.famCode
+            $query = sprintf(
+                "SELECT events.no, events.id, events.eventCode, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventDescription, events.party_event_id, events.party_event_slug, events.party_rsvp_url, events.party_card_url, events.party_sync_status, personal.firstName, personal.lastName, personal.famCode, profilePics.img AS creatorImg
                 FROM events
                 INNER JOIN personal ON events.id = personal.id
-                WHERE (personal.famCode IN ($inPlaceholders) OR events.eventCode IN ($inPlaceholders))
+                LEFT JOIN profilePics ON personal.id = profilePics.id
+                WHERE (personal.famCode IN (%s) OR events.eventCode IN (%s))
                 AND events.deleted_at IS NULL
                 AND events.eventDate >= CURDATE()
                 ORDER BY events.eventDate ASC
-                LIMIT 30";
+                LIMIT 30",
+                $inPlaceholders,
+                $inPlaceholders
+            );
 
             $conn = parent::connect2();
             $result = $conn->prepare($query);
             $result->execute([...$cleanedCodes, ...$cleanedCodes]);
             return $result->fetchAll();
+        } catch (\Throwable $th) {
+            showError($th);
+            return [];
+        }
+    }
+
+    /**
+     * Retrieves all scheduled events by family members within a given horizon (default: up to 3 months).
+     *
+     * @param array<int, string>|string|null $famCode
+     * @param int $months
+     * @return array<int, array<string, mixed>>
+     */
+    public static function getUpcomingEventsForMonths(array|string|null $famCode, int $months = 3): array
+    {
+        try {
+            $codes = is_array($famCode) ? $famCode : ($famCode !== null && $famCode !== '' ? [$famCode] : []);
+            $cleanedCodes = array_values(array_filter(array_map('strval', $codes), fn($c) => $c !== ''));
+
+            if (empty($cleanedCodes)) {
+                return [];
+            }
+
+            $monthsBounded = max(1, min(12, $months));
+            $inPlaceholders = implode(',', array_fill(0, count($cleanedCodes), '?'));
+            $query = sprintf(
+                "SELECT events.no, events.id, events.eventCode, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventDescription, events.party_event_id, events.party_event_slug, events.party_rsvp_url, events.party_card_url, events.party_sync_status,
+                        personal.firstName, personal.lastName, personal.famCode,
+                        profilePics.img AS creatorImg
+                FROM events
+                INNER JOIN personal ON events.id = personal.id
+                LEFT JOIN profilePics ON personal.id = profilePics.id
+                WHERE (personal.famCode IN (%s) OR events.eventCode IN (%s))
+                AND events.deleted_at IS NULL
+                AND events.eventDate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL %d MONTH)
+                ORDER BY events.eventDate ASC
+                LIMIT 100",
+                $inPlaceholders,
+                $inPlaceholders,
+                $monthsBounded
+            );
+
+            $conn = parent::connect2();
+            $result = $conn->prepare($query);
+            $result->execute([...$cleanedCodes, ...$cleanedCodes]);
+            return $result->fetchAll() ?: [];
         } catch (\Throwable $th) {
             showError($th);
             return [];

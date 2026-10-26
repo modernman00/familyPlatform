@@ -253,7 +253,11 @@
                             <button type="button" class="btn-action" data-set-gender="Male" style="min-height: 44px; padding: 6px 14px; border-radius: 999px; margin-left: 6px;">Male</button>
                             <button type="button" class="btn-action" data-set-gender="Female" style="min-height: 44px; padding: 6px 14px; border-radius: 999px;">Female</button>
                         </div>
+                        <div id="cardOccupationRow"><i class="bi bi-briefcase-fill me-1 text-info"></i> Occupation: <strong id="cardOccupation">Not specified</strong></div>
+                        <div id="cardEmailRow"><i class="bi bi-envelope-fill me-1 text-warning"></i> Email: <span id="cardEmail" style="word-break: break-all;">Not provided</span></div>
+                        <div id="cardMobileRow"><i class="bi bi-telephone-fill me-1 text-success"></i> Mobile: <span id="cardMobile">Not provided</span></div>
                         <div><i class="bi bi-people-fill me-1"></i> Descendants: <strong id="cardDescendants">0</strong></div>
+                        <div id="cardLifespanRow" style="display: none;"><i class="bi bi-hourglass-split me-1 text-warning"></i> Lifespan: <strong id="cardLifespan">-</strong></div>
                     </div>
 
                     <!-- Conditional Registered: View Profile -->
@@ -859,6 +863,10 @@
     window.__ACTIVE_LINEAGE_SCOPE__ = '{{ $activeLineageScope ?? 'primary' }}';
     window.__MARITAL_SURNAME__ = '{{ $maritalSurname ?? ($data['lastName'] ?? '') }}';
     window.__MAIDEN_SURNAME__ = '{{ $maidenSurname ?? '' }}';
+    window.__MOTHER_MAIDEN_SURNAME__ = '{{ addslashes($motherMaidenSurname ?? '') }}';
+    window.__MOTHER_BIRTH_FAMILY_CODE__ = '{{ addslashes($motherBirthFamCode ?? '') }}';
+    window.__PATERNAL_SURNAME__ = '{{ addslashes($paternalSurname ?? ($data['lastName'] ?? '')) }}';
+    window.__EGO_GENDER__ = '{{ strtolower((string)($data['gender'] ?? '')) }}';
     window.__FAMILY_CODE__ = '{{ ($activeLineageScope ?? 'primary') === 'maternal' && !empty($maternalFamCode) ? $maternalFamCode : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}';
     window.__IS_READ_ONLY__ = {{ !empty($isReadOnly) ? 'true' : 'false' }};
     
@@ -1119,10 +1127,17 @@
                     generation_level: (typeof node.generation_level !== 'undefined') ? Number(node.generation_level) : undefined,
                     voice_capsule_url: node.voice_capsule_url || null,
                     is_placeholder: Boolean(node.is_placeholder),
+                    isDeceased: Boolean(node.is_deceased),
+                    birth_year: node.birth_year || (node.birth_date ? String(node.birth_date).substring(0, 4) : null),
+                    death_year: node.death_year || (node.death_date ? String(node.death_date).substring(0, 4) : null),
+                    death_date: node.death_date || null,
                     pending_confirmation: Boolean(node.pending_confirmation),
                     maiden_name: node.maiden_name || '',
                     birth_family_code: node.birth_family_code || '',
                     sibling_kind: node.sibling_kind || null,
+                    email: node.email || (node.raw ? node.raw.email : '') || '',
+                    mobile: node.mobile || (node.raw ? node.raw.mobile : '') || '',
+                    occupation: node.occupation || (node.raw ? node.raw.occupation : '') || '',
                     raw: node
                 });
             });
@@ -1134,37 +1149,93 @@
         if (!hasBuiltTree) {
             const memberName = window.__VIEWED_MEMBER_NAME__ || 'This Member';
             const emptyTreeHtml = isSelf ? `
-                <div class="d-flex flex-column align-items-center justify-content-center p-5 text-center" style="min-height: 480px;">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.1); border: 2px dashed #10b981;">
-                        <i class="bi bi-diagram-3 text-success fs-1"></i>
+                <div class="d-flex flex-column align-items-center justify-content-center p-4 p-md-5 text-center" style="min-height: 480px; max-width: 860px; margin: 0 auto;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 76px; height: 76px; background: rgba(245, 158, 11, 0.15); border: 2px solid rgba(245, 158, 11, 0.5); color: #fbbf24;">
+                        <i class="bi bi-diagram-3-fill fs-2"></i>
                     </div>
-                    <h3 class="fw-bold text-white mb-2">Build Your Family Tree</h3>
-                    <p class="text-white-50 mb-4" style="max-width: 500px;">
-                        Your family tree is currently empty. Start building your lineage by adding your parents, partner, siblings, or children!
+                    <span class="badge rounded-pill bg-warning text-dark fw-bold px-3 py-1 mb-2" style="font-size: 0.78rem; letter-spacing: 0.5px;">
+                        YOUR FAMILY LEGACY SANCTUARY
+                    </span>
+                    <h2 class="fw-bold text-white mb-2" style="font-size: 1.75rem; letter-spacing: -0.02em;">
+                        Why Build Your Family Tree?
+                    </h2>
+                    <p class="text-white-50 mb-4" style="max-width: 640px; font-size: 0.95rem; line-height: 1.55;">
+                        Your family tree is not just a diagram — it is a living heirloom. When you add your parents, siblings, partner, or children, you unlock permanent benefits for your entire household:
                     </p>
-                    <a href="/familyStudio" class="btn btn-success px-4 py-2 fw-bold" style="border-radius: 50px; min-height: 44px; display: inline-flex; align-items: center;">
-                        <i class="bi bi-plus-circle me-1"></i> Add Relatives Now
-                    </a>
+
+                    <!-- 3 Core Benefit Cards -->
+                    <div class="row g-3 text-start w-100 mb-4 justify-content-center">
+                        <div class="col-12 col-md-4">
+                            <div class="p-3.5 h-100 rounded-3" style="background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(255, 255, 255, 0.12);">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: rgba(16, 185, 129, 0.2); color: #34d399;">
+                                        <i class="bi bi-shield-lock-fill"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-white mb-0" style="font-size: 0.92rem;">Preserve Living Heritage</h6>
+                                </div>
+                                <p class="text-white-50 small mb-0" style="font-size: 0.82rem; line-height: 1.45;">
+                                    Protect your ancestral roots, maiden names, and oral voice capsules in a private vault before stories fade across generations.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <div class="p-3.5 h-100 rounded-3" style="background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(255, 255, 255, 0.12);">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: rgba(59, 130, 246, 0.2); color: #60a5fa;">
+                                        <i class="bi bi-compass-fill"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-white mb-0" style="font-size: 0.92rem;">Automatic Kinship</h6>
+                                </div>
+                                <p class="text-white-50 small mb-0" style="font-size: 0.82rem; line-height: 1.45;">
+                                    Never wonder how cousins, in-laws, or aunts are related. Our engine calculates and illustrates exact relationships instantly.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <div class="p-3.5 h-100 rounded-3" style="background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(255, 255, 255, 0.12);">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: rgba(245, 158, 11, 0.2); color: #fbbf24;">
+                                        <i class="bi bi-heart-pulse-fill"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-white mb-0" style="font-size: 0.92rem;">A Gift for Your Children</h6>
+                                </div>
+                                <p class="text-white-50 small mb-0" style="font-size: 0.82rem; line-height: 1.45;">
+                                    Give younger family members a clear, visual identity and pride in their roots, ancestors, and extended family network.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="/familyStudio" class="btn btn-warning px-4 py-2.5 fw-bold text-dark shadow-sm d-inline-flex align-items-center gap-2" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
+                            <i class="bi bi-plus-circle-fill"></i> Add Your Parents &amp; Siblings
+                        </a>
+                        <button type="button" class="btn btn-outline-light px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2" style="border-radius: 50px; min-height: 44px; white-space: nowrap; border-color: rgba(255,255,255,0.35);" data-bs-toggle="modal" data-bs-target="#inviteFamilyModal">
+                            <i class="bi bi-person-lines-fill"></i> Invite Relatives by Phone/WhatsApp
+                        </button>
+                    </div>
                 </div>
             ` : `
-                <div class="d-flex flex-column align-items-center justify-content-center p-5 text-center" style="min-height: 480px;">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; background: rgba(163,22,33, 0.1); border: 2px dashed #a31621;">
-                        <i class="bi bi-diagram-3 text-primary fs-1"></i>
+                <div class="d-flex flex-column align-items-center justify-content-center p-4 p-md-5 text-center" style="min-height: 480px; max-width: 720px; margin: 0 auto;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 76px; height: 76px; background: rgba(163,22,33, 0.15); border: 2px solid rgba(163,22,33, 0.45); color: #ef6b73;">
+                        <i class="bi bi-diagram-3 fs-2"></i>
                     </div>
-                    <h3 class="fw-bold text-white mb-2">${memberName} Has Not Connected Their Branch Yet</h3>
-                    <p class="text-white-50 mb-4" style="max-width: 500px;">
-                        This relative has not added their immediate family members yet. Once they connect their relatives, their branch will appear here.
+                    <span class="badge rounded-pill bg-danger-subtle text-danger-emphasis fw-bold px-3 py-1 mb-2" style="font-size: 0.78rem;">
+                        BRANCH NOT CONNECTED YET
+                    </span>
+                    <h3 class="fw-bold text-white mb-2">${memberName} Has Not Added Their Family Branch</h3>
+                    <p class="text-white-50 mb-4" style="max-width: 520px; font-size: 0.92rem; line-height: 1.5;">
+                        A complete family tree thrives when every relative adds their immediate branch. Send ${memberName.split(' ')[0] || 'them'} a warm invitation to connect their parents, spouse, or children so the whole family stays linked.
                     </p>
-                    <div class="d-flex flex-wrap justify-content-center gap-3 mt-2">
-                        <a href="/allMembers" class="btn btn-outline-light px-4 py-2 fw-bold d-inline-flex align-items-center" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
-                            <i class="bi bi-arrow-left me-2"></i> Back to Directory
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="/allMembers" class="btn btn-outline-light px-4 py-2 fw-bold d-inline-flex align-items-center gap-2" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
+                            <i class="bi bi-arrow-left"></i> Family Directory
                         </a>
                         <button type="button" class="btn btn-warning text-dark px-4 py-2 fw-bold d-inline-flex align-items-center justify-content-center shadow-sm btn-prompt-tree-action" id="btnPromptBuildTree" style="border-radius: 50px; min-height: 44px; white-space: nowrap;" onclick="window.promptMemberToBuildTree()">
                             <i class="bi bi-envelope-heart-fill me-2 text-dark"></i> Invite ${memberName.split(' ')[0] || 'Them'} to Connect Branch
                         </button>
-                        <a href="/allMembers/seeProfile/${encodeURIComponent(window.__ROOT_USER_ID__)}" class="btn btn-primary px-4 py-2 fw-bold d-inline-flex align-items-center" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
-                            <i class="bi bi-person-badge me-2"></i> View Profile
-                        </a>
                     </div>
                 </div>
             `;
@@ -1246,11 +1317,12 @@
                             personId: nodeData.legacyId,
                             nodeId: nodeData.id,
                             familyCode: window.__FAMILY_CODE__,
-                            email: rawNode ? rawNode.email : '',
+                            email: (rawNode && rawNode.email) ? rawNode.email : (nodeData.email || ''),
+                            mobile: (rawNode && rawNode.mobile) ? rawNode.mobile : (nodeData.mobile || ''),
                             maritalStatus: rawNode ? rawNode.marital_status : '',
-                            occupation: rawNode ? rawNode.occupation : '',
-                            country: rawNode ? rawNode.country_of_residence : '',
-                            isDeceased: rawNode ? rawNode.is_deceased : false,
+                            occupation: (rawNode && rawNode.occupation) ? rawNode.occupation : (nodeData.occupation || ''),
+                            country: rawNode ? (rawNode.country_of_residence || rawNode.location) : '',
+                            isDeceased: Boolean(rawNode ? rawNode.is_deceased : nodeData.isDeceased),
                             isRegistered: !!nodeData.legacyId,
                             isReadOnly: isReadOnlyTree
                         });
@@ -1497,16 +1569,78 @@
                 };
             });
         }
-        if (avatarEl) avatarEl.src = node.img || (node.gender === 'female' ? '/resources/images/profile/avatarF.png' : '/resources/images/profile/avatarM.png');
+        const isDeceased = Boolean(node.isDeceased || node.is_deceased || (node.raw && node.raw.is_deceased));
+
+        if (avatarEl) {
+            avatarEl.src = node.img || (node.gender === 'female' ? '/resources/images/profile/avatarF.png' : '/resources/images/profile/avatarM.png');
+            avatarEl.style.filter = isDeceased ? 'grayscale(100%)' : 'none';
+            avatarEl.style.borderColor = isDeceased ? '#94a3b8' : '';
+        }
 
         const layoutNode = window.family && window.family.layout && window.family.layout.nodes 
             ? window.family.layout.nodes.find(n => String(n.id) === String(node.id)) 
             : null;
         if (descendantsEl) descendantsEl.textContent = layoutNode ? layoutNode.descendantCount : 0;
 
+        // Lifespan display in floating detail card
+        const lifespanRow = document.getElementById('cardLifespanRow');
+        const lifespanEl = document.getElementById('cardLifespan');
+        const birthYr = node.birth_year || (node.birth_date ? String(node.birth_date).substring(0, 4) : (node.raw && node.raw.birth_year ? String(node.raw.birth_year) : (node.raw && node.raw.birth_date ? String(node.raw.birth_date).substring(0, 4) : null)));
+        const deathYr = node.death_year || (node.death_date ? String(node.death_date).substring(0, 4) : (node.raw && node.raw.death_year ? String(node.raw.death_year) : (node.raw && node.raw.death_date ? String(node.raw.death_date).substring(0, 4) : null)));
+        if (isDeceased) {
+            const lifeStr = (birthYr && deathYr) ? `${birthYr} – ${deathYr}` : (deathYr ? `Passed in ${deathYr}` : (birthYr ? `Born in ${birthYr} (Deceased)` : 'In Loving Memory'));
+            if (lifespanRow && lifespanEl) {
+                lifespanEl.textContent = lifeStr;
+                lifespanRow.style.display = 'block';
+            }
+        } else if (lifespanRow) {
+            lifespanRow.style.display = 'none';
+        }
+
+        // Occupation, Email & Mobile Contact Details
+        const occEl = document.getElementById('cardOccupation');
+        const emailEl = document.getElementById('cardEmail');
+        const mobileEl = document.getElementById('cardMobile');
+
+        const occupationVal = (node.occupation || (node.raw && node.raw.occupation) || '').trim();
+        if (occEl) {
+            occEl.textContent = occupationVal || 'Not specified';
+        }
+
+        const emailVal = (node.email || (node.raw && node.raw.email) || '').trim();
+        if (emailEl) {
+            if (emailVal) {
+                const safeEmail = encodeURI(emailVal);
+                const safeDisplay = typeof escapeHtmlText === 'function' ? escapeHtmlText(emailVal) : emailVal;
+                emailEl.innerHTML = `<a href="mailto:${safeEmail}" class="card-contact-link text-info text-decoration-none" title="Send email to ${safeEmail}">${safeDisplay}</a>`;
+            } else {
+                emailEl.innerHTML = `<span class="text-white-50 fst-italic">Not provided</span>`;
+            }
+        }
+
+        const mobileVal = (node.mobile || (node.raw && node.raw.mobile) || '').trim();
+        if (mobileEl) {
+            if (mobileVal) {
+                const safeMobile = encodeURI(mobileVal);
+                const safeDisplay = typeof escapeHtmlText === 'function' ? escapeHtmlText(mobileVal) : mobileVal;
+                mobileEl.innerHTML = `<a href="tel:${safeMobile}" class="card-contact-link text-success text-decoration-none" title="Call ${safeMobile}"><i class="bi bi-telephone-outbound me-1"></i>${safeDisplay}</a>`;
+            } else {
+                mobileEl.innerHTML = `<span class="text-white-50 fst-italic">Not provided</span>`;
+            }
+        }
+
         const isReadOnlyTree = Boolean(window.__IS_READ_ONLY__) || (typeof graphData !== 'undefined' && graphData && graphData.isReadOnly);
 
-        if (node.legacyId) {
+        if (isDeceased) {
+            if (statusBadge) {
+                statusBadge.className = 'card-status-badge card-status-deceased';
+                statusBadge.innerHTML = '<i class="bi bi-flower1"></i> <span>In Loving Memory (Deceased)</span>';
+            }
+            if (registeredActions) registeredActions.style.display = node.legacyId ? 'block' : 'none';
+            if (claimSpotSection) claimSpotSection.style.display = 'none';
+            const profileLink = document.getElementById('cardViewProfileLink');
+            if (profileLink && node.legacyId) profileLink.href = '/allMembers/seeProfile/' + encodeURIComponent(node.legacyId);
+        } else if (node.legacyId) {
             if (statusBadge) {
                 statusBadge.className = 'card-status-badge card-status-registered';
                 statusBadge.innerHTML = '<i class="bi bi-patch-check-fill"></i> <span>Registered Member</span>';
@@ -1527,32 +1661,64 @@
                 const nodeFamCode = (node.raw && node.raw.family_code) ? String(node.raw.family_code).toUpperCase() : '';
                 const birthFamCode = (window.__BIRTH_FAMILY_CODE__ || '').toUpperCase();
                 const primaryFamCode = (window.__PRIMARY_FAMILY_CODE__ || window.__FAMILY_CODE__ || 'OLAOGUN').toUpperCase();
+                const motherBirthCode = (window.__MOTHER_BIRTH_FAMILY_CODE__ || '').toUpperCase();
+                const paternalSurname = (window.__PATERNAL_SURNAME__ || window.__MARITAL_SURNAME__ || primaryFamCode);
                 const roleLower = String(node.title || node.ego_relation || '').toLowerCase();
-                const isBirthRelativeRole = /(father|mother|dad|mum|parent|sister|brother|sibling|grandparent|grandfather|grandmother|uncle|aunt)/.test(roleLower);
+                const egoSide = String(node.ego_side || (node.raw && node.raw.ego_side) || '').toLowerCase();
 
-                // Resolve whether this node belongs to the Birth / Maiden Family or Marital / Household Tree
+                // 1. Identify Lineage Sphere: Maternal vs Paternal/Birth vs Marital/Household
+                const isMaternalRelative = (egoSide === 'maternal') || 
+                                           roleLower.includes('maternal') || 
+                                           (window.__ACTIVE_LINEAGE_SCOPE__ === 'maternal') ||
+                                           (Boolean(nodeFamCode) && Boolean(motherBirthCode) && nodeFamCode === motherBirthCode);
+
+                const isPaternalBirthRelative = (egoSide === 'paternal') || 
+                                                roleLower.includes('paternal') || 
+                                                /(father|dad|brother|sister|sibling)/.test(roleLower);
+
                 let familyCode = nodeFamCode || (window.__FAMILY_CODE__ || primaryFamCode);
-                if (window.__HAS_BIRTH_FAMILY__ && birthFamCode) {
-                    if (window.__ACTIVE_LINEAGE_SCOPE__ === 'maternal' || nodeFamCode === birthFamCode || (!nodeFamCode && isBirthRelativeRole)) {
-                        familyCode = birthFamCode;
+                let familySurname = window.__MARITAL_SURNAME__ || primaryFamCode;
+                let treeContextLabel = `${familySurname} Family Tree (#${familyCode})`;
+                let lineageScope = 'primary';
+                let claimSubtitleText = `Send a personal invite to join your <strong>Household Family Tree (#${familyCode})</strong> and claim this spot.`;
+
+                if (isMaternalRelative) {
+                    lineageScope = 'maternal';
+                    const rawNodeLast = (node.last_name || (node.raw && node.raw.last_name) || '').trim();
+                    const maternalSurname = (rawNodeLast && rawNodeLast.toUpperCase() !== paternalSurname.toUpperCase())
+                        ? rawNodeLast
+                        : (window.__MOTHER_MAIDEN_SURNAME__ || 'Maternal');
+                    familySurname = maternalSurname;
+
+                    if (motherBirthCode) {
+                        familyCode = motherBirthCode;
+                        treeContextLabel = `${maternalSurname} Birth Family Tree (#${familyCode})`;
+                        claimSubtitleText = `Send a personal invite to join the <strong>${maternalSurname} Birth Family (#${familyCode})</strong> and claim this spot.`;
+                    } else {
+                        treeContextLabel = `${maternalSurname} Family Tree (Maternal Lineage)`;
+                        claimSubtitleText = `Send a personal invite to join our <strong>${maternalSurname} Family Tree (Maternal Lineage)</strong> and claim this spot.`;
                     }
+                } else if (window.__HAS_BIRTH_FAMILY__ && birthFamCode && (isPaternalBirthRelative || nodeFamCode === birthFamCode)) {
+                    lineageScope = 'birth';
+                    familyCode = birthFamCode;
+                    familySurname = window.__MAIDEN_SURNAME__ || familyCode;
+                    treeContextLabel = `${familySurname} Birth Family Tree (#${familyCode})`;
+                    claimSubtitleText = `Send a personal invite to join your <strong>Birth / Maiden Family (#${familyCode})</strong> and claim this spot.`;
+                } else if (isPaternalBirthRelative) {
+                    lineageScope = 'primary';
+                    familySurname = paternalSurname;
+                    treeContextLabel = `${paternalSurname} Birth / Paternal Family Tree (#${familyCode})`;
+                    claimSubtitleText = `Send a personal invite to join your <strong>Birth / Paternal Family Tree (#${familyCode})</strong> and claim this spot.`;
+                } else {
+                    claimSubtitleText = `Send a personal invite to join your <strong>Household Family Tree (#${familyCode})</strong> and claim this spot.`;
                 }
-                const isBirthLineage = Boolean(birthFamCode && familyCode.toUpperCase() === birthFamCode);
-                const familySurname = isBirthLineage
-                    ? (window.__MAIDEN_SURNAME__ || familyCode)
-                    : (window.__MARITAL_SURNAME__ || familyCode);
-                const treeContextLabel = isBirthLineage
-                    ? `${familySurname} Birth Family Tree (#${familyCode})`
-                    : `${familySurname} Family Tree (#${familyCode})`;
 
                 const cleanName = (node.name || 'Relative').replace(/\s+/g, ' ').trim();
 
                 // Update card subtitle to clarify Marital vs Birth family code
                 const claimSubtitle = document.querySelector('#cardClaimSpotSection .claim-spot-subtitle');
                 if (claimSubtitle) {
-                    claimSubtitle.innerHTML = isBirthLineage
-                        ? `Send a personal invite to join your <strong>Birth / Maiden Family (#${familyCode})</strong> and claim this spot.`
-                        : `Send a personal invite to join your <strong>Marital / Household Tree (#${familyCode})</strong> and claim this spot.`;
+                    claimSubtitle.innerHTML = claimSubtitleText;
                 }
 
                 // Generate opaque invite token via AJAX — zero PII in the URL
@@ -1569,7 +1735,7 @@
                     },
                     body: JSON.stringify({
                         family_code: familyCode,
-                        lineage_scope: isBirthLineage ? 'maternal' : 'primary',
+                        lineage_scope: lineageScope,
                         family_surname: familySurname,
                         first_name: cleanName.split(' ')[0] || '',
                         last_name: cleanName.split(' ').slice(1).join(' ') || '',
@@ -1961,17 +2127,17 @@
                         const fullName = (node.full_name || `${node.first_name || ''} ${node.last_name || ''}`).trim() || 'Family Member';
                         const avatar = node.avatar_url || (node.gender === 'Female' ? '/resources/images/profile/avatarF.png' : '/resources/images/profile/avatarM.png');
                         const role = node.bio || (lvl === '0' ? (String(node.user_id) === String(window.__ROOT_USER_ID__) ? 'You (Self)' : 'Household / Sibling') : (lvl === '-1' ? 'Parent / Elder' : (lvl === '-2' ? 'Grandparent' : (lvl === '1' ? 'Child' : 'Descendant'))));
-                        const isDeceased = !!node.is_deceased;
+                        const isDeceased = Boolean(node.is_deceased);
                         const isSelf = String(node.user_id) === String(window.__ROOT_USER_ID__);
 
                         return `
-                        <div class="pedigree-member-card ${isSelf ? 'border-primary' : ''}" onclick="openNodeFromPedigree('${node.id}')">
-                            <img src="${avatar}" alt="${fullName}" class="pedigree-member-avatar" onerror="this.src='/resources/images/profile/avatarM.png'">
+                        <div class="pedigree-member-card ${isDeceased ? 'pedigree-deceased-card' : ''} ${isSelf ? 'border-primary' : ''}" onclick="openNodeFromPedigree('${node.id}')">
+                            <img src="${avatar}" alt="${fullName}" class="pedigree-member-avatar ${isDeceased ? 'pedigree-avatar-deceased' : ''}" onerror="this.src='/resources/images/profile/avatarM.png'">
                             <div class="pedigree-member-info">
                                 <div class="pedigree-member-name">${fullName} ${isSelf ? '<span class="badge bg-primary ms-1" style="font-size: 0.65rem;">You</span>' : ''}</div>
                                 <div class="pedigree-member-meta">
                                     <span class="pedigree-role-pill">${role}</span>
-                                    ${isDeceased ? '<span class="pedigree-deceased-pill"><i class="bi bi-flower1"></i> Deceased</span>' : ''}
+                                    ${isDeceased ? '<span class="pedigree-deceased-pill fw-bold"><i class="bi bi-flower1 text-warning"></i> In Memory</span>' : ''}
                                 </div>
                             </div>
                             <i class="bi bi-chevron-right text-muted fs-6"></i>
@@ -1994,13 +2160,15 @@
                     ${otherNodes.map(node => {
                         const fullName = (node.full_name || `${node.first_name || ''} ${node.last_name || ''}`).trim() || 'Family Member';
                         const avatar = node.avatar_url || (node.gender === 'Female' ? '/resources/images/profile/avatarF.png' : '/resources/images/profile/avatarM.png');
+                        const isDeceased = Boolean(node.is_deceased);
                         return `
-                        <div class="pedigree-member-card" onclick="openNodeFromPedigree('${node.id}')">
-                            <img src="${avatar}" alt="${fullName}" class="pedigree-member-avatar" onerror="this.src='/resources/images/profile/avatarM.png'">
+                        <div class="pedigree-member-card ${isDeceased ? 'pedigree-deceased-card' : ''}" onclick="openNodeFromPedigree('${node.id}')">
+                            <img src="${avatar}" alt="${fullName}" class="pedigree-member-avatar ${isDeceased ? 'pedigree-avatar-deceased' : ''}" onerror="this.src='/resources/images/profile/avatarM.png'">
                             <div class="pedigree-member-info">
                                 <div class="pedigree-member-name">${fullName}</div>
                                 <div class="pedigree-member-meta">
                                     <span class="pedigree-role-pill">${node.bio || 'Relative'}</span>
+                                    ${isDeceased ? '<span class="pedigree-deceased-pill fw-bold"><i class="bi bi-flower1 text-warning"></i> In Memory</span>' : ''}
                                 </div>
                             </div>
                             <i class="bi bi-chevron-right text-muted fs-6"></i>
@@ -2041,11 +2209,12 @@
                 personId: rawNode.user_id,
                 familyCode: window.__FAMILY_CODE__,
                 email: rawNode.email || '',
+                mobile: rawNode.mobile || '',
                 maritalStatus: rawNode.marital_status || '',
                 occupation: rawNode.occupation || '',
-                country: rawNode.country_of_residence || '',
+                country: rawNode.country_of_residence || rawNode.location || '',
                 nodeId: rawNode.id,
-                isDeceased: rawNode.is_deceased || false,
+                isDeceased: Boolean(rawNode.is_deceased),
                 isRegistered: !!rawNode.user_id,
                 isReadOnly: isReadOnlyTree
             });
@@ -2460,18 +2629,21 @@
             badgeEl.textContent = '#' + activeCode;
         }
 
+        const isMaleOrUnmarried = (window.__EGO_GENDER__ === 'male' || !window.__HAS_BIRTH_FAMILY__);
+        const primaryCodeLabel = isMaleOrUnmarried ? 'Birth / Paternal Tree' : 'Marital / Household Tree';
+
         const helpEl = document.getElementById('wizardLineageScopeHelp');
         if (helpEl) {
             helpEl.innerHTML = isMaternal
                 ? `Adding to your <strong>Birth / Maiden Family (#${activeCode})</strong> so your parents and birth siblings connect directly to your ${activeSurname ? activeSurname + ' ' : ''}birth lineage.`
-                : `Adding to your <strong>Marital / Household Tree (#${activeCode})</strong>. Switch to Birth / Maiden Family when adding your own parents or birth siblings.`;
+                : `Adding to your <strong>${primaryCodeLabel} (#${activeCode})</strong>. Switch to Birth / Maiden Family when adding your own parents or birth siblings.`;
         }
 
         const parentsHint = document.getElementById('parentsLineageHint');
         if (parentsHint) {
             parentsHint.innerHTML = isMaternal
                 ? `<i class="bi bi-diagram-3-fill me-1"></i> Saving parents to your <strong>Birth / Maiden Family (#${activeCode})</strong>. Provide details for one or both parents.`
-                : `<i class="bi bi-house-heart-fill me-1"></i> Saving parents to your <strong>Marital / Household Tree (#${activeCode})</strong>. Provide details for one or both parents.`;
+                : `<i class="bi bi-house-heart-fill me-1"></i> Saving parents to your <strong>${primaryCodeLabel} (#${activeCode})</strong>. Provide details for one or both parents.`;
         }
 
         // Update surname placeholders & button labels to reflect Marital vs Birth family context
@@ -2901,11 +3073,12 @@
                     rotAngle += 180;
                 }
 
+                const isDeceased = Boolean(node && (node.is_deceased || node.isDeceased));
                 svgHtml += `
                     <g class="fan-wedge" style="cursor: pointer;" onclick="onFanWedgeClick('${slot}')">
-                        <path d="${pathD}" fill="${fillColor}" fill-opacity="${opacity}" stroke="#0f172a" stroke-width="2" class="fan-arc-path" />
+                        <path d="${pathD}" fill="${fillColor}" fill-opacity="${opacity}" stroke="${isDeceased ? '#cbd5e1' : '#0f172a'}" stroke-width="${isDeceased ? '2.5' : '2'}" class="fan-arc-path" />
                         <g transform="translate(${textPos.x}, ${textPos.y}) rotate(${rotAngle})">
-                            <text x="0" y="-3" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="${gen === 3 ? '8.5' : '10.5'}" font-family="Inter, sans-serif">${l1}</text>
+                            <text x="0" y="-3" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="${gen === 3 ? '8.5' : '10.5'}" font-family="Inter, sans-serif">${l1}${isDeceased ? ' 🕊️' : ''}</text>
                             ${l2 ? `<text x="0" y="8" text-anchor="middle" fill="#e2e8f0" font-weight="600" font-size="${gen === 3 ? '7.5' : '9'}" font-family="Inter, sans-serif">${l2}</text>` : ''}
                         </g>
                     </g>

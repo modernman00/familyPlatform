@@ -18,8 +18,14 @@
         <div class="profile-hero">
             <div class="hero-background"></div>
             <div class="hero-content">
-                <div class="profile-avatar-wrapper">
-                    <img src="/resources/images/profile/{{ $data['profilePics'] ?? 'avatarM.png' }}" alt="{{ $data['fullName'] }}" class="profile-avatar">
+                <div class="profile-avatar-wrapper" style="cursor: pointer;" title="Click to enlarge profile photo" role="button" tabindex="0" aria-label="View {{ $data['fullName'] }}'s profile photo in full size">
+                    <img src="/resources/images/profile/{{ $data['profilePics'] ?? 'avatarM.png' }}" 
+                         alt="{{ $data['fullName'] }}" 
+                         class="profile-avatar profile-avatar-interactive"
+                         data-profile-expand="true"
+                         data-profile-name="{{ $data['fullName'] }}"
+                         data-profile-subtitle="Family Member • {{ $data['famCode'] ?? '' }}"
+                         data-can-edit="false">
                     <div class="avatar-ring"></div>
                 </div>
                 <div class="profile-main-info">

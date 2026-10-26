@@ -32,22 +32,28 @@
 
 <!-- 1. Sunday Family Trivia Section -->
 @if(!empty($trivia))
+@php
+    $triviaPostNo = !empty($trivia['post_no']) ? (int)$trivia['post_no'] : null;
+    $triviaUrl = $triviaPostNo 
+        ? "{$baseUrl}/profilePage?post_no={$triviaPostNo}#post{$triviaPostNo}" 
+        : "{$baseUrl}/profilePage";
+@endphp
 <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 5px solid #f59e0b; padding: 20px 24px; border-radius: 12px; margin-bottom: 26px;">
     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
         <span style="font-size: 20px;">🧠</span>
         <h4 style="margin: 0; color: #92400e; font-size: 17px; font-weight: 700;">
-            This Week's Sunday Family Trivia
+            <a href="{{ $triviaUrl }}" target="_blank" style="color: #92400e; text-decoration: none;">This Week's Sunday Family Trivia</a>
         </h4>
     </div>
     <p style="margin: 0 0 16px 0; color: #78350f; font-size: 15px; font-weight: 600; line-height: 1.5;">
-        {{ $trivia['question'] ?? 'Test how well you know our family roots!' }}
+        <a href="{{ $triviaUrl }}" target="_blank" style="color: #78350f; text-decoration: none;">{{ $trivia['question'] ?? 'Test how well you know our family roots!' }}</a>
     </p>
 
     <!-- Vote Button -->
     <table border="0" cellpadding="0" cellspacing="0" style="margin: 0;">
         <tr>
             <td align="center" style="border-radius: 8px; background: #d97706;">
-                <a href="{{ $baseUrl }}/profilePage" 
+                <a href="{{ $triviaUrl }}" 
                    target="_blank" 
                    style="font-size: 14px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 8px; padding: 10px 20px; border: 1px solid #d97706; display: inline-block; font-weight: 700;">
                     👉 Vote in Feed &amp; See Results

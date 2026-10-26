@@ -81,6 +81,9 @@ final class CollateralKinshipService
                    COALESCE(NULLIF(p.firstName, ''), fn.first_name) AS first_name,
                    COALESCE(NULLIF(p.lastName, ''), fn.last_name) AS last_name,
                    COALESCE(NULLIF(p.gender, ''), fn.gender) AS gender,
+                   COALESCE(NULLIF(fn.email, ''), NULLIF(c.email, ''), NULLIF(a.email, '')) AS email,
+                   COALESCE(NULLIF(fn.mobile, ''), NULLIF(c.mobile, '')) AS mobile,
+                   COALESCE(NULLIF(fn.occupation, ''), NULLIF(w.occupation, ''), NULLIF(c.occupation, '')) AS occupation,
                    CASE 
                        WHEN pp.img IS NOT NULL AND pp.img != '' AND pp.img NOT LIKE '%/%' THEN CONCAT('/resources/images/profile/', pp.img)
                        WHEN pp.img IS NOT NULL AND pp.img != '' THEN pp.img
@@ -90,6 +93,9 @@ final class CollateralKinshipService
             FROM family_nodes fn 
             LEFT JOIN personal p ON fn.user_id = p.id
             LEFT JOIN profilePics pp ON fn.user_id = pp.id 
+            LEFT JOIN contact c ON fn.user_id = c.id
+            LEFT JOIN account a ON fn.user_id = a.id
+            LEFT JOIN work w ON fn.user_id = w.id
             WHERE fn.family_code = ? 
             ORDER BY fn.id ASC
         ");
@@ -170,7 +176,10 @@ final class CollateralKinshipService
                 'generation_level' => 0,
                 'bio' => 'Primary Member',
                 'is_root' => true,
-                'ego_relation' => 'You (Primary Member)'
+                'ego_relation' => 'You (Primary Member)',
+                'email' => (string)($memberData['email'] ?? ''),
+                'mobile' => (string)($memberData['mobile'] ?? ''),
+                'occupation' => (string)($memberData['occupation'] ?? '')
             ];
 
             return [

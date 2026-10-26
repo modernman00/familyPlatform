@@ -30,6 +30,7 @@ document.addEventListener('click', (e) => {
   const role = node.dataset.role || node.querySelector('.node-title')?.textContent?.trim() || nodeFn('.node-relation-hidden') || 'Relative';
   const img = node.dataset.img || node.querySelector('.profile-image')?.src || nodeFn('.node-img') || '/resources/images/profile/avatarM.png';
   const email = node.dataset.email || nodeFn('.node-email') || '';
+  const mobile = node.dataset.mobile || nodeFn('.node-mobile') || '';
   const maritalStatus = node.dataset.maritalStatus || nodeFn('.node-maritalStatus') || '';
   const spouseName = node.dataset.spouseName || nodeFn('.node-spouseName') || '';
   const occupation = node.dataset.occupation || nodeFn('.node-occupation') || '';
@@ -44,6 +45,7 @@ document.addEventListener('click', (e) => {
     personId: (personId && personId !== '') ? personId : null,
     nodeId: nodeId,
     email: email,
+    mobile: mobile,
     relation: role,
     img: img,
     maritalStatus: maritalStatus,
@@ -83,6 +85,7 @@ memberSearchInput?.addEventListener('input', (e) => {
       name: n.name || 'Relative',
       role: n.title || 'Family Member',
       img: n.img || '/resources/images/profile/avatarM.png',
+      isDeceased: Boolean(n.isDeceased || n.is_deceased || (n.raw && n.raw.is_deceased)),
       nodeType: 'balkan'
     }));
   } else if (window.graphData?.nodes && Array.isArray(window.graphData.nodes)) {
@@ -95,6 +98,7 @@ memberSearchInput?.addEventListener('input', (e) => {
       name: n.full_name || `${n.first_name || ''} ${n.last_name || ''}`.trim() || 'Relative',
       role: n.bio || 'Family Member',
       img: n.avatar_url || '/resources/images/profile/avatarM.png',
+      isDeceased: Boolean(n.is_deceased),
       nodeType: 'balkan'
     }));
   }
@@ -110,7 +114,8 @@ memberSearchInput?.addEventListener('input', (e) => {
       const role = n.querySelector('.node-title')?.textContent?.trim() || n.dataset.role || '';
       const img = n.querySelector('.profile-image')?.src || n.dataset.img || '/resources/images/profile/avatarM.png';
       const id = n.dataset.nId || n.dataset.id || '';
-      return { id, name, role, img, nodeType: 'dom' };
+      const isDeceased = n.dataset.deceased === '1' || n.classList.contains('deceased');
+      return { id, name, role, img, isDeceased, nodeType: 'dom' };
     });
   }
 
@@ -126,9 +131,9 @@ memberSearchInput?.addEventListener('input', (e) => {
     // it goes into innerHTML (SEC-2).
     resultsHtml += `
       <div class="search-result-item" data-id="${esc(item.id)}" data-name="${esc(item.name)}">
-        <img src="${esc(item.img)}" alt="${esc(item.name)}">
+        <img src="${esc(item.img)}" alt="${esc(item.name)}" style="${item.isDeceased ? 'filter: grayscale(100%); border: 1.5px solid #94a3b8;' : ''}">
         <div class="search-result-info">
-          <div class="search-result-name">${esc(item.name)}</div>
+          <div class="search-result-name">${esc(item.name)} ${item.isDeceased ? '<span class="badge" style="font-size: 0.65rem; background: #334155; color: #f1f5f9; padding: 2px 6px; border-radius: 999px; border: 1px solid #64748b;">🕊️ Deceased</span>' : ''}</div>
           <div class="search-result-meta">${esc(item.role)}</div>
         </div>
       </div>

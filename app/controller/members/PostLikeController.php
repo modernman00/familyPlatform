@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\controller\members;
 
 
-use App\classes\{AllFunctionalities, Pusher};
+use App\classes\{AllFunctionalities, Pusher, PushNotificationClass};
 use Src\Db;
 use App\model\Post;
 
@@ -50,6 +50,43 @@ final class PostLikeController extends Db
                 // Increment count
                 $updStmt = $pdo->prepare("UPDATE post SET post_likes = post_likes + 1, likes_updated_at = NOW() WHERE post_no = :postNo");
                 $updStmt->execute(['postNo' => $postNo]);
+
+                // Notify post author about the new reaction
+                try {
+                    $postRow = Post::postByNo($postNo);
+                    $postAuthorId = (string)($postRow['id'] ?? '');
+                    if ($postAuthorId !== '' && $postAuthorId !== $userId) {
+                        $likerName = trim(($_SESSION['fName'] ?? '') . ' ' . ($_SESSION['lName'] ?? ''));
+                        if ($likerName === '') {
+                            $likerName = 'A family member';
+                        }
+                        $postUrl = '/profilePage?post_no=' . (int)$postNo . '#post' . (int)$postNo;
+                        $notifMsg = "{$likerName} liked your post";
+
+                        $nStmt = $pdo->prepare("
+                            INSERT INTO notification 
+                            (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                            VALUES (?, ?, ?, 'Post Reaction', 'Post', ?, ?, 'new', NOW())
+                        ");
+                        $nStmt->execute([
+                            $userId,
+                            $postAuthorId,
+                            $likerName,
+                            $notifMsg,
+                            $postUrl
+                        ]);
+
+                        PushNotificationClass::sendPushNotification(
+                            userId: $postAuthorId,
+                            message: $notifMsg,
+                            url: $postUrl,
+                            title: '❤️ Post Reaction',
+                            tag: 'post-like-' . $postNo
+                        );
+                    }
+                } catch (\Throwable $likeNotifEx) {
+                    error_log('[PostLikeController notif warning] ' . $likeNotifEx->getMessage());
+                }
             }
 
             self::getNewLikesPusher();

@@ -279,7 +279,7 @@ async function confirmAndDispatchBroadcast() {
     }
 
     sendBtn.disabled = true;
-    sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Dispatched Processing...';
+    sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
     try {
         const res = await fetch('/admin/api/broadcast/send', {

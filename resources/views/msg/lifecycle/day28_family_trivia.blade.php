@@ -46,10 +46,16 @@
 </ul>
 
 <!-- CTA Button -->
+@php
+    $triviaPostNo = !empty($data['post_no']) ? (int)$data['post_no'] : null;
+    $triviaUrl = $triviaPostNo 
+        ? "{$baseUrl}/profilePage?post_no={$triviaPostNo}#post{$triviaPostNo}" 
+        : "{$baseUrl}/profilePage";
+@endphp
 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0 24px 0;">
     <tr>
         <td align="center">
-            <a href="{{ $baseUrl }}/member/trivia" target="_blank" style="background: linear-gradient(135deg, #ef6b73 0%, #8a1019 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(184,32,44, 0.35);">
+            <a href="{{ $triviaUrl }}" target="_blank" style="background: linear-gradient(135deg, #ef6b73 0%, #8a1019 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(184,32,44, 0.35);">
                 Play Weekly Trivia &rarr;
             </a>
         </td>

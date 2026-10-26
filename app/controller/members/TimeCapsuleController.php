@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\controller\members;
 
+use App\classes\PushNotificationClass;
 use App\controller\BaseController;
+use App\model\AllMembersData;
 use App\services\FamilyTimeCapsuleService;
-use Src\{CheckToken, CorsHandler, Limiter};
+use Src\{CheckToken, CorsHandler, Db, Limiter};
 
 /**
  * TimeCapsuleController
@@ -139,6 +141,74 @@ final class TimeCapsuleController extends BaseController
                 'unlock_type'       => isset($input['unlock_type']) && is_string($input['unlock_type']) ? trim($input['unlock_type']) : 'date',
                 'unlock_date'       => $unlockDate,
             ]);
+
+            // Dispatch notification to designated recipient or family
+            try {
+                $authorName = trim(($_SESSION['fName'] ?? '') . ' ' . ($_SESSION['lName'] ?? ''));
+                if ($authorName === '') {
+                    $authorName = 'A family member';
+                }
+                $targetUserId = isset($input['recipient_user_id']) && is_string($input['recipient_user_id']) ? trim($input['recipient_user_id']) : '';
+                $capsuleUrl = '/profilePage#timeCapsuleCard';
+                $formattedUnlock = date('d M Y', (int)strtotime($unlockDate));
+                $db = Db::connect2();
+
+                if ($targetUserId !== '' && $targetUserId !== $userId) {
+                    $notifMsg = "{$authorName} sealed a Time Capsule for you: \"{$title}\"! Unlocks on {$formattedUnlock}.";
+                    $stmt = $db->prepare("
+                        INSERT INTO notification 
+                        (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                        VALUES (?, ?, ?, '⏳ Time Capsule Sealed', 'Capsule', ?, ?, 'new', NOW())
+                    ");
+                    $stmt->execute([
+                        $userId,
+                        $targetUserId,
+                        $authorName,
+                        $notifMsg,
+                        $capsuleUrl
+                    ]);
+                    PushNotificationClass::sendPushNotification(
+                        userId: $targetUserId,
+                        message: $notifMsg,
+                        url: $capsuleUrl,
+                        title: '⏳ Time Capsule Sealed',
+                        tag: 'capsule-sealed-' . $capsuleId
+                    );
+                } else {
+                    // Family-wide notification
+                    $members = AllMembersData::AllMembersEmailByFamCode($familyCode, $userId);
+                    $notifMsg = "{$authorName} sealed a Family Time Capsule: \"{$title}\" (Unlocks {$formattedUnlock})";
+                    $stmt = $db->prepare("
+                        INSERT INTO notification 
+                        (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                        VALUES (?, ?, ?, '⏳ Time Capsule Sealed', 'Capsule', ?, ?, 'new', NOW())
+                    ");
+                    foreach ($members as $m) {
+                        $mId = (string)($m['id'] ?? '');
+                        if ($mId === '' || $mId === $userId) {
+                            continue;
+                        }
+                        try {
+                            $stmt->execute([
+                                $userId,
+                                $mId,
+                                $authorName,
+                                $notifMsg,
+                                $capsuleUrl
+                            ]);
+                            PushNotificationClass::sendPushNotification(
+                                userId: $mId,
+                                message: $notifMsg,
+                                url: $capsuleUrl,
+                                title: '⏳ Time Capsule Sealed',
+                                tag: 'capsule-sealed-' . $capsuleId
+                            );
+                        } catch (\Throwable) {}
+                    }
+                }
+            } catch (\Throwable $notifEx) {
+                error_log('[TimeCapsuleController::createCapsule notif warning] ' . $notifEx->getMessage());
+            }
 
             http_response_code(201);
             // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response (Content-Type: application/json); json_encode escapes output safely

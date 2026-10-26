@@ -2,6 +2,16 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import { format } from 'timeago.js';
 import { esc } from '../global';
+import { FAMILY_GIFS, GIF_CATEGORIES } from '../profilePage/gifCatalog';
+
+const REEL_COMMENT_EMOJI_MAP = {
+    like: '👍',
+    love: '❤️',
+    haha: '😄',
+    wow: '😮',
+    sad: '😢',
+    angry: '😠'
+};
 
 class FamilyReelsPlayer {
     constructor() {
@@ -24,12 +34,33 @@ class FamilyReelsPlayer {
         this.commentForm = document.getElementById('reelCommentForm');
         this.commentInput = document.getElementById('reelCommentInput');
 
+        this.replyTarget = null;
+        this.attachedGifUrl = null;
+        this.selectedGifCat = 'all';
+
+        this.gifPickerDrawer = document.getElementById('reelGifPickerDrawer');
+        this.gifToggleBtn = document.getElementById('reelGifToggleBtn');
+        this.closeGifPickerBtn = document.getElementById('closeReelGifPickerBtn');
+        this.gifCategoriesContainer = document.getElementById('reelGifCategories');
+        this.gifGridContainer = document.getElementById('reelGifGrid');
+        this.commentAuxBar = document.getElementById('reelCommentAuxBar');
+        this.replyBadge = document.getElementById('reelReplyBadge');
+        this.replyTargetName = document.getElementById('reelReplyTargetName');
+        this.cancelReplyBtn = document.getElementById('cancelReelReplyBtn');
+        this.attachedGifContainer = document.getElementById('reelAttachedGifContainer');
+        this.attachedGifImg = document.getElementById('reelAttachedGifImg');
+        this.removeAttachedGifBtn = document.getElementById('removeReelAttachedGifBtn');
+        this.commentSubmitBtn = document.getElementById('reelCommentSubmitBtn');
+        this.commentSubmitIcon = document.getElementById('reelCommentSubmitIcon');
+        this.commentSubmitSpinner = document.getElementById('reelCommentSubmitSpinner');
+
         if (this.viewport || this.container) {
             this.init();
         }
 
         this.initTrayCards();
         this.initCreateModal();
+        this.initCommentControls();
     }
 
     /**
@@ -310,14 +341,45 @@ class FamilyReelsPlayer {
                 }
             }, { passive: true });
         }
+    }
 
-        // Comment Form Submit
+    initCommentControls() {
         if (this.commentForm) {
             this.commentForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 this.submitComment();
             });
         }
+
+        if (this.gifToggleBtn && this.gifPickerDrawer) {
+            this.gifToggleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.toggleGifPicker();
+            });
+        }
+
+        if (this.closeGifPickerBtn && this.gifPickerDrawer) {
+            this.closeGifPickerBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.gifPickerDrawer.classList.add('d-none');
+            });
+        }
+
+        if (this.cancelReplyBtn) {
+            this.cancelReplyBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.cancelReply();
+            });
+        }
+
+        if (this.removeAttachedGifBtn) {
+            this.removeAttachedGifBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.removeAttachedGif();
+            });
+        }
+
+        this.renderGifPicker();
     }
 
     handleSwipe() {
@@ -889,18 +951,373 @@ class FamilyReelsPlayer {
                 return;
             }
 
-            this.commentsList.innerHTML = comments.map(c => `
-            <div class="reel-comment-bubble">
-                <img src="${esc(c.profilePics ? (c.profilePics.startsWith('/') ? c.profilePics : `/resources/images/profile/${c.profilePics}`) : '/resources/images/profile/avatarM.png')}" class="reel-comment-avatar" alt="User" onerror="this.src='/resources/images/profile/avatarM.png'">
-                <div class="reel-comment-content">
-                    <div class="reel-comment-user">${esc(`${c.firstName || 'Family'} ${c.lastName || 'Member'}`)}</div>
-                    <div class="reel-comment-text" style="font-variant-emoji: emoji;">${esc(this.normalizeEmoji(c.comment || ''))}</div>
-                    <span class="reel-comment-time">${c.created_at ? format(c.created_at) : 'Just now'}</span>
-                </div>
-            </div>
-            `).join('');
+            // Organize 1-level threads: parents and replies
+            const topLevel = [];
+            const replyMap = new Map();
+            comments.forEach(c => {
+                if (c.parent_comment_no) {
+                    const pid = Number(c.parent_comment_no);
+                    if (!replyMap.has(pid)) replyMap.set(pid, []);
+                    replyMap.get(pid).push(c);
+                } else {
+                    topLevel.push(c);
+                }
+            });
+
+            let html = '';
+            topLevel.forEach(parent => {
+                html += `<div class="reel-comment-thread mb-3" data-root-id="${parent.comment_id}">`;
+                html += this.renderCommentItem(parent, false, reel);
+                const replies = replyMap.get(Number(parent.comment_id)) || [];
+                if (replies.length > 0) {
+                    html += `<div class="reel-comment-reply-container">`;
+                    replies.forEach(rep => {
+                        html += this.renderCommentItem(rep, true, reel);
+                    });
+                    html += `</div>`;
+                }
+                html += `</div>`;
+            });
+
+            this.commentsList.innerHTML = html;
+            this.bindCommentEvents(reel);
         } catch (error) {
             this.commentsList.innerHTML = '<div class="text-center py-4 text-danger small">Failed to load comments.</div>';
+        }
+    }
+
+    renderCommentItem(c, isReply, reel) {
+        const isAuthor = this.currentUserId && String(c.user_id) === String(this.currentUserId);
+        const isReelOwner = this.currentUserId && String(reel.user_id) === String(this.currentUserId);
+        const canDelete = isAuthor || isReelOwner;
+        const deleteTitle = isAuthor ? 'Delete your comment' : 'Delete comment from your reel';
+        const authorName = `${c.firstName || 'Family'} ${c.lastName || 'Member'}`.trim();
+        const avatarUrl = c.profilePics ? (c.profilePics.startsWith('/') ? c.profilePics : `/resources/images/profile/${c.profilePics}`) : '/resources/images/profile/avatarM.png';
+
+        // Top reactions preview
+        const reactions = c.reactions || {};
+        const topReactions = Object.entries(reactions)
+            .filter(([k, v]) => !['total', 'comment_id'].includes(k) && Number(v) > 0)
+            .sort(([, a], [, b]) => Number(b) - Number(a))
+            .slice(0, 3)
+            .map(([k, v]) => ({ emoji: REEL_COMMENT_EMOJI_MAP[k] || '👍', count: v }));
+
+        const activeReaction = c.user_reaction || '';
+        const likeLabel = activeReaction ? (activeReaction.charAt(0).toUpperCase() + activeReaction.slice(1)) : 'Like';
+        const likeEmoji = activeReaction ? (REEL_COMMENT_EMOJI_MAP[activeReaction] || '👍') : '';
+
+        return `
+        <div class="reel-comment-bubble" data-comment-id="${c.comment_id}">
+            <img src="${esc(avatarUrl)}" class="reel-comment-avatar" alt="${esc(authorName)}" onerror="this.src='/resources/images/profile/avatarM.png'">
+            <div class="reel-comment-content flex-grow-1">
+                <div class="d-flex align-items-center justify-content-between gap-1">
+                    <div class="reel-comment-user">${esc(authorName)}</div>
+                    ${canDelete ? `
+                    <button type="button" class="btn btn-link text-danger p-0 delete-reel-comment-btn" data-comment-id="${c.comment_id}" title="${esc(deleteTitle)}" style="font-size: 0.82rem; text-decoration: none; opacity: 0.75; min-width: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                    ` : ''}
+                </div>
+
+                <div class="reel-comment-text-box" id="reelCommentTextBox_${c.comment_id}">
+                    ${c.comment ? `<div class="reel-comment-text" style="font-variant-emoji: emoji;">${esc(this.normalizeEmoji(c.comment))}</div>` : ''}
+                    ${c.gif_url ? `<img src="${esc(c.gif_url)}" alt="GIF" loading="lazy" class="reel-comment-gif-img">` : ''}
+                </div>
+
+                ${topReactions.length > 0 ? `
+                <div class="reel-comment-reaction-pill" data-comment-id="${c.comment_id}">
+                    ${topReactions.map(r => `<span>${r.emoji} <span style="color:#94a3b8; font-size:0.7rem;">${r.count}</span></span>`).join(' ')}
+                </div>
+                ` : ''}
+
+                <div class="reel-comment-meta-bar position-relative">
+                    <span class="reel-comment-time">${c.created_at ? format(c.created_at) : 'Just now'}${c.updated_at ? ' <span class="text-white-50">(edited)</span>' : ''}</span>
+                    
+                    <!-- Like Button & Reaction Bar -->
+                    <div class="position-relative d-inline-block">
+                        <button type="button" class="reel-comment-action-btn reel-comment-react-toggle ${activeReaction ? 'text-primary fw-bold' : ''}" data-comment-id="${c.comment_id}" data-active-reaction="${esc(activeReaction)}">
+                            ${likeEmoji ? `${likeEmoji} ` : ''}${esc(likeLabel)}
+                        </button>
+                        <div class="reel-comment-reaction-picker d-none" id="reactionPicker_${c.comment_id}">
+                            ${Object.keys(REEL_COMMENT_EMOJI_MAP).map(type => `
+                                <button type="button" class="reel-comment-reaction-emoji-btn" data-comment-id="${c.comment_id}" data-reaction-type="${type}" title="${type}">
+                                    ${REEL_COMMENT_EMOJI_MAP[type]}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Reply Button -->
+                    <button type="button" class="reel-comment-action-btn reel-comment-reply-btn" data-comment-id="${c.comment_id}" data-author-name="${esc(authorName)}">
+                        Reply
+                    </button>
+
+                    <!-- Edit Button (Author only) -->
+                    ${isAuthor && c.comment ? `
+                    <button type="button" class="reel-comment-action-btn reel-comment-edit-btn" data-comment-id="${c.comment_id}" data-current-text="${esc(c.comment)}">
+                        Edit
+                    </button>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+        `;
+    }
+
+    bindCommentEvents(reel) {
+        if (!this.commentsList) return;
+
+        // 1. Delete comment
+        this.commentsList.querySelectorAll('.delete-reel-comment-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const commentId = btn.getAttribute('data-comment-id');
+                if (commentId) {
+                    this.deleteReelComment(commentId);
+                }
+            });
+        });
+
+        // 2. Reply to comment
+        this.commentsList.querySelectorAll('.reel-comment-reply-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const commentId = btn.getAttribute('data-comment-id');
+                const authorName = btn.getAttribute('data-author-name') || 'Family Member';
+                if (commentId) {
+                    this.startReply(commentId, authorName);
+                }
+            });
+        });
+
+        // 3. Edit comment
+        this.commentsList.querySelectorAll('.reel-comment-edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const commentId = btn.getAttribute('data-comment-id');
+                const currentText = btn.getAttribute('data-current-text') || '';
+                if (commentId) {
+                    this.startEdit(commentId, currentText);
+                }
+            });
+        });
+
+        // 4. Reaction toggle button (click toggles default 'like' or toggles picker)
+        this.commentsList.querySelectorAll('.reel-comment-react-toggle').forEach(btn => {
+            const commentId = btn.getAttribute('data-comment-id');
+            const picker = document.getElementById(`reactionPicker_${commentId}`);
+
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const active = btn.getAttribute('data-active-reaction');
+                // If already reacted, clicking the button toggles that same reaction off
+                this.toggleCommentReaction(commentId, active || 'like');
+            });
+
+            // On mouseenter or long-press, show picker
+            btn.addEventListener('mouseenter', () => {
+                if (picker) picker.classList.remove('d-none');
+            });
+
+            const parentDiv = btn.parentElement;
+            if (parentDiv) {
+                parentDiv.addEventListener('mouseleave', () => {
+                    if (picker) picker.classList.add('d-none');
+                });
+            }
+        });
+
+        // 5. Reaction emoji buttons inside picker
+        this.commentsList.querySelectorAll('.reel-comment-reaction-emoji-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const commentId = btn.getAttribute('data-comment-id');
+                const reactionType = btn.getAttribute('data-reaction-type') || 'like';
+                const picker = document.getElementById(`reactionPicker_${commentId}`);
+                if (picker) picker.classList.add('d-none');
+                if (commentId) {
+                    this.toggleCommentReaction(commentId, reactionType);
+                }
+            });
+        });
+    }
+
+    startReply(commentId, authorName) {
+        this.replyTarget = { id: Number(commentId), name: authorName };
+        if (this.replyTargetName) this.replyTargetName.textContent = `Replying to ${authorName}`;
+        if (this.replyBadge) this.replyBadge.classList.remove('d-none');
+        if (this.commentAuxBar) this.commentAuxBar.classList.remove('d-none');
+        if (this.commentInput) {
+            this.commentInput.placeholder = `Reply to ${authorName}...`;
+            this.commentInput.focus();
+        }
+    }
+
+    cancelReply() {
+        this.replyTarget = null;
+        if (this.replyBadge) this.replyBadge.classList.add('d-none');
+        if (!this.attachedGifUrl && this.commentAuxBar) {
+            this.commentAuxBar.classList.add('d-none');
+        }
+        if (this.commentInput) {
+            this.commentInput.placeholder = 'Add a family note...';
+        }
+    }
+
+    startEdit(commentId, currentText) {
+        const box = document.getElementById(`reelCommentTextBox_${commentId}`);
+        if (!box) return;
+
+        box.innerHTML = `
+        <div class="reel-comment-edit-box">
+            <input type="text" class="form-control form-control-sm rounded-pill bg-dark text-white border-secondary mb-1 reel-edit-input" value="${esc(currentText)}" style="font-size: 0.82rem; padding: 4px 12px;">
+            <div class="d-flex gap-2 justify-content-end align-items-center">
+                <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 py-0 save-edit-btn" style="font-size: 0.75rem; min-height: 28px;">Save</button>
+                <button type="button" class="btn btn-link btn-sm text-white-50 p-0 cancel-edit-btn" style="font-size: 0.75rem;">Cancel</button>
+            </div>
+        </div>
+        `;
+
+        const input = box.querySelector('.reel-edit-input');
+        input?.focus();
+
+        const saveBtn = box.querySelector('.save-edit-btn');
+        const cancelBtn = box.querySelector('.cancel-edit-btn');
+
+        saveBtn?.addEventListener('click', async () => {
+            const newText = input?.value?.trim() || '';
+            if (!newText) return;
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+            await this.saveEdit(commentId, newText);
+        });
+
+        cancelBtn?.addEventListener('click', () => {
+            this.loadComments();
+        });
+    }
+
+    async saveEdit(commentId, newText) {
+        try {
+            const res = await axios.post('/api/reels/comment/update', {
+                comment_id: Number(commentId),
+                comment: newText
+            });
+            if (res.data?.status === 'success') {
+                this.showToast('Comment updated.', 'success');
+                await this.loadComments();
+            }
+        } catch (error) {
+            this.showToast(error.response?.data?.message || 'Could not update comment.', 'error');
+            await this.loadComments();
+        }
+    }
+
+    async toggleCommentReaction(commentId, reactionType = 'like') {
+        try {
+            const res = await axios.post('/api/reels/comment/react', {
+                comment_id: Number(commentId),
+                reaction_type: reactionType
+            });
+            if (res.data?.status === 'success') {
+                await this.loadComments();
+            }
+        } catch (error) {
+            this.showToast(error.response?.data?.message || 'Could not react to comment.', 'error');
+        }
+    }
+
+    renderGifPicker() {
+        if (!this.gifCategoriesContainer || !this.gifGridContainer) return;
+
+        // Render categories
+        this.gifCategoriesContainer.innerHTML = GIF_CATEGORIES.map(cat => `
+            <button type="button" class="btn btn-sm ${this.selectedGifCat === cat.key ? 'btn-primary' : 'btn-outline-secondary text-white-50'} rounded-pill py-0 px-2 fw-semibold reel-gif-cat-btn" data-cat="${cat.key}" style="font-size: 0.72rem; white-space: nowrap;">
+                ${cat.label}
+            </button>
+        `).join('');
+
+        this.gifCategoriesContainer.querySelectorAll('.reel-gif-cat-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.selectedGifCat = btn.getAttribute('data-cat') || 'all';
+                this.renderGifPicker();
+            });
+        });
+
+        // Render GIF grid
+        const filtered = this.selectedGifCat === 'all'
+            ? FAMILY_GIFS
+            : FAMILY_GIFS.filter(g => g.cat === this.selectedGifCat);
+
+        this.gifGridContainer.innerHTML = filtered.map(g => `
+            <img src="${esc(g.url)}" alt="${esc(g.title)}" class="reel-gif-item" data-url="${esc(g.url)}" loading="lazy">
+        `).join('');
+
+        this.gifGridContainer.querySelectorAll('.reel-gif-item').forEach(img => {
+            img.addEventListener('click', () => {
+                const url = img.getAttribute('data-url');
+                if (url) {
+                    this.selectGif(url);
+                }
+            });
+        });
+    }
+
+    toggleGifPicker() {
+        if (!this.gifPickerDrawer) return;
+        this.gifPickerDrawer.classList.toggle('d-none');
+    }
+
+    selectGif(url) {
+        this.attachedGifUrl = url;
+        if (this.attachedGifImg) this.attachedGifImg.src = url;
+        if (this.attachedGifContainer) this.attachedGifContainer.classList.remove('d-none');
+        if (this.commentAuxBar) this.commentAuxBar.classList.remove('d-none');
+        if (this.gifPickerDrawer) this.gifPickerDrawer.classList.add('d-none');
+        if (this.commentInput) this.commentInput.focus();
+    }
+
+    removeAttachedGif() {
+        this.attachedGifUrl = null;
+        if (this.attachedGifImg) this.attachedGifImg.src = '';
+        if (this.attachedGifContainer) this.attachedGifContainer.classList.add('d-none');
+        if (!this.replyTarget && this.commentAuxBar) {
+            this.commentAuxBar.classList.add('d-none');
+        }
+    }
+
+    async deleteReelComment(commentId) {
+        const reel = this.reels[this.currentIndex];
+        if (!reel || !commentId) return;
+
+        if (typeof Swal !== 'undefined') {
+            const confirm = await Swal.fire({
+                icon: 'warning',
+                title: 'Delete this comment?',
+                text: 'This comment and any replies will be permanently removed.',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, Delete'
+            });
+            if (!confirm.isConfirmed) return;
+        }
+
+        try {
+            const res = await axios.post('/api/reels/comment/delete', {
+                comment_id: Number(commentId)
+            });
+
+            if (res.data?.status === 'success') {
+                this.showToast('Comment deleted.', 'success');
+                reel.comments_count = Math.max(0, (reel.comments_count || 1) - 1);
+                const countBadge = document.getElementById('reelCommentCount');
+                if (countBadge) countBadge.textContent = reel.comments_count;
+
+                await this.loadComments();
+            }
+        } catch (error) {
+            this.showToast(error.response?.data?.message || 'Could not delete comment.', 'error');
         }
     }
 
@@ -909,16 +1326,34 @@ class FamilyReelsPlayer {
         if (!reel || !this.commentInput) return;
 
         const text = this.commentInput.value.trim();
-        if (!text) return;
+        const gif = this.attachedGifUrl;
+        if (!text && !gif) return;
+
+        // Button spinner activation
+        if (this.commentSubmitBtn) this.commentSubmitBtn.disabled = true;
+        if (this.commentSubmitIcon) this.commentSubmitIcon.classList.add('d-none');
+        if (this.commentSubmitSpinner) this.commentSubmitSpinner.classList.remove('d-none');
 
         try {
-            const res = await axios.post('/api/reels/comment', {
+            const payload = {
                 reel_id: reel.id,
                 comment: text
-            });
+            };
+            if (this.replyTarget?.id) {
+                payload.parent_comment_no = this.replyTarget.id;
+            }
+            if (gif) {
+                payload.gif_url = gif;
+            }
+
+            const res = await axios.post('/api/reels/comment', payload);
 
             if (res.data?.status === 'success') {
                 this.commentInput.value = '';
+                this.cancelReply();
+                this.removeAttachedGif();
+                if (this.gifPickerDrawer) this.gifPickerDrawer.classList.add('d-none');
+
                 reel.comments_count = (reel.comments_count || 0) + 1;
                 const countBadge = document.getElementById('reelCommentCount');
                 if (countBadge) countBadge.textContent = reel.comments_count;
@@ -926,7 +1361,11 @@ class FamilyReelsPlayer {
                 await this.loadComments();
             }
         } catch (error) {
-            this.showToast('Could not post comment. Please retry.', 'error');
+            this.showToast(error.response?.data?.message || 'Could not post comment. Please retry.', 'error');
+        } finally {
+            if (this.commentSubmitBtn) this.commentSubmitBtn.disabled = false;
+            if (this.commentSubmitIcon) this.commentSubmitIcon.classList.remove('d-none');
+            if (this.commentSubmitSpinner) this.commentSubmitSpinner.classList.add('d-none');
         }
     }
 

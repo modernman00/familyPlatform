@@ -62,6 +62,12 @@ const notificationHTML = (data) => {
         if (text.includes('test') || text.includes('lab')) return '🧪';
         if (text.includes('wedding') || text.includes('marriage')) return '💍';
         if (text.includes('friend') || text.includes('request') || text.includes('connect')) return '👋';
+        if (text.includes('reel') || text.includes('video')) return '🎬';
+        if (text.includes('announcement')) return '📢';
+        if (text.includes('journal') || text.includes('chronicle')) return '📖';
+        if (text.includes('capsule')) return '⏳';
+        if (text.includes('dispute') || text.includes('tribunal') || text.includes('roundtable')) return '⚖️';
+        if (text.includes('trivia')) return '🏆';
         if (text.includes('post') || text.includes('photo') || text.includes('memory')) return '📸';
         if (text.includes('like') || text.includes('heart')) return '❤️';
         if (text.includes('comment')) return '💬';
@@ -261,6 +267,17 @@ export const scrollToAndHighlightItem = (hash) => {
                 el = document.getElementById('eventHeader') || document.getElementById('eventList');
             } else if (rawId.startsWith('post')) {
                 el = document.getElementById(rawId) || document.querySelector(`.${rawId}`);
+            } else if (rawId.startsWith('comment')) {
+                el = document.getElementById(rawId) || document.querySelector(`.${rawId}`) || document.querySelector(`[data-comment-no="${rawId.replace(/\D/g, '')}"]`);
+            } else if (rawId === 'memoriesCard' || rawId === 'milestonesCard' || rawId === 'memoriesMilestonesWidget' || rawId === 'memoriesWidgetDesktop' || rawId.startsWith('memory') || rawId.startsWith('milestone') || rawId.startsWith('flashback')) {
+                el = document.getElementById('memoriesCard')
+                    || document.getElementById('milestonesCard')
+                    || document.getElementById('mobileMemoriesCard')
+                    || document.getElementById('mobileMilestonesCard')
+                    || document.getElementById('memoriesWidgetDesktop')
+                    || document.getElementById('memoriesMilestonesWidget')
+                    || document.getElementById('mobileMemoriesMilestones')
+                    || document.querySelector('.mobile-highlights-container');
             }
         }
 

@@ -197,15 +197,40 @@ final class Reel extends Select
     }
 
     /**
-     * Get comments for a Reel
+     * Sanitize and validate a GIF URL against the Giphy allowlist.
+     */
+    public static function sanitizeCommentGifUrl(mixed $raw): ?string
+    {
+        if (!is_string($raw)) {
+            return null;
+        }
+        $url = trim($raw);
+        if ($url === '' || strlen($url) > 2048 || !filter_var($url, FILTER_VALIDATE_URL)) {
+            return null;
+        }
+        $parts = parse_url($url);
+        $host = strtolower((string) ($parts['host'] ?? ''));
+        if (strtolower((string) ($parts['scheme'] ?? '')) !== 'https'
+            || isset($parts['user']) || isset($parts['pass'])
+            || !preg_match('/^(media\d*\.)?giphy\.com$/', $host)
+        ) {
+            return null;
+        }
+        return $url;
+    }
+
+    /**
+     * Get comments for a Reel (with reaction summary and threaded parent linkage)
      *
      * @return array<int, array<string, mixed>>
      */
-    public static function getComments(int $reelId): array
+    public static function getComments(int $reelId, string|int $currentUserId = ''): array
     {
         try {
             $pdo = self::connect2();
-            $sql = "SELECT c.id AS comment_id, c.reel_id, c.user_id, c.comment, c.created_at,
+            $strUserId = (string)$currentUserId;
+
+            $sql = "SELECT c.id AS comment_id, c.reel_id, c.user_id, c.parent_comment_no, c.comment, c.gif_url, c.created_at, c.updated_at,
                            p.firstName, p.lastName, pp.img AS profilePics
                     FROM family_reel_comments AS c
                     INNER JOIN personal AS p ON c.user_id = p.id
@@ -215,41 +240,321 @@ final class Reel extends Select
 
             $stmt = $pdo->prepare($sql);
             $stmt->execute([':reelId' => $reelId]);
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []; return array_map([self::class, 'normalizeMediaUrls'], $rows);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            if (empty($rows)) {
+                return [];
+            }
+
+            // Extract comment IDs
+            $commentIds = array_map(fn($r) => (int)$r['comment_id'], $rows);
+            $placeholders = implode(',', array_fill(0, count($commentIds), '?'));
+
+            // Batch fetch reactions summary
+            $reactionsSql = sprintf(
+                'SELECT comment_id, reaction_type, COUNT(*) AS cnt FROM family_reel_comment_reactions WHERE comment_id IN (%s) GROUP BY comment_id, reaction_type',
+                $placeholders
+            );
+            $reactStmt = $pdo->prepare($reactionsSql);
+            $reactStmt->execute($commentIds);
+            $reactionRows = $reactStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+            $reactionMap = [];
+            foreach ($reactionRows as $rr) {
+                $cId = (int)$rr['comment_id'];
+                $rType = (string)$rr['reaction_type'];
+                $cnt = (int)$rr['cnt'];
+                if (!isset($reactionMap[$cId])) {
+                    $reactionMap[$cId] = ['like' => 0, 'love' => 0, 'haha' => 0, 'wow' => 0, 'sad' => 0, 'angry' => 0, 'total' => 0];
+                }
+                $reactionMap[$cId][$rType] = $cnt;
+                $reactionMap[$cId]['total'] += $cnt;
+            }
+
+            // Batch fetch user active reaction
+            $userReactions = [];
+            if ($strUserId !== '') {
+                $userReactSql = sprintf(
+                    'SELECT comment_id, reaction_type FROM family_reel_comment_reactions WHERE comment_id IN (%s) AND user_id = ?',
+                    $placeholders
+                );
+                $userStmt = $pdo->prepare($userReactSql);
+                $execParams = array_merge($commentIds, [$strUserId]);
+                $userStmt->execute($execParams);
+                $uRows = $userStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+                foreach ($uRows as $ur) {
+                    $userReactions[(int)$ur['comment_id']] = (string)$ur['reaction_type'];
+                }
+            }
+
+            // Merge reactions and normalize media URLs
+            foreach ($rows as &$comment) {
+                $cId = (int)$comment['comment_id'];
+                $comment['reactions'] = $reactionMap[$cId] ?? ['like' => 0, 'love' => 0, 'haha' => 0, 'wow' => 0, 'sad' => 0, 'angry' => 0, 'total' => 0];
+                $comment['total_reactions'] = $comment['reactions']['total'] ?? 0;
+                $comment['user_reaction'] = $userReactions[$cId] ?? null;
+            }
+            unset($comment);
+
+            return array_map([self::class, 'normalizeMediaUrls'], $rows);
         } catch (\Throwable $e) {
+            error_log('[Reel::getComments] ' . $e->getMessage());
             return [];
         }
     }
 
     /**
-     * Add comment to a Reel
+     * Add comment to a Reel (supports 1-level threaded reply and curated GIFs)
      *
      * @return array<string, mixed>
      */
-    public static function addComment(int $reelId, string|int $userId, string $comment): array
-    {
+    public static function addComment(
+        int $reelId,
+        string|int $userId,
+        string $comment,
+        ?int $parentCommentNo = null,
+        ?string $gifUrl = null
+    ): array {
         $pdo = self::connect2();
         $strUserId = (string)$userId;
+        $sanitizedGif = self::sanitizeCommentGifUrl($gifUrl);
+        $cleanComment = trim($comment);
 
-        $sql = "INSERT INTO family_reel_comments (reel_id, user_id, comment) VALUES (:reelId, :userId, :comment)";
+        if ($cleanComment === '' && $sanitizedGif === null) {
+            throw new \InvalidArgumentException('Write a comment or pick a GIF.');
+        }
+
+        $resolvedParentNo = null;
+        if ($parentCommentNo !== null && $parentCommentNo > 0) {
+            $pStmt = $pdo->prepare("SELECT id, reel_id, parent_comment_no FROM family_reel_comments WHERE id = :pid LIMIT 1");
+            $pStmt->execute([':pid' => $parentCommentNo]);
+            $parentRow = $pStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$parentRow || (int)$parentRow['reel_id'] !== $reelId) {
+                throw new \InvalidArgumentException('The comment you are replying to is no longer available on this reel.');
+            }
+
+            // 1-level thread invariant: reply to a reply attaches to root parent
+            $resolvedParentNo = !empty($parentRow['parent_comment_no']) ? (int)$parentRow['parent_comment_no'] : (int)$parentRow['id'];
+        }
+
+        $sql = "INSERT INTO family_reel_comments (reel_id, user_id, parent_comment_no, comment, gif_url) 
+                VALUES (:reelId, :userId, :parentCommentNo, :comment, :gifUrl)";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
             ':reelId' => $reelId,
             ':userId' => $strUserId,
-            ':comment' => $comment
+            ':parentCommentNo' => $resolvedParentNo,
+            ':comment' => $cleanComment,
+            ':gifUrl' => $sanitizedGif
         ]);
 
         $commentId = (int)$pdo->lastInsertId();
 
         // Return the full comment object for instant optimistic DOM insertion
-        $fetchStmt = $pdo->prepare("SELECT c.id AS comment_id, c.reel_id, c.user_id, c.comment, c.created_at,
+        $fetchStmt = $pdo->prepare("SELECT c.id AS comment_id, c.reel_id, c.user_id, c.parent_comment_no, c.comment, c.gif_url, c.created_at, c.updated_at,
                                            p.firstName, p.lastName, pp.img AS profilePics
                                     FROM family_reel_comments AS c
                                     INNER JOIN personal AS p ON c.user_id = p.id
                                     LEFT JOIN profilePics AS pp ON c.user_id = pp.id
                                     WHERE c.id = :id LIMIT 1");
         $fetchStmt->execute([':id' => $commentId]);
-        return $fetchStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        $res = $fetchStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        if (!empty($res)) {
+            $res = self::normalizeMediaUrls($res);
+            $res['reactions'] = ['like' => 0, 'love' => 0, 'haha' => 0, 'wow' => 0, 'sad' => 0, 'angry' => 0, 'total' => 0];
+            $res['total_reactions'] = 0;
+            $res['user_reaction'] = null;
+        }
+        return $res;
+    }
+
+    /**
+     * Update an existing Reel comment (Author-only, IDOR protected).
+     *
+     * @return array{success: bool, code: int, message: string, data?: array<string, mixed>}
+     */
+    public static function updateComment(int $commentId, string|int $userId, string $newComment): array
+    {
+        try {
+            $pdo = self::connect2();
+            $strUserId = (string)$userId;
+            $cleanText = trim($newComment);
+
+            if ($cleanText === '') {
+                return ['success' => false, 'code' => 400, 'message' => 'Comment text cannot be empty.'];
+            }
+
+            $stmt = $pdo->prepare("SELECT id, user_id, reel_id FROM family_reel_comments WHERE id = :id LIMIT 1");
+            $stmt->execute([':id' => $commentId]);
+            $comment = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$comment) {
+                return ['success' => false, 'code' => 404, 'message' => 'Comment not found.'];
+            }
+
+            if ((string)$comment['user_id'] !== $strUserId) {
+                return ['success' => false, 'code' => 403, 'message' => 'You can only edit your own comments.'];
+            }
+
+            $upd = $pdo->prepare("UPDATE family_reel_comments SET comment = :comment WHERE id = :id");
+            $upd->execute([':comment' => $cleanText, ':id' => $commentId]);
+
+            $fetchStmt = $pdo->prepare(
+                "SELECT c.id AS comment_id, c.reel_id, c.user_id, c.parent_comment_no, c.comment, c.gif_url, c.created_at, c.updated_at,
+                        p.firstName, p.lastName, pp.img AS profilePics
+                 FROM family_reel_comments AS c
+                 INNER JOIN personal AS p ON c.user_id = p.id
+                 LEFT JOIN profilePics AS pp ON c.user_id = pp.id
+                 WHERE c.id = :id LIMIT 1"
+            );
+            $fetchStmt->execute([':id' => $commentId]);
+            $updated = $fetchStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+            return [
+                'success' => true,
+                'code' => 200,
+                'message' => 'Comment updated successfully.',
+                'data' => self::normalizeMediaUrls($updated)
+            ];
+        } catch (\Throwable $e) {
+            error_log('[Reel::updateComment] ' . $e->getMessage());
+            return ['success' => false, 'code' => 500, 'message' => 'Internal server error.'];
+        }
+    }
+
+    /**
+     * Toggle reaction on a Reel comment (like, love, haha, wow, sad, angry).
+     *
+     * @return array{status: string, action: string, reaction: string, count: int, reactions: array<string, int>, commentAuthorId: string, reelId: int}
+     */
+    public static function toggleCommentReaction(int $commentId, string|int $userId, string $type = 'like'): array
+    {
+        $pdo = self::connect2();
+        $strUserId = (string)$userId;
+        $allowed = ['like', 'love', 'haha', 'wow', 'sad', 'angry'];
+        $reactionType = in_array($type, $allowed, true) ? $type : 'like';
+
+        // Check if comment exists
+        $checkComm = $pdo->prepare("SELECT id, reel_id, user_id FROM family_reel_comments WHERE id = :cid LIMIT 1");
+        $checkComm->execute([':cid' => $commentId]);
+        $comm = $checkComm->fetch(PDO::FETCH_ASSOC);
+        if (!$comm) {
+            throw new \InvalidArgumentException('Comment not found.');
+        }
+
+        // Check if user already reacted
+        $checkStmt = $pdo->prepare("SELECT reaction_type FROM family_reel_comment_reactions WHERE comment_id = :cid AND user_id = :uid LIMIT 1");
+        $checkStmt->execute([':cid' => $commentId, ':uid' => $strUserId]);
+        $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+        $action = 'added';
+        $userReaction = $reactionType;
+
+        if ($existing) {
+            if ($existing['reaction_type'] === $reactionType) {
+                // Same reaction clicked -> remove (toggle off)
+                $delStmt = $pdo->prepare("DELETE FROM family_reel_comment_reactions WHERE comment_id = :cid AND user_id = :uid");
+                $delStmt->execute([':cid' => $commentId, ':uid' => $strUserId]);
+                $action = 'removed';
+                $userReaction = '';
+            } else {
+                // Different reaction -> update
+                $updStmt = $pdo->prepare("UPDATE family_reel_comment_reactions SET reaction_type = :type WHERE comment_id = :cid AND user_id = :uid");
+                $updStmt->execute([':type' => $reactionType, ':cid' => $commentId, ':uid' => $strUserId]);
+                $action = 'updated';
+            }
+        } else {
+            // New reaction -> insert
+            $insStmt = $pdo->prepare("INSERT INTO family_reel_comment_reactions (comment_id, user_id, reaction_type) VALUES (:cid, :uid, :type)");
+            $insStmt->execute([':cid' => $commentId, ':uid' => $strUserId, ':type' => $reactionType]);
+            $action = 'added';
+        }
+
+        // Fetch refreshed reaction counts
+        $countStmt = $pdo->prepare("SELECT reaction_type, COUNT(*) AS cnt FROM family_reel_comment_reactions WHERE comment_id = :cid GROUP BY reaction_type");
+        $countStmt->execute([':cid' => $commentId]);
+        $cRows = $countStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        $counts = ['like' => 0, 'love' => 0, 'haha' => 0, 'wow' => 0, 'sad' => 0, 'angry' => 0];
+        $total = 0;
+        foreach ($cRows as $r) {
+            $t = (string)$r['reaction_type'];
+            $c = (int)$r['cnt'];
+            if (isset($counts[$t])) {
+                $counts[$t] = $c;
+            }
+            $total += $c;
+        }
+
+        return [
+            'status' => 'success',
+            'action' => $action,
+            'reaction' => $userReaction,
+            'count' => $total,
+            'reactions' => $counts,
+            'commentAuthorId' => (string)($comm['user_id'] ?? ''),
+            'reelId' => (int)($comm['reel_id'] ?? 0)
+        ];
+    }
+
+    /**
+     * Delete a Reel comment (IDOR protected: author of comment OR account holder of reel)
+     * Cascades deletion of all child replies and reactions.
+     *
+     * @param int $commentId
+     * @param string|int $userId
+     * @return array{success: bool, code: int, message: string}
+     */
+    public static function deleteComment(int $commentId, string|int $userId): array
+    {
+        try {
+            $pdo = self::connect2();
+            $strUserId = (string)$userId;
+
+            $stmt = $pdo->prepare(
+                "SELECT c.id, c.reel_id, c.user_id AS comment_user_id, r.user_id AS reel_user_id
+                 FROM family_reel_comments c
+                 INNER JOIN family_reels r ON c.reel_id = r.id
+                 WHERE c.id = :commentId LIMIT 1"
+            );
+            $stmt->execute([':commentId' => $commentId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$row) {
+                return ['success' => false, 'code' => 404, 'message' => 'Comment not found or already deleted.'];
+            }
+
+            $commentUserId = (string)($row['comment_user_id'] ?? '');
+            $reelUserId = (string)($row['reel_user_id'] ?? '');
+
+            if ($strUserId !== $commentUserId && $strUserId !== $reelUserId) {
+                return ['success' => false, 'code' => 403, 'message' => 'You are not authorised to delete this comment.'];
+            }
+
+            // Cascade delete reactions for child replies and the comment itself
+            $delChildReactions = $pdo->prepare(
+                "DELETE cr FROM family_reel_comment_reactions cr 
+                 INNER JOIN family_reel_comments c ON cr.comment_id = c.id 
+                 WHERE c.parent_comment_no = :pid"
+            );
+            $delChildReactions->execute([':pid' => $commentId]);
+
+            $delReactions = $pdo->prepare("DELETE FROM family_reel_comment_reactions WHERE comment_id = :commentId");
+            $delReactions->execute([':commentId' => $commentId]);
+
+            // Cascade delete child replies
+            $delReplies = $pdo->prepare("DELETE FROM family_reel_comments WHERE parent_comment_no = :pid");
+            $delReplies->execute([':pid' => $commentId]);
+
+            // Delete the comment
+            $delStmt = $pdo->prepare("DELETE FROM family_reel_comments WHERE id = :commentId");
+            $delStmt->execute([':commentId' => $commentId]);
+
+            return ['success' => true, 'code' => 200, 'message' => 'Comment deleted successfully.'];
+        } catch (\Throwable $e) {
+            error_log('[Reel::deleteComment] ' . $e->getMessage());
+            return ['success' => false, 'code' => 500, 'message' => 'Internal server error.'];
+        }
     }
 
     /**
@@ -314,9 +619,12 @@ final class Reel extends Select
                 self::deleteMediaFiles((string)($reel['video_url'] ?? ''), (string)($reel['thumbnail_url'] ?? ''), $basePath);
             }
 
-            // Delete child reactions and comments
+            // Delete child reactions, comment reactions, and comments
             $delReact = $pdo->prepare("DELETE FROM family_reel_reactions WHERE reel_id = :id");
             $delReact->execute([':id' => $reelId]);
+
+            $delCommReact = $pdo->prepare("DELETE cr FROM family_reel_comment_reactions cr INNER JOIN family_reel_comments c ON cr.comment_id = c.id WHERE c.reel_id = :id");
+            $delCommReact->execute([':id' => $reelId]);
 
             $delComm = $pdo->prepare("DELETE FROM family_reel_comments WHERE reel_id = :id");
             $delComm->execute([':id' => $reelId]);
@@ -375,6 +683,9 @@ final class Reel extends Select
                 // Delete reactions
                 $delReact = $pdo->prepare("DELETE FROM family_reel_reactions WHERE reel_id = :id");
                 $delReact->execute([':id' => $reelId]);
+
+                $delCommReact = $pdo->prepare("DELETE cr FROM family_reel_comment_reactions cr INNER JOIN family_reel_comments c ON cr.comment_id = c.id WHERE c.reel_id = :id");
+                $delCommReact->execute([':id' => $reelId]);
 
                 // Delete comments
                 $delComm = $pdo->prepare("DELETE FROM family_reel_comments WHERE reel_id = :id");

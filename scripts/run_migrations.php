@@ -255,6 +255,8 @@ class MigrationRunner
             $normalizedStmt = preg_replace('/^CREATE\s+TABLE\s+(?!IF\s+NOT\s+EXISTS)/i', 'CREATE TABLE IF NOT EXISTS ', $stmt);
             // Auto-convert ADD COLUMN IF NOT EXISTS to ADD COLUMN for MySQL compatibility
             $normalizedStmt = preg_replace('/ADD\s+COLUMN\s+IF\s+NOT\s+EXISTS\s+/i', 'ADD COLUMN ', (string) $normalizedStmt);
+            // Auto-convert CREATE INDEX IF NOT EXISTS to CREATE INDEX for MySQL compatibility
+            $normalizedStmt = preg_replace('/CREATE\s+(UNIQUE\s+)?INDEX\s+IF\s+NOT\s+EXISTS\s+/i', 'CREATE $1INDEX ', (string) $normalizedStmt);
             if ($normalizedStmt === null || trim($normalizedStmt) === '') {
                 continue;
             }

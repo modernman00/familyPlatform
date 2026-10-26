@@ -769,12 +769,18 @@ class FamilyCodeApprovalService
             $stmtOther = $this->pdo->prepare('INSERT INTO otherFamily (id) VALUES (?) ON DUPLICATE KEY UPDATE id = id');
             $stmtOther->execute([$userId]);
 
-            // 4. Update user_families
+            // 4. Update user_families and family_codes registry
             $stmtFam = $this->pdo->prepare(
                 'INSERT INTO user_families (user_id, family_code, status, role) VALUES (?, ?, "approved", "admin")
                  ON DUPLICATE KEY UPDATE status = "approved", role = "admin"'
             );
             $stmtFam->execute([$userId, $newCode]);
+
+            $stmtReg = $this->pdo->prepare(
+                "INSERT INTO family_codes (code, kind, created_by) VALUES (?, 'primary', ?)
+                 ON DUPLICATE KEY UPDATE created_by = IF(created_by IS NULL OR created_by = '', VALUES(created_by), created_by)"
+            );
+            $stmtReg->execute([$newCode, $userId]);
 
             // 5. Initialize fresh tree root node in family_nodes for the new code
             try {

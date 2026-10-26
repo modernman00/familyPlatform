@@ -3,6 +3,7 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
 @endphp
 <div class="card border-0 shadow-sm mb-4 overflow-hidden" 
      id="{{ $wId }}"
+     data-id="memoriesMilestonesWidget"
      style="border-radius: 20px; background-color: var(--card-bg, #ffffff); border: 1px solid var(--border-color, #e5e7eb);"
      x-data="memoriesMilestonesWidget('{{ $wId }}')"
      x-init="initWidget()"
@@ -46,6 +47,8 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                 <!-- 1. Nostalgia "On This Day" Memory Card -->
                 <template x-if="memories.length > 0">
                     <div class="p-3 rounded-4 position-relative overflow-hidden" 
+                         id="memoriesCard"
+                         data-id="memoriesCard"
                          style="background: linear-gradient(135deg, rgba(184,32,44, 0.08) 0%, rgba(236, 72, 153, 0.08) 100%); border: 1px solid rgba(184,32,44, 0.18);">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <span class="badge rounded-pill px-2.5 py-1.5 fw-bold text-white d-inline-flex align-items-center gap-1 shadow-sm" 
@@ -86,10 +89,10 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                                 </a>
                                 <button type="button" 
                                         class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1 shadow-sm"
-                                        style="font-size: 0.78rem; background-color: var(--primary-color, #a31621); border: none; min-height: 34px;"
+                                        style="font-size: 0.85rem; background-color: var(--primary-color, #a31621); color: #ffffff !important; border: none; min-height: 44px;"
                                         @click="openShareModal(memories[0])"
                                         :disabled="sharing">
-                                    <i class="bi bi-share-fill" style="font-size: 0.7rem;"></i> Share Flashback
+                                    <i class="bi bi-share-fill" style="font-size: 0.75rem;"></i> Share Flashback
                                 </button>
                             </div>
                         </div>
@@ -98,8 +101,8 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
 
                 <!-- 2. Upcoming Milestones List (Birthdays & Anniversaries) -->
                 <template x-if="milestones.length > 0">
-                    <div>
-                        <h6 class="fw-bold mb-2 text-uppercase tracking-wider text-muted" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                    <div id="milestonesCard" data-id="milestonesCard">
+                        <h6 class="fw-bold mb-2 text-uppercase tracking-wider" style="font-size: 0.8125rem; letter-spacing: 0.05em; color: var(--text-muted-aa, #475569);">
                             🎉 Upcoming Milestones
                         </h6>
                         <div class="d-flex flex-column gap-2">
@@ -113,12 +116,12 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                                             <i class="bi" :class="milestone.icon"></i>
                                         </div>
                                         <div class="text-truncate">
-                                            <div class="fw-bold text-truncate" style="color: var(--text-color, #1f2937); font-size: 0.84rem;" x-text="milestone.title"></div>
-                                            <div class="text-muted small text-truncate" style="font-size: 0.75rem;" x-text="milestone.subtitle"></div>
+                                            <div class="fw-bold text-truncate" style="color: var(--text-color, #1f2937); font-size: 0.95rem;" x-text="milestone.title"></div>
+                                            <div class="text-truncate" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569); line-height: 1.4;" x-text="milestone.subtitle"></div>
                                         </div>
                                     </div>
                                     <button type="button" class="btn btn-sm rounded-pill flex-shrink-0 me-1 fw-bold"
-                                            style="min-height:44px; background:#b8202c; color:#fff;"
+                                            style="min-height: 44px; background: #b8202c; color: #ffffff !important; font-size: 0.85rem;"
                                             x-show="milestone.days_remaining === 0 && (milestone.type === 'birthday' || milestone.type === 'anniversary')"
                                             :aria-label="'Share a Then and Now for ' + milestone.title"
                                             @click="window.__openThenNow('', { caption: thenNowCaption(milestone) })">
@@ -126,7 +129,7 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                                     </button>
                                     <span class="badge rounded-pill px-2.5 py-1 fw-bold flex-shrink-0" 
                                           :class="milestone.days_remaining === 0 ? 'bg-danger text-white' : 'bg-light text-primary border'"
-                                          style="font-size: 0.72rem;" 
+                                          style="font-size: 0.75rem;" 
                                           x-text="milestone.date_badge"></span>
                                 </div>
                             </template>
@@ -239,7 +242,7 @@ if (typeof window.memoriesMilestonesWidget !== 'function') {
                 const quote = memory.postMessage ? `"${memory.postMessage.trim()}"` : '';
                 const refl = reflection ? `\n\n💬 ${reflection.trim()}` : '';
                 const origin = window.location.origin || '';
-                const link = memory.post_no ? `${origin}/profilePage#post${memory.post_no}` : `${origin}/profilePage`;
+                const link = memory.post_no ? `${origin}/profilePage?post_no=${memory.post_no}#post${memory.post_no}` : `${origin}/profilePage`;
                 let text = `✨ [Family Memory Flashback — ${yearsAgo}]${author}\n\n${quote}${refl}\n\n🔗 ${link}`;
                 if (text.length > 700) {
                     text = text.slice(0, 690) + '...\n\n🔗 ' + link;

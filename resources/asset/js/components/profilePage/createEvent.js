@@ -51,6 +51,21 @@ if (createEventModalEl) {
         if (submitBtnEl) submitBtnEl.textContent = 'Create Event';
         const eventForm = id('eventModalForm');
         if (eventForm) eventForm.reset();
+        const partyToggle = id('enablePartyPlatformToggle');
+        if (partyToggle) partyToggle.checked = false;
+    });
+}
+
+// Auto-toggle "Plan with PartyPlatform Studio" ON for large gathering types (Gear 2/3 default)
+const eventTypeSelect = id('eventType');
+if (eventTypeSelect) {
+    eventTypeSelect.addEventListener('change', (ev) => {
+        const partyToggle = id('enablePartyPlatformToggle');
+        if (!partyToggle) return;
+        const studioTypes = ['Party', 'Wedding', 'Reunion', 'House_warming', 'Graduation'];
+        if (studioTypes.includes(ev.target.value)) {
+            partyToggle.checked = true;
+        }
     });
 }
 
@@ -126,6 +141,9 @@ const process = async (e) => {
         // get the form data
         const eventForm = id('eventModalForm');
         let eventFormEntries = new FormData(eventForm);
+        const partyToggleEl = id('enablePartyPlatformToggle');
+        const enablePartyStudio = Boolean(partyToggleEl && partyToggleEl.checked);
+        eventFormEntries.append('enable_party_platform', enablePartyStudio ? '1' : '0');
 
         // editEvent() in sidebarComponents.js stamps this when reopening the modal
         // to edit an existing event instead of creating a new one.
@@ -185,28 +203,77 @@ const process = async (e) => {
         // rightColumn.blade.php builds server-side ({no, eventName, eventDate, eventType, dateDifference}).
         const newEventNo = eventResponse?.data?.token;
         if (newEventNo) {
+            const createdDetail = {
+                no: newEventNo,
+                id: localStorage.getItem('requesterId') || '',
+                eventName: eventFormEntries.get('eventName') || '',
+                eventDate: formatEventDate(eventFormEntries.get('eventDate')),
+                eventDateRaw: eventFormEntries.get('eventDate') || '',
+                eventType: eventFormEntries.get('eventType') || '',
+                eventDescription: eventFormEntries.get('eventDescription') || '',
+                eventFrequency: eventFormEntries.get('eventFrequency') || '',
+                dateDifference: dateDifferenceLabel(eventFormEntries.get('eventDate')),
+                party_event_id: null,
+                party_rsvp_url: null,
+                party_card_url: null,
+                party_sync_status: enablePartyStudio ? 'synced' : 'none',
+            };
+
             window.dispatchEvent(new CustomEvent('event-created', {
-                detail: {
-                    no: newEventNo,
-                    eventName: eventFormEntries.get('eventName') || '',
-                    eventDate: formatEventDate(eventFormEntries.get('eventDate')),
-                    eventType: eventFormEntries.get('eventType') || '',
-                    dateDifference: dateDifferenceLabel(eventFormEntries.get('eventDate')),
-                }
+                detail: createdDetail
             }));
+
+            if (enablePartyStudio) {
+                try {
+                    const upgradeRes = await axios.post(`/member/profilePage/event/${newEventNo}/upgrade-party`, {}, options);
+                    const bridgeData = upgradeRes?.data?.token || {};
+                    if (bridgeData.party_rsvp_url) {
+                        window.dispatchEvent(new CustomEvent('event-updated', {
+                            detail: {
+                                no: newEventNo,
+                                party_event_id: bridgeData.party_event_id || null,
+                                party_event_slug: bridgeData.party_event_slug || null,
+                                party_rsvp_url: bridgeData.party_rsvp_url || null,
+                                party_card_url: bridgeData.party_card_url || null,
+                                party_sync_status: 'synced',
+                            }
+                        }));
+                    }
+                } catch (bridgeErr) {
+                    console.warn('PartyPlatform studio link completed in background:', bridgeErr);
+                }
+            }
         }
 
         // close the modal
         displayNone();
 
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: 'Event created successfully',
-            showConfirmButton: false,
-            timer: 3000
-        });
+        if (enablePartyStudio) {
+            const swalRes = await Swal.fire({
+                icon: 'success',
+                title: 'Event Created & Linked to PartyPlatform!',
+                html: `<strong>${eventFormEntries.get('eventName') || 'Event'}</strong> is now live on PartyPlatform Studio with your family relatives pre-loaded into Guest Builder.`,
+                showCancelButton: true,
+                confirmButtonColor: '#a31621',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '🚀 Go to Party Studio Now',
+                cancelButtonText: 'Stay on FamilyPlatform'
+            });
+
+            if (swalRes.isConfirmed && newEventNo) {
+                window.location.href = `/member/profilePage/event/${newEventNo}/party-sso`;
+                return;
+            }
+        } else {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Event created successfully',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        }
 
     } catch (error) {
         // showError() writes into the modal's own #error <p> instead of firing a Swal

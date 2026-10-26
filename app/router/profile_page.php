@@ -2,7 +2,10 @@
 
 // profile page member
 $router->map('GET', '/member/ProfilePage', 'App\controller\members\ProfilePage@index', 'opening page member');
+$router->map('GET', '/member/profilePage', 'App\controller\members\ProfilePage@index', 'opening page member lowercase prefix alias');
+$router->map('GET', '/member/profilepage', 'App\controller\members\ProfilePage@index', 'opening page member all lowercase alias');
 $router->map('GET', '/profilePage', 'App\controller\members\ProfilePage@index', 'opening page member alias');
+$router->map('GET', '/profilepage', 'App\controller\members\ProfilePage@index', 'opening page member lowercase alias');
 $router->map('POST', '/member/profilePage/editProfile', 'App\controller\members\SettingController@post', 'edit_profile_post');
 
 
@@ -39,7 +42,22 @@ $router->map(
 
 $router->map('PUT', '/profileCard/postLikes', 'App\controller\members\PostLikeController@postLikes', 'postLikeCounter');
 
-// AI Family Hub Routes
+// Family RoundTable Routes (Kinship Reconciliation & Council)
+$router->map('GET', '/family/roundtable', 'App\controller\members\FamilyRoundTableController@index', 'family_roundtable');
+$router->map('POST', '/api/roundtable/file-dispute', 'App\controller\members\FamilyRoundTableController@fileDispute', 'api_roundtable_file_dispute');
+$router->map('POST', '/api/roundtable/submit-statement', 'App\controller\members\FamilyRoundTableController@submitStatement', 'api_roundtable_submit_statement');
+$router->map('POST', '/api/roundtable/adjudicate', 'App\controller\members\FamilyRoundTableController@adjudicate', 'api_roundtable_adjudicate');
+$router->map('GET', '/api/roundtable/dispute/[*:id]', 'App\controller\members\FamilyRoundTableController@getDisputeDetails', 'api_roundtable_get_dispute');
+$router->map('POST', '/api/roundtable/arbitrate-instant', 'App\controller\members\FamilyRoundTableController@arbitrateInstant', 'api_roundtable_arbitrate_instant');
+
+// Backward-compatible aliases for tribunal endpoints
+$router->map('POST', '/api/fun-place/file-dispute', 'App\controller\members\FamilyRoundTableController@fileDispute', 'alias_fun_place_file_dispute');
+$router->map('POST', '/api/fun-place/submit-statement', 'App\controller\members\FamilyRoundTableController@submitStatement', 'alias_fun_place_submit_statement');
+$router->map('POST', '/api/fun-place/adjudicate', 'App\controller\members\FamilyRoundTableController@adjudicate', 'alias_fun_place_adjudicate');
+$router->map('GET', '/api/fun-place/dispute/[*:id]', 'App\controller\members\FamilyRoundTableController@getDisputeDetails', 'alias_fun_place_get_dispute');
+
+// The Fun Place Routes (Creative Household AI & Games)
+$router->map('GET', '/family/fun-place', 'App\controller\members\FamilyAiHubController@index', 'family_fun_place');
 $router->map('GET', '/family/ai-hub', 'App\controller\members\FamilyAiHubController@index', 'family_ai_hub');
 $router->map('POST', '/api/ai/arbitrate-dispute', 'App\controller\members\FamilyAiHubController@arbitrateDispute', 'api_ai_arbitrate_dispute');
 $router->map('POST', '/api/ai/inspect-fridge', 'App\controller\members\FamilyAiHubController@inspectFridge', 'api_ai_inspect_fridge');

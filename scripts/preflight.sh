@@ -140,6 +140,38 @@ if [ -f "tests/verify_account_setting_swal_alert.php" ]; then
     php tests/verify_account_setting_swal_alert.php || GATE4_PASSED=0
 fi
 
+if [ -f "tests/verify_family_game_show_suite.php" ]; then
+    php tests/verify_family_game_show_suite.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_family_roundtable_suite.php" ]; then
+    php tests/verify_family_roundtable_suite.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_deceased_member_visibility.php" ]; then
+    php tests/verify_deceased_member_visibility.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_node_contact_details.php" ]; then
+    php tests/verify_node_contact_details.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_post_reel_comment_deletion_suite.php" ]; then
+    php tests/verify_post_reel_comment_deletion_suite.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_reels_comments_full_parity_suite.php" ]; then
+    php tests/verify_reels_comments_full_parity_suite.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_two_truths_and_a_lie_suite.php" ]; then
+    php tests/verify_two_truths_and_a_lie_suite.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_gallery_set_profile_pic.php" ]; then
+    php tests/verify_gallery_set_profile_pic.php || GATE4_PASSED=0
+fi
+
 if [ "$GATE4_PASSED" -eq 1 ]; then
     echo -e "${GREEN}  ✅ Gate 4 Passed: 0 Must-Have violations, PWA verified, Frontend stable.${NC}"
 else

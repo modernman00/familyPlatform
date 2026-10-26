@@ -376,7 +376,7 @@ class TagController
                         $targetId,
                         $authorName,
                         "{$authorName} tagged you in a family post.",
-                        "/profilePage#post{$postNo}"
+                        "/profilePage?post_no={$postNo}#post{$postNo}"
                     ]);
                 } catch (Throwable) {}
 
@@ -385,7 +385,7 @@ class TagController
                     \App\classes\PushNotificationClass::sendPushNotification(
                         userId: $targetId,
                         message: "{$authorName} tagged you in a family post.",
-                        url: "/profilePage#post{$postNo}",
+                        url: "/profilePage?post_no={$postNo}#post{$postNo}",
                         title: "Tagged in a Post",
                         tag: "post-tag-{$postNo}"
                     );

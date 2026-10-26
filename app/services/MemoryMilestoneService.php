@@ -344,8 +344,154 @@ class MemoryMilestoneService
     }
 
     /**
+     * Scans and dispatches today's nostalgia memory flashback and milestone alerts
+     * for a specific user and their family codes into both the in-app notification system
+     * and the WebPush PWA notification system with deep links directly to the card.
+     *
+     * @param string $userId
+     * @param array<string> $famCodes
+     * @return array{memories_dispatched: int, milestones_dispatched: int}
+     */
+    public function dispatchDailyMemoriesAndMilestonesForUser(string $userId, array $famCodes): array
+    {
+        $memoriesDispatched = 0;
+        $milestonesDispatched = 0;
+
+        if ($userId === '') {
+            return [
+                'memories_dispatched' => 0,
+                'milestones_dispatched' => 0,
+            ];
+        }
+
+        try {
+            $cleanedCodes = array_values(array_filter(array_map('strval', $famCodes), fn($c) => $c !== ''));
+            $todayDate = date('Y-m-d');
+
+            // 1. Process Nostalgia Flashback Memories for Today
+            $memories = $this->getNostalgiaMemories($userId, $cleanedCodes);
+            if (!empty($memories)) {
+                $primaryMemory = $memories[0];
+                $memoryTag = 'memory-flashback-' . $todayDate;
+
+                // Idempotent de-duplication: check if already dispatched for today
+                $stmt = $this->db->prepare("
+                    SELECT 1 FROM notification_orchestration 
+                    WHERE user_id = ? AND tag = ? AND DATE(created_at) = CURDATE()
+                    LIMIT 1
+                ");
+                $stmt->execute([$userId, $memoryTag]);
+                $alreadyDispatched = (bool)$stmt->fetchColumn();
+
+                if (!$alreadyDispatched) {
+                    $stmt2 = $this->db->prepare("
+                        SELECT 1 FROM notification 
+                        WHERE receiver_id = ? 
+                          AND notification_type = 'Memories' 
+                          AND (created_at >= CURDATE() OR notification_date LIKE ?)
+                        LIMIT 1
+                    ");
+                    $stmt2->execute([$userId, $todayDate . '%']);
+                    $alreadyDispatched = (bool)$stmt2->fetchColumn();
+                }
+
+                if (!$alreadyDispatched) {
+                    $yearsLabel = !empty($primaryMemory['years_ago_label']) ? (string)$primaryMemory['years_ago_label'] : 'a past year';
+                    $title = '✨ On This Day Flashback';
+                    $body = "You have a cherished family memory from {$yearsLabel}! Tap to view the flashback card.";
+                    $actionUrl = '/profilePage#memoriesCard';
+                    $famCode = (string)($primaryMemory['postFamCode'] ?: ($cleanedCodes[0] ?? ''));
+
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'social',
+                        priority: 'medium',
+                        title: $title,
+                        body: $body,
+                        actionUrl: $actionUrl,
+                        tag: $memoryTag,
+                        familyCode: $famCode !== '' ? $famCode : null,
+                        metadata: [
+                            'type' => 'memories',
+                            'post_no' => (int)$primaryMemory['post_no'],
+                            'sender_id' => 'system',
+                            'sender_name' => 'Family Memories',
+                        ]
+                    );
+
+                    $memoriesDispatched++;
+                }
+            }
+
+            // 2. Process Milestones Occurring Today (Birthdays, Anniversaries, Events)
+            $milestones = $this->getUpcomingMilestones($userId, $cleanedCodes, 0);
+            foreach ($milestones as $ms) {
+                if ((int)($ms['days_remaining'] ?? -1) !== 0) {
+                    continue;
+                }
+
+                $msType = (string)($ms['type'] ?? 'milestone');
+                $targetId = (string)($ms['user_id'] ?? 'item');
+                $milestoneTag = 'milestone-' . $msType . '-' . $targetId . '-' . $todayDate;
+
+                $stmt = $this->db->prepare("
+                    SELECT 1 FROM notification_orchestration 
+                    WHERE user_id = ? AND tag = ? AND DATE(created_at) = CURDATE()
+                    LIMIT 1
+                ");
+                $stmt->execute([$userId, $milestoneTag]);
+                $alreadyDispatched = (bool)$stmt->fetchColumn();
+
+                if (!$alreadyDispatched) {
+                    $title = match ($msType) {
+                        'birthday' => '🎂 ' . (string)($ms['title'] ?? 'Birthday Milestone'),
+                        'anniversary' => '💍 ' . (string)($ms['title'] ?? 'Anniversary Milestone'),
+                        default => '🎉 ' . (string)($ms['title'] ?? 'Family Milestone'),
+                    };
+
+                    $subtitle = !empty($ms['subtitle']) ? (string)$ms['subtitle'] : 'Celebration';
+                    $body = match ($msType) {
+                        'birthday' => "Today is " . (string)($ms['title'] ?? 'Family Birthday') . " ({$subtitle})! Celebrate this milestone.",
+                        'anniversary' => "Happy Anniversary! " . (string)($ms['title'] ?? 'Wedding Anniversary') . " is today ({$subtitle}). Tap to view.",
+                        default => "Family event milestone today: " . (string)($ms['title'] ?? 'Special Event') . ". Tap to view.",
+                    };
+
+                    $actionUrl = '/profilePage#memoriesCard';
+                    $famCode = (string)($cleanedCodes[0] ?? '');
+
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'social',
+                        priority: 'medium',
+                        title: $title,
+                        body: $body,
+                        actionUrl: $actionUrl,
+                        tag: $milestoneTag,
+                        familyCode: $famCode !== '' ? $famCode : null,
+                        metadata: [
+                            'type' => 'milestones',
+                            'milestone_type' => $msType,
+                            'sender_id' => 'system',
+                            'sender_name' => 'Family Milestones',
+                        ]
+                    );
+
+                    $milestonesDispatched++;
+                }
+            }
+        } catch (\Throwable $e) {
+            \error_log('[MemoryMilestoneService::dispatchDailyMemoriesAndMilestonesForUser] ' . $e->getMessage());
+        }
+
+        return [
+            'memories_dispatched' => $memoriesDispatched,
+            'milestones_dispatched' => $milestonesDispatched,
+        ];
+    }
+
+    /**
      * Scans for daily milestone memories & anniversaries across all families
-     * and dispatches native PWA push notifications.
+     * and dispatches native PWA push notifications and in-app notifications.
      *
      * @return array{processed_families: int, notifications_sent: int}
      */
@@ -360,52 +506,22 @@ class MemoryMilestoneService
             $famCodes = $stmt ? $stmt->fetchAll(PDO::FETCH_COLUMN) : [];
 
             foreach ($famCodes as $code) {
-                $codeStr = (string)$code;
+                $codeStr = trim((string)$code);
+                if ($codeStr === '') {
+                    continue;
+                }
                 $processedFamilies++;
 
                 // Get members of this family
-                $membersStmt = $this->db->prepare("SELECT id, firstName FROM personal WHERE famCode = ?");
+                $membersStmt = $this->db->prepare("SELECT id FROM personal WHERE famCode = ?");
                 $membersStmt->execute([$codeStr]);
                 $members = $membersStmt->fetchAll(PDO::FETCH_ASSOC);
 
-                if (empty($members)) {
-                    continue;
-                }
-
-                // Check for nostalgia memory today
-                $memQuery = "SELECT post_no, postMessage, (YEAR(CURDATE()) - YEAR(date_created)) as years_ago 
-                             FROM post 
-                             WHERE postFamCode = ? 
-                               AND post_status = 'published' 
-                               AND date_deleted IS NULL 
-                               AND MONTH(date_created) = MONTH(CURDATE()) 
-                               AND DAY(date_created) = DAY(CURDATE()) 
-                               AND YEAR(date_created) < YEAR(CURDATE()) 
-                             LIMIT 1";
-                $memStmt = $this->db->prepare($memQuery);
-                $memStmt->execute([$codeStr]);
-                $memory = $memStmt->fetch(PDO::FETCH_ASSOC);
-
-                if ($memory) {
-                    $years = (int)($memory['years_ago'] ?? 1);
-                    $yearsText = $years === 1 ? '1 year ago' : "{$years} years ago";
-                    $title = "✨ Family Memory Flashback";
-                    $body = "You have a special memory from {$yearsText} today! Tap to view.";
-
-                    foreach ($members as $m) {
-                        $uid = (string)($m['id'] ?? '');
-                        if ($uid !== '') {
-                            $sent = PushNotificationClass::sendPushNotification(
-                                userId: $uid,
-                                message: $body,
-                                url: '/profilePage',
-                                title: $title,
-                                tag: 'memory-flashback-' . date('Y-m-d')
-                            );
-                            if ($sent) {
-                                $notificationsSent++;
-                            }
-                        }
+                foreach ($members as $m) {
+                    $uid = (string)($m['id'] ?? '');
+                    if ($uid !== '') {
+                        $res = $this->dispatchDailyMemoriesAndMilestonesForUser($uid, [$codeStr]);
+                        $notificationsSent += ($res['memories_dispatched'] + $res['milestones_dispatched']);
                     }
                 }
             }

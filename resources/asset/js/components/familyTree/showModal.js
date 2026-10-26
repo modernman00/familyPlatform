@@ -13,6 +13,7 @@ export const showPersonDetails = async (personData) => {
   const { 
     fullName = 'Family Member', 
     email = '', 
+    mobile = '',
     img = '/resources/images/profile/avatarM.png', 
     relation = 'Relative', 
     maritalStatus = '', 
@@ -62,38 +63,67 @@ export const showPersonDetails = async (personData) => {
   }
 
   const effectiveFamilyCode = (personData?.raw?.family_code || familyCode || window.__FAMILY_CODE__ || '').trim();
-  const isMaternalNode = Boolean(
-    window.__HAS_MATERNAL_CODE__ &&
-    window.__MATERNAL_FAM_CODE__ &&
-    String(effectiveFamilyCode).toUpperCase() === String(window.__MATERNAL_FAM_CODE__).toUpperCase()
-  );
+  const roleLower = String(personData?.title || personData?.ego_relation || '').toLowerCase();
+  const egoSide = String(personData?.ego_side || (personData?.raw && personData?.raw?.ego_side) || '').toLowerCase();
+
+  const isMaternalNode = (egoSide === 'maternal') ||
+                         roleLower.includes('maternal') ||
+                         (window.__ACTIVE_LINEAGE_SCOPE__ === 'maternal') ||
+                         Boolean(window.__HAS_MATERNAL_CODE__ && window.__MATERNAL_FAM_CODE__ && String(effectiveFamilyCode).toUpperCase() === String(window.__MATERNAL_FAM_CODE__).toUpperCase());
+
+  const paternalSurname = (window.__PATERNAL_SURNAME__ || window.__MARITAL_SURNAME__ || 'our');
+  let familySurname = paternalSurname;
+  let familyTreeLabel = `${familySurname} Family`;
+  let displayCodeBadge = effectiveFamilyCode ? `(#${effectiveFamilyCode})` : '';
+
+  if (isMaternalNode) {
+    const rawLast = (personData?.last_name || (personData?.raw && personData?.raw?.last_name) || '').trim();
+    const maternalSurname = (rawLast && rawLast.toUpperCase() !== paternalSurname.toUpperCase())
+      ? rawLast
+      : (window.__MOTHER_MAIDEN_SURNAME__ || window.__MAIDEN_SURNAME__ || 'Maternal');
+    familySurname = maternalSurname;
+    const motherBirthCode = (window.__MOTHER_BIRTH_FAMILY_CODE__ || (window.__HAS_MATERNAL_CODE__ ? window.__MATERNAL_FAM_CODE__ : '')).toUpperCase();
+    if (motherBirthCode) {
+      familyTreeLabel = `${maternalSurname} Birth Family`;
+      displayCodeBadge = `(#${motherBirthCode})`;
+    } else {
+      familyTreeLabel = `${maternalSurname} Family (Maternal Lineage)`;
+      displayCodeBadge = `(Maternal Lineage)`;
+    }
+  } else if (window.__HAS_BIRTH_FAMILY__ && window.__BIRTH_FAMILY_CODE__ && (egoSide === 'paternal' || roleLower.includes('father') || roleLower.includes('sibling'))) {
+    familySurname = window.__MAIDEN_SURNAME__ || 'Birth';
+    familyTreeLabel = `${familySurname} Birth Family`;
+    displayCodeBadge = `(#${window.__BIRTH_FAMILY_CODE__})`;
+  } else if (egoSide === 'paternal' || roleLower.includes('father') || roleLower.includes('paternal')) {
+    familyTreeLabel = `${familySurname} Birth / Paternal Family`;
+  }
 
   const inviteLink = `${window.location.origin}/register?famCode=${encodeURIComponent(effectiveFamilyCode)}&name=${encodeURIComponent(cleanName)}`;
 
-  // Derive the family surname from the last word of the person's name or active lineage surname.
-  // e.g. cleanName "Ajibike Olaogun" → familySurname "Olaogun"
-  const nameParts = cleanName.trim().split(' ');
-  const fallbackSurname = isMaternalNode
-    ? (window.__MAIDEN_SURNAME__ || 'Birth')
-    : (window.__MARITAL_SURNAME__ || 'our');
-  const familySurname = nameParts.length >= 2
-    ? nameParts[nameParts.length - 1]
-    : (fallbackSurname || cleanName || 'our');
-  const familyTreeLabel = isMaternalNode ? `${familySurname} Birth Family` : `${familySurname} Family`;
-
+  const codeInMsg = displayCodeBadge ? ` ${displayCodeBadge}` : '';
   const inviteMessage = encodeURIComponent(
     `🌳 *Family Tree Invitation* 🌳\n\n` +
-    `You are invited to connect with the *${familyTreeLabel}* on FamilyPlatform (Family Code: *#${effectiveFamilyCode}*).\n\n` +
+    `You are invited to connect with the *${familyTreeLabel}* on FamilyPlatform${codeInMsg}.\n\n` +
     `Click below to claim your spot, explore our lineage, and connect with the family:\n` +
     `👉 ${inviteLink}`
   );
 
   const isReadOnly = Boolean(personData?.isReadOnly) || Boolean(window.__IS_READ_ONLY__) || (typeof window.graphData !== 'undefined' && Boolean(window.graphData?.isReadOnly));
 
-  const claimSpotHtml = (!isRegistered && !isReadOnly) ? `
+  const birthYr = personData?.birth_year || (personData?.birth_date ? String(personData.birth_date).substring(0, 4) : (personData?.raw?.birth_year ? String(personData.raw.birth_year) : null));
+  const deathYr = personData?.death_year || (personData?.death_date ? String(personData.death_date).substring(0, 4) : (personData?.raw?.death_year ? String(personData.raw.death_year) : null));
+  let lifespanStr = '';
+  if (isDeceased) {
+    if (birthYr && deathYr) lifespanStr = `${birthYr} – ${deathYr}`;
+    else if (deathYr) lifespanStr = `Passed in ${deathYr}`;
+    else if (birthYr) lifespanStr = `Born in ${birthYr} (Deceased)`;
+    else lifespanStr = `Deceased`;
+  }
+
+  const claimSpotHtml = (!isRegistered && !isReadOnly && !isDeceased) ? `
     <div class="claim-spot-section mt-4" style="background: var(--gold-light); padding: 18px; border-radius: 18px; text-align: center; border: 1px dashed var(--gold-accent);">
       <h4 style="color: var(--primary-color); font-size: 1rem; font-weight: 700; margin-bottom: 6px;">Invite Relative to Claim This Spot</h4>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">Send a personal invitation so they can join the <strong>${esc(familyTreeLabel)} (#${esc(effectiveFamilyCode)})</strong> and share family memories.</p>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">Send a personal invitation so they can join the <strong>${esc(familyTreeLabel)} ${esc(displayCodeBadge)}</strong> and share family memories.</p>
       <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
         <a id="treeClaimWhatsappBtn" href="https://api.whatsapp.com/send?text=${inviteMessage}" onclick="if(window.trackTreeAnalytics) window.trackTreeAnalytics('tree_invite_claim', null, { method: 'whatsapp' })" target="_blank" rel="noopener noreferrer" class="btn" style="background: #25D366; color: white; border-radius: 20px; padding: 8px 18px; font-size: 0.86rem; text-decoration: none; font-weight: 600;">
           <i class="bi bi-whatsapp"></i> WhatsApp
@@ -108,17 +138,29 @@ export const showPersonDetails = async (personData) => {
     </div>
   ` : '';
 
+  const memorialBannerHtml = isDeceased ? `
+    <div class="memorial-dossier-banner mt-3 p-3 rounded-4 text-center" style="background: rgba(30, 41, 59, 0.7); border: 1.5px solid #64748b; color: #f1f5f9;">
+      <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+        <span style="font-size: 1.1rem;">🕊️</span>
+        <span class="fw-bold" style="letter-spacing: 0.5px; font-size: 0.88rem;">IN LOVING MEMORY</span>
+      </div>
+      <p class="mb-0 text-white-50" style="font-size: 0.8rem;">This relative is lovingly remembered and honoured in your family tree heritage.</p>
+    </div>
+  ` : '';
+
   // Inject content into modal body — every field below is user-controlled
   // family-member data, so escape it before it touches innerHTML (SEC-2).
   targetModalBody.innerHTML = `
     <div class="person-detail">
-      <img src="${esc(img)}" alt="${esc(fullName)}" class="person-image">
+      <img src="${esc(img)}" alt="${esc(fullName)}" class="person-image" style="${isDeceased ? 'filter: grayscale(100%); border: 3px solid #94a3b8;' : ''}">
       <div class="person-info">
         <h2 class="person-name">${esc(fullName)}</h2>
         <div class="person-relation">${esc(relation || 'Relative')}</div>
-        ${isDeceased ? '<span class="badge bg-secondary ms-2" style="font-size: 0.75rem;"><i class="bi bi-flower1"></i> Deceased</span>' : ''}
+        ${isDeceased ? '<span class="badge" style="font-size: 0.75rem; background: #334155; color: #f8fafc; border: 1px solid #64748b; padding: 4px 10px; border-radius: 999px;"><i class="bi bi-flower1 text-warning me-1"></i> In Loving Memory (Deceased)</span>' : ''}
       </div>
     </div>
+
+    ${memorialBannerHtml}
 
     <!-- Kinship Pathfinder Shortcut -->
     <div class="kinship-action-section mt-3 mb-3">
@@ -133,6 +175,13 @@ export const showPersonDetails = async (personData) => {
         <div class="detail-label">Relationship</div>
         <div class="detail-value">${esc(relation || 'Family Member')}</div>
       </div>
+
+      ${lifespanStr ? `
+        <div class="detail-item">
+          <div class="detail-label">Lifespan / Status</div>
+          <div class="detail-value" style="color: #cbd5e1; font-weight: 700;">🕊️ ${esc(lifespanStr)}</div>
+        </div>
+      ` : ''}
 
       <div class="detail-item">
         <div class="detail-label">Marital Status</div>
@@ -162,7 +211,22 @@ export const showPersonDetails = async (personData) => {
       ${email ? `
         <div class="detail-item" style="grid-column: span 2;">
           <div class="detail-label">Email Address</div>
-          <div class="detail-value">${esc(email)}</div>
+          <div class="detail-value">
+            <a href="mailto:${esc(email)}" style="color: var(--primary-color); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+              <i class="bi bi-envelope-fill text-warning"></i> ${esc(email)}
+            </a>
+          </div>
+        </div>
+      ` : ''}
+
+      ${mobile ? `
+        <div class="detail-item" style="grid-column: span 2;">
+          <div class="detail-label">Mobile / Telephone</div>
+          <div class="detail-value">
+            <a href="tel:${esc(mobile)}" style="color: var(--primary-color); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+              <i class="bi bi-telephone-fill text-success"></i> ${esc(mobile)}
+            </a>
+          </div>
         </div>
       ` : ''}
     </div>
@@ -224,6 +288,7 @@ export const showPersonDetails = async (personData) => {
       body: JSON.stringify({
         family_code: effectiveFamilyCode,
         lineage_scope: isMaternalNode ? 'maternal' : 'primary',
+        family_surname: familySurname,
         first_name: cleanName.split(' ')[0] || '',
         last_name: cleanName.split(' ').slice(1).join(' ') || '',
         email: email || '',
@@ -238,7 +303,7 @@ export const showPersonDetails = async (personData) => {
         const freshUrl = data.invite_url;
         const freshMsg = encodeURIComponent(
           `🌳 *Family Tree Invitation* 🌳\n\n` +
-          `You are invited to connect with the *${familyTreeLabel}* on FamilyPlatform (Family Code: *#${effectiveFamilyCode}*).\n\n` +
+          `You are invited to connect with the *${familyTreeLabel}* on FamilyPlatform${codeInMsg}.\n\n` +
           `Click below to claim your spot, explore our lineage, and connect with the family:\n` +
           `👉 ${freshUrl}`
         );

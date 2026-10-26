@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace App\controller\members;
 
 use App\classes\Pusher;
+use App\classes\PushNotificationClass;
 use App\controller\BaseController;
+use App\model\AllMembersData;
 use App\model\FamilyJournal;
 use App\model\Post;
 use App\services\AIService;
@@ -335,7 +337,99 @@ final class FamilyJournalController extends BaseController
 
             $rawContributors = $_POST['contributors'] ?? [];
             if (is_array($rawContributors) && $rawContributors !== []) {
-                FamilyJournal::setContributors($insertedId, $this->famCode, $this->userId, array_map('strval', $rawContributors), $this->userId);
+                $contributorIds = array_map('strval', $rawContributors);
+                FamilyJournal::setContributors($insertedId, $this->famCode, $this->userId, $contributorIds, $this->userId);
+
+                // Notify contributors that they were credited in this chronicle
+                try {
+                    $authorName = trim(($_SESSION['fName'] ?? '') . ' ' . ($_SESSION['lName'] ?? ''));
+                    if ($authorName === '') {
+                        $authorName = 'A family member';
+                    }
+                    $journalUrl = '/familyJournal/' . (int)$insertedId;
+                    $db = Db::connect2();
+                    $stmt = $db->prepare("
+                        INSERT INTO notification 
+                        (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                        VALUES (?, ?, ?, 'Added as Chronicle Contributor', 'Journal', ?, ?, 'new', NOW())
+                    ");
+
+                    foreach ($contributorIds as $cId) {
+                        if ($cId === '' || $cId === $this->userId) {
+                            continue;
+                        }
+                        $msg = "{$authorName} credited you as a contributor to \"{$title}\"";
+                        try {
+                            $stmt->execute([
+                                $this->userId,
+                                $cId,
+                                $authorName,
+                                $msg,
+                                $journalUrl
+                            ]);
+                        } catch (\Throwable) {}
+
+                        try {
+                            PushNotificationClass::sendPushNotification(
+                                userId: $cId,
+                                message: $msg,
+                                url: $journalUrl,
+                                title: '📖 Chronicle Contributor',
+                                tag: 'journal-contributor-' . $insertedId
+                            );
+                        } catch (\Throwable) {}
+                    }
+                } catch (\Throwable $contribEx) {
+                    error_log('[FamilyJournalController::store contributor notif warning] ' . $contribEx->getMessage());
+                }
+            }
+
+            // Broadcast chronicle publication to family members
+            if ($status === 'published') {
+                try {
+                    $authorName = trim(($_SESSION['fName'] ?? '') . ' ' . ($_SESSION['lName'] ?? ''));
+                    if ($authorName === '') {
+                        $authorName = 'A family member';
+                    }
+                    $members = AllMembersData::AllMembersEmailByFamCode($this->famCode, $this->userId);
+                    $journalUrl = '/familyJournal/' . (int)$insertedId;
+                    $msg = "{$authorName} preserved a new story: \"{$title}\"";
+
+                    $db = Db::connect2();
+                    $stmt = $db->prepare("
+                        INSERT INTO notification 
+                        (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                        VALUES (?, ?, ?, '📖 New Family Chronicle', 'Journal', ?, ?, 'new', NOW())
+                    ");
+
+                    foreach ($members as $member) {
+                        $targetId = (string)($member['id'] ?? '');
+                        if ($targetId === '' || $targetId === $this->userId) {
+                            continue;
+                        }
+                        try {
+                            $stmt->execute([
+                                $this->userId,
+                                $targetId,
+                                $authorName,
+                                $msg,
+                                $journalUrl
+                            ]);
+                        } catch (\Throwable) {}
+
+                        try {
+                            PushNotificationClass::sendPushNotification(
+                                userId: $targetId,
+                                message: $msg,
+                                url: $journalUrl,
+                                title: '📖 New Family Chronicle',
+                                tag: 'journal-' . $insertedId
+                            );
+                        } catch (\Throwable) {}
+                    }
+                } catch (\Throwable $bcEx) {
+                    error_log('[FamilyJournalController::store broadcast notif warning] ' . $bcEx->getMessage());
+                }
             }
 
             // Optional auto-broadcast to the main family feed

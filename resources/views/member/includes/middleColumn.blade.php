@@ -1,10 +1,11 @@
 <!-- Middle Column - Feed -->
 <style>
-  .highlighted-post {
+  .highlighted-post, .highlighted-comment {
     animation: postHighlightPulse 2.5s ease-out;
+    border-radius: 8px;
   }
   @keyframes postHighlightPulse {
-    0% { box-shadow: 0 0 0 3px rgba(163,22,33, 0.6); }
+    0% { box-shadow: 0 0 0 4px rgba(163,22,33, 0.65); }
     100% { box-shadow: 0 0 0 0 rgba(163,22,33, 0); }
   }
 </style>
@@ -423,34 +424,33 @@
         </div>
       </div>
 
-      <div class="composer-quick-actions d-flex align-items-center gap-1 mt-3 pt-3 flex-wrap" style="border-top: 1px solid var(--border-color);">
+      <div class="composer-quick-actions d-flex align-items-center gap-2 mt-3 pt-3 flex-wrap" style="border-top: 1px solid var(--border-color);">
         <button type="button" class="btn composer-quick-action then-now-cta flex-fill d-flex align-items-center justify-content-center gap-2"
                 data-bs-toggle="modal" data-bs-target="#postModal"
                 onclick="setTimeout(function () { if (window.__openThenNow) window.__openThenNow(''); }, 0)"
-                aria-label="Post a Then and Now photo comparison"
-                style="background: linear-gradient(135deg, #b8202c, #b8202c) !important; color: #ffffff !important; border: 0 !important; box-shadow: 0 2px 8px rgba(184,32,44, 0.35) !important;">
-          <i class="bi bi-hourglass-split" style="font-size: 1.15rem; color: #ffffff !important;"></i>
-          <span class="fw-bold" style="font-size: 0.85rem; color: #ffffff !important;">Then &amp; Now</span>
+                aria-label="Post a Then and Now photo comparison">
+          <i class="bi bi-hourglass-split" style="font-size: 1.1rem; color: #a31621;"></i>
+          <span class="fw-bold" style="font-size: 0.85rem;">Then &amp; Now</span>
         </button>
         <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#postModal" aria-label="Add a photo to a post">
-          <i class="bi bi-camera-fill" style="color: #22c55e; font-size: 1.15rem;"></i>
-          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Photo</span>
+          <i class="bi bi-camera-fill" style="color: #16a34a; font-size: 1.1rem;"></i>
+          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">Photo</span>
         </button>
         <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#postModal" aria-label="Add a video to a post">
-          <i class="bi bi-play-btn-fill" style="color: #ef4444; font-size: 1.15rem;"></i>
-          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Video</span>
+          <i class="bi bi-play-btn-fill" style="color: #dc2626; font-size: 1.1rem;"></i>
+          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">Video</span>
         </button>
         <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#createAnnouncementModal" aria-label="Broadcast family announcement">
-          <i class="bi bi-megaphone-fill" style="color: #f59e0b; font-size: 1.15rem;"></i>
-          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Announcement</span>
+          <i class="bi bi-megaphone-fill" style="color: #d97706; font-size: 1.1rem;"></i>
+          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">Announcement</span>
         </button>
         <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" onclick="window.location.href='/familyJournal/create'" aria-label="Write family journal chronicle">
-          <i class="bi bi-journal-bookmark-fill" style="color: #b8202c; font-size: 1.15rem;"></i>
-          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Journal</span>
+          <i class="bi bi-journal-bookmark-fill" style="color: #059669; font-size: 1.1rem;"></i>
+          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">Journal</span>
         </button>
         <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#postModal" aria-label="Create a poll">
-          <i class="bi bi-bar-chart-fill" style="color: #f97316; font-size: 1.15rem;"></i>
-          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Poll</span>
+          <i class="bi bi-bar-chart-fill" style="color: #ea580c; font-size: 1.1rem;"></i>
+          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">Poll</span>
         </button>
       </div>
     </div>
@@ -474,45 +474,45 @@
       <div class="row g-2">
         <!-- 1. Quests -->
         <div class="col-6 col-sm-3">
-          <button type="button" onclick="openLineageQuestModal()" class="btn w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: #f0fdf4; border: 1px solid rgba(16, 185, 129, 0.25) !important; min-height: 84px; justify-content: center;" title="Solve Missing Relatives on WhatsApp">
-            <div class="rounded-circle d-flex align-items-center justify-content-center mb-1 text-success shadow-xs" style="width: 36px; height: 36px; background: #d1fae5;">
+          <button type="button" onclick="openLineageQuestModal()" class="btn hub-tile-quest w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid rgba(16, 185, 129, 0.28) !important; min-height: 88px; justify-content: center;" title="Solve Missing Relatives on WhatsApp">
+            <div class="tile-icon rounded-circle d-flex align-items-center justify-content-center mb-1.5 shadow-xs" style="width: 36px; height: 36px; background: rgba(16, 185, 129, 0.16); color: #047857;">
               <i class="bi bi-compass-fill fs-6"></i>
             </div>
-            <span class="fw-bold text-dark" style="font-size: 0.82rem; line-height: 1.2;">Tree Quests</span>
-            <span class="text-muted" style="font-size: 0.7rem;">Ask on WhatsApp</span>
+            <span class="tile-title fw-bold" style="font-size: 0.875rem; line-height: 1.2; color: #0f172a;">Tree Quests</span>
+            <span class="tile-desc" style="font-size: 0.76rem; color: #065f46; font-weight: 500;">Ask on WhatsApp</span>
           </button>
         </div>
 
         <!-- 2. Sunday Trivia -->
         <div class="col-6 col-sm-3">
-          <button type="button" onclick="openComposerWithTrivia()" class="btn w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: #fefce8; border: 1px solid rgba(245, 158, 11, 0.25) !important; min-height: 84px; justify-content: center;" title="Create or Play Sunday Family Trivia">
-            <div class="rounded-circle d-flex align-items-center justify-content-center mb-1 text-warning shadow-xs" style="width: 36px; height: 36px; background: #fef08a;">
+          <button type="button" onclick="openComposerWithTrivia()" class="btn hub-tile-trivia w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1px solid rgba(245, 158, 11, 0.32) !important; min-height: 88px; justify-content: center;" title="Create or Play Sunday Family Trivia">
+            <div class="tile-icon rounded-circle d-flex align-items-center justify-content-center mb-1.5 shadow-xs" style="width: 36px; height: 36px; background: rgba(245, 158, 11, 0.18); color: #b45309;">
               <i class="bi bi-trophy-fill fs-6"></i>
             </div>
-            <span class="fw-bold text-dark" style="font-size: 0.82rem; line-height: 1.2;">Sunday Trivia</span>
-            <span class="text-muted" style="font-size: 0.7rem;">Quiz &amp; Guess Who</span>
+            <span class="tile-title fw-bold" style="font-size: 0.875rem; line-height: 1.2; color: #0f172a;">Sunday Trivia</span>
+            <span class="tile-desc" style="font-size: 0.76rem; color: #92400e; font-weight: 500;">Quiz &amp; Guess Who</span>
           </button>
         </div>
 
         <!-- 3. WhatsApp Flyer -->
         <div class="col-6 col-sm-3">
-          <button type="button" onclick="openFamilyFlyerModal()" class="btn w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: #fdf5f5; border: 1px solid rgba(163,22,33, 0.25) !important; min-height: 84px; justify-content: center;" title="Generate Heraldic WhatsApp Clan Status Flyer">
-            <div class="rounded-circle d-flex align-items-center justify-content-center mb-1 text-primary shadow-xs" style="width: 36px; height: 36px; background: #f5dede;">
+          <button type="button" onclick="openFamilyFlyerModal()" class="btn hub-tile-flyer w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%); border: 1px solid rgba(163, 22, 33, 0.25) !important; min-height: 88px; justify-content: center;" title="Generate Heraldic WhatsApp Clan Status Flyer">
+            <div class="tile-icon rounded-circle d-flex align-items-center justify-content-center mb-1.5 shadow-xs" style="width: 36px; height: 36px; background: rgba(163, 22, 33, 0.14); color: #a31621;">
               <i class="bi bi-card-image fs-6"></i>
             </div>
-            <span class="fw-bold text-dark" style="font-size: 0.82rem; line-height: 1.2;">Clan Flyer</span>
-            <span class="text-muted" style="font-size: 0.7rem;">WhatsApp Status</span>
+            <span class="tile-title fw-bold" style="font-size: 0.875rem; line-height: 1.2; color: #0f172a;">Clan Flyer</span>
+            <span class="tile-desc" style="font-size: 0.76rem; color: #881337; font-weight: 500;">WhatsApp Status</span>
           </button>
         </div>
 
         <!-- 4. Time Capsule -->
         <div class="col-6 col-sm-3">
-          <button type="button" onclick="openTimeCapsuleModal()" class="btn w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: #fbefef; border: 1px solid rgba(184,32,44, 0.25) !important; min-height: 84px; justify-content: center;" title="Seal Personal Letters and Heirlooms for Future Milestones">
-            <div class="rounded-circle d-flex align-items-center justify-content-center mb-1 shadow-xs" style="width: 36px; height: 36px; background: #fbefef; color: #ef6b73;">
+          <button type="button" onclick="openTimeCapsuleModal()" class="btn hub-tile-capsule w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border: 1px solid rgba(109, 40, 217, 0.25) !important; min-height: 88px; justify-content: center;" title="Seal Personal Letters and Heirlooms for Future Milestones">
+            <div class="tile-icon rounded-circle d-flex align-items-center justify-content-center mb-1.5 shadow-xs" style="width: 36px; height: 36px; background: rgba(109, 40, 217, 0.14); color: #6d28d9;">
               <i class="bi bi-hourglass-split fs-6"></i>
             </div>
-            <span class="fw-bold text-dark" style="font-size: 0.82rem; line-height: 1.2;">Time Capsule</span>
-            <span class="text-muted" style="font-size: 0.7rem;">Future Milestones</span>
+            <span class="tile-title fw-bold" style="font-size: 0.875rem; line-height: 1.2; color: #0f172a;">Time Capsule</span>
+            <span class="tile-desc" style="font-size: 0.76rem; color: #5b21b6; font-weight: 500;">Future Milestones</span>
           </button>
         </div>
       </div>

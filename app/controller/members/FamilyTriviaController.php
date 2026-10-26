@@ -65,13 +65,13 @@ final class FamilyTriviaController extends BaseController
                 "SELECT p.post_no, p.fullName, p.postMessage, p.date_created, pp.poll_id, pp.question
                  FROM post p
                  JOIN post_polls pp ON pp.post_no = p.post_no
-                 WHERE p.postFamCode = ?
+                 WHERE (p.postFamCode = ? OR REPLACE(p.postFamCode, '#', '') = REPLACE(?, '#', ''))
                    AND p.postMessage LIKE '%Weekly Family Trivia%'
                    AND p.date_created >= DATE_SUB(NOW(), INTERVAL 7 DAY)
                  ORDER BY p.post_no DESC
                  LIMIT 1"
             );
-            $stmt->execute([$familyCode]);
+            $stmt->execute([$familyCode, $familyCode]);
             /** @var array<string, mixed>|false $triviaPost */
             $triviaPost = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -153,5 +153,36 @@ final class FamilyTriviaController extends BaseController
                 'message' => 'Failed to generate weekly trivia: ' . $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Redirect direct navigation (/member/trivia) to the active weekly trivia feed post.
+     */
+    public function redirectToTriviaPost(): void
+    {
+        try {
+            $famCode = (string)($_SESSION['famCode'] ?? '');
+
+            if ($famCode !== '') {
+                $db = Db::connect2();
+                $stmt = $db->prepare(
+                    "SELECT p.post_no
+                     FROM post p
+                     WHERE (p.postFamCode = ? OR REPLACE(p.postFamCode, '#', '') = REPLACE(?, '#', ''))
+                       AND p.postMessage LIKE '%Weekly Family Trivia%'
+                       AND p.date_created >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                     ORDER BY p.post_no DESC
+                     LIMIT 1"
+                );
+                $stmt->execute([$famCode, $famCode]);
+                $postNo = $stmt->fetchColumn();
+                if ($postNo) {
+                    redirect("Location: /profilePage?post_no=" . (int)$postNo . "#post" . (int)$postNo);
+                    return;
+                }
+            }
+        } catch (\Throwable) {}
+
+        redirect("Location: /profilePage");
     }
 }

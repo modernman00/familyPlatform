@@ -287,7 +287,9 @@ final class PostMessage
 
             $results = AllMembersData::AllMembersEmailByFamCode($famCode, $commentAuthorId !== '' ? $commentAuthorId : null);
 
-            $url = self::buildPostUrl($newComment[0]['post_no']);
+            $commentPostNo = $newComment[0]['post_no'] ?? 0;
+            $firstCommentNo = $newComment[0]['comment_no'] ?? null;
+            $url = self::buildCommentUrl($commentPostNo, $firstCommentNo);
 
             self::notifyMembersByPushNotification(
                 results: $results,
@@ -306,18 +308,22 @@ final class PostMessage
         try {
             CheckToken::tokenCheck();
 
-            $userId = $_SESSION['id'];
-            $commentNo = self::asIdentifier(Utility::checkInput($commentNo));
+            $userId = (string)($_SESSION['id'] ?? '');
+            $commentNo = self::asIdentifier(Utility::checkInput((string)$commentNo));
 
             // select the id of the comment author
-            $commentAuthorId = Post::commentByNo($commentNo)['id'];
-            $commentPostNo = self::asIdentifier(Post::commentByNo($commentNo)['post_no']);
+            $comment = Post::commentByNo($commentNo);
+            if (empty($comment)) {
+                throw new NotFoundException('Comment not found.');
+            }
+            $commentAuthorId = (string)($comment['id'] ?? '');
+            $commentPostNo = self::asIdentifier((string)($comment['post_no'] ?? ''));
 
             // select the post (author + family scope for the Pusher channel)
             $post = Post::postByNo($commentPostNo);
-            $postAuthorId = $post['id'] ?? null;
+            $postAuthorId = (string)($post['id'] ?? '');
 
-            // delete if the author of the comment or the author of the post
+            // delete if the author of the comment or the account holder / author of the post
             if ($userId === $commentAuthorId || $userId === $postAuthorId) {
 
                 (new Update('comment'))->updateTable(
@@ -327,12 +333,22 @@ final class PostMessage
                     identifierAnswer: $commentNo
                 );
 
+                // Also cascade soft-delete any replies hanging under this parent comment
+                try {
+                    $updReplies = \Src\Db::connect2()->prepare(
+                        "UPDATE comment SET date_deleted = NOW() WHERE parent_comment_no = ? AND date_deleted IS NULL"
+                    );
+                    $updReplies->execute([$commentNo]);
+                } catch (\Throwable $e) {
+                    error_log('[PostMessage::deleteComment replies] ' . $e->getMessage());
+                }
+
                 // trigger pusher to update all the UI elements for the deleted comment
                 Pusher::broadcastToFamily((string) ($post['postFamCode'] ?? ''), 'delete-comment', ['commentNo' => $commentNo, 'postNo' => $commentPostNo]);
 
                 msgSuccess(200, "comment deleted successfully");
             } else {
-                throw new ForbiddenException('You can only delete your own comments.');
+                throw new ForbiddenException('You can only delete your own comments or comments on your posts.');
             }
         } catch (\Throwable $th) {
             \showError($th);
@@ -348,13 +364,17 @@ final class PostMessage
         try {
             CheckToken::tokenCheck();
 
-            $userId = $_SESSION['id'];
-            $commentNo = self::asIdentifier(Utility::checkInput($commentNo));
+            $userId = (string)($_SESSION['id'] ?? '');
+            $commentNo = self::asIdentifier(Utility::checkInput((string)$commentNo));
 
-            $commentAuthorId = Post::commentByNo($commentNo)['id'];
-            $commentPostNo = self::asIdentifier(Post::commentByNo($commentNo)['post_no']);
+            $comment = Post::commentByNo($commentNo);
+            if (empty($comment)) {
+                throw new NotFoundException('Comment not found.');
+            }
+            $commentAuthorId = (string)($comment['id'] ?? '');
+            $commentPostNo = self::asIdentifier((string)($comment['post_no'] ?? ''));
             $post = Post::postByNo($commentPostNo);
-            $postAuthorId = $post['id'] ?? null;
+            $postAuthorId = (string)($post['id'] ?? '');
 
             if ($userId !== $commentAuthorId && $userId !== $postAuthorId) {
                 throw new ForbiddenException('You can only edit your own comments.');
@@ -393,10 +413,13 @@ final class PostMessage
         try {
             CheckToken::tokenCheck();
 
-            $userId = $_SESSION['id'];
-            $postNo = self::asIdentifier(Utility::checkInput($postNo));
+            $userId = (string)($_SESSION['id'] ?? '');
+            $postNo = self::asIdentifier(Utility::checkInput((string)$postNo));
             $post = Post::postByNo($postNo);
-            $postAuthorId = $post['id'] ?? null;
+            if (empty($post)) {
+                throw new NotFoundException('Post not found.');
+            }
+            $postAuthorId = (string)($post['id'] ?? '');
 
             if ($userId !== $postAuthorId) {
                 throw new ForbiddenException('You can only delete your own posts.');
@@ -408,6 +431,16 @@ final class PostMessage
                 identifier: 'post_no',
                 identifierAnswer: $postNo
             );
+
+            // Cascade soft-delete comments for this post
+            try {
+                $delComments = \Src\Db::connect2()->prepare(
+                    "UPDATE comment SET date_deleted = NOW() WHERE post_no = ? AND date_deleted IS NULL"
+                );
+                $delComments->execute([$postNo]);
+            } catch (\Throwable $e) {
+                error_log('[PostMessage::deletePost comments] ' . $e->getMessage());
+            }
 
             // Clean up family hashtag links for deleted post
             try {
@@ -554,7 +587,8 @@ final class PostMessage
                     url: $url,
                     postContent: $cleanPostContent,
                     video: $videoData,
-                    postImage: $postImage
+                    postImage: $postImage,
+                    postNo: (int)$postNo
                 );
 
                 // Human-readable push-notification text built from the post
@@ -600,8 +634,23 @@ final class PostMessage
     // Helper function to construct post URL
     private static function buildPostUrl(int|string $postNo): string
     {
-        $getUrl = getenv('MIX_APP_URL');
-        return "$getUrl/profilePage?#post$postNo";
+        $cleanNo = (int) $postNo;
+        $appUrl = rtrim((string) (getenv('APP_URL') ?: (getenv('MIX_APP_URL') ?: '')), '/');
+        $path = $appUrl !== '' ? $appUrl : '';
+        return "{$path}/profilePage?post_no={$cleanNo}#post{$cleanNo}";
+    }
+
+    // Helper function to construct comment URL
+    private static function buildCommentUrl(int|string $postNo, int|string|null $commentNo = null): string
+    {
+        $cleanPostNo = (int) $postNo;
+        $appUrl = rtrim((string) (getenv('APP_URL') ?: (getenv('MIX_APP_URL') ?: '')), '/');
+        $path = $appUrl !== '' ? $appUrl : '';
+        if ($commentNo) {
+            $cleanCommentNo = (int) $commentNo;
+            return "{$path}/profilePage?post_no={$cleanPostNo}&comment_no={$cleanCommentNo}#comment{$cleanCommentNo}";
+        }
+        return "{$path}/profilePage?post_no={$cleanPostNo}#post{$cleanPostNo}";
     }
 
     /**
@@ -617,7 +666,8 @@ final class PostMessage
         string $url,
         string $postContent,
         ?array $video = null,
-        ?string $postImage = null
+        ?string $postImage = null,
+        int|string $postNo = 0
     ): void {
         $getPostProfilePics = self::getProfilePicsForPostAndComment($postId);
 
@@ -634,6 +684,7 @@ final class PostMessage
                 'email' => is_string($memberData['email'] ?? null) ? $memberData['email'] : '',
                 'authorName' => $postOriginName,
                 'url' => $url,
+                'post_no' => (int)$postNo,
                 'img' => $getPostProfilePics,
                 'firstName' => is_string($memberData['firstName'] ?? null) ? $memberData['firstName'] : '',
                 'postContent' => $postContent,

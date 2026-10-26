@@ -532,6 +532,28 @@ final class OnboardingFollowupService
             }
 
             if (!$dryRun) {
+                $activeTriviaPostNo = null;
+                try {
+                    $triviaStmt = $db->prepare(
+                        "SELECT p.post_no
+                         FROM post p
+                         WHERE (p.postFamCode = ? OR REPLACE(p.postFamCode, '#', '') = REPLACE(?, '#', ''))
+                           AND p.postMessage LIKE '%Weekly Family Trivia%'
+                           AND p.date_created >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                         ORDER BY p.post_no DESC
+                         LIMIT 1"
+                    );
+                    $triviaStmt->execute([$famCode, $famCode]);
+                    $foundPostNo = $triviaStmt->fetchColumn();
+                    if ($foundPostNo) {
+                        $activeTriviaPostNo = (int)$foundPostNo;
+                    }
+                } catch (Throwable) {}
+
+                $triviaActionUrl = $activeTriviaPostNo 
+                    ? "/profilePage?post_no={$activeTriviaPostNo}#post{$activeTriviaPostNo}" 
+                    : '/profilePage';
+
                 try {
                     $emailData = [
                         'id'        => $userId,
@@ -539,6 +561,7 @@ final class OnboardingFollowupService
                         'lastName'  => $lastName,
                         'email'     => $email,
                         'famCode'   => $famCode,
+                        'post_no'   => $activeTriviaPostNo,
                     ];
                     SendEmailFunctionality::email(
                         'msg/lifecycle/day28_family_trivia',
@@ -556,11 +579,14 @@ final class OnboardingFollowupService
                         category: 'onboarding',
                         priority: 'medium',
                         title: '🧠 Who Knows Your Family Best? Sunday Trivia',
-                        body: 'Cast your vote in this weeks private family trivia poll! See who claims the title of Family Historian.',
-                        actionUrl: '/member/trivia',
+                        body: "Cast your vote in this week's private family trivia poll! See who claims the title of Family Historian.",
+                        actionUrl: $triviaActionUrl,
                         tag: 'onboarding-day28',
                         familyCode: $famCode,
-                        metadata: ['event' => self::EVENT_DAY28_TRIVIA]
+                        metadata: [
+                            'event' => self::EVENT_DAY28_TRIVIA,
+                            'post_no' => $activeTriviaPostNo,
+                        ]
                     );
                 } catch (Throwable $e) {
                     error_log("[OnboardingFollowupService] Day 28 Push error for user {$userId}: " . $e->getMessage());
