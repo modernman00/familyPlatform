@@ -214,6 +214,17 @@ if [ -f "package.json" ] && grep -q '"@modernman00/shared-js-lib"' package.json;
     }
 fi
 
+# Auto-commit lockfile updates from shared-lib synchronization if those are the only dirty files
+git update-index -q --refresh 2>/dev/null || true
+DIRTY_NON_LOCK=$(git diff --name-only HEAD -- 2>/dev/null | grep -vE '^(composer\.lock|package-lock\.json)$' || true)
+DIRTY_LOCK=$(git diff --name-only HEAD -- 2>/dev/null | grep -E '^(composer\.lock|package-lock\.json)$' || true)
+if [ -n "$DIRTY_LOCK" ] && [ -z "$DIRTY_NON_LOCK" ]; then
+    echo "   ↳ Committing updated shared-lib lockfile(s)..."
+    git add composer.lock package-lock.json 2>/dev/null || true
+    git commit -m "chore(deps): sync shared-lib lockfiles" --quiet || true
+    COMMIT=$(git rev-parse HEAD)
+fi
+
 ################################################################################
 # 4. GIT & WORKSPACE INTEGRITY
 ################################################################################
