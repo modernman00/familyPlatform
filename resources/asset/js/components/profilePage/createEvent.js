@@ -117,7 +117,7 @@ const process = async (e) => {
                 icon: 'error',
                 title: 'Validation Error',
                 text: 'The form cannot be submitted. Please check the errors',
-                confirmButtonColor: '#3085d6'
+                confirmButtonColor: '#a31621'
             });
             formData.clearError();
             return;
@@ -218,7 +218,7 @@ const process = async (e) => {
             icon: 'error',
             title: 'Oops...',
             text: userMessage,
-            confirmButtonColor: '#3085d6'
+            confirmButtonColor: '#a31621'
         });
         log(error);
     }

@@ -34,8 +34,8 @@
         justify-content: center;
         font-size: 1.6rem;
         color: #ffffff;
-        background: linear-gradient(135deg, #7b03fc, #6366f1);
-        box-shadow: 0 8px 20px rgba(123, 3, 252, 0.28);
+        background: linear-gradient(135deg, #8a1019, #b8202c);
+        box-shadow: 0 8px 20px rgba(138,16,25, 0.28);
     }
 
     .stitch-title {
@@ -73,25 +73,25 @@
         border: 2px solid #e2e8f0;
         border-radius: 14px;
         background-color: #ffffff;
-        color: #1e1b4b;
+        color: #2a0a0d;
         box-sizing: border-box;
         text-transform: uppercase;
         direction: ltr;
         font-family: 'Inter', system-ui, -apple-system, sans-serif;
         font-variant-numeric: tabular-nums;
-        caret-color: #7b03fc;
+        caret-color: #8a1019;
         transition: border-color 0.18s ease, box-shadow 0.18s ease;
     }
 
     .otp-input:focus {
-        border-color: #7b03fc;
-        box-shadow: 0 0 0 4px rgba(123, 3, 252, 0.15);
+        border-color: #8a1019;
+        box-shadow: 0 0 0 4px rgba(138,16,25, 0.15);
         outline: none;
     }
 
     .stitch-submit {
         width: 100%;
-        background: linear-gradient(135deg, var(--brand-primary, #00bfa5) 0%, var(--brand-primary-dark, #00897b) 100%);
+        background: linear-gradient(135deg, var(--brand-primary, #a31621) 0%, var(--brand-primary-dark, #8a1019) 100%);
         color: #ffffff;
         border: none;
         border-radius: 12px;
@@ -107,15 +107,15 @@
         justify-content: center;
         align-items: center;
         gap: 0.5rem;
-        box-shadow: 0 2px 8px rgba(0, 191, 165, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        box-shadow: 0 2px 8px rgba(163,22,33, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
     }
 
     .stitch-submit:hover {
-        background: linear-gradient(135deg, var(--brand-primary-light, #33c9b2) 0%, var(--brand-primary, #00bfa5) 100%);
+        background: linear-gradient(135deg, var(--brand-primary-light, #b8202c) 0%, var(--brand-primary, #a31621) 100%);
         transform: translateY(-1px);
-        box-shadow: 0 4px 14px rgba(0, 191, 165, 0.32);
+        box-shadow: 0 4px 14px rgba(163,22,33, 0.32);
     }
 
     .stitch-submit:active {
@@ -142,8 +142,8 @@
     }
 
     .stitch-paste-btn:hover {
-        border-color: var(--brand-primary, #00bfa5);
-        color: var(--brand-primary, #00bfa5);
+        border-color: var(--brand-primary, #a31621);
+        color: var(--brand-primary, #a31621);
         background: #F9FAFB;
         transform: translateY(-1px);
     }
@@ -153,7 +153,7 @@
     }
 
     .stitch-link {
-        color: var(--brand-primary, #7b03fc);
+        color: var(--brand-primary, #8a1019);
         text-decoration: none;
         font-weight: 600;
         cursor: pointer;
@@ -171,7 +171,7 @@
     .stitch-submit:focus-visible,
     .stitch-paste-btn:focus-visible,
     .stitch-link:focus-visible {
-        outline: 2px solid #7b03fc;
+        outline: 2px solid #8a1019;
         outline-offset: 2px;
     }
 

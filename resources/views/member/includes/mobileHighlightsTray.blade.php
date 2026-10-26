@@ -55,10 +55,10 @@ foreach(($eventData ?? []) as $event) {
         <!-- 1. Nostalgia Memory Flashback Card -->
         <template x-if="memories.length > 0">
             <div class="highlight-card flex-shrink-0 p-3 rounded-4 shadow-sm position-relative overflow-hidden"
-                 style="width: 280px; scroll-snap-align: start; background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(236, 72, 153, 0.12) 100%); border: 1px solid rgba(99, 102, 241, 0.25);">
+                 style="width: 280px; scroll-snap-align: start; background: linear-gradient(135deg, rgba(184,32,44, 0.12) 0%, rgba(236, 72, 153, 0.12) 100%); border: 1px solid rgba(184,32,44, 0.25);">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="badge rounded-pill px-2.5 py-1 fw-bold text-white d-inline-flex align-items-center gap-1 shadow-sm"
-                          style="background: linear-gradient(135deg, #4f46e5, #ec4899); font-size: 0.72rem;">
+                          style="background: linear-gradient(135deg, #a31621, #ec4899); font-size: 0.72rem;">
                         <i class="bi bi-clock-history"></i> <span x-text="memories[0].years_ago_label || 'Memory Flashback'"></span>
                     </span>
                     <span class="text-muted small" style="font-size: 0.72rem;" x-text="memories[0].formatted_date"></span>
@@ -73,10 +73,18 @@ foreach(($eventData ?? []) as $event) {
                 <p class="mb-2 fw-medium text-truncate-2" style="color: var(--text-color, #1f2937); font-size: 0.84rem; line-height: 1.35; height: 2.7em;" x-text="memories[0].postMessage"></p>
 
                 <div class="d-flex justify-content-between align-items-center pt-2 border-top border-light-subtle">
-                    <span class="text-muted small fw-semibold text-truncate" style="font-size: 0.75rem; max-width: 130px;" x-text="memories[0].fullName"></span>
-                    <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem; min-height: 36px;" @click="shareMemory(memories[0])">
-                        <i class="bi bi-share-fill me-1"></i> Share
-                    </button>
+                    <span class="text-muted small fw-semibold text-truncate" style="font-size: 0.75rem; max-width: 110px;" x-text="memories[0].fullName"></span>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <a :href="whatsappMemoryUrl(memories[0])" target="_blank" rel="noopener noreferrer"
+                           class="btn btn-sm btn-success rounded-pill px-2.5 py-1 fw-bold d-inline-flex align-items-center gap-1 text-white"
+                           style="font-size: 0.75rem; min-height: 36px; background-color: #25D366; border: none; text-decoration: none;"
+                           title="Share memory to WhatsApp" aria-label="Share memory to WhatsApp">
+                            <i class="bi bi-whatsapp"></i>
+                        </a>
+                        <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem; min-height: 36px;" @click="shareMemory(memories[0])">
+                            <i class="bi bi-share-fill me-1"></i> Share
+                        </button>
+                    </div>
                 </div>
             </div>
         </template>
@@ -113,12 +121,12 @@ foreach(($eventData ?? []) as $event) {
         <!-- 3. Upcoming Family Events Cards -->
         <template x-for="event in events" :key="'evt-' + event.no">
             <div class="highlight-card flex-shrink-0 p-3 rounded-4 shadow-sm position-relative"
-                 style="width: 250px; scroll-snap-align: start; background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%); border: 1px solid rgba(59, 130, 246, 0.2);">
+                 style="width: 250px; scroll-snap-align: start; background: linear-gradient(135deg, rgba(163,22,33, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%); border: 1px solid rgba(163,22,33, 0.2);">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="badge rounded-pill px-2.5 py-1 fw-bold text-white bg-primary bg-gradient shadow-sm" style="font-size: 0.72rem;">
                         <i class="bi bi-calendar-event me-1"></i> Event
                     </span>
-                    <span class="badge rounded-pill px-2 py-1 fw-bold" style="font-size: 0.72rem; background: #e0e7ff; color: #3730a3;" x-text="event.dateDifference"></span>
+                    <span class="badge rounded-pill px-2 py-1 fw-bold" style="font-size: 0.72rem; background: #f5dede; color: #8a1019;" x-text="event.dateDifference"></span>
                 </div>
 
                 <h6 class="fw-bold mb-1 text-truncate" style="font-size: 0.88rem; color: var(--text-color, #1f2937);" x-text="event.eventName"></h6>
@@ -192,6 +200,19 @@ if (typeof window.mobileHighlightsTray !== 'function') {
                         modal.show();
                     }
                 }
+            },
+            whatsappMemoryUrl(memory) {
+                if (!memory) return '#';
+                const yearsAgo = memory.years_ago_label || 'A family memory';
+                const author = memory.fullName ? ` — ${memory.fullName}` : '';
+                const quote = memory.postMessage ? `"${memory.postMessage.trim()}"` : '';
+                const origin = window.location.origin || '';
+                const link = memory.post_no ? `${origin}/profilePage#post${memory.post_no}` : `${origin}/profilePage`;
+                let text = `✨ [Family Memory Flashback — ${yearsAgo}]${author}\n\n${quote}\n\n🔗 ${link}`;
+                if (text.length > 700) {
+                    text = text.slice(0, 690) + '...\n\n🔗 ' + link;
+                }
+                return `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
             }
         };
     };

@@ -1,9 +1,9 @@
 /* Google Stitch Navigation Bar & Brand System */
 :root {
-  --brand-primary: #4f46e5;
-  --brand-primary-hover: #4338ca;
-  --brand-primary-container: #eef2ff;
-  --brand-on-primary-container: #3730a3;
+  --brand-primary: #a31621;
+  --brand-primary-hover: #8a1019;
+  --brand-primary-container: #fbefef;
+  --brand-on-primary-container: #8a1019;
   --brand-accent-gold: #f59e0b;
   --brand-surface: #ffffff;
   --brand-text-dark: #0f172a;
@@ -46,12 +46,12 @@
 .brand-name-family {
   font-weight: 800;
   font-size: 1.25rem;
-  color: #1e1b4b;
+  color: #2a0a0d;
 }
 .brand-name-platform {
   font-weight: 800;
   font-size: 1.25rem;
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  background: linear-gradient(135deg, #a31621 0%, #b8202c 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -118,7 +118,7 @@
 .btn-icon-stitch:hover {
   background: var(--brand-primary-container);
   color: var(--brand-primary);
-  border-color: #c7d2fe;
+  border-color: #ecc7c9;
   transform: translateY(-1px);
 }
 
@@ -150,10 +150,10 @@
 
 .navbar-toggler:hover,
 .navbar-toggler:focus {
-  background-color: var(--brand-primary-container, #eef2ff) !important;
-  border-color: var(--brand-primary, #6366f1) !important;
-  color: var(--brand-primary, #4f46e5) !important;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+  background-color: var(--brand-primary-container, #fbefef) !important;
+  border-color: var(--brand-primary, #b8202c) !important;
+  color: var(--brand-primary, #a31621) !important;
+  box-shadow: 0 0 0 3px rgba(184,32,44, 0.15) !important;
 }
 
 .navbar-toggler-icon {
@@ -214,14 +214,14 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #a31621 0%, #8a1019 100%);
   color: #ffffff;
   font-size: 0.72rem;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 1px 3px rgba(163,22,33, 0.3);
   margin-right: 0.25rem;
 }
 
@@ -381,15 +381,15 @@
 
 @keyframes notifTargetGlowPulse {
   0% {
-    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.75), 0 12px 28px rgba(79, 70, 229, 0.25);
+    box-shadow: 0 0 0 4px rgba(163,22,33, 0.75), 0 12px 28px rgba(163,22,33, 0.25);
     transform: translateY(-2px);
   }
   30% {
-    box-shadow: 0 0 0 6px rgba(79, 70, 229, 0.85), 0 16px 36px rgba(79, 70, 229, 0.35);
+    box-shadow: 0 0 0 6px rgba(163,22,33, 0.85), 0 16px 36px rgba(163,22,33, 0.35);
     transform: translateY(-3px);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0), 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0 0 0 rgba(163,22,33, 0), 0 1px 3px rgba(0, 0, 0, 0.05);
     transform: translateY(0);
   }
 }
@@ -508,8 +508,8 @@ body.dark-mode {
   --brand-text-dark: #f8fafc;
   --brand-text-muted: #94a3b8;
   --brand-border: #334155;
-  --brand-primary-container: rgba(99, 102, 241, 0.18);
-  --brand-on-primary-container: #c7d2fe;
+  --brand-primary-container: rgba(184,32,44, 0.18);
+  --brand-on-primary-container: #ecc7c9;
 }
 
 body.dark-mode .brand-navbar-stitch {
@@ -523,7 +523,7 @@ body.dark-mode .brand-name-family {
 }
 
 body.dark-mode .brand-name-platform {
-  background: linear-gradient(135deg, #818cf8 0%, #a5b4fc 100%) !important;
+  background: linear-gradient(135deg, #ef6b73 0%, #ef6b73 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
 }
@@ -533,15 +533,15 @@ body.dark-mode .stitch-nav-link {
 }
 body.dark-mode .stitch-nav-link:hover,
 body.dark-mode .stitch-nav-link.active {
-  color: #818cf8 !important;
-  background: rgba(99, 102, 241, 0.18) !important;
+  color: #ef6b73 !important;
+  background: rgba(184,32,44, 0.18) !important;
 }
 body.dark-mode .stitch-nav-link i {
   color: #94a3b8;
 }
 body.dark-mode .stitch-nav-link:hover i,
 body.dark-mode .stitch-nav-link.active i {
-  color: #818cf8;
+  color: #ef6b73;
 }
 
 body.dark-mode .btn-user-stitch {
@@ -561,8 +561,8 @@ body.dark-mode .btn-icon-stitch {
 }
 body.dark-mode .btn-icon-stitch:hover {
   background: #334155 !important;
-  color: #818cf8 !important;
-  border-color: #4f46e5 !important;
+  color: #ef6b73 !important;
+  border-color: #a31621 !important;
 }
 
 body.dark-mode .navbar-toggler {
@@ -576,9 +576,9 @@ body.dark-mode .navbar-toggler {
 body.dark-mode .navbar-toggler:hover,
 body.dark-mode .navbar-toggler:focus {
   background-color: #334155 !important;
-  border-color: #818cf8 !important;
-  color: #818cf8 !important;
-  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.25) !important;
+  border-color: #ef6b73 !important;
+  color: #ef6b73 !important;
+  box-shadow: 0 0 0 3px rgba(239,107,115, 0.25) !important;
 }
 
 body.dark-mode .navbar-toggler-icon {
@@ -606,7 +606,7 @@ body.dark-mode .notif-header-bubble {
 }
 
 body.dark-mode .notif-header-bubble i {
-  color: #818cf8 !important;
+  color: #ef6b73 !important;
 }
 
 body.dark-mode .notif-header-title {
@@ -622,7 +622,7 @@ body.dark-mode .notif-card-stitch:hover {
   background: #283548 !important;
 }
 body.dark-mode .notif-card-stitch.unread {
-  background: rgba(99, 102, 241, 0.12) !important;
+  background: rgba(184,32,44, 0.12) !important;
 }
 
 body.dark-mode .notif-item-title {
@@ -650,7 +650,7 @@ body.dark-mode .btn-mark-all-read-stitch {
 body.dark-mode .btn-mark-all-read-stitch:hover {
   background: #1e293b !important;
   color: #ffffff !important;
-  border-color: #6366f1 !important;
+  border-color: #b8202c !important;
 }
 
 body.dark-mode .dropdown-menu {

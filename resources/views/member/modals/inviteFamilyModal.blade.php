@@ -5,7 +5,7 @@
             @include('csrf')
             
             <!-- Modal Header -->
-            <div class="modal-header border-0 px-4 pt-4 pb-3 flex-shrink-0" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%); color: #ffffff;">
+            <div class="modal-header border-0 px-4 pt-4 pb-3 flex-shrink-0" style="background: linear-gradient(135deg, #2a0a0d 0%, #2a0a0d 60%, #8a1019 100%); color: #ffffff;">
                 <div class="d-flex align-items-center gap-3">
                     <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" 
                          style="width: 48px; height: 48px; min-width: 48px; min-height: 48px; background: rgba(245, 158, 11, 0.25); color: #fbbf24; border: 1.5px solid rgba(245, 158, 11, 0.5); font-size: 1.35rem;">
@@ -31,7 +31,7 @@
             <div class="modal-body px-4 py-3" style="overflow-y: auto;">
                 
                 <!-- 1. Sanctuary Privacy Guarantee Card -->
-                <div class="p-3 mb-4 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2"
+                <div class="p-3 mb-3 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2"
                      style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px;">
                     <div class="d-flex align-items-center gap-3 min-w-0">
                         <div class="rounded-circle d-flex align-items-center justify-content-center text-success flex-shrink-0"
@@ -39,17 +39,44 @@
                             <i class="bi bi-shield-check"></i>
                         </div>
                         <div>
-                            <div class="fw-bold text-dark small" style="font-size: 0.9rem;">
+                            <div class="fw-bold text-dark small" style="font-size: 0.9rem;" id="modalFamilyContextHeading">
                                 100% Private Family Network
                             </div>
-                            <div class="text-muted small" style="font-size: 0.78rem;">
-                                Relatives join your family with private code: <span class="badge bg-light text-primary border font-monospace fw-bold" id="modalFamilyCodeBadge">{{ $data['famCode'] ?? '...' }}</span>
+                            <div class="text-muted small" style="font-size: 0.78rem;" id="modalFamilyContextSub">
+                                Relatives join your <span id="modalFamilyLineageTypeLabel" class="fw-semibold text-dark">Marital / Household family</span> with private code: <span class="badge bg-light text-primary border font-monospace fw-bold" id="modalFamilyCodeBadge">{{ $data['famCode'] ?? '...' }}</span>
                             </div>
                         </div>
                     </div>
                     <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 small">
                         End-to-End Privacy
                     </span>
+                </div>
+
+                <!-- 1b. Marital vs. Birth Family Code Selector (Shown when user holds an active Birth / Maiden family code) -->
+                <div id="inviteModalLineagePickerWrap" class="p-3 mb-4 rounded-3 {{ !empty($hasMaternalCode) && !empty($maternalFamCode) ? '' : 'd-none' }}"
+                     style="background: #fdf8f8; border: 1px solid #f1d4d6; border-radius: 16px;">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                        <label class="form-label fw-bold text-dark small mb-0 d-flex align-items-center gap-1">
+                            <i class="bi bi-signpost-split text-primary"></i>
+                            <span>Which family are you inviting them to?</span>
+                        </label>
+                        <span class="badge bg-white text-secondary border" style="font-size: 0.7rem;" id="inviteModalAutoRouteBadge">
+                            Auto-adjusts by relative
+                        </span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2" role="radiogroup" aria-label="Select Marital or Birth Family Code">
+                        <label class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 border bg-white" style="cursor:pointer;min-height:44px;font-size:.82rem;white-space:nowrap;flex-shrink:0;">
+                            <input type="radio" name="invite_modal_lineage_scope" value="primary" id="inviteRadioPrimary" checked>
+                            <span><strong>Marital / Household Tree</strong> <span class="text-muted font-monospace" id="inviteRadioPrimaryCode">(#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})</span></span>
+                        </label>
+                        <label class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 border bg-white" style="cursor:pointer;min-height:44px;font-size:.82rem;white-space:nowrap;flex-shrink:0;">
+                            <input type="radio" name="invite_modal_lineage_scope" value="maternal" id="inviteRadioMaternal">
+                            <span><strong>My Birth / Maiden Family</strong> <span class="text-muted font-monospace" id="inviteRadioMaternalCode">(#{{ $maternalFamCode ?? '' }})</span></span>
+                        </label>
+                    </div>
+                    <div class="text-muted mt-2" id="inviteModalLineageHint" style="font-size: 0.76rem;">
+                        Using your <strong>Marital / Household family code</strong>. Selecting Mum, Dad, Sister, Brother, or Grandparent automatically switches to your Birth / Maiden family code.
+                    </div>
                 </div>
 
                 <!-- 2. Kinship Role Personaliser Chips -->
@@ -145,7 +172,7 @@
                         <!-- SMS / iMessage Direct -->
                         <div class="col-12 col-sm-6">
                             <a href="#" id="btnInviteSMS" class="btn w-100 d-flex align-items-center justify-content-center gap-2 py-2 fw-bold text-white shadow-xs transition-all"
-                               style="background: #0284c7; border-radius: 12px; min-height: 46px; font-size: 0.92rem; text-decoration: none;">
+                               style="background: #a31621; border-radius: 12px; min-height: 46px; font-size: 0.92rem; text-decoration: none;">
                                 <i class="bi bi-chat-text-fill fs-5"></i>
                                 <span style="white-space: nowrap;">Send via SMS / iMessage</span>
                             </a>
@@ -226,26 +253,40 @@
 
 <script>
 (function() {
-    let inviteData = {
+    let primaryInviteData = {
         invite_url: '',
         whatsapp_url: '',
         invite_text: '',
-        family_code: '{{ $data["famCode"] ?? "" }}',
-        surname: '{{ $data["familySurname"] ?? ($data["lastName"] ?? "Family") }}'
+        family_code: '{{ $primaryFamCode ?? ($data["famCode"] ?? "") }}',
+        surname: '{{ $maritalSurname ?? ($data["familySurname"] ?? ($data["lastName"] ?? "Family")) }}',
+        lineage_scope: 'primary'
     };
+    let birthInviteData = @if(!empty($hasMaternalCode) && !empty($maternalFamCode)) {
+        invite_url: '',
+        whatsapp_url: '',
+        invite_text: '',
+        family_code: '{{ $maternalFamCode }}',
+        surname: '{{ $maidenSurname ?? $maternalFamCode }}',
+        lineage_scope: 'maternal'
+    } @else null @endif;
+
+    let activeScope = '{{ ($activeLineageScope ?? "primary") === "maternal" ? "maternal" : "primary" }}';
+    let inviteData = Object.assign({}, primaryInviteData);
     let currentRole = 'General';
     let selectedContacts = [];
 
-    // Kinship template dictionary (British English copy)
+    // Kinship template dictionary (British English copy, dynamically adapts for Marital vs Birth family code)
     const kinshipTemplates = {
-        'General': (surname, url) => `👋 Hey! I've set up our private ${surname} Family Network & Heritage Tree on FamilyPlatform. Claim your branch, explore our lineage, and share memories with us: ${url}`,
-        'Mum': (surname, url) => `👋 Hi Mum! I've set up our private ${surname} family tree and sanctuary on FamilyPlatform. Tap here to view our lineage, see photos, and claim your profile: ${url}`,
-        'Dad': (surname, url) => `👋 Hi Dad! I've set up our private ${surname} family tree and sanctuary on FamilyPlatform. Tap here to view our lineage, see photos, and claim your profile: ${url}`,
-        'Sister': (surname, url) => `👭 Hey sis! Join me on FamilyPlatform for our private ${surname} family hub. Tap here to claim your spot on our family tree: ${url}`,
-        'Brother': (surname, url) => `👬 Hey bro! Join me on FamilyPlatform for our private ${surname} family hub. Tap here to claim your spot on our family tree: ${url}`,
-        'Child': (surname, url) => `🌟 Hey! I've added you to our official ${surname} family tree on FamilyPlatform. Tap here to claim your profile and see our family heritage: ${url}`,
-        'Grandparent': (surname, url) => `👵 Dear Grandparent, our ${surname} family tree has been preserved on FamilyPlatform! Tap here to see our family branches: ${url}`,
-        'Cousin': (surname, url) => `👋 Hey cousin! We are bringing the ${surname} family together on our private FamilyPlatform hub. Tap here to claim your spot: ${url}`
+        'General': (surname, url, code, isBirth) => isBirth
+            ? `👋 Hey! I've set up our private ${surname} Birth Family Network & Heritage Tree on FamilyPlatform (Family Code: #${code}). Claim your branch, explore our birth lineage, and share memories with us: ${url}`
+            : `👋 Hey! I've set up our private ${surname} Family Network & Heritage Tree on FamilyPlatform (Family Code: #${code}). Claim your branch, explore our lineage, and share memories with us: ${url}`,
+        'Mum': (surname, url, code, isBirth) => `👋 Hi Mum! I've set up our private ${surname} ${isBirth ? 'birth family tree' : 'family tree'} and sanctuary on FamilyPlatform (Family Code: #${code}). Tap here to view our lineage, see photos, and claim your profile: ${url}`,
+        'Dad': (surname, url, code, isBirth) => `👋 Hi Dad! I've set up our private ${surname} ${isBirth ? 'birth family tree' : 'family tree'} and sanctuary on FamilyPlatform (Family Code: #${code}). Tap here to view our lineage, see photos, and claim your profile: ${url}`,
+        'Sister': (surname, url, code, isBirth) => `👭 Hey sis! Join me on FamilyPlatform for our private ${surname} ${isBirth ? 'birth family' : 'family'} hub (Family Code: #${code}). Tap here to claim your spot on our family tree: ${url}`,
+        'Brother': (surname, url, code, isBirth) => `👬 Hey bro! Join me on FamilyPlatform for our private ${surname} ${isBirth ? 'birth family' : 'family'} hub (Family Code: #${code}). Tap here to claim your spot on our family tree: ${url}`,
+        'Child': (surname, url, code) => `🌟 Hey! I've added you to our official ${surname} family tree on FamilyPlatform (Family Code: #${code}). Tap here to claim your profile and see our family heritage: ${url}`,
+        'Grandparent': (surname, url, code, isBirth) => `👵 Dear Grandparent, our ${surname} ${isBirth ? 'birth family' : 'family'} tree has been preserved on FamilyPlatform (Family Code: #${code})! Tap here to see our family branches: ${url}`,
+        'Cousin': (surname, url, code, isBirth) => `👋 Hey cousin! We are bringing the ${surname} ${isBirth ? 'birth family' : 'family'} together on our private FamilyPlatform hub (Family Code: #${code}). Tap here to claim your spot: ${url}`
     };
 
     function getCleanPhoneNumber(phone) {
@@ -276,11 +317,48 @@
         return clean ? `https://wa.me/${clean}?text=${encodedText}` : `https://api.whatsapp.com/send?text=${encodedText}`;
     }
 
+    function setInviteLineageScope(scope) {
+        const useBirth = (scope === 'maternal' && birthInviteData && birthInviteData.family_code);
+        activeScope = useBirth ? 'maternal' : 'primary';
+        inviteData = Object.assign({}, useBirth ? birthInviteData : primaryInviteData);
+
+        const rPrimary = document.getElementById('inviteRadioPrimary');
+        const rMaternal = document.getElementById('inviteRadioMaternal');
+        if (rPrimary) rPrimary.checked = !useBirth;
+        if (rMaternal) rMaternal.checked = useBirth;
+
+        const codeBadge = document.getElementById('modalFamilyCodeBadge');
+        if (codeBadge && inviteData.family_code) {
+            codeBadge.textContent = inviteData.family_code;
+        }
+
+        const typeLabel = document.getElementById('modalFamilyLineageTypeLabel');
+        if (typeLabel) {
+            typeLabel.textContent = useBirth
+                ? `Birth / Maiden family (${inviteData.surname || inviteData.family_code})`
+                : `Marital / Household family (${inviteData.surname || inviteData.family_code})`;
+        }
+
+        const hintEl = document.getElementById('inviteModalLineageHint');
+        if (hintEl) {
+            hintEl.innerHTML = useBirth
+                ? `Using your <strong>Birth / Maiden family code (#${escapeHtml(inviteData.family_code)})</strong> so your parents, siblings, and birth relatives join your maiden lineage.`
+                : `Using your <strong>Marital / Household family code (#${escapeHtml(inviteData.family_code)})</strong> for your partner, children, and household relatives.`;
+        }
+
+        updateMessageUI();
+        if (selectedContacts.length > 0) {
+            renderSelectedContacts();
+        }
+    }
+
     function getPersonalisedMessage() {
         const url = inviteData.invite_url || window.location.origin + '/register';
         const surname = inviteData.surname || 'Family';
+        const code = inviteData.family_code || '';
+        const isBirth = (activeScope === 'maternal');
         const generator = kinshipTemplates[currentRole] || kinshipTemplates['General'];
-        return generator(surname, url);
+        return generator(surname, url, code, isBirth);
     }
 
     function updateMessageUI() {
@@ -328,12 +406,25 @@
             if (res.ok) {
                 const json = await res.json();
                 if (json.status === 'success' && json.data?.invite_data) {
-                    inviteData = Object.assign(inviteData, json.data.invite_data);
-                    const codeBadge = document.getElementById('modalFamilyCodeBadge');
-                    if (codeBadge && inviteData.family_code) {
-                        codeBadge.textContent = inviteData.family_code;
+                    primaryInviteData = Object.assign(primaryInviteData, json.data.invite_data);
+                    const pCodeEl = document.getElementById('inviteRadioPrimaryCode');
+                    if (pCodeEl && primaryInviteData.family_code) {
+                        pCodeEl.textContent = '(#' + primaryInviteData.family_code + ')';
                     }
-                    updateMessageUI();
+
+                    if (json.data.birth_invite_data && json.data.birth_invite_data.family_code) {
+                        birthInviteData = Object.assign(birthInviteData || {}, json.data.birth_invite_data);
+                        const mCodeEl = document.getElementById('inviteRadioMaternalCode');
+                        if (mCodeEl && birthInviteData.family_code) {
+                            mCodeEl.textContent = '(#' + birthInviteData.family_code + ')';
+                        }
+                        const pickerWrap = document.getElementById('inviteModalLineagePickerWrap');
+                        if (pickerWrap) {
+                            pickerWrap.classList.remove('d-none');
+                        }
+                    }
+
+                    setInviteLineageScope(activeScope);
                 }
             }
         } catch (err) {
@@ -372,7 +463,7 @@
             row.innerHTML = `
                 <div class="d-flex align-items-center gap-2.5 min-w-0">
                     <div class="rounded-circle d-flex align-items-center justify-content-center text-primary flex-shrink-0"
-                         style="width: 38px; height: 38px; background: #e0e7ff; font-weight: 700; font-size: 0.9rem;">
+                         style="width: 38px; height: 38px; background: #f5dede; font-weight: 700; font-size: 0.9rem;">
                         ${escapeHtml(name.charAt(0).toUpperCase())}
                     </div>
                     <div class="min-w-0">
@@ -438,8 +529,17 @@
             }
         });
 
-        // Kinship Role Chips
+        // Marital vs. Birth Family Code Radio Listeners
+        document.querySelectorAll('input[name="invite_modal_lineage_scope"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                setInviteLineageScope(this.value);
+            });
+        });
+
+        // Kinship Role Chips (automatically switch between Birth and Marital family codes when appropriate)
         const chips = document.querySelectorAll('.kinship-chip');
+        const birthRoles = ['Mum', 'Dad', 'Sister', 'Brother', 'Grandparent'];
+        const maritalRoles = ['Child'];
         chips.forEach(chip => {
             chip.addEventListener('click', function() {
                 chips.forEach(c => {
@@ -449,6 +549,17 @@
                 this.classList.remove('btn-outline-secondary');
                 this.classList.add('active', 'btn-outline-primary');
                 currentRole = this.getAttribute('data-role') || 'General';
+
+                if (birthInviteData && birthInviteData.family_code) {
+                    if (birthRoles.includes(currentRole)) {
+                        setInviteLineageScope('maternal');
+                        return;
+                    } else if (maritalRoles.includes(currentRole)) {
+                        setInviteLineageScope('primary');
+                        return;
+                    }
+                }
+
                 updateMessageUI();
                 if (selectedContacts.length > 0) {
                     renderSelectedContacts();

@@ -6,8 +6,8 @@
 <link href="https://cdn.jsdelivr.net/npm/quill@1.3.6/dist/quill.snow.css" rel="stylesheet">
 <style>
     .ai-assistant-card {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.06) 100%);
-        border: 1.5px dashed rgba(99, 102, 241, 0.35);
+        background: linear-gradient(135deg, rgba(184,32,44, 0.08) 0%, rgba(184,32,44, 0.06) 100%);
+        border: 1.5px dashed rgba(184,32,44, 0.35);
         border-radius: 16px;
     }
 
@@ -72,7 +72,7 @@
             <a href="/familyJournal" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 mb-2">
                 <i class="bi bi-arrow-left me-1"></i> Back to Family Shelf
             </a>
-            <h2 class="fw-bold mb-1" style="color: #1e1b4b; letter-spacing: -0.02em;">
+            <h2 class="fw-bold mb-1" style="color: #2a0a0d; letter-spacing: -0.02em;">
                 {{ $isEdit ? 'Edit Family Chronicle' : 'Preserve a Family Chronicle' }}
             </h2>
             <p class="text-muted small mb-0">
@@ -87,11 +87,11 @@
     <!-- AI Story Assistant Card -->
     <div class="card ai-assistant-card mb-4 p-4 shadow-sm">
         <div class="d-flex align-items-center gap-2 mb-2">
-            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: #6366f1; color: white;">
+            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: #b8202c; color: white;">
                 <i class="bi bi-magic"></i>
             </div>
             <div>
-                <h6 class="fw-bold mb-0" style="color: #4338ca;">AI Story Assistant & Chronicler</h6>
+                <h6 class="fw-bold mb-0" style="color: #8a1019;">AI Story Assistant & Chronicler</h6>
                 <small class="text-muted">Turn brief prompts or scattered memories into a beautiful, heartfelt story.</small>
             </div>
         </div>
@@ -109,7 +109,7 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <button type="button" id="btnGenerateAiDraft" class="btn btn-primary rounded-pill w-100 fw-semibold" style="background: #4f46e5; border-color: #4f46e5;">
+                <button type="button" id="btnGenerateAiDraft" class="btn btn-primary rounded-pill w-100 fw-semibold" style="background: #a31621; border-color: #a31621;">
                     <i class="bi bi-sparkles me-1"></i> Draft
                 </button>
             </div>
@@ -124,7 +124,7 @@
 
             <!-- Title -->
             <div class="mb-4">
-                <label for="titleInput" class="form-label fw-bold" style="color: #1e1b4b;">Story Title <span class="text-danger">*</span></label>
+                <label for="titleInput" class="form-label fw-bold" style="color: #2a0a0d;">Story Title <span class="text-danger">*</span></label>
                 <input type="text" class="form-control form-control-lg rounded-3" id="titleInput" name="title" value="{{ $isEdit ? $dec($journal['title']) : '' }}" placeholder="e.g. The Secret Ingredient in Grandmother's Sunday Bread" required style="font-size: 1.25rem; font-weight: 600;">
             </div>
 
@@ -156,7 +156,7 @@
             <div class="mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <label for="summaryInput" class="form-label fw-semibold small text-muted mb-0">Story Summary (Preview Excerpt)</label>
-                    <button type="button" id="btnAutoSummarize" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold" style="font-size: 0.8rem; color: #4f46e5;">
+                    <button type="button" id="btnAutoSummarize" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold" style="font-size: 0.8rem; color: #a31621;">
                         <i class="bi bi-magic me-1"></i> Auto-Summarise Content
                     </button>
                 </div>
@@ -165,7 +165,7 @@
 
             <!-- Rich Content Editor -->
             <div class="mb-4">
-                <label class="form-label fw-bold" style="color: #1e1b4b;">Story Content <span class="text-danger">*</span></label>
+                <label class="form-label fw-bold" style="color: #2a0a0d;">Story Content <span class="text-danger">*</span></label>
                 <div id="quillEditor" style="min-height: 280px; background: #ffffff;"></div>
                 <textarea id="quillFallback" class="form-control rounded-3" style="display: none; min-height: 280px; font-size: 1rem;" placeholder="Write your family memory, stories, traditions, or recipes here..."></textarea>
                 <input type="hidden" name="content" id="contentInput">
@@ -242,7 +242,7 @@
 
                 <div class="d-flex align-items-center gap-2">
                     <a href="{{ $isEdit ? '/familyJournal/' . (int)$journal['id'] : '/familyJournal' }}" class="btn btn-light rounded-pill px-4" style="min-height: 44px; display: inline-flex; align-items: center;">Cancel</a>
-                    <button type="submit" id="btnSubmitJournal" class="btn btn-primary rounded-pill px-4 fw-bold btn-spin-on-click" style="background: #4f46e5; border-color: #4f46e5; min-height: 44px;">
+                    <button type="submit" id="btnSubmitJournal" class="btn btn-primary rounded-pill px-4 fw-bold btn-spin-on-click" style="background: #a31621; border-color: #a31621; min-height: 44px;">
                         <i class="bi bi-cloud-arrow-up-fill me-1"></i> {{ $isEdit ? 'Save Changes' : 'Preserve Chronicle' }}
                     </button>
                 </div>

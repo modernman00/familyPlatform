@@ -27,6 +27,6 @@
 @endphp
 
 <div style="text-align: center;">
-    <a href="{{ $baseUrl }}/login" style="background-color: #00bfa5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Log in to Your Account</a>
+    <a href="{{ $baseUrl }}/login" style="background-color: #a31621; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Log in to Your Account</a>
 </div>
 @endsection

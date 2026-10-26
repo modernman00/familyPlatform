@@ -6,7 +6,7 @@
         <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff; max-height: calc(100vh - 3.5rem);">
             <div class="modal-header border-0 bg-light px-4 pt-4 pb-2 flex-shrink-0">
                 <div class="d-flex align-items-center gap-2">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center text-primary" style="width: 44px; height: 44px; background: #e0e7ff; font-size: 1.3rem;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center text-primary" style="width: 44px; height: 44px; background: #f5dede; font-size: 1.3rem;">
                         <i class="bi bi-camera-reels-fill"></i>
                     </div>
                     <div>
@@ -68,7 +68,7 @@
                                 </div>
 
                                 <!-- Live Tray Cover Card Preview (Zero-Stretch Verification) -->
-                                <div class="rounded-3 overflow-hidden shadow position-relative" style="width: 115px; height: 190px; background: #000000; border: 2px solid #4f46e5;">
+                                <div class="rounded-3 overflow-hidden shadow position-relative" style="width: 115px; height: 190px; background: #000000; border: 2px solid #a31621;">
                                     <canvas id="reelCoverPreviewCanvas" width="540" height="960" class="w-100 h-100" style="object-fit: cover; display: block;"></canvas>
                                     <span class="badge bg-primary position-absolute top-0 start-0 m-1" style="font-size: 0.6rem;">Tray Cover</span>
                                 </div>

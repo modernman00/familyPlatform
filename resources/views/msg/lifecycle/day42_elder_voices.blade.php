@@ -26,11 +26,11 @@
     Think about the wisdom and experiences your parents, aunts, uncles, and grandparents hold. In thirty or fifty years, what would future generations give to hear them speak directly to the camera?
 </p>
 
-<div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border-left: 4px solid #14b8a6; padding: 20px 24px; border-radius: 8px; margin-bottom: 24px;">
-    <h4 style="margin: 0 0 8px 0; color: #0f766e; font-size: 16px; font-weight: 700;">
+<div style="background: linear-gradient(135deg, #fdf5f5 0%, #f3d9db 100%); border-left: 4px solid #b8202c; padding: 20px 24px; border-radius: 8px; margin-bottom: 24px;">
+    <h4 style="margin: 0 0 8px 0; color: #8a1019; font-size: 16px; font-weight: 700;">
         🎬 Living Heritage Reels
     </h4>
-    <p style="margin: 0; color: #115e59; font-size: 14px; line-height: 1.5;">
+    <p style="margin: 0; color: #8a1019; font-size: 14px; line-height: 1.5;">
         You do not need a studio or complicated equipment. Using your mobile phone, capture a simple 60-second video of an elder sharing their favourite piece of advice or their most memorable life lesson.
     </p>
 </div>
@@ -49,7 +49,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0 24px 0;">
     <tr>
         <td align="center">
-            <a href="{{ $baseUrl }}/member/reels" target="_blank" style="background: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(20, 184, 166, 0.35);">
+            <a href="{{ $baseUrl }}/member/reels" target="_blank" style="background: linear-gradient(135deg, #b8202c 0%, #8a1019 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(184,32,44, 0.35);">
                 Record a Family Reel &rarr;
             </a>
         </td>

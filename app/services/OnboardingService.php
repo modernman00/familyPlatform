@@ -35,7 +35,8 @@ class OnboardingService
      *     completed_count: int,
      *     total_steps: int,
      *     steps: array<string, array{key: string, title: string, description: string, done: bool, action_url: string, icon: string}>,
-     *     invite_data: array{invite_url: string, whatsapp_url: string, invite_text: string, family_code: string, surname: string}
+     *     invite_data: array{invite_url: string, whatsapp_url: string, invite_text: string, family_code: string, surname: string, lineage_scope?: string},
+     *     birth_invite_data?: array{invite_url: string, whatsapp_url: string, invite_text: string, family_code: string, surname: string, lineage_scope: string}|null
      * }
      */
     public function getOnboardingState(string $userId, string $famCode): array
@@ -80,8 +81,20 @@ class OnboardingService
         $progressPercentage = (int)round(($completedCount / $totalSteps) * 100);
         $isCompleted = ($completedCount === $totalSteps);
 
-        // 2. Generate viral invite payload
-        $inviteData = $this->generateInviteData($userId, $famCode);
+        // 2. Generate viral invite payload (marital / primary household)
+        $inviteData = $this->generateInviteData($userId, $famCode, 'primary');
+
+        // 3. Check if user also holds an active Birth / Maiden family code (otherFamCode)
+        $birthInviteData = null;
+        try {
+            $birthStatus = (new BirthFamilyCodeService($this->db))->status($userId);
+            $birthCode = strtoupper(trim($birthStatus['code']));
+            if ($birthStatus['state'] === 'active' && $birthCode !== '' && $birthCode !== strtoupper($famCode)) {
+                $birthInviteData = $this->generateInviteData($userId, $birthCode, 'maternal');
+            }
+        } catch (\Throwable $e) {
+            $birthInviteData = null;
+        }
 
         return [
             'completed' => $isCompleted,
@@ -90,6 +103,7 @@ class OnboardingService
             'total_steps' => $totalSteps,
             'steps' => $steps,
             'invite_data' => $inviteData,
+            'birth_invite_data' => $birthInviteData,
         ];
     }
 
@@ -125,18 +139,22 @@ class OnboardingService
      *
      * @param string $userId
      * @param string $famCode
-     * @return array{invite_url: string, whatsapp_url: string, invite_text: string, family_code: string, surname: string}
+     * @param string $lineageScope 'primary' | 'maternal'
+     * @return array{invite_url: string, whatsapp_url: string, invite_text: string, family_code: string, surname: string, lineage_scope: string}
      */
-    public function generateInviteData(string $userId, string $famCode): array
+    public function generateInviteData(string $userId, string $famCode, string $lineageScope = 'primary'): array
     {
-        // Fetch family's surname for display (not for URL)
-        $surname = $this->getFamilySurname($userId, $famCode);
+        // Fetch family's surname for display (marital vs. maiden/birth surname)
+        $surname = $this->getFamilySurname($userId, $famCode, $lineageScope);
 
         // Create an opaque invite token (max 50 uses — general shareable family link)
         try {
             $token     = InviteTokenService::create(
                 $famCode,
-                ['invited_by' => $userId],
+                [
+                    'invited_by'    => $userId,
+                    'lineage_scope' => $lineageScope,
+                ],
                 'onboarding',
                 null,  // uses default TTL_LONG (30 days)
                 50     // general family link — up to 50 people can use
@@ -152,15 +170,20 @@ class OnboardingService
         // WhatsApp: share URL only so the OG card renders the branded 1200×630 preview
         $whatsappUrl = 'https://api.whatsapp.com/send?text=' . rawurlencode($inviteUrl);
 
-        $inviteText = "👋 Hey! I've just set up our private {$surname} Family Network & Heritage Tree on FamilyPlatform. "
+        $treeLabel = ($lineageScope === 'maternal')
+            ? "{$surname} Birth Family Network & Heritage Tree"
+            : "{$surname} Family Network & Heritage Tree";
+
+        $inviteText = "👋 Hey! I've just set up our private {$treeLabel} on FamilyPlatform (Family Code: #{$famCode}). "
             . "Claim your branch, explore our lineage, and share memories with us here: {$inviteUrl}";
 
         return [
-            'invite_url'   => $inviteUrl,
-            'whatsapp_url' => $whatsappUrl,
-            'invite_text'  => $inviteText,
-            'family_code'  => $famCode,
-            'surname'      => $surname,
+            'invite_url'    => $inviteUrl,
+            'whatsapp_url'  => $whatsappUrl,
+            'invite_text'   => $inviteText,
+            'family_code'   => $famCode,
+            'surname'       => $surname,
+            'lineage_scope' => $lineageScope,
         ];
     }
 
@@ -213,9 +236,22 @@ class OnboardingService
         }
     }
 
-    private function getFamilySurname(string $userId, string $famCode): string
+    private function getFamilySurname(string $userId, string $famCode, string $lineageScope = 'primary'): string
     {
         try {
+            if ($lineageScope === 'maternal') {
+                $stmtMaiden = $this->db->prepare("SELECT maiden_name FROM otherFamily WHERE id = ? LIMIT 1");
+                $stmtMaiden->execute([$userId]);
+                $maiden = trim((string)$stmtMaiden->fetchColumn());
+                if ($maiden !== '') {
+                    return $maiden;
+                }
+                $cleanBirthCode = preg_replace('/[0-9]+/', '', $famCode);
+                if (!empty($cleanBirthCode)) {
+                    return ucfirst(strtolower($cleanBirthCode));
+                }
+            }
+
             $stmt = $this->db->prepare("SELECT lastName FROM personal WHERE id = ? LIMIT 1");
             $stmt->execute([$userId]);
             $name = (string)$stmt->fetchColumn();

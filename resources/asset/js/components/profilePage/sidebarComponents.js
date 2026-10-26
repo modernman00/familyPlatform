@@ -141,7 +141,7 @@ export function upcomingEvents(initialEvents) {
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
+                cancelButtonColor: '#a31621',
                 confirmButtonText: 'Yes, delete it!'
             });
             if (!result.isConfirmed) return;
@@ -155,7 +155,7 @@ export function upcomingEvents(initialEvents) {
                     icon: 'error',
                     title: 'Delete Failed',
                     text: err?.response?.data?.message || 'Failed to delete event.',
-                    confirmButtonColor: '#3085d6'
+                    confirmButtonColor: '#a31621'
                 });
             }
         },

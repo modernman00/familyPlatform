@@ -4,7 +4,7 @@
 <section id="{{ $tnId }}" class="then-now-timeline card border-0 shadow-sm mb-4 d-none" aria-label="Then and Now photos"
          style="border-radius: 20px; background-color: var(--card-bg, #ffffff);">
     <div class="card-body px-3 px-sm-4 py-3">
-        <h5 class="fw-bold mb-1" style="font-size: 1rem;"><i class="bi bi-hourglass-split me-1" style="color:#8b5cf6;"></i> Then &amp; Now</h5>
+        <h5 class="fw-bold mb-1" style="font-size: 1rem;"><i class="bi bi-hourglass-split me-1" style="color:#b8202c;"></i> Then &amp; Now</h5>
         <p class="text-muted small mb-3" style="font-size: .8rem;">Before and after photos {{ !empty($memberName) ? 'of ' . e($memberName) : '' }} from the family feed.</p>
         <div class="then-now-timeline__list d-flex gap-3 overflow-auto pb-1" role="list"></div>
     </div>

@@ -14,11 +14,29 @@
                 <div>
                     <h2 class="organogram-title fw-bold" id="treeHeaderTitle">
                         <i class="bi bi-diagram-3"></i>
-                        {{ $data['firstName'] ?? '' }} {{ $data['lastName'] ?? '' }}'s Family Tree
+                        @if(($activeLineageScope ?? 'primary') === 'maternal' && !empty($maidenSurname))
+                            {{ $data['firstName'] ?? '' }}'s {{ $maidenSurname }} Birth Family Tree
+                        @else
+                            {{ $data['firstName'] ?? '' }} {{ $data['lastName'] ?? '' }}'s Family Tree
+                        @endif
                     </h2>
-                    <p class="organogram-subtitle">
-                        Explore your family heritage, partners, and lineage. Click any person to see their details and full profile.
+                    <p class="organogram-subtitle mb-0">
+                        @if(($activeLineageScope ?? 'primary') === 'maternal' && !empty($maternalFamCode))
+                            Exploring your Birth / Maiden Family lineage (<strong>#{{ $maternalFamCode }}</strong>). Click any person to see their details and full profile.
+                        @else
+                            Explore your family heritage, partners, and lineage. Click any person to see their details and full profile.
+                        @endif
                     </p>
+                    @if(!empty($hasMaternalCode) && !empty($maternalFamCode))
+                    <div class="d-inline-flex flex-wrap align-items-center gap-2 mt-2 p-1 rounded-pill" style="background: rgba(15, 23, 42, 0.78); border: 1px solid rgba(245, 158, 11, 0.35);">
+                        <a href="?lineage=primary" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') !== 'maternal' ? 'btn-warning text-dark shadow-sm' : 'text-white-50' }}" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                            <i class="bi bi-house-heart-fill"></i> Marital / Household Tree (#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})
+                        </a>
+                        <a href="?lineage=birth" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') === 'maternal' ? 'btn-warning text-dark shadow-sm' : 'text-white-50' }}" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                            <i class="bi bi-diagram-3-fill"></i> Birth / Maiden Family (#{{ $maternalFamCode }})
+                        </a>
+                    </div>
+                    @endif
                 </div>
 
                 <!-- Actions (Search & Config) -->
@@ -44,7 +62,7 @@
                     <button type="button" class="btn-action" onclick="openFamilyFlyerModal()" title="Generate WhatsApp Family Status Flyer" style="border-color: rgba(245, 158, 11, 0.4); color: #f59e0b;">
                         <i class="bi bi-card-image text-warning"></i> WhatsApp Flyer
                     </button>
-                    <button type="button" class="btn-action" onclick="openTimeCapsuleModal()" title="Digital Time Capsule Vault" style="border-color: rgba(168, 85, 247, 0.4); color: #a855f7;">
+                    <button type="button" class="btn-action" onclick="openTimeCapsuleModal()" title="Digital Time Capsule Vault" style="border-color: rgba(184,32,44, 0.4); color: #ef6b73;">
                         <i class="bi bi-hourglass-split text-primary"></i> Time Capsule
                     </button>
                     <a href="/familyStudio" id="configureFamilyBtn" class="btn-action" title="Open Lineage Studio">
@@ -68,7 +86,7 @@
     <div class="tree-mode-switcher-container text-center mb-1 d-flex flex-wrap align-items-center justify-content-center gap-2">
         @if(empty($isReadOnly))
         <div class="d-flex align-items-center gap-2 flex-shrink-0 tree-quick-actions">
-            <button type="button" onclick="openAddRelativeModalFromBanner()" class="btn btn-primary fw-bold text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); border: none; border-radius: 10px; min-height: 44px; font-size: 0.9rem;">
+            <button type="button" onclick="openAddRelativeModalFromBanner()" class="btn btn-primary fw-bold text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #a31621 0%, #b8202c 100%); border: none; border-radius: 10px; min-height: 44px; font-size: 0.9rem;">
                 <i class="bi bi-person-plus-fill me-1"></i> Add Family
             </button>
             <button type="button" onclick="openLineageQuestModal()" class="btn btn-success fw-bold text-white text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center" style="border-radius: 10px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; min-height: 44px; font-size: 0.9rem;">
@@ -117,7 +135,7 @@
 
         @if(empty($isSelf) && empty($graphData['has_built_tree']))
         <!-- Prominent Lineage Tree Prompt Banner -->
-        <div id="promptBuildTreeBanner" class="alert shadow-lg border-0 rounded-4 mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 p-3 gap-3" style="background: linear-gradient(135deg, rgba(30, 27, 75, 0.9) 0%, rgba(49, 46, 129, 0.85) 100%); border: 1px solid rgba(245, 158, 11, 0.3); border-left: 5px solid #f59e0b !important; backdrop-filter: blur(16px); box-shadow: 0 16px 36px rgba(0,0,0,0.4);">
+        <div id="promptBuildTreeBanner" class="alert shadow-lg border-0 rounded-4 mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 p-3 gap-3" style="background: linear-gradient(135deg, rgba(42,10,13, 0.9) 0%, rgba(42,10,13, 0.85) 100%); border: 1px solid rgba(245, 158, 11, 0.3); border-left: 5px solid #f59e0b !important; backdrop-filter: blur(16px); box-shadow: 0 16px 36px rgba(0,0,0,0.4);">
             <div class="d-flex align-items-center gap-3">
                 <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; flex-shrink: 0;">
                     <i class="bi bi-bell-fill fs-4"></i>
@@ -135,14 +153,14 @@
 
         @if(empty($isReadOnly))
         <!-- Kinship Auto-Match Discovery Banner ("Is this you on the family tree?") -->
-        <div id="kinshipAutoMatchBanner" class="alert shadow-lg border-0 rounded-4 mb-4 d-none flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 gap-3" style="background: linear-gradient(135deg, rgba(13, 37, 43, 0.95) 0%, rgba(19, 78, 74, 0.85) 100%); border: 1px solid rgba(0, 191, 165, 0.35); border-left: 5px solid #00bfa5 !important; backdrop-filter: blur(16px); z-index: 100; position: relative; box-shadow: 0 16px 36px rgba(0, 191, 165, 0.2) !important;">
+        <div id="kinshipAutoMatchBanner" class="alert shadow-lg border-0 rounded-4 mb-4 d-none flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 gap-3" style="background: linear-gradient(135deg, rgba(13, 37, 43, 0.95) 0%, rgba(19, 78, 74, 0.85) 100%); border: 1px solid rgba(163,22,33, 0.35); border-left: 5px solid #a31621 !important; backdrop-filter: blur(16px); z-index: 100; position: relative; box-shadow: 0 16px 36px rgba(163,22,33, 0.2) !important;">
             <div class="d-flex flex-column flex-md-row align-items-center gap-3 w-100 text-center text-md-start">
-                <div class="d-flex align-items-center justify-content-center rounded-circle p-2" style="background: rgba(0, 191, 165, 0.15); min-width: 48px; min-height: 48px;">
-                    <i class="bi bi-person-bounding-box fs-3" style="color: #00bfa5;"></i>
+                <div class="d-flex align-items-center justify-content-center rounded-circle p-2" style="background: rgba(163,22,33, 0.15); min-width: 48px; min-height: 48px;">
+                    <i class="bi bi-person-bounding-box fs-3" style="color: #a31621;"></i>
                 </div>
                 <div class="flex-grow-1">
                     <div class="d-flex flex-wrap align-items-center gap-2 mb-1 justify-content-center justify-content-md-start">
-                        <span class="badge" style="background: #00bfa5; color: #ffffff; font-size: 0.75rem; letter-spacing: 0.5px;">
+                        <span class="badge" style="background: #a31621; color: #ffffff; font-size: 0.75rem; letter-spacing: 0.5px;">
                             <i class="bi bi-stars me-1"></i> RELATIVE IDENTIFIED
                         </span>
                         <span id="matchConfidenceBadge" class="badge bg-dark text-light border border-secondary" style="font-size: 0.75rem;">
@@ -150,7 +168,7 @@
                         </span>
                     </div>
                     <h6 class="mb-1 fw-bold text-white fs-6" id="matchHeadline">
-                        We found <span id="matchPersonName" style="color: #2dd4bf;">Relative</span> on this family tree. Is this you?
+                        We found <span id="matchPersonName" style="color: #b8202c;">Relative</span> on this family tree. Is this you?
                     </h6>
                     <p class="mb-0 text-white-50" id="matchRelationshipHint" style="font-size: 0.88rem;">
                         Relative on the family tree
@@ -158,7 +176,7 @@
                 </div>
             </div>
             <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 w-100 w-md-auto justify-content-center justify-content-md-end flex-shrink-0">
-                <button type="button" id="btnConfirmMatch" onclick="openClaimMatchModal()" class="btn btn-sm px-4 py-2 fw-bold text-white shadow-sm text-nowrap" style="background: linear-gradient(135deg, #00bfa5 0%, #00897b 100%); border-radius: 10px; font-size: 0.9rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
+                <button type="button" id="btnConfirmMatch" onclick="openClaimMatchModal()" class="btn btn-sm px-4 py-2 fw-bold text-white shadow-sm text-nowrap" style="background: linear-gradient(135deg, #a31621 0%, #8a1019 100%); border-radius: 10px; font-size: 0.9rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
                     <i class="bi bi-check2-circle me-1"></i> Yes, Connect My Account
                 </button>
                 <button type="button" id="btnDismissMatch" onclick="dismissCurrentMatch()" class="btn btn-dark btn-sm px-3 py-2 fw-semibold text-light border border-secondary text-nowrap" style="border-radius: 10px; font-size: 0.88rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
@@ -257,7 +275,7 @@
                             <a id="cardWhatsappBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn-action" style="background: #25D366; color: white; border: none; font-size: 0.8rem; padding: 7px 12px; border-radius: 999px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
                                 <i class="bi bi-whatsapp"></i> WhatsApp
                             </a>
-                            <a id="cardSmsBtn" href="#" class="btn-action" style="background: #4f46e5; color: white; border: none; font-size: 0.8rem; padding: 7px 12px; border-radius: 999px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                            <a id="cardSmsBtn" href="#" class="btn-action" style="background: #a31621; color: white; border: none; font-size: 0.8rem; padding: 7px 12px; border-radius: 999px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
                                 <i class="bi bi-chat-text-fill"></i> SMS
                             </a>
                             <button type="button" id="cardCopyBtn" onclick="copyCardInviteLink(this)" class="btn-action" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); font-size: 0.8rem; padding: 7px 12px; border-radius: 999px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
@@ -301,7 +319,7 @@
                     <!-- Navigation Actions inside card -->
                     <div class="card-actions">
                         <div style="display: flex; gap: 8px;">
-                            <button type="button" class="btn-action w-100" onclick="traceCardLineage()" style="background: rgba(99, 102, 241, 0.2); border-color: rgba(129, 140, 248, 0.4); color: #c7d2fe;">
+                            <button type="button" class="btn-action w-100" onclick="traceCardLineage()" style="background: rgba(184,32,44, 0.2); border-color: rgba(239,107,115, 0.4); color: #ecc7c9;">
                                 <i class="bi bi-compass-fill text-warning"></i> Trace Lineage
                             </button>
                             <button type="button" class="btn-action" onclick="centerCardNode()" style="flex-shrink: 0;" title="Center on Node">
@@ -335,7 +353,7 @@
                             </div>
                         @else
                             <div class="d-flex flex-column align-items-center justify-content-center p-5 text-center" style="min-height: 480px;">
-                                <div class="rounded-circle d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; background: rgba(59, 130, 246, 0.1); border: 2px dashed #3b82f6;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; background: rgba(163,22,33, 0.1); border: 2px dashed #a31621;">
                                     <i class="bi bi-diagram-3 text-primary fs-1"></i>
                                 </div>
                                 <h3 class="fw-bold text-white mb-2">{{ trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? '')) }} Has Not Connected Their Branch Yet</h3>
@@ -426,7 +444,7 @@
                     </div>
                 @else
                     <div class="d-flex flex-column align-items-center justify-content-center p-5 text-center" style="min-height: 480px;">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; background: rgba(59, 130, 246, 0.1); border: 2px dashed #3b82f6;">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; background: rgba(163,22,33, 0.1); border: 2px dashed #a31621;">
                             <i class="bi bi-diagram-3 text-primary fs-1"></i>
                         </div>
                         <h3 class="fw-bold text-white mb-2">{{ trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? '')) }} Has Not Connected Their Branch Yet</h3>
@@ -470,11 +488,11 @@
             <!-- Quadrant Color Legend -->
             <div class="d-flex flex-wrap justify-content-center gap-3 mb-3 p-2 rounded-pill" style="background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); width: fit-content; margin: 0 auto; font-size: 0.8rem;">
                 <div class="d-flex align-items-center gap-1 text-white">
-                    <span style="width: 12px; height: 12px; border-radius: 3px; background: #3b82f6; display: inline-block;"></span>
+                    <span style="width: 12px; height: 12px; border-radius: 3px; background: #a31621; display: inline-block;"></span>
                     <span>Paternal Grandfather</span>
                 </div>
                 <div class="d-flex align-items-center gap-1 text-white">
-                    <span style="width: 12px; height: 12px; border-radius: 3px; background: #60a5fa; display: inline-block;"></span>
+                    <span style="width: 12px; height: 12px; border-radius: 3px; background: #ef6b73; display: inline-block;"></span>
                     <span>Paternal Grandmother</span>
                 </div>
                 <div class="d-flex align-items-center gap-1 text-white">
@@ -498,7 +516,7 @@
         </div>
 
         <!-- Mode 4: 3D Dynasty Migration Globe Container (Spatial Lineage & Diaspora) -->
-        <div class="dynasty-globe-wrapper d-none position-relative" id="dynastyGlobeContainer" style="min-height: 720px; background: radial-gradient(circle at center, #090d16 0%, #030712 100%); border-radius: 24px; padding: 24px; box-shadow: 0 20px 48px rgba(0,0,0,0.5); border: 1px solid rgba(59, 130, 246, 0.25); overflow: hidden;">
+        <div class="dynasty-globe-wrapper d-none position-relative" id="dynastyGlobeContainer" style="min-height: 720px; background: radial-gradient(circle at center, #090d16 0%, #030712 100%); border-radius: 24px; padding: 24px; box-shadow: 0 20px 48px rgba(0,0,0,0.5); border: 1px solid rgba(163,22,33, 0.25); overflow: hidden;">
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
                 <div>
                     <h4 class="text-white fw-bold mb-1"><i class="bi bi-globe-americas text-info me-2"></i>3D Dynasty Migration Globe</h4>
@@ -555,9 +573,9 @@
                 <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 4"/></svg><span class="legend-stamp legend-stamp-divorced">DIVORCED</span></div>
                 <div class="legend-item"><span class="legend-stamp legend-stamp-separated">SEPARATED</span></div>
                 <div class="legend-item"><span class="legend-stamp legend-stamp-widowed">WIDOWED</span></div>
-                <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#818cf8" stroke-width="2.5"/></svg><span>Parent &amp; child</span></div>
-                <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#818cf8" stroke-width="2.5" stroke-dasharray="8 5"/></svg><span>Half-sibling (one shared parent)</span></div>
-                <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#818cf8" stroke-width="2.5" stroke-dasharray="2 5" stroke-linecap="round"/></svg><span>Step / adopted</span></div>
+                <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#ef6b73" stroke-width="2.5"/></svg><span>Parent &amp; child</span></div>
+                <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#ef6b73" stroke-width="2.5" stroke-dasharray="8 5"/></svg><span>Half-sibling (one shared parent)</span></div>
+                <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#ef6b73" stroke-width="2.5" stroke-dasharray="2 5" stroke-linecap="round"/></svg><span>Step / adopted</span></div>
             </div>
         </div>
 
@@ -690,7 +708,7 @@
                             <canvas id="storyCanvas" width="540" height="960" style="width: 100%; max-width: 280px; border-radius: 18px; box-shadow: 0 16px 36px rgba(0,0,0,0.5);"></canvas>
                         </div>
                         <div class="d-flex gap-2 justify-content-center mt-3">
-                            <button type="button" id="btnDownloadStory" class="btn btn-primary fw-bold px-4 py-2" style="border-radius: 50px; background: linear-gradient(135deg, #4f46e5, #3b82f6); border: none;">
+                            <button type="button" id="btnDownloadStory" class="btn btn-primary fw-bold px-4 py-2" style="border-radius: 50px; background: linear-gradient(135deg, #a31621, #a31621); border: none;">
                                 <i class="bi bi-download me-2"></i>Save Card
                             </button>
                             <button type="button" class="btn btn-outline-light fw-bold px-3 py-2" style="border-radius: 50px;" data-bs-dismiss="modal">
@@ -706,8 +724,8 @@
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff;">
                     <div class="modal-header border-0 pb-0 pt-4 px-4">
                         <div class="d-flex align-items-center gap-2">
-                            <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: rgba(0, 191, 165, 0.12); width: 40px; height: 40px;">
-                                <i class="bi bi-person-check-fill fs-5" style="color: #00bfa5;"></i>
+                            <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: rgba(163,22,33, 0.12); width: 40px; height: 40px;">
+                                <i class="bi bi-person-check-fill fs-5" style="color: #a31621;"></i>
                             </div>
                             <div>
                                 <h5 class="modal-title fw-bold text-dark mb-0 fs-6">Claim Your Spot on the Tree</h5>
@@ -718,8 +736,8 @@
                     </div>
                     <div class="modal-body p-4 text-center">
                         <div class="mb-3 position-relative d-inline-block">
-                            <img id="claimModalAvatar" src="/resources/images/profile/avatarM.png" class="rounded-circle shadow-sm" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid #00bfa5;">
-                            <span class="position-absolute bottom-0 end-0 text-white rounded-circle p-1 shadow-sm d-flex align-items-center justify-content-center" style="width: 26px; height: 26px; font-size: 13px; background: #00bfa5;">
+                            <img id="claimModalAvatar" src="/resources/images/profile/avatarM.png" class="rounded-circle shadow-sm" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid #a31621;">
+                            <span class="position-absolute bottom-0 end-0 text-white rounded-circle p-1 shadow-sm d-flex align-items-center justify-content-center" style="width: 26px; height: 26px; font-size: 13px; background: #a31621;">
                                 <i class="bi bi-link-45deg"></i>
                             </span>
                         </div>
@@ -738,7 +756,7 @@
                     </div>
                     <div class="modal-footer border-0 pt-0 pb-4 px-4 d-flex gap-2">
                         <button type="button" class="btn btn-light btn-sm fw-semibold px-3 py-2 flex-grow-1" data-bs-dismiss="modal" style="border-radius: 10px;">Cancel</button>
-                        <button type="button" id="btnExecuteClaim" onclick="executeClaimMatch()" class="btn btn-primary btn-sm fw-bold px-4 py-2 flex-grow-1 text-white" style="background: linear-gradient(135deg, #00bfa5 0%, #00897b 100%); border: none; border-radius: 10px;">
+                        <button type="button" id="btnExecuteClaim" onclick="executeClaimMatch()" class="btn btn-primary btn-sm fw-bold px-4 py-2 flex-grow-1 text-white" style="background: linear-gradient(135deg, #a31621 0%, #8a1019 100%); border: none; border-radius: 10px;">
                             Confirm & Connect
                         </button>
                     </div>
@@ -835,7 +853,13 @@
     window.__ROOT_USER_ID__ = '{{ $data['id'] ?? '' }}';
     window.__LOGGED_IN_USER_ID__ = '{{ $_SESSION['id'] ?? '' }}';
     window.__VIEWED_MEMBER_NAME__ = '{{ trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? '')) }}';
-    window.__FAMILY_CODE__ = '{{ $data['famCode'] ?? '' }}';
+    window.__PRIMARY_FAMILY_CODE__ = '{{ $primaryFamCode ?? ($data['famCode'] ?? '') }}';
+    window.__BIRTH_FAMILY_CODE__ = '{{ !empty($hasMaternalCode) ? ($maternalFamCode ?? '') : '' }}';
+    window.__HAS_BIRTH_FAMILY__ = {{ !empty($hasMaternalCode) ? 'true' : 'false' }};
+    window.__ACTIVE_LINEAGE_SCOPE__ = '{{ $activeLineageScope ?? 'primary' }}';
+    window.__MARITAL_SURNAME__ = '{{ $maritalSurname ?? ($data['lastName'] ?? '') }}';
+    window.__MAIDEN_SURNAME__ = '{{ $maidenSurname ?? '' }}';
+    window.__FAMILY_CODE__ = '{{ ($activeLineageScope ?? 'primary') === 'maternal' && !empty($maternalFamCode) ? $maternalFamCode : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}';
     window.__IS_READ_ONLY__ = {{ !empty($isReadOnly) ? 'true' : 'false' }};
     
     const graphData = {!! $graphJson ?? '{}' !!};
@@ -1124,7 +1148,7 @@
                 </div>
             ` : `
                 <div class="d-flex flex-column align-items-center justify-content-center p-5 text-center" style="min-height: 480px;">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; background: rgba(59, 130, 246, 0.1); border: 2px dashed #3b82f6;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; background: rgba(163,22,33, 0.1); border: 2px dashed #a31621;">
                         <i class="bi bi-diagram-3 text-primary fs-1"></i>
                     </div>
                     <h3 class="fw-bold text-white mb-2">${memberName} Has Not Connected Their Branch Yet</h3>
@@ -1500,8 +1524,36 @@
             if (claimSpotSection) claimSpotSection.style.display = isReadOnlyTree ? 'none' : 'block';
 
             if (!isReadOnlyTree) {
-                const familyCode = window.__FAMILY_CODE__ || 'OLAOGUN';
+                const nodeFamCode = (node.raw && node.raw.family_code) ? String(node.raw.family_code).toUpperCase() : '';
+                const birthFamCode = (window.__BIRTH_FAMILY_CODE__ || '').toUpperCase();
+                const primaryFamCode = (window.__PRIMARY_FAMILY_CODE__ || window.__FAMILY_CODE__ || 'OLAOGUN').toUpperCase();
+                const roleLower = String(node.title || node.ego_relation || '').toLowerCase();
+                const isBirthRelativeRole = /(father|mother|dad|mum|parent|sister|brother|sibling|grandparent|grandfather|grandmother|uncle|aunt)/.test(roleLower);
+
+                // Resolve whether this node belongs to the Birth / Maiden Family or Marital / Household Tree
+                let familyCode = nodeFamCode || (window.__FAMILY_CODE__ || primaryFamCode);
+                if (window.__HAS_BIRTH_FAMILY__ && birthFamCode) {
+                    if (window.__ACTIVE_LINEAGE_SCOPE__ === 'maternal' || nodeFamCode === birthFamCode || (!nodeFamCode && isBirthRelativeRole)) {
+                        familyCode = birthFamCode;
+                    }
+                }
+                const isBirthLineage = Boolean(birthFamCode && familyCode.toUpperCase() === birthFamCode);
+                const familySurname = isBirthLineage
+                    ? (window.__MAIDEN_SURNAME__ || familyCode)
+                    : (window.__MARITAL_SURNAME__ || familyCode);
+                const treeContextLabel = isBirthLineage
+                    ? `${familySurname} Birth Family Tree (#${familyCode})`
+                    : `${familySurname} Family Tree (#${familyCode})`;
+
                 const cleanName = (node.name || 'Relative').replace(/\s+/g, ' ').trim();
+
+                // Update card subtitle to clarify Marital vs Birth family code
+                const claimSubtitle = document.querySelector('#cardClaimSpotSection .claim-spot-subtitle');
+                if (claimSubtitle) {
+                    claimSubtitle.innerHTML = isBirthLineage
+                        ? `Send a personal invite to join your <strong>Birth / Maiden Family (#${familyCode})</strong> and claim this spot.`
+                        : `Send a personal invite to join your <strong>Marital / Household Tree (#${familyCode})</strong> and claim this spot.`;
+                }
 
                 // Generate opaque invite token via AJAX — zero PII in the URL
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
@@ -1517,6 +1569,8 @@
                     },
                     body: JSON.stringify({
                         family_code: familyCode,
+                        lineage_scope: isBirthLineage ? 'maternal' : 'primary',
+                        family_surname: familySurname,
                         first_name: cleanName.split(' ')[0] || '',
                         last_name: cleanName.split(' ').slice(1).join(' ') || '',
                         node_id: node.id || null,
@@ -1534,7 +1588,7 @@
                         const inviteMessage = encodeURIComponent(
                             `🌳 *Family Heritage Invitation for ${cleanName}* 🌳\n\n` +
                             `Hello ${cleanName},\n\n` +
-                            `You have been honored as our *${relativeRole}* in the *${familyCode} Dynasty Family Tree* on FamilyPlatform.\n\n` +
+                            `You have been honoured as our *${relativeRole}* in the *${treeContextLabel}* on FamilyPlatform.\n\n` +
                             `✨ Claim your spot on the live family tree, share photos, record your living voice capsule, and preserve our ancestral heritage:\n\n` +
                             `👉 ${inviteLink}\n\n` +
                             `Welcome to our living family legacy!`
@@ -2159,7 +2213,7 @@
         // 1. Rich Gradient Background
         const grad = ctx.createLinearGradient(0, 0, W, H);
         grad.addColorStop(0, '#0f172a');
-        grad.addColorStop(0.35, '#1e1b4b');
+        grad.addColorStop(0.35, '#2a0a0d');
         grad.addColorStop(0.7, '#1e3a29');
         grad.addColorStop(1, '#064e3b');
         ctx.fillStyle = grad;
@@ -2179,13 +2233,13 @@
             // 3. Typography & Badges
             ctx.textAlign = 'center';
             ctx.fillStyle = '#d4af37';
-            ctx.font = '600 16px Plus Jakarta Sans, sans-serif';
+            ctx.font = '600 16px Inter, sans-serif';
             ctx.letterSpacing = '3px';
             ctx.fillText('FAMILY DYNASTY ARCHIVE', W / 2, 85);
 
             // Member Name
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 32px Plus Jakarta Sans, sans-serif';
+            ctx.font = 'bold 32px Inter, sans-serif';
             ctx.fillText(fullName || 'Family Relative', W / 2, 460);
 
             // Kinship Role Pill
@@ -2198,12 +2252,12 @@
             ctx.stroke();
 
             ctx.fillStyle = '#fef08a';
-            ctx.font = 'bold 15px Plus Jakarta Sans, sans-serif';
+            ctx.font = 'bold 15px Inter, sans-serif';
             ctx.fillText((relation || 'Relative').toUpperCase(), W / 2, 508);
 
             if (isDeceased) {
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-                ctx.font = 'italic 14px Plus Jakarta Sans, sans-serif';
+                ctx.font = 'italic 14px Inter, sans-serif';
                 ctx.fillText('🕊️ In Loving Memory', W / 2, 545);
             }
 
@@ -2217,22 +2271,22 @@
             ctx.stroke();
 
             const count = (graphData && graphData.nodes) ? graphData.nodes.length : 1;
-            ctx.font = 'bold 38px Plus Jakarta Sans, sans-serif';
+            ctx.font = 'bold 38px Inter, sans-serif';
             ctx.fillStyle = '#d4af37';
             ctx.fillText(String(count), W / 2 - 100, boxY + 60);
-            ctx.font = '600 13px Plus Jakarta Sans, sans-serif';
+            ctx.font = '600 13px Inter, sans-serif';
             ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
             ctx.fillText('RECORDED KIN', W / 2 - 100, boxY + 90);
 
-            ctx.font = 'bold 38px Plus Jakarta Sans, sans-serif';
+            ctx.font = 'bold 38px Inter, sans-serif';
             ctx.fillStyle = '#d4af37';
             ctx.fillText('6', W / 2 + 100, boxY + 60);
-            ctx.font = '600 13px Plus Jakarta Sans, sans-serif';
+            ctx.font = '600 13px Inter, sans-serif';
             ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
             ctx.fillText('GENERATIONS', W / 2 + 100, boxY + 90);
 
             // Footer
-            ctx.font = '14px Plus Jakarta Sans, sans-serif';
+            ctx.font = '14px Inter, sans-serif';
             ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
             ctx.fillText('familyplatform.com • Connect Your Heritage', W / 2, 880);
         }
@@ -2274,7 +2328,7 @@
             ctx.fillStyle = '#1e3a29';
             ctx.fill();
 
-            ctx.font = 'bold 70px Cinzel, serif';
+            ctx.font = '800 70px Inter, sans-serif';
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
             ctx.fillText(fullName ? fullName.charAt(0) : 'F', cx, cy + 25);
@@ -2380,9 +2434,95 @@
         }
     });
 
+    let currentWizardRelativeType = 'partner';
+
+    window.syncWizardLineageScope = function(scopeVal) {
+        const isMaternal = (scopeVal === 'maternal');
+        const primaryCode = window.__PRIMARY_FAMILY_CODE__ || window.__FAMILY_CODE__ || '';
+        const birthCode = window.__BIRTH_FAMILY_CODE__ || '';
+        const activeCode = (isMaternal && birthCode) ? birthCode : primaryCode;
+        const activeSurname = isMaternal
+            ? (window.__MAIDEN_SURNAME__ || birthCode || '')
+            : (window.__MARITAL_SURNAME__ || primaryCode || '');
+
+        document.querySelectorAll('input[name="wizard_lineage_scope_radio"]').forEach(r => {
+            r.checked = (r.value === (isMaternal ? 'maternal' : 'primary'));
+        });
+        document.querySelectorAll('.wizard-lineage-scope-input').forEach(inp => {
+            inp.value = isMaternal ? 'maternal' : 'primary';
+        });
+        document.querySelectorAll('.wizard-lineage-code-input').forEach(inp => {
+            inp.value = activeCode;
+        });
+
+        const badgeEl = document.getElementById('wizardActiveCodeBadge');
+        if (badgeEl && activeCode) {
+            badgeEl.textContent = '#' + activeCode;
+        }
+
+        const helpEl = document.getElementById('wizardLineageScopeHelp');
+        if (helpEl) {
+            helpEl.innerHTML = isMaternal
+                ? `Adding to your <strong>Birth / Maiden Family (#${activeCode})</strong> so your parents and birth siblings connect directly to your ${activeSurname ? activeSurname + ' ' : ''}birth lineage.`
+                : `Adding to your <strong>Marital / Household Tree (#${activeCode})</strong>. Switch to Birth / Maiden Family when adding your own parents or birth siblings.`;
+        }
+
+        const parentsHint = document.getElementById('parentsLineageHint');
+        if (parentsHint) {
+            parentsHint.innerHTML = isMaternal
+                ? `<i class="bi bi-diagram-3-fill me-1"></i> Saving parents to your <strong>Birth / Maiden Family (#${activeCode})</strong>. Provide details for one or both parents.`
+                : `<i class="bi bi-house-heart-fill me-1"></i> Saving parents to your <strong>Marital / Household Tree (#${activeCode})</strong>. Provide details for one or both parents.`;
+        }
+
+        // Update surname placeholders & button labels to reflect Marital vs Birth family context
+        const fatherLastInput = document.querySelector('#addParentsForm input[name="father_last_name"]');
+        const motherLastInput = document.querySelector('#addParentsForm input[name="mother_last_name"]');
+        const childLastInput = document.querySelector('#addChildForm input[name="last_name"]');
+        if (activeSurname) {
+            if (fatherLastInput) fatherLastInput.placeholder = activeSurname;
+            if (motherLastInput) motherLastInput.placeholder = activeSurname;
+            if (childLastInput) childLastInput.placeholder = activeSurname;
+        }
+
+        const parentsBtn = document.getElementById('submitParentsBtn');
+        if (parentsBtn && activeCode) {
+            parentsBtn.textContent = isMaternal
+                ? `Save Parents to Birth Family (#${activeCode})`
+                : `Save Parents to Marital Tree (#${activeCode})`;
+        }
+
+        const childBtn = document.getElementById('submitChildBtn');
+        if (childBtn && activeCode) {
+            const isSiblingMode = (currentWizardRelativeType === 'sibling');
+            const noun = isSiblingMode ? 'Sibling' : 'Child';
+            childBtn.textContent = isMaternal
+                ? `Save ${noun} to Birth Family (#${activeCode})`
+                : `Save ${noun} to Marital Tree (#${activeCode})`;
+        }
+
+        const partnerBtn = document.getElementById('submitPartnerBtn');
+        if (partnerBtn && activeCode) {
+            partnerBtn.textContent = isMaternal
+                ? `Save Partner (#${activeCode})`
+                : `Save Partner (#${activeCode})`;
+        }
+    };
+
     function selectRelativeType(type) {
+        currentWizardRelativeType = type;
         document.getElementById('step1').classList.add('d-none');
         document.getElementById('addRelativeError').classList.add('d-none');
+        document.getElementById('parentsBaseNodeId').value = currentBaseNodeId;
+
+        // Automatically select the most appropriate family code (Birth vs Marital) when user has both codes
+        if (window.__HAS_BIRTH_FAMILY__ && window.__BIRTH_FAMILY_CODE__) {
+            const isSelfNode = !currentBaseNodeName || currentBaseNodeName === 'Yourself' || String(currentBaseNodeId) === String(getGraphNodeId(window.__ROOT_USER_ID__, ''));
+            if (isSelfNode && (type === 'parents' || type === 'sibling')) {
+                window.syncWizardLineageScope('maternal');
+            } else if (type === 'partner' || type === 'child') {
+                window.syncWizardLineageScope(window.__ACTIVE_LINEAGE_SCOPE__ === 'maternal' ? 'maternal' : 'primary');
+            }
+        }
         
         if (type === 'partner') {
             document.getElementById('step2-partner').classList.remove('d-none');
@@ -2405,11 +2545,20 @@
         const hint = document.getElementById('childUnionHint');
         const label = document.getElementById('childUnionLabel');
         const save = document.getElementById('submitChildBtn');
-        if (hint) hint.textContent = sibling
-            ? 'Pick the parents you share with this sibling. They will be added as their brother or sister.'
-            : 'To add a child, you must select which partnership/union they belong to.';
+        const isMaternal = document.querySelector('input[name="wizard_lineage_scope_radio"]:checked')?.value === 'maternal';
+        const activeCode = isMaternal ? (window.__BIRTH_FAMILY_CODE__ || window.__FAMILY_CODE__ || '') : (window.__PRIMARY_FAMILY_CODE__ || window.__FAMILY_CODE__ || '');
+        const treeLabel = isMaternal ? `Birth / Maiden Family (#${activeCode})` : `Marital / Household Tree (#${activeCode})`;
+
+        if (hint) hint.innerHTML = sibling
+            ? `Pick the parents you share with this sibling in your <strong>${treeLabel}</strong>. They will be added as your brother or sister.`
+            : `To add a child to your <strong>${treeLabel}</strong>, select which partnership/union they belong to.`;
         if (label) label.innerHTML = (sibling ? 'Shared Parents' : 'Select Union') + ' <span class="text-danger">*</span>';
-        if (save) save.textContent = sibling ? 'Save Sibling' : 'Save Child';
+        if (save) {
+            const noun = sibling ? 'Sibling' : 'Child';
+            save.textContent = activeCode
+                ? (isMaternal ? `Save ${noun} to Birth Family (#${activeCode})` : `Save ${noun} to Marital Tree (#${activeCode})`)
+                : `Save ${noun}`;
+        }
     }
 
     function backToStep1() {
@@ -2663,8 +2812,8 @@
 
         const colors = {
             ego: '#f59e0b',
-            paternal_gf: '#3b82f6',
-            paternal_gm: '#60a5fa',
+            paternal_gf: '#a31621',
+            paternal_gm: '#ef6b73',
             maternal_gf: '#ec4899',
             maternal_gm: '#f472b6'
         };
@@ -2707,9 +2856,9 @@
         svgHtml += `
             <g class="fan-wedge ego-wedge" style="cursor: pointer;" onclick="onFanWedgeClick('1')">
                 <circle cx="${cx}" cy="${cy}" r="${r0}" fill="${egoColor}" stroke="#ffffff" stroke-width="2.5" opacity="0.95" filter="drop-shadow(0px 4px 10px rgba(0,0,0,0.5))"/>
-                <text x="${cx}" y="${cy - 8}" text-anchor="middle" fill="#0f172a" font-weight="800" font-size="12" font-family="Plus Jakarta Sans, sans-serif">${egoName.split(' ')[0]}</text>
-                <text x="${cx}" y="${cy + 8}" text-anchor="middle" fill="#0f172a" font-weight="700" font-size="10" font-family="Plus Jakarta Sans, sans-serif">${egoName.split(' ').slice(1).join(' ')}</text>
-                <text x="${cx}" y="${cy + 22}" text-anchor="middle" fill="#1e293b" font-weight="600" font-size="8.5" font-family="Plus Jakarta Sans, sans-serif">Focal Person</text>
+                <text x="${cx}" y="${cy - 8}" text-anchor="middle" fill="#0f172a" font-weight="800" font-size="12" font-family="Inter, sans-serif">${egoName.split(' ')[0]}</text>
+                <text x="${cx}" y="${cy + 8}" text-anchor="middle" fill="#0f172a" font-weight="700" font-size="10" font-family="Inter, sans-serif">${egoName.split(' ').slice(1).join(' ')}</text>
+                <text x="${cx}" y="${cy + 22}" text-anchor="middle" fill="#1e293b" font-weight="600" font-size="8.5" font-family="Inter, sans-serif">Focal Person</text>
             </g>
         `;
 
@@ -2756,8 +2905,8 @@
                     <g class="fan-wedge" style="cursor: pointer;" onclick="onFanWedgeClick('${slot}')">
                         <path d="${pathD}" fill="${fillColor}" fill-opacity="${opacity}" stroke="#0f172a" stroke-width="2" class="fan-arc-path" />
                         <g transform="translate(${textPos.x}, ${textPos.y}) rotate(${rotAngle})">
-                            <text x="0" y="-3" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="${gen === 3 ? '8.5' : '10.5'}" font-family="Plus Jakarta Sans, sans-serif">${l1}</text>
-                            ${l2 ? `<text x="0" y="8" text-anchor="middle" fill="#e2e8f0" font-weight="600" font-size="${gen === 3 ? '7.5' : '9'}" font-family="Plus Jakarta Sans, sans-serif">${l2}</text>` : ''}
+                            <text x="0" y="-3" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="${gen === 3 ? '8.5' : '10.5'}" font-family="Inter, sans-serif">${l1}</text>
+                            ${l2 ? `<text x="0" y="8" text-anchor="middle" fill="#e2e8f0" font-weight="600" font-size="${gen === 3 ? '7.5' : '9'}" font-family="Inter, sans-serif">${l2}</text>` : ''}
                         </g>
                     </g>
                 `;
@@ -3356,7 +3505,7 @@
             listEl.innerHTML = window.globeState.hubs.map((hub, idx) => `
                 <div class="p-2 rounded-3 d-flex align-items-center justify-content-between" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); cursor: pointer;" onclick="focusGlobeOnHub(${hub.lat}, ${hub.lon})">
                     <div class="d-flex align-items-center gap-2">
-                        <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; font-size: 0.75rem;">
+                        <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; background: rgba(163,22,33, 0.2); color: #ef6b73; font-size: 0.75rem;">
                             ${idx + 1}
                         </span>
                         <div>
@@ -3456,8 +3605,8 @@
 
         // 1. Atmosphere Glow & Starfield
         const atmosGrad = ctx.createRadialGradient(cx, cy, radius * 0.8, cx, cy, radius * 1.25);
-        atmosGrad.addColorStop(0, 'rgba(59, 130, 246, 0.25)');
-        atmosGrad.addColorStop(0.7, 'rgba(30, 58, 138, 0.1)');
+        atmosGrad.addColorStop(0, 'rgba(163,22,33, 0.25)');
+        atmosGrad.addColorStop(0.7, 'rgba(42,10,13, 0.1)');
         atmosGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = atmosGrad;
         ctx.beginPath();
@@ -3576,13 +3725,13 @@
             const p = project(hub.lat, hub.lon);
             if (p.visible) {
                 // Outer ripple
-                ctx.fillStyle = 'rgba(59, 130, 246, 0.35)';
+                ctx.fillStyle = 'rgba(163,22,33, 0.35)';
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, 9 + hub.members.length * 1.5, 0, Math.PI * 2);
                 ctx.fill();
 
                 // Inner core beacon
-                ctx.fillStyle = '#60a5fa';
+                ctx.fillStyle = '#ef6b73';
                 ctx.strokeStyle = '#ffffff';
                 ctx.lineWidth = 1.5;
                 ctx.beginPath();
@@ -3591,7 +3740,7 @@
                 ctx.stroke();
 
                 // City & Member Count Label
-                ctx.font = 'bold 11px Plus Jakarta Sans, sans-serif';
+                ctx.font = 'bold 11px Inter, sans-serif';
                 ctx.fillStyle = '#ffffff';
                 ctx.shadowColor = 'rgba(0,0,0,0.8)';
                 ctx.shadowBlur = 4;
@@ -3694,7 +3843,7 @@
                         icon: 'success',
                         title: 'Welcome Home!',
                         text: res.message || 'You are now connected to your spot on the family tree.',
-                        confirmButtonColor: '#00bfa5'
+                        confirmButtonColor: '#a31621'
                     }).then(() => {
                         window.location.reload();
                     });

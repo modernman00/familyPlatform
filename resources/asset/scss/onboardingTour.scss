@@ -37,7 +37,7 @@
   position: absolute;
   pointer-events: none;
   border-radius: 12px;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.6), 0 0 25px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 0 4px rgba(184,32,44, 0.6), 0 0 25px rgba(184,32,44, 0.4);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 10001;
   animation: tourPulse 2s infinite;
@@ -45,13 +45,13 @@
 
 @keyframes tourPulse {
   0% {
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.7), 0 0 20px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 0 3px rgba(184,32,44, 0.7), 0 0 20px rgba(184,32,44, 0.3);
   }
   50% {
-    box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.3), 0 0 30px rgba(99, 102, 241, 0.5);
+    box-shadow: 0 0 0 6px rgba(184,32,44, 0.3), 0 0 30px rgba(184,32,44, 0.5);
   }
   100% {
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.7), 0 0 20px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 0 3px rgba(184,32,44, 0.7), 0 0 20px rgba(184,32,44, 0.3);
   }
 }
 
@@ -84,8 +84,8 @@
       letter-spacing: 0.05em;
       padding: 4px 10px;
       border-radius: 20px;
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(59, 130, 246, 0.15));
-      color: #4f46e5;
+      background: linear-gradient(135deg, rgba(184,32,44, 0.15), rgba(163,22,33, 0.15));
+      color: #a31621;
     }
 
     .tour-close-btn {
@@ -116,7 +116,7 @@
     gap: 8px;
 
     i {
-      color: #4f46e5;
+      color: #a31621;
       font-size: 1.25rem;
     }
   }
@@ -149,7 +149,7 @@
         &.active {
           width: 20px;
           border-radius: 10px;
-          background: #4f46e5;
+          background: #a31621;
         }
       }
     }
@@ -193,7 +193,7 @@
       }
 
       .btn-tour-next {
-        background: linear-gradient(135deg, #4f46e5, #3b82f6);
+        background: linear-gradient(135deg, #a31621, #a31621);
         border: none;
         color: #ffffff;
         font-weight: 600;
@@ -201,12 +201,12 @@
         padding: 6px 16px;
         border-radius: 8px;
         cursor: pointer;
-        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        box-shadow: 0 4px 12px rgba(163,22,33, 0.3);
         transition: all 0.2s;
 
         &:hover {
           transform: translateY(-1px);
-          box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+          box-shadow: 0 6px 16px rgba(163,22,33, 0.4);
         }
       }
     }

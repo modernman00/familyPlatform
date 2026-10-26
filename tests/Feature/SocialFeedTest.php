@@ -194,5 +194,44 @@ final class SocialFeedTest extends SocialFeedTestCase
         $delStmt = $this->pdo->prepare("DELETE FROM comment WHERE comment_no = ?");
         $delStmt->execute([(int) $payload['comment_no']]);
     }
-}
 
+    public function test_post_comment_reply_is_stored_under_the_top_level_comment(): void
+    {
+        $postNo = $this->seedPost('Reply threading');
+        $top = $this->seedComment($postNo, 'top level', 'OTHER_PARENT');
+        $_SERVER['CONTENT_TYPE'] = 'multipart/form-data';
+        $_POST = ['post_no' => (string) $postNo, 'comment' => 'a reply', 'parent_comment_no' => (string) $top];
+
+        $controller = $this->makeWithoutConstructor(ProfilePage::class);
+        $response = $this->captureLastJson(fn () => $controller->postComment());
+
+        $payload = $response['message'] ?? null;
+        $this->assertSame('success', $response['status'] ?? null);
+        $this->assertSame($top, $payload['parent_comment_no'] ?? null);
+
+        $stmt = $this->pdo->prepare('SELECT parent_comment_no FROM comment WHERE comment_no = ?');
+        $stmt->execute([(int) $payload['comment_no']]);
+        $this->assertSame($top, (int) $stmt->fetchColumn());
+
+        $this->pdo->prepare('DELETE FROM notification WHERE sender_id = ?')->execute([$this->authorId]);
+        $commentNo = (int) $payload['comment_no'];
+        $this->pdo->prepare('DELETE FROM comment WHERE comment_no = ?')->execute([$commentNo]);
+    }
+
+    public function test_post_comment_reply_to_a_comment_on_another_post_is_rejected_and_saves_nothing(): void
+    {
+        $postA = $this->seedPost('A');
+        $postB = $this->seedPost('B');
+        $onA = $this->seedComment($postA);
+        $_SERVER['CONTENT_TYPE'] = 'multipart/form-data';
+        $_POST = ['post_no' => (string) $postB, 'comment' => 'cross-post reply', 'parent_comment_no' => (string) $onA];
+
+        $controller = $this->makeWithoutConstructor(ProfilePage::class);
+        $response = $this->captureLastJson(fn () => $controller->postComment());
+
+        $this->assertNotSame('success', $response['status'] ?? null);
+        $count = $this->pdo->prepare('SELECT COUNT(*) FROM comment WHERE post_no = ?');
+        $count->execute([(string) $postB]);
+        $this->assertSame(0, (int) $count->fetchColumn(), 'a rejected reply must not leave an orphan comment');
+    }
+}

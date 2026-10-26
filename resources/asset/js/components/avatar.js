@@ -27,7 +27,7 @@ if (window.devicePixelRatio) {
 
 context.fillStyle = colours[colourIndex];
 context.fillRect (0, 0, canvas.width, canvas.height);
-context.font = "50px Arial";
+context.font = "700 50px Inter, Arial, sans-serif";
 context.textAlign = "center";
 context.fillStyle = "#FFF";
 context.fillText(initials, canvasCssWidth / 2, canvasCssHeight / 1.5);

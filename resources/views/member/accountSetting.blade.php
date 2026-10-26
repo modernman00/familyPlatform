@@ -57,9 +57,9 @@
     }
 
     .nav-pills .nav-link.active {
-      background-color: #eff6ff;
-      color: #4f46e5;
-      border-left: 3px solid #4f46e5;
+      background-color: #fdf5f5;
+      color: #a31621;
+      border-left: 3px solid #a31621;
     }
 
     .nav-pills .nav-link i {
@@ -132,8 +132,8 @@
     }
 
     .form-control:focus, .form-select:focus {
-      border-color: #4f46e5;
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+      border-color: #a31621;
+      box-shadow: 0 0 0 3px rgba(163,22,33, 0.15);
       outline: none;
     }
 
@@ -240,7 +240,7 @@
     }
 
     input:checked + .slider {
-      background-color: #4f46e5;
+      background-color: #a31621;
     }
 
     input:checked + .slider:before {
@@ -249,7 +249,7 @@
 
     /* Buttons */
     .btn-save {
-      background-color: #4f46e5;
+      background-color: #a31621;
       color: #ffffff;
       font-weight: 600;
       padding: 12px 24px;
@@ -261,7 +261,7 @@
     }
 
     .btn-save:hover {
-      background-color: #4338ca;
+      background-color: #8a1019;
       color: white;
     }
 
@@ -430,7 +430,7 @@
               <div class="section-subtitle">Configure your father and mother details for your family tree connections.</div>
               <div class="section-divider"></div>
 
-              <div class="alert alert-primary shadow-sm border-0 rounded-3 mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between p-3 gap-2" style="background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);">
+              <div class="alert alert-primary shadow-sm border-0 rounded-3 mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between p-3 gap-2" style="background: linear-gradient(135deg, #fbefef 0%, #f5dede 100%);">
                 <div class="d-flex align-items-center">
                   <i class="bi bi-stars fs-3 text-primary me-3"></i>
                   <div>
@@ -447,14 +447,14 @@
               {{-- Shown whenever the user has a secondary/maternal family code set. --}}
               @php $hasMaternalCode = (($birthFamily['state'] ?? '') === 'active') && !empty($accountData['otherFamCode']); @endphp
               @if($hasMaternalCode)
-              <div class="p-3 rounded-3 mb-4 border" id="parents-lineage-banner" style="background: linear-gradient(135deg,#faf5ff 0%,#f3e8ff 100%); border-color:#e9d5ff!important;">
-                <div class="fw-bold text-purple mb-2" style="color:#7c3aed;">
+              <div class="p-3 rounded-3 mb-4 border" id="parents-lineage-banner" style="background: linear-gradient(135deg,#fbefef 0%,#fbefef 100%); border-color:#e9d5ff!important;">
+                <div class="fw-bold text-purple mb-2" style="color:#8a1019;">
                   <i class="bi bi-diagram-3-fill me-2"></i>Which family tree do these parents belong to?
                 </div>
-                <p class="small text-muted mb-3">You have two family connections. Choose the correct lineage so your parents are added to the right family tree and any invite sent uses the correct family code.</p>
+                <p class="small text-muted mb-3" id="parents-lineage-hint">You have both a marital and a birth family code. Your biological parents default to your <strong>Birth / Maiden Family (#{{ $accountData['otherFamCode'] }})</strong>, and any invitation sent will use that code.</p>
                 <div class="d-flex flex-column flex-sm-row gap-3" role="group" aria-label="Lineage scope for parents">
                   <label class="lineage-scope-pill d-flex align-items-center gap-2 px-4 py-3 rounded-3 border fw-semibold cursor-pointer" style="min-height:44px; cursor:pointer; flex:1;" id="parents-scope-primary-label">
-                    <input type="radio" name="parents_lineage_ui" id="parents-scope-primary" value="primary" checked class="form-check-input m-0">
+                    <input type="radio" name="parents_lineage_ui" id="parents-scope-primary" value="primary" class="form-check-input m-0">
                     <span>
                       <i class="bi bi-house-heart-fill text-primary me-1"></i>
                       Marital / Household Tree
@@ -462,7 +462,7 @@
                     </span>
                   </label>
                   <label class="lineage-scope-pill d-flex align-items-center gap-2 px-4 py-3 rounded-3 border fw-semibold cursor-pointer" style="min-height:44px; cursor:pointer; flex:1;" id="parents-scope-maternal-label">
-                    <input type="radio" name="parents_lineage_ui" id="parents-scope-maternal" value="maternal" class="form-check-input m-0">
+                    <input type="radio" name="parents_lineage_ui" id="parents-scope-maternal" value="maternal" checked class="form-check-input m-0">
                     <span>
                       <i class="bi bi-tree-fill text-success me-1"></i>
                       My Birth / Maiden Family
@@ -484,7 +484,7 @@
                 <input type="hidden" name="action" value="updateParents">
                 <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
                 {{-- lineage_scope & lineage_code are updated by the radio buttons above (JS) --}}
-                <input type="hidden" name="lineage_scope" id="parentsLineageScope" value="primary">
+                <input type="hidden" name="lineage_scope" id="parentsLineageScope" value="{{ $hasMaternalCode ? 'maternal' : 'primary' }}">
                 <input type="hidden" name="lineage_code" id="parentsLineageCode" value="{{ $accountData['otherFamCode'] ?? '' }}">
                 {{-- Expose the user's maiden/other code for use by the JS invite helper --}}
                 <input type="hidden" id="otherFamCode_id" value="{{ $accountData['otherFamCode'] ?? '' }}">
@@ -602,14 +602,14 @@
 
               {{-- ── Lineage Scope Selector ── --}}
               @if($hasMaternalCode)
-              <div class="p-3 rounded-3 mb-4 border" id="siblings-lineage-banner" style="background: linear-gradient(135deg,#faf5ff 0%,#f3e8ff 100%); border-color:#e9d5ff!important;">
-                <div class="fw-bold mb-2" style="color:#7c3aed;">
+              <div class="p-3 rounded-3 mb-4 border" id="siblings-lineage-banner" style="background: linear-gradient(135deg,#fbefef 0%,#fbefef 100%); border-color:#e9d5ff!important;">
+                <div class="fw-bold mb-2" style="color:#8a1019;">
                   <i class="bi bi-diagram-3-fill me-2"></i>Which family tree do these siblings belong to?
                 </div>
-                <p class="small text-muted mb-3">Choose the correct lineage so siblings are added to the right family tree and any invite uses the correct family code.</p>
+                <p class="small text-muted mb-3" id="siblings-lineage-hint">You have both a marital and a birth family code. Your brothers and sisters default to your <strong>Birth / Maiden Family (#{{ $accountData['otherFamCode'] }})</strong>, and any invitation sent will use that code.</p>
                 <div class="d-flex flex-column flex-sm-row gap-3" role="group" aria-label="Lineage scope for siblings">
                   <label class="lineage-scope-pill d-flex align-items-center gap-2 px-4 py-3 rounded-3 border fw-semibold" style="min-height:44px; cursor:pointer; flex:1;" id="siblings-scope-primary-label">
-                    <input type="radio" name="siblings_lineage_ui" id="siblings-scope-primary" value="primary" checked class="form-check-input m-0">
+                    <input type="radio" name="siblings_lineage_ui" id="siblings-scope-primary" value="primary" class="form-check-input m-0">
                     <span>
                       <i class="bi bi-house-heart-fill text-primary me-1"></i>
                       Marital / Household Tree
@@ -617,7 +617,7 @@
                     </span>
                   </label>
                   <label class="lineage-scope-pill d-flex align-items-center gap-2 px-4 py-3 rounded-3 border fw-semibold" style="min-height:44px; cursor:pointer; flex:1;" id="siblings-scope-maternal-label">
-                    <input type="radio" name="siblings_lineage_ui" id="siblings-scope-maternal" value="maternal" class="form-check-input m-0">
+                    <input type="radio" name="siblings_lineage_ui" id="siblings-scope-maternal" value="maternal" checked class="form-check-input m-0">
                     <span>
                       <i class="bi bi-tree-fill text-success me-1"></i>
                       My Birth / Maiden Family
@@ -638,7 +638,7 @@
               <form id="siblingsForm">
                 <input type="hidden" name="action" value="updateSiblings">
                 <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
-                <input type="hidden" name="lineage_scope" id="siblingsLineageScope" value="primary">
+                <input type="hidden" name="lineage_scope" id="siblingsLineageScope" value="{{ $hasMaternalCode ? 'maternal' : 'primary' }}">
                 <input type="hidden" name="lineage_code" id="siblingsLineageCode" value="{{ $accountData['otherFamCode'] ?? '' }}">
 
                 <div class="mb-4">
@@ -864,6 +864,20 @@
                   </div>
                 </div>
 
+                <div class="custom-switch">
+                  <div class="switch-info">
+                    <h6>Show Year of Birth</h6>
+                    <p>Display your birth year under Date of Birth on your profile (e.g. 29 / Jul / 1979). When turned off, only the day and month are visible (e.g. 29 / Jul).</p>
+                  </div>
+                  <div class="toggle-group">
+                    <span class="toggle-label">{{ ($accountData['show_birth_year'] ?? 'off') === 'on' ? 'ON' : 'OFF' }}</span>
+                    <label class="switch">
+                      <input type="checkbox" name="show_birth_year" value="{{ ($accountData['show_birth_year'] ?? 'off') === 'on' ? 'on' : 'off' }}" {{ ($accountData['show_birth_year'] ?? 'off') === 'on' ? 'checked' : '' }}>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
                 <button type="button" id="privacyBtn" class="btn-save mt-3">Save Privacy Settings</button>
               </form>
 
@@ -1041,13 +1055,13 @@
               <div class="card border-0 shadow-sm rounded-3 mb-4" id="birthFamilyCard" data-state="{{ $bfState }}" style="background: #ffffff; border: 1px solid #e2e8f0;">
                 <div class="card-body p-4">
                   <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: #faf5ff; color: #9333ea;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: #fbefef; color: #b8202c;">
                       <i class="bi bi-diagram-3-fill fs-4"></i>
                     </div>
                     <div class="flex-grow-1">
                       <div class="d-flex align-items-center gap-2 flex-wrap">
                         <h5 class="fw-bold mb-0">Birth / Maiden Family Code</h5>
-                        <span class="badge rounded-pill px-2.5 py-1" style="background-color: #f3e8ff; color: #7e22ce; font-size: 0.75rem;">Dual Lineage</span>
+                        <span class="badge rounded-pill px-2.5 py-1" style="background-color: #fbefef; color: #8a1019; font-size: 0.75rem;">Dual Lineage</span>
                       </div>
                       <span class="text-muted small">Keep your birth family connected without changing your household code.</span>
                     </div>
@@ -1075,10 +1089,10 @@
                   <div id="birthFamilyAlert" class="alert alert-danger small py-2 mb-3" style="display:none;" role="alert"></div>
 
                   @if($bfState === 'active')
-                    <div class="p-3 rounded-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background-color: #faf5ff; border: 1px solid #f3e8ff;">
+                    <div class="p-3 rounded-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background-color: #fbefef; border: 1px solid #fbefef;">
                       <div>
                         <span class="text-uppercase text-muted fw-bold small" style="letter-spacing: 0.05em;">Your birth family code</span>
-                        <h3 class="fw-bolder mb-0 mt-1" style="color:#7e22ce; letter-spacing:1px;">#<span id="birthCodeValue">{{ $bf['code'] }}</span></h3>
+                        <h3 class="fw-bolder mb-0 mt-1" style="color:#8a1019; letter-spacing:1px;">#<span id="birthCodeValue">{{ $bf['code'] }}</span></h3>
                       </div>
                       <div class="d-flex gap-2 flex-wrap">
                         <button type="button" id="btnCopyBirthCode" class="btn btn-outline-primary rounded-pill px-4 fw-semibold" style="min-height:44px;" data-code="{{ $bf['code'] }}">
@@ -1166,7 +1180,7 @@
                   <div class="card h-100 border-0 shadow-sm rounded-3" style="background: #ffffff; border: 1px solid #e2e8f0;">
                     <div class="card-body p-4 d-flex flex-column">
                       <div class="d-flex align-items-center gap-3 mb-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: #eff6ff; color: #3b82f6;">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: #fdf5f5; color: #a31621;">
                           <i class="bi bi-tree-fill fs-4"></i>
                         </div>
                         <div>
@@ -1446,7 +1460,7 @@
                   icon: 'success',
                   title: 'Branched Out Successfully!',
                   html: 'Your new solo Family Code is <strong>' + newCode + '</strong>.<br><br>Your profile has been transitioned to your new private family tree.',
-                  confirmButtonColor: '#4f46e5'
+                  confirmButtonColor: '#a31621'
                 }).then(() => {
                   window.location.hash = 'v-pills-familycode';
                   window.location.reload();
@@ -1459,7 +1473,7 @@
             } else {
               const err = data.message || (data.data && data.data.message) || 'Could not generate solo family code.';
               if (window.Swal) {
-                window.Swal.fire({ icon: 'error', title: 'Error', text: err, confirmButtonColor: '#4f46e5' });
+                window.Swal.fire({ icon: 'error', title: 'Error', text: err, confirmButtonColor: '#a31621' });
               } else {
                 alert(err);
               }
@@ -1470,7 +1484,7 @@
             btnStaySolo.innerHTML = origHtml;
             console.error('Solo code error:', err);
             if (window.Swal) {
-              window.Swal.fire({ icon: 'error', title: 'Network Error', text: 'Failed to process request. Please try again.', confirmButtonColor: '#4f46e5' });
+              window.Swal.fire({ icon: 'error', title: 'Network Error', text: 'Failed to process request. Please try again.', confirmButtonColor: '#a31621' });
             }
           });
         };
@@ -1483,7 +1497,7 @@
             showCancelButton: true,
             confirmButtonText: 'Yes, Branch Out',
             cancelButtonText: 'Cancel',
-            confirmButtonColor: '#4f46e5'
+            confirmButtonColor: '#a31621'
           }).then((res) => {
             if (res.isConfirmed) {
               proceed();
@@ -1680,7 +1694,7 @@
         birthAlert.textContent = msg;
         birthAlert.style.display = 'block';
       }
-      if (window.Swal) window.Swal.fire({ icon: 'error', title: 'Could not continue', text: msg, confirmButtonColor: '#4f46e5' });
+      if (window.Swal) window.Swal.fire({ icon: 'error', title: 'Could not continue', text: msg, confirmButtonColor: '#a31621' });
     };
 
     const postBirthAction = (fields, btn, onDone) => {
@@ -1721,7 +1735,7 @@
         window.location.reload();
       };
       if (window.Swal) {
-        window.Swal.fire({ icon: 'success', title: 'Done', text: msg, confirmButtonColor: '#4f46e5' }).then(go);
+        window.Swal.fire({ icon: 'success', title: 'Done', text: msg, confirmButtonColor: '#a31621' }).then(go);
       } else {
         go();
       }

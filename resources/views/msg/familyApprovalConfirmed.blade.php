@@ -13,7 +13,7 @@
 </p>
 
 <p style="margin-bottom: 20px; font-size: 15px; color: #1e293b;">
-    🎉 Great news! Your request to join the <strong>{{ $data['familyCode'] ?? '' }}</strong> family network on FamilyPlatform has been <strong style="color: #00bfa5;">approved</strong>.
+    🎉 Great news! Your request to join the <strong>{{ $data['familyCode'] ?? '' }}</strong> family network on FamilyPlatform has been <strong style="color: #a31621;">approved</strong>.
 </p>
 
 <p style="margin-bottom: 20px; color: #334155;">
@@ -22,12 +22,12 @@
 
 <div style="text-align: center; margin-bottom: 30px;">
     <a href="{{ $profileUrl }}"
-       style="background-color: #00bfa5; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 700; display: inline-block; font-size: 16px;">
+       style="background-color: #a31621; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 700; display: inline-block; font-size: 16px;">
        Visit Your Family Network →
     </a>
 </div>
 
 <p style="font-size: 13px; color: #94a3b8; text-align: center; margin: 0;">
-    If you have any questions, contact us at <a href="mailto:support@myfamilyplatform.com" style="color: #00bfa5;">support@myfamilyplatform.com</a>.
+    If you have any questions, contact us at <a href="mailto:support@myfamilyplatform.com" style="color: #a31621;">support@myfamilyplatform.com</a>.
 </p>
 @endsection

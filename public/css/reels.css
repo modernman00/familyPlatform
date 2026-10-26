@@ -3,7 +3,7 @@
   --reel-bg: #000000;
   --reel-overlay-bg: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, transparent 25%, transparent 60%, rgba(0, 0, 0, 0.85) 100%);
   --reel-sidebar-icon-size: 46px;
-  --stitch-brand-indigo: #4f46e5;
+  --stitch-brand-indigo: #a31621;
   --stitch-brand-gold: #f59e0b;
 }
 
@@ -35,13 +35,13 @@
   width: 36px;
   height: 36px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #a31621 0%, #8a1019 100%);
   color: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 1.05rem;
-  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+  box-shadow: 0 4px 10px rgba(163,22,33, 0.25);
   flex-shrink: 0;
 }
 
@@ -70,15 +70,15 @@
   transition: all 0.2s ease;
 }
 .reel-tray-filter-pill:hover {
-  background: #eef2ff;
-  color: #4f46e5;
-  border-color: #c7d2fe;
+  background: #fbefef;
+  color: #a31621;
+  border-color: #ecc7c9;
 }
 .reel-tray-filter-pill.active {
-  background: #4f46e5;
+  background: #a31621;
   color: #ffffff;
-  border-color: #4f46e5;
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.28);
+  border-color: #a31621;
+  box-shadow: 0 2px 8px rgba(163,22,33, 0.28);
 }
 
 /* Facebook-Style Vertical Reels Card */
@@ -100,7 +100,7 @@
 }
 .reel-fb-card:hover {
   transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.25);
+  box-shadow: 0 10px 24px rgba(163,22,33, 0.25);
   color: #ffffff;
 }
 
@@ -174,7 +174,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 2.5px solid #4f46e5;
+  border: 2.5px solid #a31621;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
   z-index: 3;
   background: #ffffff;
@@ -293,14 +293,14 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #4f46e5;
+  background: #a31621;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.2rem;
   border: 3px solid #ffffff;
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.4);
+  box-shadow: 0 2px 8px rgba(163,22,33, 0.4);
 }
 .reel-fb-create-label {
   font-size: 0.75rem;
@@ -421,7 +421,7 @@
 .reel-progress-fill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #4f46e5 0%, #f59e0b 100%);
+  background: linear-gradient(90deg, #a31621 0%, #f59e0b 100%);
   border-radius: 0 4px 4px 0;
   transition: width 0.1s linear;
 }
@@ -728,7 +728,7 @@
 .reel-comment-user {
   font-size: 0.8rem;
   font-weight: 700;
-  color: #93c5fd;
+  color: #ef6b73;
 }
 
 .reel-comment-text {

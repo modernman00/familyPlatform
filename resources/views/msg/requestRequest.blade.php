@@ -25,6 +25,6 @@
 @endphp
 
 <div style="text-align: center;">
-    <a href="{{ $baseUrl }}/member/seeProfile/{{ $data['id'] ?? '' }}" style="background-color: #00bfa5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Go to Profile</a>
+    <a href="{{ $baseUrl }}/member/seeProfile/{{ $data['id'] ?? '' }}" style="background-color: #a31621; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Go to Profile</a>
 </div>
 @endsection

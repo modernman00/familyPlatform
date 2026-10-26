@@ -76,7 +76,7 @@
 
 
         .text-primary {
-            color: #0d6efd !important
+            color: #a31621 !important
         }
 
         .text-warning {

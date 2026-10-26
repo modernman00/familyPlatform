@@ -31,13 +31,13 @@
 
 <div style="text-align: center; margin-bottom: 30px;">
     <a href="{{ $profileUrl }}"
-       style="background-color: #00bfa5; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; display: inline-block; font-size: 15px; box-shadow: 0 4px 12px rgba(0, 191, 165, 0.25);">
+       style="background-color: #a31621; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; display: inline-block; font-size: 15px; box-shadow: 0 4px 12px rgba(163,22,33, 0.25);">
        Review & Accept Migration
     </a>
 </div>
 
 <p style="text-align: center; font-size: 13px; color: #94a3b8; margin: 0;">
-    You can also manage migration invitations from your <a href="{{ $profileUrl }}" style="color: #00bfa5; text-decoration: underline;">profile dashboard</a>.
+    You can also manage migration invitations from your <a href="{{ $profileUrl }}" style="color: #a31621; text-decoration: underline;">profile dashboard</a>.
     This invitation remains valid for 7 days.
 </p>
 @endsection

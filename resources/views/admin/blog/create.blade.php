@@ -21,8 +21,8 @@
 }
 
 .ai-assistant-card {
-    background: linear-gradient(135deg, rgba(0, 191, 165, 0.08) 0%, rgba(0, 65, 130, 0.05) 100%);
-    border: 1px solid rgba(0, 191, 165, 0.25);
+    background: linear-gradient(135deg, rgba(163,22,33, 0.08) 0%, rgba(122,14,22, 0.05) 100%);
+    border: 1px solid rgba(163,22,33, 0.25);
     border-radius: 14px;
     padding: 24px;
     margin-bottom: 28px;
@@ -32,8 +32,8 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: rgba(0, 191, 165, 0.2);
-    color: #00796b;
+    background: rgba(163,22,33, 0.2);
+    color: #8a1019;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -61,9 +61,9 @@
 }
 
 .input-control:focus {
-    border-color: #00bfa5;
+    border-color: #a31621;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.2);
+    box-shadow: 0 0 0 3px rgba(163,22,33, 0.2);
 }
 
 #editor-container {
@@ -78,7 +78,7 @@
 }
 
 .btn-submit {
-    background: var(--brand-secondary, #004182);
+    background: var(--brand-secondary, #7a0e16);
     color: white;
     border: none;
     padding: 12px 36px;
@@ -95,7 +95,7 @@
 }
 
 .btn-ai-sparkle {
-    background: #00bfa5;
+    background: #a31621;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -109,7 +109,7 @@
 }
 
 .btn-ai-sparkle:hover {
-    background: #00897b;
+    background: #8a1019;
     color: white;
     transform: translateY(-1px);
 }
@@ -171,7 +171,7 @@
         <div class="form-group">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <label for="summary" class="mb-0">Short Summary (For SEO, Previews & Social Feeds)</label>
-                <button type="button" id="btnAiSummarize" class="btn btn-sm btn-link text-decoration-none p-0 fw-semibold" style="color: var(--brand-secondary, #004182); font-size: 0.88rem;">
+                <button type="button" id="btnAiSummarize" class="btn btn-sm btn-link text-decoration-none p-0 fw-semibold" style="color: var(--brand-secondary, #7a0e16); font-size: 0.88rem;">
                     <i class="fas fa-compress-alt me-1"></i> Auto-Summarize Content
                 </button>
             </div>

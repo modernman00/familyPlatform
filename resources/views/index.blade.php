@@ -10,7 +10,7 @@
     <div class="container">
       <div class="row align-items-center">
         <div class="col-lg-6 mb-5 mb-lg-0 pe-lg-5">
-          <div class="badge rounded-pill px-3 py-2 mb-3 fw-bold text-uppercase tracking-wider" style="background: rgba(99, 102, 241, 0.12); color: var(--brand-primary, #4f46e5); font-size: 0.8rem; letter-spacing: 0.05em;">
+          <div class="badge rounded-pill px-3 py-2 mb-3 fw-bold text-uppercase tracking-wider" style="background: rgba(184,32,44, 0.12); color: var(--brand-primary, #a31621); font-size: 0.8rem; letter-spacing: 0.05em;">
             🛡️ 100% Private
           </div>
           <h1 class="hero-title">Private Family Social Network &amp; <br><span>Living Heritage Tree.</span></h1>
@@ -90,14 +90,14 @@
     <div class="container py-4">
       <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
         <div>
-          <div class="badge rounded-pill px-3 py-2 mb-2 fw-bold text-uppercase tracking-wider" style="background: rgba(0, 191, 165, 0.12); color: #00796b; font-size: 0.8rem; letter-spacing: 0.05em;">
+          <div class="badge rounded-pill px-3 py-2 mb-2 fw-bold text-uppercase tracking-wider" style="background: rgba(163,22,33, 0.12); color: #8a1019; font-size: 0.8rem; letter-spacing: 0.05em;">
             📰 Family Stories &amp; Heritage
           </div>
           <h2 class="fw-bold fs-1 mb-1" style="color: var(--text-main);">From Our Blog</h2>
           <p class="text-muted mb-0">Insights on keeping generations connected, preserving memories, and private family bonding.</p>
         </div>
         <div>
-          <a href="/blogs" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold" style="color: var(--brand-secondary, #004182); border-color: rgba(0,65,130,0.3);">
+          <a href="/blogs" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold" style="color: var(--brand-secondary, #7a0e16); border-color: rgba(122,14,22,0.3);">
             Explore All Articles <i class="fas fa-arrow-right ms-1"></i>
           </a>
         </div>
@@ -119,7 +119,7 @@
                   <img src="{{ $coverImage }}" class="card-img-top" alt="{{ htmlspecialchars((string)$blog['title'], ENT_QUOTES, 'UTF-8') }}" style="height: 200px; object-fit: cover;">
                 </a>
                 <div class="card-body p-4 d-flex flex-column">
-                  <span class="badge mb-2 align-self-start" style="background: rgba(0,191,165,0.12); color: #00796b; font-size: 0.75rem;">
+                  <span class="badge mb-2 align-self-start" style="background: rgba(163,22,33,0.12); color: #8a1019; font-size: 0.75rem;">
                     {{ !empty($blog['created_at']) ? date('M j, Y', strtotime((string)$blog['created_at'])) : 'Heritage' }}
                   </span>
                   <h4 class="card-title fw-bold fs-5 mb-2">
@@ -130,7 +130,7 @@
                   <p class="card-text text-muted small flex-grow-1">
                     {{ $excerpt }}{{ strlen($rawExcerpt) > 110 ? '...' : '' }}
                   </p>
-                  <a href="{{ $postUrl }}" class="fw-semibold small text-decoration-none mt-2" style="color: var(--brand-primary, #00bfa5);">
+                  <a href="{{ $postUrl }}" class="fw-semibold small text-decoration-none mt-2" style="color: var(--brand-primary, #a31621);">
                     Read Article <i class="fas fa-arrow-right ms-1"></i>
                   </a>
                 </div>
@@ -144,12 +144,12 @@
                 <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Preserving Memories" style="height: 200px; object-fit: cover;">
               </a>
               <div class="card-body p-4 d-flex flex-column">
-                <span class="badge mb-2 align-self-start" style="background: rgba(0,191,165,0.12); color: #00796b; font-size: 0.75rem;">Heritage</span>
+                <span class="badge mb-2 align-self-start" style="background: rgba(163,22,33,0.12); color: #8a1019; font-size: 0.75rem;">Heritage</span>
                 <h4 class="card-title fw-bold fs-5 mb-2">
                   <a href="/blogs" class="text-dark text-decoration-none">Preserving Oral Traditions Across Generations</a>
                 </h4>
                 <p class="card-text text-muted small flex-grow-1">How private audio journals help children record and remember their grandparents' voices.</p>
-                <a href="/blogs" class="fw-semibold small text-decoration-none mt-2" style="color: var(--brand-primary, #00bfa5);">
+                <a href="/blogs" class="fw-semibold small text-decoration-none mt-2" style="color: var(--brand-primary, #a31621);">
                   Explore Blog <i class="fas fa-arrow-right ms-1"></i>
                 </a>
               </div>
@@ -161,12 +161,12 @@
                 <img src="https://images.unsplash.com/photo-1542037104857-ffbb0b9155fb?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Digital Privacy" style="height: 200px; object-fit: cover;">
               </a>
               <div class="card-body p-4 d-flex flex-column">
-                <span class="badge mb-2 align-self-start" style="background: rgba(0,191,165,0.12); color: #00796b; font-size: 0.75rem;">Privacy</span>
+                <span class="badge mb-2 align-self-start" style="background: rgba(163,22,33,0.12); color: #8a1019; font-size: 0.75rem;">Privacy</span>
                 <h4 class="card-title fw-bold fs-5 mb-2">
                   <a href="/blogs" class="text-dark text-decoration-none">Why Your Family Photos Need an Encrypted Haven</a>
                 </h4>
                 <p class="card-text text-muted small flex-grow-1">Moving away from algorithm-driven social feeds to an intimate, private family sanctuary.</p>
-                <a href="/blogs" class="fw-semibold small text-decoration-none mt-2" style="color: var(--brand-primary, #00bfa5);">
+                <a href="/blogs" class="fw-semibold small text-decoration-none mt-2" style="color: var(--brand-primary, #a31621);">
                   Explore Blog <i class="fas fa-arrow-right ms-1"></i>
                 </a>
               </div>
@@ -178,12 +178,12 @@
                 <img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Milestones" style="height: 200px; object-fit: cover;">
               </a>
               <div class="card-body p-4 d-flex flex-column">
-                <span class="badge mb-2 align-self-start" style="background: rgba(0,191,165,0.12); color: #00796b; font-size: 0.75rem;">Milestones</span>
+                <span class="badge mb-2 align-self-start" style="background: rgba(163,22,33,0.12); color: #8a1019; font-size: 0.75rem;">Milestones</span>
                 <h4 class="card-title fw-bold fs-5 mb-2">
                   <a href="/blogs" class="text-dark text-decoration-none">Chronicles &amp; Announcements for Extended Kin</a>
                 </h4>
                 <p class="card-text text-muted small flex-grow-1">Keep uncles, aunts, cousins, and distant relatives in the loop on birthdays and weddings.</p>
-                <a href="/blogs" class="fw-semibold small text-decoration-none mt-2" style="color: var(--brand-primary, #00bfa5);">
+                <a href="/blogs" class="fw-semibold small text-decoration-none mt-2" style="color: var(--brand-primary, #a31621);">
                   Explore Blog <i class="fas fa-arrow-right ms-1"></i>
                 </a>
               </div>

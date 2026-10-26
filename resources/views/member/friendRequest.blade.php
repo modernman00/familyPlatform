@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
     <style>
         :root {
-            --primary-color: #1877f2;
+            --primary-color: #a31621;
             --secondary-color: #42b72a;
             --bg-color: #f0f2f5;
             --card-bg: #ffffff;
@@ -22,7 +22,7 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
             padding: 20px;
         }
 
@@ -89,7 +89,7 @@
         }
 
         .btn-confirm {
-            background: linear-gradient(135deg, var(--primary-color, #1877f2) 0%, #166fe5 100%);
+            background: linear-gradient(135deg, var(--primary-color, #1877f2) 0%, #a31621 100%);
             color: white;
             flex: 1;
             border: none;
@@ -109,7 +109,7 @@
         }
 
         .btn-confirm:hover {
-            background: #166fe5;
+            background: #a31621;
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3);
         }
@@ -153,6 +153,7 @@
             }
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="friend-requests-container">

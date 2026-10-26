@@ -47,7 +47,7 @@
             font-size: 1.5rem;
             color: #ffffff;
             background-color: var(--brand-primary);
-            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4); /* Purple glow */
+            box-shadow: 0 10px 25px rgba(184,32,44, 0.4); /* Purple glow */
         }
 
         .stitch-title {
@@ -92,7 +92,7 @@
 
         .styleform_form .form-control:focus {
             border-color: var(--brand-primary);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+            box-shadow: 0 0 0 3px rgba(184,32,44, 0.15);
             outline: none;
         }
 
@@ -104,7 +104,7 @@
         }
 
         .stitch-submit {
-            background: linear-gradient(135deg, var(--brand-primary, #00bfa5) 0%, var(--brand-primary-dark, #00897b) 100%);
+            background: linear-gradient(135deg, var(--brand-primary, #a31621) 0%, var(--brand-primary-dark, #8a1019) 100%);
             color: white;
             border: none;
             border-radius: 12px;
@@ -120,15 +120,15 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            box-shadow: 0 2px 8px rgba(0, 191, 165, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(163,22,33, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
         }
 
         .stitch-submit:hover {
-            background: linear-gradient(135deg, var(--brand-primary-light, #33c9b2) 0%, var(--brand-primary, #00bfa5) 100%);
+            background: linear-gradient(135deg, var(--brand-primary-light, #b8202c) 0%, var(--brand-primary, #a31621) 100%);
             transform: translateY(-1px);
-            box-shadow: 0 4px 14px rgba(0, 191, 165, 0.32);
+            box-shadow: 0 4px 14px rgba(163,22,33, 0.32);
         }
 
         .stitch-submit:active {

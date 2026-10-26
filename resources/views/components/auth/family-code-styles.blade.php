@@ -26,7 +26,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 41, 130, 0.4);
+        background-color: rgba(42,10,13, 0.4);
         backdrop-filter: blur(8px);
     }
 
@@ -86,7 +86,7 @@
     }
 
     #inviter-verification-modal .modal-background {
-        background-color: rgba(0, 41, 130, 0.5);
+        background-color: rgba(42,10,13, 0.5);
     }
 
     #inviter-verification-modal .modal-content {

@@ -59,7 +59,7 @@ document.onclick = async (e) => {
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
+        cancelButtonColor: '#a31621',
         confirmButtonText: 'Yes, remove connection!'
       });
 
@@ -167,7 +167,7 @@ document.onclick = async (e) => {
         `,
         icon: 'question',
         showCancelButton: true,
-        confirmButtonColor: '#7c3aed',
+        confirmButtonColor: '#8a1019',
         cancelButtonColor: '#6b7280',
         confirmButtonText: '<i class="bi bi-send-check me-1"></i> Send Nudge',
         cancelButtonText: 'Cancel',
@@ -251,7 +251,7 @@ document.onclick = async (e) => {
         `,
         icon: 'question',
         showCancelButton: true,
-        confirmButtonColor: '#2563eb',
+        confirmButtonColor: '#a31621',
         cancelButtonColor: '#6b7280',
         confirmButtonText: '<i class="bi bi-box-arrow-in-right me-1"></i> Submit Request',
         cancelButtonText: 'Cancel',
@@ -290,7 +290,7 @@ document.onclick = async (e) => {
               text: response.data?.email_sent === false
                 ? `Your request to family #${targetCode} was submitted and members will see it in the app, but the email could not be delivered.`
                 : `Your migration request to family #${targetCode} has been sent! You will be notified as soon as a family member approves.`,
-              confirmButtonColor: '#2563eb'
+              confirmButtonColor: '#a31621'
             });
           } else {
             btn.disabled = false;

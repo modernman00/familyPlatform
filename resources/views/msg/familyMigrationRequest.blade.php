@@ -17,8 +17,8 @@
 </p>
 
 @if(!empty($data['note']))
-<div style="margin-bottom: 25px; background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px 20px; border-radius: 6px;">
-    <p style="margin: 0; font-size: 14px; font-style: italic; color: #1e40af;">
+<div style="margin-bottom: 25px; background-color: #fdf5f5; border-left: 4px solid #a31621; padding: 15px 20px; border-radius: 6px;">
+    <p style="margin: 0; font-size: 14px; font-style: italic; color: #8a1019;">
         "{{ htmlspecialchars($data['note']) }}"
     </p>
 </div>
@@ -30,13 +30,13 @@
 
 <div style="text-align: center; margin-bottom: 30px;">
     <a href="{{ $profileUrl }}"
-       style="background-color: #00bfa5; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; display: inline-block; font-size: 15px; box-shadow: 0 4px 12px rgba(0, 191, 165, 0.25);">
+       style="background-color: #a31621; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; display: inline-block; font-size: 15px; box-shadow: 0 4px 12px rgba(163,22,33, 0.25);">
        Review & Approve Request
     </a>
 </div>
 
 <p style="text-align: center; font-size: 13px; color: #94a3b8; margin: 0;">
-    Manage all pending approvals directly on your <a href="{{ $profileUrl }}" style="color: #00bfa5; text-decoration: underline;">profile dashboard</a>.
+    Manage all pending approvals directly on your <a href="{{ $profileUrl }}" style="color: #a31621; text-decoration: underline;">profile dashboard</a>.
     This request expires automatically in 7 days.
 </p>
 @endsection

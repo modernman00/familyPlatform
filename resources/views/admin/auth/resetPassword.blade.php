@@ -11,8 +11,8 @@
             --bg-card: #1e293b;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
+            --accent: #a31621;
+            --accent-hover: #a31621;
             --danger: #ef4444;
             --success: #10b981;
             --border: #334155;
@@ -121,6 +121,7 @@
             color: #6ee7b7;
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="auth-card">

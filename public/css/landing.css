@@ -10,8 +10,8 @@
        (`var(--brand-primary)`), which is a guaranteed-invalid value — every
        `var(--brand-primary)` on the public pages silently resolved to nothing,
        leaving e.g. the login "Sign In" button transparent. */
-    --brand-primary: #00bfa5;
-    --brand-secondary: #004182;
+    --brand-primary: #a31621;
+    --brand-secondary: #7a0e16;
     --brand-success: #057642;
     --bg-light: #f3f2ef;
     --bg-white: #ffffff;
@@ -73,7 +73,7 @@ body {
 }
 
 .btn-brand {
-    background: linear-gradient(135deg, var(--brand-primary, #00bfa5) 0%, var(--brand-primary-dark, #00897b) 100%);
+    background: linear-gradient(135deg, var(--brand-primary, #a31621) 0%, var(--brand-primary-dark, #8a1019) 100%);
     color: #fff !important;
     border-radius: 12px;
     padding: 0.5rem 1.25rem;
@@ -81,7 +81,7 @@ body {
     letter-spacing: -0.01em;
     transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     border: 1px solid rgba(0, 0, 0, 0.04);
-    box-shadow: 0 2px 8px rgba(0, 191, 165, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(163,22,33, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -91,10 +91,10 @@ body {
 }
 
 .btn-brand:hover {
-    background: linear-gradient(135deg, var(--brand-primary-light, #33c9b2) 0%, var(--brand-primary, #00bfa5) 100%);
+    background: linear-gradient(135deg, var(--brand-primary-light, #b8202c) 0%, var(--brand-primary, #a31621) 100%);
     color: #fff !important;
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(0, 191, 165, 0.32);
+    box-shadow: 0 4px 14px rgba(163,22,33, 0.32);
 }
 
 .btn-brand:active {
@@ -102,7 +102,7 @@ body {
 }
 
 .btn-brand-outline {
-    background-color: rgba(0, 191, 165, 0.04);
+    background-color: rgba(163,22,33, 0.04);
     color: var(--brand-primary) !important;
     border: 1.5px solid var(--brand-primary);
     border-radius: 12px;
@@ -119,9 +119,9 @@ body {
 }
 
 .btn-brand-outline:hover {
-    background-color: rgba(0, 191, 165, 0.1);
-    color: var(--brand-primary-dark, #00897b) !important;
-    border-color: var(--brand-primary-dark, #00897b);
+    background-color: rgba(163,22,33, 0.1);
+    color: var(--brand-primary-dark, #8a1019) !important;
+    border-color: var(--brand-primary-dark, #8a1019);
     transform: translateY(-1px);
 }
 
@@ -424,13 +424,13 @@ body {
     letter-spacing: 0.1em;
 }
 .btn-coral-glow {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%) !important;
+    background: linear-gradient(135deg, #ef6b73 0%, #ee5253 100%) !important;
     color: white !important;
     border: none !important;
     transition: all 0.3s ease !important;
 }
 .btn-coral-glow:hover {
-    box-shadow: 0 6px 15px rgba(255, 107, 107, 0.4);
+    box-shadow: 0 6px 15px rgba(239,107,115, 0.4);
 }
 
 /* ==========================================================================
@@ -446,12 +446,12 @@ body {
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(0, 191, 165, 0.3);
-    color: var(--brand-primary, #00bfa5);
+    border: 1px solid rgba(163,22,33, 0.3);
+    color: var(--brand-primary, #a31621);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 191, 165, 0.2);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(163,22,33, 0.2);
     cursor: pointer;
     z-index: 1040;
     opacity: 0;
@@ -475,20 +475,20 @@ body {
 }
 
 .back-to-top-btn:hover {
-    background: var(--brand-primary, #00bfa5);
+    background: var(--brand-primary, #a31621);
     color: #ffffff;
-    border-color: var(--brand-primary, #00bfa5);
+    border-color: var(--brand-primary, #a31621);
     transform: translateY(-3px) scale(1.08);
-    box-shadow: 0 12px 28px rgba(0, 191, 165, 0.35), 0 4px 10px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 12px 28px rgba(163,22,33, 0.35), 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .back-to-top-btn:active {
     transform: translateY(-1px) scale(0.98);
-    box-shadow: 0 4px 12px rgba(0, 191, 165, 0.25);
+    box-shadow: 0 4px 12px rgba(163,22,33, 0.25);
 }
 
 .back-to-top-btn:focus-visible {
-    outline: 2px solid var(--brand-primary, #00bfa5);
+    outline: 2px solid var(--brand-primary, #a31621);
     outline-offset: 3px;
 }
 
@@ -513,15 +513,15 @@ body {
 body.dark-mode .back-to-top-btn,
 body.dark-theme .back-to-top-btn {
     background: rgba(30, 41, 59, 0.85);
-    border-color: rgba(0, 191, 165, 0.4);
-    color: #00bfa5;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 191, 165, 0.3);
+    border-color: rgba(163,22,33, 0.4);
+    color: #a31621;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(163,22,33, 0.3);
 }
 
 [data-theme="dark"] .back-to-top-btn:hover,
 body.dark-mode .back-to-top-btn:hover,
 body.dark-theme .back-to-top-btn:hover {
-    background: var(--brand-primary, #00bfa5);
+    background: var(--brand-primary, #a31621);
     color: #ffffff;
 }
 

@@ -12,7 +12,7 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
     <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 pb-2 px-3 px-sm-4">
         <div class="d-flex align-items-center gap-2">
             <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" 
-                 style="width: 36px; height: 36px; background: rgba(99, 102, 241, 0.12); color: var(--primary-color, #4f46e5);">
+                 style="width: 36px; height: 36px; background: rgba(184,32,44, 0.12); color: var(--primary-color, #a31621);">
                 <i class="bi bi-stars fs-6 text-primary"></i>
             </div>
             <div>
@@ -46,10 +46,10 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                 <!-- 1. Nostalgia "On This Day" Memory Card -->
                 <template x-if="memories.length > 0">
                     <div class="p-3 rounded-4 position-relative overflow-hidden" 
-                         style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(236, 72, 153, 0.08) 100%); border: 1px solid rgba(99, 102, 241, 0.18);">
+                         style="background: linear-gradient(135deg, rgba(184,32,44, 0.08) 0%, rgba(236, 72, 153, 0.08) 100%); border: 1px solid rgba(184,32,44, 0.18);">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <span class="badge rounded-pill px-2.5 py-1.5 fw-bold text-white d-inline-flex align-items-center gap-1 shadow-sm" 
-                                  style="background: linear-gradient(135deg, #4f46e5, #ec4899); font-size: 0.72rem;">
+                                  style="background: linear-gradient(135deg, #a31621, #ec4899); font-size: 0.72rem;">
                                 <i class="bi bi-clock-history"></i> <span x-text="memories[0].years_ago_label"></span>
                             </span>
                             <span class="text-muted small" style="font-size: 0.75rem;" x-text="memories[0].formatted_date"></span>
@@ -77,13 +77,21 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                                 <span class="text-muted small fw-semibold text-truncate" style="font-size: 0.78rem; max-width: 130px;" x-text="memories[0].fullName"></span>
                             </div>
 
-                            <button type="button" 
-                                    class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1 shadow-sm"
-                                    style="font-size: 0.78rem; background-color: var(--primary-color, #4f46e5); border: none; min-height: 34px;"
-                                    @click="openShareModal(memories[0])"
-                                    :disabled="sharing">
-                                <i class="bi bi-share-fill" style="font-size: 0.7rem;"></i> Share Flashback
-                            </button>
+                            <div class="d-flex align-items-center gap-1.5">
+                                <a :href="whatsappMemoryUrl(memories[0])" target="_blank" rel="noopener noreferrer"
+                                   class="btn btn-sm btn-success rounded-pill px-2.5 py-1.5 fw-bold d-inline-flex align-items-center gap-1 shadow-sm text-white"
+                                   style="font-size: 0.78rem; background-color: #25D366; border: none; min-height: 34px; text-decoration: none;"
+                                   title="Share memory to WhatsApp" aria-label="Share memory to WhatsApp">
+                                    <i class="bi bi-whatsapp"></i> <span class="d-none d-sm-inline">WhatsApp</span>
+                                </a>
+                                <button type="button" 
+                                        class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1 shadow-sm"
+                                        style="font-size: 0.78rem; background-color: var(--primary-color, #a31621); border: none; min-height: 34px;"
+                                        @click="openShareModal(memories[0])"
+                                        :disabled="sharing">
+                                    <i class="bi bi-share-fill" style="font-size: 0.7rem;"></i> Share Flashback
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </template>
@@ -110,7 +118,7 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                                         </div>
                                     </div>
                                     <button type="button" class="btn btn-sm rounded-pill flex-shrink-0 me-1 fw-bold"
-                                            style="min-height:44px; background:#8b5cf6; color:#fff;"
+                                            style="min-height:44px; background:#b8202c; color:#fff;"
                                             x-show="milestone.days_remaining === 0 && (milestone.type === 'birthday' || milestone.type === 'anniversary')"
                                             :aria-label="'Share a Then and Now for ' + milestone.title"
                                             @click="window.__openThenNow('', { caption: thenNowCaption(milestone) })">
@@ -130,7 +138,7 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                 <template x-if="memories.length === 0 && milestones.length === 0">
                     <div class="text-center py-3 px-2">
                         <div class="mb-2 d-inline-flex align-items-center justify-content-center rounded-circle p-2.5" 
-                             style="width: 44px; height: 44px; background: rgba(99, 102, 241, 0.08); color: var(--primary-color, #4f46e5);">
+                             style="width: 44px; height: 44px; background: rgba(184,32,44, 0.08); color: var(--primary-color, #a31621);">
                             <i class="bi bi-camera-reels fs-4"></i>
                         </div>
                         <h6 class="fw-bold mb-1" style="color: var(--text-color, #1f2937); font-size: 0.88rem;">No Flashbacks Today</h6>
@@ -178,15 +186,23 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                         </div>
                     </template>
                 </div>
-                <div class="modal-footer border-0 pt-0 px-4 pb-4">
-                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" 
-                            class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" 
-                            @click="submitShareMemory()" 
-                            :disabled="sharing">
-                        <span x-show="!sharing">Share to Family Feed</span>
-                        <span x-show="sharing" class="spinner-border spinner-border-sm" role="status"></span>
-                    </button>
+                <div class="modal-footer border-0 pt-0 px-4 pb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <a :href="whatsappMemoryUrl(activeMemory, reflectionText)" target="_blank" rel="noopener noreferrer"
+                       class="btn btn-success rounded-pill px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1.5 shadow-sm text-white"
+                       style="background-color: #25D366; border: none; text-decoration: none; min-height: 38px; font-size: 0.84rem;"
+                       title="Share to Family WhatsApp Group">
+                        <i class="bi bi-whatsapp"></i> Send to WhatsApp
+                    </a>
+                    <div class="d-flex gap-2 align-items-center">
+                        <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" 
+                                class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" 
+                                @click="submitShareMemory()" 
+                                :disabled="sharing">
+                            <span x-show="!sharing">Share to Family Feed</span>
+                            <span x-show="sharing" class="spinner-border spinner-border-sm" role="status"></span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -214,6 +230,21 @@ if (typeof window.memoriesMilestonesWidget !== 'function') {
                 const title = String(milestone?.title || '').replace(/'s (Birthday|Anniversary)$/, '');
                 if (milestone?.type === 'anniversary') return `Then & Now: ${title} 💞 #ThenAndNow`;
                 return `Then & Now for ${title}'s birthday 🎂 #ThenAndNow`;
+            },
+
+            whatsappMemoryUrl(memory, reflection = '') {
+                if (!memory) return '#';
+                const yearsAgo = memory.years_ago_label || 'A family memory';
+                const author = memory.fullName ? ` — ${memory.fullName}` : '';
+                const quote = memory.postMessage ? `"${memory.postMessage.trim()}"` : '';
+                const refl = reflection ? `\n\n💬 ${reflection.trim()}` : '';
+                const origin = window.location.origin || '';
+                const link = memory.post_no ? `${origin}/profilePage#post${memory.post_no}` : `${origin}/profilePage`;
+                let text = `✨ [Family Memory Flashback — ${yearsAgo}]${author}\n\n${quote}${refl}\n\n🔗 ${link}`;
+                if (text.length > 700) {
+                    text = text.slice(0, 690) + '...\n\n🔗 ' + link;
+                }
+                return `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
             },
 
             async loadData() {

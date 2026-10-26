@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: #f4f4f7;
             margin: 0;
             padding: 0;
@@ -108,6 +108,7 @@
             }
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="wrapper">
@@ -145,7 +146,7 @@
                         $appName = (string)($_ENV['APP_NAME'] ?? getenv('APP_NAME') ?: 'Family Platform');
                     @endphp
                     <a href="{{ $baseUrl }}" target="_blank" style="text-decoration: none; display: inline-block;">
-                        <img src="{{ $logoUrl }}" alt="{{ $appName }}" width="200" style="display: block; margin: 0 auto 15px auto; width: 200px; max-width: 220px; height: auto; border: 0; outline: none; text-decoration: none; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 22px; font-weight: 700; color: #1c1e21;" />
+                        <img src="{{ $logoUrl }}" alt="{{ $appName }}" width="200" style="display: block; margin: 0 auto 15px auto; width: 200px; max-width: 220px; height: auto; border: 0; outline: none; text-decoration: none; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 22px; font-weight: 700; color: #1c1e21;" />
                     </a>
                     <h1 class="title">@yield('title', 'Notification')</h1>
                     <p class="subtitle">@yield('subtitle', 'Updates from your family network')</p>
@@ -169,7 +170,7 @@
             <tr>
                 <td class="footer">
                     <p style="margin: 0 0 8px 0; font-size: 13px; color: #6c757d;">
-                        Questions? Contact Customer Support at <a href="mailto:{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}" style="color: #00bfa5; text-decoration: none;">{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}</a>.
+                        Questions? Contact Customer Support at <a href="mailto:{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}" style="color: #a31621; text-decoration: none;">{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}</a>.
                     </p>
                     @php
                         $recipientEmail = (string)($email ?? ($data['email'] ?? ($data['mail'] ?? '')));

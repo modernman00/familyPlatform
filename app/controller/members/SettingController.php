@@ -132,6 +132,7 @@ final class SettingController extends BaseController
                         'two_factor_auth' => $normalizeSwitch($_POST['two_factor_auth'] ?? 'off'),
                         'profile_visibility' => $visibility,
                         'show_my_profile' => $normalizeSwitch($_POST['show_my_profile'] ?? 'off'),
+                        'show_birth_year' => $normalizeSwitch($_POST['show_birth_year'] ?? 'off'),
                     ];
                     UpdateFn::updateMultiple('contact', $data, 'id');
                     msgSuccess(200, "Privacy settings successfully updated.");
@@ -643,10 +644,19 @@ final class SettingController extends BaseController
                     $relRequests = [];
                     $relRequesterId = (string)($_SESSION['id'] ?? $_POST['id'] ?? '');
 
-                    // 1. Get Base Node
+                    // 1. Get Base Node (and auto-initialize if routing to a verified birth family tree for the first time)
                     $stmt = $db->prepare("SELECT id, generation_level, gender FROM family_nodes WHERE user_id = ? AND family_code = ?");
                     $stmt->execute([$_POST['id'], $familyCode]);
                     $baseNode = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+                    if (!$baseNode && !empty($_POST['id'])) {
+                        $memberProfile = parent::findMemberById((string)$_POST['id']);
+                        if (!empty($memberProfile)) {
+                            \App\services\FamilyClaimService::claimOrInitializeNode($familyCode, (string)$_POST['id'], $memberProfile);
+                            $stmt->execute([$_POST['id'], $familyCode]);
+                            $baseNode = $stmt->fetch(\PDO::FETCH_ASSOC);
+                        }
+                    }
 
                     if ($baseNode) {
                         $baseNodeId = (int)$baseNode['id'];

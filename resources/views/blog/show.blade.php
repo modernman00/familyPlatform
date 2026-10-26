@@ -83,7 +83,7 @@
     }
 
     .article-breadcrumb a:hover {
-        color: var(--brand-secondary, #004182);
+        color: var(--brand-secondary, #7a0e16);
     }
 
     .article-hero-title {
@@ -116,8 +116,8 @@
         width: 44px;
         height: 44px;
         border-radius: 50%;
-        background: rgba(0, 191, 165, 0.15);
-        color: var(--brand-primary, #00bfa5);
+        background: rgba(163,22,33, 0.15);
+        color: var(--brand-primary, #a31621);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -131,7 +131,7 @@
         aspect-ratio: 16 / 9;
         border-radius: 1.5rem;
         overflow: hidden;
-        box-shadow: 0 16px 36px -8px rgba(0, 65, 130, 0.12);
+        box-shadow: 0 16px 36px -8px rgba(122,14,22, 0.12);
         margin-bottom: 3rem;
         background: #f1f5f9;
     }
@@ -169,9 +169,9 @@
     }
 
     .article-body blockquote {
-        border-left: 4px solid var(--brand-primary, #00bfa5);
+        border-left: 4px solid var(--brand-primary, #a31621);
         padding: 1.25rem 1.75rem;
-        background: rgba(0, 191, 165, 0.05);
+        background: rgba(163,22,33, 0.05);
         border-radius: 0 1rem 1rem 0;
         font-style: italic;
         color: #334155;
@@ -179,8 +179,8 @@
     }
 
     .share-callout-card {
-        background: linear-gradient(135deg, rgba(0, 191, 165, 0.08) 0%, rgba(0, 65, 130, 0.05) 100%);
-        border: 1px solid rgba(0, 191, 165, 0.25);
+        background: linear-gradient(135deg, rgba(163,22,33, 0.08) 0%, rgba(122,14,22, 0.05) 100%);
+        border: 1px solid rgba(163,22,33, 0.25);
         border-radius: 1.5rem;
         padding: 2.25rem;
         margin: 4rem 0 3rem;
@@ -221,7 +221,7 @@
 
     .recent-article-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 24px -6px rgba(0, 65, 130, 0.12);
+        box-shadow: 0 12px 24px -6px rgba(122,14,22, 0.12);
     }
 
     .recent-img-wrap {
@@ -254,7 +254,7 @@
         </nav>
 
         <!-- Topic Pill -->
-        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: rgba(0, 191, 165, 0.12); color: #00796b; font-size: 0.82rem; font-weight: 700;">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: rgba(163,22,33, 0.12); color: #8a1019; font-size: 0.82rem; font-weight: 700;">
             <i class="fas fa-heart"></i> Family Heritage & Stories
         </div>
 
@@ -305,7 +305,7 @@
 
         <!-- Share Callout Card -->
         <div class="share-callout-card text-center">
-            <div class="d-inline-flex p-3 rounded-circle mb-3" style="background: rgba(0, 191, 165, 0.15); color: var(--brand-primary, #00bfa5); font-size: 1.5rem;">
+            <div class="d-inline-flex p-3 rounded-circle mb-3" style="background: rgba(163,22,33, 0.15); color: var(--brand-primary, #a31621); font-size: 1.5rem;">
                 <i class="fas fa-heart"></i>
             </div>
             <h3 class="fw-bold mb-2" style="color: #1a202c;">Cherished memories grow when shared</h3>
@@ -334,7 +334,7 @@
 
         <!-- Navigation back -->
         <div class="text-center my-5">
-            <a href="/blog" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold" style="color: var(--brand-secondary, #004182); border-color: rgba(0,65,130,0.3);">
+            <a href="/blog" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold" style="color: var(--brand-secondary, #7a0e16); border-color: rgba(122,14,22,0.3);">
                 <i class="fas fa-arrow-left me-2"></i> Back to all stories
             </a>
         </div>
@@ -411,7 +411,7 @@
         <div class="modal-content rounded-4 border-0 shadow-lg">
             <div class="modal-header border-0 pb-0">
                 <div class="d-flex align-items-center gap-2">
-                    <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: rgba(0, 191, 165, 0.15); color: var(--brand-primary, #00bfa5);">
+                    <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: rgba(163,22,33, 0.15); color: var(--brand-primary, #a31621);">
                         <i class="fas fa-share-alt"></i>
                     </div>
                     <h5 class="modal-title fw-bold" id="blogShareModalLabel" style="color: #1a202c;">Share Article with Family</h5>
@@ -431,7 +431,7 @@
 
                 <!-- Web Share API Button (Mobile & Supported Desktops) -->
                 <div id="modalNativeShareWrap" class="mb-3 d-none">
-                    <button type="button" id="btnModalNativeShare" class="btn w-100 py-2 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2 text-white shadow-sm" style="background-color: var(--brand-secondary, #004182); border: none;">
+                    <button type="button" id="btnModalNativeShare" class="btn w-100 py-2 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2 text-white shadow-sm" style="background-color: var(--brand-secondary, #7a0e16); border: none;">
                         <i class="fas fa-share-alt"></i> Share via Device (System Sheet)
                     </button>
                     <div class="text-center text-muted small my-2">or send directly to:</div>
@@ -486,7 +486,7 @@
                 </div>
 
                 <!-- Feedback Toast / Alert -->
-                <div id="blogShareToast" class="alert alert-success d-none mt-3 mb-0 py-2 text-center small rounded-3" role="alert" style="background: rgba(0, 191, 165, 0.15); border: 1px solid #00bfa5; color: #00796b;">
+                <div id="blogShareToast" class="alert alert-success d-none mt-3 mb-0 py-2 text-center small rounded-3" role="alert" style="background: rgba(163,22,33, 0.15); border: 1px solid #a31621; color: #8a1019;">
                     <i class="fas fa-check-circle me-1"></i> Story link copied to clipboard!
                 </div>
             </div>

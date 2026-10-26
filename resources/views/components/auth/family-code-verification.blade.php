@@ -5,7 +5,7 @@
         <button class="modal-close is-large" type="button" @click="showInviterModal = false" aria-label="close"></button>
 
         <div class="text-center mb-4">
-            <h3 class="fw-bold" style="font-size: 1.5rem; color: #00bfa5;">
+            <h3 class="fw-bold" style="font-size: 1.5rem; color: #a31621;">
                 <i class="bi bi-shield-check" style="color: #28a745;"></i> Verify Your Invitation
             </h3>
             <p style="font-size: 1rem; font-weight: 600; color: #1e293b; margin-top: 0.5rem; margin-bottom: 0;">

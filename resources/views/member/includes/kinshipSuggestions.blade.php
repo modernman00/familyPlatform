@@ -13,7 +13,7 @@
     <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="d-flex align-items-center gap-2">
-                <div class="rounded-circle d-flex align-items-center justify-content-center text-primary" style="width: 36px; height: 36px; background: #e0e7ff; font-size: 1.1rem; flex-shrink: 0;">
+                <div class="rounded-circle d-flex align-items-center justify-content-center text-primary" style="width: 36px; height: 36px; background: #f5dede; font-size: 1.1rem; flex-shrink: 0;">
                     <i class="bi bi-people-fill"></i>
                 </div>
                 <div>

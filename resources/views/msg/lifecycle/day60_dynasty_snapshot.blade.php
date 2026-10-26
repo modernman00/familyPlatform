@@ -26,11 +26,11 @@
     Two months ago, you took the initiative to set up your family sanctuary on <strong>FamilyPlatform</strong>. Because of your dedication, your lineage, stories, and connections are now preserved for generations to come.
 </p>
 
-<div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-left: 4px solid #6366f1; padding: 20px 24px; border-radius: 8px; margin-bottom: 24px;">
-    <h4 style="margin: 0 0 8px 0; color: #4338ca; font-size: 16px; font-weight: 700;">
+<div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-left: 4px solid #b8202c; padding: 20px 24px; border-radius: 8px; margin-bottom: 24px;">
+    <h4 style="margin: 0 0 8px 0; color: #8a1019; font-size: 16px; font-weight: 700;">
         🌟 Your 60-Day Dynasty Milestone
     </h4>
-    <p style="margin: 0; color: #3730a3; font-size: 14px; line-height: 1.5;">
+    <p style="margin: 0; color: #8a1019; font-size: 14px; line-height: 1.5;">
         You have turned forgotten memories into a permanent, interactive heirloom. Relatives across branches are now connected, photos and voice notes are secure, and future generations will inherit a living record of their roots.
     </p>
 </div>
@@ -49,7 +49,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0 24px 0;">
     <tr>
         <td align="center">
-            <a href="{{ $baseUrl }}/organogram" target="_blank" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);">
+            <a href="{{ $baseUrl }}/organogram" target="_blank" style="background: linear-gradient(135deg, #b8202c 0%, #a31621 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(184,32,44, 0.35);">
                 View Your Family Sanctuary &rarr;
             </a>
         </td>

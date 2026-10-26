@@ -48,8 +48,8 @@
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(16px);
     border-radius: 20px;
-    border: 1px solid rgba(99, 102, 241, 0.15);
-    box-shadow: 0 20px 45px -10px rgba(79, 70, 229, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(184,32,44, 0.15);
+    box-shadow: 0 20px 45px -10px rgba(163,22,33, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.03);
     max-width: 640px;
     width: 100%;
     padding: 2.5rem 2rem;
@@ -60,20 +60,20 @@
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #312e81 100%);
+    background: linear-gradient(135deg, #b8202c 0%, #a31621 50%, #2a0a0d 100%);
     color: #ffffff;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-size: 2rem;
-    box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 10px 25px -5px rgba(184,32,44, 0.4);
     margin-bottom: 1.5rem;
   }
 
   .sanctuary-title {
     font-size: 1.85rem;
     font-weight: 800;
-    color: #1e1b4b;
+    color: #2a0a0d;
     line-height: 1.25;
     margin-bottom: 0.75rem;
   }
@@ -82,8 +82,8 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: #eef2ff;
-    color: #4338ca;
+    background: #fbefef;
+    color: #8a1019;
     padding: 0.4rem 1rem;
     border-radius: 9999px;
     font-size: 0.95rem;
@@ -136,14 +136,14 @@
     width: 100%;
     min-height: 44px;
     padding: 0.62rem 1.25rem;
-    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+    background: linear-gradient(135deg, #a31621 0%, #8a1019 100%);
     color: #ffffff;
     font-size: 0.95rem;
     font-weight: 600;
     letter-spacing: -0.01em;
     border-radius: 12px;
     text-decoration: none;
-    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.28);
+    box-shadow: 0 4px 14px rgba(163,22,33, 0.28);
     transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
@@ -152,7 +152,7 @@
   .btn-sanctuary-primary:hover {
     color: #ffffff;
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(79, 70, 229, 0.38);
+    box-shadow: 0 6px 18px rgba(163,22,33, 0.38);
   }
 
   .btn-sanctuary-primary:active {
@@ -247,7 +247,7 @@
       </a>
 
       <div style="margin-top: 1rem;">
-        <a href="/register{{ !empty($refToken) ? '?ref=' . urlencode($refToken) : '' }}" style="color: #4f46e5; font-size: 0.95rem; font-weight: 600; text-decoration: underline;">
+        <a href="/register{{ !empty($refToken) ? '?ref=' . urlencode($refToken) : '' }}" style="color: #a31621; font-size: 0.95rem; font-weight: 600; text-decoration: underline;">
           Joining an existing family? Register with a code
         </a>
       </div>

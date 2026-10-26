@@ -5,7 +5,7 @@
         <div class="card-header position-relative p-0 border-0">
             <!-- Modern Brand Radial Mesh Cover -->
             <div class="cover-photo"
-                style="height: 120px; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 80%, #6366f1 100%); position: relative;">
+                style="height: 120px; background: linear-gradient(135deg, #2a0a0d 0%, #2a0a0d 40%, #8a1019 80%, #b8202c 100%); position: relative;">
                 <span class="position-absolute top-0 end-0 m-3 badge bg-white bg-opacity-25 text-white fw-bold px-2 py-1 rounded-pill" style="font-size: 0.7rem; letter-spacing: 0.04em;">
                     <i class="bi bi-shield-check text-warning"></i> VERIFIED
                 </span>
@@ -33,6 +33,10 @@
             </div>
 
             <div class="d-flex flex-row flex-wrap flex-lg-column gap-2 px-2 w-100">
+                <a href="/family/ai-hub" class="btn fw-bold flex-fill text-decoration-none text-center shadow-sm" style="background: linear-gradient(135deg, #7b03fc 0%, #ec4899 100%); color: #ffffff; border-radius: 12px; padding: 10px 12px; font-size: 0.92rem; box-shadow: 0 4px 14px rgba(123, 3, 252, 0.35);">
+                    <i class="bi bi-stars me-1 text-warning"></i> AI Family Hub
+                </a>
+
                 <button type="button" class="btn text-white fw-bold shadow-sm flex-fill" style="background-color: var(--primary-color); border-radius: 12px; padding: 8px 12px; font-size: 0.9rem;" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                     <i class="bi bi-pencil-square me-1"></i> Edit Profile
                 </button>

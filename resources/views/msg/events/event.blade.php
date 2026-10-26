@@ -15,7 +15,7 @@
 <div style="background-color: #f8fafc; border-radius: 8px; padding: 25px; margin-bottom: 25px; text-align: center; border: 1px solid #e2e8f0;">
     <h2 style="font-size: 22px; font-weight: 700; color: #1e293b; margin: 0 0 10px;">{{ $data['eventName'] }}</h2>
     
-    <p style="font-size: 16px; color: #00bfa5; font-weight: 600; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">
+    <p style="font-size: 16px; color: #a31621; font-weight: 600; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">
         {{ date('F d, Y', strtotime($data['eventDate'])) }}
     </p>
 
@@ -31,6 +31,6 @@
 @endphp
 
 <div style="text-align: center;">
-    <a href="{{ $baseUrl }}/member/ProfilePage" style="background-color: #00bfa5; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">View Event Details</a>
+    <a href="{{ $baseUrl }}/member/ProfilePage" style="background-color: #a31621; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">View Event Details</a>
 </div>
 @endsection

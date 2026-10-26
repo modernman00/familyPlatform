@@ -79,7 +79,7 @@
                                 </span>
                             </td>
                             <td style="padding: 14px 12px; vertical-align: middle;">
-                                <span class="w3-tag w3-light-grey w3-border w3-round" style="font-family: monospace; font-weight: 700; color: #0369a1;">
+                                <span class="w3-tag w3-light-grey w3-border w3-round" style="font-family: monospace; font-weight: 700; color: #8a1019;">
                                     {{ $user['famCode'] ?? 'N/A' }}
                                 </span>
                             </td>

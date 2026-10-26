@@ -111,7 +111,7 @@
                         <div class="detail-icon"><i class="bi bi-calendar-event"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Date of Birth</div>
-                            <div class="detail-value">{{ !empty($data['day']) ? $data['day'] . ' / ' . ($data['month'] ?? '') . ' / ' . ($data['year'] ?? '') : 'Not Specified' }}</div>
+                            <div class="detail-value">{{ !empty($data['day']) ? ($data['day'] . ' / ' . ($data['month'] ?? '') . ((($data['show_birth_year'] ?? 'off') === 'on' && !empty($data['year'])) ? ' / ' . $data['year'] : '')) : 'Not Specified' }}</div>
                         </div>
                     </div>
                     <div class="detail-item">

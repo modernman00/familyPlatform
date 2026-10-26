@@ -2,7 +2,7 @@
 <div class="modal fade" id="createAnnouncementModal" tabindex="-1" aria-labelledby="createAnnouncementModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden; max-height: calc(100vh - 3.5rem);">
-            <div class="modal-header border-0 pb-0 flex-shrink-0" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #ffffff;">
+            <div class="modal-header border-0 pb-0 flex-shrink-0" style="background: linear-gradient(135deg, #2a0a0d 0%, #2a0a0d 100%); color: #ffffff;">
                 <div class="d-flex align-items-center gap-2">
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: rgba(255,255,255,0.2);">
                         <i class="bi bi-megaphone-fill text-warning"></i>
@@ -64,7 +64,7 @@
 
                 <div class="modal-footer border-0 pt-0 px-4 pb-4 flex-shrink-0">
                     <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" id="btnBroadcastAnnouncement" class="btn btn-primary rounded-pill px-4 fw-bold" style="background: #4f46e5; border-color: #4f46e5; min-height: 44px;">
+                    <button type="submit" id="btnBroadcastAnnouncement" class="btn btn-primary rounded-pill px-4 fw-bold" style="background: #a31621; border-color: #a31621; min-height: 44px;">
                         <i class="bi bi-broadcast me-1"></i> Broadcast Announcement
                     </button>
                 </div>

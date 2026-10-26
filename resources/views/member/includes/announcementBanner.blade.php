@@ -13,9 +13,9 @@
   }
   body.dark-mode .family-announcement-card.announcement-normal,
   [data-bs-theme="dark"] .family-announcement-card.announcement-normal {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.18) 0%, #1e293b 100%) !important;
-    border: 1px solid rgba(59, 130, 246, 0.35) !important;
-    border-left: 5px solid #3b82f6 !important;
+    background: linear-gradient(135deg, rgba(163,22,33, 0.18) 0%, #1e293b 100%) !important;
+    border: 1px solid rgba(163,22,33, 0.35) !important;
+    border-left: 5px solid #a31621 !important;
   }
   body.dark-mode .family-announcement-card.announcement-important,
   [data-bs-theme="dark"] .family-announcement-card.announcement-important {
@@ -50,10 +50,10 @@
                 
                 $bgColor = $isUrgent 
                     ? 'linear-gradient(135deg, #fff1f2 0%, #fee2e2 100%)' 
-                    : ($isNormal ? 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)' : 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)');
+                    : ($isNormal ? 'linear-gradient(135deg, #fdf5f5 0%, #f5dede 100%)' : 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)');
                 
-                $borderLeftColor = $isUrgent ? '#ef4444' : ($isNormal ? '#3b82f6' : '#f59e0b');
-                $textColor = $isUrgent ? '#991b1b' : ($isNormal ? '#1e40af' : '#92400e');
+                $borderLeftColor = $isUrgent ? '#ef4444' : ($isNormal ? '#a31621' : '#f59e0b');
+                $textColor = $isUrgent ? '#991b1b' : ($isNormal ? '#8a1019' : '#92400e');
                 $iconClass = $isUrgent ? 'bi-exclamation-octagon-fill text-danger' : ($isNormal ? 'bi-megaphone-fill text-primary' : 'bi-pin-angle-fill text-warning');
                 $badgeText = $isUrgent ? 'URGENT NOTICE' : ($isNormal ? 'FAMILY BULLETIN' : 'IMPORTANT ANNOUNCEMENT');
                 $badgeClass = $isUrgent ? 'bg-danger text-white' : ($isNormal ? 'bg-primary text-white' : 'bg-warning text-dark');
@@ -61,6 +61,10 @@
                 $annAuthorName = trim((string)($announcement['firstName'] ?? 'Family') . ' ' . (string)($announcement['lastName'] ?? 'Member'));
                 $annDate = !empty($announcement['created_at']) ? date('M j, g:i A', strtotime((string)$announcement['created_at'])) : 'Recent';
                 $canDelete = ($announcement['author_id'] === ($_SESSION['id'] ?? '')) || (($_SESSION['type'] ?? '') === 'admin');
+                $annWhatsappText = "📢 " . (string)$announcement['title'] . "\n\n"
+                    . mb_substr((string)$announcement['message'], 0, 600) . "\n\n"
+                    . "— " . $annAuthorName . ", shared via FamilyPlatform";
+                $annWhatsappUrl = 'https://api.whatsapp.com/send?text=' . rawurlencode($annWhatsappText);
             @endphp
 
             <div class="card mb-3 border-0 shadow-sm family-announcement-card {{ $isUrgent ? 'announcement-urgent' : ($isNormal ? 'announcement-normal' : 'announcement-important') }}" id="announcementCard-{{ $announcement['id'] }}"
@@ -92,6 +96,12 @@
                     <p class="mb-0 text-dark" style="font-size: 0.95rem; line-height: 1.6; white-space: pre-line;">
                         {{ htmlspecialchars((string)$announcement['message'], ENT_QUOTES, 'UTF-8') }}
                     </p>
+
+                    <a href="{{ $annWhatsappUrl }}" target="_blank" rel="noopener noreferrer"
+                       class="btn btn-sm btn-outline-success rounded-pill d-inline-flex align-items-center gap-2 mt-3"
+                       style="min-height:44px;" data-testid="announcement-whatsapp-share">
+                        <i class="bi bi-whatsapp"></i> Share on WhatsApp
+                    </a>
                 </div>
             </div>
         @endforeach

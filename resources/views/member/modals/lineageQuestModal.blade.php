@@ -60,7 +60,7 @@
                     <div class="spinner-border text-success" role="status" style="width: 2.2rem; height: 2.2rem;">
                         <span class="visually-hidden">Loading quests...</span>
                     </div>
-                    <p class="text-muted small mt-2 mb-0">Analyzing lineage gaps & generating signed WhatsApp links...</p>
+                    <p class="text-muted small mt-2 mb-0">Analysing lineage gaps &amp; generating signed WhatsApp links...</p>
                 </div>
 
                 <div id="questsListContainer" class="d-flex flex-column gap-3 d-none">
@@ -177,7 +177,7 @@
 
             card.innerHTML = `
                 <div class="d-flex align-items-start gap-3 mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center text-success flex-shrink-0 shadow-sm" style="width: 44px; height: 44px; background: #e0f2fe;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center text-success flex-shrink-0 shadow-sm" style="width: 44px; height: 44px; background: #f5dede;">
                         <i class="bi ${quest.icon || 'bi-compass-fill'} fs-5 text-primary"></i>
                     </div>
                     <div class="flex-grow-1 min-w-0">

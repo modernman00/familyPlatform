@@ -52,7 +52,7 @@
 
             <div class="d-flex align-items-center gap-2">
                 <!-- Recommend / Invite Others Button -->
-                <button class="btn btn-sm d-flex align-items-center gap-1 px-3 py-1 fw-bold text-white rounded-pill shadow-sm" id="btnOpenRecommendModal" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); font-size: 0.85rem;" type="button">
+                <button class="btn btn-sm d-flex align-items-center gap-1 px-3 py-1 fw-bold text-white rounded-pill shadow-sm" id="btnOpenRecommendModal" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" style="background: linear-gradient(135deg, #b8202c 0%, #a31621 100%); font-size: 0.85rem;" type="button">
                     <i class="bi bi-person-plus-fill text-warning"></i> <span>Invite Others</span>
                 </button>
 

@@ -89,7 +89,7 @@ foreach(($eventData ?? []) as $event) {
                                 <div class="d-flex flex-column">
                                     <div class="d-flex justify-content-between align-items-start mb-1">
                                         <h6 class="fw-bold mb-0 text-truncate" style="color: var(--text-color); font-size: 0.9rem;" x-text="event.eventName"></h6>
-                                        <span class="badge rounded-pill px-2 py-1 fw-bold" style="background: var(--secondary-color); color: #4338ca; font-size: 0.72rem;" x-text="event.dateDifference"></span>
+                                        <span class="badge rounded-pill px-2 py-1 fw-bold" style="background: var(--secondary-color); color: #8a1019; font-size: 0.72rem;" x-text="event.dateDifference"></span>
                                     </div>
                                     
                                     <div class="d-flex align-items-center mb-1 text-muted" style="font-size: 0.82rem;">
@@ -124,7 +124,7 @@ foreach(($eventData ?? []) as $event) {
     </div>
 
     <!-- Family Members Metric Card -->
-    <div class="card border-0 text-white text-center shadow-lg position-relative overflow-hidden" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 80%, #6366f1 100%); border-radius: 20px; padding: 28px 20px; box-shadow: 0 16px 32px -4px rgba(49, 46, 129, 0.35);">
+    <div class="card border-0 text-white text-center shadow-lg position-relative overflow-hidden" style="background: linear-gradient(135deg, #2a0a0d 0%, #2a0a0d 40%, #8a1019 80%, #b8202c 100%); border-radius: 20px; padding: 28px 20px; box-shadow: 0 16px 32px -4px rgba(42,10,13, 0.35);">
         <div class="d-inline-flex align-items-center gap-1 mb-2 px-3 py-1 rounded-pill mx-auto" style="background: rgba(255, 255, 255, 0.15); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
             <i class="bi bi-people-fill text-warning"></i> Family Network
         </div>

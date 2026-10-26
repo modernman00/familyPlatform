@@ -56,6 +56,14 @@ final class ProfilepageService
             error_log('[ProfilepageService] Failed to load pending migrations: ' . $e->getMessage());
         }
 
+        $allFamilyMembers = (new DataAll())->getAllMembers($userId);
+        $familyRoster = array_values(array_map(static fn(array $m): array => [
+            'id' => (string)($m['id'] ?? ''),
+            'firstName' => (string)($m['firstName'] ?? ''),
+            'lastName' => (string)($m['lastName'] ?? ''),
+            'img' => (string)($m['img'] ?? ''),
+        ], $allFamilyMembers));
+
         return [
             'memberData' => $memberData,
             'famCode' => $famCode,
@@ -65,7 +73,8 @@ final class ProfilepageService
             'events' => DataAll::getEventDataByFamCode((array)$famCodes),
             'post2Id' => Post::postLink2Id($userId),
             'pics' => Post::getAllPostPics($userId),
-            'totalFamilyMembers' => count((new DataAll())->getAllMembers($userId)),
+            'totalFamilyMembers' => count($allFamilyMembers),
+            'familyRoster' => $familyRoster,
             'unclaimedMatch' => FamilyClaimService::findFuzzyUnclaimedMatches($famCode, $userId, $memberData),
             'pendingFamilyRequests' => $pendingFamilyRequests,
             'pendingMigrations' => $pendingMigrations,

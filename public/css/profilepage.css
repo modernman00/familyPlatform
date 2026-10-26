@@ -1,6 +1,6 @@
 :root {
-  --primary-color: #4f46e5;
-  --secondary-color: #eef2ff;
+  --primary-color: #a31621;
+  --secondary-color: #fbefef;
   --bg-color: #f8f6f0;
   --bg-radial-1: rgba(30, 86, 49, 0.05);
   --bg-radial-2: rgba(212, 175, 55, 0.07);
@@ -14,10 +14,10 @@
 }
 
 .dark-mode {
-  --primary-color: #818cf8;
-  --secondary-color: #1e1b4b;
+  --primary-color: #ef6b73;
+  --secondary-color: #2a0a0d;
   --bg-color: #0f172a;
-  --bg-radial-1: rgba(99, 102, 241, 0.06);
+  --bg-radial-1: rgba(184,32,44, 0.06);
   --bg-radial-2: rgba(16, 185, 129, 0.05);
   --bg-radial-3: rgba(15, 23, 42, 0.6);
   --card-bg: #1e293b;
@@ -40,7 +40,7 @@ body {
     radial-gradient(at 50% 100%, var(--bg-radial-3) 0px, transparent 50%);
   background-attachment: fixed;
   color: var(--text-color);
-  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
   transition: background-color 0.3s, color 0.3s;
   min-height: 100vh;
   padding: 0;
@@ -493,7 +493,7 @@ body {
 }
 
 .btn-icon:focus {
-  outline: 2px solid #0d6efd;
+  outline: 2px solid #a31621;
   outline-offset: 2px;
 }
 
@@ -965,9 +965,9 @@ body {
   font-weight: 600 !important;
   font-size: 0.95rem !important;
   padding: 10px !important;
-  background-color: var(--primary-color, #4f46e5) !important;
+  background-color: var(--primary-color, #a31621) !important;
   border: none !important;
-  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25) !important;
+  box-shadow: 0 2px 6px rgba(163,22,33, 0.25) !important;
   transition: all 0.2s ease !important;
 }
 
@@ -1059,8 +1059,8 @@ body {
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: -0.2px;
-  color: #06b6d4; /* Vibrant Cyan / Teal */
-  border: 1.8px solid #06b6d4;
+  color: #b8202c; /* Vibrant Cyan / Teal */
+  border: 1.8px solid #b8202c;
   width: 34px;
   height: 34px;
   margin: 2px;
@@ -1068,17 +1068,17 @@ body {
 }
 .btn-composer-action.action-gif:hover,
 .btn-composer-action.gif-btn:hover {
-  background-color: rgba(6, 182, 212, 0.14);
-  border-color: #0891b2;
-  color: #0891b2;
+  background-color: rgba(184,32,44, 0.14);
+  border-color: #a31621;
+  color: #a31621;
 }
 
 .btn-composer-action.action-tag {
-  color: #3b82f6; /* Royal Sky Blue */
+  color: #a31621; /* Royal Sky Blue */
 }
 .btn-composer-action.action-tag:hover {
-  background-color: rgba(59, 130, 246, 0.14);
-  color: #2563eb;
+  background-color: rgba(163,22,33, 0.14);
+  color: #a31621;
 }
 
 .btn-composer-action.action-poll {
@@ -1097,7 +1097,7 @@ body {
 
 /* Facebook Layout Redesign overrides */
 body, h1, h2, h3, h4, h5, h6, p, span, button, input, textarea {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
+  font-family: 'Inter', -apple-system, system-ui, sans-serif !important;
 }
 
 .comment-bubble-text,
@@ -1107,7 +1107,7 @@ body, h1, h2, h3, h4, h5, h6, p, span, button, input, textarea {
 .reaction-count-pill,
 .reaction-preview,
 .reaction-option {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
+  font-family: 'Inter', -apple-system, system-ui, sans-serif !important;
   font-variant-emoji: emoji;
 }
 
@@ -1263,7 +1263,7 @@ body, h1, h2, h3, h4, h5, h6, p, span, button, input, textarea {
    ========================================================================== */
 .family-code-pill {
   background-color: var(--secondary-color);
-  border: 1px solid #c7d2fe;
+  border: 1px solid #ecc7c9;
   border-radius: 9999px;
   padding: 6px 18px;
   width: fit-content;
@@ -1276,24 +1276,24 @@ body, h1, h2, h3, h4, h5, h6, p, span, button, input, textarea {
   display: inline-block;
   text-transform: uppercase;
   font-weight: 700;
-  color: #4f46e5;
+  color: #a31621;
   font-size: 0.82rem;
   letter-spacing: 0.05em;
 }
 
 .family-code-value {
   font-weight: 800;
-  color: #312e81;
+  color: #2a0a0d;
   font-size: 0.95rem;
 }
 
 body.dark-mode .family-code-pill {
-  background-color: rgba(99, 102, 241, 0.18) !important;
-  border-color: rgba(99, 102, 241, 0.4) !important;
+  background-color: rgba(184,32,44, 0.18) !important;
+  border-color: rgba(184,32,44, 0.4) !important;
 }
 
 body.dark-mode .family-code-label {
-  color: #a5b4fc !important;
+  color: #ef6b73 !important;
 }
 
 body.dark-mode .family-code-value {
@@ -1334,8 +1334,8 @@ body.dark-mode .form-select:focus,
 body.dark-mode .inputComment:focus {
   background-color: #0f172a !important;
   color: #f8fafc !important;
-  border-color: #818cf8 !important;
-  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.25) !important;
+  border-color: #ef6b73 !important;
+  box-shadow: 0 0 0 3px rgba(239,107,115, 0.25) !important;
 }
 
 body.dark-mode .composer-prompt {
@@ -1345,7 +1345,7 @@ body.dark-mode .composer-prompt {
 }
 body.dark-mode .composer-prompt:hover {
   background-color: #1e293b !important;
-  border-color: #4f46e5 !important;
+  border-color: #a31621 !important;
 }
 
 body.dark-mode .card,
@@ -1420,16 +1420,16 @@ body.dark-mode .text-muted {
 /* ── Feed Banners & Migration Cards Dark Theme Invariant ────────────── */
 body.dark-mode .family-join-request-card,
 [data-bs-theme="dark"] .family-join-request-card {
-  background: linear-gradient(135deg, rgba(0, 191, 165, 0.16) 0%, #1e293b 100%) !important;
+  background: linear-gradient(135deg, rgba(163,22,33, 0.16) 0%, #1e293b 100%) !important;
   background-color: #1e293b !important;
-  border: 1px solid rgba(0, 191, 165, 0.35) !important;
-  border-left: 5px solid #00bfa5 !important;
+  border: 1px solid rgba(163,22,33, 0.35) !important;
+  border-left: 5px solid #a31621 !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
 }
 body.dark-mode .family-join-request-card .card-icon-badge,
 [data-bs-theme="dark"] .family-join-request-card .card-icon-badge {
-  background: rgba(0, 191, 165, 0.22) !important;
-  color: #5eead4 !important;
+  background: rgba(163,22,33, 0.22) !important;
+  color: #b8202c !important;
 }
 body.dark-mode .family-join-request-card .card-heading,
 [data-bs-theme="dark"] .family-join-request-card .card-heading {
@@ -1453,15 +1453,15 @@ body.dark-mode .family-join-request-card .btn-deny:hover,
 
 body.dark-mode .family-migration-nudge-card,
 [data-bs-theme="dark"] .family-migration-nudge-card {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.22) 0%, #1e293b 100%) !important;
+  background: linear-gradient(135deg, rgba(138,16,25, 0.22) 0%, #1e293b 100%) !important;
   background-color: #1e293b !important;
-  border: 1px solid rgba(168, 85, 247, 0.35) !important;
-  border-left: 5px solid #8b5cf6 !important;
+  border: 1px solid rgba(184,32,44, 0.35) !important;
+  border-left: 5px solid #b8202c !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
 }
 body.dark-mode .family-migration-nudge-card .card-icon-badge,
 [data-bs-theme="dark"] .family-migration-nudge-card .card-icon-badge {
-  background: rgba(139, 92, 246, 0.25) !important;
+  background: rgba(184,32,44, 0.25) !important;
   color: #c4b5fd !important;
 }
 body.dark-mode .family-migration-nudge-card .card-heading,
@@ -1492,16 +1492,16 @@ body.dark-mode .family-migration-nudge-card .btn-decline:hover,
 
 body.dark-mode .family-migration-request-card,
 [data-bs-theme="dark"] .family-migration-request-card {
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.22) 0%, #1e293b 100%) !important;
+  background: linear-gradient(135deg, rgba(163,22,33, 0.22) 0%, #1e293b 100%) !important;
   background-color: #1e293b !important;
-  border: 1px solid rgba(59, 130, 246, 0.35) !important;
-  border-left: 5px solid #2563eb !important;
+  border: 1px solid rgba(163,22,33, 0.35) !important;
+  border-left: 5px solid #a31621 !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
 }
 body.dark-mode .family-migration-request-card .card-icon-badge,
 [data-bs-theme="dark"] .family-migration-request-card .card-icon-badge {
-  background: rgba(37, 99, 235, 0.25) !important;
-  color: #93c5fd !important;
+  background: rgba(163,22,33, 0.25) !important;
+  color: #ef6b73 !important;
 }
 body.dark-mode .family-migration-request-card .card-heading,
 [data-bs-theme="dark"] .family-migration-request-card .card-heading {
@@ -1531,16 +1531,16 @@ body.dark-mode .family-migration-request-card .btn-deny:hover,
 
 body.dark-mode .unclaimed-match-card,
 [data-bs-theme="dark"] .unclaimed-match-card {
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.18) 0%, #1e293b 100%) !important;
+  background: linear-gradient(135deg, rgba(163,22,33, 0.18) 0%, #1e293b 100%) !important;
   background-color: #1e293b !important;
-  border: 1px solid rgba(59, 130, 246, 0.35) !important;
-  border-left: 5px solid #2563eb !important;
+  border: 1px solid rgba(163,22,33, 0.35) !important;
+  border-left: 5px solid #a31621 !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
 }
 body.dark-mode .unclaimed-match-card .card-icon-badge,
 [data-bs-theme="dark"] .unclaimed-match-card .card-icon-badge {
-  background: rgba(37, 99, 235, 0.25) !important;
-  color: #93c5fd !important;
+  background: rgba(163,22,33, 0.25) !important;
+  color: #ef6b73 !important;
 }
 body.dark-mode .unclaimed-match-card .card-heading,
 [data-bs-theme="dark"] .unclaimed-match-card .card-heading {
@@ -1579,19 +1579,19 @@ body.dark-mode .family-heritage-hub .hub-tile-trivia .tile-icon {
   color: #fbbf24 !important;
 }
 body.dark-mode .family-heritage-hub .hub-tile-flyer {
-  background: rgba(59, 130, 246, 0.12) !important;
-  border-color: rgba(59, 130, 246, 0.3) !important;
+  background: rgba(163,22,33, 0.12) !important;
+  border-color: rgba(163,22,33, 0.3) !important;
 }
 body.dark-mode .family-heritage-hub .hub-tile-flyer .tile-icon {
-  background: rgba(59, 130, 246, 0.25) !important;
-  color: #60a5fa !important;
+  background: rgba(163,22,33, 0.25) !important;
+  color: #ef6b73 !important;
 }
 body.dark-mode .family-heritage-hub .hub-tile-capsule {
-  background: rgba(168, 85, 247, 0.12) !important;
-  border-color: rgba(168, 85, 247, 0.3) !important;
+  background: rgba(184,32,44, 0.12) !important;
+  border-color: rgba(184,32,44, 0.3) !important;
 }
 body.dark-mode .family-heritage-hub .hub-tile-capsule .tile-icon {
-  background: rgba(168, 85, 247, 0.25) !important;
+  background: rgba(184,32,44, 0.25) !important;
   color: #c084fc !important;
 }
 body.dark-mode .family-heritage-hub .tile-title {
@@ -1603,10 +1603,10 @@ body.dark-mode .family-heritage-hub .tile-desc {
 
 body.dark-mode .active-hashtag-filter-card,
 [data-bs-theme="dark"] .active-hashtag-filter-card {
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.22) 0%, #1e293b 100%) !important;
+  background: linear-gradient(135deg, rgba(163,22,33, 0.22) 0%, #1e293b 100%) !important;
   background-color: #1e293b !important;
-  border: 1px solid rgba(99, 102, 241, 0.35) !important;
-  border-left: 4px solid #6366f1 !important;
+  border: 1px solid rgba(184,32,44, 0.35) !important;
+  border-left: 4px solid #b8202c !important;
 }
 body.dark-mode .active-hashtag-filter-card .stream-label,
 [data-bs-theme="dark"] .active-hashtag-filter-card .stream-label {
@@ -1633,7 +1633,7 @@ body.dark-mode .feed-empty-state-card p {
 
 #memoriesWidgetMobile:hover,
 #memoriesWidgetDesktop:hover {
-  box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.12) !important;
+  box-shadow: 0 8px 24px -4px rgba(184,32,44, 0.12) !important;
 }
 
 @media (max-width: 576px) {
@@ -1744,4 +1744,169 @@ body.dark-mode .feed-empty-state-card p {
   .pwa-btn-install {
     min-height: 44px; /* 44px minimum touch target on small mobile */
   }
+}
+
+/* ==========================================================================
+   Redesigned Comment Composer (Smooth Pill, Focus-Within, Zero Red Rectangle)
+   ========================================================================== */
+.comment-composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.comment-composer__field {
+  flex: 1;
+  min-width: 0;
+  background-color: #f0f2f5;
+  border: 1.5px solid transparent;
+  border-radius: 9999px;
+  padding: 2px 8px 2px 14px;
+  transition: background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.comment-composer__field:hover {
+  background-color: #e9ecef;
+}
+
+.comment-composer__field:focus-within {
+  background-color: #ffffff !important;
+  border-color: rgba(163, 22, 33, 0.45) !important;
+  box-shadow: 0 0 0 3px rgba(163, 22, 33, 0.12), 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+}
+
+.comment-composer__row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.comment-composer input,
+.comment-composer input:focus,
+.comment-composer input:focus-visible,
+.comment-composer__input,
+.comment-composer__input:focus,
+.comment-composer__input:focus-visible {
+  flex: 1;
+  min-width: 0;
+  border: 0 !important;
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  font-size: 0.9rem;
+  padding: 10px 0;
+  color: inherit;
+}
+
+.comment-composer__input::placeholder {
+  color: #65676b;
+}
+
+.comment-composer__tool,
+.comment-composer__send {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #65676b;
+  font-size: 1.15rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.comment-composer__tool:hover {
+  background-color: rgba(0, 0, 0, 0.07);
+  color: #1e293b;
+}
+
+.comment-composer__tool:active {
+  transform: scale(0.92);
+}
+
+.comment-composer__tool:focus-visible {
+  outline: 2px solid #a31621;
+  outline-offset: 1px;
+  border-radius: 50%;
+}
+
+.comment-composer__tool[aria-expanded="true"] {
+  color: #a31621;
+  background-color: rgba(163, 22, 33, 0.08);
+}
+
+.comment-composer__send {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  color: #94a3b8;
+}
+
+.comment-composer__send:hover {
+  background-color: rgba(163, 22, 33, 0.08);
+  color: #a31621;
+}
+
+.comment-composer__send:active {
+  transform: scale(0.92);
+}
+
+.comment-composer__send.is-active {
+  color: #a31621 !important;
+  background-color: rgba(163, 22, 33, 0.1) !important;
+  transform: scale(1.05);
+}
+
+body.dark-mode .comment-composer__field {
+  background-color: #1e293b !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+body.dark-mode .comment-composer__field:hover {
+  background-color: #253349 !important;
+}
+
+body.dark-mode .comment-composer__field:focus-within {
+  background-color: #0f172a !important;
+  border-color: rgba(239, 107, 115, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(239, 107, 115, 0.2), 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .comment-composer__input {
+  color: #f8fafc !important;
+  background: transparent !important;
+}
+
+body.dark-mode .comment-composer__input::placeholder {
+  color: #94a0b4 !important;
+}
+
+body.dark-mode .comment-composer__tool {
+  color: #94a0b4;
+}
+
+body.dark-mode .comment-composer__tool:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+}
+
+body.dark-mode .comment-composer__send {
+  color: #64748b;
+}
+
+body.dark-mode .comment-composer__send:hover {
+  background-color: rgba(239, 107, 115, 0.12);
+  color: #ef6b73;
+}
+
+body.dark-mode .comment-composer__send.is-active {
+  color: #ef6b73 !important;
+  background-color: rgba(239, 107, 115, 0.16) !important;
 }

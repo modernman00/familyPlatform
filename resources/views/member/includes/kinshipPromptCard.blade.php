@@ -1,7 +1,7 @@
 <!-- Kinship Inner Circle Prompt Card -->
 <div class="card border-0 shadow-sm mb-4 kinship-prompt-card overflow-hidden" 
      id="kinshipPromptCard"
-     style="border-radius: 20px; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #4338ca 100%); color: #ffffff; border: 1.5px solid rgba(129, 140, 248, 0.4); display: none;">
+     style="border-radius: 20px; background: linear-gradient(135deg, #2a0a0d 0%, #2a0a0d 45%, #8a1019 100%); color: #ffffff; border: 1.5px solid rgba(239,107,115, 0.4); display: none;">
     <div class="card-body p-4 position-relative">
         
         <!-- Dismiss Button -->

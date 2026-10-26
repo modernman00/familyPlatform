@@ -28,7 +28,7 @@
         font-size: 1.15rem;
         line-height: 1.85;
         color: #1e293b;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Georgia, serif;
+        font-family: 'Inter', -apple-system, system-ui, sans-serif;
     }
 
     .story-body p {
@@ -52,11 +52,11 @@
     }
 
     .story-body blockquote {
-        border-left: 4px solid #6366f1;
+        border-left: 4px solid #b8202c;
         padding-left: 1.25rem;
         margin: 1.8rem 0;
         font-style: italic;
-        color: #4338ca;
+        color: #8a1019;
     }
 
     .whatsapp-share-btn {
@@ -176,7 +176,7 @@
         </article>
 
         <!-- Bottom Family Keepsake Card -->
-        <div class="card p-4 rounded-4 border-0 shadow-sm text-center my-4 no-print" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%);">
+        <div class="card p-4 rounded-4 border-0 shadow-sm text-center my-4 no-print" style="background: linear-gradient(135deg, rgba(184,32,44, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%);">
             <h5 class="fw-bold mb-2 text-dark">This story is preserved for future generations</h5>
             <p class="text-muted small mx-auto mb-3" style="max-width: 520px;">
                 Only registered members of Family Network #{{ htmlspecialchars($familyCode, ENT_QUOTES, 'UTF-8') }} have access to this private chronicle.
@@ -185,7 +185,7 @@
                 <a href="/familyJournal" class="btn btn-outline-primary rounded-pill px-4 fw-semibold">
                     <i class="bi bi-journal-bookmark me-1"></i> More Family Chronicles
                 </a>
-                <a href="/familyJournal/create" class="btn btn-primary rounded-pill px-4 fw-semibold" style="background: #4f46e5; border-color: #4f46e5;">
+                <a href="/familyJournal/create" class="btn btn-primary rounded-pill px-4 fw-semibold" style="background: #a31621; border-color: #a31621;">
                     <i class="bi bi-pencil-square me-1"></i> Write Another Chronicle
                 </a>
             </div>

@@ -26,11 +26,11 @@
     Every family dynasty has an origin point — a hometown, village, crossing, or neighbourhood where your ancestors laid the foundation for everything you are today.
 </p>
 
-<div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-left: 4px solid #3b82f6; padding: 20px 24px; border-radius: 8px; margin-bottom: 24px;">
-    <h4 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 16px; font-weight: 700;">
+<div style="background: linear-gradient(135deg, #fdf5f5 0%, #f5dede 100%); border-left: 4px solid #a31621; padding: 20px 24px; border-radius: 8px; margin-bottom: 24px;">
+    <h4 style="margin: 0 0 8px 0; color: #8a1019; font-size: 16px; font-weight: 700;">
         🗺️ Lineage Quests: The Origin Story
     </h4>
-    <p style="margin: 0; color: #1e40af; font-size: 14px; line-height: 1.5;">
+    <p style="margin: 0; color: #8a1019; font-size: 14px; line-height: 1.5;">
         Take two minutes to document where your parents or grandparents grew up. Record the name of their ancestral town or parish, and watch your family heritage map light up with generations of migration and history.
     </p>
 </div>
@@ -49,7 +49,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0 24px 0;">
     <tr>
         <td align="center">
-            <a href="{{ $baseUrl }}/organogram" target="_blank" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);">
+            <a href="{{ $baseUrl }}/organogram" target="_blank" style="background: linear-gradient(135deg, #a31621 0%, #8a1019 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(163,22,33, 0.35);">
                 Explore Your Lineage &rarr;
             </a>
         </td>

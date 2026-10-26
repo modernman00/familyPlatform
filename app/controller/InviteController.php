@@ -63,19 +63,41 @@ final class InviteController
                 return;
             }
 
-            $familyCode = trim((string)($input['family_code'] ?? ''));
+            $familyCode = strtoupper(trim(str_replace('#', '', (string)($input['family_code'] ?? ''))));
+            $primaryCode = strtoupper(trim((string)($_SESSION['famCode'] ?? '')));
+            if ($familyCode === '') {
+                $familyCode = $primaryCode;
+            }
             if ($familyCode === '') {
                 http_response_code(400);
                 echo json_encode(['status' => 'error', 'message' => 'family_code is required.']);
                 return;
             }
 
+            // Security gate (RFC-0004): Verify the signed-in user holds this family code
+            // (either their marital/primary famCode or an approved birth/maiden family code).
+            $holdsCode = BaseController::sessionSharesFamily($familyCode);
+            if ($holdsCode && $familyCode !== $primaryCode && !empty($_SESSION['id'])) {
+                $holdsCode = (new \App\services\BirthFamilyCodeService(\Src\Db::connect2()))
+                    ->userHoldsCode((string)$_SESSION['id'], $familyCode);
+            }
+            if (!$holdsCode) {
+                http_response_code(403);
+                echo json_encode(['status' => 'error', 'message' => 'You do not have permission to generate invites for this family code.']);
+                return;
+            }
+
+            $lineageScope = trim((string)($input['lineage_scope'] ?? ''));
+            $isBirthLineage = ($lineageScope === 'maternal' || $lineageScope === 'birth' || ($primaryCode !== '' && $familyCode !== $primaryCode));
+            $familySurname = trim((string)($input['family_surname'] ?? ''));
+
             $type = in_array($input['type'] ?? '', ['organogram', 'onboarding', 'family_invite', 'referral'], true)
                 ? (string)$input['type']
                 : 'organogram';
 
             $meta = [
-                'invited_by' => $userId,
+                'invited_by'    => $userId,
+                'lineage_scope' => $isBirthLineage ? 'maternal' : 'primary',
             ];
             if (!empty($input['first_name'])) {
                 $meta['first_name'] = trim((string)$input['first_name']);
@@ -93,11 +115,28 @@ final class InviteController
             $token     = InviteTokenService::create($familyCode, $meta, $type);
             $inviteUrl = InviteTokenService::getRegisterUrl($token);
 
+            // Generate ready-to-share WhatsApp link with lineage-aware copy (marital vs. birth)
+            $firstName = trim((string)($input['first_name'] ?? ''));
+            $lastName  = trim((string)($input['last_name'] ?? ''));
+            $relativeName = trim($firstName . ' ' . $lastName);
+            $treeLabel = $isBirthLineage
+                ? ($familySurname !== '' ? "our {$familySurname} Birth Family Tree" : 'our Birth Family Tree')
+                : ($familySurname !== '' ? "our {$familySurname} Family Tree" : 'our Family Tree');
+
+            $whatsappMessage = !empty($relativeName)
+                ? "👋 Hello {$relativeName}! I have reserved your branch on {$treeLabel} on FamilyPlatform (Family Code: #{$familyCode}). Tap here to claim your spot and connect with our family:\n" . $inviteUrl
+                : "👋 Hello! You have been invited to connect with {$treeLabel} on FamilyPlatform (Family Code: #{$familyCode}). Tap here to claim your branch:\n" . $inviteUrl;
+
+            $whatsappShareUrl = 'https://api.whatsapp.com/send?text=' . rawurlencode($whatsappMessage);
+
             header('Content-Type: application/json');
             echo json_encode([
-                'status'     => 'success',
-                'invite_url' => $inviteUrl,
-                'token'      => $token,
+                'status'             => 'success',
+                'invite_url'         => $inviteUrl,
+                'whatsapp_share_url' => $whatsappShareUrl,
+                'token'              => $token,
+                'family_code'        => $familyCode,
+                'lineage_scope'      => $isBirthLineage ? 'maternal' : 'primary',
             ]);
 
         } catch (BadRequestException $e) {

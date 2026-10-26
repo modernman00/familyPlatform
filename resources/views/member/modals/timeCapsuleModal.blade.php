@@ -69,7 +69,7 @@
                             </div>
 
                             <div class="col-12">
-                                <div class="p-3 rounded-3" style="background: #faf5ff; border: 1px dashed #d8b4fe;">
+                                <div class="p-3 rounded-3" style="background: #fbefef; border: 1px dashed #d8b4fe;">
                                     <div class="d-flex align-items-center gap-2 mb-1">
                                         <i class="bi bi-shield-lock-fill text-primary"></i>
                                         <span class="fw-bold small text-dark">Zero-Trust Cryptographic Sealing</span>
@@ -85,7 +85,7 @@
                             <button type="button" class="btn btn-light btn-sm px-3 py-2 fw-semibold border" onclick="switchCapsuleTab('view')">
                                 Cancel
                             </button>
-                            <button type="submit" id="btnSubmitCapsule" class="btn btn-primary btn-sm px-4 py-2 fw-bold shadow-sm" style="background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%); border: none;">
+                            <button type="submit" id="btnSubmitCapsule" class="btn btn-primary btn-sm px-4 py-2 fw-bold shadow-sm" style="background: linear-gradient(135deg, #ef6b73 0%, #8a1019 100%); border: none;">
                                 <i class="bi bi-lock-fill me-1"></i> Seal Capsule in Vault
                             </button>
                         </div>
@@ -186,7 +186,7 @@
         if (capsules.length === 0) {
             container.innerHTML = `
                 <div class="text-center py-5">
-                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-2" style="background: #fdf4ff; color: #a855f7;">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-2" style="background: #fdf4ff; color: #ef6b73;">
                         <i class="bi bi-safe2 fs-2"></i>
                     </div>
                     <h6 class="fw-bold mb-1 text-dark">The Family Vault is Empty</h6>
@@ -203,8 +203,8 @@
             const card = document.createElement('div');
             card.className = 'card border-0 shadow-sm p-3';
             card.style.borderRadius = '16px';
-            card.style.background = capsule.is_unlocked ? '#f0fdf4' : '#faf5ff';
-            card.style.borderLeft = capsule.is_unlocked ? '5px solid #10b981 !important' : '5px solid #a855f7 !important';
+            card.style.background = capsule.is_unlocked ? '#f0fdf4' : '#fbefef';
+            card.style.borderLeft = capsule.is_unlocked ? '5px solid #10b981 !important' : '5px solid #ef6b73 !important';
 
             const badgeText = capsule.is_unlocked ? 'UNLOCKED' : `SEALED (${capsule.days_remaining}d remaining)`;
             const badgeClass = capsule.is_unlocked ? 'bg-success text-white' : 'bg-dark text-white';

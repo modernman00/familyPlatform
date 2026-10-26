@@ -1,10 +1,10 @@
 <!-- Recommend FamilyPlatform Modal -->
 <div class="modal fade" id="recommendFriendsModal" tabindex="-1" aria-labelledby="recommendFriendsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius: 20px; border: 1px solid rgba(99, 102, 241, 0.2); box-shadow: 0 25px 50px -12px rgba(79, 70, 229, 0.25);">
+    <div class="modal-content" style="border-radius: 20px; border: 1px solid rgba(184,32,44, 0.2); box-shadow: 0 25px 50px -12px rgba(163,22,33, 0.25);">
       
       <!-- Modal Header -->
-      <div class="modal-header" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); color: #ffffff; border-top-left-radius: 19px; border-top-right-radius: 19px; padding: 1.5rem 1.75rem;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #a31621 0%, #8a1019 100%); color: #ffffff; border-top-left-radius: 19px; border-top-right-radius: 19px; padding: 1.5rem 1.75rem;">
         <div class="d-flex align-items-center gap-3">
           <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
             🌟
@@ -13,7 +13,7 @@
             <h5 class="modal-title fw-bold mb-0" id="recommendFriendsModalLabel" style="font-size: 1.25rem;">
               Invite Others to FamilyPlatform
             </h5>
-            <small style="color: #c7d2fe; font-size: 0.85rem;">Invite in-laws & friends to launch their own family hub</small>
+            <small style="color: #ecc7c9; font-size: 0.85rem;">Invite in-laws & friends to launch their own family hub</small>
           </div>
         </div>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>

@@ -135,11 +135,11 @@ describe('Social Feed Interactions', () => {
         cy.contains(postMarker, { timeout: 10000 }).parents('.card').within(() => {
             // The comment form is hidden per-post until the "Comment" toggle button is clicked
             cy.contains('button', 'Comment').click();
-            cy.get('input.form-control.rounded-pill[placeholder*="Write a comment"]')
+            cy.get('input.comment-composer__input[placeholder*="Write a comment"]')
                 .should('be.visible')
                 .type(commentContent)
                 .should('have.value', commentContent);
-            cy.contains('button', 'Post').click();
+            cy.get('button[aria-label="Post comment"]').click();
         });
 
         // Wait for backend persistence confirmation
@@ -158,11 +158,11 @@ describe('Social Feed Interactions', () => {
 
         cy.contains(postMarker, { timeout: 10000 }).parents('.card').within(() => {
             cy.contains('button', 'Comment').click();
-            cy.get('input.form-control.rounded-pill[placeholder*="Write a comment"]')
+            cy.get('input.comment-composer__input[placeholder*="Write a comment"]')
                 .should('be.visible')
                 .type(commentContent)
                 .should('have.value', commentContent);
-            cy.contains('button', 'Post').click();
+            cy.get('button[aria-label="Post comment"]').click();
         });
 
         cy.wait('@commentReq', { timeout: 15000 }).its('response.statusCode').should('eq', 200);

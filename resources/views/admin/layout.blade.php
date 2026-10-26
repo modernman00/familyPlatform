@@ -39,7 +39,7 @@
         body {
             background-color: #0b0f19;
             color: #f3f4f6;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
         }
         .glass-panel {
             background: rgba(17, 24, 39, 0.75);

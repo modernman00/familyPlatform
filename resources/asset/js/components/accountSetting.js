@@ -146,6 +146,9 @@ window.addEventListener('hashchange', handleHashNavigation);
 // When the user switches to "maternal", the sibling/parent invite emails will
 // use their otherFamCode instead of the primary marital family code.
 (function initLineageScopePickers() {
+  const primaryCode = (id('famCode_id')?.value || '').trim();
+  const maternalCode = (id('otherFamCode_id')?.value || '').trim();
+
   const TABS = [
     {
       primaryRadioId:  'parents-scope-primary',
@@ -154,6 +157,9 @@ window.addEventListener('hashchange', handleHashNavigation);
       codeFieldId:     'parentsLineageCode',
       primaryLabelId:  'parents-scope-primary-label',
       maternalLabelId: 'parents-scope-maternal-label',
+      hintId:          'parents-lineage-hint',
+      saveBtnId:       'parentsBtn',
+      entityLabel:     'Parents',
     },
     {
       primaryRadioId:  'siblings-scope-primary',
@@ -162,22 +168,44 @@ window.addEventListener('hashchange', handleHashNavigation);
       codeFieldId:     'siblingsLineageCode',
       primaryLabelId:  'siblings-scope-primary-label',
       maternalLabelId: 'siblings-scope-maternal-label',
+      hintId:          'siblings-lineage-hint',
+      saveBtnId:       'siblingsBtn',
+      entityLabel:     'Siblings',
     },
   ];
 
-  TABS.forEach(({ primaryRadioId, maternalRadioId, scopeFieldId, codeFieldId, primaryLabelId, maternalLabelId }) => {
+  TABS.forEach(({ primaryRadioId, maternalRadioId, scopeFieldId, codeFieldId, primaryLabelId, maternalLabelId, hintId, saveBtnId, entityLabel }) => {
     const primaryRadio  = id(primaryRadioId);
     const maternalRadio = id(maternalRadioId);
     const scopeField    = id(scopeFieldId);
     const codeField     = id(codeFieldId);
     const primaryLabel  = id(primaryLabelId);
     const maternalLabel = id(maternalLabelId);
+    const hintEl        = id(hintId);
+    const saveBtn       = id(saveBtnId);
 
     if (!primaryRadio || !maternalRadio || !scopeField) return;
 
     const applyStyles = (selected) => {
-      if (primaryLabel)  { primaryLabel.style.borderColor  = selected === 'primary'  ? '#4f46e5' : ''; primaryLabel.style.background  = selected === 'primary'  ? '#eef2ff' : ''; }
+      if (primaryLabel)  { primaryLabel.style.borderColor  = selected === 'primary'  ? '#a31621' : ''; primaryLabel.style.background  = selected === 'primary'  ? '#fbefef' : ''; }
       if (maternalLabel) { maternalLabel.style.borderColor = selected === 'maternal' ? '#16a34a' : ''; maternalLabel.style.background = selected === 'maternal' ? '#f0fdf4' : ''; }
+
+      const activeCode = selected === 'maternal' ? (codeField?.value || maternalCode) : primaryCode;
+      const codeBadge = activeCode ? ` (#${activeCode})` : '';
+
+      if (hintEl) {
+        if (selected === 'maternal') {
+          hintEl.innerHTML = `${entityLabel} will be added to your <strong>Birth / Maiden Family${codeBadge}</strong>, and any invitation sent will use your birth family code.`;
+        } else {
+          hintEl.innerHTML = `${entityLabel} will be added to your <strong>Marital / Household Tree${codeBadge}</strong>, and any invitation sent will use your marital family code.`;
+        }
+      }
+
+      if (saveBtn) {
+        saveBtn.textContent = selected === 'maternal'
+          ? `Save ${entityLabel} to Birth Family${codeBadge}`
+          : `Save ${entityLabel} to Marital Tree${codeBadge}`;
+      }
     };
 
     const onPrimary = () => {
@@ -198,7 +226,9 @@ window.addEventListener('hashchange', handleHashNavigation);
     maternalRadio.addEventListener('change', onMaternal);
 
     // Apply initial visual state
-    applyStyles(primaryRadio.checked ? 'primary' : 'maternal');
+    const initialScope = maternalRadio.checked ? 'maternal' : 'primary';
+    scopeField.value = initialScope;
+    applyStyles(initialScope);
   });
 })();
 
@@ -284,7 +314,7 @@ processKidsSiblings(fName, famCode);
             icon: 'success',
             title: mode === 'immediate' ? 'Account Permanently Erased' : 'Deletion Scheduled',
             text: body?.message || 'Your account deletion request has been processed.',
-            confirmButtonColor: '#0284c7',
+            confirmButtonColor: '#a31621',
             confirmButtonText: 'Return to Sign In',
           });
         }
@@ -331,7 +361,7 @@ processKidsSiblings(fName, famCode);
                 </div>
               </label>
             </div>
-            <div class="p-3 border rounded-3" style="background-color: #fff5f5; border-color: #fecaca !important; cursor: pointer;">
+            <div class="p-3 border rounded-3" style="background-color: #fdf5f5; border-color: #fecaca !important; cursor: pointer;">
               <label class="d-flex align-items-start gap-2" style="cursor: pointer;">
                 <input class="form-check-input mt-1" type="radio" name="deletionMode" id="delModeImmediate" value="immediate" style="cursor: pointer;">
                 <div>

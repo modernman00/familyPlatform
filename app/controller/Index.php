@@ -82,6 +82,15 @@ final class Index
         }
     }
 
+    public function whyFamilyPlatform(): void
+    {
+        try {
+            Utility::view('why_familyplatform');
+        } catch (\Throwable $th) {
+            Utility::showError($th);
+        }
+    }
+
     public function unsubscribe(): void
     {
         $rawEmail = filter_input(INPUT_GET, 'email', FILTER_DEFAULT) ?: (filter_input(INPUT_POST, 'email', FILTER_DEFAULT) ?: '');

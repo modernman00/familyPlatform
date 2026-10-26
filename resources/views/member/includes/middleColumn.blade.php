@@ -4,17 +4,17 @@
     animation: postHighlightPulse 2.5s ease-out;
   }
   @keyframes postHighlightPulse {
-    0% { box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.6); }
-    100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
+    0% { box-shadow: 0 0 0 3px rgba(163,22,33, 0.6); }
+    100% { box-shadow: 0 0 0 0 rgba(163,22,33, 0); }
   }
 </style>
 <div class="feed-column">
   @if(!empty($pendingFamilyRequests))
     @foreach($pendingFamilyRequests as $joinReq)
-      <div class="card mb-4 border-0 shadow-sm family-join-request-card" id="familyJoinReq-{{ $joinReq['no'] }}" style="border-radius: 16px; background: linear-gradient(135deg, #f0fdfa 0%, #ecfdf5 100%); border-left: 5px solid #00bfa5 !important;">
+      <div class="card mb-4 border-0 shadow-sm family-join-request-card" id="familyJoinReq-{{ $joinReq['no'] }}" style="border-radius: 16px; background: linear-gradient(135deg, #fdf5f5 0%, #fbefef 100%); border-left: 5px solid #a31621 !important;">
         <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
           <div class="d-flex align-items-center gap-3">
-            <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px; background: #ccfbf1; color: #0f766e; font-size: 1.3rem;">
+            <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px; background: #f3d9db; color: #8a1019; font-size: 1.3rem;">
               <i class="bi bi-person-plus-fill"></i>
             </div>
             <div>
@@ -29,7 +29,7 @@
           <div class="d-flex align-items-center gap-2">
             <button class="btn btn-sm text-white rounded-pill px-3 py-2 fw-semibold" 
                     id="btnApproveJoin-{{ $joinReq['no'] }}"
-                    style="background-color: #00bfa5; min-height: 44px;" 
+                    style="background-color: #a31621; min-height: 44px;" 
                     onclick="handleJoinRequestAction({{ (int)$joinReq['no'] }}, '{{ htmlspecialchars($joinReq['approval_token'] ?? '') }}', 'approve')">
               <i class="bi bi-check-lg me-1"></i> Approve Request
             </button>
@@ -108,7 +108,7 @@
 
   @if(!empty($pendingMigrations['incomingNudges']))
     @foreach($pendingMigrations['incomingNudges'] as $nudge)
-      <div class="card mb-4 border-0 shadow-sm family-migration-nudge-card" id="migrationNudgeCard-{{ $nudge['id'] }}" style="border-radius: 16px; background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border-left: 5px solid #8b5cf6 !important;">
+      <div class="card mb-4 border-0 shadow-sm family-migration-nudge-card" id="migrationNudgeCard-{{ $nudge['id'] }}" style="border-radius: 16px; background: linear-gradient(135deg, #f5f3ff 0%, #fbefef 100%); border-left: 5px solid #b8202c !important;">
         <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
           <div class="d-flex align-items-center gap-3">
             <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px; background: #ddd6fe; color: #6d28d9; font-size: 1.3rem;">
@@ -131,7 +131,7 @@
           <div class="d-flex align-items-center gap-2">
             <button class="btn btn-sm text-white rounded-pill px-3 py-2 fw-semibold" 
                     id="btnAcceptNudge-{{ $nudge['id'] }}"
-                    style="background-color: #7c3aed; min-height: 44px;" 
+                    style="background-color: #8a1019; min-height: 44px;" 
                     onclick="handleMigrationNudgeAction({{ (int)$nudge['id'] }}, '{{ htmlspecialchars($nudge['token'] ?? '') }}', 'accept')">
               <i class="bi bi-check-circle-fill me-1"></i> Accept & Migrate
             </button>
@@ -213,10 +213,10 @@
 
   @if(!empty($pendingMigrations['incomingRequests']))
     @foreach($pendingMigrations['incomingRequests'] as $migReq)
-      <div class="card mb-4 border-0 shadow-sm family-migration-request-card" id="migrationReqCard-{{ $migReq['id'] }}" style="border-radius: 16px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-left: 5px solid #2563eb !important;">
+      <div class="card mb-4 border-0 shadow-sm family-migration-request-card" id="migrationReqCard-{{ $migReq['id'] }}" style="border-radius: 16px; background: linear-gradient(135deg, #fdf5f5 0%, #f5dede 100%); border-left: 5px solid #a31621 !important;">
         <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
           <div class="d-flex align-items-center gap-3">
-            <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px; background: #bfdbfe; color: #1d4ed8; font-size: 1.3rem;">
+            <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px; background: #bfdbfe; color: #8a1019; font-size: 1.3rem;">
               <i class="bi bi-box-arrow-in-right"></i>
             </div>
             <div>
@@ -236,7 +236,7 @@
           <div class="d-flex align-items-center gap-2">
             <button class="btn btn-sm text-white rounded-pill px-3 py-2 fw-semibold" 
                     id="btnApproveMigReq-{{ $migReq['id'] }}"
-                    style="background-color: #2563eb; min-height: 44px;" 
+                    style="background-color: #a31621; min-height: 44px;" 
                     onclick="handleMigrationRequestAction({{ (int)$migReq['id'] }}, '{{ htmlspecialchars($migReq['token'] ?? '') }}', 'approve')">
               <i class="bi bi-check-lg me-1"></i> Approve Migration
             </button>
@@ -313,10 +313,10 @@
   @endif
 
   @if(!empty($unclaimedMatch))
-  <div class="card mb-4 border-0 shadow-sm unclaimed-match-card" id="unclaimedMatchBanner" style="border-radius: 16px; background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border-left: 5px solid #2563eb !important;">
+  <div class="card mb-4 border-0 shadow-sm unclaimed-match-card" id="unclaimedMatchBanner" style="border-radius: 16px; background: linear-gradient(135deg, #fdf5f5 0%, #f0fdf4 100%); border-left: 5px solid #a31621 !important;">
     <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
       <div class="d-flex align-items-center gap-3">
-        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: #dbeafe; color: #2563eb; font-size: 1.4rem;">
+        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: #f5dede; color: #a31621; font-size: 1.4rem;">
           <i class="bi bi-diagram-3-fill"></i>
         </div>
         <div>
@@ -428,7 +428,7 @@
                 data-bs-toggle="modal" data-bs-target="#postModal"
                 onclick="setTimeout(function () { if (window.__openThenNow) window.__openThenNow(''); }, 0)"
                 aria-label="Post a Then and Now photo comparison"
-                style="background: linear-gradient(135deg, #8b5cf6, #6366f1) !important; color: #ffffff !important; border: 0 !important; box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35) !important;">
+                style="background: linear-gradient(135deg, #b8202c, #b8202c) !important; color: #ffffff !important; border: 0 !important; box-shadow: 0 2px 8px rgba(184,32,44, 0.35) !important;">
           <i class="bi bi-hourglass-split" style="font-size: 1.15rem; color: #ffffff !important;"></i>
           <span class="fw-bold" style="font-size: 0.85rem; color: #ffffff !important;">Then &amp; Now</span>
         </button>
@@ -445,7 +445,7 @@
           <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Announcement</span>
         </button>
         <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" onclick="window.location.href='/familyJournal/create'" aria-label="Write family journal chronicle">
-          <i class="bi bi-journal-bookmark-fill" style="color: #6366f1; font-size: 1.15rem;"></i>
+          <i class="bi bi-journal-bookmark-fill" style="color: #b8202c; font-size: 1.15rem;"></i>
           <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Journal</span>
         </button>
         <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#postModal" aria-label="Create a poll">
@@ -466,7 +466,7 @@
           </span>
           <span class="fw-bold text-dark small" style="font-size: 0.92rem;">Family Dynasty Hub</span>
         </div>
-        <a href="/organogram/{{ $data['id'] ?? '' }}?mode=canvas" class="text-decoration-none small d-flex align-items-center gap-1" style="color: #0d6efd; font-size: 0.82rem; font-weight: 600;">
+        <a href="/organogram/{{ $data['id'] ?? '' }}?mode=canvas" class="text-decoration-none small d-flex align-items-center gap-1" style="color: #a31621; font-size: 0.82rem; font-weight: 600;">
           <span>Explore Tree Canvas</span> <i class="bi bi-chevron-right" style="font-size: 0.72rem;"></i>
         </a>
       </div>
@@ -496,8 +496,8 @@
 
         <!-- 3. WhatsApp Flyer -->
         <div class="col-6 col-sm-3">
-          <button type="button" onclick="openFamilyFlyerModal()" class="btn w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: #eff6ff; border: 1px solid rgba(59, 130, 246, 0.25) !important; min-height: 84px; justify-content: center;" title="Generate Heraldic WhatsApp Clan Status Flyer">
-            <div class="rounded-circle d-flex align-items-center justify-content-center mb-1 text-primary shadow-xs" style="width: 36px; height: 36px; background: #dbeafe;">
+          <button type="button" onclick="openFamilyFlyerModal()" class="btn w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: #fdf5f5; border: 1px solid rgba(163,22,33, 0.25) !important; min-height: 84px; justify-content: center;" title="Generate Heraldic WhatsApp Clan Status Flyer">
+            <div class="rounded-circle d-flex align-items-center justify-content-center mb-1 text-primary shadow-xs" style="width: 36px; height: 36px; background: #f5dede;">
               <i class="bi bi-card-image fs-6"></i>
             </div>
             <span class="fw-bold text-dark" style="font-size: 0.82rem; line-height: 1.2;">Clan Flyer</span>
@@ -507,8 +507,8 @@
 
         <!-- 4. Time Capsule -->
         <div class="col-6 col-sm-3">
-          <button type="button" onclick="openTimeCapsuleModal()" class="btn w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: #faf5ff; border: 1px solid rgba(168, 85, 247, 0.25) !important; min-height: 84px; justify-content: center;" title="Seal Personal Letters and Heirlooms for Future Milestones">
-            <div class="rounded-circle d-flex align-items-center justify-content-center mb-1 shadow-xs" style="width: 36px; height: 36px; background: #f3e8ff; color: #a855f7;">
+          <button type="button" onclick="openTimeCapsuleModal()" class="btn w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: #fbefef; border: 1px solid rgba(184,32,44, 0.25) !important; min-height: 84px; justify-content: center;" title="Seal Personal Letters and Heirlooms for Future Milestones">
+            <div class="rounded-circle d-flex align-items-center justify-content-center mb-1 shadow-xs" style="width: 36px; height: 36px; background: #fbefef; color: #ef6b73;">
               <i class="bi bi-hourglass-split fs-6"></i>
             </div>
             <span class="fw-bold text-dark" style="font-size: 0.82rem; line-height: 1.2;">Time Capsule</span>
@@ -528,7 +528,7 @@
   </div>
 
   <!-- Reactive Alpine.js Feed -->
-  <div x-data="profileFeed({ famCode: '{{ $data['famCode'] ?? '' }}', userId: '{{ $data['id'] ?? '' }}' })" class="feed-posts-container">
+  <div x-data="profileFeed({ famCode: '{{ $data['famCode'] ?? '' }}', userId: '{{ $data['id'] ?? '' }}', familyRoster: {{ json_encode($data['familyRoster'] ?? []) }} })" class="feed-posts-container">
     <!-- Error Alert if loading fails -->
     <template x-if="errorMessage">
       <div class="alert alert-danger shadow-sm rounded-3 mb-4" role="alert">
@@ -539,10 +539,10 @@
     </template>
 
     <!-- Active Family Hashtag Filter Stream Banner -->
-    <div x-cloak x-show="activeHashtagFilter" class="card border-0 shadow-sm mb-4 p-3" style="border-radius: 14px; background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); border-left: 4px solid #4f46e5 !important;">
+    <div x-cloak x-show="activeHashtagFilter" class="card border-0 shadow-sm mb-4 p-3" style="border-radius: 14px; background: linear-gradient(135deg, #fdf5f5 0%, #f5dede 100%); border-left: 4px solid #a31621 !important;">
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div class="d-flex align-items-center gap-2">
-          <span class="badge rounded-pill text-white px-3 py-1.5 shadow-xs" style="background: #4f46e5; font-size: 0.88rem; letter-spacing: 0.3px;">
+          <span class="badge rounded-pill text-white px-3 py-1.5 shadow-xs" style="background: #a31621; font-size: 0.88rem; letter-spacing: 0.3px;">
             <i class="bi bi-hash me-0.5"></i><span x-text="activeHashtagFilter"></span>
           </span>
           <span class="text-dark fw-bold small" style="font-size: 0.9rem;">Family Memory Stream</span>
@@ -551,6 +551,45 @@
           <i class="bi bi-x-circle-fill"></i> Show All Posts
         </button>
       </div>
+    </div>
+
+    <!-- Active Tagged With You Stream Banner -->
+    <div x-cloak x-show="activeStreamFilter === 'tagged'" class="card border-0 shadow-sm mb-4 p-3" style="border-radius: 14px; background: linear-gradient(135deg, #fdf5f5 0%, #f5dede 100%); border-left: 4px solid #a31621 !important;">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge rounded-pill text-white px-3 py-1.5 shadow-xs" style="background: #a31621; font-size: 0.88rem; letter-spacing: 0.3px;">
+            <i class="bi bi-tag-fill me-1"></i>Tagged With You
+          </span>
+          <span class="text-dark fw-bold small" style="font-size: 0.9rem;">Your Living Heritage Scrapbook</span>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1" @click="setStreamFilter('all')" style="font-size: 0.82rem; font-weight: 600;">
+          <i class="bi bi-arrow-left-circle-fill"></i> Show All Memories
+        </button>
+      </div>
+    </div>
+
+    <!-- Feed Stream Selector Tabs (All Posts vs Tagged With You) -->
+    <div class="feed-tabs-container mb-3.5 d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div class="btn-group p-1 rounded-pill bg-light border shadow-2xs" role="group" aria-label="Feed memory stream tabs">
+        <button type="button" 
+                class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold transition-all"
+                :class="activeStreamFilter === 'all' ? 'btn-primary text-white shadow-xs' : 'text-muted border-0 bg-transparent'"
+                @click="setStreamFilter('all')"
+                style="font-size: 0.82rem; white-space: nowrap; min-height: 38px;">
+          <i class="bi bi-clock-history me-1"></i>All Family Memories
+        </button>
+        <button type="button" 
+                class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold transition-all d-inline-flex align-items-center gap-1.5"
+                :class="activeStreamFilter === 'tagged' ? 'btn-primary text-white shadow-xs' : 'text-muted border-0 bg-transparent'"
+                @click="setStreamFilter('tagged')"
+                style="font-size: 0.82rem; white-space: nowrap; min-height: 38px;">
+          <i class="bi bi-tag-fill me-0.5"></i>Tagged With You
+          <span class="badge rounded-pill" :class="activeStreamFilter === 'tagged' ? 'bg-white text-primary' : 'bg-secondary bg-opacity-25 text-dark'" style="font-size: 0.68rem;" x-text="taggedPostsCount"></span>
+        </button>
+      </div>
+      <template x-if="activeStreamFilter === 'tagged'">
+        <span class="small text-muted" style="font-size: 0.75rem;">Showing memories featuring you</span>
+      </template>
     </div>
 
     <!-- Trending Family Hashtags Carousel -->
@@ -599,10 +638,10 @@
     <template x-if="!isLoading && posts.length === 0 && !errorMessage">
       <div class="card border-0 shadow-sm p-5 text-center mb-4" style="border-radius: 16px; background: white;">
         <div class="mb-3">
-          <i class="bi bi-chat-heart text-muted" style="font-size: 3rem;"></i>
+          <i class="bi text-muted" :class="activeStreamFilter === 'tagged' ? 'bi-tags-fill' : 'bi-chat-heart'" style="font-size: 3rem;"></i>
         </div>
-        <h5 class="fw-bold text-dark">No family posts yet</h5>
-        <p class="text-muted mb-0">Share the first memory or event with your family above!</p>
+        <h5 class="fw-bold text-dark" x-text="activeStreamFilter === 'tagged' ? 'No tagged memories yet' : 'No family posts yet'"></h5>
+        <p class="text-muted mb-0" x-text="activeStreamFilter === 'tagged' ? 'When relatives tag you in stories or milestone photos, they will appear in this personal scrapbook.' : 'Share the first memory or event with your family above!'"></p>
       </div>
     </template>
 

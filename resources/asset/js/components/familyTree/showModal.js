@@ -61,18 +61,29 @@ export const showPersonDetails = async (personData) => {
     }).join(' ');
   }
 
-  const inviteLink = `${window.location.origin}/register?famCode=${encodeURIComponent(familyCode)}&name=${encodeURIComponent(cleanName)}`;
+  const effectiveFamilyCode = (personData?.raw?.family_code || familyCode || window.__FAMILY_CODE__ || '').trim();
+  const isMaternalNode = Boolean(
+    window.__HAS_MATERNAL_CODE__ &&
+    window.__MATERNAL_FAM_CODE__ &&
+    String(effectiveFamilyCode).toUpperCase() === String(window.__MATERNAL_FAM_CODE__).toUpperCase()
+  );
 
-  // Derive the family surname from the last word of the person's name.
+  const inviteLink = `${window.location.origin}/register?famCode=${encodeURIComponent(effectiveFamilyCode)}&name=${encodeURIComponent(cleanName)}`;
+
+  // Derive the family surname from the last word of the person's name or active lineage surname.
   // e.g. cleanName "Ajibike Olaogun" → familySurname "Olaogun"
   const nameParts = cleanName.trim().split(' ');
+  const fallbackSurname = isMaternalNode
+    ? (window.__MAIDEN_SURNAME__ || 'Birth')
+    : (window.__MARITAL_SURNAME__ || 'our');
   const familySurname = nameParts.length >= 2
     ? nameParts[nameParts.length - 1]
-    : (cleanName || 'our family');
+    : (fallbackSurname || cleanName || 'our');
+  const familyTreeLabel = isMaternalNode ? `${familySurname} Birth Family` : `${familySurname} Family`;
 
   const inviteMessage = encodeURIComponent(
     `🌳 *Family Tree Invitation* 🌳\n\n` +
-    `You are invited to connect with the *${familySurname} Family* on FamilyPlatform.\n\n` +
+    `You are invited to connect with the *${familyTreeLabel}* on FamilyPlatform (Family Code: *#${effectiveFamilyCode}*).\n\n` +
     `Click below to claim your spot, explore our lineage, and connect with the family:\n` +
     `👉 ${inviteLink}`
   );
@@ -82,7 +93,7 @@ export const showPersonDetails = async (personData) => {
   const claimSpotHtml = (!isRegistered && !isReadOnly) ? `
     <div class="claim-spot-section mt-4" style="background: var(--gold-light); padding: 18px; border-radius: 18px; text-align: center; border: 1px dashed var(--gold-accent);">
       <h4 style="color: var(--primary-color); font-size: 1rem; font-weight: 700; margin-bottom: 6px;">Invite Relative to Claim This Spot</h4>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">Send a personal invitation so they can join and share family memories.</p>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">Send a personal invitation so they can join the <strong>${esc(familyTreeLabel)} (#${esc(effectiveFamilyCode)})</strong> and share family memories.</p>
       <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
         <a id="treeClaimWhatsappBtn" href="https://api.whatsapp.com/send?text=${inviteMessage}" onclick="if(window.trackTreeAnalytics) window.trackTreeAnalytics('tree_invite_claim', null, { method: 'whatsapp' })" target="_blank" rel="noopener noreferrer" class="btn" style="background: #25D366; color: white; border-radius: 20px; padding: 8px 18px; font-size: 0.86rem; text-decoration: none; font-weight: 600;">
           <i class="bi bi-whatsapp"></i> WhatsApp
@@ -198,7 +209,7 @@ export const showPersonDetails = async (personData) => {
   targetModal.style.display = 'flex';
 
   // Asynchronously upgrade invite links to opaque zero-PII tokens if available
-  if (familyCode && !isReadOnly && !isRegistered) {
+  if (effectiveFamilyCode && !isReadOnly && !isRegistered) {
     const csrfToken = getCsrfToken();
 
     fetch('/api/invite/generate', {
@@ -211,7 +222,8 @@ export const showPersonDetails = async (personData) => {
         'X-CSRF-TOKEN': csrfToken
       },
       body: JSON.stringify({
-        family_code: familyCode,
+        family_code: effectiveFamilyCode,
+        lineage_scope: isMaternalNode ? 'maternal' : 'primary',
         first_name: cleanName.split(' ')[0] || '',
         last_name: cleanName.split(' ').slice(1).join(' ') || '',
         email: email || '',
@@ -226,7 +238,7 @@ export const showPersonDetails = async (personData) => {
         const freshUrl = data.invite_url;
         const freshMsg = encodeURIComponent(
           `🌳 *Family Tree Invitation* 🌳\n\n` +
-          `You are invited to connect with the *${familySurname} Family* on FamilyPlatform.\n\n` +
+          `You are invited to connect with the *${familyTreeLabel}* on FamilyPlatform (Family Code: *#${effectiveFamilyCode}*).\n\n` +
           `Click below to claim your spot, explore our lineage, and connect with the family:\n` +
           `👉 ${freshUrl}`
         );

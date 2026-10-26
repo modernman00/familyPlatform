@@ -1124,7 +1124,7 @@ class FamilyReelsPlayer {
                         icon: 'info',
                         title: 'Select a Video',
                         text: 'Please choose a video file or enter a video URL before publishing.',
-                        confirmButtonColor: '#4f46e5'
+                        confirmButtonColor: '#a31621'
                     });
                 } else {
                     alert('Please choose a video file or enter a video URL before publishing.');
@@ -1155,7 +1155,7 @@ class FamilyReelsPlayer {
                             icon: 'success',
                             title: 'Reel Published! 🎉',
                             text: 'Your family reel is now live.',
-                            confirmButtonColor: '#4f46e5'
+                            confirmButtonColor: '#a31621'
                         });
                     }
                     window.location.href = `/reels?id=${res.data?.data?.id || ''}`;

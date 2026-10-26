@@ -6,7 +6,7 @@ declare(strict_types=1);
  * 🛡️ Automated Verification Suite: Universal PWA Optimization (FamilyPlatform)
  * 
  * Verifies:
- * 1. public/manifest.json existence, valid JSON, and complete PWA specification (#2563eb)
+ * 1. public/manifest.json existence, valid JSON, and complete PWA specification (#a31621)
  * 2. High-resolution app icons (192x192, 512x512, apple-touch-icon, favicon) exist on disk
  * 3. Offline fallback shell (public/offline.html) exists and contains friendly reload trigger
  * 4. PWA partials (pwa-head and pwa-register) exist and implement canonical best practices
@@ -56,8 +56,8 @@ runCheck("public/manifest.json exists and satisfies PWA installability criteria"
     if ($data['display'] !== 'standalone') {
         throw new \Exception("Manifest display must be 'standalone', found: " . $data['display']);
     }
-    if (strtolower($data['theme_color']) !== '#2563eb') {
-        throw new \Exception("Manifest theme_color must be '#2563eb', found: " . $data['theme_color']);
+    if (strtolower($data['theme_color']) !== '#a31621') {
+        throw new \Exception("Manifest theme_color must be '#a31621', found: " . $data['theme_color']);
     }
     if (empty($data['icons']) || !is_array($data['icons'])) {
         throw new \Exception("Manifest icons array is empty.");

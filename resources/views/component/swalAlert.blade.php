@@ -50,7 +50,7 @@
   if (window.SwalAlertManagerInitialized) return;
   window.SwalAlertManagerInitialized = true;
 
-  var BRAND_COLOR = '#1d4ed8';
+  var BRAND_COLOR = '#8a1019';
   var DANGER_COLOR = '#dc2626';
 
   function safeString(val, fallback) {

@@ -61,7 +61,7 @@
     if (window.__familyNotify) return;
     window.__familyNotify = true;
 
-    var BRAND = '#4f46e5';
+    var BRAND = '#a31621';
 
     // The shared JS lib sets the outcome class dynamically (bg-* / is-* / w3-*);
     // a static alert-* class on the same element is only the banner's resting

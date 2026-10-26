@@ -61,7 +61,7 @@
 
             <button type="button" onclick="openFamilyFlyerModal()" class="btn btn-sm btn-light border w-100 p-2 d-flex align-items-center justify-content-between text-start shadow-xs transition-all" style="border-radius: 12px;">
                 <div class="d-flex align-items-center gap-2.5">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center text-primary" style="width: 32px; height: 32px; background: #dbeafe;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center text-primary" style="width: 32px; height: 32px; background: #f5dede;">
                         <i class="bi bi-card-image" style="font-size: 0.9rem;"></i>
                     </div>
                     <div>
@@ -74,7 +74,7 @@
 
             <button type="button" onclick="openTimeCapsuleModal()" class="btn btn-sm btn-light border w-100 p-2 d-flex align-items-center justify-content-between text-start shadow-xs transition-all" style="border-radius: 12px;">
                 <div class="d-flex align-items-center gap-2.5">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #f3e8ff; color: #a855f7;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #fbefef; color: #ef6b73;">
                         <i class="bi bi-hourglass-split" style="font-size: 0.9rem;"></i>
                     </div>
                     <div>

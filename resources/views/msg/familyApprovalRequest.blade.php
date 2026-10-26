@@ -35,7 +35,7 @@
 
 <div style="text-align: center; margin-bottom: 30px;">
     <a href="{{ $approveUrl }}"
-       style="background-color: #00bfa5; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 700; display: inline-block; margin-right: 12px; font-size: 15px;">
+       style="background-color: #a31621; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 700; display: inline-block; margin-right: 12px; font-size: 15px;">
        Approve Request
     </a>
     <a href="{{ $denyUrl }}"
@@ -45,7 +45,7 @@
 </div>
 
 <p style="text-align: center; font-size: 13px; color: #94a3b8; margin: 0;">
-    You can also manage join requests from your <a href="{{ $baseUrl }}/profilePage" style="color: #00bfa5; text-decoration: underline;">profile page</a>.
+    You can also manage join requests from your <a href="{{ $baseUrl }}/profilePage" style="color: #a31621; text-decoration: underline;">profile page</a>.
     This link expires in 7 days.
 </p>
 @endsection

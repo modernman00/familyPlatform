@@ -212,7 +212,7 @@
                     labels: ['Web Push', 'Email', 'In-App', 'SMS'],
                     datasets: [{
                         data: [48, 34, 14, 4],
-                        backgroundColor: ['#10b981', '#14b8a6', '#6366f1', '#ec4899'],
+                        backgroundColor: ['#10b981', '#b8202c', '#b8202c', '#ec4899'],
                         borderWidth: 0
                     }]
                 },

@@ -39,6 +39,14 @@ $router->map(
 
 $router->map('PUT', '/profileCard/postLikes', 'App\controller\members\PostLikeController@postLikes', 'postLikeCounter');
 
+// AI Family Hub Routes
+$router->map('GET', '/family/ai-hub', 'App\controller\members\FamilyAiHubController@index', 'family_ai_hub');
+$router->map('POST', '/api/ai/arbitrate-dispute', 'App\controller\members\FamilyAiHubController@arbitrateDispute', 'api_ai_arbitrate_dispute');
+$router->map('POST', '/api/ai/inspect-fridge', 'App\controller\members\FamilyAiHubController@inspectFridge', 'api_ai_inspect_fridge');
+$router->map('POST', '/api/ai/transcribe-voice', 'App\controller\members\FamilyAiHubController@transcribeVoice', 'api_ai_transcribe_voice');
+$router->map('POST', '/api/ai/generate-flyer', 'App\controller\members\FamilyAiHubController@generateFlyer', 'api_ai_generate_flyer');
+$router->map('POST', '/api/ai/generate-trivia', 'App\controller\members\FamilyAiHubController@generateTrivia', 'api_ai_generate_trivia');
+
 
 
 // $router->map('GET', '/member/profileCard/getComments', 'App\model\Post@likeFunction', 'likeCounter');

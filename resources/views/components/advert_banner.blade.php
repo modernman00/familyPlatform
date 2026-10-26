@@ -30,7 +30,7 @@
 @php
     $bannerId = (string) ($banner['id'] ?? 'promo_default');
     $accentColor = (string) ($banner['accent_color'] ?? '#9B5CFB');
-    $gradient = (string) ($banner['gradient'] ?? 'linear-gradient(135deg, #9B5CFB 0%, #6366f1 100%)');
+    $gradient = (string) ($banner['gradient'] ?? 'linear-gradient(135deg, #9B5CFB 0%, #b8202c 100%)');
     $icon = (string) ($banner['icon'] ?? 'bi-stars');
     $badge = (string) ($banner['badge'] ?? 'ECOSYSTEM PERK');
     $brandName = (string) ($banner['brand_name'] ?? '');
@@ -142,8 +142,8 @@
     pointer-events: none;
 }
 .pp-advert-banner-card {
-    background: linear-gradient(135deg, rgba(26, 10, 46, 0.90) 0%, rgba(42, 16, 75, 0.76) 100%);
-    border: 1px solid rgba(155, 92, 251, 0.32);
+    background: linear-gradient(135deg, rgba(42,10,13, 0.90) 0%, rgba(42,10,13, 0.76) 100%);
+    border: 1px solid rgba(184,32,44, 0.32);
     border-radius: 16px;
     padding: 14px 18px;
     backdrop-filter: blur(14px);
@@ -185,7 +185,7 @@
     letter-spacing: 0.05em;
     text-transform: uppercase;
     color: #ffffff;
-    background: var(--banner-gradient, rgba(155, 92, 251, 0.3));
+    background: var(--banner-gradient, rgba(184,32,44, 0.3));
     border-radius: 6px;
     padding: 3px 8px;
     display: inline-flex;
@@ -241,7 +241,7 @@
     width: 52px;
     height: 52px;
     border-radius: 14px;
-    background: var(--banner-gradient, rgba(155, 92, 251, 0.25));
+    background: var(--banner-gradient, rgba(184,32,44, 0.25));
     display: flex;
     align-items: center;
     justify-content: center;

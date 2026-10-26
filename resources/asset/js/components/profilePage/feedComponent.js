@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import { extractVideoFromText, cleanPostMessage } from './videoParser';
 import { getCsrfToken } from '../global';
 import { getPostImageUrl, getProfileImageUrl } from '../helper/imageUrls';
+import { FAMILY_GIFS, GIF_CATEGORIES, isAllowedGifUrl } from './gifCatalog';
 
 export function profileFeed(opts = {}) {
     return {
@@ -31,9 +32,21 @@ export function profileFeed(opts = {}) {
         activeReactionBars: {},
         activeCommentReactionBars: {},
         commentEmojiOpen: {},
+        commentGifOpen: {},
+        commentGifs: {},
+        commentGifCategory: 'all',
+        gifCategories: GIF_CATEGORIES,
+        familyRoster: Array.isArray(opts.familyRoster) ? opts.familyRoster : [],
+        mentionOpen: {},
+        mentionMatches: {},
+        mentionIndex: {},
+        threadExpanded: {},
         pusher: null,
         editingCommentNo: null,
+        // postNo -> { comment_no, fullName } of the comment being replied to
+        replyingTo: {},
         editCommentText: '',
+        activeStreamFilter: 'all',
         activeHashtagFilter: null,
         trendingHashtags: [],
         isHashtagFilterActive: false,
@@ -52,6 +65,13 @@ export function profileFeed(opts = {}) {
             sad:   { icon: '😢', label: 'Sad'   },
         },
 
+        // Picker palette: unique, curated, 8 columns x 3 rows
+        commentEmojiPalette: [
+            '👍','❤️','😂','😮','😢','😡','😊','😍',
+            '🥰','😎','🤣','😭','🙏','🔥','💯','🎉',
+            '👏','✨','💪','🤔','😅','🥳','🙌','🎂',
+        ],
+
         commentEmojiMap: {
             like:  '👍',
             likes: '👍',
@@ -68,6 +88,7 @@ export function profileFeed(opts = {}) {
             // silently dropped because nothing was listening for it yet.
             this.initPusher();
             this.initEventListeners();
+            this.loadFamilyRoster();
             await this.fetchPosts();
             await this.loadTrendingHashtags();
             this.scrollToHashPost();
@@ -94,12 +115,13 @@ export function profileFeed(opts = {}) {
             });
         },
 
-        async fetchPosts() {
+        async fetchPosts(options = {}) {
+            const filter = options.filter || (this.activeStreamFilter === 'tagged' ? 'tagged' : '');
             this.isLoading = this.posts.length === 0;
             this.errorMessage = '';
 
-            // 1. Instant offline cache hydration (Facebook standard)
-            if (window.offlineSync && typeof window.offlineSync.getCachedFeed === 'function') {
+            // 1. Instant offline cache hydration (only if on default 'all' stream)
+            if (!filter && window.offlineSync && typeof window.offlineSync.getCachedFeed === 'function') {
                 try {
                     const cachedPosts = await window.offlineSync.getCachedFeed();
                     if (Array.isArray(cachedPosts) && cachedPosts.length > 0 && this.posts.length === 0) {
@@ -113,13 +135,14 @@ export function profileFeed(opts = {}) {
 
             // 2. Fetch fresh updates from server
             try {
-                const response = await axios.get('/post/getAllPostCommentByFamCode');
+                const url = filter ? `/post/getAllPostCommentByFamCode?filter=${encodeURIComponent(filter)}` : '/post/getAllPostCommentByFamCode';
+                const response = await axios.get(url);
                 const rawPosts = response?.data?.message?.message;
                 
                 if (Array.isArray(rawPosts)) {
                     this.posts = rawPosts.map(p => this.normalizePost(p));
-                    // Update offline store in background
-                    if (window.offlineSync && typeof window.offlineSync.cacheFeed === 'function') {
+                    // Update offline store in background if main stream
+                    if (!filter && window.offlineSync && typeof window.offlineSync.cacheFeed === 'function') {
                         window.offlineSync.cacheFeed(rawPosts).catch(() => {});
                     }
                     this.scrollToHashPost();
@@ -134,6 +157,12 @@ export function profileFeed(opts = {}) {
             } finally {
                 this.isLoading = false;
             }
+        },
+
+        async setStreamFilter(filterType) {
+            this.activeStreamFilter = filterType;
+            this.isLoading = true;
+            await this.fetchPosts({ filter: filterType === 'tagged' ? 'tagged' : '' });
         },
 
         normalizePost(p) {
@@ -183,10 +212,12 @@ export function profileFeed(opts = {}) {
             return {
                 comment_no: c?.comment_no,
                 post_no: c?.post_no,
+                parent_comment_no: Number(c?.parent_comment_no) > 0 ? Number(c.parent_comment_no) : null,
                 id: c?.id,
                 fullName: c?.fullName || 'Family Member',
                 profileImg: img ? ((img.startsWith('/') || img.startsWith('http')) ? img : `/resources/images/profile/${img}`) : '/public/avatar/avatarM.png',
                 comment: this.normalizeEmojiText(rawComment),
+                gif_url: isAllowedGifUrl(c?.gif_url) ? c.gif_url : '',
                 date_created: c?.date_created || '',
                 post_time: c?.post_time || '',
                 comment_time: timeVal,
@@ -274,6 +305,24 @@ export function profileFeed(opts = {}) {
                 .replace(/(^|\s)<3(?=\s|$|[.,!?])/g, '$1❤️');
         },
 
+        async loadFamilyRoster() {
+            if (this.familyRoster && this.familyRoster.length > 0) return;
+            try {
+                const res = await axios.get('/allMembers/processApiData');
+                const members = res?.data?.data || res?.data?.message || [];
+                if (Array.isArray(members)) {
+                    this.familyRoster = members.map(m => ({
+                        id: String(m.id || ''),
+                        firstName: String(m.firstName || '').trim(),
+                        lastName: String(m.lastName || '').trim(),
+                        img: m.img || ''
+                    }));
+                }
+            } catch (err) {
+                // Non-blocking
+            }
+        },
+
         renderHashtags(message) {
             if (!message) return '';
             let safeText = this.escapeHtml(message);
@@ -284,11 +333,20 @@ export function profileFeed(opts = {}) {
                 return `<a href="${cleanHref}" target="_blank" rel="noopener noreferrer" class="text-primary fw-medium text-decoration-underline" style="word-break: break-all;" onclick="event.stopPropagation();">${cleanHref}</a>`;
             });
 
+            // Highlight @First Last mentions as chips
+            safeText = safeText.replace(/(?<![\w@])@([A-Z\p{Lu}][\p{L}'-]+(?:\s+[A-Z\p{Lu}][\p{L}'-]+)+)(?![\w])/gu, (match, name) => {
+                return `<span class="mention-chip" title="Mentioned: ${name}"><i class="bi bi-at"></i>${name}</span>`;
+            });
+
             // Hashtag pills
             return safeText.replace(/#([a-zA-Z0-9_]{2,40})/g, (match, tag) => {
                 const cleanTag = tag.toLowerCase();
                 return `<span class="badge family-tag-pill" role="button" tabindex="0" onclick="window.filterByFamilyHashtag('${cleanTag}')" title="Filter family memories by #${cleanTag}"><i class="bi bi-hash me-0.5"></i>${tag}</span>`;
             });
+        },
+
+        renderCommentText(comment) {
+            return this.renderHashtags(comment);
         },
 
         async lazyFetchLinkPreview(post, url) {
@@ -338,7 +396,7 @@ export function profileFeed(opts = {}) {
                     icon: 'error',
                     title: 'Memory Stream Error',
                     text: 'Could not load memories for this hashtag.',
-                    confirmButtonColor: '#4f46e5'
+                    confirmButtonColor: '#a31621'
                 });
             } finally {
                 this.isLoading = false;
@@ -360,13 +418,202 @@ export function profileFeed(opts = {}) {
             this.activeCommentForms[postNo] = !this.activeCommentForms[postNo];
         },
 
-        async submitComment(postNo) {
+        // ── Threaded replies (one level: a reply to a reply hangs under the top-level comment) ──
+
+        /**
+         * Top-level comments in feed order, each followed by its replies.
+         * If a root comment has > 2 replies and the thread is not expanded, only the first 2
+         * replies are shown, followed by an interactive expansion toggle.
+         */
+        threadedComments(post) {
+            const all = Array.isArray(post?.comments) ? post.comments : [];
+            const known = new Set(all.map(c => String(c?.comment_no)));
+            const repliesOf = {};
+            const roots = [];
+            for (const c of all) {
+                const parent = c?.parent_comment_no ? String(c.parent_comment_no) : '';
+                if (parent && known.has(parent)) {
+                    (repliesOf[parent] = repliesOf[parent] || []).push(c);
+                } else {
+                    roots.push(c);
+                }
+            }
+
+            const result = [];
+            for (const root of roots) {
+                result.push(root);
+                const rootNo = String(root.comment_no);
+                const replies = repliesOf[rootNo] || [];
+                if (replies.length <= 2 || this.threadExpanded[rootNo]) {
+                    result.push(...replies);
+                } else {
+                    result.push(...replies.slice(0, 2));
+                }
+            }
+            return result;
+        },
+
+        getThreadRoot(post, comment) {
+            if (!comment) return null;
+            const parent = comment.parent_comment_no ? String(comment.parent_comment_no) : '';
+            if (!parent) return comment;
+            const all = Array.isArray(post?.comments) ? post.comments : [];
+            return all.find(c => String(c?.comment_no) === parent) || comment;
+        },
+
+        getRepliesForRoot(post, rootComment) {
+            const rootNo = String(rootComment?.comment_no || '');
+            if (!rootNo) return [];
+            const all = Array.isArray(post?.comments) ? post.comments : [];
+            return all.filter(c => String(c?.parent_comment_no || '') === rootNo);
+        },
+
+        getTotalReplyCount(post, rootComment) {
+            return this.getRepliesForRoot(post, rootComment).length;
+        },
+
+        getHiddenReplyCount(post, rootComment) {
+            const rootNo = String(rootComment?.comment_no || '');
+            if (!rootNo || this.threadExpanded[rootNo]) return 0;
+            const total = this.getTotalReplyCount(post, rootComment);
+            return total > 2 ? total - 2 : 0;
+        },
+
+        toggleThread(rootCommentNo) {
+            const key = String(rootCommentNo);
+            this.threadExpanded[key] = !this.threadExpanded[key];
+        },
+
+        isLastVisibleInThread(post, comment) {
+            if (!comment) return false;
+            const root = this.getThreadRoot(post, comment);
+            if (!root) return false;
+            const rootNo = String(root.comment_no);
+            const replies = this.getRepliesForRoot(post, root);
+            if (replies.length === 0) {
+                return String(comment.comment_no) === rootNo;
+            }
+            const isExp = !!this.threadExpanded[rootNo];
+            const visibleReplies = (replies.length <= 2 || isExp) ? replies : replies.slice(0, 2);
+            const lastItem = visibleReplies[visibleReplies.length - 1];
+            return String(comment.comment_no) === String(lastItem?.comment_no);
+        },
+
+        isReply(post, comment) {
+            const parent = comment?.parent_comment_no;
+            return !!parent && (post?.comments || []).some(c => String(c?.comment_no) === String(parent));
+        },
+
+        startReply(post, comment) {
+            const postNo = post?.post_no;
+            if (!postNo || !comment?.comment_no) return;
+            this.replyingTo[postNo] = { comment_no: comment.comment_no, fullName: comment.fullName || 'Family Member' };
+            this.activeCommentForms[postNo] = true;
+            const root = this.getThreadRoot(post, comment);
+            if (root?.comment_no) {
+                this.threadExpanded[String(root.comment_no)] = true;
+            }
+            // Pre-fill an @mention of the person being answered (server resolves it to a notification).
+            if (!(this.commentInputs[postNo] || '').trim() && String(comment.id) !== String(this.currentUserId)) {
+                this.commentInputs[postNo] = `@${comment.fullName} `;
+            }
+            this.$nextTick(() => {
+                const el = document.querySelector(`input[data-comment-input="${postNo}"]`);
+                if (el) {
+                    el.focus();
+                    el.setSelectionRange(el.value.length, el.value.length);
+                }
+            });
+        },
+
+        cancelReply(postNo) {
+            this.replyingTo[postNo] = null;
+        },
+
+        handleCommentInput(postNo, event) {
+            const input = event.target;
+            const text = input.value || '';
+            const cursorPos = input.selectionEnd ?? text.length;
+            const textBeforeCursor = text.slice(0, cursorPos);
+
+            const match = textBeforeCursor.match(/(?:^|\s)@([^\s@]*)$/);
+            if (!match) {
+                this.mentionOpen[postNo] = false;
+                this.mentionMatches[postNo] = [];
+                return;
+            }
+
+            const query = (match[1] || '').toLowerCase();
+            const currentUserId = String(this.currentUserId || '');
+
+            const matches = (this.familyRoster || []).filter(m => {
+                const first = (m.firstName || '').trim();
+                const last = (m.lastName || '').trim();
+                if (!first && !last) return false;
+                if (String(m.id) === currentUserId) return false;
+                const full = `${first} ${last}`.toLowerCase();
+                if (!query) return true;
+                return full.includes(query) || first.toLowerCase().startsWith(query) || last.toLowerCase().startsWith(query);
+            }).slice(0, 6);
+
+            this.mentionMatches[postNo] = matches;
+            this.mentionIndex[postNo] = 0;
+            this.mentionOpen[postNo] = matches.length > 0;
+        },
+
+        handleCommentKeydown(postNo, event) {
+            if (!this.mentionOpen[postNo] || !(this.mentionMatches[postNo] || []).length) return;
+
+            const matches = this.mentionMatches[postNo];
+            let idx = this.mentionIndex[postNo] || 0;
+
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                this.mentionIndex[postNo] = (idx + 1) % matches.length;
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                this.mentionIndex[postNo] = (idx - 1 + matches.length) % matches.length;
+            } else if (event.key === 'Enter' || event.key === 'Tab') {
+                if (matches[idx]) {
+                    event.preventDefault();
+                    this.selectMention(postNo, matches[idx]);
+                }
+            } else if (event.key === 'Escape') {
+                this.mentionOpen[postNo] = false;
+            }
+        },
+
+        selectMention(postNo, member) {
+            if (!member) return;
+            const text = this.commentInputs[postNo] || '';
+            const replaced = text.replace(/(?:^|\s)@([^\s@]*)$/, (match) => {
+                const prefix = match.startsWith(' ') ? ' ' : '';
+                return `${prefix}@${member.firstName} ${member.lastName} `;
+            });
+            this.commentInputs[postNo] = replaced;
+            this.mentionOpen[postNo] = false;
+            this.mentionMatches[postNo] = [];
+
+            this.$nextTick(() => {
+                const el = document.querySelector(`input[data-comment-input="${postNo}"]`);
+                if (el) {
+                    el.focus();
+                    el.setSelectionRange(el.value.length, el.value.length);
+                }
+            });
+        },
+
+        async submitComment(postNo, ev = null) {
             const commentText = (this.commentInputs[postNo] || '').trim();
-            if (!commentText) return;
+            const gifUrl = isAllowedGifUrl(this.commentGifs[postNo]) ? this.commentGifs[postNo] : '';
+            if (!commentText && !gifUrl) return;
 
             const formData = new FormData();
             formData.append('post_no', postNo);
             formData.append('comment', commentText);
+            if (gifUrl) formData.append('gif_url', gifUrl);
+            const replyTo = this.replyingTo[postNo]?.comment_no;
+            if (replyTo) formData.append('parent_comment_no', String(replyTo));
 
             try {
                 const response = await axios.post('/postCommentProfile', formData, {
@@ -390,10 +637,12 @@ export function profileFeed(opts = {}) {
                             const newComment = this.normalizeComment({
                                 comment_no: commentNo,
                                 post_no: postNo,
+                                parent_comment_no: (respData && typeof respData === 'object' && respData.parent_comment_no) || null,
                                 id: this.currentUserId,
                                 fullName: (respData && typeof respData === 'object' && respData.fullName) || 'You',
                                 profileImg: (respData && typeof respData === 'object' && respData.profileImg) || '',
                                 comment: commentText,
+                                gif_url: (respData && typeof respData === 'object' && respData.gif_url) || gifUrl,
                                 post_time: (respData && typeof respData === 'object' && respData.post_time) || Date.now().toString(),
                                 comment_time: (respData && typeof respData === 'object' && respData.comment_time) || Date.now().toString(),
                                 date_created: (respData && typeof respData === 'object' && respData.date_created) || new Date().toISOString(),
@@ -404,7 +653,19 @@ export function profileFeed(opts = {}) {
                         }
                     }
 
+                    if (replyTo) {
+                        const root = this.getThreadRoot(post, { comment_no: replyTo, parent_comment_no: replyTo });
+                        if (root?.comment_no) {
+                            this.threadExpanded[String(root.comment_no)] = true;
+                        }
+                    }
+
                     this.commentInputs[postNo] = '';
+                    this.commentGifs[postNo] = '';
+                    this.commentGifOpen[postNo] = false;
+                    this.mentionOpen[postNo] = false;
+                    this.mentionMatches[postNo] = [];
+                    this.cancelReply(postNo);
                 }
             } catch (err) {
                 console.error('Failed to submit comment:', err);
@@ -412,8 +673,15 @@ export function profileFeed(opts = {}) {
                     icon: 'error',
                     title: 'Submission Failed',
                     text: err?.response?.data?.message || 'Failed to submit comment.',
-                    confirmButtonColor: '#3085d6'
+                    confirmButtonColor: '#a31621'
                 });
+            } finally {
+                // The global submit spinner locks the send button for 15s unless told otherwise,
+                // which would block an immediate follow-up reply.
+                const spinner = window.FamilyPlatformSpinner;
+                if (ev?.target && spinner?.findSubmitButton) {
+                    spinner.stop(spinner.findSubmitButton(ev.target, ev.submitter));
+                }
             }
         },
 
@@ -423,9 +691,30 @@ export function profileFeed(opts = {}) {
             return String(post?.id) === String(this.currentUserId);
         },
 
+        isCurrentUser(userId) {
+            return String(userId) === String(this.currentUserId || '');
+        },
+
         isUserTaggedInPost(post) {
             if (!post || !Array.isArray(post.post_tags) || !this.currentUserId) return false;
             return post.post_tags.some(t => String(t.user_id) === String(this.currentUserId));
+        },
+
+        getSortedTagsForViewer(post) {
+            if (!post || !Array.isArray(post.post_tags)) return [];
+            const uid = String(this.currentUserId || '');
+            const hasViewer = post.post_tags.some(t => String(t.user_id) === uid);
+            if (!hasViewer) return post.post_tags;
+            return [...post.post_tags].sort((a, b) => {
+                if (String(a.user_id) === uid) return -1;
+                if (String(b.user_id) === uid) return 1;
+                return 0;
+            });
+        },
+
+        get taggedPostsCount() {
+            if (!Array.isArray(this.posts)) return 0;
+            return this.posts.filter(p => this.isUserTaggedInPost(p)).length;
         },
 
         async untagSelfFromPost(post) {
@@ -435,7 +724,7 @@ export function profileFeed(opts = {}) {
                 text: 'Do you want to remove your tag from this family post?',
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#2563eb',
+                confirmButtonColor: '#a31621',
                 cancelButtonColor: '#64748b',
                 confirmButtonText: 'Yes, Remove Tag'
             });
@@ -458,7 +747,7 @@ export function profileFeed(opts = {}) {
                     icon: 'error',
                     title: 'Action Failed',
                     text: 'Unable to remove tag. Please try again.',
-                    confirmButtonColor: '#2563eb'
+                    confirmButtonColor: '#a31621'
                 });
             }
         },
@@ -491,7 +780,7 @@ export function profileFeed(opts = {}) {
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
+                cancelButtonColor: '#a31621',
                 confirmButtonText: 'Yes, delete it!'
             });
             if (!result.isConfirmed) return;
@@ -505,7 +794,7 @@ export function profileFeed(opts = {}) {
                     icon: 'error',
                     title: 'Delete Failed',
                     text: err?.response?.data?.message || 'Failed to delete post.',
-                    confirmButtonColor: '#3085d6'
+                    confirmButtonColor: '#a31621'
                 });
             }
         },
@@ -551,7 +840,7 @@ export function profileFeed(opts = {}) {
                     icon: 'error',
                     title: 'Update Failed',
                     text: err?.response?.data?.message || 'Failed to update comment.',
-                    confirmButtonColor: '#3085d6'
+                    confirmButtonColor: '#a31621'
                 });
             }
         },
@@ -563,7 +852,7 @@ export function profileFeed(opts = {}) {
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
+                cancelButtonColor: '#a31621',
                 confirmButtonText: 'Yes, delete it!'
             });
             if (!result.isConfirmed) return;
@@ -580,7 +869,7 @@ export function profileFeed(opts = {}) {
                     icon: 'error',
                     title: 'Delete Failed',
                     text: err?.response?.data?.message || 'Failed to delete comment.',
-                    confirmButtonColor: '#3085d6'
+                    confirmButtonColor: '#a31621'
                 });
             }
         },
@@ -693,13 +982,33 @@ export function profileFeed(opts = {}) {
 
         // ── Comment emoji picker for text input ─────────────────────────────
         toggleCommentEmoji(postNo) {
+            this.commentGifOpen[postNo] = false;
             this.commentEmojiOpen[postNo] = !this.commentEmojiOpen[postNo];
+        },
+
+        // ── Comment GIF picker (same curated catalog as the post composer) ──
+        toggleCommentGif(postNo) {
+            this.commentEmojiOpen[postNo] = false;
+            this.commentGifOpen[postNo] = !this.commentGifOpen[postNo];
+        },
+
+        filteredCommentGifs() {
+            return FAMILY_GIFS.filter(g => this.commentGifCategory === 'all' || g.cat === this.commentGifCategory);
+        },
+
+        selectCommentGif(postNo, url) {
+            if (!isAllowedGifUrl(url)) return;
+            this.commentGifs[postNo] = url;
+            this.commentGifOpen[postNo] = false;
+        },
+
+        clearCommentGif(postNo) {
+            this.commentGifs[postNo] = '';
         },
 
         insertEmojiIntoComment(postNo, emoji) {
             const current = this.commentInputs[postNo] || '';
             this.commentInputs[postNo] = current + emoji;
-            this.commentEmojiOpen[postNo] = false;
         },
 
         // ── React to a comment with an emoji ───────────────────────────────

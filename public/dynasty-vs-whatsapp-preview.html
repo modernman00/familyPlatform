@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Why FamilyPlatform vs WhatsApp — Brand Design & Interactive Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    :root {
+      /* Official FamilyPlatform Brand Tokens (standards-v21.css & main.css) */
+      --brand-primary: #a31621;
+      --brand-secondary: #7a0e16;
+      --brand-primary-light: #b8202c;
+      --brand-primary-dark: #8a1019;
+      --brand-success: #057642;
+      --bg-light: #f3f2ef;
+      --bg-white: #ffffff;
+      --text-main: rgba(0, 0, 0, 0.9);
+      --text-muted: #475569;
+      --text-muted-aa: #475569;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --card-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+      --card-shadow-hover: 0 12px 28px -4px rgba(163, 22, 33, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+      --gold-accent: #d4af37;
+      --gold-light: #fef3c7;
+      --whatsapp-green: #25d366;
+      --whatsapp-dark: #128c7e;
+      --whatsapp-bg: #0b141a;
+      --whatsapp-bubble-in: #202c33;
+      --whatsapp-bubble-out: #005c4b;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --tap-min: 44px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+    }
+
+    /* Top Executive Header (Matching Public Navbar) */
+    header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0 24px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo-mark {
+      height: 38px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-title-lead {
+      color: #2a0a0d;
+    }
+
+    .brand-title-accent {
+      color: var(--brand-primary);
+    }
+
+    .brand-badge {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 3px 10px;
+      background: rgba(163, 22, 33, 0.08);
+      color: var(--brand-primary);
+      border: 1px solid rgba(163, 22, 33, 0.2);
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      margin-left: 8px;
+    }
+
+    /* Tab Switcher Controls */
+    .tab-nav {
+      display: flex;
+      align-items: center;
+      background: #e2e8f0;
+      padding: 4px;
+      border-radius: var(--radius-full);
+      gap: 4px;
+    }
+
+    .tab-btn {
+      padding: 8px 18px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #64748b;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .tab-btn.active {
+      background: var(--brand-primary);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(163, 22, 33, 0.35);
+    }
+
+    .btn-brand-primary {
+      background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-dark) 100%);
+      color: #ffffff !important;
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 9px 20px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: var(--tap-min);
+      box-shadow: 0 2px 8px rgba(163, 22, 33, 0.25);
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-brand-primary:hover {
+      background: linear-gradient(135deg, var(--brand-primary-light) 0%, var(--brand-primary) 100%);
+      box-shadow: 0 4px 14px rgba(163, 22, 33, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .btn-brand-outline {
+      background-color: rgba(163, 22, 33, 0.04);
+      border: 1.5px solid var(--brand-primary);
+      border-radius: var(--radius-md);
+      color: var(--brand-primary) !important;
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 9px 18px;
+      min-height: var(--tap-min);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-brand-outline:hover {
+      background-color: rgba(163, 22, 33, 0.1);
+      border-color: var(--brand-primary-dark);
+      color: var(--brand-primary-dark) !important;
+      transform: translateY(-1px);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 36px 20px 60px;
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      text-align: center;
+      max-width: 860px;
+      margin: 0 auto 40px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--brand-primary);
+      background: rgba(163, 22, 33, 0.08);
+      padding: 6px 16px;
+      border-radius: var(--radius-full);
+      margin-bottom: 16px;
+      border: 1px solid rgba(163, 22, 33, 0.2);
+    }
+
+    .hero-headline {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 2.6rem;
+      font-weight: 700;
+      line-height: 1.25;
+      color: #1e293b;
+      margin-bottom: 16px;
+    }
+
+    .hero-headline span {
+      color: var(--brand-primary);
+    }
+
+    .hero-lead {
+      font-size: 1.1rem;
+      color: var(--text-muted-aa);
+      line-height: 1.6;
+    }
+
+    /* Tab Panels */
+    .preview-tab-panel {
+      display: none;
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    .preview-tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ========================================================= */
+    /* TAB 1: THE INTERACTIVE COMPARISON (WHATSAPP VS SANCTUARY)  */
+    /* ========================================================= */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 960px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .surface-card {
+      background: var(--bg-white);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--card-shadow);
+      transition: all 0.25s ease;
+    }
+
+    .surface-card.whatsapp-card {
+      border-top: 5px solid #25d366;
+    }
+
+    .surface-card.sanctuary-card {
+      border-top: 5px solid var(--brand-primary);
+      box-shadow: var(--card-shadow-hover);
+    }
+
+    .card-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-pill-tag {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: var(--radius-full);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tag-whatsapp {
+      background: #e8f5e9;
+      color: #1b5e20;
+      border: 1px solid #c8e6c9;
+    }
+
+    .tag-sanctuary {
+      background: rgba(163, 22, 33, 0.08);
+      color: var(--brand-primary);
+      border: 1px solid rgba(163, 22, 33, 0.2);
+    }
+
+    .alert-meter {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #dc2626;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .success-meter {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--brand-success);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* WhatsApp Stream Box */
+    .wa-stream-box {
+      background: #0b141a;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      font-size: 0.85rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    .wa-bubble {
+      max-width: 85%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      line-height: 1.4;
+      font-size: 0.82rem;
+      color: #e9edef;
+    }
+
+    .wa-bubble.in {
+      background: #202c33;
+      align-self: flex-start;
+      border-top-left-radius: 0;
+    }
+
+    .wa-bubble.out {
+      background: #005c4b;
+      align-self: flex-end;
+      border-top-right-radius: 0;
+    }
+
+    .wa-sender {
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+      color: #53bdeb;
+    }
+
+    .wa-time {
+      font-size: 0.65rem;
+      color: #8696a0;
+      float: right;
+      margin-top: 4px;
+      margin-left: 8px;
+    }
+
+    .wa-lost-banner {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px dashed rgba(239, 68, 68, 0.5);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #fca5a5;
+      margin: 8px 0;
+    }
+
+    /* Sanctuary Box in Light Theme */
+    .sanctuary-feature-box {
+      background: #f8fafc;
+      border-radius: var(--radius-md);
+      padding: 18px;
+      border: 1px solid #e2e8f0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    .milestone-vault-card {
+      background: #ffffff;
+      border: 1.5px solid rgba(163, 22, 33, 0.15);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    .milestone-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 2px solid var(--brand-primary);
+      background: url('https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80') center/cover;
+      flex-shrink: 0;
+    }
+
+    .milestone-info h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 2px;
+    }
+
+    .milestone-info p {
+      font-size: 0.78rem;
+      color: var(--brand-primary);
+      font-weight: 600;
+    }
+
+    .voice-player-box {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .voice-play-trigger {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--brand-primary);
+      color: #ffffff;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .voice-play-trigger:hover {
+      background: var(--brand-primary-light);
+      transform: scale(1.05);
+    }
+
+    .waveform-visual {
+      flex: 1;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .wave-line {
+      width: 3px;
+      background: var(--brand-primary);
+      border-radius: 2px;
+      opacity: 0.75;
+      animation: wave 1.2s infinite ease-in-out alternate;
+    }
+
+    @keyframes wave {
+      from { height: 6px; }
+      to { height: 22px; }
+    }
+
+    .reunion-card-box {
+      background: #ffffff;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .reunion-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #0f172a;
+    }
+
+    .reunion-bar {
+      height: 7px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .reunion-bar-fill {
+      width: 78%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--brand-success), #10b981);
+    }
+
+    .task-chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .task-pill {
+      font-size: 0.72rem;
+      padding: 3px 10px;
+      background: #f1f5f9;
+      border-radius: var(--radius-full);
+      color: #475569;
+      font-weight: 500;
+    }
+
+    .task-pill.active {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+      font-weight: 600;
+    }
+
+    /* Comparison Bullets */
+    .feature-points-list {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .feature-point {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.88rem;
+      color: var(--text-muted-aa);
+      line-height: 1.5;
+    }
+
+    .feature-point i {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .feature-point.bad i {
+      color: #dc2626;
+    }
+
+    .feature-point.good i {
+      color: var(--brand-success);
+    }
+
+    /* ========================================================= */
+    /* TAB 2: THE WHATSAPP BRIDGE & SHARE ENGINE (MOCKUP)         */
+    /* ========================================================= */
+    .bridge-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    @media (max-width: 960px) {
+      .bridge-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .bridge-left-info h3 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.9rem;
+      color: #0f172a;
+      margin-bottom: 14px;
+    }
+
+    .bridge-left-info p {
+      font-size: 0.95rem;
+      color: var(--text-muted-aa);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .bridge-perks-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .bridge-perk-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: var(--bg-white);
+      padding: 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
+    }
+
+    .bridge-perk-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      background: rgba(37, 211, 102, 0.12);
+      color: #128c7e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .bridge-perk-text h5 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 3px;
+    }
+
+    .bridge-perk-text p {
+      font-size: 0.82rem;
+      color: var(--text-muted-aa);
+      margin-bottom: 0;
+      line-height: 1.45;
+    }
+
+    .interactive-share-panel {
+      background: var(--bg-white);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .share-select-dropdown {
+      width: 100%;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 0.88rem;
+      color: #0f172a;
+      margin-bottom: 14px;
+      outline: none;
+    }
+
+    .btn-share-trigger {
+      background: #25d366;
+      color: #0b141a;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      transition: all 0.2s ease;
+      min-height: var(--tap-min);
+    }
+
+    .btn-share-trigger:hover {
+      background: #20ba5a;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
+    }
+
+    /* Mobile Phone Bezel Simulator */
+    .phone-simulator-frame {
+      width: 340px;
+      height: 640px;
+      background: #111b21;
+      border-radius: 44px;
+      border: 10px solid #2a3942;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35), inset 0 0 10px rgba(0, 0, 0, 0.8);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .phone-notch-top {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 110px;
+      height: 18px;
+      background: #2a3942;
+      border-radius: 10px;
+      z-index: 50;
+    }
+
+    .phone-inner-screen {
+      flex: 1;
+      background: #0b141a;
+      display: flex;
+      flex-direction: column;
+      padding-top: 32px;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+
+    .wa-chat-header-bar {
+      background: #202c33;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .wa-avatar-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .wa-chat-title h5 {
+      font-size: 0.85rem;
+      color: #e9edef;
+      font-weight: 600;
+    }
+
+    .wa-chat-title p {
+      font-size: 0.65rem;
+      color: #8696a0;
+    }
+
+    .wa-messages-container {
+      flex: 1;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+    }
+
+    /* OpenGraph Rich WhatsApp Card */
+    .wa-rich-preview-card {
+      background: #005c4b;
+      color: #e9edef;
+      border-radius: 8px;
+      padding: 6px;
+      align-self: flex-end;
+      max-width: 95%;
+      border-top-right-radius: 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .wa-og-box {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .wa-og-hero-img {
+      width: 100%;
+      height: 120px;
+      background: url('https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80') center/cover;
+      position: relative;
+    }
+
+    .wa-badge-ribbon {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      background: var(--brand-primary);
+      color: #ffffff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    .wa-og-text-wrap {
+      padding: 8px 10px;
+    }
+
+    .wa-og-headline {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 3px;
+    }
+
+    .wa-og-body {
+      font-size: 0.7rem;
+      color: #aebac1;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+
+    .wa-og-site {
+      font-size: 0.62rem;
+      color: #25d366;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .wa-message-footer {
+      font-size: 0.78rem;
+      line-height: 1.4;
+      padding: 4px 6px;
+    }
+
+    /* ========================================================= */
+    /* TAB 3: THE "CLAIM YOUR BRANCH" EXPERIENCE (MOCKUP)        */
+    /* ========================================================= */
+    .claim-grid-layout {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    @media (max-width: 960px) {
+      .claim-grid-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .claim-action-card {
+      background: #ffffff;
+      border: 1.5px solid rgba(163, 22, 33, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: var(--card-shadow-hover);
+      position: relative;
+    }
+
+    .claim-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--brand-primary);
+      background: rgba(163, 22, 33, 0.08);
+      padding: 5px 14px;
+      border-radius: var(--radius-full);
+      margin-bottom: 14px;
+      border: 1px solid rgba(163, 22, 33, 0.2);
+    }
+
+    .claim-card-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.75rem;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+
+    .claim-card-subhead {
+      font-size: 0.92rem;
+      color: var(--text-muted-aa);
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .mini-lineage-container {
+      background: #f8fafc;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .mini-lineage-title {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted-aa);
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    .tree-step-nodes {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ancestor-pill-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .tree-node-chip {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: var(--radius-full);
+      padding: 6px 14px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .tree-connector-line {
+      width: 2px;
+      height: 12px;
+      background: #cbd5e1;
+    }
+
+    .tree-node-chip.glowing-target {
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark));
+      color: #ffffff;
+      font-weight: 700;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 16px rgba(163, 22, 33, 0.5);
+      animation: pulseBrand 2s infinite;
+      padding: 8px 18px;
+    }
+
+    @keyframes pulseBrand {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(163, 22, 33, 0.5); }
+      70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(163, 22, 33, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(163, 22, 33, 0); }
+    }
+
+    .claim-form-box {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .claim-field label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 5px;
+    }
+
+    .claim-field input {
+      width: 100%;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: #0f172a;
+      font-size: 0.88rem;
+      outline: none;
+      min-height: var(--tap-min);
+    }
+
+    .claim-field input:focus {
+      border-color: var(--brand-primary);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(163, 22, 33, 0.15);
+    }
+
+    .btn-submit-claim {
+      background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-dark) 100%);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 14px 24px;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      min-height: var(--tap-min);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(163, 22, 33, 0.3);
+      transition: all 0.2s ease;
+      margin-top: 6px;
+    }
+
+    .btn-submit-claim:hover {
+      background: linear-gradient(135deg, var(--brand-primary-light) 0%, var(--brand-primary) 100%);
+      transform: translateY(-1px);
+    }
+
+    .right-perks-container h4 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.6rem;
+      color: #0f172a;
+      margin-bottom: 14px;
+    }
+
+    .perk-row-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .perk-icon-square {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-md);
+      background: rgba(163, 22, 33, 0.08);
+      color: var(--brand-primary);
+      border: 1px solid rgba(163, 22, 33, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .perk-row-text h5 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .perk-row-text p {
+      font-size: 0.85rem;
+      color: var(--text-muted-aa);
+      line-height: 1.5;
+    }
+
+    /* Simulation Toast */
+    .action-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--brand-success);
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      display: none;
+      align-items: center;
+      gap: 8px;
+      z-index: 1000;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Executive Brand Bar -->
+  <header>
+    <div class="brand-wrap">
+      <img src="/public/assets/images/logo.png" alt="FamilyPlatform Logo" class="brand-logo-mark" onerror="this.onerror=null; this.src='/public/img/logo/logo.png';">
+      <div>
+        <div style="display:flex; align-items:center;">
+          <span class="brand-title"><span class="brand-title-lead">Family</span><span class="brand-title-accent">Platform</span></span>
+          <span class="brand-badge">Brand Review</span>
+        </div>
+        <p style="font-size: 0.68rem; color: var(--text-muted-aa); margin-top: 1px;">Competing with WhatsApp: Official Design Standards</p>
+      </div>
+    </div>
+
+    <!-- Tab Navigation Switcher -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" onclick="switchPreviewTab('comparison')">
+        <i class="bi bi-arrows-angle-expand"></i> 1. WhatsApp vs Sanctuary
+      </button>
+      <button class="tab-btn" onclick="switchPreviewTab('bridge')">
+        <i class="bi bi-whatsapp"></i> 2. The WhatsApp Bridge
+      </button>
+      <button class="tab-btn" onclick="switchPreviewTab('claim')">
+        <i class="bi bi-person-check-fill"></i> 3. Claim Your Branch
+      </button>
+    </nav>
+
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <a href="/why-familyplatform" class="btn-brand-outline">
+        <i class="bi bi-eye-fill"></i> Live Route
+      </a>
+      <a href="/login" class="btn-brand-primary">
+        <i class="bi bi-house-door-fill"></i> Sign In
+      </a>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Hero Introduction -->
+    <div class="hero-banner">
+      <div class="hero-badge">
+        <i class="bi bi-shield-check"></i> Product Strategy &amp; Live Verification
+      </div>
+      <h1 class="hero-headline">
+        Why Families Choose <span>FamilyPlatform</span> Over WhatsApp
+      </h1>
+      <p class="hero-lead">
+        WhatsApp was engineered for fleeting, rapid text messaging. FamilyPlatform is your family's living sanctuary—preserving oral histories, uncompressed memories, multi-generational kinship, and structured milestones that never get lost.
+      </p>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 1: THE INTERACTIVE COMPARISON (WHATSAPP GROUP VS DYNASTY SANCTUARY)  -->
+    <!-- ========================================================================= -->
+    <section id="panel-comparison" class="preview-tab-panel active">
+      <div class="comparison-grid">
+        
+        <!-- LEFT: THE WHATSAPP GROUP (THE FATAL FLAWS) -->
+        <div class="surface-card whatsapp-card">
+          <div class="card-top-bar">
+            <span class="card-pill-tag tag-whatsapp">
+              <i class="bi bi-whatsapp"></i> WhatsApp Family Group
+            </span>
+            <span class="alert-meter">
+              <i class="bi bi-exclamation-triangle-fill"></i> 48-Hour Memory Half-Life
+            </span>
+          </div>
+
+          <p style="font-size: 0.88rem; color: #475569; margin-bottom: 14px;">
+            <strong>The Ephemeral Firehose:</strong> Crucial moments, ancestral recipes, and family events drown in a continuous stream of stickers, debates, and forwards.
+          </p>
+
+          <div class="wa-stream-box">
+            <div class="wa-bubble in">
+              <div class="wa-sender">Uncle Wale</div>
+              Can everyone upload their photos from Grandma's 80th birthday? Please don't forget!
+              <span class="wa-time">10:14</span>
+            </div>
+
+            <div class="wa-bubble in">
+              <div class="wa-sender">Auntie Bimbo</div>
+              [Blurry compressed photo] Grandma cutting cake! 🎉🎂
+              <span class="wa-time">10:18</span>
+            </div>
+
+            <div class="wa-bubble in">
+              <div class="wa-sender">Cousin Segun</div>
+              [Good Morning Blessed Thursday GIF] 🙏✨
+              <span class="wa-time">10:22</span>
+            </div>
+
+            <div class="wa-lost-banner">
+              ⚠️ 142 messages, political debates &amp; stickers later...
+            </div>
+
+            <div class="wa-bubble in">
+              <div class="wa-sender">Cousin Tolu</div>
+              Wait, what time are we meeting on Saturday? And who has Grandma's secret spiced beef recipe? I can't find it anywhere in this chat!
+              <span class="wa-time">18:45</span>
+            </div>
+
+            <div class="wa-bubble in">
+              <div class="wa-sender">Auntie Toyin</div>
+              I posted the recipe in June! Now it says "Media expired from device". Someone please repost! 🤦‍♀️
+              <span class="wa-time">18:49</span>
+            </div>
+
+            <div class="wa-bubble out">
+              You: WhatsApp doesn't preserve our family history. Everything gets buried or deleted!
+              <span class="wa-time">18:52</span>
+            </div>
+          </div>
+
+          <div class="feature-points-list">
+            <div class="feature-point bad">
+              <i class="bi bi-x-circle-fill"></i>
+              <div><strong>Chronic Amnesia:</strong> Photos and documents disappear into individual camera rolls or expire within weeks.</div>
+            </div>
+            <div class="feature-point bad">
+              <i class="bi bi-x-circle-fill"></i>
+              <div><strong>Generational Disconnect:</strong> Elders are overwhelmed by rapid texting; younger children cannot participate safely.</div>
+            </div>
+            <div class="feature-point bad">
+              <i class="bi bi-x-circle-fill"></i>
+              <div><strong>Awkward Privacy Boundaries:</strong> In-laws and distant branches are forced into one chaotic room, or splinter into 10 disjointed groups.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: THE FAMILYPLATFORM SANCTUARY (THE DYNASTY VAULT) -->
+        <div class="surface-card sanctuary-card">
+          <div class="card-top-bar">
+            <span class="card-pill-tag tag-sanctuary">
+              <i class="bi bi-shield-check"></i> FamilyPlatform Sanctuary
+            </span>
+            <span class="success-meter">
+              <i class="bi bi-check-circle-fill"></i> Preserved for 100+ Years
+            </span>
+          </div>
+
+          <p style="font-size: 0.88rem; color: var(--brand-primary); margin-bottom: 14px; font-weight: 600;">
+            The Permanent Dynasty Vault: Every memory is tethered to your family tree, organised by branch, and heirloom-preserved.
+          </p>
+
+          <div class="sanctuary-feature-box">
+            <!-- Living Vault Milestone -->
+            <div class="milestone-vault-card">
+              <div class="milestone-avatar"></div>
+              <div class="milestone-info">
+                <h4>Grandma Abigail's 80th Jubilee</h4>
+                <p>Dynasty Milestone • 32 High-Resolution Photos • 18 Relatives Tagged</p>
+              </div>
+            </div>
+
+            <!-- Voice Capsule Player -->
+            <div class="voice-player-box">
+              <button class="voice-play-trigger" onclick="toggleWaveform(this)">
+                <i class="bi bi-play-fill" style="font-size: 1.25rem;"></i>
+              </button>
+              <div style="flex: 1;">
+                <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px;">
+                  <span style="font-weight:700; color:#0f172a;">Oral History: Arriving in London (1968)</span>
+                  <span style="color:var(--brand-primary); font-weight:600;">03:42</span>
+                </div>
+                <div class="waveform-visual" id="waveVisualBox">
+                  <div class="wave-line" style="animation-delay: 0.1s;"></div>
+                  <div class="wave-line" style="animation-delay: 0.3s;"></div>
+                  <div class="wave-line" style="animation-delay: 0.5s;"></div>
+                  <div class="wave-line" style="animation-delay: 0.2s;"></div>
+                  <div class="wave-line" style="animation-delay: 0.4s;"></div>
+                  <div class="wave-line" style="animation-delay: 0.6s;"></div>
+                  <div class="wave-line" style="animation-delay: 0.1s;"></div>
+                  <div class="wave-line" style="animation-delay: 0.3s;"></div>
+                  <div class="wave-line" style="animation-delay: 0.5s;"></div>
+                  <div class="wave-line" style="animation-delay: 0.7s;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Structured Event RSVP & Potluck Delegation -->
+            <div class="reunion-card-box">
+              <div class="reunion-header">
+                <span>Annual Family Reunion 2026</span>
+                <span style="color:var(--brand-success);"><i class="bi bi-check-circle-fill"></i> 18 / 24 Confirmed</span>
+              </div>
+              <div class="reunion-bar">
+                <div class="reunion-bar-fill"></div>
+              </div>
+              <div class="task-chip-list">
+                <span class="task-pill active"><i class="bi bi-check2"></i> Drinks: Uncle Wale</span>
+                <span class="task-pill active"><i class="bi bi-check2"></i> Jollof Rice: Auntie Bimbo</span>
+                <span class="task-pill"><i class="bi bi-clock"></i> Music &amp; Games: Segun</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="feature-points-list">
+            <div class="feature-point good">
+              <i class="bi bi-check-circle-fill"></i>
+              <div><strong>Interactive Living Organogram:</strong> Complete genealogical mapping—every photo, video, and memory connects to ancestral roots.</div>
+            </div>
+            <div class="feature-point good">
+              <i class="bi bi-check-circle-fill"></i>
+              <div><strong>Elder Voice &amp; Time Capsules:</strong> Record spoken stories from grandparents before they are lost, locked until milestone years.</div>
+            </div>
+            <div class="feature-point good">
+              <i class="bi bi-check-circle-fill"></i>
+              <div><strong>Maiden Lineage Isolation:</strong> Complete privacy across maternal and paternal branches without family awkwardness.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 2: THE WHATSAPP BRIDGE & SHARE ENGINE (THE TROJAN HORSE)              -->
+    <!-- ========================================================================= -->
+    <section id="panel-bridge" class="preview-tab-panel">
+      <div class="bridge-layout">
+        
+        <!-- Left: Explainer & Interactive Share Trigger -->
+        <div class="bridge-left-info">
+          <div class="hero-badge" style="margin-bottom: 12px;">
+            <i class="bi bi-share-fill"></i> The Trojan Horse Growth Flywheel
+          </div>
+          <h3>Don't Fight WhatsApp — Harness It as Your Free Acquisition Engine</h3>
+          <p>
+            We never force families to abandon WhatsApp. Instead, FamilyPlatform provides 1-click rich share hooks that drop stunning OpenGraph preview cards into WhatsApp groups. Every post, milestone, and tree update acts as an invitation back into the Dynasty Sanctuary.
+          </p>
+
+          <div class="bridge-perks-stack">
+            <div class="bridge-perk-card">
+              <div class="bridge-perk-icon">
+                <i class="bi bi-image"></i>
+              </div>
+              <div class="bridge-perk-text">
+                <h5>High-Resolution WhatsApp Story Cards</h5>
+                <p>Generates rich OpenGraph cards with family crests and milestone badges that render crisply inside WhatsApp chats.</p>
+              </div>
+            </div>
+
+            <div class="bridge-perk-card">
+              <div class="bridge-perk-icon">
+                <i class="bi bi-calendar-event"></i>
+              </div>
+              <div class="bridge-perk-text">
+                <h5>Weekly Automated Dynasty Digest</h5>
+                <p>A Sunday night 1-tap summary for group admins: "This week in the Olaogun Family: 3 new memories, 1 new voice capsule, and Grandma's countdown!"</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Share Preview Trigger -->
+          <div class="interactive-share-panel">
+            <label style="display:block; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--brand-primary); font-weight:700; margin-bottom:8px;">
+              <i class="bi bi-lightning-charge-fill"></i> Test Interactive WhatsApp Share
+            </label>
+            <select class="share-select-dropdown" id="shareSelectOption" onchange="updateBrandMockupCard(this.value)">
+              <option value="milestone">Milestone: Grandma Abigail's 80th Jubilee</option>
+              <option value="recipe">Ancestral Recipe: Grandma's Spiced Jollof Rice</option>
+              <option value="voice">Elder Voice Capsule: Life in London (1968)</option>
+              <option value="reunion">Event RSVP: Olaogun Family Reunion 2026</option>
+            </select>
+            <button class="btn-share-trigger" onclick="simulateBrandWhatsAppShare()">
+              <i class="bi bi-whatsapp"></i> Simulate 1-Tap Share to WhatsApp
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Native Mobile Phone Bezel Simulating WhatsApp Chat -->
+        <div class="phone-simulator-frame">
+          <div class="phone-notch-top"></div>
+          <div class="phone-inner-screen">
+            <!-- WhatsApp Chat Bar -->
+            <div class="wa-chat-header-bar">
+              <div class="wa-avatar-icon">OF</div>
+              <div class="wa-chat-title">
+                <h5>Olaogun Family Global 🌍</h5>
+                <p>Uncle Wale, Auntie Bimbo, Tolu +14 others</p>
+              </div>
+            </div>
+
+            <!-- WhatsApp Chat Body -->
+            <div class="wa-messages-container">
+              <div class="wa-bubble in">
+                <div class="wa-sender">Uncle Wale</div>
+                I just archived the high-resolution jubilee album and Grandma's voice recording into our FamilyPlatform vault!
+                <span class="wa-time">14:02</span>
+              </div>
+
+              <!-- Live Dynamic OpenGraph Rich Card -->
+              <div class="wa-rich-preview-card" id="mockupBrandCard">
+                <div class="wa-og-box">
+                  <div class="wa-og-hero-img" id="mockupBrandImg">
+                    <span class="wa-badge-ribbon" id="mockupBrandBadge">DYNASTY VAULT</span>
+                  </div>
+                  <div class="wa-og-text-wrap">
+                    <div class="wa-og-headline" id="mockupBrandTitle">Grandma Abigail's 80th Jubilee Album</div>
+                    <div class="wa-og-body" id="mockupBrandDesc">32 full-res photos, oral history audio, and 18 tagged relatives. Preserved permanently.</div>
+                    <div class="wa-og-site">familyplatform.com • Tap to View</div>
+                  </div>
+                </div>
+                <div class="wa-message-footer" id="mockupBrandCaption">
+                  ✨ Tap the link to view the uncompressed photos and listen to Grandma's 1968 audio interview!
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB 3: THE "CLAIM YOUR BRANCH" EXPERIENCE (3-TAP ONBOARDING)-->
+    <!-- ========================================================= -->
+    <section id="panel-claim" class="preview-tab-panel">
+      <div class="claim-grid-layout">
+        
+        <!-- Left: The Direct Mobile Invite Screen -->
+        <div class="claim-action-card">
+          <div class="claim-pill-badge">
+            <i class="bi bi-stars"></i> Exclusive Kinship Invitation
+          </div>
+          <h2 class="claim-card-title">Welcome, Tolu Olaogun!</h2>
+          <p class="claim-card-subhead">
+            Uncle Wale has reserved your spot on the <strong>Olaogun Family Dynasty Tree</strong>. Claim your branch to access private family memories and historical records.
+          </p>
+
+          <!-- Interactive Mini-Tree Preview -->
+          <div class="mini-lineage-container">
+            <div class="mini-lineage-title">Your Lineage Connection (3 Generations)</div>
+            <div class="tree-step-nodes">
+              <div class="ancestor-pill-row">
+                <div class="tree-node-chip"><i class="bi bi-person-fill"></i> Pa Samuel</div>
+                <div class="tree-node-chip"><i class="bi bi-person-fill"></i> Abigail</div>
+              </div>
+              <div class="tree-connector-line"></div>
+              <div class="tree-node-chip"><i class="bi bi-person-fill"></i> Wale Olaogun (Uncle)</div>
+              <div class="tree-connector-line"></div>
+              <!-- Glowing Brand Claim Target -->
+              <div class="tree-node-chip glowing-target">
+                <i class="bi bi-star-fill"></i> Tolu Olaogun (You) • Ready to Claim
+              </div>
+            </div>
+          </div>
+
+          <!-- Frictionless 2-Field Claim Form -->
+          <form class="claim-form-box" onsubmit="event.preventDefault(); submitBrandClaimSim();">
+            <input type="hidden" name="_token" value="preview_token_sample">
+            <div class="claim-field">
+              <label>Your Full Name</label>
+              <input type="text" value="Tolu Olaogun" readonly>
+            </div>
+            <div class="claim-field">
+              <label>Create Secret Password</label>
+              <input type="password" value="••••••••••••" placeholder="Choose a secure password">
+            </div>
+            <button type="submit" class="btn-submit-claim">
+              <i class="bi bi-check-circle-fill"></i> Claim My Branch &amp; Enter Sanctuary
+            </button>
+          </form>
+        </div>
+
+        <!-- Right: Why This Destroys WhatsApp Friction -->
+        <div class="right-perks-container">
+          <div class="hero-badge" style="margin-bottom: 12px;">
+            <i class="bi bi-magic"></i> Zero-Friction Onboarding
+          </div>
+          <h4>Why Relatives Actually Join (Zero Form Fatigue)</h4>
+          <p style="font-size: 0.95rem; color: var(--text-muted-aa); line-height: 1.6; margin-bottom: 24px;">
+            Generic registration forms lose 80% of family members. Our "Claim Your Branch" flow greets the relative by name, proves their exact ancestral connection, and requires just a single tap to join.
+          </p>
+
+          <div class="perk-row-item">
+            <div class="perk-icon-square">
+              <i class="bi bi-diagram-3-fill"></i>
+            </div>
+            <div class="perk-row-text">
+              <h5>Instant Visual Connection</h5>
+              <p>They immediately see where they sit in the family tree next to their parents and grandparents. It's an emotional hook WhatsApp can't touch.</p>
+            </div>
+          </div>
+
+          <div class="perk-row-item">
+            <div class="perk-icon-square">
+              <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <div class="perk-row-text">
+              <h5>Cryptographic Opaque Invites</h5>
+              <p>Powered by <code>InviteTokenService</code> with zero PII in the URL. Fully secured with single-use tokens and CSRF protection.</p>
+            </div>
+          </div>
+
+          <div class="perk-row-item">
+            <div class="perk-icon-square">
+              <i class="bi bi-gift-fill"></i>
+            </div>
+            <div class="perk-row-text">
+              <h5>Instant Welcome Gift</h5>
+              <p>The moment they claim their branch, they unlock 5 curated family heirloom memories, recipes, and upcoming reunion events.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Live Simulation Toast Notification -->
+  <div class="action-toast" id="brandSimToast">
+    <i class="bi bi-check-circle-fill"></i>
+    <span id="brandToastMsg">Simulated share link copied!</span>
+  </div>
+
+  <script>
+    // Tab Switching Logic
+    function switchPreviewTab(tabKey) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.preview-tab-panel').forEach(panel => panel.classList.remove('active'));
+
+      if (tabKey === 'comparison') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('panel-comparison').classList.add('active');
+      } else if (tabKey === 'bridge') {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('panel-bridge').classList.add('active');
+      } else if (tabKey === 'claim') {
+        document.querySelectorAll('.tab-btn')[2].classList.add('active');
+        document.getElementById('panel-claim').classList.add('active');
+      }
+    }
+
+    // Toggle Waveform Audio Animation
+    function toggleWaveform(btn) {
+      const icon = btn.querySelector('i');
+      if (icon.classList.contains('bi-play-fill')) {
+        icon.classList.remove('bi-play-fill');
+        icon.classList.add('bi-pause-fill');
+        showBrandToast('Playing Grandma Abigail (1968 Oral History)...');
+      } else {
+        icon.classList.remove('bi-pause-fill');
+        icon.classList.add('bi-play-fill');
+      }
+    }
+
+    // Dynamic Mockup Card Data
+    const brandShareData = {
+      milestone: {
+        title: "Grandma Abigail's 80th Jubilee Album",
+        desc: "32 full-res photos, oral history audio, and 18 tagged relatives. Preserved permanently.",
+        badge: "DYNASTY MILESTONE",
+        caption: "✨ Tap the link to view uncompressed photos and listen to Grandma's 1968 audio interview!",
+        img: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80"
+      },
+      recipe: {
+        title: "Grandma Abigail's Secret Spiced Jollof Rice",
+        desc: "Handwritten 1974 spice measurements, firewood technique, and video walkthrough.",
+        badge: "LIVING JOURNAL",
+        caption: "🍲 The recipe we've all been searching for! Added to our Dynasty Recipe Journal.",
+        img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"
+      },
+      voice: {
+        title: "Elder Voice Capsule: Life in London (1968)",
+        desc: "14-minute oral history recorded by Granddaughter Tolu. Preserved for future generations.",
+        badge: "ORAL HISTORY",
+        caption: "🎙️ Listen to Grandma recount arriving in London 58 years ago. Truly moving.",
+        img: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=600&q=80"
+      },
+      reunion: {
+        title: "Olaogun Annual Family Reunion 2026",
+        desc: "18 confirmed, potluck assignments live. Tap to RSVP and select your contribution.",
+        badge: "FAMILY EVENT",
+        caption: "📅 Reunion schedule is now live! Please confirm your attendance on FamilyPlatform.",
+        img: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80"
+      }
+    };
+
+    function updateBrandMockupCard(key) {
+      const data = brandShareData[key];
+      if (!data) return;
+      document.getElementById('mockupBrandTitle').textContent = data.title;
+      document.getElementById('mockupBrandDesc').textContent = data.desc;
+      document.getElementById('mockupBrandBadge').textContent = data.badge;
+      document.getElementById('mockupBrandCaption').textContent = data.caption;
+      document.getElementById('mockupBrandImg').style.backgroundImage = `url('${data.img}')`;
+    }
+
+    function simulateBrandWhatsAppShare() {
+      const sel = document.getElementById('shareSelectOption').value;
+      const data = brandShareData[sel];
+      showBrandToast(`Simulated WhatsApp Share: "${data.title}" card generated!`);
+      document.querySelector('.phone-simulator-frame').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function submitBrandClaimSim() {
+      showBrandToast('🎉 Branch Claimed! Tolu is now connected to 3 generations.');
+      setTimeout(() => {
+        alert("🎉 Verification Success!\n\nTolu Olaogun's node is claimed.\n- Lineage: Son of Uncle Wale, Grandson of Pa Samuel & Abigail.\n- Access Granted: Full Dynasty Vault & Reunion RSVPs.");
+      }, 500);
+    }
+
+    function showBrandToast(msg) {
+      const toast = document.getElementById('brandSimToast');
+      document.getElementById('brandToastMsg').textContent = msg;
+      toast.style.display = 'flex';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3500);
+    }
+  </script>
+</body>
+</html>

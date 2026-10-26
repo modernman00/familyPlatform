@@ -29,12 +29,12 @@
 
 @if(!empty($famCode))
 <!-- Family Code Heirloom Card -->
-<div style="background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%); border: 1px solid #99f6e4; border-radius: 12px; padding: 20px 24px; margin-bottom: 28px; text-align: center;">
-    <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #0d9488;">Your Private Family Code</span>
-    <div style="font-size: 26px; font-weight: 800; color: #0f766e; letter-spacing: 2px; margin: 8px 0; font-family: monospace;">
+<div style="background: linear-gradient(135deg, #fdf5f5 0%, #fdf5f5 100%); border: 1px solid #f3d9db; border-radius: 12px; padding: 20px 24px; margin-bottom: 28px; text-align: center;">
+    <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #a31621;">Your Private Family Code</span>
+    <div style="font-size: 26px; font-weight: 800; color: #8a1019; letter-spacing: 2px; margin: 8px 0; font-family: monospace;">
         {{ $famCode }}
     </div>
-    <p style="margin: 0; font-size: 13px; color: #134e4a;">
+    <p style="margin: 0; font-size: 13px; color: #2a0a0d;">
         Share this code with your siblings, parents, and children so they can connect directly to your family tree.
     </p>
 </div>
@@ -48,7 +48,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 16px;">
     <tr>
         <td width="44" valign="top" style="padding-right: 14px;">
-            <div style="width: 36px; height: 36px; background-color: #ccfbf1; color: #0d9488; border-radius: 50%; font-size: 18px; line-height: 36px; text-align: center; font-weight: 700;">
+            <div style="width: 36px; height: 36px; background-color: #f3d9db; color: #a31621; border-radius: 50%; font-size: 18px; line-height: 36px; text-align: center; font-weight: 700;">
                 1
             </div>
         </td>
@@ -65,7 +65,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 16px;">
     <tr>
         <td width="44" valign="top" style="padding-right: 14px;">
-            <div style="width: 36px; height: 36px; background-color: #e0f2fe; color: #0284c7; border-radius: 50%; font-size: 18px; line-height: 36px; text-align: center; font-weight: 700;">
+            <div style="width: 36px; height: 36px; background-color: #f5dede; color: #a31621; border-radius: 50%; font-size: 18px; line-height: 36px; text-align: center; font-weight: 700;">
                 2
             </div>
         </td>
@@ -99,7 +99,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0 24px 0;">
     <tr>
         <td align="center">
-            <a href="{{ $baseUrl }}/login" target="_blank" style="background: linear-gradient(135deg, #00bfa5 0%, #00897b 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(0, 191, 165, 0.35);">
+            <a href="{{ $baseUrl }}/login" target="_blank" style="background: linear-gradient(135deg, #a31621 0%, #8a1019 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(163,22,33, 0.35);">
                 Enter Your Family Sanctuary &rarr;
             </a>
         </td>

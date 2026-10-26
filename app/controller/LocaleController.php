@@ -18,10 +18,12 @@ class LocaleController
      * Switch application language and return user to previous page.
      *
      * @param string $locale Requested locale code (e.g. 'en', 'fr', 'es')
+     * @param string|null $lang Route parameter alias for backwards compatibility
      */
-    public function switch(string $locale): void
+    public function switch(string $locale = 'en', ?string $lang = null): void
     {
-        $success = I18n::setLocale($locale);
+        $target = $lang ?? $locale;
+        $success = I18n::setLocale($target);
 
         $isJson = (!empty($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'))
             || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');

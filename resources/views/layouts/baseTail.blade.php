@@ -52,7 +52,7 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: "#1d4ed8", // A rich blue inspired by the header/buttons
+                        primary: "#8a1019", // A rich blue inspired by the header/buttons
                         secondary: "#dc2626", // Red for key actions
                         "background-light": "#f3f4f6",
                         "background-dark": "#111111", // Deep dark background

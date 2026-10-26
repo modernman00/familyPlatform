@@ -172,7 +172,7 @@
                         <!-- 3. Family GIF Picker Drawer -->
                         <div id="gifPickerDrawer" class="composer-drawer d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
                             <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
-                                <span class="fw-bold small text-info d-flex align-items-center gap-1.5" style="color: #0891b2 !important;">
+                                <span class="fw-bold small text-info d-flex align-items-center gap-1.5" style="color: #a31621 !important;">
                                     <i class="bi bi-filetype-gif fs-5"></i> Choose a Family GIF
                                 </span>
                                 <button type="button" id="closeGifDrawerBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Close GIF picker"></button>

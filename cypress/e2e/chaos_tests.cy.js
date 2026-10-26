@@ -143,7 +143,7 @@ describe('Chaos & Resiliency Testing', () => {
 
         // The comment form is hidden per-post until the "Comment" toggle button is clicked
         cy.contains('button', 'Comment').first().click({ force: true });
-        cy.get('input.form-control.rounded-pill[placeholder*="Write a comment"], input[placeholder="Write a comment..."]').first().should('be.visible').type('Test comment{enter}');
+        cy.get('input.comment-composer__input[placeholder*="Write a comment"], input[placeholder="Write a comment..."]').first().should('be.visible').type('Test comment{enter}');
 
         cy.wait('@commentTimeout');
 

@@ -5,7 +5,7 @@
 
 @section('content')
   <!-- Header Banner -->
-  <header class="doc-center-header" style="background: linear-gradient(135deg, #004182 0%, #00bfa5 100%); padding: 60px 0; color: #ffffff; text-align: center;">
+  <header class="doc-center-header" style="background: linear-gradient(135deg, #7a0e16 0%, #a31621 100%); padding: 60px 0; color: #ffffff; text-align: center;">
     <div class="container">
       <h1 class="display-5 fw-bold mb-2">Living Product Guide</h1>
       <p class="fs-5 text-white-50 mb-0">Master your family tree, preserve oral heirlooms, and connect generations.</p>
@@ -21,12 +21,12 @@
         <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
           <div class="card-body p-4 p-md-5">
             <div class="d-flex align-items-center gap-3 mb-3">
-              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(0, 191, 165, 0.12); color: #00bfa5;">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(163,22,33, 0.12); color: #a31621;">
                 <i class="bi bi-diagram-3-fill fs-4"></i>
               </div>
               <div>
                 <h3 class="fw-bold mb-0 text-dark">1. Navigating Your 7-Generation Dynasty Tree</h3>
-                <span class="badge bg-teal text-white" style="background: #00bfa5;">Core Architecture</span>
+                <span class="badge bg-teal text-white" style="background: #a31621;">Core Architecture</span>
               </div>
             </div>
 
@@ -59,7 +59,7 @@
         <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
           <div class="card-body p-4 p-md-5">
             <div class="d-flex align-items-center gap-3 mb-3">
-              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(59, 130, 246, 0.12); color: #3b82f6;">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(163,22,33, 0.12); color: #a31621;">
                 <i class="bi bi-person-check-fill fs-4"></i>
               </div>
               <div>
@@ -72,7 +72,7 @@
               When a relative registers independently or readjusts their Family Code, our multi-vector entity resolution engine automatically pairs them with their position on the live tree.
             </p>
 
-            <div class="alert alert-info border-0 rounded-3 mb-4" style="background: rgba(59, 130, 246, 0.08);">
+            <div class="alert alert-info border-0 rounded-3 mb-4" style="background: rgba(163,22,33, 0.08);">
               <h6 class="fw-bold text-primary mb-1"><i class="bi bi-magic me-2"></i>How the Auto-Matching Engine Works:</h6>
               <ul class="mb-0 small text-dark ps-3">
                 <li><strong>Yoruba & Anglo Diminutive AI:</strong> Recognizes nicknames like <em>Femi &harr; Olufemi</em>, <em>Wale &harr; Adewale</em>, <em>Segun &harr; Olusegun</em>, and <em>Kenny &harr; Kehinde</em>.</li>
@@ -130,7 +130,7 @@
             <div class="row g-3">
               <div class="col-md-4">
                 <div class="p-3 border rounded-3 bg-light h-100">
-                  <span class="badge bg-teal text-white mb-2" style="background: #00bfa5;">Touch 1 (Day 1)</span>
+                  <span class="badge bg-teal text-white mb-2" style="background: #a31621;">Touch 1 (Day 1)</span>
                   <h6 class="fw-bold text-dark">Lineage Kickstart</h6>
                   <p class="small text-muted mb-0">Helpful tips via Email and WebPush guiding new members to add parents and siblings in under 60 seconds.</p>
                 </div>
@@ -157,12 +157,12 @@
         <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden" id="playbook-birth-family">
           <div class="card-body p-4 p-md-5">
             <div class="d-flex align-items-center gap-3 mb-3">
-              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(147, 51, 234, 0.12); color: #9333ea;">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(184,32,44, 0.12); color: #b8202c;">
                 <i class="bi bi-diagram-3-fill fs-4"></i>
               </div>
               <div>
                 <h3 class="fw-bold mb-0 text-dark">4b. Your Birth / Maiden Family Code</h3>
-                <span class="badge" style="background:#9333ea;">Dual Lineage</span>
+                <span class="badge" style="background:#b8202c;">Dual Lineage</span>
               </div>
             </div>
             <p class="lead text-secondary">
@@ -198,12 +198,12 @@
         <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden" id="playbook-code-rename">
           <div class="card-body p-4 p-md-5">
             <div class="d-flex align-items-center gap-3 mb-3">
-              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(79, 70, 229, 0.12); color: #4f46e5;">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(163,22,33, 0.12); color: #a31621;">
                 <i class="bi bi-ui-checks-grid fs-4"></i>
               </div>
               <div>
                 <h3 class="fw-bold mb-0 text-dark">4c. Changing Your Family Code</h3>
-                <span class="badge" style="background:#4f46e5;">Family Vote</span>
+                <span class="badge" style="background:#a31621;">Family Vote</span>
               </div>
             </div>
             <p class="lead text-secondary">
@@ -297,7 +297,7 @@
         <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
           <div class="card-body p-4 p-md-5">
             <div class="d-flex align-items-center gap-3 mb-3">
-              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(59, 130, 246, 0.12); color: #3b82f6;">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(163,22,33, 0.12); color: #a31621;">
                 <i class="bi bi-card-image fs-4"></i>
               </div>
               <div>
@@ -322,12 +322,12 @@
         <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
           <div class="card-body p-4 p-md-5">
             <div class="d-flex align-items-center gap-3 mb-3">
-              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(168, 85, 247, 0.12); color: #a855f7;">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(184,32,44, 0.12); color: #ef6b73;">
                 <i class="bi bi-hourglass-split fs-4"></i>
               </div>
               <div>
                 <h3 class="fw-bold mb-0 text-dark">8. Digital Time Capsule Vault</h3>
-                <span class="badge" style="background: #a855f7; color: #fff;">Generational Preservation</span>
+                <span class="badge" style="background: #ef6b73; color: #fff;">Generational Preservation</span>
               </div>
             </div>
 
@@ -347,7 +347,7 @@
         <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
           <div class="card-body p-4 p-md-5">
             <div class="d-flex align-items-center gap-3 mb-3">
-              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(14, 165, 233, 0.12); color: #0ea5e9;">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(163,22,33, 0.12); color: #0ea5e9;">
                 <i class="bi bi-shield-lock-fill fs-4"></i>
               </div>
               <div>
@@ -372,17 +372,17 @@
         <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
           <div class="card-body p-4 p-md-5">
             <div class="d-flex align-items-center gap-3 mb-3">
-              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(0, 191, 165, 0.12); color: #00bfa5;">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(163,22,33, 0.12); color: #a31621;">
                 <i class="bi bi-journal-richtext fs-4"></i>
               </div>
               <div>
                 <h3 class="fw-bold mb-0 text-dark">10. Family Chronicles, Announcements &amp; Public Blog</h3>
-                <span class="badge" style="background: #00bfa5; color: #fff;">Storytelling &amp; Insights</span>
+                <span class="badge" style="background: #a31621; color: #fff;">Storytelling &amp; Insights</span>
               </div>
             </div>
 
             <p class="lead text-secondary">
-              Members can preserve rich family chronicles with the built-in AI Story Assistant at <strong>Family Journal</strong>, broadcast urgent family notices, and explore public heritage articles on our <a href="/blogs" class="fw-bold text-decoration-none" style="color: #004182;">Public Blog</a>.
+              Members can preserve rich family chronicles with the built-in AI Story Assistant at <strong>Family Journal</strong>, broadcast urgent family notices, and explore public heritage articles on our <a href="/blogs" class="fw-bold text-decoration-none" style="color: #7a0e16;">Public Blog</a>.
             </p>
 
             <div class="p-3 rounded-3 bg-light border">
@@ -395,7 +395,7 @@
 
         <!-- Back to Organogram CTA -->
         <div class="text-center mt-5">
-          <a href="/organogram" class="btn btn-lg fw-bold px-5 py-3 text-white shadow-sm" style="background: linear-gradient(135deg, #00bfa5 0%, #004182 100%); border-radius: 50px;">
+          <a href="/organogram" class="btn btn-lg fw-bold px-5 py-3 text-white shadow-sm" style="background: linear-gradient(135deg, #a31621 0%, #7a0e16 100%); border-radius: 50px;">
             <i class="bi bi-diagram-3-fill me-2"></i>Explore Your Family Tree
           </a>
         </div>

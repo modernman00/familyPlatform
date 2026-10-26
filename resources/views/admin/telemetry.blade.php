@@ -3,17 +3,17 @@
 @section('title', 'TELEMETRY_RUM_DASHBOARD')
 
 @section('content')
-<div class="w3-container" style="padding-top:22px; background:#0f172a; color:#f8fafc; min-height:100vh; font-family: system-ui, -apple-system, sans-serif;">
+<div class="w3-container" style="padding-top:22px; background:#0f172a; color:#f8fafc; min-height:100vh; font-family: 'Inter', -apple-system, system-ui, sans-serif;">
     <!-- Dashboard Header -->
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #334155; padding-bottom:16px; margin-bottom:24px;">
         <div>
-            <h2 style="margin:0; font-weight:800; color:#38bdf8; display:flex; align-items:center; gap:10px;">
+            <h2 style="margin:0; font-weight:800; color:#ef6b73; display:flex; align-items:center; gap:10px;">
                 <i class="fa fa-tachometer" aria-hidden="true"></i> Executive Telemetry & RUM Friction Dashboard
             </h2>
             <p style="margin:4px 0 0 0; color:#94a3b8; font-size:14px;">Real-Time Privacy-Preserving User Experience Defect & Rage-Click Telemetry</p>
         </div>
         <div>
-            <span style="background:rgba(56, 189, 248, 0.1); border:1px solid #38bdf8; color:#38bdf8; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600;">
+            <span style="background:rgba(239,107,115, 0.1); border:1px solid #ef6b73; color:#ef6b73; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600;">
                 <i class="fa fa-shield"></i> UK GDPR Zero-PII Enforced
             </span>
         </div>
@@ -25,7 +25,7 @@
             <div style="background:rgba(30, 41, 59, 0.8); border:1px solid #334155; border-radius:12px; padding:20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="color:#94a3b8; font-size:13px; font-weight:600; text-transform:uppercase;">Total Events</span>
-                    <i class="fa fa-bar-chart" style="color:#38bdf8; font-size:20px;"></i>
+                    <i class="fa fa-bar-chart" style="color:#ef6b73; font-size:20px;"></i>
                 </div>
                 <h2 id="totalEvents" style="margin:12px 0 0 0; font-weight:800; color:#f8fafc; font-size:32px;">--</h2>
             </div>
@@ -104,7 +104,7 @@
 
     <!-- Live Telemetry Stream -->
     <div style="background:rgba(30, 41, 59, 0.8); border:1px solid #334155; border-radius:12px; padding:20px;">
-        <h4 style="margin:0 0 16px 0; color:#38bdf8; font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px;">
+        <h4 style="margin:0 0 16px 0; color:#ef6b73; font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px;">
             <i class="fa fa-list-alt"></i> Recent Telemetry Activity Stream (Live Auto-Refresh)
         </h4>
         <div style="overflow-x:auto;">
@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (evt === 'rage_click') return '<span style="background:rgba(239, 68, 68, 0.2); color:#ef4444; padding:3px 8px; border-radius:12px; font-weight:600; font-size:11px;">Rage Click</span>';
         if (evt === 'dead_click') return '<span style="background:rgba(245, 158, 11, 0.2); color:#f59e0b; padding:3px 8px; border-radius:12px; font-weight:600; font-size:11px;">Dead Click</span>';
         if (evt === 'funnel_step') return '<span style="background:rgba(16, 185, 129, 0.2); color:#10b981; padding:3px 8px; border-radius:12px; font-weight:600; font-size:11px;">Funnel Step</span>';
-        return `<span style="background:rgba(56, 189, 248, 0.2); color:#38bdf8; padding:3px 8px; border-radius:12px; font-weight:600; font-size:11px;">${escapeHtml(evt)}</span>`;
+        return `<span style="background:rgba(239,107,115, 0.2); color:#ef6b73; padding:3px 8px; border-radius:12px; font-weight:600; font-size:11px;">${escapeHtml(evt)}</span>`;
     }
 
     function escapeHtml(str) {

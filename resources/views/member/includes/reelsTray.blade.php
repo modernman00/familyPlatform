@@ -125,7 +125,7 @@
             </a>
         @empty
             <!-- Fallback Guide Card -->
-            <a href="/reels" class="reel-fb-card d-flex flex-column align-items-center justify-content-center text-center p-2" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);">
+            <a href="/reels" class="reel-fb-card d-flex flex-column align-items-center justify-content-center text-center p-2" style="background: linear-gradient(135deg, #2a0a0d 0%, #2a0a0d 100%);">
                 <i class="bi bi-camera-reels-fill text-warning fs-2 mb-2"></i>
                 <div class="small fw-bold text-white">Watch Family Reels</div>
             </a>

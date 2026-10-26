@@ -37,7 +37,7 @@
                     
                     <!-- Header -->
                     <tr>
-                        <td align="center" style="background: linear-gradient(135deg, #00bfa5 0%, #004182 100%); padding: 36px 20px;">
+                        <td align="center" style="background: linear-gradient(135deg, #a31621 0%, #7a0e16 100%); padding: 36px 20px;">
                             @php
                                 $rawBaseUrl = (string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com');
                                 $baseUrl = rtrim($rawBaseUrl, '/');
@@ -87,7 +87,7 @@
                             <table border="0" cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
                                     <td align="center" style="padding-bottom: 30px;">
-                                        <div style="height: 3px; width: 40px; background-color: #00bfa5; border-radius: 2px;"></div>
+                                        <div style="height: 3px; width: 40px; background-color: #a31621; border-radius: 2px;"></div>
                                     </td>
                                 </tr>
                             </table>
@@ -104,7 +104,7 @@
                         <td style="padding: 0 40px 40px 40px;">
                             <p style="margin: 30px 0 0 0; font-size: 16px; line-height: 1.6; color: #475569; font-weight: 500;">
                                 Warm regards,<br/>
-                                <span style="color: #00bfa5; font-weight: 600;">The Membership Team</span>
+                                <span style="color: #a31621; font-weight: 600;">The Membership Team</span>
                             </p>
                         </td>
                     </tr>
@@ -116,7 +116,7 @@
                     <tr>
                         <td align="center" style="padding: 0 20px;">
                             <p style="margin: 0 0 10px 0; font-size: 13px; color: #64748b; line-height: 1.5; text-align: center;">
-                                If you have any questions regarding your account, please contact Customer Services at <a href="mailto:{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}" style="color: #00bfa5; text-decoration: none;">{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}</a>.
+                                If you have any questions regarding your account, please contact Customer Services at <a href="mailto:{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}" style="color: #a31621; text-decoration: none;">{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}</a>.
                             </p>
 
                             @php

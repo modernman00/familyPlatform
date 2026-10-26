@@ -17,7 +17,7 @@
 </p>
 
 @if(!empty($data['postContent']))
-<div style="background-color: #f8fafc; border-left: 4px solid #00bfa5; padding: 16px 20px; border-radius: 6px; margin-bottom: 20px; font-style: italic; color: #475569; font-size: 15px; line-height: 1.6;">
+<div style="background-color: #f8fafc; border-left: 4px solid #a31621; padding: 16px 20px; border-radius: 6px; margin-bottom: 20px; font-style: italic; color: #475569; font-size: 15px; line-height: 1.6;">
     "{{ mb_strlen($data['postContent']) > 150 ? mb_substr($data['postContent'], 0, 150) . '...' : $data['postContent'] }}"
 </div>
 @endif
@@ -40,7 +40,7 @@
                         <td width="36" valign="middle" style="padding-right: 12px;">
                             <a href="{{ $postUrl }}" target="_blank" style="text-decoration: none; display: inline-block;">
                                 <div style="width: 32px; height: 32px; background-color: #ef4444; border-radius: 50%; text-align: center; line-height: 32px;">
-                                    <span style="color: #ffffff; font-size: 13px; font-family: Arial, sans-serif; margin-left: 2px;">&#9658;</span>
+                                    <span style="color: #ffffff; font-size: 13px; font-family: 'Inter', Arial, sans-serif; margin-left: 2px;">&#9658;</span>
                                 </div>
                             </a>
                         </td>
@@ -73,12 +73,12 @@
     </a>
 </div>
 @elseif(empty($data['postContent']))
-<div style="background-color: #f8fafc; border-left: 4px solid #00bfa5; padding: 20px; border-radius: 4px; margin-bottom: 25px; font-style: italic; color: #475569;">
+<div style="background-color: #f8fafc; border-left: 4px solid #a31621; padding: 20px; border-radius: 4px; margin-bottom: 25px; font-style: italic; color: #475569;">
     "View the post to see more details..."
 </div>
 @endif
 
 <div style="text-align: center; margin-top: 25px;">
-    <a href="{{ $postUrl }}" style="background-color: #00bfa5; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block; box-shadow: 0 2px 6px rgba(0, 191, 165, 0.3);">View Post</a>
+    <a href="{{ $postUrl }}" style="background-color: #a31621; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block; box-shadow: 0 2px 6px rgba(163,22,33, 0.3);">View Post</a>
 </div>
 @endsection

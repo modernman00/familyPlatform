@@ -456,6 +456,29 @@ final class ProfilePage extends ProcessImg
             // SEC-5 — cap comment spam per user (30 / 5 min via the shared limiter's
             // 'post' profile).
             \Src\Limiter::limit($id . ':comment', 'post');
+
+            // Optional curated GIF. Validated here, then stripped from $_POST so the
+            // generic insert never sees an unvetted value; written to its own column below.
+            $gifUrl = self::sanitizeCommentGifUrl($_POST['gif_url'] ?? null);
+            unset($_POST['gif_url']);
+            if ($gifUrl === null && trim((string) ($_POST['comment'] ?? '')) === '') {
+                throw new \Src\Exceptions\ValidationException('Write a comment or pick a GIF.');
+            }
+
+            // Optional reply target. Validated against the post BEFORE the insert so a bad
+            // parent never leaves an orphan comment, then stripped from $_POST for the same
+            // reason as gif_url: the generic insert must not see client-supplied columns.
+            $replyToNo = (int) ($_POST['parent_comment_no'] ?? 0);
+            unset($_POST['parent_comment_no']);
+            $thread = null;
+            if ($replyToNo > 0) {
+                $thread = \App\services\CommentThreadService::resolveParent(
+                    \Src\Db::connect2(),
+                    $replyToNo,
+                    (string) ($_POST['post_no'] ?? '')
+                );
+            }
+
             $newInput = [
                 'id' => $id,
                 'fullName' => $_SESSION['fName'] . " " . $_SESSION['lName'],
@@ -465,21 +488,51 @@ final class ProfilePage extends ProcessImg
             $result = SubmitPostData::submitToOneTablenImage(
                 table: 'comment',
                 newInput: $newInput,
-                isCaptcha: false
+                isCaptcha: false,
+                optionalFields: $gifUrl !== null ? ['comment'] : null
             );
             if ($result) {
                 $_SESSION["LAST_INSERT_ID_COMMENT"] = $result;
 
+                // Must land before getNewCommentPusher() reads the row for the realtime broadcast.
+                if ($gifUrl !== null) {
+                    (new \Src\Update('comment'))->updateTable(
+                        column: 'gif_url',
+                        columnAnswer: $gifUrl,
+                        identifier: 'comment_no',
+                        identifierAnswer: $result
+                    );
+                }
+
+                if ($thread !== null) {
+                    (new \Src\Update('comment'))->updateTable(
+                        column: 'parent_comment_no',
+                        columnAnswer: $thread['root'],
+                        identifier: 'comment_no',
+                        identifierAnswer: $result
+                    );
+                }
+
                 // Trigger background notifications server-side
                 \App\controller\members\PostMessage::getNewCommentPusher();
+
+                $this->notifyReplyAndMentions(
+                    authorId: $id,
+                    authorName: (string) $newInput['fullName'],
+                    postNo: (string) ($_POST['post_no'] ?? ''),
+                    text: (string) ($_POST['comment'] ?? ''),
+                    parentAuthorId: $thread['parentAuthorId'] ?? null
+                );
 
                 $commentData = [
                     'comment_no' => (int) $result,
                     'post_no' => (string) ($_POST['post_no'] ?? ''),
+                    'parent_comment_no' => $thread['root'] ?? null,
                     'id' => $id,
                     'fullName' => (string) $newInput['fullName'],
                     'profileImg' => (string) $newInput['profileImg'],
                     'comment' => \checkInput((string) ($_POST['comment'] ?? '')),
+                    'gif_url' => $gifUrl,
                     'post_time' => (string) $newInput['post_time'],
                     'comment_time' => (string) $newInput['post_time'],
                     'date_created' => date('Y-m-d H:i:s'),
@@ -491,6 +544,59 @@ final class ProfilePage extends ProcessImg
   
             showError($th);
         }
+    }
+
+    /**
+     * Tell the replied-to author and any "@First Last" mentions. Best effort: a notification
+     * failure must never fail the comment that was already saved.
+     */
+    private function notifyReplyAndMentions(
+        string $authorId,
+        string $authorName,
+        string $postNo,
+        string $text,
+        ?string $parentAuthorId
+    ): void {
+        try {
+            $famCode = (string) (Post::postByNo($postNo)['postFamCode'] ?? '');
+            $members = $famCode !== '' ? \App\model\AllMembersData::AllMembersEmailByFamCode($famCode, $authorId) : [];
+            $mentioned = \App\services\CommentThreadService::extractMentionedIds($text, $members, $authorId);
+            \App\services\CommentThreadService::notify(
+                \Src\Db::connect2(),
+                $authorId,
+                $authorName,
+                $postNo,
+                $mentioned,
+                $parentAuthorId
+            );
+        } catch (\Throwable $e) {
+            error_log('[ProfilePage] reply/mention notify failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Comment GIFs come from the curated Giphy picker, so accept only https Giphy
+     * media hosts. Stricter than the post path: a comment renders in every family
+     * member's feed, so an arbitrary host would be a tracking-pixel vector.
+     */
+    private static function sanitizeCommentGifUrl(mixed $raw): ?string
+    {
+        if (!is_string($raw)) {
+            return null;
+        }
+        $url = trim($raw);
+        if ($url === '' || strlen($url) > 2048 || !filter_var($url, FILTER_VALIDATE_URL)) {
+            return null;
+        }
+        $parts = parse_url($url);
+        $host = strtolower((string) ($parts['host'] ?? ''));
+        if (strtolower((string) ($parts['scheme'] ?? '')) !== 'https'
+            || isset($parts['user']) || isset($parts['pass'])
+            || !preg_match('/^(media\d*\.)?giphy\.com$/', $host)
+        ) {
+            return null;
+        }
+        return $url;
     }
 
     /**

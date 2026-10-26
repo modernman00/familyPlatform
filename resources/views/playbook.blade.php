@@ -39,15 +39,15 @@
     }
     .step-pill:hover {
         background: #f1f5f9;
-        color: #00bfa5;
+        color: #a31621;
         border-color: #cbd5e1;
         transform: translateY(-1px);
     }
     .step-pill.active {
-        background: #00bfa5;
+        background: #a31621;
         color: #ffffff;
-        border-color: #00bfa5;
-        box-shadow: 0 4px 12px rgba(0, 191, 165, 0.25);
+        border-color: #a31621;
+        box-shadow: 0 4px 12px rgba(163, 22, 33, 0.25);
     }
 
     .state-node {
@@ -64,16 +64,16 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
     .state-node.active-node {
-        border-color: #00bfa5;
-        background: #f0fdf4;
-        color: #047857;
-        box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.2);
+        border-color: #a31621;
+        background: #fef2f2;
+        color: #a31621;
+        box-shadow: 0 0 0 3px rgba(163, 22, 33, 0.2);
     }
 
     .custom-range {
         height: 8px;
         border-radius: 9999px;
-        accent-color: #00bfa5;
+        accent-color: #a31621;
     }
 
     .touch-target-btn {
@@ -108,7 +108,7 @@
                 <a href="/register" class="btn btn-outline-secondary rounded-pill px-4 touch-target-btn fw-semibold">
                     <i class="fas fa-user-plus me-2"></i>Join Family Tree
                 </a>
-                <a href="/login" class="btn btn-primary rounded-pill px-4 touch-target-btn fw-bold" style="background-color: #00bfa5; border-color: #00bfa5;">
+                <a href="/login" class="btn btn-primary rounded-pill px-4 touch-target-btn fw-bold" style="background-color: #a31621; border-color: #a31621;">
                     <i class="fas fa-sign-in-alt me-2"></i>Family Portal
                 </a>
             </div>
@@ -121,7 +121,7 @@
                 <div class="card-white p-4 p-lg-5 h-100">
                     <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
                         <div class="d-flex align-items-center gap-3">
-                            <span class="badge rounded-circle text-white d-inline-flex align-items-center justify-content-center fs-6" style="width: 36px; height: 36px; background-color: #00bfa5;">Q1</span>
+                            <span class="badge rounded-circle text-white d-inline-flex align-items-center justify-content-center fs-6" style="width: 36px; height: 36px; background-color: #a31621;">Q1</span>
                             <div>
                                 <h2 class="h5 fw-bold text-slate-900 mb-0">End-to-End Family Lifecycle Explorer</h2>
                                 <small class="text-slate-500">Step through the 8 chronological phases from family creation to heritage preservation</small>
@@ -189,7 +189,7 @@
                         <button id="prevStageBtn" class="btn btn-outline-secondary rounded-pill px-4 touch-target-btn fw-semibold" onclick="prevStage()" disabled>
                             <i class="fas fa-arrow-left me-2"></i>Previous Stage
                         </button>
-                        <button id="nextStageBtn" class="btn btn-primary rounded-pill px-4 touch-target-btn fw-bold" style="background-color: #00bfa5; border-color: #00bfa5;" onclick="nextStage()">
+                        <button id="nextStageBtn" class="btn btn-primary rounded-pill px-4 touch-target-btn fw-bold" style="background-color: #a31621; border-color: #a31621;" onclick="nextStage()">
                             Next Stage<i class="fas fa-arrow-right ms-2"></i>
                         </button>
                     </div>
@@ -448,7 +448,7 @@
                                 <strong class="text-slate-900 small">3. AES-256 Memory Vault Encryption</strong>
                                 <span class="badge bg-success text-white rounded-pill px-2 py-1"><i class="fas fa-lock me-1"></i>PROTECTED</span>
                             </div>
-                            <p class="text-slate-500 small mb-0">Family photos, heritage recordings, and documents are encrypted at rest with dedicated per-file initialization vectors.</p>
+                            <p class="text-slate-500 small mb-0">Family photos, heritage recordings, and documents are encrypted at rest with dedicated per-file initialisation vectors.</p>
                         </div>
 
                         <div class="p-3 bg-slate-50 border border-slate-200 rounded-3">
@@ -530,7 +530,7 @@
             num: 4,
             title: "Stage 4: Family Chronicles, 16:9 Rich Social Cards, Private Hashtags & Smart Memory Pills",
             route: "/profilepage",
-            desc: "Relatives share multi-line celebration stories, milestone videos, and external event invites (such as PartyPlatform flyers) with automatic 16:9 rich OpenGraph social graphics unfurling, live composer previewing, self-healing URL reconstruction, private multi-tenant hashtags, smart memory pills, weekly Sunday Family Trivia, time capsules, and Then & Now before/after photo comparisons (drag-to-compare slider, side-by-side view, and a one-tap \"Add your Then & Now\" reply loop, a ghost-overlay camera to re-create the old pose, birthday and anniversary prompts, EXIF year suggestions, a Then & Now timeline on profiles).",
+            desc: "Relatives share multi-line celebration stories, milestone videos, and external event invites (such as PartyPlatform flyers) with automatic 16:9 rich OpenGraph social graphics unfurling, live composer previewing, self-healing URL reconstruction, private multi-tenant hashtags, smart memory pills, weekly Sunday Family Trivia, time capsules, and Then & Now before/after photo comparisons (drag-to-compare slider, side-by-side view, and a one-tap \"Add your Then & Now\" reply loop, a ghost-overlay camera to re-create the old pose, birthday and anniversary prompts, EXIF year suggestions, a Then & Now timeline on profiles), a GIF button beside the emoji button in every comment box (same curated family GIF catalog as the composer; Giphy-only, stored in comment.gif_url), a Reply button on every comment (one level of threading: a reply to a reply hangs under the top-level comment, stored in comment.parent_comment_no; the person replied to is notified), @First Last mentions with composer autocomplete and highlighted chips, progressive disclosure to collapse long comment threads, 1-tap WhatsApp sharing for Flashback memories, and a Share on WhatsApp button on every family announcement. There is deliberately no private messaging: families already have WhatsApp groups, so the platform shares to them instead.",
             controller: "Family Storyteller & Memory Contributor",
             state: "TREE_CONNECTED \u2192 MOMENT_PUBLISHED",
             db: "Family Feed, Then & Now Comparisons (post_comparisons), OpenGraph 16:9 Preview Cache, Family Hashtags, Memory Links & Reels Sanctuary",

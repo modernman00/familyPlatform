@@ -29,12 +29,41 @@ final class Organogram extends SingleCustomerData
             }
 
             $data = BaseController::findMemberById($idStr);
-            $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
+            $primaryFamCode = strtoupper(trim((string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''))));
+            $familyCode = $primaryFamCode;
 
             if (empty($familyCode)) {
                 http_response_code(403);
                 echo json_encode(['error' => 'Invalid family context']);
                 exit;
+            }
+
+            $isSelf = (string)$idStr === (string)($_SESSION['id'] ?? '');
+            $birthFamily = ['state' => 'none', 'code' => '', 'origin' => ''];
+            try {
+                $birthFamily = (new \App\services\BirthFamilyCodeService(Db::connect2()))->status($idStr);
+            } catch (\Throwable) {
+                $birthFamily = ['state' => 'none', 'code' => '', 'origin' => ''];
+            }
+            $maternalFamCode = strtoupper(trim($birthFamily['code']));
+            $hasMaternalCode = $birthFamily['state'] === 'active'
+                && $maternalFamCode !== ''
+                && $maternalFamCode !== $primaryFamCode;
+
+            $requestedLineage = strtolower(trim((string)($_GET['lineage'] ?? '')));
+            $requestedCode = strtoupper(trim(str_replace('#', '', (string)($_GET['family_code'] ?? ''))));
+            $activeLineageScope = 'primary';
+
+            if ($hasMaternalCode && ($requestedLineage === 'birth' || $requestedLineage === 'maternal' || $requestedCode === $maternalFamCode)) {
+                $familyCode = $maternalFamCode;
+                $activeLineageScope = 'maternal';
+            }
+
+            $maritalSurname = trim((string)($data['lastName'] ?? ''));
+            $maidenSurname = trim((string)($data['maiden_name'] ?? ''));
+            if ($maidenSurname === '' && $maternalFamCode !== '') {
+                $cleanBirth = preg_replace('/[0-9]+/', '', $maternalFamCode);
+                $maidenSurname = !empty($cleanBirth) ? ucfirst(strtolower($cleanBirth)) : $maritalSurname;
             }
 
             // Access control: viewable by members of that family OR approved connected kin.
@@ -45,7 +74,6 @@ final class Organogram extends SingleCustomerData
             }
 
             $isReadOnly = !BaseController::sessionSharesFamily($familyCode);
-            $isSelf = (string)$idStr === (string)($_SESSION['id'] ?? '');
 
             // Ensure graph tables are initialized and synced with legacy records
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
@@ -55,6 +83,11 @@ final class Organogram extends SingleCustomerData
             // Fetch 6-generation graph data
             $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
             $graphData['isReadOnly'] = $isReadOnly;
+            $graphData['activeLineageScope'] = $activeLineageScope;
+            $graphData['primaryFamCode'] = $primaryFamCode;
+            $graphData['maternalFamCode'] = $hasMaternalCode ? $maternalFamCode : '';
+            $graphData['maritalSurname'] = $maritalSurname;
+            $graphData['maidenSurname'] = $maidenSurname;
 
             // Backwards-compatible orgData for existing templates
             $spouse = $this->fetchRelationsData($idStr, 'otherFamily', 'spouse');
@@ -78,7 +111,22 @@ final class Organogram extends SingleCustomerData
 
             $nodeAnalysis = $this->analyzeMissingNodes($orgData, $graphData);
 
-            view('member/organogram', compact('orgData', 'data', 'graphData', 'graphJson', 'nodeAnalysis', 'isReadOnly', 'isSelf'));
+            view('member/organogram', compact(
+                'orgData',
+                'data',
+                'graphData',
+                'graphJson',
+                'nodeAnalysis',
+                'isReadOnly',
+                'isSelf',
+                'birthFamily',
+                'hasMaternalCode',
+                'activeLineageScope',
+                'primaryFamCode',
+                'maternalFamCode',
+                'maritalSurname',
+                'maidenSurname'
+            ));
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -101,7 +149,36 @@ final class Organogram extends SingleCustomerData
             }
 
             $data = BaseController::findMemberById($idStr);
-            $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
+            $primaryFamCode = strtoupper(trim((string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''))));
+            $familyCode = $primaryFamCode;
+
+            $isSelf = (string)$idStr === (string)($_SESSION['id'] ?? '');
+            $birthFamily = ['state' => 'none', 'code' => '', 'origin' => ''];
+            try {
+                $birthFamily = (new \App\services\BirthFamilyCodeService(Db::connect2()))->status($idStr);
+            } catch (\Throwable) {
+                $birthFamily = ['state' => 'none', 'code' => '', 'origin' => ''];
+            }
+            $maternalFamCode = strtoupper(trim($birthFamily['code']));
+            $hasMaternalCode = $birthFamily['state'] === 'active'
+                && $maternalFamCode !== ''
+                && $maternalFamCode !== $primaryFamCode;
+
+            $requestedLineage = strtolower(trim((string)($_GET['lineage'] ?? '')));
+            $requestedCode = strtoupper(trim(str_replace('#', '', (string)($_GET['family_code'] ?? ''))));
+            $activeLineageScope = 'primary';
+
+            if ($hasMaternalCode && ($requestedLineage === 'birth' || $requestedLineage === 'maternal' || $requestedCode === $maternalFamCode)) {
+                $familyCode = $maternalFamCode;
+                $activeLineageScope = 'maternal';
+            }
+
+            $maritalSurname = trim((string)($data['lastName'] ?? ''));
+            $maidenSurname = trim((string)($data['maiden_name'] ?? ''));
+            if ($maidenSurname === '' && $maternalFamCode !== '') {
+                $cleanBirth = preg_replace('/[0-9]+/', '', $maternalFamCode);
+                $maidenSurname = !empty($cleanBirth) ? ucfirst(strtolower($cleanBirth)) : $maritalSurname;
+            }
 
             // Access control: viewable by members of that family OR approved connected kin.
             if (!BaseController::sessionCanViewMember($idStr, $familyCode)) {
@@ -109,13 +186,17 @@ final class Organogram extends SingleCustomerData
             }
 
             $isReadOnly = !BaseController::sessionSharesFamily($familyCode);
-            $isSelf = (string)$idStr === (string)($_SESSION['id'] ?? '');
 
             // Ensure graph is initialized & synced
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
             $this->repairOrphanedFamilyGraph($familyCode, $idStr);
             $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
             $graphData['isReadOnly'] = $isReadOnly;
+            $graphData['activeLineageScope'] = $activeLineageScope;
+            $graphData['primaryFamCode'] = $primaryFamCode;
+            $graphData['maternalFamCode'] = $hasMaternalCode ? $maternalFamCode : '';
+            $graphData['maritalSurname'] = $maritalSurname;
+            $graphData['maidenSurname'] = $maidenSurname;
 
             // Backwards-compatible orgData
             $spouse = $this->fetchRelationsData($idStr, 'otherFamily', 'spouse');
@@ -227,7 +308,25 @@ final class Organogram extends SingleCustomerData
                 }
             }
 
-            view('member/familyStudio', compact('data', 'graphData', 'orgData', 'generations', 'stats', 'graphJson', 'rootNodeId', 'isReadOnly', 'rootUnions', 'pendingRelRequests'));
+            view('member/familyStudio', compact(
+                'data',
+                'graphData',
+                'orgData',
+                'generations',
+                'stats',
+                'graphJson',
+                'rootNodeId',
+                'isReadOnly',
+                'rootUnions',
+                'pendingRelRequests',
+                'birthFamily',
+                'hasMaternalCode',
+                'activeLineageScope',
+                'primaryFamCode',
+                'maternalFamCode',
+                'maritalSurname',
+                'maidenSurname'
+            ));
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -244,7 +343,23 @@ final class Organogram extends SingleCustomerData
             $idStr = is_string($rawId) ? $rawId : (string)($_SESSION['id'] ?? '');
 
             $data = BaseController::findMemberById($idStr);
-            $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
+            $primaryFamCode = strtoupper(trim((string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''))));
+            $familyCode = $primaryFamCode;
+
+            try {
+                $birthFamily = (new \App\services\BirthFamilyCodeService(Db::connect2()))->status($idStr);
+                $maternalFamCode = strtoupper(trim($birthFamily['code']));
+                $hasMaternalCode = $birthFamily['state'] === 'active'
+                    && $maternalFamCode !== ''
+                    && $maternalFamCode !== $primaryFamCode;
+                $requestedLineage = strtolower(trim((string)($_GET['lineage'] ?? '')));
+                $requestedCode = strtoupper(trim(str_replace('#', '', (string)($_GET['family_code'] ?? ''))));
+                if ($hasMaternalCode && ($requestedLineage === 'birth' || $requestedLineage === 'maternal' || $requestedCode === $maternalFamCode)) {
+                    $familyCode = $maternalFamCode;
+                }
+            } catch (\Throwable) {
+                // Keep primary family code
+            }
 
             if (empty($familyCode)) {
                 http_response_code(403);
@@ -540,9 +655,12 @@ final class Organogram extends SingleCustomerData
             VALUES (?, ?, 'biological')
         ");
 
-        // 2. Sync Spouse / Partner for this user
-        $spouseName = trim((string)($memberData['spouse_name'] ?? ''));
-        if (empty($spouseName)) {
+        $primaryFamCode = strtoupper(trim((string)($memberData['famCode'] ?? '')));
+        $isPrimaryTree = ($primaryFamCode === '' || strtoupper(trim($familyCode)) === $primaryFamCode);
+
+        // 2. Sync Spouse / Partner for this user (marital / primary household tree only)
+        $spouseName = $isPrimaryTree ? trim((string)($memberData['spouse_name'] ?? '')) : '';
+        if ($isPrimaryTree && empty($spouseName)) {
             $legacyOther = SelectFn::selectAllRowsById('otherFamily', 'id', $userId);
             if (!empty($legacyOther) && !empty($legacyOther[0]['spouse_name'])) {
                 $spouseName = trim((string)$legacyOther[0]['spouse_name']);
@@ -560,7 +678,7 @@ final class Organogram extends SingleCustomerData
         $existingUnion = $findCurrentUnion->fetch(\PDO::FETCH_ASSOC);
         $currentUnionId = $existingUnion ? (int)$existingUnion['id'] : null;
 
-        if (!empty($spouseName) && !$existingUnion) {
+        if ($isPrimaryTree && !empty($spouseName) && !$existingUnion) {
             $spouseGender = ($userGender === 'Male') ? 'Female' : 'Male';
             $spouseSex = ($spouseGender === 'Male') ? 'avatarM.png' : 'avatarF.png';
 
@@ -596,8 +714,8 @@ final class Organogram extends SingleCustomerData
             $currentUnionId = (int)$db->lastInsertId();
         }
 
-        // 3. Sync Children for this user (Generation Level + 1)
-        $children = SelectFn::selectAllRowsById('children', 'id', $userId);
+        // 3. Sync Children for this user (Generation Level + 1) — marital / primary household tree only
+        $children = $isPrimaryTree ? SelectFn::selectAllRowsById('children', 'id', $userId) : [];
         if (!empty($children)) {
             // If user has children but no union, create a personal/co-parent union
             if (!$currentUnionId) {

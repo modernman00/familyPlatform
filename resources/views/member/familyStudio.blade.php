@@ -9,14 +9,14 @@
             --stitch-surface: #ffffff;
             --stitch-surface-container: #f8fafc;
             --stitch-surface-container-high: #f1f5f9;
-            --stitch-primary: #4f46e5;
-            --stitch-primary-container: #eef2ff;
-            --stitch-on-primary-container: #3730a3;
+            --stitch-primary: #a31621;
+            --stitch-primary-container: #fbefef;
+            --stitch-on-primary-container: #8a1019;
             --stitch-outline: #e2e8f0;
             --stitch-outline-variant: #cbd5e1;
             --stitch-shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
             --stitch-shadow-md: 0 4px 16px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
-            --stitch-shadow-lg: 0 16px 32px -4px rgba(79, 70, 229, 0.12), 0 6px 12px -4px rgba(79, 70, 229, 0.06);
+            --stitch-shadow-lg: 0 16px 32px -4px rgba(163,22,33, 0.12), 0 6px 12px -4px rgba(163,22,33, 0.06);
             --stitch-radius-lg: 20px;
             --stitch-radius-md: 14px;
             --stitch-radius-pill: 9999px;
@@ -28,12 +28,12 @@
 
         /* Hero Header with Mesh Gradient & Glassmorphism */
         .studio-header {
-            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 80%, #6366f1 100%);
+            background: linear-gradient(135deg, #2a0a0d 0%, #2a0a0d 40%, #8a1019 80%, #b8202c 100%);
             color: #ffffff;
             border-radius: var(--stitch-radius-lg);
             padding: 3rem 2.25rem;
             margin-bottom: 2rem;
-            box-shadow: 0 20px 40px -10px rgba(49, 46, 129, 0.35);
+            box-shadow: 0 20px 40px -10px rgba(42,10,13, 0.35);
             position: relative;
             overflow: hidden;
         }
@@ -44,7 +44,7 @@
             right: -20%;
             width: 500px;
             height: 500px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(99, 102, 241, 0.1) 50%, transparent 70%);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(184,32,44, 0.1) 50%, transparent 70%);
             border-radius: 50%;
             pointer-events: none;
         }
@@ -55,7 +55,7 @@
             left: -10%;
             width: 350px;
             height: 350px;
-            background: radial-gradient(circle, rgba(238, 242, 255, 0.12) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(251,239,239, 0.12) 0%, transparent 70%);
             border-radius: 50%;
             pointer-events: none;
         }
@@ -145,7 +145,7 @@
         .filter-pill-btn.active {
             background: var(--stitch-primary);
             color: #ffffff;
-            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+            box-shadow: 0 2px 8px rgba(163,22,33, 0.3);
         }
         .search-input-stitch {
             border: 1px solid var(--stitch-outline);
@@ -160,7 +160,7 @@
             outline: none;
             border-color: var(--stitch-primary);
             background: #ffffff;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+            box-shadow: 0 0 0 3px rgba(163,22,33, 0.12);
             width: 260px;
         }
 
@@ -184,9 +184,9 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
-        .badge-gen-minus1 { background: #dbeafe; color: #1e40af; }
+        .badge-gen-minus1 { background: #f5dede; color: #8a1019; }
         .badge-gen-0 { background: #dcfce7; color: #15803d; }
-        .badge-gen-plus1 { background: #e0f2fe; color: #0369a1; }
+        .badge-gen-plus1 { background: #f5dede; color: #8a1019; }
 
         /* Google Stitch Relative Card */
         .relative-card {
@@ -204,23 +204,23 @@
         }
         .relative-card:hover {
             transform: translateY(-4px);
-            border-color: #c7d2fe;
+            border-color: #ecc7c9;
             box-shadow: var(--stitch-shadow-lg);
         }
         .relative-card.root-card {
-            border: 2px solid #818cf8;
+            border: 2px solid #ef6b73;
             background: linear-gradient(180deg, #ffffff 0%, #fcfdff 100%);
         }
 
         /* Real-Time Update Highlight Animation */
         @keyframes pulseHighlight {
-            0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); transform: scale(1.02); }
-            70% { box-shadow: 0 0 0 14px rgba(79, 70, 229, 0); transform: scale(1.01); }
-            100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); transform: scale(1); }
+            0% { box-shadow: 0 0 0 0 rgba(163,22,33, 0.7); transform: scale(1.02); }
+            70% { box-shadow: 0 0 0 14px rgba(163,22,33, 0); transform: scale(1.01); }
+            100% { box-shadow: 0 0 0 0 rgba(163,22,33, 0); transform: scale(1); }
         }
         .flash-updated {
             animation: pulseHighlight 1.3s cubic-bezier(0.16, 1, 0.3, 1);
-            border-color: #4f46e5 !important;
+            border-color: #a31621 !important;
             background: #fdfdff !important;
         }
 
@@ -263,11 +263,11 @@
             letter-spacing: 0.03em;
             margin-bottom: 6px;
         }
-        .role-chip-parent { background: #eff6ff; color: #1d4ed8; }
+        .role-chip-parent { background: #fdf5f5; color: #8a1019; }
         .role-chip-partner { background: #fff1f2; color: #be123c; }
         .role-chip-child { background: #ecfdf5; color: #047857; }
         .role-chip-sibling { background: #fffbeb; color: #b45309; }
-        .role-chip-root { background: #eef2ff; color: #4338ca; }
+        .role-chip-root { background: #fbefef; color: #8a1019; }
 
         .relative-name {
             font-size: 1.05rem;
@@ -325,8 +325,8 @@
             text-decoration: none;
         }
         .btn-tonal-action:hover {
-            background: #e0e7ff;
-            color: #3730a3;
+            background: #f5dede;
+            color: #8a1019;
             transform: translateY(-1px);
         }
 
@@ -397,12 +397,32 @@
                 <div class="studio-title-badge mb-3">
                     <i class="bi bi-stars text-warning"></i> Flagship Heritage Studio
                 </div>
-                <h1 class="display-6 fw-bold text-white mb-2" style="letter-spacing: -0.02em;">Family Lineage Studio</h1>
-                <p class="text-white-50 mb-4" style="font-size: 1.05rem; max-width: 520px; line-height: 1.5;">
-                    Curate your family dynasty, document generational stories, and manage relatives with complete ease.
+                <h1 class="display-6 fw-bold text-white mb-2" style="letter-spacing: -0.02em;">
+                    @if(($activeLineageScope ?? 'primary') === 'maternal' && !empty($maidenSurname))
+                        {{ $maidenSurname }} Birth Family Studio
+                    @else
+                        Family Lineage Studio
+                    @endif
+                </h1>
+                <p class="text-white-50 mb-3" style="font-size: 1.05rem; max-width: 520px; line-height: 1.5;">
+                    @if(($activeLineageScope ?? 'primary') === 'maternal' && !empty($maternalFamCode))
+                        Curating your Birth / Maiden Family lineage (<strong>#{{ $maternalFamCode }}</strong>). Manage your parents, birth siblings, and heritage with complete ease.
+                    @else
+                        Curate your family dynasty, document generational stories, and manage relatives with complete ease.
+                    @endif
                 </p>
+                @if(!empty($hasMaternalCode) && !empty($maternalFamCode))
+                <div class="d-inline-flex flex-wrap align-items-center gap-2 mb-3 p-1 rounded-pill" style="background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(255, 255, 255, 0.25);">
+                    <a href="?lineage=primary" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') !== 'maternal' ? 'btn-warning text-dark shadow-sm' : 'text-white' }}" style="min-height: 38px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                        <i class="bi bi-house-heart-fill"></i> Marital / Household Tree (#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})
+                    </a>
+                    <a href="?lineage=birth" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') === 'maternal' ? 'btn-warning text-dark shadow-sm' : 'text-white' }}" style="min-height: 38px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                        <i class="bi bi-diagram-3-fill"></i> Birth / Maiden Family (#{{ $maternalFamCode }})
+                    </a>
+                </div>
+                @endif
                 <div class="d-flex flex-wrap gap-2">
-                    <a href="/organogram?mode=canvas" class="btn btn-light fw-bold text-primary px-3 px-sm-4 py-2" style="border-radius: 12px; min-height: 44px; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                    <a href="/organogram?mode=canvas{{ ($activeLineageScope ?? 'primary') === 'maternal' ? '&lineage=birth' : '' }}" class="btn btn-light fw-bold text-primary px-3 px-sm-4 py-2" style="border-radius: 12px; min-height: 44px; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                         <i class="bi bi-diagram-3-fill me-2"></i>View Interactive Tree
                     </a>
                     <button type="button" class="btn btn-outline-light fw-bold px-3 px-sm-4 py-2" onclick="openStudioAddModal()" style="border-radius: 12px; min-height: 44px; font-size: 0.9rem;">
@@ -686,8 +706,8 @@
                     <div>
                         <div class="d-flex align-items-start gap-3">
                             <div class="relative-avatar-wrapper">
-                                <img src="{{ $data['img'] ?? '/resources/images/profile/avatarM.png' }}" alt="Self" class="relative-avatar" style="border-color: #c7d2fe;">
-                                <span class="avatar-online-dot" style="background: #6366f1;"></span>
+                                <img src="{{ $data['img'] ?? '/resources/images/profile/avatarM.png' }}" alt="Self" class="relative-avatar" style="border-color: #ecc7c9;">
+                                <span class="avatar-online-dot" style="background: #b8202c;"></span>
                             </div>
                             <div class="flex-grow-1 overflow-hidden">
                                 <span class="role-chip role-chip-root">
@@ -856,7 +876,7 @@
                 </div>
             @empty
                 <div class="col-12 text-center py-5 bg-white rounded-4 border">
-                    <div class="add-icon-bubble mx-auto mb-3" style="width: 56px; height: 56px; font-size: 1.6rem; background: #e0f2fe; color: #0284c7;">
+                    <div class="add-icon-bubble mx-auto mb-3" style="width: 56px; height: 56px; font-size: 1.6rem; background: #f5dede; color: #a31621;">
                         <i class="bi bi-emoji-smile"></i>
                     </div>
                     <h5 class="fw-bold text-dark">No children documented yet</h5>
@@ -894,6 +914,37 @@
             </div>
             <div class="modal-body p-4" style="overflow-y: auto;">
                 <div id="studioRelativeError" class="alert alert-danger d-none" style="border-radius: var(--stitch-radius-md);"></div>
+
+                @if(!empty($hasMaternalCode) && !empty($maternalFamCode))
+                <!-- Lineage Family Code Selector (Marital / Household vs. Birth / Maiden Family) -->
+                <div id="studioLineageScopeBanner" class="mb-3 p-3 rounded-3" style="background:#f8fafc;border:1px solid #e2e8f0;">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-1 mb-2">
+                        <div class="fw-bold small text-dark">
+                            <i class="bi bi-signpost-split me-1 text-primary"></i>Which family tree does this relative belong to?
+                        </div>
+                        <span class="badge bg-primary rounded-pill" id="studioActiveCodeBadge" style="font-size: 0.72rem;">
+                            #{{ ($activeLineageScope ?? 'primary') === 'maternal' ? $maternalFamCode : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}
+                        </span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2" role="radiogroup" aria-label="Target family tree">
+                        <label class="studio-lineage-option d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 border bg-white" style="cursor:pointer;min-height:44px;font-size:.82rem;white-space:nowrap;flex-shrink:0;">
+                            <input type="radio" name="studio_lineage_scope_radio" value="primary" data-code="{{ $primaryFamCode ?? ($data['famCode'] ?? '') }}" data-surname="{{ $maritalSurname ?? ($data['lastName'] ?? '') }}" {{ ($activeLineageScope ?? 'primary') !== 'maternal' ? 'checked' : '' }} onchange="window.syncStudioLineageScope && window.syncStudioLineageScope(this.value)">
+                            <span><strong>Marital / Household Tree</strong> <span class="text-muted">(#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})</span></span>
+                        </label>
+                        <label class="studio-lineage-option d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 border bg-white" style="cursor:pointer;min-height:44px;font-size:.82rem;white-space:nowrap;flex-shrink:0;">
+                            <input type="radio" name="studio_lineage_scope_radio" value="maternal" data-code="{{ $maternalFamCode }}" data-surname="{{ $maidenSurname ?? '' }}" {{ ($activeLineageScope ?? 'primary') === 'maternal' ? 'checked' : '' }} onchange="window.syncStudioLineageScope && window.syncStudioLineageScope(this.value)">
+                            <span><strong>My Birth / Maiden Family</strong> <span class="text-muted">(#{{ $maternalFamCode }})</span></span>
+                        </label>
+                    </div>
+                    <div class="text-muted mt-2" id="studioLineageScopeHelp" style="font-size:.76rem;">
+                        @if(($activeLineageScope ?? 'primary') === 'maternal')
+                            Adding to your <strong>Birth / Maiden Family (#{{ $maternalFamCode }})</strong> so your parents and birth siblings connect directly to your birth lineage.
+                        @else
+                            Adding to your <strong>Marital / Household Tree (#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})</strong>. Switch to Birth / Maiden Family when adding your own parents or birth siblings.
+                        @endif
+                    </div>
+                </div>
+                @endif
 
                 <!-- Step 1: Relationship Type Selection -->
                 <div id="studioStep1">
@@ -934,7 +985,7 @@
                         </button>
                         <button type="button" class="btn btn-outline-info text-start p-3 rounded-3" onclick="selectStudioRelativeType('parents')" style="border-color: #e2e8f0;">
                             <div class="d-flex align-items-center">
-                                <div class="add-icon-bubble mb-0 me-3" style="width: 42px; height: 42px; background: #eff6ff; color: #2563eb;">
+                                <div class="add-icon-bubble mb-0 me-3" style="width: 42px; height: 42px; background: #fdf5f5; color: #a31621;">
                                     <i class="bi bi-diagram-3-fill"></i>
                                 </div>
                                 <div>
@@ -951,6 +1002,8 @@
                     <form id="studioPartnerForm">
     @include('csrf')
                         <input type="hidden" name="base_node_id" value="{{ $rootNodeId ?? 1 }}">
+                        <input type="hidden" name="lineage_scope" class="studio-lineage-scope-input" value="{{ $activeLineageScope ?? 'primary' }}">
+                        <input type="hidden" name="lineage_code" class="studio-lineage-code-input" value="{{ ($activeLineageScope ?? 'primary') === 'maternal' ? ($maternalFamCode ?? '') : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}">
                         <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-heart-fill me-2 text-danger"></i>Partner / Spouse Details</h6>
                         <div class="mb-3">
                             <label class="form-label small fw-semibold">First Name *</label>
@@ -999,6 +1052,8 @@
                     <form id="studioChildForm">
     @include('csrf')
                         <input type="hidden" name="base_node_id" value="{{ $rootNodeId ?? 1 }}">
+                        <input type="hidden" name="lineage_scope" class="studio-lineage-scope-input" value="{{ $activeLineageScope ?? 'primary' }}">
+                        <input type="hidden" name="lineage_code" class="studio-lineage-code-input" value="{{ ($activeLineageScope ?? 'primary') === 'maternal' ? ($maternalFamCode ?? '') : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}">
                         <h6 class="fw-bold mb-3 text-success"><i class="bi bi-emoji-smile-fill me-2"></i>Child Details</h6>
                         <div class="mb-3">
                             <label class="form-label small fw-semibold">Who is the other parent? *</label>
@@ -1058,7 +1113,9 @@
                     <form id="studioSiblingForm">
     @include('csrf')
                         <input type="hidden" name="base_node_id" value="{{ $rootNodeId ?? 1 }}">
-                        <h6 class="fw-bold mb-3 text-warning"><i class="bi bi-people-fill me-2"></i>Sibling Details</h6>
+                        <input type="hidden" name="lineage_scope" class="studio-lineage-scope-input" value="{{ $activeLineageScope ?? 'primary' }}">
+                        <input type="hidden" name="lineage_code" class="studio-lineage-code-input" value="{{ ($activeLineageScope ?? 'primary') === 'maternal' ? ($maternalFamCode ?? '') : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}">
+                        <h6 class="fw-bold mb-3 text-warning"><i class="bi bi-people-fill me-2"></i><span id="studioSiblingHeading">Sibling Details</span></h6>
                         <div class="mb-3">
                             <label class="form-label small fw-semibold">First Name *</label>
                             <input type="text" name="first_name" class="form-control" placeholder="Sibling's first name" required>
@@ -1108,6 +1165,8 @@
     @include('csrf')
                         <input type="hidden" name="base_node_id" value="{{ $rootNodeId ?? 1 }}">
                         <input type="hidden" name="rel_mode" id="studioParentsMode" value="parents">
+                        <input type="hidden" name="lineage_scope" class="studio-lineage-scope-input" value="{{ $activeLineageScope ?? 'primary' }}">
+                        <input type="hidden" name="lineage_code" class="studio-lineage-code-input" value="{{ ($activeLineageScope ?? 'primary') === 'maternal' ? ($maternalFamCode ?? '') : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}">
                         <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-people-fill me-2"></i><span id="studioParentsHeading">Parents Details</span></h6>
                         <div class="mb-3 d-none" id="studioGrandSideWrap">
                             <label class="form-label small fw-semibold">Whose parents are these?</label>
@@ -1261,6 +1320,69 @@
         myModal.show();
     }
 
+    const studioPrimaryCode = '{{ $primaryFamCode ?? ($data['famCode'] ?? '') }}';
+    const studioBirthCode = '{{ !empty($hasMaternalCode) ? ($maternalFamCode ?? '') : '' }}';
+    const studioHasBirthFamily = {{ !empty($hasMaternalCode) ? 'true' : 'false' }};
+    const studioActiveLineageScope = '{{ $activeLineageScope ?? 'primary' }}';
+    const studioMaritalSurname = '{{ $maritalSurname ?? ($data['lastName'] ?? '') }}';
+    const studioMaidenSurname = '{{ $maidenSurname ?? '' }}';
+
+    window.syncStudioLineageScope = function(scopeVal) {
+        const isMaternal = (scopeVal === 'maternal');
+        const activeCode = (isMaternal && studioBirthCode) ? studioBirthCode : studioPrimaryCode;
+        const activeSurname = isMaternal
+            ? (studioMaidenSurname || studioBirthCode || '')
+            : (studioMaritalSurname || studioPrimaryCode || '');
+
+        document.querySelectorAll('input[name="studio_lineage_scope_radio"]').forEach(r => {
+            r.checked = (r.value === (isMaternal ? 'maternal' : 'primary'));
+        });
+        document.querySelectorAll('.studio-lineage-scope-input').forEach(inp => {
+            inp.value = isMaternal ? 'maternal' : 'primary';
+        });
+        document.querySelectorAll('.studio-lineage-code-input').forEach(inp => {
+            inp.value = activeCode;
+        });
+
+        const badgeEl = document.getElementById('studioActiveCodeBadge');
+        if (badgeEl && activeCode) {
+            badgeEl.textContent = '#' + activeCode;
+        }
+
+        const helpEl = document.getElementById('studioLineageScopeHelp');
+        if (helpEl) {
+            helpEl.innerHTML = isMaternal
+                ? `Adding to your <strong>Birth / Maiden Family (#${activeCode})</strong> so your parents and birth siblings connect directly to your ${activeSurname ? activeSurname + ' ' : ''}birth lineage.`
+                : `Adding to your <strong>Marital / Household Tree (#${activeCode})</strong>. Switch to Birth / Maiden Family when adding your own parents or birth siblings.`;
+        }
+
+        // Update surname placeholders & button labels to match Marital vs Birth family context
+        const sibLast = document.querySelector('#studioSiblingForm input[name="last_name"]');
+        const fatherLast = document.querySelector('#studioParentsForm input[name="father_last_name"]');
+        const motherLast = document.querySelector('#studioParentsForm input[name="mother_last_name"]');
+        if (activeSurname) {
+            if (sibLast) sibLast.placeholder = activeSurname;
+            if (fatherLast) fatherLast.placeholder = activeSurname;
+            if (motherLast) motherLast.placeholder = activeSurname;
+        }
+
+        const sibBtn = document.getElementById('studioSaveSiblingBtn');
+        if (sibBtn && activeCode) {
+            sibBtn.textContent = isMaternal
+                ? `Save Sibling to Birth Family (#${activeCode})`
+                : `Save Sibling to Marital Tree (#${activeCode})`;
+        }
+
+        const isGrand = (document.getElementById('studioParentsMode')?.value === 'grandparents');
+        const parentsBtn = document.getElementById('studioSaveParentsBtn');
+        if (parentsBtn && activeCode) {
+            const noun = isGrand ? 'Grandparents' : 'Parents';
+            parentsBtn.textContent = isMaternal
+                ? `Save ${noun} to Birth Family (#${activeCode})`
+                : `Save ${noun} to Marital Tree (#${activeCode})`;
+        }
+    };
+
     function selectStudioRelativeType(type) {
         document.getElementById('studioStep1').classList.add('d-none');
         document.getElementById('studioStep2-partner').classList.add('d-none');
@@ -1268,6 +1390,15 @@
         document.getElementById('studioStep2-sibling').classList.add('d-none');
         document.getElementById('studioStep2-parents').classList.add('d-none');
         document.getElementById('studioRelativeError').classList.add('d-none');
+
+        // Auto-select Birth / Maiden Family when adding Parents or Siblings if the user holds an active birth family code
+        if (studioHasBirthFamily && studioBirthCode) {
+            if (type === 'parents' || type === 'sibling' || type === 'grandparents') {
+                window.syncStudioLineageScope('maternal');
+            } else {
+                window.syncStudioLineageScope(studioActiveLineageScope === 'maternal' ? 'maternal' : 'primary');
+            }
+        }
 
         if (type === 'partner') {
             document.getElementById('studioStep2-partner').classList.remove('d-none');
@@ -1282,7 +1413,12 @@
             document.getElementById('studioParentsMode').value = type;
             document.getElementById('studioParentsHeading').textContent = isGrand ? 'Grandparents Details' : 'Parents Details';
             document.getElementById('studioGrandSideWrap').classList.toggle('d-none', !isGrand);
-            document.getElementById('studioSaveParentsBtn').textContent = isGrand ? 'Save Grandparents' : 'Save Parents';
+            const isMaternal = document.querySelector('input[name="studio_lineage_scope_radio"]:checked')?.value === 'maternal';
+            const activeCode = isMaternal ? studioBirthCode : studioPrimaryCode;
+            const noun = isGrand ? 'Grandparents' : 'Parents';
+            document.getElementById('studioSaveParentsBtn').textContent = (studioHasBirthFamily && activeCode)
+                ? (isMaternal ? `Save ${noun} to Birth Family (#${activeCode})` : `Save ${noun} to Marital Tree (#${activeCode})`)
+                : (isGrand ? 'Save Grandparents' : 'Save Parents');
             form.querySelectorAll('label').forEach(l => {
                 l.textContent = l.textContent.replace(/^(Grand)?(Father|Mother)/, (m, g, r) => isGrand ? 'Grand' + r.toLowerCase() : r);
             });

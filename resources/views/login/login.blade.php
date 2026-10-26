@@ -98,7 +98,7 @@
 
     .styleform_form .form-control:focus {
         border-color: var(--brand-primary);
-        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+        box-shadow: 0 0 0 3px rgba(184,32,44, 0.15);
     }
 
     .stitch-options {
@@ -139,7 +139,7 @@
 
     .stitch-submit {
         width: 100%;
-        background: linear-gradient(135deg, var(--brand-primary, #00bfa5) 0%, var(--brand-primary-dark, #00897b) 100%);
+        background: linear-gradient(135deg, var(--brand-primary, #a31621) 0%, var(--brand-primary-dark, #8a1019) 100%);
         color: white;
         border: none;
         border-radius: 12px;
@@ -154,15 +154,15 @@
         justify-content: center;
         align-items: center;
         gap: 0.5rem;
-        box-shadow: 0 2px 8px rgba(0, 191, 165, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        box-shadow: 0 2px 8px rgba(163,22,33, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
     }
 
     .stitch-submit:hover {
-        background: linear-gradient(135deg, var(--brand-primary-light, #33c9b2) 0%, var(--brand-primary, #00bfa5) 100%);
+        background: linear-gradient(135deg, var(--brand-primary-light, #b8202c) 0%, var(--brand-primary, #a31621) 100%);
         transform: translateY(-1px);
-        box-shadow: 0 4px 14px rgba(0, 191, 165, 0.32);
+        box-shadow: 0 4px 14px rgba(163,22,33, 0.32);
     }
 
     .stitch-submit:active {
@@ -233,8 +233,8 @@
         box-shadow: 0 2px 6px rgba(24, 119, 242, 0.22);
     }
     .stitch-social-btn.facebook:hover {
-        background-color: #166FE5;
-        border-color: #166FE5;
+        background-color: #a31621;
+        border-color: #a31621;
         box-shadow: 0 4px 10px rgba(24, 119, 242, 0.32);
         color: #ffffff;
         transform: translateY(-1px);
@@ -305,7 +305,7 @@
 
         <button type="button" id="btn-passkey-login"
                 style="margin-top: 0.75rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: #ffffff; color: #374151; border: 1px solid #E5E7EB; border-radius: 12px; min-height: 44px; padding: 0.55rem 1rem; font-size: 0.9rem; font-weight: 550; letter-spacing: -0.01em; cursor: pointer; transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04); touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
-            <svg style="width: 20px; height: 20px; color: var(--brand-primary, #004182);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004 11m0 0a8 8 0 00.99 7.132"></path></svg>
+            <svg style="width: 20px; height: 20px; color: var(--brand-primary, #7a0e16);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004 11m0 0a8 8 0 00.99 7.132"></path></svg>
             Sign in with Biometrics
         </button>
     </form>

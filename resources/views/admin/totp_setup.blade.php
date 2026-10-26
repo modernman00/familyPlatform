@@ -18,7 +18,7 @@
             
             <!-- Instructions Panel -->
             <div class="w3-panel w3-light-blue w3-leftbar w3-border-blue w3-round" style="padding:16px 20px; margin-bottom:28px;">
-                <h5 style="margin:0 0 8px 0; font-weight:700; color:#0369a1;">
+                <h5 style="margin:0 0 8px 0; font-weight:700; color:#8a1019;">
                     <i class="fa fa-list-ol"></i> Step-by-Step Setup Instructions
                 </h5>
                 <ol style="margin:0; padding-left:20px; font-size:14px; line-height:1.7; color:#1e293b;">
@@ -78,7 +78,7 @@
                            autocomplete="one-time-code"
                            inputmode="numeric"
                            pattern="[0-9]{6}"
-                           style="font-size:32px; letter-spacing:8px; font-weight:bold; text-align:center; padding:12px; border:2px solid #0284c7; border-radius:10px; width:100%; outline:none; box-shadow:0 2px 8px rgba(2,132,199,0.15);"
+                           style="font-size:32px; letter-spacing:8px; font-weight:bold; text-align:center; padding:12px; border:2px solid #a31621; border-radius:10px; width:100%; outline:none; box-shadow:0 2px 8px rgba(163,22,33,0.15);"
                            required>
                 </div>
 

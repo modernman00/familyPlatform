@@ -241,8 +241,8 @@ document.addEventListener('DOMContentLoaded', () => {
         box-shadow: 0 2px 6px rgba(24, 119, 242, 0.22);
     }
     .stitch-social-btn.facebook:hover {
-        background-color: #166FE5;
-        border-color: #166FE5;
+        background-color: #a31621;
+        border-color: #a31621;
         box-shadow: 0 4px 10px rgba(24, 119, 242, 0.32);
         color: #ffffff;
         transform: translateY(-1px);
@@ -309,6 +309,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h1 class="register-title h2">Join Your Family Network</h1>
                     <p class="register-subtitle">Complete the steps below to create your secure family account</p>
                 </div>
+
+                @if ($hasInvitation)
+                <div class="card p-4 mb-4 border-0 shadow-sm" style="background: linear-gradient(135deg, rgba(163, 22, 33, 0.06) 0%, rgba(122, 14, 22, 0.03) 100%); border-left: 5px solid var(--brand-primary) !important; border-radius: 14px;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center justify-content-center text-white" style="width: 48px; height: 48px; border-radius: 50%; background: var(--brand-primary); flex-shrink: 0;">
+                            <i class="fas fa-tree fs-5"></i>
+                        </div>
+                        <div>
+                            <span class="badge rounded-pill mb-1" style="background: rgba(163, 22, 33, 0.12); color: var(--brand-primary); font-weight: 700; font-size: 0.72rem; padding: 4px 10px;">
+                                <i class="fas fa-star me-1"></i>Kinship Invitation
+                            </span>
+                            <h3 class="h5 fw-bold mb-1 text-dark">
+                                @if(!empty($invitedFirstName))
+                                Welcome, {{ $invitedFirstName }}!
+                                @elseif(!empty($familySurname))
+                                Welcome to the {{ $familySurname }} Family Sanctuary!
+                                @else
+                                Welcome to Your Family Tree!
+                                @endif
+                            </h3>
+                            <p class="small text-muted mb-0">
+                                Your spot has been reserved on the family organogram. Set your password below to claim your branch and unlock private memories, oral histories, and family events.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 @if (!empty($inviteTokenError))
                 <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" style="background-color: #fee2e2; border: 1.5px solid #fca5a5; color: #7f1d1d; border-radius: 10px; padding: 16px;">
@@ -398,10 +425,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 @endif
 
                 @if($hasInvitation)
-                <div class="invited-relative-hero mb-4" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%); border-radius: 18px; padding: 26px; color: #ffffff; box-shadow: 0 16px 36px rgba(49, 46, 129, 0.28); border: 1.5px solid rgba(129, 140, 248, 0.4); position: relative; overflow: hidden;">
+                <div class="invited-relative-hero mb-4" style="background: linear-gradient(135deg, #2a0a0d 0%, #2a0a0d 50%, #8a1019 100%); border-radius: 18px; padding: 26px; color: #ffffff; box-shadow: 0 16px 36px rgba(42,10,13, 0.28); border: 1.5px solid rgba(239,107,115, 0.4); position: relative; overflow: hidden;">
                     <div style="position: absolute; top: -30px; right: -30px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(245, 158, 11, 0.22) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
                     
-                    <div class="d-flex align-items-center gap-2 mb-2">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
                         <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); font-size: 0.78rem; padding: 5px 12px; border-radius: 999px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
                             <i class="bi bi-tree-fill me-1"></i> Official Family Dynasty Invitation
                         </span>
@@ -418,8 +445,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         @endif
                     </h2>
 
-                    <p style="color: rgba(224, 231, 255, 0.88); font-size: 0.94rem; line-height: 1.55; margin-bottom: 18px; max-width: 620px;">
-                        You have been personally invited to claim your branch on the <strong>{{ htmlspecialchars($familySurname ?: 'Family') }} Family Tree</strong>. Connect directly with your kin, discover ancestral stories, and preserve cherished memories together.
+                    <p style="color: rgba(245,222,222, 0.88); font-size: 0.94rem; line-height: 1.55; margin-bottom: 18px; max-width: 620px;">
+                        You have been personally invited to claim your branch on the <strong style="color:#fff;">{{ htmlspecialchars($familySurname ?: 'Family') }} Family Tree</strong>. Connect directly with your kin, discover ancestral stories, and preserve cherished memories together.
                     </p>
 
                     <div class="d-flex flex-wrap align-items-center gap-3" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 12px 18px;">
@@ -428,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <strong style="color: #fbbf24; font-size: 1rem; letter-spacing: 0.06em; font-family: monospace;">{{ htmlspecialchars($inviteFamCode ?: 'PRE-SET') }}</strong>
                         </div>
                         <div style="height: 16px; width: 1px; background: rgba(255,255,255,0.2);"></div>
-                        <div class="d-flex align-items-center gap-2" style="color: #c7d2fe; font-size: 0.84rem;">
+                        <div class="d-flex align-items-center gap-2" style="color: #ecc7c9; font-size: 0.84rem;">
                             <i class="bi bi-lightning-charge-fill text-warning"></i>
                             <span>Fast-Track: Name &amp; Code Pre-Filled Below</span>
                         </div>

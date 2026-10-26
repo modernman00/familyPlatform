@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 /*
  * Global Design Standards v2.1 base layer (CEO-approved 2026-10-22).
  * Loaded after main.css. Additive only: tokens, focus, press, motion and hit-area rules.
@@ -33,8 +34,153 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 summary:focus-visible {
-  outline: 2px solid var(--brand-primary, #00bfa5);
+  outline: 2px solid var(--brand-primary, #a31621);
   outline-offset: 2px;
+}
+
+/* Redesigned Comment Composer & Rounded Pills: Prevent rectangular outline clipping */
+.comment-composer input:focus,
+.comment-composer input:focus-visible,
+.comment-composer__input:focus,
+.comment-composer__input:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.comment-composer__field {
+  background-color: #f0f2f5;
+  border: 1.5px solid transparent;
+  border-radius: 9999px;
+  padding: 2px 8px 2px 14px;
+  transition: background-color var(--motion-fast) var(--ease),
+              border-color var(--motion-fast) var(--ease),
+              box-shadow var(--motion-fast) var(--ease);
+}
+
+.comment-composer__field:hover {
+  background-color: #e9ecef;
+}
+
+.comment-composer__field:focus-within {
+  background-color: #ffffff !important;
+  border-color: rgba(163, 22, 33, 0.45) !important;
+  box-shadow: 0 0 0 3px rgba(163, 22, 33, 0.12), 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+}
+
+body.dark-mode .comment-composer__field {
+  background-color: #1e293b !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+body.dark-mode .comment-composer__field:hover {
+  background-color: #253349 !important;
+}
+
+body.dark-mode .comment-composer__field:focus-within {
+  background-color: #0f172a !important;
+  border-color: rgba(239, 107, 115, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(239, 107, 115, 0.2), 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .comment-composer__input {
+  color: #f8fafc !important;
+  background: transparent !important;
+}
+
+body.dark-mode .comment-composer__input::placeholder {
+  color: #94a0b4 !important;
+}
+
+input.rounded-pill:focus-visible,
+.form-control.rounded-pill:focus-visible {
+  outline: none !important;
+  border-color: var(--brand-primary, #a31621) !important;
+  box-shadow: 0 0 0 3px rgba(163, 22, 33, 0.18) !important;
+}
+
+.comment-composer__tool {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #65676b;
+  transition: background-color var(--motion-fast) var(--ease),
+              color var(--motion-fast) var(--ease),
+              transform var(--motion-fast) var(--ease);
+}
+
+.comment-composer__tool:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+  color: #1e293b;
+}
+
+.comment-composer__tool:active {
+  transform: scale(0.92);
+}
+
+.comment-composer__tool:focus-visible {
+  outline: 2px solid var(--brand-primary, #a31621);
+  outline-offset: 1px;
+  border-radius: 50%;
+}
+
+.comment-composer__tool[aria-expanded="true"] {
+  color: var(--brand-primary, #a31621);
+  background-color: rgba(163, 22, 33, 0.08);
+}
+
+.comment-composer__send {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  transition: all var(--motion-fast) var(--ease);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.comment-composer__send:hover {
+  background-color: rgba(163, 22, 33, 0.08);
+  color: var(--brand-primary, #a31621);
+}
+
+.comment-composer__send:active {
+  transform: scale(0.92);
+}
+
+.comment-composer__send.is-active {
+  color: var(--brand-primary, #a31621) !important;
+  background-color: rgba(163, 22, 33, 0.1) !important;
+  transform: scale(1.05);
+}
+
+body.dark-mode .comment-composer__tool {
+  color: #94a0b4;
+}
+
+body.dark-mode .comment-composer__tool:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+}
+
+body.dark-mode .comment-composer__send {
+  color: #64748b;
+}
+
+body.dark-mode .comment-composer__send:hover {
+  background-color: rgba(239, 107, 115, 0.12);
+  color: #ef6b73;
+}
+
+body.dark-mode .comment-composer__send.is-active {
+  color: #ef6b73 !important;
+  background-color: rgba(239, 107, 115, 0.16) !important;
 }
 
 /* Press feedback is primary (works on touch) */
@@ -80,4 +226,328 @@ button:not(:disabled):active,
 }
 body.dark-mode .notif-item-time {
   color: #94a3b8;
+}
+
+/* =====================================================================
+ * v2.2 Brand & Responsive layer (CEO brief 2026-10-25)
+ * One brand: the "family" app icon, now crimson (#a31621) to match the UI, so
+ * white text on it passes WCAG AA (7.8:1); the raw icon red does not (4.0:1).
+ * Breakpoints: phone < 768, tablet 768-1199 (2-col), desktop >= 1200 (3-col).
+ * ===================================================================== */
+:root {
+  --brand-primary: #a31621;
+  --brand-primary-hover: #8a1019;
+  --brand-primary-active: #7a0e16;
+  --brand-primary-soft: #fbefef;
+  --brand-primary-rgb: 163, 22, 33;
+  --brand-gradient: linear-gradient(135deg, #b8202c 0%, #8a1019 100%);
+  --brand-ink: #2a0a0d;
+  --shadow-1: 0 1px 2px rgba(28, 21, 23, .06), 0 4px 12px rgba(28, 21, 23, .06);
+  --shadow-2: 0 2px 4px rgba(28, 21, 23, .08), 0 12px 28px rgba(28, 21, 23, .12);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --bs-primary: #a31621;
+  --bs-primary-rgb: 163, 22, 33;
+  --bs-link-color: #a31621;
+  --bs-link-color-rgb: 163, 22, 33;
+  --bs-link-hover-color: #8a1019;
+  --bs-link-hover-color-rgb: 138, 16, 25;
+}
+
+body.dark-mode,
+[data-bs-theme="dark"] {
+  --brand-primary: #b8202c;
+  --brand-primary-hover: #e0454e;
+  --brand-primary-soft: rgba(184,32,44, .16);
+  --bs-link-color: #ef6b73;
+  --bs-link-color-rgb: 255, 107, 107;
+  --bs-link-hover-color: #f2a0a6;
+}
+
+/* Bootstrap primaries follow the brand wherever a page still uses them */
+.btn-primary {
+  --bs-btn-bg: #a31621;
+  --bs-btn-border-color: #a31621;
+  --bs-btn-hover-bg: #8a1019;
+  --bs-btn-hover-border-color: #8a1019;
+  --bs-btn-active-bg: #7a0e16;
+  --bs-btn-active-border-color: #7a0e16;
+  --bs-btn-disabled-bg: #a31621;
+  --bs-btn-disabled-border-color: #a31621;
+  --bs-btn-focus-shadow-rgb: 163, 22, 33;
+}
+.btn-outline-primary {
+  --bs-btn-color: #a31621;
+  --bs-btn-border-color: #a31621;
+  --bs-btn-hover-bg: #a31621;
+  --bs-btn-hover-border-color: #a31621;
+  --bs-btn-active-bg: #8a1019;
+  --bs-btn-active-border-color: #8a1019;
+  --bs-btn-focus-shadow-rgb: 163, 22, 33;
+}
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 .2rem rgba(var(--brand-primary-rgb), .18);
+}
+.form-check-input:checked {
+  background-color: var(--brand-primary);
+  border-color: var(--brand-primary);
+}
+.form-check-input:focus { box-shadow: 0 0 0 .2rem rgba(var(--brand-primary-rgb), .18); }
+.progress-bar,
+.nav-pills .nav-link.active,
+.dropdown-item.active,
+.page-item.active .page-link { background-color: var(--brand-primary); border-color: var(--brand-primary); }
+
+/* Overflow safety: nothing may cause sideways scroll on any device */
+html, body { max-width: 100%; overflow-x: clip; }
+img, video { max-width: 100%; height: auto; }
+.table-responsive, pre { max-width: 100%; overflow-x: auto; }
+
+/* Touch devices: every control is a 44px target (Golden Invariant 8) */
+@media (pointer: coarse) {
+  .btn:not(.btn-close):not(.btn-sm),
+  .form-control,
+  .form-select,
+  .dropdown-item { min-height: var(--tap-min); }
+  .btn-sm { min-height: 40px; }
+}
+
+/* Mouse devices: cards respond, honestly and briefly */
+@media (hover: hover) and (pointer: fine) {
+  .feed-column .card,
+  .sidebar-column .card {
+    transition: box-shadow var(--motion-base) var(--ease), transform var(--motion-base) var(--ease);
+  }
+  .feed-column .card:hover,
+  .sidebar-column .card:hover {
+    box-shadow: var(--shadow-2);
+    transform: translateY(-1px);
+  }
+}
+
+/* Phone: breathing room, notch/home-indicator safe, content never hides under the tab bar */
+@media (max-width: 767.98px) {
+  body .container-main { padding: 12px; gap: 14px; }
+  body:has(.pwa-bottom-nav) { padding-bottom: calc(76px + var(--safe-bottom)); }
+}
+
+/* Tablet (iPad portrait & landscape): two columns instead of one long stack */
+@media (min-width: 768px) and (max-width: 1199.98px) {
+  body .container-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.75fr) minmax(260px, 1fr);
+    gap: 20px;
+    padding: 20px;
+    align-items: start;
+  }
+  body .container-main > .profile-column {
+    grid-column: 1 / -1;
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+  body .container-main > .feed-column { grid-column: 1; grid-row: 2; }
+  body .container-main > .sidebar-column {
+    grid-column: 2;
+    grid-row: 2;
+    position: sticky;
+    top: calc(80px + env(safe-area-inset-top, 0px));
+  }
+  body:has(.pwa-bottom-nav) { padding-bottom: calc(76px + var(--safe-bottom)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feed-column .card:hover,
+  .sidebar-column .card:hover { transform: none; }
+}
+
+/* Profile quick actions: one icon colour so the stack reads as a single, calm family */
+.profile-column .btn > i[class*="text-"] { color: var(--brand-primary) !important; }
+
+/* Public pages: balanced headlines, and a container that never hugs the screen edge */
+h1, h2, .hero-title { text-wrap: balance; }
+.hero-section .container,
+.hero-section ~ section .container {
+  width: 100%;
+  max-width: 1140px;
+  margin-inline: auto;
+  padding-inline: clamp(16px, 4vw, 32px);
+}
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .hero-section .col-lg-6 { text-align: center; }
+  .hero-section .d-flex.flex-sm-row { justify-content: center; }
+}
+
+/* Auth cards: float with a gutter on phones; brand-coloured native checkboxes/radios */
+body .stitch-auth-container { width: calc(100% - 32px); }
+@media (max-width: 480px) {
+  body .stitch-auth-container { padding: 2rem 1.25rem; margin: 1.5rem auto 3rem; }
+}
+input[type="checkbox"], input[type="radio"], progress { accent-color: var(--brand-primary); }
+
+/* =====================================================================
+ * v2.3 Calm CTAs (CEO chose option A "Crimson", 2026-10-25: bright red was too loud)
+ * Solid call-to-action buttons use deep crimson (#a31621, 7.8:1 with white); brand red is kept for the logo,
+ * links, icons, focus rings, active tabs and badges.
+ * Change --cta-bg once to retune every primary button.
+ * ===================================================================== */
+:root {
+  --cta-bg: #a31621;
+  --cta-bg-hover: #8a1019;
+  --cta-glow: 0 6px 16px rgba(var(--brand-primary-rgb), .28);
+}
+body.dark-mode,
+[data-bs-theme="dark"] {
+  --cta-bg: #a31621;
+  --cta-bg-hover: #b8202c;
+}
+
+.btn-primary,
+.btn-brand,
+.btn-save,
+.btn-confirm,
+.btn-create-journal,
+.btn-sanctuary-primary,
+.stitch-submit,
+.submitPost,
+.cta-btn,
+.cookie-btn-solid,
+.swal2-styled.swal2-confirm,
+.btn[style*="background"][style*="#a31621"],
+.btn[style*="background"][style*="#b8202c"],
+.btn[style*="background"][style*="#8a1019"],
+.btn[style*="background"][style*="--primary-color"] {
+  background: var(--cta-bg) !important;
+  border-color: var(--cta-bg) !important;
+  color: #fff !important;
+}
+
+.btn-primary:hover, .btn-primary:focus-visible,
+.btn-brand:hover,
+.btn-save:hover,
+.btn-confirm:hover,
+.btn-create-journal:hover,
+.btn-sanctuary-primary:hover,
+.stitch-submit:hover,
+.submitPost:hover,
+.cta-btn:hover,
+.cookie-btn-solid:hover,
+.swal2-styled.swal2-confirm:hover,
+.btn[style*="background"][style*="#a31621"]:hover,
+.btn[style*="background"][style*="#b8202c"]:hover,
+.btn[style*="background"][style*="#8a1019"]:hover,
+.btn[style*="background"][style*="--primary-color"]:hover {
+  background: var(--cta-bg-hover) !important;
+  border-color: var(--cta-bg-hover) !important;
+  box-shadow: var(--cta-glow) !important;
+}
+
+/* Top bar: buttons never wrap onto two lines, long names truncate instead of clipping */
+#mainNavbar .btn { white-space: nowrap; }
+#mainNavbar .dropdown-toggle { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Small laptops / iPad landscape (992-1199px): tighten the top bar so nothing is pushed off-screen */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  #mainNavbar .container-fluid { padding-inline: 12px; }
+  #mainNavbar .stitch-nav-link { padding-inline: .5rem !important; font-size: .86rem; }
+  #mainNavbar .stitch-nav-link i { margin-right: .2rem !important; }
+  #mainNavbar .navbar-nav { gap: 0 !important; margin-left: .25rem !important; }
+  #mainNavbar .dropdown-toggle { max-width: 150px; }
+}
+
+/* Centre "Add Photo" bubble follows the CTA colour */
+.pwa-center-btn-bubble {
+  background: var(--cta-bg) !important;
+  box-shadow: 0 6px 18px rgba(var(--brand-primary-rgb), .28), 0 0 0 3px rgba(var(--brand-primary-rgb), .22) !important;
+}
+
+/* The logo tile never shrinks when the top bar is crowded */
+#mainNavbar .navbar-brand,
+#mainNavbar .brand-logo-icon-wrapper { flex: none; }
+#mainNavbar .brand-logo-icon-wrapper img { min-width: 34px; }
+
+/* =====================================================================
+ * v2.4 One typeface (CEO 2026-10-25): Inter everywhere. Icon fonts keep their own
+ * face through their own class rules (.bi, .fa, .material-icons), which outrank these.
+ * ===================================================================== */
+:root { --font-sans: "Inter", -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+html, body, button, input, select, textarea, optgroup, .btn, .form-control, .form-select,
+h1, h2, h3, h4, h5, h6, .navbar, .modal, .dropdown-menu, .swal2-popup, .swal2-title, .swal2-html-container {
+  font-family: var(--font-sans);
+}
+
+/* Landing: logo tile keeps its size next to the wordmark; centred copy stays centred on small screens */
+.public-navbar .navbar-brand img { width: 34px; height: 34px; border-radius: 9px; object-fit: contain; flex: none; }
+@media (max-width: 991.98px) { .hero-section .hero-subtitle { margin-inline: auto; max-width: 36rem; } }
+
+/* Badges may wrap on phones instead of being clipped */
+.invited-relative-hero .badge { white-space: normal; text-align: left; line-height: 1.3; }
+
+/* RFC-0007 Follow-ups: Mentions & Thread Collapsing */
+.mention-autocomplete {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    width: 280px;
+    max-width: 90vw;
+    background: var(--card-bg, #ffffff);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 14px;
+    padding: 6px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    z-index: 250;
+}
+.mention-autocomplete__header {
+    border-bottom: 1px solid var(--border-color, #f1f5f9);
+    margin-bottom: 4px;
+}
+.mention-autocomplete__list {
+    max-height: 220px;
+    overflow-y: auto;
+}
+.mention-autocomplete__item {
+    background: transparent;
+    border-radius: 8px;
+    transition: background 0.12s ease;
+    cursor: pointer;
+    min-height: 40px;
+}
+.mention-autocomplete__item:hover,
+.mention-autocomplete__item--active {
+    background: var(--hover-color, #f1f5f9);
+}
+.mention-autocomplete__item:focus-visible {
+    outline: 2px solid var(--primary-color, #a31621);
+    outline-offset: -1px;
+}
+.mention-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    background: rgba(163, 22, 33, 0.09);
+    color: var(--primary-color, #a31621);
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-size: 0.88em;
+    vertical-align: baseline;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+}
+.mention-chip i {
+    font-size: 0.9em;
+    opacity: 0.85;
+}
+.mention-chip:hover {
+    background: rgba(163, 22, 33, 0.18);
+}
+.comment-thread-toggle {
+    transition: color 0.15s ease;
+    cursor: pointer;
+    font-family: inherit;
+}
+.comment-thread-toggle:hover {
+    text-decoration: underline !important;
+    opacity: 0.9;
 }

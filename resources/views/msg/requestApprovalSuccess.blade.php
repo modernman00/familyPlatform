@@ -74,7 +74,7 @@
 
         .success-ring .circle {
             fill: none;
-            stroke: #00bfa5;
+            stroke: #a31621;
             stroke-width: 4;
             stroke-linecap: round;
             stroke-dasharray: 283;
@@ -85,7 +85,7 @@
 
         .success-ring .checkmark {
             fill: none;
-            stroke: #00bfa5;
+            stroke: #a31621;
             stroke-width: 4;
             stroke-linecap: round;
             stroke-linejoin: round;
@@ -122,7 +122,7 @@
         }
 
         .subheading strong {
-            color: #00bfa5;
+            color: #a31621;
             font-weight: 600;
         }
 
@@ -145,14 +145,14 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #00bfa5, #004182);
+            background: linear-gradient(135deg, #a31621, #7a0e16);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 22px;
             font-weight: 700;
             color: #fff;
-            box-shadow: 0 4px 12px rgba(0, 191, 165, 0.3);
+            box-shadow: 0 4px 12px rgba(163,22,33, 0.3);
         }
 
         .connection-icon {
@@ -162,10 +162,10 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #00bfa5, #26c6a9);
+            background: linear-gradient(135deg, #a31621, #26c6a9);
             color: #fff;
             font-size: 16px;
-            box-shadow: 0 4px 12px rgba(0, 191, 165, 0.25);
+            box-shadow: 0 4px 12px rgba(163,22,33, 0.25);
             animation: pulse 2s infinite 1.5s;
         }
 
@@ -180,7 +180,7 @@
             align-items: center;
             gap: 10px;
             padding: 14px 36px;
-            background: linear-gradient(135deg, #00bfa5 0%, #004182 100%);
+            background: linear-gradient(135deg, #a31621 0%, #7a0e16 100%);
             color: #fff;
             font-size: 16px;
             font-weight: 600;
@@ -189,14 +189,14 @@
             text-decoration: none;
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 8px 24px rgba(0, 65, 130, 0.25);
+            box-shadow: 0 8px 24px rgba(122,14,22, 0.25);
             animation: fadeIn 0.5s 1.3s ease forwards;
             opacity: 0;
         }
 
         .cta-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(0, 65, 130, 0.35);
+            box-shadow: 0 12px 32px rgba(122,14,22, 0.35);
         }
 
         .cta-btn:active {
@@ -273,7 +273,7 @@
                 <div class="connection-icon">
                     <i class="bi bi-link-45deg"></i>
                 </div>
-                <div class="avatar-circle" style="background: linear-gradient(135deg, #004182, #1a6fcc);">{{ $requesterInitials }}</div>
+                <div class="avatar-circle" style="background: linear-gradient(135deg, #7a0e16, #1a6fcc);">{{ $requesterInitials }}</div>
             </div>
         @else
             <div class="success-ring">
@@ -311,7 +311,7 @@
     <script>
         // Celebratory confetti particles
         (function() {
-            const colors = ['#00bfa5', '#004182', '#f59e0b', '#ec4899', '#8b5cf6', '#10b981'];
+            const colors = ['#a31621', '#7a0e16', '#f59e0b', '#ec4899', '#b8202c', '#10b981'];
             const body = document.body;
             for (let i = 0; i < 30; i++) {
                 const p = document.createElement('div');

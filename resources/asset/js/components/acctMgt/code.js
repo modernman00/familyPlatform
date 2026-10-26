@@ -162,7 +162,7 @@ const initOtp = () => {
             icon: 'info',
             title: 'Clipboard unavailable',
             text: 'Your browser blocked clipboard access. Please type the code manually.',
-            confirmButtonColor: '#7b03fc',
+            confirmButtonColor: '#8a1019',
           });
         }
       }
@@ -191,14 +191,14 @@ const initOtp = () => {
             icon: 'success',
             title: 'Code sent',
             text: result?.message || 'A new verification code has been sent to your email.',
-            confirmButtonColor: '#7b03fc',
+            confirmButtonColor: '#8a1019',
           });
         } else {
           window.Swal?.fire({
             icon: 'error',
             title: 'Could not resend',
             text: result?.message || 'Failed to resend the code. Please try again.',
-            confirmButtonColor: '#7b03fc',
+            confirmButtonColor: '#8a1019',
           });
         }
       } catch (err) {
@@ -206,7 +206,7 @@ const initOtp = () => {
           icon: 'error',
           title: 'Network error',
           text: 'A connection error occurred. Please check your network and try again.',
-          confirmButtonColor: '#7b03fc',
+          confirmButtonColor: '#8a1019',
         });
       } finally {
         resendBtn.innerHTML = original;

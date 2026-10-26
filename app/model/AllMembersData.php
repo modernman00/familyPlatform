@@ -443,6 +443,41 @@ class AllMembersData extends InnerJoin
     }
 
 
+    /**
+     * Batch form of commentProfilePicByPostNo(): one query for a whole page of posts
+     * instead of one per post. Same filters and ordering; grouped by post_no.
+     *
+     * @param array<int|string> $postNos
+     * @return array<string, array<int, array<string, mixed>>> post_no => comments (newest first)
+     */
+    public static function commentProfilePicByPostNos(array $postNos): array
+    {
+        $postNos = array_values(array_unique(array_map('strval', $postNos)));
+        if ($postNos === []) {
+            return [];
+        }
+        try {
+            $placeholders = implode(',', array_fill(0, count($postNos), '?'));
+            $query = "SELECT comment.*, profilePics.img, profilePics.id 
+              FROM comment
+              INNER JOIN profilePics ON comment.id = profilePics.id
+            WHERE comment.post_no IN ($placeholders)
+            AND comment.date_deleted IS NULL
+            ORDER BY comment.date_created DESC";
+            $stmt = parent::connect2()->prepare($query);
+            $stmt->execute($postNos);
+
+            $grouped = [];
+            foreach ($stmt->fetchAll() as $row) {
+                $grouped[(string) ($row['post_no'] ?? '')][] = $row;
+            }
+            return $grouped;
+        } catch (PDOException $e) {
+            showError($e);
+            return [];
+        }
+    }
+
     public static function commentProfilePicByPostNo($postNo): array
     {
         try {

@@ -87,7 +87,9 @@
         const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
         bsModal.show();
 
-        // Fetch or create a general family invite token for this flyer
+        // Fetch or create a general family invite token for the currently active family code (marital vs. birth)
+        const activeCode = window.__FAMILY_CODE__ || '{{ $data["famCode"] ?? "" }}';
+        const activeScope = window.__ACTIVE_LINEAGE_SCOPE__ || 'primary';
         fetch('/api/invite/generate', {
             method: 'POST',
             headers: {
@@ -95,6 +97,8 @@
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
             },
             body: JSON.stringify({
+                family_code: activeCode,
+                lineage_scope: activeScope,
                 type: 'onboarding'
             })
         })
@@ -201,7 +205,7 @@
         // 3. Heraldic Top Tag
         ctx.textAlign = 'center';
         ctx.fillStyle = '#f59e0b';
-        ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.font = 'bold 20px Inter, sans-serif';
         ctx.letterSpacing = '3px';
         ctx.fillText('👑  OFFICIAL FAMILY SANCTUARY', W / 2, 95);
 
@@ -211,12 +215,12 @@
         titleGrad.addColorStop(0.5, '#eab308');
         titleGrad.addColorStop(1, '#ca8a04');
         ctx.fillStyle = titleGrad;
-        ctx.font = 'bold 54px "Georgia", serif';
+        ctx.font = '800 54px Inter, sans-serif';
         ctx.fillText(`THE ${familySurname.toUpperCase()} DYNASTY`, W / 2, 165);
 
         // 5. Subtitle
         ctx.fillStyle = '#94a3b8';
-        ctx.font = '500 22px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.font = '500 22px Inter, sans-serif';
         ctx.fillText('Recorded Heritage, Lineage Connections & Living Memories', W / 2, 210);
 
         // 6. Stats Grid Cards
@@ -232,7 +236,7 @@
 
         // 7. Call To Action Footer Banner
         ctx.fillStyle = '#ffffff';
-        ctx.font = '600 24px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.font = '600 24px Inter, sans-serif';
         ctx.fillText('Join our family circle & claim your place on the family tree', W / 2, 495);
 
         ctx.fillStyle = '#10b981';
@@ -240,7 +244,7 @@
         ctx.fillText(flyerInviteUrl.replace(/^https?:\/\//, ''), W / 2, 535);
 
         ctx.fillStyle = '#64748b';
-        ctx.font = '400 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.font = '400 16px Inter, sans-serif';
         ctx.fillText('Private & Walled Sanctuary • Zero Tree Pollution • FamilyPlatform', W / 2, 585);
 
         flyerRendered = true;
@@ -258,11 +262,11 @@
 
         ctx.textAlign = 'center';
         ctx.fillStyle = '#fbbf24';
-        ctx.font = 'bold 44px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.font = 'bold 44px Inter, sans-serif';
         ctx.fillText(`${icon} ${value}`, x + w / 2, y + 65);
 
         ctx.fillStyle = '#cbd5e1';
-        ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.font = 'bold 15px Inter, sans-serif';
         ctx.letterSpacing = '1px';
         ctx.fillText(label, x + w / 2, y + 115);
         ctx.restore();

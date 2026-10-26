@@ -69,8 +69,8 @@
     }
     #createEventModal .form-control:focus, 
     #createEventModal .form-select:focus {
-        border-color: var(--brand-primary, #00bfa5);
-        box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.15);
+        border-color: var(--brand-primary, #a31621);
+        box-shadow: 0 0 0 3px rgba(163,22,33, 0.15);
         background-color: var(--bg-white, #ffffff);
         color: var(--text-main, #0f172a);
         outline: none;
@@ -114,13 +114,13 @@
         font-size: 0.9rem;
         font-weight: 600;
         color: #ffffff !important;
-        background-color: var(--brand-primary, #00bfa5);
+        background-color: var(--brand-primary, #a31621);
         border: none;
         transition: all 0.2s;
         flex: 1;
     }
     #createEventModal .btn-save:hover {
-        background-color: var(--brand-secondary, #004182);
+        background-color: var(--brand-secondary, #7a0e16);
         opacity: 1;
     }
     #createEventModal .btn-close {

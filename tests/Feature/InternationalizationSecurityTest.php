@@ -71,4 +71,33 @@ class InternationalizationSecurityTest extends TestCase
         $this->assertSame('US', CountryCatalog::find('USA')['code'] ?? null);
         $this->assertSame('AE', CountryCatalog::find('UAE')['code'] ?? null);
     }
+
+    public function testLocaleRouteDispatchSucceedsWithoutNamedParameterError(): void
+    {
+        // Assert LocaleController method accepts both 'locale' and 'lang' parameters
+        $refMethod = new \ReflectionMethod(\App\controller\LocaleController::class, 'switch');
+        $params = array_map(fn($p) => $p->getName(), $refMethod->getParameters());
+        $this->assertContains('locale', $params);
+        $this->assertContains('lang', $params);
+
+        // Assert AltoRouter route exists and maps to LocaleController@switch
+        $router = new \AltoRouter();
+        require __DIR__ . '/../../app/router/router.php';
+        $match = $router->match('/locale/fr', 'GET');
+        $this->assertIsArray($match);
+        $this->assertSame('App\controller\LocaleController@switch', $match['target']);
+        $this->assertArrayHasKey('locale', $match['params']);
+        $this->assertSame('fr', $match['params']['locale']);
+
+        // Assert I18n sets and translates French and Spanish accurately
+        $this->assertTrue(I18n::setLocale('fr'));
+        $this->assertSame('fr', I18n::getLocale());
+        $this->assertSame('Accueil', I18n::trans('nav.home'));
+
+        $this->assertTrue(I18n::setLocale('es'));
+        $this->assertSame('es', I18n::getLocale());
+        $this->assertSame('Inicio', I18n::trans('nav.home'));
+
+        I18n::setLocale('en');
+    }
 }

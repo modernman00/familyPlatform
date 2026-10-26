@@ -57,7 +57,7 @@
   #cookieBanner .cookie-copy { flex: 1 1 22rem; }
   #cookieBanner .cookie-copy strong { display: block; font-size: 0.92rem; margin-bottom: 0.2rem; }
   #cookieBanner .cookie-copy p { margin: 0; font-size: 0.83rem; line-height: 1.5; color: #5c5749; }
-  #cookieBanner .cookie-copy a { color: #00857a; font-weight: 600; }
+  #cookieBanner .cookie-copy a { color: #a31621; font-weight: 600; }
   #cookieBanner .cookie-actions { display: flex; gap: 0.55rem; flex: 0 0 auto; }
   #cookieBanner .cookie-btn {
     font: inherit;
@@ -70,10 +70,10 @@
     transition: background-color .15s ease, border-color .15s ease, transform .15s ease;
   }
   #cookieBanner .cookie-btn-ghost { background: #ffffff; border-color: #cfccc0; color: #3c3830; }
-  #cookieBanner .cookie-btn-ghost:hover { border-color: #00bfa5; color: #00857a; }
-  #cookieBanner .cookie-btn-solid { background: #00bfa5; color: #ffffff; }
+  #cookieBanner .cookie-btn-ghost:hover { border-color: #a31621; color: #a31621; }
+  #cookieBanner .cookie-btn-solid { background: #a31621; color: #ffffff; }
   #cookieBanner .cookie-btn-solid:hover { background: #00a794; transform: translateY(-1px); }
-  #cookieBanner .cookie-btn:focus-visible { outline: 2px solid #00857a; outline-offset: 2px; }
+  #cookieBanner .cookie-btn:focus-visible { outline: 2px solid #a31621; outline-offset: 2px; }
   @media (max-width: 560px) {
     #cookieBanner .cookie-actions { width: 100%; }
     #cookieBanner .cookie-btn { flex: 1; }

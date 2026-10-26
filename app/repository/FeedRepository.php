@@ -33,11 +33,12 @@ class FeedRepository
      * @param array<string> $famCodes
      * @param int $limit
      * @param int $offset
+     * @param string $filter 'all'|'tagged'
      * @return array<PostDto>
      */
-    public function getFeedPosts(string $userId, array $famCodes, int $limit = 50, int $offset = 0): array
+    public function getFeedPosts(string $userId, array $famCodes, int $limit = 50, int $offset = 0, string $filter = ''): array
     {
-        $rows = $this->fetchFeedRows($userId, $famCodes, $limit, $offset);
+        $rows = $this->fetchFeedRows($userId, $famCodes, $limit, $offset, $filter);
         if (empty($rows)) {
             return [];
         }
@@ -57,11 +58,12 @@ class FeedRepository
      * @param array<string> $famCodes
      * @param int $limit
      * @param int $offset
+     * @param string $filter 'all'|'tagged'
      * @return array<array<string, mixed>>
      */
-    public function getFeedPostsAsArray(string $userId, array $famCodes, int $limit = 50, int $offset = 0): array
+    public function getFeedPostsAsArray(string $userId, array $famCodes, int $limit = 50, int $offset = 0, string $filter = ''): array
     {
-        $dtos = $this->getFeedPosts($userId, $famCodes, $limit, $offset);
+        $dtos = $this->getFeedPosts($userId, $famCodes, $limit, $offset, $filter);
         return array_map(fn(PostDto $dto) => $dto->toArray(), $dtos);
     }
 
@@ -70,9 +72,10 @@ class FeedRepository
      *
      * @param string $userId
      * @param array<string> $famCodes
+     * @param string $filter
      * @return int
      */
-    public function countFeedPosts(string $userId, array $famCodes): int
+    public function countFeedPosts(string $userId, array $famCodes, string $filter = ''): int
     {
         try {
             $cleanedCodes = array_values(array_filter(array_map('strval', $famCodes), fn($c) => $c !== ''));
@@ -92,7 +95,7 @@ class FeedRepository
                 $query .= "post.postFamCode IN ($inQuery) OR ";
             }
 
-            $query .= "post.id = rm.approver_id OR post.id = ?)
+            $query .= "post.id = rm.approver_id OR post.id = ? OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_no = post.post_no AND pt.user_id = ?))
                 AND post.post_status = 'published'
                 AND post.date_deleted IS NULL";
 
@@ -101,6 +104,12 @@ class FeedRepository
                 $params = array_merge($params, $cleanedCodes);
             }
             $params[] = $userId;
+            $params[] = $userId;
+
+            if ($filter === 'tagged') {
+                $query .= " AND EXISTS (SELECT 1 FROM post_tags pt_filter WHERE pt_filter.post_no = post.post_no AND pt_filter.user_id = ?)";
+                $params[] = $userId;
+            }
 
             $stmt = $this->db->prepare($query);
             foreach ($params as $key => $val) {
@@ -108,9 +117,7 @@ class FeedRepository
             }
 
             $stmt->execute();
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            return (int)($row['total'] ?? 0);
+            return (int)$stmt->fetchColumn();
         } catch (PDOException $e) {
             \showError($e);
             throw $e;
@@ -226,9 +233,10 @@ class FeedRepository
      * @param array<string> $famCodes
      * @param int $limit
      * @param int $offset
+     * @param string $filter
      * @return array<array<string, mixed>>
      */
-    private function fetchFeedRows(string $userId, array $famCodes, int $limit, int $offset): array
+    private function fetchFeedRows(string $userId, array $famCodes, int $limit, int $offset, string $filter = ''): array
     {
         try {
             $cleanedCodes = array_values(array_filter(array_map('strval', $famCodes), fn($c) => $c !== ''));
@@ -249,17 +257,23 @@ class FeedRepository
                 $query .= "post.postFamCode IN ($inQuery) OR ";
             }
 
-            $query .= "post.id = rm.approver_id OR post.id = ?)
+            $query .= "post.id = rm.approver_id OR post.id = ? OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_no = post.post_no AND pt.user_id = ?))
                 AND post.post_status = 'published'
-                AND post.date_deleted IS NULL
-                ORDER BY post.date_created DESC
-                LIMIT ? OFFSET ?";
+                AND post.date_deleted IS NULL";
 
             $params = [$userId];
             if ($hasFamCodes) {
                 $params = array_merge($params, $cleanedCodes);
             }
             $params[] = $userId;
+            $params[] = $userId;
+
+            if ($filter === 'tagged') {
+                $query .= " AND EXISTS (SELECT 1 FROM post_tags pt_filter WHERE pt_filter.post_no = post.post_no AND pt_filter.user_id = ?)";
+                $params[] = $userId;
+            }
+
+            $query .= " ORDER BY post.date_created DESC LIMIT ? OFFSET ?";
             $params[] = $limit;
             $params[] = $offset;
 
@@ -326,8 +340,13 @@ class FeedRepository
             $tagStmt->execute($postIds);
             $tagRows = $tagStmt->fetchAll(PDO::FETCH_ASSOC);
 
+            // Collect all unique tagged user IDs for batch kinship resolution
+            $taggedUserIds = array_values(array_unique(array_filter(array_map('strval', array_column($tagRows, 'user_id')))));
+            $kinshipMap = $this->batchResolveKinship($userId, $taggedUserIds);
+
             foreach ($tagRows as $tRow) {
                 $pNo = (int)$tRow['post_no'];
+                $uId = (string)$tRow['user_id'];
                 $img = $tRow['img'] ?? null;
                 $profImg = '/resources/images/profile/avatarM.png';
                 if (!empty($img)) {
@@ -336,12 +355,13 @@ class FeedRepository
                         : "/resources/images/profile/{$img}";
                 }
                 $postTagsByPostNo[$pNo][] = [
-                    'user_id' => (string)$tRow['user_id'],
+                    'user_id' => $uId,
                     'fullName' => trim(($tRow['firstName'] ?? '') . ' ' . ($tRow['lastName'] ?? '')),
                     'firstName' => (string)($tRow['firstName'] ?? ''),
                     'lastName' => (string)($tRow['lastName'] ?? ''),
                     'profileImg' => $profImg,
                     'tagged_by' => (string)$tRow['tagged_by'],
+                    'kinship' => $kinshipMap[$uId] ?? 'Family Member',
                 ];
             }
         } catch (\Throwable $tagEx) {
@@ -371,5 +391,129 @@ class FeedRepository
             $post['link_preview'] = !empty($msg) ? \App\services\LinkPreviewService::getPreviewForPostText($msg) : null;
         }
         unset($post);
+    }
+
+    /**
+     * Efficiently batch-resolves kinship labels between viewer and tagged relatives.
+     *
+     * @param string $currentUserId
+     * @param array<string> $targetUserIds
+     * @return array<string, string> Map of userId => kinship title
+     */
+    private function batchResolveKinship(string $currentUserId, array $targetUserIds): array
+    {
+        if (empty($targetUserIds) || $currentUserId === '') {
+            return [];
+        }
+
+        $results = [];
+        $unresolved = [];
+
+        foreach ($targetUserIds as $tid) {
+            $tidStr = (string)$tid;
+            if ($tidStr === $currentUserId) {
+                $results[$tidStr] = 'You';
+            } else {
+                $unresolved[] = $tidStr;
+            }
+        }
+
+        if (empty($unresolved)) {
+            return $results;
+        }
+
+        try {
+            // Check direct siblings in 1 query
+            $inSib = implode(',', array_fill(0, count($unresolved), '?'));
+            $sibSql = sprintf(
+                "SELECT sibling_linked FROM sibling WHERE id = ? AND sibling_linked IN (%s)",
+                $inSib
+            );
+            $sibStmt = $this->db->prepare($sibSql);
+            $sibStmt->execute(array_merge([$currentUserId], $unresolved));
+            while ($row = $sibStmt->fetch(PDO::FETCH_ASSOC)) {
+                $linkedId = (string)($row['sibling_linked'] ?? '');
+                if ($linkedId !== '') {
+                    $results[$linkedId] = 'Sibling';
+                }
+            }
+
+            // Check direct children in 1 query
+            $childSql = sprintf(
+                "SELECT children_linked FROM children WHERE id = ? AND children_linked IN (%s)",
+                $inSib
+            );
+            $childStmt = $this->db->prepare($childSql);
+            $childStmt->execute(array_merge([$currentUserId], $unresolved));
+            while ($row = $childStmt->fetch(PDO::FETCH_ASSOC)) {
+                $linkedId = (string)($row['children_linked'] ?? '');
+                if ($linkedId !== '') {
+                    $results[$linkedId] = 'Child';
+                }
+            }
+
+            // Check if viewer is a child of target in 1 query
+            $parentSql = sprintf(
+                "SELECT id FROM children WHERE id IN (%s) AND children_linked = ?",
+                $inSib
+            );
+            $parentStmt = $this->db->prepare($parentSql);
+            $parentStmt->execute(array_merge($unresolved, [$currentUserId]));
+            while ($row = $parentStmt->fetch(PDO::FETCH_ASSOC)) {
+                $parentId = (string)($row['id'] ?? '');
+                if ($parentId !== '') {
+                    $results[$parentId] = 'Parent';
+                }
+            }
+
+            // Check generation difference from family_nodes if available
+            $stillUnresolved = array_values(array_filter($unresolved, fn($id) => !isset($results[$id])));
+            if (!empty($stillUnresolved)) {
+                $nodeStmt = $this->db->prepare("SELECT generation_level FROM family_nodes WHERE user_id = ? LIMIT 1");
+                $nodeStmt->execute([$currentUserId]);
+                $viewerGen = $nodeStmt->fetchColumn();
+
+                if ($viewerGen !== false && $viewerGen !== null) {
+                    $viewerGenInt = (int)$viewerGen;
+                    $inNode = implode(',', array_fill(0, count($stillUnresolved), '?'));
+                    $targetNodeSql = sprintf(
+                        "SELECT user_id, generation_level, gender FROM family_nodes WHERE user_id IN (%s)",
+                        $inNode
+                    );
+                    $targetNodeStmt = $this->db->prepare($targetNodeSql);
+                    $targetNodeStmt->execute($stillUnresolved);
+                    while ($tNode = $targetNodeStmt->fetch(PDO::FETCH_ASSOC)) {
+                        $tUid = (string)($tNode['user_id'] ?? '');
+                        $tGen = (int)($tNode['generation_level'] ?? 0);
+                        $gender = strtolower((string)($tNode['gender'] ?? ''));
+                        $diff = $tGen - $viewerGenInt;
+
+                        if ($diff === 0) {
+                            $results[$tUid] = 'Cousin';
+                        } elseif ($diff === 1) {
+                            $results[$tUid] = $gender === 'female' ? 'Aunt' : ($gender === 'male' ? 'Uncle' : 'Elder Kin');
+                        } elseif ($diff >= 2) {
+                            $results[$tUid] = $gender === 'female' ? 'Grandmother' : ($gender === 'male' ? 'Grandfather' : 'Grandparent');
+                        } elseif ($diff === -1) {
+                            $results[$tUid] = $gender === 'female' ? 'Niece' : ($gender === 'male' ? 'Nephew' : 'Niece/Nephew');
+                        } else {
+                            $results[$tUid] = 'Grandchild';
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            \error_log('[FeedRepository::batchResolveKinship] ' . $e->getMessage());
+        }
+
+        // Fill remaining with 'Family Member'
+        foreach ($targetUserIds as $tid) {
+            $tidStr = (string)$tid;
+            if (!isset($results[$tidStr])) {
+                $results[$tidStr] = 'Family Member';
+            }
+        }
+
+        return $results;
     }
 }

@@ -10,7 +10,7 @@
         <div class="w3-row-padding">
             <div class="w3-twothird">
                 <h2 style="font-size: 26px; font-weight: 800; margin: 0; color: #1e293b;">
-                    <i class="fa fa-users text-primary" style="color:#0284c7; margin-right: 8px;"></i> Registered Platform Users
+                    <i class="fa fa-users text-primary" style="color:#a31621; margin-right: 8px;"></i> Registered Platform Users
                 </h2>
                 <p class="w3-text-grey" style="margin-top: 6px; font-size: 15px;">
                     Comprehensive directory of registered members, geographic location, and live connectivity activity.
@@ -30,7 +30,7 @@
     <!-- Quick Stats Summary -->
     <div class="w3-row-padding w3-margin-bottom" style="margin: 0 -8px;">
         <div class="w3-quarter" style="padding: 0 8px; margin-bottom: 12px;">
-            <div class="w3-card w3-white w3-padding-16 w3-round" style="border-left: 4px solid #0284c7;">
+            <div class="w3-card w3-white w3-padding-16 w3-round" style="border-left: 4px solid #a31621;">
                 <span class="w3-text-grey" style="font-size: 13px; font-weight: 600; text-transform: uppercase;">Active Accounts</span>
                 <h3 style="font-size: 24px; font-weight: 800; margin: 6px 0 0 0; color: #1e293b;">{{ count($members) }}</h3>
             </div>
@@ -52,9 +52,9 @@
             </div>
         </div>
         <div class="w3-quarter" style="padding: 0 8px; margin-bottom: 12px;">
-            <div class="w3-card w3-white w3-padding-16 w3-round" style="border-left: 4px solid #8b5cf6;">
+            <div class="w3-card w3-white w3-padding-16 w3-round" style="border-left: 4px solid #b8202c;">
                 <span class="w3-text-grey" style="font-size: 13px; font-weight: 600; text-transform: uppercase;">Security Protocol</span>
-                <h3 style="font-size: 20px; font-weight: 700; margin: 8px 0 0 0; color: #8b5cf6;"><i class="fa fa-lock"></i> GDPR / Zero-PII</h3>
+                <h3 style="font-size: 20px; font-weight: 700; margin: 8px 0 0 0; color: #b8202c;"><i class="fa fa-lock"></i> GDPR / Zero-PII</h3>
             </div>
         </div>
     </div>
@@ -81,7 +81,7 @@
                                 @if(!empty($m['img']))
                                     <img src="/{{ ltrim($m['img'], '/') }}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0;">
                                 @else
-                                    <div style="width: 42px; height: 42px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px;">
+                                    <div style="width: 42px; height: 42px; border-radius: 50%; background: #f5dede; color: #a31621; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px;">
                                         {{ strtoupper(substr($m['firstName'] ?? 'U', 0, 1)) }}
                                     </div>
                                 @endif
@@ -104,7 +104,7 @@
                             @endif
                         </td>
                         <td style="padding: 14px 12px; vertical-align: middle;">
-                            <span class="w3-tag w3-light-grey w3-border w3-round" style="font-family: monospace; font-weight: 700; color: #0369a1;">
+                            <span class="w3-tag w3-light-grey w3-border w3-round" style="font-family: monospace; font-weight: 700; color: #8a1019;">
                                 {{ $m['famCode'] ?? 'N/A' }}
                             </span>
                         </td>

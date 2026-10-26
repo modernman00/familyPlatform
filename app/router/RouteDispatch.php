@@ -33,7 +33,7 @@ final class RouteDispatch
 
         /* ----------  callable route ---------- */
         if (is_callable($this->match['target'])) {
-            call_user_func_array($this->match['target'], $this->match['params']);
+            call_user_func_array($this->match['target'], array_values($this->match['params']));
             return;
         }
 
@@ -114,7 +114,7 @@ final class RouteDispatch
         }
         // -----------------------------------------------
 
-        call_user_func_array([new $controller, $method], $this->match['params']);
+        call_user_func_array([new $controller, $method], array_values($this->match['params']));
 
     } catch (UnauthorisedException $e) {
         http_response_code(401);

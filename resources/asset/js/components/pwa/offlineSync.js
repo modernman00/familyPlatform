@@ -127,7 +127,7 @@ class OfflineSyncManager {
           text: `You are currently offline. Your ${actionDescription.toLowerCase()} has been safely saved and will publish automatically when you reconnect.`,
           timer: 4000,
           timerProgressBar: true,
-          confirmButtonColor: '#2563eb'
+          confirmButtonColor: '#a31621'
         });
 
         resolve(true);

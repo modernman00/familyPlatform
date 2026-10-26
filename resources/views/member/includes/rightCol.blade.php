@@ -28,7 +28,7 @@
 
          <p class="eventInfo"><strong>RSVP: </strong>{{ $event['firstName'] }} {{ $event['lastName'] }}</p>
          <p class="eventInfo"><strong>Event: </strong>{{ $event['eventName'] }}</p>
-         <p class="eventInfo"><strong>Date: </strong>{{ dateFormat($event['eventDate']) }} | <b><i style="color: rgba(11, 11, 201, 0.631)"> {{ $dateDifference }} </i></b> </p>
+         <p class="eventInfo"><strong>Date: </strong>{{ dateFormat($event['eventDate']) }} | <b><i style="color: rgba(138,16,25, 0.631)"> {{ $dateDifference }} </i></b> </p>
          <p class="eventInfo"><strong>Type: </strong>{{ $event['eventType'] }}</p>
          <p class="eventInfo"><strong>Description: </strong> {{ $event['eventDescription'] }}</p>
          <hr>

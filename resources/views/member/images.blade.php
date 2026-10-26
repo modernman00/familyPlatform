@@ -44,7 +44,7 @@
             z-index: 10;
         }
         .gallery-back-btn:hover {
-            background: var(--primary-color-subtle, rgba(79, 70, 229, 0.1));
+            background: var(--primary-color-subtle, rgba(163,22,33, 0.1));
             color: var(--primary-color);
             transform: scale(1.1);
         }
@@ -126,7 +126,7 @@
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                 <div class="d-flex align-items-center gap-3">
                     <div>
-                        <h2 class="mb-0 fw-bold" style="font-family: 'Playfair Display', serif; color: var(--text-color);">
+                        <h2 class="mb-0 fw-bold" style="font-family: var(--font-family, 'Inter', sans-serif); color: var(--text-color);">
                             @if(isset($member['firstName']))
                                 {{ ucwords(strtolower($member['firstName'])) }}'s Photo Gallery
                             @else

@@ -5,9 +5,9 @@
 @push('styles')
 <style>
     .journal-hero {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(79, 70, 229, 0.05) 50%, rgba(16, 185, 129, 0.08) 100%);
+        background: linear-gradient(135deg, rgba(184,32,44, 0.08) 0%, rgba(163,22,33, 0.05) 50%, rgba(16, 185, 129, 0.08) 100%);
         border-radius: 20px;
-        border: 1px solid rgba(99, 102, 241, 0.15);
+        border: 1px solid rgba(184,32,44, 0.15);
         padding: 2.5rem 1.5rem;
         margin-bottom: 2rem;
     }
@@ -25,8 +25,8 @@
 
     .journal-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 16px 32px -8px rgba(99, 102, 241, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04);
-        border-color: rgba(99, 102, 241, 0.3);
+        box-shadow: 0 16px 32px -8px rgba(184,32,44, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04);
+        border-color: rgba(184,32,44, 0.3);
     }
 
     .journal-cover-frame {
@@ -55,8 +55,8 @@
         text-transform: uppercase;
         padding: 0.3rem 0.75rem;
         border-radius: 2rem;
-        background: rgba(99, 102, 241, 0.1);
-        color: #4f46e5;
+        background: rgba(184,32,44, 0.1);
+        color: #a31621;
     }
 
     .read-time-pill {
@@ -66,20 +66,20 @@
     }
 
     .btn-create-journal {
-        background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+        background: linear-gradient(135deg, #a31621 0%, #b8202c 100%);
         color: #ffffff;
         font-weight: 600;
         border-radius: 50px;
         padding: 0.65rem 1.4rem;
         border: none;
-        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        box-shadow: 0 4px 12px rgba(163,22,33, 0.25);
         transition: transform 0.2s, box-shadow 0.2s;
     }
 
     .btn-create-journal:hover {
         color: #ffffff;
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+        box-shadow: 0 6px 16px rgba(163,22,33, 0.35);
     }
 
     .filter-pill-btn {
@@ -94,9 +94,9 @@
     }
 
     .filter-pill-btn:hover, .filter-pill-btn.active {
-        background: #4f46e5;
+        background: #a31621;
         color: #ffffff;
-        border-color: #4f46e5;
+        border-color: #a31621;
     }
 </style>
 @endpush
@@ -108,7 +108,7 @@
         <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2 rounded-pill mb-2" style="font-size: 0.82rem; letter-spacing: 0.04em;">
             <i class="bi bi-shield-lock-fill me-1"></i> PRIVATE TO FAMILY NETWORK #{{ htmlspecialchars($familyCode, ENT_QUOTES, 'UTF-8') }}
         </span>
-        <h1 class="fw-bold mb-2" style="color: #1e1b4b; font-size: clamp(1.8rem, 3.5vw, 2.5rem); letter-spacing: -0.02em;">
+        <h1 class="fw-bold mb-2" style="color: #2a0a0d; font-size: clamp(1.8rem, 3.5vw, 2.5rem); letter-spacing: -0.02em;">
             Family Living Journal & Chronicles
         </h1>
         <p class="text-muted mx-auto mb-3" style="max-width: 650px; font-size: 1rem; line-height: 1.6;">
@@ -128,10 +128,10 @@
     <!-- Empty State -->
     @if(empty($journals))
         <div class="card border-0 shadow-sm text-center py-5 px-4 my-4" style="border-radius: 20px; background: #ffffff;">
-            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; background: rgba(99, 102, 241, 0.1); color: #4f46e5; font-size: 2.2rem;">
+            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; background: rgba(184,32,44, 0.1); color: #a31621; font-size: 2.2rem;">
                 <i class="bi bi-journal-plus"></i>
             </div>
-            <h3 class="fw-bold mb-2" style="color: #1e1b4b;">No Chronicles Written Yet</h3>
+            <h3 class="fw-bold mb-2" style="color: #2a0a0d;">No Chronicles Written Yet</h3>
             <p class="text-muted mx-auto mb-4" style="max-width: 520px;">
                 Start preserving your family heritage today. Chronicle a favorite grandparent memory, a cherished holiday tradition, or an unforgettable milestone.
             </p>

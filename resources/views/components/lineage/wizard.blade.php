@@ -8,6 +8,37 @@
             </div>
             <div class="modal-body p-4" style="overflow-y: auto;">
                 <div id="addRelativeError" class="alert alert-danger d-none" style="border-radius: 8px;"></div>
+
+                @if(!empty($hasMaternalCode) && !empty($maternalFamCode))
+                <!-- Lineage Family Code Selector (Marital / Household vs. Birth / Maiden Family) -->
+                <div id="wizardLineageScopeBanner" class="mb-3 p-3 rounded-3" style="background:#f8fafc;border:1px solid #e2e8f0;">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-1 mb-2">
+                        <div class="fw-bold small text-dark">
+                            <i class="bi bi-signpost-split me-1 text-primary"></i>Which family tree does this relative belong to?
+                        </div>
+                        <span class="badge bg-primary rounded-pill" id="wizardActiveCodeBadge" style="font-size: 0.72rem;">
+                            #{{ ($activeLineageScope ?? 'primary') === 'maternal' ? $maternalFamCode : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}
+                        </span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2" role="radiogroup" aria-label="Target family tree">
+                        <label class="wizard-lineage-option d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 border bg-white" style="cursor:pointer;min-height:44px;font-size:.82rem;white-space:nowrap;flex-shrink:0;">
+                            <input type="radio" name="wizard_lineage_scope_radio" value="primary" data-code="{{ $primaryFamCode ?? ($data['famCode'] ?? '') }}" data-surname="{{ $maritalSurname ?? ($data['lastName'] ?? '') }}" {{ ($activeLineageScope ?? 'primary') !== 'maternal' ? 'checked' : '' }} onchange="window.syncWizardLineageScope && window.syncWizardLineageScope(this.value)">
+                            <span><strong>Marital / Household Tree</strong> <span class="text-muted">(#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})</span></span>
+                        </label>
+                        <label class="wizard-lineage-option d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 border bg-white" style="cursor:pointer;min-height:44px;font-size:.82rem;white-space:nowrap;flex-shrink:0;">
+                            <input type="radio" name="wizard_lineage_scope_radio" value="maternal" data-code="{{ $maternalFamCode }}" data-surname="{{ $maidenSurname ?? '' }}" {{ ($activeLineageScope ?? 'primary') === 'maternal' ? 'checked' : '' }} onchange="window.syncWizardLineageScope && window.syncWizardLineageScope(this.value)">
+                            <span><strong>My Birth / Maiden Family</strong> <span class="text-muted">(#{{ $maternalFamCode }})</span></span>
+                        </label>
+                    </div>
+                    <div class="text-muted mt-2" id="wizardLineageScopeHelp" style="font-size:.76rem;">
+                        @if(($activeLineageScope ?? 'primary') === 'maternal')
+                            Adding to your <strong>Birth / Maiden Family (#{{ $maternalFamCode }})</strong> so your parents and siblings connect directly to your birth lineage.
+                        @else
+                            Adding to your <strong>Marital / Household Tree (#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})</strong>. Switch to Birth / Maiden Family when adding your own parents or birth siblings.
+                        @endif
+                    </div>
+                </div>
+                @endif
                 
                 <!-- Step 1: Select Type -->
                 <div id="step1">
@@ -61,6 +92,8 @@
                     <form id="addPartnerForm">
     @include('csrf')
                         <input type="hidden" name="base_node_id" id="partnerBaseNodeId">
+                        <input type="hidden" name="lineage_scope" class="wizard-lineage-scope-input" value="{{ $activeLineageScope ?? 'primary' }}">
+                        <input type="hidden" name="lineage_code" class="wizard-lineage-code-input" value="{{ ($activeLineageScope ?? 'primary') === 'maternal' ? ($maternalFamCode ?? '') : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}">
                         
                         <div class="mb-3">
                             <label class="form-label fw-bold">Relationship Status</label>
@@ -123,6 +156,8 @@
                     <form id="addChildForm">
     @include('csrf')
                         <input type="hidden" name="base_node_id" id="childBaseNodeId">
+                        <input type="hidden" name="lineage_scope" class="wizard-lineage-scope-input" value="{{ $activeLineageScope ?? 'primary' }}">
+                        <input type="hidden" name="lineage_code" class="wizard-lineage-code-input" value="{{ ($activeLineageScope ?? 'primary') === 'maternal' ? ($maternalFamCode ?? '') : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}">
                         
                         <div id="childUnionHint" class="alert alert-warning small py-2">
                             To add a child, you must select which partnership/union they belong to.
@@ -177,8 +212,10 @@
                     <form id="addParentsForm">
     @include('csrf')
                         <input type="hidden" name="base_node_id" id="parentsBaseNodeId">
+                        <input type="hidden" name="lineage_scope" class="wizard-lineage-scope-input" value="{{ $activeLineageScope ?? 'primary' }}">
+                        <input type="hidden" name="lineage_code" class="wizard-lineage-code-input" value="{{ ($activeLineageScope ?? 'primary') === 'maternal' ? ($maternalFamCode ?? '') : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}">
                         
-                        <div class="alert alert-info small py-2">
+                        <div class="alert alert-info small py-2" id="parentsLineageHint">
                             Provide details for one or both parents. Leave blank if unknown.
                         </div>
                         

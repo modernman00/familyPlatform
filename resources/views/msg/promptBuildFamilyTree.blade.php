@@ -19,8 +19,8 @@
 </p>
 
 @if(!empty($data['note']))
-<div style="margin-bottom: 25px; background-color: #f8fafc; border-left: 4px solid #3b82f6; padding: 16px 20px; border-radius: 8px;">
-    <p style="margin: 0; font-size: 14px; font-style: italic; color: #1e40af; line-height: 1.5;">
+<div style="margin-bottom: 25px; background-color: #f8fafc; border-left: 4px solid #a31621; padding: 16px 20px; border-radius: 8px;">
+    <p style="margin: 0; font-size: 14px; font-style: italic; color: #8a1019; line-height: 1.5;">
         "{{ htmlspecialchars((string)$data['note']) }}"
     </p>
     <p style="margin: 8px 0 0 0; font-size: 12px; color: #64748b; font-weight: 600;">

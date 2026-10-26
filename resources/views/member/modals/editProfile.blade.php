@@ -72,8 +72,8 @@
         }
         #editProfileModal .form-control:focus, 
         #editProfileModal .form-select:focus {
-            border-color: var(--brand-primary, #00bfa5);
-            box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.15);
+            border-color: var(--brand-primary, #a31621);
+            box-shadow: 0 0 0 3px rgba(163,22,33, 0.15);
             background-color: var(--bg-white, #ffffff);
             color: var(--text-main, #0f172a);
             outline: none;
@@ -99,7 +99,7 @@
             margin-top: 0;
         }
         #editProfileModal .section-title i {
-            color: var(--brand-primary, #00bfa5);
+            color: var(--brand-primary, #a31621);
             font-size: 1rem;
         }
         #editProfileModal .profile-preview-container {
@@ -112,7 +112,7 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 2px solid var(--brand-primary, #00bfa5);
+            border: 2px solid var(--brand-primary, #a31621);
             box-shadow: 0 3px 8px rgba(0,0,0,0.12);
             object-fit: cover;
         }
@@ -123,7 +123,7 @@
             width: 30px;
             height: 30px;
             border-radius: 50%;
-            background-color: var(--brand-primary, #00bfa5);
+            background-color: var(--brand-primary, #a31621);
             border: 2px solid var(--bg-white, #ffffff);
             display: flex;
             align-items: center;
@@ -180,17 +180,17 @@
             font-size: 0.88rem;
             font-weight: 600;
             color: #ffffff !important;
-            background: linear-gradient(135deg, var(--brand-primary, #00bfa5) 0%, var(--brand-primary-dark, #00897b) 100%);
+            background: linear-gradient(135deg, var(--brand-primary, #a31621) 0%, var(--brand-primary-dark, #8a1019) 100%);
             border: none;
-            box-shadow: 0 2px 8px rgba(0, 191, 165, 0.22);
+            box-shadow: 0 2px 8px rgba(163,22,33, 0.22);
             transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
             flex: 1;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
         }
         #editProfileModal .btn-save:hover {
-            background: linear-gradient(135deg, var(--brand-primary-light, #33c9b2) 0%, var(--brand-primary, #00bfa5) 100%);
-            box-shadow: 0 4px 14px rgba(0, 191, 165, 0.32);
+            background: linear-gradient(135deg, var(--brand-primary-light, #b8202c) 0%, var(--brand-primary, #a31621) 100%);
+            box-shadow: 0 4px 14px rgba(163,22,33, 0.32);
             transform: translateY(-1px);
             opacity: 1;
         }

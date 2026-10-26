@@ -57,9 +57,10 @@ final class PostMessage
             // concurrent AJAX calls queued behind the same session file lock.
             \releaseSessionLock();
 
-            // Get pagination parameters
+            // Get pagination & filter parameters
             $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
             $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 50;
+            $filter = isset($_GET['filter']) ? trim((string)$_GET['filter']) : '';
             $offset = ($page - 1) * $limit;
 
             // 1. Get visible posts with pagination across multiple families via unified FeedRepository
@@ -68,11 +69,12 @@ final class PostMessage
                 $id,
                 $famCodes,
                 $limit,
-                $offset
+                $offset,
+                $filter
             );
 
             // Get total count for pagination metadata
-            $total = $feedRepo->countFeedPosts($id, $famCodes);
+            $total = $feedRepo->countFeedPosts($id, $famCodes, $filter);
             $lastPage = (int)ceil($total / $limit);
 
 
@@ -95,10 +97,13 @@ final class PostMessage
             }
 
             // 2. Loop through each post: MUST use the reference operator (&) to modify the original array.
+            // One batched query for the whole page instead of one per post (N+1).
+            $commentsByPost = AllMembersData::commentProfilePicByPostNos(array_column($posts, 'post_no'));
+
             foreach ($posts as &$post) {
 
                 // 3. Get all comments for THIS post
-                $comments = AllMembersData::commentProfilePicByPostNo($post['post_no']);
+                $comments = $commentsByPost[(string) $post['post_no']] ?? [];
 
                 if (!$comments) {
                     continue; // No comments for this post, move to the next post

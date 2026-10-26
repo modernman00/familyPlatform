@@ -21,7 +21,6 @@ include_once __DIR__ . "/realtime.php";
 include_once __DIR__ . "/admin.php";
 include_once __DIR__ . "/profile_page.php";
 include_once __DIR__ . "/allMembersRoute.php";
-include_once __DIR__ . "/chat.php";
 include_once __DIR__ . "/Event.php";
 include_once __DIR__ . "/notification.php";
 include_once __DIR__ . "/friendRequest.php";
@@ -40,7 +39,7 @@ include_once __DIR__ . "/announcement.php";
 include_once __DIR__ . "/familyMigrationRoute.php";
 
 // Internationalization & Diaspora Language Switching
-$router->map('GET', '/locale/[a:lang]', 'App\controller\LocaleController@switch', 'LOCALE_SWITCH');
+$router->map('GET', '/locale/[a:locale]', 'App\controller\LocaleController@switch', 'LOCALE_SWITCH');
 // SEC-4 — /checking was an unauthenticated `while (true)` SSE loop that pins an
 // FPM worker forever; superseded by Pusher. Route removed.
 

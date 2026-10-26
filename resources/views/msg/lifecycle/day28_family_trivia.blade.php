@@ -26,8 +26,8 @@
     Who in your family has the sharpest memory? Who knows which uncle was born during a historic storm, or what grandmother's very first job was?
 </p>
 
-<div style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); border-left: 4px solid #a855f7; padding: 20px 24px; border-radius: 8px; margin-bottom: 24px;">
-    <h4 style="margin: 0 0 8px 0; color: #7e22ce; font-size: 16px; font-weight: 700;">
+<div style="background: linear-gradient(135deg, #fbefef 0%, #fbefef 100%); border-left: 4px solid #ef6b73; padding: 20px 24px; border-radius: 8px; margin-bottom: 24px;">
+    <h4 style="margin: 0 0 8px 0; color: #8a1019; font-size: 16px; font-weight: 700;">
         🧠 Weekly Family Trivia
     </h4>
     <p style="margin: 0; color: #6b21a8; font-size: 14px; line-height: 1.5;">
@@ -49,7 +49,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0 24px 0;">
     <tr>
         <td align="center">
-            <a href="{{ $baseUrl }}/member/trivia" target="_blank" style="background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.35);">
+            <a href="{{ $baseUrl }}/member/trivia" target="_blank" style="background: linear-gradient(135deg, #ef6b73 0%, #8a1019 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(184,32,44, 0.35);">
                 Play Weekly Trivia &rarr;
             </a>
         </td>

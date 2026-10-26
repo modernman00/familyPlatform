@@ -188,7 +188,7 @@ input[type="file"] {
 
     {{-- DATE OF BIRTH --}}
     <p><i class="fa fa-birthday-cake fa-fw w3-margin-right w3-text-theme"></i> {{ $data['day'] }} /
-      {{ $data['month'] }} /{{ $data['year'] }}
+      {{ $data['month'] }}@if(($data['show_birth_year'] ?? 'off') === 'on' && !empty($data['year'])) / {{ $data['year'] }}@endif
     </p><br>
 
   </div>

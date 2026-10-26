@@ -42,6 +42,14 @@ Just as TAT executive governance reviews are visibly conducted, the **Engineerin
 1. **The Engineering Council Debate:** Proposer vs. Designated Technical Adversary clash (Option A vs Option B, lock contention, Big-O, failure modes), Council resolution, and assigned Single-Threaded Owner (STO) execution pod.
 2. **The TAT 2.0 Crucible Debate:** Executive 6-seat check (Victor/James, David/Kieran, Marcus/Ghost, Sarah, Helena, Olutobi) culminating in Olutobi's delegated sign-off.
 
+### 1.6 The Universal British English (UK) Invariant ⚡ (Jumoke Inviolable Standard)
+All user-facing copy, view templates (`.blade.php`, `.html`), email notifications, and dynamically generated content (e.g. `AutonomousBlogService`) across the entire application must strictly use **British English (en-GB)**:
+- Mandatory `-ise` / `-ising` / `-ised` (e.g., *maximising*, *optimising*, *prioritising*, *recognise*, *organise*).
+- Mandatory `-our` (e.g., *behaviour*, *colour*, *favour*, *honour*, *neighbour*).
+- Mandatory `licence` (noun), `defence`, `centre`, `mould`, `enquiry`.
+- Technical database columns and internal schema keys (e.g. `'neighbor'`) are preserved for database compatibility, while all visible labels, badges, tooltips, and headers must display pure British English.
+- The pre-commit gate `scripts/verify_engineering_must_haves.php` statically scans and blocks US English spellings in view files.
+
 ---
 
 ## 2. Master Team Roles & Responsibilities
@@ -51,7 +59,7 @@ Just as TAT executive governance reviews are visibly conducted, the **Engineerin
 
 ### 🏛️ Executive Front-Door & Strategic Advisory
 - **Jumoke Olaogun** | Special Assistant to the CEO, Chief of Staff & Chief Token Efficiency Specialist ⚡
-  - *Responsibilities:* **Automatic CEO Front-Door.** Ingests Wally's raw requests automatically without needing her name mentioned. Silently triages tasks, enforces the **Automated Dual-Test Mandate** and the **Living "How to Use" Guide Invariant (Standard 19)** alongside CPO Sarah, and operates in **Strict Velocity Mode** by default (saving full board monologues strictly for explicit requests or Tier 3 changes). Ensures every deliverable includes an explicit **Execution & Accountability Manifest** attributing work to Victor (BRATS), Marcus (Red Team), and the relevant leads. Continuously audits token burn across squads.
+  - *Responsibilities:* **Automatic CEO Front-Door.** Ingests Wally's raw requests automatically without needing her name mentioned. Silently triages tasks, enforces the **Automated Dual-Test Mandate**, the **Living "How to Use" Guide Invariant (Standard 19)**, the **Universal Button Spinner Mandate (Rule 2)**, and the **Universal British English (UK) Invariant (Standard 1.6)** alongside CPO Sarah, and operates in **Strict Velocity Mode** by default (saving full board monologues strictly for explicit requests or Tier 3 changes). Ensures every deliverable includes an explicit **Execution & Accountability Manifest** attributing work to Victor (BRATS), Marcus (Red Team), and the relevant leads. Continuously audits token burn across squads.
 - **Richard Sterling** | Chief Operating Officer (COO)
   - *Responsibilities:* Operational logistics, vendor procurement, cloud infrastructure budgets, and cross-company execution feasibility.
 - **Isabella Chen** | Senior Social Media & Growth Adviser to the CEO
@@ -179,7 +187,6 @@ Just as TAT executive governance reviews are visibly conducted, the **Engineerin
 - **Amara Osei** | FinTech Business Logic & Fraud Specialist — Transaction race conditions, multi-step workflow bypasses, and financial/data compliance.
 - **The Mandatory Adversarial Enterprise Security Attack Rule (Dr. Viktor Kovács & Marcus Gate) ⚡:**
   Every Tier 2 and Tier 3 implementation across the entire portfolio MUST undergo an adversarial penetration attack led by Dr. Viktor Kovács & Marcus. The Red Team must construct concrete, raw Proof-of-Concept (PoC) exploit payloads (curl/bash/scripts). Code cannot merge or deploy until an automated regression test proves each exploit is neutralized.
-- **The Proof-of-Exploit Rule:** Marcus & Ghost must provide the concrete Proof-of-Concept (PoC) exploit payload. Code cannot merge until an automated regression test proves the exploit is neutralized.
 - **The Playbook Reconnaissance Audit:** Marcus & Ghost must inspect all public- and manager-facing playbook templates to verify zero exposure of internal class names, method signatures, database table keys, or defense algorithms. Any internal architectural leakage constitutes an immediate **P1 Security Block** at TAT Seat 3.
 
 ---
@@ -252,7 +259,8 @@ graph TD
     subgraph Tier 3: Core Architectural Gauntlet
         T3 --> RFC_Draft[Engineering Council TFT: 1-Page RFC & Proof Capsule]
         RFC_Draft --> Victor_Cert[Victor 6-Pillar CTO Pre-Approval]
-        Victor_Cert --> TAT_Gauntlet[Chamber 4: TAT 2.0 6-Seat Dialectic Gauntlet]
+        Victor_Cert --> Red_Gauntlet[Chamber 3: Dr. Viktor Kovács Enterprise Attack Gauntlet]
+        Red_Gauntlet --> TAT_Gauntlet[Chamber 4: TAT 2.0 6-Seat Dialectic Gauntlet]
         TAT_Gauntlet -->|Dissent / Gate Fail| RFC_Draft
         TAT_Gauntlet -->|Dialectic Consensus| Olutobi_Sign[Olutobi Final Executive Sign-Off]
         Olutobi_Sign --> TFT_Exec[TFT Zero-Defect Execution & Deploy]
@@ -270,16 +278,18 @@ graph TD
   2. BRATS audits systemic ripple effects across other 6 apps.
   3. **Mandatory Dr. Viktor Kovács & Marcus Enterprise Attack:** Dr. Kovács & Marcus execute raw PoC exploit tests (CSRF, IDOR, enumeration, auth tampering). All exploits must be neutralized before proceeding.
   4. Kieran audits Big-O efficiency; Isla audits UI aesthetics; Segun audits mobile responsiveness.
-  5. Verified via browser screenshot artifact before marking complete.
+  5. Verified via in-flight/pre-flight test suites and browser screenshot artifact before marking complete.
 
 ### 🔴 Tier 3: Core Architecture & Structural Changes (High Risk)
 - **Scope:** Database schema migrations (`ALTER`, `CREATE`), auth/session routing, shared libraries (`shared-lib`), payment/pledge logic, service workers (`sw.js`).
 - **Process:**
   1. James drafts a 1-Page ADR (Context, Tradeoffs, Blast Radius, Rollback).
   2. Victor conducts 6-Pillar CTO Pre-Approval Certification and files with Jumoke.
-  3. Full adversarial review across Chambers 1, 2, 3, and 4.
-  4. David verifies 4 structural gates; Olutobi applies Final Executive Sign-Off.
-  5. Deployment executed with automated rollback trigger.
+  3. **Mandatory Dr. Viktor Kovács Enterprise Security Attack Gauntlet:** Full adversarial penetration assault by Dr. Kovács & Marcus with concrete PoC exploit neutralization proofs required.
+  4. Full adversarial review across Chambers 1, 2, 3, and 4.
+  5. David verifies 4 structural gates; Olutobi applies Final Executive Sign-Off.
+  6. In-flight and pre-flight gates (`scripts/preflight.sh`) pass cleanly (Exit Code 0).
+  7. Deployment executed with automated rollback trigger.
 
 ---
 
@@ -310,6 +320,47 @@ graph TD
 | **21**| **Enforced `shared-lib` & `shared-js-lib` Component Invariant (Zero Ad-Hoc Helper Reinventions) ⚡** | Ad-hoc helper duplication is strictly prohibited across all portfolio apps: (1) **JSON API Responses:** Controllers MUST use `\Src\ApiResponse::json()` and `\Src\ApiResponse::error()`. Writing local `respondJson()` or unstandardized `json_encode()` is an automatic preflight failure. (2) **Rate-Limiting:** All public-facing API endpoints MUST apply `\Src\Limiter::limit()`. (3) **Audit Logging:** System mutations and approval gates MUST record entries using `\Src\AuditLogger::log()`. (4) **Frontend Components:** Web views requiring digital signatures, ID badges, button loading spinners, or AJAX requests MUST import and leverage `@modernman00/shared-js-lib` (`DigitalSignaturePad`, `CardCanvasGenerator`, `ButtonLoader`, `Http.js`, `ShowResponse`). |
 | **22**| **Healthcare Workforce Bifurcation & CQC Reg 5 FPPT Invariant (BCP Specific) ⚡** | When developing HR, recruitment, or lifecycle features for healthcare: (1) **Workforce Bifurcation:** Never apply clinical care dependency ratios to office, administrative, or executive roles. Office roles are justified by operational workload and bed count (e.g. 1 Admin per 45 beds). (2) **CQC Regulation 5 (FPPT):** All Registered Care Home Manager (Band 7) and Director (Band 8a) recruitment pipelines MUST enforce the CQC Regulation 5 Fit and Proper Person Test (FPPT): Insolvency Register checks, Companies House Disqualified Directors Register checks, and Level 5 Leadership Diploma verification. |
 | **23**| **Pre-Commit Must-Haves Scanner Invariant & Test Fixture SQL Safety ⚡** | No PR, feature, or refactor may be marked complete without executing `php scripts/verify_engineering_must_haves.php` and `bash scripts/preflight.sh` to zero violations. (1) **Universal CSRF:** All `<form>` elements in Blade templates (including AJAX/modal forms) must contain `@include('csrf')` or `@csrf`. (2) **Zero SQL String Interpolation:** Raw variable interpolation (`{$var}`, `$var`, or concatenation) is strictly prohibited across ALL PHP files without exception. Test fixtures, seeders, and assertion queries are NOT exempt—all test queries must use parameterized PDO statements (`prepare` & `execute`). (3) **Decoupled Placeholders:** Dynamic batch placeholders (`?,?,?`) must be decoupled from the SQL command string via `sprintf()` so that no variable name appears on the SQL statement line. |
+| **24**| **PHP `readonly` + Constructor Body Override (Fatal Pattern Ban) ⚡** | When writing PHP 8.1+ code, agents and developers are STRICTLY FORBIDDEN from combining constructor-promoted `readonly` properties with a body-level reassignment (`$this->prop = $prop ?? new ...`). The promoted property's implicit assignment IS the one allowed initialization; reassigning in the constructor body triggers a fatal runtime error (`Cannot modify readonly property`). Either drop `readonly` or use a static factory constructor method (`create()`). |
+| **25**| **Strict String Typing for User/Entity IDs ⚡** | All user and entity IDs must be strictly typed as `string` in PHP models, controllers, and DTOs. This prevents silent alphanumeric truncation bugs (where alphanumeric IDs such as `usr_98a7b` evaluate to `0` or integer prefixes when cast to `int`). |
+| **26**| **Strict Router Whitelist & Session Dependency (`RouteDispatch.php`) ⚡** | Any controller that calls `$this->requireManager()` or reads `$_SESSION['manager_id']` MUST NOT be added to `$publicControllers` in `RouteDispatch.php`. Whitelisted controllers bypass the JWT decoding block that populates `$_SESSION`, causing authenticated methods to throw 401/null pointer errors. Casing in router string comparisons is strict (`in_array(..., true)`). |
+| **27**| **MySQL `ONLY_FULL_GROUP_BY` Strict Mode & Application-Layer Deduplication ⚡** | The database runs with `ONLY_FULL_GROUP_BY` strict mode enabled. Never use `GROUP BY` for simple deduplication if the `SELECT` clause contains `*` or non-aggregated columns. Instead, query raw records and perform deduplication in the PHP array layer using unique associative keys. |
+| **28**| **Pre-Flight Schema Parity Rule (`SHOW COLUMNS`) ⚡** | When investigating "works locally, fails in production" bugs, never assume schemas match just because tables exist. Run `SHOW COLUMNS FROM <table>` on both environments and compare `DEFAULT` constraints, `ON UPDATE` triggers, and column types before touching PHP application code. |
+| **29**| **Controlled Deletion & Protected Live Syncs (`rsync --delete-excluded`) ⚡** | All deployment scripts using `--delete` or `--delete-excluded` MUST be guarded by a strict `.rsync-filter` protecting persistent directories (`P /public/uploads/***`, `P /storage/***`, `P .env`). Scripts MUST include a pre-flight structural dry-run assertion before synchronization. |
+
+---
+
+### 4.1 Granular Technical Defensive Patterns & Gotchas
+
+#### 🚨 Pattern A: PHP `readonly` Constructor Trap (PHP 8.1+)
+```php
+// ❌ FORBIDDEN — readonly + body reassignment (causes fatal 500 at runtime):
+public function __construct(private readonly ?CacheService $cache = null) {
+    $this->cache = $cache ?? new CacheService(); // FATAL: Cannot modify readonly property
+}
+
+// ✅ CORRECT Option 1 — Drop readonly when default initialization occurs in constructor body:
+public function __construct(private ?CacheService $cache = null) {
+    $this->cache = $cache ?? new CacheService();
+}
+
+// ✅ CORRECT Option 2 — Retain readonly and provide static factory:
+public function __construct(private readonly CacheService $cache) {}
+
+public static function create(?CacheService $cache = null): self {
+    return new self($cache ?? new CacheService());
+}
+```
+
+#### 🚨 Pattern B: Router Whitelist & Session Injection Dependencies
+```php
+// Router must decode JWT and populate session BEFORE manager controllers execute:
+$VerifyJWT = SignIn::verify();
+$_SESSION['id']         = $id;
+$_SESSION['manager_id'] = $id;
+
+// Controllers calling requireManager() MUST NOT be in $publicControllers.
+// Sequential Dependency: Router (JWT -> Session) ===> Controller (reads Session).
+```
 
 ---
 

@@ -16,6 +16,91 @@ final class OrganogramEditorController extends BaseController
     }
 
     /**
+     * Resolve the active family code (marital / primary household vs. birth / maiden family)
+     * and map $baseNodeId or $targetNodeId across the signed-in user's held family trees.
+     *
+     * @param \PDO $db
+     * @param int $baseNodeId
+     * @param int $targetNodeId
+     * @param array<string, mixed>|null $jsonInput
+     * @return array{family_code: string, base_node_id: int, lineage_scope: string}
+     */
+    private function resolveEditorFamilyContext(\PDO $db, int $baseNodeId = 0, int $targetNodeId = 0, ?array $jsonInput = null): array
+    {
+        $userId = (string)($_SESSION['id'] ?? '');
+        $primaryCode = strtoupper(trim((string)($_SESSION['famCode'] ?? '')));
+        $lineageScope = trim((string)($_POST['lineage_scope'] ?? ($jsonInput['lineage_scope'] ?? '')));
+        $requestedCode = strtoupper(trim(str_replace('#', '', (string)($_POST['lineage_code'] ?? ($_POST['family_code'] ?? ($jsonInput['lineage_code'] ?? ($jsonInput['family_code'] ?? '')))))));
+
+        $familyCode = $primaryCode;
+        $resolvedScope = 'primary';
+
+        // 1. Explicit maternal / birth lineage request
+        if (($lineageScope === 'maternal' || $lineageScope === 'birth') && $requestedCode !== '') {
+            if ($userId !== '' && (new \App\services\BirthFamilyCodeService($db))->userHoldsCode($userId, $requestedCode)) {
+                $familyCode = $requestedCode;
+                $resolvedScope = 'maternal';
+            }
+        } elseif ($requestedCode !== '' && $requestedCode !== $primaryCode) {
+            if ($userId !== '' && (new \App\services\BirthFamilyCodeService($db))->userHoldsCode($userId, $requestedCode)) {
+                $familyCode = $requestedCode;
+                $resolvedScope = 'maternal';
+            }
+        }
+
+        // 2. If operating on an existing target node (update, delete, fillPlaceholder, setGender, linkMember),
+        // check which family tree that node actually lives in and verify session ownership.
+        $checkId = $targetNodeId > 0 ? $targetNodeId : $baseNodeId;
+        if ($checkId > 0) {
+            $stmtNode = $db->prepare('SELECT id, user_id, family_code FROM family_nodes WHERE id = ? LIMIT 1');
+            $stmtNode->execute([$checkId]);
+            $nodeRow = $stmtNode->fetch(\PDO::FETCH_ASSOC);
+
+            if ($nodeRow) {
+                $nodeFamCode = strtoupper(trim((string)($nodeRow['family_code'] ?? '')));
+                $nodeUserId = (string)($nodeRow['user_id'] ?? '');
+
+                // Case A: User is adding a relative (e.g. Parents or Sibling) to their own root node
+                // while explicitly routing to their Birth / Maiden family tree ($resolvedScope === 'maternal'),
+                // or vice-versa when viewing one tree and routing to the other.
+                if ($baseNodeId > 0
+                    && $targetNodeId === 0
+                    && $nodeFamCode !== ''
+                    && $familyCode !== ''
+                    && $nodeFamCode !== $familyCode
+                    && $userId !== ''
+                    && $nodeUserId === $userId
+                ) {
+                    $stmtTargetSelf = $db->prepare('SELECT id FROM family_nodes WHERE user_id = ? AND family_code = ? LIMIT 1');
+                    $stmtTargetSelf->execute([$userId, $familyCode]);
+                    $targetSelfId = (int)$stmtTargetSelf->fetchColumn();
+
+                    if ($targetSelfId <= 0) {
+                        $memberProfile = parent::findMemberById($userId);
+                        if (!empty($memberProfile)) {
+                            $targetSelfId = \App\services\FamilyClaimService::claimOrInitializeNode($familyCode, $userId, $memberProfile);
+                        }
+                    }
+                    if ($targetSelfId > 0) {
+                        $baseNodeId = $targetSelfId;
+                    }
+                }
+                // Case B: No explicit cross-tree switch requested, or editing an existing relative node in the user's birth tree
+                elseif ($nodeFamCode !== '' && $nodeFamCode !== $familyCode && BaseController::sessionSharesFamily($nodeFamCode)) {
+                    $familyCode = $nodeFamCode;
+                    $resolvedScope = ($nodeFamCode !== $primaryCode) ? 'maternal' : 'primary';
+                }
+            }
+        }
+
+        return [
+            'family_code'   => $familyCode,
+            'base_node_id'  => $baseNodeId,
+            'lineage_scope' => $resolvedScope,
+        ];
+    }
+
+    /**
      * Add a Partner/Spouse to an existing node
      */
     public function addPartner(): void
@@ -32,13 +117,15 @@ final class OrganogramEditorController extends BaseController
                 return;
             }
 
-            $familyCode = (string)($_SESSION['famCode'] ?? '');
+            $db = Db::connect2();
+            $ctx = $this->resolveEditorFamilyContext($db, $baseNodeId);
+            $familyCode = $ctx['family_code'];
+            $baseNodeId = $ctx['base_node_id'];
+
             if (empty($familyCode)) {
                 msgException(403, 'Unauthorized Access');
                 return;
             }
-
-            $db = Db::connect2();
 
             // IDOR Protection: Verify the base node belongs to this user's family
             $stmt = $db->prepare("SELECT user_id, generation_level FROM family_nodes WHERE id = ? AND family_code = ?");
@@ -145,18 +232,30 @@ final class OrganogramEditorController extends BaseController
                 return;
             }
 
-            $familyCode = (string)($_SESSION['famCode'] ?? '');
-            if (empty($familyCode)) {
-                msgException(403, 'Unauthorized Access');
-                return;
-            }
-
             $db = Db::connect2();
 
             $rawUnion = (string)($_POST['union_id'] ?? '');
             $unionId = ctype_digit($rawUnion) ? (int)$rawUnion : 0;
             $baseNodeId = (int)($_POST['base_node_id'] ?? 0);
             $wantsNewPartner = ($rawUnion === 'new');
+
+            $ctx = $this->resolveEditorFamilyContext($db, $baseNodeId);
+            $familyCode = $ctx['family_code'];
+            $baseNodeId = $ctx['base_node_id'];
+
+            if ($unionId > 0) {
+                $stmtU = $db->prepare('SELECT family_code FROM family_unions WHERE id = ? LIMIT 1');
+                $stmtU->execute([$unionId]);
+                $unionFamCode = strtoupper(trim((string)$stmtU->fetchColumn()));
+                if ($unionFamCode !== '' && $unionFamCode !== $familyCode && BaseController::sessionSharesFamily($unionFamCode)) {
+                    $familyCode = $unionFamCode;
+                }
+            }
+
+            if (empty($familyCode)) {
+                msgException(403, 'Unauthorized Access');
+                return;
+            }
 
             // "Someone else": create the partnership first (named, or an unnamed placeholder partner)
             if ($wantsNewPartner) {
@@ -322,13 +421,15 @@ final class OrganogramEditorController extends BaseController
                 return;
             }
 
-            $familyCode = (string)($_SESSION['famCode'] ?? '');
+            $db = Db::connect2();
+            $ctx = $this->resolveEditorFamilyContext($db, $baseNodeId);
+            $familyCode = $ctx['family_code'];
+            $baseNodeId = $ctx['base_node_id'];
+
             if (empty($familyCode)) {
                 msgException(403, 'Unauthorized Access');
                 return;
             }
-
-            $db = Db::connect2();
 
             // IDOR Protection: Verify the base node belongs to this user's family
             $stmt = $db->prepare("SELECT user_id, generation_level FROM family_nodes WHERE id = ? AND family_code = ?");
@@ -472,13 +573,15 @@ final class OrganogramEditorController extends BaseController
                 return;
             }
 
-            $familyCode = (string)($_SESSION['famCode'] ?? '');
+            $db = Db::connect2();
+            $ctx = $this->resolveEditorFamilyContext($db, $baseNodeId);
+            $familyCode = $ctx['family_code'];
+            $baseNodeId = $ctx['base_node_id'];
+
             if (empty($familyCode)) {
                 msgException(403, 'Unauthorized Access');
                 return;
             }
-
-            $db = Db::connect2();
 
             // Verify base node
             $stmt = $db->prepare("SELECT generation_level FROM family_nodes WHERE id = ? AND family_code = ?");
@@ -580,13 +683,13 @@ final class OrganogramEditorController extends BaseController
                 return;
             }
 
-            $familyCode = (string)($_SESSION['famCode'] ?? '');
+            $db = Db::connect2();
+            $ctx = $this->resolveEditorFamilyContext($db, 0, $nodeId, $jsonInput);
+            $familyCode = $ctx['family_code'];
             if (empty($familyCode)) {
                 msgException(403, 'Unauthorized Access');
                 return;
             }
-
-            $db = Db::connect2();
 
             // Verify node belongs to this user's family
             $stmt = $db->prepare("SELECT id, user_id FROM family_nodes WHERE id = ? AND family_code = ?");
@@ -676,13 +779,14 @@ final class OrganogramEditorController extends BaseController
                 return;
             }
 
-            $familyCode = (string)($_SESSION['famCode'] ?? '');
+            $db = Db::connect2();
+            $ctx = $this->resolveEditorFamilyContext($db, 0, $nodeId, $jsonInput);
+            $familyCode = $ctx['family_code'];
             if ($familyCode === '') {
                 msgException(403, 'Unauthorized Access');
                 return;
             }
 
-            $db = Db::connect2();
             $stmt = $db->prepare("SELECT id, user_id, gender FROM family_nodes WHERE id = ? AND family_code = ?");
             $stmt->execute([$nodeId, $familyCode]);
             $node = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -733,14 +837,14 @@ final class OrganogramEditorController extends BaseController
                 return;
             }
 
-            $familyCode = (string)($_SESSION['famCode'] ?? '');
             $sessionUserId = (string)($_SESSION['id'] ?? '');
+            $db = Db::connect2();
+            $ctx = $this->resolveEditorFamilyContext($db, 0, $nodeId, $jsonInput);
+            $familyCode = $ctx['family_code'];
             if (empty($familyCode)) {
                 msgException(403, 'Unauthorized Access');
                 return;
             }
-
-            $db = Db::connect2();
 
             // Verify node belongs to this user's family
             $stmt = $db->prepare("SELECT id, user_id, first_name, last_name, email FROM family_nodes WHERE id = ? AND family_code = ?");
@@ -865,6 +969,20 @@ final class OrganogramEditorController extends BaseController
 
             $audioContent = null;
             $extension = 'webm';
+            $allowedAudioMimeMap = [
+                'audio/mpeg'               => 'mp3',
+                'audio/mp3'                => 'mp3',
+                'audio/ogg'                => 'ogg',
+                'application/ogg'          => 'ogg',
+                'audio/wav'                => 'wav',
+                'audio/x-wav'              => 'wav',
+                'audio/mp4'                => 'm4a',
+                'video/mp4'                => 'm4a',
+                'audio/x-m4a'              => 'm4a',
+                'audio/webm'               => 'webm',
+                'video/webm'               => 'webm',
+                'application/octet-stream' => 'webm',
+            ];
 
             // 1. Direct file upload via $_FILES
             if (!empty($_FILES['audio']['tmp_name'])) {
@@ -878,32 +996,21 @@ final class OrganogramEditorController extends BaseController
                     return;
                 }
 
-                $origName = (string)$file['name'];
-                $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
-                $extension = match ($ext) {
-                    'mp3' => 'mp3',
-                    'ogg' => 'ogg',
-                    'wav' => 'wav',
-                    'm4a' => 'm4a',
-                    'mp4' => 'mp4',
-                    default => 'webm',
-                };
-                $audioContent = file_get_contents($file['tmp_name']);
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $detectedMime = $finfo !== false ? finfo_file($finfo, (string)$file['tmp_name']) : false;
+                if (!is_string($detectedMime) || !isset($allowedAudioMimeMap[$detectedMime])) {
+                    msgException(422, 'Invalid audio file content. Only MP3, WAV, OGG, M4A, and WebM audio formats are permitted.');
+                    return;
+                }
+
+                $extension = $allowedAudioMimeMap[$detectedMime];
+                $audioContent = file_get_contents((string)$file['tmp_name']);
             }
             // 2. Base64 Audio Blob from In-Browser MediaRecorder
             elseif (!empty($_POST['audio_base64'])) {
                 $rawBase64 = (string)$_POST['audio_base64'];
                 if (str_contains($rawBase64, ',')) {
-                    [$header, $data] = explode(',', $rawBase64, 2);
-                    if (str_contains($header, 'audio/mp3') || str_contains($header, 'audio/mpeg')) {
-                        $extension = 'mp3';
-                    } elseif (str_contains($header, 'audio/wav')) {
-                        $extension = 'wav';
-                    } elseif (str_contains($header, 'audio/ogg')) {
-                        $extension = 'ogg';
-                    } else {
-                        $extension = 'webm';
-                    }
+                    [, $data] = explode(',', $rawBase64, 2);
                     $audioContent = base64_decode($data, true);
                 } else {
                     $audioContent = base64_decode($rawBase64, true);
@@ -915,6 +1022,17 @@ final class OrganogramEditorController extends BaseController
                 }
                 if (strlen($audioContent) > 10 * 1024 * 1024) {
                     msgException(400, 'Audio size exceeds 10MB limit.');
+                    return;
+                }
+
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $detectedMime = $finfo !== false ? finfo_buffer($finfo, $audioContent) : false;
+                if (is_string($detectedMime) && isset($allowedAudioMimeMap[$detectedMime])) {
+                    $extension = $allowedAudioMimeMap[$detectedMime];
+                } elseif (str_starts_with($audioContent, 'RIFF') || str_starts_with($audioContent, 'ID3') || str_starts_with($audioContent, 'OggS') || str_starts_with($audioContent, "\x1A\x45\xDF\xA3")) {
+                    $extension = 'webm';
+                } else {
+                    msgException(422, 'Decoded payload is not a valid audio stream.');
                     return;
                 }
             } else {
@@ -1055,19 +1173,21 @@ final class OrganogramEditorController extends BaseController
                 msgException(405, 'Method Not Allowed');
                 return;
             }
-            $familyCode = (string)($_SESSION['famCode'] ?? '');
-            if ($familyCode === '') {
-                msgException(403, 'Unauthorized Access');
-                return;
-            }
             $nodeId = (int)($_POST['node_id'] ?? 0);
             $first = trim((string)($_POST['first_name'] ?? ''));
             if ($nodeId <= 0 || $first === '') {
                 msgException(400, 'Please enter a first name.');
                 return;
             }
+            $db = Db::connect2();
+            $ctx = $this->resolveEditorFamilyContext($db, 0, $nodeId);
+            $familyCode = $ctx['family_code'];
+            if ($familyCode === '') {
+                msgException(403, 'Unauthorized Access');
+                return;
+            }
             $node = \App\services\FamilyGraphService::fillPlaceholder(
-                Db::connect2(),
+                $db,
                 $familyCode,
                 $nodeId,
                 $first,
@@ -1092,14 +1212,16 @@ final class OrganogramEditorController extends BaseController
     {
         try {
             $userId = (string)($_SESSION['id'] ?? '');
-            $fam = (string)($_SESSION['famCode'] ?? '');
+            $db = Db::connect2();
+            $ctx = $this->resolveEditorFamilyContext($db);
+            $fam = $ctx['family_code'];
             if ($_SERVER['REQUEST_METHOD'] !== 'POST' || $userId === '' || $fam === '') {
                 msgException(403, 'Unauthorized Access');
                 return;
             }
             \Src\Limiter::limit($userId . ':member_lookup');
             $res = \App\services\MemberLookupService::lookup(
-                Db::connect2(),
+                $db,
                 $userId,
                 $fam,
                 (string)($_POST['email'] ?? ''),
@@ -1118,14 +1240,16 @@ final class OrganogramEditorController extends BaseController
     {
         try {
             $userId = (string)($_SESSION['id'] ?? '');
-            $fam = (string)($_SESSION['famCode'] ?? '');
             $nodeId = (int)($_POST['node_id'] ?? 0);
+            $db = Db::connect2();
+            $ctx = $this->resolveEditorFamilyContext($db, 0, $nodeId);
+            $fam = $ctx['family_code'];
             if ($_SERVER['REQUEST_METHOD'] !== 'POST' || $userId === '' || $fam === '' || $nodeId <= 0) {
                 msgException(400, 'Invalid request.');
                 return;
             }
             \Src\Limiter::limit($userId . ':member_link');
-            $res = \App\services\MemberLookupService::link(Db::connect2(), $fam, $userId, $this->requesterName(), $nodeId, (string)($_POST['link_token'] ?? ''));
+            $res = \App\services\MemberLookupService::link($db, $fam, $userId, $this->requesterName(), $nodeId, (string)($_POST['link_token'] ?? ''));
             if (!$res['ok']) {
                 msgException(400, $res['message']);
                 return;

@@ -51,7 +51,7 @@
                     </div>
                     <div class="col-6">
                         <div class="stat-badge-card">
-                            <div class="stat-badge-val"><i class="bi bi-shield-check text-success"></i> Verified</div>
+                            <div class="stat-badge-val"><i class="bi bi-shield-check" style="color:#fff"></i> Verified</div>
                             <div class="stat-badge-lbl">Privacy Protected</div>
                         </div>
                     </div>
