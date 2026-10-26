@@ -62,6 +62,13 @@ mix.webpackConfig((webpack, config) => {
         },
       },
     },
+    module: {
+      parser: {
+        javascript: {
+          exportsPresence: "warn",
+        },
+      },
+    },
     resolve: {
       symlinks: false,
       modules: [
