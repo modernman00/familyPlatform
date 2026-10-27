@@ -366,8 +366,14 @@
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link rounded-pill fw-bold py-2 d-inline-flex align-items-center justify-content-center gap-2 w-100" 
-                    id="tab-trivia-btn" data-bs-toggle="pill" data-bs-target="#tab-trivia" type="button" role="tab" style="min-height: 44px;">
+                    id="tab-trivia-btn" data-bs-toggle="pill" data-bs-target="#tab-trivia" type="button" role="tab" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
                 <i class="bi bi-trophy-fill text-danger"></i> 🎮 Family Game Show
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill fw-bold py-2 d-inline-flex align-items-center justify-content-center gap-2 w-100" 
+                    id="tab-outings-btn" data-bs-toggle="pill" data-bs-target="#tab-outings" type="button" role="tab" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
+                <i class="bi bi-compass-fill text-primary"></i> 🗺️ Weekend Outings
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -1763,6 +1769,47 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
                                         </button>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- 🗺️ TAB 6: LIVE FAMILY WEEKEND OUTINGS & CULTURAL SCOUT --}}
+        <div class="tab-pane fade" id="tab-outings" role="tabpanel">
+            <div class="row g-4">
+                <div class="col-lg-5">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                        <h4 class="fw-bold mb-2"><i class="bi bi-compass-fill text-primary me-2"></i> Weekend Family Outing Scout</h4>
+                        <p class="text-muted small mb-4">Discover live family-friendly museum exhibitions, parks, cultural festivals, and weekend activities in your neighbourhood using grounded web search.</p>
+
+                        <form id="family-outings-form" onsubmit="handleScoutFamilyOutings(event)">
+                            @csrf
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small" for="outings-city">City or Outward Postcode</label>
+                                <input type="text" id="outings-city" class="form-control rounded-3" value="South Kensington London SW7" placeholder="e.g. London SW7, Birmingham B1" required>
+                                <div class="form-text small text-muted">Postcodes are automatically anonymised to outward district codes for family privacy.</div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold small" for="outings-interests">Family Interests &amp; Ages</label>
+                                <input type="text" id="outings-interests" class="form-control rounded-3" value="science museums, outdoor parks, child-friendly exhibitions" placeholder="e.g. interactive museums, botanical gardens">
+                            </div>
+
+                            <button type="submit" id="btn-scout-outings" class="btn btn-primary w-100 rounded-pill py-2 fw-bold text-white shadow-sm d-inline-flex align-items-center justify-content-center gap-2" style="min-height: 48px; white-space: nowrap; flex-shrink: 0;">
+                                <i class="bi bi-search"></i> Discover Weekend Outings
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                        <h4 class="fw-bold mb-3">Grounded Family Outing Ideas</h4>
+                        <div id="family-outings-results" class="d-flex flex-column gap-3">
+                            <div class="text-center py-5 text-muted">
+                                <i class="bi bi-map display-4 d-block mb-2 text-secondary opacity-50"></i>
+                                <span>Enter your city and family interests to discover verified weekend outings.</span>
                             </div>
                         </div>
                     </div>
@@ -4567,6 +4614,48 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
             setTimeout(() => {
                 p.remove();
             }, 3200);
+        }
+    }
+
+    // 🗺️ LIVE FAMILY WEEKEND OUTINGS SCOUT
+    async function handleScoutFamilyOutings(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn-scout-outings');
+        const container = document.getElementById('family-outings-results');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Scouting Family Outings...';
+
+        try {
+            const res = await fetch('/api/ai/weekend-outings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    city: document.getElementById('outings-city').value,
+                    interests: document.getElementById('outings-interests').value
+                })
+            });
+            const data = await res.json();
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-search"></i> Discover Weekend Outings';
+
+            if (data.success && Array.isArray(data.outings) && data.outings.length > 0) {
+                container.innerHTML = data.outings.map((o, idx) => `
+                    <div class="p-3 rounded-4 border bg-light d-flex flex-column gap-1">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <h6 class="fw-bold mb-0 text-dark">Outing ${idx + 1}: ${o.title}</h6>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle small">Verified Local</span>
+                        </div>
+                        <p class="small text-muted mb-2">${o.snippet}</p>
+                        ${o.url ? `<a href="${o.url}" target="_blank" rel="noopener noreferrer" class="small fw-semibold text-primary text-decoration-none"><i class="bi bi-box-arrow-up-right me-1"></i> View Details</a>` : ''}
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<div class="alert alert-warning rounded-4 mb-0">No weekend outings matched that search. Try another city or interest.</div>';
+            }
+        } catch (err) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-search"></i> Discover Weekend Outings';
+            alert('Outings search error: ' + err.message);
         }
     }
 </script>

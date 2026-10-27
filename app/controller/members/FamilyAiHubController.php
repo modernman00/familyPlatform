@@ -460,4 +460,29 @@ final class FamilyAiHubController extends BaseController
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
     }
+
+    /**
+     * Endpoint: Discover Live UK Weekend Family Outings & Battle Card
+     * Powered by Src\Ai\ResilientWebSearchService (72h SHA-256 Cache + DeepSeek Search API + £0 Fallback)
+     */
+    public function discoverWeekendOutings(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        try {
+            $raw = file_get_contents('php://input');
+            $json = is_string($raw) ? (json_decode($raw, true) ?: []) : [];
+
+            $region = htmlspecialchars(strip_tags(trim((string)($json['region'] ?? $_POST['region'] ?? 'London'))), ENT_QUOTES, 'UTF-8');
+            $ageGroup = htmlspecialchars(strip_tags(trim((string)($json['age_group'] ?? $_POST['age_group'] ?? 'all-ages'))), ENT_QUOTES, 'UTF-8');
+
+            $service = new \Src\Ai\ResilientWebSearchService();
+            $result = $service->discoverFamilyWeekendOutings($region, $ageGroup);
+
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+            echo json_encode($result);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
 }
