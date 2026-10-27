@@ -1805,7 +1805,24 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
 
                 <div class="col-lg-7">
                     <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                        <h4 class="fw-bold mb-3">Grounded Family Outing Ideas</h4>
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                            <h4 class="fw-bold mb-0">Grounded Family Outing Ideas</h4>
+                            <button type="button" id="btn-post-outings-poll" class="btn btn-success rounded-pill px-3 py-2 fw-bold btn-sm d-none align-items-center gap-2" onclick="postOutingsPollToFeed()" style="min-height: 44px; white-space: nowrap;">
+                                <i class="bi bi-broadcast"></i> 🗳️ Post Outings Vote to Family Feed
+                            </button>
+                        </div>
+                        <div id="outings-posted-alert" class="alert alert-success d-none align-items-center justify-content-between rounded-4 p-3 mb-3 border-0 shadow-sm">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-check-circle-fill text-success fs-5 flex-shrink-0"></i>
+                                <div>
+                                    <div class="fw-bold text-dark">Posted to Family Feed!</div>
+                                    <div class="text-muted small">Your weekend outing poll is live for everyone to cast their votes.</div>
+                                </div>
+                            </div>
+                            <a id="outings-feed-link" href="/profilePage" target="_blank" class="btn btn-sm btn-outline-success rounded-pill fw-semibold text-nowrap px-3">
+                                View on Feed <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
                         <div id="family-outings-results" class="d-flex flex-column gap-3">
                             <div class="text-center py-5 text-muted">
                                 <i class="bi bi-map display-4 d-block mb-2 text-secondary opacity-50"></i>
@@ -4617,20 +4634,28 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
         }
     }
 
+    let lastScoutedOutings = [];
+    let lastScoutedCity = '';
+
     // 🗺️ LIVE FAMILY WEEKEND OUTINGS SCOUT
     async function handleScoutFamilyOutings(e) {
         e.preventDefault();
         const btn = document.getElementById('btn-scout-outings');
         const container = document.getElementById('family-outings-results');
+        const pollBtn = document.getElementById('btn-post-outings-poll');
+        const alertBox = document.getElementById('outings-posted-alert');
+        if (alertBox) alertBox.classList.add('d-none');
+
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Scouting Family Outings...';
 
         try {
+            const cityInput = document.getElementById('outings-city').value;
             const res = await fetch('/api/ai/weekend-outings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    city: document.getElementById('outings-city').value,
+                    city: cityInput,
                     interests: document.getElementById('outings-interests').value
                 })
             });
@@ -4639,6 +4664,9 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
             btn.innerHTML = '<i class="bi bi-search"></i> Discover Weekend Outings';
 
             if (data.success && Array.isArray(data.outings) && data.outings.length > 0) {
+                lastScoutedOutings = data.outings;
+                lastScoutedCity = cityInput;
+
                 container.innerHTML = data.outings.map((o, idx) => `
                     <div class="p-3 rounded-4 border bg-light d-flex flex-column gap-1">
                         <div class="d-flex justify-content-between align-items-start gap-2">
@@ -4649,13 +4677,66 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
                         ${o.url ? `<a href="${o.url}" target="_blank" rel="noopener noreferrer" class="small fw-semibold text-primary text-decoration-none"><i class="bi bi-box-arrow-up-right me-1"></i> View Details</a>` : ''}
                     </div>
                 `).join('');
+
+                if (pollBtn) {
+                    pollBtn.classList.remove('d-none');
+                    pollBtn.classList.add('d-inline-flex');
+                }
             } else {
                 container.innerHTML = '<div class="alert alert-warning rounded-4 mb-0">No weekend outings matched that search. Try another city or interest.</div>';
+                if (pollBtn) pollBtn.classList.add('d-none');
             }
         } catch (err) {
             btn.disabled = false;
             btn.innerHTML = '<i class="bi bi-search"></i> Discover Weekend Outings';
             alert('Outings search error: ' + err.message);
+        }
+    }
+
+    async function postOutingsPollToFeed() {
+        if (!lastScoutedOutings || lastScoutedOutings.length < 2) {
+            alert('Please scout at least 2 outings first before posting a vote.');
+            return;
+        }
+
+        const pollBtn = document.getElementById('btn-post-outings-poll');
+        const alertBox = document.getElementById('outings-posted-alert');
+        const feedLink = document.getElementById('outings-feed-link');
+        const origText = pollBtn.innerHTML;
+
+        pollBtn.disabled = true;
+        pollBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Publishing Poll...';
+
+        try {
+            const options = lastScoutedOutings.map(o => o.title || 'Outing');
+            const res = await fetch('/api/ai/post-outings-poll', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    location: lastScoutedCity || 'Our Area',
+                    options: options
+                })
+            });
+            const data = await res.json();
+            pollBtn.disabled = false;
+            pollBtn.innerHTML = origText;
+
+            if (data.success) {
+                if (feedLink && data.post_url) {
+                    feedLink.href = data.post_url;
+                }
+                if (alertBox) {
+                    alertBox.classList.remove('d-none');
+                    alertBox.classList.add('d-flex');
+                }
+                pollBtn.classList.add('d-none');
+            } else {
+                alert(data.error || 'Failed to post outings poll.');
+            }
+        } catch (err) {
+            pollBtn.disabled = false;
+            pollBtn.innerHTML = origText;
+            alert('Post error: ' + err.message);
         }
     }
 </script>

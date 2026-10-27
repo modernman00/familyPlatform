@@ -65,6 +65,7 @@ $router->map('POST', '/api/ai/transcribe-voice', 'App\controller\members\FamilyA
 $router->map('POST', '/api/ai/generate-flyer', 'App\controller\members\FamilyAiHubController@generateFlyer', 'api_ai_generate_flyer');
 $router->map('POST', '/api/ai/generate-trivia', 'App\controller\members\FamilyAiHubController@generateTrivia', 'api_ai_generate_trivia');
 $router->map('POST', '/api/ai/weekend-outings', 'App\controller\members\FamilyAiHubController@discoverWeekendOutings', 'api_ai_weekend_outings');
+$router->map('POST', '/api/ai/post-outings-poll', 'App\controller\members\FamilyAiHubController@postOutingsPoll', 'api_ai_post_outings_poll');
 
 
 

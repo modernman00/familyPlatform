@@ -485,4 +485,91 @@ final class FamilyAiHubController extends BaseController
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
     }
+
+    /**
+     * Endpoint: Post Grounded Weekend Outings Poll to Family Feed
+     * Posts the scouted options to the family wall and creates a live interactive poll.
+     */
+    public function postOutingsPoll(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        try {
+            $raw = file_get_contents('php://input');
+            $json = is_string($raw) ? (json_decode($raw, true) ?: []) : [];
+
+            $location = htmlspecialchars(strip_tags(trim((string)($json['location'] ?? 'Our Area'))), ENT_QUOTES, 'UTF-8');
+            $options = is_array($json['options'] ?? null) ? $json['options'] : [];
+
+            if (count($options) < 2) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Please provide at least 2 outing options for the family vote.']);
+                return;
+            }
+
+            // Clean options down to max 4 succinct poll choices
+            $pollOptions = [];
+            foreach (array_slice($options, 0, 4) as $opt) {
+                $cleanOpt = mb_substr(htmlspecialchars(strip_tags(trim((string)$opt)), ENT_QUOTES, 'UTF-8'), 0, 80);
+                if ($cleanOpt !== '') {
+                    $pollOptions[] = $cleanOpt;
+                }
+            }
+
+            $db = Database::connection();
+            $fullName = $_SESSION['user_full_name'] ?? 'Family Organiser';
+
+            $pStmt = $db->prepare("SELECT img FROM profilePics WHERE id = ? LIMIT 1");
+            $pStmt->execute([$this->userId]);
+            $profileImg = (string)($pStmt->fetchColumn() ?: '');
+
+            $postMsg = "🗺️ Family Weekend Outings Vote: " . $location . "!\n\n";
+            $postMsg .= "We just scouted live activities and museum events for our family. Cast your vote in the poll below to decide where we're heading this weekend!\n\n";
+            $postMsg .= "🗳️ Voting closes Friday evening — tap your pick!";
+
+            $currentTime = (string)(function_exists('milliSeconds') ? milliSeconds() : time());
+            $postStmt = $db->prepare(
+                "INSERT INTO post (id, fullName, profileImg, postMessage, postFamCode, post_time, post_status, date_created) 
+                 VALUES (?, ?, ?, ?, ?, ?, 'published', NOW())"
+            );
+            $postStmt->execute([
+                $this->userId,
+                $fullName,
+                $profileImg,
+                $postMsg,
+                $this->famCode,
+                $currentTime
+            ]);
+            $postNo = (int)$db->lastInsertId();
+
+            // Create interactive native poll
+            PollData::createPoll($postNo, "Where are we heading this weekend in {$location}?", $pollOptions);
+            Post::updatePostByStatusAsPublished($postNo);
+
+            // Real-time broadcast to family wall
+            try {
+                Pusher::broadcastToFamily($this->famCode, 'new-post', [[
+                    'post_no' => $postNo,
+                    'id' => $this->userId,
+                    'fullName' => $fullName,
+                    'profileImg' => $profileImg,
+                    'postMessage' => $postMsg,
+                    'postFamCode' => $this->famCode,
+                    'post_img0' => '',
+                    'date_created' => date('Y-m-d H:i:s'),
+                ]]);
+            } catch (\Throwable $pusherEx) {
+                // Resilient fallback
+            }
+
+            echo json_encode([
+                'success' => true,
+                'post_no' => $postNo,
+                'post_url' => '/profilePage?post_no=' . $postNo . '#post' . $postNo,
+                'message' => 'Weekend Outings poll successfully posted to your family feed!'
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
 }
