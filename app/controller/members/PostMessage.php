@@ -762,4 +762,48 @@ final class PostMessage
         $result = Post::getProfilePics($postId);
         return isset($result[0]['img']) && is_string($result[0]['img']) ? $result[0]['img'] : null;
     }
+
+    /**
+     * API: Record Post View (increments views_count).
+     */
+    public static function recordView(): void
+    {
+        if (empty($_SESSION['id'])) {
+            try {
+                SignIn::verify('users');
+            } catch (\Throwable $e) {
+                http_response_code(401);
+                header('Content-Type: application/json');
+                echo json_encode(['status' => 'error', 'message' => 'Unauthorised']);
+                return;
+            }
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            $raw = file_get_contents('php://input') ?: '';
+            $payload = json_decode($raw, true) ?? $_POST;
+            $postNo = (int)($payload['post_no'] ?? 0);
+
+            if ($postNo <= 0 || empty($userId)) {
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Invalid post number or user session']);
+                return;
+            }
+
+            Post::incrementViews($postNo);
+            $viewsCount = Post::getViewsCount($postNo);
+
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+            echo json_encode([
+                'status' => 'success',
+                'post_no' => (int)$postNo,
+                'views_count' => (int)$viewsCount,
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
 }

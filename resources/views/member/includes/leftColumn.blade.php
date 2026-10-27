@@ -7,7 +7,7 @@
             <div class="cover-photo"
                 style="height: 120px; background: linear-gradient(135deg, #2a0a0d 0%, #2a0a0d 40%, #8a1019 80%, #b8202c 100%); position: relative;">
                 <span class="position-absolute top-0 end-0 m-3 badge bg-white bg-opacity-25 text-white fw-bold px-2 py-1 rounded-pill" style="font-size: 0.7rem; letter-spacing: 0.04em;">
-                    <i class="bi bi-shield-check text-warning"></i> VERIFIED
+                    <i class="bi bi-shield-check text-warning"></i> {{ __('profile.verified', 'VERIFIED') }}
                 </span>
             </div>
             <div class="avatar-container position-absolute w-100" style="top: 55px;" title="Click to enlarge profile photo" role="button" tabindex="0" aria-label="View {{ ucwords(strtolower($data['firstName'] ?? '')) }}'s profile photo in full size">
@@ -16,7 +16,7 @@
                      class="avatar profileImg profile-avatar-interactive shadow-sm" 
                      data-profile-expand="true"
                      data-profile-name="{{ ucwords(strtolower($data['firstName'] ?? '')) }} {{ ucwords(strtolower($data['lastName'] ?? '')) }}"
-                     data-profile-subtitle="Family Member • {{ $data['famCode'] ?? '' }}"
+                     data-profile-subtitle="{{ __('profile.family_member', 'Family Member') }} • {{ $data['famCode'] ?? '' }}"
                      data-can-edit="true"
                      style="width: 105px; height: 105px; border-radius: 50%; border: 4px solid var(--card-bg); object-fit: cover; background: var(--card-bg);">
                 <div class="avatar-zoom-cue" aria-hidden="true" title="Enlarge photo">
@@ -38,37 +38,37 @@
 
             <!-- Family Code Tonal Pill -->
             <div class="family-code-pill mb-3">
-                <small class="family-code-label me-1">Family Code:</small>
+                <small class="family-code-label me-1">{{ __('profile.family_code', 'Family Code') }}:</small>
                 <span class="family-code-value"><i class="bi bi-hash"></i>{{ $data['famCode'] }}</span>
             </div>
 
             <div class="d-flex flex-row flex-wrap flex-lg-column gap-2 px-2 w-100">
                 <a href="/family/fun-place" class="btn fw-bold flex-fill text-decoration-none text-center shadow-sm" style="background: linear-gradient(135deg, #6d28d9 0%, #db2777 100%); color: #ffffff !important; border: none; border-radius: 12px; padding: 10px 12px; font-size: 0.92rem; box-shadow: 0 4px 14px rgba(109, 40, 217, 0.3); min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-stars me-1.5 text-warning"></i> The Fun Place
+                    <i class="bi bi-stars me-1.5 text-warning"></i> {{ __('profile.the_fun_place', 'The Fun Place') }}
                 </a>
 
                 <button type="button" class="btn btn-primary text-white fw-bold shadow-sm flex-fill" style="background-color: var(--primary-color, #a31621); border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px;" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                    <i class="bi bi-pencil-square me-1.5"></i> Edit Profile
+                    <i class="bi bi-pencil-square me-1.5"></i> {{ __('profile.edit_profile', 'Edit Profile') }}
                 </button>
 
                 <button type="button" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px;" data-bs-toggle="modal" data-bs-target="#createEventModal">
-                    <i class="bi bi-calendar-plus me-1.5" style="color: #2563eb;"></i> Create Event
+                    <i class="bi bi-calendar-plus me-1.5" style="color: #2563eb;"></i> {{ __('profile.create_event', 'Create Event') }}
                 </button>
 
                 <button type="button" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px;" data-bs-toggle="modal" data-bs-target="#createAnnouncementModal">
-                    <i class="bi bi-megaphone-fill me-1.5" style="color: #d97706;"></i> Announcement
+                    <i class="bi bi-megaphone-fill me-1.5" style="color: #d97706;"></i> {{ __('profile.announcement', 'Announcement') }}
                 </button>
 
                 <a href="/familyJournal" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px;">
-                    <i class="bi bi-journal-bookmark-fill me-1.5" style="color: #059669;"></i> Family Journal
+                    <i class="bi bi-journal-bookmark-fill me-1.5" style="color: #059669;"></i> {{ __('profile.family_journal', 'Family Journal') }}
                 </a>
 
                 <a href="/family/roundtable" class="btn fw-semibold flex-fill text-decoration-none text-center shadow-xs" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #ffffff !important; border: 1.5px solid #d4af37; border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-shield-shaded me-1.5 text-warning"></i> Family RoundTable
+                    <i class="bi bi-shield-shaded me-1.5 text-warning"></i> {{ __('profile.family_roundtable', 'Family RoundTable') }}
                 </a>
 
                 <button type="button" id="directToImages" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px;" onclick="window.location.href='/profilepage/gallery'">
-                    <i class="bi bi-images me-1.5" style="color: #6366f1;"></i> Photo Gallery
+                    <i class="bi bi-images me-1.5" style="color: #6366f1;"></i> {{ __('profile.photo_gallery', 'Photo Gallery') }}
                 </button>
             </div>
 
@@ -85,14 +85,14 @@
         <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2 px-4">
             <template x-if="friendRequests.length > 1">
                 <h5 class="mb-0 fw-bold" style="color: var(--text-color); font-size: 1.05rem;">
-                    <span x-text="friendRequests.length"></span> Kin Requests
+                    <span x-text="friendRequests.length"></span> {{ __('profile.kin_requests', 'Kin Requests') }}
                 </h5>
             </template>
             <template x-if="friendRequests.length === 1">
-                <h5 class="mb-0 fw-bold" style="color: var(--text-color); font-size: 1.05rem;">Kin Request</h5>
+                <h5 class="mb-0 fw-bold" style="color: var(--text-color); font-size: 1.05rem;">{{ __('profile.kin_request', 'Kin Request') }}</h5>
             </template>
             <template x-if="friendRequests.length > 1">
-                <a href="/allMembers" class="text-decoration-none" style="color: var(--primary-color); font-weight: 600; font-size: 0.85rem;">See All <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i></a>
+                <a href="/allMembers" class="text-decoration-none" style="color: var(--primary-color); font-weight: 600; font-size: 0.85rem;">{{ __('profile.see_all', 'See All') }} <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i></a>
             </template>
         </div>
 

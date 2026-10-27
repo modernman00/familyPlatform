@@ -44,13 +44,16 @@ final class Reel extends Select
             
             // Join reels with personal profile and reactions
             $sql = "SELECT r.id, r.user_id, r.famCode, r.caption, r.video_url, r.thumbnail_url, 
-                           r.aspect_ratio, r.category, r.music_title, r.views_count, r.created_at,
+                           r.aspect_ratio, r.category, r.music_title, r.audio_url, r.video_volume, r.music_volume, r.audio_start_sec,
+                           r.chrono_sync_cluster_id, r.chrono_sync_label, r.time_bridge_node_id, r.views_count, r.created_at,
                            p.firstName, p.lastName, pp.img AS profilePics,
                            (SELECT COUNT(*) FROM family_reel_reactions frr WHERE frr.reel_id = r.id) AS likes_count,
                            (SELECT COUNT(*) FROM family_reel_comments frc WHERE frc.reel_id = r.id) AS comments_count,
-                           (SELECT frr2.reaction_type FROM family_reel_reactions frr2 WHERE frr2.reel_id = r.id AND frr2.user_id = :currUser LIMIT 1) AS user_reaction
+                           (SELECT frr2.reaction_type FROM family_reel_reactions frr2 WHERE frr2.reel_id = r.id AND frr2.user_id = :currUser LIMIT 1) AS user_reaction,
+                           (SELECT COUNT(*) FROM family_reels fr_sync WHERE fr_sync.chrono_sync_cluster_id = r.chrono_sync_cluster_id AND fr_sync.chrono_sync_cluster_id IS NOT NULL AND fr_sync.famCode = r.famCode AND fr_sync.id != r.id) AS chrono_sync_count,
+                           (SELECT CONCAT_WS(' ', p_tb.firstName, p_tb.lastName) FROM personal p_tb WHERE p_tb.id = r.time_bridge_node_id LIMIT 1) AS time_bridge_member_name
                     FROM family_reels AS r
-                    INNER JOIN personal AS p ON r.user_id = p.id
+                    LEFT JOIN personal AS p ON r.user_id = p.id
                     LEFT JOIN profilePics AS pp ON r.user_id = pp.id
                     WHERE (r.famCode = :famCode
                        OR r.user_id = :currUser2
@@ -92,8 +95,8 @@ final class Reel extends Select
     public static function createReel(array $data): int
     {
         $pdo = self::connect2();
-        $sql = "INSERT INTO family_reels (user_id, famCode, caption, video_url, thumbnail_url, aspect_ratio, category, music_title)
-                VALUES (:user_id, :famCode, :caption, :video_url, :thumbnail_url, :aspect_ratio, :category, :music_title)";
+        $sql = "INSERT INTO family_reels (user_id, famCode, caption, video_url, thumbnail_url, aspect_ratio, category, music_title, audio_url, video_volume, music_volume, audio_start_sec, chrono_sync_cluster_id, chrono_sync_label, time_bridge_node_id)
+                VALUES (:user_id, :famCode, :caption, :video_url, :thumbnail_url, :aspect_ratio, :category, :music_title, :audio_url, :video_volume, :music_volume, :audio_start_sec, :chrono_sync_cluster_id, :chrono_sync_label, :time_bridge_node_id)";
         
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
@@ -104,7 +107,14 @@ final class Reel extends Select
             ':thumbnail_url' => $data['thumbnail_url'] ?? null,
             ':aspect_ratio' => $data['aspect_ratio'] ?? '9:16',
             ':category' => $data['category'] ?? 'milestone',
-            ':music_title' => $data['music_title'] ?? 'Original Audio'
+            ':music_title' => $data['music_title'] ?? 'Original Audio',
+            ':audio_url' => !empty($data['audio_url']) ? (string)$data['audio_url'] : null,
+            ':video_volume' => isset($data['video_volume']) ? max(0, min(100, (int)$data['video_volume'])) : 100,
+            ':music_volume' => isset($data['music_volume']) ? max(0, min(100, (int)$data['music_volume'])) : 40,
+            ':audio_start_sec' => isset($data['audio_start_sec']) ? max(0.0, (float)$data['audio_start_sec']) : 0.0,
+            ':chrono_sync_cluster_id' => !empty($data['chrono_sync_cluster_id']) ? (string)$data['chrono_sync_cluster_id'] : null,
+            ':chrono_sync_label' => !empty($data['chrono_sync_label']) ? (string)$data['chrono_sync_label'] : null,
+            ':time_bridge_node_id' => !empty($data['time_bridge_node_id']) ? (int)$data['time_bridge_node_id'] : null,
         ]);
 
         return (int)$pdo->lastInsertId();
@@ -125,9 +135,11 @@ final class Reel extends Select
             $sql = "SELECT r.*, p.firstName, p.lastName, pp.img AS profilePics,
                            (SELECT COUNT(*) FROM family_reel_reactions frr WHERE frr.reel_id = r.id) AS likes_count,
                            (SELECT COUNT(*) FROM family_reel_comments frc WHERE frc.reel_id = r.id) AS comments_count,
-                           (SELECT frr2.reaction_type FROM family_reel_reactions frr2 WHERE frr2.reel_id = r.id AND frr2.user_id = :currUser LIMIT 1) AS user_reaction
+                           (SELECT frr2.reaction_type FROM family_reel_reactions frr2 WHERE frr2.reel_id = r.id AND frr2.user_id = :currUser LIMIT 1) AS user_reaction,
+                           (SELECT COUNT(*) FROM family_reels fr_sync WHERE fr_sync.chrono_sync_cluster_id = r.chrono_sync_cluster_id AND fr_sync.chrono_sync_cluster_id IS NOT NULL AND fr_sync.famCode = r.famCode AND fr_sync.id != r.id) AS chrono_sync_count,
+                           (SELECT CONCAT_WS(' ', p_tb.firstName, p_tb.lastName) FROM personal p_tb WHERE p_tb.id = r.time_bridge_node_id LIMIT 1) AS time_bridge_member_name
                     FROM family_reels AS r
-                    INNER JOIN personal AS p ON r.user_id = p.id
+                    LEFT JOIN personal AS p ON r.user_id = p.id
                     LEFT JOIN profilePics AS pp ON r.user_id = pp.id
                     WHERE r.id = :reelId" . $expiryClause . " LIMIT 1";
 
@@ -143,6 +155,93 @@ final class Reel extends Select
             return is_array($res) ? self::normalizeMediaUrls($res) : null;
         } catch (\Throwable $e) {
             return null;
+        }
+    }
+
+    /**
+     * Fetch peer synchronized multi-angle family reels for a given cluster.
+     * Enforces strict tenant isolation by matching famCode.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function getChronoSyncAngles(string $clusterId, string $famCode, int $excludeReelId = 0): array
+    {
+        $cleanCluster = trim($clusterId);
+        $cleanFam = trim($famCode);
+        if ($cleanCluster === '' || $cleanFam === '') {
+            return [];
+        }
+
+        try {
+            $pdo = self::connect2();
+            $expiryDays = self::getExpirationDays();
+            $expiryClause = $expiryDays > 0 ? " AND r.created_at >= DATE_SUB(NOW(), INTERVAL :expiryDays DAY)" : "";
+
+            $sql = "SELECT r.id, r.user_id, r.famCode, r.caption, r.video_url, r.thumbnail_url,
+                           r.aspect_ratio, r.category, r.music_title, r.audio_url, r.video_volume,
+                           r.music_volume, r.audio_start_sec, r.chrono_sync_cluster_id, r.chrono_sync_label,
+                           r.time_bridge_node_id, r.views_count, r.created_at,
+                           p.firstName, p.lastName, pp.img AS profilePics
+                    FROM family_reels AS r
+                    LEFT JOIN personal AS p ON r.user_id = p.id
+                    LEFT JOIN profilePics AS pp ON r.user_id = pp.id
+                    WHERE r.chrono_sync_cluster_id = :clusterId
+                      AND r.famCode = :famCode
+                      AND r.id != :excludeReelId" . $expiryClause . "
+                    ORDER BY r.created_at ASC";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindValue(':clusterId', $cleanCluster, PDO::PARAM_STR);
+            $stmt->bindValue(':famCode', $cleanFam, PDO::PARAM_STR);
+            $stmt->bindValue(':excludeReelId', $excludeReelId, PDO::PARAM_INT);
+            if ($expiryDays > 0) {
+                $stmt->bindValue(':expiryDays', $expiryDays, PDO::PARAM_INT);
+            }
+            $stmt->execute();
+
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            /** @var array<int, array<string, mixed>> $rows */
+            return array_map([self::class, 'normalizeMediaUrls'], $rows);
+        } catch (\Throwable $e) {
+            error_log("[Reel::getChronoSyncAngles] " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get recent active family reels for multi-angle linking in the creation modal.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function getRecentActiveReelsForCluster(string $famCode, int $limit = 15): array
+    {
+        try {
+            $pdo = self::connect2();
+            $expiryDays = self::getExpirationDays();
+            $expiryClause = $expiryDays > 0 ? " AND r.created_at >= DATE_SUB(NOW(), INTERVAL :expiryDays DAY)" : "";
+
+            $sql = "SELECT r.id, r.caption, r.thumbnail_url, r.video_url, r.chrono_sync_cluster_id, r.chrono_sync_label, r.created_at,
+                           p.firstName, p.lastName
+                    FROM family_reels AS r
+                    LEFT JOIN personal AS p ON r.user_id = p.id
+                    WHERE r.famCode = :famCode" . $expiryClause . "
+                    ORDER BY r.created_at DESC
+                    LIMIT :limit";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindValue(':famCode', $famCode, PDO::PARAM_STR);
+            if ($expiryDays > 0) {
+                $stmt->bindValue(':expiryDays', $expiryDays, PDO::PARAM_INT);
+            }
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            /** @var array<int, array<string, mixed>> $rows */
+            return array_map([self::class, 'normalizeMediaUrls'], $rows);
+        } catch (\Throwable $e) {
+            error_log("[Reel::getRecentActiveReelsForCluster] " . $e->getMessage());
+            return [];
         }
     }
 
@@ -771,6 +870,119 @@ final class Reel extends Select
         if (isset($reel['thumbnail_url']) && is_string($reel['thumbnail_url'])) {
             $reel['thumbnail_url'] = str_replace('/public/resources/images/reels/thumbs/', '/resources/images/reels/thumbs/', $reel['thumbnail_url']);
         }
+        if (isset($reel['audio_url']) && is_string($reel['audio_url'])) {
+            $reel['audio_url'] = str_replace('/public/audio/reels/', '/audio/reels/', $reel['audio_url']);
+        }
         return $reel;
+    }
+
+    /**
+     * Curated starter collection of royalty-free, high-vibe family celebration audio tracks.
+     *
+     * @return array<int, array{id: string, title: string, genre: string, duration: string, url: string, description: string}>
+     */
+    public static function getAudioLibrary(): array
+    {
+        return [
+            [
+                'id' => 'birthday_fanfare',
+                'title' => 'Birthday Fanfare & Joy',
+                'genre' => 'Celebration',
+                'duration' => '0:12',
+                'url' => '/audio/reels/library/birthday_fanfare.wav',
+                'description' => 'Festive arpeggios and celebratory energy for milestone birthdays',
+            ],
+            [
+                'id' => 'acoustic_warmth',
+                'title' => 'Acoustic Warmth & Memories',
+                'genre' => 'Acoustic Folk',
+                'duration' => '0:12',
+                'url' => '/audio/reels/library/acoustic_warmth.wav',
+                'description' => 'Gentle fingerpicked guitar for heartfelt family nostalgia',
+            ],
+            [
+                'id' => 'gospel_faith',
+                'title' => 'Gospel Faith & Praise',
+                'genre' => 'Gospel',
+                'duration' => '0:12',
+                'url' => '/audio/reels/library/gospel_faith.wav',
+                'description' => 'Uplifting church organ chords and choir warmth',
+            ],
+            [
+                'id' => 'afrobeats_groove',
+                'title' => 'Afrobeats Heritage Groove',
+                'genre' => 'Afrobeats',
+                'duration' => '0:12',
+                'url' => '/audio/reels/library/afrobeats_groove.wav',
+                'description' => 'Energetic syncopated percussion for lively family gatherings',
+            ],
+            [
+                'id' => 'lofi_nostalgia',
+                'title' => 'Lofi Nostalgia Chill',
+                'genre' => 'Lofi / Chill',
+                'duration' => '0:12',
+                'url' => '/audio/reels/library/lofi_nostalgia.wav',
+                'description' => 'Warm vintage electric piano chords with gentle vinyl tone',
+            ],
+            [
+                'id' => 'wedding_reunion',
+                'title' => 'Wedding & Grand Reunion',
+                'genre' => 'Orchestral',
+                'duration' => '0:12',
+                'url' => '/audio/reels/library/wedding_reunion.wav',
+                'description' => 'Triumphant orchestral bells and strings for major milestones',
+            ],
+        ];
+    }
+
+    /**
+     * Fetch peer reels within the family tenant sharing the same audio/soundtrack title.
+     * Enforces strict tenant isolation by famCode.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function getReelsBySound(string $musicTitle, string $famCode, int $limit = 24): array
+    {
+        $cleanMusic = trim($musicTitle);
+        $cleanFam = trim($famCode);
+        if ($cleanMusic === '' || $cleanFam === '') {
+            return [];
+        }
+
+        try {
+            $pdo = self::connect2();
+            $expiryDays = self::getExpirationDays();
+            $expiryClause = $expiryDays > 0 ? " AND r.created_at >= DATE_SUB(NOW(), INTERVAL :expiryDays DAY)" : "";
+
+            $sql = "SELECT r.id, r.user_id, r.famCode, r.caption, r.video_url, r.thumbnail_url,
+                           r.aspect_ratio, r.category, r.music_title, r.audio_url, r.video_volume,
+                           r.music_volume, r.audio_start_sec, r.views_count, r.created_at,
+                           p.firstName, p.lastName, pp.img AS profilePics,
+                           (SELECT COUNT(*) FROM family_reel_reactions frr WHERE frr.reel_id = r.id) AS likes_count,
+                           (SELECT COUNT(*) FROM family_reel_comments frc WHERE frc.reel_id = r.id) AS comments_count
+                    FROM family_reels AS r
+                    LEFT JOIN personal AS p ON r.user_id = p.id
+                    LEFT JOIN profilePics AS pp ON r.user_id = pp.id
+                    WHERE r.famCode = :famCode
+                      AND r.music_title = :musicTitle" . $expiryClause . "
+                    ORDER BY r.created_at DESC
+                    LIMIT :limit";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindValue(':famCode', $cleanFam, PDO::PARAM_STR);
+            $stmt->bindValue(':musicTitle', $cleanMusic, PDO::PARAM_STR);
+            if ($expiryDays > 0) {
+                $stmt->bindValue(':expiryDays', $expiryDays, PDO::PARAM_INT);
+            }
+            $stmt->bindValue(':limit', max(1, min(60, $limit)), PDO::PARAM_INT);
+            $stmt->execute();
+
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            /** @var array<int, array<string, mixed>> $rows */
+            return array_map([self::class, 'normalizeMediaUrls'], $rows);
+        } catch (\Throwable $e) {
+            error_log("[Reel::getReelsBySound] " . $e->getMessage());
+            return [];
+        }
     }
 }

@@ -60,14 +60,14 @@
     box-shadow: 0 6px 20px rgba(0,0,0,0.8);
 }
 
-/* 🎨 USER-CENTRIC FLYER STUDIO PRESET BUTTONS (ZERO RED FONT INVARIANT) */
+/* 🎨 USER-CENTRIC FLYER STUDIO PRESET BUTTONS (ZERO RED FONT INVARIANT & 44PX HIT TARGET) */
 .flyer-preset-btn {
     background: #ffffff !important;
     color: #1e293b !important;
     border: 1.5px solid #cbd5e1 !important;
     font-weight: 600 !important;
-    font-size: 0.8rem !important;
-    padding: 0.38rem 0.85rem !important;
+    font-size: 0.82rem !important;
+    padding: 0.45rem 1rem !important;
     border-radius: 9999px !important;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
     white-space: nowrap !important;
@@ -75,8 +75,10 @@
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    min-height: 36px;
+    gap: 0.45rem;
+    min-height: 44px;
+    min-width: 44px;
+    scroll-snap-align: start;
 }
 .flyer-preset-btn:hover {
     background: #f1f5f9 !important;
@@ -98,21 +100,22 @@
     color: #ffffff !important;
 }
 
-/* Format Switcher Pills */
+/* Format Switcher Pills (44px Minimum Hit Area) */
 .flyer-format-btn {
     background: #ffffff;
     color: #475569;
     border: 1.5px solid #e2e8f0;
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     font-weight: 700;
-    padding: 0.4rem 0.75rem;
-    border-radius: 10px;
+    padding: 0.45rem 0.95rem;
+    border-radius: 12px;
     transition: all 0.18s ease;
     white-space: nowrap;
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    min-height: 38px;
+    gap: 0.45rem;
+    min-height: 44px;
+    scroll-snap-align: start;
 }
 .flyer-format-btn:hover {
     background: #f8fafc;
@@ -185,24 +188,145 @@
     cursor: grabbing;
 }
 
-/* Horizontal single-row scrollable pill strips */
+/* Horizontal single-row scrollable pill strips (Ergonomic Touch & Snapping) */
 .flyer-horiz-strip {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0.5rem;
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: thin;
-    padding-bottom: 2px;
+    padding-bottom: 6px;
+    padding-top: 2px;
     -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
 }
 .flyer-horiz-strip::-webkit-scrollbar {
-    height: 4px;
+    height: 5px;
 }
 .flyer-horiz-strip::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 999px;
+}
+.flyer-horiz-strip .btn-sm {
+    min-height: 38px;
+    padding: 0.35rem 0.75rem !important;
+    font-size: 0.74rem !important;
+    scroll-snap-align: start;
+}
+
+/* Luxury Atelier Form & Input Styling (High-Status VIP Craftsmanship) */
+.luxury-card-box {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1rem 1.15rem;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.luxury-card-box:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+.luxury-card-gold {
+    background: linear-gradient(135deg, #fffdf8 0%, #fefcf3 100%);
+    border: 1.5px solid #e6ca65;
+    border-radius: 16px;
+    padding: 1.15rem;
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.09);
+    position: relative;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.luxury-card-gold:hover {
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.15);
+    border-color: #d4af37;
+}
+.luxury-card-plaque-1 {
+    background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+    border: 1.5px solid #86efac;
+    border-radius: 16px;
+    padding: 1.15rem;
+    box-shadow: 0 4px 14px rgba(22, 101, 52, 0.05);
+    transition: all 0.2s ease;
+}
+.luxury-card-plaque-1:hover {
+    box-shadow: 0 6px 18px rgba(22, 101, 52, 0.08);
+}
+.luxury-card-plaque-2 {
+    background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
+    border: 1.5px solid #93c5fd;
+    border-radius: 16px;
+    padding: 1.15rem;
+    box-shadow: 0 4px 14px rgba(30, 64, 175, 0.05);
+    transition: all 0.2s ease;
+}
+.luxury-card-plaque-2:hover {
+    box-shadow: 0 6px 18px rgba(30, 64, 175, 0.08);
+}
+.luxury-card-ribbon {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1.5px solid #fde68a;
+    border-radius: 16px;
+    padding: 1.15rem;
+    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.08);
+    transition: all 0.2s ease;
+}
+.luxury-field-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #334155;
+    margin-bottom: 0.35rem;
+    display: flex;
+    align-items: center;
+}
+.luxury-input {
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.88rem;
+    color: #0f172a;
+    background-color: #ffffff;
+    transition: all 0.15s ease-in-out;
+}
+.luxury-input:focus {
+    border-color: #d4af37 !important;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.22) !important;
+    background-color: #ffffff;
+    outline: none;
+}
+.luxury-input-hero {
+    border: 2px solid #d4af37;
+    border-radius: 0 12px 12px 0;
+    padding: 0.65rem 1rem;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #1e1b18;
+    background: #ffffff;
+    letter-spacing: 0.03em;
+}
+.luxury-input-hero:focus {
+    border-color: #aa771c !important;
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3) !important;
+    outline: none;
+}
+.luxury-input-addon {
+    background: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-right: none;
+    border-radius: 10px 0 0 10px;
+    color: #64748b;
+    font-size: 0.88rem;
+    padding: 0 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.input-group > .luxury-input:not(:first-child) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
 }
 </style>
 @endpush
@@ -338,113 +462,84 @@
 
         {{-- 🎨 TAB 4: FAMILY FLYER STUDIO --}}
         <div class="tab-pane fade" id="tab-flyer" role="tabpanel">
-            <div class="row g-3">
-                {{-- Full-Width Top Horizontal Studio Deck: Header + Templates + AR + Format + Background Colour --}}
-                <div class="col-12">
-                    <div class="card border-0 shadow-sm rounded-4 p-3 px-4 bg-white">
-                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3 pb-2 border-bottom">
-                            <div class="d-flex align-items-center gap-2 flex-wrap">
-                                <h4 class="fw-bold mb-0"><i class="bi bi-stars text-warning me-1"></i> Event Poster &amp; Gig Studio</h4>
-                                <span class="badge rounded-pill bg-warning-subtle text-dark border border-warning small px-2 py-1 fw-semibold">👑 3D Gold, Gigs &amp; AR Suite</span>
-                                <span class="text-muted small d-none d-xl-inline">&mdash; Customise bespoke family celebration posters, live gig flyers, WhatsApp stories &amp; AR designs.</span>
-                            </div>
-                        </div>
-
-                        {{-- Horizontal Bar 1: Designer Celebration, Gig & Show Templates --}}
-                        <div class="d-flex align-items-center gap-2 mb-2 p-2 px-3 rounded-3 border" style="background: #f8fafc;">
-                            <span class="fw-bold small text-dark text-nowrap flex-shrink-0">
-                                <i class="bi bi-stars text-warning me-1"></i> Designer Celebration &amp; Gig Templates:
-                            </span>
-                            <div class="flyer-horiz-strip flex-grow-1" id="flyerTemplatePills">
-                                <button type="button" id="btnPresetBirthday" class="flyer-preset-btn active" onclick="applyBirthdayPreset()">🎂 Birthday</button>
-                                <button type="button" id="btnPresetLiveShow" class="flyer-preset-btn" onclick="applyLiveShowPreset()">🎭 Live Show &amp; Concert</button>
-                                <button type="button" id="btnPresetGigHeadline" class="flyer-preset-btn" onclick="applyGigPreset('headline_gig')">🎸 Headline Gig &amp; Tour</button>
-                                <button type="button" id="btnPresetGigRave" class="flyer-preset-btn" onclick="applyGigPreset('dj_rave')">🎧 Club Night &amp; DJ Rave</button>
-                                <button type="button" id="btnPresetGigComedy" class="flyer-preset-btn" onclick="applyGigPreset('comedy_night')">🎤 Comedy &amp; Encore</button>
-                                <button type="button" id="btnPresetGigJazz" class="flyer-preset-btn" onclick="applyGigPreset('jazz_lounge')">🎷 Afro-Jazz &amp; Lounge</button>
-                                <button type="button" id="btnPresetGigFestival" class="flyer-preset-btn" onclick="applyGigPreset('festival_show')">🎪 Festival &amp; Block Party</button>
-                                <button type="button" id="btnPresetJubilee" class="flyer-preset-btn" onclick="applyJubileePreset()">👑 Golden Jubilee</button>
-                                <button type="button" id="btnPresetFiesta" class="flyer-preset-btn" onclick="applyFiestaPreset()">🪅 Fiesta</button>
-                            </div>
-                        </div>
-
-                        {{-- Horizontal Bar 2: Augmented Reality (AR) Themes --}}
-                        <div class="d-flex align-items-center gap-2 mb-2 p-2 px-3 rounded-3 border" style="background: #f8fafc;">
-                            <span class="fw-bold small text-dark text-nowrap flex-shrink-0">
-                                <i class="bi bi-badge-vr-fill text-primary me-1"></i> Augmented Reality (AR) Themes:
-                            </span>
-                            <div class="flyer-horiz-strip flex-grow-1">
-                                <button type="button" id="btnPresetArHologram" class="flyer-preset-btn" onclick="applyArPreset('hologram')">🔮 AR Hologram Gold</button>
-                                <button type="button" id="btnPresetArCyber" class="flyer-preset-btn" onclick="applyArPreset('cyber_emerald')">⚡ AR Cyber Emerald</button>
-                                <button type="button" id="btnPresetArRoyal" class="flyer-preset-btn" onclick="applyArPreset('royal_plaque')">🏛️ AR Royal Plaque</button>
-                                <button type="button" id="btnPresetArNeon" class="flyer-preset-btn" onclick="applyArPreset('neon_glass')">💎 AR Floating Neon</button>
-                            </div>
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle d-none d-md-inline-block flex-shrink-0" style="font-size: 0.65rem;">3D INTERACTIVE</span>
-                        </div>
-
-                        {{-- Horizontal Bar 3: Format & Aspect Ratio --}}
-                        <div class="d-flex align-items-center gap-2 mb-2 p-2 px-3 rounded-3 border" style="background: #f8fafc;">
-                            <span class="fw-bold small text-dark text-nowrap flex-shrink-0">
-                                <i class="bi bi-aspect-ratio text-secondary me-1"></i> Format &amp; Aspect Ratio:
-                            </span>
-                            <div class="flyer-horiz-strip flex-grow-1" id="flyerFormatPills">
-                                <button type="button" id="btnFmtPortrait" class="flyer-format-btn active" onclick="setFlyerFormat('portrait_3_4')">🖼️ Poster (3:4)</button>
-                                <button type="button" id="btnFmtStory" class="flyer-format-btn" onclick="setFlyerFormat('story_9_16')">📱 Story (9:16)</button>
-                                <button type="button" id="btnFmtSquare" class="flyer-format-btn" onclick="setFlyerFormat('square_1_1')">🔲 Square (1:1)</button>
-                                <button type="button" id="btnFmtLandscape" class="flyer-format-btn" onclick="setFlyerFormat('landscape_16_9')">🖥️ Banner (16:9)</button>
-                            </div>
-                        </div>
-
-                        {{-- Horizontal Bar 3: Poster Background Colour (Pick Any Colour or Preset Horizontally) --}}
-                        <div class="d-flex align-items-center gap-2 p-2 px-3 rounded-3 border flex-wrap flex-xl-nowrap" style="background: #f8fafc;" id="posterBgColorControlBox">
-                            <span class="fw-bold small text-dark text-nowrap flex-shrink-0">
-                                <i class="bi bi-palette-fill text-warning me-1"></i> Poster Background Colour:
-                            </span>
-
-                            {{-- Custom Colour Pickers (Any Colour) --}}
-                            <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                                <div class="d-flex align-items-center gap-1 bg-white border rounded-pill px-2 py-1 shadow-xs">
-                                    <input type="color" id="flyer-bg-color-1" value="#021a12" oninput="setCustomFlyerBgColor(this.value, null)" style="width: 24px; height: 24px; padding: 0; border: none; border-radius: 50%; cursor: pointer; background: transparent;" title="Pick Any Primary Background Colour">
-                                    <input type="text" id="flyer-bg-hex-1" value="#021a12" maxlength="7" oninput="onHexBgInput(this.value, 1)" class="border-0 small fw-bold text-uppercase" style="width: 60px; font-size: 0.72rem; outline: none; font-family: monospace;" aria-label="Primary Hex Colour">
-                                </div>
-
-                                <div class="d-flex align-items-center gap-1 bg-white border rounded-pill px-2 py-1 shadow-xs" id="flyerBgColor2Wrap">
-                                    <span class="text-muted" style="font-size: 0.68rem;">Blend:</span>
-                                    <input type="color" id="flyer-bg-color-2" value="#041424" oninput="setCustomFlyerBgColor(null, this.value)" style="width: 22px; height: 22px; padding: 0; border: none; border-radius: 50%; cursor: pointer; background: transparent;" title="Pick Secondary Gradient Colour">
-                                </div>
-
-                                <select id="flyer-bg-style" class="form-select form-select-sm py-0 px-2 rounded-pill fw-semibold" style="font-size: 0.72rem; width: auto; min-height: 28px;" onchange="setFlyerBgFillStyle(this.value)" aria-label="Background Fill Style">
-                                    <option value="gradient" selected>✨ Luxury Gradient</option>
-                                    <option value="solid">🎨 Solid Colour</option>
-                                    <option value="radial">🌟 Spotlight Glow</option>
-                                </select>
-                            </div>
-
-                            {{-- Quick-Pick Swatches (Single Horizontal Strip) --}}
-                            <div class="flyer-horiz-strip flex-grow-1" id="flyerBgSwatches">
-                                <button type="button" class="btn btn-sm rounded-pill py-0 px-2 fw-semibold border text-nowrap flex-shrink-0" style="background: linear-gradient(135deg, #021a12, #041424); color: #fce79a; font-size: 0.68rem; min-height: 26px;" onclick="setFlyerBgScheme('emerald')" title="Emerald Night">Emerald</button>
-                                <button type="button" class="btn btn-sm rounded-pill py-0 px-2 fw-semibold border text-nowrap flex-shrink-0" style="background: linear-gradient(135deg, #2a1f0a, #050403); color: #ffd700; font-size: 0.68rem; min-height: 26px;" onclick="setFlyerBgScheme('obsidian')" title="Obsidian Gold">Obsidian</button>
-                                <button type="button" class="btn btn-sm rounded-pill py-0 px-2 fw-semibold border text-nowrap flex-shrink-0" style="background: linear-gradient(135deg, #051937, #000c1e); color: #93c5fd; font-size: 0.68rem; min-height: 26px;" onclick="setFlyerBgScheme('sapphire')" title="Sapphire Gala">Sapphire</button>
-                                <button type="button" class="btn btn-sm rounded-pill py-0 px-2 fw-semibold border text-nowrap flex-shrink-0" style="background: linear-gradient(135deg, #3d0714, #0a0104); color: #fda4af; font-size: 0.68rem; min-height: 26px;" onclick="setFlyerBgScheme('ruby')" title="Royal Ruby">Ruby</button>
-                                <button type="button" class="btn btn-sm rounded-pill py-0 px-2 fw-semibold border text-nowrap flex-shrink-0" style="background: linear-gradient(135deg, #2e0854, #0d021a); color: #e9d5ff; font-size: 0.68rem; min-height: 26px;" onclick="setFlyerBgScheme('purple')" title="Imperial Purple">Purple</button>
-                                <button type="button" class="btn btn-sm rounded-pill py-0 px-2 fw-semibold border text-nowrap flex-shrink-0" style="background: linear-gradient(135deg, #1e1b4b, #090d16); color: #7dd3fc; font-size: 0.68rem; min-height: 26px;" onclick="setFlyerBgScheme('indigo')" title="Electric Indigo Stage">Indigo</button>
-                                <button type="button" class="btn btn-sm rounded-pill py-0 px-2 fw-semibold border text-nowrap flex-shrink-0" style="background: linear-gradient(135deg, #431407, #1e1b4b); color: #fdba74; font-size: 0.68rem; min-height: 26px;" onclick="setFlyerBgScheme('sunset')" title="Festival Sunset">Sunset</button>
-                                <button type="button" class="btn btn-sm rounded-pill py-0 px-2 fw-semibold border text-nowrap flex-shrink-0" style="background: linear-gradient(135deg, #4a1525, #1f070e); color: #fecdd3; font-size: 0.68rem; min-height: 26px;" onclick="setFlyerBgScheme('rose')" title="Rose Blush">Rose</button>
-                                <button type="button" class="btn btn-sm rounded-pill py-0 px-2 fw-semibold border text-nowrap flex-shrink-0" style="background: linear-gradient(135deg, #042f2e, #021014); color: #99f6e4; font-size: 0.68rem; min-height: 26px;" onclick="setFlyerBgScheme('teal')" title="Midnight Teal">Teal</button>
-                                <button type="button" class="btn btn-sm rounded-pill py-0 px-2 fw-semibold border text-nowrap flex-shrink-0" style="background: linear-gradient(135deg, #fdfbf7, #e6dec8); color: #1e293b; font-size: 0.68rem; min-height: 26px;" onclick="setFlyerBgScheme('champagne')" title="Champagne Cream">Cream</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Left Column: Controls & Studio Tools --}}
-                <div class="col-lg-5">
+            <div class="row g-4">
+                {{-- Left Column: Controls & Studio Tools (Vertical Ergonomic Architecture) --}}
+                <div class="col-lg-5" id="flyerControlsColumn">
                     <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                        {{-- Top Header & Linked Event Bar --}}
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3 pb-2 border-bottom">
+                            <div>
+                                <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-stars text-warning me-1"></i> Event Poster &amp; Gig Studio</h4>
+                                <small class="text-muted">Customise celebration posters, live gig flyers, stories &amp; AR designs.</small>
+                            </div>
+                        </div>
+
+                        {{-- 🎨 Choose Template & Vibe (Clean Vertical Category & Grid Deck) --}}
+                        <div class="p-3 rounded-4 mb-3 border bg-light">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <label class="form-label fw-bold small text-dark mb-0">
+                                    <i class="bi bi-grid-fill text-warning me-1"></i> Choose Template &amp; Vibe
+                                </label>
+                                <span class="badge bg-dark text-warning small px-2 py-1 fw-bold">13 Styles</span>
+                            </div>
+
+                            {{-- Category Filter Pills --}}
+                            <div class="d-flex gap-1 mb-2 overflow-x-auto pb-1 flyer-horiz-strip" style="scrollbar-width: none;">
+                                <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-bold template-cat-filter active btn-dark" id="filterCatAll" onclick="filterTemplateCategory('all')" style="min-height: 36px; font-size: 0.75rem;">All</button>
+                                <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-bold template-cat-filter btn-light border" id="filterCatCelebration" onclick="filterTemplateCategory('celebration')" style="min-height: 36px; font-size: 0.75rem;">🎂 Celebrations</button>
+                                <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-bold template-cat-filter btn-light border" id="filterCatGigs" onclick="filterTemplateCategory('gigs')" style="min-height: 36px; font-size: 0.75rem;">🎸 Gigs &amp; Shows</button>
+                                <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-bold template-cat-filter btn-light border" id="filterCatAr" onclick="filterTemplateCategory('ar')" style="min-height: 36px; font-size: 0.75rem;">🔮 3D &amp; AR</button>
+                            </div>
+
+                            {{-- Grid of Template Buttons (Responsive 2-Col Grid) --}}
+                            <div class="row g-2" id="studioTemplateGrid">
+                                <div class="col-6 tpl-item tpl-cat-celebration">
+                                    <button type="button" id="btnPresetBirthday" class="flyer-preset-btn w-100 justify-content-center active" onclick="applyBirthdayPreset()">🎂 Birthday</button>
+                                </div>
+                                <div class="col-6 tpl-item tpl-cat-celebration">
+                                    <button type="button" id="btnPresetJubilee" class="flyer-preset-btn w-100 justify-content-center" onclick="applyJubileePreset()">👑 Golden Jubilee</button>
+                                </div>
+                                <div class="col-6 tpl-item tpl-cat-celebration">
+                                    <button type="button" id="btnPresetFiesta" class="flyer-preset-btn w-100 justify-content-center" onclick="applyFiestaPreset()">🪅 Fiesta</button>
+                                </div>
+                                <div class="col-6 tpl-item tpl-cat-gigs">
+                                    <button type="button" id="btnPresetGigHeadline" class="flyer-preset-btn w-100 justify-content-center" onclick="applyGigPreset('headline_gig')">🎸 Headline Gig</button>
+                                </div>
+                                <div class="col-6 tpl-item tpl-cat-gigs">
+                                    <button type="button" id="btnPresetGigRave" class="flyer-preset-btn w-100 justify-content-center" onclick="applyGigPreset('dj_rave')">🎧 DJ Rave</button>
+                                </div>
+                                <div class="col-6 tpl-item tpl-cat-gigs">
+                                    <button type="button" id="btnPresetGigComedy" class="flyer-preset-btn w-100 justify-content-center" onclick="applyGigPreset('comedy_night')">🎤 Comedy</button>
+                                </div>
+                                <div class="col-6 tpl-item tpl-cat-gigs">
+                                    <button type="button" id="btnPresetGigJazz" class="flyer-preset-btn w-100 justify-content-center" onclick="applyGigPreset('jazz_lounge')">🎷 Afro-Jazz</button>
+                                </div>
+                                <div class="col-6 tpl-item tpl-cat-gigs">
+                                    <button type="button" id="btnPresetGigFestival" class="flyer-preset-btn w-100 justify-content-center" onclick="applyGigPreset('festival_show')">🎪 Festival</button>
+                                </div>
+                                <div class="col-6 tpl-item tpl-cat-gigs">
+                                    <button type="button" id="btnPresetLiveShow" class="flyer-preset-btn w-100 justify-content-center" onclick="applyLiveShowPreset()">🎭 Live Show &amp; Concert</button>
+                                </div>
+                                <div class="col-6 tpl-item tpl-cat-ar">
+                                    <button type="button" id="btnPresetArHologram" class="flyer-preset-btn w-100 justify-content-center" onclick="applyArPreset('hologram')">🔮 AR Hologram</button>
+                                </div>
+                                <div class="col-6 tpl-item tpl-cat-ar">
+                                    <button type="button" id="btnPresetArCyber" class="flyer-preset-btn w-100 justify-content-center" onclick="applyArPreset('cyber_emerald')">⚡ AR Cyber</button>
+                                </div>
+                                <div class="col-6 tpl-item tpl-cat-ar">
+                                    <button type="button" id="btnPresetArRoyal" class="flyer-preset-btn w-100 justify-content-center" onclick="applyArPreset('royal_plaque')">🏛️ AR Royal</button>
+                                </div>
+                                <div class="col-6 tpl-item tpl-cat-ar">
+                                    <button type="button" id="btnPresetArNeon" class="flyer-preset-btn w-100 justify-content-center" onclick="applyArPreset('neon_glass')">💎 AR Neon</button>
+                                </div>
+                            </div>
+                        </div>
+
                         {{-- Tabbed Studio Controls: Content vs Visual Customiser vs AR Tools --}}
                         <ul class="nav nav-tabs nav-fill mb-3" id="flyerControlTabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active small py-2 fw-semibold" id="tab-ctrl-content-btn" data-bs-toggle="tab" data-bs-target="#tab-ctrl-content" type="button" role="tab">
-                                    <i class="bi bi-pencil-square me-1"></i> Content
+                                    <i class="bi bi-pencil-square me-1"></i> Content &amp; Photo
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
@@ -462,168 +557,325 @@
                         <div class="tab-content" id="flyerControlTabContent">
                             {{-- SUBTAB 1: CONTENT EDITING --}}
                             <div class="tab-pane fade show active" id="tab-ctrl-content" role="tabpanel">
+                                
+                                {{-- 📷 UNIVERSAL PHOTO & ARTWORK STUDIO (WORKS ACROSS CELEBRATION, GIG & SHOW MODES) --}}
+                                <div class="mb-3 p-3 rounded-4 bg-light border" id="universalPhotoStudioCard">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label fw-bold small mb-0 text-dark">
+                                            <i class="bi bi-person-bounding-box text-primary me-1"></i> <span id="labelPhotoTitle">Celebrant / Artist Photo</span>
+                                        </label>
+                                        <button type="button" class="btn btn-outline-danger btn-sm py-0 px-2 fw-semibold" onclick="clearCelebrantPhoto(true)" id="btnRemovePhoto" style="font-size: 0.75rem; display: none; min-height: 28px;">
+                                            <i class="bi bi-trash me-1"></i> Remove Photo
+                                        </button>
+                                    </div>
+                                    <input type="file" id="fam-celebrant-file" class="form-control rounded-3 form-control-sm mb-2" accept="image/*" onchange="handleCelebrantPhoto(event)">
+                                    
+                                    {{-- Live Active Photo Status & Scaling Controls --}}
+                                    <div class="p-2 rounded-3 bg-white border" id="celebrantScaleRow" style="display: none !important;">
+                                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Photo Active &amp; Synced
+                                            </span>
+                                            <div class="d-flex align-items-center gap-2 ms-auto">
+                                                <label class="small text-muted mb-0" style="font-size: 0.72rem;">Scale:</label>
+                                                <input type="range" id="celebrant-scale" class="form-range" min="50" max="150" value="100" style="width: 85px;" oninput="updateCelebrantScale(this.value)">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {{-- MODE 1 CONTROLS: CELEBRATION GALA (BIRTHDAY, JUBILEE, FIESTA, AR) --}}
                                 <div id="controlsTransatlantic">
-                                    {{-- Celebrant Portrait Upload (Optional) --}}
-                                    <div class="mb-3 p-3 rounded-3 bg-light border">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <label class="form-label fw-semibold small mb-0 text-dark"><i class="bi bi-person-bounding-box text-primary me-1"></i> Celebrant Portrait (Optional)</label>
-                                            <button type="button" class="btn btn-outline-danger btn-sm py-0 px-2 fw-semibold" onclick="clearCelebrantPhoto()" id="btnRemovePhoto" style="font-size: 0.75rem; display: none;">Remove Photo</button>
+                                    {{-- Proclamation & Script Intro Card --}}
+                                    <div class="luxury-card-box mb-3">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span class="badge" style="background: #f1f5f9; color: #1e293b; font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 700; border: 1px solid #e2e8f0;">
+                                                <i class="bi bi-megaphone-fill text-warning me-1"></i> Proclamation Banners
+                                            </span>
+                                            <span class="text-muted small" style="font-size: 0.74rem;">Invitation Header</span>
                                         </div>
-                                        <input type="file" id="fam-celebrant-file" class="form-control rounded-3 form-control-sm mb-2" accept="image/*" onchange="handleCelebrantPhoto(event)">
-                                        <div class="d-flex align-items-center justify-content-between flex-wrap" id="celebrantScaleRow" style="display: none !important;">
-                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="bi bi-check-circle me-1"></i> Portrait Active</span>
-                                            <div class="d-flex align-items-center gap-1 ms-auto">
-                                                <label class="small text-muted" style="font-size: 0.72rem;">Scale:</label>
-                                                <input type="range" id="celebrant-scale" class="form-range" min="50" max="150" value="100" style="width: 80px;" oninput="updateCelebrantScale(this.value)">
+                                        <div class="row g-2">
+                                            <div class="col-sm-6">
+                                                <label class="luxury-field-label">Top Headline</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-card-heading"></i></span>
+                                                    <input type="text" id="flyer-headline" class="form-control luxury-input form-control-sm" value="SAVE THE DATE" oninput="updateFamFlyerPreview()" placeholder="e.g. SAVE THE DATE">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="luxury-field-label">Intro Script</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-pen"></i></span>
+                                                    <input type="text" id="flyer-intro" class="form-control luxury-input form-control-sm" value="For the Grand Celebration of" oninput="updateFamFlyerPreview()" placeholder="e.g. For the Grand Celebration of">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {{-- Typography & Headings --}}
-                                    <div class="row g-2 mb-2">
-                                        <div class="col-sm-6">
-                                            <label class="form-label fw-semibold small text-dark">Top Headline</label>
-                                            <input type="text" id="flyer-headline" class="form-control rounded-3" value="SAVE THE DATE" oninput="updateFamFlyerPreview()">
+                                    {{-- Hero Title Centerpiece (Regal 3D Gold Card) --}}
+                                    <div class="luxury-card-gold mb-3">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span class="badge" style="background: linear-gradient(135deg, #d4af37, #aa771c); color: #ffffff; font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 700; box-shadow: 0 2px 6px rgba(170, 119, 28, 0.35);">
+                                                <i class="bi bi-crown-fill me-1"></i> Regal Centerpiece
+                                            </span>
+                                            <span class="badge bg-warning-subtle text-dark border border-warning-subtle small fw-semibold" style="font-size: 0.72rem;">3D Gold Embossed</span>
                                         </div>
-                                        <div class="col-sm-6">
-                                            <label class="form-label fw-semibold small text-dark">Intro Script</label>
-                                            <input type="text" id="flyer-intro" class="form-control rounded-3" value="For the Grand Celebration of" oninput="updateFamFlyerPreview()">
+                                        <label class="luxury-field-label" style="color: #78350f;">Hero Title (3D Gold)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text luxury-input-addon" style="border-color: #d4af37; background: #fffdf5; color: #b8860b;"><i class="bi bi-stars"></i></span>
+                                            <input type="text" id="flyer-hero-title" class="form-control luxury-input luxury-input-hero" value="BIRTHDAY GALA" oninput="updateFamFlyerPreview()" placeholder="e.g. BIRTHDAY GALA">
                                         </div>
                                     </div>
 
-                                    <div class="mb-2">
-                                        <label class="form-label fw-semibold small text-dark">Hero Title (3D Gold)</label>
-                                        <input type="text" id="flyer-hero-title" class="form-control rounded-3 fw-bold" value="BIRTHDAY GALA" oninput="updateFamFlyerPreview()">
-                                    </div>
-
-                                    <div class="row g-2 mb-2">
-                                        <div class="col-sm-6">
-                                            <label class="form-label fw-semibold small text-dark">Subtitle / Region</label>
-                                            <input type="text" id="flyer-subtitle" class="form-control rounded-3" value="IN NIGERIA &amp; UK" oninput="updateFamFlyerPreview()">
+                                    {{-- Territory & Family Creed Card --}}
+                                    <div class="luxury-card-box mb-3">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span class="badge" style="background: #f1f5f9; color: #1e293b; font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 700; border: 1px solid #e2e8f0;">
+                                                <i class="bi bi-globe-americas text-primary me-1"></i> Scope &amp; Tagline
+                                            </span>
+                                            <span class="text-muted small" style="font-size: 0.74rem;">Sub-Headings</span>
                                         </div>
-                                        <div class="col-sm-6">
-                                            <label class="form-label fw-semibold small text-dark">Emotional Motto / Script</label>
-                                            <input type="text" id="flyer-motto" class="form-control rounded-3" value="Two Countries • One Celebration • Same Great Family" oninput="updateFamFlyerPreview()">
+                                        <div class="row g-2">
+                                            <div class="col-sm-6">
+                                                <label class="luxury-field-label">Subtitle / Region</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-geo-alt"></i></span>
+                                                    <input type="text" id="flyer-subtitle" class="form-control luxury-input form-control-sm" value="IN NIGERIA &amp; UK" oninput="updateFamFlyerPreview()" placeholder="e.g. IN NIGERIA &amp; UK">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="luxury-field-label">Emotional Motto / Script</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-quote"></i></span>
+                                                    <input type="text" id="flyer-motto" class="form-control luxury-input form-control-sm" value="Two Countries • One Celebration • Same Great Family" oninput="updateFamFlyerPreview()" placeholder="e.g. Two Countries • One Celebration">
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
                                     {{-- Destination Shield 1 --}}
-                                    <div class="p-3 mb-2 rounded-3 border" style="background: #f8fafc;" id="ctrlPlaque1Wrap">
+                                    <div class="luxury-card-plaque-1 mb-3" id="ctrlPlaque1Wrap">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <div class="fw-bold small text-dark"><i class="bi bi-geo-alt-fill text-warning me-1"></i> Celebration Plaque 1 (Left Shield)</div>
-                                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 small" onclick="toggleLayerVisibility('plaque1')" id="btnTogglePlaque1">Hide</button>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="badge bg-success text-white px-2 py-1" style="font-size: 0.72rem; font-weight: 700;">
+                                                    <i class="bi bi-shield-fill-check me-1"></i> PLAQUE 1
+                                                </span>
+                                                <div class="fw-bold small text-dark"><i class="bi bi-geo-alt-fill text-warning me-1"></i> Celebration Plaque 1 (Left Shield)</div>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 small" onclick="toggleLayerVisibility('plaque1')" id="btnTogglePlaque1" style="font-size: 0.75rem; border-radius: 20px; font-weight: 600; min-height: 28px;">Hide</button>
                                         </div>
                                         <div class="row g-2 mb-2">
                                             <div class="col-sm-4">
-                                                <input type="text" id="flyer-dest1-flag" class="form-control rounded-3 form-control-sm text-center" value="🇳🇬" placeholder="Flag/Icon" oninput="updateFamFlyerPreview()">
+                                                <label class="luxury-field-label">Flag / Icon</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-flag"></i></span>
+                                                    <input type="text" id="flyer-dest1-flag" class="form-control luxury-input form-control-sm text-center" value="🇳🇬" placeholder="Flag/Icon" oninput="updateFamFlyerPreview()">
+                                                </div>
                                             </div>
                                             <div class="col-sm-8">
-                                                <input type="text" id="flyer-dest1-title" class="form-control rounded-3 form-control-sm" value="NIGERIA Celebration" oninput="updateFamFlyerPreview()">
+                                                <label class="luxury-field-label">Celebration Title</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-geo"></i></span>
+                                                    <input type="text" id="flyer-dest1-title" class="form-control luxury-input form-control-sm" value="NIGERIA Celebration" placeholder="e.g. NIGERIA Celebration" oninput="updateFamFlyerPreview()">
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="row g-2">
                                             <div class="col-sm-6">
-                                                <input type="text" id="flyer-dest1-date" class="form-control rounded-3 form-control-sm" value="DATE: AUGUST, 2027" oninput="updateFamFlyerPreview()">
+                                                <label class="luxury-field-label">Date &amp; Schedule</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-calendar-event"></i></span>
+                                                    <input type="text" id="flyer-dest1-date" class="form-control luxury-input form-control-sm" value="DATE: AUGUST, 2027" placeholder="e.g. DATE: AUGUST, 2027" oninput="updateFamFlyerPreview()">
+                                                </div>
                                             </div>
                                             <div class="col-sm-6">
-                                                <input type="text" id="flyer-dest1-venue" class="form-control rounded-3 form-control-sm" value="VENUE: COMING SOON" oninput="updateFamFlyerPreview()">
+                                                <label class="luxury-field-label">Venue / Coordinates</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-pin-map"></i></span>
+                                                    <input type="text" id="flyer-dest1-venue" class="form-control luxury-input form-control-sm" value="VENUE: COMING SOON" placeholder="e.g. VENUE: COMING SOON" oninput="updateFamFlyerPreview()">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     {{-- Destination Shield 2 --}}
-                                    <div class="p-3 mb-2 rounded-3 border" style="background: #f8fafc;" id="ctrlPlaque2Wrap">
+                                    <div class="luxury-card-plaque-2 mb-3" id="ctrlPlaque2Wrap">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <div class="fw-bold small text-dark"><i class="bi bi-geo-alt-fill text-warning me-1"></i> Celebration Plaque 2 (Right Shield)</div>
-                                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 small" onclick="toggleLayerVisibility('plaque2')" id="btnTogglePlaque2">Hide</button>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="badge bg-primary text-white px-2 py-1" style="font-size: 0.72rem; font-weight: 700;">
+                                                    <i class="bi bi-shield-fill-check me-1"></i> PLAQUE 2
+                                                </span>
+                                                <div class="fw-bold small text-dark"><i class="bi bi-geo-alt-fill text-warning me-1"></i> Celebration Plaque 2 (Right Shield)</div>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 small" onclick="toggleLayerVisibility('plaque2')" id="btnTogglePlaque2" style="font-size: 0.75rem; border-radius: 20px; font-weight: 600; min-height: 28px;">Hide</button>
                                         </div>
                                         <div class="row g-2 mb-2">
                                             <div class="col-sm-4">
-                                                <input type="text" id="flyer-dest2-flag" class="form-control rounded-3 form-control-sm text-center" value="🇬🇧" placeholder="Flag/Icon" oninput="updateFamFlyerPreview()">
+                                                <label class="luxury-field-label">Flag / Icon</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-flag"></i></span>
+                                                    <input type="text" id="flyer-dest2-flag" class="form-control luxury-input form-control-sm text-center" value="🇬🇧" placeholder="Flag/Icon" oninput="updateFamFlyerPreview()">
+                                                </div>
                                             </div>
                                             <div class="col-sm-8">
-                                                <input type="text" id="flyer-dest2-title" class="form-control rounded-3 form-control-sm" value="UK Celebration" oninput="updateFamFlyerPreview()">
+                                                <label class="luxury-field-label">Celebration Title</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-geo"></i></span>
+                                                    <input type="text" id="flyer-dest2-title" class="form-control luxury-input form-control-sm" value="UK Celebration" placeholder="e.g. UK Celebration" oninput="updateFamFlyerPreview()">
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="row g-2">
                                             <div class="col-sm-6">
-                                                <input type="text" id="flyer-dest2-date" class="form-control rounded-3 form-control-sm" value="DATE: SEPTEMBER, 2027" oninput="updateFamFlyerPreview()">
+                                                <label class="luxury-field-label">Date &amp; Schedule</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-calendar-event"></i></span>
+                                                    <input type="text" id="flyer-dest2-date" class="form-control luxury-input form-control-sm" value="DATE: SEPTEMBER, 2027" placeholder="e.g. DATE: SEPTEMBER, 2027" oninput="updateFamFlyerPreview()">
+                                                </div>
                                             </div>
                                             <div class="col-sm-6">
-                                                <input type="text" id="flyer-dest2-venue" class="form-control rounded-3 form-control-sm" value="VENUE: COMING SOON" oninput="updateFamFlyerPreview()">
+                                                <label class="luxury-field-label">Venue / Coordinates</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-pin-map"></i></span>
+                                                    <input type="text" id="flyer-dest2-venue" class="form-control luxury-input form-control-sm" value="VENUE: COMING SOON" placeholder="e.g. VENUE: COMING SOON" oninput="updateFamFlyerPreview()">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <label class="form-label fw-semibold small text-dark mb-0">Bottom Gold Ribbon Text</label>
-                                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 small" onclick="toggleLayerVisibility('ribbon')" id="btnToggleRibbon">Hide</button>
+                                    {{-- Bottom Gold Ribbon --}}
+                                    <div class="luxury-card-ribbon mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="badge" style="background: linear-gradient(135deg, #d4af37, #9a741e); color: #ffffff; font-size: 0.72rem; font-weight: 700;">
+                                                    <i class="bi bi-bookmark-star-fill me-1"></i> GOLD RIBBON
+                                                </span>
+                                                <label class="luxury-field-label mb-0" style="color: #78350f;">Bottom Gold Ribbon Text</label>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 small" onclick="toggleLayerVisibility('ribbon')" id="btnToggleRibbon" style="font-size: 0.75rem; border-radius: 20px; font-weight: 600; min-height: 28px;">Hide</button>
                                         </div>
-                                        <input type="text" id="flyer-bottom-ribbon" class="form-control rounded-3" value="★ More Details to Follow ★" oninput="updateFamFlyerPreview()">
+                                        <div class="input-group">
+                                            <span class="input-group-text luxury-input-addon" style="border-color: #fde68a; background: #fffbeb; color: #b8860b;"><i class="bi bi-award-fill"></i></span>
+                                            <input type="text" id="flyer-bottom-ribbon" class="form-control luxury-input" value="★ More Details to Follow ★" oninput="updateFamFlyerPreview()" placeholder="★ More Details to Follow ★">
+                                        </div>
                                     </div>
                                 </div>
 
                                 {{-- MODE 2 CONTROLS: LIVE SHOW & CONCERT (FORMERLY ALL WHITE) --}}
                                 <div id="controlsAllWhite" style="display: none;">
-                                    <div class="mb-2">
-                                        <label class="form-label fw-semibold small text-dark">Top Presenter / Host Line</label>
-                                        <input type="text" id="aw-presenter" class="form-control rounded-3 form-control-sm" value="FAMILY ENTERTAINMENT PRESENTS" oninput="updateFamFlyerPreview()">
-                                    </div>
-
-                                    <div class="row g-2 mb-2">
-                                        <div class="col-sm-6">
-                                            <label class="form-label fw-semibold small text-dark">Hero Title (3D Pearl/Gold)</label>
-                                            <input type="text" id="aw-hero-main" class="form-control rounded-3 fw-bold" value="LIVE SHOW" oninput="updateFamFlyerPreview()">
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <label class="form-label fw-semibold small text-dark">Gold Brush Script</label>
-                                            <input type="text" id="aw-hero-script" class="form-control rounded-3" value="&amp; CONCERT" oninput="updateFamFlyerPreview()">
+                                    {{-- Presenter / Host Line --}}
+                                    <div class="luxury-card-box mb-3">
+                                        <label class="luxury-field-label">Top Presenter / Host Line</label>
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text luxury-input-addon"><i class="bi bi-mic-fill text-warning"></i></span>
+                                            <input type="text" id="aw-presenter" class="form-control luxury-input form-control-sm" value="FAMILY ENTERTAINMENT PRESENTS" oninput="updateFamFlyerPreview()">
                                         </div>
                                     </div>
 
-                                    <div class="row g-2 mb-2">
-                                        <div class="col-sm-6">
-                                            <label class="form-label fw-semibold small text-dark">Location Pill Badge</label>
-                                            <input type="text" id="aw-city-pill" class="form-control rounded-3 form-control-sm" value="IN LONDON" oninput="updateFamFlyerPreview()">
+                                    {{-- Hero Title (3D Pearl/Gold) & Brush Script --}}
+                                    <div class="luxury-card-gold mb-3">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span class="badge" style="background: linear-gradient(135deg, #d4af37, #aa771c); color: #ffffff; font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 700;">
+                                                <i class="bi bi-music-note-beamed me-1"></i> Headliner &amp; Gig
+                                            </span>
+                                            <span class="badge bg-warning-subtle text-dark border border-warning-subtle small fw-semibold" style="font-size: 0.72rem;">3D Pearl / Gold</span>
                                         </div>
-                                        <div class="col-sm-6">
-                                            <label class="form-label fw-semibold small text-dark">Dress Code Seal</label>
-                                            <input type="text" id="aw-dress-code" class="form-control rounded-3 form-control-sm" value="Dress Code • GLAMOROUS &amp; CHIC" oninput="updateFamFlyerPreview()">
+                                        <div class="row g-2">
+                                            <div class="col-sm-6">
+                                                <label class="luxury-field-label" style="color: #78350f;">Hero Title</label>
+                                                <input type="text" id="aw-hero-main" class="form-control luxury-input fw-bold" value="LIVE SHOW" oninput="updateFamFlyerPreview()" placeholder="LIVE SHOW">
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="luxury-field-label" style="color: #78350f;">Gold Brush Script</label>
+                                                <input type="text" id="aw-hero-script" class="form-control luxury-input" value="&amp; CONCERT" oninput="updateFamFlyerPreview()" placeholder="&amp; CONCERT">
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div class="p-3 mb-2 rounded-3 border" style="background: #f8fafc;">
+                                    {{-- Location Pill & Dress Code --}}
+                                    <div class="luxury-card-box mb-3">
+                                        <div class="row g-2">
+                                            <div class="col-sm-6">
+                                                <label class="luxury-field-label">Location Pill Badge</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-geo-alt"></i></span>
+                                                    <input type="text" id="aw-city-pill" class="form-control luxury-input form-control-sm" value="IN LONDON" oninput="updateFamFlyerPreview()">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="luxury-field-label">Dress Code Seal</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-tag"></i></span>
+                                                    <input type="text" id="aw-dress-code" class="form-control luxury-input form-control-sm" value="Dress Code • GLAMOROUS &amp; CHIC" oninput="updateFamFlyerPreview()">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- Date, Time & Venue --}}
+                                    <div class="luxury-card-box mb-3">
                                         <div class="fw-bold small text-dark mb-2"><i class="bi bi-calendar2-check text-warning me-1"></i> Event Date, Time &amp; Venue</div>
                                         <div class="row g-2 mb-2">
                                             <div class="col-sm-7">
-                                                <input type="text" id="aw-date" class="form-control rounded-3 form-control-sm" value="FRIDAY 30TH MAY 2026" oninput="updateFamFlyerPreview()">
+                                                <label class="luxury-field-label">Date</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-calendar-event"></i></span>
+                                                    <input type="text" id="aw-date" class="form-control luxury-input form-control-sm" value="FRIDAY 30TH MAY 2026" oninput="updateFamFlyerPreview()">
+                                                </div>
                                             </div>
                                             <div class="col-sm-5">
-                                                <input type="text" id="aw-time" class="form-control rounded-3 form-control-sm" value="7PM - MIDNIGHT" oninput="updateFamFlyerPreview()">
+                                                <label class="luxury-field-label">Time</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-clock"></i></span>
+                                                    <input type="text" id="aw-time" class="form-control luxury-input form-control-sm" value="7PM - MIDNIGHT" oninput="updateFamFlyerPreview()">
+                                                </div>
                                             </div>
                                         </div>
-                                        <input type="text" id="aw-venue" class="form-control rounded-3 form-control-sm" value="THE GRAND ARENA, LONDON SW1" oninput="updateFamFlyerPreview()">
+                                        <div>
+                                            <label class="luxury-field-label">Venue Coordinates</label>
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text luxury-input-addon"><i class="bi bi-building"></i></span>
+                                                <input type="text" id="aw-venue" class="form-control luxury-input form-control-sm" value="THE GRAND ARENA, LONDON SW1" oninput="updateFamFlyerPreview()">
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div class="p-3 mb-2 rounded-3 border" style="background: #f8fafc;">
-                                        <div class="fw-bold small text-dark mb-2"><i class="bi bi-stars text-warning me-1"></i> VIP Highlights</div>
+                                    {{-- VIP Highlights (Vertical as requested previously) --}}
+                                    <div class="luxury-card-box mb-3">
+                                        <div class="fw-bold small text-dark mb-2"><i class="bi bi-stars text-warning me-1"></i> VIP Highlights (Vertical)</div>
                                         <div class="d-flex flex-column gap-2">
-                                            <input type="text" id="aw-feat1" class="form-control rounded-3 form-control-sm" value="🎧 LIVE BAND" oninput="updateFamFlyerPreview()">
-                                            <input type="text" id="aw-feat2" class="form-control rounded-3 form-control-sm" value="🥂 VIP TABLES" oninput="updateFamFlyerPreview()">
-                                            <input type="text" id="aw-feat3" class="form-control rounded-3 form-control-sm" value="👥 RED CARPET" oninput="updateFamFlyerPreview()">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text luxury-input-addon"><i class="bi bi-check2-circle text-success"></i></span>
+                                                <input type="text" id="aw-feat1" class="form-control luxury-input form-control-sm" value="🎧 LIVE BAND" oninput="updateFamFlyerPreview()">
+                                            </div>
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text luxury-input-addon"><i class="bi bi-check2-circle text-success"></i></span>
+                                                <input type="text" id="aw-feat2" class="form-control luxury-input form-control-sm" value="🥂 VIP TABLES" oninput="updateFamFlyerPreview()">
+                                            </div>
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text luxury-input-addon"><i class="bi bi-check2-circle text-success"></i></span>
+                                                <input type="text" id="aw-feat3" class="form-control luxury-input form-control-sm" value="👥 RED CARPET" oninput="updateFamFlyerPreview()">
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div class="d-flex flex-column gap-2 mb-3">
-                                        <div>
-                                            <label class="form-label fw-semibold small text-dark mb-1">Tickets Platform</label>
-                                            <input type="text" id="aw-tickets" class="form-control rounded-3 form-control-sm" value="TICKETS: RSVP VIA FAMILY PLATFORM" oninput="updateFamFlyerPreview()">
-                                        </div>
-                                        <div>
-                                            <label class="form-label fw-semibold small text-dark mb-1">VIP Table Reservations</label>
-                                            <input type="text" id="aw-rsvp" class="form-control rounded-3 form-control-sm" value="RESERVATIONS: DM HOST OR APP" oninput="updateFamFlyerPreview()">
+                                    {{-- Tickets & VIP Tables (Vertical as requested) --}}
+                                    <div class="luxury-card-box mb-3">
+                                        <div class="d-flex flex-column gap-2">
+                                            <div>
+                                                <label class="luxury-field-label">Tickets Platform</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-ticket-perforated text-primary"></i></span>
+                                                    <input type="text" id="aw-tickets" class="form-control luxury-input form-control-sm" value="TICKETS: RSVP VIA FAMILY PLATFORM" oninput="updateFamFlyerPreview()">
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="luxury-field-label">VIP Table Reservations</label>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text luxury-input-addon"><i class="bi bi-telephone text-success"></i></span>
+                                                    <input type="text" id="aw-rsvp" class="form-control luxury-input form-control-sm" value="RESERVATIONS: DM HOST OR APP" oninput="updateFamFlyerPreview()">
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -635,6 +887,38 @@
 
                             {{-- SUBTAB 2: MOVE, RESIZE, FONT & CONTAINER FREEDOM --}}
                             <div class="tab-pane fade" id="tab-ctrl-layout" role="tabpanel">
+                                {{-- Poster Background Colour & Palette Swatches --}}
+                                <div class="p-3 rounded-4 bg-light border mb-3" id="flyerBgColorCard">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <label class="form-label fw-bold small text-dark mb-0">
+                                            <i class="bi bi-palette-fill text-warning me-1"></i> Poster Background Colour
+                                        </label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <label class="small text-muted mb-0" style="font-size: 0.72rem;">Custom:</label>
+                                            <input type="color" id="flyer-bg-color-picker" value="#021a12" oninput="setCustomFlyerBgColor(this.value, null)" style="width: 32px; height: 32px; padding: 0; border: 2px solid #cbd5e1; border-radius: 50%; cursor: pointer; background: transparent;" title="Pick Any Custom Background Colour">
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <label class="small text-muted mb-0 text-nowrap" style="font-size: 0.72rem;">Fill Style:</label>
+                                        <select class="form-select form-select-sm rounded-pill fw-semibold" id="flyer-bg-fill-style" style="font-size: 0.75rem; height: 32px;" onchange="setFlyerBgFillStyle(this.value)" aria-label="Background Fill Style">
+                                            <option value="gradient" selected>✨ Luxury Gradient</option>
+                                            <option value="solid">🎨 Solid Colour</option>
+                                            <option value="radial">🌟 Spotlight Glow</option>
+                                        </select>
+                                    </div>
+                                    <div class="d-flex gap-1 flex-wrap" id="flyerBgSwatches">
+                                        <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold border" style="background: linear-gradient(135deg, #021a12, #041424); color: #fce79a; font-size: 0.75rem; min-height: 36px;" onclick="setFlyerBgScheme('emerald')" title="Emerald Night">Emerald</button>
+                                        <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold border" style="background: linear-gradient(135deg, #2a1f0a, #050403); color: #ffd700; font-size: 0.75rem; min-height: 36px;" onclick="setFlyerBgScheme('obsidian')" title="Obsidian Gold">Obsidian</button>
+                                        <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold border" style="background: linear-gradient(135deg, #051937, #000c1e); color: #93c5fd; font-size: 0.75rem; min-height: 36px;" onclick="setFlyerBgScheme('sapphire')" title="Sapphire Gala">Sapphire</button>
+                                        <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold border" style="background: linear-gradient(135deg, #3d0714, #0a0104); color: #fda4af; font-size: 0.75rem; min-height: 36px;" onclick="setFlyerBgScheme('ruby')" title="Royal Ruby">Ruby</button>
+                                        <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold border" style="background: linear-gradient(135deg, #2e0854, #0d021a); color: #e9d5ff; font-size: 0.75rem; min-height: 36px;" onclick="setFlyerBgScheme('purple')" title="Imperial Purple">Purple</button>
+                                        <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold border" style="background: linear-gradient(135deg, #1e1b4b, #090d16); color: #7dd3fc; font-size: 0.75rem; min-height: 36px;" onclick="setFlyerBgScheme('indigo')" title="Electric Indigo Stage">Indigo</button>
+                                        <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold border" style="background: linear-gradient(135deg, #431407, #1e1b4b); color: #fdba74; font-size: 0.75rem; min-height: 36px;" onclick="setFlyerBgScheme('sunset')" title="Festival Sunset">Sunset</button>
+                                        <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold border" style="background: linear-gradient(135deg, #4a1525, #1f070e); color: #fecdd3; font-size: 0.75rem; min-height: 36px;" onclick="setFlyerBgScheme('rose')" title="Rose Blush">Rose</button>
+                                        <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold border" style="background: linear-gradient(135deg, #042f2e, #021014); color: #99f6e4; font-size: 0.75rem; min-height: 36px;" onclick="setFlyerBgScheme('teal')" title="Midnight Teal">Teal</button>
+                                        <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold border" style="background: linear-gradient(135deg, #fdfbf7, #e6dec8); color: #1e293b; font-size: 0.75rem; min-height: 36px;" onclick="setFlyerBgScheme('champagne')" title="Champagne Cream">Cream</button>
+                                    </div>
+                                </div>
                                 <div class="p-3 rounded-3 bg-light border mb-3">
                                     <label class="form-label fw-bold small text-dark mb-1"><i class="bi bi-hand-index-thumb text-primary me-1"></i> Select Element to Move &amp; Format</label>
                                     <select id="flyer-layer-picker" class="form-select rounded-3 mb-3" onchange="onSelectLayerToCustomise(this.value)">
@@ -785,7 +1069,7 @@
                 </div>
 
                 {{-- Right Column: Live Interactive Poster Preview & Action Hub --}}
-                <div class="col-lg-7">
+                <div class="col-lg-7" id="flyerPreviewColumn">
                     <div class="card border-0 shadow-sm rounded-4 p-4 bg-white text-center">
                         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                             <div class="text-start">
@@ -797,6 +1081,14 @@
                                     <i class="bi bi-stars text-warning me-1"></i> Interactive Flyer Studio
                                 </span>
                             </div>
+                        </div>
+
+                        {{-- Format & Aspect Ratio Switcher (Right Above the Live Poster) --}}
+                        <div class="d-flex align-items-center justify-content-center gap-2 mb-3 flex-wrap" id="flyerFormatPills">
+                            <button type="button" id="btnFmtPortrait" class="flyer-format-btn active" onclick="setFlyerFormat('portrait_3_4')">🖼️ Poster (3:4)</button>
+                            <button type="button" id="btnFmtStory" class="flyer-format-btn" onclick="setFlyerFormat('story_9_16')">📱 Story (9:16)</button>
+                            <button type="button" id="btnFmtSquare" class="flyer-format-btn" onclick="setFlyerFormat('square_1_1')">🔲 Square (1:1)</button>
+                            <button type="button" id="btnFmtLandscape" class="flyer-format-btn" onclick="setFlyerFormat('landscape_16_9')">🖥️ Banner (16:9)</button>
                         </div>
 
                         {{-- 3D Wrap for Hologram Parallax --}}
@@ -821,6 +1113,12 @@
                                 <div id="prevCelebrantWrap" class="position-absolute top-0 start-0 h-100" style="width: 55%; overflow: hidden; z-index: 1; pointer-events: none; display: none;">
                                     <img id="prevCelebrantPhoto" src="" alt="Celebrant" 
                                          style="display: none; width: 100%; height: 100%; object-fit: cover; object-position: top center; mask-image: linear-gradient(to right, black 65%, transparent 100%); -webkit-mask-image: linear-gradient(to right, black 65%, transparent 100%);">
+                                </div>
+
+                                {{-- Artist / Performer Backdrop Photo Layer (Mode 2 - Live Show & Gigs) --}}
+                                <div id="prevAwArtistPhotoWrap" class="position-absolute top-0 start-0 w-100 h-100" style="overflow: hidden; z-index: 1; pointer-events: none; display: none;">
+                                    <img id="prevAwArtistPhoto" src="" alt="Performer" 
+                                         style="display: none; width: 100%; height: 58%; object-fit: cover; object-position: top center; mask-image: linear-gradient(to bottom, black 50%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%); opacity: 0.55;">
                                 </div>
 
                                 {{-- Background Golden Glow Layer --}}
@@ -1122,6 +1420,13 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {{-- Mobile Quick-Jump Pill: Jump between Studio Controls and Live Poster Preview (Segun Mobile Invariant) --}}
+            <div class="d-lg-none position-fixed bottom-0 end-0 p-3" style="z-index: 1040; pointer-events: none;">
+                <button type="button" id="mobileFlyerJumpBtn" onclick="toggleMobileFlyerView()" class="btn btn-dark shadow-lg rounded-pill px-3 py-2 fw-bold border border-warning" style="pointer-events: auto; min-height: 44px; backdrop-filter: blur(8px); box-shadow: 0 8px 24px rgba(0,0,0,0.45) !important;">
+                    <span class="text-warning"><i class="bi bi-eye-fill me-1" id="mobileFlyerJumpIcon"></i></span> <span id="mobileFlyerJumpText" class="text-white">View Live Poster</span>
+                </button>
             </div>
         </div>
 
@@ -1837,13 +2142,76 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
         updateFamFlyerPreview();
     }
 
+    function updatePhotoDisplay() {
+        const celImg = document.getElementById('prevCelebrantPhoto');
+        const celWrap = document.getElementById('prevCelebrantWrap');
+        const awImg = document.getElementById('prevAwArtistPhoto');
+        const awWrap = document.getElementById('prevAwArtistPhotoWrap');
+        const hdr = document.getElementById('prevHeaderColumn');
+        const btnRemove = document.getElementById('btnRemovePhoto');
+        const scaleRow = document.getElementById('celebrantScaleRow');
+        const labelTitle = document.getElementById('labelPhotoTitle');
+        const scaleVal = flyerLayerState?.layers?.celebrant?.scale || 100;
+
+        if (labelTitle) {
+            labelTitle.textContent = currentPosterLayoutMode === 'allwhite_vip' ? 'Headliner / Artist Photo' : 'Celebrant Portrait (Optional)';
+        }
+
+        if (hasCelebrantPhoto && currentCelebrantPhotoData) {
+            if (celImg) {
+                celImg.src = currentCelebrantPhotoData;
+                celImg.style.display = 'block';
+                celImg.style.transform = `scale(${scaleVal / 100})`;
+                celImg.style.transformOrigin = 'top left';
+            }
+            if (awImg) {
+                awImg.src = currentCelebrantPhotoData;
+                awImg.style.display = 'block';
+                awImg.style.transform = `scale(${scaleVal / 100})`;
+                awImg.style.transformOrigin = 'top center';
+            }
+            if (btnRemove) btnRemove.style.display = 'inline-block';
+            if (scaleRow) scaleRow.style.setProperty('display', 'flex', 'important');
+
+            if (currentPosterLayoutMode === 'allwhite_vip') {
+                if (celWrap) celWrap.style.display = 'none';
+                if (awWrap) awWrap.style.display = 'block';
+                if (hdr) {
+                    hdr.style.marginLeft = '0';
+                    hdr.classList.remove('text-end');
+                    hdr.classList.add('text-center');
+                }
+            } else {
+                if (awWrap) awWrap.style.display = 'none';
+                if (celWrap) celWrap.style.display = 'block';
+                if (hdr) {
+                    hdr.style.marginLeft = '35%';
+                    hdr.classList.remove('text-center');
+                    hdr.classList.add('text-end');
+                }
+            }
+        } else {
+            if (celImg) { celImg.src = ''; celImg.style.display = 'none'; }
+            if (awImg) { awImg.src = ''; awImg.style.display = 'none'; }
+            if (celWrap) celWrap.style.display = 'none';
+            if (awWrap) awWrap.style.display = 'none';
+            if (btnRemove) btnRemove.style.display = 'none';
+            if (scaleRow) scaleRow.style.setProperty('display', 'none', 'important');
+            if (hdr) {
+                hdr.style.marginLeft = '0';
+                hdr.classList.remove('text-end');
+                hdr.classList.add('text-center');
+            }
+        }
+    }
+    window.updatePhotoDisplay = updatePhotoDisplay;
+
     function setPosterMode(mode) {
         currentPosterLayoutMode = mode;
         const ctrlTrans = document.getElementById('controlsTransatlantic');
         const ctrlWhite = document.getElementById('controlsAllWhite');
         const prevTrans = document.getElementById('previewModeTransatlantic');
         const prevWhite = document.getElementById('previewModeAllWhite');
-        const celWrap = document.getElementById('prevCelebrantWrap');
         const card = document.getElementById('famFlyerCardPreview');
 
         if (mode === 'allwhite_vip') {
@@ -1857,7 +2225,6 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
                 prevWhite.style.display = 'flex';
                 prevWhite.classList.add('d-flex');
             }
-            if (celWrap) celWrap.style.display = 'none';
             if (card && !currentFamFlyerImageData) {
                 applyPosterBgColorsToCard(card);
             }
@@ -1872,11 +2239,11 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
                 prevTrans.style.display = 'flex';
                 prevTrans.classList.add('d-flex');
             }
-            if (celWrap) celWrap.style.display = hasCelebrantPhoto ? 'block' : 'none';
             if (card && !currentFamFlyerImageData) {
                 applyPosterBgColorsToCard(card);
             }
         }
+        updatePhotoDisplay();
         updateFamFlyerPreview();
     }
 
@@ -2054,6 +2421,8 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
         setVal('flyer-bottom-ribbon', '★ Formal Attire • Gold & Champagne ★');
         applyBgGradient(null, 'emerald');
         setPosterMode('transatlantic');
+        updatePhotoDisplay();
+        updateFamFlyerPreview();
     }
     window.applyMajorPreset = applyBirthdayPreset; // Backward compatibility
 
@@ -2192,6 +2561,8 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
         setVal('flyer-bottom-ribbon', '★ Formal Attire • Gold & Champagne ★');
         applyBgGradient(null, 'obsidian');
         setPosterMode('transatlantic');
+        updatePhotoDisplay();
+        updateFamFlyerPreview();
     }
 
     // 🪅 PRESET 4: FIESTA (RENAMED FROM AFRICAN HERITAGE FIESTA)
@@ -2216,6 +2587,8 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
         setVal('flyer-bottom-ribbon', '★ RSVP via Family Platform ★');
         applyBgGradient(null, 'emerald');
         setPosterMode('transatlantic');
+        updatePhotoDisplay();
+        updateFamFlyerPreview();
     }
     window.applyHeritagePreset = applyFiestaPreset; // Backward compatibility
 
@@ -2269,28 +2642,17 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
             if (flyerLayerState && flyerLayerState.layers && flyerLayerState.layers.celebrant) {
                 flyerLayerState.layers.celebrant.visible = true;
             }
-            const img = document.getElementById('prevCelebrantPhoto');
-            const wrap = document.getElementById('prevCelebrantWrap');
-            const hdr = document.getElementById('prevHeaderColumn');
-            const btnRemove = document.getElementById('btnRemovePhoto');
-            const scaleRow = document.getElementById('celebrantScaleRow');
-            if (img) {
-                img.src = currentCelebrantPhotoData;
-                img.style.display = 'block';
-            }
-            if (wrap && currentPosterLayoutMode === 'transatlantic') wrap.style.display = 'block';
-            if (hdr) {
-                hdr.style.marginLeft = '35%';
-                hdr.classList.remove('text-center');
-                hdr.classList.add('text-end');
-            }
-            if (btnRemove) btnRemove.style.display = 'inline-block';
-            if (scaleRow) scaleRow.style.setProperty('display', 'flex', 'important');
+            updatePhotoDisplay();
+            updateFamFlyerPreview();
         };
         reader.readAsDataURL(file);
     }
 
-    function clearCelebrantPhoto() {
+    function clearCelebrantPhoto(force = false) {
+        if (!force && hasCelebrantPhoto && currentCelebrantPhotoData) {
+            updatePhotoDisplay();
+            return;
+        }
         hasCelebrantPhoto = false;
         currentCelebrantPhotoData = null;
         if (flyerLayerState && flyerLayerState.layers && flyerLayerState.layers.celebrant) {
@@ -2298,28 +2660,13 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
         }
         const fileInput = document.getElementById('fam-celebrant-file');
         if (fileInput) fileInput.value = '';
-        const img = document.getElementById('prevCelebrantPhoto');
-        if (img) {
-            img.src = '';
-            img.style.display = 'none';
-        }
-        const wrap = document.getElementById('prevCelebrantWrap');
-        const hdr = document.getElementById('prevHeaderColumn');
-        const btnRemove = document.getElementById('btnRemovePhoto');
-        const scaleRow = document.getElementById('celebrantScaleRow');
-        if (wrap) wrap.style.display = 'none';
-        if (hdr) {
-            hdr.style.marginLeft = '0';
-            hdr.classList.remove('text-end');
-            hdr.classList.add('text-center');
-        }
-        if (btnRemove) btnRemove.style.display = 'none';
-        if (scaleRow) scaleRow.style.setProperty('display', 'none', 'important');
+        updatePhotoDisplay();
+        updateFamFlyerPreview();
     }
 
     function toggleCelebrantVisibility() {
         if (hasCelebrantPhoto) {
-            clearCelebrantPhoto();
+            clearCelebrantPhoto(true);
         } else {
             document.getElementById('fam-celebrant-file')?.click();
         }
@@ -2330,7 +2677,32 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
         if (wrap) {
             wrap.style.width = `${Math.min(90, Math.max(30, val * 0.55))}%`;
         }
+        if (flyerLayerState && flyerLayerState.layers && flyerLayerState.layers.celebrant) {
+            flyerLayerState.layers.celebrant.scale = parseInt(val, 10);
+        }
+        updatePhotoDisplay();
     }
+
+    function filterTemplateCategory(cat) {
+        document.querySelectorAll('.template-cat-filter').forEach(btn => {
+            btn.classList.remove('active', 'btn-dark');
+            btn.classList.add('btn-light', 'border');
+        });
+        const activeBtn = document.getElementById('filterCat' + cat.charAt(0).toUpperCase() + cat.slice(1));
+        if (activeBtn) {
+            activeBtn.classList.remove('btn-light', 'border');
+            activeBtn.classList.add('active', 'btn-dark');
+        }
+        const items = document.querySelectorAll('#studioTemplateGrid .tpl-item');
+        items.forEach(item => {
+            if (cat === 'all' || item.classList.contains('tpl-cat-' + cat)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    window.filterTemplateCategory = filterTemplateCategory;
 
     // 🎨 LAYER CUSTOMISATION & MOVING THINGS AROUND
     function onSelectLayerToCustomise(layerKey) {
@@ -3017,6 +3389,37 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
             const feat3 = (document.getElementById('aw-feat3')?.value || '👥 RED CARPET').toUpperCase();
             const tickets = document.getElementById('aw-tickets')?.value || 'TICKETS: RSVP VIA FAMILY PLATFORM';
             const rsvp = document.getElementById('aw-rsvp')?.value || 'RESERVATIONS: DM HOST OR IN-APP';
+
+            // Performer / Headliner Artist Photo on Canvas in Mode 2 (Live Shows & Gigs)
+            if (hasCelebrantPhoto && currentCelebrantPhotoData) {
+                const celImg = await loadCanvasImage(currentCelebrantPhotoData);
+                if (celImg) {
+                    ctx.save();
+                    ctx.globalAlpha = 0.50;
+                    const targetW = isLandscape ? width * 0.45 : width;
+                    const targetH = isLandscape ? height * 0.90 : height * 0.58;
+                    const imgRatio = celImg.width / celImg.height;
+                    const targetRatio = targetW / targetH;
+                    let sX = 0, sY = 0, sW = celImg.width, sH = celImg.height;
+                    if (imgRatio > targetRatio) {
+                        sW = celImg.height * targetRatio;
+                        sX = (celImg.width - sW) / 2;
+                    } else {
+                        sH = celImg.width / targetRatio;
+                        sY = 0;
+                    }
+                    const drawX = isLandscape ? 40 : 0;
+                    ctx.drawImage(celImg, sX, sY, sW, sH, drawX, 0, targetW, targetH);
+                    
+                    // Fade bottom into stage background
+                    const fadeGrad = ctx.createLinearGradient(0, targetH * 0.45, 0, targetH);
+                    fadeGrad.addColorStop(0, 'rgba(4, 18, 28, 0)');
+                    fadeGrad.addColorStop(1, '#050c18');
+                    ctx.fillStyle = fadeGrad;
+                    ctx.fillRect(drawX, targetH * 0.45, targetW, targetH * 0.55);
+                    ctx.restore();
+                }
+            }
 
             if (isLandscape) {
                 // Widescreen 16:9 2-column layout
@@ -3740,6 +4143,42 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
     async function shareFamFlyerWhatsApp(evt) {
         return sharePosterToSocial('whatsapp', evt);
     }
+
+    function toggleMobileFlyerView() {
+        var previewCol = document.getElementById('flyerPreviewColumn');
+        var controlsCol = document.getElementById('flyerControlsColumn');
+        var btnText = document.getElementById('mobileFlyerJumpText');
+        var btnIcon = document.getElementById('mobileFlyerJumpIcon');
+        if (!previewCol) return;
+        var rect = previewCol.getBoundingClientRect();
+        var isPreviewVisible = (rect.top <= 250 && rect.bottom >= 250);
+        if (isPreviewVisible && controlsCol) {
+            controlsCol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (btnText) btnText.textContent = 'View Live Poster';
+            if (btnIcon) btnIcon.className = 'bi bi-eye-fill me-1';
+        } else {
+            previewCol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (btnText) btnText.textContent = 'Back to Controls';
+            if (btnIcon) btnIcon.className = 'bi bi-pencil-fill me-1';
+        }
+    }
+    window.toggleMobileFlyerView = toggleMobileFlyerView;
+
+    window.addEventListener('scroll', function() {
+        var previewCol = document.getElementById('flyerPreviewColumn');
+        var btnText = document.getElementById('mobileFlyerJumpText');
+        var btnIcon = document.getElementById('mobileFlyerJumpIcon');
+        if (!previewCol || !btnText) return;
+        var rect = previewCol.getBoundingClientRect();
+        var isPreviewVisible = (rect.top <= 250 && rect.bottom >= 250);
+        if (isPreviewVisible) {
+            btnText.textContent = 'Back to Controls';
+            if (btnIcon) btnIcon.className = 'bi bi-pencil-fill me-1';
+        } else {
+            btnText.textContent = 'View Live Poster';
+            if (btnIcon) btnIcon.className = 'bi bi-eye-fill me-1';
+        }
+    }, { passive: true });
 
     // 🎮 FAMILY GAME SHOW
     let triviaQuestions = [];

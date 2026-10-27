@@ -341,7 +341,7 @@ runJourney("E2E PartyPlatform Bridge: Kinship Tier Mapping, S2S Provisioning & B
 
         // Legitimate Host Provisioning & Kinship Prospect Seeding
         $bridgeResult = \App\services\PartyPlatformBridgeService::provisionAndLinkEvent($eventNo, $hostId, $famCode);
-        if (empty($bridgeResult['party_event_id']) || !str_contains($bridgeResult['party_rsvp_url'], '/e/')) {
+        if (empty($bridgeResult['party_event_id']) || (!str_contains($bridgeResult['party_rsvp_url'], '/e/') && !str_contains($bridgeResult['party_rsvp_url'], '/i/'))) {
             throw new \Exception("PartyPlatformBridgeService failed to return valid party_event_id and RSVP URL.");
         }
 

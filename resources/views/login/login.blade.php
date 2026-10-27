@@ -242,11 +242,26 @@
 </style>
 
 <div class="stitch-auth-container">
+    <!-- Language Selector Dropdown -->
+    <div class="d-flex justify-content-end mb-3">
+        @php
+            $activeLocale = \App\classes\I18n::getLocale();
+            $supportedLocales = \App\classes\I18n::getSupportedLocales();
+        @endphp
+        <div class="d-flex align-items-center gap-1 p-1 rounded-pill" style="background: rgba(15, 23, 42, 0.06); border: 1px solid rgba(0, 0, 0, 0.08);">
+            @foreach ($supportedLocales as $locKey => $locMeta)
+                <a href="/locale/{{ $locKey }}" class="btn btn-sm py-0.5 px-2 rounded-pill {{ $locKey === $activeLocale ? 'btn-primary fw-bold text-white' : 'text-secondary' }}" style="font-size: 0.75rem; text-decoration: none;">
+                    {{ $locMeta['flag'] }} {{ $locMeta['native'] }}
+                </a>
+            @endforeach
+        </div>
+    </div>
+
     <div class="text-center mb-4">
         <img src="{{ getenv('APP_LOGO') }}" alt="logo" style="height: 64px;" class="mb-2">
     </div>
-    <h1 class="stitch-title">Sign in to your account</h1>
-    <p class="stitch-subtitle">Welcome back! Please enter your details.</p>
+    <h1 class="stitch-title">{{ __('auth.sign_in_title', 'Sign in to your account') }}</h1>
+    <p class="stitch-subtitle">{{ __('auth.welcome_back_subtitle', 'Welcome back! Please enter your details.') }}</p>
 
     <!-- Social Auth at the top -->
     <a href="/auth/google" class="stitch-social-btn google">
@@ -256,17 +271,17 @@
             <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15Z"/>
             <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/>
         </svg>
-        <span>Continue with Google</span>
+        <span>{{ __('auth.continue_google', 'Continue with Google') }}</span>
     </a>
     <a href="/auth/facebook" class="stitch-social-btn facebook">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffffff">
             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
         </svg>
-        <span>Continue with Facebook</span>
+        <span>{{ __('auth.continue_facebook', 'Continue with Facebook') }}</span>
     </a>
 
     <div class="stitch-divider">
-        <span>OR</span>
+        <span>{{ __('auth.or', 'OR') }}</span>
     </div>
 
     <!-- Email Form -->
@@ -294,24 +309,24 @@
         <div class="stitch-options">
             <label class="stitch-checkbox-group">
                 <input type="checkbox" class="stitch-checkbox" id="rememberMe" name="rememberMe" value="true">
-                Remember me
+                {{ __('auth.remember_me', 'Remember me') }}
             </label>
-            <a href="/login/forgot?verify=1" class="stitch-link">Forgot password?</a>
+            <a href="/login/forgot?verify=1" class="stitch-link">{{ __('auth.forgot_password', 'Forgot password?') }}</a>
         </div>
 
         <button type="button" class="stitch-submit" id="button">
-            Sign In <i class="bi bi-arrow-right"></i>
+            {{ __('auth.sign_in_btn', 'Sign In') }} <i class="bi bi-arrow-right"></i>
         </button>
 
         <button type="button" id="btn-passkey-login"
                 style="margin-top: 0.75rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: #ffffff; color: #374151; border: 1px solid #E5E7EB; border-radius: 12px; min-height: 44px; padding: 0.55rem 1rem; font-size: 0.9rem; font-weight: 550; letter-spacing: -0.01em; cursor: pointer; transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04); touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
             <svg style="width: 20px; height: 20px; color: var(--brand-primary, #7a0e16);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004 11m0 0a8 8 0 00.99 7.132"></path></svg>
-            Sign in with Biometrics
+            {{ __('auth.sign_in_biometrics', 'Sign in with Biometrics') }}
         </button>
     </form>
 
     <div class="stitch-footer">
-        Don't have an account? <a href="/register" class="stitch-link">Sign up</a>
+        {{ __('auth.no_account_prompt', "Don't have an account?") }} <a href="/register" class="stitch-link">{{ __('auth.sign_up_link', 'Sign up') }}</a>
     </div>
 
 </div>

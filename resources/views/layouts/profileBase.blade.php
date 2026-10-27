@@ -1,10 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ \App\classes\I18n::getLocale() }}">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="language" content="{{ \App\classes\I18n::getLocale() }}">
   <title>{{ $_ENV['APP_NAME'] }}</title>
+  <script>
+    window.APP_LOCALE = '{{ \App\classes\I18n::getLocale() }}';
+    window.__TRANSLATIONS__ = {!! json_encode(\App\classes\I18n::transArray()) !!};
+    window.__ = function(k, fb) { return (window.__TRANSLATIONS__ && window.__TRANSLATIONS__[k]) || fb || k; };
+    window.trans = window.__;
+
+    window.toggleTranslatePost = function(post) {
+      if (!post) return;
+      if (post._isTranslated) {
+        post.displayMessage = post._origDisplayMessage || post.displayMessage;
+        post._isTranslated = false;
+        return;
+      }
+      const textToTranslate = post.displayMessage || post.postMessage;
+      if (!textToTranslate) return;
+
+      if (post._translatedMessage) {
+        post._origDisplayMessage = post.displayMessage || post.postMessage;
+        post.displayMessage = post._translatedMessage;
+        post._isTranslated = true;
+        return;
+      }
+
+      post._isTranslating = true;
+      const targetLang = window.APP_LOCALE || 'en';
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+      
+      fetch('/api/translate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify({
+          text: textToTranslate,
+          target: targetLang
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        post._isTranslating = false;
+        if (data.success && data.translation) {
+          post._origDisplayMessage = post.displayMessage || post.postMessage;
+          post._translatedMessage = data.translation;
+          post.displayMessage = data.translation;
+          post._isTranslated = true;
+        }
+      })
+      .catch(err => {
+        console.error('Translation error:', err);
+        post._isTranslating = false;
+      });
+    };
+  </script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
 

@@ -952,3 +952,120 @@
 .reel-comment-edit-box {
   margin-top: 6px;
 }
+
+/* =========================================================
+   World-First Multi-Angle Chrono-Sync & Audio Equalizer
+   ========================================================= */
+.reel-chrono-sync-badge-container {
+  position: relative;
+  display: inline-block;
+  z-index: 15;
+}
+
+.reel-chrono-sync-dropdown {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 14px;
+}
+
+.reel-chrono-sync-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #f1f5f9;
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.reel-chrono-sync-item:hover,
+.reel-chrono-sync-item.active {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #ffffff;
+}
+
+.reel-chrono-sync-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* Audio Wave Equalizer Animation */
+.reel-audio-eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+  width: 14px;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.reel-audio-eq span {
+  width: 3px;
+  background-color: #f59e0b;
+  border-radius: 1px;
+  height: 3px;
+  transition: height 0.2s ease;
+}
+
+.reel-audio-eq.playing span:nth-child(1) {
+  animation: eqBounce 0.8s ease-in-out infinite alternate;
+}
+.reel-audio-eq.playing span:nth-child(2) {
+  animation: eqBounce 0.6s ease-in-out 0.2s infinite alternate;
+}
+.reel-audio-eq.playing span:nth-child(3) {
+  animation: eqBounce 0.9s ease-in-out 0.4s infinite alternate;
+}
+
+@keyframes eqBounce {
+  0% { height: 3px; }
+  100% { height: 12px; }
+}
+
+/* Double-Tap Floating Heart Reaction Burst */
+.reel-doubletap-burst {
+  position: absolute;
+  pointer-events: none;
+  z-index: 50;
+  transform: translate(-50%, -50%) scale(0);
+  animation: doubleTapHeartPop 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.reel-doubletap-burst i {
+  font-size: 4.5rem;
+  color: #ef4444;
+  filter: drop-shadow(0 4px 16px rgba(239, 68, 68, 0.65));
+}
+
+@keyframes doubleTapHeartPop {
+  0% {
+    transform: translate(-50%, -50%) scale(0) rotate(-15deg);
+    opacity: 0;
+  }
+  35% {
+    transform: translate(-50%, -50%) scale(1.25) rotate(0deg);
+    opacity: 1;
+  }
+  70% {
+    transform: translate(-50%, -50%) scale(1) translateY(-10px);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.4) translateY(-35px);
+    opacity: 0;
+  }
+}

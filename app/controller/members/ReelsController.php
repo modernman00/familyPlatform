@@ -265,6 +265,101 @@ final class ReelsController extends BaseController
                 }
             }
 
+            // Multi-Angle Chrono-Sync Resolution (Tenant Isolated)
+            $clusterId = null;
+            $rawCluster = isset($_POST['chrono_sync_cluster_id']) ? trim((string)$_POST['chrono_sync_cluster_id']) : '';
+            $linkReelId = isset($_POST['link_reel_id']) ? (int)$_POST['link_reel_id'] : 0;
+            $isMultiAngle = !empty($_POST['is_multi_angle']);
+
+            if (!empty($rawCluster) && preg_match('/^[a-zA-Z0-9_-]{8,64}$/', $rawCluster)) {
+                $clusterId = $rawCluster;
+            } elseif ($linkReelId > 0) {
+                // Link to an existing reel strictly within the same family tenant
+                $db = Db::connect2();
+                $linkStmt = $db->prepare("SELECT id, chrono_sync_cluster_id FROM family_reels WHERE id = ? AND famCode = ? LIMIT 1");
+                $linkStmt->execute([$linkReelId, $famCode]);
+                $linkedReel = $linkStmt->fetch(\PDO::FETCH_ASSOC);
+                if ($linkedReel) {
+                    if (!empty($linkedReel['chrono_sync_cluster_id'])) {
+                        $clusterId = (string)$linkedReel['chrono_sync_cluster_id'];
+                    } else {
+                        // Generate a new shared cluster ID and backfill the linked parent
+                        $clusterId = 'cluster_' . time() . '_' . bin2hex(random_bytes(4));
+                        $updLinked = $db->prepare("UPDATE family_reels SET chrono_sync_cluster_id = ? WHERE id = ?");
+                        $updLinked->execute([$clusterId, $linkReelId]);
+                    }
+                }
+            } elseif ($isMultiAngle) {
+                $clusterId = 'cluster_' . time() . '_' . bin2hex(random_bytes(4));
+            }
+
+            $rawAngleLabel = isset($_POST['chrono_sync_label']) ? trim((string)$_POST['chrono_sync_label']) : '';
+            $chronoSyncLabel = $rawAngleLabel !== '' ? mb_substr($rawAngleLabel, 0, 60) : ($clusterId ? 'Perspective' : null);
+
+            $rawTimeBridge = isset($_POST['time_bridge_node_id']) ? (int)$_POST['time_bridge_node_id'] : 0;
+            $timeBridgeNodeId = $rawTimeBridge > 0 ? $rawTimeBridge : null;
+
+            // Audio soundtrack & dual-track volume handling
+            $audioUrl = null;
+            $videoVolume = isset($_POST['video_volume']) ? max(0, min(100, (int)$_POST['video_volume'])) : 100;
+            $musicVolume = isset($_POST['music_volume']) ? max(0, min(100, (int)$_POST['music_volume'])) : 40;
+            $audioStartSec = isset($_POST['audio_start_sec']) ? max(0.0, min(3600.0, (float)$_POST['audio_start_sec'])) : 0.0;
+
+            // 1. Direct custom audio file upload (MP3, WAV, OGG, M4A, AAC)
+            if (!empty($_FILES['audio_file']['name'])) {
+                $audioFile = $_FILES['audio_file'];
+                $allowedAudioMimes = [
+                    'audio/mpeg'       => 'mp3',
+                    'audio/mp3'        => 'mp3',
+                    'audio/wav'        => 'wav',
+                    'audio/x-wav'      => 'wav',
+                    'audio/ogg'        => 'ogg',
+                    'audio/mp4'        => 'm4a',
+                    'audio/x-m4a'      => 'm4a',
+                    'audio/aac'        => 'aac',
+                ];
+
+                $aFinfo = finfo_open(FILEINFO_MIME_TYPE);
+                $aMimeType = $aFinfo !== false ? finfo_file($aFinfo, $audioFile['tmp_name']) : false;
+                if ($aFinfo !== false) {
+                    finfo_close($aFinfo);
+                }
+
+                if (!is_string($aMimeType) || !isset($allowedAudioMimes[$aMimeType])) {
+                    throw new Exception('Invalid audio format. Supported formats: MP3, WAV, OGG, M4A, AAC.', 400);
+                }
+
+                if ($audioFile['size'] > 20 * 1024 * 1024) { // 20MB limit
+                    throw new Exception('Audio file exceeds maximum allowed size (20MB).', 400);
+                }
+
+                $aExt = $allowedAudioMimes[$aMimeType];
+                $uniqueAudioName = 'audio_' . preg_replace('/[^a-zA-Z0-9_-]/', '', $userId) . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $aExt;
+                $audioTargetDir = __DIR__ . '/../../../public/audio/reels/custom/';
+
+                if (!is_dir($audioTargetDir)) {
+                    mkdir($audioTargetDir, 0755, true);
+                }
+
+                $audioTargetPath = $audioTargetDir . $uniqueAudioName;
+                if (!move_uploaded_file($audioFile['tmp_name'], $audioTargetPath)) {
+                    throw new Exception('Failed to save uploaded audio file on server.', 500);
+                }
+
+                $audioUrl = '/audio/reels/custom/' . $uniqueAudioName;
+                if ($musicTitle === 'Original Family Audio' || $musicTitle === 'Original Audio') {
+                    $origAudioName = pathinfo((string)$audioFile['name'], PATHINFO_FILENAME);
+                    $musicTitle = !empty($origAudioName) ? mb_substr(trim($origAudioName), 0, 80) : 'Custom Family Soundtrack';
+                }
+            } elseif (!empty($_POST['audio_url'])) {
+                // Curated library track OR "Use This Sound" track
+                $candidateAudioUrl = trim((string)$_POST['audio_url']);
+                // Strict validation: must be internal relative path starting with /audio/reels/ or /resources/videos/reels/
+                if (preg_match('#^/(audio/reels/|resources/videos/reels/)[a-zA-Z0-9_.-]+(\.[a-zA-Z0-9]{3,4})?$#', $candidateAudioUrl) && !str_contains($candidateAudioUrl, '..')) {
+                    $audioUrl = $candidateAudioUrl;
+                }
+            }
+
             // Create Reel Record
             $rawAspect = isset($_POST['aspect_ratio']) ? trim((string)$_POST['aspect_ratio']) : '9:16';
             $allowedAspects = ['9:16', '16:9', '1:1', '4:5', 'cinema'];
@@ -278,7 +373,14 @@ final class ReelsController extends BaseController
                 'thumbnail_url' => $thumbnailPath,
                 'aspect_ratio' => $safeAspect,
                 'category' => $category,
-                'music_title' => $musicTitle
+                'music_title' => $musicTitle,
+                'audio_url' => $audioUrl,
+                'video_volume' => $videoVolume,
+                'music_volume' => $musicVolume,
+                'audio_start_sec' => $audioStartSec,
+                'chrono_sync_cluster_id' => $clusterId,
+                'chrono_sync_label' => $chronoSyncLabel,
+                'time_bridge_node_id' => $timeBridgeNodeId,
             ]);
 
             $createdReel = Reel::getReelById($reelId, $userId);
@@ -440,7 +542,7 @@ final class ReelsController extends BaseController
             $result = Reel::toggleReaction($reelId, $userId, $type);
 
             // Notify reel owner on added reaction
-            if (($result['action'] ?? '') === 'added') {
+            if ($result['action'] === 'added') {
                 try {
                     $targetReel = Reel::getReelById($reelId, $userId);
                     $ownerId = (string)($targetReel['user_id'] ?? '');
@@ -580,20 +682,22 @@ final class ReelsController extends BaseController
             try {
                 $targetReel = Reel::getReelById($reelId, $userId);
                 $ownerId = (string)($targetReel['user_id'] ?? '');
-                if ($ownerId !== '' && $ownerId !== $userId) {
-                    $commenterName = trim(($newComment['firstName'] ?? '') . ' ' . ($newComment['lastName'] ?? ''));
-                    if ($commenterName === '') {
-                        $commenterName = trim(($_SESSION['fName'] ?? '') . ' ' . ($_SESSION['lName'] ?? ''));
-                    }
-                    if ($commenterName === '') {
-                        $commenterName = 'A family member';
-                    }
 
-                    $snippet = mb_substr($commentText, 0, 70);
-                    $reelUrl = '/reels?id=' . $reelId;
+                $commenterName = trim(($newComment['firstName'] ?? '') . ' ' . ($newComment['lastName'] ?? ''));
+                if ($commenterName === '') {
+                    $commenterName = trim(($_SESSION['fName'] ?? '') . ' ' . ($_SESSION['lName'] ?? ''));
+                }
+                if ($commenterName === '') {
+                    $commenterName = 'A family member';
+                }
+
+                $snippet = mb_substr($commentText, 0, 70);
+                $reelUrl = '/reels?id=' . $reelId;
+                $db = Db::connect2();
+
+                if ($ownerId !== '' && $ownerId !== $userId) {
                     $notifMsg = "{$commenterName} commented: \"{$snippet}\"";
 
-                    $db = Db::connect2();
                     $stmt = $db->prepare("
                         INSERT INTO notification 
                         (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
@@ -617,7 +721,7 @@ final class ReelsController extends BaseController
                 }
 
                 // If this was a reply to another comment, notify the parent comment's author
-                if ($parentCommentNo !== null && $parentCommentNo > 0) {
+                if ($parentCommentNo !== null) {
                     $pStmt = $db->prepare("SELECT user_id FROM family_reel_comments WHERE id = ? LIMIT 1");
                     $pStmt->execute([$parentCommentNo]);
                     $parentAuthorId = (string)$pStmt->fetchColumn();
@@ -781,15 +885,15 @@ final class ReelsController extends BaseController
             $result = Reel::toggleCommentReaction($commentId, $userId, $type);
 
             // Notify comment author on added reaction
-            if (($result['action'] ?? '') === 'added') {
+            if ($result['action'] === 'added') {
                 try {
-                    $targetAuthorId = (string)($result['commentAuthorId'] ?? '');
+                    $targetAuthorId = (string)$result['commentAuthorId'];
                     if ($targetAuthorId !== '' && $targetAuthorId !== $userId) {
                         $reactorName = trim(($_SESSION['fName'] ?? '') . ' ' . ($_SESSION['lName'] ?? ''));
                         if ($reactorName === '') {
                             $reactorName = 'A family member';
                         }
-                        $reelId = (int)($result['reelId'] ?? 0);
+                        $reelId = (int)$result['reelId'];
                         $reelUrl = '/reels?id=' . $reelId;
                         $notifMsg = "{$reactorName} reacted with {$type} to your comment";
 
@@ -1015,6 +1119,134 @@ final class ReelsController extends BaseController
         } catch (\Throwable $e) {
             $code = (int)$e->getCode();
             http_response_code(in_array($code, [400, 401, 403, 404], true) ? $code : 400);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * API: Fetch peer synchronized angles for a multi-angle reel cluster.
+     * Enforces tenant-isolation strictly against the authenticated user's famCode.
+     */
+    public function getChronoSyncAngles(): void
+    {
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $famCode = (string)($_SESSION['famCode'] ?? '');
+            $clusterId = isset($_GET['cluster_id']) ? trim((string)$_GET['cluster_id']) : '';
+            $excludeId = isset($_GET['exclude_id']) ? (int)$_GET['exclude_id'] : 0;
+
+            if ($famCode === '' || $clusterId === '') {
+                echo json_encode([
+                    'status' => 'success',
+                    'data' => [],
+                    'count' => 0
+                ]);
+                return;
+            }
+
+            $angles = Reel::getChronoSyncAngles($clusterId, $famCode, $excludeId);
+
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+            echo json_encode([
+                'status' => 'success',
+                'data' => $angles,
+                'count' => count($angles)
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * API: Fetch active family reels from the last 7 days for multi-angle linking in the modal.
+     */
+    public function getRecentClusters(): void
+    {
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $famCode = (string)($_SESSION['famCode'] ?? '');
+            if ($famCode === '') {
+                echo json_encode(['status' => 'success', 'data' => []]);
+                return;
+            }
+
+            $reels = Reel::getRecentActiveReelsForCluster($famCode, 15);
+
+            echo json_encode([
+                'status' => 'success',
+                'data' => $reels
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * API: Get Curated Audio Library tracks for Reels creation
+     */
+    public function getAudioLibrary(): void
+    {
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $tracks = Reel::getAudioLibrary();
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response (Content-Type: application/json); json_encode escapes the payload.
+            echo json_encode([
+                'status' => 'success',
+                'data' => $tracks
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * API: Get Reels by Sound / Soundtrack Title (Viral "Use This Sound")
+     */
+    public function getReelsBySound(): void
+    {
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $famCode = (string)($_SESSION['famCode'] ?? '');
+            if (empty($famCode)) {
+                throw new Exception('Unauthorized family tenant', 401);
+            }
+
+            $sound = isset($_GET['sound']) ? trim((string)$_GET['sound']) : '';
+            if ($sound === '') {
+                throw new Exception('Soundtrack title parameter is required.', 400);
+            }
+
+            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 24;
+            $reels = Reel::getReelsBySound($sound, $famCode, $limit);
+
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response (Content-Type: application/json); json_encode escapes the payload.
+            echo json_encode([
+                'status' => 'success',
+                'sound' => $sound,
+                'count' => count($reels),
+                'data' => $reels
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code($e->getCode() >= 400 && $e->getCode() < 600 ? $e->getCode() : 400);
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }

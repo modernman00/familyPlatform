@@ -22,44 +22,44 @@ body.dark-mode .pwa-bottom-nav, body.dark-theme .pwa-bottom-nav { background: #0
 <!-- Mobile PWA Bottom Tab Navigation (Native App Store / Facebook Standard) -->
 <nav class="pwa-bottom-nav d-lg-none" id="pwaBottomNav" aria-label="Mobile App Navigation">
     <!-- Home / Feed -->
-    <a href="/profilePage" class="pwa-tab-item" data-tab="feed" title="Home Feed">
+    <a href="/profilePage" class="pwa-tab-item" data-tab="feed" title="{{ __('nav.home', 'Home Feed') }}">
         <div class="pwa-tab-icon-wrap">
             <i class="bi bi-house-door-fill"></i>
         </div>
-        <span class="pwa-tab-label">Home</span>
+        <span class="pwa-tab-label">{{ __('nav.home', 'Home') }}</span>
     </a>
 
     <!-- Family Tree -->
-    <a href="/organogram/{{ $_SESSION['id'] ?? '' }}?mode=canvas" class="pwa-tab-item" data-tab="tree" title="Family Tree">
+    <a href="/organogram/{{ $_SESSION['id'] ?? '' }}?mode=canvas" class="pwa-tab-item" data-tab="tree" title="{{ __('nav.tree', 'Family Tree') }}">
         <div class="pwa-tab-icon-wrap">
             <i class="bi bi-diagram-3-fill"></i>
         </div>
-        <span class="pwa-tab-label">Tree</span>
+        <span class="pwa-tab-label">{{ __('nav.tree', 'Tree') }}</span>
     </a>
 
     <!-- Quick Camera & Photo Upload (Universal iPhone & Mobile 1-Tap Trigger) -->
-    <button type="button" class="pwa-tab-item pwa-tab-center-action" id="pwaQuickCameraBtn" aria-label="Add photo or memory from camera roll" title="Add Photo or Video">
+    <button type="button" class="pwa-tab-item pwa-tab-center-action" id="pwaQuickCameraBtn" aria-label="{{ __('nav.add_photo', 'Add photo or memory from camera roll') }}" title="{{ __('nav.add_photo', 'Add Photo or Video') }}">
         <div class="pwa-center-btn-bubble shadow-md">
             <i class="bi bi-camera-fill"></i>
         </div>
-        <span class="pwa-tab-label">Add Photo</span>
+        <span class="pwa-tab-label">{{ __('nav.add_photo', 'Add Photo') }}</span>
     </button>
 
     <!-- Family Studio / Reels -->
-    <a href="/familyStudio" class="pwa-tab-item" data-tab="reels" title="Family Studio & Reels">
+    <a href="/familyStudio" class="pwa-tab-item" data-tab="reels" title="{{ __('nav.studio', 'Family Studio & Reels') }}">
         <div class="pwa-tab-icon-wrap">
             <i class="bi bi-camera-reels-fill"></i>
         </div>
-        <span class="pwa-tab-label">Studio</span>
+        <span class="pwa-tab-label">{{ __('nav.studio', 'Studio') }}</span>
     </a>
 
     <!-- Notifications & Alerts -->
-    <a href="javascript:void(0)" role="button" aria-haspopup="true" class="pwa-tab-item position-relative" id="pwaNotifTab" data-tab="notifications" title="Alerts & Notifications">
+    <a href="javascript:void(0)" role="button" aria-haspopup="true" class="pwa-tab-item position-relative" id="pwaNotifTab" data-tab="notifications" title="{{ __('nav.alerts', 'Alerts & Notifications') }}">
         <div class="pwa-tab-icon-wrap position-relative">
             <i class="bi bi-bell-fill"></i>
             <span class="pwa-tab-badge" id="pwa_bottom_badge" style="display: none;"></span>
         </div>
-        <span class="pwa-tab-label">Alerts</span>
+        <span class="pwa-tab-label">{{ __('nav.alerts', 'Alerts') }}</span>
     </a>
 </nav>
 

@@ -1,7 +1,4 @@
-{{-- Kinship Radar widget. Always rendered so the "People You May Know" surface
-     is a stable target; getSuggestedKin() is typed `: array` and returns [] on
-     every empty/error path, in which case we show the empty state rather than
-     hiding the whole widget. --}}
+{{-- Kinship Radar widget. Does not occupy space when there is no new suggestion. --}}
 @php
     $suggestedKin = $suggestedKin ?? [];
     // The in-feed (mobile) copy scrolls horizontally like the Reels tray; the
@@ -9,6 +6,7 @@
     // discriminator between the two placements.
     $kinCarousel = ($kinshipWidgetId ?? 'kinshipRadarWidget') === 'kinshipRadarWidgetMobile';
 @endphp
+@if(!empty($suggestedKin))
 <div class="card border-0 shadow-sm mb-4 kinship-radar-widget" id="{{ $kinshipWidgetId ?? 'kinshipRadarWidget' }}" style="border-radius: 20px; background-color: var(--card-bg, #ffffff); border: 1px solid #e2e8f0 !important;">
     <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -17,19 +15,13 @@
                     <i class="bi bi-people-fill"></i>
                 </div>
                 <div>
-                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem; letter-spacing: -0.01em;">Suggested Kin &amp; In-Laws</h6>
-                    <span class="d-block" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569); line-height: 1.4;">People you may know</span>
+                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem; letter-spacing: -0.01em;">{{ __('kinship.suggested_kin', 'Suggested Kin & In-Laws') }}</h6>
+                    <span class="d-block" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569); line-height: 1.4;">{{ __('kinship.people_you_may_know', 'People you may know') }}</span>
                 </div>
             </div>
-            <span class="badge rounded-pill bg-light text-primary border" style="font-size: 0.75rem; font-weight: 700;">Kinship Radar</span>
+            <span class="badge rounded-pill bg-light text-primary border" style="font-size: 0.75rem; font-weight: 700;">{{ __('kinship.radar', 'Kinship Radar') }}</span>
         </div>
 
-        @if(empty($suggestedKin))
-            <div class="text-center text-muted py-3" id="kinshipEmptyState" style="font-size: 0.875rem;">
-                <i class="bi bi-check2-circle text-success d-block mb-2" style="font-size: 1.5rem;"></i>
-                You're connected to all nearby kin. We'll surface new suggestions as your family network grows.
-            </div>
-        @else
         <div class="{{ $kinCarousel ? 'kinship-suggestions-scroll' : 'd-flex flex-column gap-3' }}" id="kinshipSuggestionsList">
             @foreach($suggestedKin as $kin)
                 @php
@@ -48,14 +40,14 @@
                             <div class="text-truncate" style="min-width: 0; flex: 1;">
                                 <a href="/organogram/{{ $kinId }}" class="fw-bold text-dark text-decoration-none d-block text-truncate" title="{{ $kinName }}" style="font-size: 0.95rem;">{{ $kinName }}</a>
                                 <div class="d-flex align-items-center gap-1 mt-1 flex-wrap">
-                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-0.5" style="font-size: 0.75rem; font-weight: 700;">{{ $score }}% Match</span>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-0.5" style="font-size: 0.75rem; font-weight: 700;">{{ $score }}% {{ __('kinship.match', 'Match') }}</span>
                                     <span class="text-secondary fw-semibold" style="font-size: 0.8125rem;">• {{ $kinType }}</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Dismiss Button (Top Right) -->
-                        <button type="button" class="btn btn-sm btn-link text-muted p-0 text-decoration-none btn-dismiss-kin flex-shrink-0" data-user-id="{{ $kinId }}" title="Dismiss suggestion" style="line-height: 1; margin-top: 2px;">
+                        <button type="button" class="btn btn-sm btn-link text-muted p-0 text-decoration-none btn-dismiss-kin flex-shrink-0" data-user-id="{{ $kinId }}" title="{{ __('kinship.dismiss', 'Dismiss suggestion') }}" style="line-height: 1; margin-top: 2px;">
                             <i class="bi bi-x-lg" style="font-size: 0.85rem;"></i>
                         </button>
                     </div>
@@ -67,11 +59,11 @@
 
                     <!-- Connect Action Button (Full Width, never overlaps) -->
                     <button type="button" class="btn btn-primary btn-sm rounded-pill w-100 fw-bold btn-connect-kin d-flex align-items-center justify-content-center gap-1 shadow-sm" data-user-id="{{ $kinId }}" style="font-size: 0.875rem; min-height: 44px; padding: 8px 14px; color: #ffffff !important; background-color: var(--brand-primary, #a31621); transition: all 0.2s ease;">
-                        <i class="bi bi-person-plus-fill"></i> Connect
+                        <i class="bi bi-person-plus-fill"></i> {{ __('kinship.connect', 'Connect') }}
                     </button>
                 </div>
             @endforeach
         </div>
-        @endif
     </div>
 </div>
+@endif

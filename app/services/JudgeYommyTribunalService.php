@@ -401,7 +401,9 @@ class JudgeYommyTribunalService
             $partyAName,
             $partyBName,
             $promptContext,
-            $isThirdParty ? $initiatorName : null
+            $isThirdParty ? $initiatorName : null,
+            (string)($dispute['category'] ?? 'general_harmony'),
+            (string)($dispute['grievance'] ?? '')
         );
 
         // Update database with decree
@@ -517,7 +519,7 @@ class JudgeYommyTribunalService
         }
         $promptContext .= "Party A ({$nameA}): \"{$claimA}\"\nParty B ({$nameB}): \"{$claimB}\"";
 
-        return array_merge(['success' => true], $this->callReconciliatoryEngine($nameA, $nameB, $promptContext, $initiatorName));
+        return array_merge(['success' => true], $this->callReconciliatoryEngine($nameA, $nameB, $promptContext, $initiatorName, $context, $claimA . ' ' . $claimB));
     }
 
     /**
@@ -535,21 +537,47 @@ class JudgeYommyTribunalService
      *     yommy_wisdom: string
      * }
      */
+    /**
+     * Internal Reconciliatory Prompt Engine for Judge Yommy
+     *
+     * Multi-tiered inference pipeline:
+     * 1. Google Gemini 3.8 Flash (live, sub-2s response, structured JSON)
+     * 2. DeepSeek Chat API (live secondary fallback)
+     * 3. HuggingFace / FallbackChat Gateway (tertiary fallback)
+     * 4. Smart Category & Keyword-Aware Deterministic Kinship Fallback
+     *
+     * @param string $partyA
+     * @param string $partyB
+     * @param string $docketDetails
+     * @param string|null $initiatorName
+     * @param string $category
+     * @param string $grievance
+     * @return array{
+     *     verdict_title: string,
+     *     finding_of_fact: string,
+     *     reconciliatory_bridge: string,
+     *     restorative_action_plan: array<string, string>,
+     *     yommy_wisdom: string
+     * }
+     */
     private function callReconciliatoryEngine(
         string $partyA,
         string $partyB,
         string $docketDetails,
-        ?string $initiatorName = null
+        ?string $initiatorName = null,
+        string $category = 'general_harmony',
+        string $grievance = ''
     ): array {
         $systemPrompt = <<<PROMPT
 You are 'Judge Yommy', an exceptionally wise, compassionate, dignified, and emotionally intelligent British family arbiter and referee presiding over the Court of Family Harmony.
 Your tone is FIRM, FAIR, WARM, AND STRICTLY RECONCILIATORY.
+Your mission is RECONCILIATION, KINSHIP UNITY, DOMESTIC HARMONY, EMPATHY, AND FIRM COOPERATION.
 Under NO circumstances are you to be punitive, shaming, or vindictive.
 You NEVER declare one person an enemy or villain.
 Instead, your judicial mission is:
-1. "verdict_title": A regal, uplifting title for the judicial decree (e.g. "The Great Kitchen Accord of 2026").
-2. "finding_of_fact": An objective, respectful summary of what occurred, explicitly validating how each person felt and why their frustration arose naturally.
-3. "reconciliatory_bridge": A touching, deeply empathetic synthesis that highlights the mutual care, underlying family bond, and common ground shared by both sides.
+1. "verdict_title": A regal, uplifting title for the judicial decree (e.g. "The Great Kinship Accord of 2026").
+2. "finding_of_fact": An objective, respectful summary of what occurred, explicitly validating how each person felt and why their frustration arose naturally. Must specifically address the real subject matter (e.g. financial loans, interest, borrowed items, or family boundaries).
+3. "reconciliatory_bridge": A touching, deeply empathetic synthesis that highlights the mutual care, underlying family bond, reconciliatory spirit, and domestic harmony shared by both sides.
 4. "restorative_action_plan": Concrete, practical, firm, and non-punitive commitments. Must be an object with keys "{$partyA}", "{$partyB}", and optionally "family_agreement", containing specific positive actions to solve the issue permanently.
 5. "yommy_wisdom": A memorable, witty, or profound golden proverb from Judge Yommy to seal family peace.
 
@@ -567,36 +595,46 @@ You must output ONLY a valid JSON object matching this exact schema:
 }
 PROMPT;
 
-        $messages = [
-            ['role' => 'system', 'content' => $systemPrompt],
-            ['role' => 'user', 'content' => $docketDetails],
-        ];
+        $parsed = null;
 
-        $content = null;
+        // Tier 1: Google Gemini Flash Engine (Fast, High Quality, Native JSON Mode)
         try {
-            $response = $this->gateway->chatCompletion($messages, 'meta-llama/Llama-3.2-3B-Instruct', [
-                'max_tokens' => 1024,
-                'temperature' => 0.5,
-            ]);
-
-            if ($response !== null && !empty($response['choices'][0]['message']['content'])) {
-                $content = (string)$response['choices'][0]['message']['content'];
-            } else {
-                // Secondary fallback via ResilientAiChat
-                if (method_exists($this->fallbackChat, 'chat')) {
-                    $content = $this->fallbackChat->chat($messages, ['max_tokens' => 1024, 'temperature' => 0.5]);
-                } else {
-                    $res = $this->fallbackChat->complete($messages, ['max_tokens' => 1024, 'temperature' => 0.5]);
-                    $content = ($res['success'] && trim($res['content']) !== '') ? $res['content'] : null;
-                }
-            }
+            $parsed = $this->callGeminiEngine($systemPrompt, $docketDetails);
         } catch (\Throwable $e) {
-            $content = null;
+            $parsed = null;
         }
 
-        $parsed = null;
-        if ($content !== null && trim($content) !== '') {
-            $parsed = $this->extractJson($content);
+        // Tier 2: DeepSeek Chat API Engine (Secondary Live Tier)
+        if (!is_array($parsed) || empty($parsed['finding_of_fact'])) {
+            try {
+                $parsed = $this->callDeepSeekEngine($systemPrompt, $docketDetails);
+            } catch (\Throwable $e) {
+                $parsed = null;
+            }
+        }
+
+        // Tier 3: Gateway / Fallback Chat Interface (Tertiary Tier)
+        if (!is_array($parsed) || empty($parsed['finding_of_fact'])) {
+            $messages = [
+                ['role' => 'system', 'content' => $systemPrompt],
+                ['role' => 'user', 'content' => $docketDetails],
+            ];
+            try {
+                $response = $this->gateway->chatCompletion($messages, 'meta-llama/Llama-3.2-3B-Instruct', [
+                    'max_tokens' => 1024,
+                    'temperature' => 0.5,
+                ]);
+
+                if ($response !== null && !empty($response['choices'][0]['message']['content'])) {
+                    $content = (string)$response['choices'][0]['message']['content'];
+                    $parsed = $this->extractJson($content);
+                } elseif (method_exists($this->fallbackChat, 'chat')) {
+                    $content = $this->fallbackChat->chat($messages, ['max_tokens' => 1024, 'temperature' => 0.5]);
+                    $parsed = $this->extractJson((string)$content);
+                }
+            } catch (\Throwable $e) {
+                $parsed = null;
+            }
         }
 
         if (is_array($parsed) && !empty($parsed['finding_of_fact'])) {
@@ -612,16 +650,140 @@ PROMPT;
             ];
         }
 
-        // Deterministic Fallback Engine (Guarantees zero-downtime reconciliatory decree)
-        return $this->deterministicReconciliatoryFallback($partyA, $partyB, $initiatorName);
+        // Tier 4: Smart Context & Keyword-Aware Deterministic Reconciliatory Fallback
+        return $this->deterministicReconciliatoryFallback($partyA, $partyB, $initiatorName, $category, $grievance, $docketDetails);
+    }
+
+    /**
+     * Call Google Gemini API directly with JSON response formatting.
+     *
+     * @param string $systemPrompt
+     * @param string $docketDetails
+     * @return array<string, mixed>|null
+     */
+    private function callGeminiEngine(string $systemPrompt, string $docketDetails): ?array
+    {
+        $apiKey = $this->getEnvVar('GEMINI_API_KEY');
+        if ($apiKey === '') {
+            return null;
+        }
+
+        $model = $this->getEnvVar('GEMINI_MODEL');
+        if ($model === '') {
+            $model = 'gemini-3.8-flash';
+        }
+
+        $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . urlencode($model) . ':generateContent?key=' . urlencode($apiKey);
+
+        $payload = [
+            'systemInstruction' => [
+                'parts' => [
+                    ['text' => $systemPrompt]
+                ]
+            ],
+            'contents' => [
+                [
+                    'parts' => [
+                        ['text' => $docketDetails]
+                    ]
+                ]
+            ],
+            'generationConfig' => [
+                'responseMimeType' => 'application/json',
+                'temperature' => 0.4,
+            ]
+        ];
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            CURLOPT_TIMEOUT => 15,
+            CURLOPT_CONNECTTIMEOUT => 5,
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200 || !is_string($response) || trim($response) === '') {
+            return null;
+        }
+
+        $decoded = json_decode($response, true);
+        $text = $decoded['candidates'][0]['content']['parts'][0]['text'] ?? null;
+        if (!is_string($text) || trim($text) === '') {
+            return null;
+        }
+
+        return $this->extractJson($text);
+    }
+
+    /**
+     * Call DeepSeek Chat API directly with JSON object format.
+     *
+     * @param string $systemPrompt
+     * @param string $docketDetails
+     * @return array<string, mixed>|null
+     */
+    private function callDeepSeekEngine(string $systemPrompt, string $docketDetails): ?array
+    {
+        $apiKey = $this->getEnvVar('DEEPSEEK_API_KEY');
+        if ($apiKey === '') {
+            return null;
+        }
+
+        $payload = [
+            'model' => 'deepseek-chat',
+            'messages' => [
+                ['role' => 'system', 'content' => $systemPrompt],
+                ['role' => 'user', 'content' => $docketDetails],
+            ],
+            'response_format' => ['type' => 'json_object'],
+            'max_tokens' => 1024,
+            'temperature' => 0.4,
+        ];
+
+        $ch = curl_init('https://api.deepseek.com/chat/completions');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $apiKey,
+            ],
+            CURLOPT_TIMEOUT => 15,
+            CURLOPT_CONNECTTIMEOUT => 5,
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200 || !is_string($response) || trim($response) === '') {
+            return null;
+        }
+
+        $decoded = json_decode($response, true);
+        $text = $decoded['choices'][0]['message']['content'] ?? null;
+        if (!is_string($text) || trim($text) === '') {
+            return null;
+        }
+
+        return $this->extractJson($text);
     }
 
     /**
      * Deterministic Reconciliatory Fallback when LLM gateways are offline.
+     * Dynamically adapts to the subject matter (finances, loans, belongings, boundaries, events, chores).
      *
      * @param string $partyA
      * @param string $partyB
      * @param string|null $initiatorName
+     * @param string $category
+     * @param string $grievance
+     * @param string $docketDetails
      * @return array{
      *     verdict_title: string,
      *     finding_of_fact: string,
@@ -633,12 +795,89 @@ PROMPT;
     private function deterministicReconciliatoryFallback(
         string $partyA,
         string $partyB,
-        ?string $initiatorName = null
+        ?string $initiatorName = null,
+        string $category = 'general_harmony',
+        string $grievance = '',
+        string $docketDetails = ''
     ): array {
+        $combined = strtolower($category . ' ' . $grievance . ' ' . $docketDetails);
         $peacemakerText = $initiatorName !== null
             ? " Brought forward with love by {$initiatorName} to safeguard kinship."
             : "";
 
+        // Check if dispute involves financial commitments, loans, repayments, debt, interest
+        $isFinancial = $category === 'finances_split'
+            || (bool)preg_match('/(\b(money|loan|interest|debt|owe|owing|paid|pay|repay|repayment|pound|pounds|borrow|borrowed|cash|bank|fund|funds|financial|credit)\b|£|\$|€)/i', $combined);
+
+        if ($isFinancial) {
+            return [
+                'verdict_title' => "The Covenant of Financial Honour & Kinship Relief: {$partyA} & {$partyB}",
+                'finding_of_fact' => "Judge Yommy has examined the financial accounts and perspectives presented. Money lent within a family is extended out of genuine love, trust, and kinship solidarity. Naturally, the strain of unpaid balances and accumulating interest creates acute anxiety and pressure for {$partyB}. Simultaneously, the Court recognises that {$partyA}'s delay arises from unforeseen financial pressures rather than malice or disregard. Both parties deserve relief, transparent accounting, and peace of mind.{$peacemakerText}",
+                'reconciliatory_bridge' => "Kinship wealth is measured not by ledger balances, but by mutual trust, dignity, and generational unity. The bond between {$partyA} and {$partyB} far exceeds any monetary figure. By replacing silence and worry with a structured, transparent, and realistic repayment pathway, the family preserves both financial integrity and familial love.",
+                'restorative_action_plan' => [
+                    $partyA => "Agrees to commit to a structured, transparent monthly instalment schedule to steadily clear the balance and interest, providing proactive fortnightly communication updates.",
+                    $partyB => "Agrees to provide transparent documentation of remaining balance and interest charges, and graciously accept the structured repayment schedule with patience as long as communication remains open.",
+                    'family_agreement' => "Family elders and peacemakers will serve as supportive custodians, holding a gentle monthly review to celebrate repayment milestones and protect domestic peace.",
+                ],
+                'yommy_wisdom' => "Money borrowed between kin must never outvalue the hands that shared it; when honour guides repayment and patience tempers the journey, family wealth endures forever.",
+            ];
+        }
+
+        // Check if dispute involves borrowed belongings or property
+        $isProperty = $category === 'borrowed_property'
+            || (bool)preg_match('/(\b(borrowed|lent|lend|return|item|belongings|tools|car|vehicle|clothing|clothes|property|gadget|laptop|phone)\b)/i', $combined);
+
+        if ($isProperty) {
+            return [
+                'verdict_title' => "The Covenant of Property Care & Kinship Trust: {$partyA} & {$partyB}",
+                'finding_of_fact' => "Judge Yommy has reviewed the accounts regarding borrowed belongings. Sharing items among kin is an expression of closeness, but unreturned or damaged possessions naturally erode confidence and create daily friction. Both parties value mutual respect and clear boundaries.{$peacemakerText}",
+                'reconciliatory_bridge' => "Possessions come and go, but mutual trust remains irreplaceable. Restoring borrowed items with gratitude and care revitalises the affection and goodwill between family members.",
+                'restorative_action_plan' => [
+                    $partyA => "Agrees to return all borrowed items promptly in clean, restored condition within 48 hours, or arrange prompt repair/replacement if damaged.",
+                    $partyB => "Agrees to receive the returned items with warmth and close the matter without lingering grievance.",
+                    'family_agreement' => "A clear family principle that borrowed items must be accompanied by an agreed return date and treated with higher care than one's own.",
+                ],
+                'yommy_wisdom' => "To borrow from kin is an act of trust; to return with gratitude and care is the cement of family honour.",
+            ];
+        }
+
+        // Check if dispute involves personal boundaries, space, noise, or privacy
+        $isBoundaries = $category === 'boundaries_space'
+            || (bool)preg_match('/(\b(boundary|boundaries|privacy|private|space|room|quiet|noise|loud|music|sleep|door|knock)\b)/i', $combined);
+
+        if ($isBoundaries) {
+            return [
+                'verdict_title' => "The Covenant of Sacred Sanctuary & Mutual Regard: {$partyA} & {$partyB}",
+                'finding_of_fact' => "Judge Yommy recognises that every family member requires personal sanctuary, emotional space, and rest to thrive. In a busy household, overlapping schedules, noise, and unintentional intrusions inevitably cause fatigue and short tempers. Both parties desire a peaceful environment where their space is honoured.{$peacemakerText}",
+                'reconciliatory_bridge' => "Boundaries within a loving home are not walls built for division, but gentle gardens that allow each soul to recharge in safety and warmth.",
+                'restorative_action_plan' => [
+                    $partyA => "Agrees to knock and request permission before entering private spaces, respecting quiet hours and downtime.",
+                    $partyB => "Agrees to communicate fatigue or the need for quiet calmly and early, before frustration builds.",
+                    'family_agreement' => "Designated household quiet hours and a shared commitment that closed doors signal a request for restful privacy.",
+                ],
+                'yommy_wisdom' => "When we give our kin the space to breathe in peace, the entire home becomes a sanctuary of lasting joy.",
+            ];
+        }
+
+        // Check if dispute involves family events or milestones
+        $isEvents = $category === 'family_events'
+            || (bool)preg_match('/(\b(event|holiday|birthday|celebration|wedding|party|dinner|vacation|trip|gathering|christmas|new year)\b)/i', $combined);
+
+        if ($isEvents) {
+            return [
+                'verdict_title' => "The Covenant of Celebratory Unity & Shared Light: {$partyA} & {$partyB}",
+                'finding_of_fact' => "Judge Yommy acknowledges that major family gatherings carry heightened expectations, logistical burdens, and emotional weight. Misaligned schedules or uneven preparation duties naturally create strain during what should be joyful milestones.{$peacemakerText}",
+                'reconciliatory_bridge' => "Family milestones exist to celebrate the enduring gift of kinship, not to foster contention. Shared laughter and presence are vastly more precious than flawless coordination.",
+                'restorative_action_plan' => [
+                    $partyA => "Agrees to confirm attendance and travel details with reasonable notice, sharing the logistical load generously.",
+                    $partyB => "Agrees to extend flexibility for unexpected delays and focus on warm celebration rather than rigid perfection.",
+                    'family_agreement' => "A shared family coordination checklist established 7 days prior to any major gathering to distribute roles evenly.",
+                ],
+                'yommy_wisdom' => "A modest gathering wrapped in patience and laughter feeds the soul deeper than a grand banquet served with bitter words.",
+            ];
+        }
+
+        // Default: Household Harmony & Mutual Respect
         return [
             'verdict_title' => "The Covenant of Mutual Respect: {$partyA} & {$partyB}",
             'finding_of_fact' => "Judge Yommy has examined the accounts presented. This disagreement does not stem from malice, but from competing pressures, fatigue, and mismatched expectations. {$partyA} felt unheard and unappreciated, whilst {$partyB} felt unfairly pressured and scrutinised. Both emotional viewpoints are valid and deserve honour.{$peacemakerText}",
@@ -650,6 +889,39 @@ PROMPT;
             ],
             'yommy_wisdom' => "A strong family is not one that never clashes, but one that knows how to forgive quickly, listen deeply, and laugh together afterwards. Court is adjourned in peace.",
         ];
+    }
+
+    /**
+     * Safely fetch environment variable from $_ENV, getenv, $_SERVER, or direct .env file.
+     *
+     * @param string $key
+     * @return string
+     */
+    private function getEnvVar(string $key): string
+    {
+        $val = $_ENV[$key] ?? getenv($key) ?: ($_SERVER[$key] ?? '');
+        if (is_string($val) && trim($val) !== '') {
+            return trim($val);
+        }
+
+        static $fileEnv = null;
+        if ($fileEnv === null) {
+            $fileEnv = [];
+            $envPath = dirname(__DIR__, 2) . '/.env';
+            if (file_exists($envPath)) {
+                $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+                foreach ($lines as $line) {
+                    $line = trim($line);
+                    if ($line === '' || str_starts_with($line, '#') || !str_contains($line, '=')) {
+                        continue;
+                    }
+                    [$k, $v] = explode('=', $line, 2);
+                    $fileEnv[trim($k)] = trim($v, " \t\n\r\0\x0B\"'");
+                }
+            }
+        }
+
+        return (string)($fileEnv[$key] ?? '');
     }
 
     /**

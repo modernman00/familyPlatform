@@ -23,34 +23,34 @@
     </a>
 
      <!-- Main Navigation -->
-    <a href="/allMembers" class="w3-bar-item w3-button nav-link allMemberNav w3-mobile w3-hide-small" title="All members">
+    <a href="/allMembers" class="w3-bar-item w3-button nav-link allMemberNav w3-mobile w3-hide-small" title="{{ __('nav.all_members', 'All Members') }}">
       <i class="fa fa-users"></i>
-      <span class="nav-link-text">All Members</span>
+      <span class="nav-link-text">{{ __('nav.all_members', 'All Members') }}</span>
     </a>
 
-        <a href="/profilePage" class="w3-hide-small w3-mobile w3-bar-item w3-button nav-link profilePageNav" title="My page">
+        <a href="/profilePage" class="w3-hide-small w3-mobile w3-bar-item w3-button nav-link profilePageNav" title="{{ __('nav.my_page', 'My Page') }}">
       <i class="fa fa-user"></i>
-      <span class="nav-link-text">My Page</span>
+      <span class="nav-link-text">{{ __('nav.my_page', 'My Page') }}</span>
     </a>
 
     @isset($data)
-      <a href="/organogram?id={{ $data['id'] }}&mode=canvas" class="w3-bar-item w3-button nav-link familyTreeNav w3-hide-small w3-mobile" title="Family Tree">
+      <a href="/organogram?id={{ $data['id'] }}&mode=canvas" class="w3-bar-item w3-button nav-link familyTreeNav w3-hide-small w3-mobile" title="{{ __('nav.tree', 'Family Tree') }}">
         <i class="fa fa-tree"></i>
-        <span class="nav-link-text">Family Tree</span>
+        <span class="nav-link-text">{{ __('nav.tree', 'Family Tree') }}</span>
       </a>
 
       @if (isset($data['mobile']) && !empty($data['email']) && !empty($data['country']) && !empty($data['famCode']))
         <a href="/accountSetting/{{ urlencode(trim($data['id'])) }}/{{ urlencode(trim($data['mobile'])) }}/{{ trim($data['email']) }}/{{ str_replace(' ', '', trim($data['country'])) }}/{{ urlencode(trim($data['famCode'])) }}" 
-           class="w3-bar-item w3-button nav-link w3-hide-small w3-mobile" title="Account Settings">
+           class="w3-bar-item w3-button nav-link w3-hide-small w3-mobile" title="{{ __('nav.settings', 'Settings') }}">
           <i class="fa fa-cog"></i>
-          <span class="nav-link-text">Settings</span>
+          <span class="nav-link-text">{{ __('nav.settings', 'Settings') }}</span>
         </a>
       @endif
     @endisset
 
     <!-- Notifications -->
     <div class="w3-dropdown-hover">
-      <button class="w3-button notification_count" title="Notifications">
+      <button class="w3-button notification_count" title="{{ __('nav.notifications', 'Notifications') }}">
         <i class="fa fa-bell"></i>
         <span class="w3-badge w3-green" id="notification_count"></span>
       </button>
@@ -66,7 +66,7 @@
         $supportedLocales = \App\classes\I18n::getSupportedLocales();
         $currLocale = $supportedLocales[$activeLocale] ?? $supportedLocales['en'];
       @endphp
-      <button class="w3-button" title="Change Language" style="font-size: 0.9rem;">
+      <button class="w3-button" title="{{ __('nav.change_language', 'Change Language') }}" style="font-size: 0.9rem;">
         <span>{{ $currLocale['flag'] }}</span> <span class="w3-hide-small">{{ $currLocale['name'] }}</span> <i class="fa fa-caret-down"></i>
       </button>
       <div class="w3-dropdown-content w3-card-4 w3-bar-block" style="min-width: 140px; right: 0;">
@@ -79,9 +79,9 @@
     </div>
 
     <!-- Sign Out -->
-    <a href="signout/login" class="w3-bar-item w3-button sign-out-btn w3-right" title="Sign out">
+    <a href="signout/login" class="w3-bar-item w3-button sign-out-btn w3-right" title="{{ __('nav.logout', 'Sign Out') }}">
       <i class="fa fa-sign-out-alt"></i>
-      <span class="w3-hide-small">Sign Out</span>
+      <span class="w3-hide-small">{{ __('nav.logout', 'Sign Out') }}</span>
     </a>
 
     <!-- Mobile menu button -->
@@ -96,27 +96,27 @@
 <!-- Mobile Menu - Simplified Version -->
 <div id="navDemo" class="w3-bar-block w3-white w3-hide w3-hide-large w3-hide-medium w3-card-4">
   <a href="/allMembers" class="w3-bar-item w3-button w3-padding-16">
-    <i class="fa fa-users w3-margin-right"></i>All Members
+    <i class="fa fa-users w3-margin-right"></i>{{ __('nav.all_members', 'All Members') }}
   </a>
   <a href="/member/ProfilePage" class="w3-bar-item w3-button w3-padding-16">
-    <i class="fa fa-user w3-margin-right"></i>My Page
+    <i class="fa fa-user w3-margin-right"></i>{{ __('nav.my_page', 'My Page') }}
   </a>
   
   @isset($data)
     <a href="/organogram?id={{ $data['id'] }}&mode=canvas" class="w3-bar-item w3-button w3-padding-16">
-      <i class="fa fa-tree w3-margin-right"></i>Family Tree
+      <i class="fa fa-tree w3-margin-right"></i>{{ __('nav.tree', 'Family Tree') }}
     </a>
     
     @if (isset($data['mobile']) && !empty($data['email']) && !empty($data['country']) && !empty($data['famCode']))
       <a href="/accountSetting/{{ urlencode(trim($data['id'])) }}/{{ urlencode(trim($data['mobile'])) }}/{{ trim($data['email']) }}/{{ str_replace(' ', '', trim($data['country'])) }}/{{ urlencode(trim($data['famCode'])) }}" 
          class="w3-bar-item w3-button w3-padding-16">
-         <i class="fa fa-cog w3-margin-right"></i>Account Settings
+         <i class="fa fa-cog w3-margin-right"></i>{{ __('nav.settings', 'Account Settings') }}
       </a>
     @endif
   @endisset
   
   <a href="/signout" class="w3-bar-item w3-button w3-padding-16">
-    <i class="fas fa-sign-out-alt w3-margin-right"></i>Sign Out
+    <i class="fas fa-sign-out-alt w3-margin-right"></i>{{ __('nav.logout', 'Sign Out') }}
   </a>
 </div>
 

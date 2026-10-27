@@ -172,6 +172,18 @@ if [ -f "tests/verify_gallery_set_profile_pic.php" ]; then
     php tests/verify_gallery_set_profile_pic.php || GATE4_PASSED=0
 fi
 
+if [ -f "tests/verify_post_and_reel_views_suite.php" ]; then
+    php tests/verify_post_and_reel_views_suite.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_reels_chrono_sync_multi_angle_suite.php" ]; then
+    php tests/verify_reels_chrono_sync_multi_angle_suite.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_reels_music_and_dual_volume_suite.php" ]; then
+    php tests/verify_reels_music_and_dual_volume_suite.php || GATE4_PASSED=0
+fi
+
 if [ "$GATE4_PASSED" -eq 1 ]; then
     echo -e "${GREEN}  ✅ Gate 4 Passed: 0 Must-Have violations, PWA verified, Frontend stable.${NC}"
 else
@@ -202,7 +214,7 @@ echo ""
 # ------------------------------------------------------------------------------
 echo -e "${BOLD}${CYAN}[GATE 6/7] Running PHPUnit Test Suite...${NC}"
 if [ -x "vendor/bin/phpunit" ]; then
-    if vendor/bin/phpunit; then
+    if php -d memory_limit=1G vendor/bin/phpunit; then
         echo -e "${GREEN}  ✅ Gate 6 Passed: All PHPUnit tests succeeded.${NC}"
     else
         echo -e "${RED}  ❌ Gate 6 Failed: PHPUnit reported test failures.${NC}"

@@ -485,27 +485,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     <!-- Create vs Join Toggle -->
                     <div class="field mb-4" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 20px;">
-                        <label style="color: #cbd5e1; font-weight: 600; font-size: 0.95rem; display: block; margin-bottom: 12px;">What would you like to do?</label>
+                        <label style="color: #cbd5e1; font-weight: 600; font-size: 0.95rem; display: block; margin-bottom: 12px;">{{ __('auth.what_would_you_like_to_do', 'What would you like to do?') }}</label>
                         <div class="d-flex gap-4">
                             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #e2e8f0;">
                                 <input type="radio" name="account_type" value="join" x-model="isCreating" :value="false" style="cursor: pointer;">
-                                <span>Join existing family (have a code?)</span>
+                                <span>{{ __('auth.join_existing_family', 'Join existing family (have a code?)') }}</span>
                             </label>
                             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #e2e8f0;">
                                 <input type="radio" name="account_type" value="create" x-model="isCreating" :value="true" style="cursor: pointer;">
-                                <span>Create new family</span>
+                                <span>{{ __('auth.create_new_family', 'Create new family') }}</span>
                             </label>
                         </div>
                     </div>
 
                     @php
                     $formArray = [
-                    'Personal Information' => 'title',
+                    __('auth.personal_info', 'Personal Information') => 'title',
                     'name' => [
                     'mixed',
-                    'label' => ['first Name', 'last Name', 'Family Surname', 'Family code <button type="button" id="generateFamilyCode" class="button is-small is-primary ms-2 js-modal-trigger" data-target="modal-familyCode" style="font-size: 0.7rem; padding: 0.2rem 0.5rem; vertical-align: middle;">Generate</button>'],
+                    'label' => [
+                        __('auth.first_name', 'First Name'),
+                        __('auth.last_name', 'Last Name'),
+                        __('auth.family_surname', 'Family Surname'),
+                        __('auth.family_code', 'Family Code') . ' <button type="button" id="generateFamilyCode" class="button is-small is-primary ms-2 js-modal-trigger" data-target="modal-familyCode" style="font-size: 0.7rem; padding: 0.2rem 0.5rem; vertical-align: middle;">' . __('global.generate', 'Generate') . '</button>'
+                    ],
                     'attribute' => ['firstName', 'lastName', 'familySurname', 'famCode'],
-                    'placeholder' => ['Toyin', 'Edwars', 'e.g. Olaogun', 'check your email for the code '],
+                    'placeholder' => ['Toyin', 'Edwars', 'e.g. Olaogun', __('auth.family_code_placeholder', 'Check your email for the code')],
                     'inputType' => ['text', 'text', 'text', 'text'],
                     'value' => [
                     isset($registerPostData['firstName']) ? $registerPostData['firstName'] : '',
@@ -521,12 +526,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     ]
                     ],
                     'Date_of_Birth' => 'birthday',
-                    'Contact Information' => 'title',
+                    __('auth.contact_info', 'Contact Information') => 'title',
                     'email_mobile' => [
                     'mixed',
-                    'label' => ["Email", "Country", 'Mobile'],
+                    'label' => [__('auth.email', 'Email'), __('global.country', 'Country'), __('auth.mobile', 'Mobile')],
                     'attribute' => ['email', 'country', 'mobile'],
-                    'placeholder' => ['e.g. alex@example.com', 'Select Country', 'e.g. +44 7123 456789 or local number'],
+                    'placeholder' => [__('auth.email_placeholder', 'e.g. alex@example.com'), __('global.select_country', 'Select Country'), __('auth.mobile_placeholder', 'e.g. +44 7123 456789 or local number')],
                     'inputType' => ['email', 'select', 'text'],
                     'value' => [
                     isset($registerPostData['email']) ? $registerPostData['email'] : '',
@@ -547,10 +552,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     ];
 
                     if (!isset($_SESSION['oauth_pending'])) {
-                    $formArray['create an account'] = 'title';
+                    $formArray[__('auth.create_account', 'Create Your Account')] = 'title';
                     $formArray['account'] = [
                     'mixed',
-                    'label' => ['Password', 'Confirm password'],
+                    'label' => [__('auth.password', 'Password'), __('auth.confirm_password', 'Confirm Password')],
                     'attribute' => ['password', 'confirm_password'],
                     'placeholder' => ['xxxx', 'xxxx'],
                     'inputType' => ['password', 'password'],
@@ -595,7 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
 
                     <div class="field mt-5">
-                        <button type="submit" name="submit" id="btnSubmit" data-ready="true" class="button is-primary is-fullwidth">Submit form</button>
+                        <button type="submit" name="submit" id="btnSubmit" data-ready="true" class="button is-primary is-fullwidth">{{ __('auth.submit', 'Submit Form') }}</button>
                     </div>
                     <input type="hidden" name="token" id="token" value="{{ $_SESSION['token'] ?? '' }}">
 

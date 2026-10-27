@@ -17,8 +17,8 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                 <i class="bi bi-stars fs-6 text-primary"></i>
             </div>
             <div>
-                <h5 class="mb-0 fw-bold" style="color: var(--text-color, #1f2937); font-size: 1rem;">Memories &amp; Milestones</h5>
-                <p class="text-muted small mb-0" style="font-size: 0.78rem;">On this day flashbacks &amp; family celebrations</p>
+                <h5 class="mb-0 fw-bold" style="color: var(--text-color, #1f2937); font-size: 1rem;">{{ __('milestones.title', 'Memories & Milestones') }}</h5>
+                <p class="text-muted small mb-0" style="font-size: 0.78rem;">{{ __('milestones.subtitle', 'On this day flashbacks & family celebrations') }}</p>
             </div>
         </div>
         <button type="button" 
@@ -37,7 +37,7 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
         <template x-if="loading && !loaded">
             <div class="py-4 text-center">
                 <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
-                <p class="text-muted small mb-0" style="font-size: 0.8rem;">Gathering family memories...</p>
+                <p class="text-muted small mb-0" style="font-size: 0.8rem;">{{ __('milestones.gathering', 'Gathering family memories...') }}</p>
             </div>
         </template>
 

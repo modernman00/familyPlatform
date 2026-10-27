@@ -56,7 +56,8 @@ final class PostDto implements JsonSerializable
         public readonly array $reactions = [],
         public readonly ?array $linkPreview = null,
         public readonly array $postTags = [],
-        public readonly array $rawAttributes = []
+        public readonly array $rawAttributes = [],
+        public readonly int $viewsCount = 0
     ) {}
 
     /**
@@ -107,6 +108,8 @@ final class PostDto implements JsonSerializable
         /** @var array<int, mixed> $postTags */
         $postTags = isset($row['post_tags']) && is_array($row['post_tags']) ? array_values($row['post_tags']) : [];
 
+        $viewsCount = max(0, (int)($row['views_count'] ?? 0));
+
         return new self(
             postNo: $postNo,
             id: $id,
@@ -127,7 +130,8 @@ final class PostDto implements JsonSerializable
             reactions: $reactions,
             linkPreview: $linkPreview,
             postTags: $postTags,
-            rawAttributes: $row
+            rawAttributes: $row,
+            viewsCount: $viewsCount
         );
     }
 
@@ -160,6 +164,7 @@ final class PostDto implements JsonSerializable
         $arr['reactions'] = $this->reactions;
         $arr['link_preview'] = $this->linkPreview;
         $arr['post_tags'] = $this->postTags;
+        $arr['views_count'] = $this->viewsCount;
 
         return $arr;
     }

@@ -20,10 +20,10 @@
             </div>
             <div>
               <h6 class="fw-bold mb-1 text-dark" style="font-size: 1rem;">
-                👋 <strong>{{ htmlspecialchars($joinReq['requesterName'] ?? 'New Member') }}</strong> wants to join your <strong>{{ htmlspecialchars($joinReq['family_code'] ?? '') }}</strong> family network
+                👋 <strong>{{ htmlspecialchars($joinReq['requesterName'] ?? 'New Member') }}</strong> {{ __('family.wants_to_join', 'wants to join your :code family network', ['code' => htmlspecialchars($joinReq['family_code'] ?? '')]) }}
               </h6>
               <p class="mb-0 text-muted" style="font-size: 0.88rem;">
-                Requested to connect on FamilyPlatform. Approve to grant immediate access to your family tree and updates.
+                {{ __('family.join_desc', 'Requested to connect on FamilyPlatform. Approve to grant immediate access to your family tree and updates.') }}
               </p>
             </div>
           </div>
@@ -32,13 +32,13 @@
                     id="btnApproveJoin-{{ $joinReq['no'] }}"
                     style="background-color: #a31621; min-height: 44px;" 
                     onclick="handleJoinRequestAction({{ (int)$joinReq['no'] }}, '{{ htmlspecialchars($joinReq['approval_token'] ?? '') }}', 'approve')">
-              <i class="bi bi-check-lg me-1"></i> Approve Request
+              <i class="bi bi-check-lg me-1"></i> {{ __('family.approve_request', 'Approve Request') }}
             </button>
             <button class="btn btn-sm btn-outline-danger rounded-pill px-3 py-2 fw-semibold" 
                     id="btnDenyJoin-{{ $joinReq['no'] }}"
                     style="min-height: 44px;"
                     onclick="handleJoinRequestAction({{ (int)$joinReq['no'] }}, '{{ htmlspecialchars($joinReq['approval_token'] ?? '') }}', 'deny')">
-              <i class="bi bi-x-lg me-1"></i> Deny
+              <i class="bi bi-x-lg me-1"></i> {{ __('family.deny', 'Deny') }}
             </button>
           </div>
         </div>
@@ -117,10 +117,10 @@
             </div>
             <div>
               <h6 class="fw-bold mb-1 text-dark" style="font-size: 1rem;">
-                🌟 <strong>{{ htmlspecialchars($nudge['requesterName'] ?? 'A family relative') }}</strong> invited you to migrate to the <strong>#{{ htmlspecialchars($nudge['new_family_code'] ?? '') }}</strong> family network!
+                🌟 <strong>{{ htmlspecialchars($nudge['requesterName'] ?? 'A family relative') }}</strong> {{ __('family.invited_to_migrate', 'invited you to migrate to the :code family network!', ['code' => '#' . htmlspecialchars($nudge['new_family_code'] ?? '')]) }}
               </h6>
               <p class="mb-1 text-muted" style="font-size: 0.88rem;">
-                You are currently registered with code #{{ htmlspecialchars($nudge['old_family_code'] ?? '') }}. Accept this invitation to unite under the main family tree and timeline.
+                {{ __('family.join_desc', 'Requested to connect on FamilyPlatform. Approve to grant immediate access to your family tree and updates.') }}
               </p>
               @if(!empty($nudge['message']))
                 <p class="mb-0 text-secondary fst-italic small bg-white bg-opacity-75 p-2 rounded-2 mt-1 border">
@@ -134,13 +134,13 @@
                     id="btnAcceptNudge-{{ $nudge['id'] }}"
                     style="background-color: #8a1019; min-height: 44px;" 
                     onclick="handleMigrationNudgeAction({{ (int)$nudge['id'] }}, '{{ htmlspecialchars($nudge['token'] ?? '') }}', 'accept')">
-              <i class="bi bi-check-circle-fill me-1"></i> Accept & Migrate
+              <i class="bi bi-check-circle-fill me-1"></i> {{ __('family.accept_migrate', 'Accept & Migrate') }}
             </button>
             <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-2 fw-semibold" 
                     id="btnDeclineNudge-{{ $nudge['id'] }}"
                     style="min-height: 44px;"
                     onclick="handleMigrationNudgeAction({{ (int)$nudge['id'] }}, '{{ htmlspecialchars($nudge['token'] ?? '') }}', 'decline')">
-              <i class="bi bi-x-lg me-1"></i> Decline
+              <i class="bi bi-x-lg me-1"></i> {{ __('family.decline', 'Decline') }}
             </button>
           </div>
         </div>
@@ -239,13 +239,13 @@
                     id="btnApproveMigReq-{{ $migReq['id'] }}"
                     style="background-color: #a31621; min-height: 44px;" 
                     onclick="handleMigrationRequestAction({{ (int)$migReq['id'] }}, '{{ htmlspecialchars($migReq['token'] ?? '') }}', 'approve')">
-              <i class="bi bi-check-lg me-1"></i> Approve Migration
+              <i class="bi bi-check-lg me-1"></i> {{ __('family.approve_request', 'Approve Migration') }}
             </button>
             <button class="btn btn-sm btn-outline-danger rounded-pill px-3 py-2 fw-semibold" 
                     id="btnDenyMigReq-{{ $migReq['id'] }}"
                     style="min-height: 44px;"
                     onclick="handleMigrationRequestAction({{ (int)$migReq['id'] }}, '{{ htmlspecialchars($migReq['token'] ?? '') }}', 'deny')">
-              <i class="bi bi-x-lg me-1"></i> Deny
+              <i class="bi bi-x-lg me-1"></i> {{ __('family.deny', 'Deny') }}
             </button>
           </div>
         </div>
@@ -331,10 +331,10 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm btn-primary rounded-pill px-3 py-2 fw-semibold" id="btnClaimNode" onclick="claimFamilyNode({{ (int)$unclaimedMatch['node_id'] }})">
-          <i class="bi bi-check2-circle me-1"></i> Yes, that's me!
+          <i class="bi bi-check2-circle me-1"></i> {{ __('family.thats_me', "Yes, that's me!") }}
         </button>
         <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-2" onclick="dismissFamilyNode({{ (int)$unclaimedMatch['node_id'] }})">
-          Not now
+          {{ __('family.not_now', 'Not now') }}
         </button>
       </div>
     </div>
@@ -420,7 +420,7 @@
 
         <div role="button" tabindex="0" class="composer-prompt flex-grow-1 rounded-pill px-3 py-3 text-truncate" data-bs-toggle="modal" data-bs-target="#postModal"
           style="background-color: #f1f5f9; border: 1.5px solid #cbd5e1; cursor: text; transition: all 0.2s ease-in-out;">
-          <span style="color: #64748b; font-size: 0.95rem; font-weight: 500;">Share a moment with your family...</span>
+          <span style="color: #64748b; font-size: 0.95rem; font-weight: 500;">{{ __('feed.share_prompt', 'Share a moment with your family...') }}</span>
         </div>
       </div>
 
@@ -430,27 +430,27 @@
                 onclick="setTimeout(function () { if (window.__openThenNow) window.__openThenNow(''); }, 0)"
                 aria-label="Post a Then and Now photo comparison">
           <i class="bi bi-hourglass-split" style="font-size: 1.1rem; color: #a31621;"></i>
-          <span class="fw-bold" style="font-size: 0.85rem;">Then &amp; Now</span>
+          <span class="fw-bold" style="font-size: 0.85rem;">{{ __('feed.then_now', 'Then & Now') }}</span>
         </button>
         <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#postModal" aria-label="Add a photo to a post">
           <i class="bi bi-camera-fill" style="color: #16a34a; font-size: 1.1rem;"></i>
-          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">Photo</span>
+          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">{{ __('feed.photo', 'Photo') }}</span>
         </button>
         <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#postModal" aria-label="Add a video to a post">
           <i class="bi bi-play-btn-fill" style="color: #dc2626; font-size: 1.1rem;"></i>
-          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">Video</span>
+          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">{{ __('feed.video', 'Video') }}</span>
         </button>
         <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#createAnnouncementModal" aria-label="Broadcast family announcement">
           <i class="bi bi-megaphone-fill" style="color: #d97706; font-size: 1.1rem;"></i>
-          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">Announcement</span>
+          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">{{ __('feed.announcement', 'Announcement') }}</span>
         </button>
         <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" onclick="window.location.href='/familyJournal/create'" aria-label="Write family journal chronicle">
           <i class="bi bi-journal-bookmark-fill" style="color: #059669; font-size: 1.1rem;"></i>
-          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">Journal</span>
+          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">{{ __('feed.journal', 'Journal') }}</span>
         </button>
         <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#postModal" aria-label="Create a poll">
           <i class="bi bi-bar-chart-fill" style="color: #ea580c; font-size: 1.1rem;"></i>
-          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">Poll</span>
+          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">{{ __('feed.poll', 'Poll') }}</span>
         </button>
       </div>
     </div>
@@ -462,12 +462,12 @@
       <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
         <div class="d-flex align-items-center gap-2">
           <span class="badge rounded-pill shadow-xs" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-size: 0.72rem; letter-spacing: 0.5px; padding: 4px 10px; font-weight: 700;">
-            <i class="bi bi-stars me-1"></i> RITUALS &amp; HERITAGE
+            <i class="bi bi-stars me-1"></i> {{ __('heritage.rituals_heritage', 'RITUALS & HERITAGE') }}
           </span>
-          <span class="fw-bold text-dark small" style="font-size: 0.92rem;">Family Dynasty Hub</span>
+          <span class="fw-bold text-dark small" style="font-size: 0.92rem;">{{ __('heritage.dynasty_hub', 'Family Dynasty Hub') }}</span>
         </div>
         <a href="/organogram/{{ $data['id'] ?? '' }}?mode=canvas" class="text-decoration-none small d-flex align-items-center gap-1" style="color: #a31621; font-size: 0.82rem; font-weight: 600;">
-          <span>Explore Tree Canvas</span> <i class="bi bi-chevron-right" style="font-size: 0.72rem;"></i>
+          <span>{{ __('heritage.explore_canvas', 'Explore Tree Canvas') }}</span> <i class="bi bi-chevron-right" style="font-size: 0.72rem;"></i>
         </a>
       </div>
 
@@ -478,8 +478,8 @@
             <div class="tile-icon rounded-circle d-flex align-items-center justify-content-center mb-1.5 shadow-xs" style="width: 36px; height: 36px; background: rgba(16, 185, 129, 0.16); color: #047857;">
               <i class="bi bi-compass-fill fs-6"></i>
             </div>
-            <span class="tile-title fw-bold" style="font-size: 0.875rem; line-height: 1.2; color: #0f172a;">Tree Quests</span>
-            <span class="tile-desc" style="font-size: 0.76rem; color: #065f46; font-weight: 500;">Ask on WhatsApp</span>
+            <span class="tile-title fw-bold" style="font-size: 0.875rem; line-height: 1.2; color: #0f172a;">{{ __('heritage.tree_quests', 'Tree Quests') }}</span>
+            <span class="tile-desc" style="font-size: 0.76rem; color: #065f46; font-weight: 500;">{{ __('heritage.ask_whatsapp', 'Ask on WhatsApp') }}</span>
           </button>
         </div>
 
@@ -489,8 +489,8 @@
             <div class="tile-icon rounded-circle d-flex align-items-center justify-content-center mb-1.5 shadow-xs" style="width: 36px; height: 36px; background: rgba(245, 158, 11, 0.18); color: #b45309;">
               <i class="bi bi-trophy-fill fs-6"></i>
             </div>
-            <span class="tile-title fw-bold" style="font-size: 0.875rem; line-height: 1.2; color: #0f172a;">Sunday Trivia</span>
-            <span class="tile-desc" style="font-size: 0.76rem; color: #92400e; font-weight: 500;">Quiz &amp; Guess Who</span>
+            <span class="tile-title fw-bold" style="font-size: 0.875rem; line-height: 1.2; color: #0f172a;">{{ __('heritage.sunday_trivia', 'Sunday Trivia') }}</span>
+            <span class="tile-desc" style="font-size: 0.76rem; color: #92400e; font-weight: 500;">{{ __('heritage.quiz_guess', 'Quiz & Guess Who') }}</span>
           </button>
         </div>
 
@@ -500,8 +500,8 @@
             <div class="tile-icon rounded-circle d-flex align-items-center justify-content-center mb-1.5 shadow-xs" style="width: 36px; height: 36px; background: rgba(163, 22, 33, 0.14); color: #a31621;">
               <i class="bi bi-card-image fs-6"></i>
             </div>
-            <span class="tile-title fw-bold" style="font-size: 0.875rem; line-height: 1.2; color: #0f172a;">Clan Flyer</span>
-            <span class="tile-desc" style="font-size: 0.76rem; color: #881337; font-weight: 500;">WhatsApp Status</span>
+            <span class="tile-title fw-bold" style="font-size: 0.875rem; line-height: 1.2; color: #0f172a;">{{ __('heritage.clan_flyer', 'Clan Flyer') }}</span>
+            <span class="tile-desc" style="font-size: 0.76rem; color: #881337; font-weight: 500;">{{ __('heritage.whatsapp_status', 'WhatsApp Status') }}</span>
           </button>
         </div>
 
@@ -511,8 +511,8 @@
             <div class="tile-icon rounded-circle d-flex align-items-center justify-content-center mb-1.5 shadow-xs" style="width: 36px; height: 36px; background: rgba(109, 40, 217, 0.14); color: #6d28d9;">
               <i class="bi bi-hourglass-split fs-6"></i>
             </div>
-            <span class="tile-title fw-bold" style="font-size: 0.875rem; line-height: 1.2; color: #0f172a;">Time Capsule</span>
-            <span class="tile-desc" style="font-size: 0.76rem; color: #5b21b6; font-weight: 500;">Future Milestones</span>
+            <span class="tile-title fw-bold" style="font-size: 0.875rem; line-height: 1.2; color: #0f172a;">{{ __('heritage.time_capsule', 'Time Capsule') }}</span>
+            <span class="tile-desc" style="font-size: 0.76rem; color: #5b21b6; font-weight: 500;">{{ __('heritage.future_milestones', 'Future Milestones') }}</span>
           </button>
         </div>
       </div>
@@ -523,9 +523,11 @@
   @includeIf('member.includes.mobileHighlightsTray')
 
   <!-- Kinship Radar: Mobile-Only (visible < 992px, hidden on desktop where sidebar shows it) -->
+  @if(!empty($suggestedKin))
   <div class="d-lg-none">
     @includeIf('member.includes.kinshipSuggestions', ['kinshipWidgetId' => 'kinshipRadarWidgetMobile'])
   </div>
+  @endif
 
   <!-- Reactive Alpine.js Feed -->
   <div x-data="profileFeed({ famCode: '{{ $data['famCode'] ?? '' }}', userId: '{{ $data['id'] ?? '' }}', familyRoster: {{ json_encode($data['familyRoster'] ?? []) }} })" class="feed-posts-container">
@@ -545,10 +547,10 @@
           <span class="badge rounded-pill text-white px-3 py-1.5 shadow-xs" style="background: #a31621; font-size: 0.88rem; letter-spacing: 0.3px;">
             <i class="bi bi-hash me-0.5"></i><span x-text="activeHashtagFilter"></span>
           </span>
-          <span class="text-dark fw-bold small" style="font-size: 0.9rem;">Family Memory Stream</span>
+          <span class="text-dark fw-bold small" style="font-size: 0.9rem;">{{ __('feed.memory_stream', 'Family Memory Stream') }}</span>
         </div>
         <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1" @click="clearHashtagFilter()" style="font-size: 0.82rem; font-weight: 600;">
-          <i class="bi bi-x-circle-fill"></i> Show All Posts
+          <i class="bi bi-x-circle-fill"></i> {{ __('feed.show_all_posts', 'Show All Posts') }}
         </button>
       </div>
     </div>
@@ -558,12 +560,12 @@
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div class="d-flex align-items-center gap-2">
           <span class="badge rounded-pill text-white px-3 py-1.5 shadow-xs" style="background: #a31621; font-size: 0.88rem; letter-spacing: 0.3px;">
-            <i class="bi bi-tag-fill me-1"></i>Tagged With You
+            <i class="bi bi-tag-fill me-1"></i>{{ __('feed.tagged_with_you', 'Tagged With You') }}
           </span>
-          <span class="text-dark fw-bold small" style="font-size: 0.9rem;">Your Living Heritage Scrapbook</span>
+          <span class="text-dark fw-bold small" style="font-size: 0.9rem;">{{ __('feed.living_scrapbook', 'Your Living Heritage Scrapbook') }}</span>
         </div>
         <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1" @click="setStreamFilter('all')" style="font-size: 0.82rem; font-weight: 600;">
-          <i class="bi bi-arrow-left-circle-fill"></i> Show All Memories
+          <i class="bi bi-arrow-left-circle-fill"></i> {{ __('feed.show_all_memories', 'Show All Memories') }}
         </button>
       </div>
     </div>
@@ -576,19 +578,19 @@
                 :class="activeStreamFilter === 'all' ? 'btn-primary text-white shadow-xs' : 'text-muted border-0 bg-transparent'"
                 @click="setStreamFilter('all')"
                 style="font-size: 0.82rem; white-space: nowrap; min-height: 38px;">
-          <i class="bi bi-clock-history me-1"></i>All Family Memories
+          <i class="bi bi-clock-history me-1"></i>{{ __('feed.all_memories', 'All Family Memories') }}
         </button>
         <button type="button" 
                 class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold transition-all d-inline-flex align-items-center gap-1.5"
                 :class="activeStreamFilter === 'tagged' ? 'btn-primary text-white shadow-xs' : 'text-muted border-0 bg-transparent'"
                 @click="setStreamFilter('tagged')"
                 style="font-size: 0.82rem; white-space: nowrap; min-height: 38px;">
-          <i class="bi bi-tag-fill me-0.5"></i>Tagged With You
+          <i class="bi bi-tag-fill me-0.5"></i>{{ __('feed.tagged_with_you', 'Tagged With You') }}
           <span class="badge rounded-pill" :class="activeStreamFilter === 'tagged' ? 'bg-white text-primary' : 'bg-secondary bg-opacity-25 text-dark'" style="font-size: 0.68rem;" x-text="taggedPostsCount"></span>
         </button>
       </div>
       <template x-if="activeStreamFilter === 'tagged'">
-        <span class="small text-muted" style="font-size: 0.75rem;">Showing memories featuring you</span>
+        <span class="small text-muted" style="font-size: 0.75rem;">{{ __('feed.showing_tagged', 'Showing memories featuring you') }}</span>
       </template>
     </div>
 
@@ -598,9 +600,9 @@
         <div class="d-flex align-items-center justify-content-between mb-2">
           <div class="d-flex align-items-center gap-2">
             <i class="bi bi-tags-fill text-primary" style="font-size: 1rem;"></i>
-            <span class="fw-bold small text-dark" style="font-size: 0.88rem;">Family Topics &amp; Milestones</span>
+            <span class="fw-bold small text-dark" style="font-size: 0.88rem;">{{ __('feed.topics_milestones', 'Family Topics & Milestones') }}</span>
           </div>
-          <span class="text-muted small" style="font-size: 0.75rem;">Click to filter</span>
+          <span class="text-muted small" style="font-size: 0.75rem;">{{ __('feed.click_to_filter', 'Click to filter') }}</span>
         </div>
         <div class="d-flex gap-2 flex-wrap align-items-center">
           <template x-for="item in trendingHashtags" :key="item.tag">
@@ -640,8 +642,8 @@
         <div class="mb-3">
           <i class="bi text-muted" :class="activeStreamFilter === 'tagged' ? 'bi-tags-fill' : 'bi-chat-heart'" style="font-size: 3rem;"></i>
         </div>
-        <h5 class="fw-bold text-dark" x-text="activeStreamFilter === 'tagged' ? 'No tagged memories yet' : 'No family posts yet'"></h5>
-        <p class="text-muted mb-0" x-text="activeStreamFilter === 'tagged' ? 'When relatives tag you in stories or milestone photos, they will appear in this personal scrapbook.' : 'Share the first memory or event with your family above!'"></p>
+        <h5 class="fw-bold text-dark" x-text="activeStreamFilter === 'tagged' ? (window.__ ? window.__('feed.no_tagged_yet', 'No tagged memories yet') : 'No tagged memories yet') : (window.__ ? window.__('feed.no_posts_yet', 'No family posts yet') : 'No family posts yet')"></h5>
+        <p class="text-muted mb-0" x-text="activeStreamFilter === 'tagged' ? (window.__ ? window.__('feed.no_tagged_desc', 'When relatives tag you in stories or milestone photos, they will appear in this personal scrapbook.') : 'When relatives tag you in stories or milestone photos, they will appear in this personal scrapbook.') : (window.__ ? window.__('feed.no_posts_desc', 'Share the first memory or event with your family above!') : 'Share the first memory or event with your family above!')"></p>
       </div>
     </template>
 

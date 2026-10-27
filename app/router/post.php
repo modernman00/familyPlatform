@@ -156,3 +156,18 @@ $router->map(
   target: 'App\controller\members\ThenNowController@memberTimeline',
   name: 'api_member_then_now'
 );
+
+// POST VIEWS TRACKING
+$router->map(
+  method: 'POST',
+  route: '/api/posts/view',
+  target: 'App\controller\members\PostMessage@recordView',
+  name: 'api_post_record_view'
+);
+
+$router->map(
+  method: 'POST',
+  route: '/post/view',
+  target: 'App\controller\members\PostMessage@recordView',
+  name: 'post_record_view'
+);

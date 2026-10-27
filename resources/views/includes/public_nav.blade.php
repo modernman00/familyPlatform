@@ -10,41 +10,63 @@
     <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
       <ul class="navbar-nav align-items-center">
         <li class="nav-item">
-          <a class="nav-link {{ ($_SERVER['REQUEST_URI'] ?? '') == '/' ? 'active' : '' }}" href="/">Home</a>
+          <a class="nav-link {{ ($_SERVER['REQUEST_URI'] ?? '') == '/' ? 'active' : '' }}" href="/">{{ __('nav.home', 'Home') }}</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link {{ ($_SERVER['REQUEST_URI'] ?? '') == '/aboutus' ? 'active' : '' }}" href="/aboutus">About Us</a>
+          <a class="nav-link {{ ($_SERVER['REQUEST_URI'] ?? '') == '/aboutus' ? 'active' : '' }}" href="/aboutus">{{ __('nav.about_us', 'About Us') }}</a>
         </li>
         <li class="nav-item">
           <a class="nav-link {{ str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/why-familyplatform') ? 'active' : '' }}" href="/why-familyplatform">
-            <i class="fas fa-shield-alt me-1" style="color: var(--brand-primary, #a31621);"></i>Why Us vs WhatsApp
+            <i class="fas fa-shield-alt me-1" style="color: var(--brand-primary, #a31621);"></i>{{ __('nav.why_us', 'Why Us vs WhatsApp') }}
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link {{ str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/playbook') ? 'active' : '' }}" href="/playbook">
-            <i class="fas fa-book-open me-1" style="color: var(--brand-primary, #a31621);"></i>Playbook
+            <i class="fas fa-book-open me-1" style="color: var(--brand-primary, #a31621);"></i>{{ __('nav.playbook', 'Playbook') }}
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link {{ str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/blog') ? 'active' : '' }}" href="/blogs">
-            <i class="fas fa-newspaper me-1" style="color: var(--brand-primary, #a31621);"></i>Blog
+            <i class="fas fa-newspaper me-1" style="color: var(--brand-primary, #a31621);"></i>{{ __('nav.blog', 'Blog') }}
           </a>
         </li>
 @if(\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('users'))
         <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
-          <a class="btn btn-brand w-100" href="/profilePage">Go to Family Dashboard</a>
+          <a class="btn btn-brand w-100" href="/profilePage">{{ __('nav.dashboard', 'Go to Family Dashboard') }}</a>
         </li>
         <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-          <a class="btn btn-brand-outline w-100" href="/signout">Sign Out</a>
+          <a class="btn btn-brand-outline w-100" href="/signout">{{ __('nav.logout', 'Sign Out') }}</a>
         </li>
 @else
         <li class="nav-item ms-lg-3 mt-3 mt-lg-0 loginNav signup_login">
-          <a class="btn btn-brand-outline w-100" href="/login">Log In</a>
+          <a class="btn btn-brand-outline w-100" href="/login">{{ __('nav.login', 'Log In') }}</a>
         </li>
         <li class="nav-item ms-lg-2 mt-2 mt-lg-0 registerNav signup_login">
-          <a class="btn btn-brand w-100" href="/register">Join Now</a>
+          <a class="btn btn-brand w-100" href="/register">{{ __('nav.join_now', 'Join Now') }}</a>
         </li>
 @endif
+        <!-- Language Selector Dropdown -->
+        <li class="nav-item dropdown ms-lg-2 mt-2 mt-lg-0">
+          @php
+            $activeLocale = \App\classes\I18n::getLocale();
+            $supportedLocales = \App\classes\I18n::getSupportedLocales();
+            $currLocale = $supportedLocales[$activeLocale] ?? $supportedLocales['en'];
+          @endphp
+          <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 px-2 py-1 rounded-pill" type="button" id="publicLangMenu" data-bs-toggle="dropdown" aria-expanded="false" title="{{ __('nav.change_language', 'Change Language') }}">
+            <span>{{ $currLocale['flag'] }}</span>
+            <span class="fw-semibold text-uppercase" style="font-size: 0.78rem;">{{ $activeLocale }}</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-1" aria-labelledby="publicLangMenu" style="border-radius: 12px; min-width: 140px;">
+            @foreach ($supportedLocales as $locKey => $locMeta)
+              <li>
+                <a class="dropdown-item py-1.5 px-3 d-flex align-items-center gap-2 {{ $locKey === $activeLocale ? 'active fw-bold' : '' }}" href="/locale/{{ $locKey }}">
+                  <span>{{ $locMeta['flag'] }}</span>
+                  <span>{{ $locMeta['native'] }}</span>
+                </a>
+              </li>
+            @endforeach
+          </ul>
+        </li>
       </ul>
     </div>
   </div>

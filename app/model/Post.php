@@ -353,4 +353,40 @@ final class Post extends Select
         }
     }
 
+    /**
+     * Atomically increment post view count.
+     *
+     * @param int $postNo
+     * @return void
+     */
+    public static function incrementViews(int $postNo): void
+    {
+        try {
+            $pdo = parent::connect2();
+            $stmt = $pdo->prepare("UPDATE post SET views_count = views_count + 1 WHERE post_no = ?");
+            $stmt->execute([$postNo]);
+        } catch (\Throwable $e) {
+            error_log('[Post::incrementViews] ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get the current view count for a post.
+     *
+     * @param int $postNo
+     * @return int
+     */
+    public static function getViewsCount(int $postNo): int
+    {
+        try {
+            $pdo = parent::connect2();
+            $stmt = $pdo->prepare("SELECT views_count FROM post WHERE post_no = ?");
+            $stmt->execute([$postNo]);
+            return (int) $stmt->fetchColumn();
+        } catch (\Throwable $e) {
+            error_log('[Post::getViewsCount] ' . $e->getMessage());
+            return 0;
+        }
+    }
+
 }

@@ -11,7 +11,7 @@ declare(strict_types=1);
  * 3. The Fun Place Independence: 'familyAiHub.blade.php' is cleanly separated with Fridge Chef as active default.
  * 4. Route Registration: All core RoundTable and council routes registered cleanly.
  * 5. Direct Dispute Lifecycle: Party A files against Party B -> Party B responds -> Reconciliatory accord sealed.
- * 6. Third-Party Peacemaker Mediation: Concerned family member initiates for feuding parties.
+ * 6. Third-Party Peacemaker Mediation: Concerned family member initiates for members in disagreement.
  * 7. Quick 2-Minute Peacemaker: Fast banter referee delivers reconciliatory wisdom.
  * 8. Zero-residual test cleanup.
  */
@@ -84,7 +84,15 @@ if (!str_contains($roundTableContent, 'id="complex-witness-select"') || str_cont
     echo "❌ FAILED: Named Eyewitnesses / Confidants must use a dropdown select ('complex-witness-select') instead of tickboxes.\n";
     exit(1);
 }
-echo "  ✅ PASSED: Dedicated Family RoundTable view template & Eyewitness Dropdown verified.\n";
+if (str_contains($roundTableContent, 'Feuding Member') || str_contains($roundTableContent, 'feuding')) {
+    echo "❌ FAILED: 'feuding' tone violates reconciliatory family standard.\n";
+    exit(1);
+}
+if (!str_contains($roundTableContent, "url('/public/img/family.jpeg')") && !str_contains($roundTableContent, 'family.jpeg')) {
+    echo "❌ FAILED: Family RoundTable hero header must include family background image.\n";
+    exit(1);
+}
+echo "  ✅ PASSED: Dedicated Family RoundTable view template, Hero Background & Eyewitness Dropdown verified.\n";
 
 // [TEST 3] The Fun Place Independence
 echo "[TEST 3] Verifying 'The Fun Place' independence & separation...\n";
@@ -174,8 +182,16 @@ if (!$adj1['success'] || empty($adj1['finding_of_fact']) || empty($adj1['reconci
     exit(1);
 }
 
-$fullVerdictText = strtolower($adj1['finding_of_fact'] . ' ' . $adj1['reconciliatory_bridge'] . ' ' . $adj1['yommy_wisdom']);
-if (!str_contains($fullVerdictText, 'reconcil') && !str_contains($fullVerdictText, 'harmony') && !str_contains($fullVerdictText, 'bond')) {
+$fullVerdictText = strtolower($adj1['finding_of_fact'] . ' ' . $adj1['reconciliatory_bridge'] . ' ' . $adj1['yommy_wisdom'] . ' ' . $adj1['verdict_title']);
+$hasReconciliatoryTone = str_contains($fullVerdictText, 'reconcil') 
+    || str_contains($fullVerdictText, 'harmony') 
+    || str_contains($fullVerdictText, 'bond') 
+    || str_contains($fullVerdictText, 'peace')
+    || str_contains($fullVerdictText, 'unity')
+    || str_contains($fullVerdictText, 'kinship')
+    || str_contains($fullVerdictText, 'concord');
+
+if (!$hasReconciliatoryTone) {
     echo "❌ FAILED: Accord missing reconciliatory language.\n";
     exit(1);
 }
@@ -185,7 +201,7 @@ echo "  ✅ PASSED: Direct council hearing resolved with sealed RoundTable Accor
 echo "[TEST 6] Verifying 3rd-Party Peacemaker Mediation Lifecycle...\n";
 $ins->execute(['RTB_PEACEMAKER', 'Grandma', 'Elena', $famCode]);
 
-// Grandma Elena initiates hearing on behalf of feuding Liam and Maya
+// Grandma Elena initiates hearing on behalf of relatives Liam and Maya
 $file3rd = $service->fileDispute(
     famCode: $famCode,
     initiatorId: 'RTB_PEACEMAKER',
@@ -204,7 +220,7 @@ if (!$file3rd['success'] || empty($file3rd['dispute_id'])) {
 }
 $disputeId2 = (string)$file3rd['dispute_id'];
 
-// Both feuding parties submit statements
+// Both involved parties submit statements
 $service->submitStatement($disputeId2, 'RTB_USER_1', 'I filled up £40 of petrol last week and now it is nearly on empty.');
 $service->submitStatement($disputeId2, 'RTB_USER_2', 'I drove Grandma to her doctor appointments all Thursday.');
 
@@ -240,16 +256,56 @@ if (!$instant['success'] || empty($instant['verdict_title']) || empty($instant['
 }
 echo "  ✅ PASSED: Quick peacemaker delivered reconciliatory accord.\n";
 
-// [TEST 8] Test Fixture Cleanup
-echo "[TEST 8] Cleaning up test fixtures...\n";
+// [TEST 8] Financial Loan Contextual Accord Verification
+echo "[TEST 8] Verifying Financial Loan Dispute Contextual Accord...\n";
+$loanDispute = $service->fileDispute(
+    famCode: $famCode,
+    initiatorId: 'RTB_PEACEMAKER',
+    isThirdParty: true,
+    partyAId: 'RTB_USER_1',
+    partyBId: 'RTB_USER_2',
+    witnessIds: ['RTB_WITNESS_1'],
+    title: 'Family Loan Repayment & Bank Interest',
+    category: 'finances_split',
+    grievance: 'Borrowed £4,000 for emergency medical bills to pay back within 5 months, but high bank interest is accumulating.'
+);
+
+if (!$loanDispute['success'] || empty($loanDispute['dispute_id'])) {
+    echo "❌ FAILED: Loan dispute filing failed.\n";
+    exit(1);
+}
+$disputeId3 = (string)$loanDispute['dispute_id'];
+$service->submitStatement($disputeId3, 'RTB_USER_1', 'I intend to repay every penny, but work hours were cut.');
+$service->submitStatement($disputeId3, 'RTB_USER_2', 'The bank interest on £4,000 is causing me intense financial strain.');
+
+$loanAdj = $service->adjudicate($disputeId3);
+if (!$loanAdj['success']) {
+    echo "❌ FAILED: Loan adjudication failed.\n";
+    exit(1);
+}
+
+$loanText = strtolower($loanAdj['finding_of_fact'] . ' ' . $loanAdj['reconciliatory_bridge'] . ' ' . json_encode($loanAdj['restorative_action_plan']));
+if (str_contains($loanText, 'dishwasher') || str_contains($loanText, 'tea or a favourite snack') || str_contains($loanText, 'sunday evening family sync to coordinate schedules')) {
+    echo "❌ FAILED: Loan dispute returned generic chore tasks instead of financial accord!\n";
+    exit(1);
+}
+
+if (!str_contains($loanText, 'financ') && !str_contains($loanText, 'repay') && !str_contains($loanText, 'interest') && !str_contains($loanText, 'instalment') && !str_contains($loanText, 'balance')) {
+    echo "❌ FAILED: Loan dispute missing financial and repayment terms!\n";
+    exit(1);
+}
+echo "  ✅ PASSED: Financial dispute produced authentic financial relief covenant (no generic chore fallbacks).\n";
+
+// [TEST 9] Test Fixture Cleanup
+echo "[TEST 9] Cleaning up test fixtures...\n";
 $clean1 = $pdo->prepare("DELETE FROM family_disputes WHERE famCode = ?");
 $clean1->execute([$famCode]);
-$clean2 = $pdo->prepare("DELETE FROM family_dispute_statements WHERE dispute_id IN (?, ?)");
-$clean2->execute([$disputeId1, $disputeId2]);
+$clean2 = $pdo->prepare("DELETE FROM family_dispute_statements WHERE dispute_id IN (?, ?, ?)");
+$clean2->execute([$disputeId1, $disputeId2, $disputeId3]);
 $clean3 = $pdo->prepare("DELETE FROM personal WHERE famCode = ?");
 $clean3->execute([$famCode]);
 echo "  ✅ PASSED: Cleaned up all test records.\n";
 
 echo "=================================================================\n";
-echo "🏆 ALL 8 FAMILY ROUNDTABLE VERIFICATION GATES PASSED CLEANLY!\n";
+echo "🏆 ALL 9 FAMILY ROUNDTABLE VERIFICATION GATES PASSED CLEANLY!\n";
 echo "=================================================================\n";

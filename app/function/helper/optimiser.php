@@ -32,17 +32,38 @@ function assetVersion(string $relativePath): string
     return $cache[$rel] = $mtime !== false ? (string) $mtime : '1';
 }
 
-if (!function_exists('__')) {
+if (!function_exists('trans')) {
     /**
      * Global I18n translation helper.
      *
      * @param string $key Translation key
-     * @param string|null $fallback Fallback string if key not found
-     * @param array<string, string|int|float> $replace Replacement pairs
+     * @param array<string, string|int|float>|string|null $replaceOrFallback
+     * @param string|null $fallback
      * @return string
      */
-    function __(string $key, ?string $fallback = null, array $replace = []): string
+    function trans(string $key, array|string|null $replaceOrFallback = null, ?string $fallback = null): string
     {
-        return \App\classes\I18n::trans($key, $replace, $fallback);
+        if (is_array($replaceOrFallback)) {
+            return \App\classes\I18n::trans($key, $replaceOrFallback, $fallback);
+        }
+        return \App\classes\I18n::trans($key, [], is_string($replaceOrFallback) ? $replaceOrFallback : $fallback);
+    }
+}
+
+if (!function_exists('__')) {
+    /**
+     * Global I18n translation helper alias.
+     *
+     * @param string $key Translation key
+     * @param array<string, string|int|float>|string|null $replaceOrFallback
+     * @param string|null $fallback
+     * @return string
+     */
+    function __(string $key, array|string|null $replaceOrFallback = null, ?string $fallback = null): string
+    {
+        if (is_array($replaceOrFallback)) {
+            return \App\classes\I18n::trans($key, $replaceOrFallback, $fallback);
+        }
+        return \App\classes\I18n::trans($key, [], is_string($replaceOrFallback) ? $replaceOrFallback : $fallback);
     }
 }

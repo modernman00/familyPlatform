@@ -443,6 +443,7 @@ This document is the supreme governance charter across the entire portfolio. Any
 
 ### 8.3 Color Harmony, Contrast & Tactile Micro-Interactions
 * **WCAG AA Contrast Strictness:** All body copy and critical data must guarantee a minimum 4.5:1 contrast ratio against its background (3:1 for large headers). Never place medium grey on light grey, or muted blue on dark slate.
+* **Inviolable Red Surface Rule (Zero Black Font on Red):** Never overplay or place a black or dark font (`#000000`, `#111827`, `#1e293b`, `text-dark`, `text-black`) over a red, crimson, or ruby background (e.g. `bg-danger`, `--brand-primary`, `#a31621`, `#b8202c`, `#dc3545`, or red gradients). Red surfaces must strictly use crisp white (`#ffffff`), warm champagne / cream (`#fff7ed`, `#fef3c7`), or high-contrast metallic gold (`#ffd700`, `#fce79a`). This is a hard-blocking design gate across all apps.
 * **Disciplined Accent Allocation (60-30-10 Rule):**
   - 60% neutral surface/canvas (whites, slate, deep navy).
   - 30% structural contrast (cards, dividers, readable typography).

@@ -7,7 +7,7 @@
 
             <div class="modal-header composer-sheet__header flex-shrink-0">
                 <span class="composer-sheet__grab" aria-hidden="true"></span>
-                <h5 class="modal-title" id="postModalLabel">Create Post</h5>
+                <h5 class="modal-title" id="postModalLabel">{{ __('modal.create_post', 'Create Post') }}</h5>
                 <button type="button" class="composer-sheet__close" data-bs-dismiss="modal" aria-label="Close">
                     <i class="bi bi-x-lg"></i>
                 </button>
@@ -28,7 +28,7 @@
                                 </span>
                             </h6>
                             <span class="composer-audience">
-                                <i class="bi bi-shield-check"></i> Shared with Family
+                                <i class="bi bi-shield-check"></i> {{ __('modal.shared_with_family', 'Shared with Family') }}
                             </span>
                         </div>
                     </div>
@@ -40,7 +40,7 @@
                     <input type="hidden" name="attached_gif_url" id="attachedGifUrlInput" value="">
 
                     <textarea class="composer-text form-control border-0 bg-transparent shadow-none px-0" data-emoji-target
-                        placeholder="What's on your mind, {{ $data['firstName'] }}?" name="postMessage" id="postMessage"
+                        placeholder="{{ __('feed.share_prompt', 'Share a moment with your family...') }}" name="postMessage" id="postMessage"
                         rows="2"></textarea>
 
                     <!-- Smart Family Hashtags Quick Pill Suggestions (single swipeable row) -->
@@ -338,7 +338,7 @@
 
                     <!-- "Add to your post" tool grid -->
                     <div class="add-to-post-box composer-tools">
-                        <span class="composer-tools__title">Add to your post</span>
+                        <span class="composer-tools__title">{{ __('modal.add_to_post', 'Add to your post') }}</span>
 
                         <div class="composer-tools__grid">
                             <label for="imageUpload" class="btn-composer-action composer-tool action-photo mb-0" title="Attach Photo" aria-label="Attach photo">
@@ -390,7 +390,7 @@
 
                 <!-- Sticky footer: the Post button is always on screen, whatever is attached above -->
                 <div class="composer-sheet__footer flex-shrink-0">
-                    <button type="button" id="submitPost" name="submit" class="btn btn-primary fw-semibold submitPost">Post</button>
+                    <button type="button" id="submitPost" name="submit" class="btn btn-primary fw-semibold submitPost">{{ __('feed.post_btn', 'Post') }}</button>
                 </div>
 
             </form>

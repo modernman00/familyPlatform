@@ -106,11 +106,15 @@
 
                 <!-- Top-Right Play / Activity Badge -->
                 <div class="reel-fb-play-badge">
-                    <i class="bi bi-play-fill"></i>
-                    @if($likesCount > 0)
-                        <span><i class="bi bi-heart-fill text-danger" style="font-size: 0.55rem;"></i> {{ $likesCount }}</span>
-                    @elseif($viewsCount > 0)
+                    <span title="{{ $viewsCount }} views" class="d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-eye-fill text-info" style="font-size: 0.65rem;"></i>
                         <span>{{ $viewsCount }}</span>
+                    </span>
+                    @if($likesCount > 0)
+                        <span title="{{ $likesCount }} likes" class="d-inline-flex align-items-center gap-1 ms-1">
+                            <i class="bi bi-heart-fill text-danger" style="font-size: 0.55rem;"></i>
+                            <span>{{ $likesCount }}</span>
+                        </span>
                     @endif
                 </div>
 

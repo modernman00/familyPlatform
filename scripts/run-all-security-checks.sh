@@ -178,7 +178,7 @@ elif command -v phpunit > /dev/null 2>&1; then
 fi
 
 if [ -n "$PHPUNIT_BIN" ]; then
-    if "$PHPUNIT_BIN" > /dev/null 2>&1; then
+    if php -d memory_limit=1G "$PHPUNIT_BIN" > /dev/null 2>&1; then
         log_pass "All PHPUnit automated unit & integration tests passed."
     else
         log_fail "PHPUnit tests failed. Run '$PHPUNIT_BIN' for detailed report."

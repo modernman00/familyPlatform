@@ -73,6 +73,11 @@ final class LineagePromptTest extends TestCase
             INSERT INTO contact (id, email, country, mobile)
             VALUES (?, 'outsider@example.com', 'UK', '07123456787')
         ")->execute([$this->outsiderId]);
+
+        $_SESSION = [
+            'id' => $this->senderId,
+            'famCode' => $this->testFamCode
+        ];
     }
 
     protected function tearDown(): void

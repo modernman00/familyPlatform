@@ -567,8 +567,8 @@
         Don't let your family's precious milestones, oral histories, and ancestral roots vanish into a fleeting chat stream. Anchor your dynasty on FamilyPlatform.
       </p>
       <div class="d-flex justify-content-center gap-3 flex-wrap">
-        <a href="/register" class="btn btn-light btn-lg text-dark fw-bold px-4">
-          <i class="fas fa-plus-circle me-2 text-danger"></i>Create Your Family Sanctuary
+        <a href="/register" class="btn btn-light btn-lg fw-bold px-4" style="color: var(--brand-primary);">
+          <i class="fas fa-plus-circle me-2"></i>Create Your Family Sanctuary
         </a>
         <a href="/login" class="btn btn-outline-light btn-lg px-4">
           <i class="fas fa-users me-2"></i>Join Existing Family

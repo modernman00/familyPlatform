@@ -20,6 +20,31 @@ function getCsrfToken() {
     );
 }
 
+function removeKinCardAcrossWidgets(targetUserId) {
+    if (!targetUserId) return;
+    const cards = document.querySelectorAll(`.kinship-radar-widget #kinCard_${targetUserId}, .kinship-radar-widget [data-user-id="${targetUserId}"]`);
+    const processedCards = new Set();
+    cards.forEach(el => {
+        const card = el.closest('.kinship-item-card');
+        if (card && !processedCards.has(card)) {
+            processedCards.add(card);
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                const widget = card.closest('.kinship-radar-widget');
+                card.remove();
+                if (widget && widget.querySelectorAll('.kinship-item-card').length === 0) {
+                    widget.style.display = 'none';
+                    const wrapper = widget.parentElement;
+                    if (wrapper && (wrapper.classList.contains('d-lg-none') || wrapper.classList.contains('d-none'))) {
+                        wrapper.style.display = 'none';
+                    }
+                }
+            }, 250);
+        }
+    });
+}
+
 function bindKinshipRadarContainer(container) {
     // 1. Handle Connect Button
     container.addEventListener('click', async (e) => {
@@ -65,6 +90,11 @@ function bindKinshipRadarContainer(container) {
                         });
                         Toast.fire({ icon: 'success', title: 'Kinship request sent!' });
                     }
+
+                    // Once connected, fade out and remove card so container does not occupy space when all connected
+                    setTimeout(() => {
+                        removeKinCardAcrossWidgets(targetUserId);
+                    }, 1000);
                 }
             } catch (error) {
                 console.error('[KinshipRadar] Connect error:', error);
@@ -81,21 +111,7 @@ function bindKinshipRadarContainer(container) {
             const targetUserId = dismissBtn.getAttribute('data-user-id');
             if (!targetUserId) return;
 
-            // Scoped to the button that was actually clicked rather than a
-            // document-wide id lookup - the same kin's card id is duplicated
-            // across the mobile/desktop widget copies, and getElementById would
-            // only ever find (and remove) the first one.
-            const card = dismissBtn.closest('.kinship-item-card');
-            if (card) {
-                card.style.opacity = '0';
-                card.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    card.remove();
-                    if (container.querySelectorAll('.kinship-item-card').length === 0) {
-                        container.style.display = 'none';
-                    }
-                }, 250);
-            }
+            removeKinCardAcrossWidgets(targetUserId);
 
             try {
                 await axios.post('/api/kinship/dismiss', {

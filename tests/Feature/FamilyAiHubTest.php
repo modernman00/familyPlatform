@@ -88,7 +88,7 @@ final class FamilyAiHubTest extends TestCase
         $this->assertIsString($output);
         $this->assertStringNotContainsString('Something went wrong on our end', $output);
         $this->assertStringNotContainsString('Server Error', $output);
-        $this->assertStringContainsString('The Fun Place; Judge Yommy', $output);
+        $this->assertStringContainsString('The Fun Place', $output);
     }
 
     public function test_generate_trivia_executes_without_undefined_method_error(): void

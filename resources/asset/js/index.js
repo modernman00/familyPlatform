@@ -260,8 +260,31 @@ if (window.location.pathname === '/register') {
 // alpine:init event and initialise as empty {}.
 const startAlpine = () => routePromise.finally(() => Alpine.start());
 
+// Reels player & Create Modal handler lazy loader for feed & profile pages
+const loadReelsModuleIfPresent = () => {
+  if (document.getElementById('createReelModal') || document.querySelector('.reels-tray-scroll') || document.getElementById('reelsViewport')) {
+    import(
+      /* webpackChunkName: 'reels' */
+      './components/reels/reelsPlayer'
+    ).catch(() => {});
+  }
+};
+
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', startAlpine, { once: true });
+  document.addEventListener('DOMContentLoaded', () => {
+    startAlpine();
+    loadReelsModuleIfPresent();
+  }, { once: true });
 } else {
   startAlpine();
+  loadReelsModuleIfPresent();
 }
+
+document.addEventListener('show.bs.modal', (e) => {
+  if (e.target && e.target.id === 'createReelModal') {
+    import(
+      /* webpackChunkName: 'reels' */
+      './components/reels/reelsPlayer'
+    ).catch(() => {});
+  }
+});

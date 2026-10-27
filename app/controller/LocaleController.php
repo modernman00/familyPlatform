@@ -22,6 +22,10 @@ class LocaleController
      */
     public function switch(string $locale = 'en', ?string $lang = null): void
     {
+        if (session_status() !== PHP_SESSION_ACTIVE && !headers_sent()) {
+            @session_start();
+        }
+
         $target = $lang ?? $locale;
         $success = I18n::setLocale($target);
 

@@ -39,3 +39,16 @@ $router->map('POST', '/api/reels/view', 'App\controller\members\ReelsController@
 // Update / Auto-Heal Reel Cover Thumbnail
 $router->map('POST', '/api/reels/thumbnail', 'App\controller\members\ReelsController@updateThumbnail', 'family_reels_thumbnail_api');
 
+// Multi-Angle Chrono-Sync Angles
+$router->map('GET', '/api/reels/chrono-sync-angles', 'App\controller\members\ReelsController@getChronoSyncAngles', 'family_reels_chrono_sync_angles_api');
+
+// Recent Active Reels for Multi-Angle Linking
+$router->map('GET', '/api/reels/recent-clusters', 'App\controller\members\ReelsController@getRecentClusters', 'family_reels_recent_clusters_api');
+
+// Curated Audio Library
+$router->map('GET', '/api/reels/audio-library', 'App\controller\members\ReelsController@getAudioLibrary', 'family_reels_audio_library_api');
+
+// Sound-Peer Reels (Viral "Use This Sound")
+$router->map('GET', '/api/reels/sound-reels', 'App\controller\members\ReelsController@getReelsBySound', 'family_reels_sound_reels_api');
+
+

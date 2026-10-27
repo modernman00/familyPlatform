@@ -1,12 +1,18 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ \App\classes\I18n::getLocale() }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover">
   <meta name="description" content="@yield('meta_description', 'Private family social network and interactive family tree. Safely connect relatives, coordinate private chats, share cherished memories, and build your digital family archive.')">
   <meta name="robots" content="index, follow">
   <meta name="author" content="Family Platform Team">
-  <meta name="language" content="English">
+  <meta name="language" content="{{ \App\classes\I18n::getLocale() }}">
+  <script>
+    window.APP_LOCALE = '{{ \App\classes\I18n::getLocale() }}';
+    window.__TRANSLATIONS__ = {!! json_encode(\App\classes\I18n::transArray()) !!};
+    window.__ = function(k, fb) { return (window.__TRANSLATIONS__ && window.__TRANSLATIONS__[k]) || fb || k; };
+    window.trans = window.__;
+  </script>
   <title>@yield('title', 'FamilyPlatform | Private Family Social Network')</title>
   <link rel="canonical" href="{{ rtrim($_ENV['APP_URL'] ?? 'https://myfamilyplatform.com', '/') . ($_SERVER['REQUEST_URI'] ?? '/') }}">
   

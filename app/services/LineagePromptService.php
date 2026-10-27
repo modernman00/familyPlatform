@@ -47,7 +47,14 @@ final class LineagePromptService
         }
 
         // 2. Resolve sender and target records
-        $sender = BaseController::findMemberById($senderId);
+        try {
+            $sender = BaseController::findMemberById($senderId);
+        } catch (\Throwable $e) {
+            $db = Db::connect2();
+            $sStmt = $db->prepare("SELECT id, firstName, lastName, famCode FROM personal WHERE id = ? LIMIT 1");
+            $sStmt->execute([$senderId]);
+            $sender = $sStmt->fetch(\PDO::FETCH_ASSOC) ?: [];
+        }
         if (empty($sender) || empty($sender['id'])) {
             return [
                 'success' => false,
@@ -55,7 +62,14 @@ final class LineagePromptService
             ];
         }
 
-        $target = BaseController::findMemberById($targetUserId);
+        try {
+            $target = BaseController::findMemberById($targetUserId);
+        } catch (\Throwable $e) {
+            $db = Db::connect2();
+            $tStmt = $db->prepare("SELECT p.id, p.firstName, p.lastName, p.famCode, c.email FROM personal p LEFT JOIN contact c ON p.id = c.id WHERE p.id = ? LIMIT 1");
+            $tStmt->execute([$targetUserId]);
+            $target = $tStmt->fetch(\PDO::FETCH_ASSOC) ?: [];
+        }
         if (empty($target) || empty($target['id'])) {
             return [
                 'success' => false,
@@ -134,7 +148,7 @@ final class LineagePromptService
                     'sender_id' => $senderId,
                     'sender_name' => $senderName,
                     'note' => $sanitizedNote,
-                    'type' => 'tree_build_prompt'
+                    'type' => 'Lineage'
                 ]
             );
         } catch (\Throwable $e) {

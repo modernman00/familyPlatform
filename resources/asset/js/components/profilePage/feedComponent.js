@@ -51,6 +51,8 @@ export function profileFeed(opts = {}) {
         trendingHashtags: [],
         isHashtagFilterActive: false,
         votingPolls: {},
+        viewedPostNos: new Set(),
+        _postObserver: null,
         csrfOptions: {
             xsrfCookieName: 'XSRF-TOKEN',
             xsrfHeaderName: 'X-XSRF-TOKEN',
@@ -92,6 +94,7 @@ export function profileFeed(opts = {}) {
             await this.fetchPosts();
             await this.loadTrendingHashtags();
             this.scrollToHashPost();
+            this.observePostViews();
 
             // Expose filter helper globally for post pills
             window.filterByFamilyHashtag = (tag) => {
@@ -212,6 +215,7 @@ export function profileFeed(opts = {}) {
                         window.offlineSync.cacheFeed(rawPosts).catch(() => {});
                     }
                     this.scrollToHashPost();
+                    this.observePostViews();
                 } else if (this.posts.length === 0) {
                     this.posts = [];
                 }
@@ -258,6 +262,7 @@ export function profileFeed(opts = {}) {
                 comments: Array.isArray(p?.comments) ? p.comments.map(c => this.normalizeComment(c)) : [],
                 isLiked: false,
                 post_tags: Array.isArray(p?.post_tags) ? p.post_tags : [],
+                views_count: parseInt(p?.views_count || 0, 10),
             };
 
             // Progressive enhancement: lazy unfurl link preview if server hasn't pre-hydrated
@@ -369,6 +374,54 @@ export function profileFeed(opts = {}) {
                 .replace(/\u2665(?!\uFE0F)/g, '\u2764\uFE0F')
                 // Convert standalone ASCII heart '<3' to '❤️'
                 .replace(/(^|\s)<3(?=\s|$|[.,!?])/g, '$1❤️');
+        },
+
+        observePostViews() {
+            if (typeof IntersectionObserver === 'undefined') return;
+            if (!this._postObserver) {
+                this._postObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const postNo = parseInt(entry.target.getAttribute('data-post-no') || '0', 10);
+                            if (postNo > 0) {
+                                this.recordPostView(postNo);
+                                this._postObserver.unobserve(entry.target);
+                            }
+                        }
+                    });
+                }, { threshold: 0.4 });
+            }
+            setTimeout(() => {
+                const postEls = document.querySelectorAll('.feed-post-card[data-post-no]');
+                postEls.forEach(el => {
+                    const pNo = parseInt(el.getAttribute('data-post-no') || '0', 10);
+                    if (pNo > 0 && !this.viewedPostNos.has(pNo)) {
+                        this._postObserver.observe(el);
+                    }
+                });
+            }, 300);
+        },
+
+        async recordPostView(postNo) {
+            if (!postNo || this.viewedPostNos.has(postNo)) return;
+            this.viewedPostNos.add(postNo);
+            try {
+                const csrfToken = getCsrfToken();
+                const headers = { 'Content-Type': 'application/json' };
+                if (csrfToken) {
+                    headers['X-CSRF-TOKEN'] = csrfToken;
+                    headers['X-XSRF-TOKEN'] = csrfToken;
+                }
+                const res = await axios.post('/api/posts/view', { post_no: postNo }, { headers });
+                if (res.data?.status === 'success' && typeof res.data.views_count === 'number') {
+                    const post = this.posts.find(p => p.post_no === postNo);
+                    if (post) {
+                        post.views_count = res.data.views_count;
+                    }
+                }
+            } catch (err) {
+                // Silently ignore view counter increments
+            }
         },
 
         async loadFamilyRoster() {

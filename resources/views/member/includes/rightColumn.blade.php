@@ -37,6 +37,7 @@ foreach(($eventData ?? []) as $event) {
 <!-- Right Column - Sidebar -->
 <div class="sidebar-column" x-data="upcomingEvents({{ json_encode($enrichedEvents) }})">
     <!-- Suggested Kin & In-Laws (Kinship Radar) — Desktop only (mobile version is in feed column) -->
+    @if(!empty($suggestedKin))
     <div class="d-none d-lg-block">
         {{-- BladeOne's default includeScope=false means include-passed variables leak
              globally into every include that runs afterward - middleColumn.blade.php's
@@ -45,6 +46,7 @@ foreach(($eventData ?? []) as $event) {
              `?? 'kinshipRadarWidget'` default in the partial actually applies. --}}
         @includeIf('member.includes.kinshipSuggestions', ['kinshipWidgetId' => null])
     </div>
+    @endif
 
     <!-- Family Heritage & Weekly Rituals Hub Widget -->
     @includeIf('member.includes.familyHeritageWidget')
@@ -59,19 +61,19 @@ foreach(($eventData ?? []) as $event) {
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px; background-color: var(--card-bg);">
         <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-start pt-4 pb-2 px-4" id="eventHeader">
             <div>
-                <h5 class="mb-0 fw-bold" style="color: var(--text-color); font-size: 1.15rem;">Upcoming Events</h5>
-                <p class="mb-0" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569); line-height: 1.5;">Family gatherings, birthdays &amp; milestones.</p>
+                <h5 class="mb-0 fw-bold" style="color: var(--text-color); font-size: 1.15rem;">{{ __('events.upcoming', 'Upcoming Events') }}</h5>
+                <p class="mb-0" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569); line-height: 1.5;">{{ __('events.gatherings_subtitle', 'Family gatherings, birthdays & milestones.') }}</p>
                 <div class="mt-1" style="font-size: 0.8125rem; color: var(--text-muted-aa, #475569);">
-                    <i class="bi bi-globe me-1 text-primary"></i> <span class="user-tz-name">Local Time</span>
+                    <i class="bi bi-globe me-1 text-primary"></i> <span class="user-tz-name">{{ __('global.local_time', 'Local Time') }}</span>
                 </div>
             </div>
             <button type="button" 
                     class="btn btn-link text-decoration-none mt-1 p-0 d-inline-flex align-items-center gap-1 border-0 bg-transparent flex-shrink-0" 
-                    style="color: var(--primary-color); font-weight: 600; font-size: 0.875rem; min-height: 44px; min-width: 44px; justify-content: flex-end; white-space: nowrap;"
+                    style="color: var(--primary-color); font-weight: 600; font-size: 0.875rem; min-height: 44px; min-width: 44px; justify-content: flex-end; white-space: nowrap;" 
                     data-bs-toggle="modal" 
                     data-bs-target="#allUpcomingEventsModal"
-                    aria-label="See all scheduled family events for the next 3 months">
-                <span>See All</span> <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i>
+                    aria-label="{{ __('profile.see_all', 'See All') }}">
+                <span>{{ __('profile.see_all', 'See All') }}</span> <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i>
             </button>
         </div>
 
@@ -82,12 +84,12 @@ foreach(($eventData ?? []) as $event) {
                     <div class="mb-3 d-inline-flex align-items-center justify-content-center rounded-circle p-3" style="width: 52px; height: 52px; background: var(--secondary-color); color: var(--primary-color);">
                         <i class="bi bi-calendar-event fs-3"></i>
                     </div>
-                    <h6 class="fw-bold mb-1" style="color: var(--text-color); font-size: 0.95rem;">No Upcoming Events</h6>
+                    <h6 class="fw-bold mb-1" style="color: var(--text-color); font-size: 0.95rem;">{{ __('events.no_events', 'No Upcoming Events') }}</h6>
                     <p class="mb-3" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569); line-height: 1.45;">
-                        Looks like the calendar is clear. Why not plan the next family gathering or reunion?
+                        {{ __('events.clear_calendar_desc', 'Looks like the calendar is clear. Why not plan the next family gathering or reunion?') }}
                     </p>
                     <button type="button" class="btn btn-sm text-white rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#createEventModal" style="background-color: var(--primary-color, #a31621); color: #ffffff !important; border: none; font-size: 0.875rem; min-height: 44px;">
-                        <i class="bi bi-plus-circle-fill me-1 text-warning"></i> Create Event
+                        <i class="bi bi-plus-circle-fill me-1 text-warning"></i> {{ __('events.create_event', 'Create Event') }}
                     </button>
                 </div>
             </template>

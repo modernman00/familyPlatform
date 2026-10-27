@@ -42,10 +42,8 @@ class AdminController extends BaseController
             } catch (\Throwable $e) {}
         }
 
-        if (!$userId) {
-            if (($_ENV['APP_ENV'] ?? '') === 'local') {
-                return 1;
-            }
+        $isSuperAdmin = ($_SESSION['auth']['type'] ?? '') === 'super_admin' && !empty($_SESSION['auth']['2fa_passed']);
+        if (!$userId || !$isSuperAdmin) {
             $adminPrefix = '/' . trim((string)($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH') ?: 'admin'), '/');
             redirect($adminPrefix . '/login');
             exit;
@@ -117,6 +115,7 @@ class AdminController extends BaseController
      */
     public function apiMetrics(): string
     {
+        $this->getAuthenticatedAdminId();
         $selectedApp = (string)($_GET['app'] ?? 'all');
         $metrics = $this->adminService->getOverviewMetrics($selectedApp);
         $insights = $this->adminService->getAppInsights($selectedApp);
@@ -243,6 +242,7 @@ class AdminController extends BaseController
      */
     public function apiAudienceCount(): string
     {
+        $this->getAuthenticatedAdminId();
         $input = json_decode((string)file_get_contents('php://input'), true) ?? $_POST;
         $targetApp = (string)($input['target_app'] ?? 'all');
         $audienceTier = (string)($input['audience_tier'] ?? 'all');

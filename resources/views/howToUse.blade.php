@@ -405,6 +405,14 @@
               </div>
               <div class="col-12">
                 <div class="p-3 rounded-3 bg-light border">
+                  <h6 class="fw-bold text-dark"><i class="bi bi-eye text-primary me-2"></i>Post &amp; Reel Views Transparency</h6>
+                  <p class="small text-muted mb-0">
+                    Keep track of family engagement with live view counts on both feed posts and <strong>Family Reels</strong>. Post views are displayed in the metrics bar alongside likes and comments, while reel views appear on both the horizontal Reels Tray cards and within the full-screen Reels Theater action stack and metadata overlay.
+                  </p>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="p-3 rounded-3 bg-light border">
                   <h6 class="fw-bold text-dark"><i class="bi bi-chat-heart text-danger me-2"></i>Reels Comments Parity &amp; Interactive Features</h6>
                   <p class="small text-muted mb-0">
                     Comments on <strong>Family Reels</strong> enjoy full functional parity with standard post comments: organise discussions into <strong>1-level threaded replies</strong>, attach vibrant animated stickers from our curated <strong>Family GIF</strong> catalogue, react with emotional emoji pickers (Like, Love, Haha, Wow, Sad, Angry), and edit your own comments inline with instant preview.
@@ -493,7 +501,7 @@
                 <div class="p-3 border rounded-3 bg-light h-100">
                   <span class="badge bg-warning text-dark mb-2">🕊️ Peacemaker Mediation</span>
                   <h6 class="fw-bold text-dark">Third-Party Initiation</h6>
-                  <p class="small text-muted mb-0">When two family members are feuding, any concerned relative (parent, sibling, or elder) can initiate a reconciliatory hearing as a neutral peacemaker to heal kinship friction.</p>
+                  <p class="small text-muted mb-0">When family members experience tension or disagreement, any concerned relative (parent, sibling, or elder) can initiate a reconciliatory hearing as a neutral peacemaker to heal kinship friction.</p>
                 </div>
               </div>
               <div class="col-md-4">

@@ -6,10 +6,25 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Montserrat:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 .roundtable-hero {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.03) 0%, rgba(99, 102, 241, 0.06) 100%);
+    position: relative;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.82) 0%, rgba(30, 27, 75, 0.88) 100%), 
+                url('/public/img/family.jpeg') center/cover no-repeat;
     border-radius: 24px;
-    padding: 32px 20px;
-    border: 1px solid rgba(212, 175, 55, 0.25);
+    padding: 44px 24px;
+    border: 1.5px solid rgba(212, 175, 55, 0.45);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+    overflow: hidden;
+}
+.roundtable-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 30%, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+}
+.roundtable-hero-content {
+    position: relative;
+    z-index: 2;
 }
 .gold-seal-badge {
     background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
@@ -24,6 +39,23 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.08) !important;
 }
+#roundTableModes .nav-link {
+    color: #475569 !important;
+    transition: all 0.2s ease;
+}
+#roundTableModes .nav-link:hover {
+    color: var(--brand-primary) !important;
+    background-color: rgba(163, 22, 33, 0.06) !important;
+}
+#roundTableModes .nav-link.active {
+    background-color: var(--brand-primary) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(163, 22, 33, 0.28) !important;
+}
+#roundTableModes .nav-link.active *,
+#roundTableModes .nav-link.active i {
+    color: #ffffff !important;
+}
 </style>
 @endpush
 
@@ -31,13 +63,72 @@
 <div class="container-fluid py-4" style="max-width: 1200px;">
     {{-- RoundTable Header --}}
     <div class="roundtable-hero text-center mb-4">
-        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-white shadow-sm small fw-bold mb-3" style="color: #4338ca;">
-            <i class="bi bi-shield-shaded text-warning"></i> ✨ Kinship Council &bull; Reconciliatory Justice
+        <div class="roundtable-hero-content">
+            <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill small fw-bold mb-3" style="background: rgba(255, 255, 255, 0.14); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(212, 175, 55, 0.5); color: #ffd700;">
+                <i class="bi bi-shield-shaded text-warning"></i> ✨ Kinship Council &bull; Reconciliatory Justice
+            </div>
+            <h1 class="h2 fw-bold text-white mb-2" style="font-family: 'Cinzel', serif; letter-spacing: -0.5px; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);">Family RoundTable</h1>
+            <p class="mx-auto mb-3" style="max-width: 680px; color: #f1f5f9; font-size: 1.02rem; line-height: 1.6; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);">
+                A dignified, ancestral council for resolving complex family issues, hearing all perspectives with empathy, and sealing reconciliatory accords that preserve family unity.
+            </p>
+
+            {{-- 4 Reassurance Steps: How the RoundTable Works --}}
+            <div class="row g-2 pt-2 justify-content-center text-start" style="max-width: 1040px; margin: 0 auto;">
+                <div class="col-6 col-md-3">
+                    <div class="p-3 rounded-3 h-100" style="background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(212, 175, 55, 0.35);">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge rounded-circle p-1 bg-warning text-dark fw-bold" style="width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">1</span>
+                            <span class="text-white fw-bold small">1. Matter Raised</span>
+                        </div>
+                        <p class="mb-0 text-white-50" style="font-size: 0.78rem; line-height: 1.45;">
+                            A relative or neutral peacemaker describes the tension calmly, with zero blame or finger-pointing.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 rounded-3 h-100" style="background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(212, 175, 55, 0.35);">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge rounded-circle p-1 bg-warning text-dark fw-bold" style="width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">2</span>
+                            <span class="text-white fw-bold small">2. Everyone Heard</span>
+                        </div>
+                        <p class="mb-0 text-white-50" style="font-size: 0.78rem; line-height: 1.45;">
+                            Both members and trusted confidants share their side of the story in their own words and time.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 rounded-3 h-100" style="background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(212, 175, 55, 0.35);">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge rounded-circle p-1 bg-warning text-dark fw-bold" style="width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">3</span>
+                            <span class="text-white fw-bold small">3. Zero Blame</span>
+                        </div>
+                        <p class="mb-0 text-white-50" style="font-size: 0.78rem; line-height: 1.45;">
+                            No one is branded a culprit. The council validates the feelings and good intentions of both sides.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 rounded-3 h-100" style="background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(212, 175, 55, 0.35);">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge rounded-circle p-1 bg-warning text-dark fw-bold" style="width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">4</span>
+                            <span class="text-white fw-bold small">4. Peace Accord</span>
+                        </div>
+                        <p class="mb-0 text-white-50" style="font-size: 0.78rem; line-height: 1.45;">
+                            A fair, restorative compromise (action steps + family proverb) seals lasting domestic peace.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Kinship Promise Ribbon --}}
+            <div class="d-inline-flex flex-wrap justify-content-center align-items-center gap-3 mt-3 px-3 py-1 rounded-pill small" style="background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.15); color: #e2e8f0;">
+                <span><i class="bi bi-shield-check text-warning me-1"></i> <strong>100% Non-Punitive</strong></span>
+                <span class="d-none d-sm-inline opacity-50">&bull;</span>
+                <span><i class="bi bi-lock-fill text-info me-1"></i> <strong>Private to Your Family</strong></span>
+                <span class="d-none d-sm-inline opacity-50">&bull;</span>
+                <span><i class="bi bi-heart-fill text-danger me-1"></i> <strong>Preserves Love &amp; Respect</strong></span>
+            </div>
         </div>
-        <h1 class="h2 fw-bold text-dark mb-2" style="font-family: 'Cinzel', serif; letter-spacing: -0.5px;">Family RoundTable</h1>
-        <p class="text-muted mx-auto mb-0" style="max-width: 680px;">
-            A dignified, ancestral council for resolving complex family issues, hearing all perspectives with empathy, and sealing reconciliatory accords that preserve family unity.
-        </p>
     </div>
 
     {{-- Council Sub-Nav: Grand Council vs Fast 2-Minute Peacemaker --}}
@@ -82,7 +173,7 @@
                                     </label>
                                 </div>
                                 <small class="text-muted d-block" style="font-size: 0.8rem;">
-                                    Enable if you are a third party (e.g. parent, sibling, or elder) observing two family members feuding, and asking the RoundTable to mediate.
+                                    Enable if you are a third party (e.g. parent, sibling, or elder) observing disagreement or tension between two family members, and asking the RoundTable to mediate.
                                 </small>
                             </div>
 
@@ -99,7 +190,7 @@
                                     <option value="boundaries_space">🚪 Personal Space, Noise &amp; Boundaries</option>
                                     <option value="borrowed_property">📱 Borrowing Clothes, Electronics &amp; Belongings</option>
                                     <option value="family_events">📅 Family Event Attendance &amp; Planning</option>
-                                    <option value="finances_split">💳 Shared Expenses &amp; Takeaway Splits</option>
+                                    <option value="finances_split">💰 Family Loans, Debt, Shared Expenses &amp; Financial Relief</option>
                                     <option value="respect_communication">🗣️ Tone of Voice &amp; Communication Frustrations</option>
                                     <option value="general_harmony">🌿 General Kinship Reconciliation</option>
                                 </select>
@@ -122,7 +213,9 @@
 
                             {{-- Party B --}}
                             <div class="mb-3">
-                                <label class="form-label fw-semibold small">Second Person (Party B)</label>
+                                <label class="form-label fw-semibold small">
+                                    <span id="party-b-label">Second Person (Party B)</span>
+                                </label>
                                 <select id="complex-party-b" class="form-select rounded-3" required>
                                     <option value="" disabled selected>-- Select family member --</option>
                                     @foreach($familyMembers as $m)
@@ -371,6 +464,14 @@
 
                         {{-- Council Wisdom --}}
                         <div class="text-end fst-italic text-warning small pt-2 border-top border-warning border-opacity-25" id="verdict-modal-wisdom"></div>
+
+                        {{-- Reconvene Action --}}
+                        <div class="mt-3 pt-2 border-top border-warning border-opacity-25 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <small class="text-white-50"><i class="bi bi-shield-lock-fill text-warning me-1"></i> Sealed under sacred kinship honour</small>
+                            <button type="button" id="btn-re-adjudicate" class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-semibold" onclick="conveneCourtJudgement(true)" style="min-height: 44px;">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Refresh &amp; Re-adjudicate Accord
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -382,11 +483,19 @@
 
                 {{-- Submit Statement Box (If hearing active) --}}
                 <div id="modal-statement-form-wrap" class="p-3 bg-light rounded-4 border">
-                    <h6 class="fw-bold text-dark mb-2"><i class="bi bi-pencil-fill text-primary me-2"></i> Add Your Perspective</h6>
-                    <p class="text-muted small mb-2">Speak from the heart with dignity. Your account will help the RoundTable construct a reconciliatory accord.</p>
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                        <h6 class="fw-bold text-dark mb-0"><i class="bi bi-pencil-fill text-primary me-2"></i> Add Your Perspective</h6>
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1 small">
+                            <i class="bi bi-shield-check me-1"></i> Safe &amp; Blame-Free Space
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-3" style="line-height: 1.5;">
+                        Speak from the heart with dignity. The RoundTable never punishes, blames, or takes sides — your honest thoughts will help uncover common ground and heal domestic friction.
+                    </p>
                     <form onsubmit="submitStatementToDocket(event)">
                         @csrf
                         <textarea id="modal-user-statement" class="form-control rounded-3 mb-3" rows="3" placeholder="Share your account, observations, or response..." required></textarea>
+                        <div id="modal-statement-feedback" class="small mb-3" style="display: none;"></div>
                         <div class="d-flex justify-content-between align-items-center">
                             <button type="submit" id="btn-submit-statement" class="btn btn-primary rounded-pill px-4 fw-semibold" style="min-height: 44px;">
                                 <i class="bi bi-send-fill me-1"></i> Submit Statement
@@ -444,17 +553,20 @@
 
     function togglePeacemakerMode(isThirdParty) {
         const partyALabel = document.getElementById('party-a-label');
+        const partyBLabel = document.getElementById('party-b-label');
         const grievanceLabel = document.getElementById('grievance-label');
         const partyASelect = document.getElementById('complex-party-a');
 
         if (isThirdParty) {
-            partyALabel.innerHTML = 'First Feuding Member (Party A)';
-            grievanceLabel.innerHTML = 'Your Observation as Peacemaker (What issue are they facing?)';
+            partyALabel.innerHTML = 'First Involved Member (Party A)';
+            if (partyBLabel) partyBLabel.innerHTML = 'Second Involved Member (Party B)';
+            grievanceLabel.innerHTML = 'Your Observation as Peacemaker (What situation needs reconciliation?)';
             if (partyASelect.options.length > 1) {
                 partyASelect.selectedIndex = 1;
             }
         } else {
             partyALabel.innerHTML = 'First Person (Party A)';
+            if (partyBLabel) partyBLabel.innerHTML = 'Second Person (Party B)';
             grievanceLabel.innerHTML = 'Your Statement / Grievance';
             partyASelect.selectedIndex = 0;
         }
@@ -588,7 +700,9 @@
                         ? '<span class="badge bg-info bg-opacity-10 text-info small">Party B</span>'
                         : (st.role === 'initiator'
                             ? '<span class="badge bg-purple bg-opacity-10 text-purple small">🕊️ Peacemaker</span>'
-                            : '<span class="badge bg-secondary bg-opacity-10 text-secondary small">Eyewitness</span>'));
+                            : (st.role === 'relative'
+                                ? '<span class="badge bg-success bg-opacity-10 text-success small">Family Relative</span>'
+                                : '<span class="badge bg-secondary bg-opacity-10 text-secondary small">Eyewitness</span>')));
 
                 const row = document.createElement('div');
                 row.className = 'p-3 rounded-3 border bg-white shadow-xs';
@@ -604,6 +718,9 @@
                 `;
                 sList.appendChild(row);
             });
+
+            const fb = document.getElementById('modal-statement-feedback');
+            if (fb) fb.style.display = 'none';
 
             if (d.status === 'resolved') {
                 document.getElementById('modal-verdict-section').style.display = 'block';
@@ -636,20 +753,48 @@
         }
     }
 
+    function showStatementFeedback(msg, isSuccess) {
+        const el = document.getElementById('modal-statement-feedback');
+        if (!el) return;
+        el.style.display = 'block';
+        el.className = isSuccess 
+            ? 'alert alert-success py-2 px-3 small rounded-3 mb-3' 
+            : 'alert alert-danger py-2 px-3 small rounded-3 mb-3';
+        el.innerHTML = isSuccess 
+            ? '<i class="bi bi-check-circle-fill me-1"></i> ' + msg 
+            : '<i class="bi bi-exclamation-triangle-fill me-1"></i> ' + msg;
+    }
+
     async function submitStatementToDocket(e) {
         e.preventDefault();
-        if (!activeDisputeId) return;
+        const textInput = document.getElementById('modal-user-statement');
+        const text = textInput ? textInput.value.trim() : '';
+
+        if (!text) {
+            showStatementFeedback('Please enter your statement or perspective.', false);
+            return;
+        }
+
+        if (!activeDisputeId) {
+            showStatementFeedback('Docket reference missing. Please close and re-open the docket.', false);
+            return;
+        }
 
         const btn = document.getElementById('btn-submit-statement');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Submitting...';
-
-        const text = document.getElementById('modal-user-statement').value;
+        if (window.FamilyPlatformSpinner) {
+            window.FamilyPlatformSpinner.start(btn);
+        } else if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Submitting...';
+        }
 
         try {
             const res = await fetch('/api/roundtable/submit-statement', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
                 body: JSON.stringify({
                     dispute_id: activeDisputeId,
                     statement: text
@@ -657,50 +802,73 @@
             });
 
             const data = await res.json();
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-send-fill me-1"></i> Submit Statement';
 
             if (data.success) {
-                document.getElementById('modal-user-statement').value = '';
-                openDisputeDocket(activeDisputeId);
+                if (textInput) textInput.value = '';
+                showStatementFeedback('Your perspective has been recorded in the council docket.', true);
+                setTimeout(() => {
+                    const fb = document.getElementById('modal-statement-feedback');
+                    if (fb) fb.style.display = 'none';
+                    openDisputeDocket(activeDisputeId);
+                }, 1000);
             } else {
-                alert(data.error || 'Failed to submit statement.');
+                showStatementFeedback(data.error || 'Failed to submit statement.', false);
             }
         } catch (err) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-send-fill me-1"></i> Submit Statement';
-            alert('Error submitting statement: ' + err.message);
+            showStatementFeedback('Error submitting statement: ' + err.message, false);
+        } finally {
+            if (window.FamilyPlatformSpinner) {
+                window.FamilyPlatformSpinner.stop(btn);
+            } else if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-send-fill me-1"></i> Submit Statement';
+            }
         }
     }
 
-    async function conveneCourtJudgement() {
+    async function conveneCourtJudgement(isReAdjudicate = false) {
         if (!activeDisputeId) return;
-        if (!confirm('Convene the Family RoundTable to seal the reconciliatory accord now?')) return;
+        const confirmMsg = isReAdjudicate 
+            ? 'Reconvene the Family RoundTable to re-evaluate all testimonies and update the reconciliatory accord?'
+            : 'Convene the Family RoundTable to seal the reconciliatory accord now?';
+        if (!confirm(confirmMsg)) return;
 
-        const btn = document.getElementById('btn-convene-judgement');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Sealing Accord...';
+        const btn = isReAdjudicate ? document.getElementById('btn-re-adjudicate') : document.getElementById('btn-convene-judgement');
+        if (window.FamilyPlatformSpinner) {
+            window.FamilyPlatformSpinner.start(btn);
+        } else if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Sealing Accord...';
+        }
 
         try {
             const res = await fetch('/api/roundtable/adjudicate', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
                 body: JSON.stringify({ dispute_id: activeDisputeId })
             });
 
             const data = await res.json();
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-shield-shaded me-1"></i> Convene Council &amp; Seal Accord';
 
             if (data.success) {
                 openDisputeDocket(activeDisputeId);
             } else {
-                alert(data.error || 'Accord generation failed.');
+                showStatementFeedback(data.error || 'Accord generation failed.', false);
             }
         } catch (err) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-shield-shaded me-1"></i> Convene Council &amp; Seal Accord';
-            alert('Request error: ' + err.message);
+            showStatementFeedback('Request error: ' + err.message, false);
+        } finally {
+            if (window.FamilyPlatformSpinner) {
+                window.FamilyPlatformSpinner.stop(btn);
+            } else if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = isReAdjudicate
+                    ? '<i class="bi bi-arrow-clockwise me-1"></i> Refresh &amp; Re-adjudicate Accord'
+                    : '<i class="bi bi-shield-shaded me-1"></i> Convene Council &amp; Seal Accord';
+            }
         }
     }
 

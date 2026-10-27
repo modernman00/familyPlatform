@@ -1,15 +1,15 @@
 {{-- Scoped Feed Post Card Component --}}
-<div class="card border-0 shadow-sm mb-4 p-3" :id="'post' + post.post_no" :class="'post' + post.post_no" :style="isUserTaggedInPost(post) ? 'border-radius: 12px; background-color: var(--card-bg); border-left: 4px solid #a31621 !important;' : 'border-radius: 8px; background-color: var(--card-bg);'">
+<div class="card border-0 shadow-sm mb-4 p-3 feed-post-card" :data-post-no="post.post_no" :id="'post' + post.post_no" :class="'post' + post.post_no" :style="isUserTaggedInPost(post) ? 'border-radius: 12px; background-color: var(--card-bg); border-left: 4px solid #a31621 !important;' : 'border-radius: 8px; background-color: var(--card-bg);'">
 
   <!-- Tagged with You Heritage Ribbon -->
   <template x-if="isUserTaggedInPost(post)">
     <div class="d-flex align-items-center justify-content-between mb-2.5 py-1 px-2.5 rounded-2 shadow-2xs" style="background: rgba(163,22,33,0.06); border: 1px solid rgba(163,22,33,0.18);">
       <div class="d-flex align-items-center gap-1.5" style="color: #8a1019; font-size: 0.78rem; font-weight: 600;">
         <i class="bi bi-tag-fill" style="font-size: 0.82rem;"></i>
-        <span>You are tagged in this family memory</span>
+        <span>{{ __('feed.tagged_banner', 'You are tagged in this family memory') }}</span>
       </div>
       <span class="badge rounded-pill bg-white text-muted border px-2 py-0.5 shadow-2xs" style="font-size: 0.7rem; font-weight: 500;">
-        Living Memory
+        {{ __('feed.living_memory', 'Living Memory') }}
       </span>
     </div>
   </template>
@@ -26,11 +26,11 @@
             <h6 class="mb-0 fw-semibold text-dark" style="font-size: 1.05rem;" x-text="post.fullName"></h6>
             <template x-if="post.post_tags && post.post_tags.length > 0">
               <span class="text-secondary small fw-normal ms-1">
-                is with 
+                <span x-text="window.__ ? window.__('feed.is_with', 'is with') : 'is with'"></span> 
                 <template x-for="(tag, tIdx) in getSortedTagsForViewer(post).slice(0, 2)" :key="tag.user_id">
                   <span>
                     <template x-if="isCurrentUser(tag.user_id)">
-                      <span class="fw-bold text-primary">you</span>
+                      <span class="fw-bold text-primary" x-text="window.__ ? window.__('feed.you', 'you') : 'you'"></span>
                     </template>
                     <template x-if="!isCurrentUser(tag.user_id)">
                       <span class="d-inline-flex align-items-center">
@@ -40,13 +40,13 @@
                         </template>
                       </span>
                     </template>
-                    <span x-show="tIdx === 0 && post.post_tags.length === 2"> and </span>
+                    <span x-show="tIdx === 0 && post.post_tags.length === 2" x-text="' ' + (window.__ ? window.__('feed.and', 'and') : 'and') + ' '"></span>
                     <span x-show="tIdx === 0 && post.post_tags.length > 2">, </span>
                   </span>
                 </template>
                 <template x-if="post.post_tags.length > 2">
                   <span class="dropdown d-inline">
-                    <a href="#" class="fw-semibold text-primary text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" x-text="(post.post_tags.length - 2) + ' others'"></a>
+                    <a href="#" class="fw-semibold text-primary text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" x-text="(post.post_tags.length - 2) + ' ' + (window.__ ? window.__('feed.others', 'others') : 'others')"></a>
                     <ul class="dropdown-menu shadow-sm border-0 p-2" style="border-radius: 12px; min-width: 190px;">
                       <template x-for="tag in getSortedTagsForViewer(post).slice(2)" :key="tag.user_id">
                         <li>
@@ -70,7 +70,7 @@
           <div class="d-flex align-items-center gap-2 mt-0.5">
             <small class="text-muted" style="font-size: 0.85rem;" x-text="formatDate(post.post_time || post.date_created)"></small>
             <template x-if="post.postFamCode">
-              <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill" style="font-size: 0.78rem; font-weight: normal; padding: 2px 8px;" x-text="'Family: ' + post.postFamCode"></span>
+              <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill" style="font-size: 0.78rem; font-weight: normal; padding: 2px 8px;" x-text="(window.__ ? window.__('feed.family_label', 'Family') : 'Family') + ': ' + post.postFamCode"></span>
             </template>
           </div>
         </div>
@@ -84,12 +84,12 @@
                 <div>
                   <li>
                     <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" @click.prevent="editPost(post)">
-                      <i class="bi bi-pencil-square text-primary"></i> Edit Post
+                      <i class="bi bi-pencil-square text-primary"></i> {{ __('feed.edit_post', 'Edit Post') }}
                     </a>
                   </li>
                   <li>
                     <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger" href="#" @click.prevent="deletePost(post.post_no)">
-                      <i class="bi bi-trash3"></i> Delete Post
+                      <i class="bi bi-trash3"></i> {{ __('feed.delete_post', 'Delete Post') }}
                     </a>
                   </li>
                 </div>
@@ -97,7 +97,7 @@
               <template x-if="isUserTaggedInPost(post)">
                 <li>
                   <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-warning" href="#" @click.prevent="untagSelfFromPost(post)">
-                    <i class="bi bi-tag-fill"></i> Remove Tag from Post
+                    <i class="bi bi-tag-fill"></i> {{ __('feed.remove_tag', 'Remove Tag from Post') }}
                   </a>
                 </li>
               </template>
@@ -112,7 +112,7 @@
   <template x-if="post.postMessage && post.postMessage.includes('Weekly Family Trivia')">
     <div class="px-1 mb-2">
       <span class="badge rounded-pill px-3 py-1.5 text-white shadow-sm d-inline-flex align-items-center gap-1" style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.5px;">
-        <i class="bi bi-trophy-fill"></i> WEEKLY FAMILY TRIVIA
+        <i class="bi bi-trophy-fill"></i> {{ __('feed.trivia_badge', 'WEEKLY FAMILY TRIVIA') }}
       </span>
     </div>
   </template>
@@ -121,7 +121,7 @@
   <template x-if="post.postMessage && (post.postMessage.includes('Family Chronicle') || post.postMessage.includes('/familyJournal/'))">
     <div class="px-1 mb-2">
       <span class="badge rounded-pill px-3 py-1.5 text-white shadow-sm d-inline-flex align-items-center gap-1.5" style="background: linear-gradient(135deg, #b8202c 0%, #8a1019 100%); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.5px;">
-        <i class="bi bi-journal-bookmark-fill"></i> FAMILY CHRONICLE
+        <i class="bi bi-journal-bookmark-fill"></i> {{ __('feed.chronicle_badge', 'FAMILY CHRONICLE') }}
       </span>
     </div>
   </template>
@@ -130,6 +130,14 @@
   <template x-if="post.displayMessage || (!post.video && post.postMessage)">
     <div class="post-content px-1 mb-3">
       <p class="mb-0" style="white-space: pre-line; font-size: 1.05rem; color: var(--text-main); line-height: 1.55; font-family: 'Inter', -apple-system, system-ui, sans-serif;" x-html="renderHashtags(post.displayMessage || post.postMessage)"></p>
+      
+      <!-- On-Demand Post Translation Toggle for Diaspora Viewers -->
+      <div class="mt-1 d-flex align-items-center gap-2" x-show="window.APP_LOCALE && window.APP_LOCALE !== 'en'">
+        <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none d-inline-flex align-items-center gap-1" style="font-size: 0.8rem; color: #a31621; font-weight: 600;" @click="window.toggleTranslatePost ? window.toggleTranslatePost(post) : null">
+          <i class="bi bi-translate"></i>
+          <span x-text="post._isTranslated ? (window.__ ? window.__('feed.see_original', 'See original') : 'See original') : (post._isTranslating ? (window.__ ? window.__('feed.translating', 'Translating...') : 'Translating...') : (window.__ ? window.__('feed.translate', 'Translate') : 'Translate'))"></span>
+        </button>
+      </div>
     </div>
   </template>
 
@@ -140,7 +148,7 @@
          class="btn btn-sm text-white d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold shadow-xs" 
          style="background: linear-gradient(135deg, #a31621 0%, #8a1019 100%); border-radius: 12px; font-size: 0.88rem; min-height: 44px; text-decoration: none;">
         <i class="bi bi-book-half"></i>
-        <span>Read Full Chronicle</span>
+        <span>{{ __('feed.read_chronicle', 'Read Full Chronicle') }}</span>
         <i class="bi bi-arrow-right ms-1"></i>
       </a>
     </div>
@@ -329,16 +337,22 @@
   </template>
 
   <!-- Post Metrics -->
-  <div class="d-flex justify-content-between px-1 pb-2 text-muted border-bottom" style="font-size: 0.825rem;">
+  <div class="d-flex justify-content-between align-items-center px-1 pb-2 text-muted border-bottom" style="font-size: 0.825rem;">
     <div>
       <span x-show="post.post_likes > 0">
         <i class="bi bi-hand-thumbs-up-fill text-primary"></i>
         <span x-text="post.post_likes"></span>
       </span>
     </div>
-    <div>
+    <div class="d-flex align-items-center gap-2">
+      <!-- Post View Count -->
+      <span class="d-inline-flex align-items-center gap-1 post-views-count" :title="(post.views_count || 0) + ' family views'">
+        <i class="bi bi-eye text-secondary"></i>
+        <span x-text="post.views_count || 0"></span>
+        <span x-text="(post.views_count === 1) ? (window.__ ? window.__('feed.view', 'view') : 'view') : (window.__ ? window.__('feed.views', 'views') : 'views')"></span>
+      </span>
       <span x-show="post.comments && post.comments.length > 0">
-        <span x-text="post.comments.length"></span> comments
+        • <span x-text="post.comments.length"></span> <span x-text="(post.comments.length === 1) ? (window.__ ? window.__('feed.comment_single', 'comment') : 'comment') : (window.__ ? window.__('feed.comments', 'comments') : 'comments')"></span>
       </span>
     </div>
   </div>
@@ -386,7 +400,7 @@
               @touchend="cancelPostLongPress()"
               @touchmove="cancelPostLongPress()">
         <span x-text="post.user_reaction ? (emojiMap[post.user_reaction]?.icon || '👍') : '👍'" style="font-size:1.15rem;"></span>
-        <span x-text="post.user_reaction ? (emojiMap[post.user_reaction]?.label || 'Like') : 'Like'" class="ms-1"></span>
+        <span x-text="post.user_reaction ? (emojiMap[post.user_reaction]?.label || (window.__ ? window.__('feed.like', 'Like') : 'Like')) : (window.__ ? window.__('feed.like', 'Like') : 'Like')" class="ms-1"></span>
       </button>
     </div>
 
@@ -399,7 +413,7 @@
             type="button"
             @click="toggleCommentForm(post.post_no)">
       <i class="bi bi-chat-bubble"></i>
-      Comment
+      {{ __('feed.comment', 'Comment') }}
     </button>
 
     <!-- Divider -->
@@ -410,9 +424,9 @@
             style="font-size: 0.95rem; font-weight: 500; min-height: 44px;"
             type="button"
             @click="sharePostToSocialMedia(post)"
-            title="Share this memory">
+            title="{{ __('feed.share', 'Share') }}">
       <i class="bi bi-share"></i>
-      Share
+      {{ __('feed.share', 'Share') }}
     </button>
   </div>
 
@@ -511,7 +525,7 @@
             </div>
             <div class="comment-composer__row">
               <input type="text" class="comment-composer__input"
-                     placeholder="Write a comment... (use @ to mention)" aria-label="Write a comment"
+                     placeholder="{{ __('feed.write_comment', 'Write a comment...') }}" aria-label="{{ __('feed.write_comment', 'Write a comment...') }}"
                      :data-comment-input="post.post_no"
                      x-model="commentInputs[post.post_no]" :required="!commentGifs[post.post_no]"
                      @input="handleCommentInput(post.post_no, $event)"
