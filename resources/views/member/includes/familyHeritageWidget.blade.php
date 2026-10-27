@@ -16,7 +16,7 @@
     color: #f8fafc !important;
   }
 </style>
-<div class="card border-0 shadow-sm mb-4 family-heritage-sidebar-widget" style="border-radius: 20px; background-color: var(--card-bg);">
+<div class="card border-0 shadow-sm mb-4 family-heritage-sidebar-widget" id="familyHeritageSection" style="border-radius: 20px; background-color: var(--card-bg); scroll-margin-top: 80px;">
     <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2 px-4">
         <div>
             <h5 class="mb-0 fw-bold" style="color: var(--text-color); font-size: 1.05rem;">

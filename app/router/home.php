@@ -6,6 +6,7 @@ $router->map('GET', '/', 'App\controller\Index@index', 'Home');
 $router->map('GET', '/launch', 'App\controller\Index@launch', 'launch');
 
 $router->map('GET', '/aboutus', 'App\controller\About@index', 'About');
+$router->map('GET', '/about', 'App\controller\About@index', 'About_Alias');
 $router->map('GET', '/why-familyplatform', 'App\controller\Index@whyFamilyPlatform', 'why_familyplatform');
 $router->map('GET', '/playbook', 'App\controller\PlaybookController@index', 'playbook');
 $router->map('GET', '/how-to-use', 'App\controller\PlaybookController@howToUse', 'how_to_use');

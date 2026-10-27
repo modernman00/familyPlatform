@@ -405,9 +405,9 @@
               </div>
               <div class="col-12">
                 <div class="p-3 rounded-3 bg-light border">
-                  <h6 class="fw-bold text-dark"><i class="bi bi-eye text-primary me-2"></i>Post &amp; Reel Views Transparency</h6>
+                  <h6 class="fw-bold text-dark"><i class="bi bi-eye text-primary me-2"></i>Post &amp; Comment Views Transparency &amp; Author Viewers Roster</h6>
                   <p class="small text-muted mb-0">
-                    Keep track of family engagement with live view counts on both feed posts and <strong>Family Reels</strong>. Post views are displayed in the metrics bar alongside likes and comments, while reel views appear on both the horizontal Reels Tray cards and within the full-screen Reels Theater action stack and metadata overlay.
+                    Keep track of family engagement with live view counts on feed posts, comments, and <strong>Family Reels</strong>. As the author of a post or comment, you can tap directly on the view counter (e.g. '12 views' on your post or '3 views' on your comment) to open the interactive <strong>Author Viewers Roster</strong> modal. This reveals exactly which relatives have seen your content, complete with profile avatars, relative timestamps ('2 hours ago'), repeat view tallies, and an in-modal search filter. For relatives who are not the author, view tallies remain transparent and read-only.
                   </p>
                 </div>
               </div>
@@ -509,6 +509,50 @@
                   <span class="badge bg-success text-white mb-2">Sealed Reconciliatory Decree</span>
                   <h6 class="fw-bold text-dark">Fair, Firm &amp; Restorative</h6>
                   <p class="small text-muted mb-0">Once statements and eyewitness testimonies are gathered, Judge Yommy seals a binding family decree with an objective Finding of Fact, a Reconciliatory Bridge, and a balanced Action Plan.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 13: Supervised Child Accounts & Turning 18 Milestone -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(163,22,33, 0.12); color: #a31621;">
+                <i class="bi bi-balloon-heart-fill fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">13. Supervised Child Accounts &amp; Turning 18 Graduation</h3>
+                <span class="badge bg-teal text-white" style="background: #a31621;">Multi-Generational Safe Space</span>
+              </div>
+            </div>
+            <p class="lead text-secondary">
+              FamilyPlatform is a private, gated sanctuary. Children under 18 participate actively through parent-sponsored accounts, posting school milestones, drawings, and commenting on family stories within a secure, tamper-proof environment.
+            </p>
+            <div class="row g-4 mt-2">
+              <div class="col-md-4">
+                <div class="p-3 rounded-3 bg-light border h-100">
+                  <h6 class="fw-bold text-dark"><i class="bi bi-shield-lock-fill text-primary me-2"></i>1. Parent Provisioning</h6>
+                  <p class="small text-muted mb-0">
+                    Parents enable child access directly from their family tree node by setting a child username and a 4–8 digit PIN. No external email is required for minors under 13.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 rounded-3 bg-light border h-100">
+                  <h6 class="fw-bold text-dark"><i class="bi bi-chat-heart-fill text-success me-2"></i>2. Gated Family Feed</h6>
+                  <p class="small text-muted mb-0">
+                    Children can post updates and photos, and comment on relatives' reels and posts. All uploaded media has GPS coordinates and EXIF metadata automatically stripped for privacy.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 rounded-3 bg-light border h-100">
+                  <h6 class="fw-bold text-dark"><i class="bi bi-cake2-fill text-danger me-2"></i>3. The "Turning 18" Milestone</h6>
+                  <p class="small text-muted mb-0">
+                    On their 18th birthday, the platform automatically celebrates the young adult on the family feed, unseals childhood 18th Birthday Time Capsules, and transfers full sovereign data ownership.
+                  </p>
                 </div>
               </div>
             </div>

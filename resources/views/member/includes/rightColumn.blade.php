@@ -58,7 +58,7 @@ foreach(($eventData ?? []) as $event) {
     @includeIf('member.includes.thenNowTimeline', ['memberId' => (string)($_SESSION['id'] ?? ''), 'memberName' => '', 'tnSuffix' => 'self'])
 
     <!-- Events Card -->
-    <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px; background-color: var(--card-bg);">
+    <div class="card border-0 shadow-sm mb-4" id="upcomingEventsSection" style="border-radius: 20px; background-color: var(--card-bg); scroll-margin-top: 80px;">
         <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-start pt-4 pb-2 px-4" id="eventHeader">
             <div>
                 <h5 class="mb-0 fw-bold" style="color: var(--text-color); font-size: 1.15rem;">{{ __('events.upcoming', 'Upcoming Events') }}</h5>

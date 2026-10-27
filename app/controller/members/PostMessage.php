@@ -323,8 +323,18 @@ final class PostMessage
             $post = Post::postByNo($commentPostNo);
             $postAuthorId = (string)($post['id'] ?? '');
 
-            // delete if the author of the comment or the account holder / author of the post
-            if ($userId === $commentAuthorId || $userId === $postAuthorId) {
+            $isParentOfCommenter = false;
+            if ($commentAuthorId !== '' && $userId !== $commentAuthorId && $userId !== $postAuthorId) {
+                try {
+                    \App\services\ChildAccountService::assertParentSupervisionAllowed($userId, $commentAuthorId);
+                    $isParentOfCommenter = true;
+                } catch (\Throwable) {
+                    $isParentOfCommenter = false;
+                }
+            }
+
+            // delete if the author of the comment or the account holder / author of the post or verified parent of minor commenter
+            if ($userId === $commentAuthorId || $userId === $postAuthorId || $isParentOfCommenter) {
 
                 (new Update('comment'))->updateTable(
                     column: 'date_deleted',
@@ -422,7 +432,18 @@ final class PostMessage
             $postAuthorId = (string)($post['id'] ?? '');
 
             if ($userId !== $postAuthorId) {
-                throw new ForbiddenException('You can only delete your own posts.');
+                $isParentOfAuthor = false;
+                if ($postAuthorId !== '') {
+                    try {
+                        \App\services\ChildAccountService::assertParentSupervisionAllowed($userId, $postAuthorId);
+                        $isParentOfAuthor = true;
+                    } catch (\Throwable) {
+                        $isParentOfAuthor = false;
+                    }
+                }
+                if (!$isParentOfAuthor) {
+                    throw new ForbiddenException('You can only delete your own posts or moderate your minor children\'s posts.');
+                }
             }
 
             (new Update('post'))->updateTable(
@@ -792,7 +813,7 @@ final class PostMessage
                 return;
             }
 
-            Post::incrementViews($postNo);
+            Post::incrementViews($postNo, $userId);
             $viewsCount = Post::getViewsCount($postNo);
 
             // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
@@ -803,6 +824,156 @@ final class PostMessage
             ]);
         } catch (\Throwable $e) {
             http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * API: Get Post Viewers (Author Only).
+     *
+     * @param int|string|null $postNo
+     */
+    public static function getPostViewers(int|string|null $postNo = null): void
+    {
+        if (empty($_SESSION['id'])) {
+            try {
+                SignIn::verify('users');
+            } catch (\Throwable $e) {
+                http_response_code(401);
+                header('Content-Type: application/json');
+                echo json_encode(['status' => 'error', 'message' => 'Unauthorised']);
+                return;
+            }
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            $postNo = (int)($postNo ?: ($_GET['post_no'] ?? 0));
+
+            if ($postNo <= 0 || empty($userId)) {
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Invalid post number']);
+                return;
+            }
+
+            $isAdmin = (!empty($_SESSION['auth']['type']) && in_array((string)$_SESSION['auth']['type'], ['admin', 'super_admin'], true))
+                || (($_SESSION['type'] ?? '') === 'admin');
+
+            if (!Post::isPostAuthor($postNo, $userId) && !$isAdmin) {
+                http_response_code(403);
+                echo json_encode(['status' => 'error', 'message' => 'Only the author can view who viewed this post.']);
+                return;
+            }
+
+            $viewers = Post::getPostViewers($postNo);
+            $viewsCount = Post::getViewsCount($postNo);
+
+            echo json_encode([
+                'status' => 'success',
+                'post_no' => $postNo,
+                'views_count' => $viewsCount,
+                'viewers' => $viewers,
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * API: Record Comment View (increments views_count and logs audit viewer).
+     */
+    public static function recordCommentView(): void
+    {
+        if (empty($_SESSION['id'])) {
+            try {
+                SignIn::verify('users');
+            } catch (\Throwable $e) {
+                http_response_code(401);
+                header('Content-Type: application/json');
+                echo json_encode(['status' => 'error', 'message' => 'Unauthorised']);
+                return;
+            }
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            $raw = file_get_contents('php://input') ?: '';
+            $payload = json_decode($raw, true) ?? $_POST;
+            $commentNo = (int)($payload['comment_no'] ?? 0);
+
+            if ($commentNo <= 0 || empty($userId)) {
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Invalid comment number or user session']);
+                return;
+            }
+
+            Post::incrementCommentViews($commentNo, $userId);
+            $viewsCount = Post::getCommentViewsCount($commentNo);
+
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+            echo json_encode([
+                'status' => 'success',
+                'comment_no' => (int)$commentNo,
+                'views_count' => (int)$viewsCount,
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * API: Get Comment Viewers (Author Only).
+     *
+     * @param int|string|null $commentNo
+     */
+    public static function getCommentViewers(int|string|null $commentNo = null): void
+    {
+        if (empty($_SESSION['id'])) {
+            try {
+                SignIn::verify('users');
+            } catch (\Throwable $e) {
+                http_response_code(401);
+                header('Content-Type: application/json');
+                echo json_encode(['status' => 'error', 'message' => 'Unauthorised']);
+                return;
+            }
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            $commentNo = (int)($commentNo ?: ($_GET['comment_no'] ?? 0));
+
+            if ($commentNo <= 0 || empty($userId)) {
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Invalid comment number']);
+                return;
+            }
+
+            $isAdmin = (!empty($_SESSION['auth']['type']) && in_array((string)$_SESSION['auth']['type'], ['admin', 'super_admin'], true))
+                || (($_SESSION['type'] ?? '') === 'admin');
+
+            if (!Post::isCommentAuthor($commentNo, $userId) && !$isAdmin) {
+                http_response_code(403);
+                echo json_encode(['status' => 'error', 'message' => 'Only the author can view who viewed this comment.']);
+                return;
+            }
+
+            $viewers = Post::getCommentViewers($commentNo);
+            $viewsCount = Post::getCommentViewsCount($commentNo);
+
+            echo json_encode([
+                'status' => 'success',
+                'comment_no' => $commentNo,
+                'views_count' => $viewsCount,
+                'viewers' => $viewers,
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }

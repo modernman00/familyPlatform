@@ -76,6 +76,20 @@ $router->map(
 
 $router->map(
   method: 'POST',
+  route: '/api/notifications/subscribe',
+  target: 'App\controller\NotificationController@postSubscriberData',
+  name: 'apiNotificationsSubscribe'
+);
+
+$router->map(
+  method: 'POST',
+  route: '/api/notifications/test',
+  target: 'App\controller\NotificationController@sendTestNotification',
+  name: 'apiNotificationsTest'
+);
+
+$router->map(
+  method: 'POST',
   route: '/pushNotification/unsubscribe',
   target: 'App\controller\NotificationController@deleteSubscriberData',
   name: 'deleteSubscriberData'

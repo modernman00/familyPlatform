@@ -200,6 +200,39 @@
                             </div>
                         </div>
 
+                        <!-- Gated Family App: Enable Child Account & Posting -->
+                        <div class="card p-3 mb-3 border-0" style="background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="enableChildAccessCheck" name="enable_child_access" value="1" onchange="toggleChildAccessFields(this.checked)">
+                                <label class="form-check-label fw-bold text-slate-800" for="enableChildAccessCheck" style="font-size: 0.9rem;">
+                                    Enable Child Sign-In & Posting (PIN Access)
+                                </label>
+                            </div>
+                            <p class="text-muted small mb-0" style="font-size: 0.8rem; line-height: 1.4;">
+                                Creates a supervised, safe child account inside your gated family network so they can post updates, drawings, and comment.
+                            </p>
+                            <div id="childAccessFields" class="d-none mt-3 pt-2 border-top">
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Child Username <span class="text-danger">*</span></label>
+                                        <input type="text" name="child_username" id="childUsernameInput" class="form-control form-control-sm" placeholder="e.g. sammy_o" autocomplete="off">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Child PIN (4–8 digits) <span class="text-danger">*</span></label>
+                                        <input type="password" name="child_pin" id="childPinInput" class="form-control form-control-sm" placeholder="4 to 8 digits" maxlength="8" autocomplete="off">
+                                    </div>
+                                    <div class="col-12 mt-2">
+                                        <label class="form-label small fw-bold">Date of Birth (For 18th Birthday Milestone)</label>
+                                        <div class="d-flex gap-2">
+                                            <input type="number" name="dob_day" class="form-control form-control-sm" placeholder="Day (DD)" min="1" max="31">
+                                            <input type="number" name="dob_month" class="form-control form-control-sm" placeholder="Month (MM)" min="1" max="12">
+                                            <input type="number" name="dob_year" class="form-control form-control-sm" placeholder="Year (YYYY)" min="1900" max="{{ date('Y') }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="d-flex justify-content-between mt-4">
                             <button type="button" class="btn btn-light fw-bold" onclick="backToStep1()">Back</button>
                             <button type="submit" class="btn btn-success fw-bold" id="submitChildBtn">Save Child</button>
@@ -275,3 +308,22 @@
         </div>
     </div>
 </div>
+
+<script nonce="{{ $nonce ?? '' }}">
+function toggleChildAccessFields(enabled) {
+    const fields = document.getElementById('childAccessFields');
+    const uInput = document.getElementById('childUsernameInput');
+    const pInput = document.getElementById('childPinInput');
+    if (fields) {
+        if (enabled) {
+            fields.classList.remove('d-none');
+            if (uInput) uInput.required = true;
+            if (pInput) pInput.required = true;
+        } else {
+            fields.classList.add('d-none');
+            if (uInput) uInput.required = false;
+            if (pInput) pInput.required = false;
+        }
+    }
+}
+</script>

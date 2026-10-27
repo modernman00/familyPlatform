@@ -815,12 +815,36 @@
                     <p id="pushPrefHint">Get instant alerts on this device even when the app is closed.</p>
                   </div>
                   <div class="toggle-group">
-                    <span class="toggle-label" id="pushPrefLabel">ON</span>
+                    <span class="toggle-label" id="pushPrefLabel">CHECKING...</span>
                     <label class="switch">
-                      <input type="checkbox" id="pushPrefToggle" data-standalone="1" checked>
+                      <input type="checkbox" id="pushPrefToggle" data-standalone="1">
                       <span class="slider"></span>
                     </label>
                   </div>
+                </div>
+
+                <!-- Self-Serve Notification Diagnostics & Device Test Card -->
+                <div class="p-3 mt-3 rounded-3 border" style="background-color: #f8fafc; border-color: #e2e8f0 !important;">
+                  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                    <span class="fw-bold text-dark" style="font-size: 0.9rem;">
+                      <i class="bi bi-shield-check text-success me-1"></i> Device Delivery &amp; Push Diagnostics
+                    </span>
+                    <span id="pushDeviceBadge" class="badge bg-light text-secondary border">Checking Status...</span>
+                  </div>
+                  <p class="small text-muted mb-3" style="font-size: 0.82rem; line-height: 1.45;">
+                    Verify whether this device is actively registered to receive lockscreen and in-app milestone alerts.
+                  </p>
+                  <div class="d-flex flex-wrap gap-2">
+                    <button type="button" id="sendTestNotifBtn" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center" style="min-height: 44px; border-color: #a31621; color: #a31621;">
+                      <i class="bi bi-broadcast me-1.5"></i>
+                      <span>Send Test Alert to This Device</span>
+                    </button>
+                    <button type="button" id="resyncDeviceBtn" class="btn btn-sm btn-light border d-inline-flex align-items-center" style="min-height: 44px;">
+                      <i class="bi bi-arrow-clockwise me-1.5"></i>
+                      <span>Re-sync Device Endpoint</span>
+                    </button>
+                  </div>
+                  <div id="testNotifFeedback" class="small mt-2" style="display: none;"></div>
                 </div>
 
                 <button type="button" id="preferencesBtn" class="btn-save mt-3">Save Preferences</button>

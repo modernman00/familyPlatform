@@ -6,6 +6,8 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
       <title>@yield('title')</title>
     <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
+    <meta name="user-id" content="{{ $_SESSION['id'] ?? '' }}">
+    <meta name="vapid-public-key" content="{{ $_ENV['VAPID_PUBLIC_KEY'] ?? $_SERVER['VAPID_PUBLIC_KEY'] ?? (getenv('VAPID_PUBLIC_KEY') ?: ($_ENV['MIX_VAPID_PUBLIC_KEY'] ?? '')) }}">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
         rel="stylesheet" />
@@ -301,6 +303,7 @@
     <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/index.js" defer></script>
     <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/pwa-notifications.js" defer></script>
     <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>
+    @include('partials.push-notification-banner')
     @include('component.submitSpinner')
     @include('partials.pwa-register')
 </body>

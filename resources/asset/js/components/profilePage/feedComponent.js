@@ -52,7 +52,16 @@ export function profileFeed(opts = {}) {
         isHashtagFilterActive: false,
         votingPolls: {},
         viewedPostNos: new Set(),
+        viewedCommentNos: new Set(),
         _postObserver: null,
+        _commentObserver: null,
+        isViewersModalOpen: false,
+        viewersLoading: false,
+        viewersList: [],
+        viewersType: 'post',
+        viewersTargetNo: null,
+        viewersCount: 0,
+        viewersSearchQuery: '',
         csrfOptions: {
             xsrfCookieName: 'XSRF-TOKEN',
             xsrfHeaderName: 'X-XSRF-TOKEN',
@@ -95,6 +104,7 @@ export function profileFeed(opts = {}) {
             await this.loadTrendingHashtags();
             this.scrollToHashPost();
             this.observePostViews();
+            this.observeCommentViews();
 
             // Expose filter helper globally for post pills
             window.filterByFamilyHashtag = (tag) => {
@@ -216,6 +226,7 @@ export function profileFeed(opts = {}) {
                     }
                     this.scrollToHashPost();
                     this.observePostViews();
+                    this.observeCommentViews();
                 } else if (this.posts.length === 0) {
                     this.posts = [];
                 }
@@ -295,6 +306,7 @@ export function profileFeed(opts = {}) {
                 reactions: c?.reactions?.counts ?? {},
                 totalReactions: c?.reactions?.counts?.totalReactions ?? 0,
                 userReaction: c?.user_reaction || null,
+                views_count: parseInt(c?.views_count || 0, 10),
             };
         },
 
@@ -424,6 +436,143 @@ export function profileFeed(opts = {}) {
             }
         },
 
+        observeCommentViews() {
+            if (typeof IntersectionObserver === 'undefined') return;
+            if (!this.viewedCommentNos) {
+                this.viewedCommentNos = new Set();
+            }
+            if (!this._commentObserver) {
+                this._commentObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const cNo = parseInt(entry.target.getAttribute('data-comment-no') || '0', 10);
+                            if (cNo > 0) {
+                                this.recordCommentView(cNo);
+                                this._commentObserver.unobserve(entry.target);
+                            }
+                        }
+                    });
+                }, { threshold: 0.3 });
+            }
+            setTimeout(() => {
+                const commentEls = document.querySelectorAll('.feed-comment-item[data-comment-no]');
+                commentEls.forEach(el => {
+                    const cNo = parseInt(el.getAttribute('data-comment-no') || '0', 10);
+                    if (cNo > 0 && !this.viewedCommentNos.has(cNo)) {
+                        this._commentObserver.observe(el);
+                    }
+                });
+            }, 300);
+        },
+
+        async recordCommentView(commentNo) {
+            if (!commentNo || this.viewedCommentNos.has(commentNo)) return;
+            this.viewedCommentNos.add(commentNo);
+            try {
+                const csrfToken = getCsrfToken();
+                const headers = { 'Content-Type': 'application/json' };
+                if (csrfToken) {
+                    headers['X-CSRF-TOKEN'] = csrfToken;
+                    headers['X-XSRF-TOKEN'] = csrfToken;
+                }
+                const res = await axios.post('/api/comments/view', { comment_no: commentNo }, { headers });
+                if (res.data?.status === 'success' && typeof res.data.views_count === 'number') {
+                    for (const post of this.posts) {
+                        if (Array.isArray(post.comments)) {
+                            const c = post.comments.find(item => item.comment_no === commentNo);
+                            if (c) {
+                                c.views_count = res.data.views_count;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                // Silently ignore view counter increments
+            }
+        },
+
+        async openPostViewersModal(post) {
+            if (!post || !post.post_no) return;
+            this.viewersType = 'post';
+            this.viewersTargetNo = post.post_no;
+            this.viewersCount = post.views_count || 0;
+            this.viewersList = [];
+            this.viewersSearchQuery = '';
+            this.viewersLoading = true;
+            this.isViewersModalOpen = true;
+
+            try {
+                const res = await axios.get(`/api/posts/${post.post_no}/viewers`);
+                if (res.data?.status === 'success') {
+                    this.viewersList = Array.isArray(res.data.viewers) ? res.data.viewers : [];
+                    this.viewersCount = typeof res.data.views_count === 'number' ? res.data.views_count : this.viewersList.length;
+                }
+            } catch (err) {
+                console.error('[openPostViewersModal] Failed to fetch viewers:', err);
+            } finally {
+                this.viewersLoading = false;
+            }
+        },
+
+        async openCommentViewersModal(comment) {
+            if (!comment || !comment.comment_no) return;
+            this.viewersType = 'comment';
+            this.viewersTargetNo = comment.comment_no;
+            this.viewersCount = comment.views_count || 0;
+            this.viewersList = [];
+            this.viewersSearchQuery = '';
+            this.viewersLoading = true;
+            this.isViewersModalOpen = true;
+
+            try {
+                const res = await axios.get(`/api/comments/${comment.comment_no}/viewers`);
+                if (res.data?.status === 'success') {
+                    this.viewersList = Array.isArray(res.data.viewers) ? res.data.viewers : [];
+                    this.viewersCount = typeof res.data.views_count === 'number' ? res.data.views_count : this.viewersList.length;
+                }
+            } catch (err) {
+                console.error('[openCommentViewersModal] Failed to fetch viewers:', err);
+            } finally {
+                this.viewersLoading = false;
+            }
+        },
+
+        closeViewersModal() {
+            this.isViewersModalOpen = false;
+            this.viewersList = [];
+            this.viewersSearchQuery = '';
+        },
+
+        getFilteredViewers() {
+            if (!this.viewersSearchQuery || !this.viewersSearchQuery.trim()) {
+                return this.viewersList;
+            }
+            const q = this.viewersSearchQuery.toLowerCase().trim();
+            return this.viewersList.filter(v => {
+                const fullName = `${v.firstName || ''} ${v.lastName || ''}`.toLowerCase();
+                return fullName.includes(q);
+            });
+        },
+
+        getViewerAvatar(viewer) {
+            const img = viewer?.profile_img || viewer?.img;
+            if (!img) return '/public/avatar/avatarM.png';
+            if (img.startsWith('/') || img.startsWith('http')) return img;
+            return `/resources/images/profile/${img}`;
+        },
+
+        formatViewerTime(dateStr) {
+            if (!dateStr) return 'Recently';
+            try {
+                const d = new Date(dateStr.replace(/-/g, '/'));
+                if (isNaN(d.getTime())) return 'Recently';
+                return format(d);
+            } catch (e) {
+                return 'Recently';
+            }
+        },
+
         async loadFamilyRoster() {
             if (this.familyRoster && this.familyRoster.length > 0) return;
             try {
@@ -535,6 +684,9 @@ export function profileFeed(opts = {}) {
 
         toggleCommentForm(postNo) {
             this.activeCommentForms[postNo] = !this.activeCommentForms[postNo];
+            if (this.activeCommentForms[postNo]) {
+                setTimeout(() => this.observeCommentViews(), 200);
+            }
         },
 
         // ── Threaded replies (one level: a reply to a reply hangs under the top-level comment) ──
@@ -601,6 +753,9 @@ export function profileFeed(opts = {}) {
         toggleThread(rootCommentNo) {
             const key = String(rootCommentNo);
             this.threadExpanded[key] = !this.threadExpanded[key];
+            if (this.threadExpanded[key]) {
+                setTimeout(() => this.observeCommentViews(), 200);
+            }
         },
 
         isLastVisibleInThread(post, comment) {

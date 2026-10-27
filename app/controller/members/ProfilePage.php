@@ -75,6 +75,9 @@ final class ProfilePage extends ProcessImg
             $recentReels = \App\model\Reel::getReelsFeed($this->id, (string)($data['famCode'] ?? ''), 10, 0);
             $suggestedKin = \App\services\KinshipEngineService::getSuggestedKin($this->id, 5);
 
+            // Check and process 18th birthday graduation milestone
+            $adulthoodGraduation = \App\services\AdulthoodTransitionService::checkAndProcessUserGraduation($this->id);
+
             view('member/profilePage', [
                 'data' => $data['memberData'],
                 'allData' => $data['posts'],
@@ -88,7 +91,8 @@ final class ProfilePage extends ProcessImg
                 'pendingFamilyRequests' => $data['pendingFamilyRequests'] ?? [],
                 'pendingMigrations' => $data['pendingMigrations'] ?? [],
                 'recentReels' => $recentReels,
-                'suggestedKin' => $suggestedKin
+                'suggestedKin' => $suggestedKin,
+                'adulthoodGraduation' => $adulthoodGraduation
             ]);
 
         } catch (\Throwable $th) {
@@ -365,6 +369,25 @@ final class ProfilePage extends ProcessImg
                 // Explicitly update the status to published first.
                 // Do not rely on background tasks or secondary queries to handle critical state transitions.
                 Post::updatePostByStatusAsPublished($result);
+
+                // Strip EXIF / GPS metadata from images if authored by a child account
+                $isChildAccount = !empty($_SESSION['is_child_account']) || 
+                    (!empty($_SESSION['adulthood_status']) && in_array($_SESSION['adulthood_status'], ['minor_supervised', 'minor_teen'], true));
+                if ($isChildAccount) {
+                    $postBaseDir = realpath(__DIR__ . '/../../../resources/images/post');
+                    if ($postBaseDir) {
+                        $postRow = Post::postByNo($result);
+                        for ($k = 0; $k < 6; $k++) {
+                            $colName = 'post_img' . $k;
+                            if (!empty($postRow[$colName])) {
+                                $filePath = $postBaseDir . '/' . basename((string)$postRow[$colName]);
+                                if (file_exists($filePath)) {
+                                    \App\services\ChildAccountService::stripExifMetadata($filePath);
+                                }
+                            }
+                        }
+                    }
+                }
 
                 // Trigger background notifications server-side. The post is already
                 // saved at this point, so a notification failure (e.g. email/SMTP)

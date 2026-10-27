@@ -109,9 +109,42 @@ final class ReelsController extends BaseController
 
             $userId = (string)($_SESSION['id'] ?? '');
             $famCode = (string)($_SESSION['famCode'] ?? '');
+            if (empty($famCode) && !empty($userId)) {
+                $pStmt = Db::connect2()->prepare("SELECT famCode FROM personal WHERE id = ? LIMIT 1");
+                $pStmt->execute([$userId]);
+                $famCode = trim((string)$pStmt->fetchColumn());
+                if (!empty($famCode)) {
+                    $_SESSION['famCode'] = $famCode;
+                }
+            }
+            if (empty($famCode) && !empty($userId)) {
+                $pStmt = Db::connect2()->prepare("SELECT famCode FROM personal WHERE id = ? LIMIT 1");
+                $pStmt->execute([$userId]);
+                $famCode = trim((string)$pStmt->fetchColumn());
+                if (!empty($famCode)) {
+                    $_SESSION['famCode'] = $famCode;
+                }
+            }
 
             $data = $this->membersData();
             $initialReels = Reel::getReelsFeed($userId, $famCode, 30, 0);
+
+            if ($targetReel && !empty($targetReel['id'])) {
+                $alreadyInFeed = false;
+                foreach ($initialReels as $idx => $r) {
+                    if ((int)$r['id'] === (int)$targetReel['id']) {
+                        $alreadyInFeed = true;
+                        if ($idx > 0) {
+                            array_splice($initialReels, $idx, 1);
+                            array_unshift($initialReels, $targetReel);
+                        }
+                        break;
+                    }
+                }
+                if (!$alreadyInFeed && self::canAccessReel($targetReel, $userId)) {
+                    array_unshift($initialReels, $targetReel);
+                }
+            }
 
             // Track reel theater view
             AnalyticsService::track($userId, 'reel_theater_view', null, ['count' => count($initialReels)]);
@@ -140,6 +173,14 @@ final class ReelsController extends BaseController
         try {
             $userId = (string)($_SESSION['id'] ?? '');
             $famCode = (string)($_SESSION['famCode'] ?? '');
+            if (empty($famCode) && !empty($userId)) {
+                $pStmt = Db::connect2()->prepare("SELECT famCode FROM personal WHERE id = ? LIMIT 1");
+                $pStmt->execute([$userId]);
+                $famCode = trim((string)$pStmt->fetchColumn());
+                if (!empty($famCode)) {
+                    $_SESSION['famCode'] = $famCode;
+                }
+            }
 
             $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
             $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
@@ -171,9 +212,30 @@ final class ReelsController extends BaseController
         try {
             $userId = (string)($_SESSION['id'] ?? '');
             $famCode = (string)($_SESSION['famCode'] ?? '');
+            if (empty($famCode) && !empty($userId)) {
+                $pStmt = Db::connect2()->prepare("SELECT famCode FROM personal WHERE id = ? LIMIT 1");
+                $pStmt->execute([$userId]);
+                $famCode = trim((string)$pStmt->fetchColumn());
+                if (!empty($famCode)) {
+                    $_SESSION['famCode'] = $famCode;
+                }
+            }
 
-            if (empty($userId) || empty($famCode)) {
+            if (empty($userId)) {
                 throw new Exception('Unauthorized user session', 401);
+            }
+
+            if (empty($famCode)) {
+                $pStmt = Db::connect2()->prepare("SELECT famCode FROM personal WHERE id = ? LIMIT 1");
+                $pStmt->execute([$userId]);
+                $famCode = trim((string)$pStmt->fetchColumn());
+                if (!empty($famCode)) {
+                    $_SESSION['famCode'] = $famCode;
+                }
+            }
+
+            if (empty($famCode)) {
+                throw new Exception('Unauthorized user session: no family code found', 401);
             }
 
             $caption = isset($_POST['caption']) ? trim((string)$_POST['caption']) : '';
@@ -505,6 +567,110 @@ final class ReelsController extends BaseController
     }
 
     /**
+     * Determine whether the current authenticated user has permission to view,
+     * react, or comment on a family reel.
+     *
+     * Grants access if:
+     * 1. The user is the author/creator of the reel.
+     * 2. The user holds Super Admin privileges.
+     * 3. The user's active session or registered families share the reel's explicit famCode.
+     * 4. The user and the reel author share the author's primary famCode.
+     * 5. The user and the reel author share ANY approved family in personal or user_families.
+     * 6. The user and the reel author are connected through approved kinship (requestMgt).
+     *
+     * @param array<string, mixed> $targetReel
+     * @param string $userId
+     * @return bool
+     */
+    public static function canAccessReel(array $targetReel, string $userId): bool
+    {
+        if ($userId === '') {
+            return false;
+        }
+
+        $authorId = (string)($targetReel['user_id'] ?? '');
+        if ($authorId !== '' && hash_equals($userId, $authorId)) {
+            return true;
+        }
+
+        if (BaseController::isSuperAdmin($userId)) {
+            return true;
+        }
+
+        $reelFamCode = trim((string)($targetReel['famCode'] ?? ''));
+
+        // 1. Reel's own family code matches current user session/membership
+        if ($reelFamCode !== '' && BaseController::sessionSharesFamily($reelFamCode)) {
+            return true;
+        }
+
+        // 2. Reel author's primary family code matches current user session/membership
+        $authorPrimaryFam = trim((string)($targetReel['authorFamCode'] ?? ''));
+        if ($authorPrimaryFam === '' && $authorId !== '') {
+            try {
+                $stmt = Db::connect2()->prepare("SELECT famCode FROM personal WHERE id = ? LIMIT 1");
+                $stmt->execute([$authorId]);
+                $authorPrimaryFam = trim((string)$stmt->fetchColumn());
+            } catch (\Throwable $e) {
+                $authorPrimaryFam = '';
+            }
+        }
+        if ($authorPrimaryFam !== '' && BaseController::sessionSharesFamily($authorPrimaryFam)) {
+            return true;
+        }
+
+        if ($authorId === '') {
+            return $reelFamCode === '';
+        }
+
+        // 3. User and author share ANY family code across personal or user_families
+        try {
+            $sharedStmt = Db::connect2()->prepare("
+                SELECT 1 FROM (
+                    SELECT UPPER(TRIM(REPLACE(famCode, '#', ''))) AS code FROM personal WHERE id = ? AND famCode IS NOT NULL AND famCode != ''
+                    UNION
+                    SELECT UPPER(TRIM(REPLACE(family_code, '#', ''))) AS code FROM user_families WHERE user_id = ? AND family_code IS NOT NULL AND family_code != ''
+                ) viewer_fams
+                INNER JOIN (
+                    SELECT UPPER(TRIM(REPLACE(famCode, '#', ''))) AS code FROM personal WHERE id = ? AND famCode IS NOT NULL AND famCode != ''
+                    UNION
+                    SELECT UPPER(TRIM(REPLACE(family_code, '#', ''))) AS code FROM user_families WHERE user_id = ? AND family_code IS NOT NULL AND family_code != ''
+                ) author_fams ON viewer_fams.code = author_fams.code
+                LIMIT 1
+            ");
+            $sharedStmt->execute([$userId, $userId, $authorId, $authorId]);
+            if ((bool)$sharedStmt->fetchColumn()) {
+                return true;
+            }
+        } catch (\Throwable $e) {
+            error_log('[canAccessReel] shared family check failed: ' . $e->getMessage());
+        }
+
+        // 4. Approved Kinship Circle link (requestMgt)
+        try {
+            $kinStmt = Db::connect2()->prepare("
+                SELECT 1 FROM requestMgt
+                WHERE LOWER(status) IN ('approved','accepted')
+                  AND ((approver_id = ? AND requester_id = ?) OR (approver_id = ? AND requester_id = ?))
+                LIMIT 1
+            ");
+            $kinStmt->execute([$userId, $authorId, $authorId, $userId]);
+            if ((bool)$kinStmt->fetchColumn()) {
+                return true;
+            }
+        } catch (\Throwable $e) {
+            error_log('[canAccessReel] kinship check failed: ' . $e->getMessage());
+        }
+
+        // 5. Fallback session check
+        if (BaseController::sessionCanViewMember($authorId, $reelFamCode !== '' ? $reelFamCode : $authorPrimaryFam)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * API: Toggle Reaction on Reel (Like, Love, Celebrate)
      */
     public function toggleReaction(): void
@@ -532,8 +698,7 @@ final class ReelsController extends BaseController
                 echo json_encode(['status' => 'error', 'message' => 'Reel not found']);
                 return;
             }
-            $reelFamCode = trim((string)($targetReel['famCode'] ?? ''));
-            if ($reelFamCode !== '' && (string)($targetReel['user_id'] ?? '') !== $userId && !BaseController::sessionSharesFamily($reelFamCode)) {
+            if (!self::canAccessReel($targetReel, $userId)) {
                 http_response_code(403);
                 echo json_encode(['status' => 'error', 'message' => 'Access denied to this family reel']);
                 return;
@@ -611,8 +776,7 @@ final class ReelsController extends BaseController
                 echo json_encode(['status' => 'error', 'message' => 'Reel not found']);
                 return;
             }
-            $reelFamCode = trim((string)($targetReel['famCode'] ?? ''));
-            if ($reelFamCode !== '' && (string)($targetReel['user_id'] ?? '') !== $userId && !BaseController::sessionSharesFamily($reelFamCode)) {
+            if (!self::canAccessReel($targetReel, $userId)) {
                 http_response_code(403);
                 echo json_encode(['status' => 'error', 'message' => 'Access denied to this family reel']);
                 return;
@@ -644,6 +808,14 @@ final class ReelsController extends BaseController
         try {
             $userId = (string)($_SESSION['id'] ?? '');
             $famCode = (string)($_SESSION['famCode'] ?? '');
+            if (empty($famCode) && !empty($userId)) {
+                $pStmt = Db::connect2()->prepare("SELECT famCode FROM personal WHERE id = ? LIMIT 1");
+                $pStmt->execute([$userId]);
+                $famCode = trim((string)$pStmt->fetchColumn());
+                if (!empty($famCode)) {
+                    $_SESSION['famCode'] = $famCode;
+                }
+            }
             $raw = file_get_contents('php://input') ?: '';
             $payload = json_decode($raw, true) ?? $_POST;
 
@@ -662,8 +834,7 @@ final class ReelsController extends BaseController
                 echo json_encode(['status' => 'error', 'message' => 'Reel not found']);
                 return;
             }
-            $reelFamCode = trim((string)($targetReelCheck['famCode'] ?? ''));
-            if ($reelFamCode !== '' && (string)($targetReelCheck['user_id'] ?? '') !== $userId && !BaseController::sessionSharesFamily($reelFamCode)) {
+            if (!self::canAccessReel($targetReelCheck, $userId)) {
                 http_response_code(403);
                 echo json_encode(['status' => 'error', 'message' => 'Access denied to this family reel']);
                 return;

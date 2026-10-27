@@ -37,6 +37,7 @@ include_once __DIR__ . "/invite.php";
 include_once __DIR__ . "/journal.php";
 include_once __DIR__ . "/announcement.php";
 include_once __DIR__ . "/familyMigrationRoute.php";
+include_once __DIR__ . "/childAccountRoute.php";
 
 // Internationalization & Diaspora Language Switching
 $router->map('GET|POST|HEAD', '/locale/[a:locale]', 'App\controller\LocaleController@switch', 'LOCALE_SWITCH');

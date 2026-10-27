@@ -157,7 +157,7 @@ $router->map(
   name: 'api_member_then_now'
 );
 
-// POST VIEWS TRACKING
+// POST VIEWS TRACKING & AUTHOR VIEWERS INSPECTION
 $router->map(
   method: 'POST',
   route: '/api/posts/view',
@@ -170,4 +170,18 @@ $router->map(
   route: '/post/view',
   target: 'App\controller\members\PostMessage@recordView',
   name: 'post_record_view'
+);
+
+$router->map(
+  method: 'GET',
+  route: '/api/posts/[i:postNo]/viewers',
+  target: 'App\controller\members\PostMessage@getPostViewers',
+  name: 'api_post_get_viewers'
+);
+
+$router->map(
+  method: 'GET',
+  route: '/post/[i:postNo]/viewers',
+  target: 'App\controller\members\PostMessage@getPostViewers',
+  name: 'post_get_viewers'
 );

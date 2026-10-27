@@ -70,7 +70,68 @@
                 <button type="button" id="directToImages" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px;" onclick="window.location.href='/profilepage/gallery'">
                     <i class="bi bi-images me-1.5" style="color: #6366f1;"></i> {{ __('profile.photo_gallery', 'Photo Gallery') }}
                 </button>
+
+                <button type="button" id="quickLinkThenNow" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" onclick="scrollToProfileWidget('thenNowSection')" aria-label="{{ __('profile.then_and_now', 'Then & Now') }}">
+                    <i class="bi bi-hourglass-split me-1.5" style="color: #b8202c;"></i> {{ __('profile.then_and_now', 'Then & Now') }}
+                </button>
+
+                <button type="button" id="quickLinkUpcomingEvents" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" onclick="scrollToProfileWidget('upcomingEventsSection', 'allUpcomingEventsModal')" aria-label="{{ __('profile.upcoming_events', 'Upcoming Events') }}">
+                    <i class="bi bi-calendar-event-fill me-1.5" style="color: #2563eb;"></i> {{ __('profile.upcoming_events', 'Upcoming Events') }}
+                </button>
+
+                <button type="button" id="quickLinkFamilyHeritage" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" onclick="scrollToProfileWidget('familyHeritageSection')" aria-label="{{ __('profile.family_heritage', 'Family Heritage') }}">
+                    <i class="bi bi-stars me-1.5" style="color: #059669;"></i> {{ __('profile.family_heritage', 'Family Heritage') }}
+                </button>
+
+                <a href="/how-to-use" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;">
+                    <i class="bi bi-book-half me-1.5" style="color: #0284c7;"></i> {{ __('profile.how_to_use', 'How to Use Guide') }}
+                </a>
             </div>
+
+            <style>
+            .highlight-section-pulse {
+                animation: profileWidgetPulse 2.5s ease-out;
+                scroll-margin-top: 80px;
+            }
+            @keyframes profileWidgetPulse {
+                0% { box-shadow: 0 0 0 6px rgba(163, 22, 33, 0.7); }
+                50% { box-shadow: 0 0 0 3px rgba(163, 22, 33, 0.35); }
+                100% { box-shadow: 0 0 0 0 rgba(163, 22, 33, 0); }
+            }
+            </style>
+            <script>
+            window.scrollToProfileWidget = function(targetId, modalFallbackId) {
+                var target = document.getElementById(targetId);
+                if (target && target.classList.contains('d-none')) {
+                    target.classList.remove('d-none');
+                }
+                if (target && target.offsetParent !== null) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    target.classList.add('highlight-section-pulse');
+                    setTimeout(function() {
+                        target.classList.remove('highlight-section-pulse');
+                    }, 2500);
+                    return false;
+                }
+                if (modalFallbackId) {
+                    var modalEl = document.getElementById(modalFallbackId);
+                    if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+                        var bsModal = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+                        bsModal.show();
+                        return false;
+                    }
+                }
+                if (target) {
+                    target.classList.remove('d-none');
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    target.classList.add('highlight-section-pulse');
+                    setTimeout(function() {
+                        target.classList.remove('highlight-section-pulse');
+                    }, 2500);
+                }
+                return false;
+            };
+            </script>
 
         </div>
     </div>

@@ -67,6 +67,8 @@
   <!-- PWA & Mobile Web App Capabilities -->
   @include('partials.pwa-head')
   <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
+  <meta name="user-id" content="{{ $_SESSION['id'] ?? '' }}">
+  <meta name="vapid-public-key" content="{{ $_ENV['VAPID_PUBLIC_KEY'] ?? $_SERVER['VAPID_PUBLIC_KEY'] ?? (getenv('VAPID_PUBLIC_KEY') ?: ($_ENV['MIX_VAPID_PUBLIC_KEY'] ?? '')) }}">
   <meta name="pusher-key" content="{{ $_ENV['MIX_PUSHER_APP_KEY'] ?? $_SERVER['MIX_PUSHER_APP_KEY'] ?? $_ENV['PUSHER_APP_KEY'] ?? $_SERVER['PUSHER_APP_KEY'] ?? '' }}">
   <meta name="pusher-cluster" content="{{ $_ENV['MIX_PUSHER_APP_CLUSTER'] ?? $_SERVER['MIX_PUSHER_APP_CLUSTER'] ?? $_ENV['PUSHER_APP_CLUSTER'] ?? $_SERVER['PUSHER_APP_CLUSTER'] ?? 'eu' }}">
 
@@ -125,6 +127,8 @@
 
   <!-- Mobile PWA Bottom Tab Navigation (Native App Parity) -->
   @include('layouts.bottom_nav')
+
+  @include('partials.push-notification-banner')
 
   @include('partials.cookie-banner')
 

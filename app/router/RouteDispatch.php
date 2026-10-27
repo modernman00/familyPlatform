@@ -73,6 +73,7 @@ final class RouteDispatch
             'App\controller\api\KinshipApiController',
             'App\controller\PlaybookController',
             'App\controller\LocaleController',
+            'App\controller\About',
         ];
 
         if (\class_exists('\App\controller\BaseController')) {

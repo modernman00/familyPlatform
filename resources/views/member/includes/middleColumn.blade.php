@@ -519,8 +519,6 @@
     </div>
   </div>
 
-  <!-- Mobile Highlights & Events Tray (Facebook Mobile UX: horizontal carousel above feed) -->
-  @includeIf('member.includes.mobileHighlightsTray')
 
   <!-- Kinship Radar: Mobile-Only (visible < 992px, hidden on desktop where sidebar shows it) -->
   @if(!empty($suggestedKin))
@@ -735,6 +733,141 @@
         <div x-show="lightboxImages && lightboxImages.length > 1" 
              style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); color: #ffffff; font-size: 14px; font-weight: 600; background: rgba(0,0,0,0.75); padding: 6px 20px; border-radius: 30px; letter-spacing: 0.5px; box-shadow: 0 4px 14px rgba(0,0,0,0.5); z-index: 100002; border: 1px solid rgba(255,255,255,0.2);" 
              x-text="(lightboxIndex + 1) + ' / ' + lightboxImages.length"></div>
+    </div>
+
+    <!-- Author Viewers Roster Modal (Post & Comment Views) -->
+    <div x-cloak x-show="isViewersModalOpen"
+         class="viewers-modal-overlay"
+         style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 10500; display: flex; align-items: center; justify-content: center; padding: 16px;"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         @keydown.escape.window="closeViewersModal()"
+         @click.self="closeViewersModal()"
+         role="dialog"
+         aria-modal="true"
+         :aria-label="viewersType === 'comment' ? 'Comment Viewers' : 'Post Viewers'">
+        
+        <div class="card border-0 shadow-lg"
+             style="width: 100%; max-width: 480px; max-height: 85vh; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; background: var(--card-bg, #ffffff);">
+            
+            <!-- Modal Header -->
+            <div class="d-flex align-items-center justify-content-between p-3 px-4 border-bottom"
+                 style="background: linear-gradient(135deg, #a31621 0%, #801018 100%); color: #ffffff;">
+                <div class="d-flex align-items-center gap-2.5">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width: 40px; height: 40px; background: rgba(255, 255, 255, 0.18); font-size: 1.15rem; color: #ffffff;">
+                        <i class="bi bi-eye-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-white" style="font-size: 1.05rem;"
+                            x-text="viewersType === 'comment' ? 'Comment Viewers' : 'Post Viewers'"></h6>
+                        <small style="color: #fce79a; font-size: 0.78rem;"
+                               x-text="(viewersList.length || 0) + (viewersList.length === 1 ? ' family member seen' : ' family members seen')"></small>
+                    </div>
+                </div>
+                <button type="button" 
+                        class="btn-close btn-close-white" 
+                        @click="closeViewersModal()" 
+                        aria-label="Close viewers modal"
+                        style="opacity: 0.9; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;"></button>
+            </div>
+
+            <!-- Search Filter Bar (if more than 3 viewers) -->
+            <div x-show="viewersList.length > 3" class="p-3 border-bottom bg-light">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" 
+                           class="form-control border-start-0" 
+                           placeholder="Filter family members..." 
+                           x-model="viewersSearchQuery"
+                           aria-label="Filter family members"
+                           style="box-shadow: none;">
+                </div>
+            </div>
+
+            <!-- Modal Body (Scrollable Roster) -->
+            <div class="p-3 overflow-y-auto" style="max-height: 55vh; min-height: 180px;">
+                <!-- Loading State Skeleton -->
+                <template x-if="viewersLoading">
+                    <div class="d-flex flex-column gap-3 py-2">
+                        <template x-for="i in [1, 2, 3]" :key="i">
+                            <div class="d-flex align-items-center gap-3 animate-pulse">
+                                <div class="rounded-circle bg-secondary" style="width: 44px; height: 44px; opacity: 0.25;"></div>
+                                <div class="flex-grow-1">
+                                    <div class="bg-secondary rounded mb-1.5" style="height: 14px; width: 55%; opacity: 0.25;"></div>
+                                    <div class="bg-secondary rounded" style="height: 11px; width: 35%; opacity: 0.18;"></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Empty State (No viewers yet) -->
+                <template x-if="!viewersLoading && viewersList.length === 0">
+                    <div class="text-center py-5 px-3">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                             style="width: 58px; height: 58px; background: #f8fafc; color: #94a3b8; font-size: 1.75rem;">
+                            <i class="bi bi-eye-slash"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">No views recorded yet</h6>
+                        <p class="text-muted small mb-0"
+                           x-text="viewersType === 'comment' ? 'When family members view your comment, they will appear here.' : 'When family members view your post, they will appear here.'"></p>
+                    </div>
+                </template>
+
+                <!-- Filtered No Match -->
+                <template x-if="!viewersLoading && viewersList.length > 0 && getFilteredViewers().length === 0">
+                    <div class="text-center py-4 text-muted small">
+                        <i class="bi bi-search me-1"></i> No family members match "<span x-text="viewersSearchQuery"></span>"
+                    </div>
+                </template>
+
+                <!-- Viewers List -->
+                <template x-if="!viewersLoading && getFilteredViewers().length > 0">
+                    <div class="d-flex flex-column gap-2">
+                        <template x-for="viewer in getFilteredViewers()" :key="viewer.user_id">
+                            <div class="d-flex align-items-center justify-content-between p-2 rounded-3 hover-bg"
+                                 style="transition: background-color 0.15s ease;">
+                                <div class="d-flex align-items-center gap-2.5 min-w-0">
+                                    <img :src="getViewerAvatar(viewer)" 
+                                         alt="Avatar" 
+                                         class="rounded-circle flex-shrink-0" 
+                                         width="42" 
+                                         height="42" 
+                                         style="object-fit: cover; border: 1px solid #e2e8f0;"
+                                         x-on:error="$event.target.src = '/public/avatar/avatarM.png'">
+                                    <div class="min-w-0">
+                                        <div class="fw-semibold text-dark text-truncate" style="font-size: 0.9rem;"
+                                             x-text="(viewer.firstName || '') + ' ' + (viewer.lastName || '')"></div>
+                                        <div class="text-muted" style="font-size: 0.76rem;"
+                                             x-text="formatViewerTime(viewer.updated_at || viewer.created_at)"></div>
+                                    </div>
+                                </div>
+                                <template x-if="viewer.view_count > 1">
+                                    <span class="badge rounded-pill bg-light text-secondary border flex-shrink-0 ms-2"
+                                          style="font-size: 0.72rem; padding: 4px 8px;"
+                                          x-text="viewer.view_count + ' views'"></span>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-2 px-3 border-top bg-light d-flex justify-content-end">
+                <button type="button" 
+                        class="btn btn-sm btn-secondary rounded-pill px-3" 
+                        style="min-height: 44px; min-width: 80px;"
+                        @click="closeViewersModal()">
+                    Close
+                </button>
+            </div>
+        </div>
     </div>
   </div>
 

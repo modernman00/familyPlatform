@@ -14,7 +14,9 @@
 import axios from 'axios';
 import { getCsrfToken } from '../global';
 
-const VAPID_PUBLIC_KEY = process.env.MIX_VAPID_PUBLIC_KEY || '';
+const VAPID_PUBLIC_KEY = process.env.MIX_VAPID_PUBLIC_KEY 
+  || (typeof document !== 'undefined' ? document.querySelector('meta[name="vapid-public-key"]')?.getAttribute('content') : '') 
+  || '';
 const PUSH_PROMPT_DISMISSED_KEY = 'push_prompt_dismissed';
 
 const pushSupported = () =>
@@ -55,15 +57,14 @@ async function syncToServer(subscription) {
 
 // ---- import-time bootstrap: keep an existing grant in sync -----------------
 if (pushSupported()) {
-  navigator.serviceWorker
-    .register('/sw.js')
+  navigator.serviceWorker.ready
     .then((swReg) => swReg.pushManager.getSubscription().then((sub) => {
       if (sub) return syncToServer(sub).catch((e) => console.warn('[push] resync failed', e?.response?.data?.message || e.message));
       if (Notification.permission === 'granted' && VAPID_PUBLIC_KEY) {
         return doSubscribe(swReg).catch((e) => console.warn('[push] auto-subscribe skipped', e?.response?.data?.message || e.message));
       }
     }))
-    .catch((err) => console.warn('[push] SW registration failed', err));
+    .catch((err) => console.warn('[push] SW ready check failed', err));
 }
 
 async function doSubscribe(swReg) {

@@ -205,8 +205,10 @@
   // 6. Real-Time Socket Bridge (Pusher User Channel listener)
   function initUserSocketListener() {
     try {
-      const userId = localStorage.getItem('requesterId');
-      if (!userId || typeof window === 'undefined' || !window.Pusher) {
+      const userId = document.querySelector('meta[name="user-id"]')?.getAttribute('content')
+        || localStorage.getItem('requesterId');
+      const PusherClass = window.Pusher || (window._fpPusherInstance ? window._fpPusherInstance.constructor : null);
+      if (!userId || typeof window === 'undefined' || (!PusherClass && !window._fpPusherInstance)) {
         return;
       }
       const pusherKey = document.querySelector('meta[name="pusher-key"]')?.getAttribute('content')
@@ -214,9 +216,9 @@
       const pusherCluster = document.querySelector('meta[name="pusher-cluster"]')?.getAttribute('content')
         || window.PUSHER_APP_CLUSTER
         || 'eu';
-      if (!pusherKey) return;
+      if (!pusherKey && !window._fpPusherInstance) return;
 
-      const pusherClient = window._fpPusherInstance || new window.Pusher(pusherKey, {
+      const pusherClient = window._fpPusherInstance || new PusherClass(pusherKey, {
         cluster: pusherCluster,
         forceTLS: true,
         channelAuthorization: {

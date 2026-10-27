@@ -562,11 +562,12 @@ final class NotificationController extends Select
                 return;
             }
 
-            $userId = !empty($inputData['id']) ? cleanSession((string)$inputData['id']) : (isset($_SESSION['id']) ? cleanSession((string)$_SESSION['id']) : '');
-            if (empty($userId)) {
+            $sessionUserId = isset($_SESSION['id']) ? cleanSession((string)$_SESSION['id']) : '';
+            if (empty($sessionUserId)) {
                 msgException(401, 'User authentication required for push subscription');
                 return;
             }
+            $userId = $sessionUserId;
 
             $endpoint = (string)$inputData['endpoint'];
             $p256dhKey = (string)$inputData['keys']['p256dh'];
@@ -744,6 +745,99 @@ final class NotificationController extends Select
             error_log('[NotificationController] Webhook error: ' . $e->getMessage());
             http_response_code(500);
             echo json_encode(['error' => 'Webhook processing failed']);
+        }
+    }
+
+    /**
+     * Dispatch an immediate live test notification across In-App, Socket, and PWA WebPush.
+     * Accessible from Account Settings to verify device receipt.
+     */
+    public static function sendTestNotification(): void
+    {
+        try {
+            $userId = isset($_SESSION['id']) ? cleanSession((string) $_SESSION['id']) : '';
+            if (!is_string($userId) || $userId === '') {
+                msgException(401, 'Unauthorized');
+                return;
+            }
+
+            // CSRF validation
+            $sessionToken = $_SESSION['token'] ?? '';
+            $requestToken = $_SERVER['HTTP_X_XSRF_TOKEN'] 
+                ?? $_SERVER['HTTP_X_CSRF_TOKEN'] 
+                ?? $_SERVER['HTTP_CSRF_TOKEN'] 
+                ?? ($_POST['token'] ?? '');
+
+            if (empty($sessionToken) || !is_string($requestToken) || !hash_equals($sessionToken, $requestToken)) {
+                $rawInput = file_get_contents('php://input');
+                $input = json_decode($rawInput !== false ? $rawInput : '', true);
+                $bodyToken = is_array($input) && !empty($input['token']) ? (string)$input['token'] : '';
+                if (empty($sessionToken) || !hash_equals($sessionToken, $bodyToken)) {
+                    msgException(401, 'Unauthorized CSRF Token');
+                    return;
+                }
+            }
+
+            $db = \Src\Db::connect2();
+            $stmt = $db->prepare('SELECT COUNT(*) FROM pushNotification WHERE id = ?');
+            $stmt->execute([$userId]);
+            $endpointCount = (int)$stmt->fetchColumn();
+
+            $timestamp = date('H:i:s');
+            $testTitle = 'FamilyPlatform Live Alert 🔔';
+            $testBody = "Test notification received successfully at {$timestamp}! Push notifications are operating normally.";
+            $actionUrl = '/profilePage';
+
+            // Insert durable in-app notification row
+            $insertStmt = $db->prepare("
+                INSERT INTO notification 
+                (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                VALUES ('system', ?, 'Family Platform', ?, 'Test', ?, ?, 'new', NOW())
+            ");
+            $insertStmt->execute([
+                $userId,
+                $testTitle,
+                $testBody,
+                $actionUrl
+            ]);
+
+            // Dispatch PWA Web Push if endpoints exist
+            $pushSent = false;
+            if ($endpointCount > 0) {
+                $pushSent = \App\classes\PushNotificationClass::sendPushNotification(
+                    userId: $userId,
+                    message: $testBody,
+                    url: $actionUrl,
+                    title: $testTitle,
+                    tag: 'test-notification-' . time()
+                );
+            }
+
+            // Broadcast real-time Pusher event
+            try {
+                $pusher = \App\classes\Pusher::pusher();
+                if ($pusher !== null) {
+                    $pusher->trigger("private-user-{$userId}", 'new-notification', [
+                        'title' => $testTitle,
+                        'body' => $testBody,
+                        'action_url' => $actionUrl,
+                    ]);
+                }
+            } catch (\Throwable) {}
+
+            msgSuccess(200, [
+                'status' => 'success',
+                'endpoints_registered' => $endpointCount,
+                'push_dispatched' => $pushSent,
+                'message' => $endpointCount > 0 
+                    ? "Test notification dispatched to {$endpointCount} registered device(s)." 
+                    : "In-app test notification created. Note: 0 push endpoints are registered on the server for your account. Please tap 'Enable Notifications' on this device."
+            ]);
+        } catch (\Src\Exceptions\HttpException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            error_log('[NotificationController] sendTestNotification error: ' . $e->getMessage());
+            msgException(500, 'Failed to send test notification');
         }
     }
 }

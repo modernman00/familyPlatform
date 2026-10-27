@@ -10,6 +10,8 @@
   --text-muted: #64748b;
   --border-color: #e2e8f0;
   --hover-color: #f1f5f9;
+  --kin-card-bg: #f8fafc;
+  --kin-card-border: #e2e8f0;
   --shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
 }
 
@@ -25,6 +27,8 @@
   --text-muted: #94a3b8;
   --border-color: #334155;
   --hover-color: #334155;
+  --kin-card-bg: #0f172a;
+  --kin-card-border: rgba(255, 255, 255, 0.1);
   --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
@@ -477,6 +481,46 @@ body {
 /* Keep the connect button comfortably tappable in the narrower card */
 .kinship-item-card--scroll .btn-connect-kin {
   padding: 8px 12px;
+}
+
+/* ── Kinship Radar Cards & Tactical States ────────────────────────── */
+.kinship-item-card {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.kinship-item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  border-color: #cbd5e1;
+}
+.kinship-item-card:active {
+  transform: scale(0.99);
+}
+
+.kinship-radar-widget .kin-heading {
+  color: #0f172a;
+}
+.kinship-radar-widget .kin-member-name {
+  color: #0f172a;
+}
+.kinship-radar-widget .kin-primary-reason {
+  color: #475569;
+}
+.kinship-radar-widget .kin-tap-hint {
+  color: #64748b;
+}
+
+/* Modal Kinship Details Base */
+#kinshipDetailsModal .kin-modal-name {
+  color: #0f172a;
+}
+#kinshipDetailsModal .kin-section-title {
+  color: #0f172a;
+}
+#kinshipDetailsModal .kin-clues-box {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
 }
 
 /* Empty state should sit centred across the whole widget, not as one flex item */
@@ -1623,6 +1667,123 @@ body.dark-mode .feed-empty-state-card h5 {
 }
 body.dark-mode .feed-empty-state-card p {
   color: #94a3b8 !important;
+}
+
+/* ── Kinship Radar & Modal Dark Theme Invariant ─────────────────── */
+body.dark-mode .kinship-radar-widget,
+body.dark-theme .kinship-radar-widget,
+[data-bs-theme="dark"] .kinship-radar-widget {
+  background-color: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-mode .kinship-radar-widget .kin-heading,
+body.dark-theme .kinship-radar-widget .kin-heading,
+[data-bs-theme="dark"] .kinship-radar-widget .kin-heading {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .kinship-radar-widget .kin-subtitle,
+body.dark-theme .kinship-radar-widget .kin-subtitle,
+[data-bs-theme="dark"] .kinship-radar-widget .kin-subtitle {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .kinship-item-card,
+body.dark-theme .kinship-item-card,
+[data-bs-theme="dark"] .kinship-item-card {
+  background-color: #0f172a !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .kinship-item-card:hover,
+body.dark-theme .kinship-item-card:hover,
+[data-bs-theme="dark"] .kinship-item-card:hover {
+  background-color: #131f37 !important;
+  border-color: rgba(163, 22, 33, 0.45) !important;
+}
+
+body.dark-mode .kinship-item-card .kin-member-name,
+body.dark-theme .kinship-item-card .kin-member-name,
+body.dark-mode .kinship-radar-widget .kin-member-name,
+body.dark-theme .kinship-radar-widget .kin-member-name,
+[data-bs-theme="dark"] .kinship-item-card .kin-member-name,
+[data-bs-theme="dark"] .kinship-radar-widget .kin-member-name {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .kinship-item-card .kin-type-label,
+body.dark-theme .kinship-item-card .kin-type-label,
+[data-bs-theme="dark"] .kinship-item-card .kin-type-label {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .kinship-item-card .kin-primary-reason,
+body.dark-theme .kinship-item-card .kin-primary-reason,
+[data-bs-theme="dark"] .kinship-item-card .kin-primary-reason {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .kinship-item-card .kin-tap-hint,
+body.dark-theme .kinship-item-card .kin-tap-hint,
+[data-bs-theme="dark"] .kinship-item-card .kin-tap-hint {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .kinship-item-card .btn-dismiss-kin,
+body.dark-theme .kinship-item-card .btn-dismiss-kin,
+[data-bs-theme="dark"] .kinship-item-card .btn-dismiss-kin {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .kinship-radar-widget .badge.bg-light,
+body.dark-theme .kinship-radar-widget .badge.bg-light,
+[data-bs-theme="dark"] .kinship-radar-widget .badge.bg-light {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Modal Dark Mode */
+body.dark-mode #kinshipDetailsModal .modal-content,
+[data-bs-theme="dark"] #kinshipDetailsModal .modal-content {
+  background-color: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+body.dark-mode #kinshipDetailsModal .kin-modal-profile-card,
+[data-bs-theme="dark"] #kinshipDetailsModal .kin-modal-profile-card {
+  background: linear-gradient(135deg, rgba(163, 22, 33, 0.15) 0%, #131f37 100%) !important;
+  border-color: rgba(163, 22, 33, 0.3) !important;
+}
+
+body.dark-mode #kinshipDetailsModal .kin-modal-name,
+[data-bs-theme="dark"] #kinshipDetailsModal .kin-modal-name {
+  color: #f8fafc !important;
+}
+
+body.dark-mode #kinshipDetailsModal .kin-section-title,
+[data-bs-theme="dark"] #kinshipDetailsModal .kin-section-title {
+  color: #f8fafc !important;
+}
+
+body.dark-mode #kinshipDetailsModal .kin-clues-box,
+[data-bs-theme="dark"] #kinshipDetailsModal .kin-clues-box {
+  background-color: #0f172a !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode #kinshipDetailsModal #kinModalBranchBox > div,
+[data-bs-theme="dark"] #kinshipDetailsModal #kinModalBranchBox > div {
+  background-color: #0f172a !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-mode #kinshipDetailsModal #kinModalBranchBox strong,
+[data-bs-theme="dark"] #kinshipDetailsModal #kinModalBranchBox strong {
+  color: #f8fafc !important;
 }
 
 /* ── Segun PWA & Mobile Optimization: Memories & Milestones ────────── */

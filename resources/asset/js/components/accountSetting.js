@@ -411,10 +411,32 @@ processKidsSiblings(fName, famCode);
   const toggle = id('pushPrefToggle');
   const label = id('pushPrefLabel');
   const hint = id('pushPrefHint');
+  const deviceBadge = id('pushDeviceBadge');
+  const testBtn = id('sendTestNotifBtn');
+  const resyncBtn = id('resyncDeviceBtn');
+  const testFeedback = id('testNotifFeedback');
   if (!toggle) return;
 
   const DEFAULT_HINT = 'Get instant alerts on this device even when the app is closed.';
   const PUSH_OPT_OUT_KEY = 'fp_push_pref_disabled';
+
+  const updateBadge = (status, text) => {
+    if (!deviceBadge) return;
+    deviceBadge.className = 'badge border ';
+    if (status === 'active') {
+      deviceBadge.className += 'bg-success text-white';
+      deviceBadge.innerHTML = '<i class="bi bi-check-circle me-1"></i> ' + (text || 'Device Active');
+    } else if (status === 'warning') {
+      deviceBadge.className += 'bg-warning text-dark';
+      deviceBadge.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i> ' + (text || 'Needs Activation');
+    } else if (status === 'error') {
+      deviceBadge.className += 'bg-danger text-white';
+      deviceBadge.innerHTML = '<i class="bi bi-x-circle me-1"></i> ' + (text || 'Blocked by Browser');
+    } else {
+      deviceBadge.className += 'bg-light text-secondary';
+      deviceBadge.innerHTML = text || 'Checking...';
+    }
+  };
 
   const paint = (on, note) => {
     toggle.checked = on;
@@ -425,10 +447,9 @@ processKidsSiblings(fName, famCode);
   const state = getPushState();
   if (state === 'unsupported') {
     toggle.disabled = true;
+    updateBadge('error', 'Push Unsupported');
     const pwa = window.pwaManager;
     if (pwa && pwa.isIOS && !pwa.isStandalone) {
-      // iOS only delivers Web Push to an installed PWA (iOS 16.4+). Route the
-      // user through the existing "Add to Home Screen" walkthrough (PUSH-3).
       if (hint) {
         hint.innerHTML =
           'On iPhone, notifications work once the app is on your Home Screen. ' +
@@ -448,6 +469,7 @@ processKidsSiblings(fName, famCode);
   }
   if (state === 'denied') {
     toggle.disabled = true;
+    updateBadge('error', 'Blocked by Browser');
     paint(false, 'Notifications are blocked in your browser settings. Re-enable them there, then reload this page.');
     return;
   }
@@ -456,15 +478,114 @@ processKidsSiblings(fName, famCode);
     if (subbed) {
       localStorage.removeItem(PUSH_OPT_OUT_KEY);
       paint(true);
+      updateBadge('active', 'Device Subscribed');
     } else if (localStorage.getItem(PUSH_OPT_OUT_KEY) === '1') {
       paint(false);
+      updateBadge('warning', 'Turned Off');
     } else {
-      paint(true);
       if (state === 'granted') {
-        enablePushNotifications().catch(() => {});
+        updateBadge('warning', 'Connecting...');
+        enablePushNotifications().then((res) => {
+          if (res.ok) {
+            paint(true);
+            updateBadge('active', 'Device Subscribed');
+          } else {
+            paint(false);
+            updateBadge('warning', 'Subscription Pending');
+          }
+        }).catch(() => {
+          paint(false);
+          updateBadge('warning', 'Subscription Pending');
+        });
+      } else {
+        paint(false);
+        updateBadge('warning', 'Not Activated');
       }
     }
   });
+
+  // Attach Test Notification Trigger
+  if (testBtn) {
+    testBtn.addEventListener('click', async () => {
+      const origHtml = testBtn.innerHTML;
+      testBtn.disabled = true;
+      testBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Sending Test...';
+      if (testFeedback) {
+        testFeedback.style.display = 'block';
+        testFeedback.className = 'small mt-2 text-muted';
+        testFeedback.textContent = 'Transmitting live test alert to backend cascade...';
+      }
+
+      try {
+        const res = await fetch('/api/notifications/test', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': getCsrfToken(),
+            'X-XSRF-TOKEN': getCsrfToken()
+          },
+          body: JSON.stringify({ token: getCsrfToken() })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.status === 'success') {
+          const msg = data.data?.message || data.message || 'Test notification sent!';
+          if (testFeedback) {
+            testFeedback.className = 'small mt-2 text-success fw-medium';
+            testFeedback.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> ' + msg;
+          }
+          if (window.Swal) {
+            window.Swal.fire({
+              icon: 'success',
+              title: 'Test Alert Sent! 🎉',
+              text: msg,
+              confirmButtonColor: '#a31621'
+            });
+          }
+        } else {
+          throw new Error(data.message || 'Could not dispatch test notification');
+        }
+      } catch (err) {
+        if (testFeedback) {
+          testFeedback.className = 'small mt-2 text-danger fw-medium';
+          testFeedback.innerHTML = '<i class="bi bi-exclamation-circle-fill me-1"></i> ' + (err.message || 'Test dispatch failed');
+        }
+      } finally {
+        testBtn.disabled = false;
+        testBtn.innerHTML = origHtml;
+      }
+    });
+  }
+
+  // Attach Re-sync Device Trigger
+  if (resyncBtn) {
+    resyncBtn.addEventListener('click', async () => {
+      const origHtml = resyncBtn.innerHTML;
+      resyncBtn.disabled = true;
+      resyncBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Re-syncing...';
+
+      try {
+        const res = await enablePushNotifications();
+        if (res.ok) {
+          paint(true, 'Push notifications are on for this device.');
+          updateBadge('active', 'Device Subscribed');
+          if (testFeedback) {
+            testFeedback.style.display = 'block';
+            testFeedback.className = 'small mt-2 text-success';
+            testFeedback.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Device endpoint successfully registered with server.';
+          }
+        } else {
+          updateBadge('warning', 'Re-sync Skipped');
+        }
+      } catch (err) {
+        showError(err);
+      } finally {
+        resyncBtn.disabled = false;
+        resyncBtn.innerHTML = origHtml;
+      }
+    });
+  }
 
   toggle.addEventListener('change', async () => {
     toggle.disabled = true;

@@ -148,6 +148,10 @@ if [ -f "tests/verify_family_roundtable_suite.php" ]; then
     php tests/verify_family_roundtable_suite.php || GATE4_PASSED=0
 fi
 
+if [ -f "tests/verify_mobile_quick_links.php" ]; then
+    php tests/verify_mobile_quick_links.php || GATE4_PASSED=0
+fi
+
 if [ -f "tests/verify_deceased_member_visibility.php" ]; then
     php tests/verify_deceased_member_visibility.php || GATE4_PASSED=0
 fi
@@ -164,6 +168,10 @@ if [ -f "tests/verify_reels_comments_full_parity_suite.php" ]; then
     php tests/verify_reels_comments_full_parity_suite.php || GATE4_PASSED=0
 fi
 
+if [ -f "tests/verify_reels_comments_access_suite.php" ]; then
+    php tests/verify_reels_comments_access_suite.php || GATE4_PASSED=0
+fi
+
 if [ -f "tests/verify_two_truths_and_a_lie_suite.php" ]; then
     php tests/verify_two_truths_and_a_lie_suite.php || GATE4_PASSED=0
 fi
@@ -176,12 +184,24 @@ if [ -f "tests/verify_post_and_reel_views_suite.php" ]; then
     php tests/verify_post_and_reel_views_suite.php || GATE4_PASSED=0
 fi
 
+if [ -f "tests/verify_author_post_and_comment_viewers_suite.php" ]; then
+    php tests/verify_author_post_and_comment_viewers_suite.php || GATE4_PASSED=0
+fi
+
 if [ -f "tests/verify_reels_chrono_sync_multi_angle_suite.php" ]; then
     php tests/verify_reels_chrono_sync_multi_angle_suite.php || GATE4_PASSED=0
 fi
 
 if [ -f "tests/verify_reels_music_and_dual_volume_suite.php" ]; then
     php tests/verify_reels_music_and_dual_volume_suite.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_child_accounts_and_turning_18_suite.php" ]; then
+    php tests/verify_child_accounts_and_turning_18_suite.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_ux_ui_look_and_feel.php" ]; then
+    php tests/verify_ux_ui_look_and_feel.php || GATE4_PASSED=0
 fi
 
 if [ "$GATE4_PASSED" -eq 1 ]; then

@@ -346,8 +346,15 @@
     </div>
     <div class="d-flex align-items-center gap-2">
       <!-- Post View Count -->
-      <span class="d-inline-flex align-items-center gap-1 post-views-count" :title="(post.views_count || 0) + ' family views'">
-        <i class="bi bi-eye text-secondary"></i>
+      <span class="d-inline-flex align-items-center gap-1 post-views-count"
+            :class="isOwnPost(post) ? 'cursor-pointer text-decoration-none' : ''"
+            :role="isOwnPost(post) ? 'button' : undefined"
+            :tabindex="isOwnPost(post) ? '0' : undefined"
+            @click="isOwnPost(post) && openPostViewersModal(post)"
+            @keydown.enter="isOwnPost(post) && openPostViewersModal(post)"
+            :title="isOwnPost(post) ? 'Click to see who viewed your post' : ((post.views_count || 0) + ' family views')"
+            :style="isOwnPost(post) ? 'cursor: pointer;' : ''">
+        <i class="bi bi-eye text-secondary" :class="isOwnPost(post) ? 'text-primary' : ''"></i>
         <span x-text="post.views_count || 0"></span>
         <span x-text="(post.views_count === 1) ? (window.__ ? window.__('feed.view', 'view') : 'view') : (window.__ ? window.__('feed.views', 'views') : 'views')"></span>
       </span>
@@ -556,7 +563,7 @@
     <!-- Comments List -->
     <div class="d-flex flex-column gap-2">
       <template x-for="c in threadedComments(post)" :key="c.comment_no">
-        <div class="d-flex align-items-start gap-2" :id="'comment' + c.comment_no" :class="'comment' + c.comment_no" :data-comment-no="c.comment_no" :style="isReply(post, c) ? 'margin-left: 2.25rem;' : ''" :data-reply="isReply(post, c) ? 'true' : 'false'">
+        <div class="d-flex align-items-start gap-2 feed-comment-item" :id="'comment' + c.comment_no" :class="'comment' + c.comment_no" :data-comment-no="c.comment_no" :style="isReply(post, c) ? 'margin-left: 2.25rem;' : ''" :data-reply="isReply(post, c) ? 'true' : 'false'">
           <img :src="c.profileImg" alt="Avatar" class="rounded-circle" width="32" height="32" style="object-fit: cover; margin-top: 2px;">
           <div class="flex-grow-1">
             <!-- Comment Bubble -->
@@ -646,6 +653,20 @@
               <template x-if="canModerateComment(post, c)">
                 <button type="button" class="text-muted" style="background:none; border:none; font-size:0.78rem; cursor:pointer; padding: 2px 4px; min-height: 32px; display: inline-flex; align-items: center;" :title="canEditComment(c) ? 'Delete your comment' : 'Delete comment from your post'" @click="deleteComment(post.post_no, c.comment_no)">Delete</button>
               </template>
+
+              <!-- Comment View Count (Author-clickable) -->
+              <span class="d-inline-flex align-items-center gap-1 comment-views-count text-muted"
+                    :class="canEditComment(c) ? 'cursor-pointer' : ''"
+                    :role="canEditComment(c) ? 'button' : undefined"
+                    :tabindex="canEditComment(c) ? '0' : undefined"
+                    @click="canEditComment(c) && openCommentViewersModal(c)"
+                    @keydown.enter="canEditComment(c) && openCommentViewersModal(c)"
+                    :title="canEditComment(c) ? 'Click to see who viewed your comment' : ((c.views_count || 0) + ' views')"
+                    :style="canEditComment(c) ? 'cursor: pointer; font-size: 0.75rem; min-height: 28px;' : 'font-size: 0.75rem; min-height: 28px;'">
+                <i class="bi bi-eye" :class="canEditComment(c) ? 'text-primary' : ''"></i>
+                <span x-text="c.views_count || 0"></span>
+                <span x-text="(c.views_count === 1) ? 'view' : 'views'"></span>
+              </span>
             </div>
           </div>
         </div>

@@ -323,7 +323,49 @@
             <svg style="width: 20px; height: 20px; color: var(--brand-primary, #7a0e16);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004 11m0 0a8 8 0 00.99 7.132"></path></svg>
             {{ __('auth.sign_in_biometrics', 'Sign in with Biometrics') }}
         </button>
+
+        <button type="button" id="btn-child-login-toggle"
+                onclick="openChildLoginModal()"
+                style="margin-top: 0.75rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: #f8fafc; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 12px; min-height: 44px; padding: 0.55rem 1rem; font-size: 0.9rem; font-weight: 600; letter-spacing: -0.01em; cursor: pointer; transition: all 0.18s ease; touch-action: manipulation; white-space: nowrap; flex-shrink: 0;">
+            <span style="font-size: 1.1rem;">🧒</span>
+            <span>Child / Minor Sign-In (Family PIN)</span>
+        </button>
     </form>
+
+    <!-- Child Sign-In Modal -->
+    <div id="childLoginModal" class="d-none" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem;">
+        <div style="background: #ffffff; border-radius: 20px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+            <div style="background: linear-gradient(135deg, #7a0e16 0%, #a31621 100%); color: #ffffff; padding: 1.5rem; text-align: center;">
+                <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🧒🎈</div>
+                <h4 style="font-weight: 700; margin: 0; font-size: 1.25rem; color: #ffffff;">Family Child Sign-In</h4>
+                <p style="margin: 0.25rem 0 0; font-size: 0.825rem; color: rgba(255, 255, 255, 0.85);">Enter your family network code and PIN</p>
+            </div>
+            <form id="childLoginForm" style="padding: 1.5rem;" onsubmit="handleChildLogin(event)">
+                @include('csrf')
+                <div id="childLoginError" class="alert alert-danger d-none py-2 px-3 small mb-3" style="border-radius: 8px;"></div>
+                <div style="margin-bottom: 1rem;">
+                    <label class="form-label small fw-bold" style="color: #334155;">Family Code <span class="text-danger">*</span></label>
+                    <input type="text" name="family_code" id="childFamCode" class="form-control" placeholder="e.g. FAM-12345" required style="border-radius: 10px; min-height: 44px; text-transform: uppercase;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label class="form-label small fw-bold" style="color: #334155;">Username <span class="text-danger">*</span></label>
+                    <input type="text" name="username" id="childUsername" class="form-control" placeholder="e.g. sammy_o" required style="border-radius: 10px; min-height: 44px;">
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label class="form-label small fw-bold" style="color: #334155;">Child PIN (4–8 digits) <span class="text-danger">*</span></label>
+                    <input type="password" name="pin" id="childPin" class="form-control" placeholder="Enter PIN" maxlength="8" required style="border-radius: 10px; min-height: 44px; letter-spacing: 0.2em;">
+                </div>
+                <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                    <button type="button" onclick="closeChildLoginModal()" style="min-height: 44px; min-width: 44px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 10px; padding: 0.5rem 1rem; font-weight: 600; cursor: pointer; color: #475569; white-space: nowrap; flex-shrink: 0;">
+                        Cancel
+                    </button>
+                    <button type="submit" id="childLoginSubmitBtn" style="min-height: 44px; min-width: 44px; border: none; background: var(--brand-primary, #7a0e16); color: #ffffff; border-radius: 10px; padding: 0.5rem 1.25rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
+                        Sign In to Family
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <div class="stitch-footer">
         {{ __('auth.no_account_prompt', "Don't have an account?") }} <a href="/register" class="stitch-link">{{ __('auth.sign_up_link', 'Sign up') }}</a>
@@ -455,6 +497,65 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
+
+function openChildLoginModal() {
+    const modal = document.getElementById('childLoginModal');
+    if (modal) {
+        modal.classList.remove('d-none');
+        document.getElementById('childFamCode')?.focus();
+    }
+}
+
+function closeChildLoginModal() {
+    const modal = document.getElementById('childLoginModal');
+    if (modal) {
+        modal.classList.add('d-none');
+        const err = document.getElementById('childLoginError');
+        if (err) err.classList.add('d-none');
+    }
+}
+
+async function handleChildLogin(e) {
+    e.preventDefault();
+    const btn = document.getElementById('childLoginSubmitBtn');
+    const errDiv = document.getElementById('childLoginError');
+    if (errDiv) errDiv.classList.add('d-none');
+
+    const origText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Signing in...';
+
+    const formData = new FormData(document.getElementById('childLoginForm'));
+
+    try {
+        const res = await fetch('/login/child', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        const data = await res.json();
+        if (res.ok && data.status === 'success') {
+            btn.innerHTML = '✓ Signed In!';
+            window.location.href = data.redirect || '/member/profilePage';
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = origText;
+            if (errDiv) {
+                errDiv.textContent = data.message || 'Invalid family code, username, or PIN.';
+                errDiv.classList.remove('d-none');
+            }
+        }
+    } catch (err) {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+        if (errDiv) {
+            errDiv.textContent = 'Connection error. Please try again.';
+            errDiv.classList.remove('d-none');
+        }
+    }
+}
 </script>
 
 @endsection

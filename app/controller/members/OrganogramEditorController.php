@@ -379,9 +379,29 @@ final class OrganogramEditorController extends BaseController
                 );
                 $childId = $resolution['node_id'];
 
+                // Optional Gated Family Child Account Provisioning
+                $childAccount = null;
+                $enableAccess = ($_POST['enable_child_access'] ?? '') === '1';
+                $childUsername = trim((string)($_POST['child_username'] ?? ''));
+                $childPin = trim((string)($_POST['child_pin'] ?? ''));
+
+                if ($enableAccess && !empty($childUsername) && !empty($childPin)) {
+                    $childAccount = \App\services\ChildAccountService::provisionChildAccount(
+                        parentUserId: (string)($_SESSION['id'] ?? ''),
+                        childNodeId: (int)$childId,
+                        username: $childUsername,
+                        pin: $childPin,
+                        dobYear: !empty($_POST['dob_year']) ? (string)$_POST['dob_year'] : null,
+                        dobMonth: !empty($_POST['dob_month']) ? (string)$_POST['dob_month'] : null,
+                        dobDay: !empty($_POST['dob_day']) ? (string)$_POST['dob_day'] : null,
+                        clientIp: (string)($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1')
+                    );
+                }
+
                 $db->commit();
                 msgSuccess(200, [
-                    "message" => "Child added successfully.",
+                    "message" => "Child added successfully." . ($childAccount ? " Child account provisioned." : ""),
+                    "child_account" => $childAccount,
                     "node" => [
                         "id" => $childId,
                         "first_name" => $firstName,

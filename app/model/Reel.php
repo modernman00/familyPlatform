@@ -125,14 +125,14 @@ final class Reel extends Select
      *
      * @return array<string, mixed>|null
      */
-    public static function getReelById(int $reelId, int|string $currentUserId = ''): ?array
+    public static function getReelById(int $reelId, int|string $currentUserId = '', bool $includeExpired = true): ?array
     {
         try {
             $pdo = self::connect2();
             $expiryDays = self::getExpirationDays();
-            $expiryClause = $expiryDays > 0 ? " AND r.created_at >= DATE_SUB(NOW(), INTERVAL :expiryDays DAY)" : "";
+            $expiryClause = (!$includeExpired && $expiryDays > 0) ? " AND r.created_at >= DATE_SUB(NOW(), INTERVAL :expiryDays DAY)" : "";
 
-            $sql = "SELECT r.*, p.firstName, p.lastName, pp.img AS profilePics,
+            $sql = "SELECT r.*, p.firstName, p.lastName, p.famCode AS authorFamCode, pp.img AS profilePics,
                            (SELECT COUNT(*) FROM family_reel_reactions frr WHERE frr.reel_id = r.id) AS likes_count,
                            (SELECT COUNT(*) FROM family_reel_comments frc WHERE frc.reel_id = r.id) AS comments_count,
                            (SELECT frr2.reaction_type FROM family_reel_reactions frr2 WHERE frr2.reel_id = r.id AND frr2.user_id = :currUser LIMIT 1) AS user_reaction,
@@ -146,7 +146,7 @@ final class Reel extends Select
             $stmt = $pdo->prepare($sql);
             $stmt->bindValue(':reelId', $reelId, PDO::PARAM_INT);
             $stmt->bindValue(':currUser', (string)$currentUserId, PDO::PARAM_STR);
-            if ($expiryDays > 0) {
+            if (!$includeExpired && $expiryDays > 0) {
                 $stmt->bindValue(':expiryDays', $expiryDays, PDO::PARAM_INT);
             }
             $stmt->execute();
@@ -332,7 +332,7 @@ final class Reel extends Select
             $sql = "SELECT c.id AS comment_id, c.reel_id, c.user_id, c.parent_comment_no, c.comment, c.gif_url, c.created_at, c.updated_at,
                            p.firstName, p.lastName, pp.img AS profilePics
                     FROM family_reel_comments AS c
-                    INNER JOIN personal AS p ON c.user_id = p.id
+                    LEFT JOIN personal AS p ON c.user_id = p.id
                     LEFT JOIN profilePics AS pp ON c.user_id = pp.id
                     WHERE c.reel_id = :reelId
                     ORDER BY c.created_at ASC";

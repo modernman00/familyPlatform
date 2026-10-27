@@ -354,17 +354,27 @@ final class Post extends Select
     }
 
     /**
-     * Atomically increment post view count.
+     * Atomically increment post view count and log viewer audit record.
      *
      * @param int $postNo
+     * @param string $userId
      * @return void
      */
-    public static function incrementViews(int $postNo): void
+    public static function incrementViews(int $postNo, string $userId = ''): void
     {
         try {
             $pdo = parent::connect2();
             $stmt = $pdo->prepare("UPDATE post SET views_count = views_count + 1 WHERE post_no = ?");
             $stmt->execute([$postNo]);
+
+            if ($userId !== '') {
+                $stmtAudit = $pdo->prepare("
+                    INSERT INTO post_views (post_no, user_id, view_count, created_at, updated_at)
+                    VALUES (?, ?, 1, NOW(), NOW())
+                    ON DUPLICATE KEY UPDATE view_count = view_count + 1, updated_at = NOW()
+                ");
+                $stmtAudit->execute([$postNo, $userId]);
+            }
         } catch (\Throwable $e) {
             error_log('[Post::incrementViews] ' . $e->getMessage());
         }
@@ -386,6 +396,174 @@ final class Post extends Select
         } catch (\Throwable $e) {
             error_log('[Post::getViewsCount] ' . $e->getMessage());
             return 0;
+        }
+    }
+
+    /**
+     * Verify whether a given user is the author of the post.
+     *
+     * @param int $postNo
+     * @param string $userId
+     * @return bool
+     */
+    public static function isPostAuthor(int $postNo, string $userId): bool
+    {
+        if ($postNo <= 0 || $userId === '') {
+            return false;
+        }
+        try {
+            $pdo = parent::connect2();
+            $stmt = $pdo->prepare("SELECT id FROM post WHERE post_no = ? AND date_deleted IS NULL");
+            $stmt->execute([$postNo]);
+            $authorId = $stmt->fetchColumn();
+            return $authorId !== false && (string)$authorId === (string)$userId;
+        } catch (\Throwable $e) {
+            error_log('[Post::isPostAuthor] ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Retrieve the list of users who have viewed a post.
+     *
+     * @param int $postNo
+     * @return array<int, array<string, mixed>>
+     */
+    public static function getPostViewers(int $postNo): array
+    {
+        if ($postNo <= 0) {
+            return [];
+        }
+        try {
+            $pdo = parent::connect2();
+            $stmt = $pdo->prepare("
+                SELECT pv.user_id, pv.view_count, pv.created_at, pv.updated_at,
+                       COALESCE(p.firstName, '') AS firstName,
+                       COALESCE(p.lastName, '') AS lastName,
+                       COALESCE(pp.img, '') AS profile_img
+                FROM post_views pv
+                LEFT JOIN personal p ON pv.user_id = p.id
+                LEFT JOIN profilePics pp ON pv.user_id = pp.id
+                WHERE pv.post_no = ?
+                ORDER BY pv.updated_at DESC
+            ");
+            $stmt->execute([$postNo]);
+            /** @var array<int, array<string, mixed>> $rows */
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+            return $rows;
+        } catch (\Throwable $e) {
+            error_log('[Post::getPostViewers] ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Atomically increment comment view count and log viewer audit record.
+     *
+     * @param int $commentNo
+     * @param string $userId
+     * @return void
+     */
+    public static function incrementCommentViews(int $commentNo, string $userId = ''): void
+    {
+        if ($commentNo <= 0) {
+            return;
+        }
+        try {
+            $pdo = parent::connect2();
+            $stmt = $pdo->prepare("UPDATE comment SET views_count = views_count + 1 WHERE comment_no = ?");
+            $stmt->execute([$commentNo]);
+
+            if ($userId !== '') {
+                $stmtAudit = $pdo->prepare("
+                    INSERT INTO comment_views (comment_no, user_id, view_count, created_at, updated_at)
+                    VALUES (?, ?, 1, NOW(), NOW())
+                    ON DUPLICATE KEY UPDATE view_count = view_count + 1, updated_at = NOW()
+                ");
+                $stmtAudit->execute([$commentNo, $userId]);
+            }
+        } catch (\Throwable $e) {
+            error_log('[Post::incrementCommentViews] ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get the current view count for a comment.
+     *
+     * @param int $commentNo
+     * @return int
+     */
+    public static function getCommentViewsCount(int $commentNo): int
+    {
+        if ($commentNo <= 0) {
+            return 0;
+        }
+        try {
+            $pdo = parent::connect2();
+            $stmt = $pdo->prepare("SELECT views_count FROM comment WHERE comment_no = ?");
+            $stmt->execute([$commentNo]);
+            return (int) $stmt->fetchColumn();
+        } catch (\Throwable $e) {
+            error_log('[Post::getCommentViewsCount] ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Verify whether a given user is the author of the comment.
+     *
+     * @param int $commentNo
+     * @param string $userId
+     * @return bool
+     */
+    public static function isCommentAuthor(int $commentNo, string $userId): bool
+    {
+        if ($commentNo <= 0 || $userId === '') {
+            return false;
+        }
+        try {
+            $pdo = parent::connect2();
+            $stmt = $pdo->prepare("SELECT id FROM comment WHERE comment_no = ? AND date_deleted IS NULL");
+            $stmt->execute([$commentNo]);
+            $authorId = $stmt->fetchColumn();
+            return $authorId !== false && (string)$authorId === (string)$userId;
+        } catch (\Throwable $e) {
+            error_log('[Post::isCommentAuthor] ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Retrieve the list of users who have viewed a comment.
+     *
+     * @param int $commentNo
+     * @return array<int, array<string, mixed>>
+     */
+    public static function getCommentViewers(int $commentNo): array
+    {
+        if ($commentNo <= 0) {
+            return [];
+        }
+        try {
+            $pdo = parent::connect2();
+            $stmt = $pdo->prepare("
+                SELECT cv.user_id, cv.view_count, cv.created_at, cv.updated_at,
+                       COALESCE(p.firstName, '') AS firstName,
+                       COALESCE(p.lastName, '') AS lastName,
+                       COALESCE(pp.img, '') AS profile_img
+                FROM comment_views cv
+                LEFT JOIN personal p ON cv.user_id = p.id
+                LEFT JOIN profilePics pp ON cv.user_id = pp.id
+                WHERE cv.comment_no = ?
+                ORDER BY cv.updated_at DESC
+            ");
+            $stmt->execute([$commentNo]);
+            /** @var array<int, array<string, mixed>> $rows */
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+            return $rows;
+        } catch (\Throwable $e) {
+            error_log('[Post::getCommentViewers] ' . $e->getMessage());
+            return [];
         }
     }
 

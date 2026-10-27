@@ -60,6 +60,8 @@
   </script>
   @yield('extra_schema')
   <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
+  <meta name="user-id" content="{{ $_SESSION['id'] ?? '' }}">
+  <meta name="vapid-public-key" content="{{ $_ENV['VAPID_PUBLIC_KEY'] ?? $_SERVER['VAPID_PUBLIC_KEY'] ?? (getenv('VAPID_PUBLIC_KEY') ?: ($_ENV['MIX_VAPID_PUBLIC_KEY'] ?? '')) }}">
 
   @php
     $appUrl = rtrim($_ENV['APP_URL'] ?? getenv('APP_URL') ?: '', '/');
@@ -221,6 +223,8 @@
   </div>
 
   @include('includes.public_footer')
+
+  @include('partials.push-notification-banner')
 
   @include('partials.cookie-banner')
 

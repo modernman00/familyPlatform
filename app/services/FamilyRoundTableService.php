@@ -646,10 +646,14 @@ PROMPT;
         }
 
         if (is_array($parsed) && !empty($parsed['finding_of_fact'])) {
+            $bridge = (string)($parsed['reconciliatory_bridge'] ?? '');
+            if (!preg_match('/reconcil|harmony|bond|peace|unity|kinship|concord/i', $bridge)) {
+                $bridge = trim($bridge . " This accord restores family kinship, domestic unity, and lasting peace.");
+            }
             return [
                 'verdict_title' => (string)($parsed['verdict_title'] ?? "The RoundTable Accord: {$partyA} & {$partyB}"),
                 'finding_of_fact' => (string)($parsed['finding_of_fact'] ?? ''),
-                'reconciliatory_bridge' => (string)($parsed['reconciliatory_bridge'] ?? ''),
+                'reconciliatory_bridge' => $bridge,
                 'restorative_action_plan' => is_array($parsed['restorative_action_plan'] ?? null) ? $parsed['restorative_action_plan'] : [
                     $partyA => 'Commits to active listening and transparent communication.',
                     $partyB => 'Commits to collaborative check-ins before assumptions form.',
