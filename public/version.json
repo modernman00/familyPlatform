@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(security): Red Team & BRATS comprehensive audit remediation, Family RoundTable, Two Truths, PartyPlatform bridge & Reels parity",
+    "title": "Feat(release): Reels audio library & dual volume, multi-angle chrono sync, Family RoundTable peacemaker tribunal, I18n translation engine, and Global Design Standards v2.1",
     "notes": [
+        "Feat(release): Reels audio library & dual volume, multi-angle chrono sync, Family RoundTable peacemaker tribunal, I18n translation engine, and Global Design Standards v2.1",
         "Feat(security): Red Team & BRATS comprehensive audit remediation, Family RoundTable, Two Truths, PartyPlatform bridge & Reels parity",
-        "Build(webpack): set exportsPresence to warn for barrel re-exports in shared-js-lib",
-        "Feat(release): threaded comment replies, @mentions, GIF comments, Family AI Hub, and crimson brand unification"
+        "Build(webpack): set exportsPresence to warn for barrel re-exports in shared-js-lib"
     ],
-    "released_at": "2026-10-26",
-    "commit": "c634801"
+    "released_at": "2026-10-27",
+    "commit": "d0b50cb"
 }
