@@ -135,15 +135,15 @@ if (!str_contains($mobileFile, 'milestone.meaningful_message') || !str_contains(
     exit(1);
 }
 
-// Verify Post Card Share Button is Removed (Absolute Privacy Standard)
+// Verify Post Card External Social Leaks are Removed (Absolute Privacy Standard)
 $postCardFile = file_get_contents(__DIR__ . '/../resources/views/components/feed/post-card.blade.php');
 if ($postCardFile === false) {
     echo "❌ FAILED: Unable to read post-card.blade.php\n";
     exit(1);
 }
 
-if (str_contains($postCardFile, 'sharePostToSocialMedia')) {
-    echo "❌ FAILED: Post card still contains sharePostToSocialMedia button! Must be private.\n";
+if (str_contains($postCardFile, 'bi-whatsapp') || str_contains($postCardFile, 'api.whatsapp.com')) {
+    echo "❌ FAILED: Post card still contains WhatsApp share link! Must be private.\n";
     exit(1);
 }
 
