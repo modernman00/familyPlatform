@@ -11,7 +11,7 @@ foreach(($eventData ?? []) as $event) {
         } else if ($dateDiff === 1 || strtolower($getDateDiff) === 'one') {
             $dateDifference = 'Tomorrow';
         } else {
-            $dateDifference = "in $getDateDiff Days";
+            $dateDifference = "in {$dateDiff} days";
         }
     }
 
@@ -101,8 +101,8 @@ foreach(($eventData ?? []) as $event) {
                         <div class="event-card" :id="'linkNotification' + event.no">
                             <div class="p-3 rounded-3" style="background-color: var(--hover-color); border: 1px solid var(--border-color); border-radius: 14px;">
                                 <div class="d-flex flex-column">
-                                    <div class="d-flex justify-content-between align-items-start mb-1">
-                                        <h6 class="fw-bold mb-0 text-truncate" style="color: var(--text-color); font-size: 0.95rem;" x-text="event.eventName"></h6>
+                                    <h6 class="fw-bold mb-1" style="color: var(--text-color); font-size: 0.95rem; line-height: 1.35; word-break: break-word;" x-text="event.eventName" :title="event.eventName"></h6>
+                                    <div class="mb-2">
                                         <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: var(--secondary-color); color: #8a1019; font-size: 0.75rem;" x-text="event.dateDifference"></span>
                                     </div>
                                     
@@ -135,8 +135,8 @@ foreach(($eventData ?? []) as $event) {
 
                                             <template x-if="event.party_card_url && ['Birthday', 'Anniversary', 'Wedding', 'Graduation', 'Party', 'Reunion'].includes(event.eventType)">
                                                 <a :href="event.party_card_url" target="_blank" rel="noopener noreferrer"
-                                                   class="btn btn-sm rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1"
-                                                   style="background-color: #fbefef; color: #8a1019 !important; border: 1px solid rgba(163, 22, 33, 0.25); font-size: 0.85rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;"
+                                                   class="btn btn-sm rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm"
+                                                   style="background-color: #ffffff; color: #8a1019 !important; border: 1px solid rgba(163, 22, 33, 0.25); font-size: 0.85rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;"
                                                    title="Sign the Family Celebration Card">
                                                     <i class="bi bi-envelope-paper-heart-fill"></i> Sign Card
                                                 </a>
