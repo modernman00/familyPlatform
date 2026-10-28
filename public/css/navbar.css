@@ -703,5 +703,52 @@ body.dark-mode .btn-omni-search-trigger:hover {
   color: #f8fafc;
 }
 
+/* =========================================================
+   Dropdown Anchoring & Viewport Overflow Protection
+   Prevents user & language dropdowns from clipping off-screen
+   ========================================================= */
+.brand-navbar-stitch .dropdown {
+  position: relative;
+}
+
+.brand-navbar-stitch .dropdown-menu-end,
+.dropdown-menu-end:not([data-bs-popper]) {
+  right: 0 !important;
+  left: auto !important;
+  max-width: calc(100vw - 24px) !important;
+}
+
+.brand-navbar-stitch .dropdown-menu-end[data-bs-popper] {
+  right: 0;
+  left: auto;
+  max-width: calc(100vw - 24px) !important;
+}
+
+.stitch-user-dropdown {
+  min-width: 210px;
+  max-width: calc(100vw - 24px) !important;
+  z-index: 1060;
+}
+
+@media (max-width: 991.98px) {
+  .brand-navbar-stitch .navbar-collapse .navbar-actions-group {
+    flex-wrap: wrap;
+    padding-top: 0.75rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--brand-border, #e2e8f0);
+    gap: 0.5rem !important;
+    width: 100%;
+  }
+
+  .brand-navbar-stitch .dropdown-menu-end,
+  .brand-navbar-stitch .stitch-user-dropdown {
+    right: 0 !important;
+    left: auto !important;
+    max-width: calc(100vw - 24px) !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18) !important;
+  }
+}
+
+
 
 

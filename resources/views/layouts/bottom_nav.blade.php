@@ -1,30 +1,77 @@
 <style>
-/* Scroll-stability: the bar must never move relative to the screen edge.
-   - opaque background, no backdrop-filter (iOS Safari repaints blur layers while the URL bar resizes -> visible jump)
-   - own GPU layer so the toolbar collapse/expand doesn't re-layout it
-   - no JS repositioning (the old visualViewport transform fought the browser) */
+/* Scroll-stability & Frosted Acrylic Standard (v2.1 Instagram/iOS Glassmorphism) */
 .pwa-bottom-nav {
-    background: #ffffff !important;
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
+    background: var(--nav-frosted-bg, rgba(255, 255, 255, 0.88)) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    border-top: 0.5px solid var(--nav-border, rgba(0, 0, 0, 0.08)) !important;
     -webkit-transform: translate3d(0, 0, 0);
     transform: translate3d(0, 0, 0);
     will-change: transform;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
 }
-body.dark-mode .pwa-bottom-nav, body.dark-theme .pwa-bottom-nav { background: #0f172a !important; }
+body.dark-mode .pwa-bottom-nav, 
+body.dark-theme .pwa-bottom-nav,
+[data-bs-theme="dark"] .pwa-bottom-nav { 
+    background: var(--nav-frosted-bg, rgba(20, 20, 22, 0.88)) !important;
+    border-top: 0.5px solid var(--nav-border, rgba(255, 255, 255, 0.08)) !important;
+}
 @media (max-width: 991.98px) {
     /* Android resizes the layout viewport for the keyboard and would float the bar over the input */
     body:has(input:focus, textarea:focus, select:focus) .pwa-bottom-nav { display: none !important; }
 }
+
+/* Active Tab Micro-Dot & Tonal Icon Fill */
+.pwa-tab-item {
+    color: var(--text-tertiary, #94a3b8) !important;
+    transition: color 150ms ease, transform 120ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pwa-tab-item .pwa-tab-icon-outline { display: inline-block; }
+.pwa-tab-item .pwa-tab-icon-filled { display: none; }
+
+.pwa-tab-item.active {
+    color: var(--brand-primary, #a31621) !important;
+}
+.pwa-tab-item.active .pwa-tab-icon-outline { display: none; }
+.pwa-tab-item.active .pwa-tab-icon-filled { 
+    display: inline-block;
+    color: var(--brand-primary, #a31621) !important;
+}
+.pwa-tab-item.active .pwa-tab-label {
+    color: var(--brand-primary, #a31621) !important;
+    font-weight: 700;
+}
+.pwa-tab-item.active .pwa-tab-icon-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: var(--brand-primary, #a31621);
+    box-shadow: 0 0 6px var(--brand-primary-glow, rgba(163, 22, 33, 0.5));
+}
+.pwa-tab-center-action .pwa-center-btn-bubble {
+    background: var(--brand-primary-gradient, linear-gradient(135deg, #a31621 0%, #8a1019 100%)) !important;
+    border: 3px solid var(--surface-card, #ffffff) !important;
+    box-shadow: 0 4px 14px var(--brand-primary-glow, rgba(163, 22, 33, 0.42)) !important;
+}
+body.dark-mode .pwa-tab-center-action .pwa-center-btn-bubble,
+body.dark-theme .pwa-tab-center-action .pwa-center-btn-bubble,
+[data-bs-theme="dark"] .pwa-tab-center-action .pwa-center-btn-bubble {
+    border-color: #141416 !important;
+}
 </style>
-<!-- Mobile PWA Bottom Tab Navigation (Native App Store / Facebook Standard) -->
+<!-- Mobile PWA Bottom Tab Navigation (Native App Store / Instagram Standard) -->
 <nav class="pwa-bottom-nav d-lg-none" id="pwaBottomNav" aria-label="Mobile App Navigation">
     <!-- Home / Feed -->
     <a href="/profilePage" class="pwa-tab-item" data-tab="feed" title="{{ __('nav.home', 'Home Feed') }} - Go to main family updates and posts">
         <div class="pwa-tab-icon-wrap">
-            <i class="bi bi-house-door-fill"></i>
+            <i class="bi bi-house pwa-tab-icon-outline"></i>
+            <i class="bi bi-house-door-fill pwa-tab-icon-filled"></i>
         </div>
         <span class="pwa-tab-label">{{ __('nav.home', 'Home') }}</span>
     </a>
@@ -32,7 +79,8 @@ body.dark-mode .pwa-bottom-nav, body.dark-theme .pwa-bottom-nav { background: #0
     <!-- Family Tree -->
     <a href="/organogram/{{ $_SESSION['id'] ?? '' }}?mode=canvas" class="pwa-tab-item" data-tab="tree" title="{{ __('nav.tree', 'Family Tree') }} - Explore living family tree and lineage">
         <div class="pwa-tab-icon-wrap">
-            <i class="bi bi-diagram-3-fill"></i>
+            <i class="bi bi-diagram-3 pwa-tab-icon-outline"></i>
+            <i class="bi bi-diagram-3-fill pwa-tab-icon-filled"></i>
         </div>
         <span class="pwa-tab-label">{{ __('nav.tree', 'Tree') }}</span>
     </a>
@@ -48,7 +96,8 @@ body.dark-mode .pwa-bottom-nav, body.dark-theme .pwa-bottom-nav { background: #0
     <!-- Family Studio / Reels -->
     <a href="/familyStudio" class="pwa-tab-item" data-tab="reels" title="{{ __('nav.studio', 'Family Studio') }} - Watch captivating family reels and celebrations">
         <div class="pwa-tab-icon-wrap">
-            <i class="bi bi-camera-reels-fill"></i>
+            <i class="bi bi-camera-reels pwa-tab-icon-outline"></i>
+            <i class="bi bi-camera-reels-fill pwa-tab-icon-filled"></i>
         </div>
         <span class="pwa-tab-label">{{ __('nav.studio', 'Studio') }}</span>
     </a>
@@ -56,7 +105,8 @@ body.dark-mode .pwa-bottom-nav, body.dark-theme .pwa-bottom-nav { background: #0
     <!-- Notifications & Alerts -->
     <a href="javascript:void(0)" role="button" aria-haspopup="true" class="pwa-tab-item position-relative" id="pwaNotifTab" data-tab="notifications" title="{{ __('nav.alerts', 'Alerts & Notifications') }} - View family notifications and invitations">
         <div class="pwa-tab-icon-wrap position-relative">
-            <i class="bi bi-bell-fill"></i>
+            <i class="bi bi-bell pwa-tab-icon-outline"></i>
+            <i class="bi bi-bell-fill pwa-tab-icon-filled"></i>
             <span class="pwa-tab-badge" id="pwa_bottom_badge" style="display: none;"></span>
         </div>
         <span class="pwa-tab-label">{{ __('nav.alerts', 'Alerts') }}</span>

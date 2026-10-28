@@ -54,15 +54,14 @@ body {
 
 .container-main {
   display: flex;
-  gap: 24px;
+  gap: 20px;
   padding: 20px;
-  max-width: 1360px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
 .profile-column {
-  flex: 0 0 280px;
-  min-width: 280px;
+  flex: 0 0 300px;
   position: sticky;
   top: calc(80px + env(safe-area-inset-top, 0px));
   height: fit-content;
@@ -76,9 +75,7 @@ body {
 }
 
 .sidebar-column {
-  flex: 0 0 380px;
-  width: 380px;
-  max-width: 100%;
+  flex: 0 0 300px;
   position: sticky;
   top: calc(80px + env(safe-area-inset-top, 0px));
   height: fit-content;
@@ -571,6 +568,73 @@ body {
 }
 .kinship-radar-widget .kin-tap-hint {
   color: #64748b;
+}
+
+/* Kinship Radar Pulse & Redesign Classes */
+@keyframes kinRadarPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.85); }
+}
+.kin-radar-pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background-color: var(--brand-primary, #8B152B);
+  animation: kinRadarPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.kin-radar-badge {
+  background-color: #fff1f2;
+  color: #9f1239;
+  border: 1px solid #fecdd3;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.btn-filter-kin {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btn-filter-kin:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+.btn-filter-kin.active {
+  background-color: var(--brand-primary, #8B152B) !important;
+  color: #ffffff !important;
+  border-color: var(--brand-primary, #8B152B) !important;
+}
+
+.kin-lineage-breadcrumb {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 0.72rem;
+  color: #475569;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.kin-heritage-clue {
+  background-color: #fefce8;
+  border: 1px solid #fef08a;
+  color: #713f12;
+  font-size: 0.825rem;
+  font-weight: 500;
+  border-radius: 12px;
+}
+
+.kin-match-pill {
+  background-color: #fff1f2;
+  color: #be123c;
+  border: 1px solid #ffe4e6;
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 /* Modal Kinship Details Base */
@@ -1371,11 +1435,30 @@ body, h1, h2, h3, h4, h5, h6, p, span, button, input, textarea {
   background-color: var(--secondary-color);
   border: 1px solid #ecc7c9;
   border-radius: 9999px;
-  padding: 6px 18px;
+  padding: 8px 18px;
+  min-height: 44px;
   width: fit-content;
+  max-width: 100%;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.2s ease;
+}
+
+a.family-code-pill:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
+a.family-code-pill:active {
+  transform: scale(0.98);
+}
+
+.family-code-pill--birth {
+  background-color: #ecfdf5;
+  border-color: #a7f3d0;
 }
 
 .family-code-label {
@@ -1383,14 +1466,25 @@ body, h1, h2, h3, h4, h5, h6, p, span, button, input, textarea {
   text-transform: uppercase;
   font-weight: 700;
   color: #a31621;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   letter-spacing: 0.05em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.family-code-label--birth {
+  color: #047857;
 }
 
 .family-code-value {
   font-weight: 800;
   color: #2a0a0d;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+
+.family-code-value--birth {
+  color: #064e3b;
 }
 
 body.dark-mode .family-code-pill {
@@ -1398,11 +1492,21 @@ body.dark-mode .family-code-pill {
   border-color: rgba(184,32,44, 0.4) !important;
 }
 
+body.dark-mode .family-code-pill--birth {
+  background-color: rgba(16, 185, 129, 0.16) !important;
+  border-color: rgba(16, 185, 129, 0.42) !important;
+}
+
 body.dark-mode .family-code-label {
   color: #ef6b73 !important;
 }
 
-body.dark-mode .family-code-value {
+body.dark-mode .family-code-label--birth {
+  color: #6ee7b7 !important;
+}
+
+body.dark-mode .family-code-value,
+body.dark-mode .family-code-value--birth {
   color: #ffffff !important;
 }
 
@@ -1805,6 +1909,30 @@ body.dark-theme .kinship-radar-widget .badge.bg-light,
   background-color: rgba(255, 255, 255, 0.08) !important;
   color: #f8fafc !important;
   border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+body.dark-mode .kin-heritage-clue,
+body.dark-theme .kin-heritage-clue,
+[data-bs-theme="dark"] .kin-heritage-clue {
+  background-color: rgba(254, 240, 138, 0.1) !important;
+  border-color: rgba(254, 240, 138, 0.25) !important;
+  color: #fef08a !important;
+}
+
+body.dark-mode .kin-lineage-breadcrumb,
+body.dark-theme .kin-lineage-breadcrumb,
+[data-bs-theme="dark"] .kin-lineage-breadcrumb {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .btn-filter-kin:not(.active),
+body.dark-theme .btn-filter-kin:not(.active),
+[data-bs-theme="dark"] .btn-filter-kin:not(.active) {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #e2e8f0 !important;
 }
 
 /* Modal Dark Mode */

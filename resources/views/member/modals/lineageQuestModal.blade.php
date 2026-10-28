@@ -20,6 +20,19 @@
             </div>
 
             <div class="modal-body px-4 py-3" style="overflow-y: auto;">
+                @if(!empty($hasMaternalCode) && !empty($maternalFamCode))
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 p-2.5 mb-3 rounded-3 border" style="background: #f0fdf4; border-color: #bbf7d0 !important;">
+                    <span class="small fw-bold text-dark"><i class="bi bi-signpost-split text-success me-1"></i> Quest Family Tree:</span>
+                    <div class="d-flex flex-wrap gap-2" role="radiogroup" aria-label="Select Married or Birth Family Code for Quests">
+                        <button type="button" id="questScopePrimaryBtn" class="btn btn-sm rounded-pill fw-semibold px-3 btn-primary text-white" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0;" onclick="window.switchQuestLineageScope('{{ ltrim((string)($primaryFamCode ?? ($data['famCode'] ?? '')), '#') }}', 'primary')">
+                            Married (#{{ ltrim((string)($primaryFamCode ?? ($data['famCode'] ?? '')), '#') }})
+                        </button>
+                        <button type="button" id="questScopeBirthBtn" class="btn btn-sm rounded-pill fw-semibold px-3 btn-outline-success" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0;" onclick="window.switchQuestLineageScope('{{ ltrim((string)$maternalFamCode, '#') }}', 'maternal')">
+                            Birth (#{{ ltrim((string)$maternalFamCode, '#') }})
+                        </button>
+                    </div>
+                </div>
+                @endif
                 <!-- Completeness Metric Card -->
                 <div class="card border-0 mb-4 shadow-sm" style="border-radius: 18px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff;">
                     <div class="card-body p-4">
@@ -89,6 +102,24 @@
 (function() {
     let questsLoaded = false;
     let loadedFamilyCode = '';
+
+    window.switchQuestLineageScope = function(code, scope) {
+        window.__FAMILY_CODE__ = code;
+        window.__ACTIVE_LINEAGE_SCOPE__ = scope || 'primary';
+        const pBtn = document.getElementById('questScopePrimaryBtn');
+        const bBtn = document.getElementById('questScopeBirthBtn');
+        if (pBtn && bBtn) {
+            if (scope === 'maternal') {
+                bBtn.className = 'btn btn-sm rounded-pill fw-semibold px-3 btn-success text-white';
+                pBtn.className = 'btn btn-sm rounded-pill fw-semibold px-3 btn-outline-primary';
+            } else {
+                pBtn.className = 'btn btn-sm rounded-pill fw-semibold px-3 btn-primary text-white';
+                bBtn.className = 'btn btn-sm rounded-pill fw-semibold px-3 btn-outline-success';
+            }
+        }
+        questsLoaded = false;
+        loadLineageQuests(code);
+    };
 
     window.openLineageQuestModal = function() {
         const modalEl = document.getElementById('lineageQuestModal');

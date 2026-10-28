@@ -217,6 +217,39 @@ final class KinshipCalculatorService
                 }
             }
 
+            // Parent's other partner (not Ego's own parent): clarify whose parent they are or label as Stepmother/Stepfather
+            if (is_array($path) && count($path) === 2 && $path[0]['type'] === 'parent' && $path[1]['type'] === 'spouse' && !in_array($id, $parentsOf[$egoNodeId] ?? [], true)) {
+                $pGender = strtolower((string)($node['gender'] ?? ''));
+                $roleWord = match ($pGender) {
+                    'female' => 'Mother',
+                    'male' => 'Father',
+                    default => 'Parent',
+                };
+                $halfKidFirst = '';
+                foreach ($childrenOf[$id] ?? [] as $hkId) {
+                    if ($hkId !== $egoNodeId && isset($nodesById[$hkId])) {
+                        $hkFirst = trim((string)($nodesById[$hkId]['first_name'] ?? ''));
+                        if ($hkFirst === '' && !empty($nodesById[$hkId]['full_name'])) {
+                            $hkFirst = explode(' ', trim((string)$nodesById[$hkId]['full_name']))[0] ?? '';
+                        }
+                        if ($hkFirst !== '') {
+                            $halfKidFirst = $hkFirst;
+                            break;
+                        }
+                    }
+                }
+                if ($halfKidFirst !== '') {
+                    $node['ego_relation'] = $halfKidFirst . "'s " . $roleWord;
+                } else {
+                    $node['ego_relation'] = match ($pGender) {
+                        'female' => 'Stepmother',
+                        'male' => 'Stepfather',
+                        default => 'Step-parent',
+                    };
+                }
+                $node['kinship_category'] = 'step_parent';
+            }
+
             // Former partners keep their own title instead of reading as a current spouse
             if ($titleInfo['category'] === 'spouse' && is_array($path) && count($path) === 1) {
                 $pair = $unionOfPair[min($egoNodeId, $id) . '_' . max($egoNodeId, $id)] ?? null;

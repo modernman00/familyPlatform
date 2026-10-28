@@ -47,27 +47,122 @@ final class CommentReactionController
         return;
       }
 
-      $allowed = ['like', 'love', 'haha', 'wow', 'sad', 'angry'];
+      $allowed = ['like', 'love', 'haha', 'wow', 'shock', 'sad', 'angry', 'celebrate'];
       if (!\in_array($reactionType, $allowed, true)) {
         http_response_code(400);
         header('Content-Type: application/json');
         echo json_encode(['status' => 'error', 'message' => 'Invalid reaction type.']);
         return;
       }
+      if ($reactionType === 'shock') {
+        $reactionType = 'wow';
+      }
 
       $pdo = Db::connect2();
 
-      // ── Verify the comment belongs to this user's family ───────────────
+      // ── Verify the comment belongs to this user's family or connected feed network ──
       $stmt = $pdo->prepare(
-        "SELECT cr.comment_no, cr.post_no, p.postFamCode FROM comment cr
+        "SELECT cr.comment_no, cr.post_no, cr.id AS comment_author_id, p.id AS post_author_id, p.postFamCode
+         FROM comment cr
          INNER JOIN post p ON cr.post_no = p.post_no
-         WHERE cr.comment_no = :commentNo AND p.postFamCode = :famCode
+         WHERE cr.comment_no = :commentNo
          LIMIT 1"
       );
-      $stmt->execute(['commentNo' => $commentNo, 'famCode' => $famCode]);
+      $stmt->execute(['commentNo' => $commentNo]);
       $commentRow = $stmt->fetch(PDO::FETCH_ASSOC);
 
-      if (!$commentRow) {
+      $hasAccess = false;
+      if ($commentRow) {
+        $postFamCode = trim((string) ($commentRow['postFamCode'] ?? ''));
+        $postAuthorId = trim((string) ($commentRow['post_author_id'] ?? ''));
+
+        // 1. Primary famCode or multi-family session codes
+        $sessionFamCodes = is_array($_SESSION['famCodes'] ?? null) ? $_SESSION['famCodes'] : [];
+        $sessionFamCodes[] = $famCode;
+        foreach ($sessionFamCodes as $sfc) {
+          $cleanSfc = trim((string) $sfc);
+          if ($cleanSfc !== '' && strcasecmp($cleanSfc, $postFamCode) === 0) {
+            $hasAccess = true;
+            break;
+          }
+        }
+
+        // 2. Approved secondary family membership in user_families
+        if (!$hasAccess && $postFamCode !== '') {
+          $ufStmt = $pdo->prepare(
+            "SELECT 1 FROM user_families
+             WHERE user_id = :uid AND UPPER(family_code) = UPPER(:famCode) AND status = 'approved'
+             LIMIT 1"
+          );
+          $ufStmt->execute(['uid' => $userId, 'famCode' => $postFamCode]);
+          if ($ufStmt->fetchColumn()) {
+            $hasAccess = true;
+          }
+        }
+
+        // 3. Connected family member via requestMgt (same visibility rule as FeedRepository)
+        if (!$hasAccess && $postAuthorId !== '') {
+          $rmStmt = $pdo->prepare(
+            "SELECT 1 FROM requestMgt
+             WHERE (requester_id = :uid1 AND approver_id = :author1)
+                OR (approver_id = :uid2 AND requester_id = :author2)
+                OR (:postFam1 != '' AND requester_id = :uid3 AND UPPER(requesterCode) = UPPER(:postFam2))
+                OR (:postFam3 != '' AND approver_id = :uid4 AND UPPER(approverCode) = UPPER(:postFam4))
+             LIMIT 1"
+          );
+          $rmStmt->execute([
+            'uid1' => $userId,
+            'author1' => $postAuthorId,
+            'uid2' => $userId,
+            'author2' => $postAuthorId,
+            'postFam1' => $postFamCode,
+            'uid3' => $userId,
+            'postFam2' => $postFamCode,
+            'postFam3' => $postFamCode,
+            'uid4' => $userId,
+            'postFam4' => $postFamCode,
+          ]);
+          if ($rmStmt->fetchColumn()) {
+            $hasAccess = true;
+          }
+        }
+
+        // 4. Tagged in the post
+        if (!$hasAccess) {
+          $tagStmt = $pdo->prepare(
+            "SELECT 1 FROM post_tags WHERE post_no = :postNo AND user_id = :uid LIMIT 1"
+          );
+          $tagStmt->execute(['postNo' => (int) $commentRow['post_no'], 'uid' => $userId]);
+          if ($tagStmt->fetchColumn()) {
+            $hasAccess = true;
+          }
+        }
+
+        // 5. Approved kinship network connection
+        if (!$hasAccess && $postAuthorId !== '') {
+          try {
+            $kcStmt = $pdo->prepare(
+              "SELECT 1 FROM kinship_connections
+               WHERE ((user_a_id = :uid1 AND user_b_id = :author1) OR (user_b_id = :uid2 AND user_a_id = :author2))
+                 AND status = 'approved'
+               LIMIT 1"
+            );
+            $kcStmt->execute([
+              'uid1' => $userId,
+              'author1' => $postAuthorId,
+              'uid2' => $userId,
+              'author2' => $postAuthorId,
+            ]);
+            if ($kcStmt->fetchColumn()) {
+              $hasAccess = true;
+            }
+          } catch (\Throwable) {
+            // Ignore if table not present
+          }
+        }
+      }
+
+      if (!$commentRow || !$hasAccess) {
         http_response_code(403);
         header('Content-Type: application/json');
         echo json_encode(['status' => 'error', 'message' => 'Comment not found in your family.']);
@@ -238,6 +333,7 @@ final class CommentReactionController
         'wow' => 0,
         'sad' => 0,
         'angry' => 0,
+        'celebrate' => 0,
         'comment_no' => $commentNo,
         'totalReactions' => 0
       ];
@@ -249,7 +345,9 @@ final class CommentReactionController
       $columnForLabel = [
         'like' => 'likes', 'likes' => 'likes',
         'love' => 'love', 'haha' => 'haha',
-        'wow' => 'wow', 'sad' => 'sad', 'angry' => 'angry',
+        'wow' => 'wow', 'shock' => 'wow',
+        'sad' => 'sad', 'angry' => 'angry',
+        'celebrate' => 'celebrate',
       ];
 
       foreach ($countReaction ?? [] as $count) {

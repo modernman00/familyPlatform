@@ -457,12 +457,31 @@ class BaseController
         $motherFirstName = $data['mother_first_name'] ?? $motherParts[0];
         $motherLastName = $data['mother_last_name'] ?? ($motherParts[1] ?? '');
 
+        $idStr = (string)($data['id'] ?? '');
+        $primaryFamCode = strtoupper(trim(ltrim((string)($data['famCode'] ?? ''), '#')));
+        $birthFamily = ['state' => 'none', 'code' => '', 'origin' => null, 'pending' => null];
+        if ($idStr !== '') {
+            try {
+                $birthFamily = (new \App\services\BirthFamilyCodeService(Db::connect2()))->status($idStr);
+            } catch (\Throwable) {
+                $birthFamily = ['state' => 'none', 'code' => '', 'origin' => null, 'pending' => null];
+            }
+        }
+        $maternalFamCode = strtoupper(trim(ltrim((string)($birthFamily['code'] ?? ''), '#')));
+        $hasMaternalCode = ($birthFamily['state'] ?? '') === 'active'
+            && $maternalFamCode !== ''
+            && $maternalFamCode !== $primaryFamCode;
+
         return [
             'id' => $data['id'] ?? '',
             'firstName' => $data['firstName'] ?? '',
             'lastName' => $data['lastName'] ?? '',
             'fullName' => $data['firstName'] . ' ' . $data['lastName'] ?? '',
             'famCode' => $data['famCode'] ?? '',
+            'primaryFamCode' => $primaryFamCode,
+            'maternalFamCode' => $hasMaternalCode ? $maternalFamCode : '',
+            'hasMaternalCode' => $hasMaternalCode,
+            'birthFamily' => $birthFamily,
             'gender' => $data['gender'] ?? '',
             'birthDate' => \sprintf('%d-%s-%d', $data['year'] ?? 0, $data['month'] ?? '', $data['day'] ?? 0),
             'maritalStatus' => $data['marital_status'] ?? '',
@@ -489,7 +508,7 @@ class BaseController
             'spouse_name' => $data['spouse_name'] ?? null,
             'spouse_email' => $data['spouse_email'] ?? null,
             'spouse_mobile' => $data['spouse_mobile'] ?? null,
-            'otherFamCode' => $data['otherFamCode'] ?? null,
+            'otherFamCode' => $hasMaternalCode ? $maternalFamCode : ($data['otherFamCode'] ?? null),
             'two_factor_auth' => $data['two_factor_auth'] ?? 'off',
             'profile_visibility' => $data['profile_visibility'] ?? 'Public',
             'show_my_profile' => $data['show_my_profile'] ?? 'on',

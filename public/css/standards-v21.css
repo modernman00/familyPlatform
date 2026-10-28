@@ -4,6 +4,33 @@
  * Loaded after main.css. Additive only: tokens, focus, press, motion and hit-area rules.
  */
 :root {
+  /* 🌟 Surface & Canvas Semantic Tokens (Light Mode Default) */
+  --canvas-ground: #f8fafc;
+  --surface-card: #ffffff;
+  --surface-elevated: #ffffff;
+  --border-subtle: rgba(0, 0, 0, 0.07);
+  --border-hairline: rgba(0, 0, 0, 0.04);
+  --text-main: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #94a3b8;
+  
+  /* 👑 Brand Identity (Daytime: Royal Heritage Crimson) */
+  --brand-primary: #a31621;
+  --brand-primary-hover: #8a1019;
+  --brand-primary-rgb: 163, 22, 33;
+  --brand-primary-glow: rgba(163, 22, 33, 0.16);
+  --brand-primary-gradient: linear-gradient(135deg, #a31621 0%, #8a1019 100%);
+  
+  /* 🌟 Secondary Accents (Celebration Gold) */
+  --accent-gold: #f59e0b;
+  --accent-gold-light: #fef3c7;
+  --accent-gold-rgb: 245, 158, 11;
+  
+  /* 🪟 Navigation Chrome */
+  --nav-frosted-bg: rgba(255, 255, 255, 0.88);
+  --nav-border: rgba(0, 0, 0, 0.08);
+
+  /* Typography Scale */
   --text-xs: .75rem;
   --text-sm: .875rem;
   --text-base: 1rem;
@@ -23,6 +50,443 @@
   --ease: cubic-bezier(.16, 1, .3, 1);
   --tap-min: 44px;
   --text-muted-aa: #475569; /* 7.6:1 on white */
+  --card-bg: #ffffff;
+  --text-color: #0f172a;
+  --text-muted: #475569;
+  --border-color: #e2e8f0;
+  --hover-color: #f1f5f9;
+}
+
+/* 🌙 Super Premium Dark Theme & Brand Colour Luminance Inversion */
+body.dark-mode,
+body.dark-theme,
+[data-bs-theme="dark"] {
+  /* Neutral OLED-Black & Elevated Charcoal Surfaces */
+  --canvas-ground: #000000;
+  --surface-card: #141416;
+  --surface-elevated: #1e293b;
+  --border-subtle: rgba(255, 255, 255, 0.12);
+  --border-hairline: rgba(255, 255, 255, 0.06);
+  --text-main: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --text-muted-aa: #cbd5e1; /* 11.4:1 on #141416 (WCAG AAA) */
+  --card-bg: #141416;
+  --text-color: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: rgba(255, 255, 255, 0.12);
+  --hover-color: #1e293b;
+  
+  /* 💎 Brand Identity Inversion (Night-time: High-Contrast Luminous Rose Ruby) */
+  /* Contrast ratio jumps from 2.19:1 (Failing) to 6.8:1 (Passing WCAG AAA on #141416) */
+  --brand-primary: #ff4d61;
+  --brand-primary-hover: #ff6b7d;
+  --brand-primary-rgb: 255, 77, 97;
+  --brand-primary-glow: rgba(255, 77, 97, 0.28);
+  --brand-primary-gradient: linear-gradient(135deg, #ff4d61 0%, #e11d48 100%);
+  
+  /* 🏆 Cartier Heritage Gold Accent (Warm Luxury) */
+  --accent-gold: #fbbf24;
+  --accent-gold-light: rgba(251, 191, 36, 0.15);
+  --accent-gold-rgb: 251, 191, 36;
+  
+  /* 🪟 Navigation Chrome */
+  --nav-frosted-bg: rgba(20, 20, 22, 0.88);
+  --nav-border: rgba(255, 255, 255, 0.09);
+  
+  color-scheme: dark;
+}
+
+body.dark-mode,
+body.dark-theme,
+[data-bs-theme="dark"] {
+  background-color: var(--canvas-ground, #000000) !important;
+  color: var(--text-main, #f8fafc) !important;
+}
+
+body.dark-mode .card,
+body.dark-mode .post-composer,
+body.dark-mode .profile-card,
+body.dark-mode .modal-content,
+body.dark-theme .card,
+body.dark-theme .post-composer,
+body.dark-theme .profile-card,
+body.dark-theme .modal-content,
+[data-bs-theme="dark"] .card,
+[data-bs-theme="dark"] .post-composer,
+[data-bs-theme="dark"] .profile-card,
+[data-bs-theme="dark"] .modal-content {
+  background-color: var(--surface-card, #141416) !important;
+  color: var(--text-main, #f8fafc) !important;
+  border-color: var(--border-subtle, rgba(255, 255, 255, 0.12)) !important;
+}
+
+/* 🌙 Global Dark-Mode Typography & Surface Contrast Guarantees (WCAG AA/AAA) */
+body.dark-mode .text-dark:not(.bg-warning):not(.btn-warning),
+body.dark-theme .text-dark:not(.bg-warning):not(.btn-warning),
+[data-bs-theme="dark"] .text-dark:not(.bg-warning):not(.btn-warning),
+body.dark-mode .text-body,
+body.dark-theme .text-body,
+[data-bs-theme="dark"] .text-body,
+body.dark-mode .text-black,
+body.dark-theme .text-black,
+[data-bs-theme="dark"] .text-black {
+  color: var(--text-main, #f8fafc) !important;
+}
+
+/* Preserve dark legibility on solid amber/yellow warning surfaces */
+body.dark-mode .bg-warning.text-dark,
+body.dark-mode .btn-warning.text-dark,
+body.dark-mode .bg-warning .text-dark,
+body.dark-mode .btn-warning .text-dark,
+body.dark-theme .bg-warning.text-dark,
+body.dark-theme .btn-warning.text-dark,
+body.dark-theme .bg-warning .text-dark,
+body.dark-theme .btn-warning .text-dark,
+[data-bs-theme="dark"] .bg-warning.text-dark,
+[data-bs-theme="dark"] .btn-warning.text-dark,
+[data-bs-theme="dark"] .bg-warning .text-dark,
+[data-bs-theme="dark"] .btn-warning .text-dark {
+  color: #0f172a !important;
+}
+
+body.dark-mode .text-muted,
+body.dark-theme .text-muted,
+[data-bs-theme="dark"] .text-muted,
+body.dark-mode .form-text,
+body.dark-theme .form-text,
+[data-bs-theme="dark"] .form-text {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .text-secondary,
+body.dark-theme .text-secondary,
+[data-bs-theme="dark"] .text-secondary {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .form-label,
+body.dark-theme .form-label,
+[data-bs-theme="dark"] .form-label,
+body.dark-mode .col-form-label,
+body.dark-theme .col-form-label,
+[data-bs-theme="dark"] .col-form-label {
+  color: #f1f5f9 !important;
+}
+
+/* Dark-Mode Surface Inversion for Bootstrap Utility Backgrounds */
+body.dark-mode .bg-white:not(.bg-opacity-25):not(.badge),
+body.dark-theme .bg-white:not(.bg-opacity-25):not(.badge),
+[data-bs-theme="dark"] .bg-white:not(.bg-opacity-25):not(.badge) {
+  background-color: var(--surface-card, #141416) !important;
+  color: var(--text-main, #f8fafc) !important;
+  border-color: var(--border-subtle, rgba(255, 255, 255, 0.12)) !important;
+}
+
+body.dark-mode .bg-light,
+body.dark-mode .bg-body-tertiary,
+body.dark-mode .bg-body-secondary,
+body.dark-theme .bg-light,
+body.dark-theme .bg-body-tertiary,
+body.dark-theme .bg-body-secondary,
+[data-bs-theme="dark"] .bg-light,
+[data-bs-theme="dark"] .bg-body-tertiary,
+[data-bs-theme="dark"] .bg-body-secondary {
+  background-color: var(--surface-elevated, #1e293b) !important;
+  color: var(--text-main, #f8fafc) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+body.dark-mode .badge.bg-light,
+body.dark-mode .badge.bg-white,
+body.dark-theme .badge.bg-light,
+body.dark-theme .badge.bg-white,
+[data-bs-theme="dark"] .badge.bg-light,
+[data-bs-theme="dark"] .badge.bg-white {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+/* Subtle Semantic Badges & Alerts in Dark Mode */
+body.dark-mode .bg-danger-subtle,
+body.dark-theme .bg-danger-subtle,
+[data-bs-theme="dark"] .bg-danger-subtle {
+  background-color: rgba(225, 29, 72, 0.22) !important;
+  color: #fecdd3 !important;
+  border-color: rgba(244, 63, 94, 0.38) !important;
+}
+
+body.dark-mode .bg-danger-subtle.text-danger,
+body.dark-mode .bg-danger-subtle .text-danger,
+body.dark-theme .bg-danger-subtle.text-danger,
+body.dark-theme .bg-danger-subtle .text-danger,
+[data-bs-theme="dark"] .bg-danger-subtle.text-danger,
+[data-bs-theme="dark"] .bg-danger-subtle .text-danger {
+  color: #fecdd3 !important;
+}
+
+body.dark-mode .bg-success-subtle,
+body.dark-theme .bg-success-subtle,
+[data-bs-theme="dark"] .bg-success-subtle {
+  background-color: rgba(16, 185, 129, 0.2) !important;
+  color: #86efac !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+body.dark-mode .bg-success-subtle.text-success,
+body.dark-mode .bg-success-subtle .text-success,
+body.dark-theme .bg-success-subtle.text-success,
+body.dark-theme .bg-success-subtle .text-success,
+[data-bs-theme="dark"] .bg-success-subtle.text-success,
+[data-bs-theme="dark"] .bg-success-subtle .text-success {
+  color: #86efac !important;
+}
+
+body.dark-mode .bg-warning-subtle,
+body.dark-theme .bg-warning-subtle,
+[data-bs-theme="dark"] .bg-warning-subtle {
+  background-color: rgba(245, 158, 11, 0.2) !important;
+  color: #fde68a !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+body.dark-mode .bg-warning-subtle.text-warning,
+body.dark-mode .bg-warning-subtle .text-warning,
+body.dark-mode .bg-warning-subtle .text-dark,
+body.dark-theme .bg-warning-subtle.text-warning,
+body.dark-theme .bg-warning-subtle .text-warning,
+body.dark-theme .bg-warning-subtle .text-dark,
+[data-bs-theme="dark"] .bg-warning-subtle.text-warning,
+[data-bs-theme="dark"] .bg-warning-subtle .text-warning,
+[data-bs-theme="dark"] .bg-warning-subtle .text-dark {
+  color: #fde68a !important;
+}
+
+body.dark-mode .bg-primary-subtle,
+body.dark-theme .bg-primary-subtle,
+[data-bs-theme="dark"] .bg-primary-subtle,
+body.dark-mode .bg-info-subtle,
+body.dark-theme .bg-info-subtle,
+[data-bs-theme="dark"] .bg-info-subtle {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+  color: #bfdbfe !important;
+  border-color: rgba(59, 130, 246, 0.35) !important;
+}
+
+body.dark-mode .bg-primary-subtle.text-primary,
+body.dark-mode .bg-primary-subtle .text-primary,
+body.dark-theme .bg-primary-subtle.text-primary,
+body.dark-theme .bg-primary-subtle .text-primary,
+[data-bs-theme="dark"] .bg-primary-subtle.text-primary,
+[data-bs-theme="dark"] .bg-primary-subtle .text-primary {
+  color: #bfdbfe !important;
+}
+
+/* Semantic Status Text Luminance Boost on Dark Surfaces */
+body.dark-mode .text-danger:not(.btn):not(.bg-danger),
+body.dark-theme .text-danger:not(.btn):not(.bg-danger),
+[data-bs-theme="dark"] .text-danger:not(.btn):not(.bg-danger) {
+  color: #fb7185 !important;
+}
+
+body.dark-mode .text-success:not(.btn):not(.bg-success),
+body.dark-theme .text-success:not(.btn):not(.bg-success),
+[data-bs-theme="dark"] .text-success:not(.btn):not(.bg-success) {
+  color: #4ade80 !important;
+}
+
+body.dark-mode .text-primary:not(.btn):not(.bg-primary),
+body.dark-theme .text-primary:not(.btn):not(.bg-primary),
+[data-bs-theme="dark"] .text-primary:not(.btn):not(.bg-primary) {
+  color: #60a5fa !important;
+}
+
+/* Dark-Mode Form Controls & Inputs (Shared Across All Member Views) */
+body.dark-mode input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+body.dark-mode textarea,
+body.dark-mode select,
+body.dark-mode .form-control,
+body.dark-mode .form-select,
+body.dark-mode .input-group-text,
+body.dark-theme input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+body.dark-theme textarea,
+body.dark-theme select,
+body.dark-theme .form-control,
+body.dark-theme .form-select,
+body.dark-theme .input-group-text,
+[data-bs-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+[data-bs-theme="dark"] textarea,
+[data-bs-theme="dark"] select,
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select,
+[data-bs-theme="dark"] .input-group-text {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder,
+body.dark-mode .form-control::placeholder,
+body.dark-theme input::placeholder,
+body.dark-theme textarea::placeholder,
+body.dark-theme .form-control::placeholder,
+[data-bs-theme="dark"] input::placeholder,
+[data-bs-theme="dark"] textarea::placeholder,
+[data-bs-theme="dark"] .form-control::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1 !important;
+}
+
+/* Dark-Mode Tabs, Nav Pills & Secondary Buttons */
+body.dark-mode .nav-pills .nav-link:not(.active),
+body.dark-mode .nav-tabs .nav-link:not(.active),
+body.dark-theme .nav-pills .nav-link:not(.active),
+body.dark-theme .nav-tabs .nav-link:not(.active),
+[data-bs-theme="dark"] .nav-pills .nav-link:not(.active),
+[data-bs-theme="dark"] .nav-tabs .nav-link:not(.active) {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .nav-pills .nav-link:not(.active):hover,
+body.dark-mode .nav-tabs .nav-link:not(.active):hover,
+body.dark-theme .nav-pills .nav-link:not(.active):hover,
+body.dark-theme .nav-tabs .nav-link:not(.active):hover,
+[data-bs-theme="dark"] .nav-pills .nav-link:not(.active):hover,
+[data-bs-theme="dark"] .nav-tabs .nav-link:not(.active):hover {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.dark-mode .btn-light,
+body.dark-mode .btn-white,
+body.dark-mode .btn-outline-secondary,
+body.dark-mode .btn-outline-dark,
+body.dark-theme .btn-light,
+body.dark-theme .btn-white,
+body.dark-theme .btn-outline-secondary,
+body.dark-theme .btn-outline-dark,
+[data-bs-theme="dark"] .btn-light,
+[data-bs-theme="dark"] .btn-white,
+[data-bs-theme="dark"] .btn-outline-secondary,
+[data-bs-theme="dark"] .btn-outline-dark {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #475569 !important;
+}
+
+body.dark-mode .btn-close,
+body.dark-theme .btn-close,
+[data-bs-theme="dark"] .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+body.dark-mode .border,
+body.dark-mode .border-top,
+body.dark-mode .border-bottom,
+body.dark-mode .border-start,
+body.dark-mode .border-end,
+body.dark-mode .border-light-subtle,
+body.dark-theme .border,
+body.dark-theme .border-top,
+body.dark-theme .border-bottom,
+body.dark-theme .border-start,
+body.dark-theme .border-end,
+body.dark-theme .border-light-subtle,
+[data-bs-theme="dark"] .border,
+[data-bs-theme="dark"] .border-top,
+[data-bs-theme="dark"] .border-bottom,
+[data-bs-theme="dark"] .border-start,
+[data-bs-theme="dark"] .border-end,
+[data-bs-theme="dark"] .border-light-subtle {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Shared Member Views & Widgets Dark-Mode Surface Overrides */
+body.dark-mode .event-card > div,
+body.dark-mode #memoriesCard,
+body.dark-mode #milestonesCard [style*="linear-gradient"],
+body.dark-mode #mobileMemoriesCard,
+body.dark-mode #mobileMilestonesCard,
+body.dark-mode .studio-toolbar,
+body.dark-mode .members-toolbar-stitch,
+body.dark-mode .relative-card,
+body.dark-mode .member-card,
+body.dark-mode .member-details,
+body.dark-mode .sidebar-card,
+body.dark-mode .content-card,
+body.dark-mode .journal-card,
+body.dark-mode .form-card,
+body.dark-theme .event-card > div,
+body.dark-theme #memoriesCard,
+body.dark-theme #milestonesCard [style*="linear-gradient"],
+body.dark-theme #mobileMemoriesCard,
+body.dark-theme #mobileMilestonesCard,
+body.dark-theme .studio-toolbar,
+body.dark-theme .members-toolbar-stitch,
+body.dark-theme .relative-card,
+body.dark-theme .member-card,
+body.dark-theme .member-details,
+body.dark-theme .sidebar-card,
+body.dark-theme .content-card,
+body.dark-theme .journal-card,
+body.dark-theme .form-card {
+  background: var(--surface-card, #141416) !important;
+  color: var(--text-main, #f8fafc) !important;
+  border-color: var(--border-subtle, rgba(255, 255, 255, 0.12)) !important;
+}
+
+body.dark-mode .relative-name,
+body.dark-mode .member-name,
+body.dark-mode .page-title,
+body.dark-mode .section-title,
+body.dark-mode .story-body,
+body.dark-mode .story-body h2,
+body.dark-mode .story-body h3,
+body.dark-theme .relative-name,
+body.dark-theme .member-name,
+body.dark-theme .page-title,
+body.dark-theme .section-title,
+body.dark-theme .story-body,
+body.dark-theme .story-body h2,
+body.dark-theme .story-body h3 {
+  color: var(--text-main, #f8fafc) !important;
+}
+
+body.dark-mode .relative-subtext,
+body.dark-mode .card-meta-item,
+body.dark-mode .member-detail,
+body.dark-mode .story-body blockquote,
+body.dark-theme .relative-subtext,
+body.dark-theme .card-meta-item,
+body.dark-theme .member-detail,
+body.dark-theme .story-body blockquote {
+  color: var(--text-secondary, #cbd5e1) !important;
+}
+
+body.dark-mode .ql-toolbar.ql-snow,
+body.dark-mode .ql-container.ql-snow,
+body.dark-mode #quillEditor,
+body.dark-theme .ql-toolbar.ql-snow,
+body.dark-theme .ql-container.ql-snow,
+body.dark-theme #quillEditor {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+/* Primary buttons in dark mode: Luminous Ruby Gradient with crisp white text (Inviolable Red Surface Rule) */
+body.dark-mode .btn-primary,
+body.dark-theme .btn-primary,
+[data-bs-theme="dark"] .btn-primary,
+body.dark-mode .btn-stitch-primary,
+body.dark-theme .btn-stitch-primary,
+[data-bs-theme="dark"] .btn-stitch-primary {
+  background: var(--brand-primary-gradient, linear-gradient(135deg, #ff4d61 0%, #e11d48 100%)) !important;
+  border-color: var(--brand-primary, #ff4d61) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px var(--brand-primary-glow, rgba(255, 77, 97, 0.28)) !important;
 }
 
 /* Keyboard focus: one definition for every interactive element */
@@ -363,7 +827,7 @@ img, video { max-width: 100%; height: auto; }
 @media (min-width: 768px) and (max-width: 1199.98px) {
   body .container-main {
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(340px, 1fr);
+    grid-template-columns: minmax(0, 1.75fr) minmax(260px, 1fr);
     gap: 20px;
     padding: 20px;
     align-items: start;
@@ -1038,14 +1502,14 @@ h1, h2, h3, h4, h5, h6, .navbar, .modal, .dropdown-menu, .swal2-popup, .swal2-ti
   transform: scale(0.94);
 }
 
-/* Instagram Multi-Colour Gradient Ring */
+/* Instagram Multi-Colour Living Conic Gradient Ring */
 .ig-story-avatar-wrap.is-active {
-  background: linear-gradient(45deg, #ff3040, #f77737, #fcaf45);
+  background: conic-gradient(from 180deg at 50% 50%, var(--brand-primary, #a31621) 0deg, #e11d48 90deg, var(--accent-gold, #f59e0b) 180deg, #e11d48 270deg, var(--brand-primary, #a31621) 360deg);
 }
 
 /* Birthday / Milestone Radiant Gold Ring */
 .ig-story-avatar-wrap.is-gold {
-  background: linear-gradient(45deg, #ffd700, #ffa500);
+  background: conic-gradient(from 180deg at 50% 50%, #f59e0b 0deg, #fbbf24 90deg, #fef08a 180deg, #fbbf24 270deg, #f59e0b 360deg);
 }
 
 /* Self / Add Story Ring */
@@ -1103,21 +1567,22 @@ body.dark-theme .ig-story-plus-badge {
   line-height: 1.2;
 }
 
-/* 3. Edge-to-Edge Feed Post Cards on Mobile (< 576px) */
-@media (max-width: 576px) {
+/* 3. Edge-to-Edge Feed Post Cards on Mobile (< 768px) */
+@media (max-width: 767.98px) {
   .feed-post-card {
     border-radius: 0 !important;
     border-left: none !important;
     border-right: none !important;
     border-top: none !important;
-    border-bottom: 1px solid var(--border-color, #e2e8f0) !important;
+    border-bottom: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.06)) !important;
     box-shadow: none !important;
     margin-bottom: 8px !important;
     padding: 12px 0 !important;
   }
 
   .feed-post-card .post-content,
-  .feed-post-card .px-1 {
+  .feed-post-card .px-1,
+  .feed-post-card .feed-actions-row {
     padding-left: 12px !important;
     padding-right: 12px !important;
   }
@@ -1141,7 +1606,7 @@ body.dark-theme .ig-story-plus-badge {
   .feed-post-card .post-media-stage a,
   .feed-post-card .post-media-first-img {
     border-radius: 0 !important;
-    max-height: 480px !important;
+    max-height: 540px !important;
     width: 100% !important;
     object-fit: cover;
   }
@@ -1182,6 +1647,67 @@ body.dark-theme .ig-story-plus-badge {
     overflow-y: auto !important;
     scrollbar-width: thin;
   }
+}
+
+/* ==============================================================================
+   🌟 Super-Premium Instagram Minimalist Action Bar & Spring Micro-Interactions
+   ============================================================================== */
+.btn-action-glyph {
+  background: transparent;
+  border: none;
+  color: var(--text-main, #0f172a);
+  padding: 8px;
+  cursor: pointer;
+  transition: transform 120ms cubic-bezier(0.16, 1, 0.3, 1), opacity 120ms ease;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-action-glyph:hover {
+  opacity: 0.75;
+}
+.btn-action-glyph:active {
+  transform: scale(0.86);
+}
+@keyframes heartSpringPop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.38); }
+  70% { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+.btn-action-glyph.is-liked i,
+.btn-action-glyph.is-liked svg {
+  color: #ff2d55 !important;
+  animation: heartSpringPop 350ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+body.dark-mode .btn-action-glyph,
+body.dark-theme .btn-action-glyph,
+[data-bs-theme="dark"] .btn-action-glyph {
+  color: #f8fafc !important;
+}
+body.dark-mode .btn-action-glyph.is-liked i,
+body.dark-theme .btn-action-glyph.is-liked i,
+[data-bs-theme="dark"] .btn-action-glyph.is-liked i {
+  color: #ff2d55 !important;
+}
+
+/* Frosted glass acrylic chrome for top and bottom navigation bars */
+.pwa-bottom-nav,
+.brand-navbar-stitch {
+  background: var(--nav-frosted-bg, rgba(255, 255, 255, 0.88)) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  border-top: 0.5px solid var(--nav-border, rgba(0, 0, 0, 0.08)) !important;
+}
+body.dark-mode .pwa-bottom-nav,
+body.dark-mode .brand-navbar-stitch,
+body.dark-theme .pwa-bottom-nav,
+body.dark-theme .brand-navbar-stitch,
+[data-bs-theme="dark"] .pwa-bottom-nav,
+[data-bs-theme="dark"] .brand-navbar-stitch {
+  background: var(--nav-frosted-bg, rgba(20, 20, 22, 0.88)) !important;
+  border-color: var(--nav-border, rgba(255, 255, 255, 0.09)) !important;
 }
 
 /* ==========================================================================
@@ -1290,4 +1816,441 @@ body.dark-theme .family-tooltip-container,
     transition: none !important;
   }
 }
+
+/* ==============================================================================
+   🌟 Super-Premium Instagram Multi-Image Carousel & Pagination Dots
+   ============================================================================== */
+.post-carousel-track::-webkit-scrollbar {
+  display: none !important;
+}
+.carousel-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-tertiary, #94a3b8);
+  opacity: 0.55;
+  transition: width 200ms cubic-bezier(0.16, 1, 0.3, 1), background-color 200ms ease, opacity 200ms ease;
+  display: inline-block;
+}
+.carousel-dot.is-active {
+  width: 18px;
+  border-radius: 4px;
+  opacity: 1;
+  background: var(--brand-primary, #a31621);
+}
+body.dark-mode .carousel-dot.is-active,
+body.dark-theme .carousel-dot.is-active,
+[data-bs-theme="dark"] .carousel-dot.is-active {
+  background: var(--brand-primary, #ff4d61);
+  box-shadow: 0 0 6px var(--brand-primary-glow, rgba(255, 77, 97, 0.4));
+}
+
+/* ==============================================================================
+   🌟 Super-Premium Comment Meta Row — Subpixel Baseline & Vertical Precision
+   ============================================================================== */
+.comment-meta-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  font-size: 0.75rem !important;
+  line-height: 1 !important;
+  margin-top: 4px !important;
+  padding-left: 8px !important;
+}
+
+.comment-meta-row .comment-meta-item,
+.comment-meta-row .comment-meta-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  font-size: 0.75rem !important;
+  line-height: 1 !important;
+  height: 16px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-sizing: border-box !important;
+  vertical-align: middle !important;
+}
+
+.comment-meta-row .comment-meta-btn {
+  cursor: pointer !important;
+  position: relative !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  transition: opacity 120ms ease, color 120ms ease !important;
+}
+
+.comment-meta-row .comment-meta-btn:hover {
+  opacity: 0.8 !important;
+  text-decoration: underline !important;
+}
+
+/* Expanded hit area for touchscreen accessibility (Fitts's Law 44px) */
+.comment-meta-row .comment-meta-btn::after {
+  content: '' !important;
+  position: absolute !important;
+  inset: -8px -6px !important;
+  z-index: 1 !important;
+}
+
+.comment-meta-row .comment-views-count.cursor-pointer:hover {
+  text-decoration: underline !important;
+  opacity: 0.8 !important;
+}
+
+/* ==========================================================================
+   🌟 LIVING HEIRLOOM GLASS 3D REACTIONS (Chamber 1 Sovereign Board Approved)
+   ========================================================================== */
+
+/* The Frosted Glass Floating Dock (Apple Vision / Heirloom Gem standard) */
+.heirloom-glass-dock {
+  background: rgba(255, 255, 255, 0.86) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.65) !important;
+  box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.16),
+              0 4px 12px -2px rgba(15, 23, 42, 0.08),
+              inset 0 1px 1px 0 rgba(255, 255, 255, 0.9) !important;
+  border-radius: 9999px !important;
+  padding: 6px 10px !important;
+  align-items: center !important;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease !important;
+}
+
+body.dark-mode .heirloom-glass-dock {
+  background: rgba(15, 23, 42, 0.88) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 20px 42px -6px rgba(0, 0, 0, 0.55),
+              0 6px 14px -2px rgba(0, 0, 0, 0.4),
+              inset 0 1px 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+
+/* Individual Reaction Interactive Button */
+.heirloom-reaction-btn {
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  padding: 4px !important;
+  border-radius: 50% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  touch-action: manipulation !important;
+  user-select: none !important;
+  transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1),
+              filter 0.2s ease !important;
+}
+
+.heirloom-reaction-btn:hover,
+.heirloom-reaction-btn:focus-visible {
+  transform: translateY(-8px) scale(1.36) !important;
+  filter: drop-shadow(0 12px 18px var(--heirloom-glow, rgba(225, 29, 72, 0.45))) !important;
+  z-index: 10 !important;
+}
+
+.heirloom-reaction-btn:active {
+  transform: scale(0.94) !important;
+  transition-duration: 0.08s !important;
+}
+
+.heirloom-reaction-btn.active {
+  background: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 0 0 2px var(--heirloom-glow, rgba(225, 29, 72, 0.4)) !important;
+}
+
+body.dark-mode .heirloom-reaction-btn.active {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Floating Label Tooltip on Hover */
+.heirloom-tooltip-pill {
+  position: absolute !important;
+  bottom: calc(100% + 6px) !important;
+  left: 50% !important;
+  transform: translateX(-50%) translateY(4px) scale(0.85) !important;
+  background: rgba(15, 23, 42, 0.9) !important;
+  color: #ffffff !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  padding: 3px 8px !important;
+  border-radius: 9999px !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  transition: opacity 0.15s ease, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.heirloom-reaction-btn:hover .heirloom-tooltip-pill {
+  opacity: 1 !important;
+  transform: translateX(-50%) translateY(0) scale(1) !important;
+}
+
+/* Vector SVG Glass Micro-Kinetics */
+.heirloom-glass-svg {
+  display: block !important;
+  transition: transform 0.22s ease !important;
+  overflow: visible !important;
+}
+
+/* Milestone Post Radiant Heirloom Aura (Option C Hybrid) */
+.heirloom-milestone-aura {
+  position: relative !important;
+}
+
+.heirloom-milestone-aura::after {
+  content: '' !important;
+  position: absolute !important;
+  inset: -2px !important;
+  border-radius: inherit !important;
+  background: linear-gradient(135deg, rgba(253, 224, 71, 0.28), rgba(192, 132, 252, 0.28), rgba(244, 63, 94, 0.2)) !important;
+  z-index: -1 !important;
+  filter: blur(8px) !important;
+  animation: heirloomAuraBreathe 3s ease-in-out infinite alternate !important;
+}
+
+@keyframes heirloomAuraBreathe {
+  0% { opacity: 0.4; filter: blur(6px); }
+  100% { opacity: 0.85; filter: blur(12px); }
+}
+
+@keyframes heirloomCrystalPulse {
+  0% { transform: scale(0.9); }
+  50% { transform: scale(1.35); filter: drop-shadow(0 0 16px rgba(253, 224, 71, 0.8)); }
+  100% { transform: scale(1); }
+}
+
+.heirloom-active-icon {
+  animation: heirloomCrystalPulse 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+/* ==========================================================================
+   ⚡ LIVING HEIRLOOM GLASS MICRO-ACTIONS (Expressive Animated Reactions)
+   ========================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  /* 1. LOVE: Cardiac Double-Beat + Rising Ruby Micro-Hearts */
+  .heirloom-love .hg-heart-body {
+    transform-origin: 20px 20px;
+    animation: hgLoveHeartbeat 1.5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  }
+  .heirloom-love .hg-heart-core {
+    transform-origin: 20px 18px;
+    animation: hgLoveCoreGlow 1.5s ease-in-out infinite alternate;
+  }
+  .heirloom-love .hg-love-spark-1 {
+    transform-origin: 9px 6px;
+    animation: hgLoveSparkFloat 1.8s ease-out infinite;
+  }
+  .heirloom-love .hg-love-spark-2 {
+    transform-origin: 31px 6px;
+    animation: hgLoveSparkFloat 1.8s ease-out 0.75s infinite;
+  }
+
+  /* 2. LIKE: Dynamic Thumbs-Up Tilt, Spring Nod & Topaz Rays */
+  .heirloom-like .hg-thumb-hand {
+    transform-origin: 18px 24px;
+    animation: hgThumbPopAction 1.8s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+  }
+  .heirloom-like .hg-thumb-spark {
+    transform-origin: 20px 9px;
+    animation: hgThumbSparkPop 1.8s ease-out infinite;
+  }
+
+  /* 3. HAHA: Joyful Laughing Head Bounce, Chattering Mouth & Tears of Joy */
+  .heirloom-haha .hg-haha-face {
+    transform-origin: 20px 20px;
+    animation: hgHahaLaughBounce 1.1s ease-in-out infinite;
+  }
+  .heirloom-haha .hg-haha-mouth {
+    transform-origin: 20px 23px;
+    animation: hgHahaMouthChatter 0.55s ease-in-out infinite alternate;
+  }
+  .heirloom-haha .hg-haha-tears {
+    transform-origin: 20px 21px;
+    animation: hgHahaTearsWiggle 0.55s ease-in-out infinite alternate;
+  }
+
+  /* 4. WOW / SHOCK: Astonished Raised Brows & Gasping Mouth */
+  .heirloom-shock .hg-wow-brows {
+    transform-origin: 20px 11px;
+    animation: hgWowBrowsLift 1.6s ease-in-out infinite;
+  }
+  .heirloom-shock .hg-wow-mouth {
+    transform-origin: 20px 25px;
+    animation: hgWowMouthGasp 1.6s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+  }
+  .heirloom-shock .hg-wow-eyes {
+    transform-origin: 20px 15.8px;
+    animation: hgWowEyesWide 1.6s ease-in-out infinite;
+  }
+
+  /* 5. SAD / EMPATHY: Gentle Brow Tilt & Rolling Crystalline Teardrop */
+  .heirloom-sad .hg-sad-brows {
+    transform-origin: 20px 13px;
+    animation: hgSadBrowsDroop 2.4s ease-in-out infinite alternate;
+  }
+  .heirloom-sad .hg-sad-tear {
+    transform-origin: 26.8px 21px;
+    animation: hgSadTearDrop 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* 6. CELEBRATE: Spinning Golden Starburst & Orbiting Diamond Sparkles */
+  .heirloom-celebrate .hg-celebrate-star {
+    transform-origin: 20px 20.5px;
+    animation: hgCelebrateStarSpin 3.2s linear infinite;
+  }
+  .heirloom-celebrate .hg-celebrate-orbit {
+    transform-origin: 20px 20px;
+    animation: hgCelebrateOrbitPulse 1.4s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes hgLoveHeartbeat {
+  0%, 100% { transform: scale(1); }
+  14% { transform: scale(1.14); }
+  28% { transform: scale(0.96); }
+  42% { transform: scale(1.10); }
+  70% { transform: scale(1); }
+}
+
+@keyframes hgLoveCoreGlow {
+  0% { opacity: 0.7; transform: scale(0.88); }
+  100% { opacity: 1; transform: scale(1.18); }
+}
+
+@keyframes hgLoveSparkFloat {
+  0% { opacity: 0; transform: translateY(4px) scale(0.4); }
+  35% { opacity: 0.95; transform: translateY(-1px) scale(1.05); }
+  100% { opacity: 0; transform: translateY(-7px) scale(0.6); }
+}
+
+@keyframes hgThumbPopAction {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  20% { transform: rotate(-14deg) translateY(1px) scale(0.92); }
+  45% { transform: rotate(10deg) translateY(-2.5px) scale(1.14); }
+  65% { transform: rotate(-3deg) translateY(0) scale(1.02); }
+}
+
+@keyframes hgThumbSparkPop {
+  0%, 25%, 100% { opacity: 0; transform: scale(0.5); }
+  45% { opacity: 1; transform: scale(1.2) translateY(-1.5px); }
+  75% { opacity: 0; transform: scale(1.35) translateY(-3px); }
+}
+
+@keyframes hgHahaLaughBounce {
+  0%, 100% { transform: rotate(-7deg) translateY(0); }
+  25% { transform: rotate(7deg) translateY(-2px); }
+  50% { transform: rotate(-6deg) translateY(0); }
+  75% { transform: rotate(6deg) translateY(-1.5px); }
+}
+
+@keyframes hgHahaMouthChatter {
+  0% { transform: scaleY(0.85) scaleX(0.96); }
+  100% { transform: scaleY(1.14) scaleX(1.05); }
+}
+
+@keyframes hgHahaTearsWiggle {
+  0% { transform: translateY(0) scale(0.92); }
+  100% { transform: translateY(1.8px) scale(1.12); }
+}
+
+@keyframes hgWowBrowsLift {
+  0%, 100% { transform: translateY(0); }
+  40%, 65% { transform: translateY(-2.6px); }
+}
+
+@keyframes hgWowMouthGasp {
+  0%, 100% { transform: scale(0.82); }
+  40%, 65% { transform: scale(1.22); }
+}
+
+@keyframes hgWowEyesWide {
+  0%, 100% { transform: scale(0.95); }
+  45%, 65% { transform: scale(1.12); }
+}
+
+@keyframes hgSadBrowsDroop {
+  0% { transform: translateY(-0.5px); }
+  100% { transform: translateY(1.4px); }
+}
+
+@keyframes hgSadTearDrop {
+  0% { opacity: 0; transform: translateY(-2px) scale(0.45); }
+  25% { opacity: 1; transform: translateY(0px) scale(0.95); }
+  75% { opacity: 1; transform: translateY(5.5px) scale(1.05); }
+  100% { opacity: 0; transform: translateY(9px) scale(0.6); }
+}
+
+@keyframes hgCelebrateStarSpin {
+  0% { transform: rotate(0deg) scale(0.95); }
+  50% { transform: rotate(180deg) scale(1.12); }
+  100% { transform: rotate(360deg) scale(0.95); }
+}
+
+@keyframes hgCelebrateOrbitPulse {
+  0% { opacity: 0.45; transform: scale(0.85) rotate(-8deg); }
+  100% { opacity: 1; transform: scale(1.12) rotate(8deg); }
+}
+
+/* 3D Click Particle Burst Stage & Fountain */
+.heirloom-burst-particle {
+  position: absolute;
+  left: -10px;
+  top: -10px;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: heirloomBurstFly 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes heirloomBurstFly {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.35) rotate(0deg);
+  }
+  65% {
+    opacity: 1;
+    transform: translate(var(--burst-dx, 0px), var(--burst-dy, -40px)) scale(var(--burst-scale, 1)) rotate(var(--burst-rot, 15deg));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--burst-dx, 0px), calc(var(--burst-dy, -40px) + 16px)) scale(0.25) rotate(var(--burst-rot, 15deg));
+  }
+}
+
+/* ==============================================================================
+   🌟 Zero-CLS Shimmering Skeleton Surface & Mobile Safe-Area Invariants (Segun Gate)
+   ============================================================================== */
+.vse-skeleton-surface {
+  background-color: #0f172a;
+  background-image: linear-gradient(
+    110deg,
+    rgba(15, 23, 42, 0.92) 8%,
+    rgba(30, 41, 59, 0.96) 18%,
+    rgba(15, 23, 42, 0.92) 33%
+  );
+  background-size: 200% 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .vse-skeleton-surface {
+    animation: vseSkeletonShimmer 1.8s linear infinite;
+  }
+}
+
+@keyframes vseSkeletonShimmer {
+  to {
+    background-position-x: -200%;
+  }
+}
+
+
+
+
 

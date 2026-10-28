@@ -71,7 +71,9 @@ final class FamilyAiHubController extends BaseController
             $twoTruthsGame = \App\services\TwoTruthsGameService::ensureStarterGameIfEmpty($this->famCode, $this->userId, $userName);
         }
 
-        view('member.familyAiHub', compact('data', 'userData', 'familyMembers', 'disputes', 'selectedDispute', 'twoTruthsGame'));
+        $journals = \App\model\FamilyJournal::getFamilyJournals($this->famCode, 12, 0);
+
+        view('member.familyAiHub', compact('data', 'userData', 'familyMembers', 'disputes', 'selectedDispute', 'twoTruthsGame', 'journals'));
     }
 
     /**

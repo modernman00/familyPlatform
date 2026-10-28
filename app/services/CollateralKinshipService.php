@@ -357,24 +357,6 @@ final class CollateralKinshipService
         }
 
         // C. Ego Tier (Gen 0):
-        // Ego's Partners/Spouses & In-Laws (Parents-in-law & Siblings-in-law)
-        foreach ($personPartners[$egoNodeId] ?? [] as $partId) {
-            $selectedNodes[$partId] = true;
-            $relativeGen[$partId] = 0;
-
-            // Spouse's Parents (Father-in-law & Mother-in-law at Gen -1)
-            foreach ($getParents($partId) as $inLawParentId) {
-                $selectedNodes[$inLawParentId] = true;
-                $relativeGen[$inLawParentId] = -1;
-            }
-
-            // Spouse's Siblings (Brothers-in-law & Sisters-in-law at Gen 0)
-            foreach ($getSiblings($partId) as $inLawSibId) {
-                $selectedNodes[$inLawSibId] = true;
-                $relativeGen[$inLawSibId] = 0;
-            }
-        }
-
         // Ego's Siblings (Brothers & Sisters) and their descendant lineages (up to 7 tiers down)
         $egoSiblings = $getSiblings($egoNodeId);
         foreach ($egoSiblings as $sibId) {
@@ -436,6 +418,41 @@ final class CollateralKinshipService
             $currentDescendants = array_unique($nextDescendants);
         }
 
+        // E. Ego's Partners/Spouses & Extended In-Law Branch (Parents-in-law & Siblings-in-law)
+        // Snapshot blood/direct family nodes BEFORE adding extended in-law branches so we know
+        // which relatives belong exclusively to a spouse's family (collapsible by default on canvas).
+        foreach ($personPartners[$egoNodeId] ?? [] as $partId) {
+            $selectedNodes[$partId] = true;
+            $relativeGen[$partId] = 0;
+        }
+        $bloodAndDirectNodes = $selectedNodes;
+        $inLawSpouseOfNode = [];
+        $inLawBranchCountBySpouse = [];
+
+        foreach ($personPartners[$egoNodeId] ?? [] as $partId) {
+            $inLawBranchCountBySpouse[$partId] = 0;
+
+            // Spouse's Parents (Father-in-law & Mother-in-law at Gen -1)
+            foreach ($getParents($partId) as $inLawParentId) {
+                if (!isset($bloodAndDirectNodes[$inLawParentId]) && !isset($inLawSpouseOfNode[$inLawParentId])) {
+                    $inLawSpouseOfNode[$inLawParentId] = $partId;
+                    $inLawBranchCountBySpouse[$partId]++;
+                }
+                $selectedNodes[$inLawParentId] = true;
+                $relativeGen[$inLawParentId] = -1;
+            }
+
+            // Spouse's Siblings (Brothers-in-law & Sisters-in-law at Gen 0)
+            foreach ($getSiblings($partId) as $inLawSibId) {
+                if (!isset($bloodAndDirectNodes[$inLawSibId]) && !isset($inLawSpouseOfNode[$inLawSibId])) {
+                    $inLawSpouseOfNode[$inLawSibId] = $partId;
+                    $inLawBranchCountBySpouse[$partId]++;
+                }
+                $selectedNodes[$inLawSibId] = true;
+                $relativeGen[$inLawSibId] = 0;
+            }
+        }
+
         // 5. Build Final Formatted Nodes, Unions, and Children Sets
         // Filter down to collected nodes in this multi-generational network
         // Relatives still waiting for a family member to confirm the connection
@@ -490,7 +507,10 @@ final class CollateralKinshipService
                 'voice_capsule_url' => $n['voice_capsule_url'] ?? null,
                 'is_placeholder' => (bool)($n['is_placeholder'] ?? false),
                 'pending_confirmation' => isset($pendingNodeIds[$nId]),
-                'is_root' => ($nId === $egoNodeId)
+                'is_root' => ($nId === $egoNodeId),
+                'is_inlaw_branch' => isset($inLawSpouseOfNode[$nId]),
+                'inlaw_spouse_id' => $inLawSpouseOfNode[$nId] ?? null,
+                'inlaw_branch_count' => (int)($inLawBranchCountBySpouse[$nId] ?? 0)
             ];
         }
 

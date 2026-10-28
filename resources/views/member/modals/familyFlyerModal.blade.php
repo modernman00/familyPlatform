@@ -20,6 +20,19 @@
             </div>
 
             <div class="modal-body px-4 py-3" style="overflow-y: auto;">
+                @if(!empty($hasMaternalCode) && !empty($maternalFamCode))
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 p-2.5 mb-3 rounded-3 border" style="background: #fdf8f8; border-color: #f1d4d6 !important;">
+                    <span class="small fw-bold text-dark"><i class="bi bi-signpost-split text-primary me-1"></i> Flyer Family Code:</span>
+                    <div class="d-flex flex-wrap gap-2" role="radiogroup" aria-label="Select Married or Birth Family Code for Flyer">
+                        <button type="button" id="flyerScopePrimaryBtn" class="btn btn-sm rounded-pill fw-semibold px-3 btn-primary" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0;" onclick="window.switchFlyerLineageScope('primary', '{{ ltrim((string)($primaryFamCode ?? ($data['famCode'] ?? '')), '#') }}', '{{ addslashes((string)($maritalSurname ?? ($data['lastName'] ?? 'Family'))) }}')">
+                            Married (#{{ ltrim((string)($primaryFamCode ?? ($data['famCode'] ?? '')), '#') }})
+                        </button>
+                        <button type="button" id="flyerScopeBirthBtn" class="btn btn-sm rounded-pill fw-semibold px-3 btn-outline-success" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0;" onclick="window.switchFlyerLineageScope('maternal', '{{ ltrim((string)$maternalFamCode, '#') }}', '{{ addslashes((string)($maidenSurname ?? $maternalFamCode)) }}')">
+                            Birth (#{{ ltrim((string)$maternalFamCode, '#') }})
+                        </button>
+                    </div>
+                </div>
+                @endif
                 <!-- Flyer Canvas Preview Wrapper -->
                 <div class="card border-0 mb-3 shadow-sm overflow-hidden" style="border-radius: 18px; background: #06170e;">
                     <div class="d-flex justify-content-center align-items-center p-2 p-md-3">
@@ -81,6 +94,26 @@
     let flyerRendered = false;
     let flyerInviteUrl = window.location.origin + '/register';
 
+    window.switchFlyerLineageScope = function(scope, code, surname) {
+        window.__ACTIVE_LINEAGE_SCOPE__ = scope;
+        window.__FAMILY_CODE__ = code;
+        const pBtn = document.getElementById('flyerScopePrimaryBtn');
+        const bBtn = document.getElementById('flyerScopeBirthBtn');
+        if (pBtn && bBtn) {
+            if (scope === 'maternal') {
+                bBtn.className = 'btn btn-sm rounded-pill fw-semibold px-3 btn-success text-white';
+                pBtn.className = 'btn btn-sm rounded-pill fw-semibold px-3 btn-outline-primary';
+            } else {
+                pBtn.className = 'btn btn-sm rounded-pill fw-semibold px-3 btn-primary text-white';
+                bBtn.className = 'btn btn-sm rounded-pill fw-semibold px-3 btn-outline-success';
+            }
+        }
+        if (window.cachedFlyerStats) {
+            window.cachedFlyerStats.familySurname = surname || code || 'Family';
+        }
+        window.openFamilyFlyerModal();
+    };
+
     window.openFamilyFlyerModal = function() {
         const modalEl = document.getElementById('familyFlyerModal');
         if (!modalEl) return;
@@ -115,15 +148,15 @@
 
         // If outside organogram page, asynchronously fetch live stats from lineage quests API
         if (typeof graphData === 'undefined' || !graphData) {
-            fetch('/api/lineage/quests')
+            fetch('/api/lineage/quests?family_code=' + encodeURIComponent(activeCode))
                 .then(res => res.json())
                 .then(res => {
                     if (res && res.status === 'success' && res.data) {
                         window.cachedFlyerStats = {
-                            memberCount: res.data.stats?.total_nodes || 1,
-                            genCount: Math.max(1, Math.min(6, Math.ceil((res.data.stats?.total_nodes || 1) / 3))),
-                            hubsCount: Math.max(1, Math.min(10, Math.ceil((res.data.stats?.total_nodes || 1) / 4))),
-                            familySurname: res.data.family_code || 'Family'
+                            memberCount: res.data.stats?.total_nodes || res.data.total_nodes || 1,
+                            genCount: Math.max(1, Math.min(6, Math.ceil((res.data.stats?.total_nodes || res.data.total_nodes || 1) / 3))),
+                            hubsCount: Math.max(1, Math.min(10, Math.ceil((res.data.stats?.total_nodes || res.data.total_nodes || 1) / 4))),
+                            familySurname: res.data.family_code || activeCode || 'Family'
                         };
                         renderFamilyFlyer();
                     }

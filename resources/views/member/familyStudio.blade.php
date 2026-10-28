@@ -1600,6 +1600,7 @@
             sibBtn.textContent = isMaternal
                 ? `Save Sibling to Birth Family (#${activeCode})`
                 : `Save Sibling to Marital Tree (#${activeCode})`;
+            sibBtn.dataset.stCleanHtml = sibBtn.innerHTML;
         }
 
         const isGrand = (document.getElementById('studioParentsMode')?.value === 'grandparents');
@@ -1609,6 +1610,7 @@
             parentsBtn.textContent = isMaternal
                 ? `Save ${noun} to Birth Family (#${activeCode})`
                 : `Save ${noun} to Marital Tree (#${activeCode})`;
+            parentsBtn.dataset.stCleanHtml = parentsBtn.innerHTML;
         }
     };
 
@@ -1653,9 +1655,13 @@
             const isMaternal = document.querySelector('input[name="studio_lineage_scope_radio"]:checked')?.value === 'maternal';
             const activeCode = isMaternal ? studioBirthCode : studioPrimaryCode;
             const noun = isGrand ? 'Grandparents' : 'Parents';
-            document.getElementById('studioSaveParentsBtn').textContent = (studioHasBirthFamily && activeCode)
-                ? (isMaternal ? `Save ${noun} to Birth Family (#${activeCode})` : `Save ${noun} to Marital Tree (#${activeCode})`)
-                : (isGrand ? 'Save Grandparents' : 'Save Parents');
+            const parentsBtn = document.getElementById('studioSaveParentsBtn');
+            if (parentsBtn) {
+                parentsBtn.textContent = (studioHasBirthFamily && activeCode)
+                    ? (isMaternal ? `Save ${noun} to Birth Family (#${activeCode})` : `Save ${noun} to Marital Tree (#${activeCode})`)
+                    : (isGrand ? 'Save Grandparents' : 'Save Parents');
+                parentsBtn.dataset.stCleanHtml = parentsBtn.innerHTML;
+            }
             form.querySelectorAll('label').forEach(l => {
                 l.textContent = l.textContent.replace(/^(Grand)?(Father|Mother)/, (m, g, r) => isGrand ? 'Grand' + r.toLowerCase() : r);
             });
@@ -1742,6 +1748,7 @@
             btn.textContent = activeCode
                 ? `Save ${noun} to ${treeLabel} (#${activeCode})`
                 : `Save ${noun}`;
+            btn.dataset.stCleanHtml = btn.innerHTML;
         }
     };
 
@@ -1789,6 +1796,7 @@
             btn.textContent = activeCode
                 ? `Save ${noun} to ${treeLabel} (#${activeCode})`
                 : `Save ${noun}`;
+            btn.dataset.stCleanHtml = btn.innerHTML;
         }
     };
 
@@ -1949,7 +1957,10 @@
         e.preventDefault();
         const form = this;
         const btn = document.getElementById('studioSaveEditBtn');
-        const originalText = btn.innerHTML;
+        if (!btn.dataset.stCleanHtml && !/spinner-border|st-spinner-border/i.test(btn.innerHTML)) {
+            btn.dataset.stCleanHtml = btn.innerHTML;
+        }
+        const originalText = btn.dataset.stCleanHtml || '<i class="bi bi-check-circle-fill me-1"></i> Save Changes';
         btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving Changes...`;
         btn.disabled = true;
 
@@ -1975,6 +1986,9 @@
         })
         .then(res => res.json())
         .then(data => {
+            if (window.FamilyPlatformSpinner?.stop) {
+                window.FamilyPlatformSpinner.stop(btn);
+            }
             btn.innerHTML = originalText;
             btn.disabled = false;
 
@@ -2042,6 +2056,9 @@
             }
         })
         .catch(err => {
+            if (window.FamilyPlatformSpinner?.stop) {
+                window.FamilyPlatformSpinner.stop(btn);
+            }
             btn.innerHTML = originalText;
             btn.disabled = false;
             errorDiv.textContent = 'A network error occurred.';
@@ -2292,7 +2309,10 @@
 
     function submitStudioForm(form, url, btnId, loadingText, relType) {
         const btn = document.getElementById(btnId);
-        const originalText = btn.innerHTML;
+        if (!btn.dataset.stCleanHtml && !/spinner-border|st-spinner-border/i.test(btn.innerHTML)) {
+            btn.dataset.stCleanHtml = btn.innerHTML;
+        }
+        const originalText = btn.dataset.stCleanHtml || 'Save';
         btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${loadingText}`;
         btn.disabled = true;
 
@@ -2308,6 +2328,9 @@
         })
         .then(res => res.json())
         .then(data => {
+            if (window.FamilyPlatformSpinner?.stop) {
+                window.FamilyPlatformSpinner.stop(btn);
+            }
             btn.innerHTML = originalText;
             btn.disabled = false;
 
@@ -2434,6 +2457,9 @@
             }
         })
         .catch(err => {
+            if (window.FamilyPlatformSpinner?.stop) {
+                window.FamilyPlatformSpinner.stop(btn);
+            }
             btn.innerHTML = originalText;
             btn.disabled = false;
             if (errorDiv) {

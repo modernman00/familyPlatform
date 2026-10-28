@@ -342,6 +342,11 @@
 
                     <!-- Navigation Actions inside card -->
                     <div class="card-actions">
+                        <div id="cardInLawBranchWrapper" style="display: none; margin-bottom: 8px;">
+                            <button type="button" class="btn-action w-100" id="cardToggleInLawBranchBtn" onclick="window.promptOrToggleSpouseInLawBranch(window.selectedNodeId)" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(217, 119, 6, 0.32)); border-color: rgba(245, 158, 11, 0.65); color: #fde68a; font-weight: 700; min-height: 44px; justify-content: center; border-radius: 10px;">
+                                <i class="bi bi-people-fill text-warning me-1"></i> <span id="cardToggleInLawBranchText">Show Extended Family</span>
+                            </button>
+                        </div>
                         <div style="display: flex; gap: 8px;">
                             <button type="button" class="btn-action w-100" onclick="traceCardLineage()" style="background: rgba(184,32,44, 0.2); border-color: rgba(239,107,115, 0.4); color: #ecc7c9;">
                                 <i class="bi bi-compass-fill text-warning"></i> Trace Lineage
@@ -1159,6 +1164,9 @@
                     maiden_name: node.maiden_name || '',
                     birth_family_code: node.birth_family_code || '',
                     sibling_kind: node.sibling_kind || null,
+                    is_inlaw_branch: Boolean(node.is_inlaw_branch),
+                    inlaw_spouse_id: node.inlaw_spouse_id || null,
+                    inlaw_branch_count: Number(node.inlaw_branch_count || 0),
                     email: node.email || (node.raw ? node.raw.email : '') || '',
                     mobile: node.mobile || (node.raw ? node.raw.mobile : '') || '',
                     occupation: node.occupation || (node.raw ? node.raw.occupation : '') || '',
@@ -1304,6 +1312,13 @@
             setTimeout(() => window.autoSizeTreeStage && window.autoSizeTreeStage(), 400);
             window.familyTreeNodes = familyTreeNodes;
             window.graphData = graphData;
+
+            // Interactive Spouse / In-Law Lineage Progressive Disclosure Prompt
+            family.on('inlaw_toggle', function (sender, args) {
+                if (typeof window.promptOrToggleSpouseInLawBranch === 'function') {
+                    window.promptOrToggleSpouseInLawBranch(args.spouseId);
+                }
+            });
 
             // Intercept clicks to trigger the floating Luxury Detail Card & custom Modal flow
             family.on('click', function (sender, args) {
@@ -1838,7 +1853,72 @@
             removeWrapper.style.display = (isRootUser || isReadOnlyTree) ? 'none' : 'block';
         }
 
+        // Spouse / In-Law Extended Family Branch Progressive Disclosure Control
+        const inLawWrapper = document.getElementById('cardInLawBranchWrapper');
+        const inLawText = document.getElementById('cardToggleInLawBranchText');
+        const inLawCount = Number(node.inlaw_branch_count || (node.raw && node.raw.inlaw_branch_count) || 0);
+        if (inLawWrapper && inLawText) {
+            if (inLawCount > 0) {
+                const isExpanded = Boolean(window.family && typeof window.family.isInLawBranchExpanded === 'function' && window.family.isInLawBranchExpanded(node.id));
+                const firstName = (node.nameL1 || (node.name || 'Spouse').split(' ')[0] || 'Spouse');
+                inLawText.textContent = isExpanded
+                    ? `Hide ${firstName}'s Extended Family`
+                    : `Show ${firstName}'s Family (+${inLawCount} Relatives)`;
+                inLawWrapper.style.display = 'block';
+            } else {
+                inLawWrapper.style.display = 'none';
+            }
+        }
+
         card.style.display = 'block';
+    };
+
+    window.promptOrToggleSpouseInLawBranch = function(spouseNodeId) {
+        if (!spouseNodeId || !window.family || typeof window.family.toggleInLawBranch !== 'function') return;
+        const node = (window.familyTreeNodes || []).find(n => String(n.id) === String(spouseNodeId));
+        const inLawCount = Number((node && (node.inlaw_branch_count || (node.raw && node.raw.inlaw_branch_count))) || 0);
+        if (inLawCount <= 0) return;
+
+        const isCurrentlyExpanded = window.family.isInLawBranchExpanded(spouseNodeId);
+        const firstName = (node && (node.nameL1 || (node.name || 'Spouse').split(' ')[0])) || 'Spouse';
+        const fullName = (node && node.name) || firstName;
+
+        // If already expanded, collapse immediately and keep the tree clean
+        if (isCurrentlyExpanded) {
+            window.family.toggleInLawBranch(spouseNodeId, false);
+            if (String(window.selectedNodeId) === String(spouseNodeId) && typeof window.openPersonCard === 'function') {
+                window.openPersonCard(node);
+            }
+            return;
+        }
+
+        // Prompt the user before expanding the spouse's extended family branch onto the canvas
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: `Show ${firstName}'s Family Lineage?`,
+                html: `<p class="text-muted small mb-0">To keep your primary family tree clean and easy to read, <strong>${fullName}'s</strong> parents and siblings (<strong>${inLawCount} relative${inLawCount === 1 ? '' : 's'}</strong>) are tucked away by default.<br><br>Would you like to expand ${firstName}'s family branch on this tree?</p>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#f59e0b',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: `<i class="bi bi-people-fill me-1"></i> Show ${firstName}'s Family (+${inLawCount})`,
+                cancelButtonText: 'Keep Hidden'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.family.toggleInLawBranch(spouseNodeId, true);
+                    if (String(window.selectedNodeId) === String(spouseNodeId) && typeof window.openPersonCard === 'function') {
+                        window.openPersonCard(node);
+                    }
+                }
+            });
+        } else {
+            if (confirm(`Show ${fullName}'s extended family (${inLawCount} relatives) on the tree?`)) {
+                window.family.toggleInLawBranch(spouseNodeId, true);
+                if (String(window.selectedNodeId) === String(spouseNodeId) && typeof window.openPersonCard === 'function') {
+                    window.openPersonCard(node);
+                }
+            }
+        }
     };
 
     window.removeSelectedCardNode = function() {
@@ -2849,7 +2929,10 @@
 
     function submitForm(form, url, btnId, loadingText) {
         const btn = document.getElementById(btnId);
-        const originalText = btn.innerHTML;
+        if (!btn.dataset.stCleanHtml && !/spinner-border|st-spinner-border/i.test(btn.innerHTML)) {
+            btn.dataset.stCleanHtml = btn.innerHTML;
+        }
+        const originalText = btn.dataset.stCleanHtml || 'Save';
         btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${loadingText}`;
         btn.disabled = true;
         
@@ -2894,6 +2977,9 @@
             } else {
                 errorDiv.textContent = window.extractErrorMessage ? window.extractErrorMessage(data) : extractStudioErrorMessage(data.message || data.error || data);
                 errorDiv.classList.remove('d-none');
+                if (window.FamilyPlatformSpinner?.stop) {
+                    window.FamilyPlatformSpinner.stop(btn);
+                }
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
@@ -2901,6 +2987,9 @@
         .catch(err => {
             errorDiv.textContent = window.extractErrorMessage ? window.extractErrorMessage(err, 'A network error occurred. Please try again.') : 'A network error occurred. Please try again.';
             errorDiv.classList.remove('d-none');
+            if (window.FamilyPlatformSpinner?.stop) {
+                window.FamilyPlatformSpinner.stop(btn);
+            }
             btn.innerHTML = originalText;
             btn.disabled = false;
         });

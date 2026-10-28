@@ -74,12 +74,19 @@ final class ProfilePage extends ProcessImg
 
             $recentReels = \App\model\Reel::getReelsFeed($this->id, (string)($data['famCode'] ?? ''), 10, 0);
             $suggestedKin = \App\services\KinshipEngineService::getSuggestedKin($this->id, 5);
+            $radarSettings = \App\services\KinshipEngineService::getRadarSettings($this->id);
 
             // Check and process 18th birthday graduation milestone
             $adulthoodGraduation = \App\services\AdulthoodTransitionService::checkAndProcessUserGraduation($this->id);
 
             view('member/profilePage', [
                 'data' => $data['memberData'],
+                'primaryFamCode' => $data['primaryFamCode'] ?? ($data['famCode'] ?? ''),
+                'maternalFamCode' => $data['maternalFamCode'] ?? '',
+                'hasMaternalCode' => $data['hasMaternalCode'] ?? false,
+                'maritalSurname' => $data['maritalSurname'] ?? ($data['memberData']['lastName'] ?? ''),
+                'maidenSurname' => $data['maidenSurname'] ?? ($data['memberData']['maiden_name'] ?? ''),
+                'birthFamily' => $data['birthFamily'] ?? ['state' => 'none', 'code' => '', 'origin' => null, 'pending' => null],
                 'allData' => $data['posts'],
                 'comment' => $data['comments'],
                 'post2Id' => $data['post2Id'],
@@ -93,6 +100,7 @@ final class ProfilePage extends ProcessImg
                 'pendingMigrations' => $data['pendingMigrations'] ?? [],
                 'recentReels' => $recentReels,
                 'suggestedKin' => $suggestedKin,
+                'radarSettings' => $radarSettings,
                 'adulthoodGraduation' => $adulthoodGraduation
             ]);
 

@@ -3,14 +3,41 @@ import Swal from 'sweetalert2';
 import { format } from 'timeago.js';
 import { esc } from '../global';
 import { FAMILY_GIFS, GIF_CATEGORIES } from '../profilePage/gifCatalog';
+import { HEIRLOOM_REACTIONS, getHeirloomGlassSvg, triggerHeirloomBurst } from '../profilePage/heirloomGlassReactions';
 
 const REEL_COMMENT_EMOJI_MAP = {
-    like: '👍',
     love: '❤️',
-    haha: '😄',
-    wow: '😮',
+    like: '👍',
+    haha: '😂',
+    shock: '😮',
     sad: '😢',
-    angry: '😠'
+    celebrate: '✨'
+};
+
+const REEL_REACTION_LABELS = {
+    love: 'Love',
+    like: 'Like',
+    likes: 'Like',
+    haha: 'Haha',
+    shock: 'Wow',
+    wow: 'Wow',
+    sad: 'Empathy',
+    celebrate: 'Celebrate',
+    bless: 'Celebrate',
+    proud: 'Celebrate'
+};
+
+const REEL_REACTION_COLORS = {
+    love: '#fb7185',
+    like: '#fbbf24',
+    likes: '#fbbf24',
+    haha: '#fde047',
+    shock: '#38bdf8',
+    wow: '#38bdf8',
+    sad: '#2dd4bf',
+    celebrate: '#c084fc',
+    bless: '#c084fc',
+    proud: '#c084fc'
 };
 
 class FamilyReelsPlayer {
@@ -489,14 +516,17 @@ class FamilyReelsPlayer {
         const ambientThumbUrl = esc(rawThumb);
         const userReaction = reel.user_reaction || '';
         const isLiked = !!userReaction;
-        const reactionIconMap = {
-            like: 'bi-heart-fill',
-            love: 'bi-emoji-heart-eyes-fill',
-            celebrate: 'bi-stars',
-            bless: 'bi-sun-fill',
-            proud: 'bi-trophy-fill'
-        };
-        const activeLikeIcon = isLiked ? (reactionIconMap[userReaction] || 'bi-heart-fill') : 'bi-heart';
+        const normalizedReelReaction = (userReaction === 'bless' || userReaction === 'proud') ? 'celebrate' : userReaction;
+        const activeLikeContent = isLiked
+            ? `<span class="d-inline-flex align-items-center justify-content-center heirloom-active-icon">${getHeirloomGlassSvg(normalizedReelReaction, 26)}</span>`
+            : '<i class="bi bi-heart"></i>';
+        const reelPickerItems = ['love', 'like', 'haha', 'shock', 'sad', 'celebrate'].map(type => {
+            const meta = HEIRLOOM_REACTIONS[type] || HEIRLOOM_REACTIONS.love;
+            return `<button type="button" class="reel-reaction-emoji-btn heirloom-reaction-btn ${normalizedReelReaction === type ? 'active' : ''}" data-reaction="${type}" title="${esc(meta.label)}" aria-label="${esc(meta.label)}" style="--heirloom-glow:${meta.glow};">
+                <span class="d-inline-flex align-items-center justify-content-center">${getHeirloomGlassSvg(type, 30)}</span>
+                <span class="heirloom-tooltip-pill">${esc(meta.label)}</span>
+            </button>`;
+        }).join('');
         const categoryLabel = esc(reel.category ? `#${String(reel.category).replace(/_/g, ' ').toUpperCase()}` : '#FAMILY');
         const mediaHtml = this.getMediaEmbed(reel.video_url, reel.aspect_ratio || '9:16');
         const isOwner = this.currentUserId && String(reel.user_id) === String(this.currentUserId);
@@ -561,16 +591,13 @@ class FamilyReelsPlayer {
                 </div>
                 ` : ''}
 
-                <!-- Like & Celebratory Reaction Picker -->
+                <!-- Like & Celebratory Reaction Picker (Living Heirloom Glass 3D Dock) -->
                 <div class="d-flex flex-column align-items-center position-relative" id="reelReactionWrapper">
-                    <div class="reel-reaction-picker" id="reelReactionPicker">
-                        <button type="button" class="reel-reaction-emoji-btn" data-reaction="like" title="Love">❤️</button>
-                        <button type="button" class="reel-reaction-emoji-btn" data-reaction="celebrate" title="Celebrate Milestone">🎉</button>
-                        <button type="button" class="reel-reaction-emoji-btn" data-reaction="bless" title="Family Blessing">🙏</button>
-                        <button type="button" class="reel-reaction-emoji-btn" data-reaction="proud" title="So Proud">👏</button>
+                    <div class="reel-reaction-picker heirloom-glass-dock" id="reelReactionPicker">
+                        ${reelPickerItems}
                     </div>
-                    <button class="reel-action-btn ${isLiked ? 'liked' : ''}" id="btnReelLike" title="Tap to Like • Hold for Reactions">
-                        <i class="bi ${activeLikeIcon}"></i>
+                    <button class="reel-action-btn ${isLiked ? 'liked' : ''}" id="btnReelLike" title="Tap to React • Hover or Hold for Living Heirloom Glass Reactions">
+                        ${activeLikeContent}
                     </button>
                     <span class="reel-action-count" id="reelLikeCount">${reel.likes_count || 0}</span>
                 </div>
@@ -954,9 +981,11 @@ class FamilyReelsPlayer {
         const reactionPicker = document.getElementById('reelReactionPicker');
 
         if (likeBtn) {
-            likeBtn.addEventListener('click', () => {
-                this.spawnFloatingEmoji('❤️');
-                this.toggleLike('like');
+            likeBtn.addEventListener('click', (e) => {
+                const defaultReact = reel.user_reaction || 'love';
+                this.spawnFloatingEmoji(defaultReact);
+                triggerHeirloomBurst(defaultReact, e);
+                this.toggleLike(defaultReact);
             });
         }
         if (reactionWrapper && reactionPicker) {
@@ -965,9 +994,9 @@ class FamilyReelsPlayer {
             reactionPicker.querySelectorAll('[data-reaction]').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const rType = btn.getAttribute('data-reaction') || 'like';
-                    const emojiChar = btn.textContent || '🎉';
-                    this.spawnFloatingEmoji(emojiChar);
+                    const rType = btn.getAttribute('data-reaction') || 'love';
+                    this.spawnFloatingEmoji(rType);
+                    triggerHeirloomBurst(rType, e);
                     reactionPicker.classList.remove('open');
                     this.toggleLike(rType);
                 });
@@ -1011,7 +1040,7 @@ class FamilyReelsPlayer {
     }
 
     /**
-     * Spawn an animated heart burst on double-tap or double-click.
+     * Spawn an animated 3D Living Heirloom Glass heart burst on double-tap or double-click.
      */
     spawnDoubleTapHeart(x, y) {
         if (!this.viewport) return;
@@ -1019,8 +1048,10 @@ class FamilyReelsPlayer {
         burst.className = 'reel-doubletap-burst';
         burst.style.left = `${Math.round(x)}px`;
         burst.style.top = `${Math.round(y)}px`;
-        burst.innerHTML = '<i class="bi bi-heart-fill"></i>';
+        burst.innerHTML = getHeirloomGlassSvg('love', 68);
         this.viewport.appendChild(burst);
+        const vpRect = this.viewport.getBoundingClientRect();
+        triggerHeirloomBurst('love', { clientX: vpRect.left + x, clientY: vpRect.top + y });
         setTimeout(() => burst.remove(), 900);
     }
 
@@ -1065,12 +1096,17 @@ class FamilyReelsPlayer {
         }
     }
 
-    spawnFloatingEmoji(emoji = '❤️') {
+    spawnFloatingEmoji(reactionType = 'love') {
         const card = document.getElementById('activeReelCard');
         if (!card) return;
         const el = document.createElement('div');
         el.className = 'reel-floating-emoji';
-        el.textContent = emoji;
+        const svg = getHeirloomGlassSvg(reactionType, 40);
+        if (svg) {
+            el.innerHTML = svg;
+        } else {
+            el.textContent = reactionType;
+        }
         card.appendChild(el);
         setTimeout(() => el.remove(), 1150);
     }
@@ -1192,19 +1228,12 @@ class FamilyReelsPlayer {
         }
     }
 
-    async toggleLike(reactionType = 'like') {
+    async toggleLike(reactionType = 'love') {
         const reel = this.reels[this.currentIndex];
         if (!reel) return;
 
         const likeBtn = document.getElementById('btnReelLike');
         const likeCount = document.getElementById('reelLikeCount');
-        const reactionIconMap = {
-            like: 'bi-heart-fill',
-            love: 'bi-emoji-heart-eyes-fill',
-            celebrate: 'bi-stars',
-            bless: 'bi-sun-fill',
-            proud: 'bi-trophy-fill'
-        };
 
         try {
             const res = await axios.post('/api/reels/react', {
@@ -1221,8 +1250,8 @@ class FamilyReelsPlayer {
                 if (likeBtn) {
                     if (res.data.action === 'added' || res.data.action === 'updated') {
                         likeBtn.classList.add('liked');
-                        const iconCls = reactionIconMap[res.data.reaction] || 'bi-heart-fill';
-                        likeBtn.innerHTML = `<i class="bi ${iconCls}"></i>`;
+                        const normReact = (res.data.reaction === 'bless' || res.data.reaction === 'proud') ? 'celebrate' : (res.data.reaction || 'love');
+                        likeBtn.innerHTML = `<span class="d-inline-flex align-items-center justify-content-center heirloom-active-icon">${getHeirloomGlassSvg(normReact, 26)}</span>`;
                     } else {
                         likeBtn.classList.remove('liked');
                         likeBtn.innerHTML = '<i class="bi bi-heart"></i>';
@@ -1312,17 +1341,21 @@ class FamilyReelsPlayer {
         const authorName = `${c.firstName || 'Family'} ${c.lastName || 'Member'}`.trim();
         const avatarUrl = c.profilePics ? (c.profilePics.startsWith('/') ? c.profilePics : `/resources/images/profile/${c.profilePics}`) : '/resources/images/profile/avatarM.png';
 
-        // Top reactions preview
+        // Top reactions preview (Living Heirloom Glass 3D)
         const reactions = c.reactions || {};
         const topReactions = Object.entries(reactions)
             .filter(([k, v]) => !['total', 'comment_id'].includes(k) && Number(v) > 0)
             .sort(([, a], [, b]) => Number(b) - Number(a))
             .slice(0, 3)
-            .map(([k, v]) => ({ emoji: REEL_COMMENT_EMOJI_MAP[k] || '👍', count: v }));
+            .map(([k, v]) => ({
+                svg: getHeirloomGlassSvg(k, 16),
+                count: v
+            }));
 
         const activeReaction = c.user_reaction || '';
-        const likeLabel = activeReaction ? (activeReaction.charAt(0).toUpperCase() + activeReaction.slice(1)) : 'Like';
-        const likeEmoji = activeReaction ? (REEL_COMMENT_EMOJI_MAP[activeReaction] || '👍') : '';
+        const likeLabel = activeReaction ? (REEL_REACTION_LABELS[activeReaction] || (activeReaction.charAt(0).toUpperCase() + activeReaction.slice(1))) : 'Like';
+        const likeSvg = activeReaction ? getHeirloomGlassSvg(activeReaction, 16) : '';
+        const likeColor = activeReaction ? (REEL_REACTION_COLORS[activeReaction] || '#38bdf8') : '';
 
         return `
         <div class="reel-comment-bubble" data-comment-id="${c.comment_id}">
@@ -1343,25 +1376,28 @@ class FamilyReelsPlayer {
                 </div>
 
                 ${topReactions.length > 0 ? `
-                <div class="reel-comment-reaction-pill" data-comment-id="${c.comment_id}">
-                    ${topReactions.map(r => `<span>${r.emoji} <span style="color:#94a3b8; font-size:0.7rem;">${r.count}</span></span>`).join(' ')}
+                <div class="reel-comment-reaction-pill d-inline-flex align-items-center gap-1.5" data-comment-id="${c.comment_id}">
+                    ${topReactions.map(r => `<span class="d-inline-flex align-items-center gap-1">${r.svg} <span style="color:#94a3b8; font-size:0.7rem;">${r.count}</span></span>`).join(' ')}
                 </div>
                 ` : ''}
 
                 <div class="reel-comment-meta-bar position-relative">
                     <span class="reel-comment-time">${c.created_at ? format(c.created_at) : 'Just now'}${c.updated_at ? ' <span class="text-white-50">(edited)</span>' : ''}</span>
                     
-                    <!-- Like Button & Reaction Bar -->
+                    <!-- Like Button & Living Heirloom Glass Reaction Bar -->
                     <div class="position-relative d-inline-block">
-                        <button type="button" class="reel-comment-action-btn reel-comment-react-toggle ${activeReaction ? 'text-primary fw-bold' : ''}" data-comment-id="${c.comment_id}" data-active-reaction="${esc(activeReaction)}">
-                            ${likeEmoji ? `${likeEmoji} ` : ''}${esc(likeLabel)}
+                        <button type="button" class="reel-comment-action-btn reel-comment-react-toggle d-inline-flex align-items-center gap-1 ${activeReaction ? 'fw-bold' : ''}" style="${likeColor ? `color:${likeColor};` : ''}" data-comment-id="${c.comment_id}" data-active-reaction="${esc(activeReaction)}">
+                            ${likeSvg ? `<span class="d-inline-flex align-items-center justify-content-center">${likeSvg}</span>` : ''}<span>${esc(likeLabel)}</span>
                         </button>
-                        <div class="reel-comment-reaction-picker d-none" id="reactionPicker_${c.comment_id}">
-                            ${Object.keys(REEL_COMMENT_EMOJI_MAP).map(type => `
-                                <button type="button" class="reel-comment-reaction-emoji-btn" data-comment-id="${c.comment_id}" data-reaction-type="${type}" title="${type}">
-                                    ${REEL_COMMENT_EMOJI_MAP[type]}
+                        <div class="reel-comment-reaction-picker heirloom-glass-dock d-none" id="reactionPicker_${c.comment_id}">
+                            ${Object.keys(REEL_COMMENT_EMOJI_MAP).map(type => {
+                                const meta = HEIRLOOM_REACTIONS[type] || HEIRLOOM_REACTIONS.love;
+                                return `
+                                <button type="button" class="reel-comment-reaction-emoji-btn heirloom-reaction-btn" data-comment-id="${c.comment_id}" data-reaction-type="${type}" title="${esc(meta.label)}" style="--heirloom-glow:${meta.glow}; min-width:36px; min-height:36px; padding:2px;">
+                                    <span class="d-inline-flex align-items-center justify-content-center">${getHeirloomGlassSvg(type, 24)}</span>
                                 </button>
-                            `).join('')}
+                                `;
+                            }).join('')}
                         </div>
                     </div>
 
@@ -1428,6 +1464,9 @@ class FamilyReelsPlayer {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const active = btn.getAttribute('data-active-reaction');
+                if (!active) {
+                    triggerHeirloomBurst('like', e);
+                }
                 // If already reacted, clicking the button toggles that same reaction off
                 this.toggleCommentReaction(commentId, active || 'like');
             });
@@ -1453,6 +1492,7 @@ class FamilyReelsPlayer {
                 const reactionType = btn.getAttribute('data-reaction-type') || 'like';
                 const picker = document.getElementById(`reactionPicker_${commentId}`);
                 if (picker) picker.classList.add('d-none');
+                triggerHeirloomBurst(reactionType, e);
                 if (commentId) {
                     this.toggleCommentReaction(commentId, reactionType);
                 }

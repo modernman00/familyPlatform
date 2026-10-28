@@ -24,20 +24,23 @@ const getTopReactions = (counts = {}) =>
  * @param {string|number} commentNo - Unique identifier for the comment block
  */
 export const renderTopReactions = (counts) => {
-  // 🧩 Map semantic labels to emoji characters
-  const emojiMap = {
-    likes: '👍', love: '❤️', haha: '😄',
-    wow: '😮', sad: '😢', angry: '😠'
-  };
-
   const top = getTopReactions(counts); // 🧠 Get top 3 reactions
 
   const html = top
     .map(([label, count]) => {
+      if (typeof window !== 'undefined' && typeof window.__getHeirloomGlassSvg === 'function') {
+        const svg = window.__getHeirloomGlassSvg(label, 16);
+        return `<span class="d-inline-flex align-items-center gap-1">${svg}<span>${count}</span></span>`;
+      }
+      // 🧩 Fallback map
+      const emojiMap = {
+        likes: '👍', like: '👍', love: '❤️', haha: '😄',
+        wow: '😮', shock: '😮', sad: '😢', angry: '😠', celebrate: '✨'
+      };
       const emoji = emojiMap[label] ?? ''; // 🧼 Fallback if label missing
       return `${emoji} ${count}`; // 🖼️ Render emoji + count
     })
     .join(' '); // 🧵 Combine into single HTML string
-    return html;
+  return html;
 };
 

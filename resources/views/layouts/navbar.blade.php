@@ -55,9 +55,9 @@
                 </li>
             </ul>
 
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center flex-wrap flex-lg-nowrap gap-2 navbar-actions-group">
                 <!-- Omni-Search Trigger Button (Search Data, Activities & Functions) -->
-                <button class="btn btn-omni-search-trigger d-flex align-items-center gap-2" id="omniSearchTriggerBtn" type="button" aria-label="Search data, activities, functions" title="Search activities, memories, and family members (⌘K)" data-bs-toggle="modal" data-bs-target="#omniSearchModal">
+                <button class="btn btn-omni-search-trigger d-none d-lg-flex align-items-center gap-2" id="omniSearchTriggerBtn" type="button" aria-label="Search data, activities, functions" title="Search activities, memories, and family members (⌘K)" data-bs-toggle="modal" data-bs-target="#omniSearchModal">
                     <i class="bi bi-search text-primary"></i>
                     <span class="d-none d-xl-inline text-muted small pe-2">{{ __('nav.search_placeholder', 'Search data, activities, functions...') }}</span>
                     <span class="d-inline d-xl-none text-muted small pe-1">{{ __('nav.search', 'Search...') }}</span>
@@ -108,7 +108,7 @@
                         $supportedLocales = \App\classes\I18n::getSupportedLocales();
                         $currLocale = $supportedLocales[$activeLocale] ?? $supportedLocales['en'];
                     @endphp
-                    <button class="btn btn-sm d-flex align-items-center gap-1 px-2 py-1 rounded-pill border" type="button" id="langMenu" data-bs-toggle="dropdown" aria-expanded="false" style="background: var(--card-bg, #fff); font-size: 0.85rem;" title="{{ __('nav.change_language', 'Change Language / Select locale') }}">
+                    <button class="btn btn-sm d-flex align-items-center gap-1 px-2 py-1 rounded-pill border" type="button" id="langMenu" data-bs-toggle="dropdown" data-bs-display="dynamic" aria-expanded="false" style="background: var(--card-bg, #fff); font-size: 0.85rem;" title="{{ __('nav.change_language', 'Change Language / Select locale') }}">
                         <span style="font-size: 1.1rem;">{{ $currLocale['flag'] }}</span>
                         <span class="d-none d-md-inline fw-semibold text-uppercase" style="font-size: 0.78rem;">{{ $activeLocale }}</span>
                     </button>
@@ -126,11 +126,11 @@
 
                 <!-- User Profile Dropdown (Refined Capsule with Avatar Monogram) -->
                 <div class="dropdown">
-                    <button class="btn btn-user-stitch dropdown-toggle d-flex align-items-center gap-2" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false" title="Account profile and preferences menu">
+                    <button class="btn btn-user-stitch dropdown-toggle d-flex align-items-center gap-2" type="button" id="userMenu" data-bs-toggle="dropdown" data-bs-display="dynamic" aria-expanded="false" title="Account profile and preferences menu">
                         <span class="user-avatar-initials">{{ strtoupper(substr($_SESSION['fullName'] ?? 'A', 0, 1)) }}</span>
                         <span class="fw-semibold text-truncate" style="max-width: 130px;">{{ ucwords(strtolower($_SESSION['fullName'] ?? 'Account')) }}</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-2" aria-labelledby="userMenu" style="border-radius: 16px; min-width: 200px;">
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-2 stitch-user-dropdown" aria-labelledby="userMenu" style="border-radius: 16px; min-width: 200px;">
                         <li>
                             <a class="dropdown-item py-2 px-3 fw-medium text-primary" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" title="Invite family relatives and friends to join your family network">
                                 <i class="bi bi-person-plus-fill me-2 text-warning"></i> {{ __('nav.invite_others', 'Invite Others') }}

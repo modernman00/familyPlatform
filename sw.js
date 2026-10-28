@@ -13,17 +13,18 @@
 
 'use strict';
 
-const SW_VERSION = 'v2.0.7';
+const SW_VERSION = 'v2.0.8';
 const STATIC_CACHE = `fp-static-${SW_VERSION}`;
 const DYNAMIC_CACHE = `fp-dynamic-${SW_VERSION}`;
 const IMAGE_CACHE = `fp-images-${SW_VERSION}`;
-const MAX_IMAGE_CACHE_ENTRIES = 60;
+const MAX_IMAGE_CACHE_ENTRIES = 200;
 
 // Core App Shell Files for Immediate Offline Availability
 const PRECACHE_ASSETS = [
   '/offline.html',
   '/manifest.json',
   '/public/css/main.css',
+  '/public/css/standards-v21.css',
   '/public/css/organogram.css',
   '/public/js/manifest.js',
   '/public/js/vendor.js',
@@ -190,12 +191,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // B. Images & Avatars -> Cache-First Strategy
+  // B. Images & Avatars (including VSE Display P3 AVIF/WebP Ladders) -> Cache-First Strategy
   const isImage =
     request.destination === 'image' ||
     url.pathname.startsWith('/resources/images') ||
+    url.pathname.startsWith('/media/posts') ||
     url.pathname.startsWith('/public/img') ||
-    /\.(png|jpg|jpeg|svg|webp|gif|ico)$/i.test(url.pathname);
+    /\.(png|jpg|jpeg|svg|webp|avif|gif|ico)$/i.test(url.pathname);
 
   if (isImage) {
     event.respondWith(cacheFirstStrategy(request, IMAGE_CACHE, MAX_IMAGE_CACHE_ENTRIES));

@@ -38,6 +38,12 @@ final class KinshipEngineService
             return [];
         }
 
+        // ── Check user's Radar Settings ──
+        $settings = self::getRadarSettings($userIdStr);
+        if (!$settings['radar_enabled']) {
+            return [];
+        }
+
         try {
             $pdo = Select::connect2();
 
@@ -78,35 +84,37 @@ final class KinshipEngineService
                 $params[':sigLastName'] = $userLastName;
             }
 
-            // Signal B: User's maiden name matches candidate's lastName or famCode
-            if (!empty($userMaiden)) {
-                $whereClauses[] = "(UPPER(p.lastName) = :sigMaiden1 OR UPPER(p.famCode) = :sigMaiden2)";
-                $params[':sigMaiden1'] = $userMaiden;
-                $params[':sigMaiden2'] = $userMaiden;
+            // Signal B & C: Maternal Lineage & Maiden Name Cross-Matching
+            if ($settings['include_maternal']) {
+                if (!empty($userMaiden)) {
+                    $whereClauses[] = "(UPPER(p.lastName) = :sigMaiden1 OR UPPER(p.famCode) = :sigMaiden2)";
+                    $params[':sigMaiden1'] = $userMaiden;
+                    $params[':sigMaiden2'] = $userMaiden;
+                }
+
+                if (!empty($userLastName)) {
+                    $whereClauses[] = "UPPER(o.maiden_name) = :sigCandMaiden1";
+                    $params[':sigCandMaiden1'] = $userLastName;
+                }
+                if (!empty($userFamCode)) {
+                    $whereClauses[] = "UPPER(o.maiden_name) = :sigCandMaiden2";
+                    $params[':sigCandMaiden2'] = $userFamCode;
+                }
             }
 
-            // Signal C: Candidate's maiden name matches user's lastName or famCode
-            if (!empty($userLastName)) {
-                $whereClauses[] = "UPPER(o.maiden_name) = :sigCandMaiden1";
-                $params[':sigCandMaiden1'] = $userLastName;
-            }
-            if (!empty($userFamCode)) {
-                $whereClauses[] = "UPPER(o.maiden_name) = :sigCandMaiden2";
-                $params[':sigCandMaiden2'] = $userFamCode;
-            }
+            // Signal D & E: Secondary family code & In-Law overlap
+            if ($settings['include_inlaws']) {
+                if (!empty($userFamCode2)) {
+                    $whereClauses[] = "(UPPER(p.famCode) = :sigFam2a OR UPPER(p.familyCode2) = :sigFam2b)";
+                    $params[':sigFam2a'] = $userFamCode2;
+                    $params[':sigFam2b'] = $userFamCode2;
+                }
 
-            // Signal D: Secondary family code overlap
-            if (!empty($userFamCode2)) {
-                $whereClauses[] = "(UPPER(p.famCode) = :sigFam2a OR UPPER(p.familyCode2) = :sigFam2b)";
-                $params[':sigFam2a'] = $userFamCode2;
-                $params[':sigFam2b'] = $userFamCode2;
-            }
-
-            // Signal E: Other family code overlap
-            if (!empty($userOtherFamCode)) {
-                $whereClauses[] = "(UPPER(p.famCode) = :sigOfc1 OR UPPER(o.otherFamCode) = :sigOfc2)";
-                $params[':sigOfc1'] = $userOtherFamCode;
-                $params[':sigOfc2'] = $userOtherFamCode;
+                if (!empty($userOtherFamCode)) {
+                    $whereClauses[] = "(UPPER(p.famCode) = :sigOfc1 OR UPPER(o.otherFamCode) = :sigOfc2)";
+                    $params[':sigOfc1'] = $userOtherFamCode;
+                    $params[':sigOfc2'] = $userOtherFamCode;
+                }
             }
 
             // Signal F: Mutual kin (users connected to someone the current user is connected to)
@@ -188,30 +196,34 @@ final class KinshipEngineService
                 $matchReasons = [];
                 $kinshipType  = 'Potential Kin';
 
-                // Tier 2A: Maiden Name Cross-Matching
-                if (!empty($userMaiden) && ($candLastName === $userMaiden || $candFamCode === $userMaiden)) {
-                    $matchScore += 45;
-                    $matchReasons[] = "Maternal Lineage: Matches your mother's maiden name ({$userMaiden})";
-                    $kinshipType = 'Maternal Cousin / In-Law';
-                }
+                // Tier 2A: Maiden Name Cross-Matching (Maternal)
+                if ($settings['include_maternal']) {
+                    if (!empty($userMaiden) && ($candLastName === $userMaiden || $candFamCode === $userMaiden)) {
+                        $matchScore += 45;
+                        $matchReasons[] = "Maternal Lineage: Matches your mother's maiden name ({$userMaiden})";
+                        $kinshipType = 'Maternal Cousin / In-Law';
+                    }
 
-                if (!empty($candMaiden) && ($candMaiden === $userLastName || $candMaiden === $userFamCode)) {
-                    $matchScore += 45;
-                    $matchReasons[] = "Maternal Match: Has maiden heritage in {$userLastName}";
-                    $kinshipType = 'Maternal Relative';
+                    if (!empty($candMaiden) && ($candMaiden === $userLastName || $candMaiden === $userFamCode)) {
+                        $matchScore += 45;
+                        $matchReasons[] = "Maternal Match: Has maiden heritage in {$userLastName}";
+                        $kinshipType = 'Maternal Relative';
+                    }
                 }
 
                 // Tier 2B: Secondary Family Code & In-Law Matching
-                if (!empty($userFamCode2) && ($candFamCode === $userFamCode2 || $candFamCode2 === $userFamCode2)) {
-                    $matchScore += 40;
-                    $matchReasons[] = "In-Law Lineage: Connected to family branch {$userFamCode2}";
-                    $kinshipType = 'Potential In-Law';
-                }
+                if ($settings['include_inlaws']) {
+                    if (!empty($userFamCode2) && ($candFamCode === $userFamCode2 || $candFamCode2 === $userFamCode2)) {
+                        $matchScore += 40;
+                        $matchReasons[] = "In-Law Lineage: Connected to family branch {$userFamCode2}";
+                        $kinshipType = 'Potential In-Law';
+                    }
 
-                if (!empty($userOtherFamCode) && ($candFamCode === $userOtherFamCode || $candOtherFam === $userOtherFamCode)) {
-                    $matchScore += 40;
-                    $matchReasons[] = "In-Law Circle: Shared secondary family code ({$userOtherFamCode})";
-                    $kinshipType = 'In-Law Relative';
+                    if (!empty($userOtherFamCode) && ($candFamCode === $userOtherFamCode || $candOtherFam === $userOtherFamCode)) {
+                        $matchScore += 40;
+                        $matchReasons[] = "In-Law Circle: Shared secondary family code ({$userOtherFamCode})";
+                        $kinshipType = 'In-Law Relative';
+                    }
                 }
 
                 // Tier 3: Mutual Kinship Graph (batched — O(1) lookup)
@@ -228,32 +240,34 @@ final class KinshipEngineService
                 // Tier 4: Surname / Heritage Clan Overlap
                 if ($candLastName === $userLastName && !empty($userLastName)) {
                     $matchScore += 30;
-                    $matchReasons[] = "Shared Family Surname ({$userLastName})";
+                    $matchReasons[] = "Shared Surname ({$userLastName})";
                     if ($kinshipType === 'Potential Kin') {
                         $kinshipType = 'Paternal Clan';
                     }
                 }
 
-                // Only include if score >= 30
+                // Match confidence filtering (respect user's minimum confidence preference)
                 if ($matchScore >= 30) {
                     $confidencePct = min(98, max(55, $matchScore + 20));
-                    $scoredSuggestions[] = [
-                        'user_id'          => $candId,
-                        'firstName'        => $cand['firstName'] ?? '',
-                        'lastName'         => $cand['lastName'] ?? '',
-                        'famCode'          => $cand['famCode'] ?? '',
-                        'familyCode2'      => $cand['familyCode2'] ?? '',
-                        'maiden_name'      => $cand['maiden_name'] ?? '',
-                        'father_name'      => $cand['father_name'] ?? '',
-                        'mother_name'      => $cand['mother_name'] ?? '',
-                        'spouse_name'      => $cand['spouse_name'] ?? '',
-                        'otherFamCode'     => $cand['otherFamCode'] ?? '',
-                        'profilePics'      => $cand['profilePics'] ?? '',
-                        'confidence_score' => $confidencePct,
-                        'kinship_type'     => $kinshipType,
-                        'reasons'          => $matchReasons,
-                        'primary_reason'   => $matchReasons[0] ?? 'Shared family heritage network'
-                    ];
+                    if ($confidencePct >= $settings['min_confidence']) {
+                        $scoredSuggestions[] = [
+                            'user_id'          => $candId,
+                            'firstName'        => $cand['firstName'] ?? '',
+                            'lastName'         => $cand['lastName'] ?? '',
+                            'famCode'          => $cand['famCode'] ?? '',
+                            'familyCode2'      => $cand['familyCode2'] ?? '',
+                            'maiden_name'      => $cand['maiden_name'] ?? '',
+                            'father_name'      => $cand['father_name'] ?? '',
+                            'mother_name'      => $cand['mother_name'] ?? '',
+                            'spouse_name'      => $cand['spouse_name'] ?? '',
+                            'otherFamCode'     => $cand['otherFamCode'] ?? '',
+                            'profilePics'      => $cand['profilePics'] ?? '',
+                            'confidence_score' => $confidencePct,
+                            'kinship_type'     => $kinshipType,
+                            'reasons'          => $matchReasons,
+                            'primary_reason'   => $matchReasons[0] ?? 'Shared family heritage network'
+                        ];
+                    }
                 }
             }
 
@@ -306,6 +320,18 @@ final class KinshipEngineService
             }
         } catch (\Throwable $e) {
             // Non-blocking in case kinship_dismissed table is not yet migrated
+        }
+
+        // Exclude users who have opted out of radar discovery (discoverable = 0)
+        try {
+            $discStmt = $pdo->query("SELECT user_id FROM user_radar_settings WHERE discoverable = 0");
+            if ($discStmt) {
+                while ($row = $discStmt->fetch(PDO::FETCH_NUM)) {
+                    $excluded[] = (string)$row[0];
+                }
+            }
+        } catch (\Throwable $e) {
+            // Non-blocking in case user_radar_settings table is not yet migrated
         }
 
         return array_unique($excluded);
@@ -413,6 +439,113 @@ final class KinshipEngineService
             $stmt->execute([':u' => $userId, ':du' => $dismissedUserId]);
             return true;
         } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Get Radar Settings for a user.
+     * Returns default values if no row exists.
+     *
+     * @param string|int $userId
+     * @return array{
+     *     user_id: string,
+     *     radar_enabled: bool,
+     *     include_inlaws: bool,
+     *     include_maternal: bool,
+     *     min_confidence: int,
+     *     discoverable: bool
+     * }
+     */
+    public static function getRadarSettings(string|int $userId): array
+    {
+        $userIdStr = (string)$userId;
+        $defaults = [
+            'user_id'          => $userIdStr,
+            'radar_enabled'    => true,
+            'include_inlaws'   => true,
+            'include_maternal' => true,
+            'min_confidence'   => 50,
+            'discoverable'     => true,
+        ];
+
+        if (empty($userIdStr)) {
+            return $defaults;
+        }
+
+        try {
+            $pdo = Select::connect2();
+            $stmt = $pdo->prepare("
+                SELECT radar_enabled, include_inlaws, include_maternal, min_confidence, discoverable
+                FROM user_radar_settings
+                WHERE user_id = :userId LIMIT 1
+            ");
+            $stmt->execute([':userId' => $userIdStr]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$row) {
+                return $defaults;
+            }
+
+            return [
+                'user_id'          => $userIdStr,
+                'radar_enabled'    => (bool)($row['radar_enabled'] ?? 1),
+                'include_inlaws'   => (bool)($row['include_inlaws'] ?? 1),
+                'include_maternal' => (bool)($row['include_maternal'] ?? 1),
+                'min_confidence'   => max(30, min(95, (int)($row['min_confidence'] ?? 50))),
+                'discoverable'     => (bool)($row['discoverable'] ?? 1),
+            ];
+        } catch (\Throwable $e) {
+            error_log('[KinshipEngineService::getRadarSettings] ' . $e->getMessage());
+            return $defaults;
+        }
+    }
+
+    /**
+     * Update Radar Settings for a user.
+     *
+     * @param string|int $userId
+     * @param array<string, mixed> $settings
+     * @return bool
+     */
+    public static function updateRadarSettings(string|int $userId, array $settings): bool
+    {
+        $userIdStr = (string)$userId;
+        if (empty($userIdStr)) {
+            return false;
+        }
+
+        $radarEnabled    = isset($settings['radar_enabled']) ? (int)(bool)$settings['radar_enabled'] : 1;
+        $includeInlaws   = isset($settings['include_inlaws']) ? (int)(bool)$settings['include_inlaws'] : 1;
+        $includeMaternal = isset($settings['include_maternal']) ? (int)(bool)$settings['include_maternal'] : 1;
+        $minConfidence   = isset($settings['min_confidence']) ? max(30, min(95, (int)$settings['min_confidence'])) : 50;
+        $discoverable    = isset($settings['discoverable']) ? (int)(bool)$settings['discoverable'] : 1;
+
+        try {
+            $pdo = Select::connect2();
+            $stmt = $pdo->prepare("
+                INSERT INTO user_radar_settings 
+                    (user_id, radar_enabled, include_inlaws, include_maternal, min_confidence, discoverable)
+                VALUES 
+                    (:u, :re, :ii, :im, :mc, :d)
+                ON DUPLICATE KEY UPDATE
+                    radar_enabled = VALUES(radar_enabled),
+                    include_inlaws = VALUES(include_inlaws),
+                    include_maternal = VALUES(include_maternal),
+                    min_confidence = VALUES(min_confidence),
+                    discoverable = VALUES(discoverable),
+                    updated_at = CURRENT_TIMESTAMP
+            ");
+            return $stmt->execute([
+                ':u'  => $userIdStr,
+                ':re' => $radarEnabled,
+                ':ii' => $includeInlaws,
+                ':im' => $includeMaternal,
+                ':mc' => $minConfidence,
+                ':d'  => $discoverable,
+            ]);
+        } catch (\Throwable $e) {
+            error_log('[KinshipEngineService::updateRadarSettings] ' . $e->getMessage());
             return false;
         }
     }

@@ -48,6 +48,23 @@ final class PostComparison extends Db
         }
         [$before, $after] = $stored;
 
+        // Ensure Next-Gen Visual Supremacy Engine (AVIF/WebP/Display P3) variants exist for comparison pair
+        try {
+            $postImgDir = realpath(__DIR__ . '/../../resources/images/post');
+            if ($postImgDir && is_dir($postImgDir) && class_exists(\App\services\VisualSupremacyService::class)) {
+                foreach ([$before, $after] as $imgFile) {
+                    $base = basename($imgFile);
+                    $fullPath = rtrim($postImgDir, '/\\') . DIRECTORY_SEPARATOR . $base;
+                    $stem = pathinfo($fullPath, PATHINFO_DIRNAME) . DIRECTORY_SEPARATOR . pathinfo($fullPath, PATHINFO_FILENAME);
+                    if (is_file($fullPath) && (!is_file($stem . '.avif') || !is_file($stem . '.webp'))) {
+                        \App\services\VisualSupremacyService::processInPlace($fullPath);
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            error_log('[PostComparison::createForPost VSE] ' . $e->getMessage());
+        }
+
         if ($parentPostNo !== null && !self::isComparison($parentPostNo)) {
             $parentPostNo = null;
         }
@@ -119,7 +136,7 @@ final class PostComparison extends Db
         }
 
         $stmt = self::connect2()->prepare(
-            "SELECT c.post_no, c.before_img, c.after_img, c.before_label, c.after_label, p.fullName, p.date_created
+            "SELECT c.post_no, c.before_img, c.after_img, c.before_label, c.after_label, p.fullName, p.date_created, p.postMessage
                FROM post_comparisons c
                JOIN post p ON p.post_no = c.post_no
               WHERE p.post_status = 'published'
@@ -141,6 +158,7 @@ final class PostComparison extends Db
                 'after_label' => $row['after_label'] !== null ? (string)$row['after_label'] : null,
                 'fullName' => (string)$row['fullName'],
                 'date_created' => (string)$row['date_created'],
+                'post_desc' => (string)($row['postMessage'] ?? ''),
             ];
         }
         return $out;

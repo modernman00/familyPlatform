@@ -285,5 +285,114 @@ final class KinshipController extends BaseController
             echo json_encode(['status' => 'error', 'message' => 'Internal server error']);
         }
     }
+
+    /**
+     * API: Get Kinship Radar Settings for the authenticated user.
+     */
+    public function getSettings(): void
+    {
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            if (empty($userId)) {
+                http_response_code(401);
+                echo json_encode(['status' => 'error', 'message' => 'Unauthenticated']);
+                return;
+            }
+
+            $settings = KinshipEngineService::getRadarSettings($userId);
+
+            echo json_encode([
+                'status' => 'success',
+                'data'   => $settings,
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Internal server error']);
+        }
+    }
+
+    /**
+     * API: Update Kinship Radar Settings for the authenticated user.
+     */
+    public function updateSettings(): void
+    {
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            if (empty($userId)) {
+                http_response_code(401);
+                echo json_encode(['status' => 'error', 'message' => 'Unauthenticated']);
+                return;
+            }
+
+            // Rate limiting: 20 updates per minute
+            if (AnalyticsService::isRateLimited($userId, 'kinship_settings_update', 20, 60)) {
+                http_response_code(429);
+                echo json_encode(['status' => 'error', 'message' => 'Too many update requests. Please wait a moment.']);
+                return;
+            }
+
+            $rawInput = file_get_contents('php://input');
+            $rawString = is_string($rawInput) ? $rawInput : '';
+            /** @var array<string, mixed> $payload */
+            $payload = (is_array($decoded = json_decode($rawString, true)) ? $decoded : null) ?: $_POST;
+
+            // CSRF Verification
+            $sessionToken = (string)($_SESSION['token'] ?? '');
+            $reqToken = (string)($payload['token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($_SERVER['HTTP_X_XSRF_TOKEN'] ?? '')));
+            if (empty($sessionToken) || !hash_equals($sessionToken, $reqToken)) {
+                if (!empty($_POST['token'])) {
+                    CheckToken::tokenCheck();
+                } else {
+                    http_response_code(403);
+                    echo json_encode(['status' => 'error', 'message' => 'Invalid or missing CSRF token']);
+                    return;
+                }
+            }
+
+            // Validate and sanitise settings
+            $radarEnabled = isset($payload['radar_enabled']) ? (bool)$payload['radar_enabled'] : true;
+            $includeInlaws = isset($payload['include_inlaws']) ? (bool)$payload['include_inlaws'] : true;
+            $includeMaternal = isset($payload['include_maternal']) ? (bool)$payload['include_maternal'] : true;
+            $rawConfidence = isset($payload['min_confidence']) ? (int)$payload['min_confidence'] : 50;
+            $minConfidence = in_array($rawConfidence, [50, 70, 80], true) ? $rawConfidence : 50;
+            $discoverable = isset($payload['discoverable']) ? (bool)$payload['discoverable'] : true;
+
+            $settingsData = [
+                'radar_enabled'    => $radarEnabled,
+                'include_inlaws'   => $includeInlaws,
+                'include_maternal' => $includeMaternal,
+                'min_confidence'   => $minConfidence,
+                'discoverable'     => $discoverable,
+            ];
+
+            $success = KinshipEngineService::updateRadarSettings($userId, $settingsData);
+
+            if ($success) {
+                AnalyticsService::track($userId, 'kinship_settings_update');
+                $updated = KinshipEngineService::getRadarSettings($userId);
+                echo json_encode([
+                    'status'  => 'success',
+                    'message' => 'Radar preferences updated successfully',
+                    'data'    => $updated,
+                ]);
+            } else {
+                http_response_code(500);
+                echo json_encode(['status' => 'error', 'message' => 'Failed to save radar settings']);
+            }
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Internal server error: ' . $e->getMessage()]);
+        }
+    }
 }
 

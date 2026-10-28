@@ -7,6 +7,7 @@ import { getCsrfToken } from '../global';
 import { getPostImageUrl, getProfileImageUrl, getPostImageVariantUrl } from '../helper/imageUrls';
 import { FAMILY_GIFS, GIF_CATEGORIES, isAllowedGifUrl } from './gifCatalog';
 import { getPreferredSkinTone, setPreferredSkinTone, SKIN_TONES } from '../emojiPicker';
+import { HEIRLOOM_REACTIONS, getHeirloomGlassSvg, triggerHeirloomBurst } from './heirloomGlassReactions';
 
 export function profileFeed(opts = {}) {
     return {
@@ -69,13 +70,52 @@ export function profileFeed(opts = {}) {
             xsrfHeaderName: 'X-XSRF-TOKEN',
         },
 
-        // Emoji map shared across post + comment reactions
+        // Living Heirloom Glass 3D Emoji Map
         emojiMap: {
-            like:  { icon: '👍', label: 'Like'  },
-            love:  { icon: '❤️', label: 'Love'  },
-            haha:  { icon: '😂', label: 'Haha'  },
-            shock: { icon: '😮', label: 'Wow'   },
-            sad:   { icon: '😢', label: 'Sad'   },
+            love:      { icon: '❤️', label: 'Love',      glow: 'rgba(225, 29, 72, 0.45)',  tone: '#e11d48' },
+            like:      { icon: '👍', label: 'Like',      glow: 'rgba(245, 158, 11, 0.45)',  tone: '#f59e0b' },
+            likes:     { icon: '👍', label: 'Like',      glow: 'rgba(245, 158, 11, 0.45)',  tone: '#f59e0b' },
+            haha:      { icon: '😂', label: 'Haha',      glow: 'rgba(234, 179, 8, 0.45)',   tone: '#eab308' },
+            shock:     { icon: '😮', label: 'Wow',       glow: 'rgba(2, 132, 199, 0.45)',   tone: '#0284c7' },
+            wow:       { icon: '😮', label: 'Wow',       glow: 'rgba(2, 132, 199, 0.45)',   tone: '#0284c7' },
+            sad:       { icon: '😢', label: 'Empathy',   glow: 'rgba(13, 148, 136, 0.45)',  tone: '#0d9488' },
+            celebrate: { icon: '✨', label: 'Celebrate', glow: 'rgba(147, 51, 234, 0.5)',   tone: '#9333ea' },
+        },
+
+        getHeirloomGlassSvg(type, size = 32) {
+            return getHeirloomGlassSvg(type, size);
+        },
+
+        formatReactionLabel(type) {
+            if (!type) return 'Like';
+            const norm = String(type).toLowerCase();
+            const map = {
+                like: 'Like',
+                likes: 'Like',
+                love: 'Love',
+                haha: 'Haha',
+                shock: 'Wow',
+                wow: 'Wow',
+                sad: 'Empathy',
+                celebrate: 'Celebrate'
+            };
+            return map[norm] || (type.charAt(0).toUpperCase() + type.slice(1));
+        },
+
+        getReactionColor(type) {
+            if (!type) return '';
+            const norm = String(type).toLowerCase();
+            const map = {
+                like: '#f59e0b',
+                likes: '#f59e0b',
+                love: '#e11d48',
+                haha: '#eab308',
+                shock: '#0284c7',
+                wow: '#0284c7',
+                sad: '#0d9488',
+                celebrate: '#9333ea'
+            };
+            return map[norm] || '';
         },
 
         // Race-conscious diversity state & curated comment palette
@@ -115,16 +155,23 @@ export function profileFeed(opts = {}) {
         },
 
         commentEmojiMap: {
-            like:  '👍',
-            likes: '👍',
-            love:  '❤️',
-            haha:  '😄',
-            wow:   '😮',
-            sad:   '😢',
-            angry: '😠',
+            like:      '👍',
+            likes:     '👍',
+            love:      '❤️',
+            haha:      '😄',
+            wow:       '😮',
+            shock:     '😮',
+            sad:       '😢',
+            angry:     '😠',
+            celebrate: '✨',
         },
 
         async init() {
+            if (typeof window !== 'undefined') {
+                window.__getHeirloomGlassSvg = getHeirloomGlassSvg;
+                window.__HEIRLOOM_REACTIONS = HEIRLOOM_REACTIONS;
+            }
+
             // Register listeners before awaiting the initial fetch - a post created (or a
             // Pusher event received) while that first fetch is still in flight must not be
             // silently dropped because nothing was listening for it yet.
@@ -334,9 +381,9 @@ export function profileFeed(opts = {}) {
                 date_created: c?.date_created || '',
                 post_time: c?.post_time || '',
                 comment_time: timeVal,
-                reactions: c?.reactions?.counts ?? {},
-                totalReactions: c?.reactions?.counts?.totalReactions ?? 0,
-                userReaction: c?.user_reaction || null,
+                reactions: c?.reactions?.counts ?? c?.reactions ?? {},
+                totalReactions: c?.reactions?.counts?.totalReactions ?? c?.reactions?.totalReactions ?? 0,
+                userReaction: (c?.user_reaction === 'likes' ? 'like' : (c?.user_reaction === 'shock' ? 'wow' : c?.user_reaction)) || null,
                 views_count: parseInt(c?.views_count || 0, 10),
             };
         },
@@ -1258,6 +1305,7 @@ export function profileFeed(opts = {}) {
             this._postLongPressTimer = setTimeout(() => {
                 this._postLongPressFired = true;
                 this.activeReactionBars[postNo] = true;
+                if (typeof window.triggerHaptic === 'function') window.triggerHaptic('selection');
             }, 450);
         },
 
@@ -1281,6 +1329,7 @@ export function profileFeed(opts = {}) {
             this._commentLongPressTimer = setTimeout(() => {
                 this._commentLongPressFired = true;
                 this.activeCommentReactionBars[commentNo] = true;
+                if (typeof window.triggerHaptic === 'function') window.triggerHaptic('selection');
             }, 450);
         },
 
@@ -1293,7 +1342,20 @@ export function profileFeed(opts = {}) {
                 this._commentLongPressFired = false;
                 return;
             }
-            this.reactToComment(postNo, commentNo, reactionType);
+            // Marcus Adversarial Hardening: 300ms rapid-tap debounce per comment
+            const now = Date.now();
+            this._commentReactDebounce = this._commentReactDebounce || {};
+            if (now - (this._commentReactDebounce[commentNo] || 0) < 300) {
+                return;
+            }
+            this._commentReactDebounce[commentNo] = now;
+            if (typeof window.triggerHaptic === 'function') window.triggerHaptic('impact');
+
+            const post = this.posts.find(p => String(p.post_no) === String(postNo));
+            const comment = post?.comments?.find(c => String(c.comment_no) === String(commentNo));
+            // If already reacted, toggle off with current reaction; if unreacted, default to 'like' (Topaz Thumb)
+            const targetType = comment?.userReaction || 'like';
+            this.reactToComment(postNo, commentNo, targetType);
         },
 
         // ── Comment emoji picker for text input ─────────────────────────────
@@ -1374,54 +1436,76 @@ export function profileFeed(opts = {}) {
 
         // ── React to a comment with an emoji ───────────────────────────────
         async reactToComment(postNo, commentNo, reactionType) {
-            const post = this.posts.find(p => p.post_no === postNo);
+            const post = this.posts.find(p => String(p.post_no) === String(postNo));
             if (!post) return;
-            const comment = post.comments.find(c => c.comment_no === commentNo);
+            const comment = post.comments.find(c => String(c.comment_no) === String(commentNo));
             if (!comment) return;
 
-            // Optimistic UI — update local state immediately
-            const prevReactions = { ...comment.reactions };
-            const prevTotal = comment.totalReactions;
+            // Normalize type
+            let cleanType = String(reactionType || 'like').toLowerCase();
+            if (cleanType === 'likes') cleanType = 'like';
+            if (cleanType === 'shock') cleanType = 'wow';
 
-            const isSame = comment.userReaction === reactionType;
+            // Optimistic UI — update local state immediately
+            const prevReactions = { ...(comment.reactions || {}) };
+            const prevTotal = Number(comment.totalReactions || 0);
+
+            const currentReaction = comment.userReaction === 'shock' ? 'wow' : (comment.userReaction === 'likes' ? 'like' : comment.userReaction);
+            const isSame = currentReaction === cleanType;
             const wasReaction = comment.userReaction;
 
-            const targetKey = (reactionType === 'like' || reactionType === 'likes') ? 'likes' : reactionType;
-            const wasKey = (wasReaction === 'like' || wasReaction === 'likes') ? 'likes' : wasReaction;
+            const targetKey = cleanType === 'like' ? 'likes' : cleanType;
+            const wasKey = (currentReaction === 'like' || currentReaction === 'likes') ? 'likes' : currentReaction;
 
+            const nextReactions = { ...(comment.reactions || {}) };
             if (isSame) {
                 // Toggle off
-                comment.reactions[targetKey] = Math.max(0, (comment.reactions[targetKey] || 1) - 1);
-                comment.totalReactions = Math.max(0, comment.totalReactions - 1);
+                nextReactions[targetKey] = Math.max(0, Number(nextReactions[targetKey] || 1) - 1);
+                comment.totalReactions = Math.max(0, prevTotal - 1);
                 comment.userReaction = null;
             } else {
                 // Remove old reaction from counts if switching
-                if (wasReaction && wasKey && comment.reactions[wasKey]) {
-                    comment.reactions[wasKey] = Math.max(0, comment.reactions[wasKey] - 1);
-                    comment.totalReactions = Math.max(0, comment.totalReactions - 1);
+                if (currentReaction && wasKey && Number(nextReactions[wasKey]) > 0) {
+                    nextReactions[wasKey] = Math.max(0, Number(nextReactions[wasKey]) - 1);
+                    comment.totalReactions = Math.max(0, prevTotal - 1);
                 }
-                comment.reactions[targetKey] = (comment.reactions[targetKey] || 0) + 1;
-                comment.totalReactions += 1;
-                comment.userReaction = reactionType;
+                nextReactions[targetKey] = Number(nextReactions[targetKey] || 0) + 1;
+                comment.totalReactions = Number(comment.totalReactions || 0) + 1;
+                comment.userReaction = cleanType;
+                triggerHeirloomBurst(cleanType, window.event || null);
             }
+            comment.reactions = nextReactions;
 
             // Hide the reaction bar after clicking
             this.activeCommentReactionBars[commentNo] = false;
 
             try {
+                const token = getCsrfToken();
                 const formData = new FormData();
                 formData.append('comment_no', commentNo);
-                formData.append('reaction', reactionType);
+                formData.append('reaction', cleanType);
+                if (token) {
+                    formData.append('token', token);
+                }
 
                 const res = await axios.post('/api/reactions/add', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
+                    headers: {
+                        ...(token ? { 'X-XSRF-TOKEN': token, 'X-CSRF-TOKEN': token } : {}),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
                 });
 
                 // Sync server counts if returned
-                if (res?.data?.message?.counts?.counts) {
-                    const serverCounts = res.data.message.counts.counts;
+                const serverCounts = res?.data?.message?.counts?.counts || res?.data?.message?.counts;
+                if (serverCounts && typeof serverCounts === 'object') {
                     comment.reactions = { ...serverCounts };
-                    comment.totalReactions = serverCounts?.totalReactions ?? comment.totalReactions;
+                    comment.totalReactions = Number(serverCounts?.totalReactions ?? comment.totalReactions);
+                }
+                const serverAction = res?.data?.message?.action;
+                if (serverAction === 'removed') {
+                    comment.userReaction = null;
+                } else if (serverAction === 'added' || serverAction === 'updated') {
+                    comment.userReaction = cleanType;
                 }
             } catch (err) {
                 // Revert optimistic update on failure
@@ -1440,7 +1524,11 @@ export function profileFeed(opts = {}) {
                 .filter(([k, v]) => !['comment_no', 'total', 'totalReactions'].includes(k) && Number(v) > 0 && !(k === 'like' && reactions.likes !== undefined))
                 .sort(([, a], [, b]) => Number(b) - Number(a))
                 .slice(0, 3)
-                .map(([label, count]) => ({ emoji: map[label] ?? '👍', count: Number(count) }));
+                .map(([label, count]) => ({
+                    label: label,
+                    emoji: map[label] ?? '👍',
+                    count: Number(count)
+                }));
         },
 
         // ── React to a post with an emoji (post-level reactions) ────────────
@@ -1448,8 +1536,21 @@ export function profileFeed(opts = {}) {
             const post = this.posts.find(p => String(p.post_no) === String(postNo));
             if (!post) return;
 
+            // Marcus Adversarial Hardening: 300ms rapid-tap debounce per post
+            const now = Date.now();
+            this._postReactDebounce = this._postReactDebounce || {};
+            if (now - (this._postReactDebounce[postNo] || 0) < 300) {
+                return;
+            }
+            this._postReactDebounce[postNo] = now;
+            if (typeof window.triggerHaptic === 'function') window.triggerHaptic('impact');
+
             const previousReaction = post.user_reaction;
             post.user_reaction = (post.user_reaction === reactionType) ? null : reactionType;
+
+            if (post.user_reaction) {
+                triggerHeirloomBurst(post.user_reaction, window.event || null);
+            }
 
             // Optimistic like counter bump
             if (previousReaction === null) post.post_likes += 1;
@@ -1462,7 +1563,7 @@ export function profileFeed(opts = {}) {
                 const formData = new FormData();
                 formData.append('post_no', postNo);
                 formData.append('reaction', reactionType);
-                await axios.put('/profileCard/postLikes?postNo=' + postNo);
+                await axios.put('/profileCard/postLikes?postNo=' + encodeURIComponent(postNo) + '&reaction=' + encodeURIComponent(reactionType));
             } catch (err) {
                 console.error('Failed to record post reaction:', err);
                 post.user_reaction = previousReaction;

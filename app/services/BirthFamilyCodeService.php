@@ -65,7 +65,11 @@ final class BirthFamilyCodeService
     /** The stored (normalised) birth/maiden code, held or not. */
     public function storedCode(string $userId): string
     {
-        $stmt = $this->pdo->prepare('SELECT otherFamCode FROM otherFamily WHERE id = ? ORDER BY no ASC LIMIT 1');
+        $stmt = $this->pdo->prepare(
+            "SELECT otherFamCode FROM otherFamily
+             WHERE id = ? AND otherFamCode IS NOT NULL AND TRIM(otherFamCode) != ''
+             ORDER BY no ASC LIMIT 1"
+        );
         $stmt->execute([$userId]);
         return self::normalise((string)($stmt->fetchColumn() ?: ''));
     }

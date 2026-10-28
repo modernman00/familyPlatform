@@ -35,8 +35,20 @@
                             <i class="bi bi-geo-alt-fill"></i>
                             <span>Lives in {{ $data['country'] ?? 'Not Specified' }}</span>
                         </div>
-                        <div class="meta-item">
-                            <span class="family-code-badge">{{ $data['famCode'] }}</span>
+                        @php
+                            $heroPrimaryCode = ltrim((string)($data['primaryFamCode'] ?? ($data['famCode'] ?? '')), '#');
+                            $heroBirthCode = ltrim((string)($data['maternalFamCode'] ?? ($data['otherFamCode'] ?? '')), '#');
+                            $heroHasDualCodes = !empty($data['hasMaternalCode']) || ($heroBirthCode !== '' && strtoupper($heroBirthCode) !== strtoupper($heroPrimaryCode));
+                            $heroMarriedCode = ($heroHasDualCodes && $heroBirthCode !== '') ? $heroPrimaryCode : '';
+                            $heroEffectiveBirthCode = ($heroHasDualCodes && $heroBirthCode !== '') ? $heroBirthCode : $heroPrimaryCode;
+                        @endphp
+                        <div class="meta-item d-inline-flex align-items-center gap-2 flex-wrap">
+                            @if($heroMarriedCode !== '')
+                                <span class="family-code-badge" title="{{ __('profile.married_family_code', 'Married Code') }}">{{ __('profile.married_family_code', 'Married Code') }}: {{ $heroMarriedCode }}</span>
+                            @endif
+                            @if($heroEffectiveBirthCode !== '')
+                                <span class="family-code-badge" style="{{ $heroMarriedCode !== '' ? 'background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.45); color: #ecfdf5;' : '' }}" title="{{ __('profile.birth_family_code', 'Birth Code') }}">{{ __('profile.birth_family_code', 'Birth Code') }}: {{ $heroEffectiveBirthCode }}</span>
+                            @endif
                         </div>
                     </div>
 
@@ -153,13 +165,24 @@
                             <div class="detail-value">{{ !empty($data['spouse_name']) ? $data['spouse_name'] : ($data['spouse']['fullName'] ?? 'Not Provided') }}</div>
                         </div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="bi bi-hash"></i></div>
-                        <div class="detail-content">
-                            <div class="detail-label">Family Code</div>
-                            <div class="detail-value">{{ $data['famCode'] ?? 'Not Provided' }}</div>
+                    @if($heroMarriedCode !== '')
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="bi bi-hash"></i></div>
+                            <div class="detail-content">
+                                <div class="detail-label">{{ __('profile.married_family_code', 'Married Code') }}</div>
+                                <div class="detail-value">{{ $heroMarriedCode }}</div>
+                            </div>
                         </div>
-                    </div>
+                    @endif
+                    @if($heroEffectiveBirthCode !== '')
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="bi bi-diagram-3"></i></div>
+                            <div class="detail-content">
+                                <div class="detail-label">{{ __('profile.birth_family_code', 'Birth Code') }}</div>
+                                <div class="detail-value">{{ $heroEffectiveBirthCode }}</div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Contact Information Card -->
@@ -280,5 +303,7 @@
             }
         });
     </script>
+
+    @includeIf('member.modals.thenNowComparisonModal')
 
 @endsection

@@ -132,8 +132,8 @@ echo "  ✅ PASSED: All 6 core Family RoundTable routes registered cleanly.\n";
 echo "[TEST 5] Verifying Direct Dispute Filing & RoundTable Accord...\n";
 $pdo = Db::connect2();
 $famCode = 'ROUNDTABLE_TEST_FAM';
-$delOld = $pdo->prepare("DELETE FROM personal WHERE famCode = ?");
-$delOld->execute([$famCode]);
+$delOld = $pdo->prepare("DELETE FROM personal WHERE famCode = ? OR id IN (?, ?, ?, ?)");
+$delOld->execute([$famCode, 'RTB_USER_1', 'RTB_USER_2', 'RTB_WITNESS_1', 'RTB_PEACEMAKER']);
 
 $ins = $pdo->prepare("INSERT INTO personal (id, firstName, lastName, famCode) VALUES (?, ?, ?, ?)");
 $ins->execute(['RTB_USER_1', 'Liam', 'Sterling', $famCode]);

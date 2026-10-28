@@ -4,8 +4,8 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
 <style>
   body.dark-mode #memoriesCard,
   [data-bs-theme="dark"] #memoriesCard {
-    background: linear-gradient(135deg, rgba(184, 32, 44, 0.22) 0%, rgba(30, 41, 59, 0.95) 100%) !important;
-    border: 1px solid rgba(184, 32, 44, 0.35) !important;
+    background: var(--card-bg, #1e293b) !important;
+    border: 1px solid var(--border-color, #334155) !important;
   }
 </style>
 <div class="card border-0 shadow-sm mb-4 overflow-hidden" 
@@ -53,99 +53,236 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                 
                 <!-- 1. Nostalgia "On This Day" Memory Card -->
                 <template x-if="memories.length > 0">
-                    <div class="p-3 rounded-4 position-relative overflow-hidden" 
+                    <div class="p-3.5 rounded-4 position-relative overflow-hidden shadow-xs" 
                          id="memoriesCard"
                          data-id="memoriesCard"
-                         style="background: linear-gradient(135deg, rgba(184,32,44, 0.08) 0%, rgba(236, 72, 153, 0.08) 100%); border: 1px solid rgba(184,32,44, 0.18);">
-                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
-                            <span class="badge rounded-pill px-2.5 py-1.5 fw-bold text-white d-inline-flex align-items-center gap-1 shadow-xs" 
-                                  style="background: linear-gradient(135deg, #a31621, #ec4899); font-size: 0.72rem; white-space: nowrap;">
+                         style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%); border: 1px solid var(--border-color, #e2e8f0); box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                        
+                        <!-- Commemorative Archival Header -->
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2.5">
+                            <span class="badge rounded-pill px-3 py-1.5 fw-bold text-white d-inline-flex align-items-center gap-1.5 shadow-xs" 
+                                  style="background: linear-gradient(135deg, #a31621, #d97706); font-size: 0.74rem; white-space: nowrap;">
                                 <i class="bi bi-clock-history"></i> <span x-text="memories[0].years_ago_label"></span>
                             </span>
-                            <span class="text-muted small fw-medium text-nowrap" style="font-size: 0.78rem;" x-text="memories[0].formatted_date"></span>
+                            <span class="badge bg-white bg-opacity-75 text-dark border px-2.5 py-1 rounded-pill small fw-semibold text-nowrap" style="font-size: 0.76rem;" x-text="memories[0].formatted_date"></span>
                         </div>
 
-                        <!-- Optional Memory Image Preview -->
+                        <!-- Graphics-Rich Memory Media -->
+                        <!-- A. If Memory has a photo: Archival Polaroid Keepsake Frame -->
                         <template x-if="memories[0].primary_image">
-                            <div class="mb-2 rounded-3 overflow-hidden shadow-sm position-relative" style="max-height: 160px;">
-                                <img :src="'/resources/images/post/' + memories[0].primary_image" 
-                                     alt="Memory" 
-                                     class="w-100 object-fit-cover" 
-                                     style="height: 160px; max-height: 160px;"
-                                     onerror="this.style.display='none'">
+                            <div class="mb-2.5 rounded-3 overflow-hidden position-relative" 
+                                 style="border: 3px solid #ffffff; box-shadow: 0 4px 14px rgba(0,0,0,0.08); background: #f8fafc; max-height: 180px;">
+                                <picture class="w-100 d-block h-100">
+                                    <source :srcset="'/resources/images/post/' + memories[0].primary_image.replace(/\.[^/.]+$/, '') + '.avif'" type="image/avif">
+                                    <source :srcset="'/resources/images/post/' + memories[0].primary_image.replace(/\.[^/.]+$/, '') + '.webp'" type="image/webp">
+                                    <img :src="'/resources/images/post/' + memories[0].primary_image" 
+                                         alt="Memory" 
+                                         class="w-100 object-fit-cover" 
+                                         style="height: 175px; max-height: 175px;"
+                                         loading="lazy"
+                                         decoding="async"
+                                         onerror="this.style.display='none'">
+                                </picture>
+                                <span class="position-absolute bottom-0 start-0 m-2 badge bg-dark bg-opacity-75 text-white rounded-pill px-2.5 py-1 d-inline-flex align-items-center gap-1 shadow-xs" 
+                                      style="font-size: 0.7rem; backdrop-filter: blur(4px);">
+                                    <i class="bi bi-camera-fill text-warning"></i> Family Chronicle
+                                </span>
                             </div>
                         </template>
 
-                        <!-- Memory Text -->
-                        <p class="mb-2 fw-medium" style="color: var(--text-color, #1f2937); font-size: 0.88rem; line-height: 1.45;" x-text="memories[0].postMessage"></p>
+                        <!-- B. If Memory has NO photo (Text-Only): Bespoke Heirloom Chronicle SVG Illustration -->
+                        <template x-if="!memories[0].primary_image">
+                            <div class="mb-2.5 rounded-3 p-2.5 text-center position-relative overflow-hidden" 
+                                 style="background: linear-gradient(135deg, rgba(255, 253, 248, 0.95) 0%, rgba(254, 243, 199, 0.6) 100%); border: 1px dashed rgba(245, 158, 11, 0.35);">
+                                <svg width="68" height="52" viewBox="0 0 72 56" fill="none" xmlns="http://www.w3.org/2000/svg" class="mx-auto mb-1">
+                                    <path d="M36 16C30 12 18 12 10 15V44C18 41 30 41 36 45C42 41 54 41 62 44V15C54 12 42 12 36 16Z" fill="#FFFDF8" stroke="#D97706" stroke-width="1.6"/>
+                                    <path d="M36 16V45" stroke="#B45309" stroke-width="1.6"/>
+                                    <line x1="16" y1="22" x2="30" y2="22" stroke="#CBD5E1" stroke-width="1.5" stroke-linecap="round"/>
+                                    <line x1="16" y1="27" x2="28" y2="27" stroke="#CBD5E1" stroke-width="1.5" stroke-linecap="round"/>
+                                    <line x1="16" y1="32" x2="30" y2="32" stroke="#CBD5E1" stroke-width="1.5" stroke-linecap="round"/>
+                                    <line x1="42" y1="22" x2="56" y2="22" stroke="#CBD5E1" stroke-width="1.5" stroke-linecap="round"/>
+                                    <line x1="42" y1="27" x2="54" y2="27" stroke="#CBD5E1" stroke-width="1.5" stroke-linecap="round"/>
+                                    <line x1="42" y1="32" x2="56" y2="32" stroke="#CBD5E1" stroke-width="1.5" stroke-linecap="round"/>
+                                    <path d="M50 8C48 10 42 22 41 26L43 27C45 23 52 12 53 9C54 6 52 6 50 8Z" fill="#F59E0B"/>
+                                    <circle cx="20" cy="10" r="1.8" fill="#B8202C"/>
+                                    <circle cx="56" cy="12" r="2.2" fill="#D97706"/>
+                                    <circle cx="12" cy="38" r="1.5" fill="#F59E0B"/>
+                                </svg>
+                                <div class="small fw-bold text-uppercase tracking-wider" style="color: #8a1019; font-size: 0.72rem; letter-spacing: 0.05em;">Family Heirloom Chronicle</div>
+                                <div class="text-muted small" style="font-size: 0.75rem;">A preserved story from our generational heritage</div>
+                            </div>
+                        </template>
 
-                        <div class="pt-2 border-top border-light-subtle">
-                            <!-- Author Info -->
-                            <div class="d-flex align-items-center gap-2 mb-2.5">
+                        <!-- Meaningful Memory Quote Text -->
+                        <div class="mb-2">
+                            <p class="mb-0 fw-medium fst-italic" style="color: var(--text-color, #1f2937); font-size: 0.88rem; line-height: 1.5;">
+                                &ldquo;<span x-text="memories[0].postMessage"></span>&rdquo;
+                            </p>
+                        </div>
+
+                        <!-- Meaningful Generational Prompt -->
+                        <div class="p-2 rounded-3 mb-2.5" style="background: rgba(248, 250, 252, 0.8); border-left: 3px solid #f59e0b; font-size: 0.78rem; color: #475569;">
+                            <i class="bi bi-heart-pulse-fill text-warning me-1"></i> <span x-text="memories[0].meaningful_prompt || 'A cherished moment etched forever in our family story.'"></span>
+                        </div>
+
+                        <div class="pt-2 border-top border-light-subtle d-flex align-items-center justify-content-between flex-wrap gap-2">
+                            <!-- Author Attribution -->
+                            <div class="d-flex align-items-center gap-2">
                                 <template x-if="memories[0].profileImg">
-                                    <img :src="'/resources/images/profile/' + memories[0].profileImg" class="rounded-circle flex-shrink-0" style="width: 24px; height: 24px; object-fit: cover;" alt="Author">
+                                    <img :src="'/resources/images/profile/' + memories[0].profileImg" class="rounded-circle flex-shrink-0 shadow-2xs" style="width: 26px; height: 26px; object-fit: cover; border: 1px solid #e2e8f0;" alt="Author">
                                 </template>
-                                <span class="text-muted small fw-semibold text-truncate" style="font-size: 0.8rem;" x-text="memories[0].fullName"></span>
+                                <div class="text-truncate">
+                                    <span class="text-dark small fw-bold text-truncate d-block" style="font-size: 0.8125rem;" x-text="memories[0].fullName"></span>
+                                    <span class="text-muted small" style="font-size: 0.7rem;">Family Story Contributor</span>
+                                </div>
                             </div>
 
-                            <!-- Balanced 2-Column Action Buttons (Zero Clipping) -->
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <a :href="whatsappMemoryUrl(memories[0])" target="_blank" rel="noopener noreferrer"
-                                       class="btn btn-sm btn-success rounded-pill w-100 fw-bold d-inline-flex align-items-center justify-content-center gap-1.5 shadow-xs text-white"
-                                       style="font-size: 0.8125rem; background-color: #25D366; border: none; min-height: 40px; text-decoration: none; white-space: nowrap;"
-                                       title="Share memory to WhatsApp" aria-label="Share memory to WhatsApp">
-                                        <i class="bi bi-whatsapp"></i> <span>WhatsApp</span>
-                                    </a>
-                                </div>
-                                <div class="col-6">
-                                    <button type="button" 
-                                            class="btn btn-sm btn-primary rounded-pill w-100 fw-bold d-inline-flex align-items-center justify-content-center gap-1.5 shadow-xs"
-                                            style="font-size: 0.8125rem; background-color: var(--primary-color, #a31621); color: #ffffff !important; border: none; min-height: 40px; white-space: nowrap;"
-                                            @click="openShareModal(memories[0])"
-                                            :disabled="sharing"
-                                            title="Share flashback memory with your family network"
-                                            aria-label="Share flashback memory">
-                                        <i class="bi bi-share-fill" style="font-size: 0.75rem;"></i> <span>Share</span>
-                                    </button>
-                                </div>
-                            </div>
+                            <!-- Private Family Sanctuary Indicator (Zero external social buttons) -->
+                            <span class="badge rounded-pill bg-light text-muted border px-2.5 py-1 d-inline-flex align-items-center gap-1 shadow-2xs" style="font-size: 0.72rem;">
+                                <i class="bi bi-shield-lock-fill text-secondary"></i> Private Family Chronicle
+                            </span>
                         </div>
                     </div>
                 </template>
 
-                <!-- 2. Upcoming Milestones List (Birthdays & Anniversaries) -->
+                <!-- 2. Upcoming Milestones Cards (Graphics Rich & Strictly Non-Shareable) -->
                 <template x-if="milestones.length > 0">
                     <div id="milestonesCard" data-id="milestonesCard">
-                        <h6 class="fw-bold mb-2 text-uppercase tracking-wider" style="font-size: 0.8125rem; letter-spacing: 0.05em; color: var(--text-muted-aa, #475569);">
-                            🎉 Upcoming Milestones
-                        </h6>
-                        <div class="d-flex flex-column gap-2">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h6 class="fw-bold mb-0 text-uppercase tracking-wider" style="font-size: 0.8125rem; letter-spacing: 0.05em; color: var(--text-muted-aa, #475569);">
+                                🎉 Upcoming Milestones
+                            </h6>
+                            <span class="badge rounded-pill bg-light text-muted border px-2 py-0.5" style="font-size: 0.7rem;" x-text="milestones.length + ' Upcoming'"></span>
+                        </div>
+
+                        <div class="d-flex flex-column gap-2.5">
                             <template x-for="(milestone, idx) in milestones.slice(0, 4)" :key="idx">
-                                <div class="p-2.5 rounded-3 d-flex align-items-center justify-content-between" 
-                                     style="background-color: var(--hover-color, #f9fafb); border: 1px solid var(--border-color, #e5e7eb);">
-                                    <div class="d-flex align-items-center gap-2 min-w-0">
-                                        <div class="rounded-circle p-2 d-flex align-items-center justify-content-center flex-shrink-0"
-                                             :class="milestone.color_class" 
-                                             style="width: 34px; height: 34px; font-size: 0.85rem;">
-                                            <i class="bi" :class="milestone.icon"></i>
+                                <div class="p-3 rounded-4 position-relative overflow-hidden transition-all shadow-xs" 
+                                     style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%); border: 1px solid var(--border-color, #e2e8f0); box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                                    
+                                    <!-- Header Row: Graphics & Avatar Badge + Title -->
+                                    <div class="d-flex align-items-start gap-2.5 mb-2">
+                                        
+                                        <!-- Graphics-Rich Bespoke SVG Celebration Illustration -->
+                                        <div class="flex-shrink-0">
+                                            <!-- A. Birthday Celebration Cake & Sparkles SVG -->
+                                            <template x-if="milestone.type === 'birthday'">
+                                                <svg width="44" height="44" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0">
+                                                    <circle cx="28" cy="28" r="26" fill="#F59E0B" fill-opacity="0.14"/>
+                                                    <circle cx="28" cy="28" r="24" stroke="#F59E0B" stroke-width="1.4" stroke-dasharray="3 3"/>
+                                                    <rect x="16" y="32" width="24" height="12" rx="3" fill="#B8202C"/>
+                                                    <rect x="18" y="24" width="20" height="9" rx="2" fill="#F59E0B"/>
+                                                    <path d="M16 33C18 35 20 35 22 33C24 35 26 35 28 33C30 35 32 35 34 33C36 35 38 35 40 33" stroke="#FFF7ED" stroke-width="1.5" stroke-linecap="round"/>
+                                                    <rect x="23" y="17" width="2.5" height="7" rx="1" fill="#EC4899"/>
+                                                    <rect x="30.5" y="17" width="2.5" height="7" rx="1" fill="#3B82F6"/>
+                                                    <circle cx="24.25" cy="14" r="2" fill="#F59E0B"/>
+                                                    <circle cx="31.75" cy="14" r="2" fill="#F59E0B"/>
+                                                    <path d="M11 19L12.5 15L14 19L18 20.5L14 22L12.5 26L11 22L7 20.5L11 19Z" fill="#F59E0B" fill-opacity="0.8"/>
+                                                    <path d="M43 14L44 11L45 14L48 15L45 16L44 19L43 16L40 15L43 14Z" fill="#B8202C" fill-opacity="0.7"/>
+                                                </svg>
+                                            </template>
+
+                                            <!-- B. Anniversary Interlocking Rings & Laurel SVG -->
+                                            <template x-if="milestone.type === 'anniversary'">
+                                                <svg width="44" height="44" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0">
+                                                    <circle cx="28" cy="28" r="26" fill="#F43F5E" fill-opacity="0.14"/>
+                                                    <circle cx="28" cy="28" r="24" stroke="#F43F5E" stroke-width="1.4" stroke-dasharray="3 3"/>
+                                                    <circle cx="23" cy="29" r="10" stroke="#F59E0B" stroke-width="2.8" fill="none"/>
+                                                    <circle cx="33" cy="29" r="10" stroke="#B8202C" stroke-width="2.8" fill="none"/>
+                                                    <polygon points="23,15 26,19 23,23 20,19" fill="#38BDF8"/>
+                                                    <path d="M28 20C28 17.5 30 16 32 16C34.5 16 36 18 36 20C36 23 32 25 28 27C24 25 20 23 20 20C20 18 21.5 16 24 16C26 16 28 17.5 28 20Z" fill="#EC4899" fill-opacity="0.8"/>
+                                                </svg>
+                                            </template>
+
+                                            <!-- C. Event Heritage Calendar Pad SVG -->
+                                            <template x-if="milestone.type === 'event'">
+                                                <svg width="44" height="44" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0">
+                                                    <circle cx="28" cy="28" r="26" fill="#0D9488" fill-opacity="0.14"/>
+                                                    <circle cx="28" cy="28" r="24" stroke="#0D9488" stroke-width="1.4" stroke-dasharray="3 3"/>
+                                                    <rect x="17" y="18" width="22" height="23" rx="4" fill="#0D9488"/>
+                                                    <rect x="17" y="18" width="22" height="8" rx="3" fill="#0F766E"/>
+                                                    <rect x="21" y="15" width="2.5" height="5" rx="1" fill="#F59E0B"/>
+                                                    <rect x="32.5" y="15" width="2.5" height="5" rx="1" fill="#F59E0B"/>
+                                                    <path d="M28 28L29.5 31.5L33.5 32L30.5 34.5L31.5 38.5L28 36.5L24.5 38.5L25.5 34.5L22.5 32L26.5 31.5L28 28Z" fill="#FEF08A"/>
+                                                </svg>
+                                            </template>
                                         </div>
-                                        <div class="text-truncate">
-                                            <div class="fw-bold text-truncate" style="color: var(--text-color, #1f2937); font-size: 0.95rem;" x-text="milestone.title"></div>
-                                            <div class="text-truncate" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569); line-height: 1.4;" x-text="milestone.subtitle"></div>
+
+                                        <!-- Celebratory Avatar(s) with Halo Framing -->
+                                        <div class="position-relative flex-shrink-0">
+                                            <!-- Anniversary Dual Overlapping Avatars -->
+                                            <template x-if="milestone.type === 'anniversary'">
+                                                <div class="d-flex align-items-center position-relative" style="width: 50px; height: 36px;">
+                                                    <img :src="milestone.p1_img ? (milestone.p1_img.startsWith('http') || milestone.p1_img.startsWith('/') ? milestone.p1_img : '/resources/images/profile/' + milestone.p1_img) : '/resources/images/profile/avatarM.png'" 
+                                                         class="rounded-circle shadow-xs position-absolute start-0" 
+                                                         style="width: 30px; height: 30px; object-fit: cover; border: 2px solid #ffffff; z-index: 1;" 
+                                                         alt="Partner 1"
+                                                         onerror="this.src='/resources/images/profile/avatarM.png'">
+                                                    <img :src="milestone.p2_img ? (milestone.p2_img.startsWith('http') || milestone.p2_img.startsWith('/') ? milestone.p2_img : '/resources/images/profile/' + milestone.p2_img) : '/resources/images/profile/avatarF.png'" 
+                                                         class="rounded-circle shadow-xs position-absolute end-0" 
+                                                         style="width: 30px; height: 30px; object-fit: cover; border: 2px solid #ffffff; z-index: 2;" 
+                                                         alt="Partner 2"
+                                                         onerror="this.src='/resources/images/profile/avatarF.png'">
+                                                </div>
+                                            </template>
+
+                                            <!-- Birthday Avatar with Celebratory Crown -->
+                                            <template x-if="milestone.type === 'birthday'">
+                                                <div class="position-relative">
+                                                    <img :src="milestone.profile_img ? '/resources/images/profile/' + milestone.profile_img : '/resources/images/profile/avatarM.png'" 
+                                                         class="rounded-circle shadow-xs" 
+                                                         style="width: 36px; height: 36px; object-fit: cover; border: 2px solid #f59e0b;" 
+                                                         alt="Celebrant"
+                                                         onerror="this.src='/resources/images/profile/avatarM.png'">
+                                                    <span class="position-absolute" style="top: -8px; right: -4px; font-size: 0.82rem;" title="Celebrant">👑</span>
+                                                </div>
+                                            </template>
+
+                                            <!-- Event Calendar Badge -->
+                                            <template x-if="milestone.type === 'event'">
+                                                <div class="rounded-circle d-flex align-items-center justify-content-center shadow-xs"
+                                                     style="width: 36px; height: 36px; background: rgba(13, 148, 136, 0.15); color: #0d9488; font-size: 0.95rem;">
+                                                    <i class="bi bi-calendar-check-fill"></i>
+                                                </div>
+                                            </template>
+                                        </div>
+
+                                        <!-- Title & Landmark Tag -->
+                                        <div class="min-w-0 flex-grow-1">
+                                            <div class="fw-bold text-truncate" style="color: var(--text-color, #1f2937); font-size: 0.9125rem; line-height: 1.3;" x-text="milestone.title"></div>
+                                            <div class="d-flex align-items-center gap-1.5 flex-wrap mt-0.5">
+                                                <template x-if="milestone.landmark_tag || milestone.anniversary_tag">
+                                                    <span class="badge rounded-pill px-2 py-0.5 fw-bold shadow-2xs" 
+                                                          style="background: linear-gradient(135deg, rgba(184,32,44,0.12), rgba(245,158,11,0.15)); color: #8a1019; font-size: 0.72rem;" 
+                                                          x-text="milestone.landmark_tag || milestone.anniversary_tag"></span>
+                                                </template>
+                                                <template x-if="!milestone.landmark_tag && !milestone.anniversary_tag && milestone.subtitle">
+                                                    <span class="badge bg-light text-secondary border rounded-pill px-2 py-0.5" 
+                                                          style="font-size: 0.72rem;" 
+                                                          x-text="milestone.subtitle"></span>
+                                                </template>
+                                            </div>
                                         </div>
                                     </div>
-                                    <button type="button" class="btn btn-sm rounded-pill flex-shrink-0 me-1 fw-bold"
-                                            style="min-height: 44px; background: #b8202c; color: #ffffff !important; font-size: 0.85rem;"
-                                            x-show="milestone.days_remaining === 0 && (milestone.type === 'birthday' || milestone.type === 'anniversary')"
-                                            :aria-label="'Share a Then and Now for ' + milestone.title"
-                                            @click="window.__openThenNow('', { caption: thenNowCaption(milestone) })">
-                                        <i class="bi bi-hourglass-split"></i> Then &amp; Now
-                                    </button>
-                                    <span class="badge rounded-pill px-2.5 py-1 fw-bold flex-shrink-0" 
-                                          :class="milestone.days_remaining === 0 ? 'bg-danger text-white' : 'bg-light text-primary border'"
-                                          style="font-size: 0.75rem;" 
-                                          x-text="milestone.date_badge"></span>
+
+                                    <!-- Meaningful Emotional Tribute Message (The content that MEANS something to users!) -->
+                                    <div class="p-2 rounded-3 mt-1.5" style="background: rgba(241, 245, 249, 0.65); border-left: 3px solid #b8202c;">
+                                        <p class="mb-0 fw-normal" style="font-size: 0.8rem; color: #334155; line-height: 1.45;" x-text="milestone.meaningful_message || milestone.subtitle"></p>
+                                    </div>
+
+                                    <!-- 'in xx days' placed UNDER as requested by user -->
+                                    <div class="d-flex align-items-center justify-content-between mt-2 pt-2 border-top border-light-subtle">
+                                        <span class="text-muted small d-inline-flex align-items-center gap-1" style="font-size: 0.74rem;">
+                                            <i class="bi bi-calendar3 text-secondary"></i>
+                                            <span x-text="milestone.target_date"></span>
+                                        </span>
+                                        <span class="badge rounded-pill px-2.5 py-1 fw-bold shadow-2xs" 
+                                              :class="milestone.days_remaining === 0 ? 'bg-danger text-white' : (milestone.days_remaining === 1 ? 'bg-warning text-dark' : 'bg-light text-primary border')"
+                                              style="font-size: 0.74rem; white-space: nowrap;" 
+                                              x-text="milestone.date_badge"></span>
+                                    </div>
+
+                                    <!-- NOTE: Upcoming milestones are strictly non-shareable. Zero share buttons by CEO & TAT mandate. -->
                                 </div>
                             </template>
                         </div>
@@ -175,56 +312,6 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
         </template>
     </div>
 
-    <!-- Share Memory Modal -->
-    <div class="modal fade" id="shareMemoryModal_{{ $wId }}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
-                <div class="modal-header border-0 pb-0 pt-4 px-4">
-                    <h5 class="modal-title fw-bold" style="font-size: 1.1rem;">
-                        ✨ Share Flashback Memory
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body px-4 py-3">
-                    <template x-if="activeMemory">
-                        <div>
-                            <div class="p-3 mb-3 rounded-3 bg-light border">
-                                <div class="d-flex justify-content-between text-muted small mb-1">
-                                    <span class="fw-bold" x-text="activeMemory.years_ago_label"></span>
-                                    <span x-text="activeMemory.formatted_date"></span>
-                                </div>
-                                <p class="mb-0 small text-secondary fst-italic" x-text="'&ldquo;' + activeMemory.postMessage + '&rdquo;'"></p>
-                            </div>
-
-                            <label class="form-label fw-semibold small mb-1">Add a reflection message (optional):</label>
-                            <textarea class="form-control rounded-3" 
-                                      rows="3" 
-                                      x-model="reflectionText" 
-                                      placeholder="Remember this? How time flies..."></textarea>
-                        </div>
-                    </template>
-                </div>
-                <div class="modal-footer border-0 pt-0 px-4 pb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <a :href="whatsappMemoryUrl(activeMemory, reflectionText)" target="_blank" rel="noopener noreferrer"
-                       class="btn btn-success rounded-pill px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1.5 shadow-sm text-white"
-                       style="background-color: #25D366; border: none; text-decoration: none; min-height: 38px; font-size: 0.84rem;"
-                       title="Share to Family WhatsApp Group">
-                        <i class="bi bi-whatsapp"></i> Send to WhatsApp
-                    </a>
-                    <div class="d-flex gap-2 align-items-center">
-                        <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" 
-                                class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" 
-                                @click="submitShareMemory()" 
-                                :disabled="sharing">
-                            <span x-show="!sharing">Share to Family Feed</span>
-                            <span x-show="sharing" class="spinner-border spinner-border-sm" role="status"></span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -236,33 +323,9 @@ if (typeof window.memoriesMilestonesWidget !== 'function') {
             loaded: false,
             memories: [],
             milestones: [],
-            activeMemory: null,
-            reflectionText: '',
-            sharing: false,
 
             initWidget() {
                 this.loadData();
-            },
-
-            thenNowCaption(milestone) {
-                const title = String(milestone?.title || '').replace(/'s (Birthday|Anniversary)$/, '');
-                if (milestone?.type === 'anniversary') return `Then & Now: ${title} 💞 #ThenAndNow`;
-                return `Then & Now for ${title}'s birthday 🎂 #ThenAndNow`;
-            },
-
-            whatsappMemoryUrl(memory, reflection = '') {
-                if (!memory) return '#';
-                const yearsAgo = memory.years_ago_label || 'A family memory';
-                const author = memory.fullName ? ` — ${memory.fullName}` : '';
-                const quote = memory.postMessage ? `"${memory.postMessage.trim()}"` : '';
-                const refl = reflection ? `\n\n💬 ${reflection.trim()}` : '';
-                const origin = window.location.origin || '';
-                const link = memory.post_no ? `${origin}/profilePage?post_no=${memory.post_no}#post${memory.post_no}` : `${origin}/profilePage`;
-                let text = `✨ [Family Memory Flashback — ${yearsAgo}]${author}\n\n${quote}${refl}\n\n🔗 ${link}`;
-                if (text.length > 700) {
-                    text = text.slice(0, 690) + '...\n\n🔗 ' + link;
-                }
-                return `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
             },
 
             async loadData() {
@@ -282,61 +345,6 @@ if (typeof window.memoriesMilestonesWidget !== 'function') {
                 } finally {
                     this.loading = false;
                     this.loaded = true;
-                }
-            },
-
-            openShareModal(memory) {
-                this.activeMemory = memory;
-                this.reflectionText = '';
-                const modalEl = document.getElementById(`shareMemoryModal_${this.widgetId}`);
-                if (modalEl && window.bootstrap) {
-                    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                    modal.show();
-                }
-            },
-
-            async submitShareMemory() {
-                if (!this.activeMemory) return;
-                this.sharing = true;
-
-                try {
-                    const csrfToken = document.querySelector('meta[name="token"]')?.getAttribute('content') 
-                                   || document.querySelector('input[name="token"]')?.value || '';
-
-                    const formData = new FormData();
-                    formData.append('token', csrfToken);
-                    formData.append('post_no', this.activeMemory.post_no);
-                    formData.append('reflection_message', this.reflectionText);
-                    formData.append('fam_code', this.activeMemory.postFamCode || '');
-
-                    const response = await fetch('/api/memories/share', {
-                        method: 'POST',
-                        body: formData,
-                        headers: { 'Accept': 'application/json' }
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok && data.status === 'success') {
-                        const modalEl = document.getElementById(`shareMemoryModal_${this.widgetId}`);
-                        if (modalEl && window.bootstrap) {
-                            bootstrap.Modal.getInstance(modalEl)?.hide();
-                        }
-                        if (window.swalSuccess) {
-                            window.swalSuccess('Flashback memory shared to family feed! ✨');
-                        } else if (window.Toast) {
-                            Toast.fire({ icon: 'success', title: 'Flashback shared to family feed! ✨' });
-                        } else {
-                            (window.swalToast || alert)('Flashback memory shared to family feed!');
-                        }
-                    } else {
-                        (window.swalError || alert)(data.message || 'Failed to share memory');
-                    }
-                } catch (err) {
-                    console.error('[MemoriesWidget] Share error:', err);
-                    (window.swalError || alert)('An error occurred while sharing the memory.');
-                } finally {
-                    this.sharing = false;
                 }
             }
         };

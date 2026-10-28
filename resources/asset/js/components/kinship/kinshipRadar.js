@@ -2,6 +2,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 
 let modalInitialized = false;
+let settingsModalInitialized = false;
 
 export function initKinshipRadar() {
     // The widget markup is included twice (a mobile copy in the feed column and a
@@ -12,12 +13,16 @@ export function initKinshipRadar() {
     containers.forEach(bindKinshipRadarContainer);
 
     initKinshipDetailsModal();
+    initKinshipRadarSettingsModal();
 }
 
 function getCsrfToken() {
     return (
+        document.querySelector('form#kinshipRadarSettingsForm input[name="token"]')?.value ||
+        document.querySelector('input[name="token"]')?.value ||
         document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
         document.querySelector('meta[name="csrf_token"]')?.getAttribute('content') ||
+        document.querySelector('meta[name="token"]')?.getAttribute('content') ||
         (document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/) || [])[1] ||
         ''
     );
@@ -240,6 +245,140 @@ function initKinshipDetailsModal() {
     }
 }
 
+function initKinshipRadarSettingsModal() {
+    if (settingsModalInitialized) return;
+    const modalEl = document.getElementById('kinshipRadarSettingsModal');
+    if (!modalEl) return;
+
+    settingsModalInitialized = true;
+
+    // Load settings when modal is opened
+    modalEl.addEventListener('show.bs.modal', async () => {
+        try {
+            const res = await axios.get('/api/kinship/settings');
+            if (res.data?.status === 'success' && res.data?.data) {
+                const s = res.data.data;
+                const masterSwitch = document.getElementById('radarMasterSwitch');
+                const inlawsSwitch = document.getElementById('radarInlawsSwitch');
+                const maternalSwitch = document.getElementById('radarMaternalSwitch');
+                const discoverableSwitch = document.getElementById('radarDiscoverableSwitch');
+
+                if (masterSwitch) masterSwitch.checked = Boolean(s.radar_enabled);
+                if (inlawsSwitch) inlawsSwitch.checked = Boolean(s.include_inlaws);
+                if (maternalSwitch) maternalSwitch.checked = Boolean(s.include_maternal);
+                if (discoverableSwitch) discoverableSwitch.checked = Boolean(s.discoverable);
+
+                const conf = parseInt(s.min_confidence, 10) || 50;
+                const confRadio = document.getElementById(`conf${conf}`);
+                if (confRadio) {
+                    confRadio.checked = true;
+                }
+
+                syncMasterVisuals();
+            }
+        } catch (err) {
+            console.warn('[KinshipRadar] Failed to load radar settings:', err);
+        }
+    });
+
+    const masterSwitch = document.getElementById('radarMasterSwitch');
+    function syncMasterVisuals() {
+        const isMasterOn = masterSwitch ? masterSwitch.checked : true;
+        const subItems = modalEl.querySelectorAll('.radar-sub-setting');
+        subItems.forEach(el => {
+            el.style.opacity = isMasterOn ? '1' : '0.45';
+            el.style.pointerEvents = isMasterOn ? 'auto' : 'none';
+        });
+    }
+
+    if (masterSwitch) {
+        masterSwitch.addEventListener('change', syncMasterVisuals);
+    }
+
+    const form = document.getElementById('kinshipRadarSettingsForm');
+    const saveBtn = document.getElementById('btnSaveRadarSettings');
+
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                const origHtml = saveBtn.innerHTML;
+                saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Saving...';
+            }
+
+            try {
+                const csrfToken = getCsrfToken();
+                const masterSwitch = document.getElementById('radarMasterSwitch');
+                const inlawsSwitch = document.getElementById('radarInlawsSwitch');
+                const maternalSwitch = document.getElementById('radarMaternalSwitch');
+                const discoverableSwitch = document.getElementById('radarDiscoverableSwitch');
+                const confChecked = document.querySelector('input[name="min_confidence"]:checked');
+
+                const payload = {
+                    radar_enabled: masterSwitch ? (masterSwitch.checked ? 1 : 0) : 1,
+                    include_inlaws: inlawsSwitch ? (inlawsSwitch.checked ? 1 : 0) : 1,
+                    include_maternal: maternalSwitch ? (maternalSwitch.checked ? 1 : 0) : 1,
+                    discoverable: discoverableSwitch ? (discoverableSwitch.checked ? 1 : 0) : 1,
+                    min_confidence: confChecked ? parseInt(confChecked.value, 10) : 50,
+                    token: csrfToken
+                };
+
+                const res = await axios.post('/api/kinship/settings', payload, {
+                    headers: {
+                        'X-XSRF-TOKEN': csrfToken,
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (res.data?.status === 'success' || res.status === 200) {
+                    if (window.bootstrap && window.bootstrap.Modal) {
+                        const bsModal = window.bootstrap.Modal.getInstance(modalEl);
+                        if (bsModal) {
+                            bsModal.hide();
+                        }
+                    }
+
+                    if (typeof Swal !== 'undefined') {
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 2500,
+                            timerProgressBar: true
+                        });
+                        Toast.fire({ icon: 'success', title: 'Radar preferences updated successfully!' });
+                    }
+
+                    // Reload feed to display updated recommendations according to new settings
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 800);
+                } else {
+                    throw new Error(res.data?.message || 'Failed to save');
+                }
+            } catch (err) {
+                console.error('[KinshipRadar] Save settings error:', err);
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Could not save radar preferences. Please try again.'
+                    });
+                } else {
+                    alert('Could not save radar preferences. Please try again.');
+                }
+            } finally {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = '<i class="bi bi-check2-circle"></i> Save Radar Preferences';
+                }
+            }
+        });
+    }
+}
+
 function escapeHtml(str) {
     if (!str) return '';
     return String(str)
@@ -252,6 +391,31 @@ function escapeHtml(str) {
 
 function bindKinshipRadarContainer(container) {
     container.addEventListener('click', async (e) => {
+        // 0. Handle Filter Buttons (Client-side fast tab switching)
+        const filterBtn = e.target.closest('.btn-filter-kin');
+        if (filterBtn) {
+            e.stopPropagation();
+            const filterType = filterBtn.getAttribute('data-filter') || 'all';
+
+            // Update active state on buttons within this widget
+            container.querySelectorAll('.btn-filter-kin').forEach(b => {
+                b.classList.remove('active');
+            });
+            filterBtn.classList.add('active');
+
+            // Show/hide cards matching category
+            const cards = container.querySelectorAll('.kinship-item-card');
+            cards.forEach(card => {
+                const cat = card.getAttribute('data-kin-category') || 'all';
+                if (filterType === 'all' || cat === filterType) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            return;
+        }
+
         // 1. Handle Connect Button (Stop propagation to prevent opening modal)
         const connectBtn = e.target.closest('.btn-connect-kin');
         if (connectBtn) {
@@ -278,6 +442,33 @@ function bindKinshipRadarContainer(container) {
                 });
             } catch (error) {
                 console.warn('[KinshipRadar] Dismiss sync error:', error);
+            }
+            return;
+        }
+
+        // 2b. Handle Resume Radar Button
+        const resumeBtn = e.target.closest('.btn-resume-radar');
+        if (resumeBtn) {
+            e.stopPropagation();
+            resumeBtn.disabled = true;
+            resumeBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Resuming...';
+            try {
+                const csrfToken = getCsrfToken();
+                await axios.post('/api/kinship/settings', {
+                    radar_enabled: 1,
+                    token: csrfToken
+                }, {
+                    headers: {
+                        'X-XSRF-TOKEN': csrfToken,
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                window.location.reload();
+            } catch (err) {
+                console.error('[KinshipRadar] Resume error:', err);
+                resumeBtn.disabled = false;
+                resumeBtn.innerHTML = '<i class="bi bi-play-circle me-1"></i> Resume Radar';
             }
             return;
         }

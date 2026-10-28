@@ -287,22 +287,25 @@
                                                                 <a :href="event.party_card_url" 
                                                                    target="_blank" 
                                                                    rel="noopener noreferrer"
-                                                                   class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5"
-                                                                   style="background-color: var(--secondary-color, #fef2f2); color: #8a1019; border: 1px solid rgba(163, 22, 33, 0.25); font-size: 0.76rem; min-height: 38px;">
+                                                                   class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm"
+                                                                   style="background-color: #ffffff !important; color: #8a1019 !important; border: 1px solid rgba(163, 22, 33, 0.25); font-size: 0.76rem; min-height: 38px;">
                                                                     <i class="bi bi-envelope-paper-heart-fill"></i>
                                                                     <span>Sign Card</span>
                                                                 </a>
                                                             </template>
 
                                                             <template x-if="event.isOwnEvent">
-                                                                <a :href="'/member/profilePage/event/' + event.no + '/party-sso'" 
-                                                                   target="_blank" 
-                                                                   rel="noopener noreferrer"
-                                                                   class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5"
-                                                                   style="background-color: #0f172a; color: #f8fafc; font-size: 0.76rem; min-height: 38px;">
-                                                                    <i class="bi bi-stars text-warning"></i>
-                                                                    <span>Studio ↗</span>
-                                                                </a>
+                                                                <div class="d-inline-flex flex-column align-items-start">
+                                                                    <span class="text-muted mb-1" style="font-size: 0.68rem; line-height: 1.2;">powered by <a href="https://mypartyplatform.com" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-semibold" style="color: var(--primary-color, #a31621);">mypartyplatform.com</a></span>
+                                                                    <a :href="'/member/profilePage/event/' + event.no + '/party-sso'" 
+                                                                       target="_blank" 
+                                                                       rel="noopener noreferrer"
+                                                                       class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm"
+                                                                       style="background-color: #0f172a; color: #ffffff !important; font-size: 0.76rem; min-height: 38px;">
+                                                                        <i class="bi bi-stars text-warning"></i>
+                                                                        <span>Manage Studio ↗</span>
+                                                                    </a>
+                                                                </div>
                                                             </template>
                                                         </div>
                                                     </template>

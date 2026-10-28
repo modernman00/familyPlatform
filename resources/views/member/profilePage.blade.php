@@ -38,6 +38,8 @@
         @includeIf('member.modals.upcomingEventsModal')
         @includeIf('member.modals.adulthoodCelebrationModal')
         @includeIf('member.modals.kinshipDetailsModal')
+        @includeIf('member.modals.kinshipRadarSettingsModal')
+        @includeIf('member.modals.thenNowComparisonModal')
 
 
     </div>

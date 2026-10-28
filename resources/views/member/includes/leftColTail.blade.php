@@ -20,10 +20,27 @@
                     <span class="mr-1">{{ \App\classes\CountryCatalog::getFlag($data['country'] ?? '') }}</span>
                     <span>{{ $data['country'] ?? 'Global' }}</span>
                 </p>
+                @php
+                    $tailPrimaryCode = ltrim((string)($primaryFamCode ?? ($data['primaryFamCode'] ?? ($data['famCode'] ?? ''))), '#');
+                    $tailBirthCode = ltrim((string)($maternalFamCode ?? ($data['maternalFamCode'] ?? ($data['otherFamCode'] ?? ''))), '#');
+                    $tailHasDualCodes = (!empty($hasMaternalCode) || !empty($data['hasMaternalCode']) || ($tailBirthCode !== '' && strtoupper($tailBirthCode) !== strtoupper($tailPrimaryCode)));
+                    $tailMarriedCode = ($tailHasDualCodes && $tailBirthCode !== '') ? $tailPrimaryCode : '';
+                    $tailEffectiveBirthCode = ($tailHasDualCodes && $tailBirthCode !== '') ? $tailBirthCode : $tailPrimaryCode;
+                @endphp
                 <div
                     class="bg-gray-50 dark:bg-background-dark/50 rounded-lg p-3 mb-4 border border-border-light dark:border-border-dark">
-                    <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Family Code</p>
-                    <p class="text-primary font-mono font-bold text-lg">{{ $data['famCode'] }}</p>
+                    @if($tailMarriedCode !== '')
+                        <div class="mb-2 pb-2 border-b border-border-light dark:border-border-dark">
+                            <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold">{{ __('profile.married_family_code', 'Married Code') }}</p>
+                            <p class="text-primary font-mono font-bold text-lg">{{ $tailMarriedCode }}</p>
+                        </div>
+                    @endif
+                    @if($tailEffectiveBirthCode !== '')
+                        <div>
+                            <p class="text-xs text-emerald-600 uppercase tracking-wider font-semibold">{{ __('profile.birth_family_code', 'Birth Code') }}</p>
+                            <p class="text-emerald-700 font-mono font-bold text-lg">{{ $tailEffectiveBirthCode }}</p>
+                        </div>
+                    @endif
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <button

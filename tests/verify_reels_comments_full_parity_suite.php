@@ -124,8 +124,12 @@ $react2 = Reel::toggleCommentReaction($parentCommId, $userCId, 'haha');
 assertCheck($react2['action'] === 'added' && $react2['reaction'] === 'haha', "User C added 'haha' reaction");
 assertCheck($react2['count'] === 2 && $react2['reactions']['love'] === 1 && $react2['reactions']['haha'] === 1, "Aggregated count reflects 2 reactions (1 love, 1 haha)");
 
-// User A switches reaction from 'love' to 'celebrate'
-$react3 = Reel::toggleCommentReaction($parentCommId, $userAId, 'celebrate');
+// User A switches reaction from 'love' to 'celebrate' (Heirloom Glass Super-Reaction)
+$reactCelebrate = Reel::toggleCommentReaction($parentCommId, $userAId, 'celebrate');
+assertCheck($reactCelebrate['action'] === 'updated' && $reactCelebrate['reaction'] === 'celebrate', "Heirloom Glass 'celebrate' reaction accepted on Reel comment");
+
+// User A switches reaction to an unlisted type -> normalized to 'like'
+$react3 = Reel::toggleCommentReaction($parentCommId, $userAId, 'unlisted_invalid');
 assertCheck($react3['action'] === 'updated' && $react3['reaction'] === 'like', "Unlisted reaction normalized to allowed set");
 
 // User C clicks same reaction 'haha' -> toggles off (un-reacts)

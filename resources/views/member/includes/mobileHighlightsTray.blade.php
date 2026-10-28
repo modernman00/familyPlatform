@@ -62,67 +62,153 @@ foreach(($eventData ?? []) as $event) {
         <template x-if="memories.length > 0">
             <div class="highlight-card flex-shrink-0 p-3 rounded-4 shadow-sm position-relative overflow-hidden"
                  id="mobileMemoriesCard"
-                 style="width: 280px; scroll-snap-align: start; background: linear-gradient(135deg, rgba(184,32,44, 0.12) 0%, rgba(236, 72, 153, 0.12) 100%); border: 1px solid rgba(184,32,44, 0.25);">
+                 style="width: 290px; scroll-snap-align: start; background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%); border: 1px solid var(--border-color, #e2e8f0); box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="badge rounded-pill px-2.5 py-1 fw-bold text-white d-inline-flex align-items-center gap-1 shadow-sm"
-                          style="background: linear-gradient(135deg, #a31621, #ec4899); font-size: 0.72rem;">
+                          style="background: linear-gradient(135deg, #a31621, #d97706); font-size: 0.72rem;">
                         <i class="bi bi-clock-history"></i> <span x-text="memories[0].years_ago_label || 'Memory Flashback'"></span>
                     </span>
-                    <span class="text-muted small" style="font-size: 0.72rem;" x-text="memories[0].formatted_date"></span>
+                    <span class="badge bg-white bg-opacity-75 text-dark border px-2 py-0.5 rounded-pill small" style="font-size: 0.72rem;" x-text="memories[0].formatted_date"></span>
                 </div>
 
+                <!-- Media Preview -->
                 <template x-if="memories[0].primary_image">
-                    <div class="mb-2 rounded-3 overflow-hidden shadow-sm" style="height: 100px;">
+                    <div class="mb-2 rounded-3 overflow-hidden shadow-sm position-relative" style="height: 120px; border: 2px solid #ffffff;">
                         <img :src="'/resources/images/post/' + memories[0].primary_image" alt="Memory photo" class="w-100 h-100 object-fit-cover">
+                        <span class="position-absolute bottom-0 start-0 m-1.5 badge bg-dark bg-opacity-75 text-white rounded-pill px-2 py-0.5" style="font-size: 0.65rem;">
+                            <i class="bi bi-camera-fill text-warning"></i> Chronicle
+                        </span>
+                    </div>
+                </template>
+
+                <!-- Text-only Graphic Banner -->
+                <template x-if="!memories[0].primary_image">
+                    <div class="mb-2 rounded-3 p-2 text-center position-relative overflow-hidden" style="background: rgba(255, 253, 248, 0.9); border: 1px dashed rgba(245, 158, 11, 0.35);">
+                        <svg width="48" height="34" viewBox="0 0 72 56" fill="none" xmlns="http://www.w3.org/2000/svg" class="mx-auto mb-1">
+                            <path d="M36 16C30 12 18 12 10 15V44C18 41 30 41 36 45C42 41 54 41 62 44V15C54 12 42 12 36 16Z" fill="#FFFDF8" stroke="#D97706" stroke-width="1.6"/>
+                            <path d="M36 16V45" stroke="#B45309" stroke-width="1.6"/>
+                            <path d="M50 8C48 10 42 22 41 26L43 27C45 23 52 12 53 9C54 6 52 6 50 8Z" fill="#F59E0B"/>
+                        </svg>
+                        <div class="fw-bold small text-uppercase" style="color: #8a1019; font-size: 0.68rem; letter-spacing: 0.05em;">Family Chronicle</div>
                     </div>
                 </template>
 
                 <p class="mb-2 fw-medium text-truncate-2" style="color: var(--text-color, #1f2937); font-size: 0.84rem; line-height: 1.35; height: 2.7em;" x-text="memories[0].postMessage"></p>
 
+                <!-- Meaningful Prompt -->
+                <div class="p-1.5 rounded-2 mb-2" style="background: rgba(248, 250, 252, 0.8); border-left: 2px solid #f59e0b; font-size: 0.72rem; color: #475569;">
+                    <i class="bi bi-heart-pulse text-warning me-1"></i> <span x-text="memories[0].meaningful_prompt || 'A cherished generational moment.'"></span>
+                </div>
+
                 <div class="d-flex justify-content-between align-items-center pt-2 border-top border-light-subtle">
-                    <span class="text-muted small fw-semibold text-truncate" style="font-size: 0.75rem; max-width: 110px;" x-text="memories[0].fullName"></span>
-                    <div class="d-flex align-items-center gap-1.5">
-                        <a :href="whatsappMemoryUrl(memories[0])" target="_blank" rel="noopener noreferrer"
-                           class="btn btn-sm btn-success rounded-pill px-2.5 py-1 fw-bold d-inline-flex align-items-center gap-1 text-white"
-                           style="font-size: 0.75rem; min-height: 36px; background-color: #25D366; border: none; text-decoration: none;"
-                           title="Share memory to WhatsApp" aria-label="Share memory to WhatsApp">
-                            <i class="bi bi-whatsapp"></i>
-                        </a>
-                        <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem; min-height: 36px;" @click="shareMemory(memories[0])">
-                            <i class="bi bi-share-fill me-1"></i> Share
-                        </button>
-                    </div>
+                    <span class="text-muted small fw-semibold text-truncate" style="font-size: 0.75rem; max-width: 140px;" x-text="memories[0].fullName"></span>
+                    <span class="badge rounded-pill bg-light text-muted border px-2 py-0.5" style="font-size: 0.68rem;">
+                        <i class="bi bi-shield-lock-fill me-1 text-secondary"></i> Private Chronicle
+                    </span>
                 </div>
             </div>
         </template>
 
-        <!-- 2. Upcoming Milestones Cards (Birthdays & Anniversaries) -->
+        <!-- 2. Upcoming Milestones Cards (Graphics Rich & Strictly Non-Shareable) -->
         <template x-for="(milestone, idx) in milestones" :key="'ms-' + idx">
             <div class="highlight-card flex-shrink-0 p-3 rounded-4 shadow-sm position-relative"
                  id="mobileMilestonesCard"
-                 style="width: 250px; scroll-snap-align: start; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%); border: 1px solid rgba(245, 158, 11, 0.25);">
+                 style="width: 280px; scroll-snap-align: start; background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%); border: 1px solid var(--border-color, #e2e8f0); box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                
+                <!-- Top Row: Landmark Badge -->
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="badge rounded-pill px-2.5 py-1 fw-bold text-dark bg-warning bg-gradient shadow-sm" style="font-size: 0.75rem;">
-                        <i class="bi bi-cake2-fill me-1"></i> Milestone
+                    <span class="badge rounded-pill px-2.5 py-1 fw-bold"
+                          style="background: linear-gradient(135deg, rgba(184,32,44,0.12), rgba(245,158,11,0.15)); color: #8a1019; font-size: 0.72rem;"
+                          x-text="milestone.landmark_tag || milestone.anniversary_tag || (milestone.type === 'birthday' ? 'Birthday' : (milestone.type === 'anniversary' ? 'Anniversary' : 'Event'))">
                     </span>
-                    <span class="badge rounded-pill bg-light text-dark fw-semibold" style="font-size: 0.75rem;" x-text="milestone.days_until_label || 'Upcoming'"></span>
                 </div>
 
+                <!-- Graphics & Celebratory Avatar Row -->
                 <div class="d-flex align-items-center gap-2.5 mb-2">
-                    <template x-if="milestone.profileImg">
-                        <img :src="'/resources/images/profile/' + milestone.profileImg" class="rounded-circle shadow-sm" style="width: 38px; height: 38px; object-fit: cover;" alt="Avatar">
-                    </template>
-                    <div class="overflow-hidden">
-                        <h6 class="fw-bold mb-0 text-truncate" style="font-size: 0.95rem; color: var(--text-color, #1f2937);" x-text="milestone.title"></h6>
-                        <p class="mb-0 text-truncate" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569); line-height: 1.4;" x-text="milestone.subtitle"></p>
+                    <!-- SVG Graphics Icon -->
+                    <div class="flex-shrink-0">
+                        <template x-if="milestone.type === 'birthday'">
+                            <svg width="40" height="40" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="28" cy="28" r="26" fill="#F59E0B" fill-opacity="0.14"/>
+                                <rect x="16" y="32" width="24" height="12" rx="3" fill="#B8202C"/>
+                                <rect x="18" y="24" width="20" height="9" rx="2" fill="#F59E0B"/>
+                                <path d="M16 33C18 35 20 35 22 33C24 35 26 35 28 33C30 35 32 35 34 33C36 35 38 35 40 33" stroke="#FFF7ED" stroke-width="1.5" stroke-linecap="round"/>
+                                <circle cx="24.25" cy="14" r="2" fill="#F59E0B"/>
+                                <circle cx="31.75" cy="14" r="2" fill="#F59E0B"/>
+                            </svg>
+                        </template>
+                        <template x-if="milestone.type === 'anniversary'">
+                            <svg width="40" height="40" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="28" cy="28" r="26" fill="#F43F5E" fill-opacity="0.14"/>
+                                <circle cx="23" cy="29" r="9" stroke="#F59E0B" stroke-width="2.5" fill="none"/>
+                                <circle cx="33" cy="29" r="9" stroke="#B8202C" stroke-width="2.5" fill="none"/>
+                                <path d="M28 20C28 17.5 30 16 32 16C34.5 16 36 18 36 20C36 23 32 25 28 27C24 25 20 23 20 20C20 18 21.5 16 24 16C26 16 28 17.5 28 20Z" fill="#EC4899" fill-opacity="0.8"/>
+                            </svg>
+                        </template>
+                        <template x-if="milestone.type === 'event'">
+                            <svg width="40" height="40" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="28" cy="28" r="26" fill="#0D9488" fill-opacity="0.14"/>
+                                <rect x="17" y="18" width="22" height="23" rx="4" fill="#0D9488"/>
+                                <path d="M28 28L29.5 31.5L33.5 32L30.5 34.5L31.5 38.5L28 36.5L24.5 38.5L25.5 34.5L22.5 32L26.5 31.5L28 28Z" fill="#FEF08A"/>
+                            </svg>
+                        </template>
+                    </div>
+
+                    <!-- Celebratory Avatar(s) with Halo -->
+                    <div class="position-relative flex-shrink-0">
+                        <template x-if="milestone.type === 'anniversary'">
+                            <div class="d-flex align-items-center position-relative" style="width: 48px; height: 34px;">
+                                <img :src="milestone.p1_img ? (milestone.p1_img.startsWith('http') || milestone.p1_img.startsWith('/') ? milestone.p1_img : '/resources/images/profile/' + milestone.p1_img) : '/resources/images/profile/avatarM.png'" 
+                                     class="rounded-circle shadow-xs position-absolute start-0" 
+                                     style="width: 28px; height: 28px; object-fit: cover; border: 2px solid #ffffff; z-index: 1;" 
+                                     alt="Partner 1"
+                                     onerror="this.src='/resources/images/profile/avatarM.png'">
+                                <img :src="milestone.p2_img ? (milestone.p2_img.startsWith('http') || milestone.p2_img.startsWith('/') ? milestone.p2_img : '/resources/images/profile/' + milestone.p2_img) : '/resources/images/profile/avatarF.png'" 
+                                     class="rounded-circle shadow-xs position-absolute end-0" 
+                                     style="width: 28px; height: 28px; object-fit: cover; border: 2px solid #ffffff; z-index: 2;" 
+                                     alt="Partner 2"
+                                     onerror="this.src='/resources/images/profile/avatarF.png'">
+                            </div>
+                        </template>
+                        <template x-if="milestone.type === 'birthday'">
+                            <div class="position-relative">
+                                <img :src="milestone.profile_img || milestone.profileImg ? '/resources/images/profile/' + (milestone.profile_img || milestone.profileImg) : '/resources/images/profile/avatarM.png'" 
+                                     class="rounded-circle shadow-xs" 
+                                     style="width: 34px; height: 34px; object-fit: cover; border: 2px solid #f59e0b;" 
+                                     alt="Celebrant"
+                                     onerror="this.src='/resources/images/profile/avatarM.png'">
+                                <span class="position-absolute" style="top: -8px; right: -4px; font-size: 0.78rem;">👑</span>
+                            </div>
+                        </template>
+                        <template x-if="milestone.type === 'event'">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center shadow-xs"
+                                 style="width: 34px; height: 34px; background: rgba(13, 148, 136, 0.15); color: #0d9488; font-size: 0.9rem;">
+                                <i class="bi bi-calendar-check-fill"></i>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="overflow-hidden min-w-0">
+                        <h6 class="fw-bold mb-0 text-truncate" style="font-size: 0.9125rem; color: var(--text-color, #1f2937);" x-text="milestone.title"></h6>
+                        <p class="mb-0 text-truncate" style="font-size: 0.78rem; color: var(--text-muted-aa, #475569); line-height: 1.3;" x-text="milestone.subtitle"></p>
                     </div>
                 </div>
 
-                <div class="pt-2 border-top border-light-subtle d-flex justify-content-end">
-                    <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-bold text-white shadow-sm" style="font-size: 0.875rem; min-height: 44px; background: #a31621; color: #ffffff !important; border: none;" data-bs-toggle="modal" data-bs-target="#postModal">
-                        🎉 Wish Birthday
-                    </button>
+                <!-- Meaningful Emotional Tribute Message -->
+                <div class="p-2 rounded-3" style="background: rgba(241, 245, 249, 0.65); border-left: 3px solid #b8202c;">
+                    <p class="mb-0 fw-normal" style="font-size: 0.76rem; color: #334155; line-height: 1.4;" x-text="milestone.meaningful_message || milestone.subtitle"></p>
                 </div>
+
+                <!-- 'in xx days' placed UNDER as requested by user -->
+                <div class="d-flex align-items-center justify-content-between mt-2 pt-2 border-top border-light-subtle">
+                    <span class="text-muted small" style="font-size: 0.72rem;" x-text="milestone.target_date"></span>
+                    <span class="badge rounded-pill px-2 py-0.5 fw-bold shadow-2xs"
+                          :class="milestone.days_remaining === 0 ? 'bg-danger text-white' : (milestone.days_remaining === 1 ? 'bg-warning text-dark' : 'bg-light text-primary border')"
+                          style="font-size: 0.72rem;"
+                          x-text="milestone.date_badge || milestone.days_until_label || 'Upcoming'"></span>
+                </div>
+
+                <!-- NOTE: Strictly Non-Shareable upcoming milestone. Zero composer triggers or share buttons. -->
             </div>
         </template>
 
@@ -197,30 +283,6 @@ if (typeof window.mobileHighlightsTray !== 'function') {
                 return (this.memories && this.memories.length > 0) ||
                        (this.milestones && this.milestones.length > 0) ||
                        (this.events && this.events.length > 0);
-            },
-            shareMemory(memory) {
-                if (typeof window.openShareModal === 'function') {
-                    window.openShareModal(memory);
-                } else {
-                    const postModal = document.getElementById('postModal');
-                    if (postModal) {
-                        const modal = new bootstrap.Modal(postModal);
-                        modal.show();
-                    }
-                }
-            },
-            whatsappMemoryUrl(memory) {
-                if (!memory) return '#';
-                const yearsAgo = memory.years_ago_label || 'A family memory';
-                const author = memory.fullName ? ` — ${memory.fullName}` : '';
-                const quote = memory.postMessage ? `"${memory.postMessage.trim()}"` : '';
-                const origin = window.location.origin || '';
-                const link = memory.post_no ? `${origin}/profilePage?post_no=${memory.post_no}#post${memory.post_no}` : `${origin}/profilePage`;
-                let text = `✨ [Family Memory Flashback — ${yearsAgo}]${author}\n\n${quote}\n\n🔗 ${link}`;
-                if (text.length > 700) {
-                    text = text.slice(0, 690) + '...\n\n🔗 ' + link;
-                }
-                return `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
             }
         };
     };

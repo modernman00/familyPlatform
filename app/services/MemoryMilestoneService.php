@@ -108,10 +108,13 @@ class MemoryMilestoneService
                     'postMessage' => (string)($row['postMessage'] ?? ''),
                     'images' => $images,
                     'primary_image' => $images[0] ?? null,
+                    'has_image' => !empty($images),
                     'date_created' => (string)$row['date_created'],
                     'formatted_date' => $formattedDate,
                     'years_ago' => $yearsAgo,
                     'years_ago_label' => $yearsLabel,
+                    'year_taken' => (int)date('Y') - $yearsAgo,
+                    'meaningful_prompt' => "A treasured moment from our family journey {$yearsLabel}. Reflect on how much our family has grown.",
                     'postFamCode' => (string)($row['postFamCode'] ?? ''),
                     'likes' => (int)($row['post_likes'] ?? 0),
                 ];
@@ -157,6 +160,11 @@ class MemoryMilestoneService
                     'type' => 'birthday',
                     'title' => $name !== '' ? "{$name}'s Birthday" : "Family Birthday",
                     'subtitle' => $milestoneTag ?: ($age ? "Turning {$age}" : 'Birthday Celebration'),
+                    'first_name' => (string)($bday['firstName'] ?? ''),
+                    'full_name' => $name,
+                    'age' => $age,
+                    'landmark_tag' => $milestoneTag,
+                    'meaningful_message' => $this->getBirthdayMeaningfulMessage($age, $name),
                     'target_date' => $calc['event_date_str'],
                     'days_remaining' => $calc['days_remaining'],
                     'date_badge' => $calc['date_badge'],
@@ -164,6 +172,8 @@ class MemoryMilestoneService
                     'profile_img' => (string)($bday['profile_img'] ?? ''),
                     'icon' => 'bi-gift-fill',
                     'color_class' => 'bg-warning text-dark',
+                    'graphic_type' => 'birthday',
+                    'accent_color' => '#b8202c',
                 ];
             }
         }
@@ -204,13 +214,22 @@ class MemoryMilestoneService
                         'type' => 'anniversary',
                         'title' => $title,
                         'subtitle' => $anniversaryTag ?: ($yearsMarried ? "{$yearsMarried} Years Together" : 'Wedding Anniversary'),
+                        'years_married' => $yearsMarried,
+                        'anniversary_tag' => $anniversaryTag,
+                        'meaningful_message' => $this->getAnniversaryMeaningfulMessage($yearsMarried, $title),
+                        'p1_name' => (string)($union['p1_name'] ?? ''),
+                        'p2_name' => (string)($union['p2_name'] ?? ''),
+                        'p1_img' => (string)($union['p1_img'] ?? ''),
+                        'p2_img' => (string)($union['p2_img'] ?? ''),
                         'target_date' => $calc['event_date_str'],
                         'days_remaining' => $calc['days_remaining'],
                         'date_badge' => $calc['date_badge'],
                         'user_id' => (string)($union['partner_1_id'] ?? ''),
-                        'profile_img' => '',
+                        'profile_img' => (string)($union['p1_img'] ?? ''),
                         'icon' => 'bi-heart-fill',
                         'color_class' => 'bg-danger text-white',
+                        'graphic_type' => 'anniversary',
+                        'accent_color' => '#ec4899',
                     ];
                 }
             }
@@ -237,10 +256,14 @@ class MemoryMilestoneService
                     default => "in {$diffDays} days",
                 };
 
+                $evName = (string)($ev['eventName'] ?? 'Family Gathering');
+                $evType = (string)($ev['eventType'] ?? 'Special Event');
+
                 $milestones[] = [
                     'type' => 'event',
-                    'title' => (string)($ev['eventName'] ?? 'Family Gathering'),
-                    'subtitle' => (string)($ev['eventType'] ?? 'Special Event'),
+                    'title' => $evName,
+                    'subtitle' => $evType,
+                    'meaningful_message' => $this->getEventMeaningfulMessage($evName, $evType),
                     'target_date' => date('M j, Y', $evTime),
                     'days_remaining' => $diffDays,
                     'date_badge' => $badge,
@@ -248,6 +271,8 @@ class MemoryMilestoneService
                     'profile_img' => '',
                     'icon' => 'bi-calendar-event-fill',
                     'color_class' => 'bg-primary text-white',
+                    'graphic_type' => 'event',
+                    'accent_color' => '#0d9488',
                 ];
             }
         }
@@ -583,10 +608,14 @@ class MemoryMilestoneService
             $inQuery = implode(',', array_fill(0, count($cleanedCodes), '?'));
             $query = "SELECT fu.*, 
                              CONCAT(COALESCE(fn1.first_name, ''), ' ', COALESCE(fn1.last_name, '')) as p1_name,
-                             CONCAT(COALESCE(fn2.first_name, ''), ' ', COALESCE(fn2.last_name, '')) as p2_name
+                             CONCAT(COALESCE(fn2.first_name, ''), ' ', COALESCE(fn2.last_name, '')) as p2_name,
+                             COALESCE(pp1.img, fn1.avatar_url, '') as p1_img,
+                             COALESCE(pp2.img, fn2.avatar_url, '') as p2_img
                       FROM family_unions fu
                       LEFT JOIN family_nodes fn1 ON fu.partner_1_id = fn1.id
                       LEFT JOIN family_nodes fn2 ON fu.partner_2_id = fn2.id
+                      LEFT JOIN profilePics pp1 ON fn1.user_id = pp1.id
+                      LEFT JOIN profilePics pp2 ON fn2.user_id = pp2.id
                       WHERE fu.family_code IN ($inQuery)
                         AND fu.is_current = 1";
 
@@ -763,5 +792,79 @@ class MemoryMilestoneService
             60 => '60th Diamond Anniversary 💎',
             default => "{$years} Years of Marriage",
         };
+    }
+
+    /**
+     * Crafts an emotionally rich, meaningful message for a birthday celebration.
+     */
+    public function getBirthdayMeaningfulMessage(?int $age, string $name): string
+    {
+        $shortName = trim(explode(' ', $name)[0] ?? 'our loved one');
+        if ($shortName === '') {
+            $shortName = 'our family member';
+        }
+
+        if ($age === null || $age <= 0) {
+            return "Honouring {$shortName}'s special day and celebrating the warmth, joy, and blessings they bring to our family circle.";
+        }
+
+        return match ($age) {
+            1 => "A miraculous first year! Celebrating 365 days of baby steps, sweet giggles, and boundless family love.",
+            18 => "Stepping into adulthood with strong roots to stay grounded and vibrant wings to reach their greatest dreams.",
+            21 => "A milestone key birthday! Unlocking new independence, adventures, and lifelong family pride.",
+            30 => "Three incredible decades of character, laughter, and accomplishment. Embracing a shining new chapter.",
+            40 => "A radiant ruby milestone! Flourishing in wisdom, purpose, and cherished family achievements.",
+            50 => "Golden Jubilee: 50 remarkable years of grace, resilience, and inspiring leadership for our whole family.",
+            60 => "Diamond celebration: 60 years of guiding our family with enduring wisdom, kindness, and devotion.",
+            70 => "Platinum Jubilee: 70 years of living family history, treasured memories, and generational blessings.",
+            80 => "Oak milestone: 80 years of strong roots, protective branches, and a lifetime of unconditional love.",
+            90 => "A revered milestone of 90 years of longevity, ancestral stories, and generational triumph.",
+            100 => "Centenary celebration: A majestic century of living history, wisdom, and family nobility.",
+            default => "Another wonderful year of laughter, growth, and shared memories that enrich our family legacy.",
+        };
+    }
+
+    /**
+     * Crafts an emotionally rich, meaningful message for a wedding anniversary.
+     */
+    public function getAnniversaryMeaningfulMessage(?int $years, string $title): string
+    {
+        if ($years === null || $years <= 0) {
+            return "Honouring a beautiful union and celebrating the enduring love and companionship that inspires our whole family.";
+        }
+
+        return match ($years) {
+            1 => "1st Paper Anniversary: One wonderful year of weaving shared dreams and writing the first chapter of forever.",
+            5 => "5th Wood Anniversary: Five years of deeply rooted devotion, growing stronger through every passing season.",
+            10 => "10th Tin Anniversary: A full decade of unbreakable unity, playful laughter, and shared family victories.",
+            15 => "15th Crystal Anniversary: Fifteen luminous years of clarity, deep affection, and sparkling shared milestones.",
+            20 => "20th China Anniversary: Two decades of gentle care, mutual respect, and building a welcoming family home.",
+            25 => "25th Silver Jubilee: A quarter-century of enduring love and partnership that serves as an inspiring beacon for all of us.",
+            30 => "30th Pearl Anniversary: Thirty years of rare, luminous love cultivated through patience, devotion, and shared triumph.",
+            40 => "40th Ruby Anniversary: Four decades of steadfast passion, unbreakable partnership, and generational warmth.",
+            50 => "50th Golden Jubilee: Half a century of golden devotion, founding an enduring dynasty of love and honour.",
+            60 => "60th Diamond Anniversary: An extraordinary diamond milestone of invincible, lifelong love and family legacy.",
+            default => "Celebrating {$years} years of devoted marriage and the inspiring partnership that keeps our family united.",
+        };
+    }
+
+    /**
+     * Crafts a meaningful message for an upcoming family event or gathering.
+     */
+    public function getEventMeaningfulMessage(string $name, string $type): string
+    {
+        $cleanType = strtolower(trim($type));
+        $cleanName = strtolower(trim($name));
+
+        if (str_contains($cleanType, 'reunion') || str_contains($cleanName, 'reunion')) {
+            return "Bringing generations together under one roof to reconnect, share laughter, and honour our shared roots.";
+        }
+        if (str_contains($cleanType, 'heritage') || str_contains($cleanName, 'heritage')) {
+            return "Honouring our ancestors, celebrating family folklore, and passing down traditions to the next generation.";
+        }
+        if (str_contains($cleanType, 'ritual') || str_contains($cleanType, 'weekly')) {
+            return "A sacred weekly rhythm to pause, break bread together, and keep our family circle close.";
+        }
+        return "A special family gathering to celebrate our heritage, create lifelong memories, and strengthen our generational bond.";
     }
 }

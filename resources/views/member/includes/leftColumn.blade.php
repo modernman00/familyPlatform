@@ -10,6 +10,18 @@
                     <i class="bi bi-shield-check text-warning"></i> {{ __('profile.verified', 'VERIFIED') }}
                 </span>
             </div>
+            @php
+                $leftPrimaryCode = ltrim((string)($primaryFamCode ?? ($data['primaryFamCode'] ?? ($data['famCode'] ?? ''))), '#');
+                $leftBirthCode = ltrim((string)($maternalFamCode ?? ($data['maternalFamCode'] ?? ($data['otherFamCode'] ?? ''))), '#');
+                $leftHasDualCodes = (!empty($hasMaternalCode) || !empty($data['hasMaternalCode']) || ($leftBirthCode !== '' && strtoupper($leftBirthCode) !== strtoupper($leftPrimaryCode)));
+                // When the user holds two distinct codes (primary + birth), primary is their Married Code and secondary is their Birth Code.
+                // When the user only holds one code (no separate birth/married split), their single code is their Birth Code and Married Code is hidden.
+                $leftMarriedCode = ($leftHasDualCodes && $leftBirthCode !== '') ? $leftPrimaryCode : '';
+                $leftEffectiveBirthCode = ($leftHasDualCodes && $leftBirthCode !== '') ? $leftBirthCode : $leftPrimaryCode;
+                $leftAvatarSubtitle = $leftMarriedCode !== ''
+                    ? __('profile.family_member', 'Family Member') . ' • ' . __('profile.married_family_code', 'Married Code') . ': ' . $leftMarriedCode . ' • ' . __('profile.birth_family_code', 'Birth Code') . ': ' . $leftEffectiveBirthCode
+                    : __('profile.family_member', 'Family Member') . ' • ' . __('profile.birth_family_code', 'Birth Code') . ': ' . $leftEffectiveBirthCode;
+            @endphp
             <div class="avatar-container position-absolute w-100" style="top: 55px;" title="Click to enlarge profile photo" role="button" tabindex="0" aria-label="View {{ ucwords(strtolower($data['firstName'] ?? '')) }}'s profile photo in full size">
                 <div class="position-relative d-inline-block">
                     <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" 
@@ -18,7 +30,7 @@
                          id="leftColProfileAvatar"
                          data-profile-expand="true"
                          data-profile-name="{{ ucwords(strtolower($data['firstName'] ?? '')) }} {{ ucwords(strtolower($data['lastName'] ?? '')) }}"
-                         data-profile-subtitle="{{ __('profile.family_member', 'Family Member') }} • {{ ltrim($data['famCode'] ?? '', '#') }}"
+                         data-profile-subtitle="{{ $leftAvatarSubtitle }}"
                          data-can-edit="true"
                          style="width: 105px; height: 105px; border-radius: 50%; border: 4px solid var(--card-bg); object-fit: cover; background: var(--card-bg); margin: 0 auto; display: block;">
                     
@@ -57,10 +69,26 @@
                 <span>{{ $data['country'] ?? 'Global' }}</span>
             </p>
 
-            <!-- Family Code Tonal Pill (without hash) -->
-            <div class="family-code-pill mb-3">
-                <small class="family-code-label me-1">{{ __('profile.family_code', 'Family Code') }}:</small>
-                <span class="family-code-value">{{ ltrim($data['famCode'] ?? '', '#') }}</span>
+            <!-- Family Code Tonal Pill(s) (Split into Married & Birth; hide Married Code if user does not have one) -->
+            <div class="d-flex flex-column align-items-center gap-2 mb-3 w-100" id="leftColumnDualFamilyCodes" role="group" aria-label="{{ __('profile.family_codes', 'Married and Birth Family Codes') }}">
+                @if($leftMarriedCode !== '')
+                    <a href="/organogram/{{ $data['id'] ?? '' }}?mode=canvas&amp;family_code={{ urlencode($leftMarriedCode) }}&amp;lineage=primary"
+                       class="family-code-pill family-code-pill--married text-decoration-none"
+                       id="marriedFamCodePill"
+                       title="{{ __('profile.view_married_tree_tooltip', 'View Married / Household Family Tree') }} (#{{ $leftMarriedCode }})">
+                        <small class="family-code-label me-1.5">{{ __('profile.married_family_code', 'Married Code') }}:</small>
+                        <span class="family-code-value">{{ $leftMarriedCode }}</span>
+                    </a>
+                @endif
+                @if($leftEffectiveBirthCode !== '')
+                    <a href="/organogram/{{ $data['id'] ?? '' }}?mode=canvas&amp;family_code={{ urlencode($leftEffectiveBirthCode) }}&amp;lineage={{ $leftMarriedCode !== '' ? 'birth' : 'primary' }}"
+                       class="family-code-pill {{ $leftMarriedCode !== '' ? 'family-code-pill--birth' : '' }} text-decoration-none"
+                       id="birthFamCodePill"
+                       title="{{ __('profile.view_birth_tree_tooltip', 'View Birth / Maiden Family Tree') }} (#{{ $leftEffectiveBirthCode }})">
+                        <small class="family-code-label {{ $leftMarriedCode !== '' ? 'family-code-label--birth' : '' }} me-1.5">{{ __('profile.birth_family_code', 'Birth Code') }}:</small>
+                        <span class="family-code-value {{ $leftMarriedCode !== '' ? 'family-code-value--birth' : '' }}">{{ $leftEffectiveBirthCode }}</span>
+                    </a>
+                @endif
             </div>
 
             <div class="d-flex flex-row flex-wrap flex-lg-column gap-2 px-2 w-100">

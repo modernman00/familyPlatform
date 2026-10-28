@@ -33,8 +33,49 @@ final class ProfilepageService
         }
 
         $famCodeClean = checkInput($memberData['famCode']);
-        $famCode = is_string($famCodeClean) ? $famCodeClean : '';
+        $famCode = is_string($famCodeClean) ? strtoupper(trim(ltrim($famCodeClean, '#'))) : '';
+        $primaryFamCode = $famCode;
+
+        $birthFamily = ['state' => 'none', 'code' => '', 'origin' => null, 'pending' => null];
+        try {
+            $birthFamily = (new BirthFamilyCodeService(\Src\Db::connect2()))->status($userId);
+        } catch (\Throwable $e) {
+            error_log('[ProfilepageService] Failed to load birth family status: ' . $e->getMessage());
+        }
+
+        $maternalFamCode = strtoupper(trim(ltrim((string)($birthFamily['code'] ?? ''), '#')));
+        $hasMaternalCode = ($birthFamily['state'] ?? '') === 'active'
+            && $maternalFamCode !== ''
+            && $maternalFamCode !== $primaryFamCode;
+
+        $maritalSurname = trim((string)($memberData['lastName'] ?? ''));
+        $maidenSurname = trim((string)($memberData['maiden_name'] ?? ''));
+        if ($maidenSurname === '' && $maternalFamCode !== '') {
+            $cleanBirth = preg_replace('/[0-9]+/', '', $maternalFamCode) ?? '';
+            $maidenSurname = $cleanBirth !== '' ? ucfirst(strtolower($cleanBirth)) : $maritalSurname;
+        }
+
+        $memberData['primaryFamCode'] = $primaryFamCode;
+        $memberData['maternalFamCode'] = $hasMaternalCode ? $maternalFamCode : '';
+        $memberData['hasMaternalCode'] = $hasMaternalCode;
+        $memberData['maritalSurname'] = $maritalSurname;
+        $memberData['maidenSurname'] = $maidenSurname;
+        $memberData['birthFamily'] = $birthFamily;
+        if ($hasMaternalCode && empty($memberData['otherFamCode'])) {
+            $memberData['otherFamCode'] = $maternalFamCode;
+        }
+
         $famCodes = $_SESSION['famCodes'] ?? ($famCode !== '' ? [$famCode] : []);
+        if (!is_array($famCodes)) {
+            $famCodes = [$famCodes];
+        }
+        if ($famCode !== '' && !in_array($famCode, $famCodes, true)) {
+            $famCodes[] = $famCode;
+        }
+        if ($hasMaternalCode && !in_array($maternalFamCode, $famCodes, true)) {
+            $famCodes[] = $maternalFamCode;
+        }
+        $_SESSION['famCodes'] = array_values(array_unique(array_filter(array_map('strval', $famCodes))));
 
         $pendingFamilyRequests = [];
         try {
@@ -67,6 +108,12 @@ final class ProfilepageService
         return [
             'memberData' => $memberData,
             'famCode' => $famCode,
+            'primaryFamCode' => $primaryFamCode,
+            'maternalFamCode' => $hasMaternalCode ? $maternalFamCode : '',
+            'hasMaternalCode' => $hasMaternalCode,
+            'maritalSurname' => $maritalSurname,
+            'maidenSurname' => $maidenSurname,
+            'birthFamily' => $birthFamily,
             'friendRequests' => DataAll::getFriendRequestData($userId, "Request sent"),
             'posts' => $this->feedRepo->getFeedPostsAsArray($userId, (array)$famCodes, 50, 0),
             'comments' => Post::getAllCommentProfilePics(),

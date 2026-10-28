@@ -361,11 +361,14 @@ final class Reel extends Select
             foreach ($reactionRows as $rr) {
                 $cId = (int)$rr['comment_id'];
                 $rType = (string)$rr['reaction_type'];
+                if ($rType === 'shock') {
+                    $rType = 'wow';
+                }
                 $cnt = (int)$rr['cnt'];
                 if (!isset($reactionMap[$cId])) {
-                    $reactionMap[$cId] = ['like' => 0, 'love' => 0, 'haha' => 0, 'wow' => 0, 'sad' => 0, 'angry' => 0, 'total' => 0];
+                    $reactionMap[$cId] = ['like' => 0, 'love' => 0, 'haha' => 0, 'wow' => 0, 'sad' => 0, 'angry' => 0, 'celebrate' => 0, 'total' => 0];
                 }
-                $reactionMap[$cId][$rType] = $cnt;
+                $reactionMap[$cId][$rType] = ($reactionMap[$cId][$rType] ?? 0) + $cnt;
                 $reactionMap[$cId]['total'] += $cnt;
             }
 
@@ -381,14 +384,15 @@ final class Reel extends Select
                 $userStmt->execute($execParams);
                 $uRows = $userStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
                 foreach ($uRows as $ur) {
-                    $userReactions[(int)$ur['comment_id']] = (string)$ur['reaction_type'];
+                    $uType = (string)$ur['reaction_type'];
+                    $userReactions[(int)$ur['comment_id']] = ($uType === 'shock') ? 'wow' : $uType;
                 }
             }
 
             // Merge reactions and normalize media URLs
             foreach ($rows as &$comment) {
                 $cId = (int)$comment['comment_id'];
-                $comment['reactions'] = $reactionMap[$cId] ?? ['like' => 0, 'love' => 0, 'haha' => 0, 'wow' => 0, 'sad' => 0, 'angry' => 0, 'total' => 0];
+                $comment['reactions'] = $reactionMap[$cId] ?? ['like' => 0, 'love' => 0, 'haha' => 0, 'wow' => 0, 'sad' => 0, 'angry' => 0, 'celebrate' => 0, 'total' => 0];
                 $comment['total_reactions'] = $comment['reactions']['total'] ?? 0;
                 $comment['user_reaction'] = $userReactions[$cId] ?? null;
             }
@@ -530,7 +534,10 @@ final class Reel extends Select
     {
         $pdo = self::connect2();
         $strUserId = (string)$userId;
-        $allowed = ['like', 'love', 'haha', 'wow', 'sad', 'angry'];
+        if ($type === 'shock') {
+            $type = 'wow';
+        }
+        $allowed = ['like', 'love', 'haha', 'wow', 'sad', 'angry', 'celebrate'];
         $reactionType = in_array($type, $allowed, true) ? $type : 'like';
 
         // Check if comment exists
@@ -574,13 +581,16 @@ final class Reel extends Select
         $countStmt->execute([':cid' => $commentId]);
         $cRows = $countStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        $counts = ['like' => 0, 'love' => 0, 'haha' => 0, 'wow' => 0, 'sad' => 0, 'angry' => 0];
+        $counts = ['like' => 0, 'love' => 0, 'haha' => 0, 'wow' => 0, 'sad' => 0, 'angry' => 0, 'celebrate' => 0];
         $total = 0;
         foreach ($cRows as $r) {
             $t = (string)$r['reaction_type'];
+            if ($t === 'shock') {
+                $t = 'wow';
+            }
             $c = (int)$r['cnt'];
             if (isset($counts[$t])) {
-                $counts[$t] = $c;
+                $counts[$t] += $c;
             }
             $total += $c;
         }

@@ -96,6 +96,11 @@ return [
     // Profile & Kinship
     'profile.edit_profile' => 'Modifier le profil',
     'profile.family_code' => 'Code de famille',
+    'profile.married_family_code' => 'Code marital',
+    'profile.birth_family_code' => 'Code de naissance',
+    'profile.family_codes' => 'Codes familiaux (marital et de naissance)',
+    'profile.view_married_tree_tooltip' => "Voir l'arbre familial marital",
+    'profile.view_birth_tree_tooltip' => "Voir l'arbre familial de naissance",
     'profile.relationship' => 'Lien de parenté',
     'profile.spouse' => 'Conjoint(e)',
     'profile.father' => 'Père',

@@ -75,9 +75,10 @@
             <div class="alert alert-info border-0 rounded-3 mb-4" style="background: rgba(163,22,33, 0.08);">
               <h6 class="fw-bold text-primary mb-1"><i class="bi bi-magic me-2"></i>How the Auto-Matching Engine Works:</h6>
               <ul class="mb-0 small text-dark ps-3">
-                <li><strong>Yoruba & Anglo Diminutive AI:</strong> Recognizes nicknames like <em>Femi &harr; Olufemi</em>, <em>Wale &harr; Adewale</em>, <em>Segun &harr; Olusegun</em>, and <em>Kenny &harr; Kehinde</em>.</li>
+                <li><strong>Yoruba & Anglo Diminutive AI:</strong> Recognises nicknames like <em>Femi &harr; Olufemi</em>, <em>Wale &harr; Adewale</em>, <em>Segun &harr; Olusegun</em>, and <em>Kenny &harr; Kehinde</em>.</li>
                 <li><strong>Kinship Context Prompt:</strong> Displays the exact family relation: <em>"We found Femi Olaogun (Brother of Wale • Son of Adesanya & Iyabo). Is this you?"</em></li>
                 <li><strong>Single-Click Grafting:</strong> If you already added children or a spouse, clicking <strong>"Yes, Connect My Account"</strong> automatically grafts your entire subtree onto the family tree without duplication.</li>
+                <li><strong>Kinship Radar &amp; Customisable Discovery:</strong> Tapping the settings slider icon beside <strong>Radar Active</strong> opens your preferences modal to toggle In-Law suggestions, maternal maiden lineage signals, adjust match sensitivity (50%+, 70%+, 80%+), or pause radar discovery with instant state restoration.</li>
                 <li><strong>Adversarial IDOR & Concurrency Guards:</strong> Row-level pessimistic locks (<code>FOR UPDATE</code>) and tenant isolation guarantee zero duplicate claims or cross-family access.</li>
               </ul>
             </div>

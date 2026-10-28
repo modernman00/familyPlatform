@@ -126,14 +126,14 @@
     </div>
   </template>
 
-  <!-- Post Text -->
-  <template x-if="post.displayMessage || (!post.video && post.postMessage)">
+  <!-- Post Text (Prominent for Text-Only Posts) -->
+  <template x-if="(post.displayMessage || (!post.video && post.postMessage)) && (!post.images || post.images.length === 0) && !post.video && !post.comparison">
     <div class="post-content px-1 mb-3">
       <p class="mb-0" style="white-space: pre-line; font-size: 1.05rem; color: var(--text-main); line-height: 1.55; font-family: 'Inter', -apple-system, system-ui, sans-serif;" x-html="renderHashtags(post.displayMessage || post.postMessage)"></p>
       
       <!-- On-Demand Post Translation Toggle for Diaspora Viewers -->
       <div class="mt-1 d-flex align-items-center gap-2" x-show="window.APP_LOCALE && window.APP_LOCALE !== 'en'">
-        <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none d-inline-flex align-items-center gap-1" style="font-size: 0.8rem; color: #a31621; font-weight: 600;" @click="window.toggleTranslatePost ? window.toggleTranslatePost(post) : null">
+        <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none d-inline-flex align-items-center gap-1" style="font-size: 0.8rem; color: var(--brand-primary, #a31621); font-weight: 600;" @click="window.toggleTranslatePost ? window.toggleTranslatePost(post) : null">
           <i class="bi bi-translate"></i>
           <span x-text="post._isTranslated ? (window.__ ? window.__('feed.see_original', 'See original') : 'See original') : (post._isTranslating ? (window.__ ? window.__('feed.translating', 'Translating...') : 'Translating...') : (window.__ ? window.__('feed.translate', 'Translate') : 'Translate'))"></span>
         </button>
@@ -157,23 +157,57 @@
   <!-- Then & Now (before / after) -->
   <template x-if="post.comparison">
     <div class="then-now px-1 mb-3" x-data="{ pos: 50, side: false }">
-      <div class="then-now__stage" x-show="!side">
-        <img class="then-now__img" :src="getPostImageUrl(post.comparison.after_img)" alt="Now" loading="lazy">
-        <img class="then-now__img then-now__img--then" :src="getPostImageUrl(post.comparison.before_img)" alt="Then" loading="lazy"
-             :style="'clip-path: inset(0 ' + (100 - pos) + '% 0 0)'">
-        <span class="then-now__tag then-now__tag--then" x-text="post.comparison.before_label"></span>
-        <span class="then-now__tag then-now__tag--now" x-text="post.comparison.after_label"></span>
-        <div class="then-now__handle" :style="'left:' + pos + '%'" aria-hidden="true"><i class="bi bi-arrows-expand-vertical"></i></div>
+      <div class="then-now__stage vse-skeleton-surface" x-show="!side" style="aspect-ratio: 4 / 5; max-height: 520px;">
+        <picture class="then-now__img" style="pointer-events: none; user-select: none; -webkit-user-drag: none;">
+          <source :srcset="getPostImageVariantUrl(post.comparison.after_img, 'avif')" type="image/avif">
+          <source :srcset="getPostImageVariantUrl(post.comparison.after_img, 'webp')" type="image/webp">
+          <img class="w-100 h-100 object-fit-cover" :src="getPostImageUrl(post.comparison.after_img)" alt="Now" loading="lazy" decoding="async" style="pointer-events: none; user-select: none; -webkit-user-drag: none;">
+        </picture>
+        <picture class="then-now__img then-now__img--then" :style="'clip-path: inset(0 ' + (100 - pos) + '% 0 0)'" style="pointer-events: none; user-select: none; -webkit-user-drag: none;">
+          <source :srcset="getPostImageVariantUrl(post.comparison.before_img, 'avif')" type="image/avif">
+          <source :srcset="getPostImageVariantUrl(post.comparison.before_img, 'webp')" type="image/webp">
+          <img class="w-100 h-100 object-fit-cover" :src="getPostImageUrl(post.comparison.before_img)" alt="Then" loading="lazy" decoding="async" style="pointer-events: none; user-select: none; -webkit-user-drag: none;">
+        </picture>
+        <span class="then-now__tag then-now__tag--then" x-text="post.comparison.before_label" style="pointer-events: none;"></span>
+        <span class="then-now__tag then-now__tag--now" x-text="post.comparison.after_label" style="pointer-events: none;"></span>
+        <div class="then-now__handle" :style="'left:' + pos + '%'" aria-hidden="true" style="pointer-events: none;"><i class="bi bi-arrows-expand-vertical"></i></div>
         <input type="range" min="0" max="100" step="1" x-model.number="pos" class="then-now__range"
-               aria-label="Drag to compare Then and Now">
+               @input="(pos === 50 && typeof window.triggerHaptic === 'function') ? window.triggerHaptic('detent') : null"
+               aria-label="Drag to compare Then and Now" style="z-index: 5; touch-action: none;">
+        <button type="button" class="position-absolute end-0 bottom-0 m-2 btn btn-sm btn-dark bg-opacity-75 text-white rounded-circle shadow-sm border border-white border-opacity-25 d-flex align-items-center justify-content-center"
+                style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; z-index: 6; cursor: pointer;"
+                @click.stop="window.__expandThenNow ? window.__expandThenNow(post.comparison, { fullName: post.fullName, post_desc: post.post_desc || post.postMessage, date_created: post.date_created, post_no: post.post_no }) : null"
+                aria-label="Expand comparison to full screen"
+                title="Expand comparison">
+          <i class="bi bi-arrows-angle-expand" style="font-size: 0.9rem;"></i>
+        </button>
       </div>
       <div class="then-now__side" x-show="side" x-cloak>
-        <figure><img :src="getPostImageUrl(post.comparison.before_img)" alt="Then" loading="lazy"><figcaption x-text="post.comparison.before_label"></figcaption></figure>
-        <figure><img :src="getPostImageUrl(post.comparison.after_img)" alt="Now" loading="lazy"><figcaption x-text="post.comparison.after_label"></figcaption></figure>
+        <figure class="cursor-pointer" style="cursor: pointer;" @click="window.__expandThenNow ? window.__expandThenNow(post.comparison, { fullName: post.fullName, post_desc: post.post_desc || post.postMessage, date_created: post.date_created, post_no: post.post_no }) : null" title="Click to expand">
+          <picture>
+            <source :srcset="getPostImageVariantUrl(post.comparison.before_img, 'avif')" type="image/avif">
+            <source :srcset="getPostImageVariantUrl(post.comparison.before_img, 'webp')" type="image/webp">
+            <img :src="getPostImageUrl(post.comparison.before_img)" alt="Then" loading="lazy">
+          </picture>
+          <figcaption x-text="post.comparison.before_label"></figcaption>
+        </figure>
+        <figure class="cursor-pointer" style="cursor: pointer;" @click="window.__expandThenNow ? window.__expandThenNow(post.comparison, { fullName: post.fullName, post_desc: post.post_desc || post.postMessage, date_created: post.date_created, post_no: post.post_no }) : null" title="Click to expand">
+          <picture>
+            <source :srcset="getPostImageVariantUrl(post.comparison.after_img, 'avif')" type="image/avif">
+            <source :srcset="getPostImageVariantUrl(post.comparison.after_img, 'webp')" type="image/webp">
+            <img :src="getPostImageUrl(post.comparison.after_img)" alt="Now" loading="lazy">
+          </picture>
+          <figcaption x-text="post.comparison.after_label"></figcaption>
+        </figure>
       </div>
       <div class="then-now__actions">
         <button type="button" class="btn btn-sm btn-light border rounded-pill" @click="side = !side"
                 x-text="side ? 'Slide to compare' : 'Side by side'"></button>
+        <button type="button" class="btn btn-sm btn-light border rounded-pill d-inline-flex align-items-center gap-1"
+                @click="window.__expandThenNow ? window.__expandThenNow(post.comparison, { fullName: post.fullName, post_desc: post.post_desc || post.postMessage, date_created: post.date_created, post_no: post.post_no }) : null"
+                aria-label="Expand Then and Now comparison">
+          <i class="bi bi-arrows-angle-expand"></i> {{ __('feed.expand_comparison', 'Expand') }}
+        </button>
         <button type="button" class="btn btn-sm btn-primary rounded-pill" @click="window.__openThenNow(post.post_no)">
           <i class="bi bi-hourglass-split"></i> Add your Then &amp; Now
         </button>
@@ -183,43 +217,96 @@
     </div>
   </template>
 
-  <!-- Post Images -->
-  <template x-if="post.images && post.images.length > 0 && !post.comparison">
-    <div class="row g-2 mb-3 px-1">
-      <template x-for="(img, idx) in post.images" :key="idx">
-        <div :class="(post.images.length === 1 ? 'col-12' : (post.images.length === 3 && idx === 0 ? 'col-12' : 'col-6')) + ' post-img-col'">
-          <div class="position-relative overflow-hidden post-media-stage" style="border-radius:10px;">
-            <a href="#" 
-               @click.prevent="typeof handleImageTap === 'function' ? handleImageTap(post, post.images, idx, $event) : openLightbox(post.images, idx)" 
-               @dblclick.prevent.stop="triggerHeartBurst(post, idx)"
-               role="button" 
-               aria-label="View enlarged photo or double tap to like" 
-               style="display:block; overflow:hidden; border-radius:10px; position:relative;">
-              <picture class="w-100 d-block" style="border-radius: 10px; overflow: hidden;">
-                <source :srcset="getPostImageVariantUrl(img, 'avif')" type="image/avif">
-                <source :srcset="getPostImageVariantUrl(img, 'webp')" type="image/webp">
-                <img :src="(img && (img.startsWith('/public/') || img.startsWith('/images/'))) ? img : getPostImageUrl(img)" 
-                     class="post-media-first-img w-100"
-                     style="border-radius: 10px; max-height: 480px; object-fit: cover; cursor: pointer;" 
-                     alt="Family post image" 
-                     loading="lazy"
-                     decoding="async"
-                     onerror="this.onerror=null; const c = this.closest('.post-img-col'); if(c) c.style.display='none';">
-              </picture>
-            </a>
+  <!-- Single Post Image (Hero Aspect Bleed) -->
+  <template x-if="post.images && post.images.length === 1 && !post.comparison">
+    <div class="mb-3 px-1">
+      <div class="position-relative overflow-hidden post-media-stage vse-skeleton-surface" style="border-radius:10px; aspect-ratio: 4 / 5; max-height: 540px;">
+        <a href="#" 
+           @click.prevent="typeof handleImageTap === 'function' ? handleImageTap(post, post.images, 0, $event) : openLightbox(post.images, 0)" 
+           @dblclick.prevent.stop="triggerHeartBurst(post, 0)"
+           role="button" 
+           aria-label="View enlarged photo or double tap to like" 
+           style="display:block; overflow:hidden; border-radius:10px; position:relative; width:100%; height:100%;">
+          <picture class="w-100 h-100 d-block" style="border-radius: 10px; overflow: hidden;">
+            <source :srcset="getPostImageVariantUrl(post.images[0], 'avif')" type="image/avif">
+            <source :srcset="getPostImageVariantUrl(post.images[0], 'webp')" type="image/webp">
+            <img :src="(post.images[0] && (post.images[0].startsWith('/public/') || post.images[0].startsWith('/images/'))) ? post.images[0] : getPostImageUrl(post.images[0])" 
+                 class="post-media-first-img w-100 h-100"
+                 style="border-radius: 10px; max-height: 540px; aspect-ratio: 4 / 5; object-fit: cover; cursor: pointer;" 
+                 alt="Family post image" 
+                 loading="lazy"
+                 decoding="async">
+          </picture>
+        </a>
 
-            <!-- Floating Spring Heart Burst (Instagram Standard) -->
-            <div class="feed-heart-burst" 
-                 x-show="heartBursts[post.post_no + '_' + idx]" 
-                 x-cloak 
-                 aria-hidden="true">
-              <svg class="heart-burst-svg" viewBox="0 0 24 24" width="76" height="76" fill="#ff2d55" stroke="#ffffff" stroke-width="1.2">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-              </svg>
-            </div>
-          </div>
+        <!-- Floating Spring Heart Burst (Instagram Standard) -->
+        <div class="feed-heart-burst" 
+             x-show="heartBursts[post.post_no + '_0']" 
+             x-cloak 
+             aria-hidden="true">
+          <svg class="heart-burst-svg" viewBox="0 0 24 24" width="76" height="76" fill="#ff2d55" stroke="#ffffff" stroke-width="1.2">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
         </div>
-      </template>
+      </div>
+    </div>
+  </template>
+
+  <!-- Multi-Image Instagram Swipeable Carousel (> 1 images) -->
+  <template x-if="post.images && post.images.length > 1 && !post.comparison">
+    <div class="mb-3 px-1 post-carousel-wrapper" x-data="{ currentIdx: 0 }">
+      <div class="position-relative overflow-hidden post-media-stage vse-skeleton-surface" style="border-radius:10px; aspect-ratio: 4 / 5; max-height: 540px;">
+        
+        <!-- Floating Glassmorphic Slide Counter (1/3) -->
+        <div class="position-absolute top-0 end-0 m-2.5 px-2.5 py-1 rounded-pill shadow-sm"
+             style="background: rgba(15, 23, 42, 0.72); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #ffffff; font-size: 0.75rem; font-weight: 600; z-index: 10; letter-spacing: 0.02em;">
+          <span x-text="(currentIdx + 1) + '/' + post.images.length"></span>
+        </div>
+
+        <!-- Snap-Scroll Track -->
+        <div class="d-flex overflow-auto post-carousel-track" 
+             style="scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch;"
+             @scroll.passive="currentIdx = Math.round($event.target.scrollLeft / ($event.target.clientWidth || 1))">
+          <template x-for="(img, idx) in post.images" :key="idx">
+            <div class="flex-shrink-0 w-100 position-relative" style="scroll-snap-align: start; min-width: 100%;">
+              <a href="#" 
+                 @click.prevent="typeof handleImageTap === 'function' ? handleImageTap(post, post.images, idx, $event) : openLightbox(post.images, idx)" 
+                 @dblclick.prevent.stop="triggerHeartBurst(post, idx)"
+                 role="button" 
+                 aria-label="View enlarged photo or double tap to like" 
+                 style="display:block; overflow:hidden; border-radius:10px; position:relative;">
+                <picture class="w-100 d-block" style="border-radius: 10px; overflow: hidden;">
+                  <source :srcset="getPostImageVariantUrl(img, 'avif')" type="image/avif">
+                  <source :srcset="getPostImageVariantUrl(img, 'webp')" type="image/webp">
+                  <img :src="(img && (img.startsWith('/public/') || img.startsWith('/images/'))) ? img : getPostImageUrl(img)" 
+                       class="post-media-first-img w-100"
+                       style="border-radius: 10px; max-height: 540px; aspect-ratio: 4/5; object-fit: cover; cursor: pointer;" 
+                       alt="Family carousel slide" 
+                       loading="lazy"
+                       decoding="async">
+                </picture>
+              </a>
+
+              <!-- Floating Spring Heart Burst for Slide -->
+              <div class="feed-heart-burst" 
+                   x-show="heartBursts[post.post_no + '_' + idx]" 
+                   x-cloak 
+                   aria-hidden="true">
+                <svg class="heart-burst-svg" viewBox="0 0 24 24" width="76" height="76" fill="#ff2d55" stroke="#ffffff" stroke-width="1.2">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Instagram Dynamic Animated Pagination Dots -->
+      <div class="d-flex justify-content-center align-items-center gap-1.5 mt-2 post-carousel-dots" aria-hidden="true">
+        <template x-for="(img, dIdx) in post.images" :key="dIdx">
+          <span class="carousel-dot" :class="currentIdx === dIdx ? 'is-active' : ''"></span>
+        </template>
+      </div>
     </div>
   </template>
 
@@ -341,15 +428,110 @@
     </div>
   </template>
 
-  <!-- Post Metrics -->
-  <div class="d-flex justify-content-between align-items-center px-1 pb-2 text-muted border-bottom" style="font-size: 0.825rem;">
-    <div>
-      <span x-show="post.post_likes > 0">
-        <i class="bi bi-hand-thumbs-up-fill text-primary"></i>
-        <span x-text="post.post_likes"></span>
-      </span>
+  <!-- Actions Bar: Super-Premium Minimalist Action Row (Instagram/Apple Standard) -->
+  <div class="d-flex align-items-center justify-content-between pt-2 pb-1 mb-1 feed-actions-row">
+    <div class="d-flex align-items-center gap-1">
+
+      <!-- Like Button with floating emoji reaction bar -->
+      <div class="position-relative"
+           @mouseenter="togglePostReactionBar(post.post_no, true)"
+           @mouseleave="togglePostReactionBar(post.post_no, false)"
+           @click.outside="activeReactionBars[post.post_no] = false">
+
+        <!-- Floating Reaction Bar (Living Heirloom Glass Dock) -->
+        <div x-show="activeReactionBars[post.post_no]"
+             x-transition:enter="transition ease-out duration-150"
+             x-transition:enter-start="opacity-0 translate-y-1"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-100"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @mouseenter="keepPostReactionBar(post.post_no, true)"
+             @mouseleave="keepPostReactionBar(post.post_no, false)"
+             class="reaction-bar-float heirloom-glass-dock"
+             style="position:absolute; bottom:calc(100% + 8px); left:0; transform:none; display:flex; gap:6px; z-index:100; white-space:nowrap;">
+          <template x-for="type in Object.keys(emojiMap)" :key="type">
+            <button type="button"
+                    @click="reactToPost(post.post_no, type)"
+                    :title="emojiMap[type].label"
+                    :aria-label="emojiMap[type].label"
+                    :class="post.user_reaction === type ? 'heirloom-reaction-btn active' : 'heirloom-reaction-btn'"
+                    :style="'--heirloom-glow:' + (emojiMap[type].glow || 'rgba(225,29,72,0.45)')">
+              <span class="heirloom-glass-glyph d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(type, 34)"></span>
+              <span class="heirloom-tooltip-pill" x-text="emojiMap[type].label"></span>
+            </button>
+          </template>
+        </div>
+
+        <!-- Like / Active Reaction Button (Spring Micro-Pop) -->
+        <button class="btn btn-action-glyph rounded-circle position-relative heirloom-trigger-btn"
+                :class="post.user_reaction ? ('is-liked reaction-' + post.user_reaction) : ''"
+                type="button"
+                :title="post.user_reaction ? ('Reacted: ' + (emojiMap[post.user_reaction]?.label || 'Liked') + ' - Click to change reaction') : 'React with heirloom glass love and appreciation'"
+                :aria-label="post.user_reaction ? ('Reacted ' + (emojiMap[post.user_reaction]?.label || 'Liked')) : 'Like this post'"
+                @click="onPostLikeClick(post.post_no, post.user_reaction || 'love')"
+                @touchstart.passive="startPostLongPress(post.post_no)"
+                @touchend="cancelPostLongPress()"
+                @touchmove="cancelPostLongPress()"
+                style="min-width: 44px; min-height: 44px;">
+          <!-- 1. Default Unreacted: Crisp Outline Heart -->
+          <template x-if="!post.user_reaction">
+            <i class="bi bi-heart" style="font-size: 1.35rem; line-height: 1;"></i>
+          </template>
+          <!-- 2. Expressive Reactions: Living Heirloom Glass 3D Vector Icon -->
+          <template x-if="post.user_reaction">
+            <span class="d-inline-flex align-items-center justify-content-center heirloom-active-icon"
+                  x-html="getHeirloomGlassSvg(post.user_reaction, 24)"></span>
+          </template>
+        </button>
+      </div>
+
+      <!-- Comment Button -->
+      <button class="btn btn-action-glyph rounded-circle"
+              style="min-width: 44px; min-height: 44px;"
+              type="button"
+              title="Write or view family comments on this post"
+              aria-label="Comment on this post"
+              @click="toggleCommentForm(post.post_no)">
+        <i class="bi bi-chat" style="font-size: 1.35rem; line-height: 1;"></i>
+      </button>
+
+      <!-- Share Button (Web Share API) -->
+      <button class="btn btn-action-glyph rounded-circle"
+              style="min-width: 44px; min-height: 44px;"
+              type="button"
+              title="Share this family memory"
+              aria-label="Share this family memory"
+              @click="sharePostToSocialMedia(post)">
+        <i class="bi bi-send" style="font-size: 1.25rem; line-height: 1;"></i>
+      </button>
     </div>
-    <div class="d-flex align-items-center gap-2">
+
+    <!-- Bookmark / Save Memory Button (Right-Aligned) -->
+    <div>
+      <button class="btn btn-action-glyph rounded-circle"
+              style="min-width: 44px; min-height: 44px;"
+              type="button"
+              title="Save memory to family collection"
+              aria-label="Save this family memory"
+              @click="window.__saveMemory ? window.__saveMemory(post.post_no) : (post._saved = !post._saved)">
+        <i :class="post._saved ? 'bi bi-bookmark-fill text-primary' : 'bi bi-bookmark'" style="font-size: 1.25rem; line-height: 1;"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Social Proof & Engagement Meta (Reaction & Pure Count - No "Like" Label on Empathy) -->
+  <div class="d-flex justify-content-between align-items-center px-1 pb-1 pt-1" style="font-size: 0.85rem;" x-show="post.post_likes > 0 || post.views_count > 0 || (post.comments && post.comments.length > 0)">
+    <div>
+      <template x-if="post.post_likes > 0">
+        <span class="d-inline-flex align-items-center gap-1 fw-bold" style="font-size: 0.88rem; color: var(--text-main, #0f172a);">
+          <span class="d-inline-flex align-items-center justify-content-center" style="line-height: 1;"
+                x-html="getHeirloomGlassSvg(post.user_reaction || 'love', 18)"></span>
+          <span x-text="post.post_likes"></span>
+        </span>
+      </template>
+    </div>
+    <div class="d-flex align-items-center gap-2 text-muted" style="font-size: 0.825rem;">
       <!-- Post View Count -->
       <span class="d-inline-flex align-items-center gap-1 post-views-count"
             :class="isOwnPost(post) ? 'cursor-pointer text-decoration-none' : ''"
@@ -369,86 +551,24 @@
     </div>
   </div>
 
-  <!-- Actions Bar (Like with Reactions / Comment Trigger) -->
-  <div class="d-flex justify-content-around pt-1 pb-1 mb-2 border-top">
+  <!-- Instagram Inline Caption Format (Under Likes / Action Row for Posts with Media) -->
+  <template x-if="(post.displayMessage || (!post.video && post.postMessage)) && ((post.images && post.images.length > 0) || post.video || post.comparison)">
+    <div class="post-caption-block px-1 mb-2 pt-1" style="font-size: 0.95rem; line-height: 1.5;">
+      <a :href="'/member/profilePage?id=' + post.id" class="fw-bold text-decoration-none me-1.5" style="color: var(--text-main, #0f172a); font-weight: 600;" x-text="post.fullName"></a>
+      <span class="post-caption-text" style="white-space: pre-line; color: var(--text-main);" x-html="renderHashtags(post.displayMessage || post.postMessage)"></span>
 
-    <!-- Like Button with floating emoji reaction bar -->
-    <div class="position-relative flex-grow-1"
-         @mouseenter="togglePostReactionBar(post.post_no, true)"
-         @mouseleave="togglePostReactionBar(post.post_no, false)"
-         @click.outside="activeReactionBars[post.post_no] = false">
-
-      <!-- Floating Reaction Bar -->
-      <div x-show="activeReactionBars[post.post_no]"
-           x-transition:enter="transition ease-out duration-150"
-           x-transition:enter-start="opacity-0 translate-y-1"
-           x-transition:enter-end="opacity-100 translate-y-0"
-           x-transition:leave="transition ease-in duration-100"
-           x-transition:leave-start="opacity-100"
-           x-transition:leave-end="opacity-0"
-           @mouseenter="keepPostReactionBar(post.post_no, true)"
-           @mouseleave="keepPostReactionBar(post.post_no, false)"
-           class="reaction-bar-float"
-           style="position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:var(--card-bg); border-radius:30px; padding:6px 10px; box-shadow:0 4px 20px rgba(0,0,0,0.18); display:flex; gap:4px; z-index:100; white-space:nowrap;">
-        <template x-for="type in Object.keys(emojiMap)" :key="type">
-          <button type="button"
-                  @click="reactToPost(post.post_no, type)"
-                  :title="emojiMap[type].label"
-                  :aria-label="emojiMap[type].label"
-                  :class="post.user_reaction === type ? 'reaction-emoji-btn active' : 'reaction-emoji-btn'"
-                  style="background:none; border:none; font-size:1.6rem; cursor:pointer; padding:2px 4px; border-radius:50%; transition:transform 0.15s ease, background 0.15s;">
-            <span x-text="emojiMap[type].icon"></span>
-          </button>
-        </template>
+      <!-- On-Demand Post Translation Toggle for Diaspora Viewers -->
+      <div class="mt-1 d-flex align-items-center gap-2" x-show="window.APP_LOCALE && window.APP_LOCALE !== 'en'">
+        <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none d-inline-flex align-items-center gap-1" style="font-size: 0.8rem; color: var(--brand-primary, #a31621); font-weight: 600;" @click="window.toggleTranslatePost ? window.toggleTranslatePost(post) : null">
+          <i class="bi bi-translate"></i>
+          <span x-text="post._isTranslated ? (window.__ ? window.__('feed.see_original', 'See original') : 'See original') : (post._isTranslating ? (window.__ ? window.__('feed.translating', 'Translating...') : 'Translating...') : (window.__ ? window.__('feed.translate', 'Translate') : 'Translate'))"></span>
+        </button>
       </div>
-
-      <!-- Like / Active Reaction Button -->
-      <button class="btn btn-link text-decoration-none w-100 py-2 d-flex align-items-center justify-content-center gap-1"
-              :class="post.user_reaction ? 'fw-semibold' : 'text-muted'"
-              :style="post.user_reaction ? 'color: #1877f2; font-size:0.95rem; font-weight:600;' : 'font-size:0.95rem; font-weight:500;'"
-              type="button"
-              :title="post.user_reaction ? ('Reacted: ' + (emojiMap[post.user_reaction]?.label || 'Liked') + ' - Click to change reaction') : 'React with love and appreciation'"
-              :aria-label="post.user_reaction ? ('Reacted ' + (emojiMap[post.user_reaction]?.label || 'Liked')) : 'Like this post'"
-              @click="onPostLikeClick(post.post_no, post.user_reaction || 'like')"
-              @touchstart.passive="startPostLongPress(post.post_no)"
-              @touchend="cancelPostLongPress()"
-              @touchmove="cancelPostLongPress()">
-        <span x-text="post.user_reaction ? (emojiMap[post.user_reaction]?.icon || '👍') : '👍'" style="font-size:1.15rem;"></span>
-        <span x-text="post.user_reaction ? (emojiMap[post.user_reaction]?.label || (window.__ ? window.__('feed.like', 'Like') : 'Like')) : (window.__ ? window.__('feed.like', 'Like') : 'Like')" class="ms-1"></span>
-      </button>
     </div>
-
-    <!-- Divider -->
-    <div style="width:1px; background:var(--border-color); margin:6px 0;"></div>
-
-    <!-- Comment Button -->
-    <button class="btn btn-link text-decoration-none text-muted flex-grow-1 py-2 d-flex align-items-center justify-content-center gap-2"
-            style="font-size: 0.95rem; font-weight: 500; min-height: 44px;"
-            type="button"
-            title="Write or view family comments on this post"
-            aria-label="Comment on this post"
-            @click="toggleCommentForm(post.post_no)">
-      <i class="bi bi-chat-bubble"></i>
-      {{ __('feed.comment', 'Comment') }}
-    </button>
-
-    <!-- Divider -->
-    <div style="width:1px; background:var(--border-color); margin:6px 0;"></div>
-
-    <!-- Share Button (Web Share API) -->
-    <button class="btn btn-link text-decoration-none text-muted flex-grow-1 py-2 d-flex align-items-center justify-content-center gap-2"
-            style="font-size: 0.95rem; font-weight: 500; min-height: 44px;"
-            type="button"
-            @click="sharePostToSocialMedia(post)"
-            title="Share with family relatives or via social apps"
-            aria-label="Share this post">
-      <i class="bi bi-share"></i>
-      {{ __('feed.share', 'Share') }}
-    </button>
-  </div>
+  </template>
 
   <!-- Comments Section -->
-  <div class="comments-section border-top pt-3">
+  <div class="comments-section pt-2">
     <!-- Dynamic Comment Form with emoji picker -->
     <div x-show="activeCommentForms[post.post_no]" x-transition class="mb-3">
       <div class="position-relative">
@@ -614,29 +734,31 @@
               </form>
             </template>
 
-            <!-- Top Reactions Preview -->
-            <div x-show="getTopCommentReactions(c.reactions).length > 0" class="d-flex align-items-center gap-1 mt-1 ps-1">
-              <div class="reaction-count-pill d-flex gap-1 align-items-center" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:20px; padding:1px 7px; font-size:0.78rem; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
-                <template x-for="r in getTopCommentReactions(c.reactions)" :key="r.emoji">
-                  <span>
-                    <span x-text="r.emoji"></span>
-                    <span x-text="r.count" style="color:var(--text-muted); font-size:0.74rem; margin-left:1px;"></span>
-                  </span>
-                </template>
+            <!-- Top Reactions Preview (Living Heirloom Glass) -->
+            <template x-if="getTopCommentReactions(c.reactions).length > 0">
+              <div class="d-flex align-items-center gap-1 mt-1 ps-1">
+                <div class="reaction-count-pill d-inline-flex gap-1 align-items-center" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:20px; padding:2px 8px; font-size:0.78rem; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+                  <template x-for="r in getTopCommentReactions(c.reactions)" :key="r.label">
+                    <span class="d-inline-flex align-items-center gap-1">
+                      <span class="d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(r.label, 16)"></span>
+                      <span x-text="r.count" style="color:var(--text-muted); font-size:0.74rem;"></span>
+                    </span>
+                  </template>
+                </div>
               </div>
-            </div>
+            </template>
 
             <!-- Comment Meta + Like Button with Reaction Bar -->
-            <div class="d-flex align-items-center gap-3 ps-2 mt-1">
-              <small class="text-muted" style="font-size: 0.75rem;" x-text="formatDate(c.comment_time || c.post_time || c.date_created)"></small>
+            <div class="comment-meta-row">
+              <span class="comment-meta-item text-muted" x-text="formatDate(c.comment_time || c.post_time || c.date_created)"></span>
 
-              <!-- Comment Like/React button -->
-              <div class="position-relative"
+              <!-- Comment Like/React button with Reaction Bar -->
+              <div class="position-relative comment-meta-item"
                    @mouseenter="toggleCommentReactionBar(c.comment_no, true)"
                    @mouseleave="toggleCommentReactionBar(c.comment_no, false)"
                    @click.outside="activeCommentReactionBars[c.comment_no] = false">
 
-                <!-- Floating Comment Reaction Bar -->
+                <!-- Floating Comment Reaction Bar (Heirloom Glass) -->
                 <div x-show="activeCommentReactionBars[c.comment_no]"
                      x-transition:enter="transition ease-out duration-150"
                      x-transition:enter-start="opacity-0 translate-y-1"
@@ -646,14 +768,16 @@
                      x-transition:leave-end="opacity-0"
                      @mouseenter="keepCommentReactionBar(c.comment_no, true)"
                      @mouseleave="keepCommentReactionBar(c.comment_no, false)"
-                     style="position:absolute; bottom:calc(100% + 4px); left:0; background:var(--card-bg); border-radius:30px; padding:5px 8px; box-shadow:0 4px 18px rgba(0,0,0,0.16); display:flex; gap:3px; z-index:100; white-space:nowrap;">
-                  <template x-for="type in Object.keys(commentEmojiMap)" :key="type">
+                     class="comment-reaction-float-bar heirloom-glass-dock"
+                     style="position:absolute; bottom:calc(100% + 4px); left:0; display:flex; gap:3px; z-index:100; white-space:nowrap;">
+                  <template x-for="type in ['love', 'like', 'haha', 'shock', 'sad', 'celebrate']" :key="type">
                     <button type="button"
-                            @click="reactToComment(post.post_no, c.comment_no, type)"
-                            :title="type"
-                            :class="c.userReaction === type ? 'reaction-emoji-btn active' : 'reaction-emoji-btn'"
-                            style="background:none; border:none; font-size:1.4rem; cursor:pointer; padding:2px 3px; border-radius:50%; transition:transform 0.15s ease;">
-                      <span x-text="commentEmojiMap[type]"></span>
+                            @click.stop="reactToComment(post.post_no, c.comment_no, type)"
+                            :title="emojiMap[type]?.label || type"
+                            :class="(c.userReaction === type || (type === 'shock' && c.userReaction === 'wow')) ? 'heirloom-reaction-btn active' : 'heirloom-reaction-btn'"
+                            :style="'--heirloom-glow:' + (emojiMap[type]?.glow || 'rgba(225,29,72,0.45)')"
+                            style="min-width:36px; min-height:36px; padding:2px;">
+                      <span class="heirloom-glass-glyph d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(type, 24)"></span>
                     </button>
                   </template>
                 </div>
@@ -664,33 +788,35 @@
                         @touchstart.passive="startCommentLongPress(c.comment_no)"
                         @touchend="cancelCommentLongPress()"
                         @touchmove="cancelCommentLongPress()"
-                        :class="c.userReaction ? 'text-primary fw-semibold' : 'text-muted'"
-                        style="background:none; border:none; font-size:0.78rem; cursor:pointer; padding:0; line-height:1;">
-                  <span x-show="c.userReaction" x-text="commentEmojiMap[c.userReaction] || ''"></span>
-                  <span x-text="c.userReaction ? c.userReaction.charAt(0).toUpperCase() + c.userReaction.slice(1) : 'Like'"></span>
+                        class="comment-meta-btn d-inline-flex align-items-center"
+                        :class="c.userReaction ? 'fw-semibold' : 'text-muted'"
+                        :style="c.userReaction ? ('color:' + getReactionColor(c.userReaction)) : ''">
+                  <template x-if="c.userReaction">
+                    <span x-html="getHeirloomGlassSvg(c.userReaction, 16)" class="me-1 d-inline-flex align-items-center justify-content-center"></span>
+                  </template>
+                  <span x-text="formatReactionLabel(c.userReaction)"></span>
                 </button>
               </div>
 
-              <button type="button" class="text-muted" data-testid="comment-reply-btn" style="background:none; border:none; font-size:0.78rem; cursor:pointer; padding:0;" @click="startReply(post, c)">Reply</button>
+              <button type="button" class="comment-meta-btn text-muted" data-testid="comment-reply-btn" @click="startReply(post, c)">Reply</button>
               <template x-if="canEditComment(c)">
-                <button type="button" class="text-muted" style="background:none; border:none; font-size:0.78rem; cursor:pointer; padding:0;" @click="startEditComment(c)">Edit</button>
+                <button type="button" class="comment-meta-btn text-muted" @click="startEditComment(c)">Edit</button>
               </template>
               <template x-if="canModerateComment(post, c)">
-                <button type="button" class="text-muted" style="background:none; border:none; font-size:0.78rem; cursor:pointer; padding: 2px 4px; min-height: 32px; display: inline-flex; align-items: center;" :title="canEditComment(c) ? 'Delete your comment' : 'Delete comment from your post'" @click="deleteComment(post.post_no, c.comment_no)">Delete</button>
+                <button type="button" class="comment-meta-btn text-muted" :title="canEditComment(c) ? 'Delete your comment' : 'Delete comment from your post'" @click="deleteComment(post.post_no, c.comment_no)">Delete</button>
               </template>
 
               <!-- Comment View Count (Author-clickable) -->
-              <span class="d-inline-flex align-items-center gap-1 comment-views-count text-muted"
+              <span class="comment-meta-item comment-views-count text-muted"
                     :class="canEditComment(c) ? 'cursor-pointer' : ''"
                     :role="canEditComment(c) ? 'button' : undefined"
                     :tabindex="canEditComment(c) ? '0' : undefined"
                     @click="canEditComment(c) && openCommentViewersModal(c)"
                     @keydown.enter="canEditComment(c) && openCommentViewersModal(c)"
-                    :title="canEditComment(c) ? 'Click to see who viewed your comment' : ((c.views_count || 0) + ' views')"
-                    :style="canEditComment(c) ? 'cursor: pointer; font-size: 0.75rem; min-height: 28px;' : 'font-size: 0.75rem; min-height: 28px;'">
-                <i class="bi bi-eye" :class="canEditComment(c) ? 'text-primary' : ''"></i>
+                    :title="canEditComment(c) ? 'Click to see who viewed your comment' : ((c.views_count || 0) + ' views')">
+                <i class="bi bi-eye" :class="canEditComment(c) ? 'text-primary' : ''" style="font-size: 0.8rem; line-height: 1; margin-right: 4px;"></i>
                 <span x-text="c.views_count || 0"></span>
-                <span x-text="(c.views_count === 1) ? 'view' : 'views'"></span>
+                <span class="ms-1" x-text="(c.views_count === 1) ? 'view' : 'views'"></span>
               </span>
             </div>
           </div>

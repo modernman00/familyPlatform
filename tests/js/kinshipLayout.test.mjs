@@ -157,4 +157,61 @@ for (let i = 0; i < 300; i++) {
     assertInvariants(g, out, engine, `random #${i}`);
     checked++;
 }
-console.log(`kinshipLayout: regression + safety net + ${checked} random families OK`);
+
+// ── Regression: 3-Union Multi-Partner Chain ("Best Professional" / Oluyomi + Iyabo + Biliki) ──
+// Oluyomi (41297) has 3 unions: EASKIT's mother (63103), Iyabo (41298, current), and Biliki (63105).
+// Best Professional (63106) is child of Oluyomi (41297) + Biliki (63105).
+// The union drop point (midX) for (Oluyomi, Biliki) MUST NOT land inside Iyabo's card bounds!
+{
+    const multiUnionGraph = {
+        nodes: [
+            { id: 41297, name: 'Oluyomi Olaogun', gender: 'Male' },
+            { id: 41298, name: 'Iyabo Olaogun', gender: 'Female' },
+            { id: 63103, name: 'Easkit Mother', gender: 'Female' },
+            { id: 63105, name: 'Biliki', gender: 'Female' },
+            { id: 38585, name: 'Segun Olaogun', gender: 'Male' },
+            { id: 63101, name: 'Pos Dents', gender: 'Male' },
+            { id: 63104, name: 'Easkit Presurd', gender: 'Male' },
+            { id: 63106, name: 'Best Professional', gender: 'Male' },
+        ],
+        unions: [
+            { id: 9734, partner_1_id: 41297, partner_2_id: 41298, is_current: 1 },
+            { id: 16039, partner_1_id: 41297, partner_2_id: 63103, is_current: 0 },
+            { id: 16040, partner_1_id: 41297, partner_2_id: 63105, is_current: 0 },
+        ],
+        children: [
+            { union_id: 9734, child_id: 38585 },
+            { union_id: 9734, child_id: 63101 },
+            { union_id: 16039, child_id: 63104 },
+            { union_id: 16040, child_id: 63106 },
+        ]
+    };
+    const { engine, out } = layout(multiUnionGraph, 38585);
+    const iyabo = out.nodes.find(n => n.id === '41298');
+    const biliki = out.nodes.find(n => n.id === '63105');
+    const bilikiUnion = out.unions.find(u => u.id === 'u_16040');
+    assert.ok(iyabo && biliki && bilikiUnion, 'Oluyomi/Iyabo/Biliki placed');
+    // Verify u_16040 drop-point is anchored to Biliki, NOT inside Iyabo's horizontal card bounds
+    const inIyaboBounds = bilikiUnion.midX >= iyabo.x && bilikiUnion.midX <= (iyabo.x + engine.nodeWidth);
+    assert.equal(inIyaboBounds, false, 'Biliki union midX must never emerge from Iyabo card');
+    assert.equal(Math.round(bilikiUnion.midX), Math.round(biliki.x + engine.nodeWidth / 2), 'Biliki union midX anchors cleanly to Biliki');
+}
+
+// ── Regression: Spouse / In-Law Extended Family Branch Hidden by Default, Expanded on Toggle ──
+{
+    const { nodes, unions } = toEngineInput(laf);
+    // Mark nodes 70 and 6009 as in-law branch via spouse 31187
+    nodes.forEach(n => {
+        if (n.id === 70 || n.id === 6009) {
+            n.is_inlaw_branch = true;
+            n.inlaw_spouse_id = 31187;
+        }
+    });
+    const engine = new Engine({ rootId: '69', nodeWidth: 210, partnerGap: 28 });
+    const collapsedOut = engine.computeLayout(nodes, new Set(), unions, new Set());
+    assert.equal(collapsedOut.nodes.some(n => n.id === '70' || n.id === '6009'), false, 'In-law branch nodes hidden by default');
+    const expandedOut = engine.computeLayout(nodes, new Set(), unions, new Set(['31187']));
+    assert.equal(expandedOut.nodes.some(n => n.id === '70') && expandedOut.nodes.some(n => n.id === '6009'), true, 'In-law branch nodes visible when spouse expanded');
+}
+
+console.log(`kinshipLayout: regression + safety net + multi-union + inlaw-collapse + ${checked} random families OK`);

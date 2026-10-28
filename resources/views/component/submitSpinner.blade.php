@@ -41,15 +41,34 @@
     activeButtons: new WeakMap(),
     activeSet: new Set(),
 
+    hasSpinnerMarkup: function(htmlOrEl) {
+      if (!htmlOrEl) return false;
+      if (typeof htmlOrEl === 'string') {
+        return /st-spinner-border|spinner-border|mmlib-btn-spinner/i.test(htmlOrEl);
+      }
+      if (typeof htmlOrEl.querySelector === 'function') {
+        return Boolean(htmlOrEl.querySelector('.st-spinner-border, .spinner-border, .mmlib-btn-spinner'));
+      }
+      return false;
+    },
+
     start: function(btn) {
       if (!btn || btn.getAttribute('aria-busy') === 'true') return;
 
+      // Never overwrite or snapshot if an inline handler already disabled the button or injected a spinner
+      if (btn.disabled || FamilyPlatformSpinner.hasSpinnerMarkup(btn)) {
+        return;
+      }
+
       var originalHtml = btn.innerHTML;
+      if (!btn.dataset.stCleanHtml && !FamilyPlatformSpinner.hasSpinnerMarkup(originalHtml)) {
+        btn.dataset.stCleanHtml = originalHtml;
+      }
       var originalWidth = btn.offsetWidth ? (btn.offsetWidth + 'px') : '';
       var originalHeight = btn.offsetHeight ? (btn.offsetHeight + 'px') : '';
 
       FamilyPlatformSpinner.activeButtons.set(btn, {
-        html: originalHtml,
+        html: btn.dataset.stCleanHtml || originalHtml,
         width: originalWidth,
         height: originalHeight,
         isInput: btn.tagName === 'INPUT'
@@ -57,7 +76,7 @@
       FamilyPlatformSpinner.activeSet.add(btn);
 
       // DOM dataset backup for unlinked recovery
-      btn.dataset.stOrigHtml = originalHtml;
+      btn.dataset.stOrigHtml = btn.dataset.stCleanHtml || originalHtml;
       if (originalWidth) btn.dataset.stOrigWidth = originalWidth;
       if (originalHeight) btn.dataset.stOrigHeight = originalHeight;
 
@@ -94,19 +113,21 @@
     stop: function(btn) {
       if (!btn) return;
       var data = FamilyPlatformSpinner.activeButtons.get(btn);
-      var backupHtml = btn.dataset.stOrigHtml;
+      var backupHtml = btn.dataset.stOrigHtml || btn.dataset.stCleanHtml;
 
       if (data) {
         if (data.isInput) {
           btn.value = btn.dataset.stOrigVal || data.html || 'Submit';
-        } else {
+        } else if (!FamilyPlatformSpinner.hasSpinnerMarkup(data.html)) {
           btn.innerHTML = data.html;
+        } else if (btn.dataset.stCleanHtml && !FamilyPlatformSpinner.hasSpinnerMarkup(btn.dataset.stCleanHtml)) {
+          btn.innerHTML = btn.dataset.stCleanHtml;
         }
         FamilyPlatformSpinner.activeButtons.delete(btn);
       } else if (backupHtml !== undefined) {
         if (btn.tagName === 'INPUT') {
           btn.value = btn.dataset.stOrigVal || backupHtml || 'Submit';
-        } else {
+        } else if (!FamilyPlatformSpinner.hasSpinnerMarkup(backupHtml)) {
           btn.innerHTML = backupHtml;
         }
       }

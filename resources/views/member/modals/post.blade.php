@@ -352,42 +352,40 @@
 
                     </div>
 
-                    <!-- "Add to your post" tool grid -->
+                    <!-- Composer action tools dock -->
                     <div class="add-to-post-box composer-tools">
-                        <span class="composer-tools__title">{{ __('modal.add_to_post', 'Add to your post') }}</span>
-
                         <div class="composer-tools__grid">
                             <label for="imageUpload" class="btn-composer-action composer-tool action-photo mb-0" title="Attach Photos - Upload family pictures or camera roll memories" aria-label="Attach photos">
-                                <i class="bi bi-image-fill"></i><span>Photo</span>
+                                <i class="bi bi-image-fill"></i>
                             </label>
                             <input type="file" name="post_img[]" id="imageUpload" accept="image/*,video/*" multiple hidden>
 
                             <button type="button" class="btn-composer-action composer-tool action-emoji" id="emojiPost" title="Add Emoji - Express feelings with diverse emoji reactions" aria-label="Add emoji">
-                                <i class="bi bi-emoji-smile-fill"></i><span>Emoji</span>
+                                <i class="bi bi-emoji-smile-fill"></i>
                             </button>
 
                             <button type="button" class="btn-composer-action composer-tool action-video" id="addVideoBtn" title="Embed Video - Share family videos from YouTube, Vimeo, or your device" aria-label="Add video">
-                                <i class="bi bi-play-btn-fill"></i><span>Video</span>
+                                <i class="bi bi-play-btn-fill"></i>
                             </button>
 
                             <button type="button" class="btn-composer-action composer-tool action-gif gif-btn" id="addGifBtn" title="Add GIF - Search and attach fun animated family GIFs" aria-label="Add GIF">
-                                <i class="bi bi-filetype-gif"></i><span>GIF</span>
+                                <i class="bi bi-filetype-gif"></i>
                             </button>
 
                             <button type="button" class="btn-composer-action composer-tool action-tag" id="addTagBtn" title="Tag Family - Mention and tag relatives present in this memory" aria-label="Tag people">
-                                <i class="bi bi-tag-fill"></i><span>Tag</span>
+                                <i class="bi bi-tag-fill"></i>
                             </button>
 
                             <button type="button" class="btn-composer-action composer-tool action-poll" id="addPollBtn" title="Create Poll - Ask questions and collect votes from family members" aria-label="Create poll">
-                                <i class="bi bi-bar-chart-fill"></i><span>Poll</span>
+                                <i class="bi bi-bar-chart-fill"></i>
                             </button>
 
-                            <button type="button" class="btn-composer-action composer-tool action-thennow action-thennow--labeled" id="addThenNowBtn" title="Then &amp; Now - Showcase your journey with side-by-side milestone photos" aria-label="Then and Now photo comparison">
-                                <i class="bi bi-hourglass-split"></i><span>Then &amp; Now</span>
+                            <button type="button" class="btn-composer-action composer-tool action-thennow" id="addThenNowBtn" title="Then &amp; Now - Showcase your journey with side-by-side milestone photos" aria-label="Then and Now photo comparison">
+                                <i class="bi bi-hourglass-split"></i>
                             </button>
 
                             <button type="button" class="btn-composer-action composer-tool action-apple" id="iosShareBtn" title="iPhone Share - Direct 1-tap sharing from Apple Photos gallery" aria-label="iPhone Photos Direct Share">
-                                <i class="bi bi-apple"></i><span>iPhone</span>
+                                <i class="bi bi-apple"></i>
                             </button>
                         </div>
                     </div>

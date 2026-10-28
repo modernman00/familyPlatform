@@ -204,6 +204,10 @@ if [ -f "tests/verify_ux_ui_look_and_feel.php" ]; then
     php tests/verify_ux_ui_look_and_feel.php || GATE4_PASSED=0
 fi
 
+if [ -f "tests/verify_heirloom_glass_reactions_suite.php" ]; then
+    php tests/verify_heirloom_glass_reactions_suite.php || GATE4_PASSED=0
+fi
+
 if [ "$GATE4_PASSED" -eq 1 ]; then
     echo -e "${GREEN}  ✅ Gate 4 Passed: 0 Must-Have violations, PWA verified, Frontend stable.${NC}"
 else

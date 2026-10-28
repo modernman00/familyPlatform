@@ -5,98 +5,43 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Great+Vibes&family=Montserrat:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
 <style>
-/* 🌟 FAMILY HUB 4K ULTRA-HD SIGNATURE HERO WITH FROSTED GLASS CAPSULE */
-.ai-hub-hero {
+/* 🌟 FAMILY HUB SIGNATURE HIGH-DEFINITION ARTWORK HERO */
+.ai-hub-hero-banner {
     position: relative;
-    background-image: linear-gradient(180deg, rgba(15, 23, 42, 0.28) 0%, rgba(15, 23, 42, 0.58) 100%), 
-                      url('/public/img/family3.jpeg');
-    background-position: center 28%;
-    background-size: cover;
-    background-repeat: no-repeat;
-    border-radius: 26px;
-    padding: 48px 24px;
+    width: 100%;
+    border-radius: 24px;
     border: 1.5px solid rgba(212, 175, 55, 0.45);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
     overflow: hidden;
-    color: #ffffff;
-    min-height: 420px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: #0b0f19;
+    aspect-ratio: 1024 / 572;
+    margin-bottom: 1.5rem;
+}
+.ai-hub-hero-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
     image-rendering: -webkit-optimize-contrast;
     transform: translateZ(0);
 }
-.ai-hub-hero::before {
-    content: '';
+.hero-hotspot {
     position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 50% 20%, rgba(255, 215, 0, 0.12) 0%, transparent 60%);
-    pointer-events: none;
-}
-.ai-hub-glass-card {
-    position: relative;
-    z-index: 2;
-    background: rgba(15, 23, 42, 0.65);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1.5px solid rgba(212, 175, 55, 0.5);
-    border-radius: 22px;
-    padding: 32px 28px;
-    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.45), inset 0 0 20px rgba(212, 175, 55, 0.15);
-    max-width: 960px;
-    width: 100%;
-    margin: 0 auto;
-}
-.ai-hub-hero-badge {
-    background: rgba(255, 255, 255, 0.16);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 215, 0, 0.65);
-    color: #ffd700;
-    letter-spacing: 0.3px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-.ai-hub-hero-title {
-    font-family: 'Cinzel', serif;
-    letter-spacing: -0.5px;
-    font-size: 2.35rem;
-    text-shadow: 0 3px 12px rgba(0, 0, 0, 0.7);
-    color: #ffffff !important;
-}
-.ai-hub-hero-lead {
-    color: #f8fafc;
-    font-size: 1.08rem;
-    line-height: 1.65;
-    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
-    font-weight: 500;
-}
-.ai-hub-quick-pill {
-    background: rgba(15, 23, 42, 0.72);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1.5px solid rgba(212, 175, 55, 0.45);
-    color: #ffffff !important;
-    text-decoration: none;
-    font-size: 0.84rem;
-    font-weight: 600;
-    padding: 0.5rem 1rem;
-    border-radius: 9999px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    min-height: 44px;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
+    border-radius: 14px;
+    transition: all 0.22s ease-in-out;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    background: rgba(255, 255, 255, 0.001);
+    border: 1.5px solid transparent;
+    z-index: 10;
+    text-decoration: none;
+    display: block;
 }
-.ai-hub-quick-pill:hover {
-    background: rgba(30, 41, 59, 0.95);
-    border-color: #ffd700;
-    color: #ffd700 !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+.hero-hotspot:hover,
+.hero-hotspot:focus-visible {
+    border-color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.45), inset 0 0 12px rgba(255, 255, 255, 0.25);
+    transform: scale(1.02);
 }
 .gold-embossed-text {
     background: linear-gradient(180deg, #fff6b3 0%, #ffd700 35%, #d4af37 70%, #9a741e 100%);
@@ -608,48 +553,188 @@
         min-height: 48px !important;
     }
 }
+
+/* 🌙 DARK MODE HIGH-CONTRAST ATELIER & GAME SHOW OVERRIDES (WCAG AA/AAA) */
+body.dark-mode .luxury-card-box,
+body.dark-mode .outings-surface-card,
+body.dark-mode .outings-result-card,
+body.dark-theme .luxury-card-box,
+body.dark-theme .outings-surface-card,
+body.dark-theme .outings-result-card {
+    background: var(--surface-card, #141416) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    color: var(--text-main, #f8fafc) !important;
+}
+
+body.dark-mode .luxury-card-gold,
+body.dark-mode .luxury-card-ribbon,
+body.dark-mode .outings-salon-hero,
+body.dark-theme .luxury-card-gold,
+body.dark-theme .luxury-card-ribbon,
+body.dark-theme .outings-salon-hero {
+    background: linear-gradient(135deg, #1c1917 0%, #141416 100%) !important;
+    border-color: rgba(251, 191, 36, 0.4) !important;
+    color: var(--text-main, #f8fafc) !important;
+}
+
+body.dark-mode .luxury-card-plaque-1,
+body.dark-theme .luxury-card-plaque-1 {
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.12) 0%, #141416 100%) !important;
+    border-color: rgba(52, 211, 153, 0.4) !important;
+    color: var(--text-main, #f8fafc) !important;
+}
+
+body.dark-mode .luxury-card-plaque-2,
+body.dark-theme .luxury-card-plaque-2 {
+    background: linear-gradient(180deg, rgba(59, 130, 246, 0.12) 0%, #141416 100%) !important;
+    border-color: rgba(96, 165, 250, 0.4) !important;
+    color: var(--text-main, #f8fafc) !important;
+}
+
+body.dark-mode .luxury-field-label,
+body.dark-theme .luxury-field-label {
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode .luxury-input,
+body.dark-mode .luxury-input-hero,
+body.dark-mode .luxury-input-addon,
+body.dark-theme .luxury-input,
+body.dark-theme .luxury-input-hero,
+body.dark-theme .luxury-input-addon {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .outings-preset-chip,
+body.dark-mode .flyer-preset-btn,
+body.dark-mode .flyer-format-btn,
+body.dark-theme .outings-preset-chip,
+body.dark-theme .flyer-preset-btn,
+body.dark-theme .flyer-format-btn {
+    background: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .outings-preset-chip:hover,
+body.dark-mode .flyer-preset-btn:hover,
+body.dark-mode .flyer-format-btn:hover,
+body.dark-theme .outings-preset-chip:hover,
+body.dark-theme .flyer-preset-btn:hover,
+body.dark-theme .flyer-format-btn:hover {
+    background: #334155 !important;
+    color: #ffffff !important;
+    border-color: #fbbf24 !important;
+}
+
+body.dark-mode .outings-chip-loc,
+body.dark-theme .outings-chip-loc {
+    background: #0f172a !important;
+    color: #cbd5e1 !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .tt-statement-card,
+body.dark-theme .tt-statement-card {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+body.dark-mode .tt-statement-card:hover,
+body.dark-theme .tt-statement-card:hover {
+    background-color: #263349 !important;
+    border-color: rgba(251, 191, 36, 0.45) !important;
+}
+
+body.dark-mode #tab-roundtable [style*="background: #fafafa"],
+body.dark-mode #tab-roundtable [style*="background:#fafafa"],
+body.dark-mode #tab-roundtable [style*="background: #ffffff"],
+body.dark-mode #tab-roundtable [style*="background:#ffffff"],
+body.dark-mode #tab-journal [style*="background: #ffffff"],
+body.dark-mode #tab-journal [style*="background:#ffffff"],
+body.dark-mode #tab-journal [style*="background: #f8fafc"],
+body.dark-mode #tab-outings [style*="background: #f8fafc"],
+body.dark-mode #tab-outings [style*="background: #ffffff"],
+body.dark-theme #tab-roundtable [style*="background: #fafafa"],
+body.dark-theme #tab-roundtable [style*="background:#fafafa"],
+body.dark-theme #tab-roundtable [style*="background: #ffffff"],
+body.dark-theme #tab-roundtable [style*="background:#ffffff"],
+body.dark-theme #tab-journal [style*="background: #ffffff"],
+body.dark-theme #tab-journal [style*="background:#ffffff"],
+body.dark-theme #tab-journal [style*="background: #f8fafc"],
+body.dark-theme #tab-outings [style*="background: #f8fafc"],
+body.dark-theme #tab-outings [style*="background: #ffffff"] {
+    background: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+}
 </style>
 @endpush
 
 @section('content')
 <div class="container-fluid py-4" style="max-width: 1200px;">
-    {{-- Hub Header --}}
-    <div class="ai-hub-hero text-center mb-4">
-        <div class="ai-hub-glass-card">
-            <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill small fw-bold mb-3 ai-hub-hero-badge">
-                <i class="bi bi-stars text-warning"></i> ✨ Studio AI Family Intelligence &bull; Creative Playground
-            </div>
-            <h1 class="h2 fw-bold text-white mb-2 ai-hub-hero-title">Family Hub &bull; The Fun Place</h1>
-            <p class="mx-auto mb-3 ai-hub-hero-lead" style="max-width: 820px;">
-                Your household creative playground, Family RoundTable, Family Journal, 15-minute fridge meal ideas, transcribed voice notes, illustrated family flyers, and Family Game Show.
-            </p>
+    {{-- Hub Header Banner with User's Exact High-Definition Artwork & Interactive Hotspots --}}
+    <div class="ai-hub-hero-banner shadow-sm">
+        <h1 class="visually-hidden">Family Hub &mdash; The Fun Place</h1>
+        <p class="visually-hidden">Your household creative playground &mdash; Family RoundTable, Family Journal, 15-minute fridge meal ideas, transcribed voice notes, illustrated family flyers, and Family Game Show.</p>
+        
+        <img src="/public/img/family-hub-hero.jpg" 
+             alt="Family Hub &mdash; The Fun Place: Your household creative playground, Family RoundTable, Family Journal, 15-minute fridge meal ideas, transcribed voice notes, illustrated family flyers, and Family Game Show." 
+             class="img-fluid w-100" 
+             width="1024" 
+             height="572" 
+             loading="eager" 
+             decoding="async">
 
-            {{-- Interactive Feature Quick-Jump Showcase Chips --}}
-            <div class="d-flex flex-wrap justify-content-center gap-2 pt-2">
-                <a href="/family/roundtable" class="ai-hub-quick-pill">
-                    <i class="bi bi-shield-shaded text-warning"></i> Family RoundTable
-                </a>
-                <a href="/familyJournal" class="ai-hub-quick-pill">
-                    <i class="bi bi-journal-bookmark-fill text-info"></i> Family Journal
-                </a>
-                <button type="button" class="ai-hub-quick-pill" onclick="document.getElementById('tab-fridge-btn').click(); document.getElementById('tab-fridge-btn').scrollIntoView({behavior: 'smooth', block: 'nearest'});">
-                    <i class="bi bi-egg-fried text-success"></i> 15-Minute Fridge Meals
-                </button>
-                <button type="button" class="ai-hub-quick-pill" onclick="document.getElementById('tab-voice-btn').click(); document.getElementById('tab-voice-btn').scrollIntoView({behavior: 'smooth', block: 'nearest'});">
-                    <i class="bi bi-mic-fill text-warning"></i> Transcribed Voice Notes
-                </button>
-                <button type="button" class="ai-hub-quick-pill" onclick="document.getElementById('tab-flyer-btn').click(); document.getElementById('tab-flyer-btn').scrollIntoView({behavior: 'smooth', block: 'nearest'});">
-                    <i class="bi bi-image-fill text-info"></i> Illustrated Flyers
-                </button>
-                <button type="button" class="ai-hub-quick-pill" onclick="document.getElementById('tab-trivia-btn').click(); document.getElementById('tab-trivia-btn').scrollIntoView({behavior: 'smooth', block: 'nearest'});">
-                    <i class="bi bi-trophy-fill text-danger"></i> Family Game Show
-                </button>
-            </div>
-        </div>
+        {{-- Interactive Clickable Hotspots Matching the 6 Neon Cards in the Artwork --}}
+        <button type="button" 
+           class="hero-hotspot" 
+           style="top: 18.5%; left: 20.5%; width: 15%; height: 13.5%;" 
+           onclick="document.getElementById('tab-roundtable-btn').click(); document.getElementById('familyAiTabs').scrollIntoView({behavior: 'smooth'});" 
+           title="Family RoundTable" 
+           aria-label="Switch to Family RoundTable"></button>
+
+        <button type="button" 
+           class="hero-hotspot" 
+           style="top: 36.5%; left: 28.5%; width: 15%; height: 13.5%;" 
+           onclick="document.getElementById('tab-journal-btn').click(); document.getElementById('familyAiTabs').scrollIntoView({behavior: 'smooth'});" 
+           title="Family Journal" 
+           aria-label="Switch to Family Journal"></button>
+
+        <button type="button" 
+                class="hero-hotspot" 
+                style="top: 55.5%; left: 17%; width: 16%; height: 23%;" 
+                onclick="document.getElementById('tab-fridge-btn').click(); document.getElementById('familyAiTabs').scrollIntoView({behavior: 'smooth'});" 
+                title="15-Minute Fridge Meals" 
+                aria-label="Switch to 15-Minute Fridge Meals"></button>
+
+        <button type="button" 
+                class="hero-hotspot" 
+                style="top: 11.5%; left: 68%; width: 14%; height: 15.5%;" 
+                onclick="document.getElementById('tab-voice-btn').click(); document.getElementById('familyAiTabs').scrollIntoView({behavior: 'smooth'});" 
+                title="Transcribed Voice Notes" 
+                aria-label="Switch to Transcribed Voice Notes"></button>
+
+        <button type="button" 
+                class="hero-hotspot" 
+                style="top: 22.5%; left: 81%; width: 15.5%; height: 19%;" 
+                onclick="document.getElementById('tab-flyer-btn').click(); document.getElementById('familyAiTabs').scrollIntoView({behavior: 'smooth'});" 
+                title="Illustrated Family Flyers" 
+                aria-label="Switch to Illustrated Family Flyers"></button>
+
+        <button type="button" 
+                class="hero-hotspot" 
+                style="top: 44.5%; left: 84.5%; width: 15%; height: 18%;" 
+                onclick="document.getElementById('tab-trivia-btn').click(); document.getElementById('familyAiTabs').scrollIntoView({behavior: 'smooth'});" 
+                title="Family Game Show" 
+                aria-label="Switch to Family Game Show"></button>
     </div>
 
     {{-- Tabs --}}
-    <ul class="nav nav-pills nav-fill gap-2 p-1 bg-white rounded-4 shadow-sm mb-4 border" id="familyAiTabs" role="tablist">
+    <ul class="nav nav-pills nav-fill gap-2 p-1.5 bg-white rounded-4 shadow-sm mb-4 border flex-nowrap overflow-x-auto" id="familyAiTabs" role="tablist" style="scrollbar-width: thin; -webkit-overflow-scrolling: touch;">
         <li class="nav-item" role="presentation">
             <button class="nav-link active rounded-pill fw-bold py-2 d-inline-flex align-items-center justify-content-center gap-2 w-100" 
                     id="tab-fridge-btn" data-bs-toggle="pill" data-bs-target="#tab-fridge" type="button" role="tab" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
@@ -676,19 +761,21 @@
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link rounded-pill fw-bold py-2 d-inline-flex align-items-center justify-content-center gap-2 w-100" 
-                    id="tab-outings-btn" data-bs-toggle="pill" data-bs-target="#tab-outings" type="button" role="tab" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
-                <i class="bi bi-compass-fill text-warning"></i> 🗺️ Outings Salon
+                    id="tab-roundtable-btn" data-bs-toggle="pill" data-bs-target="#tab-roundtable" type="button" role="tab" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
+                <i class="bi bi-shield-shaded text-warning"></i> 🛡️ Family RoundTable
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <a href="/family/roundtable" class="nav-link rounded-pill fw-bold py-2 d-inline-flex align-items-center justify-content-center gap-2 w-100 text-dark" style="min-height: 44px; border: 1.5px dashed #d4af37; background: #fffdf5; white-space: nowrap; flex-shrink: 0;">
-                <i class="bi bi-shield-shaded text-warning"></i> 🛡️ Family RoundTable <i class="bi bi-box-arrow-up-right small text-muted"></i>
-            </a>
+            <button class="nav-link rounded-pill fw-bold py-2 d-inline-flex align-items-center justify-content-center gap-2 w-100" 
+                    id="tab-journal-btn" data-bs-toggle="pill" data-bs-target="#tab-journal" type="button" role="tab" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
+                <i class="bi bi-journal-bookmark-fill text-primary"></i> 📖 Family Journal
+            </button>
         </li>
         <li class="nav-item" role="presentation">
-            <a href="/familyJournal" class="nav-link rounded-pill fw-bold py-2 d-inline-flex align-items-center justify-content-center gap-2 w-100 text-dark" style="min-height: 44px; border: 1.5px dashed #6366f1; background: #f5f7ff; white-space: nowrap; flex-shrink: 0;">
-                <i class="bi bi-journal-bookmark-fill text-primary"></i> 📖 Family Journal <i class="bi bi-box-arrow-up-right small text-muted"></i>
-            </a>
+            <button class="nav-link rounded-pill fw-bold py-2 d-inline-flex align-items-center justify-content-center gap-2 w-100" 
+                    id="tab-outings-btn" data-bs-toggle="pill" data-bs-target="#tab-outings" type="button" role="tab" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
+                <i class="bi bi-compass-fill text-warning"></i> 🗺️ Outings Salon
+            </button>
         </li>
     </ul>
 
@@ -2259,10 +2346,260 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
             </div>
         </div>
 
+        {{-- 🛡️ TAB 7: FAMILY ROUNDTABLE (RECONCILIATORY COUNCIL) --}}
+        <div class="tab-pane fade" id="tab-roundtable" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-4 bg-white position-relative overflow-hidden" style="border: 1.5px solid rgba(212, 175, 55, 0.35) !important;">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 pb-3 mb-4 border-bottom">
+                    <div>
+                        <span class="badge rounded-pill px-3 py-1.5 fw-bold mb-2 d-inline-flex align-items-center gap-1.5" style="background: rgba(212, 175, 55, 0.12); color: #8c6d1f; border: 1px solid rgba(212, 175, 55, 0.35); font-size: 0.75rem;">
+                            <i class="bi bi-shield-shaded"></i> ✨ KINSHIP COUNCIL &bull; RECONCILIATORY JUSTICE
+                        </span>
+                        <h3 class="fw-bold text-dark mb-1" style="font-family: 'Cinzel', serif;">Family RoundTable</h3>
+                        <p class="text-muted small mb-0" style="max-width: 650px;">
+                            A dignified household council for reconciling family tensions calmly with empathy, zero blame, and restorative accords that preserve kinship bonds.
+                        </p>
+                    </div>
+                    <a href="/family/roundtable" class="btn btn-outline-dark rounded-pill px-3.5 py-2 fw-bold d-inline-flex align-items-center gap-2 shadow-sm" style="min-height: 44px; white-space: nowrap; font-size: 0.88rem; border-color: #d4af37;">
+                        <i class="bi bi-box-arrow-up-right text-warning"></i> Open Grand Council Chamber
+                    </a>
+                </div>
+
+                <div class="row g-4">
+                    {{-- Left: Quick 2-Minute Peacemaker --}}
+                    <div class="col-lg-6">
+                        <div class="p-3.5 p-md-4 rounded-4 h-100" style="background: #fafafa; border: 1.5px solid #e2e8f0;">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <h5 class="fw-bold mb-0 text-dark">
+                                    <i class="bi bi-lightning-charge-fill text-warning me-1.5"></i> Quick 2-Minute Peacemaker
+                                </h5>
+                                <span class="badge bg-light text-secondary border px-2 py-1 small">Instant Resolution</span>
+                            </div>
+                            <p class="text-muted small mb-3">
+                                Describe the issue or disagreement between two family members to receive instant, balanced reconciliatory guidance.
+                            </p>
+
+                            <form id="inline-roundtable-peacemaker-form" onsubmit="handleInlineArbitrate(event)">
+                                @csrf
+                                <div class="row g-2 mb-2.5">
+                                    <div class="col-6">
+                                        <label class="form-label small fw-semibold mb-1" for="rt-party-a-name">First Member (Party A)</label>
+                                        <input type="text" id="rt-party-a-name" class="form-control form-control-sm rounded-3" value="{{ $userData['firstName'] ?? 'Myself' }}" required placeholder="e.g. Mum, Alex">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small fw-semibold mb-1" for="rt-party-b-name">Second Member (Party B)</label>
+                                        <input type="text" id="rt-party-b-name" class="form-control form-control-sm rounded-3" required placeholder="e.g. Dad, Sibling">
+                                    </div>
+                                </div>
+                                <div class="mb-2.5">
+                                    <label class="form-label small fw-semibold mb-1" for="rt-party-a-claim">Party A's Perspective / Grievance</label>
+                                    <input type="text" id="rt-party-a-claim" class="form-control form-control-sm rounded-3" required placeholder="e.g. I did the washing up twice yesterday...">
+                                </div>
+                                <div class="mb-2.5">
+                                    <label class="form-label small fw-semibold mb-1" for="rt-party-b-claim">Party B's Perspective</label>
+                                    <input type="text" id="rt-party-b-claim" class="form-control form-control-sm rounded-3" required placeholder="e.g. I worked late and had to care for the toddler...">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold mb-1" for="rt-dispute-context">Household Context &amp; Category</label>
+                                    <select id="rt-dispute-context" class="form-select form-select-sm rounded-3">
+                                        <option value="chores_cleaning">🧹 Chores &amp; Housework Equity</option>
+                                        <option value="screen_time_noise">📱 Screen Time, Noise &amp; Sleep Boundaries</option>
+                                        <option value="borrowing_items">👕 Borrowing Clothes &amp; Belongings</option>
+                                        <option value="communication_tone">🗣️ Tone of Voice &amp; Misunderstanding</option>
+                                        <option value="events_gatherings">📅 Family Schedule &amp; Gathering Commitments</option>
+                                    </select>
+                                </div>
+
+                                <button type="submit" id="btn-inline-arbitrate" class="btn btn-dark w-100 rounded-pill py-2 fw-bold shadow-sm d-inline-flex align-items-center justify-content-center gap-2" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border: 1.5px solid #d4af37; min-height: 44px;">
+                                    <i class="bi bi-peace text-warning"></i> Deliberate Restorative Accord
+                                </button>
+                            </form>
+
+                            {{-- Verdict Container --}}
+                            <div id="rt-verdict-card" class="mt-3 p-3 rounded-3" style="display: none; background: #ffffff; border: 1.5px solid #d4af37; box-shadow: 0 4px 14px rgba(0,0,0,0.06);">
+                                <div class="d-flex align-items-center gap-2 mb-2 pb-1 border-bottom">
+                                    <span class="badge bg-warning text-dark fw-bold rounded-pill">🕊️ Accord Sealed</span>
+                                    <span class="small text-muted fw-semibold" id="rt-closing-quip"></span>
+                                </div>
+                                <p class="small text-dark mb-2 fw-medium" id="rt-verdict-box" style="line-height: 1.55;"></p>
+                                <div class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 0.7rem;">Action Compromise Plan:</div>
+                                <div id="rt-action-plan-list" class="d-flex flex-column gap-1 mb-2"></div>
+                                <div class="p-2 rounded-2 bg-light small text-secondary fst-italic border" id="rt-penalty-box"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Right: Active Dockets & Kinship Principles --}}
+                    <div class="col-lg-6">
+                        <div class="p-3.5 p-md-4 rounded-4 h-100 d-flex flex-column" style="background: #ffffff; border: 1.5px solid #e2e8f0;">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <h5 class="fw-bold mb-0 text-dark">
+                                    <i class="bi bi-archive-fill text-primary me-1.5"></i> Family Council Dockets
+                                </h5>
+                                <span class="badge bg-light text-muted border px-2 py-1 small">Current Matters</span>
+                            </div>
+
+                            @if(!empty($disputes) && count($disputes) > 0)
+                                <div class="d-flex flex-column gap-2.5 overflow-auto flex-grow-1" style="max-height: 380px;">
+                                    @foreach($disputes as $d)
+                                        <div class="p-3 rounded-3 border" style="background: #f8fafc;">
+                                            <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+                                                <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.92rem;">{{ $d['title'] ?? 'Family Discussion' }}</h6>
+                                                <span class="badge rounded-pill {{ ($d['status'] ?? '') === 'adjudicated' ? 'bg-success' : 'bg-warning text-dark' }} small">
+                                                    {{ ucfirst($d['status'] ?? 'Active') }}
+                                                </span>
+                                            </div>
+                                            <div class="text-muted small mb-2" style="font-size: 0.78rem;">
+                                                Category: <span class="fw-semibold text-secondary">{{ ucwords(str_replace('_', ' ', $d['category'] ?? 'General')) }}</span>
+                                            </div>
+                                            <a href="/family/roundtable?dispute_id={{ $d['id'] ?? '' }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-semibold" style="font-size: 0.78rem; min-height: 34px;">
+                                                View Council File <i class="bi bi-arrow-right ms-1"></i>
+                                            </a>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="text-center py-4 my-auto">
+                                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 58px; height: 58px; background: rgba(16, 185, 129, 0.12); color: #059669; font-size: 1.6rem;">
+                                        <i class="bi bi-peace"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-1">Domestic Harmony Prevails</h6>
+                                    <p class="text-muted small mb-3" style="max-width: 320px; margin: 0 auto;">
+                                        No contentious disputes are active on your family docket. Keep lines of communication open and loving!
+                                    </p>
+                                    <a href="/family/roundtable" class="btn btn-sm btn-outline-dark rounded-pill px-3 py-1.5 fw-semibold" style="min-height: 38px; font-size: 0.8rem;">
+                                        <i class="bi bi-plus-circle me-1"></i> Convene Formal Hearing
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- 📖 TAB 8: FAMILY LIVING JOURNAL & CHRONICLES --}}
+        <div class="tab-pane fade" id="tab-journal" role="tabpanel">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-4 bg-white position-relative overflow-hidden" style="border: 1.5px solid rgba(99, 102, 241, 0.3) !important;">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 pb-3 mb-4 border-bottom">
+                    <div>
+                        <span class="badge rounded-pill px-3 py-1.5 fw-bold mb-2 d-inline-flex align-items-center gap-1.5" style="background: rgba(99, 102, 241, 0.12); color: #4338ca; border: 1px solid rgba(99, 102, 241, 0.35); font-size: 0.75rem;">
+                            <i class="bi bi-journal-bookmark-fill"></i> 📖 HEIRLOOM MEMORIES &bull; ORAL HISTORIES
+                        </span>
+                        <h3 class="fw-bold text-dark mb-1" style="font-family: 'Playfair Display', Georgia, serif;">Family Living Journal</h3>
+                        <p class="text-muted small mb-0" style="max-width: 650px;">
+                            A private household sanctuary to chronicle heirloom recipes, generational triumphs, grandparent memories, and oral histories away from public social feeds.
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="/familyJournal/create" class="btn btn-primary rounded-pill px-3.5 py-2 fw-bold d-inline-flex align-items-center gap-2 shadow-sm text-white" style="background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); border: none; min-height: 44px; white-space: nowrap; font-size: 0.88rem;">
+                            <i class="bi bi-pencil-square"></i> Write New Chronicle
+                        </a>
+                        <a href="/familyJournal" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm" style="min-height: 44px; white-space: nowrap; font-size: 0.88rem;">
+                            <i class="bi bi-bookshelf"></i> Open Full Shelf
+                        </a>
+                    </div>
+                </div>
+
+                @if(!empty($journals) && count($journals) > 0)
+                    <div class="row g-3">
+                        @foreach($journals as $j)
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card h-100 border rounded-4 p-3.5 shadow-sm transition-all" style="background: #ffffff; border-color: #e2e8f0 !important;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge rounded-pill px-2.5 py-1 text-uppercase" style="font-size: 0.68rem; font-weight: 700; background: rgba(99, 102, 241, 0.1); color: #4338ca;">
+                                            {{ $j['category'] ?? 'Heritage' }}
+                                        </span>
+                                        <span class="text-muted small" style="font-size: 0.72rem;">
+                                            <i class="bi bi-clock me-1"></i>{{ $j['reading_time'] ?? '3 min' }} read
+                                        </span>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-1.5" style="font-size: 1.05rem; line-height: 1.4;">
+                                        {{ $j['title'] ?? 'Untitled Chronicle' }}
+                                    </h5>
+                                    <p class="text-muted small mb-3 flex-grow-1" style="font-size: 0.82rem; line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                        {{ strip_tags($j['content'] ?? $j['story'] ?? '') }}
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                        <span class="small fw-semibold text-secondary" style="font-size: 0.76rem;">
+                                            By {{ $j['author_name'] ?? $j['userName'] ?? 'Family Chronicler' }}
+                                        </span>
+                                        <a href="/familyJournal/{{ $j['id'] ?? '' }}" class="btn btn-sm btn-link text-decoration-none fw-bold p-0" style="color: #4f46e5; font-size: 0.82rem;">
+                                            Read Chronicle &rarr;
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-5 px-3 rounded-4" style="background: #fafafa; border: 1.5px dashed #cbd5e1;">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 72px; height: 72px; background: rgba(99, 102, 241, 0.12); color: #4f46e5; font-size: 2rem;">
+                            <i class="bi bi-journal-plus"></i>
+                        </div>
+                        <h4 class="fw-bold mb-1 text-dark" style="font-family: 'Playfair Display', Georgia, serif;">No Chronicles Recorded Yet</h4>
+                        <p class="text-muted mx-auto mb-4" style="max-width: 500px; font-size: 0.88rem; line-height: 1.6;">
+                            Preserve your living family story. Chronicle an unforgettable family celebration, a grandfather's childhood memory, an ancestral journey, or grandmother's secret recipe.
+                        </p>
+                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+                            <a href="/familyJournal/create" class="btn btn-primary rounded-pill px-4 py-2.5 fw-bold shadow-sm text-white" style="background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); border: none; min-height: 44px;">
+                                <i class="bi bi-magic me-1.5"></i> Draft with AI Story Assistant
+                            </a>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+
     </div>
 </div>
 
 <script>
+    // 🛡️ INLINE FAMILY ROUNDTABLE PEACEMAKER ARBITRATION
+    async function handleInlineArbitrate(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn-inline-arbitrate');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Deliberating Accord...';
+
+        try {
+            const res = await fetch('/api/roundtable/arbitrate-instant', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    party_a_name: document.getElementById('rt-party-a-name').value,
+                    party_a_claim: document.getElementById('rt-party-a-claim').value,
+                    party_b_name: document.getElementById('rt-party-b-name').value,
+                    party_b_claim: document.getElementById('rt-party-b-claim').value,
+                    context: document.getElementById('rt-dispute-context').value
+                })
+            });
+            const data = await res.json();
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-peace text-warning me-1"></i> Deliberate Restorative Accord';
+
+            if (data.success) {
+                document.getElementById('rt-verdict-box').textContent = data.verdict;
+                const planList = document.getElementById('rt-action-plan-list');
+                planList.innerHTML = '';
+                for (const [person, task] of Object.entries(data.compromise_action_plan || {})) {
+                    const row = document.createElement('div');
+                    row.className = 'd-flex align-items-center justify-content-between p-2 bg-light rounded-3';
+                    row.innerHTML = `<span class="fw-bold small text-dark">${person}:</span><span class="small text-muted">${task}</span>`;
+                    planList.appendChild(row);
+                }
+                document.getElementById('rt-penalty-box').textContent = data.penalty_or_chore;
+                document.getElementById('rt-closing-quip').textContent = `"${data.closing_quip}"`;
+                document.getElementById('rt-verdict-card').style.display = 'block';
+            } else {
+                alert(data.error || 'Peacemaker arbitration failed.');
+            }
+        } catch (err) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-peace text-warning me-1"></i> Deliberate Restorative Accord';
+            alert('Request error: ' + err.message);
+        }
+    }
+
     // 🥦 FRIDGE SCANNER
     async function compressImageForUpload(file, maxDimension = 1600, quality = 0.82) {
         if (!file || !(file instanceof Blob)) return file;
@@ -5207,28 +5544,6 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
                             target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         }
                     }, 120);
-                }
-            } else {
-                container.innerHTML = '<div class="alert alert-warning rounded-4 mb-0">No weekend outings matched that search. Try another city or interest.</div>';
-                if (pollBtn) pollBtn.classList.add('d-none');
-            }
-        } catch (err) {
-            alert('Outings search error: ' + err.message);
-        } finally {
-            if (window.FamilyPlatformSpinner?.stop) {
-                window.FamilyPlatformSpinner.stop(btn);
-            } else if (window.ScoreTenantSpinner?.stop) {
-                window.ScoreTenantSpinner.stop(btn);
-            } else {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-compass"></i> Discover Curated Outings';
-            }
-        }
-    }
-
-                if (pollBtn) {
-                    pollBtn.classList.remove('d-none');
-                    pollBtn.classList.add('d-inline-flex');
                 }
             } else {
                 container.innerHTML = '<div class="alert alert-warning rounded-4 mb-0">No weekend outings matched that search. Try another city or interest.</div>';

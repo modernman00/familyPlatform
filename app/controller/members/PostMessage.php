@@ -100,6 +100,29 @@ final class PostMessage
             // One batched query for the whole page instead of one per post (N+1).
             $commentsByPost = AllMembersData::commentProfilePicByPostNos(array_column($posts, 'post_no'));
 
+            // Batch-hydrate current user's reaction across all comments on this page
+            $allCommentNos = [];
+            foreach ($commentsByPost as $postComments) {
+                foreach ($postComments as $c) {
+                    if (!empty($c['comment_no'])) {
+                        $allCommentNos[] = (int)$c['comment_no'];
+                    }
+                }
+            }
+            $userCommentReactions = [];
+            if ($allCommentNos !== []) {
+                $cPlaceholders = implode(',', array_fill(0, count($allCommentNos), '?'));
+                $cQuery = sprintf(
+                    'SELECT comment_no, label, reaction FROM comment_reactions WHERE id = ? AND comment_no IN (%s)',
+                    $cPlaceholders
+                );
+                $reactStmt = \Src\Db::connect2()->prepare($cQuery);
+                $reactStmt->execute([$id, ...$allCommentNos]);
+                while ($reactRow = $reactStmt->fetch(\PDO::FETCH_ASSOC)) {
+                    $userCommentReactions[(string)$reactRow['comment_no']] = (string)($reactRow['label'] ?: $reactRow['reaction']);
+                }
+            }
+
             foreach ($posts as &$post) {
 
                 // 3. Get all comments for THIS post
@@ -120,6 +143,7 @@ final class PostMessage
                     // 6. Attach the reactions directly to their comment
                     // We use $comment (the reference) to attach reactions to this specific comment array.
                     $comment['reactions'] = $reactions ? $reactions : [];
+                    $comment['user_reaction'] = $userCommentReactions[(string)$commentNo] ?? null;
                     // }                  
                 }
                 unset($comment); // Good practice to unset the inner reference

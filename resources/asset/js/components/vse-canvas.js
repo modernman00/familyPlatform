@@ -18,6 +18,7 @@ class VisualSupremacyRuntime {
         this.isP3 = false;
         this.isHDR = false;
         this.reducedMotion = false;
+        this.isLowPowerMode = false;
         this.isSensorActive = false;
         this.isInputFocused = false;
         this.orientation = { gamma: 0, beta: 0 };
@@ -53,7 +54,7 @@ class VisualSupremacyRuntime {
                     if (this.reducedMotion) {
                         this.resetTransforms();
                         this.stopSensors();
-                    } else {
+                    } else if (!this.isLowPowerMode) {
                         this.startSensors();
                     }
                 });
@@ -64,17 +65,51 @@ class VisualSupremacyRuntime {
             return;
         }
 
-        // 2. Observe media cards using IntersectionObserver to only animate visible elements
+        // 2. Segun & Victor PWA Battery-Saver & Low-Memory Killswitch
+        this.setupBatteryAndMemoryGuard();
+
+        // 3. Observe media cards using IntersectionObserver to only animate visible elements
         this.setupCardObserver();
 
-        // 3. Mandatory Adversarial Security Gate (Dr. Viktor Kovács & Marcus): Input Focus Guard
+        // 4. Mandatory Adversarial Security Gate (Dr. Viktor Kovács & Marcus): Input Focus Guard
         this.setupSecurityGuard();
 
-        // 4. Desktop Pointer Parallax Fallback
+        // 5. Desktop Pointer Parallax Fallback
         this.setupDesktopPointerParallax();
 
-        // 5. Initialize Sensor Pipeline
+        // 6. Initialize Sensor Pipeline
         this.startSensors();
+    }
+
+    setupBatteryAndMemoryGuard() {
+        try {
+            // Low-end Android / memory-constrained device guard (< 2GB RAM)
+            if (typeof navigator !== 'undefined' && navigator.deviceMemory && navigator.deviceMemory < 2) {
+                this.isLowPowerMode = true;
+                this.stopSensors();
+                this.resetTransforms();
+                return;
+            }
+
+            // Battery Status API guard: Disable 2.5D sensors if battery <= 20% and not charging
+            if (typeof navigator !== 'undefined' && typeof navigator.getBattery === 'function') {
+                navigator.getBattery().then((battery) => {
+                    const checkBattery = () => {
+                        const low = !battery.charging && battery.level <= 0.20;
+                        this.isLowPowerMode = low;
+                        if (low) {
+                            this.stopSensors();
+                            this.resetTransforms();
+                        } else if (!this.reducedMotion && !this.isInputFocused && !document.hidden) {
+                            this.startSensors();
+                        }
+                    };
+                    checkBattery();
+                    battery.addEventListener('levelchange', checkBattery);
+                    battery.addEventListener('chargingchange', checkBattery);
+                }).catch(() => {});
+            }
+        } catch (_) {}
     }
 
     setupCardObserver() {
@@ -149,7 +184,7 @@ class VisualSupremacyRuntime {
     }
 
     startSensors() {
-        if (this.isSensorActive || this.reducedMotion || this.isInputFocused) {
+        if (this.isSensorActive || this.reducedMotion || this.isInputFocused || this.isLowPowerMode) {
             return;
         }
 
@@ -178,7 +213,7 @@ class VisualSupremacyRuntime {
     }
 
     handleDeviceOrientation(event) {
-        if (this.isInputFocused || this.reducedMotion) return;
+        if (this.isInputFocused || this.reducedMotion || this.isLowPowerMode) return;
 
         // Gamma: Left to Right (-90 to 90), Beta: Front to Back (-180 to 180)
         let g = event.gamma || 0;
