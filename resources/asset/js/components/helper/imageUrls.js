@@ -50,6 +50,33 @@ export function getPostImageUrl(img) {
 }
 
 /**
+ * Resolves a post image URL for a specific modern format variant ('avif', 'webp', or fallback).
+ * 
+ * @param {string|null|undefined} img - Image filename or path
+ * @param {'avif'|'webp'|'fallback'} variant - Target format variant
+ * @returns {string} Fully qualified or root-relative URL for the requested variant
+ */
+export function getPostImageVariantUrl(img, variant = 'fallback') {
+    const fallbackUrl = getPostImageUrl(img);
+    if (!fallbackUrl || variant === 'fallback') {
+        return fallbackUrl;
+    }
+
+    // Do not transform external URLs, blobs, or data URIs
+    if (fallbackUrl.startsWith('http://') || fallbackUrl.startsWith('https://') || fallbackUrl.startsWith('blob:') || fallbackUrl.startsWith('data:')) {
+        return fallbackUrl;
+    }
+
+    const dotIndex = fallbackUrl.lastIndexOf('.');
+    if (dotIndex <= 0) {
+        return fallbackUrl;
+    }
+
+    const basePath = fallbackUrl.substring(0, dotIndex);
+    return `${basePath}.${variant}`;
+}
+
+/**
  * Resolves a profile avatar image filename or path.
  * 
  * @param {string|null|undefined} img - Image filename or path

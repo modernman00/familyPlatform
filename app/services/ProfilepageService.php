@@ -61,7 +61,7 @@ final class ProfilepageService
             'id' => (string)($m['id'] ?? ''),
             'firstName' => (string)($m['firstName'] ?? ''),
             'lastName' => (string)($m['lastName'] ?? ''),
-            'img' => (string)($m['img'] ?? ''),
+            'img' => (string)($m['img'] ?? ($m['profilePics'] ?? '')),
         ], $allFamilyMembers));
 
         return [

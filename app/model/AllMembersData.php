@@ -141,13 +141,14 @@ class AllMembersData extends InnerJoin
     public static function AllMembersEmailByFamCode($famCode, array|string|null $id = null): array
     {
         try {
-            $query = "SELECT DISTINCT a.email, p.famCode, p.firstName, p.lastName, a.id 
+            $query = "SELECT DISTINCT a.email, COALESCE(p.famCode, '') as famCode, COALESCE(p.firstName, a.firstName, '') as firstName, COALESCE(p.lastName, a.lastName, '') as lastName, a.id 
                       FROM account a
-                      INNER JOIN personal p ON a.id = p.id
+                      LEFT JOIN personal p ON a.id = p.id
                       LEFT JOIN user_families uf ON (a.id = uf.user_id AND uf.family_code = :famCode1 AND uf.status = 'approved')
-                      WHERE (p.famCode = :famCode2 OR uf.family_code IS NOT NULL)";
+                      LEFT JOIN family_nodes fn ON ((fn.user_id = a.id OR (fn.email = a.email AND fn.email != '')) AND fn.family_code = :famCode3 AND fn.is_erased = 0)
+                      WHERE (p.famCode = :famCode2 OR uf.family_code IS NOT NULL OR fn.family_code IS NOT NULL)";
             
-            $params = ['famCode1' => $famCode, 'famCode2' => $famCode];
+            $params = ['famCode1' => $famCode, 'famCode2' => $famCode, 'famCode3' => $famCode];
 
             if ($id !== null) {
                 if (is_array($id) && !empty($id)) {

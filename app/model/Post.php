@@ -242,7 +242,7 @@ final class Post extends Select
         // 1. Fetch images from published posts
         $query = "SELECT post_no, id, fullName, postMessage, post_img0, post_img1, post_img2, post_img3, post_img4, post_img5, date_created, post_likes 
                   FROM post 
-                  WHERE id = ? AND post_status = 'published' 
+                  WHERE id = ? AND post_status = 'published' AND date_deleted IS NULL 
                   ORDER BY date_created DESC";
         $stmt = parent::connect2()->prepare($query);
         $stmt->execute([$authorId]);
@@ -279,12 +279,12 @@ final class Post extends Select
             if ($hasIsPublicColumn) {
                 $query2 = "SELECT no, id, img, where_from, caption, likes, is_public, created_at 
                            FROM images 
-                           WHERE id = ? AND img IS NOT NULL AND img != '' 
+                           WHERE id = ? AND img IS NOT NULL AND img != '' AND deleted_at IS NULL 
                            ORDER BY created_at DESC";
             } else {
                 $query2 = "SELECT no, id, img, where_from, caption, likes, created_at 
                            FROM images 
-                           WHERE id = ? AND img IS NOT NULL AND img != '' 
+                           WHERE id = ? AND img IS NOT NULL AND img != '' AND deleted_at IS NULL 
                            ORDER BY created_at DESC";
             }
             $stmt2 = parent::connect2()->prepare($query2);
@@ -350,6 +350,300 @@ final class Post extends Select
         } catch (\Throwable $e) {
             error_log('[Post::setImageVisibility] Error: ' . $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Delete an image owned by the author from images and post tables.
+     *
+     * @param string $authorId
+     * @param string $imageName
+     * @return array{status: int, success: bool, message?: string, error?: string}
+     */
+    public static function deleteGalleryImage(string $authorId, string $imageName): array
+    {
+        try {
+            $db = parent::connect2();
+            $safeImg = basename(trim($imageName));
+
+            if ($safeImg === '') {
+                return [
+                    'status' => 400,
+                    'success' => false,
+                    'error' => 'Invalid picture name provided'
+                ];
+            }
+
+            // 1. Verify ownership: check if the image belongs to the author in images table
+            $chkOwnImg = $db->prepare("SELECT no FROM images WHERE id = ? AND img = ? AND deleted_at IS NULL LIMIT 1");
+            $chkOwnImg->execute([$authorId, $safeImg]);
+            $ownImgRow = $chkOwnImg->fetch(\PDO::FETCH_ASSOC);
+
+            // 2. Check if the image belongs to the author in post table
+            $chkOwnPost = $db->prepare("SELECT post_no FROM post WHERE id = ? AND date_deleted IS NULL AND (? IN (post_img0, post_img1, post_img2, post_img3, post_img4, post_img5)) LIMIT 1");
+            $chkOwnPost->execute([$authorId, $safeImg]);
+            $ownPostRow = $chkOwnPost->fetch(\PDO::FETCH_ASSOC);
+
+            $isOwner = (!empty($ownImgRow) || !empty($ownPostRow));
+
+            if (!$isOwner) {
+                // Check if the picture exists for any other user (IDOR detection)
+                $chkOtherImg = $db->prepare("SELECT id FROM images WHERE img = ? AND deleted_at IS NULL LIMIT 1");
+                $chkOtherImg->execute([$safeImg]);
+                $otherImg = $chkOtherImg->fetch(\PDO::FETCH_ASSOC);
+
+                $chkOtherPost = $db->prepare("SELECT id FROM post WHERE date_deleted IS NULL AND (? IN (post_img0, post_img1, post_img2, post_img3, post_img4, post_img5)) LIMIT 1");
+                $chkOtherPost->execute([$safeImg]);
+                $otherPost = $chkOtherPost->fetch(\PDO::FETCH_ASSOC);
+
+                if (!empty($otherImg) || !empty($otherPost)) {
+                    return [
+                        'status' => 403,
+                        'success' => false,
+                        'error' => 'You can only delete your own pictures'
+                    ];
+                }
+
+                return [
+                    'status' => 404,
+                    'success' => false,
+                    'error' => 'Picture not found in your gallery'
+                ];
+            }
+
+            // 3. Mark as soft-deleted in images table for this author
+            $delImages = $db->prepare("UPDATE images SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND img = ?");
+            $delImages->execute([$authorId, $safeImg]);
+
+            // 4. Atomically clear this image from all post image slots owned by this author
+            $clearPostImgs = $db->prepare("UPDATE post SET 
+                post_img0 = CASE WHEN post_img0 = ? THEN NULL ELSE post_img0 END,
+                post_img1 = CASE WHEN post_img1 = ? THEN NULL ELSE post_img1 END,
+                post_img2 = CASE WHEN post_img2 = ? THEN NULL ELSE post_img2 END,
+                post_img3 = CASE WHEN post_img3 = ? THEN NULL ELSE post_img3 END,
+                post_img4 = CASE WHEN post_img4 = ? THEN NULL ELSE post_img4 END,
+                post_img5 = CASE WHEN post_img5 = ? THEN NULL ELSE post_img5 END
+                WHERE id = ? AND (? IN (post_img0, post_img1, post_img2, post_img3, post_img4, post_img5))");
+            $clearPostImgs->execute([$safeImg, $safeImg, $safeImg, $safeImg, $safeImg, $safeImg, $authorId, $safeImg]);
+
+            // 5. Soft-delete posts owned by this author that now have empty text and zero pictures
+            $softDeleteEmptyPosts = $db->prepare("UPDATE post SET date_deleted = CURRENT_TIMESTAMP 
+                WHERE id = ? 
+                AND date_deleted IS NULL 
+                AND (postMessage IS NULL OR TRIM(postMessage) = '') 
+                AND post_img0 IS NULL 
+                AND post_img1 IS NULL 
+                AND post_img2 IS NULL 
+                AND post_img3 IS NULL 
+                AND post_img4 IS NULL 
+                AND post_img5 IS NULL");
+            $softDeleteEmptyPosts->execute([$authorId]);
+
+            // 6. Check if physical image file is referenced anywhere else before unlinking
+            $chkPostRef = $db->prepare("SELECT COUNT(*) FROM post WHERE date_deleted IS NULL AND (? IN (post_img0, post_img1, post_img2, post_img3, post_img4, post_img5))");
+            $chkPostRef->execute([$safeImg]);
+            $postRefCount = (int)$chkPostRef->fetchColumn();
+
+            $chkImgRef = $db->prepare("SELECT COUNT(*) FROM images WHERE deleted_at IS NULL AND img = ?");
+            $chkImgRef->execute([$safeImg]);
+            $imgRefCount = (int)$chkImgRef->fetchColumn();
+
+            $chkProfRef = $db->prepare("SELECT COUNT(*) FROM profilePics WHERE img = ?");
+            $chkProfRef->execute([$safeImg]);
+            $profRefCount = (int)$chkProfRef->fetchColumn();
+
+            if ($postRefCount === 0 && $imgRefCount === 0 && $profRefCount === 0) {
+                $primaryPath = 'resources/images/post/' . $safeImg;
+                $publicPath = 'public/img/post/' . $safeImg;
+                if (is_file($primaryPath)) {
+                    @unlink($primaryPath);
+                }
+                if (is_file($publicPath)) {
+                    @unlink($publicPath);
+                }
+            }
+
+            return [
+                'status' => 200,
+                'success' => true,
+                'message' => 'Picture removed from your gallery successfully'
+            ];
+        } catch (\Throwable $e) {
+            error_log('[Post::deleteGalleryImage] Error: ' . $e->getMessage());
+            return [
+                'status' => 500,
+                'success' => false,
+                'error' => 'An unexpected server error occurred while deleting the picture'
+            ];
+        }
+    }
+
+    /**
+     * Atomically delete multiple images owned by the author from images and post tables.
+     * Enforces an all-or-nothing PDO transaction so mixed ownership (IDOR) rolls back completely.
+     *
+     * @param string $authorId
+     * @param array<int, mixed> $imageNames
+     * @return array{status: int, success: bool, deleted_count?: int, deleted_images?: array<int, string>, message?: string, error?: string}
+     */
+    public static function deleteMultipleGalleryImages(string $authorId, array $imageNames): array
+    {
+        $cleanNames = [];
+        foreach ($imageNames as $raw) {
+            if (!is_string($raw) && !is_numeric($raw)) {
+                continue;
+            }
+            $base = basename(trim((string)$raw));
+            $safe = preg_replace('/[^a-zA-Z0-9_\.-]/', '', $base) ?? '';
+            if ($safe !== '' && !in_array($safe, $cleanNames, true)) {
+                $cleanNames[] = $safe;
+            }
+        }
+
+        if (empty($cleanNames)) {
+            return [
+                'status' => 400,
+                'success' => false,
+                'error' => 'No valid picture names provided'
+            ];
+        }
+
+        if (count($cleanNames) > 50) {
+            return [
+                'status' => 400,
+                'success' => false,
+                'error' => 'You can delete a maximum of 50 pictures at a time'
+            ];
+        }
+
+        $db = null;
+        try {
+            $db = parent::connect2();
+            $inTransaction = $db->inTransaction();
+            if (!$inTransaction) {
+                $db->beginTransaction();
+            }
+
+            $chkOwnImg = $db->prepare("SELECT no FROM images WHERE id = ? AND img = ? AND deleted_at IS NULL LIMIT 1");
+            $chkOwnPost = $db->prepare("SELECT post_no FROM post WHERE id = ? AND date_deleted IS NULL AND (? IN (post_img0, post_img1, post_img2, post_img3, post_img4, post_img5)) LIMIT 1");
+            $chkOtherImg = $db->prepare("SELECT id FROM images WHERE img = ? AND deleted_at IS NULL LIMIT 1");
+            $chkOtherPost = $db->prepare("SELECT id FROM post WHERE date_deleted IS NULL AND (? IN (post_img0, post_img1, post_img2, post_img3, post_img4, post_img5)) LIMIT 1");
+
+            // 1. Pre-verify ownership of every picture in the batch before mutating any state
+            foreach ($cleanNames as $safeImg) {
+                $chkOwnImg->execute([$authorId, $safeImg]);
+                $ownImgRow = $chkOwnImg->fetch(\PDO::FETCH_ASSOC);
+
+                $chkOwnPost->execute([$authorId, $safeImg]);
+                $ownPostRow = $chkOwnPost->fetch(\PDO::FETCH_ASSOC);
+
+                if (empty($ownImgRow) && empty($ownPostRow)) {
+                    $chkOtherImg->execute([$safeImg]);
+                    $otherImg = $chkOtherImg->fetch(\PDO::FETCH_ASSOC);
+
+                    $chkOtherPost->execute([$safeImg]);
+                    $otherPost = $chkOtherPost->fetch(\PDO::FETCH_ASSOC);
+
+                    if (!$inTransaction && $db->inTransaction()) {
+                        $db->rollBack();
+                    }
+
+                    if (!empty($otherImg) || !empty($otherPost)) {
+                        return [
+                            'status' => 403,
+                            'success' => false,
+                            'error' => 'You can only delete your own pictures'
+                        ];
+                    }
+
+                    return [
+                        'status' => 404,
+                        'success' => false,
+                        'error' => 'One or more selected pictures were not found in your gallery'
+                    ];
+                }
+            }
+
+            // 2. Execute soft-delete and slot clearing for each verified image
+            $delImages = $db->prepare("UPDATE images SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND img = ?");
+            $clearPostImgs = $db->prepare("UPDATE post SET 
+                post_img0 = CASE WHEN post_img0 = ? THEN NULL ELSE post_img0 END,
+                post_img1 = CASE WHEN post_img1 = ? THEN NULL ELSE post_img1 END,
+                post_img2 = CASE WHEN post_img2 = ? THEN NULL ELSE post_img2 END,
+                post_img3 = CASE WHEN post_img3 = ? THEN NULL ELSE post_img3 END,
+                post_img4 = CASE WHEN post_img4 = ? THEN NULL ELSE post_img4 END,
+                post_img5 = CASE WHEN post_img5 = ? THEN NULL ELSE post_img5 END
+                WHERE id = ? AND (? IN (post_img0, post_img1, post_img2, post_img3, post_img4, post_img5))");
+
+            foreach ($cleanNames as $safeImg) {
+                $delImages->execute([$authorId, $safeImg]);
+                $clearPostImgs->execute([$safeImg, $safeImg, $safeImg, $safeImg, $safeImg, $safeImg, $authorId, $safeImg]);
+            }
+
+            // 3. Soft-delete posts owned by this author that now have empty text and zero pictures
+            $softDeleteEmptyPosts = $db->prepare("UPDATE post SET date_deleted = CURRENT_TIMESTAMP 
+                WHERE id = ? 
+                AND date_deleted IS NULL 
+                AND (postMessage IS NULL OR TRIM(postMessage) = '') 
+                AND post_img0 IS NULL 
+                AND post_img1 IS NULL 
+                AND post_img2 IS NULL 
+                AND post_img3 IS NULL 
+                AND post_img4 IS NULL 
+                AND post_img5 IS NULL");
+            $softDeleteEmptyPosts->execute([$authorId]);
+
+            if (!$inTransaction && $db->inTransaction()) {
+                $db->commit();
+            }
+
+            // 4. After commit, check physical file references and unlink unreferenced files
+            $chkPostRef = $db->prepare("SELECT COUNT(*) FROM post WHERE date_deleted IS NULL AND (? IN (post_img0, post_img1, post_img2, post_img3, post_img4, post_img5))");
+            $chkImgRef = $db->prepare("SELECT COUNT(*) FROM images WHERE deleted_at IS NULL AND img = ?");
+            $chkProfRef = $db->prepare("SELECT COUNT(*) FROM profilePics WHERE img = ?");
+
+            foreach ($cleanNames as $safeImg) {
+                $chkPostRef->execute([$safeImg]);
+                $postRefCount = (int)$chkPostRef->fetchColumn();
+
+                $chkImgRef->execute([$safeImg]);
+                $imgRefCount = (int)$chkImgRef->fetchColumn();
+
+                $chkProfRef->execute([$safeImg]);
+                $profRefCount = (int)$chkProfRef->fetchColumn();
+
+                if ($postRefCount === 0 && $imgRefCount === 0 && $profRefCount === 0) {
+                    $primaryPath = 'resources/images/post/' . $safeImg;
+                    $publicPath = 'public/img/post/' . $safeImg;
+                    if (is_file($primaryPath)) {
+                        @unlink($primaryPath);
+                    }
+                    if (is_file($publicPath)) {
+                        @unlink($publicPath);
+                    }
+                }
+            }
+
+            $count = count($cleanNames);
+            return [
+                'status' => 200,
+                'success' => true,
+                'deleted_count' => $count,
+                'deleted_images' => $cleanNames,
+                'message' => $count === 1
+                    ? 'Picture removed from your gallery successfully'
+                    : "{$count} pictures removed from your gallery successfully"
+            ];
+        } catch (\Throwable $e) {
+            if ($db instanceof \PDO && $db->inTransaction()) {
+                $db->rollBack();
+            }
+            error_log('[Post::deleteMultipleGalleryImages] Error: ' . $e->getMessage());
+            return [
+                'status' => 500,
+                'success' => false,
+                'error' => 'An unexpected server error occurred while deleting the selected pictures'
+            ];
         }
     }
 

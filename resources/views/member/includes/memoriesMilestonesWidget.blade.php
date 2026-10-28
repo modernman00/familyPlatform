@@ -1,6 +1,13 @@
 @php
 $wId = $widgetId ?? 'memoriesWidgetDesktop';
 @endphp
+<style>
+  body.dark-mode #memoriesCard,
+  [data-bs-theme="dark"] #memoriesCard {
+    background: linear-gradient(135deg, rgba(184, 32, 44, 0.22) 0%, rgba(30, 41, 59, 0.95) 100%) !important;
+    border: 1px solid rgba(184, 32, 44, 0.35) !important;
+  }
+</style>
 <div class="card border-0 shadow-sm mb-4 overflow-hidden" 
      id="{{ $wId }}"
      data-id="memoriesMilestonesWidget"
@@ -22,11 +29,11 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
             </div>
         </div>
         <button type="button" 
-                class="btn btn-sm btn-link text-muted p-2" 
+                class="btn btn-sm btn-light border rounded-circle d-flex align-items-center justify-content-center text-muted shadow-xs" 
                 @click="loadData()" 
                 title="Refresh memories" 
                 aria-label="Refresh memories"
-                style="font-size: 0.85rem; text-decoration: none; min-width: 38px; min-height: 38px;">
+                style="width: 34px; height: 34px; min-width: 34px; min-height: 34px; padding: 0;">
             <i class="bi bi-arrow-clockwise" :class="{'spin-anim': loading}"></i>
         </button>
     </div>
@@ -50,12 +57,12 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                          id="memoriesCard"
                          data-id="memoriesCard"
                          style="background: linear-gradient(135deg, rgba(184,32,44, 0.08) 0%, rgba(236, 72, 153, 0.08) 100%); border: 1px solid rgba(184,32,44, 0.18);">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <span class="badge rounded-pill px-2.5 py-1.5 fw-bold text-white d-inline-flex align-items-center gap-1 shadow-sm" 
-                                  style="background: linear-gradient(135deg, #a31621, #ec4899); font-size: 0.72rem;">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                            <span class="badge rounded-pill px-2.5 py-1.5 fw-bold text-white d-inline-flex align-items-center gap-1 shadow-xs" 
+                                  style="background: linear-gradient(135deg, #a31621, #ec4899); font-size: 0.72rem; white-space: nowrap;">
                                 <i class="bi bi-clock-history"></i> <span x-text="memories[0].years_ago_label"></span>
                             </span>
-                            <span class="text-muted small" style="font-size: 0.75rem;" x-text="memories[0].formatted_date"></span>
+                            <span class="text-muted small fw-medium text-nowrap" style="font-size: 0.78rem;" x-text="memories[0].formatted_date"></span>
                         </div>
 
                         <!-- Optional Memory Image Preview -->
@@ -72,28 +79,36 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                         <!-- Memory Text -->
                         <p class="mb-2 fw-medium" style="color: var(--text-color, #1f2937); font-size: 0.88rem; line-height: 1.45;" x-text="memories[0].postMessage"></p>
 
-                        <div class="d-flex justify-content-between align-items-center pt-2 border-top border-light-subtle">
-                            <div class="d-flex align-items-center gap-2">
+                        <div class="pt-2 border-top border-light-subtle">
+                            <!-- Author Info -->
+                            <div class="d-flex align-items-center gap-2 mb-2.5">
                                 <template x-if="memories[0].profileImg">
-                                    <img :src="'/resources/images/profile/' + memories[0].profileImg" class="rounded-circle" style="width: 24px; height: 24px; object-fit: cover;" alt="Author">
+                                    <img :src="'/resources/images/profile/' + memories[0].profileImg" class="rounded-circle flex-shrink-0" style="width: 24px; height: 24px; object-fit: cover;" alt="Author">
                                 </template>
-                                <span class="text-muted small fw-semibold text-truncate" style="font-size: 0.78rem; max-width: 130px;" x-text="memories[0].fullName"></span>
+                                <span class="text-muted small fw-semibold text-truncate" style="font-size: 0.8rem;" x-text="memories[0].fullName"></span>
                             </div>
 
-                            <div class="d-flex align-items-center gap-1.5">
-                                <a :href="whatsappMemoryUrl(memories[0])" target="_blank" rel="noopener noreferrer"
-                                   class="btn btn-sm btn-success rounded-pill px-2.5 py-1.5 fw-bold d-inline-flex align-items-center gap-1 shadow-sm text-white"
-                                   style="font-size: 0.78rem; background-color: #25D366; border: none; min-height: 34px; text-decoration: none;"
-                                   title="Share memory to WhatsApp" aria-label="Share memory to WhatsApp">
-                                    <i class="bi bi-whatsapp"></i> <span class="d-none d-sm-inline">WhatsApp</span>
-                                </a>
-                                <button type="button" 
-                                        class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1 shadow-sm"
-                                        style="font-size: 0.85rem; background-color: var(--primary-color, #a31621); color: #ffffff !important; border: none; min-height: 44px;"
-                                        @click="openShareModal(memories[0])"
-                                        :disabled="sharing">
-                                    <i class="bi bi-share-fill" style="font-size: 0.75rem;"></i> Share Flashback
-                                </button>
+                            <!-- Balanced 2-Column Action Buttons (Zero Clipping) -->
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <a :href="whatsappMemoryUrl(memories[0])" target="_blank" rel="noopener noreferrer"
+                                       class="btn btn-sm btn-success rounded-pill w-100 fw-bold d-inline-flex align-items-center justify-content-center gap-1.5 shadow-xs text-white"
+                                       style="font-size: 0.8125rem; background-color: #25D366; border: none; min-height: 40px; text-decoration: none; white-space: nowrap;"
+                                       title="Share memory to WhatsApp" aria-label="Share memory to WhatsApp">
+                                        <i class="bi bi-whatsapp"></i> <span>WhatsApp</span>
+                                    </a>
+                                </div>
+                                <div class="col-6">
+                                    <button type="button" 
+                                            class="btn btn-sm btn-primary rounded-pill w-100 fw-bold d-inline-flex align-items-center justify-content-center gap-1.5 shadow-xs"
+                                            style="font-size: 0.8125rem; background-color: var(--primary-color, #a31621); color: #ffffff !important; border: none; min-height: 40px; white-space: nowrap;"
+                                            @click="openShareModal(memories[0])"
+                                            :disabled="sharing"
+                                            title="Share flashback memory with your family network"
+                                            aria-label="Share flashback memory">
+                                        <i class="bi bi-share-fill" style="font-size: 0.75rem;"></i> <span>Share</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

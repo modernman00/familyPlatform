@@ -394,7 +394,7 @@ final class PostMessage
             // have to be read manually, so the frontend sends JSON for edits.
             $rawInput = file_get_contents('php://input');
             $input = json_decode($rawInput !== false ? $rawInput : '', true) ?? [];
-            $cleanComment = checkInput($input['comment'] ?? null) ?? '';
+            $cleanComment = \App\services\LinkPreviewService::sanitizePostMessage((string)($input['comment'] ?? ''));
 
             (new Update('comment'))->updateTable(
                 column: 'comment',
@@ -766,7 +766,24 @@ final class PostMessage
                 error_log('[PostMessage] In-app notification write failed: ' . $e->getMessage());
             }
 
-            // 2. Send push notification to member
+            // 2. Broadcast real-time Pusher event to private-user channel
+            try {
+                $pusher = \App\classes\Pusher::pusher();
+                if ($pusher !== null) {
+                    $cleanTargetUid = preg_replace('/[^A-Za-z0-9_-]/', '', $targetUserId);
+                    $pusher->trigger("private-user-{$cleanTargetUid}", 'new-notification', [
+                        'title' => 'Family Platform Update',
+                        'body' => $notificationMsg,
+                        'action_url' => $url ?: '/profilePage',
+                        'type' => 'Post',
+                        'sender_name' => $postOriginName,
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                error_log('[PostMessage] Pusher notification failed: ' . $e->getMessage());
+            }
+
+            // 3. Send push notification to member
             PushNotificationClass::sendPushNotification(
                 userId: $targetUserId,
                 message: $notificationMsg,

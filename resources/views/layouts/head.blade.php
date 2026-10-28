@@ -36,6 +36,7 @@
 
       <script nonce="{{ $nonce }}" src="https://www.google.com/recaptcha/api.js" async defer></script>
       <script nonce="{{ $nonce }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>
+      <script nonce="{{ $nonce }}" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
 
   
 

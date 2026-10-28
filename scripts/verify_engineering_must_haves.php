@@ -24,9 +24,17 @@ echo "Scanning Directory: " . realpath($targetDir) . "\n";
 echo "=================================================================\n\n";
 
 $fileExtensions = ['php', 'blade.php', 'html', 'phtml'];
-$iterator = new RecursiveIteratorIterator(
-    new RecursiveDirectoryIterator($targetDir, RecursiveDirectoryIterator::SKIP_DOTS)
-);
+$dirIterator = new RecursiveDirectoryIterator($targetDir, RecursiveDirectoryIterator::SKIP_DOTS);
+$filterIterator = new RecursiveCallbackFilterIterator($dirIterator, function ($current, $key, $iterator) {
+    if ($iterator->hasChildren()) {
+        $filename = $current->getFilename();
+        if (in_array($filename, ['vendor', '.git', '.phpunit.cache', '.php_tmp', 'cache', 'storage', 'node_modules', 'scripts', 'gen_class', 'scratch', 'php-uk'], true)) {
+            return false;
+        }
+    }
+    return true;
+});
+$iterator = new RecursiveIteratorIterator($filterIterator);
 
 foreach ($iterator as $file) {
     if (!$file->isFile()) {

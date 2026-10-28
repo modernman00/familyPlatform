@@ -1,4 +1,4 @@
-<!-- Family Heritage & Weekly Rituals Sidebar Widget -->
+<!-- Family Rituals & Quests Sidebar Widget -->
 <style>
   body.dark-mode .family-heritage-sidebar-widget .tree-completeness-strip,
   [data-bs-theme="dark"] .family-heritage-sidebar-widget .tree-completeness-strip {
@@ -20,7 +20,7 @@
     <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2 px-4">
         <div>
             <h5 class="mb-0 fw-bold" style="color: var(--text-color); font-size: 1.05rem;">
-                <i class="bi bi-stars text-warning me-1"></i> {{ __('heritage.family_heritage', 'Family Heritage') }}
+                <i class="bi bi-stars text-warning me-1"></i> {{ __('heritage.family_heritage', 'Family Rituals & Quests') }}
             </h5>
             <p class="mb-0" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569); line-height: 1.5;">{{ __('heritage.rituals_subtitle', 'Rituals, quests & generational vault.') }}</p>
         </div>
@@ -39,14 +39,14 @@
             <div class="progress mb-2" style="height: 6px; background: rgba(16, 185, 129, 0.15); border-radius: 999px;">
                 <div id="sideWidgetProgressBar" class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;"></div>
             </div>
-            <button type="button" onclick="openLineageQuestModal()" class="btn btn-sm btn-success w-100 py-1.5 fw-bold text-white shadow-xs d-flex align-items-center justify-content-center gap-1.5" style="border-radius: 10px; font-size: 0.875rem; min-height: 44px; background: #059669; color: #ffffff !important; border: none;">
+            <button type="button" onclick="openLineageQuestModal()" class="btn btn-sm btn-success w-100 py-1.5 fw-bold text-white shadow-xs d-flex align-items-center justify-content-center gap-1.5" style="border-radius: 10px; font-size: 0.875rem; min-height: 44px; background: #059669; color: #ffffff !important; border: none;" title="Solve WhatsApp Quests - Fill missing tree branches with WhatsApp family quizzes">
                 <i class="bi bi-whatsapp"></i> {{ __('heritage.solve_quests', 'Solve WhatsApp Quests') }}
             </button>
         </div>
 
         <!-- 3 Quick Action Tiles -->
         <div class="d-flex flex-column gap-2">
-            <button type="button" onclick="openComposerWithTrivia()" class="btn heritage-action-tile w-100 p-2.5 d-flex align-items-center justify-content-between text-start shadow-xs transition-all" style="min-height: 54px;">
+            <button type="button" onclick="openComposerWithTrivia()" class="btn heritage-action-tile w-100 p-2.5 d-flex align-items-center justify-content-between text-start shadow-xs transition-all" style="min-height: 54px;" title="Sunday Trivia - Play weekly heritage challenge with relatives">
                 <div class="d-flex align-items-center gap-2.5">
                     <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background: rgba(245, 158, 11, 0.16); color: #b45309;">
                         <i class="bi bi-trophy-fill" style="font-size: 0.95rem;"></i>
@@ -59,7 +59,7 @@
                 <i class="bi bi-chevron-right" style="color: #64748b;"></i>
             </button>
 
-            <button type="button" onclick="openFamilyFlyerModal()" class="btn heritage-action-tile w-100 p-2.5 d-flex align-items-center justify-content-between text-start shadow-xs transition-all" style="min-height: 54px;">
+            <button type="button" onclick="openFamilyFlyerModal()" class="btn heritage-action-tile w-100 p-2.5 d-flex align-items-center justify-content-between text-start shadow-xs transition-all" style="min-height: 54px;" title="Clan Flyer - Generate and download family tree status flyer for WhatsApp">
                 <div class="d-flex align-items-center gap-2.5">
                     <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background: rgba(163, 22, 33, 0.12); color: #a31621;">
                         <i class="bi bi-card-image" style="font-size: 0.95rem;"></i>
@@ -72,7 +72,7 @@
                 <i class="bi bi-chevron-right" style="color: #64748b;"></i>
             </button>
 
-            <button type="button" onclick="openTimeCapsuleModal()" class="btn heritage-action-tile w-100 p-2.5 d-flex align-items-center justify-content-between text-start shadow-xs transition-all" style="min-height: 54px;">
+            <button type="button" onclick="openTimeCapsuleModal()" class="btn heritage-action-tile w-100 p-2.5 d-flex align-items-center justify-content-between text-start shadow-xs transition-all" style="min-height: 54px;" title="Time Capsule - Seal photos, voice notes, and messages for future delivery">
                 <div class="d-flex align-items-center gap-2.5">
                     <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background: rgba(109, 40, 217, 0.14); color: #6d28d9;">
                         <i class="bi bi-hourglass-split" style="font-size: 0.95rem;"></i>

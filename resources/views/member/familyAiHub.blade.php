@@ -5,6 +5,99 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Great+Vibes&family=Montserrat:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
 <style>
+/* 🌟 FAMILY HUB 4K ULTRA-HD SIGNATURE HERO WITH FROSTED GLASS CAPSULE */
+.ai-hub-hero {
+    position: relative;
+    background-image: linear-gradient(180deg, rgba(15, 23, 42, 0.28) 0%, rgba(15, 23, 42, 0.58) 100%), 
+                      url('/public/img/family3.jpeg');
+    background-position: center 28%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    border-radius: 26px;
+    padding: 48px 24px;
+    border: 1.5px solid rgba(212, 175, 55, 0.45);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+    overflow: hidden;
+    color: #ffffff;
+    min-height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    image-rendering: -webkit-optimize-contrast;
+    transform: translateZ(0);
+}
+.ai-hub-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 20%, rgba(255, 215, 0, 0.12) 0%, transparent 60%);
+    pointer-events: none;
+}
+.ai-hub-glass-card {
+    position: relative;
+    z-index: 2;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1.5px solid rgba(212, 175, 55, 0.5);
+    border-radius: 22px;
+    padding: 32px 28px;
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.45), inset 0 0 20px rgba(212, 175, 55, 0.15);
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
+}
+.ai-hub-hero-badge {
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 215, 0, 0.65);
+    color: #ffd700;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.ai-hub-hero-title {
+    font-family: 'Cinzel', serif;
+    letter-spacing: -0.5px;
+    font-size: 2.35rem;
+    text-shadow: 0 3px 12px rgba(0, 0, 0, 0.7);
+    color: #ffffff !important;
+}
+.ai-hub-hero-lead {
+    color: #f8fafc;
+    font-size: 1.08rem;
+    line-height: 1.65;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+    font-weight: 500;
+}
+.ai-hub-quick-pill {
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(212, 175, 55, 0.45);
+    color: #ffffff !important;
+    text-decoration: none;
+    font-size: 0.84rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+.ai-hub-quick-pill:hover {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: #ffd700;
+    color: #ffd700 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
 .gold-embossed-text {
     background: linear-gradient(180deg, #fff6b3 0%, #ffd700 35%, #d4af37 70%, #9a741e 100%);
     -webkit-background-clip: text;
@@ -522,32 +615,56 @@
 <div class="container-fluid py-4" style="max-width: 1200px;">
     {{-- Hub Header --}}
     <div class="ai-hub-hero text-center mb-4">
-        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-white shadow-sm small fw-bold mb-3" style="color: #7b03fc;">
-            <i class="bi bi-stars"></i> ✨ Studio AI Family Intelligence
+        <div class="ai-hub-glass-card">
+            <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill small fw-bold mb-3 ai-hub-hero-badge">
+                <i class="bi bi-stars text-warning"></i> ✨ Studio AI Family Intelligence &bull; Creative Playground
+            </div>
+            <h1 class="h2 fw-bold text-white mb-2 ai-hub-hero-title">Family Hub &bull; The Fun Place</h1>
+            <p class="mx-auto mb-3 ai-hub-hero-lead" style="max-width: 820px;">
+                Your household creative playground, Family RoundTable, Family Journal, 15-minute fridge meal ideas, transcribed voice notes, illustrated family flyers, and Family Game Show.
+            </p>
+
+            {{-- Interactive Feature Quick-Jump Showcase Chips --}}
+            <div class="d-flex flex-wrap justify-content-center gap-2 pt-2">
+                <a href="/family/roundtable" class="ai-hub-quick-pill">
+                    <i class="bi bi-shield-shaded text-warning"></i> Family RoundTable
+                </a>
+                <a href="/familyJournal" class="ai-hub-quick-pill">
+                    <i class="bi bi-journal-bookmark-fill text-info"></i> Family Journal
+                </a>
+                <button type="button" class="ai-hub-quick-pill" onclick="document.getElementById('tab-fridge-btn').click(); document.getElementById('tab-fridge-btn').scrollIntoView({behavior: 'smooth', block: 'nearest'});">
+                    <i class="bi bi-egg-fried text-success"></i> 15-Minute Fridge Meals
+                </button>
+                <button type="button" class="ai-hub-quick-pill" onclick="document.getElementById('tab-voice-btn').click(); document.getElementById('tab-voice-btn').scrollIntoView({behavior: 'smooth', block: 'nearest'});">
+                    <i class="bi bi-mic-fill text-warning"></i> Transcribed Voice Notes
+                </button>
+                <button type="button" class="ai-hub-quick-pill" onclick="document.getElementById('tab-flyer-btn').click(); document.getElementById('tab-flyer-btn').scrollIntoView({behavior: 'smooth', block: 'nearest'});">
+                    <i class="bi bi-image-fill text-info"></i> Illustrated Flyers
+                </button>
+                <button type="button" class="ai-hub-quick-pill" onclick="document.getElementById('tab-trivia-btn').click(); document.getElementById('tab-trivia-btn').scrollIntoView({behavior: 'smooth', block: 'nearest'});">
+                    <i class="bi bi-trophy-fill text-danger"></i> Family Game Show
+                </button>
+            </div>
         </div>
-        <h1 class="h2 fw-bold text-dark mb-2">The Fun Place</h1>
-        <p class="text-muted mx-auto mb-0" style="max-width: 680px;">
-            Your household creative playground for 15-minute fridge meal ideas, transcribed voice notes, illustrated family flyers, and Family Game Show.
-        </p>
     </div>
 
     {{-- Tabs --}}
     <ul class="nav nav-pills nav-fill gap-2 p-1 bg-white rounded-4 shadow-sm mb-4 border" id="familyAiTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active rounded-pill fw-bold py-2 d-inline-flex align-items-center justify-content-center gap-2 w-100" 
-                    id="tab-fridge-btn" data-bs-toggle="pill" data-bs-target="#tab-fridge" type="button" role="tab" style="min-height: 44px;">
+                    id="tab-fridge-btn" data-bs-toggle="pill" data-bs-target="#tab-fridge" type="button" role="tab" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
                 <i class="bi bi-egg-fried text-success"></i> 🥦 Fridge Chef
             </button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link rounded-pill fw-bold py-2 d-inline-flex align-items-center justify-content-center gap-2 w-100" 
-                    id="tab-voice-btn" data-bs-toggle="pill" data-bs-target="#tab-voice" type="button" role="tab" style="min-height: 44px;">
+                    id="tab-voice-btn" data-bs-toggle="pill" data-bs-target="#tab-voice" type="button" role="tab" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
                 <i class="bi bi-mic-fill text-warning"></i> 🎤 Voice Notes
             </button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link rounded-pill fw-bold py-2 d-inline-flex align-items-center justify-content-center gap-2 w-100" 
-                    id="tab-flyer-btn" data-bs-toggle="pill" data-bs-target="#tab-flyer" type="button" role="tab" style="min-height: 44px;">
+                    id="tab-flyer-btn" data-bs-toggle="pill" data-bs-target="#tab-flyer" type="button" role="tab" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
                 <i class="bi bi-image-fill text-info"></i> 🎨 Family Flyer Studio
             </button>
         </li>
@@ -564,8 +681,13 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <a href="/family/roundtable" class="nav-link rounded-pill fw-bold py-2 d-inline-flex align-items-center justify-content-center gap-2 w-100 text-dark" style="min-height: 44px; border: 1.5px dashed #d4af37; background: #fffdf5;">
+            <a href="/family/roundtable" class="nav-link rounded-pill fw-bold py-2 d-inline-flex align-items-center justify-content-center gap-2 w-100 text-dark" style="min-height: 44px; border: 1.5px dashed #d4af37; background: #fffdf5; white-space: nowrap; flex-shrink: 0;">
                 <i class="bi bi-shield-shaded text-warning"></i> 🛡️ Family RoundTable <i class="bi bi-box-arrow-up-right small text-muted"></i>
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a href="/familyJournal" class="nav-link rounded-pill fw-bold py-2 d-inline-flex align-items-center justify-content-center gap-2 w-100 text-dark" style="min-height: 44px; border: 1.5px dashed #6366f1; background: #f5f7ff; white-space: nowrap; flex-shrink: 0;">
+                <i class="bi bi-journal-bookmark-fill text-primary"></i> 📖 Family Journal <i class="bi bi-box-arrow-up-right small text-muted"></i>
             </a>
         </li>
     </ul>

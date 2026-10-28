@@ -284,6 +284,7 @@
     <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/vendor.js" defer></script>
     <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/index.js" defer></script>
     <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/pwa-notifications.js" defer></script>
+    <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
     {{-- <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/shared-lib.js" defer></script> --}}
 
 

@@ -1,52 +1,106 @@
 <div class="reels-tray-wrapper" id="familyReelsTray">
-    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-        <div class="d-flex align-items-center gap-2">
-            <div class="reel-tray-icon-badge">
-                <i class="bi bi-camera-reels-fill"></i>
-            </div>
-            <div>
-                <h6 class="mb-0 fw-bold text-dark" style="letter-spacing: -0.01em;">Family Reels &amp; Stories</h6>
-                <div class="text-muted" style="font-size: 0.72rem;">Short-form milestones, celebrations &amp; oral history</div>
-            </div>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn btn-sm btn-light rounded-pill fw-bold px-2.5 py-1 border" data-bs-toggle="modal" data-bs-target="#createReelModal" style="font-size: 0.75rem; min-height: 34px;">
-                <i class="bi bi-plus-circle-fill text-primary me-1"></i>New
-            </button>
-            <a href="/reels" class="text-decoration-none small fw-bold d-inline-flex align-items-center gap-1" style="color: var(--brand-primary); min-height: 34px;">
-                <span>Watch All</span> <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i>
-            </a>
-        </div>
-    </div>
-
-    <!-- Category Quick Filter Pills -->
-    <div class="reel-tray-filter-bar mb-2" role="tablist" aria-label="Filter Family Reels">
-        <button type="button" class="reel-tray-filter-pill active" data-reel-filter="all">All</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="milestone">🎉 Milestones</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="reunion">🏡 Reunions</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="storytelling">📖 Stories</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="first_steps">👶 Kids</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="wedding">💍 Weddings</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="night_out">🌙 Night Out</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="weekend_out">🏖️ Weekend Out</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="holiday">✈️ Holidays</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="birthday">🎂 Birthdays</button>
-    </div>
-
-    <div class="reels-tray-scroll" id="reelsTrayScroll">
-        <!-- 1. Create Reel Card (Facebook-Style First Card) -->
-        <div class="reel-fb-create-card" role="button" tabindex="0" data-bs-toggle="modal" data-bs-target="#createReelModal" aria-label="Create Family Reel">
-            <div class="reel-fb-create-top">
-                <img src="{{ !empty($data['img']) ? (str_starts_with($data['img'], '/') ? $data['img'] : '/resources/images/profile/' . $data['img']) : '/resources/images/profile/avatarM.png' }}" 
-                     alt="You">
-            </div>
-            <div class="reel-fb-create-bottom">
-                <div class="reel-fb-create-plus">
-                    <i class="bi bi-plus-lg"></i>
+    <!-- =========================================================
+         Instagram Mirror: Mobile Stories Tray (< 768px Viewports)
+         ========================================================= -->
+    <div class="ig-stories-tray d-md-none" id="igMobileStoriesTray">
+        <div class="ig-stories-scroll">
+            <!-- 1. Your Story / Add Moment (Instagram Self Avatar with Plus Badge) -->
+            <div class="ig-story-item" role="button" tabindex="0" data-bs-toggle="modal" data-bs-target="#createReelModal" aria-label="Add to your family story">
+                <div class="ig-story-avatar-wrap is-self">
+                    <img src="{{ !empty($data['img']) ? (str_starts_with($data['img'], '/') ? $data['img'] : '/resources/images/profile/' . $data['img']) : '/resources/images/profile/avatarM.png' }}" 
+                         alt="Your Story" 
+                         class="ig-story-avatar">
+                    <div class="ig-story-plus-badge" title="Add Moment">
+                        <i class="bi bi-plus-lg"></i>
+                    </div>
                 </div>
-                <span class="reel-fb-create-label">Create Reel</span>
+                <span class="ig-story-label">{{ __('feed.your_story', 'Your Story') }}</span>
+            </div>
+
+            <!-- 2. Dynamic Family Stories Circles -->
+            @forelse(($recentReels ?? []) as $reelItem)
+                @php
+                    $creatorAvatar = !empty($reelItem['profilePics']) ? (str_starts_with($reelItem['profilePics'], '/') ? $reelItem['profilePics'] : '/resources/images/profile/' . $reelItem['profilePics']) : '/resources/images/profile/avatarM.png';
+                    $creatorFirstName = ucwords(strtolower($reelItem['firstName'] ?? 'Family'));
+                    $isBirthday = strtolower($reelItem['category'] ?? '') === 'birthday';
+                @endphp
+                <a href="/reels?id={{ $reelItem['id'] }}" 
+                   class="ig-story-item"
+                   title="{{ !empty($reelItem['caption']) ? $reelItem['caption'] : $creatorFirstName . '\'s Story' }}">
+                    <div class="ig-story-avatar-wrap {{ $isBirthday ? 'is-gold' : 'is-active' }}">
+                        <img src="{{ $creatorAvatar }}" 
+                             alt="{{ $creatorFirstName }}" 
+                             class="ig-story-avatar" 
+                             loading="lazy" 
+                             onerror="this.src='/resources/images/profile/avatarM.png'">
+                    </div>
+                    <span class="ig-story-label">{{ $creatorFirstName }}</span>
+                </a>
+            @empty
+                <div class="ig-story-item text-muted opacity-75">
+                    <div class="ig-story-avatar-wrap" style="background: var(--border-subtle, #e2e8f0);">
+                        <div class="ig-story-avatar d-flex align-items-center justify-content-center bg-light text-muted">
+                            <i class="bi bi-camera" style="font-size: 1.25rem;"></i>
+                        </div>
+                    </div>
+                    <span class="ig-story-label">{{ __('feed.no_stories', 'No Stories') }}</span>
+                </div>
+            @endforelse
+        </div>
+    </div>
+
+    <!-- =========================================================
+         Facebook Mirror: Desktop Reels Card Carousel (>= 768px Viewports)
+         ========================================================= -->
+    <div class="d-none d-md-block">
+        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <div class="reel-tray-icon-badge">
+                    <i class="bi bi-camera-reels-fill"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0 fw-bold text-dark" style="letter-spacing: -0.01em;">Family Reels &amp; Stories</h6>
+                    <div class="text-muted" style="font-size: 0.72rem;">Short-form milestones, celebrations &amp; oral history</div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-sm btn-light rounded-pill fw-bold px-2.5 py-1 border" data-bs-toggle="modal" data-bs-target="#createReelModal" style="font-size: 0.75rem; min-height: 34px;">
+                    <i class="bi bi-plus-circle-fill text-primary me-1"></i>New
+                </button>
+                <a href="/reels" class="text-decoration-none small fw-bold d-inline-flex align-items-center gap-1" style="color: var(--brand-primary); min-height: 34px;">
+                    <span>Watch All</span> <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i>
+                </a>
             </div>
         </div>
+
+        <!-- Category Quick Filter Pills -->
+        <div class="reel-tray-filter-bar mb-2" role="tablist" aria-label="Filter Family Reels">
+            <button type="button" class="reel-tray-filter-pill active" data-reel-filter="all">All</button>
+            <button type="button" class="reel-tray-filter-pill" data-reel-filter="milestone">🎉 Milestones</button>
+            <button type="button" class="reel-tray-filter-pill" data-reel-filter="reunion">🏡 Reunions</button>
+            <button type="button" class="reel-tray-filter-pill" data-reel-filter="storytelling">📖 Stories</button>
+            <button type="button" class="reel-tray-filter-pill" data-reel-filter="first_steps">👶 Kids</button>
+            <button type="button" class="reel-tray-filter-pill" data-reel-filter="wedding">💍 Weddings</button>
+            <button type="button" class="reel-tray-filter-pill" data-reel-filter="night_out">🌙 Night Out</button>
+            <button type="button" class="reel-tray-filter-pill" data-reel-filter="weekend_out">🏖️ Weekend Out</button>
+            <button type="button" class="reel-tray-filter-pill" data-reel-filter="holiday">✈️ Holidays</button>
+            <button type="button" class="reel-tray-filter-pill" data-reel-filter="birthday">🎂 Birthdays</button>
+        </div>
+
+        <div class="reels-tray-scroll" id="reelsTrayScroll">
+            <!-- 1. Create Reel Card (Facebook-Style First Card) -->
+            <div class="reel-fb-create-card" role="button" tabindex="0" data-bs-toggle="modal" data-bs-target="#createReelModal" aria-label="Create Family Reel">
+                <div class="reel-fb-create-top">
+                    <img src="{{ !empty($data['img']) ? (str_starts_with($data['img'], '/') ? $data['img'] : '/resources/images/profile/' . $data['img']) : '/resources/images/profile/avatarM.png' }}" 
+                         alt="You">
+                </div>
+                <div class="reel-fb-create-bottom">
+                    <div class="reel-fb-create-plus">
+                        <i class="bi bi-plus-lg"></i>
+                    </div>
+                    <span class="reel-fb-create-label">Create Reel</span>
+                </div>
+            </div>
 
         <!-- 2. Dynamic Video Cover Thumbnail Cards -->
         @forelse(($recentReels ?? []) as $reelItem)
@@ -134,6 +188,7 @@
                 <div class="small fw-bold text-white">Watch Family Reels</div>
             </a>
         @endforelse
+    </div>
     </div>
 </div>
 

@@ -26,6 +26,7 @@ $router->map('GET', '/profilepage/gallery', 'App\controller\members\ProfilePage@
 $router->map('GET', '/profilepage/img', 'App\controller\members\ProfilePage@gallery', 'MEMBERS_IMG_POST_SHOW');
 $router->map('POST', '/setProfilePicFromImage', 'App\controller\members\ProfilePage@setProfilePicFromImage', 'SET_PROFILE_PIC_FROM_IMG');
 $router->map('POST', '/profilepage/gallery/toggle-visibility', 'App\controller\members\ProfilePage@toggleImageVisibility', 'TOGGLE_IMAGE_VISIBILITY');
+$router->map('POST', '/profilepage/gallery/delete', 'App\controller\members\ProfilePage@deleteImage', 'DELETE_GALLERY_IMAGE');
 
 // $router->map('POST', '/member/createEvent', 'App\controller\members\Event@submitEvent', 'PROCESS_EVENT');
 
@@ -56,7 +57,8 @@ $router->map('POST', '/api/fun-place/submit-statement', 'App\controller\members\
 $router->map('POST', '/api/fun-place/adjudicate', 'App\controller\members\FamilyRoundTableController@adjudicate', 'alias_fun_place_adjudicate');
 $router->map('GET', '/api/fun-place/dispute/[*:id]', 'App\controller\members\FamilyRoundTableController@getDisputeDetails', 'alias_fun_place_get_dispute');
 
-// The Fun Place Routes (Creative Household AI & Games)
+// Family Hub & The Fun Place Routes (Creative Household AI & Games)
+$router->map('GET', '/family/hub', 'App\controller\members\FamilyAiHubController@index', 'family_hub');
 $router->map('GET', '/family/fun-place', 'App\controller\members\FamilyAiHubController@index', 'family_fun_place');
 $router->map('GET', '/family/ai-hub', 'App\controller\members\FamilyAiHubController@index', 'family_ai_hub');
 $router->map('POST', '/api/ai/arbitrate-dispute', 'App\controller\members\FamilyAiHubController@arbitrateDispute', 'api_ai_arbitrate_dispute');

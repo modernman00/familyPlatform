@@ -13,43 +13,43 @@
         </a>
 
         <!-- Quick mobile search icon for phone viewports -->
-        <button class="btn btn-icon-stitch d-lg-none ms-auto me-2" type="button" data-bs-toggle="modal" data-bs-target="#omniSearchModal" aria-label="Search activities and data" title="Search">
+        <button class="btn btn-icon-stitch d-lg-none ms-auto me-2" type="button" data-bs-toggle="modal" data-bs-target="#omniSearchModal" aria-label="Search activities, memories, and family members" title="Search activities, memories, and family members">
             <i class="bi bi-search"></i>
         </button>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation" title="Toggle navigation menu">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navbarContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1 ms-lg-3">
                 <li class="nav-item profilePageNav">
-                    <a class="nav-link stitch-nav-link" href="/profilePage">
+                    <a class="nav-link stitch-nav-link" href="/profilePage" title="{{ __('nav.my_page', 'My Page') }} - View and manage your family profile">
                         <i class="bi bi-person-fill me-1"></i> {{ __('nav.my_page', 'My Page') }}
                     </a>
                 </li>
                 <li class="nav-item familyTreeNav">
-                    <a class="nav-link stitch-nav-link" href="/organogram/{{ $_SESSION['id'] ?? '' }}?mode=canvas">
+                    <a class="nav-link stitch-nav-link" href="/organogram/{{ $_SESSION['id'] ?? '' }}?mode=canvas" title="{{ __('nav.tree', 'Tree') }} - Explore living family tree and lineage">
                         <i class="bi bi-diagram-3-fill me-1"></i> {{ __('nav.tree', 'Tree') }}
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link stitch-nav-link" href="/familyStudio">
+                    <a class="nav-link stitch-nav-link" href="/familyStudio" title="{{ __('nav.studio', 'Studio') }} - Family reels and creative celebrations">
                         <i class="bi bi-stars me-1"></i> {{ __('nav.studio', 'Studio') }}
                     </a>
                 </li>
                 <li class="nav-item familyJournalNav">
-                    <a class="nav-link stitch-nav-link" href="/familyJournal">
+                    <a class="nav-link stitch-nav-link" href="/familyJournal" title="{{ __('nav.journal', 'Journal') }} - Family memoirs and chronicles">
                         <i class="bi bi-journal-bookmark-fill me-1"></i> {{ __('nav.journal', 'Journal') }}
                     </a>
                 </li>
                 <li class="nav-item reelsNav">
-                    <a class="nav-link stitch-nav-link" href="/reels">
+                    <a class="nav-link stitch-nav-link" href="/reels" title="{{ __('nav.reels', 'Reels') }} - Watch captivating family video moments">
                         <i class="bi bi-camera-reels-fill me-1"></i> {{ __('nav.reels', 'Reels') }}
                     </a>
                 </li>
                 <li class="nav-item allMembersNav">
-                    <a class="nav-link stitch-nav-link" href="/allMembers">
+                    <a class="nav-link stitch-nav-link" href="/allMembers" title="{{ __('nav.directory', 'Directory') }} - Browse connected family directory">
                         <i class="bi bi-people-fill me-1"></i> {{ __('nav.directory', 'Directory') }}
                     </a>
                 </li>
@@ -57,7 +57,7 @@
 
             <div class="d-flex align-items-center gap-2">
                 <!-- Omni-Search Trigger Button (Search Data, Activities & Functions) -->
-                <button class="btn btn-omni-search-trigger d-flex align-items-center gap-2" id="omniSearchTriggerBtn" type="button" aria-label="Search data, activities, functions" data-bs-toggle="modal" data-bs-target="#omniSearchModal">
+                <button class="btn btn-omni-search-trigger d-flex align-items-center gap-2" id="omniSearchTriggerBtn" type="button" aria-label="Search data, activities, functions" title="Search activities, memories, and family members (⌘K)" data-bs-toggle="modal" data-bs-target="#omniSearchModal">
                     <i class="bi bi-search text-primary"></i>
                     <span class="d-none d-xl-inline text-muted small pe-2">{{ __('nav.search_placeholder', 'Search data, activities, functions...') }}</span>
                     <span class="d-inline d-xl-none text-muted small pe-1">{{ __('nav.search', 'Search...') }}</span>
@@ -65,13 +65,13 @@
                 </button>
 
                 <!-- Recommend / Invite Others Button -->
-                <button class="btn btn-sm d-flex align-items-center gap-1 px-3 py-1 fw-bold text-white rounded-pill shadow-sm" id="btnOpenRecommendModal" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" style="background: linear-gradient(135deg, #b8202c 0%, #a31621 100%); font-size: 0.85rem;" type="button">
+                <button class="btn btn-sm d-flex align-items-center gap-1 px-3 py-1 fw-bold text-white rounded-pill shadow-sm" id="btnOpenRecommendModal" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" style="background: linear-gradient(135deg, #b8202c 0%, #a31621 100%); font-size: 0.85rem;" type="button" title="Invite family relatives and friends to join your network">
                     <i class="bi bi-person-plus-fill text-warning"></i> <span>{{ __('nav.invite_others', 'Invite Others') }}</span>
                 </button>
 
                 <!-- Notification Component -->
                 <div class="notification-wrapper position-relative">
-                    <button class="btn btn-icon-stitch" id="notificationBtn" title="{{ __('nav.notifications', 'Notifications') }}" type="button">
+                    <button class="btn btn-icon-stitch" id="notificationBtn" title="{{ __('nav.notifications', 'View alerts and family notifications') }}" type="button">
                         <i class="bi bi-bell-fill"></i>
                     </button>
                     <span class="notification-badge" id="notification_count"></span>
@@ -94,7 +94,7 @@
 
                         <!-- Google Stitch Full-Width Pill Footer -->
                         <div class="notif-footer-stitch">
-                            <button class="btn-mark-all-read-stitch" id="markAllRead" type="button">
+                            <button class="btn-mark-all-read-stitch" id="markAllRead" type="button" title="Mark all notifications as read">
                                 {{ __('nav.mark_all_read', 'Mark All as Read') }}
                             </button>
                         </div>
@@ -108,7 +108,7 @@
                         $supportedLocales = \App\classes\I18n::getSupportedLocales();
                         $currLocale = $supportedLocales[$activeLocale] ?? $supportedLocales['en'];
                     @endphp
-                    <button class="btn btn-sm d-flex align-items-center gap-1 px-2 py-1 rounded-pill border" type="button" id="langMenu" data-bs-toggle="dropdown" aria-expanded="false" style="background: var(--card-bg, #fff); font-size: 0.85rem;" title="{{ __('nav.change_language', 'Change Language') }}">
+                    <button class="btn btn-sm d-flex align-items-center gap-1 px-2 py-1 rounded-pill border" type="button" id="langMenu" data-bs-toggle="dropdown" aria-expanded="false" style="background: var(--card-bg, #fff); font-size: 0.85rem;" title="{{ __('nav.change_language', 'Change Language / Select locale') }}">
                         <span style="font-size: 1.1rem;">{{ $currLocale['flag'] }}</span>
                         <span class="d-none d-md-inline fw-semibold text-uppercase" style="font-size: 0.78rem;">{{ $activeLocale }}</span>
                     </button>
@@ -126,35 +126,35 @@
 
                 <!-- User Profile Dropdown (Refined Capsule with Avatar Monogram) -->
                 <div class="dropdown">
-                    <button class="btn btn-user-stitch dropdown-toggle d-flex align-items-center gap-2" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-user-stitch dropdown-toggle d-flex align-items-center gap-2" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false" title="Account profile and preferences menu">
                         <span class="user-avatar-initials">{{ strtoupper(substr($_SESSION['fullName'] ?? 'A', 0, 1)) }}</span>
                         <span class="fw-semibold text-truncate" style="max-width: 130px;">{{ ucwords(strtolower($_SESSION['fullName'] ?? 'Account')) }}</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-2" aria-labelledby="userMenu" style="border-radius: 16px; min-width: 200px;">
                         <li>
-                            <a class="dropdown-item py-2 px-3 fw-medium text-primary" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal">
+                            <a class="dropdown-item py-2 px-3 fw-medium text-primary" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" title="Invite family relatives and friends to join your family network">
                                 <i class="bi bi-person-plus-fill me-2 text-warning"></i> {{ __('nav.invite_others', 'Invite Others') }}
                             </a>
                         </li>
                         <li class="profileNav">
-                            <a class="dropdown-item py-2 px-3 fw-medium" href="/profile" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                            <a class="dropdown-item py-2 px-3 fw-medium" href="/profile" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Edit your personal profile information">
                                 <i class="bi bi-pencil-square me-2 text-primary"></i> {{ __('nav.edit_profile', 'Edit Profile') }}
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item py-2 px-3 fw-medium" href="/accountSetting">
+                            <a class="dropdown-item py-2 px-3 fw-medium" href="/accountSetting" title="Manage account settings and security preferences">
                                 <i class="bi bi-gear-fill me-2 text-secondary"></i> {{ __('nav.settings', 'Settings') }}
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item py-2 px-3 fw-medium d-flex align-items-center justify-content-between" href="javascript:void(0)" id="darkModeToggle" role="button">
+                            <a class="dropdown-item py-2 px-3 fw-medium d-flex align-items-center justify-content-between" href="javascript:void(0)" id="darkModeToggle" role="button" title="Toggle between dark and light appearance modes">
                                 <span><i class="bi bi-moon-stars-fill me-2 text-warning"></i> {{ __('nav.theme_mode', 'Theme Mode') }}</span>
                                 <span class="badge bg-secondary-subtle text-secondary" id="themeStatusBadge" style="font-size: 0.72rem;">Toggle</span>
                             </a>
                         </li>
                         <li><hr class="dropdown-divider my-1"></li>
                         <li>
-                            <a class="dropdown-item py-2 px-3 fw-medium text-danger" href="/signout">
+                            <a class="dropdown-item py-2 px-3 fw-medium text-danger" href="/signout" title="Sign out safely from your family account">
                                 <i class="bi bi-box-arrow-right me-2"></i> {{ __('nav.logout', 'Logout') }}
                             </a>
                         </li>

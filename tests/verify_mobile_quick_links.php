@@ -28,7 +28,7 @@ if (!file_exists($leftColPath)) {
     $requiredButtons = [
         'quickLinkThenNow' => 'Then & Now',
         'quickLinkUpcomingEvents' => 'Upcoming Events',
-        'quickLinkFamilyHeritage' => 'Family Heritage',
+        'quickLinkFamilyHeritage' => 'Family Rituals & Quests',
     ];
     
     foreach ($requiredButtons as $btnId => $label) {

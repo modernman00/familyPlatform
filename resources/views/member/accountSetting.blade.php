@@ -325,7 +325,7 @@
             </button>
           </div>
 
-          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold" style="font-size: 0.72rem; letter-spacing: 0.06em; border-top: 1px solid #f1f5f9;">
+          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold" id="familyConnectionsHeading" style="font-size: 0.72rem; letter-spacing: 0.06em; border-top: 1px solid #f1f5f9;">
             Family Connections
           </div>
           <div class="nav flex-column nav-pills" id="v-pills-family-tab" role="tablist" aria-orientation="vertical">
@@ -847,6 +847,29 @@
                   <div id="testNotifFeedback" class="small mt-2" style="display: none;"></div>
                 </div>
 
+                <!-- Icon & Button Tooltip Frequency & Guidance Control -->
+                <div class="custom-switch mt-3 pt-3 border-top">
+                  <div class="switch-info">
+                    <h6><i class="bi bi-info-circle-fill text-primary me-1"></i> Icon &amp; Button Explanatory Tooltips</h6>
+                    <p>Manage how frequently guidance tooltips appear when hovering over icons and buttons across the platform.</p>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <select id="tooltipModeSelect" class="form-select form-select-sm" style="max-width: 220px; font-size: 0.85rem; border-radius: 8px;">
+                      <option value="smart">💡 Smart (Hides Once Learned)</option>
+                      <option value="always">🟢 Always Show (Guided Mode)</option>
+                      <option value="off">⚪ Off (Minimal UI)</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="d-flex flex-wrap align-items-center justify-content-between mt-2 pt-1 mb-2">
+                  <small class="text-muted" style="font-size: 0.78rem; max-width: 440px; line-height: 1.4;">
+                    In <strong>Smart</strong> mode, tooltips appear only if you hesitate for &gt;450ms, and disappear once you click or view them 3 times.
+                  </small>
+                  <button type="button" id="resetTooltipMasteryBtn" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-inline-flex align-items-center" style="font-size: 0.75rem; min-height: 36px;" title="Reset your learned icons to view all tooltips again">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Learned Icons
+                  </button>
+                </div>
+
                 <button type="button" id="preferencesBtn" class="btn-save mt-3">Save Preferences</button>
               </form>
             </div>
@@ -1312,7 +1335,13 @@
       let targetTrigger = document.querySelector(`button[data-bs-target="#${cleanHash}"]`);
       let elementToFocus = null;
 
-      if (!targetTrigger) {
+      if (cleanHash === 'family-connections' || cleanHash === 'familyConnections') {
+        targetTrigger = document.getElementById('v-pills-parents-tab');
+        elementToFocus = document.getElementById('familyConnectionsHeading') || document.getElementById('v-pills-parents');
+      } else if (cleanHash === 'family-code-mgt' || cleanHash === 'familyCodeMgt') {
+        targetTrigger = document.getElementById('v-pills-familycode-tab');
+        elementToFocus = document.getElementById('birthFamilyCard') || document.getElementById('v-pills-familycode');
+      } else if (!targetTrigger) {
         // Check if hash matches an element inside a tab pane (e.g. #birthFamilyCard)
         const innerEl = document.getElementById(cleanHash);
         if (innerEl) {
@@ -2042,6 +2071,55 @@
         }
       });
     });
+
+    // Icon & Button Tooltip Frequency & Guidance Controls
+    const tooltipModeSelect = document.getElementById('tooltipModeSelect');
+    const resetTooltipMasteryBtn = document.getElementById('resetTooltipMasteryBtn');
+
+    if (tooltipModeSelect && window.FamilyTooltip) {
+      tooltipModeSelect.value = window.FamilyTooltip.getMode();
+      tooltipModeSelect.addEventListener('change', function() {
+        const selectedMode = this.value;
+        window.FamilyTooltip.setMode(selectedMode);
+        if (window.Swal) {
+          window.Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: 'Tooltip mode updated to ' + selectedMode.toUpperCase(),
+            showConfirmButton: false,
+            timer: 2000
+          });
+        }
+      });
+    }
+
+    if (resetTooltipMasteryBtn && window.FamilyTooltip) {
+      resetTooltipMasteryBtn.addEventListener('click', function() {
+        const origHtml = this.innerHTML;
+        window.FamilyTooltip.resetMastery();
+        this.innerHTML = '<i class="bi bi-check2 me-1"></i> Reset Complete!';
+        this.classList.remove('btn-outline-secondary');
+        this.classList.add('btn-success');
+        
+        setTimeout(() => {
+          this.innerHTML = origHtml;
+          this.classList.remove('btn-success');
+          this.classList.add('btn-outline-secondary');
+        }, 2200);
+
+        if (window.Swal) {
+          window.Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'info',
+            title: 'Learned icon memory reset. All tooltips will show again.',
+            showConfirmButton: false,
+            timer: 2500
+          });
+        }
+      });
+    }
   });
   </script>
         </div>

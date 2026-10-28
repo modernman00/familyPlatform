@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(release): Reels audio library & dual volume, multi-angle chrono sync, Family RoundTable peacemaker tribunal, I18n translation engine, and Global Design Standards v2.1",
+    "title": "Deliver race-conscious emoji picker, active GIF catalog, and omni-search lineage enhancements",
     "notes": [
-        "Feat(release): Reels audio library & dual volume, multi-angle chrono sync, Family RoundTable peacemaker tribunal, I18n translation engine, and Global Design Standards v2.1",
-        "Feat(security): Red Team & BRATS comprehensive audit remediation, Family RoundTable, Two Truths, PartyPlatform bridge & Reels parity",
-        "Build(webpack): set exportsPresence to warn for barrel re-exports in shared-js-lib"
+        "Deliver race-conscious emoji picker, active GIF catalog, and omni-search lineage enhancements",
+        "Feat(ai): wire interactive Post Outings Poll to Family Feed",
+        "Feat(ai): wire ResilientWebSearchService Live Family Weekend Outings Scout (shared-lib v2.10.0)"
     ],
-    "released_at": "2026-10-27",
-    "commit": "d0b50cb"
+    "released_at": "2026-10-28",
+    "commit": "4eeed23"
 }

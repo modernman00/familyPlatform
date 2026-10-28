@@ -11,16 +11,37 @@
                 </span>
             </div>
             <div class="avatar-container position-absolute w-100" style="top: 55px;" title="Click to enlarge profile photo" role="button" tabindex="0" aria-label="View {{ ucwords(strtolower($data['firstName'] ?? '')) }}'s profile photo in full size">
-                <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" 
-                     alt="{{ ucwords(strtolower($data['firstName'] ?? '')) }} {{ ucwords(strtolower($data['lastName'] ?? '')) }}" 
-                     class="avatar profileImg profile-avatar-interactive shadow-sm" 
-                     data-profile-expand="true"
-                     data-profile-name="{{ ucwords(strtolower($data['firstName'] ?? '')) }} {{ ucwords(strtolower($data['lastName'] ?? '')) }}"
-                     data-profile-subtitle="{{ __('profile.family_member', 'Family Member') }} • {{ $data['famCode'] ?? '' }}"
-                     data-can-edit="true"
-                     style="width: 105px; height: 105px; border-radius: 50%; border: 4px solid var(--card-bg); object-fit: cover; background: var(--card-bg);">
-                <div class="avatar-zoom-cue" aria-hidden="true" title="Enlarge photo">
-                    <i class="bi bi-arrows-angle-expand"></i>
+                <div class="position-relative d-inline-block">
+                    <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" 
+                         alt="{{ ucwords(strtolower($data['firstName'] ?? '')) }} {{ ucwords(strtolower($data['lastName'] ?? '')) }}" 
+                         class="avatar profileImg profile-avatar-interactive shadow-sm" 
+                         id="leftColProfileAvatar"
+                         data-profile-expand="true"
+                         data-profile-name="{{ ucwords(strtolower($data['firstName'] ?? '')) }} {{ ucwords(strtolower($data['lastName'] ?? '')) }}"
+                         data-profile-subtitle="{{ __('profile.family_member', 'Family Member') }} • {{ ltrim($data['famCode'] ?? '', '#') }}"
+                         data-can-edit="true"
+                         style="width: 105px; height: 105px; border-radius: 50%; border: 4px solid var(--card-bg); object-fit: cover; background: var(--card-bg); margin: 0 auto; display: block;">
+                    
+                    <!-- Zoom Cue -->
+                    <div class="avatar-zoom-cue" aria-hidden="true" title="Enlarge photo" style="right: auto; left: 0; bottom: 0;">
+                        <i class="bi bi-arrows-angle-expand"></i>
+                    </div>
+
+                    <!-- Direct Profile Image Change Camera Button Overlay -->
+                    <button type="button" 
+                            class="avatar-camera-btn shadow-sm" 
+                            id="directAvatarChangeBtn" 
+                            title="Change profile photo" 
+                            aria-label="Change profile photo"
+                            onclick="triggerDirectAvatarFileSelect(event)">
+                        <i class="bi bi-camera-fill"></i>
+                    </button>
+                    <input type="file" 
+                           id="directAvatarUploadInput" 
+                           name="direct_img" 
+                           accept="image/*" 
+                           style="display: none;" 
+                           onchange="handleDirectAvatarUpload(this)">
                 </div>
             </div>
         </div>
@@ -36,38 +57,50 @@
                 <span>{{ $data['country'] ?? 'Global' }}</span>
             </p>
 
-            <!-- Family Code Tonal Pill -->
+            <!-- Family Code Tonal Pill (without hash) -->
             <div class="family-code-pill mb-3">
                 <small class="family-code-label me-1">{{ __('profile.family_code', 'Family Code') }}:</small>
-                <span class="family-code-value"><i class="bi bi-hash"></i>{{ $data['famCode'] }}</span>
+                <span class="family-code-value">{{ ltrim($data['famCode'] ?? '', '#') }}</span>
             </div>
 
             <div class="d-flex flex-row flex-wrap flex-lg-column gap-2 px-2 w-100">
-                <a href="/family/fun-place" class="btn fw-bold flex-fill text-decoration-none text-center shadow-sm" style="background: linear-gradient(135deg, #6d28d9 0%, #db2777 100%); color: #ffffff !important; border: none; border-radius: 12px; padding: 10px 12px; font-size: 0.92rem; box-shadow: 0 4px 14px rgba(109, 40, 217, 0.3); min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-stars me-1.5 text-warning"></i> {{ __('profile.the_fun_place', 'The Fun Place') }}
+                <a href="/family/hub" class="btn fw-bold flex-fill text-decoration-none text-center shadow-sm" style="background: linear-gradient(135deg, #6d28d9 0%, #db2777 100%); color: #ffffff !important; border: none; border-radius: 12px; padding: 10px 12px; font-size: 0.92rem; box-shadow: 0 4px 14px rgba(109, 40, 217, 0.3); min-height: 44px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; flex-shrink: 0;" title="Family Hub - Access shared family applications and tools">
+                    <i class="bi bi-grid-fill me-1.5 text-warning"></i> {{ __('profile.family_hub', 'Family Hub') }}
                 </a>
 
-                <button type="button" class="btn btn-primary text-white fw-bold shadow-sm flex-fill" style="background-color: var(--primary-color, #a31621); border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px;" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                <a href="/organogram/{{ $data['id'] ?? '' }}?mode=canvas" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" title="Family Tree - View and build your interactive family lineage">
+                    <i class="bi bi-diagram-3-fill me-1.5" style="color: #059669;"></i> {{ __('profile.create_family_tree', 'Create Family Tree') }}
+                </a>
+
+                <button type="button" class="btn btn-primary text-white fw-bold shadow-sm flex-fill" style="background-color: var(--primary-color, #a31621); border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Edit Profile - Update your personal bio, photo, and details">
                     <i class="bi bi-pencil-square me-1.5"></i> {{ __('profile.edit_profile', 'Edit Profile') }}
                 </button>
 
-                <button type="button" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px;" data-bs-toggle="modal" data-bs-target="#createEventModal">
+                <a href="/accountSetting#family-connections" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" title="Family Connections - Manage friends, requests, and kin links">
+                    <i class="bi bi-people-fill me-1.5" style="color: #2563eb;"></i> {{ __('profile.family_connections', 'Family Connections') }}
+                </a>
+
+                <a href="/accountSetting#v-pills-familycode" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" title="Family Code Management - Manage and share your unique family codes">
+                    <i class="bi bi-qr-code me-1.5" style="color: #8b5cf6;"></i> {{ __('profile.family_code_mgt', 'Family Code Mgt') }}
+                </a>
+
+                <button type="button" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" data-bs-toggle="modal" data-bs-target="#createEventModal">
                     <i class="bi bi-calendar-plus me-1.5" style="color: #2563eb;"></i> {{ __('profile.create_event', 'Create Event') }}
                 </button>
 
-                <button type="button" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px;" data-bs-toggle="modal" data-bs-target="#createAnnouncementModal">
+                <button type="button" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" data-bs-toggle="modal" data-bs-target="#createAnnouncementModal">
                     <i class="bi bi-megaphone-fill me-1.5" style="color: #d97706;"></i> {{ __('profile.announcement', 'Announcement') }}
                 </button>
 
-                <a href="/familyJournal" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px;">
-                    <i class="bi bi-journal-bookmark-fill me-1.5" style="color: #059669;"></i> {{ __('profile.family_journal', 'Family Journal') }}
+                <a href="/familyJournal" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;">
+                    <i class="bi bi-journal-bookmark-fill me-1.5" style="color: #059669;"></i> Family Journal
                 </a>
 
-                <a href="/family/roundtable" class="btn fw-semibold flex-fill text-decoration-none text-center shadow-xs" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #ffffff !important; border: 1.5px solid #d4af37; border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-shield-shaded me-1.5 text-warning"></i> {{ __('profile.family_roundtable', 'Family RoundTable') }}
+                <a href="/family/roundtable" class="btn fw-semibold flex-fill text-decoration-none text-center shadow-xs" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #ffffff !important; border: 1.5px solid #d4af37; border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; flex-shrink: 0;">
+                    <i class="bi bi-shield-shaded me-1.5 text-warning"></i> Family RoundTable
                 </a>
 
-                <button type="button" id="directToImages" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px;" onclick="window.location.href='/profilepage/gallery'">
+                <button type="button" id="directToImages" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" onclick="window.location.href='/profilepage/gallery'">
                     <i class="bi bi-images me-1.5" style="color: #6366f1;"></i> {{ __('profile.photo_gallery', 'Photo Gallery') }}
                 </button>
 
@@ -79,8 +112,8 @@
                     <i class="bi bi-calendar-event-fill me-1.5" style="color: #2563eb;"></i> {{ __('profile.upcoming_events', 'Upcoming Events') }}
                 </button>
 
-                <button type="button" id="quickLinkFamilyHeritage" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" onclick="scrollToProfileWidget('familyHeritageSection')" aria-label="{{ __('profile.family_heritage', 'Family Heritage') }}">
-                    <i class="bi bi-stars me-1.5" style="color: #059669;"></i> {{ __('profile.family_heritage', 'Family Heritage') }}
+                <button type="button" id="quickLinkFamilyHeritage" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" onclick="scrollToProfileWidget('familyHeritageSection')" aria-label="{{ __('profile.family_heritage', 'Family Rituals & Quests') }}">
+                    <i class="bi bi-stars me-1.5" style="color: #059669;"></i> {{ __('profile.family_heritage', 'Family Rituals & Quests') }}
                 </button>
 
                 <a href="/how-to-use" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;">
@@ -130,6 +163,152 @@
                     }, 2500);
                 }
                 return false;
+            };
+
+            window.triggerDirectAvatarFileSelect = function(e) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                var input = document.getElementById('directAvatarUploadInput');
+                if (input) {
+                    input.click();
+                }
+            };
+
+            window.handleDirectAvatarUpload = async function(input) {
+                if (!input || !input.files || input.files.length === 0) return;
+                var file = input.files[0];
+                if (!file) return;
+
+                if (!file.type.startsWith('image/')) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Invalid File',
+                            text: 'Please select a valid image file (JPG, PNG, GIF, WebP).',
+                            confirmButtonColor: '#a31621'
+                        });
+                    } else {
+                        alert('Please select a valid image file.');
+                    }
+                    input.value = '';
+                    return;
+                }
+
+                if (file.size > 10 * 1024 * 1024) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'File Too Large',
+                            text: 'Profile image size must not exceed 10 MB.',
+                            confirmButtonColor: '#a31621'
+                        });
+                    } else {
+                        alert('Profile image size must not exceed 10 MB.');
+                    }
+                    input.value = '';
+                    return;
+                }
+
+                // Instant client preview across all avatars
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var previewUrl = e.target.result;
+                    document.querySelectorAll('.avatar.profileImg, #profilePreview, #pfViewerThumb, #pfViewerMainImg').forEach(function(img) {
+                        img.src = previewUrl;
+                    });
+                };
+                reader.readAsDataURL(file);
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Updating Profile Picture...',
+                        text: 'Uploading and saving your new photo.',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        didOpen: function() {
+                            Swal.showLoading();
+                        }
+                    });
+                }
+
+                var formData = new FormData();
+                formData.append('img', file);
+                formData.append('id', @json((string)($data['id'] ?? '')));
+
+                var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content 
+                    || document.querySelector('input[name="token"]')?.value 
+                    || @json($_SESSION['token'] ?? '');
+                if (csrfToken) {
+                    formData.append('token', csrfToken);
+                }
+
+                try {
+                    var response = await fetch('/member/profilePage/editProfile', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
+                        }
+                    });
+
+                    var result = await response.json().catch(function() { return {}; });
+
+                    if (response.ok) {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: 'Profile picture updated successfully!',
+                                showConfirmButton: false,
+                                timer: 1500,
+                                timerProgressBar: true
+                            });
+                        }
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 900);
+                    } else {
+                        var errMsg = result.message || result.error || 'Failed to update profile picture. Please try again.';
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Upload Failed',
+                                text: errMsg,
+                                confirmButtonColor: '#a31621',
+                                showCancelButton: true,
+                                confirmButtonText: 'Open Edit Profile',
+                                cancelButtonText: 'Dismiss'
+                            }).then(function(res) {
+                                if (res.isConfirmed) {
+                                    var modalEl = document.getElementById('editProfileModal');
+                                    if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+                                        window.bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                                    }
+                                }
+                            });
+                        } else {
+                            alert(errMsg);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Direct Avatar Upload Error:', err);
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Network Error',
+                            text: 'Could not connect to the server. Please try again.',
+                            confirmButtonColor: '#a31621'
+                        });
+                    } else {
+                        alert('Network error while updating profile picture.');
+                    }
+                } finally {
+                    input.value = '';
+                }
             };
             </script>
 

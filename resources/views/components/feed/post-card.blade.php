@@ -76,7 +76,7 @@
         </div>
         <template x-if="isOwnPost(post) || isUserTaggedInPost(post)">
           <div class="dropdown">
-            <button class="btn btn-sm btn-link text-muted p-1 rounded-circle" type="button" :id="'kebab' + post.post_no" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;" title="Post options">
+            <button class="btn btn-sm btn-link text-muted p-1 rounded-circle" type="button" :id="'kebab' + post.post_no" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;" title="Post options - Edit or remove this post" aria-label="Post options">
               <i class="bi bi-three-dots" style="font-size: 1.25rem;"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" :aria-labelledby="'kebab' + post.post_no" style="border-radius: 12px; font-size: 0.9rem; min-width: 160px;">
@@ -188,19 +188,24 @@
     <div class="row g-2 mb-3 px-1">
       <template x-for="(img, idx) in post.images" :key="idx">
         <div :class="(post.images.length === 1 ? 'col-12' : (post.images.length === 3 && idx === 0 ? 'col-12' : 'col-6')) + ' post-img-col'">
-          <div class="position-relative overflow-hidden" style="border-radius:10px;">
+          <div class="position-relative overflow-hidden post-media-stage" style="border-radius:10px;">
             <a href="#" 
-               @click.prevent="openLightbox(post.images, idx)" 
+               @click.prevent="typeof handleImageTap === 'function' ? handleImageTap(post, post.images, idx, $event) : openLightbox(post.images, idx)" 
                @dblclick.prevent.stop="triggerHeartBurst(post, idx)"
                role="button" 
                aria-label="View enlarged photo or double tap to like" 
                style="display:block; overflow:hidden; border-radius:10px; position:relative;">
-              <img :src="(img && (img.startsWith('/public/') || img.startsWith('/images/'))) ? img : getPostImageUrl(img)" 
-                   class="post-media-first-img w-100"
-                   style="border-radius: 10px; max-height: 380px; object-fit: cover; cursor: pointer;" 
-                   alt="Family post image" 
-                   loading="lazy"
-                   onerror="this.onerror=null; const c = this.closest('.post-img-col'); if(c) c.style.display='none';">
+              <picture class="w-100 d-block" style="border-radius: 10px; overflow: hidden;">
+                <source :srcset="getPostImageVariantUrl(img, 'avif')" type="image/avif">
+                <source :srcset="getPostImageVariantUrl(img, 'webp')" type="image/webp">
+                <img :src="(img && (img.startsWith('/public/') || img.startsWith('/images/'))) ? img : getPostImageUrl(img)" 
+                     class="post-media-first-img w-100"
+                     style="border-radius: 10px; max-height: 480px; object-fit: cover; cursor: pointer;" 
+                     alt="Family post image" 
+                     loading="lazy"
+                     decoding="async"
+                     onerror="this.onerror=null; const c = this.closest('.post-img-col'); if(c) c.style.display='none';">
+              </picture>
             </a>
 
             <!-- Floating Spring Heart Burst (Instagram Standard) -->
@@ -402,6 +407,8 @@
               :class="post.user_reaction ? 'fw-semibold' : 'text-muted'"
               :style="post.user_reaction ? 'color: #1877f2; font-size:0.95rem; font-weight:600;' : 'font-size:0.95rem; font-weight:500;'"
               type="button"
+              :title="post.user_reaction ? ('Reacted: ' + (emojiMap[post.user_reaction]?.label || 'Liked') + ' - Click to change reaction') : 'React with love and appreciation'"
+              :aria-label="post.user_reaction ? ('Reacted ' + (emojiMap[post.user_reaction]?.label || 'Liked')) : 'Like this post'"
               @click="onPostLikeClick(post.post_no, post.user_reaction || 'like')"
               @touchstart.passive="startPostLongPress(post.post_no)"
               @touchend="cancelPostLongPress()"
@@ -418,6 +425,8 @@
     <button class="btn btn-link text-decoration-none text-muted flex-grow-1 py-2 d-flex align-items-center justify-content-center gap-2"
             style="font-size: 0.95rem; font-weight: 500; min-height: 44px;"
             type="button"
+            title="Write or view family comments on this post"
+            aria-label="Comment on this post"
             @click="toggleCommentForm(post.post_no)">
       <i class="bi bi-chat-bubble"></i>
       {{ __('feed.comment', 'Comment') }}
@@ -431,7 +440,8 @@
             style="font-size: 0.95rem; font-weight: 500; min-height: 44px;"
             type="button"
             @click="sharePostToSocialMedia(post)"
-            title="{{ __('feed.share', 'Share') }}">
+            title="Share with family relatives or via social apps"
+            aria-label="Share this post">
       <i class="bi bi-share"></i>
       {{ __('feed.share', 'Share') }}
     </button>
@@ -550,23 +560,24 @@
                      :data-comment-input="post.post_no"
                      x-model="commentInputs[post.post_no]" :required="!commentGifs[post.post_no]"
                      @input="handleCommentInput(post.post_no, $event)"
+                     @paste="handleCommentPaste(post.post_no, $event)"
                      @keydown="handleCommentKeydown(post.post_no, $event)">
               <button type="button" class="comment-composer__tool"
                       @click="toggleCommentEmoji(post.post_no)"
                       :aria-expanded="commentEmojiOpen[post.post_no] ? 'true' : 'false'"
-                      title="Add emoji" aria-label="Add emoji">
+                      title="Add Emoji - Express with emoji reactions in this comment" aria-label="Add emoji">
                 <i class="bi bi-emoji-smile"></i>
               </button>
               <button type="button" class="comment-composer__tool"
                       @click="toggleCommentGif(post.post_no)"
                       :aria-expanded="commentGifOpen[post.post_no] ? 'true' : 'false'"
                       data-testid="comment-gif-btn"
-                      title="Add GIF" aria-label="Add GIF">
+                      title="Add GIF - Search and attach an animated GIF to your comment" aria-label="Add GIF">
                 <i class="bi bi-filetype-gif"></i>
               </button>
             </div>
           </div>
-          <button type="submit" class="comment-composer__send" aria-label="Post comment" title="Post"
+          <button type="submit" class="comment-composer__send" aria-label="Post comment" title="Submit Comment - Publish your comment to this family post"
                   :class="((commentInputs[post.post_no] && commentInputs[post.post_no].trim()) || commentGifs[post.post_no]) ? 'is-active' : ''">
             <i class="bi bi-send-fill"></i>
           </button>

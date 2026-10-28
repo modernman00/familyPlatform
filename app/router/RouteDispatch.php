@@ -92,8 +92,13 @@ final class RouteDispatch
         if (!in_array($controller, $publicControllers, true)) {
             if (empty($_SESSION['id'])) {
                 $tokenName = $_ENV['COOKIE_TOKEN_LOGIN'] ?? 'familyCookie';
+                $isJsonRequest = (isset($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'))
+                    || (isset($_SERVER['CONTENT_TYPE']) && str_contains($_SERVER['CONTENT_TYPE'], 'application/json'))
+                    || (isset($_SERVER['REQUEST_URI']) && (str_contains($_SERVER['REQUEST_URI'], '/api/') || str_contains($_SERVER['REQUEST_URI'], '/pushNotification/')))
+                    || (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+
                 if (empty($_COOKIE[$tokenName])) {
-                    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                    if ($isJsonRequest) {
                         throw new UnauthorisedException("Unauthorized");
                     }
                     redirect('login');
@@ -102,7 +107,7 @@ final class RouteDispatch
 
                 $VerifyJWT = SignIn::verify();
                 if (!\is_array($VerifyJWT) || empty($VerifyJWT['id'])) {
-                    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                    if ($isJsonRequest) {
                         throw new UnauthorisedException("Unauthorized");
                     }
                     redirect('login');

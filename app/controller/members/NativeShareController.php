@@ -267,10 +267,16 @@ final class NativeShareController
 
         if ($isShortcut) {
             if (!headers_sent()) {
-                header('Content-Type: application/octet-stream');
+                header('Content-Type: application/x-apple-shortcut');
                 header('Content-Disposition: attachment; filename="ShareToFamilyPlatform.shortcut"');
             }
-            echo $this->generateShortcutPlist($uploadUrl, $famCode, $userToken);
+            // Prefer the pre-signed template (required by iOS 15+; hosts without plutil cannot sign).
+            $signedTemplate = __DIR__ . '/../../../public/shortcuts/ShareToFamilyPlatform.shortcut';
+            if (is_file($signedTemplate)) {
+                readfile($signedTemplate);
+                return;
+            }
+            echo $this->toBinaryPlist($this->generateShortcutPlist($uploadUrl, $famCode, $userToken));
             return;
         }
 
@@ -321,8 +327,9 @@ final class NativeShareController
         }
 
         // 4. Request body parameters
-        $bodyFamCode = $_POST['famCode'] ?? $_POST['fam_code'] ?? null;
-        $bodyUserToken = $_POST['user_token'] ?? $_POST['user_id'] ?? null;
+        // Query-string values come from the link pasted into the signed iOS shortcut.
+        $bodyFamCode = $_POST['famCode'] ?? $_POST['fam_code'] ?? $_GET['fam_code'] ?? null;
+        $bodyUserToken = $_POST['user_token'] ?? $_POST['user_id'] ?? $_GET['user_token'] ?? null;
 
         $famCodeCandidate = is_string($headerFamCode) ? trim($headerFamCode) : (is_string($bodyFamCode) ? trim($bodyFamCode) : null);
         $userCandidate = is_string($headerUserToken) ? trim($headerUserToken) : (is_string($bodyUserToken) ? trim($bodyUserToken) : null);
@@ -432,6 +439,35 @@ final class NativeShareController
     }
 
     /**
+     * Converts an XML plist to Apple binary plist (bplist00) when plutil is available
+     * (macOS hosts). Falls back to the XML string unchanged elsewhere.
+     */
+    private function toBinaryPlist(string $xml): string
+    {
+        if (PHP_OS_FAMILY !== 'Darwin' || !function_exists('proc_open')) {
+            return $xml;
+        }
+
+        $process = @proc_open(
+            ['plutil', '-convert', 'binary1', '-o', '-', '-'],
+            [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
+            $pipes
+        );
+        if (!is_resource($process)) {
+            return $xml;
+        }
+
+        fwrite($pipes[0], $xml);
+        fclose($pipes[0]);
+        $binary = stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $exit = proc_close($process);
+
+        return ($exit === 0 && is_string($binary) && str_starts_with($binary, 'bplist00')) ? $binary : $xml;
+    }
+
+    /**
      * Generates an Apple Shortcut Property List for FamilyPlatform.
      */
     private function generateShortcutPlist(string $uploadUrl, string $famCode, string $userToken = ''): string
@@ -477,6 +513,41 @@ final class NativeShareController
 {$tokenHeaderXml}                </dict>
                 <key>WFHTTPBodyType</key>
                 <string>Form</string>
+                <key>WFFormValues</key>
+                <dict>
+                    <key>Value</key>
+                    <dict>
+                        <key>WFDictionaryFieldValueItems</key>
+                        <array>
+                            <dict>
+                                <key>WFItemType</key>
+                                <integer>5</integer>
+                                <key>WFKey</key>
+                                <dict>
+                                    <key>Value</key>
+                                    <dict>
+                                        <key>string</key>
+                                        <string>photo</string>
+                                    </dict>
+                                    <key>WFSerializationType</key>
+                                    <string>WFTextTokenString</string>
+                                </dict>
+                                <key>WFValue</key>
+                                <dict>
+                                    <key>Value</key>
+                                    <dict>
+                                        <key>Type</key>
+                                        <string>ExtensionInput</string>
+                                    </dict>
+                                    <key>WFSerializationType</key>
+                                    <string>WFTextTokenAttachment</string>
+                                </dict>
+                            </dict>
+                        </array>
+                    </dict>
+                    <key>WFSerializationType</key>
+                    <string>WFDictionaryFieldValue</string>
+                </dict>
             </dict>
         </dict>
         <dict>

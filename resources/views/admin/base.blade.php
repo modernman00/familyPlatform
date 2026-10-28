@@ -159,6 +159,7 @@
 
         <script src="/index.js"></script>
         <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+        <script src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
 

@@ -239,6 +239,7 @@
   <script type="text/javascript" src="/public/js/manifest.js?v=1.0.2"></script>
   <script type="text/javascript" src="/public/js/vendor.js?v=1.0.2"></script>
   <script type="text/javascript" src="/public/js/index.js?v=1.0.2"></script>
+  <script type="text/javascript" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
   
   @yield('extra_js')
 

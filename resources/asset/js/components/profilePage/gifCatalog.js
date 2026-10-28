@@ -61,11 +61,20 @@ export const FAMILY_GIFS = [
     { id: 'g_kid_1', cat: 'kids', title: 'Cute Baby Dancing', url: 'https://media.giphy.com/media/26ufdipQqU2lhNA4g/200.gif' },
     { id: 'g_kid_2', cat: 'kids', title: 'Toddler Big Thumbs Up', url: 'https://media.giphy.com/media/l0Exk8EUzSLsrErEQ/200.gif' },
     { id: 'g_kid_3', cat: 'kids', title: 'Excited Happy Kid', url: 'https://media.giphy.com/media/3o7527pa7qs9kCG78A/200.gif' },
-    { id: 'g_kid_4', cat: 'kids', title: 'Kids High Five', url: 'https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/200.gif' }
+    { id: 'g_kid_4', cat: 'kids', title: 'Kids High Five', url: 'https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/200.gif' },
+
+    // Stickers & Expressive Reactions
+    { id: 'g_stk_1', cat: 'stickers', title: 'Heart Love Sticker', url: 'https://media.giphy.com/media/M90mJvfWfd5mbUuULX/200.gif' },
+    { id: 'g_stk_2', cat: 'stickers', title: 'Thumbs Up Cool Sticker', url: 'https://media.giphy.com/media/l0Exk8EUzSLsrErEQ/200.gif' },
+    { id: 'g_stk_3', cat: 'stickers', title: 'Party Confetti Celebration Sticker', url: 'https://media.giphy.com/media/artj92V8o75VPL7AeQ/200.gif' },
+    { id: 'g_stk_4', cat: 'stickers', title: 'Hugs Bear Sticker', url: 'https://media.giphy.com/media/3bqtLDeiDtwhq/200.gif' },
+    { id: 'g_stk_5', cat: 'stickers', title: 'High Five Teamwork Sticker', url: 'https://media.giphy.com/media/3oEjHV0z8S7WM4MwnK/200.gif' },
+    { id: 'g_stk_6', cat: 'stickers', title: 'Happy Dance Groove Sticker', url: 'https://media.giphy.com/media/blSTtZehjAZ8I/200.gif' }
 ];
 
 export const GIF_CATEGORIES = [
     { key: 'all', label: '🌟 All' },
+    { key: 'stickers', label: '🏷️ Stickers' },
     { key: 'celebrate', label: '🎉 Celebrate' },
     { key: 'love', label: '❤️ Love & Hugs' },
     { key: 'family', label: '👨‍👩‍👧‍👦 Family' },
@@ -75,4 +84,27 @@ export const GIF_CATEGORIES = [
     { key: 'kids', label: '👶 Kids' }
 ];
 
-export const isAllowedGifUrl = (url) => /^https:\/\/(media\d*\.)?giphy\.com\//.test(String(url || ''));
+export const isAllowedGifUrl = (url) => {
+    if (!url || typeof url !== 'string') return false;
+    const trimmed = url.trim();
+    if (trimmed.startsWith('/resources/images/post/comment_') || trimmed.startsWith('/resources/images/post/')) {
+        return true;
+    }
+    if (!/^https?:\/\//i.test(trimmed)) return false;
+    try {
+        const parsed = new URL(trimmed);
+        const host = parsed.hostname.toLowerCase();
+        if (['localhost', '127.0.0.1', '::1', '0.0.0.0'].includes(host)
+            || host.startsWith('10.')
+            || host.startsWith('192.168.')
+            || host.startsWith('169.254.')
+            || /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host)
+        ) {
+            return false;
+        }
+        if (/(\.giphy\.com|\.tenor\.com|giphy\.com|tenor\.com)$/.test(host)) return true;
+        return false;
+    } catch (_) {
+        return false;
+    }
+};

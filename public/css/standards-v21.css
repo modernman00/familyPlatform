@@ -363,7 +363,7 @@ img, video { max-width: 100%; height: auto; }
 @media (min-width: 768px) and (max-width: 1199.98px) {
   body .container-main {
     display: grid;
-    grid-template-columns: minmax(0, 1.75fr) minmax(260px, 1fr);
+    grid-template-columns: minmax(0, 1.4fr) minmax(340px, 1fr);
     gap: 20px;
     padding: 20px;
     align-items: start;
@@ -943,3 +943,351 @@ h1, h2, h3, h4, h5, h6, .navbar, .modal, .dropdown-menu, .swal2-popup, .swal2-ti
     text-decoration: underline !important;
     opacity: 0.9;
 }
+
+/* ==========================================================================
+   Design System: Dual-Form Architecture (Instagram Mobile & Facebook Desktop)
+   Per design.md (v2.1 live specification)
+   ========================================================================== */
+
+/* 1. Mobile Feed Layout: Instagram Mirror (< 992px) */
+@media (max-width: 991.98px) {
+  /* In Instagram Mirror, feed starts immediately at top; left profile column is deferred to bottom nav */
+  .profile-column {
+    display: none !important;
+  }
+
+  .container-main {
+    flex-direction: column !important;
+    padding: 8px 4px calc(72px + env(safe-area-inset-bottom, 0px)) 4px !important;
+    max-width: 500px !important;
+    margin: 0 auto !important;
+  }
+
+  .feed-column {
+    order: 1 !important;
+    width: 100% !important;
+    max-width: 480px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+
+  .sidebar-column {
+    order: 2 !important;
+    width: 100% !important;
+    max-width: 480px !important;
+    margin: 16px auto 0 auto !important;
+    position: static !important;
+    max-height: none !important;
+  }
+
+  .reels-tray-wrapper {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin-bottom: 12px !important;
+    box-shadow: none !important;
+  }
+}
+
+/* 2. Instagram Mobile Story Circles (< 768px) */
+.ig-stories-tray {
+  margin-bottom: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+}
+
+.ig-stories-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 4px;
+}
+.ig-stories-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.ig-story-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  flex-shrink: 0;
+  width: 66px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.ig-story-avatar-wrap {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5px;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ig-story-avatar-wrap:active {
+  transform: scale(0.94);
+}
+
+/* Instagram Multi-Colour Gradient Ring */
+.ig-story-avatar-wrap.is-active {
+  background: linear-gradient(45deg, #ff3040, #f77737, #fcaf45);
+}
+
+/* Birthday / Milestone Radiant Gold Ring */
+.ig-story-avatar-wrap.is-gold {
+  background: linear-gradient(45deg, #ffd700, #ffa500);
+}
+
+/* Self / Add Story Ring */
+.ig-story-avatar-wrap.is-self {
+  background: transparent;
+  padding: 0;
+}
+
+.ig-story-avatar {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ffffff;
+  display: block;
+  background-color: #f1f5f9;
+}
+body.dark-mode .ig-story-avatar,
+body.dark-theme .ig-story-avatar {
+  border-color: #000000;
+  background-color: #1e293b;
+}
+
+.ig-story-plus-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: #0095f6;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 149, 246, 0.4);
+}
+body.dark-mode .ig-story-plus-badge,
+body.dark-theme .ig-story-plus-badge {
+  border-color: #000000;
+}
+
+.ig-story-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-color, #262626);
+  max-width: 66px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* 3. Edge-to-Edge Feed Post Cards on Mobile (< 576px) */
+@media (max-width: 576px) {
+  .feed-post-card {
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    border-bottom: 1px solid var(--border-color, #e2e8f0) !important;
+    box-shadow: none !important;
+    margin-bottom: 8px !important;
+    padding: 12px 0 !important;
+  }
+
+  .feed-post-card .post-content,
+  .feed-post-card .px-1 {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .feed-post-card .post-images-row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .feed-post-card .post-img-col {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .feed-post-card .post-media-stage {
+    border-radius: 0 !important;
+  }
+
+  .feed-post-card .post-media-stage a,
+  .feed-post-card .post-media-first-img {
+    border-radius: 0 !important;
+    max-height: 480px !important;
+    width: 100% !important;
+    object-fit: cover;
+  }
+}
+
+/* 4. Desktop Facebook Mirror Styling (> 992px) */
+@media (min-width: 992px) {
+  .container-main {
+    display: flex !important;
+    gap: 24px !important;
+    max-width: 1240px !important;
+    margin: 0 auto !important;
+    padding: 20px !important;
+  }
+
+  .profile-column {
+    display: block !important;
+    flex: 0 0 280px !important;
+    position: sticky !important;
+    top: calc(76px + env(safe-area-inset-top, 0px)) !important;
+    max-height: calc(100vh - 90px) !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin;
+  }
+
+  .feed-column {
+    flex: 1 1 580px !important;
+    max-width: 620px !important;
+    min-width: 0 !important;
+  }
+
+  .sidebar-column {
+    display: block !important;
+    flex: 0 0 310px !important;
+    position: sticky !important;
+    top: calc(76px + env(safe-area-inset-top, 0px)) !important;
+    max-height: calc(100vh - 90px) !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin;
+  }
+}
+
+/* ==========================================================================
+   ⚡ Next-Gen Visual Supremacy Engine (VSE) — Display P3 & 2.5D Parallax
+   ========================================================================== */
+@supports (color: color(display-p3 1 0 0)) {
+  :root.vse-p3-capable {
+    --brand-primary-p3: color(display-p3 0.639 0.086 0.129);
+    --vse-specular-edge: color(display-p3 1 1 1 / 0.12);
+    --vse-crimson-glow: color(display-p3 0.85 0.12 0.2 / 0.18);
+  }
+}
+
+.post-media-stage {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  contain: layout paint;
+  border-radius: var(--radius-md, 12px);
+  background-color: #0b0f19; /* OLED deep black anchor */
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.15);
+  transition: box-shadow var(--motion-base, 250ms) var(--ease, cubic-bezier(.16, 1, .3, 1));
+}
+
+.post-media-stage:hover {
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.25), 0 0 18px 0 var(--vse-crimson-glow, rgba(163, 22, 33, 0.12));
+}
+
+.post-media-first-img {
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post-media-stage,
+  .post-media-first-img {
+    perspective: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ==============================================================================
+   🌟 Universal Icon & Button Explanatory Tooltip Styling (v2.1 Global Standard)
+   Obsidian Glassmorphic Card, Crisp White Typography, GPU-Accelerated Micro-Elevation
+   ============================================================================== */
+.family-tooltip-container {
+  position: fixed;
+  z-index: 100050;
+  display: none;
+  pointer-events: none;
+  opacity: 0;
+  max-width: 280px;
+  background: rgba(15, 23, 42, 0.94);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: #ffffff !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.015em;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 6px 20px -2px rgba(0, 0, 0, 0.35), 0 2px 6px 0 rgba(0, 0, 0, 0.18);
+  transition: opacity 120ms cubic-bezier(0.16, 1, 0.3, 1), transform 120ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+  text-align: center;
+  word-wrap: break-word;
+}
+
+.family-tooltip-arrow {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: rgba(15, 23, 42, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  transform: rotate(45deg);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.family-tooltip-container[data-placement="top"] .family-tooltip-arrow {
+  border-top: none;
+  border-left: none;
+}
+
+.family-tooltip-container[data-placement="bottom"] .family-tooltip-arrow {
+  border-bottom: none;
+  border-right: none;
+}
+
+/* Dark mode parity */
+body.dark-mode .family-tooltip-container,
+body.dark-theme .family-tooltip-container,
+[data-bs-theme="dark"] .family-tooltip-container {
+  background: rgba(2, 6, 23, 0.96);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .family-tooltip-container {
+    transition: none !important;
+  }
+}
+

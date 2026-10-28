@@ -62,7 +62,7 @@
                 <!-- Actions (Search & Config) -->
                 <div class="header-actions d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-2 gap-md-2">
                     @if(empty($isSelf) && empty($graphData['has_built_tree']))
-                    <button type="button" class="btn btn-warning text-dark px-3 py-2 fw-bold d-inline-flex align-items-center shadow-sm btn-prompt-tree-action" id="btnHeaderPromptBuildTree" onclick="window.promptMemberToBuildTree()" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
+                    <button type="button" class="btn btn-warning text-dark px-3 py-2 fw-bold d-inline-flex align-items-center shadow-sm btn-prompt-tree-action" id="btnHeaderPromptBuildTree" onclick="window.promptMemberToBuildTree()" style="border-radius: 50px; min-height: 44px; white-space: nowrap;" title="Invite relative to connect their branch of the family tree">
                         <i class="bi bi-envelope-heart-fill me-2 text-dark"></i> Invite {{ explode(' ', trim($data['firstName'] ?? 'Them'))[0] }} to Connect Branch
                     </button>
                     @endif
@@ -127,7 +127,7 @@
                 <i class="bi bi-list-nested text-success"></i>
                 <span>Pedigree Outline</span>
             </button>
-            <button type="button" id="btnModeFanChart" class="layout-segment-btn" onclick="switchTreeViewMode('fanchart')" title="Radial 360° Fan: Concentric pedigree wheel with color-coded ancestral quadrants">
+            <button type="button" id="btnModeFanChart" class="layout-segment-btn" onclick="switchTreeViewMode('fanchart')" title="Radial 360° Fan: Concentric pedigree wheel with colour-coded ancestral quadrants">
                 <i class="bi bi-pie-chart-fill text-warning"></i>
                 <span>Radial 360° Fan</span>
             </button>

@@ -540,14 +540,34 @@ final class NotificationController extends Select
                 $inputData = [];
             }
 
+            if (empty($_SESSION['id'])) {
+                try {
+                    \Src\functionality\SignIn::rehydrateSession();
+                } catch (\Throwable) {}
+            }
+            if (empty($_SESSION['id'])) {
+                try {
+                    $verify = \Src\functionality\SignIn::verify();
+                    if (is_array($verify) && !empty($verify['id'])) {
+                        $_SESSION['id'] = cleanSession((string)$verify['id']);
+                    }
+                } catch (\Throwable) {}
+            }
+
             // Robust CSRF verification across headers and JSON payload
             $sessionToken = $_SESSION['token'] ?? '';
             $requestToken = $_SERVER['HTTP_X_XSRF_TOKEN'] 
                 ?? $_SERVER['HTTP_X_CSRF_TOKEN'] 
                 ?? $_SERVER['HTTP_CSRF_TOKEN'] 
+                ?? ($_COOKIE['XSRF-TOKEN'] ?? '')
                 ?? ($inputData['token'] ?? ($_POST['token'] ?? ''));
 
-            if (empty($sessionToken) || !is_string($requestToken) || !hash_equals($sessionToken, $requestToken)) {
+            $csrfValid = (!empty($sessionToken) && is_string($requestToken) && hash_equals($sessionToken, $requestToken));
+            if (!$csrfValid && !empty($_COOKIE['XSRF-TOKEN']) && is_string($requestToken)) {
+                $csrfValid = hash_equals((string)$_COOKIE['XSRF-TOKEN'], $requestToken);
+            }
+
+            if (!$csrfValid && empty($_SESSION['id'])) {
                 msgException(401, 'Unauthorized CSRF Token');
                 return;
             }

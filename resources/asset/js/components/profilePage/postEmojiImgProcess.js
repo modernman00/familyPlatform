@@ -6,7 +6,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import { guessPhotoYear } from '../helper/photoDate';
 import { openGhostCamera } from './thenNowGhostCamera';
-import { FAMILY_GIFS } from './gifCatalog';
+import { FAMILY_GIFS, isAllowedGifUrl } from './gifCatalog';
 
 // Helper to smooth scroll an element into view within the scrollable modal body
 const scrollDrawerIntoView = (el) => {
@@ -650,6 +650,55 @@ const detachGif = () => {
     currentAttachedGifUrl = '';
 };
 
+// Intercept clipboard paste for mobile keyboard rich content (Memojis, Stickers, GIFs & photos)
+const composerTextarea = document.getElementById('postMessage') || document.querySelector('.composer-text');
+const postImageUploadInput = document.getElementById('imageUpload');
+
+if (composerTextarea) {
+    composerTextarea.addEventListener('paste', (e) => {
+        const clipboard = e.clipboardData || window.clipboardData;
+        if (!clipboard) return;
+
+        // 1. Check for binary image files (pasted stickers, Memojis, mobile keyboard GIFs)
+        const items = clipboard.items;
+        if (items && items.length) {
+            const pastedImages = [];
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                if (item.kind === 'file' && item.type.startsWith('image/')) {
+                    const blob = item.getAsFile();
+                    if (blob) {
+                        const ext = item.type.split('/')[1] || 'png';
+                        const file = new File([blob], `sticker_${Date.now()}_${i}.${ext}`, { type: item.type });
+                        pastedImages.push(file);
+                    }
+                }
+            }
+
+            if (pastedImages.length > 0 && postImageUploadInput) {
+                e.preventDefault();
+                const dt = new DataTransfer();
+                if (postImageUploadInput.files) {
+                    Array.from(postImageUploadInput.files).forEach(f => dt.items.add(f));
+                }
+                pastedImages.forEach(f => dt.items.add(f));
+                postImageUploadInput.files = dt.files;
+                postImageUploadInput.dispatchEvent(new Event('change', { bubbles: true }));
+                return;
+            }
+        }
+
+        // 2. Check for pasted GIF / image URLs as plain text
+        const pastedText = clipboard.getData('text/plain');
+        if (pastedText && isAllowedGifUrl(pastedText.trim())) {
+            const url = pastedText.trim();
+            if (/\.(gif|webp)(\?|$)/i.test(url) || /giphy\.com|tenor\.com/.test(url)) {
+                attachGif(url);
+            }
+        }
+    });
+}
+
 if (removeSelectedGifBtn) {
     removeSelectedGifBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -1007,7 +1056,7 @@ if (closeIosShareDrawerBtn) {
 
 window.copyFamilyShareEndpoint = (famCode, token) => {
     const origin = window.location.origin;
-    const url = `${origin}/api/media/ios-shortcut?fam_code=${encodeURIComponent(famCode)}&token=${encodeURIComponent(token)}`;
+    const url = `${origin}/api/media/native-share?fam_code=${encodeURIComponent(famCode)}&user_token=${encodeURIComponent(token)}`;
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(url).then(() => {
             if (window.Swal) {

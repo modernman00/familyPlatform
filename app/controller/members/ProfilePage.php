@@ -87,6 +87,7 @@ final class ProfilePage extends ProcessImg
                 'eventData' => $data['events'],
                 'requestData' => $data['friendRequests'],
                 'totalFamilyMembers' => $data['totalFamilyMembers'],
+                'familyRoster' => $data['familyRoster'] ?? [],
                 'unclaimedMatch' => $data['unclaimedMatch'] ?? null,
                 'pendingFamilyRequests' => $data['pendingFamilyRequests'] ?? [],
                 'pendingMigrations' => $data['pendingMigrations'] ?? [],
@@ -332,6 +333,28 @@ final class ProfilePage extends ProcessImg
                     unset($_SESSION['pwa_shared_target']);
                 }
 
+                // Run Next-Gen Visual Supremacy Engine (VSE) on all uploaded post images
+                try {
+                    $postBaseDir = realpath(__DIR__ . '/../../../resources/images/post');
+                    if ($postBaseDir && is_dir($postBaseDir)) {
+                        $postRecord = Post::postByNo($result);
+                        if (is_array($postRecord)) {
+                            for ($i = 0; $i < 6; $i++) {
+                                $imgCol = 'post_img' . $i;
+                                $imgVal = trim((string)($postRecord[$imgCol] ?? ''));
+                                if ($imgVal !== '' && !str_starts_with($imgVal, 'http://') && !str_starts_with($imgVal, 'https://')) {
+                                    $localImagePath = rtrim($postBaseDir, '/\\') . DIRECTORY_SEPARATOR . basename($imgVal);
+                                    if (file_exists($localImagePath) && is_file($localImagePath)) {
+                                        \App\services\VisualSupremacyService::processInPlace($localImagePath);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    error_log('[VisualSupremacyService::post] ' . $e->getMessage());
+                }
+
                 if ($isThenNow) {
                     try {
                         $replyTo = (int)($_POST['reply_to_post'] ?? 0);
@@ -480,12 +503,23 @@ final class ProfilePage extends ProcessImg
             // 'post' profile).
             \Src\Limiter::limit($id . ':comment', 'post');
 
-            // Optional curated GIF. Validated here, then stripped from $_POST so the
-            // generic insert never sees an unvetted value; written to its own column below.
-            $gifUrl = self::sanitizeCommentGifUrl($_POST['gif_url'] ?? null);
+            // Handle uploaded sticker or GIF (e.g. pasted directly from mobile keyboard)
+            $uploadedMediaUrl = null;
+            if (isset($_FILES['comment_media']) && is_array($_FILES['comment_media']) && !empty($_FILES['comment_media']['tmp_name'])) {
+                $uploadedMediaUrl = self::processUploadedCommentMedia($_FILES['comment_media']);
+            } elseif (isset($_FILES['comment_img']) && is_array($_FILES['comment_img']) && !empty($_FILES['comment_img']['tmp_name'])) {
+                $uploadedMediaUrl = self::processUploadedCommentMedia($_FILES['comment_img']);
+            }
+
+            // Optional curated GIF or external/internal media URL.
+            $gifUrl = $uploadedMediaUrl ?? self::sanitizeCommentGifUrl($_POST['gif_url'] ?? null);
             unset($_POST['gif_url']);
-            if ($gifUrl === null && trim((string) ($_POST['comment'] ?? '')) === '') {
-                throw new \Src\Exceptions\ValidationException('Write a comment or pick a GIF.');
+
+            $rawComment = (string) ($_POST['comment'] ?? '');
+            $cleanComment = \App\services\LinkPreviewService::sanitizePostMessage($rawComment);
+
+            if ($gifUrl === null && $cleanComment === '') {
+                throw new \Src\Exceptions\ValidationException('Write a comment or pick a GIF/sticker.');
             }
 
             // Optional reply target. Validated against the post BEFORE the insert so a bad
@@ -517,6 +551,16 @@ final class ProfilePage extends ProcessImg
             if ($result) {
                 $_SESSION["LAST_INSERT_ID_COMMENT"] = $result;
 
+                // Update comment column to preserve full 4-byte Unicode (compound emojis, skin tones, ZWJ, variation selectors)
+                if ($cleanComment !== '') {
+                    (new \Src\Update('comment'))->updateTable(
+                        column: 'comment',
+                        columnAnswer: $cleanComment,
+                        identifier: 'comment_no',
+                        identifierAnswer: $result
+                    );
+                }
+
                 // Must land before getNewCommentPusher() reads the row for the realtime broadcast.
                 if ($gifUrl !== null) {
                     (new \Src\Update('comment'))->updateTable(
@@ -543,7 +587,7 @@ final class ProfilePage extends ProcessImg
                     authorId: $id,
                     authorName: (string) $newInput['fullName'],
                     postNo: (string) ($_POST['post_no'] ?? ''),
-                    text: (string) ($_POST['comment'] ?? ''),
+                    text: $cleanComment,
                     parentAuthorId: $thread['parentAuthorId'] ?? null,
                     commentNo: (int) $result
                 );
@@ -555,7 +599,7 @@ final class ProfilePage extends ProcessImg
                     'id' => $id,
                     'fullName' => (string) $newInput['fullName'],
                     'profileImg' => (string) $newInput['profileImg'],
-                    'comment' => \checkInput((string) ($_POST['comment'] ?? '')),
+                    'comment' => $cleanComment,
                     'gif_url' => $gifUrl,
                     'post_time' => (string) $newInput['post_time'],
                     'comment_time' => (string) $newInput['post_time'],
@@ -601,9 +645,61 @@ final class ProfilePage extends ProcessImg
     }
 
     /**
-     * Comment GIFs come from the curated Giphy picker, so accept only https Giphy
-     * media hosts. Stricter than the post path: a comment renders in every family
-     * member's feed, so an arbitrary host would be a tracking-pixel vector.
+     * Process an uploaded sticker or GIF file attached to a comment.
+     * Validates MIME type via finfo, caps size to 10MB, and writes with a cryptographically
+     * random filename into resources/images/post/.
+     */
+    private static function processUploadedCommentMedia(array $file): ?string
+    {
+        if (empty($file['tmp_name'])) {
+            return null;
+        }
+
+        if ((int) ($file['size'] ?? 0) > 10 * 1024 * 1024) {
+            throw new \Src\Exceptions\ValidationException('Attached media exceeds the 10MB limit.');
+        }
+
+        if (!is_uploaded_file((string) $file['tmp_name']) && !isTestEnv()) {
+            return null;
+        }
+
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->file((string) $file['tmp_name']);
+
+        $allowedMimes = [
+            'image/gif'  => 'gif',
+            'image/png'  => 'png',
+            'image/jpeg' => 'jpg',
+            'image/webp' => 'webp',
+        ];
+
+        if (!is_string($mime) || !isset($allowedMimes[$mime])) {
+            throw new \Src\Exceptions\ValidationException('Invalid media format. Only GIF, PNG, JPEG, and WebP are allowed.');
+        }
+
+        $extension = $allowedMimes[$mime];
+        $targetDir = realpath(__DIR__ . '/../../../resources/images/post');
+        if (!$targetDir || !is_dir($targetDir)) {
+            $targetDir = __DIR__ . '/../../../resources/images/post';
+            if (!is_dir($targetDir)) {
+                @mkdir($targetDir, 0755, true);
+            }
+        }
+
+        $filename = 'comment_' . time() . '_' . bin2hex(random_bytes(8)) . '.' . $extension;
+        $destPath = rtrim($targetDir, '/') . '/' . $filename;
+
+        if (move_uploaded_file((string) $file['tmp_name'], $destPath)) {
+            return '/resources/images/post/' . $filename;
+        }
+
+        return null;
+    }
+
+    /**
+     * Comment GIFs and stickers come from the curated picker, internal uploads,
+     * or keyboard paste (Giphy, Tenor, or validated image links).
+     * Hardened against SSRF (no localhost, loopback, private ranges, or userinfo).
      */
     private static function sanitizeCommentGifUrl(mixed $raw): ?string
     {
@@ -611,18 +707,52 @@ final class ProfilePage extends ProcessImg
             return null;
         }
         $url = trim($raw);
-        if ($url === '' || strlen($url) > 2048 || !filter_var($url, FILTER_VALIDATE_URL)) {
+        if ($url === '' || strlen($url) > 2048) {
             return null;
         }
+
+        // Allow internal uploaded comment media
+        if (str_starts_with($url, '/resources/images/post/comment_')) {
+            $basename = basename($url);
+            if (preg_match('/^comment_[0-9]+_[a-f0-9]+\.(gif|png|jpe?g|webp)$/i', $basename)) {
+                return '/resources/images/post/' . $basename;
+            }
+            return null;
+        }
+
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            return null;
+        }
+
         $parts = parse_url($url);
+        $scheme = strtolower((string) ($parts['scheme'] ?? ''));
+        if ($scheme !== 'https') {
+            return null;
+        }
+        if (isset($parts['user']) || isset($parts['pass'])) {
+            return null;
+        }
+
         $host = strtolower((string) ($parts['host'] ?? ''));
-        if (strtolower((string) ($parts['scheme'] ?? '')) !== 'https'
-            || isset($parts['user']) || isset($parts['pass'])
-            || !preg_match('/^(media\d*\.)?giphy\.com$/', $host)
+        if (empty($host)
+            || in_array($host, ['localhost', '127.0.0.1', '::1', '0.0.0.0'], true)
+            || str_starts_with($host, '169.254.')
+            || str_starts_with($host, '10.')
+            || str_starts_with($host, '192.168.')
+            || preg_match('/^172\.(1[6-9]|2[0-9]|3[0-1])\./', $host)
         ) {
             return null;
         }
-        return $url;
+
+        // Allow approved CDN domains (Giphy, Tenor) - protects against tracking pixels
+        $isGiphy = (bool) preg_match('/(^|\.)giphy\.com$/i', $host);
+        $isTenor = (bool) preg_match('/(^|\.)tenor\.com$/i', $host);
+
+        if ($isGiphy || $isTenor) {
+            return $url;
+        }
+
+        return null;
     }
 
     /**
@@ -845,6 +975,77 @@ final class ProfilePage extends ProcessImg
             http_response_code(400);
             echo json_encode([
                 'status' => 400,
+                'success' => false,
+                'error' => $th->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Delete one or multiple images owned by the member from their photo gallery.
+     */
+    public function deleteImage(): void
+    {
+        try {
+            $id = !empty($_SESSION['id']) ? (string) $_SESSION['id'] : (string) cleanSession((string) SignIn::verify('users')['id']);
+
+            $rawInput = (string)file_get_contents('php://input');
+            $input = json_decode($rawInput, true);
+            $input = is_array($input) ? $input : [];
+
+            // Check CSRF token if present
+            $clientToken = (string)($input['csrf_token'] ?? $input['token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $_SERVER['HTTP_X_XSRF_TOKEN'] ?? $_POST['token'] ?? '');
+            $sessionToken = (string)($_SESSION['token'] ?? '');
+            if (!empty($sessionToken) && !empty($clientToken) && !hash_equals($sessionToken, $clientToken)) {
+                http_response_code(403);
+                echo json_encode([
+                    'status' => 403,
+                    'success' => false,
+                    'error' => 'Invalid security token. Please refresh the page and try again.'
+                ]);
+                return;
+            }
+
+            // Support batch deletion when imageNames array is provided
+            $rawBatch = $input['imageNames'] ?? ($_POST['imageNames'] ?? null);
+            if (is_array($rawBatch)) {
+                if (empty($rawBatch)) {
+                    throw new \InvalidArgumentException("No pictures selected for deletion");
+                }
+                $result = Post::deleteMultipleGalleryImages($id, $rawBatch);
+                http_response_code($result['status']);
+                echo json_encode($result); // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+                return;
+            }
+
+            $rawName = !empty($input['imageName']) ? (string)$input['imageName'] : (!empty($_POST['imageName']) ? (string)$_POST['imageName'] : '');
+            if (empty($rawName)) {
+                throw new \InvalidArgumentException("Picture name not provided");
+            }
+
+            // Sanitise and strip any directory traversal attempts
+            $cleanName = basename($rawName);
+            $cleanName = preg_replace('/[^a-zA-Z0-9_\.-]/', '', $cleanName) ?? '';
+
+            if (empty($cleanName)) {
+                throw new \InvalidArgumentException("Invalid picture name provided");
+            }
+
+            $result = Post::deleteGalleryImage($id, $cleanName);
+
+            http_response_code($result['status']);
+            echo json_encode($result); // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+        } catch (\InvalidArgumentException $e) {
+            http_response_code(400);
+            echo json_encode([
+                'status' => 400,
+                'success' => false,
+                'error' => $e->getMessage()
+            ]);
+        } catch (\Throwable $th) {
+            http_response_code(500);
+            echo json_encode([
+                'status' => 500,
                 'success' => false,
                 'error' => $th->getMessage()
             ]);

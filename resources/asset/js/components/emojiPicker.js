@@ -71,6 +71,19 @@ export const setPreferredSkinTone = (tone) => {
 };
 
 /**
+ * Most-used expressive emojis pinned at the top of the picker (same set as the comment palette).
+ * Emojis without skin variants simply render in their default form.
+ */
+const QUICK_PICK_EMOJIS = ['👍', '👋', '👏', '🙏', '🙌', '💪', '🤝', '🫶'];
+
+const stripVariationSelector = (s) => String(s || '').replace(/\uFE0F/g, '');
+
+const findEmojiItem = (char) => {
+  const wanted = stripVariationSelector(char);
+  return emojiData.find(e => stripVariationSelector(e.emoji) === wanted) || null;
+};
+
+/**
  * Retrieve the resolved emoji character adapted to a specific skin tone
  */
 export const getEmojiForTone = (item, tone = 0) => {
@@ -166,7 +179,7 @@ const renderModernEmojiPicker = (emojiContainerId, emojiTargetDataClass) => {
   skinToneBar.appendChild(skinTitle);
 
   const skinSwatchesContainer = document.createElement('div');
-  skinSwatchesContainer.className = 'd-flex align-items-center gap-1';
+  skinSwatchesContainer.className = 'd-flex align-items-center gap-2';
 
   SKIN_TONES.forEach(st => {
     const swatchBtn = document.createElement('button');
@@ -175,7 +188,13 @@ const renderModernEmojiPicker = (emojiContainerId, emojiTargetDataClass) => {
     swatchBtn.setAttribute('data-tone', st.tone);
     swatchBtn.setAttribute('title', st.label);
     swatchBtn.setAttribute('aria-label', st.label);
-    swatchBtn.textContent = st.swatch;
+    swatchBtn.setAttribute('aria-pressed', st.tone === currentSkinTone ? 'true' : 'false');
+    // Rendered as a CSS colour dot (see .emoji-skin-swatch[data-tone]) rather than the bare
+    // Fitzpatrick modifier glyph, which draws as a tiny, platform-inconsistent square.
+    const swatchDot = document.createElement('span');
+    swatchDot.className = 'emoji-skin-dot';
+    swatchDot.setAttribute('aria-hidden', 'true');
+    swatchBtn.appendChild(swatchDot);
 
     swatchBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -185,7 +204,9 @@ const renderModernEmojiPicker = (emojiContainerId, emojiTargetDataClass) => {
 
       // Update swatch active states
       skinSwatchesContainer.querySelectorAll('.emoji-skin-swatch').forEach(btn => {
-        btn.classList.toggle('active', parseInt(btn.getAttribute('data-tone'), 10) === currentSkinTone);
+        const isActive = parseInt(btn.getAttribute('data-tone'), 10) === currentSkinTone;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
       });
 
       // Instantly refresh current view
@@ -232,6 +253,22 @@ const renderModernEmojiPicker = (emojiContainerId, emojiTargetDataClass) => {
   });
   emojiList.appendChild(tabsNav);
 
+  // ── 2b. Pinned quick-pick row (tone-aware), mirrors the comment palette ──
+  const quickRow = document.createElement('div');
+  quickRow.className = 'emoji-quick-row';
+  quickRow.setAttribute('aria-label', 'Quick picks');
+  emojiList.appendChild(quickRow);
+
+  const renderQuickRow = () => {
+    quickRow.innerHTML = '';
+    quickRow.classList.toggle('d-none', !!searchQuery);
+    if (searchQuery) return;
+    QUICK_PICK_EMOJIS.forEach(ch => {
+      const item = findEmojiItem(ch);
+      if (item) renderSingleEmojiButton(item, quickRow, emojiTarget, emojiList, currentSkinTone);
+    });
+  };
+
   // ── 3. Content Scroll Container ──
   const contentArea = document.createElement('div');
   contentArea.className = 'emoji-content-area p-2 overflow-y-auto';
@@ -258,6 +295,7 @@ const renderModernEmojiPicker = (emojiContainerId, emojiTargetDataClass) => {
 
   // ── 4. Main Content Renderer ──
   const renderContent = () => {
+    renderQuickRow();
     contentArea.innerHTML = '';
 
     // If searching, render search results across all emojis

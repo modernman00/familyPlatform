@@ -835,6 +835,7 @@
 
 .emoji-picker-header {
     background-color: var(--card-bg, #ffffff);
+    flex-shrink: 0;
 }
 
 .emoji-search-field {
@@ -853,37 +854,69 @@
 }
 
 .emoji-skin-swatch {
+    position: relative;
     background: none;
-    border: 1.5px solid transparent;
+    border: 0;
     border-radius: 50%;
-    font-size: 0.95rem;
     padding: 0;
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: transform 0.15s ease;
 
-    &:hover {
-        transform: scale(1.18);
+    // Expand the hit area to 44x44 without enlarging the visual swatch
+    &::after {
+        content: '';
+        position: absolute;
+        inset: -8px;
+    }
+
+    .emoji-skin-dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--tone, #ffcc4d);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+        transition: box-shadow 0.15s ease;
+    }
+
+    &[data-tone='0'] { --tone: #ffcc4d; }
+    &[data-tone='1'] { --tone: #f7dece; }
+    &[data-tone='2'] { --tone: #f3d2a2; }
+    &[data-tone='3'] { --tone: #d5ab88; }
+    &[data-tone='4'] { --tone: #af7e57; }
+    &[data-tone='5'] { --tone: #7c533e; }
+
+    @media (hover: hover) {
+        &:hover { transform: scale(1.12); }
     }
 
     &:active {
-        transform: scale(0.95);
+        transform: scale(0.98);
     }
 
-    &.active {
-        border-color: var(--primary-color, #2563eb);
-        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
-        transform: scale(1.15);
+    &:focus-visible {
+        outline: 2px solid var(--primary-color, #2563eb);
+        outline-offset: 2px;
+    }
+
+    &.active .emoji-skin-dot {
+        box-shadow: 0 0 0 2px var(--card-bg, #fff), 0 0 0 4px var(--primary-color, #2563eb);
     }
 }
 
 .emoji-category-tabs {
     background-color: var(--bg-color, #f8fafc);
     scrollbar-width: none;
+    // Flex column parent has overflow:hidden - without this the row collapses and clips its tabs
+    flex-shrink: 0;
+    align-items: center;
+    min-height: 52px;
+    padding: 4px 8px;
 
     &::-webkit-scrollbar {
         display: none;
@@ -914,7 +947,20 @@
     }
 }
 
+.emoji-quick-row {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+    flex-shrink: 0;
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+
+    &.d-none { display: none !important; }
+}
+
 .emoji-content-area {
+    flex: 1 1 auto;
+    min-height: 0;
     scrollbar-width: thin;
     scrollbar-color: var(--primary-color) transparent;
 
@@ -1636,8 +1682,35 @@ body.modal-open .pwa-bottom-nav { display: none !important; }
             background: transparent !important;
         }
 
+        // Sticky header must be opaque (matching the drawer surface) or emojis scroll under its text
         .emoji-section-header {
-            background: transparent !important;
+            background: var(--bg-color) !important;
+        }
+
+        .emoji-category-tabs {
+            background: transparent;
+            border-color: var(--border-color) !important;
+        }
+
+        .emoji-cat-tab-btn {
+            min-width: 44px;
+            min-height: 44px;
+
+            &.active {
+                background: var(--card-bg, #fff);
+            }
+        }
+
+        // Fixed-size cells: 8 flexible columns across a full-width drawer made emojis enormous
+        .emoji-grid {
+            grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+            gap: 4px;
+        }
+
+        .modern-emoji-btn {
+            aspect-ratio: auto;
+            min-height: 44px;
+            font-size: 1.5rem;
         }
     }
 

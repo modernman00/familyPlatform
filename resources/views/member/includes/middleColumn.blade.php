@@ -424,97 +424,96 @@
         </div>
       </div>
 
-      <div class="composer-quick-actions d-flex align-items-center gap-2 mt-3 pt-3 flex-wrap" style="border-top: 1px solid var(--border-color);">
-        <button type="button" class="btn composer-quick-action then-now-cta flex-fill d-flex align-items-center justify-content-center gap-2"
+      <style>
+        .composer-icon-btn {
+          width: 42px;
+          height: 42px;
+          min-width: 42px;
+          min-height: 42px;
+          border-radius: 12px !important;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+          transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        .composer-icon-btn:hover {
+          transform: translateY(-2px);
+          filter: brightness(1.08);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+        }
+        .composer-icon-btn:active {
+          transform: scale(0.94);
+        }
+        body.dark-mode .composer-icon-btn,
+        [data-bs-theme="dark"] .composer-icon-btn {
+          border-color: rgba(255, 255, 255, 0.12) !important;
+        }
+      </style>
+      <div class="composer-quick-actions d-flex align-items-center justify-content-between mt-3 pt-3 gap-2" style="border-top: 1px solid var(--border-color, #e2e8f0);">
+        <div class="d-flex align-items-center justify-content-between justify-content-sm-start gap-2 flex-grow-1 flex-sm-grow-0">
+          <!-- 1. Then & Now -->
+          <button type="button" class="btn composer-icon-btn shadow-xs"
+                  data-bs-toggle="modal" data-bs-target="#postModal"
+                  onclick="setTimeout(function () { if (window.__openThenNow) window.__openThenNow(''); }, 0)"
+                  title="Then &amp; Now - Compare milestone photos across years"
+                  aria-label="{{ __('feed.then_now', 'Then & Now photo comparison') }}"
+                  style="background: rgba(163, 22, 33, 0.1); color: #a31621; border: 1px solid rgba(163, 22, 33, 0.2);">
+            <i class="bi bi-hourglass-split" style="font-size: 1.15rem;"></i>
+          </button>
+          
+          <!-- 2. Photo -->
+          <button type="button" class="btn composer-icon-btn shadow-xs"
+                  data-bs-toggle="modal" data-bs-target="#postModal"
+                  title="Upload Photos - Add memories from your device or camera"
+                  aria-label="{{ __('feed.photo', 'Add a photo to post') }}"
+                  style="background: rgba(220, 38, 38, 0.1); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.2);">
+            <i class="bi bi-camera-fill" style="font-size: 1.15rem;"></i>
+          </button>
+
+          <!-- 3. Video -->
+          <button type="button" class="btn composer-icon-btn shadow-xs"
+                  data-bs-toggle="modal" data-bs-target="#postModal"
+                  title="Upload Video - Embed or share family video clips"
+                  aria-label="{{ __('feed.video', 'Add a video to post') }}"
+                  style="background: rgba(220, 38, 38, 0.1); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.2);">
+            <i class="bi bi-play-btn-fill" style="font-size: 1.15rem;"></i>
+          </button>
+
+          <!-- 4. Announcement -->
+          <button type="button" class="btn composer-icon-btn shadow-xs"
+                  data-bs-toggle="modal" data-bs-target="#createAnnouncementModal"
+                  title="Family Announcement - Broadcast pinned notices to all relatives"
+                  aria-label="{{ __('feed.announcement', 'Broadcast family announcement') }}"
+                  style="background: rgba(217, 119, 6, 0.1); color: #d97706; border: 1px solid rgba(217, 119, 6, 0.2);">
+            <i class="bi bi-megaphone-fill" style="font-size: 1.15rem;"></i>
+          </button>
+
+          <!-- 5. Journal -->
+          <button type="button" class="btn composer-icon-btn shadow-xs"
+                  onclick="window.location.href='/familyJournal/create'"
+                  title="Family Journal - Write memoirs, stories, and chronicles"
+                  aria-label="{{ __('feed.journal', 'Write family journal chronicle') }}"
+                  style="background: rgba(5, 150, 105, 0.1); color: #059669; border: 1px solid rgba(5, 150, 105, 0.2);">
+            <i class="bi bi-journal-bookmark-fill" style="font-size: 1.15rem;"></i>
+          </button>
+
+          <!-- 6. Poll -->
+          <button type="button" class="btn composer-icon-btn shadow-xs"
+                  data-bs-toggle="modal" data-bs-target="#postModal"
+                  title="Family Poll - Gather opinions and vote on dates or plans"
+                  aria-label="{{ __('feed.poll', 'Create a poll') }}"
+                  style="background: rgba(234, 88, 12, 0.1); color: #ea580c; border: 1px solid rgba(234, 88, 12, 0.2);">
+            <i class="bi bi-bar-chart-fill" style="font-size: 1.15rem;"></i>
+          </button>
+        </div>
+
+        <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-2 fw-semibold d-none d-sm-inline-flex align-items-center gap-1.5 shadow-xs flex-shrink-0"
                 data-bs-toggle="modal" data-bs-target="#postModal"
-                onclick="setTimeout(function () { if (window.__openThenNow) window.__openThenNow(''); }, 0)"
-                aria-label="Post a Then and Now photo comparison">
-          <i class="bi bi-hourglass-split" style="font-size: 1.1rem; color: #a31621;"></i>
-          <span class="fw-bold" style="font-size: 0.85rem;">{{ __('feed.then_now', 'Then & Now') }}</span>
+                title="Create Post - Share stories, photos, and milestones with family"
+                style="background-color: var(--primary-color, #a31621); color: #ffffff !important; border: none; min-height: 40px; white-space: nowrap;">
+          <i class="bi bi-plus-lg"></i> <span>{{ __('feed.post_btn', 'Post') }}</span>
         </button>
-        <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#postModal" aria-label="Add a photo to a post">
-          <i class="bi bi-camera-fill" style="color: #16a34a; font-size: 1.1rem;"></i>
-          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">{{ __('feed.photo', 'Photo') }}</span>
-        </button>
-        <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#postModal" aria-label="Add a video to a post">
-          <i class="bi bi-play-btn-fill" style="color: #dc2626; font-size: 1.1rem;"></i>
-          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">{{ __('feed.video', 'Video') }}</span>
-        </button>
-        <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#createAnnouncementModal" aria-label="Broadcast family announcement">
-          <i class="bi bi-megaphone-fill" style="color: #d97706; font-size: 1.1rem;"></i>
-          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">{{ __('feed.announcement', 'Announcement') }}</span>
-        </button>
-        <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" onclick="window.location.href='/familyJournal/create'" aria-label="Write family journal chronicle">
-          <i class="bi bi-journal-bookmark-fill" style="color: #059669; font-size: 1.1rem;"></i>
-          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">{{ __('feed.journal', 'Journal') }}</span>
-        </button>
-        <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#postModal" aria-label="Create a poll">
-          <i class="bi bi-bar-chart-fill" style="color: #ea580c; font-size: 1.1rem;"></i>
-          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-color, #1e293b);">{{ __('feed.poll', 'Poll') }}</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Family Heritage & Rituals Hub (Immediate 1-Click Viral Engagement) -->
-  <div class="card border-0 shadow-sm mb-4 family-heritage-hub" style="border-radius: 18px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%); border: 1px solid rgba(0, 0, 0, 0.06) !important;">
-    <div class="card-body p-3 p-sm-4">
-      <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-        <div class="d-flex align-items-center gap-2">
-          <span class="badge rounded-pill shadow-xs" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-size: 0.72rem; letter-spacing: 0.5px; padding: 4px 10px; font-weight: 700;">
-            <i class="bi bi-stars me-1"></i> {{ __('heritage.rituals_heritage', 'RITUALS & HERITAGE') }}
-          </span>
-          <span class="fw-bold text-dark small" style="font-size: 0.92rem;">{{ __('heritage.dynasty_hub', 'Family Dynasty Hub') }}</span>
-        </div>
-        <a href="/organogram/{{ $data['id'] ?? '' }}?mode=canvas" class="text-decoration-none small d-flex align-items-center gap-1" style="color: #a31621; font-size: 0.82rem; font-weight: 600;">
-          <span>{{ __('heritage.explore_canvas', 'Explore Tree Canvas') }}</span> <i class="bi bi-chevron-right" style="font-size: 0.72rem;"></i>
-        </a>
-      </div>
-
-      <div class="row g-2">
-        <!-- 1. Quests -->
-        <div class="col-6 col-sm-3">
-          <button type="button" onclick="openLineageQuestModal()" class="btn hub-tile-quest w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid rgba(16, 185, 129, 0.28) !important; min-height: 88px; justify-content: center;" title="Solve Missing Relatives on WhatsApp">
-            <div class="tile-icon rounded-circle d-flex align-items-center justify-content-center mb-1.5 shadow-xs" style="width: 36px; height: 36px; background: rgba(16, 185, 129, 0.16); color: #047857;">
-              <i class="bi bi-compass-fill fs-6"></i>
-            </div>
-            <span class="tile-title fw-bold" style="font-size: 0.875rem; line-height: 1.2; color: #0f172a;">{{ __('heritage.tree_quests', 'Tree Quests') }}</span>
-            <span class="tile-desc" style="font-size: 0.76rem; color: #065f46; font-weight: 500;">{{ __('heritage.ask_whatsapp', 'Ask on WhatsApp') }}</span>
-          </button>
-        </div>
-
-        <!-- 2. Sunday Trivia -->
-        <div class="col-6 col-sm-3">
-          <button type="button" onclick="openComposerWithTrivia()" class="btn hub-tile-trivia w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1px solid rgba(245, 158, 11, 0.32) !important; min-height: 88px; justify-content: center;" title="Create or Play Sunday Family Trivia">
-            <div class="tile-icon rounded-circle d-flex align-items-center justify-content-center mb-1.5 shadow-xs" style="width: 36px; height: 36px; background: rgba(245, 158, 11, 0.18); color: #b45309;">
-              <i class="bi bi-trophy-fill fs-6"></i>
-            </div>
-            <span class="tile-title fw-bold" style="font-size: 0.875rem; line-height: 1.2; color: #0f172a;">{{ __('heritage.sunday_trivia', 'Sunday Trivia') }}</span>
-            <span class="tile-desc" style="font-size: 0.76rem; color: #92400e; font-weight: 500;">{{ __('heritage.quiz_guess', 'Quiz & Guess Who') }}</span>
-          </button>
-        </div>
-
-        <!-- 3. WhatsApp Flyer -->
-        <div class="col-6 col-sm-3">
-          <button type="button" onclick="openFamilyFlyerModal()" class="btn hub-tile-flyer w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%); border: 1px solid rgba(163, 22, 33, 0.25) !important; min-height: 88px; justify-content: center;" title="Generate Heraldic WhatsApp Clan Status Flyer">
-            <div class="tile-icon rounded-circle d-flex align-items-center justify-content-center mb-1.5 shadow-xs" style="width: 36px; height: 36px; background: rgba(163, 22, 33, 0.14); color: #a31621;">
-              <i class="bi bi-card-image fs-6"></i>
-            </div>
-            <span class="tile-title fw-bold" style="font-size: 0.875rem; line-height: 1.2; color: #0f172a;">{{ __('heritage.clan_flyer', 'Clan Flyer') }}</span>
-            <span class="tile-desc" style="font-size: 0.76rem; color: #881337; font-weight: 500;">{{ __('heritage.whatsapp_status', 'WhatsApp Status') }}</span>
-          </button>
-        </div>
-
-        <!-- 4. Time Capsule -->
-        <div class="col-6 col-sm-3">
-          <button type="button" onclick="openTimeCapsuleModal()" class="btn hub-tile-capsule w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border: 1px solid rgba(109, 40, 217, 0.25) !important; min-height: 88px; justify-content: center;" title="Seal Personal Letters and Heirlooms for Future Milestones">
-            <div class="tile-icon rounded-circle d-flex align-items-center justify-content-center mb-1.5 shadow-xs" style="width: 36px; height: 36px; background: rgba(109, 40, 217, 0.14); color: #6d28d9;">
-              <i class="bi bi-hourglass-split fs-6"></i>
-            </div>
-            <span class="tile-title fw-bold" style="font-size: 0.875rem; line-height: 1.2; color: #0f172a;">{{ __('heritage.time_capsule', 'Time Capsule') }}</span>
-            <span class="tile-desc" style="font-size: 0.76rem; color: #5b21b6; font-weight: 500;">{{ __('heritage.future_milestones', 'Future Milestones') }}</span>
-          </button>
-        </div>
       </div>
     </div>
   </div>

@@ -6,6 +6,8 @@ import Swal from 'sweetalert2';
 import PWAManager from './components/pwa/pwaManager';
 import { initDarkMode } from './components/darkMode';
 import { initBackToTop } from './components/backToTop';
+import { initVisualSupremacy } from './components/vse-canvas';
+import { initFamilyTooltip } from './components/familyTooltip';
 import './components/recommendModal';
 import './components/navbar';
 
@@ -32,6 +34,8 @@ window.upcomingEvents = upcomingEvents;
 window.pwaManager = new PWAManager();
 initDarkMode();
 initBackToTop();
+initVisualSupremacy();
+initFamilyTooltip();
 let routePromise = Promise.resolve();
 
 // The server occasionally finds the session's CSRF token missing (e.g. session

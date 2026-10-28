@@ -21,8 +21,7 @@ class PWAManager {
     this.offlineSync = new OfflineSyncManager();
     window.offlineSync = this.offlineSync;
     window.triggerHaptic = triggerHaptic;
-    // Web Push lives in components/profilePage/registerPushNotification.js — one
-    // module, imported by the profile-page bundle and driven by the Settings toggle.
+    // Auto-synchronize Web Push subscriptions whenever permission is granted
     this.init();
   }
 
@@ -34,6 +33,75 @@ class PWAManager {
     this.setupLogoutCachePurge();
     this.setupBottomNav();
     this.setupHaptics();
+    this.setupPushAutoSync();
+  }
+
+  /**
+   * 8. Web Push Automatic Sync for Installed & Granted Users
+   */
+  setupPushAutoSync() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+
+    navigator.serviceWorker.ready.then((reg) => {
+      reg.pushManager.getSubscription().then((sub) => {
+        if (sub) {
+          this.syncSubscriptionToServer(sub);
+        } else {
+          const vapidKey = document.querySelector('meta[name="vapid-public-key"]')?.getAttribute('content');
+          if (vapidKey) {
+            reg.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: this.urlBase64ToUint8Array(vapidKey)
+            }).then((newSub) => {
+              this.syncSubscriptionToServer(newSub);
+            }).catch((err) => console.warn('[PWA PushAutoSync] subscribe failed:', err));
+          }
+        }
+      }).catch((err) => console.warn('[PWA PushAutoSync] getSubscription failed:', err));
+    }).catch((err) => console.warn('[PWA PushAutoSync] SW ready failed:', err));
+  }
+
+  urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
+  syncSubscriptionToServer(subscription) {
+    if (!subscription || !subscription.endpoint) return;
+    const tokenMeta = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const userId = document.querySelector('meta[name="user-id"]')?.getAttribute('content') || '';
+    const p256dh = subscription.getKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))) : '';
+    const auth = subscription.getKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth')))) : '';
+
+    fetch('/pushNotification/subscription', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': tokenMeta,
+        'X-XSRF-TOKEN': tokenMeta
+      },
+      body: JSON.stringify({
+        endpoint: subscription.endpoint,
+        id: userId,
+        token: tokenMeta,
+        keys: { p256dh, auth }
+      })
+    }).then((res) => res.json().catch(() => ({ status: 'ok' })))
+      .then((data) => {
+        if (data && data.status !== 'error') {
+          try { localStorage.setItem('fp_push_subscribed', 'true'); } catch (e) {}
+        }
+      }).catch(() => {});
   }
 
   /**

@@ -4,7 +4,7 @@ import { format } from 'timeago.js';
 import Swal from 'sweetalert2';
 import { extractVideoFromText, cleanPostMessage } from './videoParser';
 import { getCsrfToken } from '../global';
-import { getPostImageUrl, getProfileImageUrl } from '../helper/imageUrls';
+import { getPostImageUrl, getProfileImageUrl, getPostImageVariantUrl } from '../helper/imageUrls';
 import { FAMILY_GIFS, GIF_CATEGORIES, isAllowedGifUrl } from './gifCatalog';
 import { getPreferredSkinTone, setPreferredSkinTone, SKIN_TONES } from '../emojiPicker';
 
@@ -35,6 +35,7 @@ export function profileFeed(opts = {}) {
         commentEmojiOpen: {},
         commentGifOpen: {},
         commentGifs: {},
+        commentFiles: {},
         commentGifCategory: 'all',
         gifCategories: GIF_CATEGORIES,
         familyRoster: Array.isArray(opts.familyRoster) ? opts.familyRoster : [],
@@ -96,7 +97,7 @@ export function profileFeed(opts = {}) {
             { base: '🤝', skins: ['🤝', '🤝🏻', '🤝🏼', '🤝🏽', '🤝🏾', '🤝🏿'] },
             { base: '🫶', skins: ['🫶', '🫶🏻', '🫶🏼', '🫶🏽', '🫶🏾', '🫶🏿'] },
             { base: '✌️', skins: ['✌️', '✌🏻', '✌🏼', '✌🏽', '✌🏾', '✌🏿'] },
-            { base: '🫡', skins: ['🫡', '🫡🏻', '🫡🏼', '🫡🏽', '🫡🏾', '🫡🏿'] },
+            '🫡',
             '❤️', '💖', '🥰', '😍', '😂', '🤣',
             '😊', '🥹', '🥳', '😎', '🤗', '😮',
             '😢', '😭', '🔥', '💯', '🎉', '✨',
@@ -379,6 +380,10 @@ export function profileFeed(opts = {}) {
 
         getPostImageUrl(img) {
             return getPostImageUrl(img);
+        },
+
+        getPostImageVariantUrl(img, variant = 'fallback') {
+            return getPostImageVariantUrl(img, variant);
         },
 
         getProfileImageUrl(img) {
@@ -909,13 +914,20 @@ export function profileFeed(opts = {}) {
 
         async submitComment(postNo, ev = null) {
             const commentText = (this.commentInputs[postNo] || '').trim();
-            const gifUrl = isAllowedGifUrl(this.commentGifs[postNo]) ? this.commentGifs[postNo] : '';
-            if (!commentText && !gifUrl) return;
+            const rawGif = this.commentGifs[postNo] || '';
+            const attachedFile = this.commentFiles ? this.commentFiles[postNo] : null;
+            const isBlob = typeof rawGif === 'string' && rawGif.startsWith('blob:');
+            const gifUrl = (!isBlob && isAllowedGifUrl(rawGif)) ? rawGif : '';
+            if (!commentText && !gifUrl && !attachedFile) return;
 
             const formData = new FormData();
             formData.append('post_no', postNo);
             formData.append('comment', commentText);
-            if (gifUrl) formData.append('gif_url', gifUrl);
+            if (attachedFile) {
+                formData.append('comment_media', attachedFile);
+            } else if (gifUrl) {
+                formData.append('gif_url', gifUrl);
+            }
             const replyTo = this.replyingTo[postNo]?.comment_no;
             if (replyTo) formData.append('parent_comment_no', String(replyTo));
 
@@ -946,7 +958,7 @@ export function profileFeed(opts = {}) {
                                 fullName: (respData && typeof respData === 'object' && respData.fullName) || 'You',
                                 profileImg: (respData && typeof respData === 'object' && respData.profileImg) || '',
                                 comment: commentText,
-                                gif_url: (respData && typeof respData === 'object' && respData.gif_url) || gifUrl,
+                                gif_url: (respData && typeof respData === 'object' && respData.gif_url) || (isBlob ? '' : gifUrl),
                                 post_time: (respData && typeof respData === 'object' && respData.post_time) || Date.now().toString(),
                                 comment_time: (respData && typeof respData === 'object' && respData.comment_time) || Date.now().toString(),
                                 date_created: (respData && typeof respData === 'object' && respData.date_created) || new Date().toISOString(),
@@ -965,7 +977,7 @@ export function profileFeed(opts = {}) {
                     }
 
                     this.commentInputs[postNo] = '';
-                    this.commentGifs[postNo] = '';
+                    this.clearCommentGif(postNo);
                     this.commentGifOpen[postNo] = false;
                     this.mentionOpen[postNo] = false;
                     this.mentionMatches[postNo] = [];
@@ -1307,7 +1319,52 @@ export function profileFeed(opts = {}) {
         },
 
         clearCommentGif(postNo) {
+            const current = this.commentGifs[postNo];
+            if (current && typeof current === 'string' && current.startsWith('blob:')) {
+                try { URL.revokeObjectURL(current); } catch (_) {}
+            }
             this.commentGifs[postNo] = '';
+            if (this.commentFiles) {
+                this.commentFiles[postNo] = null;
+            }
+        },
+
+        handleCommentPaste(postNo, ev) {
+            const clipboard = ev.clipboardData || window.clipboardData;
+            if (!clipboard) return;
+
+            // 1. Binary image / sticker / GIF from mobile keyboard (Gboard, iOS, Memoji)
+            const items = clipboard.items;
+            if (items && items.length) {
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    if (item.kind === 'file' && item.type.startsWith('image/')) {
+                        const blob = item.getAsFile();
+                        if (blob) {
+                            ev.preventDefault();
+                            const ext = item.type.split('/')[1] || 'png';
+                            const file = new File([blob], `sticker_${Date.now()}.${ext}`, { type: item.type });
+                            if (!this.commentFiles) this.commentFiles = {};
+                            this.commentFiles[postNo] = file;
+                            const objectUrl = URL.createObjectURL(blob);
+                            this.commentGifs[postNo] = objectUrl;
+                            this.commentGifOpen[postNo] = false;
+                            return;
+                        }
+                    }
+                }
+            }
+
+            // 2. GIF / image URL pasted as plain text
+            const text = clipboard.getData('text/plain');
+            if (text && isAllowedGifUrl(text.trim())) {
+                const url = text.trim();
+                if (/\.(gif|webp)(\?|$)/i.test(url) || /giphy\.com|tenor\.com/.test(url)) {
+                    ev.preventDefault();
+                    this.commentGifs[postNo] = url;
+                    this.commentGifOpen[postNo] = false;
+                }
+            }
         },
 
         insertEmojiIntoComment(postNo, emoji) {

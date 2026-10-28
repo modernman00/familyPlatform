@@ -20,7 +20,7 @@
                     <div class="spinner-border spinner-border-sm text-primary omni-search-spinner" id="omniSearchSpinner" role="status" style="display: none;">
                         <span class="visually-hidden">Searching...</span>
                     </div>
-                    <button type="button" class="btn btn-sm btn-light rounded-pill px-2.5 py-1 text-muted border omni-esc-badge" data-bs-dismiss="modal" aria-label="Close search">
+                    <button type="button" class="btn btn-sm btn-light rounded-pill px-2.5 py-1 text-muted border omni-esc-badge" data-bs-dismiss="modal" aria-label="Close search" title="Close search modal (Esc)">
                         <span class="small fw-semibold">ESC</span>
                     </button>
                 </div>
@@ -28,25 +28,25 @@
 
             <!-- Category Filter Tabs -->
             <div class="omni-filter-bar px-3 py-2 border-bottom d-flex align-items-center gap-2 overflow-x-auto">
-                <button type="button" class="btn btn-sm omni-filter-chip active" data-filter="all">
+                <button type="button" class="btn btn-sm omni-filter-chip active" data-filter="all" title="Show results across all categories">
                     <span>All</span>
                 </button>
-                <button type="button" class="btn btn-sm omni-filter-chip" data-filter="actions">
+                <button type="button" class="btn btn-sm omni-filter-chip" data-filter="actions" title="Filter by app functions and shortcuts">
                     <i class="bi bi-lightning-charge-fill me-1 text-warning"></i><span>Functions</span>
                 </button>
-                <button type="button" class="btn btn-sm omni-filter-chip" data-filter="journals">
+                <button type="button" class="btn btn-sm omni-filter-chip" data-filter="journals" title="Filter by family journal entries and memoirs">
                     <i class="bi bi-journal-text me-1 text-danger"></i><span>Journals</span>
                 </button>
-                <button type="button" class="btn btn-sm omni-filter-chip" data-filter="members">
+                <button type="button" class="btn btn-sm omni-filter-chip" data-filter="members" title="Filter by family members and relatives">
                     <i class="bi bi-person-fill me-1 text-info"></i><span>Members</span>
                 </button>
-                <button type="button" class="btn btn-sm omni-filter-chip" data-filter="posts">
+                <button type="button" class="btn btn-sm omni-filter-chip" data-filter="posts" title="Filter by family feed posts and stories">
                     <i class="bi bi-chat-heart-fill me-1 text-primary"></i><span>Posts</span>
                 </button>
-                <button type="button" class="btn btn-sm omni-filter-chip" data-filter="events">
+                <button type="button" class="btn btn-sm omni-filter-chip" data-filter="events" title="Filter by upcoming family events and calendar">
                     <i class="bi bi-calendar-event me-1 text-success"></i><span>Events</span>
                 </button>
-                <button type="button" class="btn btn-sm omni-filter-chip" data-filter="reels">
+                <button type="button" class="btn btn-sm omni-filter-chip" data-filter="reels" title="Filter by family video reels">
                     <i class="bi bi-camera-reels-fill me-1 text-purple"></i><span>Reels</span>
                 </button>
             </div>

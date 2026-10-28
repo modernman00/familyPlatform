@@ -247,5 +247,6 @@
             }
         }
     </script>
+    <script src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
 </body>
 </html>

@@ -31,6 +31,28 @@ final class ServeImgController {
             }
         }
 
+        // On-demand Next-Gen VSE variant generation if .avif or .webp is requested for an older post
+        if (!$filePath) {
+            $ext = strtolower(pathinfo($safeName, PATHINFO_EXTENSION));
+            if ($ext === 'avif' || $ext === 'webp') {
+                $baseNameNoExt = pathinfo($safeName, PATHINFO_FILENAME);
+                $candidateExts = ['jpg', 'jpeg', 'png', 'webp', 'avif'];
+                foreach ($searchPaths as $dir) {
+                    foreach ($candidateExts as $cExt) {
+                        $sourceCandidate = $dir . $baseNameNoExt . '.' . $cExt;
+                        if (file_exists($sourceCandidate) && is_file($sourceCandidate)) {
+                            \App\services\VisualSupremacyService::processInPlace($sourceCandidate);
+                            $newVariantPath = $dir . $safeName;
+                            if (file_exists($newVariantPath) && is_file($newVariantPath)) {
+                                $filePath = $newVariantPath;
+                                break 2;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         if (!$filePath) {
             // Check for default avatar in resources/images/profile as fallback
             $fallbackPath = __DIR__ . '/../../resources/images/profile/avatarM.png';
@@ -92,6 +114,28 @@ final class ServeImgController {
             if (file_exists($candidate) && is_file($candidate)) {
                 $filePath = $candidate;
                 break;
+            }
+        }
+
+        // On-demand Next-Gen VSE variant generation if .avif or .webp is requested for an older post
+        if (!$filePath) {
+            $ext = strtolower(pathinfo($safeName, PATHINFO_EXTENSION));
+            if ($ext === 'avif' || $ext === 'webp') {
+                $baseNameNoExt = pathinfo($safeName, PATHINFO_FILENAME);
+                $candidateExts = ['jpg', 'jpeg', 'png', 'webp', 'avif'];
+                foreach ($searchPaths as $dir) {
+                    foreach ($candidateExts as $cExt) {
+                        $sourceCandidate = $dir . $baseNameNoExt . '.' . $cExt;
+                        if (file_exists($sourceCandidate) && is_file($sourceCandidate)) {
+                            \App\services\VisualSupremacyService::processInPlace($sourceCandidate);
+                            $newVariantPath = $dir . $safeName;
+                            if (file_exists($newVariantPath) && is_file($newVariantPath)) {
+                                $filePath = $newVariantPath;
+                                break 2;
+                            }
+                        }
+                    }
+                }
             }
         }
 

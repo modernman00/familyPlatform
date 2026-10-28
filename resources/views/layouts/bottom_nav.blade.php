@@ -22,7 +22,7 @@ body.dark-mode .pwa-bottom-nav, body.dark-theme .pwa-bottom-nav { background: #0
 <!-- Mobile PWA Bottom Tab Navigation (Native App Store / Facebook Standard) -->
 <nav class="pwa-bottom-nav d-lg-none" id="pwaBottomNav" aria-label="Mobile App Navigation">
     <!-- Home / Feed -->
-    <a href="/profilePage" class="pwa-tab-item" data-tab="feed" title="{{ __('nav.home', 'Home Feed') }}">
+    <a href="/profilePage" class="pwa-tab-item" data-tab="feed" title="{{ __('nav.home', 'Home Feed') }} - Go to main family updates and posts">
         <div class="pwa-tab-icon-wrap">
             <i class="bi bi-house-door-fill"></i>
         </div>
@@ -30,7 +30,7 @@ body.dark-mode .pwa-bottom-nav, body.dark-theme .pwa-bottom-nav { background: #0
     </a>
 
     <!-- Family Tree -->
-    <a href="/organogram/{{ $_SESSION['id'] ?? '' }}?mode=canvas" class="pwa-tab-item" data-tab="tree" title="{{ __('nav.tree', 'Family Tree') }}">
+    <a href="/organogram/{{ $_SESSION['id'] ?? '' }}?mode=canvas" class="pwa-tab-item" data-tab="tree" title="{{ __('nav.tree', 'Family Tree') }} - Explore living family tree and lineage">
         <div class="pwa-tab-icon-wrap">
             <i class="bi bi-diagram-3-fill"></i>
         </div>
@@ -38,7 +38,7 @@ body.dark-mode .pwa-bottom-nav, body.dark-theme .pwa-bottom-nav { background: #0
     </a>
 
     <!-- Quick Camera & Photo Upload (Universal iPhone & Mobile 1-Tap Trigger) -->
-    <button type="button" class="pwa-tab-item pwa-tab-center-action" id="pwaQuickCameraBtn" aria-label="{{ __('nav.add_photo', 'Add photo or memory from camera roll') }}" title="{{ __('nav.add_photo', 'Add Photo or Video') }}">
+    <button type="button" class="pwa-tab-item pwa-tab-center-action" id="pwaQuickCameraBtn" aria-label="{{ __('nav.add_photo', 'Add photo or memory from camera roll') }}" title="{{ __('nav.add_photo', 'Add Photo or Video') }} - Instant camera capture or photo upload">
         <div class="pwa-center-btn-bubble shadow-md">
             <i class="bi bi-camera-fill"></i>
         </div>
@@ -46,7 +46,7 @@ body.dark-mode .pwa-bottom-nav, body.dark-theme .pwa-bottom-nav { background: #0
     </button>
 
     <!-- Family Studio / Reels -->
-    <a href="/familyStudio" class="pwa-tab-item" data-tab="reels" title="{{ __('nav.studio', 'Family Studio & Reels') }}">
+    <a href="/familyStudio" class="pwa-tab-item" data-tab="reels" title="{{ __('nav.studio', 'Family Studio') }} - Watch captivating family reels and celebrations">
         <div class="pwa-tab-icon-wrap">
             <i class="bi bi-camera-reels-fill"></i>
         </div>
@@ -54,7 +54,7 @@ body.dark-mode .pwa-bottom-nav, body.dark-theme .pwa-bottom-nav { background: #0
     </a>
 
     <!-- Notifications & Alerts -->
-    <a href="javascript:void(0)" role="button" aria-haspopup="true" class="pwa-tab-item position-relative" id="pwaNotifTab" data-tab="notifications" title="{{ __('nav.alerts', 'Alerts & Notifications') }}">
+    <a href="javascript:void(0)" role="button" aria-haspopup="true" class="pwa-tab-item position-relative" id="pwaNotifTab" data-tab="notifications" title="{{ __('nav.alerts', 'Alerts & Notifications') }} - View family notifications and invitations">
         <div class="pwa-tab-icon-wrap position-relative">
             <i class="bi bi-bell-fill"></i>
             <span class="pwa-tab-badge" id="pwa_bottom_badge" style="display: none;"></span>

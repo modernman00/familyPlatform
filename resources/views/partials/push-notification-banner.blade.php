@@ -88,8 +88,10 @@
 
         return fetch('/pushNotification/subscription', {
             method: 'POST',
+            credentials: 'same-origin',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': token,
                 'X-XSRF-TOKEN': token
@@ -97,11 +99,15 @@
             body: JSON.stringify(payload)
         }).then(function(res) {
             if (res.status === 401) {
+                console.warn('[Push] Server returned 401: Unauthenticated session');
                 return { status: 'unauthorized' };
             }
             return res.json().catch(function() { return { status: 'ok' }; });
         }).then(function(data) {
-            console.log('[Push] Subscription synchronized with server:', data);
+            if (data && (data.status === 'success' || data.code === 200 || data.status === 'ok')) {
+                localStorage.setItem(SUBSCRIBED_KEY, 'true');
+                console.log('[Push] Subscription synchronized and registered in database:', data);
+            }
             return data;
         });
     };
@@ -149,16 +155,27 @@
         setTimeout(function() { banner.style.display = 'none'; }, 300);
     }
 
-    function silentResyncPushSubscription() {
+    function forceEnsurePushSubscription(retryCount) {
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+        retryCount = retryCount || 0;
+
         navigator.serviceWorker.ready.then(function(registration) {
-            registration.pushManager.getSubscription().then(function(existingSub) {
+            return registration.pushManager.getSubscription().then(function(existingSub) {
                 if (existingSub) {
-                    window.sendSubscriptionToBackEnd(existingSub).catch(function() {});
+                    return window.sendSubscriptionToBackEnd(existingSub);
                 } else if (window.Notification && Notification.permission === 'granted') {
-                    window.subscribeUserToPush().catch(function() {});
+                    return window.subscribeUserToPush();
                 }
-            }).catch(function() {});
+            });
+        }).then(function(res) {
+            if (res && res.status === 'unauthorized' && retryCount < 3) {
+                setTimeout(function() { forceEnsurePushSubscription(retryCount + 1); }, 3000);
+            }
+        }).catch(function(err) {
+            console.warn('[Push] Auto-enrollment error, will retry:', err);
+            if (retryCount < 3) {
+                setTimeout(function() { forceEnsurePushSubscription(retryCount + 1); }, 3000);
+            }
         });
     }
 
@@ -169,25 +186,18 @@
         const closeBtn = document.getElementById('close-push-banner');
         if (!banner || !enableBtn) return;
 
-        // INVIOLABLE NON-IRRITANT HARD GATES:
-        // 1. If user already has notifications enabled (browser granted OR persistent localStorage flag) -> NEVER SHOW BANNER!
+        const isStandalone = isInStandaloneMode();
         const hasNotificationGranted = (typeof window.Notification !== 'undefined' && Notification.permission === 'granted');
-        const isSubscribedLocally = (localStorage.getItem(SUBSCRIBED_KEY) === 'true');
 
-        if (hasNotificationGranted || isSubscribedLocally) {
-            localStorage.setItem(SUBSCRIBED_KEY, 'true');
-            localStorage.setItem(DISMISS_KEY, 'true');
-            silentResyncPushSubscription();
-            return; // Hard stop: zero visual clutter or repetition for users with notifications on.
-        }
-
-        // 2. If user explicitly blocked notifications in browser -> NEVER SHOW BANNER!
-        if (typeof window.Notification !== 'undefined' && Notification.permission === 'denied') {
+        // 1. If user already granted permission: FORCE subscription sync in background & hide banner
+        if (hasNotificationGranted) {
+            forceEnsurePushSubscription();
+            hideBanner(banner);
             return;
         }
 
-        // 3. If user previously dismissed the prompt (via 'Not Now' or 'X') -> NEVER SHOW BANNER!
-        if (localStorage.getItem(DISMISS_KEY) === 'true') {
+        // 2. If user explicitly blocked notifications in browser:
+        if (typeof window.Notification !== 'undefined' && Notification.permission === 'denied') {
             return;
         }
 
@@ -199,49 +209,63 @@
         if (closeBtn) closeBtn.addEventListener('click', dismissAction);
         if (dismissBtn) dismissBtn.addEventListener('click', dismissAction);
 
-        // 4. iOS Safari non-standalone handling: Show Add-to-Home-Screen prompt only if never dismissed
-        if (isIos() && !isInStandaloneMode()) {
+        // 3. Inside the installed PWA:
+        // FORCE the prompt if permission is 'default' so the installed app gets enrolled!
+        if (isStandalone) {
             const titleEl = banner.querySelector('.push-banner-title');
             const textEl = banner.querySelector('.push-banner-text');
-            if (titleEl) titleEl.textContent = 'Instant Alerts Require App Installation';
-            if (textEl) textEl.textContent = 'To receive family milestone notifications on your iPhone, tap Share (box with arrow) below, then select "Add to Home Screen".';
-            
-            enableBtn.innerHTML = '<i class="bi bi-box-arrow-up me-1.5"></i> How to Install';
-            enableBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                dismissAction();
-                if (window.Swal) {
-                    window.Swal.fire({
-                        icon: 'info',
-                        title: 'Install on Your iPhone',
-                        html: '<div class="text-start" style="font-size:0.95rem;"><p>Apple iOS requires FamilyPlatform on your Home Screen to deliver lockscreen notifications:</p><ol class="ps-3 mb-0"><li>Tap the <strong>Share</strong> button <i class="bi bi-box-arrow-up text-primary"></i> at the bottom of Safari.</li><li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li><li>Open FamilyPlatform from your Home Screen to enjoy instant alerts.</li></ol></div>',
-                        confirmButtonColor: '#a31621',
-                        confirmButtonText: 'Understood'
-                    });
-                } else {
-                    alert('To receive notifications on iOS:\n1. Tap the Share button at the bottom of Safari.\n2. Tap "Add to Home Screen".\n3. Launch FamilyPlatform from your Home Screen.');
-                }
-            });
+            if (titleEl) titleEl.textContent = 'Activate Family Notifications';
+            if (textEl) textEl.textContent = 'Enable notifications to receive instant lockscreen alerts for family posts, birthdays, and messages.';
 
             setTimeout(function() {
                 banner.style.display = 'block';
                 banner.classList.add('show');
-            }, 2200);
-            return;
+            }, 1200);
+        } else {
+            // For standard browser visitors:
+            if (isIos()) {
+                if (localStorage.getItem(DISMISS_KEY) === 'true') return;
+
+                const titleEl = banner.querySelector('.push-banner-title');
+                const textEl = banner.querySelector('.push-banner-text');
+                if (titleEl) titleEl.textContent = 'Instant Alerts Require App Installation';
+                if (textEl) textEl.textContent = 'To receive family milestone notifications on your iPhone, tap Share (box with arrow) below, then select "Add to Home Screen".';
+                
+                enableBtn.innerHTML = '<i class="bi bi-box-arrow-up me-1.5"></i> How to Install';
+                enableBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    dismissAction();
+                    if (window.Swal) {
+                        window.Swal.fire({
+                            icon: 'info',
+                            title: 'Install on Your iPhone',
+                            html: '<div class="text-start" style="font-size:0.95rem;"><p>Apple iOS requires FamilyPlatform on your Home Screen to deliver lockscreen notifications:</p><ol class="ps-3 mb-0"><li>Tap the <strong>Share</strong> button <i class="bi bi-box-arrow-up text-primary"></i> at the bottom of Safari.</li><li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li><li>Open FamilyPlatform from your Home Screen to enjoy instant alerts.</li></ol></div>',
+                            confirmButtonColor: '#a31621',
+                            confirmButtonText: 'Understood'
+                        });
+                    }
+                });
+
+                setTimeout(function() {
+                    banner.style.display = 'block';
+                    banner.classList.add('show');
+                }, 2000);
+                return;
+            }
+
+            if (localStorage.getItem(DISMISS_KEY) === 'true') {
+                return;
+            }
+            if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+                return;
+            }
+            setTimeout(function() {
+                banner.style.display = 'block';
+                banner.classList.add('show');
+            }, 1800);
         }
 
-        // 5. Capability Check
-        if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
-            return;
-        }
-
-        // 6. Only show once for unprompted visitors or newly installed PWA
-        setTimeout(function() {
-            banner.style.display = 'block';
-            banner.classList.add('show');
-        }, 1500);
-
-        // 7. Handle "Enable Notifications" click with loading spinner
+        // Handle "Enable Notifications" click with loading spinner
         enableBtn.addEventListener('click', function() {
             enableBtn.disabled = true;
             enableBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Activating...';
@@ -250,7 +274,7 @@
                 enableBtn.innerHTML = '<i class="bi bi-check-circle-fill me-1.5"></i> Alerts Active';
                 enableBtn.style.background = '#15803d'; // Green success
                 localStorage.setItem(SUBSCRIBED_KEY, 'true');
-                localStorage.setItem(DISMISS_KEY, 'true');
+                localStorage.removeItem(DISMISS_KEY);
                 setTimeout(function() { hideBanner(banner); }, 1200);
 
                 if (typeof window.showFloatingToast === 'function') {
@@ -270,7 +294,7 @@
                 console.warn('[Push] Permission or subscription rejected:', err);
                 enableBtn.disabled = false;
                 enableBtn.innerHTML = '<i class="bi bi-bell-fill me-1.5"></i> Enable Notifications';
-                if (Notification.permission === 'denied' || Notification.permission === 'default') {
+                if (Notification.permission === 'denied') {
                     dismissAction();
                 }
             });

@@ -192,6 +192,7 @@
                             <!-- Fast Category Filter Chips -->
                             <div class="d-flex flex-wrap gap-1.5 mb-2.5" id="gifCategoryPills">
                                 <button type="button" class="btn btn-sm btn-light border py-0 px-2.5 rounded-pill fw-semibold gif-cat-pill active" data-cat="all" style="font-size: 0.75rem;">🌟 All</button>
+                                <button type="button" class="btn btn-sm btn-light border py-0 px-2.5 rounded-pill fw-semibold gif-cat-pill" data-cat="stickers" style="font-size: 0.75rem;">🏷️ Stickers</button>
                                 <button type="button" class="btn btn-sm btn-light border py-0 px-2.5 rounded-pill fw-semibold gif-cat-pill" data-cat="celebrate" style="font-size: 0.75rem;">🎉 Celebrate</button>
                                 <button type="button" class="btn btn-sm btn-light border py-0 px-2.5 rounded-pill fw-semibold gif-cat-pill" data-cat="love" style="font-size: 0.75rem;">❤️ Love &amp; Hugs</button>
                                 <button type="button" class="btn btn-sm btn-light border py-0 px-2.5 rounded-pill fw-semibold gif-cat-pill" data-cat="family" style="font-size: 0.75rem;">👨‍👩‍👧‍👦 Family</button>
@@ -344,6 +345,9 @@
                                     <i class="bi bi-clipboard"></i> Copy Direct URL
                                 </button>
                             </div>
+                            <p class="small text-muted mb-0" style="font-size: 0.78rem; line-height: 1.45;">
+                                After tapping <strong>Install iPhone Shortcut</strong>, Safari saves the file. Tap <strong>Copy Direct URL</strong> first, then install the shortcut (Safari ↓ Downloads, open the file, <strong>Add Shortcut</strong>) and paste the link when asked.
+                            </p>
                         </div>
 
                     </div>
@@ -353,36 +357,36 @@
                         <span class="composer-tools__title">{{ __('modal.add_to_post', 'Add to your post') }}</span>
 
                         <div class="composer-tools__grid">
-                            <label for="imageUpload" class="btn-composer-action composer-tool action-photo mb-0" title="Attach Photo" aria-label="Attach photo">
+                            <label for="imageUpload" class="btn-composer-action composer-tool action-photo mb-0" title="Attach Photos - Upload family pictures or camera roll memories" aria-label="Attach photos">
                                 <i class="bi bi-image-fill"></i><span>Photo</span>
                             </label>
                             <input type="file" name="post_img[]" id="imageUpload" accept="image/*,video/*" multiple hidden>
 
-                            <button type="button" class="btn-composer-action composer-tool action-emoji" id="emojiPost" title="Add Emoji" aria-label="Add emoji">
+                            <button type="button" class="btn-composer-action composer-tool action-emoji" id="emojiPost" title="Add Emoji - Express feelings with diverse emoji reactions" aria-label="Add emoji">
                                 <i class="bi bi-emoji-smile-fill"></i><span>Emoji</span>
                             </button>
 
-                            <button type="button" class="btn-composer-action composer-tool action-video" id="addVideoBtn" title="Embed Video (YouTube / Vimeo / Cloudflare)" aria-label="Add video">
+                            <button type="button" class="btn-composer-action composer-tool action-video" id="addVideoBtn" title="Embed Video - Share family videos from YouTube, Vimeo, or your device" aria-label="Add video">
                                 <i class="bi bi-play-btn-fill"></i><span>Video</span>
                             </button>
 
-                            <button type="button" class="btn-composer-action composer-tool action-gif gif-btn" id="addGifBtn" title="Add GIF" aria-label="Add GIF">
+                            <button type="button" class="btn-composer-action composer-tool action-gif gif-btn" id="addGifBtn" title="Add GIF - Search and attach fun animated family GIFs" aria-label="Add GIF">
                                 <i class="bi bi-filetype-gif"></i><span>GIF</span>
                             </button>
 
-                            <button type="button" class="btn-composer-action composer-tool action-tag" id="addTagBtn" title="Tag Family Members" aria-label="Tag people">
+                            <button type="button" class="btn-composer-action composer-tool action-tag" id="addTagBtn" title="Tag Family - Mention and tag relatives present in this memory" aria-label="Tag people">
                                 <i class="bi bi-tag-fill"></i><span>Tag</span>
                             </button>
 
-                            <button type="button" class="btn-composer-action composer-tool action-poll" id="addPollBtn" title="Create Poll" aria-label="Create poll">
+                            <button type="button" class="btn-composer-action composer-tool action-poll" id="addPollBtn" title="Create Poll - Ask questions and collect votes from family members" aria-label="Create poll">
                                 <i class="bi bi-bar-chart-fill"></i><span>Poll</span>
                             </button>
 
-                            <button type="button" class="btn-composer-action composer-tool action-thennow action-thennow--labeled" id="addThenNowBtn" title="Then &amp; Now: show how far you have come" aria-label="Then and Now photo comparison">
+                            <button type="button" class="btn-composer-action composer-tool action-thennow action-thennow--labeled" id="addThenNowBtn" title="Then &amp; Now - Showcase your journey with side-by-side milestone photos" aria-label="Then and Now photo comparison">
                                 <i class="bi bi-hourglass-split"></i><span>Then &amp; Now</span>
                             </button>
 
-                            <button type="button" class="btn-composer-action composer-tool action-apple" id="iosShareBtn" title="iPhone Direct Share Guide" aria-label="iPhone Photos Direct Share">
+                            <button type="button" class="btn-composer-action composer-tool action-apple" id="iosShareBtn" title="iPhone Share - Direct 1-tap sharing from Apple Photos gallery" aria-label="iPhone Photos Direct Share">
                                 <i class="bi bi-apple"></i><span>iPhone</span>
                             </button>
                         </div>
@@ -421,7 +425,7 @@
                 <div class="p-3 rounded-3 mb-3 border bg-light-subtle">
                     <h6 class="fw-bold mb-2 text-dark"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> How To Share from iPhone Photos</h6>
                     <ol class="small text-secondary ps-3 mb-0" style="line-height: 1.7;">
-                        <li>Tap <strong>Install Shortcut</strong> below to add <em>&quot;Share to FamilyPlatform&quot;</em> to your iPhone.</li>
+                        <li>Tap <strong>Download iPhone Shortcut</strong> below, then tap the <strong>Downloads</strong> icon (↓) in Safari&rsquo;s address bar, open the file and tap <strong>Add Shortcut</strong>.</li>
                         <li>Open any photo or video in your iPhone <strong>Apple Photos</strong> gallery.</li>
                         <li>Tap the iOS <strong>Share</strong> button and choose <strong>&quot;Share to FamilyPlatform&quot;</strong>.</li>
                         <li>It posts directly to your family feed instantly!</li>

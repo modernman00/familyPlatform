@@ -303,6 +303,7 @@
     <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/index.js" defer></script>
     <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/pwa-notifications.js" defer></script>
     <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>
+    <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
     @include('partials.push-notification-banner')
     @include('component.submitSpinner')
     @include('partials.pwa-register')
