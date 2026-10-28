@@ -219,6 +219,10 @@
                                     <option value="" disabled selected>Choose type</option>
                                     <option value="Birthday">Birthday</option>
                                     <option value="Anniversary">Anniversary</option>
+                                    <option value="Barbecue">Barbecue / Cookout</option>
+                                    <option value="Museum">Museum / Cultural Outing</option>
+                                    <option value="Weekend_Drive">Weekend Drive / Scenic Route</option>
+                                    <option value="Holiday">Holiday / Staycation</option>
                                     <option value="Reunion">Reunion</option>
                                     <option value="House_warming">House Warming</option>
                                     <option value="Wedding">Wedding</option>
@@ -226,7 +230,6 @@
                                     <option value="Meeting">Meeting</option>
                                     <option value="Memorial">Memorial</option>
                                     <option value="Graduation">Graduation</option>
-                                    <option value="Holiday">Holiday</option>
                                     <option value="Other">Other</option>
                                 </select>
                                 <small id="eventType_error" class="text-danger ps-2"></small>
@@ -239,7 +242,7 @@
                             <small id="eventDescription_error" class="text-danger ps-2"></small>
                         </div>
 
-                        <div class="mb-1">
+                        <div class="mb-2.5">
                             <label for="eventFrequency" class="form-label">Frequency</label>
                             <select class="form-select" name="eventFrequency" id="eventFrequency">
                                 <option value="" disabled selected>Choose event frequency</option>
@@ -249,6 +252,98 @@
                                 <option value="Weekly">Weekly</option>
                             </select>
                             <small id="eventFrequency_error" class="text-danger ps-2"></small>
+                        </div>
+
+                        <!-- Venue / Destination Location -->
+                        <div class="mb-2.5">
+                            <label for="eventLocation" class="form-label d-flex justify-content-between align-items-center">
+                                <span>Venue / Location</span>
+                                <span class="text-muted" style="font-size: 0.72rem; font-weight: normal;">Park, museum, route, or postcode</span>
+                            </label>
+                            <input type="text" class="form-control" id="eventLocation" placeholder="e.g. Richmond Park, Science Museum, Cotswolds">
+                        </div>
+
+                        <!-- 📍 Proximity Localisation & Radius Card -->
+                        <div class="p-3 mb-2.5 rounded-3 border" style="background: var(--bg-light, #f8fafc); border-color: var(--border-color, #e2e8f0);">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label mb-0 fw-bold d-flex align-items-center gap-1" style="font-size: 0.85rem; color: var(--text-main, #0f172a);">
+                                    <i class="bi bi-geo-alt-fill text-danger"></i>
+                                    <span>Audience &amp; Proximity Scoping</span>
+                                </label>
+                                <span class="badge rounded-pill bg-light text-secondary border px-2 py-1" style="font-size: 0.68rem;" id="proximityBadgePreview">All Family</span>
+                            </div>
+
+                            <div class="row g-2 mb-2">
+                                <div class="col-7">
+                                    <select class="form-select form-select-sm" id="proximityModeSelect" style="font-size: 0.8rem; min-height: 44px;">
+                                        <option value="all_family" selected>🌐 All Family Members (Global)</option>
+                                        <option value="proximity_only">📍 Nearby Members Only (Localised)</option>
+                                    </select>
+                                </div>
+                                <div class="col-5">
+                                    <select class="form-select form-select-sm" id="targetRadiusMilesSelect" style="font-size: 0.8rem; min-height: 44px;" disabled>
+                                        <option value="10">Within 10 miles</option>
+                                        <option value="25" selected>Within 25 miles</option>
+                                        <option value="50">Within 50 miles</option>
+                                        <option value="100">Within 100 miles</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div id="proximityAudienceNote" class="small text-muted" style="font-size: 0.75rem; line-height: 1.35;">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <span>All registered family members will receive notifications for this event.</span>
+                            </div>
+                        </div>
+
+                        <!-- ✨ AI Activity Scout (ResilientWebSearchService) -->
+                        <div class="p-3 mb-3 rounded-3" id="aiActivityScoutCard" style="background: linear-gradient(135deg, #ffffff 0%, #fdfbf7 50%, #faf6ec 100%); border: 1.5px solid rgba(212, 175, 55, 0.35); box-shadow: 0 4px 14px rgba(212, 175, 55, 0.08);">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center gap-1.5">
+                                    <span class="badge rounded-pill fw-bold" style="background: rgba(212, 175, 55, 0.15); color: #8c6d1f; border: 1px solid rgba(212, 175, 55, 0.4); font-size: 0.7rem;"><i class="bi bi-compass-fill text-warning me-1"></i> Concierge Scout</span>
+                                    <span class="fw-bold" style="font-size: 0.85rem; color: #0f172a;">Curated Family Outings</span>
+                                </div>
+                                <span class="badge bg-light text-secondary border small" style="font-size: 0.65rem;">Grounded &amp; Monetised</span>
+                            </div>
+
+                            <p class="text-secondary mb-2" style="font-size: 0.77rem; line-height: 1.4;">
+                                Instant suggestions for barbecue parklands, museum exhibitions, scenic drives, or staycations near your venue.
+                            </p>
+
+                            <!-- Category Quick-Pills -->
+                            <div class="d-flex flex-wrap gap-1 mb-2.5" id="scoutCategoryPills">
+                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill scout-pill active" data-cat="barbecue" style="font-size: 0.75rem; padding: 4px 12px; min-height: 38px; white-space: nowrap; flex-shrink: 0;">
+                                    🍖 Barbecue &amp; Picnic
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill scout-pill" data-cat="museum" style="font-size: 0.75rem; padding: 4px 12px; min-height: 38px; white-space: nowrap; flex-shrink: 0;">
+                                    🏛️ Museum &amp; Culture
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill scout-pill" data-cat="weekend_drive" style="font-size: 0.75rem; padding: 4px 12px; min-height: 38px; white-space: nowrap; flex-shrink: 0;">
+                                    🚗 Weekend Drive
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill scout-pill" data-cat="holiday" style="font-size: 0.75rem; padding: 4px 12px; min-height: 38px; white-space: nowrap; flex-shrink: 0;">
+                                    🏖️ Holiday Staycation
+                                </button>
+                            </div>
+
+                            <!-- Scout Input Bar -->
+                            <div class="input-group input-group-sm mb-2 shadow-sm rounded-3 overflow-hidden">
+                                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-geo-alt-fill text-danger"></i></span>
+                                <input type="text" class="form-control border-start-0" id="scoutLocationInput" placeholder="Town, city or outward district (e.g. Richmond, SW19)" style="min-height: 44px; font-size: 0.82rem;">
+                                <button type="button" class="btn d-inline-flex align-items-center gap-1.5 px-3 fw-bold text-white shadow-sm" id="btnRunScout" style="min-height: 44px; font-size: 0.82rem; white-space: nowrap; flex-shrink: 0; background: linear-gradient(135deg, #a31621 0%, #7e101a 100%); border: 1px solid rgba(255,215,0,0.3);">
+                                    <i class="bi bi-compass"></i>
+                                    <span>Scout Outings</span>
+                                </button>
+                            </div>
+
+                            <!-- Scout Results Area -->
+                            <div id="scoutResultsArea" class="d-none mt-2">
+                                <div id="scoutLoadingSpinner" class="text-center py-2 d-none">
+                                    <div class="spinner-border spinner-border-sm text-danger" role="status"></div>
+                                    <span class="ms-1 small text-muted">Scouting live verified ideas...</span>
+                                </div>
+                                <div id="scoutCardsContainer" class="d-flex flex-column gap-2"></div>
+                            </div>
                         </div>
 
                         <!-- 3-Gear PartyPlatform Studio Escalation Toggle (deliberately no name="" attribute so FormHelper.massValidate() ignores it) -->

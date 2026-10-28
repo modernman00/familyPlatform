@@ -5,6 +5,7 @@ namespace App\controller\members;
 
 use App\classes\{ AllFunctionalities, Insert, Select, PushNotificationClass, Pusher };
 use App\model\{EmailData, AllMembersData};
+use App\services\ActivityProximityService;
 use App\services\NotificationOrchestrator;
 use App\services\PartyPlatformBridgeService;
 use Src\CheckToken;
@@ -169,6 +170,21 @@ final class Event extends AllMembersData
                 $membersToNotify = self::filterMemberByFamCode($eventFamCodeStr);
                 $formattedDate = $eventDate !== '' ? dateFormat($eventDate) : '';
 
+                // Proximity Geofencing: Scope recipients if event is targeted to local members
+                $proximityMode = (string)($cleanData['proximity_mode'] ?? 'all_family');
+                $targetRadius = (int)($cleanData['target_radius_miles'] ?? 25);
+                $eventLocation = (string)($cleanData['eventLocation'] ?? '');
+                $isProximityScoped = ($proximityMode === 'proximity_only' && $eventLocation !== '');
+
+                if ($isProximityScoped) {
+                    $proximityResult = ActivityProximityService::filterMembersByProximity($membersToNotify, $eventLocation, $targetRadius);
+                    $membersToNotify = $proximityResult['nearby_members'];
+                }
+
+                $notifTitle = $isProximityScoped
+                    ? "📍 Nearby Activity ({$targetRadius}mi): {$eventName}"
+                    : "🎉 New Event: {$eventName}";
+
                 // 1. Dispatch via Unified NotificationOrchestrator (In-App real-time toast + WebPush OS banner + sync)
                 foreach ($membersToNotify as $member) {
                     $targetUid = is_scalar($member['id'] ?? null) ? (string)$member['id'] : '';
@@ -177,8 +193,8 @@ final class Event extends AllMembersData
                             userId: $targetUid,
                             category: 'social',
                             priority: 'medium',
-                            title: "🎉 New Event: {$eventName}",
-                            body: "{$senderNameStr} added '{$eventName}' on {$formattedDate}",
+                            title: $notifTitle,
+                            body: "{$senderNameStr} added '{$eventName}' on {$formattedDate}" . ($isProximityScoped ? " near {$eventLocation}" : ""),
                             actionUrl: '/profilePage#eventHeader',
                             tag: 'event-' . ($lastInsertedId ?: 'new'),
                             familyCode: $eventFamCodeStr,
@@ -190,6 +206,9 @@ final class Event extends AllMembersData
                                 'eventDate' => $eventDate,
                                 'eventType' => $eventType,
                                 'eventDescription' => $eventDescription,
+                                'eventLocation' => $eventLocation,
+                                'proximity_mode' => $proximityMode,
+                                'target_radius_miles' => $targetRadius,
                             ]
                         );
                     }
@@ -492,6 +511,9 @@ final class Event extends AllMembersData
                     'party_rsvp_url' => $event['party_rsvp_url'] ?? null,
                     'party_card_url' => $event['party_card_url'] ?? null,
                     'party_sync_status' => $event['party_sync_status'] ?? 'none',
+                    'eventLocation' => $event['eventLocation'] ?? '',
+                    'proximity_mode' => $event['proximity_mode'] ?? 'all_family',
+                    'target_radius_miles' => (int)($event['target_radius_miles'] ?? 25),
                     'gCalUrl' => $gCalUrl,
                 ];
             }

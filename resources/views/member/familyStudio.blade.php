@@ -1014,6 +1014,28 @@
                                 </div>
                             </div>
                         </button>
+                        <button type="button" class="btn btn-outline-warning text-start p-3 rounded-3" onclick="selectStudioRelativeType('uncle_aunt')" style="border-color: #e2e8f0;">
+                            <div class="d-flex align-items-center">
+                                <div class="add-icon-bubble mb-0 me-3" style="width: 42px; height: 42px; background: #fefce8; color: #ca8a04;">
+                                    <i class="bi bi-person-badge-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">Auntie / Uncle</div>
+                                    <div class="text-muted small">Paternal or Maternal side with Birth or Marital family code</div>
+                                </div>
+                            </div>
+                        </button>
+                        <button type="button" class="btn btn-outline-info text-start p-3 rounded-3" onclick="selectStudioRelativeType('in_law')" style="border-color: #e2e8f0;">
+                            <div class="d-flex align-items-center">
+                                <div class="add-icon-bubble mb-0 me-3" style="width: 42px; height: 42px; background: #f0f9ff; color: #0284c7;">
+                                    <i class="bi bi-people-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">In-Laws</div>
+                                    <div class="text-muted small">Father, Mother, Brother or Sister-in-law with Wife's Family Code</div>
+                                </div>
+                            </div>
+                        </button>
                     </div>
                 </div>
 
@@ -1221,6 +1243,160 @@
                         <div class="d-flex gap-2">
                             <button type="button" class="btn btn-light" onclick="backToStudioStep1()">Back</button>
                             <button type="submit" id="studioSaveParentsBtn" class="btn btn-primary flex-grow-1">Save Parents</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Studio Uncle / Aunt Form -->
+                <div id="studioStep2-uncle-aunt" class="d-none">
+                    <form id="studioUncleAuntForm">
+                        @include('csrf')
+                        <input type="hidden" name="base_node_id" value="{{ $rootNodeId ?? 1 }}">
+                        <input type="hidden" name="lineage_scope" class="studio-lineage-scope-input" value="{{ $activeLineageScope ?? 'primary' }}">
+                        <input type="hidden" name="lineage_code" class="studio-lineage-code-input" value="{{ ($activeLineageScope ?? 'primary') === 'maternal' ? ($maternalFamCode ?? '') : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}">
+                        <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-person-badge-fill me-2 text-warning"></i><span id="studioUncleAuntHeading">Auntie / Uncle Details</span></h6>
+                        
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Kinship Role *</label>
+                                <select name="relationship" id="studioUncleAuntRole" class="form-select" onchange="window.updateStudioUncleAuntRole && window.updateStudioUncleAuntRole(this.value)">
+                                    <option value="uncle">Uncle (Parent's Brother)</option>
+                                    <option value="aunt">Auntie / Aunt (Parent's Sister)</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Family Side *</label>
+                                <select name="side" id="studioUncleAuntSide" class="form-select" onchange="window.updateStudioUncleAuntSide && window.updateStudioUncleAuntSide(this.value)">
+                                    <option value="paternal">Paternal (Father's Side)</option>
+                                    <option value="maternal">Maternal (Mother's Side)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Target Family Code Toggle -->
+                        <div class="p-3 mb-3 rounded-3" style="background:#f8fafc;border:1px solid #e2e8f0;">
+                            <label class="form-label small fw-semibold mb-1">Target Family Code</label>
+                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                <label class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-2 border bg-white small" style="cursor:pointer;min-height:44px;">
+                                    <input type="radio" name="famcode_type" id="studioFamcodeTypeMarital" value="marital" checked onchange="window.setStudioUncleAuntFamCode && window.setStudioUncleAuntFamCode('marital')">
+                                    <span><strong>Marital Tree</strong> (#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})</span>
+                                </label>
+                                @if(!empty($maternalFamCode))
+                                <label class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-2 border bg-white small" style="cursor:pointer;min-height:44px;">
+                                    <input type="radio" name="famcode_type" id="studioFamcodeTypeBirth" value="birth" onchange="window.setStudioUncleAuntFamCode && window.setStudioUncleAuntFamCode('birth')">
+                                    <span><strong>Birth Family</strong> (#{{ $maternalFamCode }})</span>
+                                </label>
+                                @endif
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="form-label small text-muted">Birth FamCode (Optional)</label>
+                                    <input type="text" name="birth_famcode" id="studioUncleBirthFamCode" class="form-control form-control-sm text-uppercase" placeholder="e.g. {{ $maternalFamCode ?? 'MAYUNGBE' }}" value="{{ $maternalFamCode ?? '' }}">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small text-muted">Marital FamCode (Optional)</label>
+                                    <input type="text" name="marital_famcode" id="studioUncleMaritalFamCode" class="form-control form-control-sm text-uppercase" placeholder="e.g. {{ $primaryFamCode ?? ($data['famCode'] ?? 'OLAOGUN') }}" value="{{ $primaryFamCode ?? ($data['famCode'] ?? '') }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">First Name *</label>
+                            <input type="text" name="first_name" class="form-control" placeholder="First name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Last Name</label>
+                            <input type="text" name="last_name" id="studioUncleLastName" class="form-control" placeholder="{{ $maritalSurname ?? ($data['lastName'] ?? 'Surname') }}">
+                        </div>
+                        <div class="mb-3" id="studioUncleMaidenRow" style="display:none;">
+                            <label class="form-label small fw-semibold">Maiden name (née) - if married</label>
+                            <input type="text" name="maiden_name" class="form-control" placeholder="e.g. Akinduro">
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Email (Optional)</label>
+                                <input type="email" name="email" class="form-control" placeholder="Email">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Mobile (Optional)</label>
+                                <input type="tel" name="mobile" class="form-control" placeholder="Phone">
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-light" onclick="backToStudioStep1()">Back</button>
+                            <button type="submit" id="studioSaveUncleAuntBtn" class="btn btn-primary flex-grow-1">Save Uncle</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="studioStep2-in-law" class="d-none">
+                    <form id="studioInLawForm">
+                        @include('csrf')
+                        <input type="hidden" name="base_node_id" value="{{ $rootNodeId ?? 1 }}">
+                        <input type="hidden" name="lineage_scope" class="studio-lineage-scope-input" value="wife">
+                        <input type="hidden" name="lineage_code" class="studio-lineage-code-input" value="{{ $wifeFamCode ?? ($maternalFamCode ?? '') }}">
+                        <h6 class="fw-bold mb-3 text-info"><i class="bi bi-people-fill me-2"></i><span id="studioInLawHeading">In-Law Details</span></h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">In-Law Kinship Role *</label>
+                            <select name="relationship" id="studioInLawRole" class="form-select" onchange="window.updateStudioInLawRole && window.updateStudioInLawRole(this.value)">
+                                <option value="father_in_law">Father-in-law (Wife's Father)</option>
+                                <option value="mother_in_law">Mother-in-law (Wife's Mother)</option>
+                                <option value="brother_in_law">Brother-in-law (Wife's Brother)</option>
+                                <option value="sister_in_law">Sister-in-law (Wife's Sister)</option>
+                            </select>
+                        </div>
+
+                        <!-- Target Family Code Toggle -->
+                        <div class="p-3 mb-3 rounded-3" style="background:#f8fafc;border:1px solid #e2e8f0;">
+                            <label class="form-label small fw-semibold mb-1">Target Lineage / Family Code</label>
+                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                <label class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-2 border bg-white small" style="cursor:pointer;min-height:44px;">
+                                    <input type="radio" name="famcode_type" id="studioFamcodeTypeWife" value="wife" checked onchange="window.setStudioInLawFamCode && window.setStudioInLawFamCode('wife')">
+                                    <span><strong>Wife's / In-Law Lineage</strong></span>
+                                </label>
+                                <label class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-2 border bg-white small" style="cursor:pointer;min-height:44px;">
+                                    <input type="radio" name="famcode_type" id="studioFamcodeTypeInlawMarital" value="marital" onchange="window.setStudioInLawFamCode && window.setStudioInLawFamCode('marital')">
+                                    <span><strong>Marital Tree</strong> (#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})</span>
+                                </label>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="form-label small text-muted">Wife's FamCode</label>
+                                    <input type="text" name="wife_famcode" id="studioWifeFamCode" class="form-control form-control-sm text-uppercase" placeholder="e.g. KOKUMO" value="{{ $wifeFamCode ?? '' }}" oninput="window.refreshStudioInLawSubmitLabel && window.refreshStudioInLawSubmitLabel()">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small text-muted">Marital FamCode (Optional)</label>
+                                    <input type="text" name="marital_famcode" id="studioInlawMaritalFamCode" class="form-control form-control-sm text-uppercase" placeholder="e.g. {{ $primaryFamCode ?? ($data['famCode'] ?? 'OLAOGUN') }}" value="{{ $primaryFamCode ?? ($data['famCode'] ?? '') }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">First Name *</label>
+                            <input type="text" name="first_name" class="form-control" placeholder="First name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Last Name</label>
+                            <input type="text" name="last_name" id="studioInLawLastName" class="form-control" placeholder="In-Law Surname">
+                        </div>
+                        <div class="mb-3" id="studioInLawMaidenRow" style="display:none;">
+                            <label class="form-label small fw-semibold">Maiden name (née) - if married</label>
+                            <input type="text" name="maiden_name" class="form-control" placeholder="In-law maiden surname">
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Email (Optional)</label>
+                                <input type="email" name="email" class="form-control" placeholder="Email">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Mobile (Optional)</label>
+                                <input type="tel" name="mobile" class="form-control" placeholder="Phone">
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-light" onclick="backToStudioStep1()">Back</button>
+                            <button type="submit" id="studioSaveInLawBtn" class="btn btn-info flex-grow-1 text-dark fw-bold">Save Father-in-law</button>
                         </div>
                     </form>
                 </div>
@@ -1442,6 +1618,8 @@
         document.getElementById('studioStep2-child').classList.add('d-none');
         document.getElementById('studioStep2-sibling').classList.add('d-none');
         document.getElementById('studioStep2-parents').classList.add('d-none');
+        document.getElementById('studioStep2-uncle-aunt')?.classList.add('d-none');
+        document.getElementById('studioStep2-in-law')?.classList.add('d-none');
         document.getElementById('studioRelativeError').classList.add('d-none');
 
         // Auto-select Birth / Maiden Family when adding Parents or Siblings if the user holds an active birth family code
@@ -1460,6 +1638,12 @@
             initStudioChildUnion();
         } else if (type === 'sibling') {
             document.getElementById('studioStep2-sibling').classList.remove('d-none');
+        } else if (type === 'uncle_aunt') {
+            document.getElementById('studioStep2-uncle-aunt')?.classList.remove('d-none');
+            window.refreshStudioUncleAuntSubmitLabel && window.refreshStudioUncleAuntSubmitLabel();
+        } else if (type === 'in_law') {
+            document.getElementById('studioStep2-in-law')?.classList.remove('d-none');
+            window.refreshStudioInLawSubmitLabel && window.refreshStudioInLawSubmitLabel();
         } else if (type === 'parents' || type === 'grandparents') {
             const isGrand = type === 'grandparents';
             const form = document.getElementById('studioParentsForm');
@@ -1495,9 +1679,118 @@
         document.getElementById('studioStep2-child').classList.add('d-none');
         document.getElementById('studioStep2-sibling').classList.add('d-none');
         document.getElementById('studioStep2-parents').classList.add('d-none');
+        document.getElementById('studioStep2-uncle-aunt')?.classList.add('d-none');
+        document.getElementById('studioStep2-in-law')?.classList.add('d-none');
         document.getElementById('studioStep1').classList.remove('d-none');
         document.getElementById('studioRelativeError').classList.add('d-none');
     }
+
+    window.updateStudioUncleAuntRole = function(role) {
+        const isAunt = role === 'aunt';
+        const maidenRow = document.getElementById('studioUncleMaidenRow');
+        if (maidenRow) maidenRow.style.display = isAunt ? 'block' : 'none';
+        window.refreshStudioUncleAuntSubmitLabel && window.refreshStudioUncleAuntSubmitLabel();
+    };
+
+    window.updateStudioUncleAuntSide = function(side) {
+        if (side === 'maternal') {
+            const birthRadio = document.getElementById('studioFamcodeTypeBirth');
+            if (birthRadio) {
+                birthRadio.checked = true;
+                window.setStudioUncleAuntFamCode && window.setStudioUncleAuntFamCode('birth');
+            }
+        } else {
+            const maritalRadio = document.getElementById('studioFamcodeTypeMarital');
+            if (maritalRadio) {
+                maritalRadio.checked = true;
+                window.setStudioUncleAuntFamCode && window.setStudioUncleAuntFamCode('marital');
+            }
+        }
+        window.refreshStudioUncleAuntSubmitLabel && window.refreshStudioUncleAuntSubmitLabel();
+    };
+
+    window.setStudioUncleAuntFamCode = function(type) {
+        const isBirth = (type === 'birth');
+        const activeCode = isBirth ? (studioBirthCode || studioPrimaryCode) : studioPrimaryCode;
+        const activeSurname = isBirth ? (window.__MAIDEN_SURNAME__ || studioBirthCode) : (window.__MARITAL_SURNAME__ || studioPrimaryCode);
+
+        const form = document.getElementById('studioUncleAuntForm');
+        if (form) {
+            const scopeInp = form.querySelector('.studio-lineage-scope-input');
+            const codeInp = form.querySelector('.studio-lineage-code-input');
+            if (scopeInp) scopeInp.value = isBirth ? 'maternal' : 'primary';
+            if (codeInp) codeInp.value = activeCode;
+        }
+
+        const lastNameInput = document.getElementById('studioUncleLastName');
+        if (lastNameInput && activeSurname) {
+            lastNameInput.placeholder = activeSurname;
+        }
+
+        window.refreshStudioUncleAuntSubmitLabel && window.refreshStudioUncleAuntSubmitLabel();
+    };
+
+    window.refreshStudioUncleAuntSubmitLabel = function() {
+        const role = document.getElementById('studioUncleAuntRole')?.value || 'uncle';
+        const noun = role === 'aunt' ? 'Auntie' : 'Uncle';
+        const isBirth = document.getElementById('studioFamcodeTypeBirth')?.checked;
+        const activeCode = isBirth ? (studioBirthCode || studioPrimaryCode) : studioPrimaryCode;
+        const treeLabel = isBirth ? 'Birth Family' : 'Marital Tree';
+
+        const btn = document.getElementById('studioSaveUncleAuntBtn');
+        if (btn) {
+            btn.textContent = activeCode
+                ? `Save ${noun} to ${treeLabel} (#${activeCode})`
+                : `Save ${noun}`;
+        }
+    };
+
+    window.updateStudioInLawRole = function(role) {
+        const isFemale = (role === 'mother_in_law' || role === 'sister_in_law');
+        const maidenRow = document.getElementById('studioInLawMaidenRow');
+        if (maidenRow) maidenRow.style.display = isFemale ? 'block' : 'none';
+        window.refreshStudioInLawSubmitLabel && window.refreshStudioInLawSubmitLabel();
+    };
+
+    window.setStudioInLawFamCode = function(type) {
+        const isWife = (type === 'wife');
+        const wifeCodeInput = document.getElementById('studioWifeFamCode');
+        const wifeCode = (wifeCodeInput ? wifeCodeInput.value.trim() : '') || (window.__WIFE_FAMILY_CODE__ || '');
+        const activeCode = isWife ? (wifeCode || studioPrimaryCode) : studioPrimaryCode;
+
+        const form = document.getElementById('studioInLawForm');
+        if (form) {
+            const scopeInp = form.querySelector('.studio-lineage-scope-input');
+            const codeInp = form.querySelector('.studio-lineage-code-input');
+            if (scopeInp) scopeInp.value = isWife ? 'wife' : 'primary';
+            if (codeInp) codeInp.value = activeCode;
+        }
+
+        window.refreshStudioInLawSubmitLabel && window.refreshStudioInLawSubmitLabel();
+    };
+
+    window.refreshStudioInLawSubmitLabel = function() {
+        const role = document.getElementById('studioInLawRole')?.value || 'father_in_law';
+        const roleMap = {
+            'father_in_law': 'Father-in-law',
+            'mother_in_law': 'Mother-in-law',
+            'brother_in_law': 'Brother-in-law',
+            'sister_in_law': 'Sister-in-law'
+        };
+        const noun = roleMap[role] || 'In-Law';
+        const isWife = document.getElementById('studioFamcodeTypeWife')?.checked;
+        const wifeCodeInput = document.getElementById('studioWifeFamCode');
+        const wifeCode = (wifeCodeInput ? wifeCodeInput.value.trim() : '') || (window.__WIFE_FAMILY_CODE__ || '');
+        const activeCode = isWife ? (wifeCode || studioPrimaryCode) : studioPrimaryCode;
+        const treeLabel = isWife ? "Wife's Family" : 'Marital Tree';
+
+        const btn = document.getElementById('studioSaveInLawBtn');
+        if (btn) {
+            btn.textContent = activeCode
+                ? `Save ${noun} to ${treeLabel} (#${activeCode})`
+                : `Save ${noun}`;
+        }
+    };
 
     // Open In-Place Edit Modal
     function openStudioEditModal(nodeId) {
@@ -1855,7 +2148,7 @@
 
     // ---- "Is this person already a registered member?" (partner / child / sibling forms) ----
     (function initMemberLookup() {
-        const forms = ['studioPartnerForm', 'studioChildForm', 'studioSiblingForm'];
+        const forms = ['studioPartnerForm', 'studioChildForm', 'studioSiblingForm', 'studioUncleAuntForm'];
         let timer = null;
         forms.forEach(id => {
             const form = document.getElementById(id);
@@ -1965,6 +2258,26 @@
         submitStudioForm(this, '/member/organogram/editor/parents', 'studioSaveParentsBtn', isGrand ? 'Saving Grandparents...' : 'Saving Parents...', isGrand ? 'grandparents' : 'parents');
     });
 
+    document.getElementById('studioUncleAuntForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const role = document.getElementById('studioUncleAuntRole')?.value || 'uncle';
+        const noun = role === 'aunt' ? 'Auntie' : 'Uncle';
+        submitStudioForm(this, '/member/organogram/editor/uncle-aunt', 'studioSaveUncleAuntBtn', `Saving ${noun}...`, 'uncle_aunt');
+    });
+
+    document.getElementById('studioInLawForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const role = document.getElementById('studioInLawRole')?.value || 'father_in_law';
+        const roleMap = {
+            'father_in_law': 'Father-in-law',
+            'mother_in_law': 'Mother-in-law',
+            'brother_in_law': 'Brother-in-law',
+            'sister_in_law': 'Sister-in-law'
+        };
+        const noun = roleMap[role] || 'In-Law';
+        submitStudioForm(this, '/member/organogram/editor/in-law', 'studioSaveInLawBtn', `Saving ${noun}...`, 'in_law');
+    });
+
     function extractStudioErrorMessage(err) {
         if (typeof err === 'string' && err.trim() !== '') return err;
         if (err && typeof err === 'object') {
@@ -2064,6 +2377,33 @@
                             const mHtml = createStudioCardHtml(msg.mother, 'Mother', 'role-chip-parent', 'bi-person-fill');
                             const motherPlaceholder = document.getElementById('relative-card-node-mother') || row.children[1];
                             if (motherPlaceholder) motherPlaceholder.outerHTML = mHtml;
+                        }
+                    }
+                } else if (relType === 'uncle_aunt' && msg.node) {
+                    const row = document.querySelector('#group-gen-minus1 .row');
+                    if (row) {
+                        const isAunt = (msg.node.role === 'aunt' || msg.node.gender === 'Female');
+                        const roleTitle = isAunt ? 'Auntie' : 'Uncle';
+                        const cardHtml = createStudioCardHtml(msg.node, roleTitle, 'role-chip-parent', 'bi-person-badge-fill');
+                        const addBtn = row.querySelector('.btn-add-stitch-card')?.closest('.relative-card-container');
+                        if (addBtn) {
+                            addBtn.insertAdjacentHTML('beforebegin', cardHtml);
+                        } else {
+                            row.insertAdjacentHTML('beforeend', cardHtml);
+                        }
+                    }
+                } else if (relType === 'in_law' && msg.node) {
+                    const isParentInLaw = (parseInt(msg.node.generation_level, 10) < 0);
+                    const targetSelector = isParentInLaw ? '#group-gen-minus1 .row' : '#group-gen-0 .row';
+                    const row = document.querySelector(targetSelector);
+                    if (row) {
+                        const roleTitle = msg.node.bio?.split(' (')[0] || 'In-Law';
+                        const cardHtml = createStudioCardHtml(msg.node, roleTitle, isParentInLaw ? 'role-chip-parent' : 'role-chip-partner', 'bi-people-fill');
+                        const addBtn = row.querySelector('.btn-add-stitch-card')?.closest('.relative-card-container');
+                        if (addBtn) {
+                            addBtn.insertAdjacentHTML('beforebegin', cardHtml);
+                        } else {
+                            row.insertAdjacentHTML('beforeend', cardHtml);
                         }
                     }
                 }

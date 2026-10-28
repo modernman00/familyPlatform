@@ -14,16 +14,21 @@ use Src\Select;
  */
 final class AnnouncementWhatsappShareTest extends TestCase
 {
-    private const USER = '888803USERW';
-    private const FAM = 'FAMWHATS300';
+    private string $user;
+    private string $fam;
 
     protected function setUp(): void
     {
+        $suffix = bin2hex(random_bytes(4));
+        $this->user = '888803U' . $suffix;
+        $this->fam = 'FAMW' . $suffix;
+
         $pdo = Select::connect2();
         $this->cleanup();
+        $pdo->prepare('DELETE FROM personal WHERE id = ?')->execute(['888803USERW']);
         $pdo->prepare('INSERT INTO personal (id, firstName, lastName, famCode) VALUES (?, ?, ?, ?)')
-            ->execute([self::USER, 'Wanda', 'Share', self::FAM]);
-        $_SESSION = ['famCode' => self::FAM, 'id' => self::USER, 'token' => 't'];
+            ->execute([$this->user, 'Wanda', 'Share', $this->fam]);
+        $_SESSION = ['famCode' => $this->fam, 'id' => $this->user, 'token' => 't'];
     }
 
     protected function tearDown(): void
@@ -33,9 +38,12 @@ final class AnnouncementWhatsappShareTest extends TestCase
 
     private function cleanup(): void
     {
+        if (empty($this->fam) || empty($this->user)) {
+            return;
+        }
         $pdo = Select::connect2();
-        $pdo->prepare('DELETE FROM family_announcements WHERE family_code = ?')->execute([self::FAM]);
-        $pdo->prepare('DELETE FROM personal WHERE id = ?')->execute([self::USER]);
+        $pdo->prepare('DELETE FROM family_announcements WHERE family_code = ?')->execute([$this->fam]);
+        $pdo->prepare('DELETE FROM personal WHERE id = ?')->execute([$this->user]);
     }
 
     private function render(): string
@@ -49,7 +57,7 @@ final class AnnouncementWhatsappShareTest extends TestCase
     public function test_card_links_to_whatsapp_with_the_encoded_announcement(): void
     {
         FamilyAnnouncement::createAnnouncement([
-            'family_code' => self::FAM, 'author_id' => self::USER,
+            'family_code' => $this->fam, 'author_id' => $this->user,
             'title' => 'Reunion & BBQ', 'message' => 'Bring food!', 'priority' => 'important', 'type' => 'general',
         ]);
 
@@ -64,7 +72,7 @@ final class AnnouncementWhatsappShareTest extends TestCase
     public function test_hostile_markup_in_the_announcement_cannot_break_out_of_the_link(): void
     {
         FamilyAnnouncement::createAnnouncement([
-            'family_code' => self::FAM, 'author_id' => self::USER,
+            'family_code' => $this->fam, 'author_id' => $this->user,
             'title' => '"><script>alert(1)</script>', 'message' => "x\" onmouseover=\"alert(2)", 'priority' => 'important', 'type' => 'general',
         ]);
 

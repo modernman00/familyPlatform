@@ -357,10 +357,22 @@ final class CollateralKinshipService
         }
 
         // C. Ego Tier (Gen 0):
-        // Ego's Partners/Spouses
+        // Ego's Partners/Spouses & In-Laws (Parents-in-law & Siblings-in-law)
         foreach ($personPartners[$egoNodeId] ?? [] as $partId) {
             $selectedNodes[$partId] = true;
             $relativeGen[$partId] = 0;
+
+            // Spouse's Parents (Father-in-law & Mother-in-law at Gen -1)
+            foreach ($getParents($partId) as $inLawParentId) {
+                $selectedNodes[$inLawParentId] = true;
+                $relativeGen[$inLawParentId] = -1;
+            }
+
+            // Spouse's Siblings (Brothers-in-law & Sisters-in-law at Gen 0)
+            foreach ($getSiblings($partId) as $inLawSibId) {
+                $selectedNodes[$inLawSibId] = true;
+                $relativeGen[$inLawSibId] = 0;
+            }
         }
 
         // Ego's Siblings (Brothers & Sisters) and their descendant lineages (up to 7 tiers down)

@@ -45,11 +45,13 @@ final class BirthFamilyCodeTest extends TestCase
             $this->pdo->prepare('DELETE FROM user_families WHERE user_id = ?')->execute([$id]);
             $this->pdo->prepare('DELETE FROM family_nodes WHERE user_id = ?')->execute([$id]);
             $this->pdo->prepare('DELETE FROM family_codes WHERE created_by = ?')->execute([$id]);
+            $this->pdo->prepare('DELETE FROM family_approval_requests WHERE id = ?')->execute([$id]);
         }
         foreach ($this->codes as $code) {
             $this->pdo->prepare('DELETE FROM family_nodes WHERE family_code = ?')->execute([$code]);
             $this->pdo->prepare('DELETE FROM user_families WHERE family_code = ?')->execute([$code]);
             $this->pdo->prepare('DELETE FROM family_codes WHERE code = ?')->execute([$code]);
+            $this->pdo->prepare('DELETE FROM family_approval_requests WHERE family_code = ?')->execute([$code]);
         }
         $this->pdo->exec("DELETE FROM family_approval_requests WHERE id LIKE 'test-bf-%'");
         $_SESSION = [];

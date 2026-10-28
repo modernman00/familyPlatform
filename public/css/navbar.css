@@ -669,4 +669,39 @@ body.dark-mode .dropdown-divider {
   border-color: #334155 !important;
 }
 
+/* 🔍 Omni-Search Trigger Button in Navbar */
+.btn-omni-search-trigger {
+  background: var(--brand-surface, #ffffff);
+  border: 1px solid var(--brand-border, #e2e8f0);
+  border-radius: var(--stitch-radius-pill, 9999px);
+  padding: 0.35rem 0.85rem;
+  min-height: 40px;
+  color: var(--brand-text-muted, #64748b);
+  font-size: 0.84rem;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+}
+.btn-omni-search-trigger:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: var(--brand-text-dark, #0f172a);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+.btn-omni-search-trigger:active {
+  transform: scale(0.98);
+}
+body.dark-mode .btn-omni-search-trigger {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+body.dark-mode .btn-omni-search-trigger:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
+
 

@@ -88,6 +88,7 @@
 <script>
 (function() {
     let questsLoaded = false;
+    let loadedFamilyCode = '';
 
     window.openLineageQuestModal = function() {
         const modalEl = document.getElementById('lineageQuestModal');
@@ -95,12 +96,15 @@
         const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
         bsModal.show();
 
-        if (!questsLoaded) {
-            loadLineageQuests();
+        const currentFamCode = (typeof window.__FAMILY_CODE__ !== 'undefined' && window.__FAMILY_CODE__) ? String(window.__FAMILY_CODE__).trim() : '';
+
+        if (!questsLoaded || loadedFamilyCode !== currentFamCode) {
+            loadLineageQuests(currentFamCode);
         }
     };
 
-    function loadLineageQuests() {
+    function loadLineageQuests(famCode) {
+        famCode = famCode || ((typeof window.__FAMILY_CODE__ !== 'undefined' && window.__FAMILY_CODE__) ? String(window.__FAMILY_CODE__).trim() : '');
         const loadingEl = document.getElementById('questsLoadingState');
         const listEl = document.getElementById('questsListContainer');
         const scoreEl = document.getElementById('questCompletenessScore');
@@ -108,7 +112,12 @@
         const statsEl = document.getElementById('questStatsNodesText');
         const countBadge = document.getElementById('questCountBadge');
 
-        fetch('/api/lineage/quests')
+        if (loadingEl) loadingEl.classList.remove('d-none');
+        if (listEl) listEl.classList.add('d-none');
+
+        const questUrl = famCode ? ('/api/lineage/quests?family_code=' + encodeURIComponent(famCode)) : '/api/lineage/quests';
+
+        fetch(questUrl)
             .then(res => {
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 return res.json();
@@ -133,6 +142,7 @@
 
                 renderQuestCards(data.quests || []);
                 questsLoaded = true;
+                loadedFamilyCode = famCode;
 
                 if (loadingEl) loadingEl.classList.add('d-none');
                 if (listEl) listEl.classList.remove('d-none');

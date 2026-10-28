@@ -150,12 +150,13 @@ final class ChildAccountController extends BaseController
 
             $safeChildName = htmlspecialchars($child['firstName'] ?? '', ENT_QUOTES, 'UTF-8');
             http_response_code(200);
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
             echo json_encode([
                 'status' => 'success',
                 'message' => 'Sign-in successful. Welcome back, ' . $safeChildName . '!',
                 'redirect' => '/member/profilePage',
                 'graduation' => $graduation,
-            ]); // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+            ]);
         } catch (\Throwable $e) {
             error_log('[ChildAccountController::login] ' . $e->getMessage());
             http_response_code(500);

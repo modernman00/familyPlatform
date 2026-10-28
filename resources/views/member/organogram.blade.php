@@ -16,6 +16,8 @@
                         <i class="bi bi-diagram-3"></i>
                         @if(($activeLineageScope ?? 'primary') === 'maternal' && !empty($maidenSurname))
                             {{ $data['firstName'] ?? '' }}'s {{ $maidenSurname }} Birth Family Tree
+                        @elseif(($activeLineageScope ?? 'primary') === 'inlaw')
+                            {{ $data['firstName'] ?? '' }}'s In-Law Lineage Tree
                         @else
                             {{ $data['firstName'] ?? '' }} {{ $data['lastName'] ?? '' }}'s Family Tree
                         @endif
@@ -23,18 +25,36 @@
                     <p class="organogram-subtitle mb-0">
                         @if(($activeLineageScope ?? 'primary') === 'maternal' && !empty($maternalFamCode))
                             Exploring your Birth / Maiden Family lineage (<strong>#{{ $maternalFamCode }}</strong>). Click any person to see their details and full profile.
+                        @elseif(($activeLineageScope ?? 'primary') === 'inlaw')
+                            Exploring your In-Law lineage (<strong>#{{ $familyCode }}</strong>). Click any person to see their details and full profile.
                         @else
                             Explore your family heritage, partners, and lineage. Click any person to see their details and full profile.
                         @endif
                     </p>
-                    @if(!empty($hasMaternalCode) && !empty($maternalFamCode))
+                    @php
+                        $currentViewMode = $_GET['mode'] ?? 'canvas';
+                        $otherHeldCodes = array_diff($heldCodes ?? [], array_filter([$primaryFamCode ?? '', $maternalFamCode ?? '', $wifeFamCode ?? '']));
+                    @endphp
+                    @if(!empty($hasMaternalCode) || !empty($wifeFamCode) || !empty($otherHeldCodes))
                     <div class="d-inline-flex flex-wrap align-items-center gap-2 mt-2 p-1 rounded-pill" style="background: rgba(15, 23, 42, 0.78); border: 1px solid rgba(245, 158, 11, 0.35);">
-                        <a href="?lineage=primary" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') !== 'maternal' ? 'btn-warning text-dark shadow-sm' : 'text-white-50' }}" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                        <a href="?mode={{ $currentViewMode }}&family_code={{ $primaryFamCode }}&lineage=primary" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') === 'primary' ? 'btn-warning text-dark shadow-sm' : 'text-white-50' }}" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
                             <i class="bi bi-house-heart-fill"></i> Marital / Household Tree (#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})
                         </a>
-                        <a href="?lineage=birth" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') === 'maternal' ? 'btn-warning text-dark shadow-sm' : 'text-white-50' }}" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                        @if(!empty($hasMaternalCode) && !empty($maternalFamCode))
+                        <a href="?mode={{ $currentViewMode }}&family_code={{ $maternalFamCode }}&lineage=birth" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') === 'maternal' ? 'btn-warning text-dark shadow-sm' : 'text-white-50' }}" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
                             <i class="bi bi-diagram-3-fill"></i> Birth / Maiden Family (#{{ $maternalFamCode }})
                         </a>
+                        @endif
+                        @if(!empty($wifeFamCode))
+                        <a href="?mode={{ $currentViewMode }}&family_code={{ $wifeFamCode }}&lineage=inlaw" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') === 'inlaw' ? 'btn-warning text-dark shadow-sm' : 'text-white-50' }}" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                            <i class="bi bi-people-fill"></i> In-Law Lineage (#{{ $wifeFamCode }})
+                        </a>
+                        @endif
+                        @foreach($otherHeldCodes as $ohc)
+                        <a href="?mode={{ $currentViewMode }}&family_code={{ $ohc }}" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($familyCode ?? '') === $ohc ? 'btn-warning text-dark shadow-sm' : 'text-white-50' }}" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                            <i class="bi bi-diagram-2"></i> #{{ $ohc }}
+                        </a>
+                        @endforeach
                     </div>
                     @endif
                 </div>
@@ -86,8 +106,8 @@
     <div class="tree-mode-switcher-container text-center mb-1 d-flex flex-wrap align-items-center justify-content-center gap-2">
         @if(empty($isReadOnly))
         <div class="d-flex align-items-center gap-2 flex-shrink-0 tree-quick-actions">
-            <button type="button" onclick="openAddRelativeModalFromBanner()" class="btn btn-primary fw-bold text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #a31621 0%, #b8202c 100%); border: none; border-radius: 10px; min-height: 44px; font-size: 0.9rem;">
-                <i class="bi bi-person-plus-fill me-1"></i> Add Family
+            <button type="button" onclick="openInviteFamilyModal()" class="btn btn-primary fw-bold text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #a31621 0%, #b8202c 100%); border: none; border-radius: 10px; min-height: 44px; font-size: 0.9rem;">
+                <i class="bi bi-send-fill me-1"></i> Invite Family
             </button>
             <button type="button" onclick="openLineageQuestModal()" class="btn btn-success fw-bold text-white text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center" style="border-radius: 10px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; min-height: 44px; font-size: 0.9rem;">
                 <i class="bi bi-whatsapp me-1"></i> WhatsApp Quests
@@ -658,9 +678,12 @@
                 </div>
                 <div class="modal-footer p-3 border-top bg-light d-flex gap-2">
                     @if(empty($isReadOnly))
-                    <button class="btn btn-sm btn-primary flex-grow-1 fw-bold" id="openAddRelativeModalBtn">
-                        <i class="bi bi-person-plus-fill"></i> Add Family Member
+                    <button class="btn btn-sm btn-primary flex-grow-1 fw-bold d-inline-flex align-items-center justify-content-center" id="openAddRelativeModalBtn" onclick="openInviteRelativeFromNode()" style="min-height: 38px;">
+                        <i class="bi bi-send-fill me-1"></i> Invite Family Member
                     </button>
+                    <a href="/familyStudio" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center justify-content-center" style="min-height: 38px;" title="To add or edit tree structure directly, open Family Studio">
+                        <i class="bi bi-diagram-3-fill me-1"></i> Studio
+                    </a>
                     <button class="btn btn-sm btn-outline-danger fw-bold" id="modalRemoveNodeBtn" style="display: none;" onclick="removeCurrentModalNode()">
                         <i class="bi bi-trash3-fill"></i> Remove
                     </button>
@@ -867,7 +890,8 @@
     window.__MOTHER_BIRTH_FAMILY_CODE__ = '{{ addslashes($motherBirthFamCode ?? '') }}';
     window.__PATERNAL_SURNAME__ = '{{ addslashes($paternalSurname ?? ($data['lastName'] ?? '')) }}';
     window.__EGO_GENDER__ = '{{ strtolower((string)($data['gender'] ?? '')) }}';
-    window.__FAMILY_CODE__ = '{{ ($activeLineageScope ?? 'primary') === 'maternal' && !empty($maternalFamCode) ? $maternalFamCode : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}';
+    window.__FAMILY_CODE__ = '{{ $familyCode ?? (($activeLineageScope ?? 'primary') === 'maternal' && !empty($maternalFamCode) ? $maternalFamCode : ($primaryFamCode ?? ($data['famCode'] ?? ''))) }}';
+    window.__WIFE_FAMILY_CODE__ = '{{ $wifeFamCode ?? '' }}';
     window.__IS_READ_ONLY__ = {{ !empty($isReadOnly) ? 'true' : 'false' }};
     
     const graphData = {!! $graphJson ?? '{}' !!};
@@ -2553,44 +2577,13 @@
     let currentBaseNodeName = '';
 
     document.getElementById('openAddRelativeModalBtn')?.addEventListener('click', function() {
-        document.getElementById('addRelativeBaseName').textContent = currentBaseNodeName;
-        document.getElementById('partnerBaseNodeId').value = currentBaseNodeId;
-        document.getElementById('childBaseNodeId').value = currentBaseNodeId;
-
-        // Reset wizard
-        document.getElementById('step1').classList.remove('d-none');
-        document.getElementById('step2-partner').classList.add('d-none');
-        document.getElementById('step2-child').classList.add('d-none');
-        document.getElementById('addRelativeError').classList.add('d-none');
-
-        // Close person modal and open wizard
-        document.getElementById('personModal').style.display = 'none';
-        var myModal = new bootstrap.Modal(document.getElementById('addRelativeModal'));
-        myModal.show();
+        const pm = document.getElementById('personModal');
+        if (pm) pm.style.display = 'none';
+        openInviteRelativeFromNode();
     });
 
     function openAddRelativeModalFromBanner(relationType) {
-        currentBaseNodeName = 'Yourself';
-        currentBaseNodeId = getGraphNodeId(window.__ROOT_USER_ID__, currentBaseNodeName);
-        
-        document.getElementById('addRelativeBaseName').textContent = currentBaseNodeName;
-        document.getElementById('partnerBaseNodeId').value = currentBaseNodeId;
-        document.getElementById('childBaseNodeId').value = currentBaseNodeId;
-
-        // Reset wizard steps
-        document.getElementById('step1').classList.remove('d-none');
-        document.getElementById('step2-partner').classList.add('d-none');
-        document.getElementById('step2-child').classList.add('d-none');
-        document.getElementById('step2-parents').classList.add('d-none');
-        document.getElementById('addRelativeError').classList.add('d-none');
-
-        const validTypes = ['parents', 'partner', 'child', 'sibling'];
-        if (relationType && validTypes.includes(relationType)) {
-            selectRelativeType(relationType);
-        }
-
-        var myModal = new bootstrap.Modal(document.getElementById('addRelativeModal'));
-        myModal.show();
+        openInviteFamilyModal(null, relationType);
     }
 
 
@@ -2690,7 +2683,7 @@
         if (window.__HAS_BIRTH_FAMILY__ && window.__BIRTH_FAMILY_CODE__) {
             const isSelfNode = !currentBaseNodeName || currentBaseNodeName === 'Yourself' || String(currentBaseNodeId) === String(getGraphNodeId(window.__ROOT_USER_ID__, ''));
             if (isSelfNode && (type === 'parents' || type === 'sibling')) {
-                window.syncWizardLineageScope('maternal');
+                window.syncWizardLineageScope(window.__ACTIVE_LINEAGE_SCOPE__ === 'maternal' ? 'maternal' : 'primary');
             } else if (type === 'partner' || type === 'child') {
                 window.syncWizardLineageScope(window.__ACTIVE_LINEAGE_SCOPE__ === 'maternal' ? 'maternal' : 'primary');
             }
@@ -2708,6 +2701,16 @@
             fetchParentUnionsForNode(currentBaseNodeId);
         } else if (type === 'parents') {
             document.getElementById('step2-parents').classList.remove('d-none');
+        } else if (type === 'uncle_aunt') {
+            document.getElementById('step2-uncle-aunt')?.classList.remove('d-none');
+            const uInp = document.getElementById('uncleAuntBaseNodeId');
+            if (uInp) uInp.value = currentBaseNodeId;
+            window.refreshUncleAuntSubmitLabel && window.refreshUncleAuntSubmitLabel();
+        } else if (type === 'in_law') {
+            document.getElementById('step2-in-law')?.classList.remove('d-none');
+            const inlawInp = document.getElementById('inLawBaseNodeId');
+            if (inlawInp) inlawInp.value = currentBaseNodeId;
+            window.refreshInLawSubmitLabel && window.refreshInLawSubmitLabel();
         }
     }
 
@@ -2737,6 +2740,8 @@
         document.getElementById('step2-partner').classList.add('d-none');
         document.getElementById('step2-child').classList.add('d-none');
         document.getElementById('step2-parents').classList.add('d-none');
+        document.getElementById('step2-uncle-aunt')?.classList.add('d-none');
+        document.getElementById('step2-in-law')?.classList.add('d-none');
         document.getElementById('step1').classList.remove('d-none');
     }
 
@@ -2804,20 +2809,30 @@
             });
     }
 
-    // Form Submissions
-    document.getElementById('addPartnerForm').addEventListener('submit', function(e) {
+    // Form Submissions (for backwards compatibility if invoked)
+    document.getElementById('addPartnerForm')?.addEventListener('submit', function(e) {
         e.preventDefault();
         submitForm(this, '/member/organogram/editor/partner', 'submitPartnerBtn', 'Saving...');
     });
 
-    document.getElementById('addChildForm').addEventListener('submit', function(e) {
+    document.getElementById('addChildForm')?.addEventListener('submit', function(e) {
         e.preventDefault();
         submitForm(this, '/member/organogram/editor/child', 'submitChildBtn', 'Saving...');
     });
     
-    document.getElementById('addParentsForm').addEventListener('submit', function(e) {
+    document.getElementById('addParentsForm')?.addEventListener('submit', function(e) {
         e.preventDefault();
         submitForm(this, '/member/organogram/editor/parents', 'submitParentsBtn', 'Saving...');
+    });
+
+    document.getElementById('addUncleAuntForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitForm(this, '/member/organogram/editor/uncle-aunt', 'submitUncleAuntBtn', 'Saving...');
+    });
+
+    document.getElementById('addInLawForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitForm(this, '/member/organogram/editor/in-law', 'submitInLawBtn', 'Saving In-Law...');
     });
 
     function extractStudioErrorMessage(err) {
@@ -2854,8 +2869,28 @@
         .then(data => {
             const isOk = (data.ok === true || data.status === 200 || data.status === 'success' || data.statusCode === 200);
             if (isOk) {
-                // Success - reload page to show new tree
-                window.location.reload();
+                // Determine target family code and lineage
+                const targetCode = data.family_code || (data.message && data.message.family_code) || formData.get('lineage_code') || formData.get('wife_famcode') || formData.get('birth_famcode') || '';
+                const targetScope = data.lineage_scope || (data.message && data.message.lineage_scope) || formData.get('lineage_scope') || '';
+                
+                // Get current view mode (canvas, lineage, etc.)
+                const urlParams = new URLSearchParams(window.location.search);
+                const currentMode = urlParams.get('mode') || 'canvas';
+                
+                let redirectUrl = window.location.pathname + '?mode=' + encodeURIComponent(currentMode);
+                if (targetCode) {
+                    redirectUrl += '&family_code=' + encodeURIComponent(targetCode);
+                }
+                if (targetScope) {
+                    redirectUrl += '&lineage=' + encodeURIComponent(targetScope);
+                }
+                
+                const successMsg = (data.message && typeof data.message === 'string' ? data.message : (data.message?.message || 'Relative added successfully!')) + (targetCode ? ` in #${targetCode}` : '');
+                try {
+                    sessionStorage.setItem('organogram_flash_notice', successMsg);
+                } catch (_) {}
+                
+                window.location.href = redirectUrl;
             } else {
                 errorDiv.textContent = window.extractErrorMessage ? window.extractErrorMessage(data) : extractStudioErrorMessage(data.message || data.error || data);
                 errorDiv.classList.remove('d-none');
@@ -2870,6 +2905,27 @@
             btn.disabled = false;
         });
     }
+
+    // Toast flash message on successful relative add
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            const flashNotice = sessionStorage.getItem('organogram_flash_notice');
+            if (flashNotice) {
+                sessionStorage.removeItem('organogram_flash_notice');
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: flashNotice,
+                        showConfirmButton: false,
+                        timer: 4500,
+                        timerProgressBar: true
+                    });
+                }
+            }
+        } catch (_) {}
+    });
 
     // Native Draggable Mobile Bottom Sheet Touch Physics
     document.addEventListener('DOMContentLoaded', function() {

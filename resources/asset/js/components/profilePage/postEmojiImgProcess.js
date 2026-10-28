@@ -19,53 +19,53 @@ const scrollDrawerIntoView = (el) => {
 };
 
 // ----------------------------------------------------
-// 1. EMOJI PICKER (Floating Popover UX with Caret & Auto-Dismiss)
+// 1. EMOJI PICKER (In-Flow Composer Drawer UX)
 // ----------------------------------------------------
 const emojiToggle = document.getElementById('emojiPost');
-const emojiContainer = document.getElementById('emojiPickerContainer');
-const closeEmojiBtn = document.getElementById('closeEmojiPicker');
+const emojiDrawer = document.getElementById('emojiPickerDrawer') || document.getElementById('emojiPickerContainer');
+const closeEmojiBtn = document.getElementById('closeEmojiDrawerBtn') || document.getElementById('closeEmojiPicker');
 
 if (document.getElementById('emojiListPost')) {
     showEmojiPicker('emojiListPost', 'data-emoji-target');
 }
 
-if (emojiToggle && emojiContainer) {
-    initEmojiPickerUX('emojiPost', 'emojiPickerContainer');
-}
-
-const closeEmojiPicker = () => {
-    if (!emojiContainer) return;
-    emojiContainer.classList.add('d-none');
+export const closeEmojiDrawer = () => {
+    if (!emojiDrawer) return;
+    emojiDrawer.classList.add('d-none');
     if (emojiToggle) {
         emojiToggle.classList.remove('emoji-active');
         emojiToggle.setAttribute('aria-expanded', 'false');
     }
 };
 
-// Sync active class and aria-expanded whenever the container is dismissed (e.g. on emoji selection)
-if (emojiContainer && window.MutationObserver) {
-    const emojiObserver = new MutationObserver(() => {
-        if (emojiContainer.classList.contains('d-none')) {
-            if (emojiToggle) {
-                emojiToggle.classList.remove('emoji-active');
-                emojiToggle.setAttribute('aria-expanded', 'false');
-            }
-        }
-    });
-    emojiObserver.observe(emojiContainer, { attributes: true, attributeFilter: ['class'] });
-}
+export const openEmojiDrawer = () => {
+    if (!emojiDrawer) return;
+    // Close other drawers if open
+    if (typeof closeGifDrawer === 'function') closeGifDrawer();
+    const videoDrawer = document.getElementById('videoEmbedContainer');
+    if (videoDrawer) videoDrawer.classList.add('d-none');
+    const tagDrawer = document.getElementById('tagPeopleContainer');
+    if (tagDrawer) tagDrawer.classList.add('d-none');
+    const pollDrawer = document.getElementById('pollCreationContainer');
+    if (pollDrawer) pollDrawer.classList.add('d-none');
 
-if (emojiToggle && emojiContainer) {
+    emojiDrawer.classList.remove('d-none');
+    if (emojiToggle) {
+        emojiToggle.classList.add('emoji-active');
+        emojiToggle.setAttribute('aria-expanded', 'true');
+    }
+    scrollDrawerIntoView(emojiDrawer);
+};
+
+if (emojiToggle && emojiDrawer) {
     emojiToggle.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const isHidden = emojiContainer.classList.contains('d-none');
+        const isHidden = emojiDrawer.classList.contains('d-none');
         if (isHidden) {
-            emojiContainer.classList.remove('d-none');
-            emojiToggle.classList.add('emoji-active');
-            emojiToggle.setAttribute('aria-expanded', 'true');
+            openEmojiDrawer();
         } else {
-            closeEmojiPicker();
+            closeEmojiDrawer();
         }
     });
 }
@@ -74,7 +74,7 @@ if (closeEmojiBtn) {
     closeEmojiBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        closeEmojiPicker();
+        closeEmojiDrawer();
     });
 }
 
@@ -662,6 +662,7 @@ if (addGifBtn && gifDrawer) {
         e.preventDefault();
         const isHidden = gifDrawer.classList.contains('d-none');
         if (isHidden) {
+            closeEmojiDrawer();
             gifDrawer.classList.remove('d-none');
             addGifBtn.classList.add('gif-active');
             scrollDrawerIntoView(gifDrawer);

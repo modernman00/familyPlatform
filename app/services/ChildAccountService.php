@@ -22,10 +22,10 @@ use Src\Exceptions\ValidationException;
  */
 final class ChildAccountService
 {
-    private const MIN_USERNAME_LENGTH = 3;
-    private const MAX_USERNAME_LENGTH = 30;
-    private const MIN_PIN_LENGTH = 4;
-    private const MAX_PIN_LENGTH = 8;
+    public const MIN_USERNAME_LENGTH = 3;
+    public const MAX_USERNAME_LENGTH = 30;
+    public const MIN_PIN_LENGTH = 4;
+    public const MAX_PIN_LENGTH = 8;
 
     /**
      * Provisions a new supervised child account for a child node in the family tree.
@@ -133,7 +133,8 @@ final class ChildAccountService
         // Generate IDs and hash credentials
         $childUserId = 'child_' . bin2hex(random_bytes(10));
         $pinHash = password_hash($cleanPin, PASSWORD_BCRYPT);
-        $placeholderEmail = $cleanUsername . '@' . strtolower(preg_replace('/[^a-z0-9]/', '', $nodeFamCode)) . '.family.local';
+        $cleanFam = strtolower((string)preg_replace('/[^a-z0-9]/', '', (string)$nodeFamCode));
+        $placeholderEmail = $cleanUsername . '@' . $cleanFam . '.family.local';
 
         $firstName = trim((string)($childNode['first_name'] ?? 'Child'));
         $lastName = trim((string)($childNode['last_name'] ?? ''));
@@ -347,7 +348,7 @@ final class ChildAccountService
             return false;
         }
 
-        $mime = $info['mime'] ?? '';
+        $mime = (string)$info['mime'];
         $success = false;
 
         switch ($mime) {
@@ -499,7 +500,7 @@ final class ChildAccountService
             'transition_due_date' => $transitionDate,
             'year' => $y,
             'month' => $m,
-            'month_str' => $monthNames[$m] ?? 'Jan',
+            'month_str' => $monthNames[$m],
             'day' => $d,
         ];
     }

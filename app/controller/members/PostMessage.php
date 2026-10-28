@@ -869,6 +869,7 @@ final class PostMessage
             $viewers = Post::getPostViewers($postNo);
             $viewsCount = Post::getViewsCount($postNo);
 
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response (Content-Type: application/json); json_encode escapes the payload.
             echo json_encode([
                 'status' => 'success',
                 'post_no' => $postNo,
@@ -966,6 +967,7 @@ final class PostMessage
             $viewers = Post::getCommentViewers($commentNo);
             $viewsCount = Post::getCommentViewsCount($commentNo);
 
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response (Content-Type: application/json); json_encode escapes the payload.
             echo json_encode([
                 'status' => 'success',
                 'comment_no' => $commentNo,

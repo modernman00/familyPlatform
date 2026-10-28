@@ -376,6 +376,158 @@ runJourney("E2E PartyPlatform Bridge: Kinship Tier Mapping, S2S Provisioning & B
     }
 });
 
+// ------------------------------------------------------------------------------
+// JOURNEY 7: Extended Kinship & In-Law Lineage Engine (Birth/Marital & Wife FamCode)
+// ------------------------------------------------------------------------------
+runJourney("E2E Extended Kinship: Dual-Lineage Uncle/Aunt & In-Law Traversal Lifecycle", function() {
+    $pdo = \Src\Db::connect2();
+
+    $e2eEgoId = 'usr_e2e_' . bin2hex(random_bytes(4));
+    $maritalFam = 'FAM_E2E_MARITAL_' . bin2hex(random_bytes(3));
+    $birthFam = 'FAM_E2E_BIRTH_' . bin2hex(random_bytes(3));
+    $wifeFam = 'FAM_E2E_WIFE_' . bin2hex(random_bytes(3));
+
+    // Register family codes
+    $pdo->prepare("INSERT INTO family_codes (code, kind, created_by) VALUES (?, 'primary', ?)")->execute([$maritalFam, $e2eEgoId]);
+    $pdo->prepare("INSERT INTO family_codes (code, kind, created_by) VALUES (?, 'birth', ?)")->execute([$birthFam, $e2eEgoId]);
+    $pdo->prepare("INSERT INTO family_codes (code, kind, created_by) VALUES (?, 'primary', ?)")->execute([$wifeFam, $e2eEgoId]);
+
+    // Register user with wife's family code in otherFamily and personal
+    $pdo->prepare("INSERT INTO personal (id, firstName, lastName, famCode) VALUES (?, 'E2E Ego', 'Household', ?)")->execute([$e2eEgoId, $maritalFam]);
+    $pdo->prepare("INSERT INTO otherFamily (id, otherFamCode, spouse_name) VALUES (?, ?, 'E2E Wife')")->execute([$e2eEgoId, $wifeFam]);
+
+    // Create Ego node in marital tree
+    $stEgo = $pdo->prepare("
+        INSERT INTO family_nodes (family_code, user_id, first_name, last_name, gender, generation_level)
+        VALUES (?, ?, 'E2E Ego', 'Household', 'Male', 0)
+    ");
+    $stEgo->execute([$maritalFam, $e2eEgoId]);
+    $egoNodeId = (int)$pdo->lastInsertId();
+
+    $controller = (new \ReflectionClass(\App\controller\members\OrganogramEditorController::class))->newInstanceWithoutConstructor();
+
+    $invokeEditor = function(string $method) use ($controller): array {
+        unset($GLOBALS['__testResponse'], $GLOBALS['__testError']);
+        ob_start();
+        try {
+            $controller->$method();
+            $output = ob_get_clean() ?: '';
+            if (isset($GLOBALS['__testResponse'])) {
+                return $GLOBALS['__testResponse'];
+            }
+            return json_decode($output, true) ?: ['raw' => $output];
+        } catch (\Throwable $e) {
+            ob_end_clean();
+            return [
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ];
+        }
+    };
+
+    try {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_SERVER['HTTP_X_REQUESTED_WITH'] = 'XMLHttpRequest';
+        $_SERVER['HTTP_ACCEPT'] = 'application/json';
+        $_SESSION['id'] = $e2eEgoId;
+        $_SESSION['famCode'] = $maritalFam;
+
+        // 1. Add Paternal Uncle via addUncleAunt in marital tree
+        $_POST = [
+            'base_node_id' => $egoNodeId,
+            'relationship' => 'uncle',
+            'side' => 'paternal',
+            'first_name' => 'E2E Uncle Kayode',
+            'last_name' => 'Household',
+            'famcode_type' => 'marital',
+            'marital_famcode' => $maritalFam
+        ];
+        $resUncle = $invokeEditor('addUncleAunt');
+        if (($resUncle['status'] ?? '') !== 'success') {
+            throw new \Exception("E2E Paternal Uncle creation failed: " . json_encode($resUncle));
+        }
+        $uncleId = (int)($resUncle['message']['node']['id'] ?? 0);
+
+        // 2. Add Maternal Auntie via addUncleAunt in birth family tree
+        $_POST = [
+            'base_node_id' => $egoNodeId,
+            'relationship' => 'aunt',
+            'side' => 'maternal',
+            'first_name' => 'E2E Auntie Bisi',
+            'last_name' => 'Mayungbe',
+            'maiden_name' => 'Mayungbe',
+            'famcode_type' => 'birth',
+            'birth_famcode' => $birthFam
+        ];
+        $resAunt = $invokeEditor('addUncleAunt');
+        if (($resAunt['status'] ?? '') !== 'success') {
+            throw new \Exception("E2E Maternal Auntie creation failed: " . json_encode($resAunt));
+        }
+        $auntId = (int)($resAunt['message']['node']['id'] ?? 0);
+
+        // 3. Add In-Laws via addInLaw linked to Wife's family code
+        // 3a. Father-in-law
+        $_POST = [
+            'base_node_id' => $egoNodeId,
+            'relationship' => 'father_in_law',
+            'first_name' => 'E2E Pa InLaw',
+            'last_name' => 'Adeleke',
+            'famcode_type' => 'wife',
+            'wife_famcode' => $wifeFam
+        ];
+        $resFil = $invokeEditor('addInLaw');
+        if (($resFil['status'] ?? '') !== 'success') {
+            throw new \Exception("E2E Father-in-law creation failed: " . json_encode($resFil));
+        }
+        $filId = (int)($resFil['message']['node']['id'] ?? 0);
+
+        // 3b. Brother-in-law (Wife's sibling)
+        $_POST = [
+            'base_node_id' => $egoNodeId,
+            'relationship' => 'brother_in_law',
+            'first_name' => 'E2E Bro InLaw',
+            'last_name' => 'Adeleke',
+            'famcode_type' => 'wife',
+            'wife_famcode' => $wifeFam
+        ];
+        $resBil = $invokeEditor('addInLaw');
+        if (($resBil['status'] ?? '') !== 'success') {
+            throw new \Exception("E2E Brother-in-law creation failed: " . json_encode($resBil));
+        }
+        $bilId = (int)($resBil['message']['node']['id'] ?? 0);
+
+        // 4. Verify Collateral Kinship Graph Traversal & Kinship Path Resolution
+        $graph = \App\services\CollateralKinshipService::buildCollateralGraph($wifeFam, $e2eEgoId);
+        $nodesByName = [];
+        foreach ($graph['nodes'] as $n) {
+            $nodesByName[$n['first_name']] = $n;
+        }
+
+        if (!isset($nodesByName['E2E Pa InLaw'])) {
+            throw new \Exception("E2E In-Law Verification: Father-in-law was not indexed in Wife's collateral graph.");
+        }
+        $filNode = $nodesByName['E2E Pa InLaw'];
+        if (($filNode['kinship_category'] ?? '') !== 'in_law' && !str_contains((string)($filNode['ego_relation'] ?? ''), 'Father-in-law')) {
+            throw new \Exception("E2E In-Law Verification: Expected Father-in-law relation, got: " . json_encode($filNode));
+        }
+
+        if (!isset($nodesByName['E2E Bro InLaw'])) {
+            throw new \Exception("E2E In-Law Verification: Brother-in-law was not indexed in Wife's collateral graph.");
+        }
+        $bilNode = $nodesByName['E2E Bro InLaw'];
+        if (($bilNode['kinship_category'] ?? '') !== 'in_law' && !str_contains((string)($bilNode['ego_relation'] ?? ''), 'Brother-in-law')) {
+            throw new \Exception("E2E In-Law Verification: Expected Brother-in-law relation, got: " . json_encode($bilNode));
+        }
+    } finally {
+        $pdo->prepare("DELETE FROM family_nodes WHERE family_code IN (?, ?, ?)")->execute([$maritalFam, $birthFam, $wifeFam]);
+        $pdo->prepare("DELETE FROM family_unions WHERE family_code IN (?, ?, ?)")->execute([$maritalFam, $birthFam, $wifeFam]);
+        $pdo->prepare("DELETE FROM family_codes WHERE code IN (?, ?, ?)")->execute([$maritalFam, $birthFam, $wifeFam]);
+        $pdo->prepare("DELETE FROM otherFamily WHERE id = ?")->execute([$e2eEgoId]);
+        $pdo->prepare("DELETE FROM personal WHERE id = ?")->execute([$e2eEgoId]);
+        $pdo->prepare("DELETE FROM user_families WHERE family_code IN (?, ?, ?)")->execute([$maritalFam, $birthFam, $wifeFam]);
+    }
+});
+
 echo "\n=================================================================\n";
 if ($failed === 0) {
     echo "🏆 ALL {$passed} E2E ROBUST USER JOURNEYS PASSED CLEANLY!\n";

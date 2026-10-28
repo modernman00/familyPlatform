@@ -449,6 +449,20 @@
              @keydown.escape.window="commentEmojiOpen[post.post_no] = false"
              role="dialog" aria-label="Choose an emoji" data-testid="comment-emoji-picker"
              class="comment-picker comment-picker--emoji">
+          <!-- Race-Conscious Fitzpatrick Skin Tone Palette -->
+          <div class="d-flex align-items-center justify-content-between px-2 py-1 border-bottom mb-1 bg-light rounded" role="toolbar" aria-label="Comment skin tone diversity selector">
+            <span class="text-muted fw-semibold" style="font-size:0.68rem;">Skin:</span>
+            <div class="d-flex align-items-center gap-1">
+              <template x-for="st in skinTones" :key="st.tone">
+                <button type="button" class="btn btn-sm p-0 border-0 rounded-circle"
+                        :class="commentSkinTone === st.tone ? 'shadow-sm border border-primary' : 'opacity-75'"
+                        style="font-size:0.82rem; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer;"
+                        :title="st.label" :aria-label="st.label"
+                        @click.stop="setCommentSkinTone(st.tone)" x-text="st.swatch"></button>
+              </template>
+            </div>
+          </div>
+
           <div class="comment-emoji-grid">
             <template x-for="emoji in commentEmojiPalette" :key="emoji">
               <button type="button" class="comment-emoji-btn" @click="insertEmojiIntoComment(post.post_no, emoji)"

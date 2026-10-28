@@ -1305,15 +1305,54 @@
   document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
-    // Tab persistence: activate tab from URL hash (e.g. #v-pills-familycode)
-    const activeHash = window.location.hash;
-    if (activeHash) {
-      const targetTrigger = document.querySelector(`button[data-bs-target="${activeHash}"]`);
+    // Tab persistence & deep-link focus (e.g. #v-pills-familycode or #birthFamilyCard)
+    const handleDeepLinkTarget = function(hashVal) {
+      if (!hashVal) return;
+      const cleanHash = hashVal.replace(/^#/, '');
+      let targetTrigger = document.querySelector(`button[data-bs-target="#${cleanHash}"]`);
+      let elementToFocus = null;
+
+      if (!targetTrigger) {
+        // Check if hash matches an element inside a tab pane (e.g. #birthFamilyCard)
+        const innerEl = document.getElementById(cleanHash);
+        if (innerEl) {
+          elementToFocus = innerEl;
+          const parentPane = innerEl.closest('.tab-pane');
+          if (parentPane && parentPane.id) {
+            targetTrigger = document.querySelector(`button[data-bs-target="#${parentPane.id}"]`);
+          }
+        }
+      } else {
+        // If clicking #v-pills-familycode directly, check for birthFamilyCard
+        if (cleanHash === 'v-pills-familycode') {
+          elementToFocus = document.getElementById('birthFamilyCard');
+        }
+      }
+
       if (targetTrigger && window.bootstrap && window.bootstrap.Tab) {
         const tabInst = window.bootstrap.Tab.getOrCreateInstance(targetTrigger);
         tabInst.show();
       }
-    }
+
+      if (elementToFocus) {
+        setTimeout(function() {
+          elementToFocus.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          elementToFocus.classList.add('pulse-highlight-target');
+          const inputToFocus = elementToFocus.querySelector('input:not([type="hidden"]), select, button.btn-primary');
+          if (inputToFocus) {
+            try { inputToFocus.focus({ preventScroll: true }); } catch (e) {}
+          }
+          setTimeout(function() {
+            elementToFocus.classList.remove('pulse-highlight-target');
+          }, 2500);
+        }, 180);
+      }
+    };
+
+    handleDeepLinkTarget(window.location.hash);
+    window.addEventListener('hashchange', function() {
+      handleDeepLinkTarget(window.location.hash);
+    });
 
     // Keep URL hash updated when switching tabs
     document.querySelectorAll('button[data-bs-toggle="pill"]').forEach(function(pillBtn) {

@@ -36,15 +36,50 @@ final class OrganogramEditorController extends BaseController
         $resolvedScope = 'primary';
 
         // 1. Explicit maternal / birth lineage request
-        if (($lineageScope === 'maternal' || $lineageScope === 'birth') && $requestedCode !== '') {
-            if ($userId !== '' && (new \App\services\BirthFamilyCodeService($db))->userHoldsCode($userId, $requestedCode)) {
+        if (($lineageScope === 'maternal' || $lineageScope === 'birth')) {
+            if ($requestedCode !== '' && $userId !== '' && (new \App\services\BirthFamilyCodeService($db))->userHoldsCode($userId, $requestedCode)) {
                 $familyCode = $requestedCode;
                 $resolvedScope = 'maternal';
+            } elseif ($requestedCode === '' && $userId !== '') {
+                $birthStatus = (new \App\services\BirthFamilyCodeService($db))->status($userId);
+                if ($birthStatus['state'] === 'active' && !empty($birthStatus['code'])) {
+                    $familyCode = strtoupper(trim((string)$birthStatus['code']));
+                    $resolvedScope = 'maternal';
+                }
+            }
+        } elseif (($lineageScope === 'wife' || $lineageScope === 'inlaw' || $lineageScope === 'spouse') && $requestedCode !== '') {
+            $isAllowedWifeCode = false;
+            if ($userId !== '') {
+                $ofCheck = $db->prepare("SELECT 1 FROM otherFamily WHERE id = ? AND (otherFamCode = ? OR otherFamCode = ?) LIMIT 1");
+                $ofCheck->execute([$userId, $requestedCode, '#' . $requestedCode]);
+                $isAllowedWifeCode = (bool)$ofCheck->fetchColumn();
+
+                if (!$isAllowedWifeCode) {
+                    $ufCheck = $db->prepare("SELECT 1 FROM user_families WHERE user_id = ? AND family_code = ? AND status = 'approved' LIMIT 1");
+                    $ufCheck->execute([$userId, $requestedCode]);
+                    $isAllowedWifeCode = (bool)$ufCheck->fetchColumn();
+                }
+
+                if (!$isAllowedWifeCode) {
+                    $stmtOwner = $db->prepare("SELECT created_by FROM family_codes WHERE code = ? LIMIT 1");
+                    $stmtOwner->execute([$requestedCode]);
+                    $codeCreator = $stmtOwner->fetchColumn();
+                    if ($codeCreator === false || (string)$codeCreator === $userId) {
+                        $isAllowedWifeCode = true;
+                    }
+                }
+            }
+            if ($isAllowedWifeCode) {
+                $familyCode = $requestedCode;
+                $resolvedScope = 'wife';
             }
         } elseif ($requestedCode !== '' && $requestedCode !== $primaryCode) {
             if ($userId !== '' && (new \App\services\BirthFamilyCodeService($db))->userHoldsCode($userId, $requestedCode)) {
                 $familyCode = $requestedCode;
                 $resolvedScope = 'maternal';
+            } elseif (BaseController::sessionSharesFamily($requestedCode)) {
+                $familyCode = $requestedCode;
+                $resolvedScope = 'external';
             }
         }
 
@@ -197,6 +232,8 @@ final class OrganogramEditorController extends BaseController
                 }
                 msgSuccess(200, [
                     "message" => "Partner added successfully.",
+                    "family_code" => $familyCode,
+                    "lineage_scope" => $ctx['lineage_scope'],
                     "node" => [
                         "id" => $partnerId,
                         "first_name" => $firstName,
@@ -401,6 +438,8 @@ final class OrganogramEditorController extends BaseController
                 $db->commit();
                 msgSuccess(200, [
                     "message" => "Child added successfully." . ($childAccount ? " Child account provisioned." : ""),
+                    "family_code" => $familyCode,
+                    "lineage_scope" => $ctx['lineage_scope'],
                     "child_account" => $childAccount,
                     "node" => [
                         "id" => $childId,
@@ -543,6 +582,8 @@ final class OrganogramEditorController extends BaseController
                 $db->commit();
                 msgSuccess(200, [
                     "message" => "Parents added successfully.",
+                    "family_code" => $familyCode,
+                    "lineage_scope" => $ctx['lineage_scope'],
                     "father" => [
                         "id" => $fatherId,
                         "first_name" => $fatherFirst,
@@ -660,6 +701,8 @@ final class OrganogramEditorController extends BaseController
                 }
                 msgSuccess(200, [
                     "message" => "Sibling added successfully.",
+                    "family_code" => $familyCode,
+                    "lineage_scope" => $ctx['lineage_scope'],
                     "node" => [
                         "id" => $sibId,
                         "first_name" => $firstName,
@@ -671,6 +714,764 @@ final class OrganogramEditorController extends BaseController
                         "bio" => "Sibling",
                         "role" => "sibling",
                         "parentage" => $parentage
+                    ]
+                ]);
+            } catch (\Exception $e) {
+                $db->rollBack();
+                throw $e;
+            }
+
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    /**
+     * Add an Auntie or Uncle to the family tree
+     * Supports both Paternal (Marital FamCode) and Maternal (Birth FamCode) branches.
+     */
+    public function addUncleAunt(): void
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                msgException(405, 'Method Not Allowed');
+                return;
+            }
+
+            $rawInput = file_get_contents('php://input') ?: '';
+            $jsonInput = json_decode($rawInput, true) ?: [];
+
+            $db = Db::connect2();
+            $userId = (string)($_SESSION['id'] ?? '');
+
+            $baseNodeId = (int)($_POST['base_node_id'] ?? ($jsonInput['base_node_id'] ?? 0));
+            $relationship = strtolower(trim((string)($_POST['relationship'] ?? ($jsonInput['relationship'] ?? 'uncle'))));
+            $side = strtolower(trim((string)($_POST['side'] ?? ($jsonInput['side'] ?? ''))));
+            $famcodeType = strtolower(trim((string)($_POST['famcode_type'] ?? ($jsonInput['famcode_type'] ?? ''))));
+
+            // Default side and lineage scope:
+            $lineageScope = trim((string)($_POST['lineage_scope'] ?? ($jsonInput['lineage_scope'] ?? '')));
+            if ($famcodeType === 'birth' || $lineageScope === 'birth' || $lineageScope === 'maternal') {
+                if ($side === '') {
+                    $side = 'maternal';
+                }
+                if ($lineageScope === '') {
+                    $_POST['lineage_scope'] = 'maternal';
+                }
+            } else {
+                if ($side === '') {
+                    $side = 'paternal';
+                }
+            }
+
+            // Auto-resolve lineage code if birth requested and empty
+            $requestedCode = strtoupper(trim(str_replace('#', '', (string)($_POST['lineage_code'] ?? ($_POST['family_code'] ?? ($jsonInput['lineage_code'] ?? ($jsonInput['family_code'] ?? '')))))));
+            $birthFamCode = strtoupper(trim(str_replace('#', '', (string)($_POST['birth_famcode'] ?? ($jsonInput['birth_famcode'] ?? '')))));
+            $maritalFamCode = strtoupper(trim(str_replace('#', '', (string)($_POST['marital_famcode'] ?? ($jsonInput['marital_famcode'] ?? '')))));
+
+            if (($famcodeType === 'birth' || $side === 'maternal' || $lineageScope === 'maternal' || $lineageScope === 'birth') && $requestedCode === '') {
+                if ($birthFamCode !== '') {
+                    $_POST['lineage_code'] = $birthFamCode;
+                } else {
+                    $birthStatus = (new \App\services\BirthFamilyCodeService($db))->status($userId);
+                    if ($birthStatus['state'] === 'active' && !empty($birthStatus['code'])) {
+                        $_POST['lineage_code'] = $birthStatus['code'];
+                        $_POST['lineage_scope'] = 'maternal';
+                    }
+                }
+            } elseif ($famcodeType === 'marital' && $requestedCode === '' && $maritalFamCode !== '') {
+                $_POST['lineage_code'] = $maritalFamCode;
+                $_POST['lineage_scope'] = 'primary';
+            }
+
+            $ctx = $this->resolveEditorFamilyContext($db, $baseNodeId, 0, $jsonInput);
+            $familyCode = $ctx['family_code'];
+            $baseNodeId = $ctx['base_node_id'];
+
+            if (empty($familyCode)) {
+                msgException(403, 'Unauthorized Access');
+                return;
+            }
+
+            // If baseNodeId is 0, auto-resolve to user's node in this family tree
+            if ($baseNodeId <= 0 && $userId !== '') {
+                $stmtSelf = $db->prepare('SELECT id FROM family_nodes WHERE user_id = ? AND family_code = ? LIMIT 1');
+                $stmtSelf->execute([$userId, $familyCode]);
+                $baseNodeId = (int)$stmtSelf->fetchColumn();
+
+                if ($baseNodeId <= 0) {
+                    $memberProfile = parent::findMemberById($userId);
+                    if (!empty($memberProfile)) {
+                        $baseNodeId = \App\services\FamilyClaimService::claimOrInitializeNode($familyCode, $userId, $memberProfile);
+                    }
+                }
+            }
+
+            if ($baseNodeId <= 0) {
+                msgException(400, 'Invalid Base Node ID');
+                return;
+            }
+
+            // IDOR Protection: Verify the base node belongs to this family tree
+            $stmt = $db->prepare("SELECT id, user_id, first_name, last_name, generation_level FROM family_nodes WHERE id = ? AND family_code = ?");
+            $stmt->execute([$baseNodeId, $familyCode]);
+            $baseNode = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$baseNode) {
+                msgException(403, 'Permission Denied: Node does not belong to your family tree.');
+                return;
+            }
+
+            $firstName = trim((string)($_POST['first_name'] ?? ($jsonInput['first_name'] ?? '')));
+            $lastName = trim((string)($_POST['last_name'] ?? ($jsonInput['last_name'] ?? '')));
+            $maidenName = trim((string)($_POST['maiden_name'] ?? ($jsonInput['maiden_name'] ?? '')));
+            $email = trim((string)($_POST['email'] ?? ($jsonInput['email'] ?? '')));
+            $mobile = trim((string)($_POST['mobile'] ?? ($jsonInput['mobile'] ?? '')));
+            $gender = trim((string)($_POST['gender'] ?? ($jsonInput['gender'] ?? '')));
+
+            $isFemale = in_array($relationship, ['aunt', 'auntie'], true) || strcasecmp($gender, 'Female') === 0;
+            $gender = $isFemale ? 'Female' : 'Male';
+            $bioRole = $isFemale ? 'Auntie' : 'Uncle';
+
+            if (empty($firstName)) {
+                msgException(400, "{$bioRole}'s First Name is required.");
+                return;
+            }
+
+            if (empty($lastName)) {
+                $lastName = (string)($baseNode['last_name'] ?? '');
+            }
+
+            $baseGenLevel = (int)$baseNode['generation_level'];
+            $parentGenLevel = $baseGenLevel - 1;
+            $avatar = ($gender === 'Male') ? '/resources/images/profile/avatarM.png' : '/resources/images/profile/avatarF.png';
+
+            // Atomic Transaction
+            $db->beginTransaction();
+
+            try {
+                // 1. Identify or Create Target Parent (Father for Paternal, Mother for Maternal)
+                $parentStmt = $db->prepare("
+                    SELECT parent.id, parent.gender, parent.first_name, parent.last_name, fnc.union_id
+                    FROM family_node_children fnc
+                    JOIN family_unions u ON u.id = fnc.union_id
+                    JOIN family_nodes parent ON (parent.id = u.partner_1_id OR parent.id = u.partner_2_id)
+                    WHERE fnc.child_id = ? AND parent.family_code = ?
+                ");
+                $parentStmt->execute([$baseNodeId, $familyCode]);
+                $existingParents = $parentStmt->fetchAll(\PDO::FETCH_ASSOC);
+
+                $targetParentId = 0;
+                $targetParentUnionId = 0;
+
+                $wantedGender = ($side === 'paternal') ? 'Male' : 'Female';
+                foreach ($existingParents as $pRow) {
+                    if (strtolower((string)$pRow['gender']) === strtolower($wantedGender)) {
+                        $targetParentId = (int)$pRow['id'];
+                        $targetParentUnionId = (int)$pRow['union_id'];
+                        break;
+                    }
+                }
+
+                if ($targetParentId <= 0) {
+                    $parentRoleName = ($side === 'paternal') ? 'Father' : 'Mother';
+                    $parentSex = ($side === 'paternal') ? 'avatarM.png' : 'avatarF.png';
+                    $parentSurname = ($side === 'maternal' && $maidenName !== '') ? $maidenName : $lastName;
+
+                    $insParent = $db->prepare("
+                        INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, is_placeholder)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+                    ");
+                    $insParent->execute([
+                        $familyCode,
+                        $parentRoleName,
+                        $parentSurname,
+                        $wantedGender,
+                        $parentGenLevel,
+                        "/resources/images/profile/{$parentSex}",
+                        $parentRoleName
+                    ]);
+                    $targetParentId = (int)$db->lastInsertId();
+
+                    $otherGender = ($wantedGender === 'Male') ? 'Female' : 'Male';
+                    $otherRoleName = ($wantedGender === 'Male') ? 'Mother' : 'Father';
+                    $otherSex = ($wantedGender === 'Male') ? 'avatarF.png' : 'avatarM.png';
+
+                    $insOtherParent = $db->prepare("
+                        INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, is_placeholder)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+                    ");
+                    $insOtherParent->execute([
+                        $familyCode,
+                        $otherRoleName,
+                        $parentSurname,
+                        $otherGender,
+                        $parentGenLevel,
+                        "/resources/images/profile/{$otherSex}",
+                        $otherRoleName
+                    ]);
+                    $otherParentId = (int)$db->lastInsertId();
+
+                    $insParentUnion = $db->prepare("
+                        INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current)
+                        VALUES (?, ?, ?, 'married', 1)
+                    ");
+                    $partner1 = ($wantedGender === 'Male') ? $targetParentId : $otherParentId;
+                    $partner2 = ($wantedGender === 'Male') ? $otherParentId : $targetParentId;
+                    $insParentUnion->execute([$familyCode, $partner1, $partner2]);
+                    $targetParentUnionId = (int)$db->lastInsertId();
+
+                    $insChildLink = $db->prepare("
+                        INSERT INTO family_node_children (union_id, child_id, relationship_type)
+                        VALUES (?, ?, 'biological')
+                    ");
+                    $insChildLink->execute([$targetParentUnionId, $baseNodeId]);
+                }
+
+                // 2. Identify or Create Grandparent Union for the Target Parent
+                $gpStmt = $db->prepare("
+                    SELECT u.id AS gp_union_id, u.partner_1_id, u.partner_2_id
+                    FROM family_node_children fnc
+                    JOIN family_unions u ON u.id = fnc.union_id
+                    WHERE fnc.child_id = ?
+                    LIMIT 1
+                ");
+                $gpStmt->execute([$targetParentId]);
+                $gpRow = $gpStmt->fetch(\PDO::FETCH_ASSOC);
+
+                $gpUnionId = $gpRow ? (int)$gpRow['gp_union_id'] : 0;
+
+                if ($gpUnionId <= 0) {
+                    $gpGenLevel = $parentGenLevel - 1;
+                    $gpSurname = ($side === 'maternal' && $maidenName !== '') ? $maidenName : $lastName;
+
+                    $insGf = $db->prepare("
+                        INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, is_placeholder)
+                        VALUES (?, 'Grandfather', ?, 'Male', ?, '/resources/images/profile/avatarM.png', 'Grandfather', 1)
+                    ");
+                    $insGf->execute([$familyCode, $gpSurname, $gpGenLevel]);
+                    $gfId = (int)$db->lastInsertId();
+
+                    $insGm = $db->prepare("
+                        INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, is_placeholder)
+                        VALUES (?, 'Grandmother', ?, 'Female', ?, '/resources/images/profile/avatarF.png', 'Grandmother', 1)
+                    ");
+                    $insGm->execute([$familyCode, $gpSurname, $gpGenLevel]);
+                    $gmId = (int)$db->lastInsertId();
+
+                    $insGpUnion = $db->prepare("
+                        INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current)
+                        VALUES (?, ?, ?, 'married', 1)
+                    ");
+                    $insGpUnion->execute([$familyCode, $gfId, $gmId]);
+                    $gpUnionId = (int)$db->lastInsertId();
+
+                    $insParentChild = $db->prepare("
+                        INSERT INTO family_node_children (union_id, child_id, relationship_type)
+                        VALUES (?, ?, 'biological')
+                    ");
+                    $insParentChild->execute([$gpUnionId, $targetParentId]);
+                }
+
+                // 3. Insert Uncle / Aunt Node
+                $metaNotes = [];
+                if (!empty($birthFamCode)) {
+                    $metaNotes[] = "Birth FamCode: #{$birthFamCode}";
+                }
+                if (!empty($maritalFamCode)) {
+                    $metaNotes[] = "Marital FamCode: #{$maritalFamCode}";
+                }
+                $bioText = $bioRole . ($metaNotes ? ' (' . implode(', ', $metaNotes) . ')' : '');
+
+                $birthYear = !empty($_POST['birth_year']) ? (int)$_POST['birth_year'] : (!empty($jsonInput['birth_year']) ? (int)$jsonInput['birth_year'] : null);
+
+                $insNode = $db->prepare("
+                    INSERT INTO family_nodes (family_code, first_name, last_name, maiden_name, gender, generation_level, avatar_url, bio, email, mobile, birth_year)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ");
+                $insNode->execute([
+                    $familyCode,
+                    $firstName,
+                    $lastName,
+                    ($maidenName !== '') ? $maidenName : null,
+                    $gender,
+                    $parentGenLevel,
+                    $avatar,
+                    $bioText,
+                    (!empty($email)) ? $email : null,
+                    (!empty($mobile)) ? $mobile : null,
+                    $birthYear
+                ]);
+                $uncleAuntId = (int)$db->lastInsertId();
+
+                // 4. Link Uncle/Aunt into Grandparent Union as sibling of Target Parent
+                $insChildLink = $db->prepare("
+                    INSERT INTO family_node_children (union_id, child_id, relationship_type)
+                    VALUES (?, ?, 'biological')
+                ");
+                $insChildLink->execute([$gpUnionId, $uncleAuntId]);
+
+                $db->commit();
+
+                $treeLabel = ($ctx['lineage_scope'] === 'maternal') ? 'Birth Family' : 'Marital Tree';
+
+                msgSuccess(200, [
+                    "message" => "{$bioRole} added successfully to your {$treeLabel} (#{$familyCode}).",
+                    "node" => [
+                        "id" => $uncleAuntId,
+                        "first_name" => $firstName,
+                        "last_name" => $lastName,
+                        "maiden_name" => $maidenName,
+                        "gender" => $gender,
+                        "avatar_url" => $avatar,
+                        "email" => $email,
+                        "mobile" => $mobile,
+                        "bio" => $bioText,
+                        "role" => strtolower($bioRole),
+                        "side" => $side,
+                        "generation_level" => $parentGenLevel,
+                        "family_code" => $familyCode,
+                        "lineage_scope" => $ctx['lineage_scope'],
+                        "birth_famcode" => $birthFamCode,
+                        "marital_famcode" => $maritalFamCode
+                    ]
+                ]);
+            } catch (\Exception $e) {
+                $db->rollBack();
+                throw $e;
+            }
+
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    /**
+     * Add an In-Law (Father-in-law, Mother-in-law, Brother-in-law, Sister-in-law)
+     * Routed with the Wife's Family Code or Marital Family Code.
+     */
+    public function addInLaw(): void
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                msgException(405, 'Method Not Allowed');
+                return;
+            }
+
+            $rawInput = file_get_contents('php://input') ?: '';
+            $jsonInput = json_decode($rawInput, true) ?: [];
+
+            $db = Db::connect2();
+            $userId = (string)($_SESSION['id'] ?? '');
+
+            $baseNodeId = (int)($_POST['base_node_id'] ?? ($jsonInput['base_node_id'] ?? 0));
+            $relationship = strtolower(trim((string)($_POST['relationship'] ?? ($jsonInput['relationship'] ?? 'in_law'))));
+            $famcodeType = strtolower(trim((string)($_POST['famcode_type'] ?? ($jsonInput['famcode_type'] ?? 'wife'))));
+            $lineageScope = trim((string)($_POST['lineage_scope'] ?? ($jsonInput['lineage_scope'] ?? '')));
+
+            $wifeFamCode = strtoupper(trim(str_replace('#', '', (string)($_POST['wife_famcode'] ?? ($_POST['spouse_famcode'] ?? ($jsonInput['wife_famcode'] ?? ($jsonInput['spouse_famcode'] ?? '')))))));
+            $maritalFamCode = strtoupper(trim(str_replace('#', '', (string)($_POST['marital_famcode'] ?? ($jsonInput['marital_famcode'] ?? '')))));
+            $requestedCode = strtoupper(trim(str_replace('#', '', (string)($_POST['lineage_code'] ?? ($_POST['family_code'] ?? ($jsonInput['lineage_code'] ?? ($jsonInput['family_code'] ?? '')))))));
+
+            if ($wifeFamCode === '' && $requestedCode !== '') {
+                $wifeFamCode = $requestedCode;
+            }
+
+            // Auto-detect wife/spouse family code from otherFamily if empty
+            if ($wifeFamCode === '' && $userId !== '') {
+                $stmtOf = $db->prepare('SELECT otherFamCode FROM otherFamily WHERE id = ? ORDER BY no ASC LIMIT 1');
+                $stmtOf->execute([$userId]);
+                $foundOf = $stmtOf->fetchColumn();
+                if ($foundOf) {
+                    $wifeFamCode = strtoupper(trim(str_replace('#', '', (string)$foundOf)));
+                }
+            }
+
+            if ($famcodeType === 'wife' || $lineageScope === 'wife' || $lineageScope === 'inlaw') {
+                if ($wifeFamCode !== '') {
+                    // Security Gate: Validate user entitlement to wifeFamCode (BOLA / Privilege Escalation Guard)
+                    $isAllowedWifeCode = false;
+                    if ($userId !== '') {
+                        $ofCheck = $db->prepare("SELECT 1 FROM otherFamily WHERE id = ? AND (otherFamCode = ? OR otherFamCode = ?) LIMIT 1");
+                        $ofCheck->execute([$userId, $wifeFamCode, '#' . $wifeFamCode]);
+                        $isAllowedWifeCode = (bool)$ofCheck->fetchColumn();
+
+                        if (!$isAllowedWifeCode) {
+                            $ufCheck = $db->prepare("SELECT 1 FROM user_families WHERE user_id = ? AND family_code = ? AND status = 'approved' LIMIT 1");
+                            $ufCheck->execute([$userId, $wifeFamCode]);
+                            $isAllowedWifeCode = (bool)$ufCheck->fetchColumn();
+                        }
+
+                        if (!$isAllowedWifeCode) {
+                            $stmtOwner = $db->prepare("SELECT created_by FROM family_codes WHERE code = ? LIMIT 1");
+                            $stmtOwner->execute([$wifeFamCode]);
+                            $codeCreator = $stmtOwner->fetchColumn();
+                            if ($codeCreator === false || (string)$codeCreator === $userId) {
+                                $isAllowedWifeCode = true;
+                            }
+                        }
+                    }
+
+                    if (!$isAllowedWifeCode) {
+                        msgException(403, "Permission Denied: You do not have authorization to link in-laws to foreign family code #{$wifeFamCode}.");
+                        return;
+                    }
+
+                    $_POST['lineage_code'] = $wifeFamCode;
+                    $_POST['lineage_scope'] = 'wife';
+                    // Auto-associate user with wife family code in user_families if legitimate
+                    $insUf = $db->prepare("INSERT IGNORE INTO user_families (user_id, family_code, status, role) VALUES (?, ?, 'approved', 'member')");
+                    $insUf->execute([$userId, $wifeFamCode]);
+                }
+            } elseif ($famcodeType === 'marital' && $maritalFamCode !== '') {
+                $_POST['lineage_code'] = $maritalFamCode;
+                $_POST['lineage_scope'] = 'primary';
+            }
+
+            $ctx = $this->resolveEditorFamilyContext($db, $baseNodeId, 0, $jsonInput);
+            $familyCode = $ctx['family_code'];
+            $baseNodeId = $ctx['base_node_id'];
+
+            if (empty($familyCode)) {
+                msgException(403, 'Unauthorized Access');
+                return;
+            }
+
+            // If baseNodeId is 0, auto-resolve to user's node in this family tree
+            if ($baseNodeId <= 0 && $userId !== '') {
+                $stmtSelf = $db->prepare('SELECT id FROM family_nodes WHERE user_id = ? AND family_code = ? LIMIT 1');
+                $stmtSelf->execute([$userId, $familyCode]);
+                $baseNodeId = (int)$stmtSelf->fetchColumn();
+
+                if ($baseNodeId <= 0) {
+                    $memberProfile = parent::findMemberById($userId);
+                    if (!empty($memberProfile)) {
+                        $baseNodeId = \App\services\FamilyClaimService::claimOrInitializeNode($familyCode, $userId, $memberProfile);
+                    }
+                }
+            }
+
+            if ($baseNodeId <= 0) {
+                msgException(400, 'Invalid Base Node ID');
+                return;
+            }
+
+            // IDOR Protection: Verify the base node belongs to this family tree
+            $stmt = $db->prepare("SELECT id, user_id, first_name, last_name, generation_level, gender, maiden_name FROM family_nodes WHERE id = ? AND family_code = ?");
+            $stmt->execute([$baseNodeId, $familyCode]);
+            $baseNode = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$baseNode) {
+                msgException(403, 'Permission Denied: Node does not belong to your family tree.');
+                return;
+            }
+
+            $firstName = trim((string)($_POST['first_name'] ?? ($jsonInput['first_name'] ?? '')));
+            $lastName = trim((string)($_POST['last_name'] ?? ($jsonInput['last_name'] ?? '')));
+            $maidenName = trim((string)($_POST['maiden_name'] ?? ($jsonInput['maiden_name'] ?? '')));
+            $email = trim((string)($_POST['email'] ?? ($jsonInput['email'] ?? '')));
+            $mobile = trim((string)($_POST['mobile'] ?? ($jsonInput['mobile'] ?? '')));
+            $gender = trim((string)($_POST['gender'] ?? ($jsonInput['gender'] ?? '')));
+            $birthYear = !empty($_POST['birth_year']) ? (int)$_POST['birth_year'] : (!empty($jsonInput['birth_year']) ? (int)$jsonInput['birth_year'] : null);
+
+            // Normalize in-law relationship role
+            $relNorm = strtolower(str_replace(['-', ' '], '_', $relationship));
+            $isFatherInLaw = str_contains($relNorm, 'father');
+            $isMotherInLaw = str_contains($relNorm, 'mother');
+            $isBrotherInLaw = str_contains($relNorm, 'brother');
+            $isSisterInLaw = str_contains($relNorm, 'sister');
+
+            if ($isFatherInLaw) {
+                $bioRole = 'Father-in-law';
+                $gender = 'Male';
+            } elseif ($isMotherInLaw) {
+                $bioRole = 'Mother-in-law';
+                $gender = 'Female';
+            } elseif ($isBrotherInLaw) {
+                $bioRole = 'Brother-in-law';
+                $gender = 'Male';
+            } elseif ($isSisterInLaw) {
+                $bioRole = 'Sister-in-law';
+                $gender = 'Female';
+            } else {
+                // Generic in-law fallback
+                $isFemale = strcasecmp($gender, 'Female') === 0;
+                $gender = $isFemale ? 'Female' : 'Male';
+                $bioRole = $isFemale ? 'Sister-in-law' : 'Brother-in-law';
+            }
+
+            if (empty($firstName)) {
+                msgException(400, "{$bioRole}'s First Name is required.");
+                return;
+            }
+
+            $avatar = ($gender === 'Male') ? '/resources/images/profile/avatarM.png' : '/resources/images/profile/avatarF.png';
+
+            // Atomic Transaction
+            $db->beginTransaction();
+
+            try {
+                // 1. Locate or Auto-Create the Spouse (Wife) node in this family tree
+                $spouseNodeId = 0;
+                $spouseGenLevel = (int)$baseNode['generation_level'];
+                $spouseNode = [];
+
+                // Check if baseNode itself is already the Wife / Spouse
+                if (strtolower((string)($baseNode['gender'] ?? '')) === 'female' && (string)($baseNode['user_id'] ?? '') !== $userId) {
+                    $spouseNodeId = (int)$baseNode['id'];
+                    $spouseNode = $baseNode;
+                } else {
+                    // Find active spouse of baseNode
+                    $stmtSpouse = $db->prepare("
+                        SELECT u.id AS union_id,
+                               CASE WHEN u.partner_1_id = ? THEN u.partner_2_id ELSE u.partner_1_id END AS spouse_id
+                        FROM family_unions u
+                        WHERE (u.partner_1_id = ? OR u.partner_2_id = ?) AND u.is_current = 1
+                        LIMIT 1
+                    ");
+                    $stmtSpouse->execute([$baseNodeId, $baseNodeId, $baseNodeId]);
+                    $spUnion = $stmtSpouse->fetch(\PDO::FETCH_ASSOC);
+
+                    if ($spUnion && !empty($spUnion['spouse_id'])) {
+                        $spouseNodeId = (int)$spUnion['spouse_id'];
+                        $stmtSpNode = $db->prepare('SELECT * FROM family_nodes WHERE id = ?');
+                        $stmtSpNode->execute([$spouseNodeId]);
+                        $spouseNode = $stmtSpNode->fetch(\PDO::FETCH_ASSOC) ?: [];
+                    } else {
+                        // Auto-create Spouse (Wife) node for Ego
+                        $spFirstName = 'Wife';
+                        $spLastName = $wifeFamCode !== '' ? ucfirst(strtolower($wifeFamCode)) : ($baseNode['last_name'] ?? 'Spouse');
+                        $spMaiden = '';
+
+                        if ($userId !== '') {
+                            $ofCheck = $db->prepare('SELECT spouse_name, maiden_name FROM otherFamily WHERE id = ? LIMIT 1');
+                            $ofCheck->execute([$userId]);
+                            $ofData = $ofCheck->fetch(\PDO::FETCH_ASSOC);
+                            if ($ofData) {
+                                if (!empty($ofData['spouse_name'])) {
+                                    $spFirstName = trim((string)$ofData['spouse_name']);
+                                }
+                                if (!empty($ofData['maiden_name'])) {
+                                    $spMaiden = trim((string)$ofData['maiden_name']);
+                                }
+                            }
+                        }
+
+                        $insSpouse = $db->prepare("
+                            INSERT INTO family_nodes (family_code, first_name, last_name, maiden_name, gender, generation_level, avatar_url, bio, is_placeholder)
+                            VALUES (?, ?, ?, ?, 'Female', ?, '/resources/images/profile/avatarF.png', 'Spouse (Wife)', 1)
+                        ");
+                        $insSpouse->execute([
+                            $familyCode, $spFirstName, $spLastName,
+                            ($spMaiden !== '') ? $spMaiden : null,
+                            $spouseGenLevel
+                        ]);
+                        $spouseNodeId = (int)$db->lastInsertId();
+
+                        $insSpUnion = $db->prepare("
+                            INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current)
+                            VALUES (?, ?, ?, 'married', 1)
+                        ");
+                        $insSpUnion->execute([$familyCode, $baseNodeId, $spouseNodeId]);
+
+                        $stmtSpNode = $db->prepare('SELECT * FROM family_nodes WHERE id = ?');
+                        $stmtSpNode->execute([$spouseNodeId]);
+                        $spouseNode = $stmtSpNode->fetch(\PDO::FETCH_ASSOC) ?: [];
+                    }
+                }
+
+                $spouseGenLevel = (int)($spouseNode['generation_level'] ?? $baseNode['generation_level']);
+                $inlawParentGen = $spouseGenLevel - 1;
+
+                // 2. Resolve or Create Spouse's Parent Union (Wife's Parents)
+                $stmtInLawUnion = $db->prepare("
+                    SELECT fnc.union_id, u.partner_1_id, u.partner_2_id
+                    FROM family_node_children fnc
+                    JOIN family_unions u ON u.id = fnc.union_id
+                    WHERE fnc.child_id = ?
+                    LIMIT 1
+                ");
+                $stmtInLawUnion->execute([$spouseNodeId]);
+                $inLawUnionRow = $stmtInLawUnion->fetch(\PDO::FETCH_ASSOC);
+
+                $inLawUnionId = 0;
+                $fatherInLawId = 0;
+                $motherInLawId = 0;
+
+                $defaultInLawSurname = $wifeFamCode !== '' ? ucfirst(strtolower($wifeFamCode)) : (!empty($spouseNode['maiden_name']) ? $spouseNode['maiden_name'] : (!empty($spouseNode['last_name']) ? $spouseNode['last_name'] : 'In-Law'));
+
+                if (empty($lastName)) {
+                    $lastName = $defaultInLawSurname;
+                }
+
+                if ($inLawUnionRow && !empty($inLawUnionRow['union_id'])) {
+                    $inLawUnionId = (int)$inLawUnionRow['union_id'];
+                    $fatherInLawId = (int)($inLawUnionRow['partner_1_id'] ?? 0);
+                    $motherInLawId = (int)($inLawUnionRow['partner_2_id'] ?? 0);
+                } else {
+                    // Create Parent Union for Spouse
+                    $fName = $isFatherInLaw ? $firstName : 'Father-in-law';
+                    $fSurname = $isFatherInLaw ? $lastName : $defaultInLawSurname;
+                    $fIsPlaceholder = $isFatherInLaw ? 0 : 1;
+
+                    $insF = $db->prepare("
+                        INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, email, mobile, birth_year, is_placeholder)
+                        VALUES (?, ?, ?, 'Male', ?, '/resources/images/profile/avatarM.png', 'Father-in-law', ?, ?, ?, ?)
+                    ");
+                    $insF->execute([
+                        $familyCode, $fName, $fSurname, $inlawParentGen,
+                        $isFatherInLaw && !empty($email) ? $email : null,
+                        $isFatherInLaw && !empty($mobile) ? $mobile : null,
+                        $isFatherInLaw && $birthYear ? $birthYear : null,
+                        $fIsPlaceholder
+                    ]);
+                    $fatherInLawId = (int)$db->lastInsertId();
+
+                    $mName = $isMotherInLaw ? $firstName : 'Mother-in-law';
+                    $mSurname = $isMotherInLaw ? $lastName : $defaultInLawSurname;
+                    $mMaiden = $isMotherInLaw && $maidenName !== '' ? $maidenName : null;
+                    $mIsPlaceholder = $isMotherInLaw ? 0 : 1;
+
+                    $insM = $db->prepare("
+                        INSERT INTO family_nodes (family_code, first_name, last_name, maiden_name, gender, generation_level, avatar_url, bio, email, mobile, birth_year, is_placeholder)
+                        VALUES (?, ?, ?, ?, 'Female', ?, '/resources/images/profile/avatarF.png', 'Mother-in-law', ?, ?, ?, ?)
+                    ");
+                    $insM->execute([
+                        $familyCode, $mName, $mSurname, $mMaiden, $inlawParentGen,
+                        $isMotherInLaw && !empty($email) ? $email : null,
+                        $isMotherInLaw && !empty($mobile) ? $mobile : null,
+                        $isMotherInLaw && $birthYear ? $birthYear : null,
+                        $mIsPlaceholder
+                    ]);
+                    $motherInLawId = (int)$db->lastInsertId();
+
+                    $insU = $db->prepare("
+                        INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current)
+                        VALUES (?, ?, ?, 'married', 1)
+                    ");
+                    $insU->execute([$familyCode, $fatherInLawId, $motherInLawId]);
+                    $inLawUnionId = (int)$db->lastInsertId();
+
+                    // Link Spouse as child of this union
+                    $insChildLink = $db->prepare("
+                        INSERT INTO family_node_children (union_id, child_id, relationship_type)
+                        VALUES (?, ?, 'biological')
+                    ");
+                    $insChildLink->execute([$inLawUnionId, $spouseNodeId]);
+                }
+
+                // 3. Populate or Insert the In-Law Node
+                $metaNotes = [];
+                if (!empty($wifeFamCode)) {
+                    $metaNotes[] = "Wife's FamCode: #{$wifeFamCode}";
+                }
+                $bioText = $bioRole . ($metaNotes ? ' (' . implode(', ', $metaNotes) . ')' : '');
+
+                $finalNodeId = 0;
+                $finalGenLevel = 0;
+
+                if ($isFatherInLaw) {
+                    $finalNodeId = $fatherInLawId;
+                    $finalGenLevel = $inlawParentGen;
+
+                    // Security Gate: Check if node is claimed by an active user
+                    $chkClaim = $db->prepare("SELECT user_id FROM family_nodes WHERE id = ?");
+                    $chkClaim->execute([$finalNodeId]);
+                    $claimedUid = $chkClaim->fetchColumn();
+                    if (!empty($claimedUid)) {
+                        $db->rollBack();
+                        msgException(403, "Permission Denied: Cannot modify details of a claimed family member's node.");
+                        return;
+                    }
+
+                    $upd = $db->prepare("
+                        UPDATE family_nodes 
+                        SET first_name = ?, last_name = ?, bio = ?, email = COALESCE(?, email), mobile = COALESCE(?, mobile), birth_year = COALESCE(?, birth_year), is_placeholder = 0
+                        WHERE id = ?
+                    ");
+                    $upd->execute([
+                        $firstName, $lastName, $bioText,
+                        !empty($email) ? $email : null,
+                        !empty($mobile) ? $mobile : null,
+                        $birthYear ?: null,
+                        $finalNodeId
+                    ]);
+                } elseif ($isMotherInLaw) {
+                    $finalNodeId = $motherInLawId;
+                    $finalGenLevel = $inlawParentGen;
+
+                    // Security Gate: Check if node is claimed by an active user
+                    $chkClaim = $db->prepare("SELECT user_id FROM family_nodes WHERE id = ?");
+                    $chkClaim->execute([$finalNodeId]);
+                    $claimedUid = $chkClaim->fetchColumn();
+                    if (!empty($claimedUid)) {
+                        $db->rollBack();
+                        msgException(403, "Permission Denied: Cannot modify details of a claimed family member's node.");
+                        return;
+                    }
+
+                    $upd = $db->prepare("
+                        UPDATE family_nodes 
+                        SET first_name = ?, last_name = ?, maiden_name = COALESCE(?, maiden_name), bio = ?, email = COALESCE(?, email), mobile = COALESCE(?, mobile), birth_year = COALESCE(?, birth_year), is_placeholder = 0
+                        WHERE id = ?
+                    ");
+                    $upd->execute([
+                        $firstName, $lastName,
+                        $maidenName !== '' ? $maidenName : null,
+                        $bioText,
+                        !empty($email) ? $email : null,
+                        !empty($mobile) ? $mobile : null,
+                        $birthYear ?: null,
+                        $finalNodeId
+                    ]);
+                } else {
+                    // Brother-in-law or Sister-in-law (Sibling of Spouse)
+                    $finalGenLevel = $spouseGenLevel;
+                    $insSib = $db->prepare("
+                        INSERT INTO family_nodes (family_code, first_name, last_name, maiden_name, gender, generation_level, avatar_url, bio, email, mobile, birth_year)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ");
+                    $insSib->execute([
+                        $familyCode, $firstName, $lastName,
+                        ($maidenName !== '') ? $maidenName : null,
+                        $gender, $finalGenLevel, $avatar, $bioText,
+                        !empty($email) ? $email : null,
+                        !empty($mobile) ? $mobile : null,
+                        $birthYear ?: null
+                    ]);
+                    $finalNodeId = (int)$db->lastInsertId();
+
+                    // Link as child of Spouse's parent union (so they are siblings of Spouse)
+                    $insChildLink = $db->prepare("
+                        INSERT INTO family_node_children (union_id, child_id, relationship_type)
+                        VALUES (?, ?, 'biological')
+                    ");
+                    $insChildLink->execute([$inLawUnionId, $finalNodeId]);
+                }
+
+                $db->commit();
+
+                $treeLabel = ($ctx['lineage_scope'] === 'wife') ? "Wife's Family Tree (#{$familyCode})" : "Marital Tree (#{$familyCode})";
+
+                msgSuccess(200, [
+                    "message" => "{$bioRole} added successfully to your {$treeLabel}.",
+                    "node" => [
+                        "id" => $finalNodeId,
+                        "first_name" => $firstName,
+                        "last_name" => $lastName,
+                        "maiden_name" => $maidenName,
+                        "gender" => $gender,
+                        "avatar_url" => $avatar,
+                        "email" => $email,
+                        "mobile" => $mobile,
+                        "bio" => $bioText,
+                        "role" => strtolower(str_replace(['-', ' '], '_', $bioRole)),
+                        "side" => 'in_law',
+                        "generation_level" => $finalGenLevel,
+                        "family_code" => $familyCode,
+                        "lineage_scope" => $ctx['lineage_scope'],
+                        "wife_famcode" => $wifeFamCode,
+                        "marital_famcode" => $maritalFamCode
                     ]
                 ]);
             } catch (\Exception $e) {

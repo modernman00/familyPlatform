@@ -328,6 +328,193 @@
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
 }
+
+/* 🗺️ PREMIUM LUXURY CONCIERGE & OUTINGS SALON */
+.outings-salon-hero {
+    background: linear-gradient(135deg, #ffffff 0%, #fdfbf7 50%, #fbf8ef 100%);
+    border: 1.5px solid rgba(212, 175, 55, 0.35);
+    border-radius: 24px;
+    box-shadow: 0 10px 30px -8px rgba(212, 175, 55, 0.12), 0 4px 12px rgba(15, 23, 42, 0.03);
+    position: relative;
+    overflow: hidden;
+    padding: 2.25rem 2.25rem 1.75rem 2.25rem;
+}
+.outings-salon-hero::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 260px;
+    height: 100%;
+    background: radial-gradient(circle at 100% 0%, rgba(212, 175, 55, 0.14) 0%, transparent 70%);
+    pointer-events: none;
+}
+.outings-preset-rail-wrap {
+    position: relative;
+    width: 100%;
+}
+.outings-preset-rail {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 6px 2px 10px 2px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.outings-preset-rail::-webkit-scrollbar {
+    display: none;
+}
+.outings-preset-chip {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    background: #ffffff;
+    color: #1e293b;
+    border: 1.5px solid #e2e8f0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 44px;
+    min-width: 44px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    cursor: pointer;
+    user-select: none;
+    scroll-snap-align: start;
+}
+.outings-chip-icon {
+    font-size: 1.05rem;
+    line-height: 1;
+}
+.outings-chip-text {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+.outings-chip-loc {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 9999px;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    letter-spacing: 0.02em;
+}
+.outings-preset-chip:hover {
+    background: #fdfbf7;
+    color: #0f172a;
+    border-color: #d4af37;
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.18);
+}
+.outings-preset-chip.active {
+    background: #0f172a !important;
+    color: #ffffff !important;
+    border-color: #d4af37 !important;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.3) !important;
+}
+.outings-preset-chip.active .outings-chip-loc {
+    background: rgba(212, 175, 55, 0.2);
+    color: #ffd700;
+    border-color: rgba(212, 175, 55, 0.4);
+}
+.outings-surface-card {
+    background: #ffffff;
+    border-radius: 24px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.04);
+    padding: 1.75rem;
+}
+.outings-result-card {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 1.5rem;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+    position: relative;
+    word-break: break-word;
+}
+.outings-result-card:hover {
+    border-color: #d4af37;
+    box-shadow: 0 10px 28px -5px rgba(212, 175, 55, 0.18), 0 4px 10px rgba(15, 23, 42, 0.04);
+    transform: translateY(-2px);
+}
+.outings-btn-search {
+    background: linear-gradient(135deg, #a31621 0%, #7e101a 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 215, 0, 0.35) !important;
+    box-shadow: 0 6px 18px -4px rgba(163, 22, 33, 0.4) !important;
+    font-weight: 700 !important;
+    min-height: 48px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    transition: all 0.2s ease !important;
+}
+.outings-btn-search:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px -4px rgba(163, 22, 33, 0.5) !important;
+}
+.outings-btn-search:active {
+    transform: scale(0.98);
+}
+.outings-btn-book {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25) !important;
+    min-height: 44px;
+    min-width: 44px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    font-weight: 700;
+}
+.outings-btn-book:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(5, 150, 105, 0.35) !important;
+    color: #ffffff !important;
+}
+.outings-btn-book:active {
+    transform: scale(0.98);
+}
+
+/* 📱 MOBILE RESPONSIVE OPTIMISATIONS */
+@media (max-width: 768px) {
+    .outings-salon-hero {
+        padding: 1.25rem 1rem !important;
+        border-radius: 18px !important;
+    }
+    .outings-surface-card {
+        padding: 1.15rem !important;
+        border-radius: 18px !important;
+    }
+    .outings-result-card {
+        padding: 1.15rem !important;
+        border-radius: 16px !important;
+    }
+    .outings-preset-chip {
+        padding: 0.45rem 0.85rem !important;
+        font-size: 0.78rem !important;
+    }
+    .outings-btn-book {
+        width: 100% !important;
+        justify-content: center !important;
+        min-height: 48px !important;
+    }
+    .outings-btn-search {
+        min-height: 48px !important;
+    }
+}
 </style>
 @endpush
 
@@ -373,7 +560,7 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link rounded-pill fw-bold py-2 d-inline-flex align-items-center justify-content-center gap-2 w-100" 
                     id="tab-outings-btn" data-bs-toggle="pill" data-bs-target="#tab-outings" type="button" role="tab" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
-                <i class="bi bi-compass-fill text-primary"></i> 🗺️ Weekend Outings
+                <i class="bi bi-compass-fill text-warning"></i> 🗺️ Outings Salon
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -1776,57 +1963,173 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
             </div>
         </div>
 
-        {{-- 🗺️ TAB 6: LIVE FAMILY WEEKEND OUTINGS & CULTURAL SCOUT --}}
+        {{-- 🗺️ TAB 6: LUXURY FAMILY OUTINGS & CULTURAL CONCIERGE --}}
         <div class="tab-pane fade" id="tab-outings" role="tabpanel">
+            {{-- Luxury Editorial Salon Header --}}
+            <div class="outings-salon-hero p-4 p-md-5 mb-4 position-relative">
+                <div class="row align-items-center g-4">
+                    <div class="col-lg-8">
+                        <span class="badge rounded-pill px-3 py-1.5 fw-bold mb-2.5 d-inline-flex align-items-center gap-1.5" style="background: rgba(212, 175, 55, 0.12); color: #8c6d1f; border: 1px solid rgba(212, 175, 55, 0.35); font-size: 0.72rem; letter-spacing: 0.06em;">
+                            <i class="bi bi-compass-fill text-warning"></i> FAMILYPLATFORM LUXURY CONCIERGE
+                        </span>
+                        <h2 class="fw-bold mb-2 text-dark" style="font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.5rem, 3vw, 2.1rem); letter-spacing: -0.015em;">
+                            Weekend &amp; Holiday Outings Salon
+                        </h2>
+                        <div style="height: 2px; width: 64px; background: linear-gradient(90deg, #d4af37 0%, transparent 100%); margin: 0.85rem 0;"></div>
+                        <p class="text-secondary mb-3 mb-lg-0" style="font-size: 0.92rem; line-height: 1.65; max-width: 640px;">
+                            Curated days out, iconic cultural exhibitions, private heritage walks, scenic countryside drives, and exclusive staycations for your family — enriched with commercial partner booking privileges.
+                        </p>
+                    </div>
+                    <div class="col-lg-4 text-lg-end">
+                        <div class="p-3 rounded-4 border bg-white shadow-sm d-inline-block text-start" style="border-color: rgba(212,175,55,0.25) !important;">
+                            <div class="small fw-bold text-dark d-flex align-items-center gap-1.5 mb-1" style="font-size: 0.82rem;">
+                                <i class="bi bi-shield-check text-success"></i> 100% Verified Attractions
+                            </div>
+                            <div class="text-muted small" style="font-size: 0.75rem; line-height: 1.4;">
+                                Curated across Viator, GetYourGuide, National Trust &amp; Booking.com.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Interactive Luxury Preset Rails --}}
+                <div class="mt-3.5 pt-3 border-top outings-preset-rail-wrap" style="border-color: rgba(212, 175, 55, 0.2) !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="small fw-bold text-dark text-uppercase d-flex align-items-center gap-1.5" style="font-size: 0.72rem; letter-spacing: 0.05em; color: #8c6d1f !important;">
+                            <i class="bi bi-lightning-charge-fill text-warning"></i> Curated Destinations &amp; Inspiration
+                        </div>
+                        <span class="text-muted small d-inline-block d-md-none" style="font-size: 0.68rem;"><i class="bi bi-arrow-left-right me-1"></i>Swipe</span>
+                    </div>
+                    <div class="outings-preset-rail">
+                        <button type="button" class="outings-preset-chip active" data-city="South Kensington London SW7" onclick="setOutingsPreset('South Kensington London SW7', 'science museums, dinosaur galleries, family exhibitions')">
+                            <span class="outings-chip-icon">🏛️</span>
+                            <span class="outings-chip-text">Kensington Museums</span>
+                            <span class="outings-chip-loc">SW7</span>
+                        </button>
+                        <button type="button" class="outings-preset-chip" data-city="Richmond London TW10" onclick="setOutingsPreset('Richmond London TW10', 'botanical gardens, deer walks, outdoor family picnics')">
+                            <span class="outings-chip-icon">🌿</span>
+                            <span class="outings-chip-text">Richmond &amp; Kew</span>
+                            <span class="outings-chip-loc">TW10</span>
+                        </button>
+                        <button type="button" class="outings-preset-chip" data-city="Cotswolds GL54" onclick="setOutingsPreset('Cotswolds GL54', 'scenic countryside drive, rare farm breeds, afternoon tea')">
+                            <span class="outings-chip-icon">🚗</span>
+                            <span class="outings-chip-text">Cotswolds Tour</span>
+                            <span class="outings-chip-loc">GL54</span>
+                        </button>
+                        <button type="button" class="outings-preset-chip" data-city="Warwick CV34" onclick="setOutingsPreset('Warwick CV34', 'medieval castle, falconry jousting, woodland glamping')">
+                            <span class="outings-chip-icon">🏰</span>
+                            <span class="outings-chip-text">Warwick Castle</span>
+                            <span class="outings-chip-loc">CV34</span>
+                        </button>
+                        <button type="button" class="outings-preset-chip" data-city="Birmingham B30" onclick="setOutingsPreset('Birmingham B30', 'chocolate factory experience, interactive science museum, minibrum')">
+                            <span class="outings-chip-icon">🍫</span>
+                            <span class="outings-chip-text">Cadbury World</span>
+                            <span class="outings-chip-loc">B30</span>
+                        </button>
+                        <button type="button" class="outings-preset-chip" data-city="Cornwall TR26" onclick="setOutingsPreset('Cornwall TR26', 'coastal holiday cottages, beach walks, family staycation')">
+                            <span class="outings-chip-icon">🏡</span>
+                            <span class="outings-chip-text">Coastal Cottages</span>
+                            <span class="outings-chip-loc">Cornwall</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="row g-4">
+                {{-- Left: Curated Scout Filter Form --}}
                 <div class="col-lg-5">
-                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                        <h4 class="fw-bold mb-2"><i class="bi bi-compass-fill text-primary me-2"></i> Weekend Family Outing Scout</h4>
-                        <p class="text-muted small mb-4">Discover live family-friendly museum exhibitions, parks, cultural festivals, and weekend activities in your neighbourhood using grounded web search.</p>
+                    <div class="outings-surface-card h-100">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h4 class="fw-bold mb-0 text-dark" style="font-size: 1.15rem;">
+                                <i class="bi bi-sliders2-vertical text-warning me-2"></i> Customise Discovery
+                            </h4>
+                            <span class="badge bg-light text-secondary border small px-2 py-1" style="font-size: 0.7rem;">UK Wide</span>
+                        </div>
+                        <p class="text-secondary small mb-4" style="font-size: 0.82rem; line-height: 1.55;">
+                            Input any UK town, city, or outward postcode to discover verified exhibitions, barbecue parks, scenic road trips, and holiday deals.
+                        </p>
 
                         <form id="family-outings-form" onsubmit="handleScoutFamilyOutings(event)">
                             @csrf
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold small" for="outings-city">City or Outward Postcode</label>
-                                <input type="text" id="outings-city" class="form-control rounded-3" value="South Kensington London SW7" placeholder="e.g. London SW7, Birmingham B1" required>
-                                <div class="form-text small text-muted">Postcodes are automatically anonymised to outward district codes for family privacy.</div>
-                            </div>
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold small" for="outings-interests">Family Interests &amp; Ages</label>
-                                <input type="text" id="outings-interests" class="form-control rounded-3" value="science museums, outdoor parks, child-friendly exhibitions" placeholder="e.g. interactive museums, botanical gardens">
+                            <div class="mb-3.5">
+                                <label class="form-label fw-semibold small text-dark d-flex align-items-center justify-content-between" for="outings-city" style="font-size: 0.82rem;">
+                                    <span><i class="bi bi-geo-alt-fill text-danger me-1"></i> Town, City or Outward Postcode</span>
+                                    <span class="badge bg-light text-muted border" style="font-size: 0.65rem;">Privacy Guarded</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted rounded-start-3" style="border-color: #cbd5e1;"><i class="bi bi-search"></i></span>
+                                    <input type="text" id="outings-city" class="form-control border-start-0 rounded-end-3 py-2.5" value="South Kensington London SW7" placeholder="e.g. London SW7, Birmingham B1, Edinburgh EH1" required style="border-color: #cbd5e1; font-size: 0.88rem;">
+                                </div>
+                                <div class="form-text small text-muted mt-1.5" style="font-size: 0.72rem;">
+                                    <i class="bi bi-shield-lock-fill text-success me-1"></i> Full postcodes are automatically anonymised to outward districts for family privacy.
+                                </div>
                             </div>
 
-                            <button type="submit" id="btn-scout-outings" class="btn btn-primary w-100 rounded-pill py-2 fw-bold text-white shadow-sm d-inline-flex align-items-center justify-content-center gap-2" style="min-height: 48px; white-space: nowrap; flex-shrink: 0;">
-                                <i class="bi bi-search"></i> Discover Weekend Outings
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold small text-dark" for="outings-interests" style="font-size: 0.82rem;">
+                                    <i class="bi bi-stars text-warning me-1"></i> Family Interests &amp; Activity Theme
+                                </label>
+                                <textarea id="outings-interests" class="form-control rounded-3 py-2.5" rows="3" placeholder="e.g. science museums, dinosaur galleries, barbecue parklands, scenic drives, cottage staycations" style="border-color: #cbd5e1; font-size: 0.88rem;">science museums, outdoor parks, child-friendly exhibitions</textarea>
+                                <div class="d-flex align-items-center gap-1.5 mt-2 flex-wrap">
+                                    <span class="badge bg-light text-secondary border cursor-pointer hover:border-dark" style="font-size: 0.68rem; cursor: pointer;" onclick="document.getElementById('outings-interests').value='free interactive museums, child discovery zones'">+ Museums</span>
+                                    <span class="badge bg-light text-secondary border cursor-pointer hover:border-dark" style="font-size: 0.68rem; cursor: pointer;" onclick="document.getElementById('outings-interests').value='designated barbecue areas, picnic lawns, play park'">+ Barbecues</span>
+                                    <span class="badge bg-light text-secondary border cursor-pointer hover:border-dark" style="font-size: 0.68rem; cursor: pointer;" onclick="document.getElementById('outings-interests').value='scenic countryside drive, viewpoint, family pub'">+ Road Trips</span>
+                                    <span class="badge bg-light text-secondary border cursor-pointer hover:border-dark" style="font-size: 0.68rem; cursor: pointer;" onclick="document.getElementById('outings-interests').value='family holiday cottage, coastal beach break, lodges'">+ Staycations</span>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="btn-scout-outings" class="btn outings-btn-search w-100 rounded-pill py-2.5 d-inline-flex align-items-center justify-content-center gap-2" style="font-size: 0.92rem;">
+                                <i class="bi bi-compass"></i> Discover Curated Outings
                             </button>
                         </form>
                     </div>
                 </div>
 
+                {{-- Right: Curated Recommendations & Interactive Polls --}}
                 <div class="col-lg-7">
-                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                            <h4 class="fw-bold mb-0">Grounded Family Outing Ideas</h4>
-                            <button type="button" id="btn-post-outings-poll" class="btn btn-success rounded-pill px-3 py-2 fw-bold btn-sm d-none align-items-center gap-2" onclick="postOutingsPollToFeed()" style="min-height: 44px; white-space: nowrap;">
+                    <div class="outings-surface-card h-100">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-2 border-bottom">
+                            <div>
+                                <h4 class="fw-bold mb-0 text-dark" style="font-size: 1.15rem;">
+                                    <i class="bi bi-gem text-warning me-1.5"></i> Curated Family Experiences
+                                </h4>
+                                <div class="text-secondary small" style="font-size: 0.76rem;">Real-time verified attractions with partner privileges</div>
+                            </div>
+                            <button type="button" id="btn-post-outings-poll" class="btn rounded-pill px-3.5 py-2 fw-bold btn-sm d-none align-items-center gap-2 text-white shadow-sm" onclick="postOutingsPollToFeed()" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); min-height: 44px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.25); font-size: 0.8rem;">
                                 <i class="bi bi-broadcast"></i> 🗳️ Post Outings Vote to Family Feed
                             </button>
                         </div>
-                        <div id="outings-posted-alert" class="alert alert-success d-none align-items-center justify-content-between rounded-4 p-3 mb-3 border-0 shadow-sm">
-                            <div class="d-flex align-items-center gap-2">
+
+                        <div id="outings-posted-alert" class="alert alert-success d-none align-items-center justify-content-between rounded-4 p-3 mb-3 border-0 shadow-sm" style="background: #ecfdf5; border: 1px solid #a7f3d0 !important;">
+                            <div class="d-flex align-items-center gap-2.5">
                                 <i class="bi bi-check-circle-fill text-success fs-5 flex-shrink-0"></i>
                                 <div>
-                                    <div class="fw-bold text-dark">Posted to Family Feed!</div>
-                                    <div class="text-muted small">Your weekend outing poll is live for everyone to cast their votes.</div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">Published to Family Feed!</div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">Your outing poll is live for all family members to cast their votes.</div>
                                 </div>
                             </div>
-                            <a id="outings-feed-link" href="/profilePage" target="_blank" class="btn btn-sm btn-outline-success rounded-pill fw-semibold text-nowrap px-3">
-                                View on Feed <i class="bi bi-arrow-right ms-1"></i>
+                            <a id="outings-feed-link" href="/profilePage" target="_blank" class="btn btn-sm btn-outline-success rounded-pill fw-semibold text-nowrap px-3" style="min-height: 38px;">
+                                View Poll <i class="bi bi-arrow-right ms-1"></i>
                             </a>
                         </div>
+
                         <div id="family-outings-results" class="d-flex flex-column gap-3">
-                            <div class="text-center py-5 text-muted">
-                                <i class="bi bi-map display-4 d-block mb-2 text-secondary opacity-50"></i>
-                                <span>Enter your city and family interests to discover verified weekend outings.</span>
+                            <div class="text-center py-5 px-3">
+                                <div class="mb-3 d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 76px; height: 76px; background: linear-gradient(135deg, rgba(212,175,55,0.15) 0%, rgba(212,175,55,0.05) 100%); border: 2px dashed #d4af37;">
+                                    <i class="bi bi-compass text-warning fs-1"></i>
+                                </div>
+                                <h5 class="fw-bold text-dark mb-1" style="font-family: 'Playfair Display', Georgia, serif; font-size: 1.25rem;">Explore Curated Family Adventures</h5>
+                                <p class="text-secondary small mb-3.5" style="max-width: 440px; margin: 0 auto; line-height: 1.6; font-size: 0.84rem;">
+                                    Tap any destination chip above or customise your search on the left to reveal bookable family outings, exhibitions, and country breaks.
+                                </p>
+                                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold" style="min-height: 38px; font-size: 0.78rem;" onclick="setOutingsPreset('South Kensington London SW7', 'science museums, dinosaur galleries, family exhibitions')">
+                                        🏛️ Scout South Kensington
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold" style="min-height: 38px; font-size: 0.78rem;" onclick="setOutingsPreset('Cotswolds GL54', 'scenic countryside drive, rare farm breeds, afternoon tea')">
+                                        🚗 Scout Cotswolds
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -4637,6 +4940,39 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
     let lastScoutedOutings = [];
     let lastScoutedCity = '';
 
+    // 🗺️ LUXURY PRESET ACTIVATION
+    function setOutingsPreset(city, interests) {
+        const cityInput = document.getElementById('outings-city');
+        const intInput = document.getElementById('outings-interests');
+        if (cityInput) cityInput.value = city;
+        if (intInput) intInput.value = interests;
+
+        document.querySelectorAll('.outings-preset-chip').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-city') === city) {
+                btn.classList.add('active');
+                if (btn.scrollIntoView) {
+                    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
+            }
+        });
+
+        // On mobile viewports, smoothly glide down so user sees discovery results
+        if (window.innerWidth < 992) {
+            setTimeout(() => {
+                const resultsArea = document.getElementById('family-outings-results');
+                if (resultsArea) {
+                    resultsArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 120);
+        }
+
+        const form = document.getElementById('family-outings-form');
+        if (form) {
+            form.dispatchEvent(new Event('submit', { cancelable: true }));
+        }
+    }
+
     // 🗺️ LIVE FAMILY WEEKEND OUTINGS SCOUT
     async function handleScoutFamilyOutings(e) {
         e.preventDefault();
@@ -4646,8 +4982,14 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
         const alertBox = document.getElementById('outings-posted-alert');
         if (alertBox) alertBox.classList.add('d-none');
 
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Scouting Family Outings...';
+        if (window.FamilyPlatformSpinner?.start) {
+            window.FamilyPlatformSpinner.start(btn);
+        } else if (window.ScoreTenantSpinner?.start) {
+            window.ScoreTenantSpinner.start(btn);
+        } else {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Scouting Family Outings...';
+        }
 
         try {
             const cityInput = document.getElementById('outings-city').value;
@@ -4656,27 +4998,111 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     city: cityInput,
-                    interests: document.getElementById('outings-interests').value
+                    region: cityInput,
+                    interests: document.getElementById('outings-interests').value,
+                    age_group: document.getElementById('outings-interests').value
                 })
             });
             const data = await res.json();
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-search"></i> Discover Weekend Outings';
 
             if (data.success && Array.isArray(data.outings) && data.outings.length > 0) {
                 lastScoutedOutings = data.outings;
                 lastScoutedCity = cityInput;
 
+                const getCatBadge = (cat) => {
+                    const c = (cat || '').toLowerCase();
+                    if (c.includes('museum')) return 'background: rgba(124, 58, 237, 0.09); color: #6d28d9; border: 1px solid rgba(124, 58, 237, 0.25);';
+                    if (c.includes('barbecue') || c.includes('picnic') || c.includes('park')) return 'background: rgba(16, 185, 129, 0.1); color: #065f46; border: 1px solid rgba(16, 185, 129, 0.25);';
+                    if (c.includes('drive')) return 'background: rgba(245, 158, 11, 0.1); color: #b45309; border: 1px solid rgba(245, 158, 11, 0.25);';
+                    if (c.includes('holiday') || c.includes('staycation')) return 'background: rgba(2, 132, 199, 0.1); color: #0369a1; border: 1px solid rgba(2, 132, 199, 0.25);';
+                    return 'background: rgba(212, 175, 55, 0.12); color: #8c6d1f; border: 1px solid rgba(212, 175, 55, 0.3);';
+                };
+
+                const disclosureHtml = data.affiliate_disclosure 
+                    ? `<div class="p-3 rounded-4 mt-3 d-flex align-items-center gap-2.5" style="background: linear-gradient(135deg, #fafaf9 0%, #f5f5f4 100%); border: 1px solid #e7e5e4; font-size: 0.74rem; color: #57534e;">
+                         <i class="bi bi-shield-check text-success flex-shrink-0 fs-5"></i>
+                         <div>
+                             <strong>Commercial Transparency:</strong> ${data.affiliate_disclosure}
+                         </div>
+                       </div>`
+                    : '';
+
                 container.innerHTML = data.outings.map((o, idx) => `
-                    <div class="p-3 rounded-4 border bg-light d-flex flex-column gap-1">
-                        <div class="d-flex justify-content-between align-items-start gap-2">
-                            <h6 class="fw-bold mb-0 text-dark">Outing ${idx + 1}: ${o.title}</h6>
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle small">Verified Local</span>
+                    <div class="outings-result-card d-flex flex-column gap-2 mb-3">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center flex-wrap gap-2 mb-1.5">
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-semibold" style="${getCatBadge(o.category)} font-size: 0.72rem;">
+                                        <i class="bi bi-tag-fill me-1 opacity-75"></i>${o.category || 'Curated Outing'}
+                                    </span>
+                                    <span class="badge rounded-pill px-2.5 py-1 fw-semibold" style="background: rgba(16, 185, 129, 0.1); color: #047857; border: 1px solid rgba(16, 185, 129, 0.25); font-size: 0.72rem;">
+                                        <i class="bi bi-ticket-perforated-fill me-1 opacity-75"></i>${o.price_guide || 'Free Entry / Low Cost'}
+                                    </span>
+                                </div>
+                                <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.05rem; letter-spacing: -0.01em;">${idx + 1}. ${o.title}</h5>
+                                ${o.location ? `
+                                    <div class="text-secondary small mb-2 d-flex align-items-center gap-1.5" style="font-size: 0.78rem;">
+                                        <i class="bi bi-geo-alt-fill text-danger flex-shrink-0"></i>
+                                        <span>${o.location}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <span class="badge bg-light text-secondary border small px-2.5 py-1.5 d-inline-flex align-items-center gap-1" style="font-size: 0.7rem;">
+                                <i class="bi bi-patch-check-fill text-success"></i>
+                                <span>${o.partner_name || 'Verified Attraction'}</span>
+                            </span>
                         </div>
-                        <p class="small text-muted mb-2">${o.snippet}</p>
-                        ${o.url ? `<a href="${o.url}" target="_blank" rel="noopener noreferrer" class="small fw-semibold text-primary text-decoration-none"><i class="bi bi-box-arrow-up-right me-1"></i> View Details</a>` : ''}
+                        
+                        <p class="text-secondary mb-3" style="font-size: 0.85rem; line-height: 1.55;">${o.snippet}</p>
+
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-2 pt-2.5 border-top">
+                            <span class="small text-muted d-inline-flex align-items-center gap-1" style="font-size: 0.74rem;">
+                                <i class="bi bi-stars text-warning"></i>
+                                <span>Concierge Recommended</span>
+                            </span>
+                            <div class="d-flex align-items-center gap-2 w-100 w-sm-auto">
+                                ${o.url ? `
+                                    <a href="${o.url}" target="_blank" rel="noopener noreferrer sponsored" class="btn btn-sm rounded-pill px-3.5 py-2.5 outings-btn-book d-inline-flex align-items-center justify-content-center gap-1.5 w-100 w-sm-auto shadow-sm" style="font-size: 0.82rem; min-height: 48px;">
+                                        ${o.affiliate_label || '🎟️ Reserve Tickets & Passes'}
+                                        <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.72rem;"></i>
+                                    </a>
+                                ` : ''}
+                            </div>
+                        </div>
                     </div>
-                `).join('');
+                `).join('') + disclosureHtml;
+
+                if (pollBtn) {
+                    pollBtn.classList.remove('d-none');
+                    pollBtn.classList.add('d-inline-flex');
+                }
+
+                // If on mobile, glide to results so user doesn't wonder if search completed
+                if (window.innerWidth < 992) {
+                    setTimeout(() => {
+                        const target = document.getElementById('family-outings-results');
+                        if (target) {
+                            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }, 120);
+                }
+            } else {
+                container.innerHTML = '<div class="alert alert-warning rounded-4 mb-0">No weekend outings matched that search. Try another city or interest.</div>';
+                if (pollBtn) pollBtn.classList.add('d-none');
+            }
+        } catch (err) {
+            alert('Outings search error: ' + err.message);
+        } finally {
+            if (window.FamilyPlatformSpinner?.stop) {
+                window.FamilyPlatformSpinner.stop(btn);
+            } else if (window.ScoreTenantSpinner?.stop) {
+                window.ScoreTenantSpinner.stop(btn);
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-compass"></i> Discover Curated Outings';
+            }
+        }
+    }
 
                 if (pollBtn) {
                     pollBtn.classList.remove('d-none');
@@ -4687,9 +5113,16 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
                 if (pollBtn) pollBtn.classList.add('d-none');
             }
         } catch (err) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-search"></i> Discover Weekend Outings';
             alert('Outings search error: ' + err.message);
+        } finally {
+            if (window.FamilyPlatformSpinner?.stop) {
+                window.FamilyPlatformSpinner.stop(btn);
+            } else if (window.ScoreTenantSpinner?.stop) {
+                window.ScoreTenantSpinner.stop(btn);
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-compass"></i> Discover Curated Outings';
+            }
         }
     }
 

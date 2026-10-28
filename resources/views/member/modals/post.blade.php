@@ -169,6 +169,17 @@
                             <div id="videoLivePreview" class="mt-2 d-none ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm" style="max-height: 180px;"></div>
                         </div>
 
+                        <!-- 2. Race-Conscious Emoji Picker Drawer -->
+                        <div id="emojiPickerDrawer" class="composer-drawer d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
+                            <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                                <span class="fw-bold small d-flex align-items-center gap-1.5" style="color: #a31621 !important;">
+                                    <i class="bi bi-emoji-smile-fill fs-5"></i> Choose an Emoji
+                                </span>
+                                <button type="button" id="closeEmojiDrawerBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Close emoji picker"></button>
+                            </div>
+                            <div id="emojiListPost" role="listbox"></div>
+                        </div>
+
                         <!-- 3. Family GIF Picker Drawer -->
                         <div id="gifPickerDrawer" class="composer-drawer d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
                             <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
@@ -187,6 +198,7 @@
                                 <button type="button" class="btn btn-sm btn-light border py-0 px-2.5 rounded-pill fw-semibold gif-cat-pill" data-cat="laugh" style="font-size: 0.75rem;">😂 Laughs</button>
                                 <button type="button" class="btn btn-sm btn-light border py-0 px-2.5 rounded-pill fw-semibold gif-cat-pill" data-cat="birthday" style="font-size: 0.75rem;">🎂 Birthday</button>
                                 <button type="button" class="btn btn-sm btn-light border py-0 px-2.5 rounded-pill fw-semibold gif-cat-pill" data-cat="dance" style="font-size: 0.75rem;">💃 Joy</button>
+                                <button type="button" class="btn btn-sm btn-light border py-0 px-2.5 rounded-pill fw-semibold gif-cat-pill" data-cat="kids" style="font-size: 0.75rem;">👶 Kids</button>
                             </div>
 
                             <!-- Search Filter Input -->
@@ -373,16 +385,6 @@
                             <button type="button" class="btn-composer-action composer-tool action-apple" id="iosShareBtn" title="iPhone Direct Share Guide" aria-label="iPhone Photos Direct Share">
                                 <i class="bi bi-apple"></i><span>iPhone</span>
                             </button>
-                        </div>
-
-                        <!-- Floating Emoji Picker Popover -->
-                        <div id="emojiPickerContainer"
-                            class="d-none position-absolute modern-emoji-picker shadow-lg"
-                            style="z-index: 1055; bottom: 58px; right: 10px;">
-                            <div class="emoji-picker-caret"></div>
-                            <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
-                                id="closeEmojiPicker" aria-label="Close" style="font-size: 0.7rem; z-index: 10;"></button>
-                            <div id="emojiListPost" class="mt-2" role="listbox"></div>
                         </div>
                     </div>
 

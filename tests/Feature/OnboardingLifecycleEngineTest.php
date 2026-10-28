@@ -195,6 +195,11 @@ final class OnboardingLifecycleEngineTest extends TestCase
     {
         $testUserId = 'USR_TEST_DRY_RUN_99';
         $db = Db::connect2();
+        $db->prepare("DELETE FROM user_lifecycle_events WHERE user_id = ?")->execute([$testUserId]);
+        $db->prepare("DELETE FROM family_nodes WHERE family_code = 'DRY_FAM_99'")->execute();
+        $db->prepare("DELETE FROM personal WHERE id = ?")->execute([$testUserId]);
+        $db->prepare("DELETE FROM account WHERE id = ?")->execute([$testUserId]);
+
         $db->prepare("
             INSERT INTO account (id, email, password, status, created_at)
             VALUES (?, 'dryrun@test.com', 'hash', 'approved', DATE_SUB(NOW(), INTERVAL 48 HOUR))
@@ -233,6 +238,11 @@ final class OnboardingLifecycleEngineTest extends TestCase
         $testUserId = 'USR_TEST_D14_ROOTS';
         $testFamCode = 'FAM_TEST_D14';
         $db = Db::connect2();
+
+        $db->prepare("DELETE FROM user_lifecycle_events WHERE user_id = ?")->execute([$testUserId]);
+        $db->prepare("DELETE FROM family_nodes WHERE family_code = ?")->execute([$testFamCode]);
+        $db->prepare("DELETE FROM personal WHERE id = ?")->execute([$testUserId]);
+        $db->prepare("DELETE FROM account WHERE id = ?")->execute([$testUserId]);
 
         $db->prepare("
             INSERT INTO account (id, email, password, status, created_at)
@@ -278,6 +288,11 @@ final class OnboardingLifecycleEngineTest extends TestCase
         $testFamCode = 'FAM_TEST_D35';
         $db = Db::connect2();
 
+        $db->prepare("DELETE FROM user_lifecycle_events WHERE user_id = ?")->execute([$testUserId]);
+        $db->prepare("DELETE FROM family_time_capsules WHERE creator_id = ?")->execute([$testUserId]);
+        $db->prepare("DELETE FROM personal WHERE id = ?")->execute([$testUserId]);
+        $db->prepare("DELETE FROM account WHERE id = ?")->execute([$testUserId]);
+
         $db->prepare("
             INSERT INTO account (id, email, password, status, created_at)
             VALUES (?, 'capsule@test.com', 'hash', 'approved', DATE_SUB(NOW(), INTERVAL 36 DAY))
@@ -321,6 +336,10 @@ final class OnboardingLifecycleEngineTest extends TestCase
         $testUserId = 'USR_TEST_D60_DYNASTY';
         $testFamCode = 'FAM_TEST_D60';
         $db = Db::connect2();
+
+        $db->prepare("DELETE FROM user_lifecycle_events WHERE user_id = ?")->execute([$testUserId]);
+        $db->prepare("DELETE FROM personal WHERE id = ?")->execute([$testUserId]);
+        $db->prepare("DELETE FROM account WHERE id = ?")->execute([$testUserId]);
 
         $db->prepare("
             INSERT INTO account (id, email, password, status, created_at)

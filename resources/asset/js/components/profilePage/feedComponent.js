@@ -6,6 +6,7 @@ import { extractVideoFromText, cleanPostMessage } from './videoParser';
 import { getCsrfToken } from '../global';
 import { getPostImageUrl, getProfileImageUrl } from '../helper/imageUrls';
 import { FAMILY_GIFS, GIF_CATEGORIES, isAllowedGifUrl } from './gifCatalog';
+import { getPreferredSkinTone, setPreferredSkinTone, SKIN_TONES } from '../emojiPicker';
 
 export function profileFeed(opts = {}) {
     return {
@@ -76,12 +77,41 @@ export function profileFeed(opts = {}) {
             sad:   { icon: '😢', label: 'Sad'   },
         },
 
-        // Picker palette: unique, curated, 8 columns x 3 rows
-        commentEmojiPalette: [
-            '👍','❤️','😂','😮','😢','😡','😊','😍',
-            '🥰','😎','🤣','😭','🙏','🔥','💯','🎉',
-            '👏','✨','💪','🤔','😅','🥳','🙌','🎂',
+        // Race-conscious diversity state & curated comment palette
+        commentSkinTone: getPreferredSkinTone(),
+        skinTones: SKIN_TONES,
+
+        setCommentSkinTone(tone) {
+            this.commentSkinTone = tone;
+            setPreferredSkinTone(tone);
+        },
+
+        commentEmojiItems: [
+            { base: '👍', skins: ['👍', '👍🏻', '👍🏼', '👍🏽', '👍🏾', '👍🏿'] },
+            { base: '👋', skins: ['👋', '👋🏻', '👋🏼', '👋🏽', '👋🏾', '👋🏿'] },
+            { base: '👏', skins: ['👏', '👏🏻', '👏🏼', '👏🏽', '👏🏾', '👏🏿'] },
+            { base: '🙏', skins: ['🙏', '🙏🏻', '🙏🏼', '🙏🏽', '🙏🏾', '🙏🏿'] },
+            { base: '🙌', skins: ['🙌', '🙌🏻', '🙌🏼', '🙌🏽', '🙌🏾', '🙌🏿'] },
+            { base: '💪', skins: ['💪', '💪🏻', '💪🏼', '💪🏽', '💪🏾', '💪🏿'] },
+            { base: '🤝', skins: ['🤝', '🤝🏻', '🤝🏼', '🤝🏽', '🤝🏾', '🤝🏿'] },
+            { base: '🫶', skins: ['🫶', '🫶🏻', '🫶🏼', '🫶🏽', '🫶🏾', '🫶🏿'] },
+            { base: '✌️', skins: ['✌️', '✌🏻', '✌🏼', '✌🏽', '✌🏾', '✌🏿'] },
+            { base: '🫡', skins: ['🫡', '🫡🏻', '🫡🏼', '🫡🏽', '🫡🏾', '🫡🏿'] },
+            '❤️', '💖', '🥰', '😍', '😂', '🤣',
+            '😊', '🥹', '🥳', '😎', '🤗', '😮',
+            '😢', '😭', '🔥', '💯', '🎉', '✨',
+            '🎂', '🎈', '🥂', '💐', '🌟', '👑',
+            '🍰', '☕', '🍕', '🏡', '🌸', '🍀',
+            '🤔', '😅', '😡', '👀', '🏆', '🎁',
         ],
+
+        get commentEmojiPalette() {
+            const tone = this.commentSkinTone || 0;
+            return this.commentEmojiItems.map(item => {
+                if (typeof item === 'string') return item;
+                return (item.skins && item.skins[tone]) ? item.skins[tone] : item.base;
+            });
+        },
 
         commentEmojiMap: {
             like:  '👍',

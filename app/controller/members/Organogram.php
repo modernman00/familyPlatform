@@ -50,13 +50,69 @@ final class Organogram extends SingleCustomerData
                 && $maternalFamCode !== ''
                 && $maternalFamCode !== $primaryFamCode;
 
+            $heldCodes = [];
+            try {
+                $ufStmt = Db::connect2()->prepare("SELECT DISTINCT family_code FROM user_families WHERE user_id = ? AND status = 'approved'");
+                $ufStmt->execute([$idStr]);
+                $heldCodes = array_values(array_unique(array_filter(array_map('strtoupper', array_map('trim', $ufStmt->fetchAll(\PDO::FETCH_COLUMN) ?: [])))));
+            } catch (\Throwable) {}
+
+            $wifeFamCode = '';
+            try {
+                $ofStmt = Db::connect2()->prepare('SELECT maiden_name, otherFamCode, spouse_name FROM otherFamily WHERE id = ? ORDER BY no ASC LIMIT 1');
+                $ofStmt->execute([$idStr]);
+                $ofRow = $ofStmt->fetch(\PDO::FETCH_ASSOC);
+                if ($ofRow && !empty($ofRow['otherFamCode']) && !empty($ofRow['spouse_name'])) {
+                    $wifeFamCode = strtoupper(trim(str_replace('#', '', (string)$ofRow['otherFamCode'])));
+                }
+            } catch (\Throwable) {}
+
+            if ($wifeFamCode === '' && !empty($heldCodes)) {
+                foreach ($heldCodes as $hc) {
+                    if ($hc !== $primaryFamCode && $hc !== $maternalFamCode) {
+                        try {
+                            $chkInLaw = Db::connect2()->prepare("SELECT 1 FROM family_nodes WHERE family_code = ? AND (bio LIKE '%In-law%' OR bio LIKE '%Wife%' OR bio LIKE '%Spouse%') LIMIT 1");
+                            $chkInLaw->execute([$hc]);
+                            if ($chkInLaw->fetchColumn()) {
+                                $wifeFamCode = $hc;
+                                break;
+                            }
+                        } catch (\Throwable) {}
+                    }
+                }
+            }
+
             $requestedLineage = strtolower(trim((string)($_GET['lineage'] ?? '')));
             $requestedCode = strtoupper(trim(str_replace('#', '', (string)($_GET['family_code'] ?? ''))));
             $activeLineageScope = 'primary';
 
-            if ($hasMaternalCode && ($requestedLineage === 'birth' || $requestedLineage === 'maternal' || $requestedCode === $maternalFamCode)) {
-                $familyCode = $maternalFamCode;
-                $activeLineageScope = 'maternal';
+            if ($requestedCode !== '') {
+                if ($hasMaternalCode && $requestedCode === $maternalFamCode) {
+                    $familyCode = $maternalFamCode;
+                    $activeLineageScope = 'maternal';
+                } elseif ($requestedCode === $primaryFamCode) {
+                    $familyCode = $primaryFamCode;
+                    $activeLineageScope = 'primary';
+                } elseif ($wifeFamCode !== '' && $requestedCode === $wifeFamCode) {
+                    $familyCode = $wifeFamCode;
+                    $activeLineageScope = 'inlaw';
+                } elseif (BaseController::sessionSharesFamily($requestedCode) || BaseController::sessionCanViewMember($idStr, $requestedCode) || in_array($requestedCode, $heldCodes, true)) {
+                    $familyCode = $requestedCode;
+                    $activeLineageScope = ($wifeFamCode !== '' && $requestedCode === $wifeFamCode) ? 'inlaw' : 'other';
+                }
+            } elseif ($requestedLineage === 'birth' || $requestedLineage === 'maternal') {
+                if ($hasMaternalCode) {
+                    $familyCode = $maternalFamCode;
+                    $activeLineageScope = 'maternal';
+                }
+            } elseif ($requestedLineage === 'inlaw' || $requestedLineage === 'wife') {
+                if ($wifeFamCode !== '') {
+                    $familyCode = $wifeFamCode;
+                    $activeLineageScope = 'inlaw';
+                }
+            } elseif ($requestedLineage === 'primary' || $requestedLineage === 'marital') {
+                $familyCode = $primaryFamCode;
+                $activeLineageScope = 'primary';
             }
 
             $maritalSurname = trim((string)($data['lastName'] ?? ''));
@@ -151,6 +207,35 @@ final class Organogram extends SingleCustomerData
             $graphData['motherBirthFamCode'] = $motherBirthFamCode;
             $graphData['paternalSurname'] = $paternalSurname;
 
+            $spNodeStmt = Db::connect2()->prepare("
+                SELECT fn.user_id, fn.maiden_name, fn.bio, fn.family_code
+                FROM family_unions u
+                JOIN family_nodes fn ON (fn.id = CASE WHEN u.partner_1_id = ? THEN u.partner_2_id ELSE u.partner_1_id END)
+                WHERE (u.partner_1_id = ? OR u.partner_2_id = ?) AND u.is_current = 1
+                LIMIT 1
+            ");
+            $egoNodeId = (int)($graphData['rootNodeId'] ?? 0);
+            if ($egoNodeId > 0) {
+                $spNodeStmt->execute([$egoNodeId, $egoNodeId, $egoNodeId]);
+                $spNodeRow = $spNodeStmt->fetch(\PDO::FETCH_ASSOC);
+                if ($spNodeRow) {
+                    if (!empty($spNodeRow['bio']) && preg_match('/(?:Birth|Wife(?:\'s)?)\s*FamCode:\s*#?([A-Za-z0-9_-]+)/i', (string)$spNodeRow['bio'], $m)) {
+                        $wifeFamCode = strtoupper($m[1]);
+                    } elseif (!empty($spNodeRow['user_id'])) {
+                        try {
+                            $spBf = (new \App\services\BirthFamilyCodeService(Db::connect2()))->status((string)$spNodeRow['user_id']);
+                            if (!empty($spBf['code']) && $spBf['state'] === 'active') {
+                                $wifeFamCode = strtoupper(trim((string)$spBf['code']));
+                            }
+                        } catch (\Throwable) {}
+                    }
+                }
+            }
+            if ($wifeFamCode === '' && !empty($ofRow['otherFamCode']) && !empty($ofRow['spouse_name'])) {
+                $wifeFamCode = strtoupper(trim(str_replace('#', '', (string)$ofRow['otherFamCode'])));
+            }
+            $graphData['wifeFamCode'] = $wifeFamCode;
+
             $orgData = [
                 'spouse' => $spouse[0] ?? null,
                 'father' => $father[0] ?? null,
@@ -183,10 +268,10 @@ final class Organogram extends SingleCustomerData
                 'motherMaidenSurname',
                 'motherBirthFamCode',
                 'paternalSurname',
-                'motherMaidenSurname',
-                'motherBirthFamCode',
-                'paternalSurname',
-                'motherNode'
+                'wifeFamCode',
+                'motherNode',
+                'familyCode',
+                'heldCodes'
             ));
         } catch (\Throwable $th) {
             showError($th);
@@ -225,13 +310,69 @@ final class Organogram extends SingleCustomerData
                 && $maternalFamCode !== ''
                 && $maternalFamCode !== $primaryFamCode;
 
+            $heldCodes = [];
+            try {
+                $ufStmt = Db::connect2()->prepare("SELECT DISTINCT family_code FROM user_families WHERE user_id = ? AND status = 'approved'");
+                $ufStmt->execute([$idStr]);
+                $heldCodes = array_values(array_unique(array_filter(array_map('strtoupper', array_map('trim', $ufStmt->fetchAll(\PDO::FETCH_COLUMN) ?: [])))));
+            } catch (\Throwable) {}
+
+            $wifeFamCode = '';
+            try {
+                $ofStmt = Db::connect2()->prepare('SELECT maiden_name, otherFamCode, spouse_name FROM otherFamily WHERE id = ? ORDER BY no ASC LIMIT 1');
+                $ofStmt->execute([$idStr]);
+                $ofRow = $ofStmt->fetch(\PDO::FETCH_ASSOC);
+                if ($ofRow && !empty($ofRow['otherFamCode']) && !empty($ofRow['spouse_name'])) {
+                    $wifeFamCode = strtoupper(trim(str_replace('#', '', (string)$ofRow['otherFamCode'])));
+                }
+            } catch (\Throwable) {}
+
+            if ($wifeFamCode === '' && !empty($heldCodes)) {
+                foreach ($heldCodes as $hc) {
+                    if ($hc !== $primaryFamCode && $hc !== $maternalFamCode) {
+                        try {
+                            $chkInLaw = Db::connect2()->prepare("SELECT 1 FROM family_nodes WHERE family_code = ? AND (bio LIKE '%In-law%' OR bio LIKE '%Wife%' OR bio LIKE '%Spouse%') LIMIT 1");
+                            $chkInLaw->execute([$hc]);
+                            if ($chkInLaw->fetchColumn()) {
+                                $wifeFamCode = $hc;
+                                break;
+                            }
+                        } catch (\Throwable) {}
+                    }
+                }
+            }
+
             $requestedLineage = strtolower(trim((string)($_GET['lineage'] ?? '')));
             $requestedCode = strtoupper(trim(str_replace('#', '', (string)($_GET['family_code'] ?? ''))));
             $activeLineageScope = 'primary';
 
-            if ($hasMaternalCode && ($requestedLineage === 'birth' || $requestedLineage === 'maternal' || $requestedCode === $maternalFamCode)) {
-                $familyCode = $maternalFamCode;
-                $activeLineageScope = 'maternal';
+            if ($requestedCode !== '') {
+                if ($hasMaternalCode && $requestedCode === $maternalFamCode) {
+                    $familyCode = $maternalFamCode;
+                    $activeLineageScope = 'maternal';
+                } elseif ($requestedCode === $primaryFamCode) {
+                    $familyCode = $primaryFamCode;
+                    $activeLineageScope = 'primary';
+                } elseif ($wifeFamCode !== '' && $requestedCode === $wifeFamCode) {
+                    $familyCode = $wifeFamCode;
+                    $activeLineageScope = 'inlaw';
+                } elseif (BaseController::sessionSharesFamily($requestedCode) || BaseController::sessionCanViewMember($idStr, $requestedCode) || in_array($requestedCode, $heldCodes, true)) {
+                    $familyCode = $requestedCode;
+                    $activeLineageScope = ($wifeFamCode !== '' && $requestedCode === $wifeFamCode) ? 'inlaw' : 'other';
+                }
+            } elseif ($requestedLineage === 'birth' || $requestedLineage === 'maternal') {
+                if ($hasMaternalCode) {
+                    $familyCode = $maternalFamCode;
+                    $activeLineageScope = 'maternal';
+                }
+            } elseif ($requestedLineage === 'inlaw' || $requestedLineage === 'wife') {
+                if ($wifeFamCode !== '') {
+                    $familyCode = $wifeFamCode;
+                    $activeLineageScope = 'inlaw';
+                }
+            } elseif ($requestedLineage === 'primary' || $requestedLineage === 'marital') {
+                $familyCode = $primaryFamCode;
+                $activeLineageScope = 'primary';
             }
 
             $maritalSurname = trim((string)($data['lastName'] ?? ''));
@@ -251,6 +392,7 @@ final class Organogram extends SingleCustomerData
             // Ensure graph is initialized & synced
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
             $this->repairOrphanedFamilyGraph($familyCode, $idStr);
+            \App\services\KinshipEntityResolver::healDuplicateNodes($familyCode);
             $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
             $graphData['isReadOnly'] = $isReadOnly;
             $graphData['activeLineageScope'] = $activeLineageScope;
@@ -319,6 +461,36 @@ final class Organogram extends SingleCustomerData
             $graphData['motherMaidenSurname'] = $motherMaidenSurname;
             $graphData['motherBirthFamCode'] = $motherBirthFamCode;
             $graphData['paternalSurname'] = $paternalSurname;
+
+            $wifeFamCode = '';
+            $spNodeStmt = Db::connect2()->prepare("
+                SELECT fn.user_id, fn.maiden_name, fn.bio, fn.family_code
+                FROM family_unions u
+                JOIN family_nodes fn ON (fn.id = CASE WHEN u.partner_1_id = ? THEN u.partner_2_id ELSE u.partner_1_id END)
+                WHERE (u.partner_1_id = ? OR u.partner_2_id = ?) AND u.is_current = 1
+                LIMIT 1
+            ");
+            $egoNodeId = (int)($graphData['rootNodeId'] ?? 0);
+            if ($egoNodeId > 0) {
+                $spNodeStmt->execute([$egoNodeId, $egoNodeId, $egoNodeId]);
+                $spNodeRow = $spNodeStmt->fetch(\PDO::FETCH_ASSOC);
+                if ($spNodeRow) {
+                    if (!empty($spNodeRow['bio']) && preg_match('/(?:Birth|Wife(?:\'s)?)\s*FamCode:\s*#?([A-Za-z0-9_-]+)/i', (string)$spNodeRow['bio'], $m)) {
+                        $wifeFamCode = strtoupper($m[1]);
+                    } elseif (!empty($spNodeRow['user_id'])) {
+                        try {
+                            $spBf = (new \App\services\BirthFamilyCodeService(Db::connect2()))->status((string)$spNodeRow['user_id']);
+                            if (!empty($spBf['code']) && $spBf['state'] === 'active') {
+                                $wifeFamCode = strtoupper(trim((string)$spBf['code']));
+                            }
+                        } catch (\Throwable) {}
+                    }
+                }
+            }
+            if ($wifeFamCode === '' && !empty($ofRow['otherFamCode']) && !empty($ofRow['spouse_name'])) {
+                $wifeFamCode = strtoupper(trim(str_replace('#', '', (string)$ofRow['otherFamCode'])));
+            }
+            $graphData['wifeFamCode'] = $wifeFamCode;
 
             $nodes = $graphData['nodes'] ?? [];
             $unions = $graphData['unions'] ?? [];
@@ -443,7 +615,8 @@ final class Organogram extends SingleCustomerData
                 'maidenSurname',
                 'motherMaidenSurname',
                 'motherBirthFamCode',
-                'paternalSurname'
+                'paternalSurname',
+                'wifeFamCode'
             ));
         } catch (\Throwable $th) {
             showError($th);
@@ -470,11 +643,62 @@ final class Organogram extends SingleCustomerData
                 $hasMaternalCode = $birthFamily['state'] === 'active'
                     && $maternalFamCode !== ''
                     && $maternalFamCode !== $primaryFamCode;
-                $requestedLineage = strtolower(trim((string)($_GET['lineage'] ?? '')));
-                $requestedCode = strtoupper(trim(str_replace('#', '', (string)($_GET['family_code'] ?? ''))));
-                if ($hasMaternalCode && ($requestedLineage === 'birth' || $requestedLineage === 'maternal' || $requestedCode === $maternalFamCode)) {
+            $heldCodes = [];
+            try {
+                $ufStmt = Db::connect2()->prepare("SELECT DISTINCT family_code FROM user_families WHERE user_id = ? AND status = 'approved'");
+                $ufStmt->execute([$idStr]);
+                $heldCodes = array_values(array_unique(array_filter(array_map('strtoupper', array_map('trim', $ufStmt->fetchAll(\PDO::FETCH_COLUMN) ?: [])))));
+            } catch (\Throwable) {}
+
+            $wifeFamCode = '';
+            try {
+                $ofStmt = Db::connect2()->prepare('SELECT maiden_name, otherFamCode, spouse_name FROM otherFamily WHERE id = ? ORDER BY no ASC LIMIT 1');
+                $ofStmt->execute([$idStr]);
+                $ofRow = $ofStmt->fetch(\PDO::FETCH_ASSOC);
+                if ($ofRow && !empty($ofRow['otherFamCode']) && !empty($ofRow['spouse_name'])) {
+                    $wifeFamCode = strtoupper(trim(str_replace('#', '', (string)$ofRow['otherFamCode'])));
+                }
+            } catch (\Throwable) {}
+
+            if ($wifeFamCode === '' && !empty($heldCodes)) {
+                foreach ($heldCodes as $hc) {
+                    if ($hc !== $primaryFamCode && $hc !== $maternalFamCode) {
+                        try {
+                            $chkInLaw = Db::connect2()->prepare("SELECT 1 FROM family_nodes WHERE family_code = ? AND (bio LIKE '%In-law%' OR bio LIKE '%Wife%' OR bio LIKE '%Spouse%') LIMIT 1");
+                            $chkInLaw->execute([$hc]);
+                            if ($chkInLaw->fetchColumn()) {
+                                $wifeFamCode = $hc;
+                                break;
+                            }
+                        } catch (\Throwable) {}
+                    }
+                }
+            }
+
+            $requestedLineage = strtolower(trim((string)($_GET['lineage'] ?? '')));
+            $requestedCode = strtoupper(trim(str_replace('#', '', (string)($_GET['family_code'] ?? ''))));
+
+            if ($requestedCode !== '') {
+                if ($hasMaternalCode && $requestedCode === $maternalFamCode) {
+                    $familyCode = $maternalFamCode;
+                } elseif ($requestedCode === $primaryFamCode) {
+                    $familyCode = $primaryFamCode;
+                } elseif ($wifeFamCode !== '' && $requestedCode === $wifeFamCode) {
+                    $familyCode = $wifeFamCode;
+                } elseif (BaseController::sessionSharesFamily($requestedCode) || BaseController::sessionCanViewMember($idStr, $requestedCode) || in_array($requestedCode, $heldCodes, true)) {
+                    $familyCode = $requestedCode;
+                }
+            } elseif ($requestedLineage === 'birth' || $requestedLineage === 'maternal') {
+                if ($hasMaternalCode) {
                     $familyCode = $maternalFamCode;
                 }
+            } elseif ($requestedLineage === 'inlaw' || $requestedLineage === 'wife') {
+                if ($wifeFamCode !== '') {
+                    $familyCode = $wifeFamCode;
+                }
+            } elseif ($requestedLineage === 'primary' || $requestedLineage === 'marital') {
+                $familyCode = $primaryFamCode;
+            }
             } catch (\Throwable) {
                 // Keep primary family code
             }
@@ -494,6 +718,7 @@ final class Organogram extends SingleCustomerData
 
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
             $this->repairOrphanedFamilyGraph($familyCode, $idStr);
+            \App\services\KinshipEntityResolver::healDuplicateNodes($familyCode);
             $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
             $graphData['isReadOnly'] = !BaseController::sessionSharesFamily($familyCode);
 
@@ -1009,6 +1234,7 @@ final class Organogram extends SingleCustomerData
 
         if ($hasExistingUnions) {
             $this->healOrphanedElders($db, $familyCode);
+            $this->healOrphanedGen0Members($db, $familyCode, $rootUserId);
             return;
         }
 
@@ -1185,6 +1411,102 @@ final class Organogram extends SingleCustomerData
             }
         } catch (\Throwable $e) {
             error_log('[Organogram::healOrphanedElders] warning: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Self-heals orphaned generation 0 members (e.g. root user or siblings who joined an existing family)
+     * by connecting them to the primary ancestral/parent union in the family graph.
+     */
+    private function healOrphanedGen0Members(\PDO $db, string $familyCode, string $rootUserId): void
+    {
+        try {
+            // Find the primary ancestral/parent union in this family
+            $findParentUnion = $db->prepare("
+                SELECT fu.id, fu.partner_1_id, fu.partner_2_id, p1.last_name AS p1_last, p2.last_name AS p2_last, COUNT(fnc.id) AS child_count
+                FROM family_unions fu
+                LEFT JOIN family_nodes p1 ON p1.id = fu.partner_1_id
+                LEFT JOIN family_nodes p2 ON p2.id = fu.partner_2_id
+                LEFT JOIN family_node_children fnc ON fnc.union_id = fu.id
+                WHERE fu.family_code = ?
+                  AND (p1.generation_level = -1 OR p2.generation_level = -1 OR LOWER(COALESCE(p1.bio, '')) LIKE '%father%' OR LOWER(COALESCE(p2.bio, '')) LIKE '%mother%')
+                GROUP BY fu.id
+                ORDER BY child_count DESC
+                LIMIT 1
+            ");
+            $findParentUnion->execute([$familyCode]);
+            /** @var array<string, mixed>|false $parentUnion */
+            $parentUnion = $findParentUnion->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$parentUnion || empty($parentUnion['id'])) {
+                return;
+            }
+
+            $parentUnionId = (int)$parentUnion['id'];
+            $p1Id = (int)$parentUnion['partner_1_id'];
+            $p2Id = (int)$parentUnion['partner_2_id'];
+            $p1Last = strtolower(trim((string)($parentUnion['p1_last'] ?? '')));
+            $p2Last = strtolower(trim((string)($parentUnion['p2_last'] ?? '')));
+            $cleanFam = strtolower(trim($familyCode));
+
+            // Find all Gen 0 nodes in this family that have NO parent link in family_node_children
+            $orphansStmt = $db->prepare("
+                SELECT fn.id, fn.user_id, fn.first_name, fn.last_name, fn.bio
+                FROM family_nodes fn
+                LEFT JOIN family_node_children fnc ON fnc.child_id = fn.id
+                WHERE fn.family_code = ?
+                  AND fn.generation_level = 0
+                  AND fn.is_placeholder = 0
+                  AND fnc.id IS NULL
+            ");
+            $orphansStmt->execute([$familyCode]);
+            /** @var array<int, array<string, mixed>> $orphans */
+            $orphans = $orphansStmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            if (empty($orphans)) {
+                return;
+            }
+
+            $insChild = $db->prepare("
+                INSERT INTO family_node_children (union_id, child_id, relationship_type)
+                VALUES (?, ?, 'biological')
+            ");
+
+            foreach ($orphans as $orphan) {
+                $orphanId = (int)$orphan['id'];
+                if ($orphanId === $p1Id || $orphanId === $p2Id) {
+                    continue;
+                }
+
+                $bio = strtolower(trim((string)($orphan['bio'] ?? '')));
+                if (str_contains($bio, 'spouse') || str_contains($bio, 'partner')) {
+                    continue;
+                }
+
+                // Check if this orphan is already a spouse of an existing child in a marriage union
+                $partnerChk = $db->prepare("
+                    SELECT COUNT(*) FROM family_unions fu
+                    WHERE fu.family_code = ?
+                      AND ((fu.partner_1_id = ? AND fu.partner_2_id != ?) OR (fu.partner_2_id = ? AND fu.partner_1_id != ?))
+                      AND EXISTS (SELECT 1 FROM family_node_children fnc WHERE fnc.union_id = ? AND (fnc.child_id = fu.partner_1_id OR fnc.child_id = fu.partner_2_id))
+                ");
+                $partnerChk->execute([$familyCode, $orphanId, $orphanId, $orphanId, $orphanId, $parentUnionId]);
+                if ((int)$partnerChk->fetchColumn() > 0) {
+                    continue;
+                }
+
+                $isRoot = (!empty($rootUserId) && (string)($orphan['user_id'] ?? '') === (string)$rootUserId);
+                $isPrimaryOrSibling = str_contains($bio, 'primary') || str_contains($bio, 'sibling');
+
+                $orphanLast = strtolower(trim((string)($orphan['last_name'] ?? '')));
+                $surnameMatches = ($orphanLast !== '' && ($orphanLast === $p1Last || $orphanLast === $p2Last || str_contains($cleanFam, $orphanLast) || str_contains($orphanLast, $cleanFam)));
+
+                if ($isRoot || ($isPrimaryOrSibling && $surnameMatches)) {
+                    $insChild->execute([$parentUnionId, $orphanId]);
+                }
+            }
+        } catch (\Throwable $e) {
+            error_log('[Organogram::healOrphanedGen0Members] warning: ' . $e->getMessage());
         }
     }
 

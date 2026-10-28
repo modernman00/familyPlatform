@@ -231,13 +231,19 @@ final class KinshipCalculatorService
                 }
             }
 
-            // Ghost parents created for half-siblings
+            // Placeholders: preserve explicit label or accurate path-resolved title (e.g. Wife, Mother-in-law)
             if (!empty($node['is_placeholder'])) {
-                $node['ego_relation'] = (string)($node['placeholder_label'] ?? (match (strtolower((string)($node['gender'] ?? ''))) {
-                    'female' => 'Mother',
-                    'male' => 'Father',
-                    default => 'Parent',
-                }));
+                if (!empty($node['placeholder_label'])) {
+                    $node['ego_relation'] = (string)$node['placeholder_label'];
+                } elseif (!empty($titleInfo['title']) && $titleInfo['title'] !== 'Relative') {
+                    $node['ego_relation'] = $titleInfo['title'];
+                } else {
+                    $node['ego_relation'] = match (strtolower((string)($node['gender'] ?? ''))) {
+                        'female' => 'Mother',
+                        'male' => 'Father',
+                        default => 'Parent',
+                    };
+                }
             }
 
             $decorated[$id] = $node;
@@ -421,8 +427,18 @@ final class KinshipCalculatorService
                 ];
             }
 
-            // [sibling, spouse] -> Brother/Sister-in-law
+            // [sibling, spouse] -> Brother/Sister-in-law (Sibling's spouse)
             if ($types === ['sibling', 'spouse']) {
+                return [
+                    'title' => $isMale ? 'Brother-in-law' : 'Sister-in-law',
+                    'side' => 'in_law',
+                    'degree' => null,
+                    'category' => 'in_law'
+                ];
+            }
+
+            // [spouse, sibling] -> Brother/Sister-in-law (Spouse's sibling)
+            if ($types === ['spouse', 'sibling']) {
                 return [
                     'title' => $isMale ? 'Brother-in-law' : 'Sister-in-law',
                     'side' => 'in_law',

@@ -38,16 +38,40 @@ final class LineageQuestService
     {
         $db = Db::connect2();
 
-        // 1. Fetch all nodes for the family
-        $stmt = $db->prepare(
-            'SELECT id, user_id, first_name, last_name, maiden_name, gender, birth_date, birth_year, is_deceased, generation_level, email, mobile
-             FROM family_nodes
-             WHERE family_code = ? AND is_placeholder = 0
-             ORDER BY generation_level ASC, id ASC'
-        );
-        $stmt->execute([$familyCode]);
-        /** @var array<int, array<string, mixed>> $nodes */
-        $nodes = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        // 0. Auto-heal duplicates before computing quests
+        try {
+            KinshipEntityResolver::healDuplicateNodes($familyCode);
+        } catch (\Throwable) {}
+
+        // 1. Fetch graph nodes and unions directly connected to user's tree for 100% organogram correlation
+        $nodes = [];
+        $unions = [];
+        if (!empty($userId)) {
+            try {
+                $graph = CollateralKinshipService::buildCollateralGraph($familyCode, $userId);
+                if (!empty($graph['nodes'])) {
+                    $nodes = array_values(array_filter($graph['nodes'], static fn(array $n): bool => empty($n['is_placeholder'])));
+                    $unions = $graph['unions'] ?? [];
+                }
+            } catch (\Throwable) {}
+        }
+
+        if (empty($nodes)) {
+            $stmt = $db->prepare(
+                'SELECT id, user_id, first_name, last_name, maiden_name, gender, birth_date, birth_year, is_deceased, generation_level, email, mobile
+                 FROM family_nodes
+                 WHERE family_code = ? AND is_placeholder = 0
+                 ORDER BY generation_level ASC, id ASC'
+            );
+            $stmt->execute([$familyCode]);
+            /** @var array<int, array<string, mixed>> $nodes */
+            $nodes = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+            $unionStmt = $db->prepare('SELECT id, partner_1_id, partner_2_id FROM family_unions WHERE family_code = ?');
+            $unionStmt->execute([$familyCode]);
+            /** @var array<int, array<string, mixed>> $unions */
+            $unions = $unionStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        }
 
         $totalNodes = count($nodes);
         if ($totalNodes === 0) {
@@ -63,12 +87,6 @@ final class LineageQuestService
                 ],
             ];
         }
-
-        // 2. Fetch union and child relations
-        $unionStmt = $db->prepare('SELECT id, partner_1_id, partner_2_id FROM family_unions WHERE family_code = ?');
-        $unionStmt->execute([$familyCode]);
-        /** @var array<int, array<string, mixed>> $unions */
-        $unions = $unionStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
         $registeredCount = 0;
         $unclaimedLiving = [];
@@ -93,8 +111,8 @@ final class LineageQuestService
                 $elders[] = $node;
             }
 
-            // Female ancestor with no maiden name recorded
-            if (($node['gender'] ?? '') === 'Female' && empty($node['maiden_name']) && $gen <= 0) {
+            // Female ancestor/relative with no maiden name recorded (excluding the user herself)
+            if (($node['gender'] ?? '') === 'Female' && empty($node['maiden_name']) && $gen <= 0 && empty($node['is_ego']) && (string)($node['user_id'] ?? '') !== $userId) {
                 $missingMaiden[] = $node;
             }
         }
@@ -120,9 +138,23 @@ final class LineageQuestService
         $quests = [];
 
         // Quest A: Unclaimed Living Relatives (High Priority Conversion)
+        // Prioritise immediate family members (Parents, Children, Siblings) before distant kin
+        usort($unclaimedLiving, static function (array $a, array $b): int {
+            $prio = [
+                'Father' => 1, 'Mother' => 1,
+                'Son' => 2, 'Daughter' => 2, 'Child' => 2,
+                'Brother' => 3, 'Sister' => 3, 'Sibling' => 3,
+                'Grandfather' => 4, 'Grandmother' => 4,
+                'Spouse' => 5, 'Wife' => 5, 'Husband' => 5,
+            ];
+            $pA = $prio[$a['ego_relation'] ?? ''] ?? 10;
+            $pB = $prio[$b['ego_relation'] ?? ''] ?? 10;
+            return $pA <=> $pB;
+        });
+
         foreach (array_slice($unclaimedLiving, 0, 3) as $unclaimed) {
             $nodeId = (int)$unclaimed['id'];
-            $relName = trim(($unclaimed['first_name'] ?? '') . ' ' . ($unclaimed['last_name'] ?? ''));
+            $relName = self::formatRelativeName((string)($unclaimed['first_name'] ?? ''), (string)($unclaimed['last_name'] ?? ''));
             $quests[] = self::buildUnclaimedNodeQuest($familyCode, $userId, $nodeId, $relName);
         }
 
@@ -133,9 +165,11 @@ final class LineageQuestService
 
         // Quest C: Missing Maternal Lineage / Maiden Names
         if (!empty($missingMaiden)) {
+            // Prioritise ancestors (mothers/grandmothers) before siblings
+            usort($missingMaiden, static fn(array $a, array $b): int => ((int)($a['generation_level'] ?? 0)) <=> ((int)($b['generation_level'] ?? 0)));
             $target = $missingMaiden[0];
             $nodeId = (int)$target['id'];
-            $targetName = trim(($target['first_name'] ?? '') . ' ' . ($target['last_name'] ?? ''));
+            $targetName = self::formatRelativeName((string)($target['first_name'] ?? ''), (string)($target['last_name'] ?? ''));
             $quests[] = self::buildMaidenNameQuest($familyCode, $userId, $nodeId, $targetName);
         }
 
@@ -311,5 +345,18 @@ final class LineageQuestService
             'whatsapp_url'  => 'https://api.whatsapp.com/send?text=' . rawurlencode($waText),
             'whatsapp_text' => $waText,
         ];
+    }
+
+    /**
+     * Clean and format full name without duplicate redundant surnames.
+     */
+    public static function formatRelativeName(string $firstName, string $lastName): string
+    {
+        $f = trim($firstName);
+        $l = trim($lastName);
+        if ($l !== '' && str_ends_with(strtolower($f), strtolower($l))) {
+            $f = trim(substr($f, 0, -strlen($l)));
+        }
+        return trim($f . ' ' . $l);
     }
 }

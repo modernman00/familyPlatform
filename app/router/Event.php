@@ -31,6 +31,10 @@ $router->map('GET', '/member/ProfilePage/event/[i:eventNo]/party-sso/', 'App\con
 // 3-MONTH INTERACTIVE SCHEDULE MODAL ENDPOINT
 $router->map('GET', '/member/events/upcoming3Months', 'App\controller\members\Event@getUpcoming3MonthsEvents', 'upcoming_events_3months');
 
+// RESILIENT AI GROUNDED ACTIVITY DISCOVERY & PROXIMITY SCOPING
+$router->map('GET', '/member/activities/discover', 'App\controller\members\ActivityDiscoveryController@discover', 'discover_activities');
+$router->map('POST', '/member/activities/preview-audience', 'App\controller\members\ActivityDiscoveryController@previewProximityAudience', 'preview_proximity_audience');
+
 
 
 

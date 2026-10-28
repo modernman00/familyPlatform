@@ -448,6 +448,19 @@ final class PartyPlatformBridgeService
                 'Please add a valid email address in your Account Settings before launching PartyPlatform Studio.'
             );
         }
+
+        // Idempotency fast path: if event is already synced, return existing bridge data
+        if (!empty($event['party_event_id']) && ($event['party_sync_status'] ?? '') === 'synced') {
+            return [
+                'synced'                 => true,
+                'party_event_id'         => (string)$event['party_event_id'],
+                'party_event_slug'       => (string)($event['party_event_slug'] ?? ''),
+                'party_rsvp_url'         => (string)($event['party_rsvp_url'] ?? ''),
+                'party_card_url'         => (string)($event['party_card_url'] ?? ''),
+                'party_studio_sso_url'   => '/member/profilePage/event/' . $eventNo . '/party-sso',
+                'seeded_prospects_count' => 0,
+            ];
+        }
         $hostFirst = trim((string) ($hostRow['firstName'] ?? $_SESSION['fName'] ?? 'Family'));
         $hostLast  = trim((string) ($hostRow['lastName'] ?? $_SESSION['lName'] ?? 'Host'));
         $hostMob   = trim((string) ($hostRow['mobile'] ?? ''));

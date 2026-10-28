@@ -11,6 +11,8 @@ set -euo pipefail
 #      - Child Addition (POST /member/organogram/editor/child)
 #      - Parents Addition (POST /member/organogram/editor/parents)
 #      - Sibling Addition (POST /member/organogram/editor/sibling)
+#      - Uncle/Auntie Addition (POST /member/organogram/editor/uncle-aunt)
+#      - In-Law Addition (POST /member/organogram/editor/in-law)
 #      - Node Details Modification (POST /member/organogram/editor/update)
 #      - Node Deletion (POST /member/organogram/editor/delete)
 #      - Node Claiming (POST /api/claim-family-node)
@@ -143,6 +145,30 @@ if [[ "$CODE" =~ ^(401|403|302|400|404)$ ]]; then
     record_pass "Guest sibling creation rejected (HTTP $CODE)"
 else
     record_fail "Guest sibling creation allowed! (HTTP $CODE)"
+fi
+
+# 2.4b Guest Add Uncle / Aunt Form
+RES_GUEST_UNCLE=$(curl -k -s -w "\n%{http_code}" -X POST "$STAGING_URL/member/organogram/editor/uncle-aunt" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "X-Requested-With: XMLHttpRequest" \
+  -d "base_node_id=$NODE_A_ID&first_name=GhostUncle&relationship=uncle")
+CODE=$(echo "$RES_GUEST_UNCLE" | tail -n 1)
+if [[ "$CODE" =~ ^(401|403|302|400|404)$ ]]; then
+    record_pass "Guest uncle/aunt creation rejected (HTTP $CODE)"
+else
+    record_fail "Guest uncle/aunt creation allowed! (HTTP $CODE)"
+fi
+
+# 2.4c Guest Add In-Law Form
+RES_GUEST_INLAW=$(curl -k -s -w "\n%{http_code}" -X POST "$STAGING_URL/member/organogram/editor/in-law" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "X-Requested-With: XMLHttpRequest" \
+  -d "base_node_id=$NODE_A_ID&first_name=GhostInLaw&relationship=father_in_law")
+CODE=$(echo "$RES_GUEST_INLAW" | tail -n 1)
+if [[ "$CODE" =~ ^(401|403|302|400|404)$ ]]; then
+    record_pass "Guest in-law creation rejected (HTTP $CODE)"
+else
+    record_fail "Guest in-law creation allowed! (HTTP $CODE)"
 fi
 
 # 2.5 Guest Node Update Form
@@ -307,6 +333,34 @@ if [[ "$CODE" =~ ^(401|403|400|404)$ ]]; then
     record_pass "Cross-family sibling addition rejected (HTTP $CODE)"
 else
     record_fail "Cross-family sibling addition allowed! (HTTP $CODE = IDOR vulnerability!)"
+fi
+
+# 3.4b Cross-Family Add Uncle / Aunt Attack
+RES_IDOR_UNCLE=$(curl -k -s -w "\n%{http_code}" -X POST "$STAGING_URL/member/organogram/editor/uncle-aunt" \
+  -H "Authorization: Bearer $USER_B_TOKEN" \
+  -H "Cookie: $COOKIE_NAME=$USER_B_TOKEN; auth_token=$USER_B_TOKEN; familyCookie=$USER_B_TOKEN" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "X-Requested-With: XMLHttpRequest" \
+  -d "base_node_id=$NODE_A_ID&first_name=AttackerUncle&relationship=uncle")
+CODE=$(echo "$RES_IDOR_UNCLE" | tail -n 1)
+if [[ "$CODE" =~ ^(401|403|400|404)$ ]]; then
+    record_pass "Cross-family uncle/aunt addition rejected (HTTP $CODE)"
+else
+    record_fail "Cross-family uncle/aunt addition allowed! (HTTP $CODE = IDOR vulnerability!)"
+fi
+
+# 3.4c Cross-Family Add In-Law Attack
+RES_IDOR_INLAW=$(curl -k -s -w "\n%{http_code}" -X POST "$STAGING_URL/member/organogram/editor/in-law" \
+  -H "Authorization: Bearer $USER_B_TOKEN" \
+  -H "Cookie: $COOKIE_NAME=$USER_B_TOKEN; auth_token=$USER_B_TOKEN; familyCookie=$USER_B_TOKEN" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "X-Requested-With: XMLHttpRequest" \
+  -d "base_node_id=$NODE_A_ID&first_name=AttackerInLaw&relationship=father_in_law")
+CODE=$(echo "$RES_IDOR_INLAW" | tail -n 1)
+if [[ "$CODE" =~ ^(401|403|400|404)$ ]]; then
+    record_pass "Cross-family in-law addition rejected (HTTP $CODE)"
+else
+    record_fail "Cross-family in-law addition allowed! (HTTP $CODE = IDOR vulnerability!)"
 fi
 
 # 3.5 Cross-Family Node Update Attack
@@ -497,6 +551,34 @@ if [[ "$CODE" =~ ^(200|201)$ ]]; then
     record_pass "Same-family add sibling succeeded (HTTP $CODE)"
 else
     record_fail "Same-family add sibling failed (HTTP $CODE)"
+fi
+
+# 4.4b Legitimate Add Uncle / Aunt
+RES_LEGIT_UNCLE=$(curl -k -s -w "\n%{http_code}" -X POST "$STAGING_URL/member/organogram/editor/uncle-aunt" \
+  -H "Authorization: Bearer $USER_A_TOKEN" \
+  -H "Cookie: $COOKIE_NAME=$USER_A_TOKEN; auth_token=$USER_A_TOKEN; familyCookie=$USER_A_TOKEN" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "X-Requested-With: XMLHttpRequest" \
+  -d "base_node_id=$NODE_A_ID&first_name=LegitUncle&last_name=FamilyA&relationship=uncle&side=paternal&famcode_type=marital")
+CODE=$(echo "$RES_LEGIT_UNCLE" | tail -n 1)
+if [[ "$CODE" =~ ^(200|201)$ ]]; then
+    record_pass "Same-family add uncle/aunt succeeded (HTTP $CODE)"
+else
+    record_fail "Same-family add uncle/aunt failed (HTTP $CODE)"
+fi
+
+# 4.4c Legitimate Add In-Law
+RES_LEGIT_INLAW=$(curl -k -s -w "\n%{http_code}" -X POST "$STAGING_URL/member/organogram/editor/in-law" \
+  -H "Authorization: Bearer $USER_A_TOKEN" \
+  -H "Cookie: $COOKIE_NAME=$USER_A_TOKEN; auth_token=$USER_A_TOKEN; familyCookie=$USER_A_TOKEN" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "X-Requested-With: XMLHttpRequest" \
+  -d "base_node_id=$NODE_A_ID&first_name=LegitFatherInLaw&last_name=WifeFam&relationship=father_in_law&famcode_type=marital")
+CODE=$(echo "$RES_LEGIT_INLAW" | tail -n 1)
+if [[ "$CODE" =~ ^(200|201)$ ]]; then
+    record_pass "Same-family add in-law succeeded (HTTP $CODE)"
+else
+    record_fail "Same-family add in-law failed (HTTP $CODE)"
 fi
 
 # 4.5 Data Integrity Verification (Verify Node A retains legit state and was NOT mutated by attacks)

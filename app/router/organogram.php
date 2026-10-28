@@ -15,6 +15,10 @@ $router->map('POST', '/member/organogram/editor/partner', 'App\controller\member
 $router->map('POST', '/member/organogram/editor/child', 'App\controller\members\OrganogramEditorController@addChild', 'MEMBER_ORGANOGRAM_ADD_CHILD');
 $router->map('POST', '/member/organogram/editor/parents', 'App\controller\members\OrganogramEditorController@addParents', 'MEMBER_ORGANOGRAM_ADD_PARENTS');
 $router->map('POST', '/member/organogram/editor/sibling', 'App\controller\members\OrganogramEditorController@addSibling', 'MEMBER_ORGANOGRAM_ADD_SIBLING');
+$router->map('POST', '/member/organogram/editor/uncle-aunt', 'App\controller\members\OrganogramEditorController@addUncleAunt', 'MEMBER_ORGANOGRAM_ADD_UNCLE_AUNT');
+$router->map('POST', '/member/organogram/editor/aunt-uncle', 'App\controller\members\OrganogramEditorController@addUncleAunt', 'MEMBER_ORGANOGRAM_ADD_AUNT_UNCLE_ALIAS');
+$router->map('POST', '/member/organogram/editor/in-law', 'App\controller\members\OrganogramEditorController@addInLaw', 'MEMBER_ORGANOGRAM_ADD_IN_LAW');
+$router->map('POST', '/member/organogram/editor/inlaw', 'App\controller\members\OrganogramEditorController@addInLaw', 'MEMBER_ORGANOGRAM_ADD_INLAW_ALIAS');
 $router->map('POST', '/member/organogram/editor/relationship-request', 'App\controller\members\OrganogramEditorController@resolveRelationshipRequest', 'MEMBER_ORGANOGRAM_RESOLVE_RELATIONSHIP_REQUEST');
 $router->map('POST', '/member/organogram/editor/fill-placeholder', 'App\controller\members\OrganogramEditorController@fillPlaceholder', 'MEMBER_ORGANOGRAM_FILL_PLACEHOLDER');
 $router->map('POST', '/member/organogram/editor/member-lookup', 'App\controller\members\OrganogramEditorController@lookupMember', 'MEMBER_ORGANOGRAM_MEMBER_LOOKUP');

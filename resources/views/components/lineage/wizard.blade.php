@@ -1,329 +1,361 @@
-{{-- Scoped Lineage Wizard Component --}}
+{{-- Scoped Family Invitation Modal Component --}}
 <div class="modal fade" id="addRelativeModal" tabindex="-1" aria-labelledby="addRelativeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="backdrop-filter: blur(8px);">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden; background: rgba(255, 255, 255, 0.95); max-height: calc(100vh - 3.5rem);">
-            <div class="modal-header border-0 bg-primary text-white flex-shrink-0">
-                <h5 class="modal-title fw-bold" id="addRelativeModalLabel"><i class="bi bi-diagram-3-fill"></i> Add Relative</h5>
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden; background: rgba(255, 255, 255, 0.98); max-height: calc(100vh - 3.5rem);">
+            <div class="modal-header border-0 text-white flex-shrink-0" style="background: linear-gradient(135deg, #a31621 0%, #b8202c 100%);">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-send-fill fs-5"></i>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="addRelativeModalLabel">Invite Family Member</h5>
+                        <div class="small text-white-50" style="font-size: 0.75rem;">Generate an instant WhatsApp or email invitation to claim their spot</div>
+                    </div>
+                </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4" style="overflow-y: auto;">
-                <div id="addRelativeError" class="alert alert-danger d-none" style="border-radius: 8px;"></div>
+                <div id="inviteFamilyError" class="alert alert-danger d-none" style="border-radius: 8px;"></div>
 
-                @if(!empty($hasMaternalCode) && !empty($maternalFamCode))
-                <!-- Lineage Family Code Selector (Marital / Household vs. Birth / Maiden Family) -->
-                <div id="wizardLineageScopeBanner" class="mb-3 p-3 rounded-3" style="background:#f8fafc;border:1px solid #e2e8f0;">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-1 mb-2">
-                        <div class="fw-bold small text-dark">
-                            <i class="bi bi-signpost-split me-1 text-primary"></i>Which family tree does this relative belong to?
+                {{-- Step A: Invitation Form --}}
+                <div id="inviteFamilyFormSection">
+                    {{-- Target Family Tree Selector --}}
+                    @php
+                        $activeCode = $familyCode ?? ($primaryFamCode ?? ($data['famCode'] ?? ''));
+                        $currentScope = $activeLineageScope ?? 'primary';
+                    @endphp
+                    <div class="mb-3 p-3 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-1 mb-2">
+                            <label class="form-label fw-bold small text-dark mb-0">
+                                <i class="bi bi-diagram-3-fill me-1 text-primary"></i>Which family tree are you inviting them to?
+                            </label>
+                            <span class="badge bg-primary rounded-pill" id="inviteActiveCodeBadge" style="font-size: 0.72rem;">
+                                #{{ $activeCode }}
+                            </span>
                         </div>
-                        <span class="badge bg-primary rounded-pill" id="wizardActiveCodeBadge" style="font-size: 0.72rem;">
-                            #{{ ($activeLineageScope ?? 'primary') === 'maternal' ? $maternalFamCode : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}
-                        </span>
+                        <div class="d-flex flex-wrap gap-2" role="radiogroup" aria-label="Target family tree">
+                            <label class="invite-tree-option d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 border bg-white" style="cursor: pointer; min-height: 44px; font-size: 0.82rem; white-space: nowrap; flex-shrink: 0;">
+                                <input type="radio" name="invite_target_code_radio" value="{{ $primaryFamCode ?? ($data['famCode'] ?? '') }}" data-scope="primary" data-surname="{{ $maritalSurname ?? ($data['lastName'] ?? '') }}" {{ $activeCode === ($primaryFamCode ?? ($data['famCode'] ?? '')) ? 'checked' : '' }} onchange="syncInviteTarget(this)">
+                                <span><strong>Marital / Household</strong> <span class="text-muted">(#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})</span></span>
+                            </label>
+                            @if(!empty($maternalFamCode) && $maternalFamCode !== ($primaryFamCode ?? ($data['famCode'] ?? '')))
+                            <label class="invite-tree-option d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 border bg-white" style="cursor: pointer; min-height: 44px; font-size: 0.82rem; white-space: nowrap; flex-shrink: 0;">
+                                <input type="radio" name="invite_target_code_radio" value="{{ $maternalFamCode }}" data-scope="maternal" data-surname="{{ $maidenSurname ?? '' }}" {{ $activeCode === $maternalFamCode ? 'checked' : '' }} onchange="syncInviteTarget(this)">
+                                <span><strong>Birth / Maiden Family</strong> <span class="text-muted">(#{{ $maternalFamCode }})</span></span>
+                            </label>
+                            @endif
+                            @if(!empty($wifeFamCode) && $wifeFamCode !== ($primaryFamCode ?? ($data['famCode'] ?? '')) && $wifeFamCode !== ($maternalFamCode ?? ''))
+                            <label class="invite-tree-option d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 border bg-white" style="cursor: pointer; min-height: 44px; font-size: 0.82rem; white-space: nowrap; flex-shrink: 0;">
+                                <input type="radio" name="invite_target_code_radio" value="{{ $wifeFamCode }}" data-scope="inlaw" data-surname="" {{ $activeCode === $wifeFamCode ? 'checked' : '' }} onchange="syncInviteTarget(this)">
+                                <span><strong>In-Law Lineage</strong> <span class="text-muted">(#{{ $wifeFamCode }})</span></span>
+                            </label>
+                            @endif
+                        </div>
                     </div>
-                    <div class="d-flex flex-wrap gap-2" role="radiogroup" aria-label="Target family tree">
-                        <label class="wizard-lineage-option d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 border bg-white" style="cursor:pointer;min-height:44px;font-size:.82rem;white-space:nowrap;flex-shrink:0;">
-                            <input type="radio" name="wizard_lineage_scope_radio" value="primary" data-code="{{ $primaryFamCode ?? ($data['famCode'] ?? '') }}" data-surname="{{ $maritalSurname ?? ($data['lastName'] ?? '') }}" {{ ($activeLineageScope ?? 'primary') !== 'maternal' ? 'checked' : '' }} onchange="window.syncWizardLineageScope && window.syncWizardLineageScope(this.value)">
-                            <span><strong>Marital / Household Tree</strong> <span class="text-muted">(#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})</span></span>
-                        </label>
-                        <label class="wizard-lineage-option d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 border bg-white" style="cursor:pointer;min-height:44px;font-size:.82rem;white-space:nowrap;flex-shrink:0;">
-                            <input type="radio" name="wizard_lineage_scope_radio" value="maternal" data-code="{{ $maternalFamCode }}" data-surname="{{ $maidenSurname ?? '' }}" {{ ($activeLineageScope ?? 'primary') === 'maternal' ? 'checked' : '' }} onchange="window.syncWizardLineageScope && window.syncWizardLineageScope(this.value)">
-                            <span><strong>My Birth / Maiden Family</strong> <span class="text-muted">(#{{ $maternalFamCode }})</span></span>
-                        </label>
-                    </div>
-                    <div class="text-muted mt-2" id="wizardLineageScopeHelp" style="font-size:.76rem;">
-                        @if(($activeLineageScope ?? 'primary') === 'maternal')
-                            Adding to your <strong>Birth / Maiden Family (#{{ $maternalFamCode }})</strong> so your parents and siblings connect directly to your birth lineage.
-                        @else
-                            Adding to your <strong>Marital / Household Tree (#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})</strong>. Switch to Birth / Maiden Family when adding your own parents or birth siblings.
-                        @endif
-                    </div>
-                </div>
-                @endif
-                
-                <!-- Step 1: Select Type -->
-                <div id="step1">
-                    <h6 class="fw-bold mb-3 text-secondary">Who are you adding for <span id="addRelativeBaseName" class="text-primary"></span>?</h6>
-                    
-                    <div class="d-grid gap-3">
-                        <button type="button" class="btn btn-outline-primary text-start p-3" onclick="selectRelativeType('partner')" style="border-radius: 12px;">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-heart-fill fs-3 me-3"></i>
-                                <div>
-                                    <div class="fw-bold fs-5">Partner / Spouse</div>
-                                    <div class="text-muted small">Current spouse, ex-partner, or co-parent.</div>
-                                </div>
-                            </div>
-                        </button>
-                        
-                        <button type="button" class="btn btn-outline-success text-start p-3" onclick="selectRelativeType('child')" style="border-radius: 12px;">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-emoji-smile-fill fs-3 me-3"></i>
-                                <div>
-                                    <div class="fw-bold fs-5">Child</div>
-                                    <div class="text-muted small">Son or daughter (requires selecting a union).</div>
-                                </div>
-                            </div>
-                        </button>
-                        
-                        <button type="button" class="btn btn-outline-info text-start p-3" onclick="selectRelativeType('sibling')" style="border-radius: 12px;">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-people-fill fs-3 me-3"></i>
-                                <div>
-                                    <div class="fw-bold fs-5">Sibling</div>
-                                    <div class="text-muted small">Brother or sister (requires selecting their parents).</div>
-                                </div>
-                            </div>
-                        </button>
-                        
-                        <button type="button" class="btn btn-outline-secondary text-start p-3" onclick="selectRelativeType('parents')" style="border-radius: 12px;">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-person-hearts fs-3 me-3"></i>
-                                <div>
-                                    <div class="fw-bold fs-5">Parents</div>
-                                    <div class="text-muted small">Father and/or Mother.</div>
-                                </div>
-                            </div>
-                        </button>
-                    </div>
-                </div>
 
-                <!-- Step 2: Partner Form -->
-                <div id="step2-partner" class="d-none">
-                    <form id="addPartnerForm">
-    @include('csrf')
-                        <input type="hidden" name="base_node_id" id="partnerBaseNodeId">
-                        <input type="hidden" name="lineage_scope" class="wizard-lineage-scope-input" value="{{ $activeLineageScope ?? 'primary' }}">
-                        <input type="hidden" name="lineage_code" class="wizard-lineage-code-input" value="{{ ($activeLineageScope ?? 'primary') === 'maternal' ? ($maternalFamCode ?? '') : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}">
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Relationship Status</label>
-                            <select name="is_current" id="partnerStatus" class="form-select" onchange="toggleDivorceYear()" required>
-                                <option value="yes">Current Partner / Married</option>
-                                <option value="no">Divorced / Past Union</option>
+                    {{-- Form Fields --}}
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold small text-dark">First Name <span class="text-danger">*</span></label>
+                            <input type="text" id="inviteFirstName" class="form-control" placeholder="e.g. Samuel" required style="border-radius: 8px; min-height: 44px;">
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold small text-dark">Last Name</label>
+                            <input type="text" id="inviteLastName" class="form-control" placeholder="e.g. Akinduro" value="{{ ($activeCode === ($maternalFamCode ?? '')) ? ($maidenSurname ?? '') : ($maritalSurname ?? '') }}" style="border-radius: 8px; min-height: 44px;">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small text-dark">Relationship / Kinship Role</label>
+                            <select id="inviteRelationship" class="form-select" style="border-radius: 8px; min-height: 44px;">
+                                <option value="Relative">Family Relative (General)</option>
+                                <option value="Parent">Parent (Father / Mother)</option>
+                                <option value="Sibling">Sibling (Brother / Sister)</option>
+                                <option value="Child">Child (Son / Daughter)</option>
+                                <option value="Partner">Partner / Spouse</option>
+                                <option value="Aunt / Uncle">Auntie / Uncle</option>
+                                <option value="In-Law">In-Law (Brother / Sister / Parent-in-law)</option>
+                                <option value="Cousin">Cousin</option>
                             </select>
                         </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">First Name <span class="text-danger">*</span></label>
-                                <input type="text" name="first_name" class="form-control" required placeholder="Jane">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Last Name</label>
-                                <input type="text" name="last_name" class="form-control" placeholder="e.g. Doe" autocomplete="off">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small text-dark">
+                                <i class="bi bi-envelope-fill me-1 text-primary"></i>Email Address <span class="text-muted fw-normal">(Optional)</span>
+                            </label>
+                            <input type="email" id="inviteEmail" class="form-control" placeholder="relative@example.com" style="border-radius: 8px; min-height: 44px;">
+                            <div class="form-text" style="font-size: 0.75rem;">
+                                If supplied, an invitation email with their personalised claim link is dispatched automatically.
                             </div>
                         </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small text-dark">
+                                <i class="bi bi-whatsapp me-1 text-success"></i>WhatsApp / Mobile Number <span class="text-muted fw-normal">(Optional)</span>
+                            </label>
+                            <input type="tel" id="inviteMobile" class="form-control" placeholder="e.g. +44 7123 456789" style="border-radius: 8px; min-height: 44px;">
+                            <div class="form-text" style="font-size: 0.75rem;">
+                                For your records or direct messaging. You can also send directly via WhatsApp below.
+                            </div>
+                        </div>
+                    </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Gender</label>
-                            <select name="gender" class="form-select" required>
-                                <option value="Female">Female</option>
-                                <option value="Male">Male</option>
-                            </select>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Email (Optional)</label>
-                                <input type="email" name="email" class="form-control" placeholder="Email to auto-link their account">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Mobile (Optional)</label>
-                                <input type="tel" name="mobile" class="form-control" placeholder="Phone number">
-                            </div>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Marriage/Start Year</label>
-                                <input type="number" name="marriage_year" class="form-control" placeholder="e.g. 2010" min="1900" max="{{ date('Y') }}">
-                            </div>
-                            <div class="col-md-6" id="divorceYearWrapper" style="display: none;">
-                                <label class="form-label fw-bold">Divorce/End Year</label>
-                                <input type="number" name="divorce_year" class="form-control" placeholder="e.g. 2020" min="1900" max="{{ date('Y') }}">
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between mt-4">
-                            <button type="button" class="btn btn-light fw-bold" onclick="backToStep1()">Back</button>
-                            <button type="submit" class="btn btn-primary fw-bold" id="submitPartnerBtn">Save Partner</button>
-                        </div>
-                    </form>
+                    <div class="mt-4">
+                        <button type="button" id="btnSubmitInviteFamily" onclick="submitInviteFamilyForm()" class="btn btn-primary fw-bold w-100 py-3 shadow-sm d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #a31621 0%, #b8202c 100%); border: none; border-radius: 12px; font-size: 1rem; min-height: 48px;">
+                            <i class="bi bi-send-fill me-2"></i> Generate Invitation
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Step 2: Child Form -->
-                <div id="step2-child" class="d-none">
-                    <form id="addChildForm">
-    @include('csrf')
-                        <input type="hidden" name="base_node_id" id="childBaseNodeId">
-                        <input type="hidden" name="lineage_scope" class="wizard-lineage-scope-input" value="{{ $activeLineageScope ?? 'primary' }}">
-                        <input type="hidden" name="lineage_code" class="wizard-lineage-code-input" value="{{ ($activeLineageScope ?? 'primary') === 'maternal' ? ($maternalFamCode ?? '') : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}">
-                        
-                        <div id="childUnionHint" class="alert alert-warning small py-2">
-                            To add a child, you must select which partnership/union they belong to.
+                {{-- Step B: Instant Output Section (Revealed on success) --}}
+                <div id="inviteFamilyOutputSection" class="d-none">
+                    <div class="text-center mb-3">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10 text-success mb-2" style="width: 56px; height: 56px;">
+                            <i class="bi bi-check2-circle fs-1"></i>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label id="childUnionLabel" for="childUnionSelect" class="form-label fw-bold">Select Union <span class="text-danger">*</span></label>
-                            <select name="union_id" id="childUnionSelect" class="form-select" required>
-                                <option value="">Loading unions...</option>
-                            </select>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">First Name <span class="text-danger">*</span></label>
-                                <input type="text" name="first_name" class="form-control" required placeholder="e.g. John" autocomplete="off">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Last Name</label>
-                                <input type="text" name="last_name" class="form-control" placeholder="Doe">
-                            </div>
-                        </div>
+                        <h5 class="fw-bold text-dark mb-1">Invitation Ready!</h5>
+                        <p class="text-muted small mb-0" id="inviteOutputSubtext">Your invitation link has been generated.</p>
+                    </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Gender</label>
-                            <select name="gender" class="form-select" required>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                            </select>
+                    {{-- Email Dispatch Notice (if email was sent) --}}
+                    <div id="inviteEmailSentNotice" class="alert alert-success d-none d-flex align-items-center p-3 mb-3" style="border-radius: 12px;">
+                        <i class="bi bi-envelope-check-fill fs-4 me-2 text-success flex-shrink-0"></i>
+                        <div class="small">
+                            <strong>Invitation Email Dispatched!</strong><br>
+                            A formal invitation email has been sent to <span id="inviteRecipientEmailText" class="fw-bold"></span>.
                         </div>
+                    </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Email (Optional)</label>
-                                <input type="email" name="email" class="form-control" placeholder="Email for auto-link">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Mobile (Optional)</label>
-                                <input type="text" name="mobile" class="form-control" placeholder="Phone number">
-                            </div>
-                        </div>
+                    {{-- WhatsApp Share Button --}}
+                    <a id="inviteWhatsAppShareLink" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-success fw-bold w-100 py-3 mb-2 shadow-sm d-flex align-items-center justify-content-center text-decoration-none" style="background: #25D366; border: none; border-radius: 12px; font-size: 1.05rem; min-height: 50px;">
+                        <i class="bi bi-whatsapp fs-4 me-2"></i> Send via WhatsApp
+                    </a>
 
-                        <!-- Gated Family App: Enable Child Account & Posting -->
-                        <div class="card p-3 mb-3 border-0" style="background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
-                            <div class="form-check form-switch mb-2">
-                                <input class="form-check-input" type="checkbox" id="enableChildAccessCheck" name="enable_child_access" value="1" onchange="toggleChildAccessFields(this.checked)">
-                                <label class="form-check-label fw-bold text-slate-800" for="enableChildAccessCheck" style="font-size: 0.9rem;">
-                                    Enable Child Sign-In & Posting (PIN Access)
-                                </label>
-                            </div>
-                            <p class="text-muted small mb-0" style="font-size: 0.8rem; line-height: 1.4;">
-                                Creates a supervised, safe child account inside your gated family network so they can post updates, drawings, and comment.
-                            </p>
-                            <div id="childAccessFields" class="d-none mt-3 pt-2 border-top">
-                                <div class="row g-2">
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold">Child Username <span class="text-danger">*</span></label>
-                                        <input type="text" name="child_username" id="childUsernameInput" class="form-control form-control-sm" placeholder="e.g. sammy_o" autocomplete="off">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold">Child PIN (4–8 digits) <span class="text-danger">*</span></label>
-                                        <input type="password" name="child_pin" id="childPinInput" class="form-control form-control-sm" placeholder="4 to 8 digits" maxlength="8" autocomplete="off">
-                                    </div>
-                                    <div class="col-12 mt-2">
-                                        <label class="form-label small fw-bold">Date of Birth (For 18th Birthday Milestone)</label>
-                                        <div class="d-flex gap-2">
-                                            <input type="number" name="dob_day" class="form-control form-control-sm" placeholder="Day (DD)" min="1" max="31">
-                                            <input type="number" name="dob_month" class="form-control form-control-sm" placeholder="Month (MM)" min="1" max="12">
-                                            <input type="number" name="dob_year" class="form-control form-control-sm" placeholder="Year (YYYY)" min="1900" max="{{ date('Y') }}">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    {{-- Copy Link Button --}}
+                    <button type="button" id="inviteCopyLinkBtn" onclick="copyGeneratedInviteLink(this)" class="btn btn-outline-dark fw-bold w-100 py-2 d-flex align-items-center justify-content-center mb-3" style="border-radius: 12px; min-height: 44px;">
+                        <i class="bi bi-link-45deg fs-4 me-2"></i> Copy Invitation Link
+                    </button>
 
-                        <div class="d-flex justify-content-between mt-4">
-                            <button type="button" class="btn btn-light fw-bold" onclick="backToStep1()">Back</button>
-                            <button type="submit" class="btn btn-success fw-bold" id="submitChildBtn">Save Child</button>
-                        </div>
-                    </form>
+                    {{-- Link Display Box --}}
+                    <div class="p-2 px-3 rounded-3 mb-3 text-break small text-muted" style="background: #f1f5f9; border: 1px solid #cbd5e1; font-family: monospace; font-size: 0.8rem;" id="inviteGeneratedUrlText">
+                    </div>
+
+                    {{-- Reset / Invite Another --}}
+                    <button type="button" onclick="resetInviteFamilyForm()" class="btn btn-light border w-100 py-2 small fw-semibold text-secondary" style="border-radius: 10px;">
+                        <i class="bi bi-person-plus me-1"></i> Invite Another Relative
+                    </button>
                 </div>
 
-                <!-- Step 2: Parents Form -->
-                <div id="step2-parents" class="d-none">
-                    <form id="addParentsForm">
-    @include('csrf')
-                        <input type="hidden" name="base_node_id" id="parentsBaseNodeId">
-                        <input type="hidden" name="lineage_scope" class="wizard-lineage-scope-input" value="{{ $activeLineageScope ?? 'primary' }}">
-                        <input type="hidden" name="lineage_code" class="wizard-lineage-code-input" value="{{ ($activeLineageScope ?? 'primary') === 'maternal' ? ($maternalFamCode ?? '') : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}">
-                        
-                        <div class="alert alert-info small py-2" id="parentsLineageHint">
-                            Provide details for one or both parents. Leave blank if unknown.
-                        </div>
-                        
-                        <!-- Father Section -->
-                        <h6 class="fw-bold text-primary mt-3 border-bottom pb-2">Father's Details</h6>
-                        <div class="row mb-2">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">First Name</label>
-                                <input type="text" name="father_first_name" class="form-control form-control-sm" placeholder="John">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Last Name</label>
-                                <input type="text" name="father_last_name" class="form-control form-control-sm" placeholder="Doe">
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Email (Optional)</label>
-                                <input type="email" name="father_email" class="form-control form-control-sm" placeholder="Email">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Mobile (Optional)</label>
-                                <input type="text" name="father_mobile" class="form-control form-control-sm" placeholder="Mobile">
-                            </div>
-                        </div>
-
-                        <!-- Mother Section -->
-                        <h6 class="fw-bold text-primary mt-4 border-bottom pb-2">Mother's Details</h6>
-                        <div class="row mb-2">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">First Name</label>
-                                <input type="text" name="mother_first_name" class="form-control form-control-sm" placeholder="Jane">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Last Name</label>
-                                <input type="text" name="mother_last_name" class="form-control form-control-sm" placeholder="Doe">
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Email (Optional)</label>
-                                <input type="email" name="mother_email" class="form-control form-control-sm" placeholder="Email">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Mobile (Optional)</label>
-                                <input type="text" name="mother_mobile" class="form-control form-control-sm" placeholder="Mobile">
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between mt-4">
-                            <button type="button" class="btn btn-light fw-bold" onclick="backToStep1()">Back</button>
-                            <button type="submit" class="btn btn-secondary fw-bold" id="submitParentsBtn">Save Parents</button>
-                        </div>
-                    </form>
+                {{-- Direct Node Adding Restriction Notice --}}
+                <div class="p-3 mt-4 rounded-3 text-center" style="background: #f8fafc; border: 1px dashed #cbd5e1; font-size: 0.82rem; color: #64748b;">
+                    <i class="bi bi-shield-lock-fill text-muted me-1"></i> <strong>Adding relatives directly to the tree?</strong><br>
+                    Direct tree modifications and offline ancestors are managed in
+                    <a href="/familyStudio" class="fw-bold text-primary text-decoration-underline">Family Studio</a> or
+                    <a href="/accountSetting" class="fw-bold text-primary text-decoration-underline">Account Settings</a>.
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<script nonce="{{ $nonce ?? '' }}">
-function toggleChildAccessFields(enabled) {
-    const fields = document.getElementById('childAccessFields');
-    const uInput = document.getElementById('childUsernameInput');
-    const pInput = document.getElementById('childPinInput');
-    if (fields) {
-        if (enabled) {
-            fields.classList.remove('d-none');
-            if (uInput) uInput.required = true;
-            if (pInput) pInput.required = true;
-        } else {
-            fields.classList.add('d-none');
-            if (uInput) uInput.required = false;
-            if (pInput) pInput.required = false;
+<script>
+    let activeInviteTargetCode = '{{ $activeCode }}';
+    let activeInviteTargetScope = '{{ $currentScope }}';
+    let lastGeneratedInviteUrl = '';
+
+    function syncInviteTarget(radio) {
+        if (!radio) return;
+        activeInviteTargetCode = radio.value;
+        activeInviteTargetScope = radio.getAttribute('data-scope') || 'primary';
+        const badge = document.getElementById('inviteActiveCodeBadge');
+        if (badge) badge.textContent = '#' + activeInviteTargetCode;
+        const surname = radio.getAttribute('data-surname');
+        const lastNameInput = document.getElementById('inviteLastName');
+        if (surname && lastNameInput && !lastNameInput.value) {
+            lastNameInput.value = surname;
         }
     }
-}
+
+    function openInviteFamilyModal(preferredScope, preferredRelation) {
+        const errorDiv = document.getElementById('inviteFamilyError');
+        if (errorDiv) errorDiv.classList.add('d-none');
+
+        resetInviteFamilyForm();
+
+        if (preferredRelation) {
+            const relSelect = document.getElementById('inviteRelationship');
+            if (relSelect) relSelect.value = preferredRelation;
+        }
+
+        const modalEl = document.getElementById('addRelativeModal');
+        if (modalEl) {
+            const myModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            myModal.show();
+        }
+    }
+
+    // Alias for existing callers
+    function openAddRelativeModalFromBanner(relationType) {
+        openInviteFamilyModal(null, relationType);
+    }
+
+    function openInviteRelativeFromNode() {
+        const nodeName = typeof currentBaseNodeName !== 'undefined' ? currentBaseNodeName : '';
+        openInviteFamilyModal();
+        if (nodeName && nodeName !== 'Yourself') {
+            const parts = nodeName.split(' ');
+            const fnInput = document.getElementById('inviteFirstName');
+            const lnInput = document.getElementById('inviteLastName');
+            if (fnInput && parts[0]) fnInput.value = parts[0];
+            if (lnInput && parts.length > 1) lnInput.value = parts.slice(1).join(' ');
+        }
+    }
+
+    function resetInviteFamilyForm() {
+        document.getElementById('inviteFamilyFormSection')?.classList.remove('d-none');
+        document.getElementById('inviteFamilyOutputSection')?.classList.add('d-none');
+        document.getElementById('inviteEmailSentNotice')?.classList.add('d-none');
+        const fnInput = document.getElementById('inviteFirstName');
+        const emailInput = document.getElementById('inviteEmail');
+        const mobInput = document.getElementById('inviteMobile');
+        if (fnInput) fnInput.value = '';
+        if (emailInput) emailInput.value = '';
+        if (mobInput) mobInput.value = '';
+        const errorDiv = document.getElementById('inviteFamilyError');
+        if (errorDiv) errorDiv.classList.add('d-none');
+    }
+
+    async function submitInviteFamilyForm() {
+        const firstName = document.getElementById('inviteFirstName')?.value.trim();
+        const lastName = document.getElementById('inviteLastName')?.value.trim();
+        const relationship = document.getElementById('inviteRelationship')?.value;
+        const email = document.getElementById('inviteEmail')?.value.trim();
+        const mobile = document.getElementById('inviteMobile')?.value.trim();
+        const errorDiv = document.getElementById('inviteFamilyError');
+        const submitBtn = document.getElementById('btnSubmitInviteFamily');
+
+        if (!firstName) {
+            if (errorDiv) {
+                errorDiv.textContent = 'Please enter the relative\'s first name.';
+                errorDiv.classList.remove('d-none');
+            }
+            return;
+        }
+
+        if (errorDiv) errorDiv.classList.add('d-none');
+
+        if (window.ScoreTenantSpinner) {
+            ScoreTenantSpinner.start(submitBtn);
+        } else if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Generating...';
+        }
+
+        try {
+            const csrfToken = (function() {
+                const el = document.querySelector('meta[name="csrf-token"]') || document.querySelector('input[name="_token"]');
+                return el ? (el.getAttribute('content') || el.value) : '';
+            })();
+
+            const res = await fetch('/api/invite/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-XSRF-TOKEN': csrfToken,
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    first_name: firstName,
+                    last_name: lastName,
+                    email: email,
+                    mobile: mobile,
+                    relationship: relationship,
+                    family_code: activeInviteTargetCode,
+                    lineage_scope: activeInviteTargetScope,
+                    type: 'organogram',
+                    token: csrfToken
+                })
+            });
+
+            const data = await res.json();
+            const payload = (data && data.message && typeof data.message === 'object') ? data.message : data;
+
+            if (res.ok && data && (data.status === 'success' || payload.invite_url)) {
+                lastGeneratedInviteUrl = payload.invite_url || '';
+                
+                // Show output
+                document.getElementById('inviteFamilyFormSection')?.classList.add('d-none');
+                const outSection = document.getElementById('inviteFamilyOutputSection');
+                outSection?.classList.remove('d-none');
+
+                const subtext = document.getElementById('inviteOutputSubtext');
+                if (subtext) {
+                    subtext.textContent = `Invitation created for ${firstName} ${lastName} (${payload.tree_label || '#' + activeInviteTargetCode}).`;
+                }
+
+                // Email notice
+                const emailNotice = document.getElementById('inviteEmailSentNotice');
+                if (payload.email_sent && email) {
+                    const recipientText = document.getElementById('inviteRecipientEmailText');
+                    if (recipientText) recipientText.textContent = email;
+                    emailNotice?.classList.remove('d-none');
+                } else {
+                    emailNotice?.classList.add('d-none');
+                }
+
+                // WhatsApp Link (Beautiful WhatsApp View)
+                const waLink = document.getElementById('inviteWhatsAppShareLink');
+                if (waLink) {
+                    const waShareUrl = payload.whatsapp_share_url || (
+                        'https://api.whatsapp.com/send?text=' + encodeURIComponent(
+                            payload.whatsapp_message || (
+                                `🌳 *Family Tree Invitation* 🌳\n\n` +
+                                `You are invited to connect with the *${payload.tree_label || 'our Family Tree'}* on FamilyPlatform (#${activeInviteTargetCode}).\n\n` +
+                                `Click below to claim your spot, explore our lineage, and connect with the family:\n` +
+                                `👉 ${payload.invite_url}`
+                            )
+                        )
+                    );
+                    waLink.href = waShareUrl;
+                }
+
+                // URL Text
+                const urlText = document.getElementById('inviteGeneratedUrlText');
+                if (urlText) {
+                    urlText.textContent = payload.invite_url;
+                }
+
+                if (window.showAppToast) {
+                    window.showAppToast('Invitation link generated successfully!', 'success');
+                }
+            } else {
+                throw new Error((payload && payload.message) || data.message || 'Could not generate invitation.');
+            }
+        } catch (err) {
+            if (errorDiv) {
+                errorDiv.textContent = err.message || 'An unexpected error occurred.';
+                errorDiv.classList.remove('d-none');
+            }
+        } finally {
+            if (window.ScoreTenantSpinner) {
+                ScoreTenantSpinner.stop(submitBtn);
+            } else if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-send-fill me-2"></i> Generate Invitation';
+            }
+        }
+    }
+
+    function copyGeneratedInviteLink(btn) {
+        if (!lastGeneratedInviteUrl) return;
+        navigator.clipboard.writeText(lastGeneratedInviteUrl).then(() => {
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check-circle-fill text-success fs-4 me-2"></i> Copied to Clipboard!';
+            btn.classList.add('btn-success', 'text-white');
+            btn.classList.remove('btn-outline-dark');
+            setTimeout(() => {
+                btn.innerHTML = orig;
+                btn.classList.remove('btn-success', 'text-white');
+                btn.classList.add('btn-outline-dark');
+            }, 3000);
+        }).catch(() => {
+            prompt('Copy this invitation link:', lastGeneratedInviteUrl);
+        });
+    }
 </script>

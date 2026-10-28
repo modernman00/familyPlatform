@@ -131,6 +131,25 @@ final class KinshipEntityResolver
         /** @var array<int, array<string, mixed>> $nodes */
         $nodes = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+        if (empty($nodes)) {
+            return ['merged_count' => 0, 'removed_ids' => []];
+        }
+
+        // 0. Sanitize redundant last_name inside first_name (e.g. "OLUYOMI OLAOGUN" with last_name "OLAOGUN")
+        foreach ($nodes as &$n) {
+            $f = trim((string)($n['first_name'] ?? ''));
+            $l = trim((string)($n['last_name'] ?? ''));
+            if ($l !== '' && str_ends_with(strtolower($f), strtolower($l))) {
+                $cleanF = trim(substr($f, 0, -strlen($l)));
+                if ($cleanF !== '') {
+                    $upd = $db->prepare("UPDATE family_nodes SET first_name = ? WHERE id = ?");
+                    $upd->execute([$cleanF, $n['id']]);
+                    $n['first_name'] = $cleanF;
+                }
+            }
+        }
+        unset($n);
+
         if (count($nodes) <= 1) {
             return ['merged_count' => 0, 'removed_ids' => []];
         }
@@ -204,6 +223,40 @@ final class KinshipEntityResolver
 
                 $removedIds[] = $dupId;
                 $mergedCount++;
+            }
+        }
+
+        // Merge duplicate unions for identical partner pairs in the same family
+        $unionsStmt = $db->prepare("SELECT * FROM family_unions WHERE family_code = ? ORDER BY id ASC");
+        $unionsStmt->execute([$familyCode]);
+        /** @var array<int, array<string, mixed>> $unions */
+        $unions = $unionsStmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $unionPairs = [];
+        foreach ($unions as $u) {
+            $p1 = (int)$u['partner_1_id'];
+            $p2 = (int)$u['partner_2_id'];
+            if ($p1 <= 0 || $p2 <= 0) {
+                continue;
+            }
+            $pairKey = min($p1, $p2) . '-' . max($p1, $p2);
+            $unionPairs[$pairKey][] = $u;
+        }
+
+        foreach ($unionPairs as $pairKey => $pairGroup) {
+            if (count($pairGroup) <= 1) {
+                continue;
+            }
+            $masterUnion = $pairGroup[0];
+            $masterUId = (int)$masterUnion['id'];
+
+            for ($j = 1; $j < count($pairGroup); $j++) {
+                $dupUId = (int)$pairGroup[$j]['id'];
+                $repointChildren = $db->prepare("UPDATE family_node_children SET union_id = ? WHERE union_id = ?");
+                $repointChildren->execute([$masterUId, $dupUId]);
+
+                $delUnion = $db->prepare("DELETE FROM family_unions WHERE id = ?");
+                $delUnion->execute([$dupUId]);
             }
         }
 

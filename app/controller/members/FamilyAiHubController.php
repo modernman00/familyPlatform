@@ -10,7 +10,7 @@ use App\model\Post;
 use Src\Db;
 use Src\SelectFn;
 use Src\FileUploader;
-use Src\Pusher;
+use App\classes\Pusher;
 use Src\functionality\SignIn;
 use Src\Exceptions\ForbiddenException;
 use Src\Exceptions\ValidationException;
@@ -472,11 +472,19 @@ final class FamilyAiHubController extends BaseController
             $raw = file_get_contents('php://input');
             $json = is_string($raw) ? (json_decode($raw, true) ?: []) : [];
 
-            $region = htmlspecialchars(strip_tags(trim((string)($json['region'] ?? $_POST['region'] ?? 'London'))), ENT_QUOTES, 'UTF-8');
-            $ageGroup = htmlspecialchars(strip_tags(trim((string)($json['age_group'] ?? $_POST['age_group'] ?? 'all-ages'))), ENT_QUOTES, 'UTF-8');
+            $region = htmlspecialchars(strip_tags(trim((string)($json['city'] ?? $json['region'] ?? $_POST['city'] ?? $_POST['region'] ?? 'London'))), ENT_QUOTES, 'UTF-8');
+            $ageGroup = htmlspecialchars(strip_tags(trim((string)($json['interests'] ?? $json['age_group'] ?? $_POST['interests'] ?? $_POST['age_group'] ?? 'all-ages'))), ENT_QUOTES, 'UTF-8');
 
             $service = new \Src\Ai\ResilientWebSearchService();
             $result = $service->discoverFamilyWeekendOutings($region, $ageGroup);
+
+            // Pass through ActivityAffiliateService to eliminate bureaucratic baseline queries (e.g. gov.uk),
+            // curate real verified family attractions, and attach commercial affiliate partnership booking links.
+            $outings = \App\services\ActivityAffiliateService::curateAndEnrichOutings($result, $region, $ageGroup);
+
+            $result['outings'] = $outings;
+            $result['affiliate_disclosure'] = \App\services\ActivityAffiliateService::getAffiliateDisclosure();
+            $result['success'] = true;
 
             // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
             echo json_encode($result);
@@ -515,7 +523,7 @@ final class FamilyAiHubController extends BaseController
                 }
             }
 
-            $db = Database::connection();
+            $db = Db::connect2();
             $fullName = $_SESSION['user_full_name'] ?? 'Family Organiser';
 
             $pStmt = $db->prepare("SELECT img FROM profilePics WHERE id = ? LIMIT 1");

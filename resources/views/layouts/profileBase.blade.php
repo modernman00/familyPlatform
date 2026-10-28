@@ -124,6 +124,7 @@
   @includeIf('member.modals.editProfile')
   @includeIf('member.modals.recommendModal')
   @includeIf('components.profilePhotoViewer')
+  @includeIf('components.omniSearchModal')
 
   <!-- Mobile PWA Bottom Tab Navigation (Native App Parity) -->
   @include('layouts.bottom_nav')

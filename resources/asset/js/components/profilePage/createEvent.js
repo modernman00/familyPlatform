@@ -53,6 +53,24 @@ if (createEventModalEl) {
         if (eventForm) eventForm.reset();
         const partyToggle = id('enablePartyPlatformToggle');
         if (partyToggle) partyToggle.checked = false;
+        const locInput = id('eventLocation');
+        if (locInput) locInput.value = '';
+        const proxMode = id('proximityModeSelect');
+        if (proxMode) proxMode.value = 'all_family';
+        const targetRad = id('targetRadiusMilesSelect');
+        if (targetRad) {
+            targetRad.value = '25';
+            targetRad.disabled = true;
+        }
+        const scoutArea = id('scoutResultsArea');
+        if (scoutArea) scoutArea.classList.add('d-none');
+        const proxNote = id('proximityAudienceNote');
+        if (proxNote) proxNote.innerHTML = '<i class="bi bi-info-circle me-1"></i><span>All registered family members will receive notifications for this event.</span>';
+        const proxBadge = id('proximityBadgePreview');
+        if (proxBadge) {
+            proxBadge.textContent = 'All Family';
+            proxBadge.className = 'badge rounded-pill bg-light text-secondary border px-2 py-1';
+        }
     });
 }
 
@@ -65,6 +83,200 @@ if (eventTypeSelect) {
         const studioTypes = ['Party', 'Wedding', 'Reunion', 'House_warming', 'Graduation'];
         if (studioTypes.includes(ev.target.value)) {
             partyToggle.checked = true;
+        }
+    });
+}
+
+// Proximity Localisation and Radius Preview
+const proximityModeSelect = id('proximityModeSelect');
+const targetRadiusSelect = id('targetRadiusMilesSelect');
+const proximityBadgePreview = id('proximityBadgePreview');
+const proximityAudienceNote = id('proximityAudienceNote');
+const eventLocationInput = id('eventLocation');
+
+const updateProximityPreview = async () => {
+    if (!proximityModeSelect) return;
+    const isProximity = proximityModeSelect.value === 'proximity_only';
+    if (targetRadiusSelect) {
+        targetRadiusSelect.disabled = !isProximity;
+    }
+    const radius = targetRadiusSelect ? targetRadiusSelect.value : '25';
+
+    if (!isProximity) {
+        if (proximityBadgePreview) {
+            proximityBadgePreview.textContent = 'All Family';
+            proximityBadgePreview.className = 'badge rounded-pill bg-light text-secondary border px-2 py-1';
+        }
+        if (proximityAudienceNote) {
+            proximityAudienceNote.innerHTML = '<i class="bi bi-info-circle me-1"></i><span>All registered family members will receive notifications for this event.</span>';
+        }
+        return;
+    }
+
+    if (proximityBadgePreview) {
+        proximityBadgePreview.textContent = `Within ${radius} miles`;
+        proximityBadgePreview.className = 'badge rounded-pill bg-danger text-white px-2 py-1';
+    }
+
+    const loc = eventLocationInput ? eventLocationInput.value.trim() : '';
+    if (!loc) {
+        if (proximityAudienceNote) {
+            proximityAudienceNote.innerHTML = `<i class="bi bi-geo-alt me-1"></i>Enter a venue or city above to preview how many family members reside within ${radius} miles.`;
+        }
+        return;
+    }
+
+    try {
+        const res = await axios.post('/member/activities/preview-audience', {
+            venue_location: loc,
+            radius_miles: radius
+        }, options);
+        const summary = res.data?.message?.summary || res.data?.data?.summary;
+        if (summary && proximityAudienceNote) {
+            proximityAudienceNote.innerHTML = `<i class="bi bi-check-circle-fill text-success me-1"></i>${summary}`;
+        }
+    } catch (_) {
+        if (proximityAudienceNote) {
+            proximityAudienceNote.innerHTML = `<i class="bi bi-geo-alt me-1"></i>Targeting family members residing within ${radius} miles of ${loc}.`;
+        }
+    }
+};
+
+if (proximityModeSelect) proximityModeSelect.addEventListener('change', updateProximityPreview);
+if (targetRadiusSelect) targetRadiusSelect.addEventListener('change', updateProximityPreview);
+if (eventLocationInput) {
+    let locDebounce;
+    eventLocationInput.addEventListener('input', () => {
+        clearTimeout(locDebounce);
+        locDebounce = setTimeout(updateProximityPreview, 500);
+    });
+}
+
+// ✨ AI Activity Scout (ResilientWebSearchService)
+let currentScoutCategory = 'barbecue';
+const scoutCategoryPills = document.querySelectorAll('.scout-pill');
+scoutCategoryPills.forEach(pill => {
+    pill.addEventListener('click', (e) => {
+        scoutCategoryPills.forEach(p => {
+            p.classList.remove('active', 'btn-danger', 'text-white');
+            p.classList.add('btn-outline-secondary');
+        });
+        const target = e.currentTarget;
+        target.classList.remove('btn-outline-secondary');
+        target.classList.add('active', 'btn-danger', 'text-white');
+        currentScoutCategory = target.getAttribute('data-cat') || 'barbecue';
+    });
+});
+
+const btnRunScout = id('btnRunScout');
+const scoutLocationInput = id('scoutLocationInput');
+const scoutResultsArea = id('scoutResultsArea');
+const scoutLoadingSpinner = id('scoutLoadingSpinner');
+const scoutCardsContainer = id('scoutCardsContainer');
+
+if (btnRunScout) {
+    btnRunScout.addEventListener('click', async () => {
+        const loc = scoutLocationInput ? scoutLocationInput.value.trim() : '';
+        if (scoutResultsArea) scoutResultsArea.classList.remove('d-none');
+        if (scoutLoadingSpinner) scoutLoadingSpinner.classList.remove('d-none');
+        if (scoutCardsContainer) scoutCardsContainer.innerHTML = '';
+
+        try {
+            const res = await axios.get('/member/activities/discover', {
+                params: {
+                    category: currentScoutCategory,
+                    location: loc || 'London',
+                    age_group: 'all-ages'
+                }
+            });
+
+            if (scoutLoadingSpinner) scoutLoadingSpinner.classList.add('d-none');
+            const data = res.data?.message || res.data?.data || {};
+            const cards = data.cards || [];
+
+            if (cards.length === 0) {
+                if (scoutCardsContainer) {
+                    scoutCardsContainer.innerHTML = '<div class="alert alert-light border small text-muted py-2">No specific suggestions found. Try another town or outward district.</div>';
+                }
+                return;
+            }
+
+            cards.forEach(card => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'p-3 rounded-3 border bg-white shadow-sm';
+                cardEl.style.fontSize = '0.8rem';
+                cardEl.style.borderColor = '#e2e8f0';
+                cardEl.style.transition = 'all 0.2s ease';
+                cardEl.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+                        <strong class="text-dark" style="font-size: 0.85rem; letter-spacing: -0.01em;">${card.title}</strong>
+                        <div class="d-flex align-items-center gap-1">
+                            ${card.price_guide ? `<span class="badge fw-semibold" style="background: rgba(16, 185, 129, 0.1); color: #047857; border: 1px solid rgba(16, 185, 129, 0.25); font-size: 0.65rem;">${card.price_guide}</span>` : ''}
+                            <span class="badge bg-light text-dark border" style="font-size: 0.65rem;">${card.type}</span>
+                        </div>
+                    </div>
+                    <p class="text-secondary mb-2" style="font-size: 0.78rem; line-height: 1.45;">${card.description}</p>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-2 border-top">
+                        <small class="text-secondary d-inline-flex align-items-center gap-1" style="font-size: 0.72rem;">
+                            <i class="bi bi-geo-alt-fill text-danger"></i>
+                            <span>${card.location}</span>
+                        </small>
+                        <div class="d-flex align-items-center gap-1.5">
+                            ${card.source_url ? `
+                                <a href="${card.source_url}" target="_blank" rel="noopener noreferrer sponsored" class="btn btn-sm rounded-pill px-2.5 py-1 fw-bold text-white d-inline-flex align-items-center gap-1" style="font-size: 0.7rem; text-decoration: none; white-space: nowrap; min-height: 32px; background: linear-gradient(135deg, #059669 0%, #047857 100%); border: 1px solid rgba(255,255,255,0.2);">
+                                    ${card.partner_name || 'Book Offer'} <i class="bi bi-box-arrow-up-right" style="font-size: 0.6rem;"></i>
+                                </a>
+                            ` : ''}
+                            <button type="button" class="btn btn-sm rounded-pill px-3 py-1 btn-use-activity fw-bold text-white" style="font-size: 0.74rem; min-height: 32px; background: linear-gradient(135deg, #a31621 0%, #7e101a 100%); border: 1px solid rgba(255,215,0,0.3); white-space: nowrap; flex-shrink: 0;">
+                                ✨ Use This Idea
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                const useBtn = cardEl.querySelector('.btn-use-activity');
+                if (useBtn) {
+                    useBtn.addEventListener('click', () => {
+                        const eventNameEl = id('eventName');
+                        const eventDescEl = id('eventDescription');
+                        const eventTypeEl = id('eventType');
+                        const eventLocEl = id('eventLocation');
+
+                        if (eventNameEl) eventNameEl.value = card.title;
+                        if (eventDescEl) eventDescEl.value = card.description;
+                        if (eventLocEl) {
+                            eventLocEl.value = card.location || loc;
+                            updateProximityPreview();
+                        }
+                        if (eventTypeEl) {
+                            for (let opt of eventTypeEl.options) {
+                                if (opt.value.toLowerCase() === card.type.toLowerCase()) {
+                                    opt.selected = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (scoutResultsArea) scoutResultsArea.classList.add('d-none');
+
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Activity details applied!',
+                            showConfirmButton: false,
+                            timer: 2500
+                        });
+                    });
+                }
+
+                if (scoutCardsContainer) scoutCardsContainer.appendChild(cardEl);
+            });
+        } catch (err) {
+            if (scoutLoadingSpinner) scoutLoadingSpinner.classList.add('d-none');
+            if (scoutCardsContainer) {
+                scoutCardsContainer.innerHTML = '<div class="alert alert-light border small text-danger py-2">Unable to load live activity ideas. Please try again.</div>';
+            }
         }
     });
 }
@@ -145,6 +357,13 @@ const process = async (e) => {
         const enablePartyStudio = Boolean(partyToggleEl && partyToggleEl.checked);
         eventFormEntries.append('enable_party_platform', enablePartyStudio ? '1' : '0');
 
+        const eventLocEl = id('eventLocation');
+        const proximityModeEl = id('proximityModeSelect');
+        const targetRadiusEl = id('targetRadiusMilesSelect');
+        if (eventLocEl && eventLocEl.value) eventFormEntries.append('eventLocation', eventLocEl.value);
+        if (proximityModeEl && proximityModeEl.value) eventFormEntries.append('proximity_mode', proximityModeEl.value);
+        if (targetRadiusEl && targetRadiusEl.value) eventFormEntries.append('target_radius_miles', targetRadiusEl.value);
+
         // editEvent() in sidebarComponents.js stamps this when reopening the modal
         // to edit an existing event instead of creating a new one.
         const editEventNo = id('editEventNo')?.value;
@@ -155,6 +374,9 @@ const process = async (e) => {
                 eventType: eventFormEntries.get('eventType') || '',
                 eventDescription: eventFormEntries.get('eventDescription') || '',
                 eventFrequency: eventFormEntries.get('eventFrequency') || '',
+                eventLocation: eventLocEl ? eventLocEl.value : '',
+                proximity_mode: proximityModeEl ? proximityModeEl.value : 'all_family',
+                target_radius_miles: targetRadiusEl ? targetRadiusEl.value : '25',
             };
 
             await axios.put(`/member/profilePage/event/${editEventNo}`, payload, options);

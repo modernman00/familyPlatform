@@ -12,6 +12,11 @@
             </div>
         </a>
 
+        <!-- Quick mobile search icon for phone viewports -->
+        <button class="btn btn-icon-stitch d-lg-none ms-auto me-2" type="button" data-bs-toggle="modal" data-bs-target="#omniSearchModal" aria-label="Search activities and data" title="Search">
+            <i class="bi bi-search"></i>
+        </button>
+
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -51,6 +56,14 @@
             </ul>
 
             <div class="d-flex align-items-center gap-2">
+                <!-- Omni-Search Trigger Button (Search Data, Activities & Functions) -->
+                <button class="btn btn-omni-search-trigger d-flex align-items-center gap-2" id="omniSearchTriggerBtn" type="button" aria-label="Search data, activities, functions" data-bs-toggle="modal" data-bs-target="#omniSearchModal">
+                    <i class="bi bi-search text-primary"></i>
+                    <span class="d-none d-xl-inline text-muted small pe-2">{{ __('nav.search_placeholder', 'Search data, activities, functions...') }}</span>
+                    <span class="d-inline d-xl-none text-muted small pe-1">{{ __('nav.search', 'Search...') }}</span>
+                    <kbd class="d-none d-md-inline-block text-muted px-1.5 py-0.5 rounded border border-secondary-subtle" style="font-size: 0.68rem; background: rgba(0,0,0,0.04);">⌘K</kbd>
+                </button>
+
                 <!-- Recommend / Invite Others Button -->
                 <button class="btn btn-sm d-flex align-items-center gap-1 px-3 py-1 fw-bold text-white rounded-pill shadow-sm" id="btnOpenRecommendModal" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" style="background: linear-gradient(135deg, #b8202c 0%, #a31621 100%); font-size: 0.85rem;" type="button">
                     <i class="bi bi-person-plus-fill text-warning"></i> <span>{{ __('nav.invite_others', 'Invite Others') }}</span>

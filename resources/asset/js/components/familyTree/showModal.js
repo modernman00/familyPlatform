@@ -76,6 +76,12 @@ export const showPersonDetails = async (personData) => {
   let familyTreeLabel = `${familySurname} Family`;
   let displayCodeBadge = effectiveFamilyCode ? `(#${effectiveFamilyCode})` : '';
 
+  const kinshipWords = ['father', 'mother', 'son', 'daughter', 'brother', 'sister', 'uncle', 'aunt', 'in-law', 'inlaw', 'relative', 'me', 'parent', 'child', 'spouse', 'partner'];
+  if (kinshipWords.includes(familySurname.toLowerCase())) {
+    familySurname = window.__MAIDEN_SURNAME__ || window.__MARITAL_SURNAME__ || '';
+    familyTreeLabel = familySurname ? `${familySurname} Family` : 'Family Tree';
+  }
+
   if (isMaternalNode) {
     const rawLast = (personData?.last_name || (personData?.raw && personData?.raw?.last_name) || '').trim();
     const maternalSurname = (rawLast && rawLast.toUpperCase() !== paternalSurname.toUpperCase())

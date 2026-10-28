@@ -640,6 +640,24 @@ final class Register extends Db
 
         try {
             $db = self::connect2();
+
+            // 1. Check if this is a registered birth family code in otherFamily (maiden name)
+            $stmtBirth = $db->prepare("SELECT maiden_name FROM otherFamily WHERE otherFamCode = ? AND maiden_name IS NOT NULL AND TRIM(maiden_name) != '' ORDER BY no DESC LIMIT 1");
+            $stmtBirth->execute([$famCode]);
+            $maiden = $stmtBirth->fetchColumn();
+            if ($maiden && is_string($maiden) && trim($maiden) !== '') {
+                return trim($maiden);
+            }
+
+            // 1b. Check if registered in family_codes where kind = 'birth' and look up creator's maiden_name
+            $stmtCode = $db->prepare("SELECT o.maiden_name FROM family_codes fc JOIN otherFamily o ON fc.created_by = o.id WHERE fc.code = ? AND fc.kind = 'birth' AND o.maiden_name IS NOT NULL AND TRIM(o.maiden_name) != '' ORDER BY o.no DESC LIMIT 1");
+            $stmtCode->execute([$famCode]);
+            $codeMaiden = $stmtCode->fetchColumn();
+            if ($codeMaiden && is_string($codeMaiden) && trim($codeMaiden) !== '') {
+                return trim($codeMaiden);
+            }
+
+            // 2. Check personal where famCode = ? (primary family code members)
             $stmt = $db->prepare("SELECT lastName FROM personal WHERE famCode = ? AND lastName IS NOT NULL AND TRIM(lastName) != '' ORDER BY id ASC LIMIT 1");
             $stmt->execute([$famCode]);
             $surname = $stmt->fetchColumn();
@@ -647,6 +665,7 @@ final class Register extends Db
                 return trim($surname);
             }
 
+            // 3. Check family_nodes
             $stmtNode = $db->prepare("SELECT last_name FROM family_nodes WHERE family_code = ? AND last_name IS NOT NULL AND TRIM(last_name) != '' ORDER BY id ASC LIMIT 1");
             $stmtNode->execute([$famCode]);
             $nodeSurname = $stmtNode->fetchColumn();

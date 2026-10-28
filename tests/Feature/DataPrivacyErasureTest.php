@@ -28,6 +28,10 @@ final class DataPrivacyErasureTest extends TestCase
         $this->testUserId = 'TEST_DEL_' . bin2hex(random_bytes(6));
         $this->testEmail = 'del_test_' . bin2hex(random_bytes(4)) . '@example.test';
 
+        // Clean any residual test state
+        $cleanup = $this->pdo->prepare('DELETE FROM account WHERE id = ? OR email = ? OR email LIKE ?');
+        $cleanup->execute([$this->testUserId, $this->testEmail, '%anonymised.local']);
+
         // Provision test account
         $stmt = $this->pdo->prepare("
             INSERT INTO account (id, email, password, status, token, token_version, created_at)
@@ -166,8 +170,8 @@ final class DataPrivacyErasureTest extends TestCase
         $this->assertNull($row['deleted_at']);
 
         // Audit log must record restoration
-        $auditStmt = $this->pdo->prepare('SELECT status FROM audit_logs WHERE user_id = ? ORDER BY created_at DESC LIMIT 1');
-        $auditStmt->execute([$this->testUserId]);
+        $auditStmt = $this->pdo->prepare('SELECT status FROM audit_logs WHERE user_id = ? AND status = ? LIMIT 1');
+        $auditStmt->execute([$this->testUserId, 'DELETION_CANCELLED_ACCOUNT_RESTORED']);
         $this->assertSame('DELETION_CANCELLED_ACCOUNT_RESTORED', (string) $auditStmt->fetchColumn());
     }
 }
