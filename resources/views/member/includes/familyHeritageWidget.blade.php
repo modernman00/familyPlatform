@@ -17,14 +17,30 @@
   }
 </style>
 <div class="card border-0 shadow-sm mb-4 family-heritage-sidebar-widget" id="familyHeritageSection" style="border-radius: 20px; background-color: var(--card-bg); scroll-margin-top: 80px;">
-    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2 px-4">
-        <div>
-            <h5 class="mb-0 fw-bold" style="color: var(--text-color); font-size: 1.05rem;">
-                <i class="bi bi-stars text-warning me-1"></i> {{ __('heritage.family_heritage', 'Family Rituals & Quests') }}
-            </h5>
-            <p class="mb-0" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569); line-height: 1.5;">{{ __('heritage.rituals_subtitle', 'Rituals, quests & generational vault.') }}</p>
+    <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4">
+        <!-- Top Row: ACTIVE badge -->
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge rounded-pill bg-success-subtle text-success px-2.5 py-1 fw-bold d-inline-flex align-items-center gap-1.5" style="font-size: 0.72rem; font-weight: 700; line-height: 1;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #059669; display: inline-block;"></span>
+                ACTIVE
+            </span>
         </div>
-        <span class="badge rounded-pill bg-success-subtle text-success px-2.5 py-1 fw-bold" style="font-size: 0.75rem;">ACTIVE</span>
+
+        <!-- Title Row: Stars Icon + Family Rituals & Quests & Subtitle (Un-squeezed) -->
+        <div class="d-flex align-items-center gap-2">
+            <div class="rounded-3 d-flex align-items-center justify-content-center" 
+                 style="width: 38px; height: 38px; border-radius: 12px; background: rgba(245, 158, 11, 0.14); color: #d97706; font-size: 1.15rem; flex-shrink: 0;">
+                <i class="bi bi-stars"></i>
+            </div>
+            <div style="min-width: 0; flex: 1;">
+                <h5 class="mb-0 fw-bold text-truncate" style="color: var(--text-color); font-size: 1rem; line-height: 1.25; letter-spacing: -0.01em;" title="{{ __('heritage.family_heritage', 'Family Rituals & Quests') }}">
+                    {{ __('heritage.family_heritage', 'Family Rituals & Quests') }}
+                </h5>
+                <p class="mb-0 text-truncate" style="font-size: 0.78rem; color: var(--text-muted-aa, #475569); line-height: 1.35; margin-top: 2px;" title="{{ __('heritage.rituals_subtitle', 'Rituals, quests & generational vault.') }}">
+                    {{ __('heritage.rituals_subtitle', 'Rituals, quests & generational vault.') }}
+                </p>
+            </div>
+        </div>
     </div>
 
     <div class="card-body px-4 pt-2 pb-4">

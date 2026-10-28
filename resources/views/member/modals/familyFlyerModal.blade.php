@@ -73,9 +73,12 @@
                 <span class="text-muted small">
                     <i class="bi bi-shield-check text-success me-1"></i> Client-side rendering • Zero PII leaked
                 </span>
-                <div class="d-flex align-items-center gap-2 w-100 w-sm-auto justify-content-end">
+                <div class="d-flex align-items-center gap-2 w-100 w-sm-auto justify-content-end flex-wrap">
+                    <button type="button" class="btn btn-outline-primary btn-sm px-3 py-2 fw-semibold rounded-3" onclick="copyFlyerFullInvite()">
+                        <i class="bi bi-clipboard-check me-1"></i> Copy Full Invite
+                    </button>
                     <button type="button" class="btn btn-outline-secondary btn-sm px-3 py-2 fw-semibold rounded-3" onclick="copyFlyerInviteLink()">
-                        <i class="bi bi-clipboard me-1"></i> Copy Link
+                        <i class="bi bi-link-45deg me-1"></i> Copy Link
                     </button>
                     <button type="button" class="btn btn-primary btn-sm px-3 py-2 fw-bold rounded-3 shadow-sm" onclick="downloadFlyerImage()">
                         <i class="bi bi-download me-1"></i> Download PNG
@@ -328,10 +331,36 @@
         link.click();
     };
 
+    function getFlyerRichInviteText() {
+        const activeCode = window.__FAMILY_CODE__ || '{{ $data["famCode"] ?? "" }}';
+        const surname = (window.cachedFlyerStats && window.cachedFlyerStats.familySurname) ? window.cachedFlyerStats.familySurname : 'Family';
+        return `🌳 *Family Heritage Invitation* 🌳\n\n` +
+            `🎉 Check out our official family dynasty status! We have connected our *${surname} Family Tree* and memories on FamilyPlatform.\n\n` +
+            `🔑 *Family Code:* #${activeCode}\n\n` +
+            `✨ Claim your branch on our live family tree, preserve our heritage, and connect across generations.\n\n` +
+            `👉 Tap here to join our family sanctuary:\n${flyerInviteUrl}\n\n` +
+            `Welcome to our living family legacy! 🏰`;
+    }
+
+    window.copyFlyerFullInvite = function() {
+        const richMsg = getFlyerRichInviteText();
+        navigator.clipboard.writeText(richMsg).then(() => {
+            const alertEl = document.getElementById('flyerCopiedAlert');
+            if (alertEl) {
+                alertEl.textContent = 'Full rich WhatsApp invitation copied to clipboard!';
+                alertEl.classList.remove('d-none');
+                setTimeout(() => alertEl.classList.add('d-none'), 3500);
+            }
+        }).catch(() => {
+            prompt('Copy invitation to clipboard:', richMsg);
+        });
+    };
+
     window.copyFlyerInviteLink = function() {
         navigator.clipboard.writeText(flyerInviteUrl).then(() => {
             const alertEl = document.getElementById('flyerCopiedAlert');
             if (alertEl) {
+                alertEl.textContent = 'WhatsApp invitation link copied to clipboard!';
                 alertEl.classList.remove('d-none');
                 setTimeout(() => alertEl.classList.add('d-none'), 3500);
             }
@@ -344,7 +373,7 @@
         const canvas = document.getElementById('familyFlyerCanvas');
         if (!canvas) return;
 
-        const shareText = `🎉 Check out our official family dynasty status! We have our family tree and memories connected on FamilyPlatform. Tap here to join our family circle: ${flyerInviteUrl}`;
+        const shareText = getFlyerRichInviteText();
 
         // Attempt Web Share API with image file if supported
         if (navigator.canShare && canvas.toBlob) {

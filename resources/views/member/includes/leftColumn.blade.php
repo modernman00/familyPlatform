@@ -112,6 +112,10 @@
                     <i class="bi bi-qr-code me-1.5" style="color: #8b5cf6;"></i> {{ __('profile.family_code_mgt', 'Family Code Mgt') }}
                 </a>
 
+                <button type="button" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" data-bs-toggle="modal" data-bs-target="#inviteFamilyModal" title="{{ __('profile.invite_family', 'Invite Family') }} - Share your family code via WhatsApp or SMS">
+                    <i class="bi bi-person-plus-fill me-1.5" style="color: #b8202c;"></i> {{ __('profile.invite_family', 'Invite Family') }}
+                </button>
+
                 <button type="button" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" data-bs-toggle="modal" data-bs-target="#createEventModal">
                     <i class="bi bi-calendar-plus me-1.5" style="color: #2563eb;"></i> {{ __('profile.create_event', 'Create Event') }}
                 </button>

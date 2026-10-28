@@ -169,28 +169,36 @@
                                 <span style="white-space: nowrap;">Share via WhatsApp</span>
                             </a>
                         </div>
-                        <!-- SMS / iMessage Direct -->
+                        <!-- Copy Full Invite (Rich Formatting with Family Code) -->
                         <div class="col-12 col-sm-6">
-                            <a href="#" id="btnInviteSMS" class="btn w-100 d-flex align-items-center justify-content-center gap-2 py-2 fw-bold text-white shadow-xs transition-all"
-                               style="background: #a31621; border-radius: 12px; min-height: 46px; font-size: 0.92rem; text-decoration: none;">
-                                <i class="bi bi-chat-text-fill fs-5"></i>
-                                <span style="white-space: nowrap;">Send via SMS / iMessage</span>
+                            <button type="button" id="btnCopyFullInvite" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2 fw-bold text-white shadow-xs transition-all"
+                                    style="background: linear-gradient(135deg, #a31621 0%, #8a1019 100%); border: none; border-radius: 12px; min-height: 46px; font-size: 0.92rem;">
+                                <i class="bi bi-clipboard-check-fill fs-5 text-warning"></i>
+                                <span id="copyFullInviteBtnText" style="white-space: nowrap;">Copy Full Invite</span>
+                            </button>
+                        </div>
+                        <!-- SMS / iMessage Direct -->
+                        <div class="col-12 col-sm-4">
+                            <a href="#" id="btnInviteSMS" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2 fw-semibold shadow-xs transition-all"
+                               style="border-radius: 12px; min-height: 46px; font-size: 0.88rem; text-decoration: none;">
+                                <i class="bi bi-chat-text-fill"></i>
+                                <span style="white-space: nowrap;">SMS / iMessage</span>
                             </a>
                         </div>
                         <!-- Native Device Share Sheet -->
-                        <div class="col-12 col-sm-6">
+                        <div class="col-12 col-sm-4">
                             <button type="button" id="btnInviteWebShare" class="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center gap-2 py-2 fw-semibold shadow-xs transition-all"
-                                    style="border-radius: 12px; min-height: 46px; font-size: 0.92rem;">
+                                    style="border-radius: 12px; min-height: 46px; font-size: 0.88rem;">
                                 <i class="bi bi-share-fill"></i>
                                 <span style="white-space: nowrap;">Device Share Sheet</span>
                             </button>
                         </div>
-                        <!-- Copy Invite Link -->
-                        <div class="col-12 col-sm-6">
+                        <!-- Copy Link Only -->
+                        <div class="col-12 col-sm-4">
                             <button type="button" id="btnCopyInviteLink" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2 py-2 fw-semibold shadow-xs transition-all"
-                                    style="border-radius: 12px; min-height: 46px; font-size: 0.92rem;">
+                                    style="border-radius: 12px; min-height: 46px; font-size: 0.88rem;">
                                 <i class="bi bi-link-45deg fs-5"></i>
-                                <span id="copyLinkBtnText" style="white-space: nowrap;">Copy Invite Link</span>
+                                <span id="copyLinkBtnText" style="white-space: nowrap;">Copy Link Only</span>
                             </button>
                         </div>
                     </div>
@@ -225,7 +233,7 @@
                         </label>
                         <span class="badge bg-light text-muted border font-monospace" style="font-size: 0.72rem;">256-bit signed</span>
                     </div>
-                    <div class="p-3 rounded-3" style="background: #f1f5f9; border: 1px solid #cbd5e1; font-size: 0.86rem; color: #334155; line-height: 1.45;" id="inviteMessagePreview">
+                    <div class="p-3 rounded-3" style="background: #f1f5f9; border: 1px solid #cbd5e1; font-size: 0.86rem; color: #334155; line-height: 1.5; white-space: pre-wrap; word-break: break-word; font-family: inherit;" id="inviteMessagePreview">
                         Loading personalised invitation link...
                     </div>
                 </div>
@@ -278,15 +286,60 @@
     // Kinship template dictionary (British English copy, dynamically adapts for Marital vs Birth family code)
     const kinshipTemplates = {
         'General': (surname, url, code, isBirth) => isBirth
-            ? `👋 Hey! I've set up our private ${surname} Birth Family Network & Heritage Tree on FamilyPlatform (Family Code: #${code}). Claim your branch, explore our birth lineage, and share memories with us: ${url}`
-            : `👋 Hey! I've set up our private ${surname} Family Network & Heritage Tree on FamilyPlatform (Family Code: #${code}). Claim your branch, explore our lineage, and share memories with us: ${url}`,
-        'Mum': (surname, url, code, isBirth) => `👋 Hi Mum! I've set up our private ${surname} ${isBirth ? 'birth family tree' : 'family tree'} and sanctuary on FamilyPlatform (Family Code: #${code}). Tap here to view our lineage, see photos, and claim your profile: ${url}`,
-        'Dad': (surname, url, code, isBirth) => `👋 Hi Dad! I've set up our private ${surname} ${isBirth ? 'birth family tree' : 'family tree'} and sanctuary on FamilyPlatform (Family Code: #${code}). Tap here to view our lineage, see photos, and claim your profile: ${url}`,
-        'Sister': (surname, url, code, isBirth) => `👭 Hey sis! Join me on FamilyPlatform for our private ${surname} ${isBirth ? 'birth family' : 'family'} hub (Family Code: #${code}). Tap here to claim your spot on our family tree: ${url}`,
-        'Brother': (surname, url, code, isBirth) => `👬 Hey bro! Join me on FamilyPlatform for our private ${surname} ${isBirth ? 'birth family' : 'family'} hub (Family Code: #${code}). Tap here to claim your spot on our family tree: ${url}`,
-        'Child': (surname, url, code) => `🌟 Hey! I've added you to our official ${surname} family tree on FamilyPlatform (Family Code: #${code}). Tap here to claim your profile and see our family heritage: ${url}`,
-        'Grandparent': (surname, url, code, isBirth) => `👵 Dear Grandparent, our ${surname} ${isBirth ? 'birth family' : 'family'} tree has been preserved on FamilyPlatform (Family Code: #${code})! Tap here to see our family branches: ${url}`,
-        'Cousin': (surname, url, code, isBirth) => `👋 Hey cousin! We are bringing the ${surname} ${isBirth ? 'birth family' : 'family'} together on our private FamilyPlatform hub (Family Code: #${code}). Tap here to claim your spot: ${url}`
+            ? `🌳 *Family Heritage Invitation* 🌳\n\n` +
+              `You are invited to join our *${surname} Birth Family Network & Heritage Tree* on FamilyPlatform.\n\n` +
+              `🔑 *Birth Family Code:* #${code}\n\n` +
+              `✨ Claim your branch on our live family tree, preserve our heritage, share memories, and connect across generations.\n\n` +
+              `👉 Tap here to join our family sanctuary:\n${url}\n\n` +
+              `Welcome to our living family legacy! 🏰`
+            : `🌳 *Family Heritage Invitation* 🌳\n\n` +
+              `You are invited to join our *${surname} Family Network & Heritage Tree* on FamilyPlatform.\n\n` +
+              `🔑 *Family Code:* #${code}\n\n` +
+              `✨ Claim your branch on our live family tree, preserve our heritage, share memories, and connect across generations.\n\n` +
+              `👉 Tap here to join our family sanctuary:\n${url}\n\n` +
+              `Welcome to our living family legacy! 🏰`,
+        'Mum': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Mum* 🌳\n\n` +
+            `Hi Mum,\n\n` +
+            `I've set up our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* sanctuary on FamilyPlatform.\n\n` +
+            `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
+            `✨ Tap here to view our lineage, see photos, and claim your spot on our living family tree:\n${url}\n\n` +
+            `Welcome to our living family legacy! 🏰`,
+        'Dad': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Dad* 🌳\n\n` +
+            `Hi Dad,\n\n` +
+            `I've set up our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* sanctuary on FamilyPlatform.\n\n` +
+            `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
+            `✨ Tap here to view our lineage, see photos, and claim your spot on our living family tree:\n${url}\n\n` +
+            `Welcome to our living family legacy! 🏰`,
+        'Sister': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Sister* 🌳\n\n` +
+            `Hey sis,\n\n` +
+            `Join me on FamilyPlatform for our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* hub.\n\n` +
+            `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
+            `✨ Tap here to claim your spot on our living family tree and share memories:\n${url}\n\n` +
+            `Welcome to our living family legacy! 🏰`,
+        'Brother': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Brother* 🌳\n\n` +
+            `Hey bro,\n\n` +
+            `Join me on FamilyPlatform for our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* hub.\n\n` +
+            `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
+            `✨ Tap here to claim your spot on our living family tree and share memories:\n${url}\n\n` +
+            `Welcome to our living family legacy! 🏰`,
+        'Child': (surname, url, code) => `🌳 *Family Heritage Invitation* 🌳\n\n` +
+            `Hey,\n\n` +
+            `I've added you to our official *${surname} Family Tree* on FamilyPlatform.\n\n` +
+            `🔑 *Family Code:* #${code}\n\n` +
+            `✨ Tap here to claim your profile, view our ancestral roots, and share memories:\n${url}\n\n` +
+            `Welcome to our living family legacy! 🏰`,
+        'Grandparent': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Grandparent* 🌳\n\n` +
+            `Dear Grandparent,\n\n` +
+            `Our *${surname} ${isBirth ? 'Birth Family' : 'Family'}* tree and heritage have been preserved on FamilyPlatform.\n\n` +
+            `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
+            `✨ Tap here to view our family branches, photos, and ancestral records:\n${url}\n\n` +
+            `Welcome to our living family legacy! 🏰`,
+        'Cousin': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Cousin* 🌳\n\n` +
+            `Hey cousin,\n\n` +
+            `We are bringing the *${surname} ${isBirth ? 'Birth Family' : 'Family'}* together on our private FamilyPlatform hub.\n\n` +
+            `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
+            `✨ Tap here to claim your branch on our live family tree:\n${url}\n\n` +
+            `Welcome to our living family legacy! 🏰`
     };
 
     function getCleanPhoneNumber(phone) {
@@ -628,23 +681,71 @@
             });
         }
 
-        // Copy Link
+        function fallbackCopy(text, feedbackMsg) {
+            try {
+                const tempArea = document.createElement('textarea');
+                tempArea.value = text;
+                tempArea.style.position = 'fixed';
+                tempArea.style.left = '-9999px';
+                tempArea.style.top = '0';
+                document.body.appendChild(tempArea);
+                tempArea.focus();
+                tempArea.select();
+                const successful = document.execCommand('copy');
+                document.body.removeChild(tempArea);
+                if (successful) {
+                    showFeedback(feedbackMsg);
+                    recordInviteStep();
+                    return;
+                }
+            } catch (e) {}
+            prompt('Copy invitation to clipboard:', text);
+            recordInviteStep();
+        }
+
+        // Copy Full Rich Invite (with Family Code, emojis, and link)
+        const btnCopyFull = document.getElementById('btnCopyFullInvite');
+        if (btnCopyFull) {
+            btnCopyFull.addEventListener('click', function() {
+                const msg = getPersonalisedMessage();
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(msg).then(() => {
+                        const textSpan = document.getElementById('copyFullInviteBtnText');
+                        if (textSpan) textSpan.textContent = 'Invite Copied! ✓';
+                        showFeedback('Full rich invitation with Family Code copied to clipboard!');
+                        recordInviteStep();
+                        setTimeout(() => {
+                            if (textSpan) textSpan.textContent = 'Copy Full Invite';
+                        }, 2500);
+                    }).catch(() => {
+                        fallbackCopy(msg, 'Full rich invitation with Family Code copied to clipboard!');
+                    });
+                } else {
+                    fallbackCopy(msg, 'Full rich invitation with Family Code copied to clipboard!');
+                }
+            });
+        }
+
+        // Copy Link Only
         const btnCopy = document.getElementById('btnCopyInviteLink');
         if (btnCopy) {
             btnCopy.addEventListener('click', function() {
                 const url = inviteData.invite_url || window.location.origin + '/register';
-                navigator.clipboard.writeText(url).then(() => {
-                    const textSpan = document.getElementById('copyLinkBtnText');
-                    if (textSpan) textSpan.textContent = 'Copied! ✓';
-                    showFeedback('Family invite link copied to clipboard!');
-                    recordInviteStep();
-                    setTimeout(() => {
-                        if (textSpan) textSpan.textContent = 'Copy Invite Link';
-                    }, 2500);
-                }).catch(() => {
-                    prompt('Copy your family invite link:', url);
-                    recordInviteStep();
-                });
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(url).then(() => {
+                        const textSpan = document.getElementById('copyLinkBtnText');
+                        if (textSpan) textSpan.textContent = 'Link Copied! ✓';
+                        showFeedback('Family invite link copied to clipboard!');
+                        recordInviteStep();
+                        setTimeout(() => {
+                            if (textSpan) textSpan.textContent = 'Copy Link Only';
+                        }, 2500);
+                    }).catch(() => {
+                        fallbackCopy(url, 'Family invite link copied to clipboard!');
+                    });
+                } else {
+                    fallbackCopy(url, 'Family invite link copied to clipboard!');
+                }
             });
         }
 

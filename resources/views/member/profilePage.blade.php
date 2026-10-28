@@ -34,7 +34,6 @@
         @includeIf('member.modals.familyFlyerModal')
         @includeIf('member.modals.timeCapsuleModal')
         @includeIf('member.modals.createAnnouncementModal')
-        @includeIf('member.modals.inviteFamilyModal')
         @includeIf('member.modals.upcomingEventsModal')
         @includeIf('member.modals.adulthoodCelebrationModal')
         @includeIf('member.modals.kinshipDetailsModal')

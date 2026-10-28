@@ -123,6 +123,7 @@
        from prefetch cache before the parser gets here) always finds this markup. --}}
   @includeIf('member.modals.editProfile')
   @includeIf('member.modals.recommendModal')
+  @includeIf('member.modals.inviteFamilyModal')
   @includeIf('components.profilePhotoViewer')
   @includeIf('components.omniSearchModal')
 

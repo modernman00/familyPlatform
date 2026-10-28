@@ -1790,14 +1790,16 @@
                         currentInviteLink = inviteLink;
 
                         const relativeRole = node.title || node.ego_relation || 'Family Relative';
-                        const inviteMessage = encodeURIComponent(
+                        const inviteMessageText = data.whatsapp_message || (
                             `🌳 *Family Heritage Invitation for ${cleanName}* 🌳\n\n` +
                             `Hello ${cleanName},\n\n` +
                             `You have been honoured as our *${relativeRole}* in the *${treeContextLabel}* on FamilyPlatform.\n\n` +
+                            `🔑 *Family Code:* #${familyCode}\n\n` +
                             `✨ Claim your spot on the live family tree, share photos, record your living voice capsule, and preserve our ancestral heritage:\n\n` +
                             `👉 ${inviteLink}\n\n` +
-                            `Welcome to our living family legacy!`
+                            `Welcome to our living family legacy! 🏰`
                         );
+                        const inviteMessage = encodeURIComponent(inviteMessageText);
 
                         const whatsappBtn = document.getElementById('cardWhatsappBtn');
                         const smsBtn = document.getElementById('cardSmsBtn');

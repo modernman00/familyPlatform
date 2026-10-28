@@ -172,15 +172,21 @@ class OnboardingService
             $inviteUrl = $appUrl . '/register';
         }
 
-        // WhatsApp: share URL only so the OG card renders the branded 1200×630 preview
-        $whatsappUrl = 'https://api.whatsapp.com/send?text=' . rawurlencode($inviteUrl);
-
         $treeLabel = ($lineageScope === 'maternal')
             ? "{$surname} Birth Family Network & Heritage Tree"
             : "{$surname} Family Network & Heritage Tree";
 
-        $inviteText = "👋 Hey! I've just set up our private {$treeLabel} on FamilyPlatform (Family Code: #{$famCode}). "
-            . "Claim your branch, explore our lineage, and share memories with us here: {$inviteUrl}";
+        $codeLabel = ($lineageScope === 'maternal') ? 'Birth Family Code' : 'Family Code';
+
+        $inviteText = "🌳 *Family Heritage Invitation* 🌳\n\n"
+            . "You are invited to join our *{$treeLabel}* on FamilyPlatform.\n\n"
+            . "🔑 *{$codeLabel}:* #{$famCode}\n\n"
+            . "✨ Claim your branch on our live family tree, preserve our heritage, share memories, and connect across generations.\n\n"
+            . "👉 Tap here to join our family sanctuary:\n{$inviteUrl}\n\n"
+            . "Welcome to our living family legacy! 🏰";
+
+        // WhatsApp: share the rich formatted invitation with Family Code and link
+        $whatsappUrl = 'https://api.whatsapp.com/send?text=' . rawurlencode($inviteText);
 
         return [
             'invite_url'    => $inviteUrl,

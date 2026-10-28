@@ -28,37 +28,24 @@
      x-data="{ activeFilter: 'all' }"
      style="border-radius: 20px; background-color: var(--card-bg, #ffffff); border: 1px solid var(--border-color, #e2e8f0) !important;">
     <div class="card-body p-3 p-md-3">
-        <!-- Widget Header (Exact Reference Match) -->
-        <div class="d-flex justify-content-between align-items-start mb-3.5" style="margin-bottom: 16px;">
-            <div class="d-flex align-items-center gap-2">
-                <div class="rounded-3 d-flex align-items-center justify-content-center" 
-                     style="width: 38px; height: 38px; border-radius: 12px; background: #fdf2f2; color: #8B152B; font-size: 1.15rem; flex-shrink: 0;">
-                    <i class="bi bi-people-fill"></i>
-                </div>
-                <div>
-                    <h6 class="fw-bold mb-0 kin-heading" style="font-size: 0.92rem; line-height: 1.2; color: var(--text-color, #0f172a); letter-spacing: -0.01em;">
-                        {{ __('kinship.suggested_kin', 'Suggested Kin & In-Laws') }}
-                    </h6>
-                    <span class="d-block kin-subtitle" style="font-size: 0.75rem; color: var(--text-muted, #64748b); line-height: 1.3; margin-top: 2px;">
-                        {{ __('kinship.lineage_matches_subtitle', 'Lineage matches you may know') }}
-                    </span>
-                </div>
-            </div>
-            <div class="d-flex align-items-center gap-1 flex-shrink-0">
+        <!-- Widget Header: Radar Active & Settings above Suggested Kin -->
+        <div class="mb-3.5" style="margin-bottom: 16px;">
+            <!-- Top Row: Radar Active badge + Settings icon button -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
                 @if($radarEnabled)
-                <span class="badge rounded-pill kin-radar-badge d-flex align-items-center gap-1.5" 
+                <span class="badge rounded-pill kin-radar-badge d-inline-flex align-items-center gap-1.5" 
                       style="background: #fdf2f2; color: #8B152B; border: none; font-size: 0.72rem; font-weight: 700; padding: 4px 10px; line-height: 1;">
                     <span class="kin-radar-pulse" style="width: 6px; height: 6px; background-color: #8B152B;"></span>
                     {{ __('kinship.radar_active', 'Radar Active') }}
                 </span>
                 @else
-                <span class="badge rounded-pill kin-radar-badge-paused d-flex align-items-center gap-1.5" 
+                <span class="badge rounded-pill kin-radar-badge-paused d-inline-flex align-items-center gap-1.5" 
                       style="background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; font-size: 0.72rem; font-weight: 700; padding: 4px 10px; line-height: 1;">
                     <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #94a3b8; display: inline-block;"></span>
                     {{ __('kinship.radar_paused', 'Radar Paused') }}
                 </span>
                 @endif
-                <button type="button" class="btn btn-sm btn-link text-muted p-1 ms-1 d-flex align-items-center justify-content-center btn-radar-settings" 
+                <button type="button" class="btn btn-sm btn-link text-muted p-1 d-flex align-items-center justify-content-center btn-radar-settings" 
                         title="{{ __('kinship.radar_settings', 'Radar settings') }}" 
                         aria-label="{{ __('kinship.radar_settings', 'Radar settings') }}" 
                         data-bs-toggle="modal" 
@@ -66,6 +53,22 @@
                         style="color: #64748b; font-size: 1.05rem; line-height: 1; text-decoration: none; min-width: 44px; min-height: 44px; border-radius: 8px;">
                     <i class="bi bi-sliders"></i>
                 </button>
+            </div>
+
+            <!-- Title Row: People Icon + Suggested Kin & Subtitle (Un-squeezed) -->
+            <div class="d-flex align-items-center gap-2">
+                <div class="rounded-3 d-flex align-items-center justify-content-center" 
+                     style="width: 38px; height: 38px; border-radius: 12px; background: #fdf2f2; color: #8B152B; font-size: 1.15rem; flex-shrink: 0;">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div style="min-width: 0; flex: 1;">
+                    <h6 class="fw-bold mb-0 kin-heading text-truncate" style="font-size: 0.95rem; line-height: 1.25; color: var(--text-color, #0f172a); letter-spacing: -0.01em;" title="{{ __('kinship.suggested_kin', 'Suggested Kin & In-Laws') }}">
+                        {{ __('kinship.suggested_kin', 'Suggested Kin & In-Laws') }}
+                    </h6>
+                    <span class="d-block kin-subtitle text-truncate" style="font-size: 0.78rem; color: var(--text-muted, #64748b); line-height: 1.35; margin-top: 2px;" title="{{ __('kinship.lineage_matches_subtitle', 'Lineage matches you may know') }}">
+                        {{ __('kinship.lineage_matches_subtitle', 'Lineage matches you may know') }}
+                    </span>
+                </div>
             </div>
         </div>
 

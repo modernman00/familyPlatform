@@ -143,10 +143,23 @@ final class InviteController
             }
 
             // Beautiful WhatsApp View Format
-            $whatsappMessage = "🌳 *Family Tree Invitation* 🌳\n\n" .
-                "You are invited to connect with the *{$treeLabel}* on FamilyPlatform (#{$familyCode}).\n\n" .
-                "Click below to claim your spot, explore our lineage, and connect with the family:\n" .
-                "👉 {$inviteUrl}";
+            $codeLabel = $isBirthLineage ? 'Birth Family Code' : 'Family Code';
+            if ($relativeName !== '') {
+                $whatsappMessage = "🌳 *Family Heritage Invitation* 🌳\n\n" .
+                    "Hello {$relativeName},\n\n" .
+                    "You are invited to connect with the *{$treeLabel}* on FamilyPlatform.\n\n" .
+                    "🔑 *{$codeLabel}:* #{$familyCode}\n\n" .
+                    "✨ Claim your spot on the live family tree, share photos, and connect across generations:\n\n" .
+                    "👉 {$inviteUrl}\n\n" .
+                    "Welcome to our living family legacy! 🏰";
+            } else {
+                $whatsappMessage = "🌳 *Family Heritage Invitation* 🌳\n\n" .
+                    "You are invited to join our *{$treeLabel} Network & Heritage Tree* on FamilyPlatform.\n\n" .
+                    "🔑 *{$codeLabel}:* #{$familyCode}\n\n" .
+                    "✨ Claim your branch on our live family tree, preserve our heritage, share memories, and connect across generations.\n\n" .
+                    "👉 Tap here to join our family sanctuary:\n{$inviteUrl}\n\n" .
+                    "Welcome to our living family legacy! 🏰";
+            }
 
             $whatsappShareUrl = 'https://api.whatsapp.com/send?text=' . rawurlencode($whatsappMessage);
 
