@@ -36,13 +36,13 @@
                 <span class="badge rounded-pill kin-radar-badge d-inline-flex align-items-center gap-1.5" 
                       style="background: #fdf2f2; color: #8B152B; border: none; font-size: 0.72rem; font-weight: 700; padding: 4px 10px; line-height: 1;">
                     <span class="kin-radar-pulse" style="width: 6px; height: 6px; background-color: #8B152B;"></span>
-                    {{ __('kinship.radar_active', 'Radar Active') }}
+                    {{ __('kinship.radar_active', 'Kinship Radar Active') }}
                 </span>
                 @else
                 <span class="badge rounded-pill kin-radar-badge-paused d-inline-flex align-items-center gap-1.5" 
                       style="background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; font-size: 0.72rem; font-weight: 700; padding: 4px 10px; line-height: 1;">
                     <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #94a3b8; display: inline-block;"></span>
-                    {{ __('kinship.radar_paused', 'Radar Paused') }}
+                    {{ __('kinship.radar_paused', 'Kinship Radar Paused') }}
                 </span>
                 @endif
                 <button type="button" class="btn btn-sm btn-link text-muted p-1 d-flex align-items-center justify-content-center btn-radar-settings" 
