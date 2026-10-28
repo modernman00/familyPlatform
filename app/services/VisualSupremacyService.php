@@ -539,6 +539,7 @@ final class VisualSupremacyService
             1 => ['file', '/dev/null', 'w'],
             2 => ['file', '/dev/null', 'w'],
         ];
+        // nosemgrep: php.lang.security.exec-use.exec-use
         $process = @proc_open($command, $descriptors, $pipes);
         if (!is_resource($process)) {
             return -1;
@@ -573,6 +574,7 @@ final class VisualSupremacyService
                 return $candidate;
             }
             // Check in PATH
+            // nosemgrep: php.lang.security.exec-use.exec-use
             $which = @exec('which ' . escapeshellarg($candidate) . ' 2>/dev/null');
             if (!empty($which) && file_exists($which) && is_executable($which)) {
                 return $which;

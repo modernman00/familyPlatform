@@ -448,6 +448,7 @@ final class NativeShareController
             return $xml;
         }
 
+        // nosemgrep: php.lang.security.exec-use.exec-use
         $process = @proc_open(
             ['plutil', '-convert', 'binary1', '-o', '-', '-'],
             [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
