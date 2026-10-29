@@ -7,6 +7,7 @@ use Src\Select;
 use Src\Insert;
 use Src\Update;
 use Src\Delete;
+use App\services\EncryptionService;
 
 final class FamilyJournal extends Select
 {
@@ -30,6 +31,15 @@ final class FamilyJournal extends Select
 
         /** @var array<int, array<string, mixed>> $result */
         $result = parent::selectFn2(query: $query, bind: [$familyCode]);
+        foreach ($result as &$row) {
+            if (isset($row['content'])) {
+                $row['content'] = EncryptionService::decrypt((string)$row['content'], $familyCode, 'journal');
+            }
+            if (isset($row['summary']) && $row['summary'] !== null) {
+                $row['summary'] = EncryptionService::decrypt((string)$row['summary'], $familyCode, 'journal');
+            }
+        }
+        unset($row);
         return $result;
     }
 
@@ -51,7 +61,16 @@ final class FamilyJournal extends Select
 
         /** @var array<int, array<string, mixed>> $result */
         $result = parent::selectFn2(query: $query, bind: [(string)$id, $familyCode]);
-        return $result[0] ?? null;
+        $row = $result[0] ?? null;
+        if ($row !== null) {
+            if (isset($row['content'])) {
+                $row['content'] = EncryptionService::decrypt((string)$row['content'], $familyCode, 'journal');
+            }
+            if (isset($row['summary']) && $row['summary'] !== null) {
+                $row['summary'] = EncryptionService::decrypt((string)$row['summary'], $familyCode, 'journal');
+            }
+        }
+        return $row;
     }
 
     /**
@@ -86,13 +105,20 @@ final class FamilyJournal extends Select
             INSERT INTO family_journals (family_code, author_id, title, slug, summary, content, cover_image, category, mood, status)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
+        $familyCode = (string)$data['family_code'];
+        $rawContent = (string)($data['content'] ?? '');
+        $rawSummary = isset($data['summary']) && $data['summary'] !== null ? (string)$data['summary'] : null;
+
+        $encryptedContent = EncryptionService::encrypt($rawContent, $familyCode, 'journal');
+        $encryptedSummary = $rawSummary !== null ? EncryptionService::encrypt($rawSummary, $familyCode, 'journal') : null;
+
         $stmt->execute([
-            $data['family_code'],
+            $familyCode,
             $data['author_id'],
             $data['title'],
             $data['slug'],
-            $data['summary'] ?? null,
-            $data['content'],
+            $encryptedSummary,
+            $encryptedContent,
             $data['cover_image'] ?? null,
             $data['category'] ?? 'Milestone',
             $data['mood'] ?? 'heartwarming',
@@ -242,9 +268,15 @@ final class FamilyJournal extends Select
      */
     public static function updateJournal(int $id, string $familyCode, array $data): void
     {
+        $rawContent = (string)($data['content'] ?? '');
+        $rawSummary = isset($data['summary']) && $data['summary'] !== null ? (string)$data['summary'] : null;
+
+        $encryptedContent = EncryptionService::encrypt($rawContent, $familyCode, 'journal');
+        $encryptedSummary = $rawSummary !== null ? EncryptionService::encrypt($rawSummary, $familyCode, 'journal') : null;
+
         $coverSql = '';
         $bind = [
-            $data['title'], $data['summary'] ?? null, $data['content'],
+            $data['title'], $encryptedSummary, $encryptedContent,
             $data['category'] ?? 'Milestone', $data['mood'] ?? 'heartwarming', $data['status'] ?? 'published',
         ];
         if (!empty($data['cover_image'])) {

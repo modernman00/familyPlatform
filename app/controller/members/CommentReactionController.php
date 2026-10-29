@@ -106,6 +106,11 @@ final class CommentReactionController
         $postFamCode = trim((string) ($commentRow['postFamCode'] ?? ''));
         $postAuthorId = trim((string) ($commentRow['post_author_id'] ?? ''));
 
+        // 0. Official FamilyPlatform broadcast post (universally accessible)
+        if ($postAuthorId === \App\services\FamilyPlatformAccountService::ACCOUNT_ID) {
+          $hasAccess = true;
+        }
+
         // 1. Primary famCode or multi-family session codes
         $sessionFamCodes = is_array($_SESSION['famCodes'] ?? null) ? $_SESSION['famCodes'] : [];
         $sessionFamCodes[] = $famCode;

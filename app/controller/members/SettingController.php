@@ -506,6 +506,12 @@ final class SettingController extends BaseController
                 }
             }
 
+            // Sync wedding date if provided (e.g. from editProfileModal)
+            if (!empty($_POST['wedding_date'])) {
+                $db = Db::connect2();
+                self::syncWeddingAnniversary($db, (string)$_POST['id'], (string)$_POST['wedding_date']);
+            }
+
             // OtherFamily table updates (Father, Mother, Spouse, etc.)
             $fatherFirstName = trim((string)($_POST['father_first_name'] ?? ''));
             $fatherLastName  = trim((string)($_POST['father_last_name'] ?? ''));
@@ -689,12 +695,16 @@ final class SettingController extends BaseController
                                 'email' => $_POST['spouse_email'] ?? '',
                                 'mobile' => $_POST['spouse_mobile'] ?? '',
                                 'maiden_name' => $maritalPost === 'Yes - Add Wife' ? ($_POST['maiden_name'] ?? '') : '',
+                                'wedding_date' => $_POST['wedding_date'] ?? '',
                                 'status' => match ($maritalPost) {
                                     'Divorced' => 'divorced',
                                     'Widowed' => 'widowed',
                                     default => 'married',
                                 },
                             ]);
+                            if (!empty($_POST['wedding_date'])) {
+                                self::syncWeddingAnniversary($db, (string)$_POST['id'], (string)$_POST['wedding_date']);
+                            }
                             if ($maritalPost === 'Divorced' && $partnerRes['partner_id'] > 0) {
                                 $addRelRequest($partnerRes['partner_id'], \App\services\FamilyRelationshipRequestService::FORMER_PARTNER, $partnerRes['union_id']);
                             }
@@ -837,7 +847,7 @@ final class SettingController extends BaseController
                 'email', 'mobile', 'country', 'occupation', 'employmentStatus',
                 'father_first_name', 'father_last_name', 'father_name', 'father_email', 'father_mobile',
                 'mother_first_name', 'mother_last_name', 'mother_name', 'mother_maiden', 'maiden_name', 'mother_email', 'mother_mobile',
-                'spouse_name', 'spouse_email', 'spouse_mobile', 'spouse_gender', 'parents_status', 'children', 'sibling', 'maritalStatus', 'button', 'action'
+                'spouse_name', 'spouse_email', 'spouse_mobile', 'spouse_gender', 'parents_status', 'children', 'sibling', 'maritalStatus', 'wedding_date', 'button', 'action'
             ]);
 
             $successMsg = match ($action) {
@@ -855,5 +865,172 @@ final class SettingController extends BaseController
         }
     }
 
-    
+    /**
+     * Dedicated AJAX endpoint to update wedding anniversary from profile smart prompt banner.
+     */
+    public function updateAnniversary(): void
+    {
+        parent::__construct();
+
+        if (empty($_SESSION['id'])) {
+            header('Content-Type: application/json; charset=utf-8');
+            http_response_code(401);
+            echo json_encode(['status' => 401, 'message' => 'Authentication required.']);
+            return;
+        }
+
+        $userId = cleanSession((string)$_SESSION['id']);
+
+        // CSRF verification
+        $token = (string)($_POST['token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''));
+        if (empty($token) && !empty($_SERVER['HTTP_CONTENT_TYPE']) && str_contains($_SERVER['HTTP_CONTENT_TYPE'], 'application/json')) {
+            $raw = json_decode((string)file_get_contents('php://input'), true);
+            if (is_array($raw)) {
+                $token = (string)($raw['token'] ?? $token);
+                $_POST = array_merge($_POST, $raw);
+            }
+        }
+
+        if (!empty($_SESSION['token']) && !hash_equals((string)$_SESSION['token'], $token)) {
+            header('Content-Type: application/json; charset=utf-8');
+            http_response_code(403);
+            echo json_encode(['status' => 403, 'message' => 'Security token verification failed. Please refresh the page.']);
+            return;
+        }
+
+        $weddingDate = trim((string)($_POST['wedding_date'] ?? ''));
+        if (empty($weddingDate)) {
+            header('Content-Type: application/json; charset=utf-8');
+            http_response_code(400);
+            echo json_encode(['status' => 400, 'message' => 'Please provide a valid wedding date.']);
+            return;
+        }
+
+        $db = Db::connect2();
+        $synced = self::syncWeddingAnniversary($db, $userId, $weddingDate);
+
+        header('Content-Type: application/json; charset=utf-8');
+        if ($synced) {
+            echo json_encode([
+                'status' => 200,
+                'message' => 'Wedding anniversary successfully saved! Your family network will now celebrate your special day every year.'
+            ]);
+        } else {
+            http_response_code(400);
+            echo json_encode([
+                'status' => 400,
+                'message' => 'Invalid wedding date. Please enter a valid date in YYYY-MM-DD format.'
+            ]);
+        }
+    }
+
+    /**
+     * Synchronise wedding anniversary into family_unions and events tables.
+     */
+    public static function syncWeddingAnniversary(\PDO $db, string $userId, string $weddingDate): bool
+    {
+        $weddingDate = trim($weddingDate);
+        if ($weddingDate === '') {
+            return false;
+        }
+
+        // Validate Y-m-d format and calendar validity
+        $dt = \DateTimeImmutable::createFromFormat('Y-m-d', $weddingDate);
+        if (!$dt || $dt->format('Y-m-d') !== $weddingDate) {
+            return false;
+        }
+
+        $mYear = (int)$dt->format('Y');
+        $currentYear = (int)date('Y');
+        // Plausible range: 1900 up to next year (allow upcoming weddings within 12 months)
+        if ($mYear < 1900 || $mYear > $currentYear + 1) {
+            return false;
+        }
+
+        // Fetch user node details
+        $nodeStmt = $db->prepare("SELECT id, family_code, first_name, last_name, gender, generation_level FROM family_nodes WHERE user_id = ? LIMIT 1");
+        $nodeStmt->execute([$userId]);
+        $node = $nodeStmt->fetch(\PDO::FETCH_ASSOC);
+
+        $famCode = (string)($node['family_code'] ?? ($_SESSION['famCode'] ?? ''));
+
+        if ($node) {
+            $nodeId = (int)$node['id'];
+            // Find current married union for this node
+            $uStmt = $db->prepare("
+                SELECT id FROM family_unions 
+                WHERE (partner_1_id = ? OR partner_2_id = ?) AND union_type = 'married' AND is_current = 1
+                ORDER BY id DESC LIMIT 1
+            ");
+            $uStmt->execute([$nodeId, $nodeId]);
+            $unionId = $uStmt->fetchColumn();
+
+            if ($unionId) {
+                $updU = $db->prepare("UPDATE family_unions SET marriage_date = ?, marriage_year = ? WHERE id = ?");
+                $updU->execute([$weddingDate, $mYear, (int)$unionId]);
+            } else {
+                // Create a placeholder spouse union so the date is safely anchored
+                $spouseGender = ($node['gender'] ?? 'Male') === 'Female' ? 'Male' : 'Female';
+                $spouseName = $spouseGender === 'Female' ? 'Wife' : 'Husband';
+                $genLevel = (int)($node['generation_level'] ?? 0);
+                $avatar = $spouseGender === 'Female' ? '/resources/images/profile/avatarF.png' : '/resources/images/profile/avatarM.png';
+
+                $insNode = $db->prepare("
+                    INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, is_placeholder)
+                    VALUES (?, ?, '', ?, ?, ?, 'Spouse', 1)
+                ");
+                $insNode->execute([$famCode, $spouseName, $spouseGender, $genLevel, $avatar]);
+                $spouseNodeId = (int)$db->lastInsertId();
+
+                $insU = $db->prepare("
+                    INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, marriage_date, marriage_year, is_current)
+                    VALUES (?, ?, ?, 'married', ?, ?, 1)
+                ");
+                $insU->execute([$famCode, $nodeId, $spouseNodeId, $weddingDate, $mYear]);
+            }
+        }
+
+        // Upsert into `events` table (yearly anniversary recurring event)
+        $chkEvt = $db->prepare("SELECT no FROM events WHERE id = ? AND eventType = 'Anniversary' LIMIT 1");
+        $chkEvt->execute([$userId]);
+        $existingNo = $chkEvt->fetchColumn();
+
+        $userName = trim(($node['first_name'] ?? '') . ' ' . ($node['last_name'] ?? ''));
+        if ($userName === '') {
+            $userP = $db->prepare("SELECT firstName, lastName FROM personal WHERE id = ? LIMIT 1");
+            $userP->execute([$userId]);
+            $pRow = $userP->fetch(\PDO::FETCH_ASSOC);
+            $userName = trim(($pRow['firstName'] ?? '') . ' ' . ($pRow['lastName'] ?? ''));
+        }
+        if ($userName === '') {
+            $userName = 'Family Member';
+        }
+
+        $eventName = "{$userName}'s Wedding Anniversary";
+
+        if ($existingNo) {
+            $updEvt = $db->prepare("
+                UPDATE events 
+                SET eventName = ?, eventDate = ?, eventFrequency = 'Yearly', updated_at = NOW() 
+                WHERE no = ?
+            ");
+            $updEvt->execute([$eventName, $weddingDate, $existingNo]);
+        } else {
+            $insEvt = $db->prepare("
+                INSERT INTO events (id, eventName, eventDate, eventType, eventDescription, eventFrequency, eventCode, created_at, updated_at)
+                VALUES (?, ?, ?, 'Anniversary', 'Wedding Anniversary celebration and milestone blessings', 'Yearly', ?, NOW(), NOW())
+            ");
+            $insEvt->execute([$userId, $eventName, $weddingDate, $famCode]);
+        }
+
+        // Ensure personal marital_status is 'Married'
+        $updPersonal = $db->prepare("
+            UPDATE personal 
+            SET marital_status = 'Married', updated_at = NOW() 
+            WHERE id = ? AND (marital_status IS NULL OR marital_status = '' OR marital_status = 'Single')
+        ");
+        $updPersonal->execute([$userId]);
+
+        return true;
+    }
 }

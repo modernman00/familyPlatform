@@ -7,6 +7,7 @@ $router->map('GET', '/member/profilepage', 'App\controller\members\ProfilePage@i
 $router->map('GET', '/profilePage', 'App\controller\members\ProfilePage@index', 'opening page member alias');
 $router->map('GET', '/profilepage', 'App\controller\members\ProfilePage@index', 'opening page member lowercase alias');
 $router->map('POST', '/member/profilePage/editProfile', 'App\controller\members\SettingController@post', 'edit_profile_post');
+$router->map('POST', '/member/profilePage/updateAnniversary', 'App\controller\members\SettingController@updateAnniversary', 'profile_update_anniversary');
 
 
 

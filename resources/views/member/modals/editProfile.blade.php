@@ -322,12 +322,27 @@
 
                                 <div class="col-12">
                                     <label for="marital_status" class="form-label">Relationship Status</label>
-                                    <select class="form-select" id="marital_status" name="marital_status">
+                                    <select class="form-select" id="marital_status" name="marital_status" onchange="toggleWeddingDatePrompt(this.value)">
                                         @foreach (['Single', 'Dating', 'Married', 'Divorced', 'Widowed'] as $option)
                                             <option value="{{ $option }}" {{ ($data['marital_status'] ?? '') === $option ? 'selected' : '' }}>{{ $option }}</option>
                                         @endforeach
                                     </select>
                                     <small id="marital_status_error" class="text-danger ps-2 small"></small>
+                                </div>
+
+                                <!-- Dynamic Wedding Anniversary Date Section -->
+                                <div class="col-12 mt-2" id="weddingDateContainer" style="{{ ($data['marital_status'] ?? '') === 'Married' ? 'display: block;' : 'display: none;' }}">
+                                    <div class="p-3 rounded-3" style="background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%); border: 1px solid #fde68a;">
+                                        <label for="wedding_date" class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-1">
+                                            <span>💍 Wedding Date / Anniversary</span>
+                                            <span class="badge bg-warning text-dark px-2 py-0.5 rounded-pill" style="font-size: 0.7rem; letter-spacing: 0.02em;">Anniversary Alerts</span>
+                                        </label>
+                                        <p class="text-muted small mb-2" style="font-size: 0.82rem; line-height: 1.4;">
+                                            Add your wedding date so your family network can celebrate your anniversary milestones and send greetings every year.
+                                        </p>
+                                        <input type="date" class="form-control" id="wedding_date" name="wedding_date" value="{{ $data['wedding_date'] ?? $data['marriage_date'] ?? '' }}" max="{{ date('Y-m-d') }}" style="min-height: 44px; border-radius: 8px;">
+                                        <small id="wedding_date_error" class="text-danger ps-2 small"></small>
+                                    </div>
                                 </div>
                             </div>
 
@@ -381,4 +396,15 @@
                 </div>
             </div>
         </div>
+        <script>
+            function toggleWeddingDatePrompt(status) {
+                var container = document.getElementById('weddingDateContainer');
+                if (!container) return;
+                if (status === 'Married') {
+                    container.style.display = 'block';
+                } else {
+                    container.style.display = 'none';
+                }
+            }
+        </script>
     </div>

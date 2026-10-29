@@ -58,11 +58,10 @@
         <div class="tab-pane fade show active" id="pane-our-family" role="tabpanel" aria-labelledby="tab-our-family">
           
           <!-- Family Context Banner -->
-          <div class="p-3 mb-3 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2"
-               style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px;">
+          <div class="modal-sub-card p-3 mb-3 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div class="d-flex align-items-center gap-2.5">
               <div class="rounded-circle d-flex align-items-center justify-content-center text-success flex-shrink-0"
-                   style="width: 38px; height: 38px; background: #dcfce7; font-size: 1.15rem;">
+                   style="width: 38px; height: 38px; background: rgba(16, 185, 129, 0.16); font-size: 1.15rem;">
                 <i class="bi bi-shield-check"></i>
               </div>
               <div>
@@ -120,15 +119,15 @@
               <label class="form-label text-muted fw-semibold small mb-0" style="font-size: 0.8rem;">
                 Message Preview (Rich WhatsApp &amp; Clipboard Format)
               </label>
-              <span class="badge bg-light text-muted border font-monospace" style="font-size: 0.72rem;">256-bit signed</span>
+              <span class="badge bg-light-subtle text-muted border font-monospace" style="font-size: 0.72rem;">256-bit signed</span>
             </div>
-            <div class="p-3 rounded-3" style="background: #f1f5f9; border: 1px solid #cbd5e1; font-size: 0.86rem; color: #334155; line-height: 1.5; white-space: pre-wrap; word-break: break-word; font-family: inherit;" id="familyModalInvitePreview">
+            <div class="modal-preview-box p-3 rounded-3" id="familyModalInvitePreview">
               Loading rich family invitation...
             </div>
           </div>
 
           <!-- Personalise or Contacts Link -->
-          <div class="p-2.5 rounded-3 bg-light border text-center">
+          <div class="modal-sub-card p-2.5 rounded-3 border text-center">
             <span class="small text-muted me-2">Need a personalised invite for Mum, Dad, or specific relatives?</span>
             <button type="button" class="btn btn-link btn-sm fw-bold text-primary p-0 text-decoration-none" onclick="window.switchToFullInviteModal && window.switchToFullInviteModal()" style="font-size: 0.84rem;">
               Open Full Kinship Inviter &rarr;
@@ -148,11 +147,11 @@
         <div class="tab-pane fade" id="pane-external-friends" role="tabpanel" aria-labelledby="tab-external-friends">
           
           <!-- USP Sanctuary Promise Box -->
-          <div class="p-3 mb-3" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px;">
+          <div class="modal-sub-card-green p-3 mb-3">
             <div class="d-flex align-items-start gap-2">
               <span style="font-size: 1.25rem;">🛡️</span>
               <div>
-                <strong style="color: #166534; font-size: 0.95rem;">The Walled Sanctuary Guarantee</strong>
+                <strong class="d-block mb-1" style="font-size: 0.95rem;">The Walled Sanctuary Guarantee</strong>
                 <p class="mb-0 text-muted" style="font-size: 0.825rem; line-height: 1.4;">
                   Your friends &amp; in-laws will create their <strong>own independent family network</strong> with their own private family code. Your family tree and posts remain 100% strictly private.
                 </p>
@@ -177,7 +176,7 @@
           <div class="mb-3">
             <label for="inputShareLink" class="form-label text-muted fw-semibold small mb-1">Your Personal Referral Link</label>
             <div class="input-group">
-              <input type="text" id="inputShareLink" class="form-control" readonly style="background: #f8fafc; font-size: 0.9rem; font-family: monospace; border-radius: 10px 0 0 10px;" value="Generating link...">
+              <input type="text" id="inputShareLink" class="form-control" readonly style="font-size: 0.9rem; font-family: monospace; border-radius: 10px 0 0 10px;" value="Generating link...">
               <button class="btn btn-primary px-3 fw-semibold" id="btnCopyShareLink" type="button" style="border-radius: 0 10px 10px 0; min-height: 38px;">
                 <i class="bi bi-clipboard me-1"></i> Copy
               </button>
@@ -188,7 +187,7 @@
           </div>
 
           <!-- Stats / Impact Ribbon -->
-          <div class="d-flex align-items-center justify-content-between p-2 px-3 mt-3" style="background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0;">
+          <div class="modal-sub-card d-flex align-items-center justify-content-between p-2 px-3 mt-3">
             <span class="text-muted small">Family Hubs Spawned:</span>
             <span class="badge bg-primary rounded-pill px-3 py-1 fw-bold" id="badgeSpawnedCount">0</span>
           </div>

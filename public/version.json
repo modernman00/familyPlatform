@@ -1,11 +1,11 @@
 {
-    "version": "v1.5.8",
-    "title": "Fix(mobile): restore left side action buttons and profile card visibility on mobile viewports",
+    "version": "v1.5.7",
+    "title": "Feat(release): GEO & pSEO engine, PWA splash & UX refinements, sitemap automation, and preflight suites",
     "notes": [
-        "Fix(mobile): restore left side action buttons and profile card visibility on mobile viewports",
-        "Fix(kinship): update radar badge label to Kinship Radar Active for consistency",
-        "Feat(invite): rich heritage invitations with family code, dual copy buttons & un-squeezed sidebar widgets"
+        "Feat(release): GEO & pSEO engine, PWA splash & UX refinements, sitemap automation, and preflight suites",
+        "Feat(typography): self-host Outfit headings, native-first stack, apply notification utf8mb4 migration",
+        "Refactor(feed): clean up unused sharePostToSocialMedia and openSocialShareModal methods"
     ],
     "released_at": "2026-10-29",
-    "commit": "efc1d4f"
+    "commit": "2bc5eef"
 }

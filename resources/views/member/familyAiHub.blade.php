@@ -17,6 +17,7 @@
     aspect-ratio: 1024 / 572;
     margin-bottom: 1.5rem;
 }
+.ai-hub-hero-banner picture,
 .ai-hub-hero-banner img {
     width: 100%;
     height: 100%;
@@ -653,6 +654,8 @@ body.dark-mode #tab-roundtable [style*="background: #fafafa"],
 body.dark-mode #tab-roundtable [style*="background:#fafafa"],
 body.dark-mode #tab-roundtable [style*="background: #ffffff"],
 body.dark-mode #tab-roundtable [style*="background:#ffffff"],
+body.dark-mode #tab-roundtable [style*="background: #f8fafc"],
+body.dark-mode #tab-roundtable [style*="background:#f8fafc"],
 body.dark-mode #tab-journal [style*="background: #ffffff"],
 body.dark-mode #tab-journal [style*="background:#ffffff"],
 body.dark-mode #tab-journal [style*="background: #f8fafc"],
@@ -662,14 +665,80 @@ body.dark-theme #tab-roundtable [style*="background: #fafafa"],
 body.dark-theme #tab-roundtable [style*="background:#fafafa"],
 body.dark-theme #tab-roundtable [style*="background: #ffffff"],
 body.dark-theme #tab-roundtable [style*="background:#ffffff"],
+body.dark-theme #tab-roundtable [style*="background: #f8fafc"],
+body.dark-theme #tab-roundtable [style*="background:#f8fafc"],
 body.dark-theme #tab-journal [style*="background: #ffffff"],
 body.dark-theme #tab-journal [style*="background:#ffffff"],
 body.dark-theme #tab-journal [style*="background: #f8fafc"],
 body.dark-theme #tab-outings [style*="background: #f8fafc"],
-body.dark-theme #tab-outings [style*="background: #ffffff"] {
+body.dark-theme #tab-outings [style*="background: #ffffff"],
+[data-bs-theme="dark"] #tab-roundtable [style*="background: #fafafa"],
+[data-bs-theme="dark"] #tab-roundtable [style*="background:#fafafa"],
+[data-bs-theme="dark"] #tab-roundtable [style*="background: #ffffff"],
+[data-bs-theme="dark"] #tab-roundtable [style*="background:#ffffff"],
+[data-bs-theme="dark"] #tab-roundtable [style*="background: #f8fafc"],
+[data-bs-theme="dark"] #tab-roundtable [style*="background:#f8fafc"],
+[data-bs-theme="dark"] #tab-journal [style*="background: #ffffff"],
+[data-bs-theme="dark"] #tab-journal [style*="background:#ffffff"],
+[data-bs-theme="dark"] #tab-journal [style*="background: #f8fafc"],
+[data-bs-theme="dark"] #tab-outings [style*="background: #f8fafc"],
+[data-bs-theme="dark"] #tab-outings [style*="background: #ffffff"] {
     background: #1e293b !important;
     color: #f8fafc !important;
     border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* 🛡️ Explicit Docket & Journal Card Contrast in Dark Mode */
+body.dark-mode .roundtable-docket-card,
+body.dark-theme .roundtable-docket-card,
+[data-bs-theme="dark"] .roundtable-docket-card {
+    background: #0f172a !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #f8fafc !important;
+}
+body.dark-mode .roundtable-docket-card .text-dark,
+body.dark-theme .roundtable-docket-card .text-dark,
+[data-bs-theme="dark"] .roundtable-docket-card .text-dark {
+    color: #f8fafc !important;
+}
+body.dark-mode .roundtable-docket-card .text-secondary,
+body.dark-theme .roundtable-docket-card .text-secondary,
+[data-bs-theme="dark"] .roundtable-docket-card .text-secondary,
+body.dark-mode .roundtable-docket-card .text-muted,
+body.dark-theme .roundtable-docket-card .text-muted,
+[data-bs-theme="dark"] .roundtable-docket-card .text-muted {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .family-journal-card,
+body.dark-theme .family-journal-card,
+[data-bs-theme="dark"] .family-journal-card {
+    background: #0f172a !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #f8fafc !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+}
+body.dark-mode .family-journal-card:hover,
+body.dark-theme .family-journal-card:hover,
+[data-bs-theme="dark"] .family-journal-card:hover {
+    border-color: rgba(99, 102, 241, 0.5) !important;
+    transform: translateY(-2px);
+}
+body.dark-mode .family-journal-card .text-dark,
+body.dark-theme .family-journal-card .text-dark,
+[data-bs-theme="dark"] .family-journal-card .text-dark {
+    color: #f8fafc !important;
+}
+body.dark-mode .family-journal-card .badge,
+body.dark-theme .family-journal-card .badge,
+[data-bs-theme="dark"] .family-journal-card .badge {
+    background: rgba(99, 102, 241, 0.25) !important;
+    color: #c7d2fe !important;
+}
+body.dark-mode .family-journal-card a.btn-link,
+body.dark-theme .family-journal-card a.btn-link,
+[data-bs-theme="dark"] .family-journal-card a.btn-link {
+    color: #a5b4fc !important;
 }
 </style>
 @endpush
@@ -681,13 +750,18 @@ body.dark-theme #tab-outings [style*="background: #ffffff"] {
         <h1 class="visually-hidden">Family Hub &mdash; The Fun Place</h1>
         <p class="visually-hidden">Your household creative playground &mdash; Family RoundTable, Family Journal, 15-minute fridge meal ideas, transcribed voice notes, illustrated family flyers, and Family Game Show.</p>
         
-        <img src="/public/img/family-hub-hero.jpg" 
-             alt="Family Hub &mdash; The Fun Place: Your household creative playground, Family RoundTable, Family Journal, 15-minute fridge meal ideas, transcribed voice notes, illustrated family flyers, and Family Game Show." 
-             class="img-fluid w-100" 
-             width="1024" 
-             height="572" 
-             loading="eager" 
-             decoding="async">
+        <picture class="w-100 h-100 d-block">
+            <source srcset="/public/img/family-hub-hero.webp, /img/family-hub-hero.webp" type="image/webp">
+            <img src="/public/img/family-hub-hero.jpg" 
+                 alt="Family Hub &mdash; The Fun Place: Your household creative playground, Family RoundTable, Family Journal, 15-minute fridge meal ideas, transcribed voice notes, illustrated family flyers, and Family Game Show." 
+                 class="img-fluid w-100 h-100" 
+                 width="1024" 
+                 height="572" 
+                 loading="eager" 
+                 decoding="async"
+                 fetchpriority="high"
+                 onerror="if(!this.dataset.retried){this.dataset.retried='1';this.src='/img/family-hub-hero.jpg';}else if(this.dataset.retried==='1'){this.dataset.retried='2';this.src='/public/images/family-hub-hero.jpg';}">
+        </picture>
 
         {{-- Interactive Clickable Hotspots Matching the 6 Neon Cards in the Artwork --}}
         <button type="button" 
@@ -1866,13 +1940,19 @@ body.dark-theme #tab-outings [style*="background: #ffffff"] {
                                 <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom flex-wrap gap-2">
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="position-relative">
-                                            @if(!empty($twoTruthsGame['author_avatar']))
-                                                <img src="{{ $twoTruthsGame['author_avatar'] }}" alt="Storyteller" class="rounded-circle shadow-sm object-fit-cover" style="width: 48px; height: 48px;">
-                                            @else
-                                                <div class="rounded-circle bg-danger-subtle text-danger fw-bold d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px; font-size: 1.2rem;">
-                                                    {{ mb_substr($twoTruthsGame['author_name'] ?? 'Family', 0, 1) }}
-                                                </div>
-                                            @endif
+                                            @php
+                                                $ttAvatarRaw = (string)($twoTruthsGame['author_avatar'] ?? '');
+                                                $ttAvatarSrc = !empty($ttAvatarRaw)
+                                                    ? ((str_starts_with($ttAvatarRaw, '/') || str_starts_with($ttAvatarRaw, 'http')) ? $ttAvatarRaw : '/resources/images/profile/' . $ttAvatarRaw)
+                                                    : '/resources/images/profile/avatarM.png';
+                                            @endphp
+                                            <img src="{{ $ttAvatarSrc }}" 
+                                                 alt="{{ $twoTruthsGame['author_name'] ?? 'Storyteller' }}" 
+                                                 class="rounded-circle shadow-sm object-fit-cover" 
+                                                 width="48" 
+                                                 height="48" 
+                                                 style="width: 48px; height: 48px; min-width: 48px; min-height: 48px; aspect-ratio: 1/1; object-fit: cover;" 
+                                                 onerror="this.onerror=null; this.src='/resources/images/profile/avatarM.png';">
                                             <span class="position-absolute bottom-0 end-0 badge rounded-pill bg-success border border-white p-1" title="Active Storyteller">
                                                 <span class="visually-hidden">Active</span>
                                             </span>
@@ -2367,7 +2447,7 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
                 <div class="row g-4">
                     {{-- Left: Quick 2-Minute Peacemaker --}}
                     <div class="col-lg-6">
-                        <div class="p-3.5 p-md-4 rounded-4 h-100" style="background: #fafafa; border: 1.5px solid #e2e8f0;">
+                        <div class="p-4 rounded-4 h-100" style="background: #fafafa; border: 1.5px solid #e2e8f0;">
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <h5 class="fw-bold mb-0 text-dark">
                                     <i class="bi bi-lightning-charge-fill text-warning me-1.5"></i> Quick 2-Minute Peacemaker
@@ -2430,7 +2510,7 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
 
                     {{-- Right: Active Dockets & Kinship Principles --}}
                     <div class="col-lg-6">
-                        <div class="p-3.5 p-md-4 rounded-4 h-100 d-flex flex-column" style="background: #ffffff; border: 1.5px solid #e2e8f0;">
+                        <div class="p-4 rounded-4 h-100 d-flex flex-column" style="background: #ffffff; border: 1.5px solid #e2e8f0;">
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <h5 class="fw-bold mb-0 text-dark">
                                     <i class="bi bi-archive-fill text-primary me-1.5"></i> Family Council Dockets
@@ -2441,18 +2521,18 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
                             @if(!empty($disputes) && count($disputes) > 0)
                                 <div class="d-flex flex-column gap-2.5 overflow-auto flex-grow-1" style="max-height: 380px;">
                                     @foreach($disputes as $d)
-                                        <div class="p-3 rounded-3 border" style="background: #f8fafc;">
-                                            <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
-                                                <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.92rem;">{{ $d['title'] ?? 'Family Discussion' }}</h6>
-                                                <span class="badge rounded-pill {{ ($d['status'] ?? '') === 'adjudicated' ? 'bg-success' : 'bg-warning text-dark' }} small">
+                                        <div class="p-3.5 rounded-3 border roundtable-docket-card" style="background: #f8fafc;">
+                                            <div class="d-flex justify-content-between align-items-start gap-2 mb-1.5">
+                                                <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.94rem; line-height: 1.4;">{{ $d['title'] ?? 'Family Discussion' }}</h6>
+                                                <span class="badge rounded-pill {{ ($d['status'] ?? '') === 'adjudicated' ? 'bg-success' : 'bg-warning text-dark' }} small flex-shrink-0">
                                                     {{ ucfirst($d['status'] ?? 'Active') }}
                                                 </span>
                                             </div>
-                                            <div class="text-muted small mb-2" style="font-size: 0.78rem;">
+                                            <div class="text-muted small mb-2.5" style="font-size: 0.8rem;">
                                                 Category: <span class="fw-semibold text-secondary">{{ ucwords(str_replace('_', ' ', $d['category'] ?? 'General')) }}</span>
                                             </div>
-                                            <a href="/family/roundtable?dispute_id={{ $d['id'] ?? '' }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-semibold" style="font-size: 0.78rem; min-height: 34px;">
-                                                View Council File <i class="bi bi-arrow-right ms-1"></i>
+                                            <a href="/family/roundtable?dispute_id={{ $d['id'] ?? '' }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center" style="font-size: 0.8rem; min-height: 44px;">
+                                                View Council File <i class="bi bi-arrow-right ms-1.5"></i>
                                             </a>
                                         </div>
                                     @endforeach
@@ -2501,29 +2581,29 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
                 </div>
 
                 @if(!empty($journals) && count($journals) > 0)
-                    <div class="row g-3">
+                    <div class="row g-4">
                         @foreach($journals as $j)
                             <div class="col-md-6 col-lg-4">
-                                <div class="card h-100 border rounded-4 p-3.5 shadow-sm transition-all" style="background: #ffffff; border-color: #e2e8f0 !important;">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="badge rounded-pill px-2.5 py-1 text-uppercase" style="font-size: 0.68rem; font-weight: 700; background: rgba(99, 102, 241, 0.1); color: #4338ca;">
+                                <div class="card h-100 border rounded-4 p-4 p-md-4 shadow-sm transition-all family-journal-card" style="background: #ffffff; border-color: #e2e8f0 !important;">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="badge rounded-pill px-3 py-1.5 text-uppercase" style="font-size: 0.72rem; font-weight: 700; background: rgba(99, 102, 241, 0.12); color: #4338ca;">
                                             {{ $j['category'] ?? 'Heritage' }}
                                         </span>
-                                        <span class="text-muted small" style="font-size: 0.72rem;">
+                                        <span class="text-muted small" style="font-size: 0.75rem;">
                                             <i class="bi bi-clock me-1"></i>{{ $j['reading_time'] ?? '3 min' }} read
                                         </span>
                                     </div>
-                                    <h5 class="fw-bold text-dark mb-1.5" style="font-size: 1.05rem; line-height: 1.4;">
+                                    <h5 class="fw-bold text-dark mb-2.5" style="font-size: 1.1rem; line-height: 1.45;">
                                         {{ $j['title'] ?? 'Untitled Chronicle' }}
                                     </h5>
-                                    <p class="text-muted small mb-3 flex-grow-1" style="font-size: 0.82rem; line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                    <p class="text-muted small mb-4 flex-grow-1" style="font-size: 0.88rem; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
                                         {{ strip_tags($j['content'] ?? $j['story'] ?? '') }}
                                     </p>
-                                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                        <span class="small fw-semibold text-secondary" style="font-size: 0.76rem;">
+                                    <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
+                                        <span class="small fw-semibold text-secondary" style="font-size: 0.8rem;">
                                             By {{ $j['author_name'] ?? $j['userName'] ?? 'Family Chronicler' }}
                                         </span>
-                                        <a href="/familyJournal/{{ $j['id'] ?? '' }}" class="btn btn-sm btn-link text-decoration-none fw-bold p-0" style="color: #4f46e5; font-size: 0.82rem;">
+                                        <a href="/familyJournal/{{ $j['id'] ?? '' }}" class="btn btn-sm btn-link text-decoration-none fw-bold p-0 d-inline-flex align-items-center gap-1" style="color: #4f46e5; font-size: 0.85rem; min-height: 44px;">
                                             Read Chronicle &rarr;
                                         </a>
                                     </div>

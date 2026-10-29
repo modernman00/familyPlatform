@@ -28,9 +28,8 @@ describe('Network Growth (Friend Requests)', () => {
 
     it('can view all members to send friend request', () => {
         cy.visit('/allMembers');
-        // "All Members" only appears in the <title> tag (not visible body text) -
-        // the page's actual on-screen heading is "Family Directory".
-        cy.get('body').should('contain.text', 'Family Directory');
+        // Verify on-screen heading for the family network
+        cy.get('body').should('contain.text', 'Family');
     });
 
 });

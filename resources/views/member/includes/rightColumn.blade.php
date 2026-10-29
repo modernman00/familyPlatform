@@ -269,7 +269,7 @@ foreach(($eventData ?? []) as $event) {
                     @if($overflowCount > 0)
                         <a href="/allMembers" 
                            class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center text-decoration-none shadow-sm position-relative" 
-                           title="+{{ $overflowCount }} more connected members in directory"
+                           title="+{{ $overflowCount }} more connected family members"
                            style="width: 44px; height: 44px; margin-left: -12px; z-index: 4; background: rgba(255, 255, 255, 0.25); border: 2.5px solid #ffffff; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-size: 0.8rem; box-shadow: 0 4px 10px rgba(0,0,0,0.35); transition: transform 0.2s ease;"
                            onmouseover="this.style.transform='translateY(-4px) scale(1.12)';"
                            onmouseout="this.style.transform='none';">

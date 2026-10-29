@@ -57,7 +57,9 @@ final class PostDto implements JsonSerializable
         public readonly ?array $linkPreview = null,
         public readonly array $postTags = [],
         public readonly array $rawAttributes = [],
-        public readonly int $viewsCount = 0
+        public readonly int $viewsCount = 0,
+        public readonly ?string $voiceCapsuleUrl = null,
+        public readonly bool $isOfficialPost = false
     ) {}
 
     /**
@@ -109,6 +111,11 @@ final class PostDto implements JsonSerializable
         $postTags = isset($row['post_tags']) && is_array($row['post_tags']) ? array_values($row['post_tags']) : [];
 
         $viewsCount = max(0, (int)($row['views_count'] ?? 0));
+        $voiceCapsuleUrl = !empty($row['voice_capsule_url']) ? (string)$row['voice_capsule_url'] : null;
+        $isOfficialPost = ($id === \App\services\FamilyPlatformAccountService::ACCOUNT_ID) || !empty($row['is_official']);
+        if ($isOfficialPost && (empty($profileImg) || str_contains($profileImg, 'avatarM') || str_contains($profileImg, 'avatarF'))) {
+            $profileImg = '/images/logo/logo.png';
+        }
 
         return new self(
             postNo: $postNo,
@@ -131,7 +138,9 @@ final class PostDto implements JsonSerializable
             linkPreview: $linkPreview,
             postTags: $postTags,
             rawAttributes: $row,
-            viewsCount: $viewsCount
+            viewsCount: $viewsCount,
+            voiceCapsuleUrl: $voiceCapsuleUrl,
+            isOfficialPost: $isOfficialPost
         );
     }
 
@@ -165,6 +174,8 @@ final class PostDto implements JsonSerializable
         $arr['link_preview'] = $this->linkPreview;
         $arr['post_tags'] = $this->postTags;
         $arr['views_count'] = $this->viewsCount;
+        $arr['voice_capsule_url'] = $this->voiceCapsuleUrl;
+        $arr['is_official'] = $this->isOfficialPost;
 
         return $arr;
     }

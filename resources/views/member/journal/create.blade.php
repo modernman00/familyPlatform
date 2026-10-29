@@ -218,6 +218,17 @@
             </div>
             @endif
 
+            <!-- Family Vault Encryption Assurance Banner -->
+            <div class="p-3 my-4 rounded-4 d-flex align-items-center gap-3" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25);">
+                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 38px; height: 38px; min-width: 38px; background: rgba(16, 185, 129, 0.15); color: #059669;">
+                    <i class="bi bi-shield-lock-fill" style="font-size: 1.2rem;"></i>
+                </div>
+                <div class="small">
+                    <strong class="text-dark d-block">Encrypted in your Family Vault</strong>
+                    <span class="text-muted">This chronicle is protected with AES-256 field encryption. Decryption is isolated strictly to authenticated members of Family #{{ htmlspecialchars($familyCode, ENT_QUOTES, 'UTF-8') }}.</span>
+                </div>
+            </div>
+
             <!-- Status & Submit -->
             <div class="d-flex align-items-center justify-content-between pt-4 border-top flex-wrap gap-3">
                 <div class="d-flex align-items-center gap-3 flex-wrap">
@@ -553,7 +564,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const submitBtn = document.getElementById('btnSubmitJournal');
             isSubmitting = true;
             if (window.FamilyPlatformSpinner) {
-                window.FamilyPlatformSpinner.start(submitBtn, ' Preserving...');
+                window.FamilyPlatformSpinner.start(submitBtn, ' Sealing in Family Vault...');
             } else if (submitBtn) {
                 submitBtn.disabled = true;
             }

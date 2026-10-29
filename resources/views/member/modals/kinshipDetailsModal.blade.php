@@ -25,11 +25,11 @@
       <div class="modal-body p-3 p-md-4" style="max-height: 75vh;">
         
         <!-- Profile Banner Card -->
-        <div class="p-3 rounded-4 mb-3 kin-modal-profile-card" style="background: linear-gradient(135deg, #fdf5f5 0%, #f9f0f0 100%); border: 1px solid #f1dede;">
+        <div class="modal-sub-card-rose p-3 rounded-4 mb-3 kin-modal-profile-card">
           <div class="d-flex align-items-center gap-3">
             <img id="kinModalAvatar" src="/resources/images/profile/avatarM.png" alt="Avatar" class="rounded-circle border border-2 border-white shadow-sm flex-shrink-0" width="68" height="68" style="width: 68px; height: 68px; min-width: 68px; min-height: 68px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 50%;">
             <div style="min-width: 0; flex: 1;">
-              <h5 class="fw-bold mb-1 text-truncate kin-modal-name" id="kinModalName" style="color: #0f172a; font-size: 1.15rem; line-height: 1.3;">
+              <h5 class="fw-bold mb-1 text-truncate kin-modal-name" id="kinModalName" style="font-size: 1.15rem; line-height: 1.3;">
                 {{ __('kinship.family_relative', 'Family Relative') }}
               </h5>
               <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -61,12 +61,12 @@
         <div class="mb-3">
           <div class="d-flex align-items-center gap-2 mb-2">
             <i class="bi bi-diagram-3-fill text-primary" style="font-size: 1rem;"></i>
-            <h6 class="fw-bold mb-0 kin-section-title" style="font-size: 0.95rem; color: #0f172a;">
+            <h6 class="fw-bold mb-0 kin-section-title" style="font-size: 0.95rem;">
               {{ __('kinship.lineage_clues', 'Lineage & Heritage Clues') }}
             </h6>
           </div>
           
-          <div class="p-3 rounded-4 border kin-clues-box" style="background-color: var(--surface-bg, #ffffff);">
+          <div class="modal-sub-card p-3 rounded-4 border kin-clues-box">
             <ul id="kinModalReasonsList" class="list-unstyled mb-0 d-flex flex-column gap-2">
               <!-- Dynamically populated -->
             </ul>
@@ -75,7 +75,7 @@
 
         <!-- Family Branch Info (Secondary) -->
         <div id="kinModalBranchBox" class="mb-3 d-none">
-          <div class="p-2.5 rounded-3 border d-flex align-items-center justify-content-between flex-wrap gap-2" style="background-color: #f8fafc; font-size: 0.8125rem;">
+          <div class="modal-sub-card p-2.5 rounded-3 border d-flex align-items-center justify-content-between flex-wrap gap-2" style="font-size: 0.8125rem;">
             <div class="d-flex align-items-center gap-2">
               <i class="bi bi-house-door text-muted"></i>
               <span class="text-secondary">{{ __('kinship.family_branch', 'Family Branch') }}:</span>
@@ -86,7 +86,7 @@
         </div>
 
         <!-- Walled Sanctuary Privacy Note -->
-        <div class="p-3 rounded-3" style="background: #f0fdf4; border: 1px solid #bbf7d0; font-size: 0.8125rem; line-height: 1.45;">
+        <div class="modal-sub-card-green p-3 rounded-3" style="font-size: 0.8125rem; line-height: 1.45;">
           <div class="d-flex align-items-start gap-2">
             <i class="bi bi-shield-lock-fill text-success fs-6 mt-0.5 flex-shrink-0"></i>
             <div>

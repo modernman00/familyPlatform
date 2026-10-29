@@ -1,6 +1,6 @@
 <div class="modal fade" id="lineageQuestModal" tabindex="-1" aria-labelledby="lineageQuestModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff; max-height: calc(100vh - 3.5rem);">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; max-height: calc(100vh - 3.5rem);">
             @include('csrf')
             <!-- Modal Header -->
             <div class="modal-header border-0 px-4 pt-4 pb-2 flex-shrink-0" style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border-bottom: 1px solid rgba(16, 185, 129, 0.1) !important;">
@@ -21,7 +21,7 @@
 
             <div class="modal-body px-4 py-3" style="overflow-y: auto;">
                 @if(!empty($hasMaternalCode) && !empty($maternalFamCode))
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 p-2.5 mb-3 rounded-3 border" style="background: #f0fdf4; border-color: #bbf7d0 !important;">
+                <div class="modal-sub-card-green d-flex align-items-center justify-content-between flex-wrap gap-2 p-2.5 mb-3 rounded-3 border">
                     <span class="small fw-bold text-dark"><i class="bi bi-signpost-split text-success me-1"></i> Quest Family Tree:</span>
                     <div class="d-flex flex-wrap gap-2" role="radiogroup" aria-label="Select Married or Birth Family Code for Quests">
                         <button type="button" id="questScopePrimaryBtn" class="btn btn-sm rounded-pill fw-semibold px-3 btn-primary text-white" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0;" onclick="window.switchQuestLineageScope('{{ ltrim((string)($primaryFamCode ?? ($data['famCode'] ?? '')), '#') }}', 'primary')">
@@ -209,9 +209,8 @@
 
         quests.forEach(quest => {
             const card = document.createElement('div');
-            card.className = 'card border-0 shadow-sm p-3 mb-2';
+            card.className = 'modal-sub-card border-0 shadow-sm p-3 mb-2';
             card.style.borderRadius = '16px';
-            card.style.background = '#f8fafc';
             card.style.borderLeft = '5px solid #10b981 !important';
 
             const badgeBg = quest.badge_color === 'warning' ? 'bg-warning text-dark' : (quest.badge_color === 'info' ? 'bg-info text-dark' : 'bg-success text-white');

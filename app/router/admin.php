@@ -65,6 +65,18 @@ $router->map('GET', $adminSecretPath . '/broadcast', 'App\controller\admin\Admin
 $router->map('GET', '/admin/system', 'App\controller\admin\AdminController@system', 'admin_system');
 $router->map('GET', $adminSecretPath . '/system', 'App\controller\admin\AdminController@system', 'admin_system_secret');
 
+// OFFICIAL PLATFORM ACCOUNT & UNIVERSAL FEED CONSOLE
+$router->map('GET', '/admin/official-posts', 'App\controller\admin\AdminController@officialPosts', 'admin_official_posts');
+$router->map('GET', $adminSecretPath . '/official-posts', 'App\controller\admin\AdminController@officialPosts', 'admin_official_posts_secret');
+$router->map('POST', '/admin/official-posts/publish', 'App\controller\admin\AdminController@publishOfficialPost', 'admin_official_posts_publish');
+$router->map('POST', $adminSecretPath . '/official-posts/publish', 'App\controller\admin\AdminController@publishOfficialPost', 'admin_official_posts_publish_secret');
+$router->map('POST', '/admin/official-posts/update', 'App\controller\admin\AdminController@updateOfficialPost', 'admin_official_posts_update');
+$router->map('POST', $adminSecretPath . '/official-posts/update', 'App\controller\admin\AdminController@updateOfficialPost', 'admin_official_posts_update_secret');
+$router->map('POST', '/admin/official-posts/delete', 'App\controller\admin\AdminController@deleteOfficialPost', 'admin_official_posts_delete');
+$router->map('POST', $adminSecretPath . '/official-posts/delete', 'App\controller\admin\AdminController@deleteOfficialPost', 'admin_official_posts_delete_secret');
+$router->map('POST', '/admin/official-posts/summarise', 'App\controller\admin\AdminController@summariseFriendlyUpdate', 'admin_official_posts_summarise');
+$router->map('POST', $adminSecretPath . '/official-posts/summarise', 'App\controller\admin\AdminController@summariseFriendlyUpdate', 'admin_official_posts_summarise_secret');
+
 // pSEO CMS & URL REGISTRY
 $router->map('GET', '/admin/pseo', 'App\controller\admin\AdminController@pseo', 'admin_pseo');
 $router->map('GET', $adminSecretPath . '/pseo', 'App\controller\admin\AdminController@pseo', 'admin_pseo_secret');

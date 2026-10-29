@@ -1,7 +1,7 @@
 <!-- Invite Family & Phone Contacts Modal -->
 <div class="modal fade" id="inviteFamilyModal" tabindex="-1" aria-labelledby="inviteFamilyModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff; max-height: calc(100vh - 3.5rem);">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; max-height: calc(100vh - 3.5rem);">
             @include('csrf')
             
             <!-- Modal Header -->
@@ -31,11 +31,10 @@
             <div class="modal-body px-4 py-3" style="overflow-y: auto;">
                 
                 <!-- 1. Sanctuary Privacy Guarantee Card -->
-                <div class="p-3 mb-3 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2"
-                     style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px;">
+                <div class="modal-sub-card p-3 mb-3 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
                     <div class="d-flex align-items-center gap-3 min-w-0">
                         <div class="rounded-circle d-flex align-items-center justify-content-center text-success flex-shrink-0"
-                             style="width: 40px; height: 40px; background: #dcfce7; font-size: 1.2rem;">
+                             style="width: 40px; height: 40px; background: rgba(16, 185, 129, 0.16); font-size: 1.2rem;">
                             <i class="bi bi-shield-check"></i>
                         </div>
                         <div>
@@ -43,7 +42,7 @@
                                 100% Private Family Network
                             </div>
                             <div class="text-muted small" style="font-size: 0.78rem;" id="modalFamilyContextSub">
-                                Relatives join your <span id="modalFamilyLineageTypeLabel" class="fw-semibold text-dark">Marital / Household family</span> with private code: <span class="badge bg-light text-primary border font-monospace fw-bold" id="modalFamilyCodeBadge">{{ $data['famCode'] ?? '...' }}</span>
+                                Relatives join your <span id="modalFamilyLineageTypeLabel" class="fw-semibold text-dark">Marital / Household family</span> with private code: <span class="badge bg-primary-subtle text-primary border font-monospace fw-bold" id="modalFamilyCodeBadge">{{ $data['famCode'] ?? '...' }}</span>
                             </div>
                         </div>
                     </div>
@@ -53,23 +52,22 @@
                 </div>
 
                 <!-- 1b. Marital vs. Birth Family Code Selector (Shown when user holds an active Birth / Maiden family code) -->
-                <div id="inviteModalLineagePickerWrap" class="p-3 mb-4 rounded-3 {{ !empty($hasMaternalCode) && !empty($maternalFamCode) ? '' : 'd-none' }}"
-                     style="background: #fdf8f8; border: 1px solid #f1d4d6; border-radius: 16px;">
+                <div id="inviteModalLineagePickerWrap" class="modal-sub-card-rose p-3 mb-4 rounded-3 {{ !empty($hasMaternalCode) && !empty($maternalFamCode) ? '' : 'd-none' }}">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
                         <label class="form-label fw-bold text-dark small mb-0 d-flex align-items-center gap-1">
                             <i class="bi bi-signpost-split text-primary"></i>
                             <span>Which family are you inviting them to?</span>
                         </label>
-                        <span class="badge bg-white text-secondary border" style="font-size: 0.7rem;" id="inviteModalAutoRouteBadge">
+                        <span class="badge bg-light-subtle text-secondary border" style="font-size: 0.7rem;" id="inviteModalAutoRouteBadge">
                             Auto-adjusts by relative
                         </span>
                     </div>
                     <div class="d-flex flex-wrap gap-2" role="radiogroup" aria-label="Select Marital or Birth Family Code">
-                        <label class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 border bg-white" style="cursor:pointer;min-height:44px;font-size:.82rem;white-space:nowrap;flex-shrink:0;">
+                        <label class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 border" style="cursor:pointer;min-height:44px;font-size:.82rem;white-space:nowrap;flex-shrink:0;">
                             <input type="radio" name="invite_modal_lineage_scope" value="primary" id="inviteRadioPrimary" checked>
                             <span><strong>Marital / Household Tree</strong> <span class="text-muted font-monospace" id="inviteRadioPrimaryCode">(#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})</span></span>
                         </label>
-                        <label class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 border bg-white" style="cursor:pointer;min-height:44px;font-size:.82rem;white-space:nowrap;flex-shrink:0;">
+                        <label class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 border" style="cursor:pointer;min-height:44px;font-size:.82rem;white-space:nowrap;flex-shrink:0;">
                             <input type="radio" name="invite_modal_lineage_scope" value="maternal" id="inviteRadioMaternal">
                             <span><strong>My Birth / Maiden Family</strong> <span class="text-muted font-monospace" id="inviteRadioMaternalCode">(#{{ $maternalFamCode ?? '' }})</span></span>
                         </label>
@@ -114,8 +112,7 @@
                 </div>
 
                 <!-- 3. Native Phone Contacts Hero Section (Shown on supported Chromium / Android devices) -->
-                <div id="contactPickerSupportedSection" class="p-3 mb-4 rounded-3 d-none"
-                     style="background: linear-gradient(135deg, #fefce8 0%, #fffbeb 100%); border: 1.5px solid #fde047; border-radius: 16px;">
+                <div id="contactPickerSupportedSection" class="modal-sub-card-amber p-3 mb-4 rounded-3 d-none">
                     <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
                         <div class="d-flex align-items-center gap-2">
                             <span class="badge bg-warning text-dark fw-bold px-2 py-1" style="font-size: 0.72rem;">
@@ -205,7 +202,7 @@
                 </div>
 
                 <!-- 5. Manual Direct Relative Add & Text -->
-                <div class="p-3 mb-4 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px;">
+                <div class="modal-sub-card p-3 mb-4 rounded-3">
                     <label class="form-label fw-bold text-dark small mb-2 d-flex align-items-center gap-1">
                         <i class="bi bi-telephone-plus-fill text-secondary"></i>
                         <span>Or Send to a Specific Number</span>
@@ -231,9 +228,9 @@
                         <label class="form-label text-muted fw-semibold small mb-0" style="font-size: 0.8rem;">
                             Message Preview (Sent to relative)
                         </label>
-                        <span class="badge bg-light text-muted border font-monospace" style="font-size: 0.72rem;">256-bit signed</span>
+                        <span class="badge bg-light-subtle text-muted border font-monospace" style="font-size: 0.72rem;">256-bit signed</span>
                     </div>
-                    <div class="p-3 rounded-3" style="background: #f1f5f9; border: 1px solid #cbd5e1; font-size: 0.86rem; color: #334155; line-height: 1.5; white-space: pre-wrap; word-break: break-word; font-family: inherit;" id="inviteMessagePreview">
+                    <div class="modal-preview-box p-3 rounded-3" style="white-space: pre-wrap;" id="inviteMessagePreview">
                         Loading personalised invitation link...
                     </div>
                 </div>
@@ -246,7 +243,7 @@
             </div>
 
             <!-- Modal Footer -->
-            <div class="modal-footer border-0 bg-light px-4 py-3 d-flex justify-content-between flex-shrink-0">
+            <div class="modal-footer border-0 px-4 py-3 d-flex justify-content-between flex-shrink-0">
                 <span class="text-muted small d-flex align-items-center gap-1">
                     <i class="bi bi-shield-lock-fill text-success"></i>
                     <span>Zero PII logged on server</span>

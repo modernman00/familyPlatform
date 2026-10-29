@@ -250,6 +250,13 @@ final class Organogram extends SingleCustomerData
 
             $nodeAnalysis = $this->analyzeMissingNodes($orgData, $graphData);
 
+            $studioData = $this->prepareStudioData($graphData, $idStr, $isSelf);
+            $generations = $studioData['generations'];
+            $stats = $studioData['stats'];
+            $rootNodeId = $studioData['rootNodeId'];
+            $rootUnions = $studioData['rootUnions'];
+            $pendingRelRequests = $studioData['pendingRelRequests'];
+
             view('member/organogram', compact(
                 'orgData',
                 'data',
@@ -271,11 +278,126 @@ final class Organogram extends SingleCustomerData
                 'wifeFamCode',
                 'motherNode',
                 'familyCode',
-                'heldCodes'
+                'heldCodes',
+                'generations',
+                'stats',
+                'rootNodeId',
+                'rootUnions',
+                'pendingRelRequests'
             ));
         } catch (\Throwable $th) {
             showError($th);
         }
+    }
+
+    /**
+     * Prepare studio context (generation bucketing, statistics, root unions, pending relationship requests)
+     * @param array<string, mixed> $graphData
+     * @param string $idStr
+     * @param bool $isSelf
+     * @return array{generations: array<string, mixed>, stats: array<string, mixed>, rootNodeId: int, rootUnions: array<int, mixed>, pendingRelRequests: array<int, mixed>}
+     */
+    protected function prepareStudioData(array $graphData, string $idStr, bool $isSelf): array
+    {
+        $nodes = $graphData['nodes'] ?? [];
+        $unions = $graphData['unions'] ?? [];
+
+        // Group nodes by generation level
+        $generations = [
+            'grandparents' => [], // level -2
+            'parents'      => [], // level -1
+            'household'    => [], // level 0 (self & partners & siblings)
+            'children'     => [], // level 1
+            'grandchildren'=> [], // level 2
+            'other'        => []
+        ];
+
+        $livingCount = 0;
+        $deceasedCount = 0;
+
+        foreach ($nodes as $node) {
+            $lvl = (int)($node['generation_level'] ?? 0);
+            if (!empty($node['is_deceased'])) {
+                $deceasedCount++;
+            } else {
+                $livingCount++;
+            }
+
+            if ($lvl === -2) {
+                $generations['grandparents'][] = $node;
+            } elseif ($lvl === -1) {
+                $generations['parents'][] = $node;
+            } elseif ($lvl === 0) {
+                $generations['household'][] = $node;
+            } elseif ($lvl === 1) {
+                $generations['children'][] = $node;
+            } elseif ($lvl === 2) {
+                $generations['grandchildren'][] = $node;
+            } else {
+                $generations['other'][] = $node;
+            }
+        }
+
+        $stats = [
+            'total_members'    => count($nodes),
+            'living_count'     => $livingCount,
+            'deceased_count'   => $deceasedCount,
+            'total_unions'     => count($unions),
+            'generations_count'=> count(array_filter($generations, fn($g) => count($g) > 0))
+        ];
+
+        $rootNodeId = 0;
+        foreach ($nodes as $node) {
+            if (($node['user_id'] ?? null) === $idStr) {
+                $rootNodeId = (int)$node['id'];
+                break;
+            }
+        }
+        if ($rootNodeId === 0 && !empty($nodes)) {
+            $rootNodeId = (int)$nodes[0]['id'];
+        }
+
+        // Partnerships the viewed member can add a child to (current spouse, former partners, ...)
+        $rootUnions = [];
+        if ($rootNodeId > 0) {
+            $nodesById = [];
+            foreach ($nodes as $n) {
+                $nodesById[(int)($n['id'] ?? 0)] = $n;
+            }
+            foreach ($unions as $u) {
+                $p1 = (int)($u['partner_1_id'] ?? 0);
+                $p2 = (int)($u['partner_2_id'] ?? 0);
+                if ($p1 === $p2 || ($p1 !== $rootNodeId && $p2 !== $rootNodeId)) {
+                    continue;
+                }
+                $partner = $nodesById[$p1 === $rootNodeId ? $p2 : $p1] ?? [];
+                $rootUnions[] = [
+                    'id' => (int)$u['id'],
+                    'partner_name' => !empty($partner['is_placeholder']) ? '' : trim((string)($partner['full_name'] ?? '')),
+                    'union_type' => (string)($u['union_type'] ?? 'married'),
+                    'is_current' => !empty($u['is_current']),
+                ];
+            }
+            usort($rootUnions, static fn(array $a, array $b): int => ((int)$b['is_current'] <=> (int)$a['is_current']) ?: ($a['id'] <=> $b['id']));
+        }
+
+        // Relationship confirmations addressed to the signed-in member
+        $pendingRelRequests = [];
+        if ($isSelf) {
+            try {
+                $pendingRelRequests = \App\services\FamilyRelationshipRequestService::pendingFor(Db::connect2(), $idStr);
+            } catch (\Throwable) {
+                $pendingRelRequests = []; // table not migrated yet: degrade silently
+            }
+        }
+
+        return [
+            'generations'        => $generations,
+            'stats'              => $stats,
+            'rootNodeId'         => $rootNodeId,
+            'rootUnions'         => $rootUnions,
+            'pendingRelRequests' => $pendingRelRequests,
+        ];
     }
 
     /**
@@ -492,52 +614,12 @@ final class Organogram extends SingleCustomerData
             }
             $graphData['wifeFamCode'] = $wifeFamCode;
 
-            $nodes = $graphData['nodes'] ?? [];
-            $unions = $graphData['unions'] ?? [];
-
-            // Group nodes by generation level
-            $generations = [
-                'grandparents' => [], // level -2
-                'parents'      => [], // level -1
-                'household'    => [], // level 0 (self & partners & siblings)
-                'children'     => [], // level 1
-                'grandchildren'=> [], // level 2
-                'other'        => []
-            ];
-
-            $livingCount = 0;
-            $deceasedCount = 0;
-
-            foreach ($nodes as $node) {
-                $lvl = (int)($node['generation_level'] ?? 0);
-                if (!empty($node['is_deceased'])) {
-                    $deceasedCount++;
-                } else {
-                    $livingCount++;
-                }
-
-                if ($lvl === -2) {
-                    $generations['grandparents'][] = $node;
-                } elseif ($lvl === -1) {
-                    $generations['parents'][] = $node;
-                } elseif ($lvl === 0) {
-                    $generations['household'][] = $node;
-                } elseif ($lvl === 1) {
-                    $generations['children'][] = $node;
-                } elseif ($lvl === 2) {
-                    $generations['grandchildren'][] = $node;
-                } else {
-                    $generations['other'][] = $node;
-                }
-            }
-
-            $stats = [
-                'total_members'    => count($nodes),
-                'living_count'     => $livingCount,
-                'deceased_count'   => $deceasedCount,
-                'total_unions'     => count($unions),
-                'generations_count'=> count(array_filter($generations, fn($g) => count($g) > 0))
-            ];
+            $studioData = $this->prepareStudioData($graphData, $idStr, $isSelf);
+            $generations = $studioData['generations'];
+            $stats = $studioData['stats'];
+            $rootNodeId = $studioData['rootNodeId'];
+            $rootUnions = $studioData['rootUnions'];
+            $pendingRelRequests = $studioData['pendingRelRequests'];
 
             $orgData = [
                 'spouse'   => $spouse[0] ?? null,
@@ -548,52 +630,7 @@ final class Organogram extends SingleCustomerData
                 'graph'    => $graphData
             ];
 
-            $rootNodeId = 0;
-            foreach ($nodes as $node) {
-                if (($node['user_id'] ?? null) === $idStr) {
-                    $rootNodeId = (int)$node['id'];
-                    break;
-                }
-            }
-            if ($rootNodeId === 0 && !empty($nodes)) {
-                $rootNodeId = (int)$nodes[0]['id'];
-            }
-
             $graphJson = json_encode($graphData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?: '{}';
-
-            // Partnerships the viewed member can add a child to (current spouse, former partners, ...)
-            $rootUnions = [];
-            if ($rootNodeId > 0) {
-                $nodesById = [];
-                foreach ($nodes as $n) {
-                    $nodesById[(int)($n['id'] ?? 0)] = $n;
-                }
-                foreach ($unions as $u) {
-                    $p1 = (int)($u['partner_1_id'] ?? 0);
-                    $p2 = (int)($u['partner_2_id'] ?? 0);
-                    if ($p1 === $p2 || ($p1 !== $rootNodeId && $p2 !== $rootNodeId)) {
-                        continue;
-                    }
-                    $partner = $nodesById[$p1 === $rootNodeId ? $p2 : $p1] ?? [];
-                    $rootUnions[] = [
-                        'id' => (int)$u['id'],
-                        'partner_name' => !empty($partner['is_placeholder']) ? '' : trim((string)($partner['full_name'] ?? '')),
-                        'union_type' => (string)($u['union_type'] ?? 'married'),
-                        'is_current' => !empty($u['is_current']),
-                    ];
-                }
-                usort($rootUnions, static fn(array $a, array $b): int => ((int)$b['is_current'] <=> (int)$a['is_current']) ?: ($a['id'] <=> $b['id']));
-            }
-
-            // Relationship confirmations addressed to the signed-in member
-            $pendingRelRequests = [];
-            if ($isSelf) {
-                try {
-                    $pendingRelRequests = \App\services\FamilyRelationshipRequestService::pendingFor(Db::connect2(), $idStr);
-                } catch (\Throwable) {
-                    $pendingRelRequests = []; // table not migrated yet: degrade silently
-                }
-            }
 
             view('member/familyStudio', compact(
                 'data',

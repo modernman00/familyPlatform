@@ -15,6 +15,7 @@ return [
     'nav.studio' => 'Studio',
     'nav.journal' => 'Journal',
     'nav.reels' => 'Reels',
+    'nav.family' => 'Family',
     'nav.directory' => 'Directory',
     'nav.all_members' => 'All Members',
     'nav.events' => 'Events',

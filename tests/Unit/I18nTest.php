@@ -72,12 +72,14 @@ class I18nTest extends TestCase
         $this->assertIsArray($dictFr);
         $this->assertSame('Accueil', $dictFr['nav.home']);
         $this->assertSame('Ma Page', $dictFr['nav.my_page']);
+        $this->assertSame('Famille', $dictFr['nav.family']);
         $this->assertSame('Annuaire', $dictFr['nav.directory']);
 
         $dictEs = I18n::getDictionary('es');
         $this->assertIsArray($dictEs);
         $this->assertSame('Inicio', $dictEs['nav.home']);
         $this->assertSame('Mi Página', $dictEs['nav.my_page']);
+        $this->assertSame('Familia', $dictEs['nav.family']);
         $this->assertSame('Directorio', $dictEs['nav.directory']);
 
         // Test transArray alias
@@ -91,6 +93,7 @@ class I18nTest extends TestCase
         $this->assertSame('Studio', __('nav.studio'));
         $this->assertSame('Journal', __('nav.journal'));
         $this->assertSame('Reels', __('nav.reels'));
+        $this->assertSame('Famille', __('nav.family'));
         $this->assertSame('Annuaire', __('nav.directory'));
         $this->assertSame('Inviter des proches', __('nav.invite_others'));
         $this->assertSame('Notifications', __('nav.notifications'));
@@ -102,6 +105,7 @@ class I18nTest extends TestCase
         $this->assertSame('Estudio', __('nav.studio'));
         $this->assertSame('Diario', __('nav.journal'));
         $this->assertSame('Reels', __('nav.reels'));
+        $this->assertSame('Familia', __('nav.family'));
         $this->assertSame('Directorio', __('nav.directory'));
         $this->assertSame('Invitar a otros', __('nav.invite_others'));
         $this->assertSame('Notificaciones', __('nav.notifications'));

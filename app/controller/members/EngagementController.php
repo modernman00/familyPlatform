@@ -85,6 +85,11 @@ class EngagementController
                 return false;
             }
 
+            // 0. Official FamilyPlatform broadcast post (universally accessible to all members)
+            if ((string)($post['id'] ?? '') === \App\services\FamilyPlatformAccountService::ACCOUNT_ID) {
+                return true;
+            }
+
             // 1. Author of the post
             if ((string)($post['id'] ?? '') === $userId) {
                 return true;

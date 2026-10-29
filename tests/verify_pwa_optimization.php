@@ -65,14 +65,18 @@ runCheck("public/manifest.json exists and satisfies PWA installability criteria"
 });
 
 // TEST 2: High-resolution icons verification
-runCheck("App icons and touch icons exist with correct dimensions", function() use ($rootDir) {
+runCheck("App icons and touch icons exist with correct dimensions across public and root", function() use ($rootDir) {
     $requiredIcons = [
         '/public/img/favicon/android-chrome-192x192.png',
         '/public/img/favicon/android-chrome-512x512.png',
         '/public/img/favicon/apple-touch-icon.png',
         '/public/img/favicon/favicon.ico',
         '/public/icon-192x192.png',
-        '/public/icon-512x512.png'
+        '/public/icon-512x512.png',
+        '/public/apple-touch-icon.png',
+        '/apple-touch-icon.png',
+        '/favicon.ico',
+        '/icon-192x192.png'
     ];
 
     foreach ($requiredIcons as $iconRel) {
@@ -132,6 +136,12 @@ runCheck("PWA partials (pwa-head and pwa-register) exist with proper meta tags",
     $splashContent = file_get_contents($pwaSplash);
     if (!str_contains($splashContent, 'fp-pwa-splash')) {
         throw new \Exception("pwa-splash missing #fp-pwa-splash container.");
+    }
+    if (!str_contains($splashContent, 'fp-pwa-splash-badge')) {
+        throw new \Exception("pwa-splash missing fp-pwa-splash-badge inline vector fallback.");
+    }
+    if (!str_contains($splashContent, 'onerror')) {
+        throw new \Exception("pwa-splash logo missing resilient onerror fallback handler.");
     }
     if (!str_contains($splashContent, 'watchdog') && !str_contains($splashContent, 'setTimeout')) {
         throw new \Exception("pwa-splash missing failsafe watchdog timer.");

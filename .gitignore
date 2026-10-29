@@ -22,8 +22,10 @@ resources/views/layouts/achive
 public/images/journals/*
 !public/images/journals/.gitkeep
 resources/images
-public/img
+public/img/*
 !public/img/logo
+!public/img/family-hub-hero.jpg
+!public/img/family-hub-hero.webp
 public/js/*
 !public/js/family-timezone.js
 !public/js/pwa-notifications.js
@@ -47,6 +49,10 @@ test.drawio
 .env
 *.log
 deployment_audit.log
+/apple-touch-icon.png
+/favicon.ico
+/icon-192x192.png
+/icon-512x512.png
 # --- Automated TAT / Shola SecOps Rules ---
 # Environment config
 .env.*

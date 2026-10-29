@@ -1,6 +1,6 @@
 <div class="modal fade" id="familyFlyerModal" tabindex="-1" aria-labelledby="familyFlyerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff; max-height: calc(100vh - 3.5rem);">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; max-height: calc(100vh - 3.5rem);">
             @include('csrf')
             <!-- Modal Header -->
             <div class="modal-header border-0 px-4 pt-4 pb-2 flex-shrink-0" style="background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%); border-bottom: 1px solid rgba(245, 158, 11, 0.15) !important;">
@@ -21,7 +21,7 @@
 
             <div class="modal-body px-4 py-3" style="overflow-y: auto;">
                 @if(!empty($hasMaternalCode) && !empty($maternalFamCode))
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 p-2.5 mb-3 rounded-3 border" style="background: #fdf8f8; border-color: #f1d4d6 !important;">
+                <div class="modal-sub-card-rose d-flex align-items-center justify-content-between flex-wrap gap-2 p-2.5 mb-3 rounded-3 border">
                     <span class="small fw-bold text-dark"><i class="bi bi-signpost-split text-primary me-1"></i> Flyer Family Code:</span>
                     <div class="d-flex flex-wrap gap-2" role="radiogroup" aria-label="Select Married or Birth Family Code for Flyer">
                         <button type="button" id="flyerScopePrimaryBtn" class="btn btn-sm rounded-pill fw-semibold px-3 btn-primary" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0;" onclick="window.switchFlyerLineageScope('primary', '{{ ltrim((string)($primaryFamCode ?? ($data['famCode'] ?? '')), '#') }}', '{{ addslashes((string)($maritalSurname ?? ($data['lastName'] ?? 'Family'))) }}')">
@@ -43,19 +43,19 @@
                 <!-- Customization / Stats Strip -->
                 <div class="row g-2 mb-3 text-center">
                     <div class="col-4">
-                        <div class="p-2 rounded-3 bg-light border">
+                        <div class="modal-sub-card p-2 rounded-3 border">
                             <span class="text-muted small d-block" style="font-size: 0.72rem;">TOTAL MEMBERS</span>
                             <span class="fw-bold text-dark fs-6" id="flyerStatMembers">--</span>
                         </div>
                     </div>
                     <div class="col-4">
-                        <div class="p-2 rounded-3 bg-light border">
+                        <div class="modal-sub-card p-2 rounded-3 border">
                             <span class="text-muted small d-block" style="font-size: 0.72rem;">GENERATIONS</span>
                             <span class="fw-bold text-dark fs-6" id="flyerStatGens">--</span>
                         </div>
                     </div>
                     <div class="col-4">
-                        <div class="p-2 rounded-3 bg-light border">
+                        <div class="modal-sub-card p-2 rounded-3 border">
                             <span class="text-muted small d-block" style="font-size: 0.72rem;">CITIES &amp; REGIONS</span>
                             <span class="fw-bold text-dark fs-6" id="flyerStatHubs">--</span>
                         </div>
@@ -69,7 +69,7 @@
             </div>
 
             <!-- Modal Footer Actions -->
-            <div class="modal-footer border-0 bg-light px-4 py-3 d-flex flex-column flex-sm-row justify-content-between gap-2 flex-shrink-0">
+            <div class="modal-footer border-0 px-4 py-3 d-flex flex-column flex-sm-row justify-content-between gap-2 flex-shrink-0">
                 <span class="text-muted small">
                     <i class="bi bi-shield-check text-success me-1"></i> Client-side rendering • Zero PII leaked
                 </span>

@@ -5,11 +5,22 @@
 # =============================================================================
 
 RewriteEngine On
-# Allow robots.txt and sitemap.xml directly (from root or public/)
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule ^(robots\.txt|sitemap\.xml)$ - [L]
-RewriteCond %{DOCUMENT_ROOT}/public/$1 -f
+# Allow robots.txt, sitemap.xml, PWA icons and favicons directly (from root, public/, or public/img/favicon/)
 RewriteRule ^(robots\.txt|sitemap\.xml)$ public/$1 [L]
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^(robots\.txt|sitemap\.xml|apple-touch-icon\.png|favicon\.ico|icon-[0-9x]+\.png)$ - [L]
+RewriteCond %{DOCUMENT_ROOT}/public/$1 -f
+RewriteRule ^(robots\.txt|sitemap\.xml|apple-touch-icon\.png|favicon\.ico|icon-[0-9x]+\.png)$ public/$1 [L]
+RewriteCond %{DOCUMENT_ROOT}/public/img/favicon/$1 -f
+RewriteRule ^(apple-touch-icon\.png|favicon\.ico)$ public/img/favicon/$1 [L]
+
+# Fallback rewrite for static assets requested without /public prefix
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{DOCUMENT_ROOT}/public/img/$1 -f
+RewriteRule ^img/(.+)$ public/img/$1 [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{DOCUMENT_ROOT}/public/images/$1 -f
+RewriteRule ^images/(.+)$ public/images/$1 [L]
 
 # ---------------------------------------------------------------------------
 # 0a. NCSC PHP Advisory ("php2shell" — CVE-2026-109618 & CVE-2026-109619) Shield

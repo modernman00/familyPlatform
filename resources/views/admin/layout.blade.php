@@ -137,6 +137,11 @@
                 <span>Campaigns</span>
             </a>
 
+            <a href="{{ $adminPrefix }}/official-posts" class="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold <?= ($activeTab ?? '') === 'official_posts' ? 'bg-emerald-600 text-white shadow-sm' : 'text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/40' ?> transition-colors">
+                <i class="fa-solid fa-bullhorn text-emerald-300"></i>
+                <span>Official Feed</span>
+            </a>
+
             <a href="{{ $adminPrefix }}/broadcast<?= ($selectedApp ?? 'familyplatform') !== 'familyplatform' ? '?app=' . htmlspecialchars($selectedApp) : '' ?>" class="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold <?= ($activeTab ?? '') === 'broadcast' ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-900/60' ?> transition-colors">
                 <i class="fa-solid fa-tower-broadcast"></i>
                 <span>Broadcast Console</span>
@@ -175,6 +180,11 @@
             <a href="{{ $adminPrefix }}/system" class="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold <?= ($activeTab ?? '') === 'system' ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-900/60' ?> transition-colors">
                 <i class="fa-solid fa-server"></i>
                 <span>System Health &amp; Vault</span>
+            </a>
+
+            <a href="{{ $adminPrefix }}/playbook" class="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold <?= ($activeTab ?? '') === 'playbook' ? 'bg-emerald-600 text-white shadow-sm' : 'text-indigo-400 hover:text-indigo-300 hover:bg-indigo-950/40' ?> transition-colors">
+                <i class="fa-solid fa-book-bookmark"></i>
+                <span>Living Playbook</span>
             </a>
         </div>
     </nav>

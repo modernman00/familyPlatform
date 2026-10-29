@@ -85,9 +85,9 @@
                     <button type="button" class="btn-action" onclick="openTimeCapsuleModal()" title="Digital Time Capsule Vault" style="border-color: rgba(184,32,44, 0.4); color: #ef6b73;">
                         <i class="bi bi-hourglass-split text-primary"></i> Time Capsule
                     </button>
-                    <a href="/familyStudio" id="configureFamilyBtn" class="btn-action" title="Open Lineage Studio">
+                    <button type="button" id="configureFamilyBtn" class="btn-action" onclick="switchTreeViewMode('studio')" title="Open Family Studio to update relatives & lineage directly on this page">
                         <i class="bi bi-stars text-warning"></i> Lineage Studio
-                    </a>
+                    </button>
                     <button type="button" class="btn-action" id="manageRelativesBtn" onclick="openManageRelativesModal()" title="Remove unrecognised names from family tree" style="border-color: rgba(239, 68, 68, 0.4); color: #ef4444;">
                         <i class="bi bi-person-x-fill text-danger"></i> Remove Relatives
                     </button>
@@ -135,11 +135,42 @@
                 <i class="bi bi-globe-americas text-info"></i>
                 <span>Dynasty Globe</span>
             </button>
+            <button type="button" id="btnModeStudio" class="layout-segment-btn" onclick="switchTreeViewMode('studio')" title="Family Studio: Curate and update relatives, unions, and lineage directly">
+                <i class="bi bi-stars text-warning"></i>
+                <span>Family Studio</span>
+                <span class="badge bg-warning text-dark ms-1 px-1.5 py-0.5 rounded-pill" style="font-size: 0.68rem; font-weight: 700;">Update Tree</span>
+            </button>
         </div>
     </div>
 
     <!-- Tree Workspace Container -->
     <div class="organogram-container">
+
+        <!-- Integrated Family Studio Discovery Announcement Banner -->
+        <div id="treeStudioDiscoveryBanner" class="alert shadow-lg border-0 rounded-4 mb-3 mx-3 d-flex flex-column flex-md-row align-items-center justify-content-between p-3 gap-3" style="background: linear-gradient(135deg, rgba(30, 10, 15, 0.95) 0%, rgba(138, 16, 25, 0.95) 100%); border: 1px solid rgba(251, 191, 36, 0.4); border-left: 5px solid #fbbf24 !important; backdrop-filter: blur(16px); box-shadow: 0 16px 36px rgba(0,0,0,0.4);">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 46px; height: 46px; background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.45); font-size: 1.25rem;">
+                    <i class="bi bi-stars"></i>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                        <h6 class="mb-0 fw-bold text-white fs-6">Family Studio is now inside your Family Tree!</h6>
+                        <span class="badge bg-warning text-dark rounded-pill px-2 py-0.5" style="font-size: 0.68rem; font-weight: 800; letter-spacing: 0.04em;">NEW</span>
+                    </div>
+                    <p class="mb-0 text-white-50" style="font-size: 0.88rem; line-height: 1.45;">
+                        You no longer have to navigate away to update your tree. Easily switch between seeing your interactive tree and adding or curating relatives directly in <strong>Family Studio</strong>!
+                    </p>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                <button type="button" class="btn btn-warning text-dark px-3 py-2 fw-bold d-inline-flex align-items-center gap-1 shadow-sm" onclick="switchTreeViewMode('studio')" style="border-radius: 50px; min-height: 44px; font-size: 0.88rem; white-space: nowrap;">
+                    <i class="bi bi-pencil-square"></i> Open Family Studio
+                </button>
+                <button type="button" class="btn btn-outline-light text-white-50 px-2.5 py-2 border-0" onclick="dismissTreeStudioDiscoveryBanner()" title="Dismiss announcement" style="border-radius: 50px; min-height: 44px; min-width: 44px;">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
 
         @php
             $analysis = $nodeAnalysis ?? [
@@ -376,9 +407,9 @@
                                 <p class="text-white-50 mb-4" style="max-width: 500px;">
                                     Your family tree is currently empty. Start building your lineage by adding your parents, partner, siblings, or children!
                                 </p>
-                                <a href="/familyStudio" class="btn btn-success px-4 py-2 fw-bold" style="border-radius: 50px; min-height: 44px; display: inline-flex; align-items: center;">
-                                    <i class="bi bi-plus-circle me-1"></i> Add Relatives Now
-                                </a>
+                                <button type="button" onclick="switchTreeViewMode('studio')" class="btn btn-success px-4 py-2 fw-bold" style="border-radius: 50px; min-height: 44px; display: inline-flex; align-items: center;">
+                                    <i class="bi bi-plus-circle me-1"></i> Add Relatives in Studio
+                                </button>
                             </div>
                         @else
                             <div class="d-flex flex-column align-items-center justify-content-center p-5 text-center" style="min-height: 480px;">
@@ -467,9 +498,9 @@
                         <p class="text-white-50 mb-4" style="max-width: 500px;">
                             Your family tree is currently empty. Start building your lineage by adding your parents, partner, siblings, or children!
                         </p>
-                        <a href="/familyStudio" class="btn btn-success px-4 py-2 fw-bold" style="border-radius: 50px; min-height: 44px; display: inline-flex; align-items: center;">
-                            <i class="bi bi-plus-circle me-1"></i> Add Relatives Now
-                        </a>
+                        <button type="button" onclick="switchTreeViewMode('studio')" class="btn btn-success px-4 py-2 fw-bold" style="border-radius: 50px; min-height: 44px; display: inline-flex; align-items: center;">
+                            <i class="bi bi-plus-circle me-1"></i> Add Relatives in Studio
+                        </button>
                     </div>
                 @else
                     <div class="d-flex flex-column align-items-center justify-content-center p-5 text-center" style="min-height: 480px;">
@@ -585,6 +616,11 @@
             </div>
         </div>
 
+        <!-- Mode 5: Integrated Family Studio Container (Direct In-Page Tree Editing) -->
+        <div class="family-studio-wrapper d-none position-relative" id="familyStudioContainer">
+            @include('member.includes.familyStudioContent')
+        </div>
+
         <!-- Legend (Canvas mode) -->
         <div class="family-legend" id="familyLegend" role="group" aria-label="How to read the family tree">
             <div class="legend-row">
@@ -686,9 +722,9 @@
                     <button class="btn btn-sm btn-primary flex-grow-1 fw-bold d-inline-flex align-items-center justify-content-center" id="openAddRelativeModalBtn" onclick="openInviteRelativeFromNode()" style="min-height: 38px;">
                         <i class="bi bi-send-fill me-1"></i> Invite Family Member
                     </button>
-                    <a href="/familyStudio" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center justify-content-center" style="min-height: 38px;" title="To add or edit tree structure directly, open Family Studio">
+                    <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center justify-content-center" onclick="closeNodeModalAndOpenStudio()" style="min-height: 38px;" title="To add or edit tree structure directly, open Family Studio">
                         <i class="bi bi-diagram-3-fill me-1"></i> Studio
-                    </a>
+                    </button>
                     <button class="btn btn-sm btn-outline-danger fw-bold" id="modalRemoveNodeBtn" style="display: none;" onclick="removeCurrentModalNode()">
                         <i class="bi bi-trash3-fill"></i> Remove
                     </button>
@@ -1241,9 +1277,9 @@
                     </div>
 
                     <div class="d-flex flex-wrap justify-content-center gap-3">
-                        <a href="/familyStudio" class="btn btn-warning px-4 py-2.5 fw-bold text-dark shadow-sm d-inline-flex align-items-center gap-2" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
-                            <i class="bi bi-plus-circle-fill"></i> Add Your Parents &amp; Siblings
-                        </a>
+                        <button type="button" onclick="switchTreeViewMode('studio')" class="btn btn-warning px-4 py-2.5 fw-bold text-dark shadow-sm d-inline-flex align-items-center gap-2" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
+                            <i class="bi bi-plus-circle-fill"></i> Add Your Parents &amp; Siblings in Studio
+                        </button>
                         <button type="button" class="btn btn-outline-light px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2" style="border-radius: 50px; min-height: 44px; white-space: nowrap; border-color: rgba(255,255,255,0.35);" data-bs-toggle="modal" data-bs-target="#inviteFamilyModal">
                             <i class="bi bi-person-lines-fill"></i> Invite Relatives by Phone/WhatsApp
                         </button>
@@ -1384,12 +1420,18 @@
             const urlMode = (urlParams.get('mode') || urlParams.get('view') || '').toLowerCase();
             const savedMode = localStorage.getItem('fp_tree_view_mode');
 
-            if (urlMode === 'pedigree' || urlMode === 'outline') {
+            if (urlMode === 'studio') {
+                switchTreeViewMode('studio');
+            } else if (urlMode === 'pedigree' || urlMode === 'outline') {
                 switchTreeViewMode('pedigree');
             } else if (urlMode === 'lineage') {
                 switchTreeViewMode('lineage');
             } else if (urlMode === 'canvas' || urlMode === 'panoramic') {
                 switchTreeViewMode('canvas');
+            } else if (urlMode === 'fanchart' || urlMode === 'fan') {
+                switchTreeViewMode('fanchart');
+            } else if (urlMode === 'globe') {
+                switchTreeViewMode('globe');
             } else if (savedMode === 'lineage') {
                 // Preserve user's manual selection of Direct Lineage during their session
                 switchTreeViewMode('lineage');
@@ -1402,6 +1444,14 @@
         } catch(_) {
             switchTreeViewMode('canvas');
         }
+
+        // Initialize tree studio discovery banner persistence
+        try {
+            if (localStorage.getItem('fp_dismissed_tree_studio_banner') === '1') {
+                const b = document.getElementById('treeStudioDiscoveryBanner');
+                if (b) b.classList.add('d-none');
+            }
+        } catch(_) {}
     });
 
     /* =======================================================
@@ -1428,21 +1478,79 @@
     /* =======================================================
        MULTI-MODAL VIEW & FLOATING DOCK LOGIC
        ======================================================= */
+    window.dismissTreeStudioDiscoveryBanner = function() {
+        const banner = document.getElementById('treeStudioDiscoveryBanner');
+        if (banner) {
+            banner.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            banner.style.opacity = '0';
+            banner.style.transform = 'translateY(-10px)';
+            setTimeout(() => { banner.classList.add('d-none'); }, 300);
+        }
+        try { localStorage.setItem('fp_dismissed_tree_studio_banner', '1'); } catch(_) {}
+    };
+
+    window.closeNodeModalAndOpenStudio = function() {
+        const modalEl = document.getElementById('personDetailsModal') || document.getElementById('nodeDetailsModal');
+        if (modalEl && window.bootstrap) {
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
+        }
+        switchTreeViewMode('studio');
+    };
+
     window.switchTreeViewMode = function(mode) {
         const canvasContainer = document.getElementById('treeContainer');
         const pedigreeContainer = document.getElementById('pedigreeOutlineContainer');
         const fanChartContainer = document.getElementById('fanChartContainer');
         const globeContainer = document.getElementById('dynastyGlobeContainer');
+        const studioContainer = document.getElementById('familyStudioContainer');
         const legend = document.getElementById('familyLegend');
         const btnCanvas = document.getElementById('btnModeCanvas');
         const btnLineage = document.getElementById('btnModeLineage');
         const btnPedigree = document.getElementById('btnModePedigree');
         const btnFanChart = document.getElementById('btnModeFanChart');
         const btnGlobe = document.getElementById('btnModeGlobe');
+        const btnStudio = document.getElementById('btnModeStudio');
+        const discoBanner = document.getElementById('treeStudioDiscoveryBanner');
 
         window.trackTreeAnalytics('tree_view_mode_switched', null, { mode: mode });
 
-        if (mode === 'globe') {
+        // If leaving studio and changes were made, refresh the page to update the interactive tree layout
+        if (window.__familyStudioDirty && mode !== 'studio') {
+            window.__familyStudioDirty = false;
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('mode', mode);
+            window.location.href = currentUrl.toString();
+            return;
+        }
+
+        // Update URL query string without reloading page
+        try {
+            const currentUrl = new URL(window.location.href);
+            if (currentUrl.searchParams.get('mode') !== mode) {
+                currentUrl.searchParams.set('mode', mode);
+                window.history.replaceState({ mode: mode }, '', currentUrl.toString());
+            }
+        } catch(_) {}
+
+        if (mode === 'studio') {
+            if (canvasContainer) canvasContainer.classList.add('d-none');
+            if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
+            if (fanChartContainer) fanChartContainer.classList.add('d-none');
+            if (globeContainer) globeContainer.classList.add('d-none');
+            if (legend) legend.classList.add('d-none');
+            if (discoBanner) discoBanner.classList.add('d-none');
+            if (studioContainer) studioContainer.classList.remove('d-none');
+
+            if (btnCanvas) btnCanvas.classList.remove('active');
+            if (btnLineage) btnLineage.classList.remove('active');
+            if (btnPedigree) btnPedigree.classList.remove('active');
+            if (btnFanChart) btnFanChart.classList.remove('active');
+            if (btnGlobe) btnGlobe.classList.remove('active');
+            if (btnStudio) btnStudio.classList.add('active');
+            try { localStorage.setItem('fp_tree_view_mode', 'studio'); } catch(_) {}
+        } else if (mode === 'globe') {
+            if (studioContainer) studioContainer.classList.add('d-none');
             if (canvasContainer) canvasContainer.classList.add('d-none');
             if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
             if (fanChartContainer) fanChartContainer.classList.add('d-none');
@@ -1457,9 +1565,11 @@
             if (btnLineage) btnLineage.classList.remove('active');
             if (btnPedigree) btnPedigree.classList.remove('active');
             if (btnFanChart) btnFanChart.classList.remove('active');
+            if (btnStudio) btnStudio.classList.remove('active');
             if (btnGlobe) btnGlobe.classList.add('active');
             try { localStorage.setItem('fp_tree_view_mode', 'globe'); } catch(_) {}
         } else if (mode === 'fanchart') {
+            if (studioContainer) studioContainer.classList.add('d-none');
             if (canvasContainer) canvasContainer.classList.add('d-none');
             if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
             if (globeContainer) globeContainer.classList.add('d-none');
@@ -1474,9 +1584,11 @@
             if (btnLineage) btnLineage.classList.remove('active');
             if (btnPedigree) btnPedigree.classList.remove('active');
             if (btnGlobe) btnGlobe.classList.remove('active');
+            if (btnStudio) btnStudio.classList.remove('active');
             if (btnFanChart) btnFanChart.classList.add('active');
             try { localStorage.setItem('fp_tree_view_mode', 'fanchart'); } catch(_) {}
         } else if (mode === 'pedigree') {
+            if (studioContainer) studioContainer.classList.add('d-none');
             if (canvasContainer) canvasContainer.classList.add('d-none');
             if (fanChartContainer) fanChartContainer.classList.add('d-none');
             if (globeContainer) globeContainer.classList.add('d-none');
@@ -1489,9 +1601,11 @@
             if (btnLineage) btnLineage.classList.remove('active');
             if (btnFanChart) btnFanChart.classList.remove('active');
             if (btnGlobe) btnGlobe.classList.remove('active');
+            if (btnStudio) btnStudio.classList.remove('active');
             if (btnPedigree) btnPedigree.classList.add('active');
             try { localStorage.setItem('fp_tree_view_mode', 'pedigree'); } catch(_) {}
         } else if (mode === 'lineage') {
+            if (studioContainer) studioContainer.classList.add('d-none');
             if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
             if (fanChartContainer) fanChartContainer.classList.add('d-none');
             if (globeContainer) globeContainer.classList.add('d-none');
@@ -1509,9 +1623,11 @@
             if (btnFanChart) btnFanChart.classList.remove('active');
             if (btnGlobe) btnGlobe.classList.remove('active');
             if (btnCanvas) btnCanvas.classList.remove('active');
+            if (btnStudio) btnStudio.classList.remove('active');
             if (btnLineage) btnLineage.classList.add('active');
             try { localStorage.setItem('fp_tree_view_mode', 'lineage'); } catch(_) {}
         } else {
+            if (studioContainer) studioContainer.classList.add('d-none');
             if (typeof window.clearLineageTrace === 'function') window.clearLineageTrace();
             if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
             if (fanChartContainer) fanChartContainer.classList.add('d-none');
@@ -1527,6 +1643,7 @@
             if (btnFanChart) btnFanChart.classList.remove('active');
             if (btnGlobe) btnGlobe.classList.remove('active');
             if (btnLineage) btnLineage.classList.remove('active');
+            if (btnStudio) btnStudio.classList.remove('active');
             if (btnCanvas) btnCanvas.classList.add('active');
             try { localStorage.setItem('fp_tree_view_mode', 'canvas'); } catch(_) {}
         }

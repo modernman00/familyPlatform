@@ -98,6 +98,46 @@
         color: #ffffff;
         border-color: #a31621;
     }
+
+    /* 🌙 Dark Mode Contrast Guarantees */
+    body.dark-mode .journal-card,
+    body.dark-theme .journal-card,
+    [data-bs-theme="dark"] .journal-card {
+        background: #141416 !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    body.dark-mode .journal-card a.text-dark,
+    body.dark-theme .journal-card a.text-dark,
+    [data-bs-theme="dark"] .journal-card a.text-dark,
+    body.dark-mode .journal-card .text-dark,
+    body.dark-theme .journal-card .text-dark,
+    [data-bs-theme="dark"] .journal-card .text-dark {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .journal-hero h1,
+    body.dark-theme .journal-hero h1,
+    [data-bs-theme="dark"] .journal-hero h1 {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .filter-pill-btn,
+    body.dark-theme .filter-pill-btn,
+    [data-bs-theme="dark"] .filter-pill-btn {
+        background: #1e293b !important;
+        color: #cbd5e1 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .filter-pill-btn.active,
+    body.dark-theme .filter-pill-btn.active,
+    [data-bs-theme="dark"] .filter-pill-btn.active {
+        background: #a31621 !important;
+        color: #ffffff !important;
+        border-color: #b8202c !important;
+    }
 </style>
 @endpush
 
@@ -105,9 +145,14 @@
 <div class="container py-4 my-2">
     <!-- Hero Header -->
     <div class="journal-hero text-center position-relative">
-        <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2 rounded-pill mb-2" style="font-size: 0.82rem; letter-spacing: 0.04em;">
-            <i class="bi bi-shield-lock-fill me-1"></i> PRIVATE TO FAMILY NETWORK #{{ htmlspecialchars($familyCode, ENT_QUOTES, 'UTF-8') }}
-        </span>
+        <div class="d-inline-flex align-items-center gap-2 mb-2 flex-wrap justify-content-center">
+            <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2 rounded-pill" style="font-size: 0.82rem; letter-spacing: 0.04em;">
+                <i class="bi bi-shield-lock-fill me-1"></i> PRIVATE TO FAMILY NETWORK #{{ htmlspecialchars($familyCode, ENT_QUOTES, 'UTF-8') }}
+            </span>
+            <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-2 rounded-pill" style="font-size: 0.82rem; letter-spacing: 0.04em;">
+                <i class="bi bi-lock-fill me-1"></i> ENCRYPTED FAMILY VAULT
+            </span>
+        </div>
         <h1 class="fw-bold mb-2" style="color: #2a0a0d; font-size: clamp(1.8rem, 3.5vw, 2.5rem); letter-spacing: -0.02em;">
             Family Living Journal & Chronicles
         </h1>
@@ -177,29 +222,29 @@
                             <img src="{{ $coverImage }}" alt="{{ htmlspecialchars((string)$journal['title'], ENT_QUOTES, 'UTF-8') }}" loading="lazy">
                         </a>
 
-                        <div class="card-body p-3 p-sm-4 d-flex flex-column flex-grow-1">
+                        <div class="card-body p-4 d-flex flex-column flex-grow-1">
                             <!-- Category & Read Time -->
-                            <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex justify-content-between align-items-center mb-2.5">
                                 <span class="category-badge">{{ $journalCategory }}</span>
                                 <span class="read-time-pill"><i class="bi bi-clock me-1"></i>{{ $readTime }}</span>
                             </div>
 
                             <!-- Title -->
-                            <h5 class="fw-bold mb-2">
-                                <a href="/familyJournal/{{ $journal['id'] }}" class="text-dark text-decoration-none" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.35;">
+                            <h5 class="fw-bold mb-2.5">
+                                <a href="/familyJournal/{{ $journal['id'] }}" class="text-dark text-decoration-none" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;">
                                     {{ htmlspecialchars((string)$journal['title'], ENT_QUOTES, 'UTF-8') }}
                                 </a>
                             </h5>
 
                             <!-- Summary Excerpt -->
-                            <p class="text-muted small mb-4 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.55;">
+                            <p class="text-muted small mb-4 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.6;">
                                 {{ htmlspecialchars((string)($journal['summary'] ?? strip_tags((string)$journal['content'])), ENT_QUOTES, 'UTF-8') }}
                             </p>
 
                             <!-- Author Footer & Action -->
                             <div class="d-flex align-items-center justify-content-between pt-3 border-top mt-auto">
                                 <div class="d-flex align-items-center gap-2">
-                                    <img src="{{ $avatarSrc }}" alt="{{ $authorName }}" class="rounded-circle flex-shrink-0" width="34" height="34" style="width: 34px; height: 34px; min-width: 34px; min-height: 34px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 50%;">
+                                    <img src="{{ $avatarSrc }}" alt="{{ $authorName }}" class="rounded-circle flex-shrink-0" width="34" height="34" style="width: 34px; height: 34px; min-width: 34px; min-height: 34px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 50%;" onerror="this.onerror=null; this.src='/resources/images/profile/avatarM.png';">
                                     <div>
                                         <div class="fw-bold small text-dark" style="line-height: 1.2;">{{ $authorName }}</div>
                                         <div class="text-muted" style="font-size: 0.72rem;">{{ $journalDate }}</div>

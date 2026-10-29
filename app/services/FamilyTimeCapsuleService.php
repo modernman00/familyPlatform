@@ -7,6 +7,7 @@ namespace App\services;
 use App\controller\BaseController;
 use App\classes\PushNotificationClass;
 use App\model\AllMembersData;
+use App\services\EncryptionService;
 use Src\Db;
 use PDO;
 
@@ -63,7 +64,7 @@ final class FamilyTimeCapsuleService
             $recipientName,
             $recipientUserId,
             $title,
-            $message,
+            EncryptionService::encrypt($message, $familyCode, 'time_capsule'),
             $mediaUrl,
             $mediaType,
             $unlockType,
@@ -139,7 +140,7 @@ final class FamilyTimeCapsuleService
             ];
 
             if ($isAccessible) {
-                $item['message'] = (string)$row['message'];
+                $item['message'] = EncryptionService::decrypt((string)$row['message'], $familyCode, 'time_capsule');
                 $item['media_url'] = $row['media_url'];
             } else {
                 // Strict Zero-Trust Redaction: payload never leaves server

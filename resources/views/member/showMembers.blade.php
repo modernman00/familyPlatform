@@ -1,5 +1,5 @@
 @extends('layouts.profileBase')
-@section('title', 'Family Directory & Members')
+@section('title', 'Family & Members')
 @section('data-page-id', 'allMembers')
 @push('styles')
     <link rel="stylesheet" href="/public/css/showMembers.css?v={{ time() }}">
@@ -14,7 +14,7 @@
                 <div class="stitch-hero-badge mb-3">
                     <i class="bi bi-people-fill text-warning"></i> Global Kinship Network
                 </div>
-                <h1 class="display-6 fw-bold text-white mb-2" style="letter-spacing: -0.02em;">Family Directory</h1>
+                <h1 class="display-6 fw-bold text-white mb-2" style="letter-spacing: -0.02em;">Family</h1>
                 <p class="text-white-50 mb-4" style="font-size: 1.05rem; max-width: 520px; line-height: 1.5;">
                     Stay seamlessly connected with your household, extended lineage, and connected relatives across the globe.
                 </p>
@@ -76,7 +76,7 @@
                 <i class="bi bi-link-45deg me-1"></i> Connected Kin
             </button>
             <button type="button" class="filter-pill-btn" data-filter="explore">
-                <i class="bi bi-globe2 me-1"></i> Directory Search
+                <i class="bi bi-globe2 me-1"></i> Explore Network
             </button>
         </div>
 

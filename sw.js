@@ -13,7 +13,7 @@
 
 'use strict';
 
-const SW_VERSION = 'v2.0.8';
+const SW_VERSION = 'v2.0.9';
 const STATIC_CACHE = `fp-static-${SW_VERSION}`;
 const DYNAMIC_CACHE = `fp-dynamic-${SW_VERSION}`;
 const IMAGE_CACHE = `fp-images-${SW_VERSION}`;
@@ -34,9 +34,14 @@ const PRECACHE_ASSETS = [
   '/public/img/favicon/android-chrome-192x192.png',
   '/public/img/favicon/android-chrome-512x512.png',
   '/public/img/favicon/apple-touch-icon.png',
+  '/public/apple-touch-icon.png',
+  '/apple-touch-icon.png',
+  '/public/icon-192x192.png',
+  '/icon-192x192.png',
   '/public/img/favicon/favicon-32x32.png',
   '/public/img/favicon/favicon-16x16.png',
   '/public/img/favicon/favicon.ico',
+  '/favicon.ico',
   '/resources/images/avatarM.png',
   '/resources/images/avatarF.png'
 ];

@@ -26,10 +26,10 @@
       <div class="modal-body p-3 p-md-4" style="overflow-y: auto; flex: 1 1 auto; min-height: 0;">
           
           <!-- Section 1: Master Status Switch -->
-          <div class="p-3 rounded-4 mb-3" style="background: #fdf2f2; border: 1px solid #f9d5d8;">
+          <div class="modal-sub-card-rose p-3 rounded-4 mb-3">
             <div class="d-flex align-items-center justify-content-between gap-3">
               <div>
-                <label for="radarMasterSwitch" class="fw-bold mb-1 d-block" style="color: #8B152B; font-size: 0.95rem;">
+                <label for="radarMasterSwitch" class="fw-bold mb-1 d-block text-dark" style="font-size: 0.95rem;">
                   {{ __('kinship.enable_radar', 'Enable Kinship Radar') }}
                 </label>
                 <small class="text-secondary d-block" style="font-size: 0.8rem; line-height: 1.35;">
@@ -118,7 +118,7 @@
           </div>
 
           <!-- Section 4: Privacy & Radar Discoverability -->
-          <div class="p-3 rounded-4 mb-3 border radar-sub-setting" style="background: #ffffff; transition: opacity 0.25s ease;">
+          <div class="modal-sub-card p-3 rounded-4 mb-3 border radar-sub-setting" style="transition: opacity 0.25s ease;">
             <div class="d-flex align-items-center justify-content-between gap-3">
               <div class="me-2">
                 <label for="radarDiscoverableSwitch" class="fw-semibold text-dark mb-1 d-block" style="font-size: 0.875rem;">
@@ -135,7 +135,7 @@
           </div>
 
           <!-- Walled Sanctuary Note -->
-          <div class="p-2.5 rounded-3 d-flex align-items-start gap-2" style="background: #f0fdf4; border: 1px solid #bbf7d0; font-size: 0.78rem;">
+          <div class="modal-sub-card-green p-2.5 rounded-3 d-flex align-items-start gap-2" style="font-size: 0.78rem;">
             <i class="bi bi-shield-check text-success fs-6 mt-0.5 flex-shrink-0"></i>
             <span class="text-secondary" style="line-height: 1.4;">
               {{ __('kinship.privacy_note', 'Your connection is protected by the Walled Sanctuary guarantee. Your private data is never exposed.') }}
@@ -145,7 +145,7 @@
         </div>
 
         <!-- Modal Footer Actions (Sticky & Guaranteed in View) -->
-        <div class="modal-footer border-0 p-3 bg-light d-flex justify-content-end gap-2 flex-shrink-0" style="border-top: 1px solid #e2e8f0 !important; position: sticky; bottom: 0; z-index: 10; background: #f8fafc;">
+        <div class="modal-footer border-0 p-3 d-flex justify-content-end gap-2 flex-shrink-0" style="position: sticky; bottom: 0; z-index: 10;">
           <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal" style="min-height: 44px;">
             {{ __('common.cancel', 'Cancel') }}
           </button>

@@ -10,6 +10,161 @@
   }
 </style>
 <div class="feed-column">
+  <!-- Proactive Wedding Anniversary Prompt Banner (World-Class Milestone Onboarding) -->
+  @if(!empty($data['needs_wedding_date_prompt']))
+  <div class="card mb-4 border-0 shadow-sm" id="weddingAnniversaryPromptCard" style="border-radius: 18px; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%); border: 1.5px solid #f59e0b !important; overflow: hidden;">
+    <div class="card-body p-4">
+      <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+        <div class="d-flex align-items-start gap-3">
+          <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 52px; height: 52px; background: #ffffff; color: #b8202c; font-size: 1.5rem; border: 2px solid #fbbf24;">
+            💍
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+              <h6 class="fw-bold mb-0 text-dark" style="font-size: 1.05rem; letter-spacing: -0.01em;">
+                Celebrate Your Marriage & Special Day
+              </h6>
+              <span class="badge bg-danger text-white px-2 py-0.5 rounded-pill" style="font-size: 0.68rem; letter-spacing: 0.04em;">
+                ANNIVERSARY MILESTONES
+              </span>
+            </div>
+            <p class="mb-3 text-dark" style="font-size: 0.88rem; line-height: 1.5; opacity: 0.9;">
+              We noticed you are married! When is your wedding anniversary? Add your special date so your family network can celebrate your milestones, send personalised wishes, and receive memorable flashbacks every year.
+            </p>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <div class="d-flex align-items-center gap-2">
+                <label for="bannerWeddingDate" class="visually-hidden">Wedding Date</label>
+                <input type="date" 
+                       id="bannerWeddingDate" 
+                       name="banner_wedding_date" 
+                       max="{{ date('Y-m-d') }}" 
+                       class="form-control" 
+                       style="max-width: 185px; min-height: 44px; border-radius: 10px; border: 1.5px solid #d97706; background-color: #ffffff; color: #1e293b; font-weight: 500;">
+                <button type="button" 
+                        id="btnSaveBannerAnniversary" 
+                        class="btn text-white fw-bold rounded-pill px-3 py-2 d-flex align-items-center gap-1 shadow-sm" 
+                        style="background-color: #a31621; min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;" 
+                        data-spin="true" 
+                        onclick="saveWeddingAnniversaryFromBanner()">
+                  <i class="bi bi-heart-fill"></i>
+                  <span>Save Anniversary</span>
+                </button>
+              </div>
+              <button type="button" 
+                      class="btn btn-link text-muted text-decoration-none small px-2 py-2" 
+                      style="min-height: 44px; font-size: 0.82rem;" 
+                      onclick="dismissAnniversaryBanner()">
+                Remind me later
+              </button>
+            </div>
+            <div id="bannerAnniversaryError" class="text-danger small mt-2" style="display: none;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function() {
+      if (sessionStorage.getItem('dismissed_anniversary_prompt') === '1') {
+        var card = document.getElementById('weddingAnniversaryPromptCard');
+        if (card) card.style.display = 'none';
+      }
+    })();
+
+    function dismissAnniversaryBanner() {
+      var card = document.getElementById('weddingAnniversaryPromptCard');
+      if (card) {
+        card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(-10px)';
+        setTimeout(function() { card.remove(); }, 400);
+      }
+      sessionStorage.setItem('dismissed_anniversary_prompt', '1');
+    }
+
+    async function saveWeddingAnniversaryFromBanner() {
+      var input = document.getElementById('bannerWeddingDate');
+      var errBox = document.getElementById('bannerAnniversaryError');
+      var btn = document.getElementById('btnSaveBannerAnniversary');
+      if (!input || !btn) return;
+
+      var val = (input.value || '').trim();
+      if (!val) {
+        if (errBox) {
+          errBox.textContent = 'Please choose your wedding date to continue.';
+          errBox.style.display = 'block';
+        }
+        input.focus();
+        return;
+      }
+      if (errBox) errBox.style.display = 'none';
+
+      if (window.ScoreTenantSpinner) {
+        ScoreTenantSpinner.start(btn);
+      } else {
+        btn.disabled = true;
+      }
+
+      var csrfToken = document.querySelector('input[name="token"]')?.value 
+                   || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+                   || @json($_SESSION['token'] ?? '');
+
+      try {
+        var resp = await fetch('/member/profilePage/updateAnniversary', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
+          },
+          body: JSON.stringify({
+            wedding_date: val,
+            token: csrfToken
+          })
+        });
+
+        var res = await resp.json().catch(function() { return {}; });
+
+        if (resp.ok) {
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'success',
+              title: 'Anniversary saved! 🎉',
+              text: res.message || 'Your family network will now celebrate your special day every year.',
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true
+            });
+          }
+          dismissAnniversaryBanner();
+          setTimeout(function() {
+            window.location.reload();
+          }, 1200);
+        } else {
+          var msg = res.message || 'Failed to save wedding anniversary. Please try again.';
+          if (errBox) {
+            errBox.textContent = msg;
+            errBox.style.display = 'block';
+          }
+        }
+      } catch (e) {
+        console.error('Error saving anniversary:', e);
+        if (errBox) {
+          errBox.textContent = 'A network error occurred. Please try again.';
+          errBox.style.display = 'block';
+        }
+      } finally {
+        if (window.ScoreTenantSpinner) {
+          ScoreTenantSpinner.stop(btn);
+        } else {
+          btn.disabled = false;
+        }
+      }
+    }
+  </script>
+  @endif
   @if(!empty($pendingFamilyRequests))
     @foreach($pendingFamilyRequests as $joinReq)
       <div class="card mb-4 border-0 shadow-sm family-join-request-card" id="familyJoinReq-{{ $joinReq['no'] }}" style="border-radius: 16px; background: linear-gradient(135deg, #fdf5f5 0%, #fbefef 100%); border-left: 5px solid #a31621 !important;">

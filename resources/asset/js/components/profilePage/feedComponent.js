@@ -65,6 +65,9 @@ export function profileFeed(opts = {}) {
         viewersTargetNo: null,
         viewersCount: 0,
         viewersSearchQuery: '',
+        activeSpotlightPostNo: null,
+        playingVoicePostNo: null,
+        activeAudioInstance: null,
         csrfOptions: {
             xsrfCookieName: 'XSRF-TOKEN',
             xsrfHeaderName: 'X-XSRF-TOKEN',
@@ -352,6 +355,7 @@ export function profileFeed(opts = {}) {
                 isLiked: false,
                 post_tags: Array.isArray(p?.post_tags) ? p.post_tags : [],
                 views_count: parseInt(p?.views_count || 0, 10),
+                voice_capsule_url: p?.voice_capsule_url || null,
             };
 
             // Progressive enhancement: lazy unfurl link preview if server hasn't pre-hydrated
@@ -1695,9 +1699,13 @@ export function profileFeed(opts = {}) {
             const key = `${post.post_no}_${idx}`;
             this.heartBursts = { ...this.heartBursts, [key]: true };
 
-            // Trigger haptic vibration if supported (Instagram tactile feel)
+            // Trigger generational celebration haptic vibration (Instagram / World-Class standard)
             if (typeof window.triggerHaptic === 'function') {
                 window.triggerHaptic('impact');
+            } else if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+                try {
+                    navigator.vibrate([20, 40, 20]);
+                } catch (_) {}
             }
 
             // Automatically like with 'love' reaction if not already reacted
@@ -1734,6 +1742,47 @@ export function profileFeed(opts = {}) {
                     this.openLightbox(images, idx);
                     this.tapTimeout = null;
                 }, 260);
+            }
+        },
+
+        toggleLineageSpotlight(post) {
+            if (!post || !post.post_no) return;
+            this.activeSpotlightPostNo = (this.activeSpotlightPostNo === post.post_no) ? null : post.post_no;
+        },
+
+        togglePlayVoiceCapsule(post) {
+            if (!post || !post.post_no) return;
+            const url = post.voice_capsule_url || post.voice_url;
+            if (!url) return;
+
+            if (this.playingVoicePostNo === post.post_no) {
+                if (this.activeAudioInstance) {
+                    this.activeAudioInstance.pause();
+                    this.activeAudioInstance = null;
+                }
+                this.playingVoicePostNo = null;
+            } else {
+                if (this.activeAudioInstance) {
+                    this.activeAudioInstance.pause();
+                    this.activeAudioInstance = null;
+                }
+                const audio = new Audio(url);
+                audio.onended = () => {
+                    this.playingVoicePostNo = null;
+                    this.activeAudioInstance = null;
+                };
+                audio.onerror = () => {
+                    this.playingVoicePostNo = null;
+                    this.activeAudioInstance = null;
+                };
+                audio.play().then(() => {
+                    this.playingVoicePostNo = post.post_no;
+                    this.activeAudioInstance = audio;
+                }).catch((e) => {
+                    console.warn('[VoiceCapsule] playback failed:', e);
+                    this.playingVoicePostNo = null;
+                    this.activeAudioInstance = null;
+                });
             }
         },
 

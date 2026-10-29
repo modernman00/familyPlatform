@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\controller\admin;
 
 use App\controller\BaseController;
+use App\services\FamilyPlatformAccountService;
 use Src\Admin\AdminService;
 use Src\Admin\BroadcastService;
 use Src\Db;
@@ -17,17 +18,20 @@ class AdminController extends BaseController
 {
     private AdminService $adminService;
     private BroadcastService $broadcastService;
+    private FamilyPlatformAccountService $officialAccountService;
     private PDO $db;
 
     public function __construct(
         ?AdminService $adminService = null,
         ?BroadcastService $broadcastService = null,
+        ?FamilyPlatformAccountService $officialAccountService = null,
         ?PDO $db = null
     ) {
         parent::__construct();
         $this->db = $db ?? Db::connect2();
         $this->adminService = $adminService ?? new AdminService($this->db);
         $this->broadcastService = $broadcastService ?? new BroadcastService($this->db);
+        $this->officialAccountService = $officialAccountService ?? new FamilyPlatformAccountService($this->db);
     }
 
     private function getAuthenticatedAdminId(): int
@@ -416,6 +420,241 @@ class AdminController extends BaseController
         }
 
         header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin/pseo'));
+        exit;
+    }
+
+    /**
+     * Official Platform Account & Universal Feed Management Console.
+     */
+    public function officialPosts(): void
+    {
+        $this->getAuthenticatedAdminId();
+        $this->officialAccountService->ensureAccountExists();
+
+        $selectedApp = 'familyplatform';
+        $stats = $this->officialAccountService->getOfficialStats();
+        $posts = $this->officialAccountService->getOfficialPosts(50, 0);
+        $totalPosts = $this->officialAccountService->countOfficialPosts();
+
+        $adminSecretPath = ($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH'));
+        $adminPrefix = !empty($adminSecretPath) ? '/' . trim((string)$adminSecretPath, '/') : '/admin';
+
+        view('admin.official_posts', [
+            'title' => 'FamilyPlatform Official Feed & Announcements',
+            'activeTab' => 'official_posts',
+            'stats' => $stats,
+            'posts' => $posts,
+            'totalPosts' => $totalPosts,
+            'selectedApp' => $selectedApp,
+            'adminPrefix' => $adminPrefix,
+        ]);
+    }
+
+    /**
+     * Publish an official announcement post from FamilyPlatform to everyone's feed.
+     */
+    public function publishOfficialPost(): void
+    {
+        $this->getAuthenticatedAdminId();
+
+        $input = $_POST;
+        if (empty($input)) {
+            $raw = file_get_contents('php://input');
+            if ($raw !== false && $raw !== '') {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) {
+                    $input = $decoded;
+                }
+            }
+        }
+
+        self::validateCsrf($input);
+
+        $message = trim((string)($input['postMessage'] ?? ''));
+        $imgUrl = !empty($input['img_url']) ? trim((string)$input['img_url']) : null;
+
+        // Handle uploaded image file if present
+        if (isset($_FILES['post_img']) && is_array($_FILES['post_img']) && !empty($_FILES['post_img']['tmp_name'])) {
+            $tmpFile = $_FILES['post_img']['tmp_name'];
+            $origName = basename((string)($_FILES['post_img']['name'] ?? ''));
+            $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'], true)) {
+                $safeName = 'official_' . bin2hex(random_bytes(8)) . '.' . $ext;
+                $targetDir = dirname(__DIR__, 2) . '/../public/images/post';
+                if (!is_dir($targetDir)) {
+                    @mkdir($targetDir, 0755, true);
+                }
+                if (@move_uploaded_file($tmpFile, $targetDir . '/' . $safeName)) {
+                    $imgUrl = '/public/images/post/' . $safeName;
+                }
+            }
+        }
+
+        $pollData = [];
+        if (!empty($input['poll_question'])) {
+            $pollData['question'] = trim((string)$input['poll_question']);
+            if (!empty($input['poll_options']) && is_array($input['poll_options'])) {
+                $pollData['options'] = $input['poll_options'];
+            }
+        }
+
+        try {
+            $postNo = $this->officialAccountService->publishPost($message, $imgUrl, $pollData);
+
+            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) || (isset($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'))) {
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Announcement published to everyone\'s feed!',
+                    'post_no' => $postNo,
+                ]);
+                exit;
+            }
+
+            $_SESSION['success'] = 'Announcement published to everyone\'s feed successfully!';
+        } catch (\Throwable $e) {
+            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) || (isset($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'))) {
+                http_response_code(400);
+                header('Content-Type: application/json');
+                echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+                exit;
+            }
+            $_SESSION['error'] = 'Failed to publish announcement: ' . $e->getMessage();
+        }
+
+        $adminSecretPath = ($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH'));
+        $adminPrefix = !empty($adminSecretPath) ? '/' . trim((string)$adminSecretPath, '/') : '/admin';
+        header('Location: ' . $adminPrefix . '/official-posts');
+        exit;
+    }
+
+    /**
+     * Update an existing official announcement post.
+     */
+    public function updateOfficialPost(): void
+    {
+        $this->getAuthenticatedAdminId();
+
+        $input = $_POST;
+        if (empty($input)) {
+            $raw = file_get_contents('php://input');
+            if ($raw !== false && $raw !== '') {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) {
+                    $input = $decoded;
+                }
+            }
+        }
+
+        self::validateCsrf($input);
+
+        $postNo = (int)($input['post_no'] ?? 0);
+        $message = trim((string)($input['postMessage'] ?? ''));
+
+        try {
+            $this->officialAccountService->updateOfficialPost($postNo, $message);
+
+            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) || (isset($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'))) {
+                header('Content-Type: application/json');
+                echo json_encode(['status' => 'success', 'message' => 'Post updated successfully!']);
+                exit;
+            }
+
+            $_SESSION['success'] = 'Post updated successfully!';
+        } catch (\Throwable $e) {
+            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) || (isset($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'))) {
+                http_response_code(400);
+                header('Content-Type: application/json');
+                echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+                exit;
+            }
+            $_SESSION['error'] = 'Failed to update post: ' . $e->getMessage();
+        }
+
+        $adminSecretPath = ($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH'));
+        $adminPrefix = !empty($adminSecretPath) ? '/' . trim((string)$adminSecretPath, '/') : '/admin';
+        header('Location: ' . $adminPrefix . '/official-posts');
+        exit;
+    }
+
+    /**
+     * Soft-delete an official announcement post from the feed.
+     */
+    public function deleteOfficialPost(): void
+    {
+        $this->getAuthenticatedAdminId();
+
+        $input = $_POST;
+        if (empty($input)) {
+            $raw = file_get_contents('php://input');
+            if ($raw !== false && $raw !== '') {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) {
+                    $input = $decoded;
+                }
+            }
+        }
+
+        self::validateCsrf($input);
+
+        $postNo = (int)($input['post_no'] ?? 0);
+
+        try {
+            $this->officialAccountService->deleteOfficialPost($postNo);
+
+            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) || (isset($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'))) {
+                header('Content-Type: application/json');
+                echo json_encode(['status' => 'success', 'message' => 'Post removed from everyone\'s feed.']);
+                exit;
+            }
+
+            $_SESSION['success'] = 'Post removed from feed successfully.';
+        } catch (\Throwable $e) {
+            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) || (isset($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'))) {
+                http_response_code(400);
+                header('Content-Type: application/json');
+                echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+                exit;
+            }
+            $_SESSION['error'] = 'Failed to delete post: ' . $e->getMessage();
+        }
+
+        $adminSecretPath = ($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH'));
+        $adminPrefix = !empty($adminSecretPath) ? '/' . trim((string)$adminSecretPath, '/') : '/admin';
+        header('Location: ' . $adminPrefix . '/official-posts');
+        exit;
+    }
+
+    /**
+     * Transform technical notes into user-friendly readable copy for family announcements.
+     */
+    public function summariseFriendlyUpdate(): void
+    {
+        $this->getAuthenticatedAdminId();
+
+        $input = $_POST;
+        if (empty($input)) {
+            $raw = file_get_contents('php://input');
+            if ($raw !== false && $raw !== '') {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) {
+                    $input = $decoded;
+                }
+            }
+        }
+
+        self::validateCsrf($input);
+
+        $rawNotes = trim((string)($input['raw_notes'] ?? ''));
+        $preset = trim((string)($input['preset'] ?? 'feature'));
+
+        $friendlyCopy = $this->officialAccountService->friendlySummarise($rawNotes, $preset);
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'status' => 'success',
+            'friendly_copy' => $friendlyCopy,
+        ]);
         exit;
     }
 }

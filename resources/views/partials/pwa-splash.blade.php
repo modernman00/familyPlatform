@@ -6,7 +6,21 @@
 <div id="fp-pwa-splash" class="fp-pwa-splash" aria-hidden="true" role="presentation">
     <div class="fp-pwa-splash-content">
         <div class="fp-pwa-splash-logo-wrap">
-            <img src="/apple-touch-icon.png" alt="FamilyPlatform" class="fp-pwa-splash-logo" width="96" height="96" decoding="async">
+            <div class="fp-pwa-splash-badge" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+            </div>
+            <img src="/public/apple-touch-icon.png"
+                 alt="FamilyPlatform"
+                 class="fp-pwa-splash-logo"
+                 width="96"
+                 height="96"
+                 decoding="async"
+                 onerror="if(this.src.indexOf('/public/img/favicon/')===-1){this.src='/public/img/favicon/apple-touch-icon.png';}else if(this.src.indexOf('/apple-touch-icon.png')===-1){this.src='/apple-touch-icon.png';}else{this.style.display='none';}">
         </div>
         <div class="fp-pwa-splash-title">FamilyPlatform</div>
         <div class="fp-pwa-splash-pulse-bar">
@@ -54,13 +68,34 @@ html.fp-pwa-splash-active #fp-pwa-splash {
     width: 96px;
     height: 96px;
     margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.fp-pwa-splash-badge {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 96px;
+    height: 96px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #a31621 0%, #c41e3a 50%, #e63946 100%);
+    box-shadow: 0 16px 40px rgba(163, 22, 33, 0.25), 0 4px 16px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    z-index: 1;
 }
 .fp-pwa-splash-logo {
+    position: relative;
     width: 96px;
     height: 96px;
     border-radius: 22px;
     box-shadow: 0 16px 40px rgba(163, 22, 33, 0.25), 0 4px 16px rgba(0, 0, 0, 0.08);
     display: block;
+    z-index: 2;
+    object-fit: cover;
 }
 .fp-pwa-splash-title {
     font-family: var(--font-heading, "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);

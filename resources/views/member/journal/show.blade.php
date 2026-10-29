@@ -79,6 +79,34 @@
         transform: translateY(-2px);
     }
 
+    /* 🌙 Dark Mode Contrast Guarantees */
+    body.dark-mode .story-body-card,
+    body.dark-theme .story-body-card,
+    [data-bs-theme="dark"] .story-body-card {
+        background-color: #141416 !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        color: #e2e8f0 !important;
+    }
+
+    body.dark-mode .story-body-card :is(h1, h2, h3, h4, h5, h6),
+    body.dark-theme .story-body-card :is(h1, h2, h3, h4, h5, h6),
+    [data-bs-theme="dark"] .story-body-card :is(h1, h2, h3, h4, h5, h6) {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .story-body-card blockquote,
+    body.dark-theme .story-body-card blockquote,
+    [data-bs-theme="dark"] .story-body-card blockquote {
+        color: #fca5a5 !important;
+        border-left-color: #ef4444 !important;
+    }
+
+    body.dark-mode .story-hero h1,
+    body.dark-theme .story-hero h1,
+    [data-bs-theme="dark"] .story-hero h1 {
+        color: #f8fafc !important;
+    }
+
     @media print {
         #mainNavbar, .no-print, .story-actions-bar {
             display: none !important;
@@ -99,9 +127,14 @@
             <a href="/familyJournal" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1">
                 <i class="bi bi-arrow-left me-1"></i> Family Chronicles
             </a>
-            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-semibold small">
-                <i class="bi bi-shield-lock-fill me-1"></i> Family #{{ htmlspecialchars($familyCode, ENT_QUOTES, 'UTF-8') }} Sanctuary
-            </span>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill fw-semibold small">
+                    <i class="bi bi-lock-fill me-1"></i> Family Vault Encrypted
+                </span>
+                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-semibold small">
+                    <i class="bi bi-shield-lock-fill me-1"></i> Family #{{ htmlspecialchars($familyCode, ENT_QUOTES, 'UTF-8') }} Sanctuary
+                </span>
+            </div>
         </div>
 
         @php
@@ -135,7 +168,7 @@
         <!-- Author Byline -->
         <div class="d-flex align-items-center justify-content-between py-3 mb-4 border-top border-bottom flex-wrap gap-3">
             <div class="d-flex align-items-center gap-3">
-                <img src="{{ $avatarSrc }}" alt="{{ $authorName }}" class="rounded-circle shadow-sm flex-shrink-0" width="48" height="48" style="width: 48px; height: 48px; min-width: 48px; min-height: 48px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 50%;">
+                <img src="{{ $avatarSrc }}" alt="{{ $authorName }}" class="rounded-circle shadow-sm flex-shrink-0" width="48" height="48" style="width: 48px; height: 48px; min-width: 48px; min-height: 48px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 50%;" onerror="this.onerror=null; this.src='/resources/images/profile/avatarM.png';">
                 <div>
                     <div class="fw-bold text-dark">{{ $authorName }}@if(!empty($contributors)) <span class="fw-normal text-muted small">with {{ htmlspecialchars(implode(', ', array_map(static fn ($c) => trim((string)($c['firstName'] ?? '') . ' ' . (string)($c['lastName'] ?? '')), $contributors)), ENT_QUOTES, 'UTF-8') }}</span>@endif</div>
                     <div class="text-muted small">Preserved on {{ $journalDate }}</div>
@@ -171,15 +204,18 @@
         @endif
 
         <!-- Story Content -->
-        <article class="story-body mb-5">
+        <article class="story-body mb-5 p-4 p-md-5 rounded-4 shadow-sm bg-white border story-body-card">
             {!! $journal['content'] !!}
         </article>
 
         <!-- Bottom Family Keepsake Card -->
         <div class="card p-4 rounded-4 border-0 shadow-sm text-center my-4 no-print" style="background: linear-gradient(135deg, rgba(184,32,44, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%);">
-            <h5 class="fw-bold mb-2 text-dark">This story is preserved for future generations</h5>
+            <div class="d-inline-flex align-items-center justify-content-center mx-auto mb-2 rounded-circle" style="width: 44px; height: 44px; background: rgba(16, 185, 129, 0.15); color: #059669;">
+                <i class="bi bi-shield-lock-fill" style="font-size: 1.3rem;"></i>
+            </div>
+            <h5 class="fw-bold mb-2 text-dark">This story is preserved in your Family Vault</h5>
             <p class="text-muted small mx-auto mb-3" style="max-width: 520px;">
-                Only registered members of Family Network #{{ htmlspecialchars($familyCode, ENT_QUOTES, 'UTF-8') }} have access to this private chronicle.
+                Protected with AES-256 field encryption and isolated to Family Network #{{ htmlspecialchars($familyCode, ENT_QUOTES, 'UTF-8') }}. Only authenticated members of your family can decrypt and view this chronicle.
             </p>
             <div class="d-flex justify-content-center gap-2 flex-wrap">
                 <a href="/familyJournal" class="btn btn-outline-primary rounded-pill px-4 fw-semibold">

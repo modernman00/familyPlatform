@@ -417,7 +417,7 @@
             </div>
 
             <p class="lead text-secondary">
-              Members can preserve rich family chronicles with the built-in AI Story Assistant at <strong>Family Journal</strong>, post short-form video memories in <strong>Family Reels</strong>, broadcast urgent family notices, and explore public heritage articles on our <a href="/blogs" class="fw-bold text-decoration-none" style="color: #7a0e16;">Public Blog</a>.
+              Members can preserve rich family chronicles with the built-in AI Story Assistant at <strong>Family Journal</strong>, post short-form video memories in <strong>Family Reels</strong>, stay informed with friendly verified <strong>Platform Announcements</strong> on everyone's feed, and explore public heritage articles on our <a href="/blogs" class="fw-bold text-decoration-none" style="color: #7a0e16;">Public Blog</a>.
             </p>
 
             <div class="row g-3 mb-3">
@@ -450,6 +450,14 @@
                   <h6 class="fw-bold text-dark"><i class="bi bi-chat-heart text-danger me-2"></i>Reels Comments Parity &amp; Interactive Features</h6>
                   <p class="small text-muted mb-0">
                     Comments on <strong>Family Reels</strong> enjoy full functional parity with standard post comments: organise discussions into <strong>1-level threaded replies</strong>, attach vibrant animated stickers from our curated <strong>Family GIF</strong> catalogue, react with emotional emoji pickers (Like, Love, Haha, Wow, Sad, Angry), and edit your own comments inline with instant preview.
+                  </p>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="p-3 rounded-3 bg-light border">
+                  <h6 class="fw-bold text-dark"><i class="bi bi-shield-lock-fill text-success me-2"></i>Cryptographic Family Vault (AES-256 Field Encryption)</h6>
+                  <p class="small text-muted mb-0">
+                    Your personal family journals, oral memoirs, and sealed time capsules are encrypted at rest using <strong>AES-256-GCM field encryption</strong> with cryptographic Additional Authenticated Data (AAD) bound to your unique Family Code. Only authenticated members of your private family group can decrypt and read your family chronicles.
                   </p>
                 </div>
               </div>

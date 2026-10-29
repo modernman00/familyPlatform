@@ -2,7 +2,7 @@
 @if(!empty($adulthoodGraduation) && !empty($adulthoodGraduation['graduated']))
 <div class="modal fade show" id="adulthoodMilestoneModal" tabindex="-1" aria-labelledby="adulthoodMilestoneTitle" aria-modal="true" style="display: block; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); z-index: 1060;">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
-        <div class="modal-content border-0 shadow-2xl" style="border-radius: var(--radius-xl, 20px); overflow: hidden; background: #ffffff;">
+        <div class="modal-content border-0 shadow-2xl" style="border-radius: var(--radius-xl, 20px); overflow: hidden;">
             <!-- Festive Header Banner -->
             <div style="background: linear-gradient(135deg, #7a0e16 0%, #b8202c 100%); color: #ffffff; padding: 2rem 1.5rem 1.75rem; text-align: center; position: relative;">
                 <div style="font-size: 3rem; margin-bottom: 0.5rem; animation: bounce 1s infinite alternate;">🎂✨</div>
@@ -16,12 +16,12 @@
 
             <!-- Modal Body -->
             <div class="modal-body p-4 text-center">
-                <div class="mb-3 p-3 text-start" style="background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+                <div class="modal-sub-card mb-3 p-3 text-start">
                     <div class="d-flex align-items-start gap-3">
                         <div style="font-size: 1.5rem; flex-shrink: 0;">👑</div>
                         <div>
-                            <h6 class="fw-bold text-slate-900 mb-1" style="color: #0f172a;">Full Sovereign Adulthood</h6>
-                            <p class="text-muted small mb-0" style="color: #64748b; line-height: 1.5;">
+                            <h6 class="fw-bold mb-1">Full Sovereign Adulthood</h6>
+                            <p class="text-muted small mb-0" style="line-height: 1.5;">
                                 You are now officially recognised as an adult family member. You hold complete sovereign data ownership and can contribute, invite, and document your family heritage with full privileges.
                             </p>
                         </div>
@@ -29,12 +29,12 @@
                 </div>
 
                 @if(!empty($adulthoodGraduation['unsealed_capsules']) && $adulthoodGraduation['unsealed_capsules'] > 0)
-                <div class="mb-4 p-3 text-start" style="background: #fef3c7; border-radius: 12px; border: 1px solid #fde68a;">
+                <div class="modal-sub-card-amber mb-4 p-3 text-start">
                     <div class="d-flex align-items-start gap-3">
                         <div style="font-size: 1.5rem; flex-shrink: 0;">🎁</div>
                         <div>
-                            <h6 class="fw-bold mb-1" style="color: #92400e;">18th Birthday Time Capsule Unsealed!</h6>
-                            <p class="small mb-0" style="color: #b45309; line-height: 1.5;">
+                            <h6 class="fw-bold mb-1">18th Birthday Time Capsule Unsealed!</h6>
+                            <p class="small mb-0" style="line-height: 1.5;">
                                 Your family sealed {{ $adulthoodGraduation['unsealed_capsules'] }} heirloom memory capsule(s) during your childhood marked <em>"Deliver on 18th Birthday"</em>. They are now unsealed and waiting for you!
                             </p>
                         </div>

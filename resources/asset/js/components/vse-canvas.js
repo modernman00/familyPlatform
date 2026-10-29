@@ -250,6 +250,12 @@ class VisualSupremacyRuntime {
                             img.style.transform = `perspective(800px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translate3d(${transX.toFixed(1)}px, ${transY.toFixed(1)}px, 6px) scale(1.02)`;
                             img.style.transition = 'transform 0.12s cubic-bezier(0.2, 0, 0, 1)';
                         }
+
+                        // 2.5D Holographic Heirloom Foil Specular Shimmer
+                        const glintX = ((relX + 1) * 50).toFixed(1);
+                        const glintY = ((relY + 1) * 50).toFixed(1);
+                        card.style.setProperty('--vse-glint-pos', `${glintX}% ${glintY}%`);
+                        card.classList.add('has-glint');
                     } else {
                         this.resetCardTransform(card);
                     }
@@ -280,6 +286,12 @@ class VisualSupremacyRuntime {
                         img.style.transformOrigin = 'center center';
                         img.style.willChange = 'transform';
                     }
+
+                    // Mobile gyroscopic holographic foil sheen update
+                    const glintX = Math.max(0, Math.min(100, 50 + (this.orientation.gamma / 30) * 50)).toFixed(1);
+                    const glintY = Math.max(0, Math.min(100, 50 + (this.orientation.beta / 30) * 50)).toFixed(1);
+                    card.style.setProperty('--vse-glint-pos', `${glintX}% ${glintY}%`);
+                    card.classList.add('has-glint');
                 });
             }
 
@@ -297,6 +309,8 @@ class VisualSupremacyRuntime {
             img.style.willChange = 'auto';
             img.style.transition = 'transform 0.3s ease-out';
         }
+        card.style.removeProperty('--vse-glint-pos');
+        card.classList.remove('has-glint');
     }
 
     resetTransforms() {

@@ -1,6 +1,6 @@
 <div class="modal fade" id="timeCapsuleModal" tabindex="-1" aria-labelledby="timeCapsuleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff; max-height: calc(100vh - 3.5rem);">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; max-height: calc(100vh - 3.5rem);">
             @include('csrf')
             <!-- Modal Header -->
             <div class="modal-header border-0 px-4 pt-4 pb-2 flex-shrink-0" style="background: linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%); border-bottom: 1px solid rgba(217, 70, 239, 0.15) !important;">
@@ -9,9 +9,10 @@
                         <i class="bi bi-hourglass-split text-dark"></i>
                     </div>
                     <div>
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
                             <h5 class="modal-title fw-bold mb-0 text-dark" id="timeCapsuleModalLabel">Digital Time Capsule Vault</h5>
                             <span class="badge bg-dark" style="font-size: 0.75rem; letter-spacing: 0.5px;">LIVING HERITAGE</span>
+                            <span class="badge bg-success bg-opacity-10 text-success fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;"><i class="bi bi-shield-lock-fill me-1"></i>AES-256 VAULT</span>
                         </div>
                         <p class="text-muted small mb-0">Seal letters, voice heirlooms, and life advice for children and relatives until a future milestone.</p>
                     </div>
@@ -20,7 +21,7 @@
             </div>
 
             <!-- Vault Mode Nav (Pills) -->
-            <div class="px-4 pt-3 pb-2 border-bottom bg-light d-flex gap-2 flex-shrink-0">
+            <div class="px-4 pt-3 pb-2 border-bottom d-flex gap-2 flex-shrink-0">
                 <button type="button" class="btn btn-sm px-3 py-1.5 fw-bold rounded-pill" id="tabBtnViewVault" style="background: #1e293b; color: #ffffff;" onclick="switchCapsuleTab('view')">
                     <i class="bi bi-safe2 me-1"></i> Family Vault
                 </button>
@@ -69,7 +70,7 @@
                             </div>
 
                             <div class="col-12">
-                                <div class="p-3 rounded-3" style="background: #fbefef; border: 1px dashed #d8b4fe;">
+                                <div class="modal-sub-card-rose p-3 rounded-3" style="border: 1px dashed rgba(217, 70, 239, 0.4);">
                                     <div class="d-flex align-items-center gap-2 mb-1">
                                         <i class="bi bi-shield-lock-fill text-primary"></i>
                                         <span class="fw-bold small text-dark">Zero-Trust Cryptographic Sealing</span>
@@ -79,6 +80,14 @@
                                     </p>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Encryption Reassurance Banner -->
+                        <div class="p-2.5 rounded-3 d-flex align-items-center gap-2 mt-3" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2);">
+                            <i class="bi bi-shield-lock-fill text-success flex-shrink-0" style="font-size: 1.1rem;"></i>
+                            <span class="small text-muted" style="font-size: 0.78rem;">
+                                <strong class="text-dark">Family Vault Encrypted:</strong> This message is encrypted at rest using AES-256-GCM. It cannot be unlocked or read until the specified milestone arrives.
+                            </span>
                         </div>
 
                         <div class="mt-4 d-flex justify-content-end gap-2">
@@ -93,7 +102,7 @@
                 </div>
             </div>
 
-            <div class="modal-footer border-0 bg-light px-4 py-3 d-flex justify-content-between flex-shrink-0">
+            <div class="modal-footer border-0 px-4 py-3 d-flex justify-content-between flex-shrink-0">
                 <span class="text-muted small">
                     <i class="bi bi-shield-check text-success me-1"></i> Multi-generational preservation
                 </span>

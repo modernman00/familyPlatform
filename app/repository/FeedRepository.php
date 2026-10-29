@@ -95,7 +95,7 @@ class FeedRepository
                 $query .= "post.postFamCode IN ($inQuery) OR ";
             }
 
-            $query .= "post.id = rm.approver_id OR post.id = ? OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_no = post.post_no AND pt.user_id = ?))
+            $query .= "post.id = rm.approver_id OR post.id = ? OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_no = post.post_no AND pt.user_id = ?) OR post.id = ?)
                 AND post.post_status = 'published'
                 AND post.date_deleted IS NULL";
 
@@ -105,6 +105,7 @@ class FeedRepository
             }
             $params[] = $userId;
             $params[] = $userId;
+            $params[] = \App\services\FamilyPlatformAccountService::ACCOUNT_ID;
 
             if ($filter === 'tagged') {
                 $query .= " AND EXISTS (SELECT 1 FROM post_tags pt_filter WHERE pt_filter.post_no = post.post_no AND pt_filter.user_id = ?)";
@@ -190,7 +191,7 @@ class FeedRepository
                 $query .= "post.postFamCode IN ($inQuery) OR ";
             }
 
-            $query .= "post.id = rm.approver_id OR post.id = ?) 
+            $query .= "post.id = rm.approver_id OR post.id = ? OR post.id = ?) 
                 AND post.post_status = 'published'
                 AND post.date_created >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
                 AND post.date_created < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), INTERVAL 1 DAY)
@@ -201,6 +202,7 @@ class FeedRepository
                 $params = array_merge($params, $cleanedCodes);
             }
             $params[] = $userId;
+            $params[] = \App\services\FamilyPlatformAccountService::ACCOUNT_ID;
 
             $stmt = $this->db->prepare($query);
             foreach ($params as $key => $val) {
@@ -257,7 +259,7 @@ class FeedRepository
                 $query .= "post.postFamCode IN ($inQuery) OR ";
             }
 
-            $query .= "post.id = rm.approver_id OR post.id = ? OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_no = post.post_no AND pt.user_id = ?))
+            $query .= "post.id = rm.approver_id OR post.id = ? OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_no = post.post_no AND pt.user_id = ?) OR post.id = ?)
                 AND post.post_status = 'published'
                 AND post.date_deleted IS NULL";
 
@@ -267,6 +269,7 @@ class FeedRepository
             }
             $params[] = $userId;
             $params[] = $userId;
+            $params[] = \App\services\FamilyPlatformAccountService::ACCOUNT_ID;
 
             if ($filter === 'tagged') {
                 $query .= " AND EXISTS (SELECT 1 FROM post_tags pt_filter WHERE pt_filter.post_no = post.post_no AND pt_filter.user_id = ?)";
@@ -368,11 +371,43 @@ class FeedRepository
             \error_log('[FeedRepository::hydrateEngagement tags] ' . $tagEx->getMessage());
         }
 
+        // Batch hydrate voice capsules from family_nodes as fallback for living oral history
+        $authorIds = array_values(array_unique(array_filter(array_map('strval', array_column($rows, 'id')))));
+        $nodeVoiceMap = [];
+        if (!empty($authorIds)) {
+            try {
+                $voicePlaceholders = implode(',', array_fill(0, count($authorIds), '?'));
+                $vSql = sprintf(
+                    "SELECT user_id, voice_capsule_url 
+                     FROM family_nodes 
+                     WHERE user_id IN (%s) 
+                       AND voice_capsule_url IS NOT NULL 
+                       AND voice_capsule_url != ''",
+                    $voicePlaceholders
+                );
+                $vStmt = $this->db->prepare($vSql);
+                $vStmt->execute($authorIds);
+                while ($vRow = $vStmt->fetch(PDO::FETCH_ASSOC)) {
+                    $nodeVoiceMap[(string)$vRow['user_id']] = (string)$vRow['voice_capsule_url'];
+                }
+            } catch (\Throwable $ve) {
+                \error_log('[FeedRepository::hydrateEngagement voice] ' . $ve->getMessage());
+            }
+        }
+
         foreach ($rows as &$post) {
             $pNo = (int)($post['post_no'] ?? 0);
             $post['poll'] = $polls[$pNo] ?? null;
             $post['comparison'] = $comparisons[$pNo] ?? null;
             $post['post_tags'] = $postTagsByPostNo[$pNo] ?? [];
+
+            // Fallback to author's family tree voice capsule if not directly set on post
+            if (empty($post['voice_capsule_url'])) {
+                $postAuthorId = (string)($post['id'] ?? '');
+                if (isset($nodeVoiceMap[$postAuthorId])) {
+                    $post['voice_capsule_url'] = $nodeVoiceMap[$postAuthorId];
+                }
+            }
 
             $post['reactions'] = array_values(array_filter($reactions, function ($r) use ($pNo) {
                 return (int)($r['post_no'] ?? 0) === $pNo;

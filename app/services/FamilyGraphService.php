@@ -510,6 +510,14 @@ final class FamilyGraphService
             )->execute([$first, $last, (string)($d['email'] ?? ''), (string)($d['mobile'] ?? ''), (string)($d['maiden_name'] ?? ''), (int)$other['id']]);
             $db->prepare('UPDATE family_unions SET union_type = ?, is_current = ? WHERE id = ?')
                 ->execute([$type, $current ? 1 : 0, (int)$u['id']]);
+
+            $mDate = (string)($d['wedding_date'] ?? ($d['marriage_date'] ?? ''));
+            if ($mDate !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $mDate)) {
+                $mYear = (int)substr($mDate, 0, 4);
+                $db->prepare('UPDATE family_unions SET marriage_date = ?, marriage_year = COALESCE(?, marriage_year) WHERE id = ?')
+                    ->execute([$mDate, $mYear, (int)$u['id']]);
+            }
+
             return ['union_id' => (int)$u['id'], 'partner_id' => (int)$other['id']];
         }
 
@@ -518,7 +526,12 @@ final class FamilyGraphService
             'bio' => 'Partner/Spouse', 'email' => $d['email'] ?? null, 'mobile' => $d['mobile'] ?? null,
             'maiden_name' => $d['maiden_name'] ?? null,
         ]);
-        $unionId = self::createUnion($db, $fam, $baseId, $partnerId, $type, null, null, $current);
+        $mDate = (string)($d['wedding_date'] ?? ($d['marriage_date'] ?? ''));
+        $mYear = ($mDate !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $mDate)) ? (int)substr($mDate, 0, 4) : null;
+        $unionId = self::createUnion($db, $fam, $baseId, $partnerId, $type, $mYear, null, $current);
+        if ($mDate !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $mDate)) {
+            $db->prepare('UPDATE family_unions SET marriage_date = ? WHERE id = ?')->execute([$mDate, $unionId]);
+        }
         return ['union_id' => $unionId, 'partner_id' => $partnerId];
     }
 

@@ -70,6 +70,13 @@ final class TwoTruthsGameService
         $avatarStmt = $db->prepare("SELECT img FROM profilePics WHERE id = ? LIMIT 1");
         $avatarStmt->execute([$game['author_id']]);
         $authorAvatar = $avatarStmt->fetchColumn() ?: null;
+        if (!empty($authorAvatar)) {
+            $authorAvatar = (str_starts_with($authorAvatar, '/') || str_starts_with($authorAvatar, 'http'))
+                ? $authorAvatar
+                : '/resources/images/profile/' . $authorAvatar;
+        } else {
+            $authorAvatar = '/resources/images/profile/avatarM.png';
+        }
         $game['author_avatar'] = $authorAvatar;
 
         // Check if current user has voted
