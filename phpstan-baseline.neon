@@ -727,6 +727,18 @@ parameters:
 			path: app/controller/BaseController.php
 
 		-
+			message: '#^Offset ''code'' on array\{state\: string, code\: string, origin\: string\|null, pending\: array\<string, mixed\>\|null\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/controller/BaseController.php
+
+		-
+			message: '#^Offset ''state'' on array\{state\: string, code\: string, origin\: string\|null, pending\: array\<string, mixed\>\|null\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/controller/BaseController.php
+
+		-
 			message: '#^PHPDoc tag @param references unknown parameter\: \$famCode$#'
 			identifier: parameter.notFound
 			count: 1
@@ -784,6 +796,18 @@ parameters:
 			message: '#^Call to function is_array\(\) with array\<int, mixed\> will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 2
+			path: app/controller/NotificationController.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\{id\: int, email\: string, role\: string\} will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/controller/NotificationController.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
 			path: app/controller/NotificationController.php
 
 		-
@@ -1087,12 +1111,6 @@ parameters:
 			path: app/controller/members/Event.php
 
 		-
-			message: '#^Call to static method broadcastToFamily\(\) on an unknown class Src\\Pusher\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/controller/members/FamilyAiHubController.php
-
-		-
 			message: '#^Offset ''quiz_title'' on array\{success\: true, quiz_title\: string, questions\: non\-empty\-array\<int, array\{question\: string, options\: array\<int, string\>, correct_index\: int, fun_fact\: string\}\>, error\?\: string\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
@@ -1139,6 +1157,12 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/members/Organogram.php
+
+		-
+			message: '#^Match arm comparison between ''celebrate'' and ''celebrate'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/controller/members/PostLikeController.php
 
 		-
 			message: '#^PHPDoc tag @param references unknown parameter\: \$likeCount$#'
@@ -1201,6 +1225,12 @@ parameters:
 			path: app/controller/members/PostMessage.php
 
 		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: app/controller/members/PostMessage.php
+
+		-
 			message: '#^Throwing object of an unknown class App\\controller\\members\\NotFoundException\.$#'
 			identifier: class.notFound
 			count: 3
@@ -1209,12 +1239,18 @@ parameters:
 		-
 			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
-			count: 1
+			count: 2
 			path: app/controller/members/ProfilePage.php
 
 		-
 			message: '#^Call to function is_array\(\) with array\{id\: int, email\: string, role\: string\} will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/controller/members/ProfilePage.php
+
+		-
+			message: '#^Method App\\controller\\members\\ProfilePage\:\:processUploadedCommentMedia\(\) has parameter \$file with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/members/ProfilePage.php
 
@@ -1708,6 +1744,12 @@ parameters:
 			path: app/services/JudgeYommyTribunalService.php
 
 		-
+			message: '#^Offset 0 on non\-empty\-list\<string\> on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/KinshipCalculatorService.php
+
+		-
 			message: '#^Call to function is_array\(\) with non\-empty\-list\<array\> will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -1744,6 +1786,12 @@ parameters:
 			path: app/services/LinkPreviewService.php
 
 		-
+			message: '#^Offset 0 on non\-empty\-list\<string\> on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/MemoryMilestoneService.php
+
+		-
 			message: '#^Offset ''id'' on array\{id\: int, user_id\: mixed, first_name\: string, last_name\: string, gender\: string, generation_level\: int, is_deceased\: bool, is_placeholder\: bool, \.\.\.\} in isset\(\) always exists and is not nullable\.$#'
 			identifier: isset.offset
 			count: 1
@@ -1756,6 +1804,18 @@ parameters:
 			path: app/services/PartyPlatformBridgeService.php
 
 		-
+			message: '#^Offset ''code'' on array\{state\: string, code\: string, origin\: string\|null, pending\: array\<string, mixed\>\|null\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/ProfilepageService.php
+
+		-
+			message: '#^Offset ''state'' on array\{state\: string, code\: string, origin\: string\|null, pending\: array\<string, mixed\>\|null\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/ProfilepageService.php
+
+		-
 			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, int\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -1766,3 +1826,87 @@ parameters:
 			identifier: method.staticCall
 			count: 2
 			path: app/services/TwoTruthsGameService.php
+
+		-
+			message: '#^Comparison operation "\<\=" between int\<1, max\> and 0 is always false\.$#'
+			identifier: smallerOrEqual.alwaysFalse
+			count: 2
+			path: app/services/VisualSupremacyService.php
+
+		-
+			message: '#^Method App\\services\\VisualSupremacyService\:\:createGdResource\(\) never returns resource so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: app/services/VisualSupremacyService.php
+
+		-
+			message: '#^Method App\\services\\VisualSupremacyService\:\:createGdResource\(\) should return GdImage\|resource\|null but returns GdImage\|false\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/services/VisualSupremacyService.php
+
+		-
+			message: '#^Offset ''mime'' on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/VisualSupremacyService.php
+
+		-
+			message: '#^Offset 0 on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/VisualSupremacyService.php
+
+		-
+			message: '#^Offset 1 on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/VisualSupremacyService.php
+
+		-
+			message: '#^Parameter \#1 \$command of function proc_open expects list\<string\>\|string, array\<int, string\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/services/VisualSupremacyService.php
+
+		-
+			message: '#^Parameter \#1 \$image of function imageavif expects GdImage, GdImage\|resource given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/services/VisualSupremacyService.php
+
+		-
+			message: '#^Parameter \#1 \$image of function imagedestroy expects GdImage, GdImage\|resource given\.$#'
+			identifier: argument.type
+			count: 5
+			path: app/services/VisualSupremacyService.php
+
+		-
+			message: '#^Parameter \#1 \$image of function imagesx expects GdImage, GdImage\|resource given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/services/VisualSupremacyService.php
+
+		-
+			message: '#^Parameter \#1 \$image of function imagesy expects GdImage, GdImage\|resource given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/services/VisualSupremacyService.php
+
+		-
+			message: '#^Parameter \#1 \$image of function imagewebp expects GdImage, GdImage\|resource given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/services/VisualSupremacyService.php
+
+		-
+			message: '#^Parameter \#2 \$src_image of function imagecopyresampled expects GdImage, GdImage\|resource given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/services/VisualSupremacyService.php
+
+		-
+			message: '#^Result of \|\| is always false\.$#'
+			identifier: booleanOr.alwaysFalse
+			count: 1
+			path: app/services/VisualSupremacyService.php

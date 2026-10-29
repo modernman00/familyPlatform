@@ -216,14 +216,14 @@ runCheck("Web Share Target API Level 2 is fully configured across manifest, SW, 
 });
 
 // TEST 8: Family Post Privacy Guard (Postings protected from external reshare)
-runCheck("Family post privacy: post-card.blade.php is protected from reshare", function() use ($rootDir) {
+runCheck("Family post privacy: post-card.blade.php and feedComponent.js are protected from reshare", function() use ($rootDir) {
     $feedCompPath = $rootDir . '/resources/asset/js/components/profilePage/feedComponent.js';
     $feedContent = file_get_contents($feedCompPath);
-    if (!str_contains($feedContent, 'sharePostToSocialMedia') || !str_contains($feedContent, 'navigator.share')) {
-        throw new \Exception("feedComponent.js missing sharePostToSocialMedia or navigator.share implementation.");
+    if (str_contains($feedContent, 'sharePostToSocialMedia')) {
+        throw new \Exception("feedComponent.js contains sharePostToSocialMedia - unused external share method must be removed.");
     }
-    if (!str_contains($feedContent, 'openSocialShareModal')) {
-        throw new \Exception("feedComponent.js missing openSocialShareModal fallback for desktop/unsupported browsers.");
+    if (str_contains($feedContent, 'openSocialShareModal')) {
+        throw new \Exception("feedComponent.js contains openSocialShareModal - external share modal must be removed.");
     }
 
     $cardPath = $rootDir . '/resources/views/components/feed/post-card.blade.php';
