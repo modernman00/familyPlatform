@@ -27,7 +27,7 @@
         <!-- Profile Banner Card -->
         <div class="p-3 rounded-4 mb-3 kin-modal-profile-card" style="background: linear-gradient(135deg, #fdf5f5 0%, #f9f0f0 100%); border: 1px solid #f1dede;">
           <div class="d-flex align-items-center gap-3">
-            <img id="kinModalAvatar" src="/resources/images/profile/avatarM.png" alt="Avatar" class="rounded-circle border border-2 border-white shadow-sm flex-shrink-0" width="68" height="68" style="object-fit: cover;">
+            <img id="kinModalAvatar" src="/resources/images/profile/avatarM.png" alt="Avatar" class="rounded-circle border border-2 border-white shadow-sm flex-shrink-0" width="68" height="68" style="width: 68px; height: 68px; min-width: 68px; min-height: 68px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 50%;">
             <div style="min-width: 0; flex: 1;">
               <h5 class="fw-bold mb-1 text-truncate kin-modal-name" id="kinModalName" style="color: #0f172a; font-size: 1.15rem; line-height: 1.3;">
                 {{ __('kinship.family_relative', 'Family Relative') }}

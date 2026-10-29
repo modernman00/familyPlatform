@@ -112,7 +112,7 @@
                         <span style="font-size: 1.1rem;">{{ $currLocale['flag'] }}</span>
                         <span class="d-none d-md-inline fw-semibold text-uppercase" style="font-size: 0.78rem;">{{ $activeLocale }}</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-1" aria-labelledby="langMenu" style="border-radius: 12px; min-width: 140px;">
+                    <ul class="dropdown-menu dropdown-menu-lg-end shadow-sm border-0 py-1" aria-labelledby="langMenu" style="border-radius: 12px; min-width: 140px;">
                         @foreach ($supportedLocales as $locKey => $locMeta)
                             <li>
                                 <a class="dropdown-item py-1.5 px-3 d-flex align-items-center gap-2 {{ $locKey === $activeLocale ? 'active fw-bold' : '' }}" href="/locale/{{ $locKey }}">
@@ -130,7 +130,7 @@
                         <span class="user-avatar-initials">{{ strtoupper(substr($_SESSION['fullName'] ?? 'A', 0, 1)) }}</span>
                         <span class="fw-semibold text-truncate" style="max-width: 130px;">{{ ucwords(strtolower($_SESSION['fullName'] ?? 'Account')) }}</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-2 stitch-user-dropdown" aria-labelledby="userMenu" style="border-radius: 16px; min-width: 200px;">
+                    <ul class="dropdown-menu dropdown-menu-lg-end shadow-lg border-0 py-2 stitch-user-dropdown" aria-labelledby="userMenu" style="border-radius: 16px; min-width: 200px;">
                         <li>
                             <a class="dropdown-item py-2 px-3 fw-medium text-primary" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" title="Invite family relatives and friends to join your family network">
                                 <i class="bi bi-person-plus-fill me-2 text-warning"></i> {{ __('nav.invite_others', 'Invite Others') }}

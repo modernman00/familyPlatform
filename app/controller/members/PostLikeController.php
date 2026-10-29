@@ -24,7 +24,7 @@ final class PostLikeController extends Db
         try {
             $postNo = \cleanSession((string)($_GET['postNo'] ?? $_POST['post_no'] ?? ''));
             $userId = \cleanSession((string)($_SESSION['id'] ?? ''));
-            $reactionType = \cleanSession((string)($_GET['reaction'] ?? $_POST['reaction'] ?? 'love'));
+            $reactionType = \cleanSession((string)($_GET['reaction'] ?? $_POST['reaction'] ?? 'like'));
             if (!in_array($reactionType, ['like', 'love', 'haha', 'shock', 'sad', 'celebrate'], true)) {
                 $reactionType = 'love';
             }

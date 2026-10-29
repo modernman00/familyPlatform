@@ -227,7 +227,7 @@ textarea {
 
 html,
 body {
-    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    font-family: var(--font-sans, -apple-system, system-ui, sans-serif);
     font-size: 15px;
     line-height: 1.5
 }
@@ -270,7 +270,7 @@ h3,
 h4,
 h5,
 h6 {
-    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    font-family: var(--font-heading, 'Outfit', var(--font-sans, -apple-system, system-ui, sans-serif));
     font-weight: 400;
     margin: 10px 0
 }

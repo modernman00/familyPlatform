@@ -85,8 +85,8 @@
         @else
 
         <!-- Filter Pills Bar (Exact Reference Match) -->
-        <div class="d-flex align-items-center gap-1.5 mb-3 kin-filter-bar overflow-x-auto text-nowrap" style="scrollbar-width: none;">
-            <span class="text-muted fw-normal" style="font-size: 0.75rem; color: #94a3b8 !important; margin-right: 2px;">{{ __('kinship.filter_label', 'Filter:') }}</span>
+        <div class="d-flex align-items-center gap-2 mb-3 kin-filter-bar overflow-x-auto text-nowrap" style="scrollbar-width: none; gap: 8px;">
+            <span class="text-muted fw-normal kin-filter-label" style="font-size: 0.75rem; color: #94a3b8 !important; margin-right: 4px; flex-shrink: 0;">{{ __('kinship.filter_label', 'Filter:') }}</span>
             <button type="button" 
                     @click="activeFilter = 'all'" 
                     class="btn btn-sm rounded-pill btn-filter-kin" 
@@ -199,7 +199,7 @@
                     <div class="d-flex align-items-center gap-3 mb-3 pe-4" style="min-width: 0; gap: 12px; margin-bottom: 12px;">
                         <div class="position-relative flex-shrink-0">
                             @if($hasCustomPic)
-                                <img src="{{ $kinAvatar }}" alt="{{ $kinName }}" class="rounded-circle border" width="44" height="44" style="object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <img src="{{ $kinAvatar }}" alt="{{ $kinName }}" class="rounded-circle border flex-shrink-0" width="44" height="44" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                 <div class="rounded-circle text-white fw-bold align-items-center justify-content-center" 
                                      style="display: none; width: 44px; height: 44px; background: #273344; font-size: 0.95rem; letter-spacing: -0.02em;">
                                     {{ $initials }}

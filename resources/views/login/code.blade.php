@@ -11,7 +11,7 @@
 <style nonce="{{ $nonce }}">
     body {
         background-color: #F4F5FB !important;
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
     }
 
     .stitch-auth-container {
@@ -77,7 +77,7 @@
         box-sizing: border-box;
         text-transform: uppercase;
         direction: ltr;
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
         font-variant-numeric: tabular-nums;
         caret-color: #8a1019;
         transition: border-color 0.18s ease, box-shadow 0.18s ease;

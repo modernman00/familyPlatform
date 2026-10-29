@@ -68,6 +68,11 @@ class PushNotificationClass extends VapidClass
             return false;
         }
 
+        // Never push to real devices from local/dev/test environments.
+        if (Pusher::outboundBlocked()) {
+            return false;
+        }
+
         $userIds = is_array($userId) ? $userId : [$userId];
         $publicKey = trim((string) ($_ENV['VAPID_PUBLIC_KEY'] ?? $_SERVER['VAPID_PUBLIC_KEY'] ?? (getenv('VAPID_PUBLIC_KEY') ?: ($_ENV['MIX_VAPID_PUBLIC_KEY'] ?? ''))), "'\"");
         $privateKey = trim((string) ($_ENV['VAPID_PRIVATE_KEY'] ?? $_SERVER['VAPID_PRIVATE_KEY'] ?? (getenv('VAPID_PRIVATE_KEY') ?: ($_ENV['MIX_VAPID_PRIVATE_KEY'] ?? ''))), "'\"");

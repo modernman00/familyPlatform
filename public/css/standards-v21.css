@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('./outfit.css');
+/* Inter font import removed – using native system stack and self‑hosted Outfit */
 /*
  * Global Design Standards v2.1 base layer (CEO-approved 2026-10-22).
  * Loaded after main.css. Additive only: tokens, focus, press, motion and hit-area rules.
@@ -793,6 +794,44 @@ body.dark-mode,
 /* Overflow safety: nothing may cause sideways scroll on any device */
 html, body { max-width: 100%; overflow-x: clip; }
 img, video { max-width: 100%; height: auto; }
+/* Universal avatar circular integrity: prevent squishing or oval distortion on non-square portrait photos */
+img.rounded-circle,
+.post-composer img,
+.composer-author__avatar,
+.feed-comment-avatar,
+.feed-comment-item > img,
+.feed-comment-item .rounded-circle,
+.avatar.profileImg {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.feed-comment-avatar,
+.feed-comment-item > img,
+.feed-comment-item img.rounded-circle {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  aspect-ratio: 1 / 1 !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+  display: block;
+}
+
+.comment-gif {
+  display: block;
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: 220px !important;
+  object-fit: contain !important;
+  border-radius: 12px;
+}
 .table-responsive, pre { max-width: 100%; overflow-x: auto; }
 
 /* Touch devices: every control is a 44px target (Golden Invariant 8) */
@@ -1324,13 +1363,20 @@ body.dark-mode #mainNavbar .btn-icon-stitch,
 #mainNavbar .brand-logo-icon-wrapper img { min-width: 34px; }
 
 /* =====================================================================
- * v2.4 One typeface (CEO 2026-10-25): Inter everywhere. Icon fonts keep their own
- * face through their own class rules (.bi, .fa, .material-icons), which outrank these.
+ * Native-First Social Hybrid (TAT & Olutobi Executive Determination):
+ * Native OS font stack for feed/UI readability (SF Pro on iOS, Roboto on Android)
+ * with Outfit / Plus Jakarta Sans geometric warmth for headings and display cards.
  * ===================================================================== */
-:root { --font-sans: "Inter", -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+:root {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-heading: "Outfit", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
 html, body, button, input, select, textarea, optgroup, .btn, .form-control, .form-select,
-h1, h2, h3, h4, h5, h6, .navbar, .modal, .dropdown-menu, .swal2-popup, .swal2-title, .swal2-html-container {
+.navbar, .modal, .dropdown-menu, .swal2-popup, .swal2-html-container {
   font-family: var(--font-sans);
+}
+h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, .card-title, .display-heading {
+  font-family: var(--font-heading);
 }
 
 /* Landing: logo tile keeps its size next to the wordmark; centred copy stays centred on small screens */
@@ -1413,11 +1459,53 @@ h1, h2, h3, h4, h5, h6, .navbar, .modal, .dropdown-menu, .swal2-popup, .swal2-ti
    Per design.md (v2.1 live specification)
    ========================================================================== */
 
-/* 1. Mobile Feed Layout: Instagram Mirror (< 992px) */
+/* 1. Mobile Feed Layout: Profile Card & Feed (< 992px) */
 @media (max-width: 991.98px) {
-  /* In Instagram Mirror, feed starts immediately at top; left profile column is deferred to bottom nav */
+  /* Left profile column with action buttons displayed prominently on mobile */
   .profile-column {
+    display: block !important;
+    order: 1 !important;
+    width: 100% !important;
+    max-width: 480px !important;
+    margin: 0 auto 16px auto !important;
+    position: static !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* Quick actions: collapsed by default on mobile/tablet so the feed stays near the top */
+  .profile-quick-actions:not(.is-open) {
     display: none !important;
+  }
+
+  .profile-quick-toggle {
+    min-height: 44px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    border: 1px solid var(--border-color, #dddfe2);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-color, #1c1e21);
+    transition: transform var(--motion-fast, 150ms) var(--ease, ease);
+  }
+
+  .profile-quick-toggle:active {
+    transform: scale(0.98);
+  }
+
+  .profile-quick-chevron {
+    transition: transform var(--motion-base, 250ms) var(--ease, ease);
+  }
+
+  .profile-quick-toggle[aria-expanded="true"] .profile-quick-chevron {
+    transform: rotate(180deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .profile-quick-chevron,
+    .profile-quick-toggle {
+      transition: none;
+    }
   }
 
   .container-main {
@@ -1428,7 +1516,7 @@ h1, h2, h3, h4, h5, h6, .navbar, .modal, .dropdown-menu, .swal2-popup, .swal2-ti
   }
 
   .feed-column {
-    order: 1 !important;
+    order: 2 !important;
     width: 100% !important;
     max-width: 480px !important;
     margin: 0 auto !important;
@@ -1436,7 +1524,7 @@ h1, h2, h3, h4, h5, h6, .navbar, .modal, .dropdown-menu, .swal2-popup, .swal2-ti
   }
 
   .sidebar-column {
-    order: 2 !important;
+    order: 3 !important;
     width: 100% !important;
     max-width: 480px !important;
     margin: 16px auto 0 auto !important;
@@ -1766,7 +1854,7 @@ body.dark-theme .brand-navbar-stitch,
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   color: #ffffff !important;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.78rem;
   font-weight: 500;
   line-height: 1.35;

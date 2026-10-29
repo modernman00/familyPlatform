@@ -2,7 +2,7 @@
    Premium Landing & Public Pages CSS (Facebook/LinkedIn Aesthetic)
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Inter font import removed – using native system stack */
 
 :root {
     /* Canonical brand palette (mirrors resources/asset/scss/_variables.scss &
@@ -21,7 +21,7 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
     color: var(--text-main);
     background-color: var(--bg-light);
     -webkit-font-smoothing: antialiased;

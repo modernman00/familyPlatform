@@ -2,22 +2,38 @@
   FamilyPlatform Push Notification & Standalone PWA Activation Legend
   Prompts users to activate push notifications and handles auto-sync for users who installed the app.
 --}}
-<div id="push-notification-banner" class="alert alert-dismissible fade shadow-lg mx-auto" role="alert" style="display: none; max-width: 620px; position: fixed; top: 20px; left: 16px; right: 16px; z-index: 1060; border-radius: 16px; border: 1.5px solid rgba(163, 22, 33, 0.25); background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 16px 36px rgba(15, 23, 42, 0.18);">
+<style>
+    /* WCAG AA: explicit surface + text colours so the banner never inherits washed-out theme text */
+    #push-notification-banner { display: none; max-width: 620px; position: fixed; top: 20px; left: 16px; right: 16px; z-index: 1060; border-radius: 16px; border: 1.5px solid rgba(163, 22, 33, 0.35); background: #ffffff; box-shadow: 0 16px 36px rgba(15, 23, 42, 0.25); font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif); }
+    #push-notification-banner .push-banner-title { color: #0f172a; font-size: 1.125rem; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; }
+    #push-notification-banner .push-banner-text { color: #334155; font-size: 0.875rem; font-weight: 500; line-height: 1.5; }
+    #push-notification-banner .push-banner-icon { background: rgba(163, 22, 33, 0.1); color: #a31621; }
+    #push-notification-banner #enable-push-btn { background: linear-gradient(135deg, #a31621 0%, #7a0e16 100%); color: #ffffff; border: none; min-height: 44px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+    #push-notification-banner #dismiss-push-btn { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; font-weight: 600; min-height: 44px; white-space: nowrap; flex-shrink: 0; }
+    #push-notification-banner #close-push-banner { opacity: 0.8; }
+    body.dark-mode #push-notification-banner, body.dark-theme #push-notification-banner, [data-bs-theme="dark"] #push-notification-banner, html.dark #push-notification-banner, html.dark-mode #push-notification-banner { background: #1e293b; border-color: rgba(239, 107, 115, 0.5); }
+    body.dark-mode #push-notification-banner .push-banner-title, body.dark-theme #push-notification-banner .push-banner-title, [data-bs-theme="dark"] #push-notification-banner .push-banner-title, html.dark #push-notification-banner .push-banner-title, html.dark-mode #push-notification-banner .push-banner-title { color: #f8fafc; }
+    body.dark-mode #push-notification-banner .push-banner-text, body.dark-theme #push-notification-banner .push-banner-text, [data-bs-theme="dark"] #push-notification-banner .push-banner-text, html.dark #push-notification-banner .push-banner-text, html.dark-mode #push-notification-banner .push-banner-text { color: #e2e8f0; }
+    body.dark-mode #push-notification-banner .push-banner-icon, body.dark-theme #push-notification-banner .push-banner-icon, [data-bs-theme="dark"] #push-notification-banner .push-banner-icon, html.dark #push-notification-banner .push-banner-icon, html.dark-mode #push-notification-banner .push-banner-icon { background: rgba(239, 107, 115, 0.18); color: #fca5a5; }
+    body.dark-mode #push-notification-banner #dismiss-push-btn, body.dark-theme #push-notification-banner #dismiss-push-btn, [data-bs-theme="dark"] #push-notification-banner #dismiss-push-btn, html.dark #push-notification-banner #dismiss-push-btn, html.dark-mode #push-notification-banner #dismiss-push-btn { background: #334155; color: #f1f5f9; border-color: #475569; }
+    body.dark-mode #push-notification-banner #close-push-banner, body.dark-theme #push-notification-banner #close-push-banner, [data-bs-theme="dark"] #push-notification-banner #close-push-banner, html.dark #push-notification-banner #close-push-banner, html.dark-mode #push-notification-banner #close-push-banner { filter: invert(1) grayscale(1) brightness(2); opacity: 1; }
+</style>
+<div id="push-notification-banner" class="alert alert-dismissible fade shadow-lg mx-auto" role="alert">
     <div class="d-flex align-items-start gap-3">
-        <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle" style="width: 44px; height: 44px; background: rgba(163, 22, 33, 0.1); color: #a31621;">
+        <div class="push-banner-icon flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle" style="width: 44px; height: 44px;">
             <i class="bi bi-bell-fill fs-4" style="line-height: 1;"></i>
         </div>
         <div class="flex-grow-1 pe-2">
-            <h6 class="push-banner-title fw-bold mb-1" style="color: #0f172a; font-size: 0.98rem; letter-spacing: -0.01em;">Stay Connected with Your Family</h6>
-            <p class="push-banner-text mb-0 text-muted" style="font-size: 0.86rem; line-height: 1.45;">
+            <h6 class="push-banner-title mb-1">Stay Connected with Your Family</h6>
+            <p class="push-banner-text mb-0">
                 Enable push notifications to receive instant alerts when family members post updates, celebrate milestones, or share memories.
             </p>
             <div class="mt-3 d-flex flex-wrap align-items-center gap-2">
-                <button id="enable-push-btn" type="button" class="btn btn-sm text-white rounded-pill px-4 fw-semibold shadow-sm d-inline-flex align-items-center justify-content-center" style="background: #a31621; border: none; min-height: 44px; transition: transform 0.15s ease, background 0.2s ease;">
+                <button id="enable-push-btn" type="button" class="btn btn-sm text-white rounded-pill px-4 fw-semibold shadow-sm d-inline-flex align-items-center justify-content-center" style="transition: transform 0.15s ease, background 0.2s ease;">
                     <i class="bi bi-bell-fill me-1.5" style="font-size: 0.85rem;"></i>
                     <span class="btn-text">Enable Notifications</span>
                 </button>
-                <button type="button" id="dismiss-push-btn" class="btn btn-sm btn-light border rounded-pill px-3 fw-medium text-secondary" style="min-height: 44px;">
+                <button type="button" id="dismiss-push-btn" class="btn btn-sm border rounded-pill px-3">
                     Not Now
                 </button>
             </div>

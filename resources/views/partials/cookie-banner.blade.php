@@ -35,7 +35,7 @@
     /* The whole banner is inert to hit-testing except the two buttons, so it
        never blocks a click (or a test's visibility check) on the page beneath. */
     pointer-events: none;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
   }
   #cookieBanner[hidden] { display: none !important; }
   #cookieBanner .cookie-btn,

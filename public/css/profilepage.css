@@ -44,7 +44,7 @@ body {
     radial-gradient(at 50% 100%, var(--bg-radial-3) 0px, transparent 50%);
   background-attachment: fixed;
   color: var(--text-color);
-  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-family: var(--font-sans, -apple-system, system-ui, sans-serif);
   transition: background-color 0.3s, color 0.3s;
   min-height: 100vh;
   padding: 0;
@@ -147,6 +147,42 @@ body {
 
 .post-composer {
   transition: box-shadow 0.2s ease;
+}
+
+.post-composer img,
+.composer-avatar-img {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  max-width: 44px !important;
+  max-height: 44px !important;
+  aspect-ratio: 1 / 1 !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+  display: block;
+}
+
+.feed-comment-avatar,
+.feed-comment-item > img,
+.feed-comment-item img.rounded-circle {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  aspect-ratio: 1 / 1 !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+  display: block;
+}
+
+img.rounded-circle {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
 }
 
 .post-composer:focus-within,
@@ -398,7 +434,7 @@ body {
   border-radius: 8px;
 }
 
-/* Mobile Responsiveness: Instagram Mirror for Mobile/PWA & Facebook for Desktop */
+/* Mobile Responsiveness: Profile Card & Feed for Mobile/PWA & Tablet (< 992px) */
 @media (max-width: 991.98px) {
   .container-main {
     flex-direction: column;
@@ -407,13 +443,20 @@ body {
     margin: 0 auto;
   }
 
-  /* In Instagram Mirror, feed starts immediately at top; left profile column is deferred to bottom nav */
+  /* Left profile column with action buttons displayed prominently at top of mobile layout */
   .profile-column {
-    display: none !important;
+    display: block !important;
+    order: 1;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto 16px auto;
+    position: static;
+    max-height: none;
+    overflow: visible;
   }
   
   .feed-column {
-    order: 1;
+    order: 2;
     width: 100%;
     max-width: 480px;
     margin: 0 auto;
@@ -421,7 +464,7 @@ body {
   }
 
   .sidebar-column {
-    order: 2;
+    order: 3;
     width: 100%;
     max-width: 480px;
     margin: 20px auto 0 auto;
@@ -590,6 +633,23 @@ body {
   border: 1px solid #fecdd3;
   font-size: 0.72rem;
   font-weight: 700;
+}
+
+.kin-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px !important;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.kin-filter-bar::-webkit-scrollbar {
+  display: none;
+}
+.kin-filter-bar .kin-filter-label {
+  margin-right: 4px;
+  flex-shrink: 0;
 }
 
 .btn-filter-kin {
@@ -1265,9 +1325,12 @@ body {
   box-shadow: 0 2px 8px rgba(249, 115, 22, 0.35);
 }
 
-/* Facebook Layout Redesign overrides */
-body, h1, h2, h3, h4, h5, h6, p, span, button, input, textarea {
-  font-family: 'Inter', -apple-system, system-ui, sans-serif !important;
+/* Layout font rules: Outfit for headings, native system for body & UI */
+body, p, span, button, input, textarea {
+  font-family: var(--font-sans, -apple-system, system-ui, sans-serif) !important;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading, "Outfit", var(--font-sans, -apple-system, system-ui, sans-serif)) !important;
 }
 
 .comment-bubble-text,
@@ -1277,7 +1340,7 @@ body, h1, h2, h3, h4, h5, h6, p, span, button, input, textarea {
 .reaction-count-pill,
 .reaction-preview,
 .reaction-option {
-  font-family: 'Inter', -apple-system, system-ui, sans-serif !important;
+  font-family: var(--font-sans, -apple-system, system-ui, sans-serif) !important;
   font-variant-emoji: emoji;
 }
 
@@ -2261,3 +2324,48 @@ body.dark-mode .comment-composer__send.is-active {
   color: #ef6b73 !important;
   background-color: rgba(239, 107, 115, 0.16) !important;
 }
+
+/* ── Comment Section Media & GIF Integrity (Zero-Stretch Invariant) ───────── */
+.comment-gif {
+  display: block;
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: 220px !important;
+  object-fit: contain !important;
+  border-radius: 12px;
+}
+
+.comment-composer__gif img {
+  width: auto !important;
+  height: auto !important;
+  max-width: 200px !important;
+  max-height: 120px !important;
+  object-fit: contain !important;
+}
+
+@media (max-width: 576px) {
+  .feed-comment-avatar,
+  .feed-comment-item > img,
+  .feed-comment-item img.rounded-circle {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    max-width: 32px !important;
+    max-height: 32px !important;
+    aspect-ratio: 1 / 1 !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+  }
+
+  .comment-gif {
+    width: auto !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: 200px !important;
+    object-fit: contain !important;
+  }
+}
+

@@ -306,22 +306,34 @@ final class PostMessage
             }
 
             // send push notification to all members with the same family code (excluding the comment author)
-            $rawCommentAuthorId = \checkInput($newComment[0]['id'] ?? ($_SESSION['id'] ?? ''));
-            $commentAuthorId = is_string($rawCommentAuthorId) ? $rawCommentAuthorId : '';
+            // Notify for EVERY comment in the batch (rapid successive comments used to be
+            // marked published but only the first one produced an in-app notification).
+            foreach ($newComment as $comment) {
+                $rawCommentAuthorId = \checkInput($comment['id'] ?? ($_SESSION['id'] ?? ''));
+                $commentAuthorId = is_string($rawCommentAuthorId) ? $rawCommentAuthorId : '';
 
-            $results = AllMembersData::AllMembersEmailByFamCode($famCode, $commentAuthorId !== '' ? $commentAuthorId : null);
+                $commentPostNo = $comment['post_no'] ?? 0;
+                $postData = Post::postByNo($commentPostNo);
+                $commentFamCode = checkInput($postData['postFamCode'] ?? '');
+                $commentFamCode = is_string($commentFamCode) && $commentFamCode !== '' ? $commentFamCode : $famCode;
 
-            $commentPostNo = $newComment[0]['post_no'] ?? 0;
-            $firstCommentNo = $newComment[0]['comment_no'] ?? null;
-            $url = self::buildCommentUrl($commentPostNo, $firstCommentNo);
+                $results = AllMembersData::AllMembersEmailByFamCode($commentFamCode, $commentAuthorId !== '' ? $commentAuthorId : null);
+                $url = self::buildCommentUrl($commentPostNo, $comment['comment_no'] ?? null);
+                $authorName = (string)($comment['fullName'] ?? 'A member');
 
-            self::notifyMembersByPushNotification(
-                results: $results,
-                postId: $commentAuthorId !== '' ? $commentAuthorId : (string)($newComment[0]['id'] ?? ''),
-                postOriginName: (string)($newComment[0]['fullName'] ?? 'A member'),
-                url: $url,
-                notificationMsg: "{$newComment[0]['fullName']} posted a new comment"
-            );
+                self::notifyMembersByPushNotification(
+                    results: $results,
+                    postId: $commentAuthorId !== '' ? $commentAuthorId : (string)($comment['id'] ?? ''),
+                    postOriginName: $authorName,
+                    url: $url,
+                    notificationMsg: "{$authorName} posted a new comment",
+                    notificationType: 'Comment',
+                    pushTitle: "💬 {$authorName}",
+                    // Same tag per post so rapid comments collapse on the lock screen.
+                    pushTag: 'comment-post-' . $commentPostNo,
+                    inAppTitle: 'New comment'
+                );
+            }
         }
     }
 
@@ -714,6 +726,11 @@ final class PostMessage
         ?string $postImage = null,
         int|string $postNo = 0
     ): void {
+        // Never email real members from local/dev/test environments.
+        if (\App\classes\Pusher::outboundBlocked()) {
+            return;
+        }
+
         $getPostProfilePics = self::getProfilePicsForPostAndComment($postId);
 
         foreach ($results as $memberData) {
@@ -738,12 +755,14 @@ final class PostMessage
             ];
 
             // Send email to all members
-            SendMail::email(
-                "msg/customer/notifyNewPost",
-                "$postOriginName posted a new update",
-                $data,
-                'member'
-            );
+            if (!\App\classes\Pusher::outboundBlocked()) {
+                SendMail::email(
+                    "msg/customer/notifyNewPost",
+                    "$postOriginName posted a new update",
+                    $data,
+                    'member'
+                );
+            }
         }
     }
 
@@ -757,8 +776,20 @@ final class PostMessage
      * 
      * @return void
      */
-    private static function notifyMembersByPushNotification(array $results, string $postId, string $postOriginName, string $url, string $notificationMsg): void
-    {
+    private static function notifyMembersByPushNotification(
+        array $results,
+        string $postId,
+        string $postOriginName,
+        string $url,
+        string $notificationMsg,
+        string $notificationType = 'Post',
+        ?string $pushTitle = null,
+        ?string $pushTag = null,
+        ?string $inAppTitle = null
+    ): void {
+        $pushTitle = $pushTitle ?? 'Family Platform Update';
+        $pushTag = $pushTag ?? ('post-' . $postId);
+        $inAppTitle = $inAppTitle ?? "New update from {$postOriginName}";
         $getPostProfilePics = self::getProfilePicsForPostAndComment($postId);
 
         foreach ($results as $memberData) {
@@ -776,13 +807,14 @@ final class PostMessage
                 $stmt = $db->prepare("
                     INSERT INTO notification 
                     (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
-                    VALUES (?, ?, ?, ?, 'Post', ?, ?, 'new', NOW())
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 'new', NOW())
                 ");
                 $stmt->execute([
                     $postId,
                     $targetUserId,
                     $postOriginName,
-                    "New update from {$postOriginName}",
+                    $inAppTitle,
+                    $notificationType,
                     $notificationMsg,
                     $url ?: '/profilePage'
                 ]);
@@ -796,10 +828,10 @@ final class PostMessage
                 if ($pusher !== null) {
                     $cleanTargetUid = preg_replace('/[^A-Za-z0-9_-]/', '', $targetUserId);
                     $pusher->trigger("private-user-{$cleanTargetUid}", 'new-notification', [
-                        'title' => 'Family Platform Update',
+                        'title' => $pushTitle,
                         'body' => $notificationMsg,
                         'action_url' => $url ?: '/profilePage',
-                        'type' => 'Post',
+                        'type' => $notificationType,
                         'sender_name' => $postOriginName,
                     ]);
                 }
@@ -812,8 +844,8 @@ final class PostMessage
                 userId: $targetUserId,
                 message: $notificationMsg,
                 url: $url,
-                title: 'Family Platform Update',
-                tag: 'post-' . $postId
+                title: $pushTitle,
+                tag: $pushTag
             );
         }
     }

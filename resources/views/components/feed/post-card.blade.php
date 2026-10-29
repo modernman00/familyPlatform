@@ -129,7 +129,7 @@
   <!-- Post Text (Prominent for Text-Only Posts) -->
   <template x-if="(post.displayMessage || (!post.video && post.postMessage)) && (!post.images || post.images.length === 0) && !post.video && !post.comparison">
     <div class="post-content px-1 mb-3">
-      <p class="mb-0" style="white-space: pre-line; font-size: 1.05rem; color: var(--text-main); line-height: 1.55; font-family: 'Inter', -apple-system, system-ui, sans-serif;" x-html="renderHashtags(post.displayMessage || post.postMessage)"></p>
+      <p class="mb-0" style="white-space: pre-line; font-size: 1.05rem; color: var(--text-main); line-height: 1.55; font-family: var(--font-sans, -apple-system, system-ui, sans-serif);" x-html="renderHashtags(post.displayMessage || post.postMessage)"></p>
       
       <!-- On-Demand Post Translation Toggle for Diaspora Viewers -->
       <div class="mt-1 d-flex align-items-center gap-2" x-show="window.APP_LOCALE && window.APP_LOCALE !== 'en'">

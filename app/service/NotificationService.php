@@ -56,12 +56,14 @@ class NotificationService
         ];
 
         try {
-            SendEmailFunctionality::email(
-                'msg/familyApprovalRequest',
-                "Someone wants to join your family network",
-                $emailData,
-                'member'
-            );
+            if (!\App\classes\Pusher::outboundBlocked()) {
+                SendEmailFunctionality::email(
+                    'msg/familyApprovalRequest',
+                    "Someone wants to join your family network",
+                    $emailData,
+                    'member'
+                );
+            }
         } catch (\Throwable $e) {
             error_log('[NotificationService] Email send failed: ' . $e->getMessage());
         }
@@ -157,12 +159,14 @@ class NotificationService
         ];
 
         try {
-            SendEmailFunctionality::email(
-                'msg/familyApprovalConfirmed',
-                "You've been approved to join your family network!",
-                $emailData,
-                'member'
-            );
+            if (!\App\classes\Pusher::outboundBlocked()) {
+                SendEmailFunctionality::email(
+                    'msg/familyApprovalConfirmed',
+                    "You've been approved to join your family network!",
+                    $emailData,
+                    'member'
+                );
+            }
         } catch (\Throwable $e) {
             error_log('[NotificationService] Confirmation email failed: ' . $e->getMessage());
         }

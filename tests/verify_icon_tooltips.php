@@ -45,6 +45,9 @@ assertCondition(str_contains($jsContent, 'ICON_DICTIONARY'), 'family-tooltip.js 
 assertCondition(str_contains($jsContent, 'family-tooltip-container'), 'family-tooltip.js creates family-tooltip-container DOM', $failures, $checks);
 assertCondition(str_contains($jsContent, 'textContent = text'), 'family-tooltip.js strictly sets textContent to prevent DOM XSS', $failures, $checks);
 assertCondition(str_contains($jsContent, 'DWELL_DELAY_MS = 450'), 'family-tooltip.js defines 450ms Intent Dwell Delay', $failures, $checks);
+assertCondition(str_contains($jsContent, 'AUTO_DISMISS_DELAY_MS = 3000'), 'family-tooltip.js defines 3000ms Auto-Dismiss delay (tooltips disappear after a few seconds)', $failures, $checks);
+assertCondition(str_contains($jsContent, 'autoDismissTimer'), 'family-tooltip.js implements autoDismissTimer auto-decay', $failures, $checks);
+assertCondition(str_contains($jsContent, 'shown.bs.dropdown'), 'family-tooltip.js implements dynamic dropdown viewport boundary clamping', $failures, $checks);
 assertCondition(str_contains($jsContent, 'MAX_VIEWS_DECAY = 3'), 'family-tooltip.js defines 3-Strike Exposure Decay threshold', $failures, $checks);
 assertCondition(str_contains($jsContent, 'getMode'), 'family-tooltip.js implements getMode() API', $failures, $checks);
 assertCondition(str_contains($jsContent, 'setMode'), 'family-tooltip.js implements setMode() API', $failures, $checks);
@@ -84,6 +87,11 @@ $navContent = file_get_contents($navbarPath) ?: '';
 assertCondition(str_contains($navContent, 'title="Search activities, memories, and family members"'), 'Navbar mobile search has explanatory tooltip', $failures, $checks);
 assertCondition(str_contains($navContent, 'title="{{ __(\'nav.my_page\', \'My Page\') }} - View and manage your family profile"'), 'Navbar My Page has explanatory tooltip', $failures, $checks);
 assertCondition(str_contains($navContent, 'View alerts and family notifications'), 'Navbar notification bell has explanatory tooltip', $failures, $checks);
+assertCondition(str_contains($navContent, 'stitch-user-dropdown') && str_contains($navContent, 'dropdown-menu-lg-end'), 'Navbar user menu uses dropdown-menu-lg-end for responsive left/right alignment', $failures, $checks);
+
+$navbarCssPath = $root . '/public/css/navbar.css';
+$navCssContent = file_get_contents($navbarCssPath) ?: '';
+assertCondition(str_contains($navCssContent, 'stitch-user-dropdown') && str_contains($navCssContent, 'right: auto !important;') && str_contains($navCssContent, 'left: 0 !important;'), 'navbar.css enforces left: 0 and right: auto on mobile to prevent settings dropdown clipping', $failures, $checks);
 
 $bottomNavPath = $root . '/resources/views/layouts/bottom_nav.blade.php';
 $bottomContent = file_get_contents($bottomNavPath) ?: '';

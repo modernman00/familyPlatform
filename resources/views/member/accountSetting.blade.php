@@ -8,7 +8,7 @@
     body {
       background-color: #f8f9fc;
       background-image: radial-gradient(at top left, rgba(255, 235, 240, 0.5) 0%, transparent 40%);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
     }
 
     .page-header {

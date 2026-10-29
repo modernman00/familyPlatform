@@ -7,7 +7,7 @@
     <style nonce="{{ $nonce }}">
         body {
             background-color: #F4F5FB !important;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
         }
 
         /* Override the outer Bootstrap container from forms.base */

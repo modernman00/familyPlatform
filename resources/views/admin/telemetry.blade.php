@@ -3,7 +3,7 @@
 @section('title', 'TELEMETRY_RUM_DASHBOARD')
 
 @section('content')
-<div class="w3-container" style="padding-top:22px; background:#0f172a; color:#f8fafc; min-height:100vh; font-family: 'Inter', -apple-system, system-ui, sans-serif;">
+<div class="w3-container" style="padding-top:22px; background:#0f172a; color:#f8fafc; min-height:100vh; font-family: var(--font-sans, -apple-system, system-ui, sans-serif);">
     <!-- Dashboard Header -->
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #334155; padding-bottom:16px; margin-bottom:24px;">
         <div>

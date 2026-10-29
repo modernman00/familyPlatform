@@ -22,7 +22,7 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            font-family: var(--font-sans, -apple-system, system-ui, sans-serif);
             padding: 20px;
         }
 
@@ -153,7 +153,6 @@
             }
         }
     </style>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="friend-requests-container">

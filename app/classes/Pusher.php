@@ -8,8 +8,27 @@ use Pusher\Pusher as PusherNotification;
 
 class Pusher
 {
+    /**
+     * True when this process must NOT deliver anything to real users (realtime,
+     * web push, email). Local/dev/testing share the production Pusher app and
+     * a prod-derived DB, so without this guard test runs notify live members.
+     * Opt in explicitly with ALLOW_OUTBOUND_NOTIFICATIONS=true.
+     */
+    public static function outboundBlocked(): bool
+    {
+        $allow = strtolower(trim((string) ($_ENV['ALLOW_OUTBOUND_NOTIFICATIONS'] ?? getenv('ALLOW_OUTBOUND_NOTIFICATIONS') ?: ''), "'\""));
+        if ($allow === 'true' || $allow === '1') {
+            return false;
+        }
+        $env = strtolower(trim((string) ($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'production'), "'\""));
+        return defined('TESTING_ENV') || in_array($env, ['local', 'development', 'dev', 'testing'], true);
+    }
+
     public static function pusher(): ?PusherNotification
     {
+        if (self::outboundBlocked()) {
+            return null;
+        }
         $key = trim((string)($_ENV['MIX_PUSHER_APP_KEY'] ?? $_SERVER['MIX_PUSHER_APP_KEY'] ?? $_ENV['PUSHER_APP_KEY'] ?? $_SERVER['PUSHER_APP_KEY'] ?? (getenv('MIX_PUSHER_APP_KEY') ?: (getenv('PUSHER_APP_KEY') ?: ''))));
         $secret = trim((string)($_ENV['MIX_PUSHER_APP_SECRET'] ?? $_SERVER['MIX_PUSHER_APP_SECRET'] ?? $_ENV['PUSHER_APP_SECRET'] ?? $_SERVER['PUSHER_APP_SECRET'] ?? (getenv('MIX_PUSHER_APP_SECRET') ?: (getenv('PUSHER_APP_SECRET') ?: ''))));
         $appId = trim((string)($_ENV['MIX_PUSHER_APP_ID'] ?? $_SERVER['MIX_PUSHER_APP_ID'] ?? $_ENV['PUSHER_APP_ID'] ?? $_SERVER['PUSHER_APP_ID'] ?? (getenv('MIX_PUSHER_APP_ID') ?: (getenv('PUSHER_APP_ID') ?: ''))));

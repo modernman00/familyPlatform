@@ -28,7 +28,7 @@
         font-size: 1.15rem;
         line-height: 1.85;
         color: #1e293b;
-        font-family: 'Inter', -apple-system, system-ui, sans-serif;
+        font-family: var(--font-sans, -apple-system, system-ui, sans-serif);
     }
 
     .story-body p {
@@ -135,7 +135,7 @@
         <!-- Author Byline -->
         <div class="d-flex align-items-center justify-content-between py-3 mb-4 border-top border-bottom flex-wrap gap-3">
             <div class="d-flex align-items-center gap-3">
-                <img src="{{ $avatarSrc }}" alt="{{ $authorName }}" class="rounded-circle shadow-sm" width="48" height="48" style="object-fit: cover;">
+                <img src="{{ $avatarSrc }}" alt="{{ $authorName }}" class="rounded-circle shadow-sm flex-shrink-0" width="48" height="48" style="width: 48px; height: 48px; min-width: 48px; min-height: 48px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 50%;">
                 <div>
                     <div class="fw-bold text-dark">{{ $authorName }}@if(!empty($contributors)) <span class="fw-normal text-muted small">with {{ htmlspecialchars(implode(', ', array_map(static fn ($c) => trim((string)($c['firstName'] ?? '') . ' ' . (string)($c['lastName'] ?? '')), $contributors)), ENT_QUOTES, 'UTF-8') }}</span>@endif</div>
                     <div class="text-muted small">Preserved on {{ $journalDate }}</div>

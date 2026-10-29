@@ -65,7 +65,9 @@ final class ReviewApps extends ReviewAppsData
     {
         try {
             $data = $this->getCustomerData();
-            SendEmailFunctionality::email("msg/admin/approve",  "Membership Approval for {$data['firstName']}", $data, 'member');
+            if (!\App\classes\Pusher::outboundBlocked()) {
+                SendEmailFunctionality::email("msg/admin/approve",  "Membership Approval for {$data['firstName']}", $data, 'member');
+            }
 
             $this->updateAccountStatus('approved');
             redirect(self::REDIRECT);
@@ -79,7 +81,9 @@ final class ReviewApps extends ReviewAppsData
     {
         try {
             $data = $this->getCustomerData();
-            SendEmailFunctionality::email("msg/admin/cancel", "Loan application cancellation", $data,  'member');
+            if (!\App\classes\Pusher::outboundBlocked()) {
+                SendEmailFunctionality::email("msg/admin/cancel", "Loan application cancellation", $data, 'member');
+            }
             $this->updateAccountStatus('cancel');
 
             DeleteFn::deleteOneRow("contact", "id", $data['id']);
@@ -100,7 +104,9 @@ final class ReviewApps extends ReviewAppsData
             $data = $this->getCustomerData();
       
             $data['email'] = 'application@loaneasyfinance.com';
-            SendEmailFunctionality::email("msg/admin/delete","Delete App", $data,  'admin');
+            if (!\App\classes\Pusher::outboundBlocked()) {
+                SendEmailFunctionality::email("msg/admin/delete", "Delete App", $data, "admin");
+            }
             $this->updateAccountStatus('deleted');
 
             DeleteFn::deleteOneRow("contact", "id", $data['id']);
@@ -115,7 +121,9 @@ final class ReviewApps extends ReviewAppsData
     {
         try {
             $data = $this->getCustomerData();
-            SendEmailFunctionality::email("msg/admin/decline",  'Decision', $data, 'member');
+            if (!\App\classes\Pusher::outboundBlocked()) {
+                SendEmailFunctionality::email("msg/admin/decline",  "Decision", $data, 'member');
+            }
             $this->updateAccountStatus('declined');
             redirect(self::REDIRECT);
         } catch (\Throwable $th) {

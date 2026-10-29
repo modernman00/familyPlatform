@@ -290,7 +290,9 @@ final class FamilyRequestController extends BaseController
           $subject = "{$app['fullName']} approved your request";
 
           try {
-              SendEmailFunctionality::email('msg/requestRequest', $subject, $req, 'member');
+                if (!\App\classes\Pusher::outboundBlocked()) {
+                    SendEmailFunctionality::email('msg/requestRequest', $subject, $req, 'member');
+                }
           } catch (\Throwable $e) {
               error_log('[FamilyRequestController] Approval notification email failed: ' . $e->getMessage());
           }

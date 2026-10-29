@@ -1343,7 +1343,7 @@ body.dark-theme #tab-outings [style*="background: #ffffff"] {
                                             <option value="'Montserrat', sans-serif">Montserrat (Geometric Modern Sans)</option>
                                             <option value="'Playfair Display', serif">Playfair Display (Editorial High-Fashion)</option>
                                             <option value="'Oswald', sans-serif">Oswald (Bold Stage &amp; Concert Title)</option>
-                                            <option value="'Inter', sans-serif">Inter (Clean Contemporary UI)</option>
+                                            <option value="'Outfit', sans-serif">Outfit (Modern Geometric Social)</option>
                                         </select>
                                     </div>
 

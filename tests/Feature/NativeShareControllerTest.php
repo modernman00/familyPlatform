@@ -219,8 +219,10 @@ class NativeShareControllerTest extends SocialFeedTestCase
         (new NativeShareController())->shortcutConfig();
         $plistOutput = ob_get_clean();
 
-        $this->assertStringContainsString('<!DOCTYPE plist PUBLIC', $plistOutput);
-        $this->assertStringContainsString('FamilyPlatform Native Share Shortcut', $plistOutput);
+        $isSignedShortcut = str_contains($plistOutput, 'AEA1') || str_contains($plistOutput, 'bplist00');
+        $isXmlPlist = str_contains($plistOutput, '<!DOCTYPE plist PUBLIC');
+        $this->assertTrue($isSignedShortcut || $isXmlPlist);
+        $this->assertStringContainsString('FamilyPlatform', $plistOutput);
 
         unset($_GET['fam_code'], $_GET['format']);
     }

@@ -19,7 +19,7 @@
 
                     <div class="composer-author">
                         <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="Avatar"
-                            class="composer-author__avatar" width="48" height="48">
+                            class="composer-author__avatar flex-shrink-0" width="48" height="48" style="width: 48px; height: 48px; min-width: 48px; min-height: 48px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 50%;">
                         <div class="composer-author__meta">
                             <h6 class="composer-author__name">
                                 {{ $data['firstName'] }} {{ $data['lastName'] }}

@@ -416,7 +416,7 @@
   <div class="card post-composer mb-4 border-0 shadow-sm" id="openPostModalTrigger" style="border-radius: 16px; overflow: hidden; background-color: var(--card-bg);">
     <div class="card-body p-3 p-sm-4">
       <div class="d-flex align-items-center gap-3">
-        <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="profile" class="rounded-circle flex-shrink-0" width="44" height="44" style="object-fit: cover;">
+        <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="profile" class="rounded-circle flex-shrink-0 composer-avatar-img" width="44" height="44" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; max-width: 44px; max-height: 44px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 50%;">
 
         <div role="button" tabindex="0" class="composer-prompt flex-grow-1 rounded-pill px-3 py-3 text-truncate" data-bs-toggle="modal" data-bs-target="#postModal"
           style="background-color: #f1f5f9; border: 1.5px solid #cbd5e1; cursor: text; transition: all 0.2s ease-in-out;">
@@ -568,7 +568,7 @@
     </div>
 
     <!-- Feed Stream Selector Tabs (All Posts vs Tagged With You) -->
-    <div class="feed-tabs-container mb-3.5 d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <div class="feed-tabs-container mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
       <div class="btn-group p-1 rounded-pill bg-light border shadow-2xs" role="group" aria-label="Feed memory stream tabs">
         <button type="button" 
                 class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold transition-all"
@@ -837,7 +837,7 @@
                                          class="rounded-circle flex-shrink-0" 
                                          width="42" 
                                          height="42" 
-                                         style="object-fit: cover; border: 1px solid #e2e8f0;"
+                                         style="width: 42px; height: 42px; min-width: 42px; min-height: 42px; aspect-ratio: 1 / 1; object-fit: cover; border: 1px solid #e2e8f0; border-radius: 50%;"
                                          x-on:error="$event.target.src = '/public/avatar/avatarM.png'">
                                     <div class="min-w-0">
                                         <div class="fw-semibold text-dark text-truncate" style="font-size: 0.9rem;"

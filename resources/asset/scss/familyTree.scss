@@ -108,7 +108,7 @@
     padding: 0.9rem 0.9rem; //pad the font in the box
     text-decoration: none;
     color: #666;
-    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    font-family: var(--font-sans, -apple-system, system-ui, sans-serif);
     // font-size: 0.9rem; // font size of the 
     display: inline-block;
     background: white;

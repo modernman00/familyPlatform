@@ -91,7 +91,13 @@
                 @endif
             </div>
 
-            <div class="d-flex flex-row flex-wrap flex-lg-column gap-2 px-2 w-100">
+            {{-- Mobile/tablet only: collapsible Quick actions toggle (desktop always shows the buttons) --}}
+            <button type="button" id="profileQuickActionsToggle" class="profile-quick-toggle d-lg-none btn fw-bold w-100 mb-2 d-inline-flex align-items-center justify-content-between" aria-expanded="false" aria-controls="profileQuickActions" onclick="var p=document.getElementById('profileQuickActions');var o=p.classList.toggle('is-open');this.setAttribute('aria-expanded',o?'true':'false');">
+                <span><i class="bi bi-lightning-charge-fill me-1.5 text-warning"></i> {{ __('profile.quick_actions', 'Quick actions') }}</span>
+                <i class="bi bi-chevron-down profile-quick-chevron" aria-hidden="true"></i>
+            </button>
+
+            <div id="profileQuickActions" class="profile-quick-actions d-flex flex-row flex-wrap flex-lg-column gap-2 px-2 w-100">
                 <a href="/family/hub" class="btn fw-bold flex-fill text-decoration-none text-center shadow-sm" style="background: linear-gradient(135deg, #6d28d9 0%, #db2777 100%); color: #ffffff !important; border: none; border-radius: 12px; padding: 10px 12px; font-size: 0.92rem; box-shadow: 0 4px 14px rgba(109, 40, 217, 0.3); min-height: 44px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; flex-shrink: 0;" title="Family Hub - Access shared family applications and tools">
                     <i class="bi bi-grid-fill me-1.5 text-warning"></i> {{ __('profile.family_hub', 'Family Hub') }}
                 </a>

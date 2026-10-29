@@ -6,6 +6,9 @@
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue-grey.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <!-- Self-Hosted Outfit Font (Headings & Display) -->
+  <link rel="preload" href="/public/fonts/outfit/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/public/css/outfit.css?v={{ assetVersion('css/outfit.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   
   <!-- PWA & Mobile Web App Capabilities -->
@@ -47,13 +50,17 @@
 
   <style>
     html,
-    body,
+    body {
+      font-family: var(--font-family, -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
+    }
     h1,
     h2,
     h3,
     h4,
-    h5 {
-      font-family: var(--font-family, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
+    h5,
+    h6,
+    .navbar-brand {
+      font-family: var(--font-heading, "Outfit", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
     }
 
     @media screen and (min-width: 768px) {

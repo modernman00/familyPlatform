@@ -1,11 +1,11 @@
 {
-    "version": "v1.5.7",
-    "title": "Deliver race-conscious emoji picker, active GIF catalog, and omni-search lineage enhancements",
+    "version": "v1.5.8",
+    "title": "Fix(mobile): restore left side action buttons and profile card visibility on mobile viewports",
     "notes": [
-        "Deliver race-conscious emoji picker, active GIF catalog, and omni-search lineage enhancements",
-        "Feat(ai): wire interactive Post Outings Poll to Family Feed",
-        "Feat(ai): wire ResilientWebSearchService Live Family Weekend Outings Scout (shared-lib v2.10.0)"
+        "Fix(mobile): restore left side action buttons and profile card visibility on mobile viewports",
+        "Fix(kinship): update radar badge label to Kinship Radar Active for consistency",
+        "Feat(invite): rich heritage invitations with family code, dual copy buttons & un-squeezed sidebar widgets"
     ],
-    "released_at": "2026-10-28",
-    "commit": "4eeed23"
+    "released_at": "2026-10-29",
+    "commit": "efc1d4f"
 }

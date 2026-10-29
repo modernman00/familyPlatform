@@ -489,6 +489,28 @@
   animation: stitchBottomUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
+/* Keep the list and the "Mark All as Read" footer as separate rows so the last
+   card is never clipped behind the footer pill; the list scrolls within the viewport. */
+@media (max-width: 991.98px) {
+  .notification-dropdown.show,
+  .mobile-pwa-dropdown.show {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - 74px - env(safe-area-inset-top, 0px) - 88px - env(safe-area-inset-bottom, 0px));
+  }
+  .notification-dropdown .notification-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overscroll-behavior: contain;
+    padding-bottom: 8px;
+  }
+  .notification-dropdown .notif-header-stitch,
+  .notification-dropdown .notif-footer-stitch {
+    flex: 0 0 auto;
+  }
+}
+
 @keyframes stitchBottomUp {
   from {
     opacity: 0;
@@ -711,17 +733,22 @@ body.dark-mode .btn-omni-search-trigger:hover {
   position: relative;
 }
 
-.brand-navbar-stitch .dropdown-menu-end,
-.dropdown-menu-end:not([data-bs-popper]) {
-  right: 0 !important;
-  left: auto !important;
-  max-width: calc(100vw - 24px) !important;
-}
+@media (min-width: 992px) {
+  .brand-navbar-stitch .dropdown-menu-end,
+  .brand-navbar-stitch .dropdown-menu-lg-end,
+  .dropdown-menu-end:not([data-bs-popper]),
+  .stitch-user-dropdown {
+    right: 0 !important;
+    left: auto !important;
+    max-width: calc(100vw - 24px) !important;
+  }
 
-.brand-navbar-stitch .dropdown-menu-end[data-bs-popper] {
-  right: 0;
-  left: auto;
-  max-width: calc(100vw - 24px) !important;
+  .brand-navbar-stitch .dropdown-menu-end[data-bs-popper],
+  .brand-navbar-stitch .dropdown-menu-lg-end[data-bs-popper] {
+    right: 0;
+    left: auto;
+    max-width: calc(100vw - 24px) !important;
+  }
 }
 
 .stitch-user-dropdown {
@@ -741,9 +768,10 @@ body.dark-mode .btn-omni-search-trigger:hover {
   }
 
   .brand-navbar-stitch .dropdown-menu-end,
+  .brand-navbar-stitch .dropdown-menu-lg-end,
   .brand-navbar-stitch .stitch-user-dropdown {
-    right: 0 !important;
-    left: auto !important;
+    right: auto !important;
+    left: 0 !important;
     max-width: calc(100vw - 24px) !important;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18) !important;
   }

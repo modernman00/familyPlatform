@@ -199,7 +199,7 @@
                             <!-- Author Footer & Action -->
                             <div class="d-flex align-items-center justify-content-between pt-3 border-top mt-auto">
                                 <div class="d-flex align-items-center gap-2">
-                                    <img src="{{ $avatarSrc }}" alt="{{ $authorName }}" class="rounded-circle" width="34" height="34" style="object-fit: cover;">
+                                    <img src="{{ $avatarSrc }}" alt="{{ $authorName }}" class="rounded-circle flex-shrink-0" width="34" height="34" style="width: 34px; height: 34px; min-width: 34px; min-height: 34px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 50%;">
                                     <div>
                                         <div class="fw-bold small text-dark" style="line-height: 1.2;">{{ $authorName }}</div>
                                         <div class="text-muted" style="font-size: 0.72rem;">{{ $journalDate }}</div>

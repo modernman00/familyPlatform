@@ -87,7 +87,11 @@
                         break;
                 }
 
-                return new Intl.DateTimeFormat(navigator.language || 'en-GB', options).format(date);
+                const activeLocale = (typeof window !== 'undefined' && window.APP_LOCALE && window.APP_LOCALE !== 'en')
+                    ? (window.APP_LOCALE === 'us' ? 'en-US' : window.APP_LOCALE)
+                    : 'en-GB';
+
+                return new Intl.DateTimeFormat(activeLocale, options).format(date);
             } catch (e) {
                 return date.toLocaleString();
             }
@@ -100,7 +104,10 @@
             // If Intl.RelativeTimeFormat is supported
             if (typeof Intl !== 'undefined' && Intl.RelativeTimeFormat) {
                 try {
-                    const rtf = new Intl.RelativeTimeFormat(navigator.language || 'en-GB', { numeric: 'auto' });
+                    const activeLocale = (typeof window !== 'undefined' && window.APP_LOCALE && window.APP_LOCALE !== 'en')
+                        ? (window.APP_LOCALE === 'us' ? 'en-US' : window.APP_LOCALE)
+                        : 'en-GB';
+                    const rtf = new Intl.RelativeTimeFormat(activeLocale, { numeric: 'auto' });
                     const absSec = Math.abs(elapsedSec);
 
                     if (absSec < 60) {

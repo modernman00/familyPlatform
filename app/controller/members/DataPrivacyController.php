@@ -161,6 +161,7 @@ final class DataPrivacyController
             $opsEmail = str_contains($opsEmail, '${') ? '' : $opsEmail;
             if ($opsEmail !== '') {
                 try {
+                if (!\App\classes\Pusher::outboundBlocked()) {
                     SendEmailFunctionality::email(
                         'msg/dataDeletionRequest',
                         'GDPR — account deletion request (30-day scheduled)',
@@ -173,6 +174,7 @@ final class DataPrivacyController
                         ],
                         'admin'
                     );
+                }
                 } catch (\Throwable $mailErr) {
                     error_log('[GDPR] deletion-request ops email failed: ' . $mailErr->getMessage());
                 }

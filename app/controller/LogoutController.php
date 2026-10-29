@@ -61,6 +61,7 @@ final class LogoutController extends BaseController
             $_ENV['COOKIE_NAME_GENERAL'] ?? 'auth_forgot', // General auth cookie
             'tokenJWT',                                     // JWT token
             'XSRF-TOKEN',                                   // CSRF token
+            'app_locale',                                   // Diaspora language selection cookie
             session_name(),                                 // PHP session cookie
         ];
 
@@ -70,7 +71,7 @@ final class LogoutController extends BaseController
 
         foreach ($cookiesToClear as $cookieName) {
             if (isset($_COOKIE[$cookieName])) {
-                // Clear cookie by setting expiration in the past
+                // Clear cookie by setting expiration in the past (both domain and host-only)
                 setcookie(
                     $cookieName,
                     '',
@@ -80,10 +81,14 @@ final class LogoutController extends BaseController
                     $params['secure'] ?? false,
                     $params['httponly'] ?? true
                 );
+                setcookie($cookieName, '', time() - 3600, '/');
 
                 // Also unset from $_COOKIE superglobal
                 unset($_COOKIE[$cookieName]);
             }
         }
+
+        // Reset I18n state to default British English
+        \App\classes\I18n::resetToDefault();
     }
 }

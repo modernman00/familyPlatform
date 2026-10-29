@@ -150,7 +150,38 @@ if (empty($failures)) {
     exit(1);
 }
 
+// [TEST 5] Verify Profile Column Visibility on Mobile (< 992px)
+echo "[TEST 5] Verifying .profile-column is visible on mobile in CSS stylesheets...\n";
+$cssFiles = [
+    $rootDir . '/public/css/profilepage.css',
+    $rootDir . '/public/css/standards-v21.css',
+];
+
+foreach ($cssFiles as $cssFile) {
+    if (!file_exists($cssFile)) {
+        $failures[] = "Missing CSS file: {$cssFile}";
+        continue;
+    }
+    $cssContent = file_get_contents($cssFile);
+    // Ensure .profile-column does not have display: none in mobile media queries
+    if (preg_match('/@media[^{]*max-width:\s*991\.98px.*?\.profile-column\s*\{[^}]*display:\s*none/s', $cssContent)) {
+        $failures[] = "Regression detected: .profile-column has display: none in mobile media query in " . basename($cssFile);
+    }
+    if (!preg_match('/@media[^{]*max-width:\s*991\.98px.*?\.profile-column\s*\{[^}]*display:\s*block/s', $cssContent)) {
+        $failures[] = ".profile-column must have explicit display: block in mobile media query in " . basename($cssFile);
+    }
+}
+
+if (empty($failures)) {
+    echo "  ✅ PASSED: .profile-column is explicitly display: block in mobile media queries across stylesheets.\n";
+} else {
+    foreach ($failures as $f) {
+        echo "  ❌ {$f}\n";
+    }
+    exit(1);
+}
+
 echo "=================================================================\n";
-echo "🏆 ALL 4 MOBILE QUICK LINKS VERIFICATION GATES PASSED CLEANLY!\n";
+echo "🏆 ALL 5 MOBILE QUICK LINKS VERIFICATION GATES PASSED CLEANLY!\n";
 echo "=================================================================\n";
 exit(0);

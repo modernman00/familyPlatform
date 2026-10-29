@@ -98,6 +98,9 @@
   <!-- CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Self-Hosted Typography: Outfit (Geometric Social Style) -->
+  <link rel="preload" href="/public/fonts/outfit/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/public/css/outfit.css?v={{ assetVersion('css/outfit.css') }}">
   <link href="/public/css/landing.css" rel="stylesheet">
   <link href="/public/css/standards-v21.css?v={{ assetVersion('css/standards-v21.css') }}" rel="stylesheet">
   <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>

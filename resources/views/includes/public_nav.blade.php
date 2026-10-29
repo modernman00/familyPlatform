@@ -2,7 +2,7 @@
   <div class="container">
     <a class="navbar-brand d-flex align-items-center" href="/">
       <img src="{{ getenv('APP_LOGO') }}" alt="Logo" class="me-2">
-      <span style="font-weight: 800; letter-spacing: -0.02em; font-size: 1.25rem; font-family: 'Inter', sans-serif;"><span style="color: #2a0a0d;">Family</span><span style="color: var(--brand-primary);">Platform</span></span>
+      <span style="font-weight: 800; letter-spacing: -0.02em; font-size: 1.25rem; font-family: var(--font-heading, 'Outfit', sans-serif);"><span style="color: #2a0a0d;">Family</span><span style="color: var(--brand-primary);">Platform</span></span>
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
