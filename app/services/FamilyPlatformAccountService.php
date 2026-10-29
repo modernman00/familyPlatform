@@ -308,12 +308,16 @@ RULES:
 Technical notes:
 {$raw}";
 
-                $aiResponse = \Src\Ai\ResilientAiChat::complete($prompt, [
-                    'temperature' => 0.6,
-                    'max_tokens' => 350,
-                ]);
+                $aiResult = (new \Src\Ai\ResilientAiChat())->complete(
+                    [['role' => 'user', 'content' => $prompt]],
+                    [
+                        'temperature' => 0.6,
+                        'max_tokens' => 350,
+                    ]
+                );
 
-                if (!empty($aiResponse) && is_string($aiResponse) && strlen(trim($aiResponse)) > 20) {
+                $aiResponse = !empty($aiResult['success']) ? (string)($aiResult['content'] ?? '') : '';
+                if (strlen(trim($aiResponse)) > 20) {
                     return trim($aiResponse);
                 }
             } catch (\Throwable $aiEx) {
