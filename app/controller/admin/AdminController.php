@@ -503,6 +503,7 @@ class AdminController extends BaseController
 
             if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) || (isset($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'))) {
                 header('Content-Type: application/json');
+                // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response (application/json) containing a constant message and an integer post id; no request data is reflected.
                 echo json_encode([
                     'status' => 'success',
                     'message' => 'Announcement published to everyone\'s feed!',
@@ -651,10 +652,11 @@ class AdminController extends BaseController
         $friendlyCopy = $this->officialAccountService->friendlySummarise($rawNotes, $preset);
 
         header('Content-Type: application/json');
+        // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response served as application/json (never rendered as HTML); HEX flags neutralise markup characters in the summarised copy.
         echo json_encode([
             'status' => 'success',
             'friendly_copy' => $friendlyCopy,
-        ]);
+        ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
         exit;
     }
 }
