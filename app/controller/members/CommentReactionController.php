@@ -13,6 +13,36 @@ use Src\{SelectFn, SubmitForm, UpdateFn, InnerJoin, CheckToken};
 
 final class CommentReactionController
 {
+  private static ?bool $hasCelebrateColumn = null;
+
+  /**
+   * Defensive check and self-healing migration for reaction_counts.celebrate column
+   */
+  private static function hasCelebrateColumn(): bool
+  {
+    if (self::$hasCelebrateColumn !== null) {
+      return self::$hasCelebrateColumn;
+    }
+
+    try {
+      $pdo = Db::connect2();
+      $stmt = $pdo->query("SHOW COLUMNS FROM `reaction_counts` LIKE 'celebrate'");
+      $col = $stmt ? $stmt->fetch(PDO::FETCH_ASSOC) : null;
+      if ($col) {
+        self::$hasCelebrateColumn = true;
+        return true;
+      }
+
+      // Self-heal: attempt to dynamically add the column if missing on production/staging
+      $pdo->exec("ALTER TABLE `reaction_counts` ADD COLUMN `celebrate` INT NOT NULL DEFAULT '0' AFTER `angry`");
+      self::$hasCelebrateColumn = true;
+      return true;
+    } catch (\Throwable $th) {
+      error_log('[CommentReactionController] celebrate column check fallback: ' . $th->getMessage());
+      self::$hasCelebrateColumn = false;
+      return false;
+    }
+  }
 
   /**
    * Adds or toggles a reaction on a comment.
@@ -367,16 +397,22 @@ final class CommentReactionController
         identifierAnswer: (string)$commentNo
       );
 
+      // Strip celebrate from DB payload if database column does not exist yet to prevent 500 errors
+      $dbPayload = $countReactionArray;
+      if (!self::hasCelebrateColumn()) {
+        unset($dbPayload['celebrate']);
+      }
+
       if ($existing) {
         UpdateFn::updateMultiple(
           table: 'reaction_counts',
           identifier: 'comment_no',
-          data: $countReactionArray
+          data: $dbPayload
         );
       } else {
         SubmitForm::submitForm(
           table: 'reaction_counts',
-          fields: $countReactionArray
+          fields: $dbPayload
         );
       }
       return $countReactionArray;

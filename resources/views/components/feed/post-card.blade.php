@@ -730,11 +730,11 @@
             <!-- Top Reactions Preview (Living Heirloom Glass) -->
             <template x-if="getTopCommentReactions(c.reactions).length > 0">
               <div class="d-flex align-items-center gap-1 mt-1 ps-1">
-                <div class="reaction-count-pill d-inline-flex gap-1 align-items-center" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:20px; padding:2px 8px; font-size:0.78rem; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+                <div class="reaction-count-pill d-inline-flex gap-1.5 align-items-center" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:20px; padding:3px 9px; font-size:0.8rem; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
                   <template x-for="r in getTopCommentReactions(c.reactions)" :key="r.label">
                     <span class="d-inline-flex align-items-center gap-1">
-                      <span class="d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(r.label, 16)"></span>
-                      <span x-text="r.count" style="color:var(--text-muted); font-size:0.74rem;"></span>
+                      <span class="d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(r.label, 20)"></span>
+                      <span x-text="r.count" style="color:var(--text-muted); font-size:0.75rem;"></span>
                     </span>
                   </template>
                 </div>
@@ -762,15 +762,17 @@
                      @mouseenter="keepCommentReactionBar(c.comment_no, true)"
                      @mouseleave="keepCommentReactionBar(c.comment_no, false)"
                      class="comment-reaction-float-bar heirloom-glass-dock"
-                     style="position:absolute; bottom:calc(100% + 4px); left:0; display:flex; gap:3px; z-index:100; white-space:nowrap;">
+                     role="toolbar" aria-label="Choose a comment reaction"
+                     style="position:absolute; bottom:calc(100% + 6px); left:0; display:flex; gap:4px; z-index:100; white-space:nowrap; padding:6px 10px;">
                   <template x-for="type in ['love', 'like', 'haha', 'shock', 'sad', 'celebrate']" :key="type">
                     <button type="button"
                             @click.stop="reactToComment(post.post_no, c.comment_no, type)"
                             :title="emojiMap[type]?.label || type"
                             :class="(c.userReaction === type || (type === 'shock' && c.userReaction === 'wow')) ? 'heirloom-reaction-btn active' : 'heirloom-reaction-btn'"
                             :style="'--heirloom-glow:' + (emojiMap[type]?.glow || 'rgba(225,29,72,0.45)')"
-                            style="min-width:36px; min-height:36px; padding:2px;">
-                      <span class="heirloom-glass-glyph d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(type, 24)"></span>
+                            style="min-width:44px; min-height:44px; padding:4px;">
+                      <span class="heirloom-glass-glyph d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(type, 34)"></span>
+                      <span class="heirloom-tooltip-pill" x-text="emojiMap[type]?.label || type"></span>
                     </button>
                   </template>
                 </div>
@@ -785,7 +787,7 @@
                         :class="c.userReaction ? 'fw-semibold' : 'text-muted'"
                         :style="c.userReaction ? ('color:' + getReactionColor(c.userReaction)) : ''">
                   <template x-if="c.userReaction">
-                    <span x-html="getHeirloomGlassSvg(c.userReaction, 16)" class="me-1 d-inline-flex align-items-center justify-content-center"></span>
+                    <span x-html="getHeirloomGlassSvg(c.userReaction, 22)" class="me-1.5 d-inline-flex align-items-center justify-content-center comment-like-active-glyph"></span>
                   </template>
                   <span x-text="formatReactionLabel(c.userReaction)"></span>
                 </button>

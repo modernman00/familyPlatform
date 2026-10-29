@@ -151,6 +151,46 @@ body.dark-theme .btn-warning .text-dark,
   color: #0f172a !important;
 }
 
+/* 🛡️ Olutobi Permanent Safeguard: Light Surface Shield against Dark-Mode Text Inversion */
+body.dark-mode .surface-light,
+body.dark-theme .surface-light,
+[data-bs-theme="dark"] .surface-light,
+body.dark-mode [data-surface="light"],
+body.dark-theme [data-surface="light"],
+[data-bs-theme="dark"] [data-surface="light"],
+body.dark-mode .bg-warning-subtle,
+body.dark-theme .bg-warning-subtle,
+[data-bs-theme="dark"] .bg-warning-subtle,
+body.dark-mode .bg-light-subtle,
+body.dark-theme .bg-light-subtle,
+[data-bs-theme="dark"] .bg-light-subtle {
+  color: #0f172a !important;
+}
+
+body.dark-mode .surface-light :is(h1, h2, h3, h4, h5, h6, strong, b, .text-dark, .fw-bold, .h1, .h2, .h3, .h4, .h5, .h6),
+body.dark-theme .surface-light :is(h1, h2, h3, h4, h5, h6, strong, b, .text-dark, .fw-bold, .h1, .h2, .h3, .h4, .h5, .h6),
+[data-bs-theme="dark"] .surface-light :is(h1, h2, h3, h4, h5, h6, strong, b, .text-dark, .fw-bold, .h1, .h2, .h3, .h4, .h5, .h6),
+body.dark-mode [data-surface="light"] :is(h1, h2, h3, h4, h5, h6, strong, b, .text-dark, .fw-bold, .h1, .h2, .h3, .h4, .h5, .h6),
+body.dark-theme [data-surface="light"] :is(h1, h2, h3, h4, h5, h6, strong, b, .text-dark, .fw-bold, .h1, .h2, .h3, .h4, .h5, .h6),
+[data-bs-theme="dark"] [data-surface="light"] :is(h1, h2, h3, h4, h5, h6, strong, b, .text-dark, .fw-bold, .h1, .h2, .h3, .h4, .h5, .h6),
+body.dark-mode .bg-warning-subtle :is(h1, h2, h3, h4, h5, h6, strong, b, .text-dark, .fw-bold),
+body.dark-theme .bg-warning-subtle :is(h1, h2, h3, h4, h5, h6, strong, b, .text-dark, .fw-bold),
+[data-bs-theme="dark"] .bg-warning-subtle :is(h1, h2, h3, h4, h5, h6, strong, b, .text-dark, .fw-bold) {
+  color: #0f172a !important;
+}
+
+body.dark-mode .surface-light :is(p, span, label, small, .text-muted, .text-secondary),
+body.dark-theme .surface-light :is(p, span, label, small, .text-muted, .text-secondary),
+[data-bs-theme="dark"] .surface-light :is(p, span, label, small, .text-muted, .text-secondary),
+body.dark-mode [data-surface="light"] :is(p, span, label, small, .text-muted, .text-secondary),
+body.dark-theme [data-surface="light"] :is(p, span, label, small, .text-muted, .text-secondary),
+[data-bs-theme="dark"] [data-surface="light"] :is(p, span, label, small, .text-muted, .text-secondary),
+body.dark-mode .bg-warning-subtle :is(p, span, label, small, .text-muted, .text-secondary),
+body.dark-theme .bg-warning-subtle :is(p, span, label, small, .text-muted, .text-secondary),
+[data-bs-theme="dark"] .bg-warning-subtle :is(p, span, label, small, .text-muted, .text-secondary) {
+  color: #475569 !important;
+}
+
 body.dark-mode .text-muted,
 body.dark-theme .text-muted,
 [data-bs-theme="dark"] .text-muted,
@@ -1950,9 +1990,10 @@ body.dark-theme .carousel-dot.is-active,
 .comment-meta-row .comment-meta-btn {
   display: inline-flex !important;
   align-items: center !important;
-  font-size: 0.75rem !important;
-  line-height: 1 !important;
-  height: 16px !important;
+  font-size: 0.78rem !important;
+  line-height: 1.2 !important;
+  min-height: 28px !important;
+  height: auto !important;
   padding: 0 !important;
   margin: 0 !important;
   border: 0 !important;
@@ -2079,11 +2120,46 @@ body.dark-mode .heirloom-reaction-btn.active {
   transform: translateX(-50%) translateY(0) scale(1) !important;
 }
 
-/* Vector SVG Glass Micro-Kinetics */
+/* Vector SVG Glass Micro-Kinetics & Razor-Sharp Rendering */
 .heirloom-glass-svg {
   display: block !important;
   transition: transform 0.22s ease !important;
   overflow: visible !important;
+  shape-rendering: geometricPrecision !important;
+  text-rendering: geometricPrecision !important;
+  image-rendering: -webkit-optimize-contrast !important;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Floating Comment Reaction Dock & Active Like Glyph Ergonomics */
+.comment-reaction-float-bar {
+  padding: 6px 10px !important;
+  gap: 4px !important;
+}
+
+.comment-like-active-glyph svg {
+  width: 22px !important;
+  height: 22px !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
+}
+
+@media (max-width: 768px) {
+  .comment-reaction-float-bar {
+    padding: 6px 8px !important;
+    gap: 2px !important;
+    bottom: calc(100% + 8px) !important;
+    max-width: calc(100vw - 32px) !important;
+  }
+  .comment-reaction-float-bar .heirloom-reaction-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding: 4px !important;
+  }
+  .comment-like-active-glyph svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
 }
 
 /* Milestone Post Radiant Heirloom Aura (Option C Hybrid) */

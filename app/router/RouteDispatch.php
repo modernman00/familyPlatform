@@ -74,6 +74,7 @@ final class RouteDispatch
             'App\controller\PlaybookController',
             'App\controller\LocaleController',
             'App\controller\About',
+            'App\controller\PublicToolsController',
             'App\controller\members\OmniSearchController',
         ];
 

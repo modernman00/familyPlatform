@@ -205,6 +205,41 @@ runTest('Frontend views include Omni-Search trigger button, modal, and deep-link
     }
 });
 
+// TEST 7: World-Class Capabilities: Recent Searches, Keyword Highlighting, and Viral Invite Trigger
+runTest('OmniSearchModal frontend includes Recent Searches, AbortController, Keyword Highlighting, and Viral Invite Trigger', function() use ($rootDir) {
+    $modalContent = file_get_contents($rootDir . '/resources/views/components/omniSearchModal.blade.php');
+    if (!str_contains($modalContent, 'omniRecentSearchesContainer') || !str_contains($modalContent, 'omniRecentSearchesChips')) {
+        throw new RuntimeException('OmniSearch modal missing recent searches container');
+    }
+    if (!str_contains($modalContent, 'omni-highlight')) {
+        throw new RuntimeException('OmniSearch modal missing omni-highlight keyword styling');
+    }
+    if (!str_contains($modalContent, 'AbortController')) {
+        throw new RuntimeException('OmniSearch modal missing AbortController in-flight request cancellation');
+    }
+    if (!str_contains($modalContent, 'omniInviteCard') || !str_contains($modalContent, 'omniInviteActionBtn')) {
+        throw new RuntimeException('OmniSearch modal missing viral lineage invite trigger');
+    }
+});
+
+// TEST 8: Backend Query Micro-Caching & Speed
+runTest('OmniSearchService returns sub-millisecond cached results on repeated queries', function() use ($service) {
+    $t1 = microtime(true);
+    $res1 = $service->search('family journal', 'cache_test_user', 'FAMCACHE');
+    $d1 = microtime(true) - $t1;
+
+    $t2 = microtime(true);
+    $res2 = $service->search('family journal', 'cache_test_user', 'FAMCACHE');
+    $d2 = microtime(true) - $t2;
+
+    if ($res1 !== $res2) {
+        throw new RuntimeException('Cached payload mismatch');
+    }
+    if ($d2 > 0.005) { // 5ms maximum for memory cache
+        throw new RuntimeException('Cache response exceeded 5ms: ' . round($d2 * 1000, 2) . 'ms');
+    }
+});
+
 echo "\n======================================================\n";
 echo "🏁 OMNI-SEARCH VERIFICATION RESULTS: {$passed} PASSED, {$failed} FAILED\n";
 echo "======================================================\n";

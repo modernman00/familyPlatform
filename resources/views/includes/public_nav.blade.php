@@ -30,6 +30,31 @@
             <i class="fas fa-newspaper me-1" style="color: var(--brand-primary, #a31621);"></i>{{ __('nav.blog', 'Blog') }}
           </a>
         </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle @if(str_contains($_SERVER['REQUEST_URI'] ?? '', 'calculator') || str_contains($_SERVER['REQUEST_URI'] ?? '', 'prompts')) active @endif" href="#" id="publicToolsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-toolbox me-1" style="color: var(--brand-primary, #a31621);"></i>Free Tools
+          </a>
+          <ul class="dropdown-menu shadow-lg border-0 py-2 rounded-3" aria-labelledby="publicToolsDropdown">
+            <li>
+              <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="/kinship-calculator">
+                <i class="fas fa-sitemap text-danger"></i>
+                <span>Kinship Calculator</span>
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="/memory-prompts">
+                <i class="fas fa-microphone text-danger"></i>
+                <span>Oral History Studio</span>
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="/prompts">
+                <i class="fas fa-book-reader text-danger"></i>
+                <span>Family Archive Guides</span>
+              </a>
+            </li>
+          </ul>
+        </li>
 @if(\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('users'))
         <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
           <a class="btn btn-brand w-100" href="/profilePage">{{ __('nav.dashboard', 'Go to Family Dashboard') }}</a>

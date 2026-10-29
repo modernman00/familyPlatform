@@ -218,6 +218,7 @@
 </head>
 
 <body data-page-id="@yield('data-page-id')">
+  @include('partials.pwa-splash')
   
   @include('includes.public_nav')
 

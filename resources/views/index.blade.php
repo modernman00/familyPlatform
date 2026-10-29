@@ -85,6 +85,92 @@
     </div>
   </section>
 
+  <!-- Free Interactive Tools Section ("Engineering as Marketing") -->
+  <section class="py-5" style="background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%); border-top: 1px solid #e2e8f0;">
+    <div class="container py-4">
+      <div class="text-center max-w-700 mx-auto mb-5">
+        <div class="badge rounded-pill px-3 py-2 mb-2 fw-bold text-uppercase" style="background: rgba(163,22,33,0.1); color: var(--brand-primary, #a31621); font-size: 0.8rem; letter-spacing: 0.05em;">
+          🛠️ Free Generational Discovery Tools
+        </div>
+        <h2 class="display-6 fw-bold mb-3 text-dark">Interactive Heritage Utilities</h2>
+        <p class="text-secondary fs-5 mb-0" style="line-height: 1.6;">
+          Explore our free, instant genealogical intelligence engines. No registration or app download required.
+        </p>
+      </div>
+
+      <div class="row g-4">
+        <!-- Tool 1: Kinship Calculator -->
+        <div class="col-md-4">
+          <div class="card h-100 border border-slate-200 rounded-4 shadow-sm hover:shadow-md transition-all bg-white" style="border-radius: 1.25rem;">
+            <div class="card-body p-4 d-flex flex-column justify-content-between">
+              <div>
+                <div class="w-12 h-12 rounded-3 bg-danger bg-opacity-10 text-danger d-inline-flex align-items-center justify-content-center mb-3" style="width: 48px; height: 48px; font-size: 1.5rem;">
+                  🌳
+                </div>
+                <h3 class="h5 fw-bold text-dark mb-2">Kinship &amp; Consanguinity Calculator</h3>
+                <p class="text-secondary small mb-4" style="line-height: 1.6;">
+                  Instantly compute exact relationships: discover what "second cousin once removed" actually means with shared ancestor paths and genetic overlap percentages.
+                </p>
+              </div>
+              <div>
+                <a href="/kinship-calculator" class="btn btn-outline-danger w-100 rounded-pill py-2.5 fw-semibold d-inline-flex align-items-center justify-content-center gap-2" style="min-height: 44px;">
+                  <span>Calculate Relationship</span>
+                  <i class="fas fa-arrow-right"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tool 2: Oral History Prompt Studio -->
+        <div class="col-md-4">
+          <div class="card h-100 border border-slate-200 rounded-4 shadow-sm hover:shadow-md transition-all bg-white" style="border-radius: 1.25rem;">
+            <div class="card-body p-4 d-flex flex-column justify-content-between">
+              <div>
+                <div class="w-12 h-12 rounded-3 bg-warning bg-opacity-10 text-warning d-inline-flex align-items-center justify-content-center mb-3" style="width: 48px; height: 48px; font-size: 1.5rem;">
+                  🎙️
+                </div>
+                <h3 class="h5 fw-bold text-dark mb-2">Oral History Prompt Studio</h3>
+                <p class="text-secondary small mb-4" style="line-height: 1.6;">
+                  Curated sensory interview questions designed to gently unlock memories from grandparents, veterans, and elders before family lore is lost forever.
+                </p>
+              </div>
+              <div>
+                <a href="/memory-prompts" class="btn btn-outline-danger w-100 rounded-pill py-2.5 fw-semibold d-inline-flex align-items-center justify-content-center gap-2" style="min-height: 44px;">
+                  <span>Generate Prompts</span>
+                  <i class="fas fa-arrow-right"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tool 3: Generational Archive Guides -->
+        <div class="col-md-4">
+          <div class="card h-100 border border-slate-200 rounded-4 shadow-sm hover:shadow-md transition-all bg-white" style="border-radius: 1.25rem;">
+            <div class="card-body p-4 d-flex flex-column justify-content-between">
+              <div>
+                <div class="w-12 h-12 rounded-3 bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center mb-3" style="width: 48px; height: 48px; font-size: 1.5rem;">
+                  📖
+                </div>
+                <h3 class="h5 fw-bold text-dark mb-2">Generational Memory Guides</h3>
+                <p class="text-secondary small mb-4" style="line-height: 1.6;">
+                  Thematic blueprints for preserving handwritten family recipes, chronicling military duty memories, and mapping ancestral migration journeys.
+                </p>
+              </div>
+              <div>
+                <a href="/prompts" class="btn btn-outline-danger w-100 rounded-pill py-2.5 fw-semibold d-inline-flex align-items-center justify-content-center gap-2" style="min-height: 44px;">
+                  <span>Explore Guides Hub</span>
+                  <i class="fas fa-arrow-right"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- From Our Blog Section -->
   <section class="blog-preview-section py-5" style="background-color: #ffffff; border-top: 1px solid #f1f5f9;">
     <div class="container py-4">

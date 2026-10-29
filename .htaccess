@@ -5,8 +5,11 @@
 # =============================================================================
 
 RewriteEngine On
-# Allow robots.txt and sitemap.xml directly
+# Allow robots.txt and sitemap.xml directly (from root or public/)
+RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^(robots\.txt|sitemap\.xml)$ - [L]
+RewriteCond %{DOCUMENT_ROOT}/public/$1 -f
+RewriteRule ^(robots\.txt|sitemap\.xml)$ public/$1 [L]
 
 # ---------------------------------------------------------------------------
 # 0a. NCSC PHP Advisory ("php2shell" — CVE-2026-109618 & CVE-2026-109619) Shield

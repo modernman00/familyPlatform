@@ -69,7 +69,7 @@ HEIRLOOM_REACTIONS.wow = HEIRLOOM_REACTIONS.shock;
  * @param {number} size - Pixel dimensions (width and height)
  * @returns {string} Safe inline SVG markup
  */
-export function getHeirloomGlassSvg(type, size = 32) {
+export function getHeirloomGlassSvg(type, size = 34) {
   if (!type) return '';
   let normType = String(type).trim().toLowerCase();
   if (normType === 'likes') normType = 'like';
@@ -80,7 +80,7 @@ export function getHeirloomGlassSvg(type, size = 32) {
 
   switch (normType) {
     case 'love':
-      return `<svg class="heirloom-glass-svg heirloom-love" viewBox="0 0 40 40" width="${size}" height="${size}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Heirloom Love Gem">
+      return `<svg class="heirloom-glass-svg heirloom-love" viewBox="0 0 40 40" width="${size}" height="${size}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Heirloom Love Gem" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
         <defs>
           <radialGradient id="lgb_${uid}" cx="40%" cy="30%" r="70%">
             <stop offset="0%" stop-color="#ff7597"/>
@@ -99,11 +99,11 @@ export function getHeirloomGlassSvg(type, size = 32) {
             <stop offset="100%" stop-color="#e11d48" stop-opacity="0"/>
           </radialGradient>
           <filter id="lc_${uid}" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="3" stdDeviation="3.5" flood-color="#be123c" flood-opacity="0.45"/>
+            <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-color="#be123c" flood-opacity="0.35"/>
           </filter>
         </defs>
-        <g filter="url(#lc_${uid})" class="hg-heart-body">
-          <path d="M20 34.5C19.3 34.5 18.6 34.2 18.1 33.7C11.2 27.5 5 21.8 5 14.5C5 9.2 9.2 5 14.5 5C16.8 5 18.8 5.8 20 7.2C21.2 5.8 23.2 5 25.5 5C30.8 5 35 9.2 35 14.5C35 21.8 28.8 27.5 21.9 33.7C21.4 34.2 20.7 34.5 20 34.5Z" fill="url(#lgb_${uid})"/>
+        <g class="hg-heart-body">
+          <path d="M20 34.5C19.3 34.5 18.6 34.2 18.1 33.7C11.2 27.5 5 21.8 5 14.5C5 9.2 9.2 5 14.5 5C16.8 5 18.8 5.8 20 7.2C21.2 5.8 23.2 5 25.5 5C30.8 5 35 9.2 35 14.5C35 21.8 28.8 27.5 21.9 33.7C21.4 34.2 20.7 34.5 20 34.5Z" fill="url(#lgb_${uid})" filter="url(#lc_${uid})"/>
           <circle cx="20" cy="18" r="9.5" fill="url(#lcg_${uid})" class="hg-heart-core"/>
           <path d="M20 32C14 26.5 7.5 21 7.5 14.5C7.5 10.5 10.5 7.5 14.5 7.5C16.8 7.5 18.8 8.5 20 10.2C21.2 8.5 23.2 7.5 25.5 7.5C29.5 7.5 32.5 10.5 32.5 14.5C32.5 21 26 26.5 20 32Z" stroke="#ffffff" stroke-width="0.75" stroke-opacity="0.4" fill="none"/>
           <path d="M10 13C10 9.8 12.2 7.5 15 7.2C13 8 11.5 9.8 11.5 12.5C11.5 14.2 12.2 16 13.5 17.5L11.8 18.5C10.6 16.8 10 14.8 10 13Z" fill="url(#ls_${uid})"/>
@@ -116,7 +116,7 @@ export function getHeirloomGlassSvg(type, size = 32) {
 
     case 'like':
     case 'likes':
-      return `<svg class="heirloom-glass-svg heirloom-like" viewBox="0 0 40 40" width="${size}" height="${size}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Heirloom Topaz Thumb">
+      return `<svg class="heirloom-glass-svg heirloom-like" viewBox="0 0 40 40" width="${size}" height="${size}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Heirloom Topaz Thumb" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
         <defs>
           <radialGradient id="kgb_${uid}" cx="35%" cy="30%" r="75%">
             <stop offset="0%" stop-color="#fef08a"/>
@@ -130,11 +130,11 @@ export function getHeirloomGlassSvg(type, size = 32) {
             <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
           </radialGradient>
           <filter id="kc_${uid}" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="3" stdDeviation="3.5" flood-color="#d97706" flood-opacity="0.45"/>
+            <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-color="#d97706" flood-opacity="0.35"/>
           </filter>
         </defs>
-        <g filter="url(#kc_${uid})">
-          <circle cx="20" cy="20" r="16.5" fill="url(#kgb_${uid})"/>
+        <g>
+          <circle cx="20" cy="20" r="16.5" fill="url(#kgb_${uid})" filter="url(#kc_${uid})"/>
           <circle cx="18" cy="18" r="10" fill="url(#kcg_${uid})"/>
           <circle cx="20" cy="20" r="15" stroke="#ffffff" stroke-width="0.8" stroke-opacity="0.5" fill="none"/>
           <g class="hg-thumb-hand">
@@ -150,7 +150,7 @@ export function getHeirloomGlassSvg(type, size = 32) {
       </svg>`;
 
     case 'haha':
-      return `<svg class="heirloom-glass-svg heirloom-haha" viewBox="0 0 40 40" width="${size}" height="${size}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Heirloom Citrine Laugh">
+      return `<svg class="heirloom-glass-svg heirloom-haha" viewBox="0 0 40 40" width="${size}" height="${size}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Heirloom Citrine Laugh" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
         <defs>
           <radialGradient id="hgb_${uid}" cx="35%" cy="30%" r="75%">
             <stop offset="0%" stop-color="#fffbeb"/>
@@ -165,11 +165,11 @@ export function getHeirloomGlassSvg(type, size = 32) {
             <stop offset="100%" stop-color="#eab308" stop-opacity="0"/>
           </radialGradient>
           <filter id="hc_${uid}" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="3" stdDeviation="3.5" flood-color="#ca8a04" flood-opacity="0.45"/>
+            <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-color="#ca8a04" flood-opacity="0.35"/>
           </filter>
         </defs>
-        <g filter="url(#hc_${uid})" class="hg-haha-face">
-          <circle cx="20" cy="20" r="16.5" fill="url(#hgb_${uid})"/>
+        <g class="hg-haha-face">
+          <circle cx="20" cy="20" r="16.5" fill="url(#hgb_${uid})" filter="url(#hc_${uid})"/>
           <circle cx="18" cy="18" r="10" fill="url(#hcg_${uid})"/>
           <circle cx="20" cy="20" r="15" stroke="#ffffff" stroke-width="0.8" stroke-opacity="0.5" fill="none"/>
           <!-- Squinting Joyful Eyes -->
@@ -192,7 +192,7 @@ export function getHeirloomGlassSvg(type, size = 32) {
 
     case 'shock':
     case 'wow':
-      return `<svg class="heirloom-glass-svg heirloom-shock" viewBox="0 0 40 40" width="${size}" height="${size}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Heirloom Sapphire Wonder">
+      return `<svg class="heirloom-glass-svg heirloom-shock" viewBox="0 0 40 40" width="${size}" height="${size}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Heirloom Sapphire Wonder" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
         <defs>
           <radialGradient id="sgb_${uid}" cx="35%" cy="30%" r="75%">
             <stop offset="0%" stop-color="#e0f2fe"/>
@@ -207,11 +207,11 @@ export function getHeirloomGlassSvg(type, size = 32) {
             <stop offset="100%" stop-color="#0284c7" stop-opacity="0"/>
           </radialGradient>
           <filter id="sc_${uid}" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="3" stdDeviation="3.5" flood-color="#0284c7" flood-opacity="0.45"/>
+            <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-color="#0284c7" flood-opacity="0.35"/>
           </filter>
         </defs>
-        <g filter="url(#sc_${uid})">
-          <circle cx="20" cy="20" r="16.5" fill="url(#sgb_${uid})"/>
+        <g>
+          <circle cx="20" cy="20" r="16.5" fill="url(#sgb_${uid})" filter="url(#sc_${uid})"/>
           <circle cx="18" cy="18" r="10" fill="url(#scg_${uid})"/>
           <circle cx="20" cy="20" r="15" stroke="#ffffff" stroke-width="0.8" stroke-opacity="0.5" fill="none"/>
           <g class="hg-wow-brows">
@@ -233,7 +233,7 @@ export function getHeirloomGlassSvg(type, size = 32) {
       </svg>`;
 
     case 'sad':
-      return `<svg class="heirloom-glass-svg heirloom-sad" viewBox="0 0 40 40" width="${size}" height="${size}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Heirloom Aquamarine Empathy">
+      return `<svg class="heirloom-glass-svg heirloom-sad" viewBox="0 0 40 40" width="${size}" height="${size}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Heirloom Aquamarine Empathy" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
         <defs>
           <radialGradient id="agb_${uid}" cx="35%" cy="30%" r="75%">
             <stop offset="0%" stop-color="#f0fdfa"/>
@@ -248,11 +248,11 @@ export function getHeirloomGlassSvg(type, size = 32) {
             <stop offset="100%" stop-color="#0284c7"/>
           </radialGradient>
           <filter id="ac_${uid}" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="3" stdDeviation="3.5" flood-color="#0d9488" flood-opacity="0.45"/>
+            <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-color="#0d9488" flood-opacity="0.35"/>
           </filter>
         </defs>
-        <g filter="url(#ac_${uid})" class="hg-sad-face">
-          <circle cx="20" cy="20" r="16.5" fill="url(#agb_${uid})"/>
+        <g class="hg-sad-face">
+          <circle cx="20" cy="20" r="16.5" fill="url(#agb_${uid})" filter="url(#ac_${uid})"/>
           <circle cx="20" cy="20" r="15" stroke="#ffffff" stroke-width="0.8" stroke-opacity="0.5" fill="none"/>
           <g class="hg-sad-brows">
             <path d="M11.5 14C13.5 13.6 15.5 12.8 17 11.8" stroke="#042f2e" stroke-width="1.8" stroke-linecap="round" fill="none"/>
@@ -273,7 +273,7 @@ export function getHeirloomGlassSvg(type, size = 32) {
       </svg>`;
 
     case 'celebrate':
-      return `<svg class="heirloom-glass-svg heirloom-celebrate" viewBox="0 0 40 40" width="${size}" height="${size}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Heirloom Diamond Milestone">
+      return `<svg class="heirloom-glass-svg heirloom-celebrate" viewBox="0 0 40 40" width="${size}" height="${size}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Heirloom Diamond Milestone" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
         <defs>
           <radialGradient id="cgb_${uid}" cx="35%" cy="30%" r="75%">
             <stop offset="0%" stop-color="#faf5ff"/>
@@ -289,11 +289,11 @@ export function getHeirloomGlassSvg(type, size = 32) {
             <stop offset="100%" stop-color="#ca8a04"/>
           </radialGradient>
           <filter id="cc_${uid}" x="-30%" y="-30%" width="160%" height="160%">
-            <feDropShadow dx="0" dy="3.5" stdDeviation="4.5" flood-color="#9333ea" flood-opacity="0.5"/>
+            <feDropShadow dx="0" dy="1.5" stdDeviation="1.8" flood-color="#9333ea" flood-opacity="0.38"/>
           </filter>
         </defs>
-        <g filter="url(#cc_${uid})">
-          <circle cx="20" cy="20" r="16.5" fill="url(#cgb_${uid})"/>
+        <g>
+          <circle cx="20" cy="20" r="16.5" fill="url(#cgb_${uid})" filter="url(#cc_${uid})"/>
           <circle cx="20" cy="20" r="15" stroke="#ffffff" stroke-width="0.8" stroke-opacity="0.6" fill="none"/>
           <g class="hg-celebrate-star">
             <path d="M20 7.5L22.2 15.5L29 13.5L24.5 19L31.5 21.5L24.5 24L28.5 29.5L22 26.5L20 33.5L18 26.5L11.5 29.5L15.5 24L8.5 21.5L15.5 19L11 13.5L17.8 15.5L20 7.5Z" fill="url(#csg_${uid})"/>

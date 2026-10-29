@@ -847,6 +847,25 @@
                   <div id="testNotifFeedback" class="small mt-2" style="display: none;"></div>
                 </div>
 
+                <!-- Ambient Progressive Web App Installation Card -->
+                <div class="p-3 mt-3 rounded-3 border" id="pwaAccountSettingCard" style="background-color: #f8fafc; border-color: #e2e8f0 !important; display: none;">
+                  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                    <span class="fw-bold text-dark" style="font-size: 0.9rem;">
+                      <i class="bi bi-phone text-primary me-1"></i> FamilyPlatform App Experience
+                    </span>
+                    <span id="pwaInstallStateBadge" class="badge bg-primary-subtle text-primary border">PWA Ready</span>
+                  </div>
+                  <p class="small text-muted mb-3" style="font-size: 0.82rem; line-height: 1.45;" id="pwaAccountSettingHint">
+                    Install FamilyPlatform directly to your home screen or desktop for 1-tap fast access, instant milestone notifications, and offline viewing.
+                  </p>
+                  <div class="d-flex flex-wrap gap-2">
+                    <button type="button" id="pwaAccountSettingInstallBtn" class="btn btn-sm btn-primary pwa-ambient-install-trigger d-inline-flex align-items-center fw-semibold rounded-pill px-3" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
+                      <i class="bi bi-download me-1.5"></i>
+                      <span>Install App on This Device</span>
+                    </button>
+                  </div>
+                </div>
+
                 <!-- Icon & Button Tooltip Frequency & Guidance Control -->
                 <div class="custom-switch mt-3 pt-3 border-top">
                   <div class="switch-info">

@@ -589,6 +589,21 @@ final class NotificationController extends Select
             }
             $userId = $sessionUserId;
 
+            // Red Team Anti-Flooding: Rate-limit subscription registration per user session (max 10 / min)
+            $rateKey = 'push_sub_rate_' . $userId;
+            $currentTime = time();
+            if (!isset($_SESSION[$rateKey]) || !is_array($_SESSION[$rateKey])) {
+                $_SESSION[$rateKey] = [];
+            }
+            $_SESSION[$rateKey] = array_filter($_SESSION[$rateKey], static function($t) use ($currentTime) {
+                return is_int($t) && ($currentTime - $t) < 60;
+            });
+            if (count($_SESSION[$rateKey]) >= 10) {
+                msgException(429, 'Too many subscription requests. Please try again shortly.');
+                return;
+            }
+            $_SESSION[$rateKey][] = $currentTime;
+
             $endpoint = (string)$inputData['endpoint'];
             $p256dhKey = (string)$inputData['keys']['p256dh'];
             $authKey = (string)$inputData['keys']['auth'];
@@ -613,6 +628,17 @@ final class NotificationController extends Select
                 $update = new Update('pushNotification');
                 $update->makeUpdate($data, 'endpoint');
             } else {
+                // Table Hygiene: Limit active registered devices per user to 10 by pruning oldest
+                $userEndpoints = Select::selectFn2('SELECT no FROM pushNotification WHERE id = ? ORDER BY no ASC', [$userId]);
+                if (count($userEndpoints) >= 10) {
+                    $excess = count($userEndpoints) - 9;
+                    $dbPrune = \Src\Db::connect2();
+                    for ($i = 0; $i < $excess; $i++) {
+                        $delStmt = $dbPrune->prepare('DELETE FROM pushNotification WHERE no = ?');
+                        $delStmt->execute([(int)$userEndpoints[$i]['no']]);
+                    }
+                }
+
                 $db = \Src\Db::connect2();
                 $stmt = $db->prepare('INSERT INTO pushNotification (id, endpoint, p256dhKey, authKey) VALUES (?, ?, ?, ?)');
                 $stmt->execute([$userId, $endpoint, $p256dhKey, $authKey]);

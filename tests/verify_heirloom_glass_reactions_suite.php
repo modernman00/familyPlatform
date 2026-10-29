@@ -62,8 +62,8 @@ assertCondition(strpos($postCardFile, "getHeirloomGlassSvg") !== false, "post-ca
 // 6. Verify Post and Comment Dual Application & Zero Default-to-Love Regression Guards
 assertCondition(strpos($postCardFile, "comment-reaction-float-bar heirloom-glass-dock") !== false, "Comment floating dock uses heirloom-glass-dock");
 assertCondition(strpos($postCardFile, "getHeirloomGlassSvg(post.user_reaction, 24)") !== false, "Post active reaction button uses Heirloom Glass SVG");
-assertCondition(strpos($postCardFile, "getHeirloomGlassSvg(c.userReaction, 16)") !== false, "Comment active reaction button uses Heirloom Glass SVG");
-assertCondition(strpos($postCardFile, "getHeirloomGlassSvg(r.label, 16)") !== false, "Comment top reactions preview uses Heirloom Glass SVG");
+assertCondition((strpos($postCardFile, "getHeirloomGlassSvg(c.userReaction, 16)") !== false || strpos($postCardFile, "getHeirloomGlassSvg(c.userReaction, 22)") !== false), "Comment active reaction button uses Heirloom Glass SVG");
+assertCondition((strpos($postCardFile, "getHeirloomGlassSvg(r.label, 16)") !== false || strpos($postCardFile, "getHeirloomGlassSvg(r.label, 20)") !== false), "Comment top reactions preview uses Heirloom Glass SVG");
 assertCondition(strpos($postCardFile, '<template x-if="c.userReaction">') !== false, "Comment reaction icon guarded by <template x-if=\"c.userReaction\"> (prevents Bootstrap .d-inline-flex !important override)");
 assertCondition(strpos($postCardFile, '<template x-if="getTopCommentReactions(c.reactions).length > 0">') !== false, "Comment reaction count pill guarded by <template x-if> (prevents empty pill render)");
 assertCondition(strpos($jsReactionsFile, "if (!type) return '';") !== false, "getHeirloomGlassSvg returns empty string on falsy input (never defaults to love)");

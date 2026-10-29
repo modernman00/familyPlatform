@@ -1,10 +1,11 @@
 <!-- Kinship Radar Settings Modal -->
 <div class="modal fade" id="kinshipRadarSettingsModal" tabindex="-1" aria-labelledby="kinshipRadarSettingsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 540px;">
-    <div class="modal-content" style="border-radius: 22px; border: 1px solid rgba(163,22,33, 0.2); box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35); overflow: hidden;">
+    <form id="kinshipRadarSettingsForm" method="POST" action="/api/kinship/settings" class="modal-content" style="border-radius: 22px; border: 1px solid rgba(163,22,33, 0.2); box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35); overflow: hidden; max-height: calc(100vh - 3.5rem);">
+      @include('csrf')
       
       <!-- Modal Header -->
-      <div class="modal-header border-0 position-relative" style="background: linear-gradient(135deg, #a31621 0%, #801018 100%); color: #ffffff; padding: 1.25rem 1.5rem;">
+      <div class="modal-header border-0 position-relative flex-shrink-0" style="background: linear-gradient(135deg, #a31621 0%, #801018 100%); color: #ffffff; padding: 1.25rem 1.5rem;">
         <div class="d-flex align-items-center gap-3">
           <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background: rgba(255, 255, 255, 0.18); font-size: 1.25rem; flex-shrink: 0; color: #ffffff;">
             <i class="bi bi-sliders"></i>
@@ -21,10 +22,8 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ __('kinship.close', 'Close') }}" style="opacity: 0.9; min-width: 44px; min-height: 44px;"></button>
       </div>
 
-      <!-- Modal Body Form -->
-      <form id="kinshipRadarSettingsForm" method="POST" action="/api/kinship/settings">
-        @include('csrf')
-        <div class="modal-body p-3 p-md-4" style="max-height: 75vh;">
+      <!-- Modal Body -->
+      <div class="modal-body p-3 p-md-4" style="overflow-y: auto; flex: 1 1 auto; min-height: 0;">
           
           <!-- Section 1: Master Status Switch -->
           <div class="p-3 rounded-4 mb-3" style="background: #fdf2f2; border: 1px solid #f9d5d8;">
@@ -145,8 +144,8 @@
 
         </div>
 
-        <!-- Modal Footer Actions -->
-        <div class="modal-footer border-0 p-3 bg-light d-flex justify-content-end gap-2">
+        <!-- Modal Footer Actions (Sticky & Guaranteed in View) -->
+        <div class="modal-footer border-0 p-3 bg-light d-flex justify-content-end gap-2 flex-shrink-0" style="border-top: 1px solid #e2e8f0 !important; position: sticky; bottom: 0; z-index: 10; background: #f8fafc;">
           <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal" style="min-height: 44px;">
             {{ __('common.cancel', 'Cancel') }}
           </button>
@@ -156,7 +155,5 @@
           </button>
         </div>
       </form>
-
-    </div>
   </div>
 </div>

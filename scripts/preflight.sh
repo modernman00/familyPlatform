@@ -128,6 +128,10 @@ if [ -f "tests/verify_frontend_stability.php" ]; then
     php tests/verify_frontend_stability.php || GATE4_PASSED=0
 fi
 
+if [ -f "tests/verify_geo_optimization_suite.php" ]; then
+    php tests/verify_geo_optimization_suite.php || GATE4_PASSED=0
+fi
+
 if [ -f "tests/verify_link_preview_graphics_test.php" ]; then
     php tests/verify_link_preview_graphics_test.php || GATE4_PASSED=0
 fi
@@ -158,6 +162,10 @@ fi
 
 if [ -f "tests/verify_node_contact_details.php" ]; then
     php tests/verify_node_contact_details.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_sitemap_suite.php" ]; then
+    php tests/verify_sitemap_suite.php || GATE4_PASSED=0
 fi
 
 if [ -f "tests/verify_post_reel_comment_deletion_suite.php" ]; then

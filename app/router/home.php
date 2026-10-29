@@ -17,13 +17,25 @@ $router->map('GET', '/terms', 'App\controller\Index@terms', 'terms');
 
 $router->map('GET', '/contact', 'App\controller\Index@contact', 'Contact');
 
+// --- PUBLIC ACQUISITION & INTERACTIVE TOOLS ("Engineering as Marketing") ---
+$router->map('GET|HEAD', '/tools/family-memory-prompts', 'App\controller\PublicToolsController@memoryPrompts', 'tools_memory_prompts');
+$router->map('GET|HEAD', '/memory-prompts', 'App\controller\PublicToolsController@memoryPrompts', 'tools_memory_prompts_short_alias');
+$router->map('GET|HEAD', '/prompts', 'App\controller\PublicToolsController@memoryPrompts', 'tools_memory_prompts_alias');
+$router->map('GET|HEAD', '/prompts/[*:slug]', 'App\controller\PublicToolsController@promptGuide', 'tools_prompt_guide');
+$router->map('GET|HEAD', '/tools/kinship-calculator', 'App\controller\PublicToolsController@kinshipCalculator', 'tools_kinship_calculator');
+$router->map('GET|HEAD', '/kinship-calculator', 'App\controller\PublicToolsController@kinshipCalculator', 'tools_kinship_calculator_alias');
+
 $router->map('GET|POST', '/email/unsubscribe', 'App\controller\Index@unsubscribe', 'email_unsubscribe');
 
 // --- ROBOTS.TXT ROUTE HANDLER ---
-$router->map('GET', '/robots.txt', function() {
+$router->map('GET|HEAD', '/robots.txt', function() {
     header('Content-Type: text/plain; charset=utf-8');
-    $robotsFile = __DIR__ . '/../../public/robots.txt';
-    if (file_exists($robotsFile)) {
+    header('Cache-Control: public, max-age=86400');
+    $robotsFile = file_exists(__DIR__ . '/../../public/robots.txt')
+        ? __DIR__ . '/../../public/robots.txt'
+        : (file_exists(__DIR__ . '/../../robots.txt') ? __DIR__ . '/../../robots.txt' : null);
+
+    if ($robotsFile !== null) {
         readfile($robotsFile);
     } else {
         echo "User-agent: *\nAllow: /\nDisallow: /app/\nDisallow: /api/\nDisallow: /cron/\nDisallow: /storage/\nSitemap: https://myfamilyplatform.com/sitemap.xml\n";
@@ -31,14 +43,49 @@ $router->map('GET', '/robots.txt', function() {
 });
 
 // --- SITEMAP.XML ROUTE HANDLER ---
-$router->map('GET', '/sitemap.xml', function() {
+$router->map('GET|HEAD', '/sitemap.xml', function() {
     header('Content-Type: application/xml; charset=utf-8');
-    $sitemapFile = __DIR__ . '/../../public/sitemap.xml';
-    if (file_exists($sitemapFile)) {
+    header('Cache-Control: public, max-age=86400');
+    $sitemapFile = file_exists(__DIR__ . '/../../public/sitemap.xml')
+        ? __DIR__ . '/../../public/sitemap.xml'
+        : (file_exists(__DIR__ . '/../../sitemap.xml') ? __DIR__ . '/../../sitemap.xml' : null);
+
+    if ($sitemapFile !== null) {
         readfile($sitemapFile);
+        return;
+    }
+
+    // Dynamic fallback generation if static file is unavailable
+    $generatorScript = __DIR__ . '/../../scripts/generate_sitemap.php';
+    if (file_exists($generatorScript)) {
+        require_once $generatorScript;
+        return;
+    }
+
+    http_response_code(404);
+    echo '<?xml version="1.0" encoding="UTF-8"?><error>Sitemap not found</error>';
+});
+
+// --- LLMS.TXT & LLMS-FULL.TXT ROUTE HANDLERS (Generative Engine Optimization) ---
+$router->map('GET', '/llms.txt', function() {
+    header('Content-Type: text/plain; charset=utf-8');
+    $llmsFile = __DIR__ . '/../../public/llms.txt';
+    if (file_exists($llmsFile)) {
+        readfile($llmsFile);
     } else {
         http_response_code(404);
-        echo '<?xml version="1.0" encoding="UTF-8"?><error>Sitemap not found</error>';
+        echo "# FamilyPlatform\n> The private family social network and living heritage organogram.\n";
+    }
+});
+
+$router->map('GET', '/llms-full.txt', function() {
+    header('Content-Type: text/plain; charset=utf-8');
+    $llmsFullFile = __DIR__ . '/../../public/llms-full.txt';
+    if (file_exists($llmsFullFile)) {
+        readfile($llmsFullFile);
+    } else {
+        http_response_code(404);
+        echo "# FamilyPlatform — Complete Knowledge Base\n";
     }
 });
 

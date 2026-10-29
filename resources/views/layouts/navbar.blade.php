@@ -146,6 +146,12 @@
                                 <i class="bi bi-gear-fill me-2 text-secondary"></i> {{ __('nav.settings', 'Settings') }}
                             </a>
                         </li>
+                        <li id="pwaAmbientInstallLi" style="display: none;">
+                            <a class="dropdown-item py-2 px-3 fw-medium text-success d-flex align-items-center justify-content-between pwa-ambient-install-trigger" href="javascript:void(0)" id="pwaAmbientInstallBtn" title="Install FamilyPlatform app on your device for fast access & alerts">
+                                <span><i class="bi bi-download me-2 text-success"></i> Install App</span>
+                                <span class="badge bg-success-subtle text-success" style="font-size: 0.72rem;">Native App</span>
+                            </a>
+                        </li>
                         <li>
                             <a class="dropdown-item py-2 px-3 fw-medium d-flex align-items-center justify-content-between" href="javascript:void(0)" id="darkModeToggle" role="button" title="Toggle between dark and light appearance modes">
                                 <span><i class="bi bi-moon-stars-fill me-2 text-warning"></i> {{ __('nav.theme_mode', 'Theme Mode') }}</span>

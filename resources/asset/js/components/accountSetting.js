@@ -470,7 +470,16 @@ processKidsSiblings(fName, famCode);
   if (state === 'denied') {
     toggle.disabled = true;
     updateBadge('error', 'Blocked by Browser');
-    paint(false, 'Notifications are blocked in your browser settings. Re-enable them there, then reload this page.');
+    paint(false, 'Notifications are blocked in your browser settings. <a href="#" id="showPushRecoveryLink" style="font-weight:600;text-decoration:underline;color:var(--brand-primary,#a31621);">How to re-enable</a>');
+    const recoveryLink = id('showPushRecoveryLink');
+    if (recoveryLink) {
+      recoveryLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (typeof window.showPushPermissionRecovery === 'function') {
+          window.showPushPermissionRecovery();
+        }
+      });
+    }
     return;
   }
 

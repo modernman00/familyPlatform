@@ -29,7 +29,7 @@ export const renderTopReactions = (counts) => {
   const html = top
     .map(([label, count]) => {
       if (typeof window !== 'undefined' && typeof window.__getHeirloomGlassSvg === 'function') {
-        const svg = window.__getHeirloomGlassSvg(label, 16);
+        const svg = window.__getHeirloomGlassSvg(label, 20);
         return `<span class="d-inline-flex align-items-center gap-1">${svg}<span>${count}</span></span>`;
       }
       // 🧩 Fallback map

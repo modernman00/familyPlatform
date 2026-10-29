@@ -116,8 +116,14 @@ try {
         !str_contains($modalHtml, 'id="btnSaveRadarSettings"') ||
         (!str_contains($modalHtml, '@csrf') && !str_contains($modalHtml, "include('csrf')"))) {
         $failures[] = "kinshipRadarSettingsModal.blade.php is missing essential form IDs or CSRF inclusion.";
+    } elseif (!str_contains($modalHtml, 'class="modal-content"') ||
+              !str_contains($modalHtml, 'position: sticky; bottom: 0') ||
+              !str_contains($modalHtml, 'modal-footer') ||
+              !str_contains($modalHtml, 'common.cancel') ||
+              !str_contains($modalHtml, 'flex-shrink-0')) {
+        $failures[] = "kinshipRadarSettingsModal.blade.php layout regression: buttons or sticky footer properties missing.";
     } else {
-        echo "  ✅ PASS: kinshipRadarSettingsModal contains complete form, CSRF token, and switch controls.\n";
+        echo "  ✅ PASS: kinshipRadarSettingsModal contains complete form, CSRF token, and guaranteed sticky in-view footer with Submit/Cancel buttons.\n";
     }
 
     $widgetHtml = $blade->run('member.includes.kinshipSuggestions', [

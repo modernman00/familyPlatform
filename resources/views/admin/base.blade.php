@@ -36,6 +36,7 @@
 </head>
 
 <body>
+  @include('partials.pwa-splash')
 
     <!-- THIS WILL APPEAR IF JAVASCRIPT IS NOT ACTIVATED ON A CUSTOMER COMPUTER -->
     <noscript>

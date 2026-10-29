@@ -43,14 +43,14 @@
                         <span>Invite from Phone Contacts</span>
                     </button>
 
-                    <button type="button" 
-                            class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold shadow-xs d-inline-flex align-items-center gap-2 transition-all"
-                            style="min-height: 44px; white-space: nowrap; flex-shrink: 0; font-size: 0.88rem; border-color: rgba(255, 255, 255, 0.35);"
-                            data-bs-toggle="modal" 
-                            data-bs-target="#inviteFamilyModal">
+                    <a href="https://api.whatsapp.com/send?text={{ rawurlencode("Hi! I'm building our family tree and oral history archive on FamilyPlatform. Claim your branch and connect with our family here: " . \App\classes\GeoSite::baseUrl() . "/register") }}" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold shadow-xs d-inline-flex align-items-center gap-2 transition-all"
+                       style="min-height: 44px; white-space: nowrap; flex-shrink: 0; font-size: 0.88rem; border-color: rgba(255, 255, 255, 0.35);">
                         <i class="bi bi-whatsapp" style="color: #4ade80;"></i>
-                        <span>WhatsApp Kin</span>
-                    </button>
+                        <span>WhatsApp Siblings &amp; Kin</span>
+                    </a>
                 </div>
             </div>
         </div>

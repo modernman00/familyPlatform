@@ -442,6 +442,10 @@ if [ -f "scripts/stamp_version.php" ]; then
     echo "🏷️ Stamping public/version.json with latest release metadata..."
     php scripts/stamp_version.php || true
 fi
+if [ -f "scripts/generate_sitemap.php" ]; then
+    echo "🗺️ Generating XML sitemaps (root & public/)..."
+    php scripts/generate_sitemap.php || true
+fi
 copy_item public
 copy_item resources
 copy_item vendor
@@ -451,6 +455,8 @@ copy_item index.php
 copy_item offline.html
 copy_item .htaccess
 copy_item .user.ini
+copy_item robots.txt
+copy_item sitemap.xml
 
 if [ -f "manifest.json" ]; then
     copy_item manifest.json

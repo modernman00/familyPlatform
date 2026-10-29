@@ -150,6 +150,13 @@
     };
 
     window.askNotificationPermission = function() {
+        if (typeof window.Notification !== 'undefined' && Notification.permission === 'denied') {
+            if (typeof window.showPushPermissionRecovery === 'function') {
+                window.showPushPermissionRecovery();
+            }
+            return Promise.reject(new Error('Permission previously denied by user'));
+        }
+
         return new Promise(function(resolve, reject) {
             const permissionResult = Notification.requestPermission(function(result) {
                 resolve(result);
@@ -163,6 +170,52 @@
             }
             return window.subscribeUserToPush();
         });
+    };
+
+    window.showPushPermissionRecovery = function() {
+        const isIOS = isIos();
+        const isAndroid = /android/i.test(navigator.userAgent);
+
+        let instructionsHtml = '';
+        if (isIOS) {
+            instructionsHtml = '<div class="text-start" style="font-size:0.92rem; line-height: 1.5;">' +
+                '<p>Notifications are currently blocked for FamilyPlatform on your iPhone or iPad:</p>' +
+                '<ol class="ps-3 mb-2">' +
+                '<li>Open your device <strong>Settings</strong> app.</li>' +
+                '<li>Scroll down to <strong>FamilyPlatform</strong> (or <strong>Safari</strong>).</li>' +
+                '<li>Tap <strong>Notifications</strong> and toggle on <strong>Allow Notifications</strong>.</li>' +
+                '<li>Return here and refresh the page to start receiving family updates.</li>' +
+                '</ol></div>';
+        } else if (isAndroid) {
+            instructionsHtml = '<div class="text-start" style="font-size:0.92rem; line-height: 1.5;">' +
+                '<p>Notifications are currently blocked in Chrome on your Android device:</p>' +
+                '<ol class="ps-3 mb-2">' +
+                '<li>Tap the <strong>tune/padlock icon</strong> on the left side of the address bar.</li>' +
+                '<li>Select <strong>Permissions</strong> or <strong>Site settings</strong>.</li>' +
+                '<li>Find <strong>Notifications</strong> and change to <strong>Allow</strong>.</li>' +
+                '<li>Reload this page to activate milestone alerts.</li>' +
+                '</ol></div>';
+        } else {
+            instructionsHtml = '<div class="text-start" style="font-size:0.92rem; line-height: 1.5;">' +
+                '<p>Notifications are currently blocked in your desktop browser:</p>' +
+                '<ol class="ps-3 mb-2">' +
+                '<li>Click the <strong>padlock or view site info icon</strong> in the address bar (left of the URL).</li>' +
+                '<li>Change the <strong>Notifications</strong> permission from <em>Block</em> to <strong>Allow</strong>.</li>' +
+                '<li>Reload the page to connect real-time family alerts.</li>' +
+                '</ol></div>';
+        }
+
+        if (window.Swal) {
+            window.Swal.fire({
+                icon: 'info',
+                title: 'How to Re-Enable Notifications',
+                html: instructionsHtml,
+                confirmButtonColor: '#a31621',
+                confirmButtonText: 'Understood'
+            });
+        } else {
+            alert('Please enable notifications in your browser site settings and reload the page.');
+        }
     };
 
     function hideBanner(banner) {
@@ -226,8 +279,13 @@
         if (dismissBtn) dismissBtn.addEventListener('click', dismissAction);
 
         // 3. Inside the installed PWA:
-        // FORCE the prompt if permission is 'default' so the installed app gets enrolled!
+        // Prompt if permission is 'default' so the installed app gets enrolled!
+        // Respect prior dismissal if user clicked 'Not Now'.
         if (isStandalone) {
+            if (localStorage.getItem(DISMISS_KEY) === 'true') {
+                return;
+            }
+
             const titleEl = banner.querySelector('.push-banner-title');
             const textEl = banner.querySelector('.push-banner-text');
             if (titleEl) titleEl.textContent = 'Activate Family Notifications';
@@ -312,6 +370,9 @@
                 enableBtn.innerHTML = '<i class="bi bi-bell-fill me-1.5"></i> Enable Notifications';
                 if (Notification.permission === 'denied') {
                     dismissAction();
+                    if (typeof window.showPushPermissionRecovery === 'function') {
+                        window.showPushPermissionRecovery();
+                    }
                 }
             });
         });

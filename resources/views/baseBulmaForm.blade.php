@@ -236,6 +236,7 @@
 </head>
 
 <body data-page-id="@yield('data-page-id')" data-spy="scroll" data-offset='60'>
+  @include('partials.pwa-splash')
 
      @include('includes.bulmaNav')
 

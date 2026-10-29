@@ -93,6 +93,7 @@
 
 <body
     class="bg-background-light dark:bg-background-dark font-body text-gray-900 dark:text-gray-100 min-h-screen pb-24 antialiased selection:bg-primary selection:text-white">
+    @include('partials.pwa-splash')
     <header
         class="sticky top-0 z-50 bg-surface-light/90 dark:bg-surface-dark/90 backdrop-blur-md border-b border-border-light dark:border-border-dark px-4 py-3 flex justify-between items-center shadow-sm">
         <div class="flex items-center gap-2">

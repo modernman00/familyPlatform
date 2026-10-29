@@ -338,6 +338,40 @@ if (is_link($sharedJsLibNodePath)) {
     $exitCode = 1;
 }
 
+// --- CHECK 9: BLADEONE TEMPLATE COMPILATION & SYNTAX INTEGRITY (BRATS GATE) ---
+$autoloadPath = $targetDir . '/vendor/autoload.php';
+$viewsDir = $targetDir . '/resources/views';
+$cacheDir = $targetDir . '/bootstrap/cache';
+if (file_exists($autoloadPath) && is_dir($viewsDir)) {
+    require_once $autoloadPath;
+    if (class_exists(\eftec\bladeone\BladeOne::class)) {
+        $blade = new \eftec\bladeone\BladeOne($viewsDir, $cacheDir, \eftec\bladeone\BladeOne::MODE_DEBUG);
+        $blade->pipeEnable = true;
+        $bladeIt = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($viewsDir, FilesystemIterator::SKIP_DOTS)
+        );
+        foreach ($bladeIt as $bFile) {
+            if (!$bFile->isFile() || !str_ends_with($bFile->getFilename(), '.blade.php')) {
+                continue;
+            }
+            $bPath = $bFile->getPathname();
+            try {
+                $compiledPhp = $blade->compileString((string) file_get_contents($bPath));
+                token_get_all($compiledPhp, TOKEN_PARSE);
+            } catch (\Throwable $e) {
+                $violations[] = [
+                    'severity' => 'CRITICAL',
+                    'rule' => 'MUST-HAVE #9: BladeOne Compilation / PHP Syntax Error in Template',
+                    'file' => $bPath,
+                    'line' => $e->getLine(),
+                    'remediation' => 'Fix Blade syntax error (' . $e->getMessage() . '). Never use `|` or `||` inside `{{ ... }}` when BladeOne pipeEnable is active; use `@if(...)` instead.',
+                ];
+                $exitCode = 1;
+            }
+        }
+    }
+}
+
 // Display report
 if (empty($violations)) {
     echo "✅ ALL MUST-HAVE CHECKS PASSED!\n";

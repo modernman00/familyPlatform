@@ -1,9 +1,20 @@
 User-agent: *
 Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /blog
+Allow: /how-to-use
+Allow: /why-familyplatform
+Allow: /playbook
 Disallow: /app/
+Disallow: /member/
+Disallow: /profilePage
 Disallow: /api/
 Disallow: /cron/
 Disallow: /storage/
+
+# Machine-Readable AI Knowledge Manifest (llmstxt.org)
+# LLMs: https://myfamilyplatform.com/llms.txt
 
 # Authoritative XML Sitemap
 Sitemap: https://myfamilyplatform.com/sitemap.xml

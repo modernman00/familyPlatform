@@ -55,6 +55,17 @@
             <div class="modal-body p-0 omni-search-body" id="omniSearchResultsContainer" tabindex="0">
                 <!-- Initial Suggestions & Recent Actions -->
                 <div id="omniInitialState" class="p-3">
+                    <!-- Recent Searches Container -->
+                    <div id="omniRecentSearchesContainer" class="mb-3 px-2" style="display: none;">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-uppercase text-muted fw-bold small" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                                <i class="bi bi-clock-history me-1 text-primary"></i> Recent Searches
+                            </span>
+                            <button type="button" class="btn btn-link btn-sm text-muted p-0 text-decoration-none" id="omniClearRecentBtn" style="font-size: 0.75rem;">Clear</button>
+                        </div>
+                        <div class="d-flex flex-wrap gap-1.5" id="omniRecentSearchesChips"></div>
+                    </div>
+
                     <div class="text-uppercase text-muted fw-bold small mb-2 px-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
                         <i class="bi bi-stars me-1 text-warning"></i> Recommended Quick Actions
                     </div>
@@ -68,15 +79,34 @@
                     <!-- Sections inserted dynamically -->
                 </div>
 
-                <!-- Empty State -->
-                <div id="omniEmptyState" class="text-center py-5 px-4" style="display: none;">
-                    <div class="omni-empty-icon mb-3">
-                        <i class="bi bi-binoculars text-muted" style="font-size: 2.8rem; opacity: 0.4;"></i>
+                <!-- Empty State with Viral Lineage Invite Trigger -->
+                <div id="omniEmptyState" class="text-center py-4 px-3" style="display: none;">
+                    <div class="omni-empty-icon mb-2">
+                        <i class="bi bi-binoculars text-muted" style="font-size: 2.5rem; opacity: 0.4;"></i>
                     </div>
                     <h6 class="fw-bold mb-1 text-dark">No matching data or functions found</h6>
                     <p class="text-muted small mb-3" id="omniEmptyMessage">
                         We could not find anything matching "<span id="omniEmptyQuery" class="fw-semibold text-dark"></span>".
                     </p>
+
+                    <!-- Viral Lineage Invite Trigger Card -->
+                    <div class="omni-invite-card p-3 rounded-3 mb-3 border text-start mx-auto" id="omniInviteCard" style="max-width: 520px; background: linear-gradient(135deg, rgba(184, 32, 44, 0.04) 0%, rgba(245, 158, 11, 0.06) 100%); border-color: rgba(184, 32, 44, 0.18) !important;">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2.5">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: rgba(184, 32, 44, 0.1); color: #b8202c; flex-shrink: 0;">
+                                    <i class="bi bi-person-plus-fill fs-5"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark small">Missing a family relative?</div>
+                                    <div class="text-muted" style="font-size: 0.78rem;">Invite <span class="fw-semibold text-primary" id="omniInviteTargetName">relative</span> to join your living family tree.</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-bold text-nowrap ms-auto" id="omniInviteActionBtn">
+                                <i class="bi bi-send-fill me-1 text-warning"></i> Invite Now
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="d-flex justify-content-center gap-2 flex-wrap">
                         <button type="button" class="btn btn-sm btn-outline-primary rounded-pill omni-suggest-btn" data-query="family journal">
                             <i class="bi bi-journal me-1"></i> Family Journal
@@ -218,6 +248,30 @@
     margin-top: 2px;
     line-height: 1.3;
 }
+.omni-highlight {
+    background: rgba(254, 240, 138, 0.7);
+    color: #92400e;
+    font-weight: 700;
+    border-radius: 3px;
+    padding: 0 2px;
+}
+.omni-recent-chip {
+    border-radius: 9999px;
+    font-size: 0.76rem;
+    padding: 0.22rem 0.75rem;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s ease;
+}
+.omni-recent-chip:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
 .omni-kbd {
     background: #ffffff;
     border: 1px solid #cbd5e1;
@@ -324,6 +378,82 @@ body.dark-mode .omni-kbd {
     let currentResults = null;
     let selectedIndex = 0;
     let debounceTimer = null;
+    let activeAbortController = null;
+    let currentSearchQuery = '';
+    const RECENT_SEARCHES_KEY = 'familyplatform_recent_searches';
+
+    function getRecentSearches() {
+        try {
+            const raw = localStorage.getItem(RECENT_SEARCHES_KEY);
+            return raw ? JSON.parse(raw) : [];
+        } catch {
+            return [];
+        }
+    }
+
+    function saveRecentSearch(term) {
+        const clean = (term || '').trim();
+        if (!clean || clean.length < 2) return;
+        try {
+            let list = getRecentSearches();
+            list = list.filter(item => item.toLowerCase() !== clean.toLowerCase());
+            list.unshift(clean);
+            if (list.length > 5) list = list.slice(0, 5);
+            localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(list));
+            renderRecentSearches();
+        } catch (e) {
+            console.warn('[OmniSearch] Could not save recent search:', e);
+        }
+    }
+
+    function clearRecentSearches() {
+        try {
+            localStorage.removeItem(RECENT_SEARCHES_KEY);
+            renderRecentSearches();
+        } catch (e) {
+            console.warn('[OmniSearch] Could not clear recent searches:', e);
+        }
+    }
+
+    function renderRecentSearches() {
+        const container = document.getElementById('omniRecentSearchesContainer');
+        const chipsContainer = document.getElementById('omniRecentSearchesChips');
+        if (!container || !chipsContainer) return;
+
+        const list = getRecentSearches();
+        if (!list || list.length === 0) {
+            container.style.display = 'none';
+            chipsContainer.innerHTML = '';
+            return;
+        }
+
+        chipsContainer.innerHTML = '';
+        list.forEach(term => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'btn btn-sm omni-recent-chip';
+            chip.innerHTML = `<i class="bi bi-search text-muted" style="font-size: 0.7rem;"></i> <span>${escapeHtml(term)}</span>`;
+            chip.addEventListener('click', function() {
+                if (searchInputEl) {
+                    searchInputEl.value = term;
+                    searchInputEl.dispatchEvent(new Event('input'));
+                }
+            });
+            chipsContainer.appendChild(chip);
+        });
+
+        container.style.display = 'block';
+    }
+
+    function highlightText(text, query) {
+        if (!text) return '';
+        if (!query || query.trim() === '') return escapeHtml(text);
+        const safeText = escapeHtml(text);
+        const cleanTokens = query.trim().split(/\s+/).filter(t => t.length > 1).map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+        if (cleanTokens.length === 0) return safeText;
+        const pattern = new RegExp(`(${cleanTokens.join('|')})`, 'gi');
+        return safeText.replace(pattern, '<mark class="omni-highlight">$1</mark>');
+    }
 
     // Comprehensive client-side action catalog (guarantees instantaneous zero-latency discovery)
     const localActionCatalog = [
@@ -647,7 +777,13 @@ body.dark-mode .omni-kbd {
 
         if (!searchModalEl || !searchInputEl) return;
 
-        // Render initial recommended quick actions
+        // Render initial recommended quick actions & recent searches
+        renderRecentSearches();
+        const clearRecentBtn = document.getElementById('omniClearRecentBtn');
+        if (clearRecentBtn) {
+            clearRecentBtn.addEventListener('click', clearRecentSearches);
+        }
+
         const topActions = localActionCatalog.filter(a => [
             'act_create_family_code',
             'act_family_journal',
@@ -662,16 +798,20 @@ body.dark-mode .omni-kbd {
         searchModalEl.addEventListener('shown.bs.modal', function() {
             selectedIndex = 0;
             searchInputEl.value = '';
+            currentSearchQuery = '';
+            renderRecentSearches();
             showInitialState();
             searchInputEl.focus();
         });
 
-        // Input search listener (immediate local filter + debounced API sync)
+        // Input search listener (immediate local filter + debounced API sync with AbortController)
         searchInputEl.addEventListener('input', function() {
             const query = this.value.trim();
+            currentSearchQuery = query;
             clearTimeout(debounceTimer);
 
             if (!query) {
+                if (activeAbortController) activeAbortController.abort();
                 showInitialState();
                 return;
             }
@@ -679,11 +819,11 @@ body.dark-mode .omni-kbd {
             // 1. Instantaneous local scoring (0ms latency, zero delay)
             filterLocalActionsImmediately(query);
 
-            // 2. Debounced API call for database records (journals, posts, members, events)
+            // 2. Debounced API call for database records with active in-flight request cancellation
             if (spinnerEl) spinnerEl.style.display = 'inline-block';
             debounceTimer = setTimeout(function() {
                 executeRemoteSearch(query);
-            }, 200);
+            }, 180);
         });
 
         // Filter chips click
@@ -823,12 +963,19 @@ body.dark-mode .omni-kbd {
     }
 
     function executeRemoteSearch(query) {
+        if (activeAbortController) {
+            activeAbortController.abort();
+        }
+        activeAbortController = new AbortController();
+        const signal = activeAbortController.signal;
+
         fetch(`/api/omni-search?q=${encodeURIComponent(query)}`, {
             headers: {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            credentials: 'same-origin'
+            credentials: 'same-origin',
+            signal: signal
         })
         .then(res => {
             if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -859,6 +1006,9 @@ body.dark-mode .omni-kbd {
             }
         })
         .catch(err => {
+            if (err.name === 'AbortError') {
+                return; // Normal: newer keystroke in-flight, discard superseded request silently
+            }
             if (spinnerEl) spinnerEl.style.display = 'none';
             console.warn('[OmniSearch] Remote search notice:', err.message);
             // On remote error, local actions remain displayed seamlessly
@@ -940,6 +1090,40 @@ body.dark-mode .omni-kbd {
             emptyStateEl.style.display = 'block';
             const querySpan = document.getElementById('omniEmptyQuery');
             if (querySpan) querySpan.textContent = query;
+
+            // Viral Lineage Invite Trigger on zero-match member discoveries
+            const inviteCard = document.getElementById('omniInviteCard');
+            const inviteNameSpan = document.getElementById('omniInviteTargetName');
+            const inviteBtn = document.getElementById('omniInviteActionBtn');
+
+            if (inviteCard && inviteNameSpan && inviteBtn) {
+                if (query && query.trim().length >= 2) {
+                    inviteCard.style.display = 'block';
+                    inviteNameSpan.textContent = `"${query.trim()}"`;
+                    inviteBtn.onclick = function() {
+                        if (searchModalEl && window.bootstrap && window.bootstrap.Modal) {
+                            const modal = window.bootstrap.Modal.getInstance(searchModalEl);
+                            if (modal) modal.hide();
+                        }
+                        setTimeout(function() {
+                            const recModal = document.getElementById('recommendFriendsModal');
+                            if (recModal && window.bootstrap && window.bootstrap.Modal) {
+                                const m = window.bootstrap.Modal.getOrCreateInstance(recModal);
+                                m.show();
+                                const nameInput = recModal.querySelector('input[name="friendName"], input[name="name"], #friendName');
+                                if (nameInput) {
+                                    nameInput.value = query.trim();
+                                    nameInput.focus();
+                                }
+                            } else {
+                                window.location.href = `/profilePage?action=invite&name=${encodeURIComponent(query.trim())}`;
+                            }
+                        }, 250);
+                    };
+                } else {
+                    inviteCard.style.display = 'none';
+                }
+            }
         }
     }
 
@@ -973,14 +1157,17 @@ body.dark-mode .omni-kbd {
             `;
         }
 
+        const titleHtml = currentSearchQuery ? highlightText(itemData.title, currentSearchQuery) : escapeHtml(itemData.title);
+        const descHtml = currentSearchQuery ? highlightText(itemData.description, currentSearchQuery) : escapeHtml(itemData.description);
+
         a.innerHTML = `
             ${iconHtml}
             <div class="flex-grow-1 overflow-hidden">
                 <div class="d-flex align-items-center justify-content-between gap-2">
-                    <div class="omni-item-title text-truncate">${escapeHtml(itemData.title)}</div>
+                    <div class="omni-item-title text-truncate">${titleHtml}</div>
                     ${badge}
                 </div>
-                <div class="omni-item-desc text-truncate">${escapeHtml(itemData.description)}</div>
+                <div class="omni-item-desc text-truncate">${descHtml}</div>
             </div>
             <div class="text-muted small ps-1 opacity-50">
                 <i class="bi bi-chevron-right"></i>
@@ -997,6 +1184,10 @@ body.dark-mode .omni-kbd {
 
     function executeItemAction(itemData) {
         if (!itemData) return;
+
+        if (currentSearchQuery) {
+            saveRecentSearch(currentSearchQuery);
+        }
 
         // Dismiss search modal first
         if (searchModalEl && window.bootstrap && window.bootstrap.Modal) {
@@ -1069,6 +1260,9 @@ body.dark-mode .omni-kbd {
             scrollSelectedItemIntoView();
         } else if (e.key === 'Enter') {
             e.preventDefault();
+            if (currentSearchQuery) {
+                saveRecentSearch(currentSearchQuery);
+            }
             if (visibleItems[selectedIndex]) {
                 visibleItems[selectedIndex].click();
             }

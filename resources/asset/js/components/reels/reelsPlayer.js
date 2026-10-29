@@ -1348,13 +1348,13 @@ class FamilyReelsPlayer {
             .sort(([, a], [, b]) => Number(b) - Number(a))
             .slice(0, 3)
             .map(([k, v]) => ({
-                svg: getHeirloomGlassSvg(k, 16),
+                svg: getHeirloomGlassSvg(k, 20),
                 count: v
             }));
 
         const activeReaction = c.user_reaction || '';
         const likeLabel = activeReaction ? (REEL_REACTION_LABELS[activeReaction] || (activeReaction.charAt(0).toUpperCase() + activeReaction.slice(1))) : 'Like';
-        const likeSvg = activeReaction ? getHeirloomGlassSvg(activeReaction, 16) : '';
+        const likeSvg = activeReaction ? getHeirloomGlassSvg(activeReaction, 22) : '';
         const likeColor = activeReaction ? (REEL_REACTION_COLORS[activeReaction] || '#38bdf8') : '';
 
         return `
@@ -1393,8 +1393,8 @@ class FamilyReelsPlayer {
                             ${Object.keys(REEL_COMMENT_EMOJI_MAP).map(type => {
                                 const meta = HEIRLOOM_REACTIONS[type] || HEIRLOOM_REACTIONS.love;
                                 return `
-                                <button type="button" class="reel-comment-reaction-emoji-btn heirloom-reaction-btn" data-comment-id="${c.comment_id}" data-reaction-type="${type}" title="${esc(meta.label)}" style="--heirloom-glow:${meta.glow}; min-width:36px; min-height:36px; padding:2px;">
-                                    <span class="d-inline-flex align-items-center justify-content-center">${getHeirloomGlassSvg(type, 24)}</span>
+                                <button type="button" class="reel-comment-reaction-emoji-btn heirloom-reaction-btn" data-comment-id="${c.comment_id}" data-reaction-type="${type}" title="${esc(meta.label)}" style="--heirloom-glow:${meta.glow}; min-width:44px; min-height:44px; padding:4px;">
+                                    <span class="d-inline-flex align-items-center justify-content-center">${getHeirloomGlassSvg(type, 34)}</span>
                                 </button>
                                 `;
                             }).join('')}

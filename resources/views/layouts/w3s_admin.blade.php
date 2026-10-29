@@ -38,6 +38,7 @@
 </head>
 
 <body class="w3-light-grey">
+  @include('partials.pwa-splash')
 
     <!-- Top container -->
     <div class="w3-bar w3-top w3-black w3-large" style="z-index:4">

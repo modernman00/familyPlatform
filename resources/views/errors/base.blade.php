@@ -37,6 +37,7 @@
     </style>
 </head>
 <body>
+  @include('partials.pwa-splash')
     <div class="error-container">
         <div class="error-code">@yield('code')</div>
         <div class="error-message">@yield('message')</div>

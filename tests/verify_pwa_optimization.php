@@ -109,6 +109,10 @@ runCheck("PWA partials (pwa-head and pwa-register) exist with proper meta tags",
     if (!file_exists($pwaReg)) {
         throw new \Exception("Missing resources/views/partials/pwa-register.blade.php");
     }
+    $pwaSplash = $rootDir . '/resources/views/partials/pwa-splash.blade.php';
+    if (!file_exists($pwaSplash)) {
+        throw new \Exception("Missing resources/views/partials/pwa-splash.blade.php");
+    }
 
     $headContent = file_get_contents($pwaHead);
     $requiredHeadDirectives = [
@@ -117,11 +121,20 @@ runCheck("PWA partials (pwa-head and pwa-register) exist with proper meta tags",
         'name="mobile-web-app-capable"',
         'name="apple-mobile-web-app-capable"',
         'rel="apple-touch-icon"',
+        'fp-pwa-splash-active',
     ];
     foreach ($requiredHeadDirectives as $directive) {
         if (!str_contains($headContent, $directive)) {
             throw new \Exception("pwa-head missing directive: {$directive}");
         }
+    }
+
+    $splashContent = file_get_contents($pwaSplash);
+    if (!str_contains($splashContent, 'fp-pwa-splash')) {
+        throw new \Exception("pwa-splash missing #fp-pwa-splash container.");
+    }
+    if (!str_contains($splashContent, 'watchdog') && !str_contains($splashContent, 'setTimeout')) {
+        throw new \Exception("pwa-splash missing failsafe watchdog timer.");
     }
 
     $regContent = file_get_contents($pwaReg);
@@ -161,6 +174,9 @@ runCheck("All base layouts include pwa-head and pwa-register partials", function
         }
         if (!str_contains($content, 'partials.pwa-register') && !str_contains($content, 'pwa-register')) {
             throw new \Exception("Layout {$name} missing `@include('partials.pwa-register')`");
+        }
+        if (!str_contains($content, 'partials.pwa-splash') && !str_contains($content, 'pwa-splash')) {
+            throw new \Exception("Layout {$name} missing `@include('partials.pwa-splash')`");
         }
     }
 });

@@ -65,6 +65,12 @@ $router->map('GET', $adminSecretPath . '/broadcast', 'App\controller\admin\Admin
 $router->map('GET', '/admin/system', 'App\controller\admin\AdminController@system', 'admin_system');
 $router->map('GET', $adminSecretPath . '/system', 'App\controller\admin\AdminController@system', 'admin_system_secret');
 
+// pSEO CMS & URL REGISTRY
+$router->map('GET', '/admin/pseo', 'App\controller\admin\AdminController@pseo', 'admin_pseo');
+$router->map('GET', $adminSecretPath . '/pseo', 'App\controller\admin\AdminController@pseo', 'admin_pseo_secret');
+$router->map('POST', '/admin/pseo/create', 'App\controller\admin\AdminController@createPseoGuide', 'admin_pseo_create');
+$router->map('POST', $adminSecretPath . '/pseo/create', 'App\controller\admin\AdminController@createPseoGuide', 'admin_pseo_create_secret');
+
 // Admin APIs
 $router->map('GET', '/admin/api/metrics', 'App\controller\admin\AdminController@apiMetrics', 'admin_api_metrics');
 $router->map('POST', '/admin/api/users/status', 'App\controller\admin\AdminController@apiUpdateUserStatus', 'admin_api_user_status');

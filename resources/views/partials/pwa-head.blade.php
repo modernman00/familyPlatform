@@ -12,3 +12,16 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/public/img/favicon/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/public/img/favicon/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/public/img/favicon/favicon-16x16.png">
+{{-- Synchronous standalone PWA detector: adds class to <html> before initial paint to prevent white flash on iOS --}}
+<script nonce="{{ $nonce ?? '' }}">
+(function() {
+  try {
+    var isStandalone = (window.navigator && window.navigator.standalone === true) ||
+                       (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+                       (window.location.search && window.location.search.indexOf('source=pwa') !== -1);
+    if (isStandalone && !sessionStorage.getItem('fp_pwa_splash_shown')) {
+      document.documentElement.classList.add('fp-pwa-splash-active');
+    }
+  } catch (e) {}
+})();
+</script>

@@ -95,6 +95,10 @@ class AdminController extends BaseController
             'server_load' => number_format((float)$sysLoad, 2),
         ];
 
+        $decision = $this->adminService->getDecisionInsights($selectedApp);
+        $activeVisitors = $this->adminService->getActiveVisitors(15, 30, $selectedApp);
+        $presenceSummary = $this->adminService->getPresenceSummary(15, $selectedApp);
+
         view('admin.dashboard', [
             'title' => 'FamilyPlatform & Portfolio Executive Command Centre',
             'metrics' => $metrics,
@@ -104,6 +108,9 @@ class AdminController extends BaseController
             'recentBroadcasts' => $recentBroadcasts,
             'recentCampaigns' => $recentCampaigns,
             'health' => $health,
+            'decision' => $decision,
+            'activeVisitors' => $activeVisitors,
+            'presenceSummary' => $presenceSummary,
             'resultMetrics' => $resultMetrics,
             'adminPrefix' => $adminPrefix,
             'activeTab' => 'dashboard',
@@ -307,5 +314,108 @@ class AdminController extends BaseController
             'status' => $success ? 'success' : 'error',
             'message' => $success ? 'Application and opcode cache purged successfully.' : 'Failed to purge cache.'
         ]);
+    }
+
+    /**
+     * Programmatic SEO (pSEO) Matrix & CMS View
+     */
+    public function pseo(): void
+    {
+        $adminId = $this->getAuthenticatedAdminId();
+        $adminPrefix = '/' . trim((string)($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH') ?: 'admin'), '/');
+        $selectedApp = (string)($_GET['app'] ?? 'familyplatform');
+        $apps = $this->adminService->getSupportedApps();
+
+        // Load FamilyPlatform prompt guides
+        require_once dirname(__DIR__, 2) . '/services/PromptGuideService.php';
+        $familyGuides = \App\services\PromptGuideService::all();
+
+        // Optionally load PartyPlatform plan guides if available
+        $partyGuides = [];
+        $partyGuideFile = '/Users/waleolaogun/Sites/partyplatform/app/Services/PartyPlanGuideService.php';
+        if (file_exists($partyGuideFile)) {
+            require_once $partyGuideFile;
+            if (class_exists('\App\Services\PartyPlanGuideService')) {
+                $partyGuides = \App\Services\PartyPlanGuideService::all();
+            }
+        }
+
+        view('admin.pseo', [
+            'title' => 'Programmatic SEO (pSEO) Matrix & Dynamic CMS',
+            'familyGuides' => $familyGuides,
+            'partyGuides' => $partyGuides,
+            'selectedApp' => $selectedApp,
+            'apps' => $apps,
+            'adminPrefix' => $adminPrefix,
+            'activeTab' => 'pseo',
+        ]);
+    }
+
+    /**
+     * Create New Programmatic SEO Guide via CMS
+     */
+    public function createPseoGuide(): void
+    {
+        $adminId = $this->getAuthenticatedAdminId();
+        $platform = trim((string)($_POST['platform'] ?? 'familyplatform'));
+        $title = trim((string)($_POST['title'] ?? ''));
+        $slug = preg_replace('/[^a-z0-9\-]/', '', strtolower(trim((string)($_POST['slug'] ?? ''))));
+        $category = trim((string)($_POST['category'] ?? 'General'));
+        $readTime = trim((string)($_POST['read_time'] ?? '5 min read')) ?: '5 min read';
+        $summary = trim((string)($_POST['summary'] ?? ''));
+        $metaDescription = trim((string)($_POST['meta_description'] ?? ''));
+        $audioTip = trim((string)($_POST['audio_tip'] ?? 'Position recording microphone 12 inches away at chest level.'));
+
+        if (empty($slug) || empty($title) || empty($summary)) {
+            $_SESSION['error'] = 'Slug, title, and summary are required.';
+            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin/pseo'));
+            exit;
+        }
+
+        // Parse structured questions/prompts
+        $questionsRaw = trim((string)($_POST['questions_raw'] ?? ''));
+        $questionsList = array_filter(array_map('trim', explode("\n", $questionsRaw)));
+        if (empty($questionsList)) {
+            $questionsList = [
+                'What is your earliest memory of growing up?',
+                'Who influenced you the most during your early career?',
+                'What wisdom do you wish to pass on to the next generation?'
+            ];
+        }
+
+        $phases = [
+            [
+                'phase_title' => 'Core Generational Discovery & Archive Prompts',
+                'questions' => array_values($questionsList)
+            ]
+        ];
+
+        require_once dirname(__DIR__, 2) . '/services/PromptGuideService.php';
+        $success = \App\services\PromptGuideService::saveGuide([
+            'slug' => $slug,
+            'title' => $title,
+            'category' => $category,
+            'read_time' => $readTime,
+            'summary' => $summary,
+            'meta_description' => $metaDescription ?: $summary,
+            'audio_tip' => $audioTip,
+            'phases' => $phases,
+            'related_slugs' => ['questions-to-ask-grandmother-about-childhood', 'questions-to-ask-parents-family-lore'],
+        ]);
+
+        if ($success) {
+            // Trigger sitemap regeneration
+            try {
+                require_once dirname(__DIR__, 2) . '/services/SitemapService.php';
+                \App\services\SitemapService::generate();
+            } catch (\Throwable $e) {}
+
+            $_SESSION['success'] = "Programmatic SEO page '/prompts/{$slug}' created and indexed successfully!";
+        } else {
+            $_SESSION['error'] = 'Failed to create programmatic SEO page. Please check storage permissions.';
+        }
+
+        header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin/pseo'));
+        exit;
     }
 }

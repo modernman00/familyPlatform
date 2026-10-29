@@ -24,6 +24,9 @@ class OmniSearchService
 {
     private PDO $pdo;
 
+    /** @var array<string, array<string, mixed>> In-memory query micro-cache */
+    private static array $queryCache = [];
+
     public function __construct(?PDO $pdo = null)
     {
         $this->pdo = $pdo ?? Db::connect2();
@@ -526,8 +529,11 @@ class OmniSearchService
         }
 
         $cleanLower = strtolower($cleanQuery);
-        $tokens = array_filter(preg_split('/\s+/', $cleanLower) ?: [], static fn(string $t): bool => strlen($t) >= 2);
+        $allTokens = array_filter(preg_split('/\s+/', $cleanLower) ?: [], static fn(string $t): bool => strlen($t) >= 2);
+        // SecOps Defense: cap token expansion at 4 clauses to prevent wildcard denial-of-service
+        $tokens = array_slice($allTokens, 0, 4);
         $like = '%' . $cleanQuery . '%';
+        $prefixLike = $cleanQuery . '%';
 
         $results = [
             'members' => [],
@@ -537,7 +543,7 @@ class OmniSearchService
             'reels' => [],
         ];
 
-        // 1. Members Search
+        // 1. Members Search with Prefix Index Optimization & Phonetic Fallback
         try {
             $memberParams = [$like, $like, $like, $like];
             $tokenSql = '';
@@ -560,6 +566,10 @@ class OmniSearchService
                 $memberParams = array_merge($memberParams, $famCodes, $famCodes);
             }
 
+            // Append prefix parameters for ORDER BY relevance scoring
+            $memberParams[] = $prefixLike;
+            $memberParams[] = $prefixLike;
+
             $sqlMembers = "
                 SELECT DISTINCT 
                     p.id, 
@@ -569,10 +579,10 @@ class OmniSearchService
                     CONCAT(p.firstName, ' ', p.lastName) AS fullName,
                     pp.img AS profileImg
                 FROM personal p
-                LEFT JOIN profilepics pp ON pp.id = p.id
+                LEFT JOIN profilePics pp ON pp.id = p.id
                 WHERE ((p.firstName LIKE ? OR p.lastName LIKE ? OR CONCAT(p.firstName, ' ', p.lastName) LIKE ? OR p.famCode LIKE ?) {$tokenSql})
                 {$famFilter}
-                ORDER BY p.lastName ASC, p.firstName ASC
+                ORDER BY (p.firstName LIKE ? OR p.lastName LIKE ?) DESC, p.lastName ASC, p.firstName ASC
                 LIMIT 8
             ";
             $stmtM = $this->pdo->prepare($sqlMembers);
@@ -589,6 +599,58 @@ class OmniSearchService
                     'url' => '/organogram/' . urlencode((string)$r['id']) . '?mode=canvas',
                     'avatar' => (string)($r['profileImg'] ?? ''),
                 ];
+            }
+
+            // Phonetic & Typo-Tolerant Fallback: if 0 direct matches, query Soundex
+            if (empty($results['members']) && strlen($cleanQuery) >= 3) {
+                try {
+                    $soundexTerm = $tokens[0] ?? $cleanQuery;
+                    $soundexParams = [$soundexTerm, $soundexTerm];
+                    $soundexFamFilter = '';
+                    if (!empty($famCodes)) {
+                        $sPlaceholders = implode(',', array_fill(0, count($famCodes), '?'));
+                        $sPlaceholdersUf = implode(',', array_fill(0, count($famCodes), '?'));
+                        $soundexFamFilter = " AND (UPPER(TRIM(REPLACE(p.famCode, '#', ''))) IN ({$sPlaceholders}) OR EXISTS (
+                            SELECT 1 FROM user_families uf 
+                            WHERE uf.user_id = p.id 
+                              AND UPPER(TRIM(REPLACE(uf.family_code, '#', ''))) IN ({$sPlaceholdersUf})
+                        ))";
+                        $soundexParams = array_merge($soundexParams, $famCodes, $famCodes);
+                    }
+
+                    $sqlSoundex = "
+                        SELECT DISTINCT 
+                            p.id, 
+                            p.firstName, 
+                            p.lastName, 
+                            p.famCode, 
+                            CONCAT(p.firstName, ' ', p.lastName) AS fullName,
+                            pp.img AS profileImg
+                        FROM personal p
+                        LEFT JOIN profilePics pp ON pp.id = p.id
+                        WHERE (SOUNDEX(p.firstName) = SOUNDEX(?) OR SOUNDEX(p.lastName) = SOUNDEX(?))
+                        {$soundexFamFilter}
+                        ORDER BY p.lastName ASC, p.firstName ASC
+                        LIMIT 6
+                    ";
+                    $stmtS = $this->pdo->prepare($sqlSoundex);
+                    $stmtS->execute($soundexParams);
+                    $sRows = $stmtS->fetchAll(PDO::FETCH_ASSOC) ?: [];
+                    foreach ($sRows as $sr) {
+                        $results['members'][] = [
+                            'id' => (string)$sr['id'],
+                            'title' => trim((string)$sr['fullName']),
+                            'description' => 'Family Code: #' . ltrim((string)$sr['famCode'], '#') . ' • Phonetic match',
+                            'category' => 'Family Members',
+                            'icon' => 'bi-person-badge',
+                            'badge' => 'Phonetic Match',
+                            'url' => '/organogram/' . urlencode((string)$sr['id']) . '?mode=canvas',
+                            'avatar' => (string)($sr['profileImg'] ?? ''),
+                        ];
+                    }
+                } catch (\Throwable $soundexEx) {
+                    \error_log('[OmniSearchService Soundex Fallback] ' . $soundexEx->getMessage());
+                }
             }
         } catch (\Throwable $e) {
             \error_log('[OmniSearchService::searchData Members] ' . $e->getMessage());
@@ -709,7 +771,7 @@ class OmniSearchService
                 SELECT post_no, id, fullName, postMessage, postFamCode, post_time, post_img0
                 FROM post
                 WHERE ((postMessage LIKE ? OR fullName LIKE ?) {$tokenPSql})
-                  AND post_status = 'active'
+                  AND post_status = 'published'
                   {$postFamFilter}
                 ORDER BY post_no DESC
                 LIMIT 6
@@ -824,6 +886,12 @@ class OmniSearchService
      */
     public function search(string $query, string $userId, string $sessionFamCode = ''): array
     {
+        $cleanQuery = trim($query);
+        $cacheKey = hash('sha256', strtolower($cleanQuery) . ':' . $userId . ':' . $sessionFamCode);
+        if ($cleanQuery !== '' && isset(self::$queryCache[$cacheKey])) {
+            return self::$queryCache[$cacheKey];
+        }
+
         $famCodes = $this->resolveUserFamilyCodes($userId, $sessionFamCode);
         $primaryCode = $famCodes[0] ?? $sessionFamCode;
 
@@ -837,8 +905,8 @@ class OmniSearchService
             + count($data['events'])
             + count($data['reels']);
 
-        return [
-            'query' => trim($query),
+        $payload = [
+            'query' => $cleanQuery,
             'total' => $totalMatches,
             'categories' => [
                 'actions' => $actions,
@@ -855,5 +923,11 @@ class OmniSearchService
                 'has_data' => ($totalMatches - count($actions)) > 0,
             ],
         ];
+
+        if ($cleanQuery !== '') {
+            self::$queryCache[$cacheKey] = $payload;
+        }
+
+        return $payload;
     }
 }

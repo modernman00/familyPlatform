@@ -1,0 +1,54 @@
+# FamilyPlatform — Complete Knowledge Base & System Specification
+
+> The private, zero-tracking family social network, digital sanctuary, and living heritage organogram.
+
+## 1. System Overview & Mission
+FamilyPlatform was engineered from the ground up to solve the privacy, fragmentation, and preservation crises facing modern families. Public social media networks (Facebook, Instagram, TikTok) treat family milestones as engagement commodities, scraping children's photographs to train commercial algorithms and targeting families with predatory advertising. Meanwhile, unstructured chat apps (WhatsApp, Telegram) suffer from digital noise, lost memories, media expiration, and zero multi-generational structure.
+
+FamilyPlatform provides:
+- A closed, invitation-only digital haven for relatives.
+- An interactive living organogram (heritage family tree).
+- Sensory oral storytelling vaults capturing grandparent memories before they are lost.
+- Collaborative event coordinators for multi-generational gatherings and reunions.
+- Absolute data sovereignty: zero tracking scripts, zero data monetization, and 100% GDPR compliance.
+
+## 2. Core Modules & Functionality
+
+### 2.1 The Living Heritage Organogram (Family Tree)
+- **Multi-Generational Visualisation:** Displays ancestors, siblings, spouses, children, and extended branches with clear lineage connectors.
+- **Node Biographies:** Every family member node contains a private life capsule, including birth milestones, ancestral origins, voice memories, and tagged family heirlooms.
+- **Elder-Accessible Navigation:** Built with responsive canvas rendering, generous touch targets (minimum 44x44px), and intuitive pan-and-zoom controls tailored for non-technical elders.
+
+### 2.2 Voice & Memory Vault
+- **Oral History Archiving:** Enables grandchildren to record high-fidelity voice notes with grandparents directly in the browser or mobile web app.
+- **Sensory Prompt Engine:** Over 100 guided prompts (e.g., "The scent of mother's kitchen", "The journey to our first home", "Lessons from difficult times") designed to trigger rich reminiscence rather than generic recollections.
+- **Digital Keepsake Vault:** High-resolution preservation of handwritten recipe cards, historical letters, and vintage photographs attached permanently to ancestor nodes.
+
+### 2.3 The Family Round Table (Private Social Feed)
+- **Zero Algorithmic Manipulation:** Content appears in pure reverse-chronological order. There are no engagement-maximizing algorithms or outrage triggers.
+- **Private Announcements:** Instant family-wide broadcasts for births, graduations, weddings, and memorial tributes.
+- **Reactions & Micro-Interactions:** Safe, heart-centred family reactions with instant tactile feedback.
+
+### 2.4 Milestone & Reunion Logistics
+- **Event Coordination:** Step-by-step RSVP manager tracking dietary requirements, accessibility needs (e.g., step-free access for elders, safe play areas for toddlers), and arrival schedules.
+- **Collaborative Recipe Book:** Shared multi-generational recipe repository allowing family branches to preserve cherished culinary traditions across generations.
+
+## 3. Privacy, Security & Data Sovereignty Architecture
+
+- **Cryptographic Tenant Isolation:** Every family unit operates in an isolated namespace. Data from Family A cannot be accessed, enumerated, or viewed by Family B under any circumstance.
+- **Zero Third-Party Tracking:** No Google Analytics, no Facebook Pixels, no third-party ad brokers. Telemetry is purely self-hosted, anonymous, and focused on platform performance (Core Web Vitals).
+- **Protection of Minor Likenesses:** All media uploaded within the family sanctuary is shielded by authenticated session gates. Public search engine spiders (Googlebot, Bingbot) are explicitly restricted via robots.txt from accessing any member directories, images, or family records.
+- **Full Data Portability & Erasure:** Families maintain total ownership. At any time, a family administrator can export their complete archive or trigger permanent cryptographic erasure under GDPR Right to be Forgotten.
+
+## 4. Key Public Endpoints & Resources
+
+- **Home:** https://myfamilyplatform.com/
+- **Interactive Walkthrough:** https://myfamilyplatform.com/how-to-use
+- **Engineering & Security Playbook:** https://myfamilyplatform.com/playbook
+- **Editorial Journal:** https://myfamilyplatform.com/blog
+- **Published Articles:**
+  - https://myfamilyplatform.com/blog/digital-sovereignty-for-family-archives
+  - https://myfamilyplatform.com/blog/planning-unforgettable-family-reunion
+  - https://myfamilyplatform.com/blog/10-ways-to-chronicle-grandparents-stories
+- **Privacy Policy:** https://myfamilyplatform.com/privacy
+- **Terms of Service:** https://myfamilyplatform.com/terms

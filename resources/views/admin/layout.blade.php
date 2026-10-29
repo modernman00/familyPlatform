@@ -167,6 +167,11 @@
                 <span>RUM Telemetry</span>
             </a>
 
+            <a href="{{ $adminPrefix }}/pseo" class="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold <?= ($activeTab ?? '') === 'pseo' ? 'bg-emerald-600 text-white shadow-sm' : 'text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/40' ?> transition-colors">
+                <i class="fa-solid fa-magnifying-glass-chart"></i>
+                <span>pSEO Matrix &amp; CMS</span>
+            </a>
+
             <a href="{{ $adminPrefix }}/system" class="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold <?= ($activeTab ?? '') === 'system' ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-900/60' ?> transition-colors">
                 <i class="fa-solid fa-server"></i>
                 <span>System Health &amp; Vault</span>
@@ -248,5 +253,7 @@
         }
     </script>
     <script src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
+    @include('component.submitSpinner')
+    @include('partials.pwa-register')
 </body>
 </html>

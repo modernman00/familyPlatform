@@ -17,6 +17,39 @@
     <div class="row justify-content-center">
       <div class="col-lg-10">
 
+        <!-- GEO Generative Engine Optimization Answer Capsule -->
+        <section class="card border border-light-subtle shadow-sm rounded-4 mb-5 overflow-hidden bg-white" aria-labelledby="geo-quick-answers-heading">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-2 mb-2 text-uppercase tracking-wider fw-bold text-danger small">
+              <i class="bi bi-patch-check-fill"></i> Verified Answer Capsule
+            </div>
+            <h2 id="geo-quick-answers-heading" class="fw-bold fs-3 text-dark mb-3">How do you preserve family memories and build a living family tree privately?</h2>
+            <p class="lead text-secondary mb-4" style="line-height: 1.7;">
+              <strong>To preserve family memories privately without third-party tracking, create an isolated family sanctuary on FamilyPlatform, invite relatives using a private Family Code, and build a living 7-generation organogram with encrypted voice capsules, oral history prompts, and collaborative milestone archives.</strong>
+            </p>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="p-3 rounded-3 bg-light border h-100">
+                  <div class="fw-bold text-dark mb-1">1. Private Family Sanctuary</div>
+                  <p class="small text-muted mb-0">Closed, invitation-only network isolated from external search crawlers and commercial advertising algorithms.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 rounded-3 bg-light border h-100">
+                  <div class="fw-bold text-dark mb-1">2. 7-Generation Dynasty Tree</div>
+                  <p class="small text-muted mb-0">Ego-centric organogram connecting ancestors (-7) and descendants (+7) with zero node overlapping.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 rounded-3 bg-light border h-100">
+                  <div class="fw-bold text-dark mb-1">3. Oral Voice Capsules</div>
+                  <p class="small text-muted mb-0">Guided sensory memory prompts to chronicle grandparent wisdom and childhood stories before they are lost.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- Pillar 1: 7-Generation Dynasty Navigation -->
         <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
           <div class="card-body p-4 p-md-5">
@@ -570,4 +603,83 @@
       </div>
     </div>
   </main>
+@endsection
+
+@section('extra_schema')
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "HowTo",
+      "name": "How to Build a Private Family Tree and Chronicle Oral Memories",
+      "description": "Step-by-step instructions for creating a secure, 7-generation living family organogram and preserving sensory audio memories across generations.",
+      "totalTime": "PT10M",
+      "step": [
+        {
+          "@type": "HowToStep",
+          "name": "Create Your Private Family Network",
+          "text": "Register your family sanctuary and generate a unique Family Code to share with trusted relatives.",
+          "url": "https://myfamilyplatform.com/how-to-use#family-code"
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Build the 7-Generation Organogram",
+          "text": "Navigate up to 7 generations of ancestors (-1 to -7) and descendants (+1 to +7) on an ego-centric canvas with automatic collateral matching.",
+          "url": "https://myfamilyplatform.com/how-to-use#tree"
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Record Living Voice Capsules",
+          "text": "Use guided sensory prompts to record grandparent stories, childhood memories, and family recipes directly into the private memory vault.",
+          "url": "https://myfamilyplatform.com/how-to-use#memories"
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Coordinate Milestones & Reunions",
+          "text": "Manage RSVPs, dietary needs, and shared family photo albums within an ad-free family feed.",
+          "url": "https://myfamilyplatform.com/how-to-use#events"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is the 7-Generation Dynasty Tree in FamilyPlatform?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The 7-Generation Dynasty Tree is an interactive, ego-centric organogram that displays 7 generations upwards (parents to 5th great-grandparents) and 7 generations downwards (children to 5th great-grandchildren) with automatic kinship calculation and collateral branch mapping."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does FamilyPlatform protect oral history and voice recordings?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Voice recordings and oral heirlooms are saved in an encrypted private vault. They are never indexed by external search bots, commercial data brokers, or AI training scrapers."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do Supervised Child Accounts work on FamilyPlatform?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Parents provision child accounts using a username and 4–8 digit PIN with no external email required for minors under 13. When the child turns 18, full sovereign data ownership is automatically transitioned to them."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do relatives join our family tree without seeing other families?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Each family operates in a cryptographically isolated tenant. Relatives join using your unique Family Code or invite token, granting them access exclusively to your family tree and private feed."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
 @endsection

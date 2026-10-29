@@ -106,7 +106,7 @@ class TagController
             }
 
             $params[] = $famCode;
-            $params[] = $limit;
+            $params[] = (int)$limit;
 
             $sql = "
                 SELECT DISTINCT p.id, p.firstName, p.lastName, p.famCode, pp.img
@@ -129,7 +129,11 @@ class TagController
             ";
 
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute($params);
+            $paramIndex = 1;
+            foreach ($params as $paramValue) {
+                $stmt->bindValue($paramIndex++, $paramValue, is_int($paramValue) ? PDO::PARAM_INT : PDO::PARAM_STR);
+            }
+            $stmt->execute();
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             $members = [];

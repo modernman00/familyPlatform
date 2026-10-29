@@ -12,7 +12,10 @@
 (function () {
     'use strict';
 
-    if (window.__familyPwaInstall) return;
+    // Consolidated into canonical PWAManager (resources/asset/js/components/pwa/pwaManager.js)
+    if (window.__familyPwaInstall || window.pwaManager) return;
+    window.__familyPwaInstall = true;
+    return;
 
     let deferredPrompt = null;
     const DISMISS_STORAGE_KEY = 'fp_pwa_install_dismissed';

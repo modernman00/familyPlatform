@@ -199,14 +199,18 @@ class PWAManager {
    * 2. Android / Chromium Custom Install Banner
    */
   setupInstallPrompt() {
+    window.__familyPwaInstall = true;
+    this.wireAmbientInstallTriggers();
+
     window.addEventListener('beforeinstallprompt', (e) => {
       // Prevent standard browser mini-infobar
       e.preventDefault();
       this.deferredPrompt = e;
+      this.updateAmbientInstallButtons(true);
 
-      // Don't show if user dismissed within last 7 days or already installed
-      const dismissed = localStorage.getItem('pwa_install_dismissed');
-      if (dismissed && Date.now() - parseInt(dismissed, 10) < 7 * 86400000) {
+      // Don't show if user dismissed within last 14 days or already installed
+      const dismissed = localStorage.getItem('pwa_install_dismissed') || localStorage.getItem('fp_pwa_install_dismissed');
+      if (dismissed && Date.now() - parseInt(dismissed, 10) < 14 * 86400000) {
         return;
       }
 
@@ -216,8 +220,84 @@ class PWAManager {
     window.addEventListener('appinstalled', () => {
       this.deferredPrompt = null;
       document.getElementById('pwa-install-banner')?.remove();
+      this.updateAmbientInstallButtons(false);
+      if (window.familyTelemetry) window.familyTelemetry.track('pwa_installed');
       console.log('[PWA] FamilyPlatform successfully installed!');
     });
+  }
+
+  wireAmbientInstallTriggers() {
+    if (this.isStandalone) {
+      this.updateAmbientInstallButtons(false);
+      return;
+    }
+
+    // On iOS Safari, we can display ambient install buttons immediately
+    if (this.isIOS) {
+      this.updateAmbientInstallButtons(true);
+    }
+
+    document.addEventListener('click', (e) => {
+      const trigger = e.target.closest('.pwa-ambient-install-trigger, #pwaAmbientInstallBtn, #pwaAccountSettingInstallBtn');
+      if (trigger) {
+        e.preventDefault();
+        this.triggerAppInstall();
+      }
+    });
+  }
+
+  updateAmbientInstallButtons(available) {
+    const navbarLi = document.getElementById('pwaAmbientInstallLi');
+    const accountCard = document.getElementById('pwaAccountSettingCard');
+
+    if (this.isStandalone) {
+      if (navbarLi) navbarLi.style.display = 'none';
+      if (accountCard) {
+        accountCard.style.display = 'block';
+        const badge = document.getElementById('pwaInstallStateBadge');
+        if (badge) {
+          badge.className = 'badge bg-success-subtle text-success border';
+          badge.textContent = 'App Installed ✅';
+        }
+        const btn = document.getElementById('pwaAccountSettingInstallBtn');
+        if (btn) btn.style.display = 'none';
+        const hint = document.getElementById('pwaAccountSettingHint');
+        if (hint) hint.textContent = 'You are currently running FamilyPlatform in native installed app mode. Automatic background updates and offline storage are active.';
+      }
+      return;
+    }
+
+    if (available) {
+      if (navbarLi) navbarLi.style.display = 'block';
+      if (accountCard) accountCard.style.display = 'block';
+    } else {
+      if (navbarLi) navbarLi.style.display = 'none';
+      if (accountCard) accountCard.style.display = 'none';
+    }
+  }
+
+  triggerAppInstall() {
+    if (this.deferredPrompt) {
+      this.deferredPrompt.prompt();
+      this.deferredPrompt.userChoice.then(({ outcome }) => {
+        if (outcome === 'accepted') {
+          if (window.familyTelemetry) window.familyTelemetry.track('pwa_installed');
+          this.updateAmbientInstallButtons(false);
+        }
+        this.deferredPrompt = null;
+      });
+    } else if (this.isIOS) {
+      this.showIOSOverlay();
+    } else {
+      if (window.Swal) {
+        window.Swal.fire({
+          icon: 'info',
+          title: 'Install FamilyPlatform',
+          html: '<p style="font-size:0.95rem;">To install this app on your device, open your browser menu (<strong>⋮</strong> or <strong>Share</strong>) and choose <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong>.</p>',
+          confirmButtonColor: '#a31621'
+        });
+      }
+    }
   }
 
   showInstallBanner() {
@@ -255,11 +335,17 @@ class PWAManager {
       this.deferredPrompt.prompt();
       const { outcome } = await this.deferredPrompt.userChoice;
       console.log(`[PWA] Install prompt outcome: ${outcome}`);
+      if (outcome === 'accepted') {
+        if (window.familyTelemetry) window.familyTelemetry.track('pwa_installed');
+      }
       this.deferredPrompt = null;
     });
 
     document.getElementById('pwa-banner-close')?.addEventListener('click', () => {
-      localStorage.setItem('pwa_install_dismissed', Date.now().toString());
+      const nowStr = Date.now().toString();
+      localStorage.setItem('pwa_install_dismissed', nowStr);
+      localStorage.setItem('fp_pwa_install_dismissed', nowStr);
+      if (window.familyTelemetry) window.familyTelemetry.track('pwa_install_dismissed');
       banner.classList.remove('show');
       setTimeout(() => banner.remove(), 400);
     });
@@ -271,8 +357,8 @@ class PWAManager {
   setupIOSPrompt() {
     if (!this.isIOS || this.isStandalone) return;
 
-    const dismissed = localStorage.getItem('pwa_ios_dismissed');
-    if (dismissed && Date.now() - parseInt(dismissed, 10) < 7 * 86400000) {
+    const dismissed = localStorage.getItem('pwa_ios_dismissed') || localStorage.getItem('fp_pwa_install_dismissed');
+    if (dismissed && Date.now() - parseInt(dismissed, 10) < 14 * 86400000) {
       return;
     }
 
@@ -317,7 +403,10 @@ class PWAManager {
     setTimeout(() => overlay.classList.add('show'), 100);
 
     document.getElementById('pwa-ios-close')?.addEventListener('click', () => {
-      localStorage.setItem('pwa_ios_dismissed', Date.now().toString());
+      const nowStr = Date.now().toString();
+      localStorage.setItem('pwa_ios_dismissed', nowStr);
+      localStorage.setItem('fp_pwa_install_dismissed', nowStr);
+      if (window.familyTelemetry) window.familyTelemetry.track('pwa_install_dismissed');
       overlay.classList.remove('show');
       setTimeout(() => overlay.remove(), 400);
     });

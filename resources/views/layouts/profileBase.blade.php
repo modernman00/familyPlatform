@@ -109,6 +109,7 @@
 </head>
 
 <body data-page-id="@yield('data-page-id')" data-spy="scroll">
+  @include('partials.pwa-splash')
 
   @include('layouts.navbar')
 
@@ -141,7 +142,6 @@
   <script nonce="{{ $nonce }}" src="/public/js/vendor.js?v={{ assetVersion('js/vendor.js') }}"></script>
   <script nonce="{{ $nonce }}" src="/public/js/index.js?v={{ assetVersion('js/index.js') }}"></script>
   <script nonce="{{ $nonce }}" src="/public/js/telemetry.js?v=1.0.0"></script>
-  <script nonce="{{ $nonce }}" src="/public/js/pwa-install.js?v=1.0.0"></script>
   <script nonce="{{ $nonce }}" src="/public/js/pwa-notifications.js?v=1.0.0" defer></script>
   <script nonce="{{ $nonce }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>
   <script nonce="{{ $nonce }}" src="/public/js/profilePhotoViewer.js?v={{ assetVersion('js/profilePhotoViewer.js') }}" defer></script>

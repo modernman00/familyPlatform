@@ -6,6 +6,7 @@
 
 
 <body class="w3-theme-l5" id="@yield('data-page-id')">
+  @include('partials.pwa-splash')
 
 <!-- Navbar -->
 @include('layouts.nav')

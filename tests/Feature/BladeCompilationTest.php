@@ -49,8 +49,8 @@ final class BladeCompilationTest extends TestCase
                 $compiledCode = $this->blade->compile($viewName);
                 $this->assertNotEmpty($compiledCode, "Compiled code should not be empty for view: {$viewName}");
 
-                // Validate compiled PHP syntax using token_get_all
-                $tokens = @token_get_all("<?php\n" . $compiledCode);
+                // Validate compiled PHP syntax using TOKEN_PARSE to catch any PHP ParseError (e.g. BladeOne pipeEnable || collisions)
+                $tokens = token_get_all($compiledCode, TOKEN_PARSE);
                 $this->assertNotEmpty($tokens, "Token stream should not be empty for view: {$viewName}");
                 $compiledCount++;
             } catch (\Throwable $e) {
