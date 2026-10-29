@@ -215,8 +215,8 @@ runCheck("Web Share Target API Level 2 is fully configured across manifest, SW, 
     }
 });
 
-// TEST 8: Web Share API (Sharing FROM PWA to Social Media)
-runCheck("Web Share API is integrated in feedComponent.js and post-card.blade.php", function() use ($rootDir) {
+// TEST 8: Family Post Privacy Guard (Postings protected from external reshare)
+runCheck("Family post privacy: post-card.blade.php is protected from reshare", function() use ($rootDir) {
     $feedCompPath = $rootDir . '/resources/asset/js/components/profilePage/feedComponent.js';
     $feedContent = file_get_contents($feedCompPath);
     if (!str_contains($feedContent, 'sharePostToSocialMedia') || !str_contains($feedContent, 'navigator.share')) {
@@ -228,8 +228,11 @@ runCheck("Web Share API is integrated in feedComponent.js and post-card.blade.ph
 
     $cardPath = $rootDir . '/resources/views/components/feed/post-card.blade.php';
     $cardContent = file_get_contents($cardPath);
-    if (!str_contains($cardContent, 'sharePostToSocialMedia(post)')) {
-        throw new \Exception("post-card.blade.php missing Share button trigger.");
+    if (str_contains($cardContent, 'sharePostToSocialMedia(post)')) {
+        throw new \Exception("post-card.blade.php contains sharePostToSocialMedia - family posts must be protected from reshare.");
+    }
+    if (str_contains($cardContent, 'bi-send') && str_contains($cardContent, 'Share this family memory')) {
+        throw new \Exception("post-card.blade.php contains share icon button - family posts must be protected from reshare.");
     }
 });
 

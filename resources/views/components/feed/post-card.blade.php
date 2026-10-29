@@ -496,15 +496,7 @@
         <i class="bi bi-chat" style="font-size: 1.35rem; line-height: 1;"></i>
       </button>
 
-      <!-- Share Button (Web Share API) -->
-      <button class="btn btn-action-glyph rounded-circle"
-              style="min-width: 44px; min-height: 44px;"
-              type="button"
-              title="Share this family memory"
-              aria-label="Share this family memory"
-              @click="sharePostToSocialMedia(post)">
-        <i class="bi bi-send" style="font-size: 1.25rem; line-height: 1;"></i>
-      </button>
+
     </div>
 
     <!-- Bookmark / Save Memory Button (Right-Aligned) -->
@@ -669,6 +661,7 @@
             <!-- Selected GIF preview (inside the field, like Facebook) -->
             <div x-show="commentGifs[post.post_no]" x-cloak class="comment-composer__gif" data-testid="comment-gif-preview">
               <img :src="commentGifs[post.post_no]" alt="Selected GIF"
+                   style="display:block; width:auto; height:auto; max-width:200px; max-height:120px; object-fit:contain;"
                    x-on:error="clearCommentGif(post.post_no)">
               <button type="button" @click="clearCommentGif(post.post_no)" aria-label="Remove GIF">
                 <i class="bi bi-x-lg"></i>
@@ -709,7 +702,7 @@
     <div class="d-flex flex-column gap-2">
       <template x-for="c in threadedComments(post)" :key="c.comment_no">
         <div class="d-flex align-items-start gap-2 feed-comment-item" :id="'comment' + c.comment_no" :class="'comment' + c.comment_no" :data-comment-no="c.comment_no" :style="isReply(post, c) ? 'margin-left: 2.25rem;' : ''" :data-reply="isReply(post, c) ? 'true' : 'false'">
-          <img :src="c.profileImg" alt="Avatar" class="rounded-circle" width="32" height="32" style="object-fit: cover; margin-top: 2px;">
+          <img :src="c.profileImg" alt="Avatar" class="rounded-circle flex-shrink-0 feed-comment-avatar" width="32" height="32" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; max-width: 32px; max-height: 32px; aspect-ratio: 1 / 1; object-fit: cover; margin-top: 2px; border-radius: 50%; flex-shrink: 0;">
           <div class="flex-grow-1">
             <!-- Comment Bubble -->
             <template x-if="editingCommentNo !== c.comment_no">
@@ -718,7 +711,7 @@
                 <div x-show="c.comment" class="mt-1 comment-bubble-text" style="font-size: 0.875rem; color: #050505; word-break: break-word; line-height: 1.35; font-variant-emoji: emoji;" x-html="renderCommentText(c.comment)"></div>
                 <template x-if="c.gif_url">
                   <img :src="c.gif_url" alt="GIF" loading="lazy" class="mt-1 rounded-3 comment-gif" data-testid="comment-gif"
-                       style="display:block; max-width:100%; max-height:220px; object-fit:contain;">
+                       style="display:block; width:auto; height:auto; max-width:100%; max-height:220px; object-fit:contain;">
                 </template>
               </div>
             </template>
