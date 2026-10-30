@@ -202,7 +202,11 @@ body {
     font-size: 1.25rem;
     font-weight: 700;
     margin-bottom: 1rem;
-    color: var(--text-main);
+    color: #0f172a !important;
+}
+
+.feature-card .text-muted {
+    color: #475569 !important;
 }
 
 /* --- Legal / Document Center Layout --- */

@@ -31,7 +31,7 @@
     .stitch-auth-container {
         max-width: 440px;
         margin: 3rem auto 5rem;
-        background: #ffffff;
+        background: #ffffff !important;
         border-radius: 20px;
         padding: 3rem 2.5rem;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
@@ -41,14 +41,14 @@
     .stitch-title {
         font-size: 1.75rem;
         font-weight: 800;
-        color: #1A1A24;
+        color: #1A1A24 !important;
         margin-bottom: 0.5rem;
         letter-spacing: -0.5px;
     }
 
     .stitch-subtitle {
         font-size: 0.95rem;
-        color: #6B7280;
+        color: #6B7280 !important;
         margin-bottom: 2rem;
     }
 
@@ -56,7 +56,7 @@
         display: flex;
         align-items: center;
         margin: 2rem 0;
-        color: #6B7280;
+        color: #6B7280 !important;
         font-size: 0.85rem;
     }
 
@@ -78,14 +78,16 @@
 
     .styleform_form .form-label {
         font-weight: 600;
-        color: #374151;
+        color: #374151 !important;
         font-size: 0.85rem;
         margin-bottom: 0.5rem;
     }
 
     .styleform_form .form-control {
+        background-color: #ffffff !important;
+        color: #111827 !important;
         border-radius: 8px;
-        border: 1px solid #D1D5DB;
+        border: 1px solid #D1D5DB !important;
         padding: 0.75rem 1rem;
         font-size: 0.95rem;
         box-shadow: none;
@@ -93,7 +95,7 @@
     }
 
     .styleform_form .form-control::placeholder {
-        color: #9CA3AF;
+        color: #9CA3AF !important;
     }
 
     .styleform_form .form-control:focus {

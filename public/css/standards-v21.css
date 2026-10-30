@@ -59,9 +59,9 @@
 }
 
 /* 🌙 Super Premium Dark Theme & Brand Colour Luminance Inversion */
-body.dark-mode,
-body.dark-theme,
-[data-bs-theme="dark"] {
+body.dark-mode:not(.public-layout):not([data-surface="light"]),
+body.dark-theme:not(.public-layout):not([data-surface="light"]),
+[data-bs-theme="dark"]:not(.public-layout):not([data-surface="light"]) {
   /* Neutral OLED-Black & Elevated Charcoal Surfaces */
   --canvas-ground: #000000;
   --surface-card: #141416;
@@ -98,25 +98,25 @@ body.dark-theme,
   color-scheme: dark;
 }
 
-body.dark-mode,
-body.dark-theme,
-[data-bs-theme="dark"] {
+body.dark-mode:not(.public-layout):not([data-surface="light"]),
+body.dark-theme:not(.public-layout):not([data-surface="light"]),
+[data-bs-theme="dark"]:not(.public-layout):not([data-surface="light"]) {
   background-color: var(--canvas-ground, #000000) !important;
   color: var(--text-main, #f8fafc) !important;
 }
 
-body.dark-mode .card,
-body.dark-mode .post-composer,
-body.dark-mode .profile-card,
-body.dark-mode .modal-content,
-body.dark-theme .card,
-body.dark-theme .post-composer,
-body.dark-theme .profile-card,
-body.dark-theme .modal-content,
-[data-bs-theme="dark"] .card,
-[data-bs-theme="dark"] .post-composer,
-[data-bs-theme="dark"] .profile-card,
-[data-bs-theme="dark"] .modal-content {
+body.dark-mode:not(.public-layout):not([data-surface="light"]) .card,
+body.dark-mode:not(.public-layout):not([data-surface="light"]) .post-composer,
+body.dark-mode:not(.public-layout):not([data-surface="light"]) .profile-card,
+body.dark-mode:not(.public-layout):not([data-surface="light"]) .modal-content,
+body.dark-theme:not(.public-layout):not([data-surface="light"]) .card,
+body.dark-theme:not(.public-layout):not([data-surface="light"]) .post-composer,
+body.dark-theme:not(.public-layout):not([data-surface="light"]) .profile-card,
+body.dark-theme:not(.public-layout):not([data-surface="light"]) .modal-content,
+[data-bs-theme="dark"]:not(.public-layout):not([data-surface="light"]) .card,
+[data-bs-theme="dark"]:not(.public-layout):not([data-surface="light"]) .post-composer,
+[data-bs-theme="dark"]:not(.public-layout):not([data-surface="light"]) .profile-card,
+[data-bs-theme="dark"]:not(.public-layout):not([data-surface="light"]) .modal-content {
   background-color: var(--surface-card, #141416) !important;
   color: var(--text-main, #f8fafc) !important;
   border-color: var(--border-subtle, rgba(255, 255, 255, 0.12)) !important;
@@ -430,6 +430,91 @@ body.dark-theme .form-control::placeholder,
 [data-bs-theme="dark"] .form-control::placeholder {
   color: #94a3b8 !important;
   opacity: 1 !important;
+}
+
+/* =====================================================================
+ * 🛡️ Public Layout & Light Surface Ghost Typography Invariant Shield
+ * Guarantees zero white-on-white / zero dark-on-dark contrast failures
+ * across all public marketing and authentication pages.
+ * ===================================================================== */
+body.public-layout,
+body[data-surface="light"],
+body.surface-light,
+.public-layout,
+[data-surface="light"] {
+  --canvas-ground: #f8fafc !important;
+  --surface-card: #ffffff !important;
+  --surface-elevated: #ffffff !important;
+  --border-subtle: rgba(0, 0, 0, 0.07) !important;
+  --border-hairline: rgba(0, 0, 0, 0.04) !important;
+  --text-main: #0f172a !important;
+  --text-secondary: #475569 !important;
+  --text-tertiary: #94a3b8 !important;
+  --text-muted: #475569 !important;
+  --text-muted-aa: #475569 !important;
+  --card-bg: #ffffff !important;
+  --text-color: #0f172a !important;
+  color-scheme: light !important;
+}
+
+body.public-layout,
+body.dark-mode.public-layout,
+body.dark-mode[data-surface="light"],
+body.dark-theme[data-surface="light"],
+[data-bs-theme="dark"][data-surface="light"] {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* Explicit Form Label & Input Contrast on Light Surfaces / Auth Containers */
+body.dark-mode :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-label, .col-form-label, label),
+body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-label, .col-form-label, label),
+[data-bs-theme="dark"] :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-label, .col-form-label, label),
+.public-layout :is(.form-label, .col-form-label, label),
+.stitch-auth-container :is(.form-label, .col-form-label, label) {
+  color: #374151 !important;
+}
+
+body.dark-mode :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-control, .form-select, input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]), textarea),
+body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-control, .form-select, input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]), textarea),
+[data-bs-theme="dark"] :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-control, .form-select, input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]), textarea),
+.public-layout :is(.form-control, .form-select),
+.stitch-auth-container :is(.form-control, .form-select) {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #d1d5db !important;
+}
+
+body.dark-mode :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-control, input, textarea)::placeholder,
+body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-control, input, textarea)::placeholder,
+[data-bs-theme="dark"] :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-control, input, textarea)::placeholder,
+.public-layout :is(.form-control, input, textarea)::placeholder,
+.stitch-auth-container :is(.form-control, input, textarea)::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1 !important;
+}
+
+/* Typography Headings & Body on Light Surfaces */
+body.dark-mode :is(.public-layout, [data-surface="light"], .surface-light) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .feature-title, .stitch-title),
+body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .feature-title, .stitch-title),
+[data-bs-theme="dark"] :is(.public-layout, [data-surface="light"], .surface-light) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .feature-title, .stitch-title),
+.public-layout :is(h1, h2, h3, h4, h5, h6, .feature-title, .stitch-title) {
+  color: #0f172a !important;
+}
+
+body.dark-mode :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container, .feature-card) :is(.text-muted, .text-secondary, .stitch-subtitle, .stitch-divider, .stitch-checkbox-group),
+body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container, .feature-card) :is(.text-muted, .text-secondary, .stitch-subtitle, .stitch-divider, .stitch-checkbox-group),
+[data-bs-theme="dark"] :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container, .feature-card) :is(.text-muted, .text-secondary, .stitch-subtitle, .stitch-divider, .stitch-checkbox-group),
+.public-layout :is(.text-muted, .text-secondary),
+.stitch-auth-container :is(.text-muted, .text-secondary, .stitch-subtitle, .stitch-divider, .stitch-checkbox-group) {
+  color: #475569 !important;
+}
+
+body.dark-mode :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container, .feature-card) .text-dark,
+body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container, .feature-card) .text-dark,
+[data-bs-theme="dark"] :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container, .feature-card) .text-dark,
+.public-layout .text-dark {
+  color: #0f172a !important;
 }
 
 /* Dark-Mode Tabs, Nav Pills & Secondary Buttons */

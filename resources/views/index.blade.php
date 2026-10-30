@@ -47,8 +47,8 @@
     <div class="container">
       <div class="row text-center mb-5">
         <div class="col-12">
-          <h2 class="fw-bold fs-1" style="color: var(--text-main);">Everything your family needs</h2>
-          <p class="text-muted fs-5 mt-2">Built from the ground up to keep your family connected, no matter the distance.</p>
+          <h2 class="fw-bold fs-1" style="color: #0f172a;">Everything your family needs</h2>
+          <p class="fs-5 mt-2" style="color: #475569;">Built from the ground up to keep your family connected, no matter the distance.</p>
         </div>
       </div>
       
@@ -92,8 +92,8 @@
         <div class="badge rounded-pill px-3 py-2 mb-2 fw-bold text-uppercase" style="background: rgba(163,22,33,0.1); color: var(--brand-primary, #a31621); font-size: 0.8rem; letter-spacing: 0.05em;">
           🛠️ Free Generational Discovery Tools
         </div>
-        <h2 class="display-6 fw-bold mb-3 text-dark">Interactive Heritage Utilities</h2>
-        <p class="text-secondary fs-5 mb-0" style="line-height: 1.6;">
+        <h2 class="display-6 fw-bold mb-3 text-dark" style="color: #0f172a;">Interactive Heritage Utilities</h2>
+        <p class="text-secondary fs-5 mb-0" style="color: #475569; line-height: 1.6;">
           Explore our free, instant genealogical intelligence engines. No registration or app download required.
         </p>
       </div>
@@ -179,8 +179,8 @@
           <div class="badge rounded-pill px-3 py-2 mb-2 fw-bold text-uppercase tracking-wider" style="background: rgba(163,22,33, 0.12); color: #8a1019; font-size: 0.8rem; letter-spacing: 0.05em;">
             📰 Family Stories &amp; Heritage
           </div>
-          <h2 class="fw-bold fs-1 mb-1" style="color: var(--text-main);">From Our Blog</h2>
-          <p class="text-muted mb-0">Insights on keeping generations connected, preserving memories, and private family bonding.</p>
+          <h2 class="fw-bold fs-1 mb-1" style="color: #0f172a;">From Our Blog</h2>
+          <p class="mb-0" style="color: #475569;">Insights on keeping generations connected, preserving memories, and private family bonding.</p>
         </div>
         <div>
           <a href="/blogs" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold" style="color: var(--brand-secondary, #7a0e16); border-color: rgba(122,14,22,0.3);">
@@ -287,8 +287,8 @@
         <div class="badge rounded-pill px-3 py-2 mb-2 fw-bold text-uppercase tracking-wider" style="background: rgba(16, 185, 129, 0.12); color: #059669; font-size: 0.8rem;">
           Frequently Asked Questions
         </div>
-        <h2 class="fw-bold fs-1" style="color: var(--text-main);">Everything You Need to Know</h2>
-        <p class="text-muted fs-5 mt-2">Clear, straightforward answers about privacy, family coordination, and features.</p>
+        <h2 class="fw-bold fs-1" style="color: #0f172a;">Everything You Need to Know</h2>
+        <p class="fs-5 mt-2" style="color: #475569;">Clear, straightforward answers about privacy, family coordination, and features.</p>
       </div>
 
       <div class="d-flex flex-column gap-3" itemscope itemtype="https://schema.org/FAQPage">
