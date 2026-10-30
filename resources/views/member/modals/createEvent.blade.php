@@ -260,7 +260,7 @@
                                 <span>Venue / Location</span>
                                 <span class="text-muted" style="font-size: 0.72rem; font-weight: normal;">Park, museum, route, or postcode</span>
                             </label>
-                            <input type="text" class="form-control" id="eventLocation" placeholder="e.g. Richmond Park, Science Museum, Cotswolds">
+                            <input type="text" class="form-control" id="eventLocation" data-optional="true" placeholder="e.g. Richmond Park, Science Museum, Cotswolds">
                         </div>
 
                         <!-- 📍 Proximity Localisation & Radius Card -->
@@ -329,7 +329,7 @@
                             <!-- Scout Input Bar -->
                             <div class="input-group input-group-sm mb-2 shadow-sm rounded-3 overflow-hidden">
                                 <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-geo-alt-fill text-danger"></i></span>
-                                <input type="text" class="form-control border-start-0" id="scoutLocationInput" placeholder="Town, city or outward district (e.g. Richmond, SW19)" style="min-height: 44px; font-size: 0.82rem;">
+                                <input type="text" class="form-control border-start-0" id="scoutLocationInput" data-optional="true" placeholder="Town, city or outward district (e.g. Richmond, SW19)" style="min-height: 44px; font-size: 0.82rem;">
                                 <button type="button" class="btn d-inline-flex align-items-center gap-1.5 px-3 fw-bold text-white shadow-sm" id="btnRunScout" style="min-height: 44px; font-size: 0.82rem; white-space: nowrap; flex-shrink: 0; background: linear-gradient(135deg, #a31621 0%, #7e101a 100%); border: 1px solid rgba(255,215,0,0.3);">
                                     <i class="bi bi-compass"></i>
                                     <span>Scout Outings</span>

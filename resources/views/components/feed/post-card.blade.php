@@ -939,6 +939,8 @@
     <!-- Comments List -->
     <div class="d-flex flex-column gap-2">
       <template x-for="c in threadedComments(post)" :key="c.comment_no">
+        {{-- x-for clones only ONE root element: wrap the item and its thread-collapse toggle together --}}
+        <div>
         <div class="d-flex align-items-start gap-2 feed-comment-item" :id="'comment' + c.comment_no" :class="'comment' + c.comment_no" :data-comment-no="c.comment_no" :style="isReply(post, c) ? 'margin-left: 2.25rem;' : ''" :data-reply="isReply(post, c) ? 'true' : 'false'">
           <img :src="c.profileImg" alt="Avatar" class="rounded-circle flex-shrink-0 feed-comment-avatar" width="32" height="32" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; max-width: 32px; max-height: 32px; aspect-ratio: 1 / 1; object-fit: cover; margin-top: 2px; border-radius: 50%; flex-shrink: 0;">
           <div class="flex-grow-1">
@@ -1078,6 +1080,7 @@
             </button>
           </div>
         </template>
+        </div>
       </template>
     </div>
   </div>

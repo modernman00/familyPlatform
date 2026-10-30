@@ -45,6 +45,8 @@ export default class FormHelper {
                 // rid it off the submit and token
                 if (['submit', 'button', 'showPassword_id', 'g-recaptcha-response', 'cancel', 'token', 'checkbox_id'].includes(post.name) ||
                     ['button'].includes(post.id) || ['button'].includes(post.type)) return;
+                // controls explicitly marked optional never block submission
+                if (post.dataset && post.dataset.optional === 'true') continue;
                 // check if there is no value
 
                 if (['spouse_name', 'spouse_mobile', 'spouse_email', 'father_mobile', 'father_email', 'mother_mobile', 'maiden_name', 'mother_email'].includes(post.name)) {

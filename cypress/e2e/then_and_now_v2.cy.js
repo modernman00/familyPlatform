@@ -28,11 +28,12 @@ describe('Then & Now v2 (RFC-0003)', () => {
     };
 
     it('puts Then & Now one tap away on the feed composer and labels it in the post window', () => {
-        cy.get('.then-now-cta').should('be.visible').and('contain.text', 'Then & Now').click();
+        // The composer quick-actions are icon-only buttons; the Then & Now one is identified by its accessible name.
+        cy.get('.composer-quick-actions button[aria-label*="Then & Now"]').should('be.visible').click();
         cy.get('#postModal').should('be.visible');
         cy.get('#thenNowContainer').should('not.have.class', 'd-none');
         cy.get('#thenNowFlag').should('have.value', '1');
-        cy.get('#addThenNowBtn').scrollIntoView().should('be.visible').and('contain.text', 'Then & Now');
+        cy.get('#addThenNowBtn').scrollIntoView().should('be.visible').and('have.attr', 'title').and('contain', 'Then & Now'); // icon-only tool, labelled by its title
         cy.screenshot('then-now-entry-points', { capture: 'viewport' });
     });
 
@@ -97,7 +98,7 @@ describe('Then & Now v2 (RFC-0003)', () => {
         cy.get('.ghost-cam').should('not.exist');
     });
 
-    it('offers a Then & Now prompt on a birthday that is today', () => {
+    it('lists a birthday that is today as a milestone without any share button (upcoming milestones are non-shareable)', () => {
         cy.intercept('GET', '/api/memories/today', {
             statusCode: 200,
             body: { status: 'success', data: { memories: [], milestones: [{
@@ -109,10 +110,12 @@ describe('Then & Now v2 (RFC-0003)', () => {
         cy.viewport(1440, 900); // the milestones widget lives in the desktop right column
         cy.reload();
         cy.wait('@milestones');
-        cy.get('button[aria-label^="Share a Then and Now for"]').should('have.length.at.least', 1);
-        cy.get('button[aria-label^="Share a Then and Now for"]').first().scrollIntoView().should('be.visible').click();
-        cy.get('#thenNowContainer').should('not.have.class', 'd-none');
-        cy.get('#postMessage').invoke('val').should('contain', "Ada Lovelace's birthday").and('contain', '#ThenAndNow');
+        // Milestone cards no longer carry a Then & Now share button (CEO/TAT mandate: zero share buttons
+        // on upcoming milestones); Then & Now stays one tap away on the composer instead.
+        cy.get('#memoriesMilestonesWidget, [data-id="memoriesMilestonesWidget"]').first()
+            .should('contain.text', "Ada Lovelace's Birthday");
+        cy.get('button[aria-label^="Share a Then and Now for"]').should('not.exist');
+        cy.get('.composer-quick-actions button[aria-label*="Then & Now"]').should('exist');
     });
 
     it('shows the Then & Now timeline on the member\'s own profile, with no share-image button (private family content)', () => {

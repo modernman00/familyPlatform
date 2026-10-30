@@ -31,8 +31,8 @@ describe('Threaded comment replies', () => {
         const post = () => cy.contains(marker).parents('.card');
 
         post().within(() => {
-            cy.contains('button', 'Comment').click();
-            cy.get('input[aria-label="Write a comment"]').type(top);
+            cy.get('button[aria-label="Comment on this post"]').click();
+            cy.get('input.comment-composer__input').type(top);
             cy.get('button[aria-label="Post comment"]').click();
         });
         cy.wait('@commentReq', { timeout: 90000 }).its('response.statusCode').should('eq', 200);
@@ -42,7 +42,7 @@ describe('Threaded comment replies', () => {
             cy.get('[data-testid="comment-reply-btn"]').click();
         });
         post().find('[data-testid="comment-replying-to"]').should('be.visible');
-        post().find('input[aria-label="Write a comment"]').type(reply);
+        post().find('input.comment-composer__input').type(reply);
         post().find('button[aria-label="Post comment"]').click();
         cy.wait('@commentReq', { timeout: 90000 }).its('response.statusCode').should('eq', 200);
         post().find('[data-testid="comment-replying-to"]').should('not.be.visible');
@@ -53,7 +53,7 @@ describe('Threaded comment replies', () => {
         post().contains('.comment-bubble-box', reply).closest('[data-reply]').within(() => {
             cy.get('[data-testid="comment-reply-btn"]').click();
         });
-        post().find('input[aria-label="Write a comment"]').type(nested);
+        post().find('input.comment-composer__input').type(nested);
         post().find('button[aria-label="Post comment"]').click();
         cy.wait('@commentReq', { timeout: 90000 }).its('response.statusCode').should('eq', 200);
         post().contains('.comment-bubble-box', nested).closest('[data-reply]').should('have.attr', 'data-reply', 'true');
@@ -80,8 +80,8 @@ describe('Threaded comment replies', () => {
         const post = () => cy.contains(marker).parents('.card');
 
         post().within(() => {
-            cy.contains('button', 'Comment').click();
-            cy.get('input[aria-label="Write a comment"]').type(top);
+            cy.get('button[aria-label="Comment on this post"]').click();
+            cy.get('input.comment-composer__input').type(top);
             cy.get('button[aria-label="Post comment"]').click();
         });
         cy.wait('@commentReq', { timeout: 90000 });
@@ -91,7 +91,7 @@ describe('Threaded comment replies', () => {
             post().contains('.comment-bubble-box', top).closest('[data-reply]').within(() => {
                 cy.get('[data-testid="comment-reply-btn"]').click();
             });
-            post().find('input[aria-label="Write a comment"]').clear().type(txt);
+            post().find('input.comment-composer__input').clear().type(txt);
             post().find('button[aria-label="Post comment"]').click();
             cy.wait('@commentReq', { timeout: 90000 });
         });
@@ -100,20 +100,24 @@ describe('Threaded comment replies', () => {
         cy.reload();
         cy.get('#openPostModalTrigger', { timeout: 60000 }).should('be.visible');
         cy.contains(marker, { timeout: 60000 }).parents('.card').within(() => {
-            cy.contains(r1).should('be.visible');
-            cy.contains(r2).should('be.visible');
-            cy.contains(r3).should('not.exist');
-            cy.get('[data-testid="thread-collapse-toggle"]').should('be.visible').and('contain.text', 'View 1 more reply');
+            // Which 2 of the 3 replies show first depends on the feed's comment ordering
+            // (newest-first after a reload), so assert the count, not the identity.
+            cy.get('[data-reply="true"]', { timeout: 30000 }).should('have.length', 2);
+            cy.get('[data-testid="thread-collapse-toggle"]').should('be.visible').invoke('text').should('match', /View\s+1\s+more\s+reply/);
+            cy.get('[data-reply="true"]').then(($replies) => {
+                const text = $replies.text();
+                Cypress.env('hiddenReply', [r1, r2, r3].find((txt) => !text.includes(txt)));
+            });
 
             // Click toggle to expand all replies
             cy.get('[data-testid="thread-collapse-toggle"]').click();
-            cy.contains(r3).should('be.visible');
+            cy.then(() => cy.contains(Cypress.env('hiddenReply')).should('be.visible'));
             cy.get('[data-testid="thread-collapse-toggle"]').should('contain.text', 'Collapse replies');
 
             // Click toggle to collapse again
             cy.get('[data-testid="thread-collapse-toggle"]').click();
-            cy.contains(r3).should('not.exist');
-            cy.get('[data-testid="thread-collapse-toggle"]').should('contain.text', 'View 1 more reply');
+            cy.then(() => cy.contains(Cypress.env('hiddenReply')).should('not.exist'));
+            cy.get('[data-testid="thread-collapse-toggle"]').invoke('text').should('match', /View\s+1\s+more\s+reply/);
         });
     });
 

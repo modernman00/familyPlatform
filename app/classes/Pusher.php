@@ -24,9 +24,13 @@ class Pusher
         return defined('TESTING_ENV') || in_array($env, ['local', 'development', 'dev', 'testing'], true);
     }
 
-    public static function pusher(): ?PusherNotification
+    /**
+     * @param bool $signingOnly Channel-auth signing is a local HMAC with no network call, so it
+     *                          is exempt from the outbound guard (which only protects delivery).
+     */
+    public static function pusher(bool $signingOnly = false): ?PusherNotification
     {
-        if (self::outboundBlocked()) {
+        if (!$signingOnly && self::outboundBlocked()) {
             return null;
         }
         $key = trim((string)($_ENV['MIX_PUSHER_APP_KEY'] ?? $_SERVER['MIX_PUSHER_APP_KEY'] ?? $_ENV['PUSHER_APP_KEY'] ?? $_SERVER['PUSHER_APP_KEY'] ?? (getenv('MIX_PUSHER_APP_KEY') ?: (getenv('PUSHER_APP_KEY') ?: ''))));
@@ -170,7 +174,7 @@ class Pusher
             return;
         }
 
-        $pusher = self::pusher();
+        $pusher = self::pusher(true);
         if ($pusher === null) {
             http_response_code(500);
             echo json_encode(['error' => 'Pusher not configured on server']);

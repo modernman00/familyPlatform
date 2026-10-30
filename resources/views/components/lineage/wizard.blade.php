@@ -325,7 +325,15 @@
                     window.showAppToast('Invitation link generated successfully!', 'success');
                 }
             } else {
-                throw new Error((payload && payload.message) || data.message || 'Could not generate invitation.');
+                // Server validation errors can arrive as an object/array of field messages;
+                // flatten them to readable text so users never see "[object Object]".
+                const flattenInviteError = (val) => {
+                    if (typeof val === 'string') return val;
+                    if (Array.isArray(val)) return val.map(flattenInviteError).filter(Boolean).join(' ');
+                    if (val && typeof val === 'object') return Object.values(val).map(flattenInviteError).filter(Boolean).join(' ');
+                    return '';
+                };
+                throw new Error(flattenInviteError((payload && payload.message) || data.message) || 'Could not generate invitation.');
             }
         } catch (err) {
             if (errorDiv) {

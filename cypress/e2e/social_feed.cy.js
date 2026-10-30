@@ -92,11 +92,11 @@ describe('Social Feed Interactions', () => {
 
         // Locate the created post card container
         cy.contains(postMarker).parents('.card').within(() => {
-            // Assert initial unliked state (not bold)
-            cy.contains('button', 'Like').should('not.have.class', 'fw-semibold');
+            // Assert initial unliked state (icon-only heart; no is-liked class)
+            cy.get('button[aria-label="Like this post"]').should('not.have.class', 'is-liked');
 
             // Click Like button
-            cy.contains('button', 'Like').click();
+            cy.get('button[aria-label="Like this post"]').click();
         });
 
         // Wait for backend persistence request
@@ -104,7 +104,7 @@ describe('Social Feed Interactions', () => {
 
         // Assert optimistic UI update
         cy.contains(postMarker).parents('.card').within(() => {
-            cy.contains('button', 'Like').should('have.class', 'fw-semibold');
+            cy.get('button.heirloom-trigger-btn').should('have.class', 'is-liked');
         });
 
         // Reload the page to test server-side hydration from AllMembersData::getVisiblePosts
@@ -116,7 +116,7 @@ describe('Social Feed Interactions', () => {
         // Verify the post retained its liked state across the refresh
         cy.contains(postMarker, { timeout: 15000 }).should('be.visible')
             .parents('.card').within(() => {
-                cy.contains('button', 'Like').should('have.class', 'fw-semibold');
+                cy.get('button.heirloom-trigger-btn').should('have.class', 'is-liked');
             });
 
         // Assert zero [object Object] artifacts in the UI
@@ -134,7 +134,7 @@ describe('Social Feed Interactions', () => {
         // Locate the created post card container deterministically
         cy.contains(postMarker, { timeout: 10000 }).parents('.card').within(() => {
             // The comment form is hidden per-post until the "Comment" toggle button is clicked
-            cy.contains('button', 'Comment').click();
+            cy.get('button[aria-label="Comment on this post"]').click();
             cy.get('input.comment-composer__input[placeholder*="Write a comment"]')
                 .should('be.visible')
                 .type(commentContent)
@@ -157,7 +157,7 @@ describe('Social Feed Interactions', () => {
         cy.intercept('POST', '**/postCommentProfile').as('commentReq');
 
         cy.contains(postMarker, { timeout: 10000 }).parents('.card').within(() => {
-            cy.contains('button', 'Comment').click();
+            cy.get('button[aria-label="Comment on this post"]').click();
             cy.get('input.comment-composer__input[placeholder*="Write a comment"]')
                 .should('be.visible')
                 .type(commentContent)
@@ -172,7 +172,7 @@ describe('Social Feed Interactions', () => {
 
         // Find the comment container and click the like button
         cy.contains(commentContent).parents('.align-items-start').within(() => {
-            cy.contains('button', 'Like').click();
+            cy.contains('button.comment-meta-btn', 'Like').click();
         });
 
         cy.wait('@commentReactionReq', { timeout: 15000 }).its('response.statusCode').should('eq', 200);
@@ -180,7 +180,7 @@ describe('Social Feed Interactions', () => {
         // Assert reaction badge preview appears with count
         cy.contains(commentContent).parents('.align-items-start').within(() => {
             cy.get('.reaction-count-pill', { timeout: 5000 }).should('be.visible').and('contain.text', '1');
-            cy.contains('button', 'Like').should('have.class', 'text-primary');
+            cy.contains('button.comment-meta-btn', 'Like').should('have.class', 'fw-semibold');
         });
     });
 
@@ -189,7 +189,7 @@ describe('Social Feed Interactions', () => {
         createFreshPost(postMarker);
 
         cy.contains(postMarker, { timeout: 10000 }).parents('.card').within(() => {
-            cy.contains('button', 'Comment').click();
+            cy.get('button[aria-label="Comment on this post"]').click();
             cy.get('input[placeholder="Write a comment..."]').should('be.visible').as('commentInput');
         });
 

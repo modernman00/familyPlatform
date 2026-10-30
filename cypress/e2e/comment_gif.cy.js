@@ -27,11 +27,11 @@ describe('GIFs in comments', () => {
         cy.intercept('POST', '**/postCommentProfile').as('commentReq');
 
         cy.contains(marker).parents('.card').within(() => {
-            cy.contains('button', 'Comment').click();
+            cy.get('button[aria-label="Comment on this post"]').click();
 
             // Emoji + GIF tools live inside the composer pill, next to the input
             cy.get('[data-testid="comment-gif-btn"]').should('be.visible').then(($gif) => {
-                const $emoji = $gif.prev('button[title="Add emoji"]');
+                const $emoji = $gif.prev('button[aria-label="Add emoji"]');
                 expect($emoji.length, 'emoji button precedes GIF button').to.eq(1);
             });
 
@@ -61,7 +61,8 @@ describe('GIFs in comments', () => {
 
         // Without text, a non-Giphy URL is dropped and the empty comment is refused.
         cy.getCookie('XSRF-TOKEN').then((c) => {
-            cy.window().then((win) => {
+            // The raw fetch can outlast Cypress' 4s default when the dev server is busy
+            cy.window().then({ timeout: 30000 }, (win) => {
                 const fd = new win.FormData();
                 fd.append('post_no', '0');
                 fd.append('comment', '');

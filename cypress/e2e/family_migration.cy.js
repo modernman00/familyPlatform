@@ -121,7 +121,7 @@ describe('Family Code Migration & Discovery Nudge E2E Journey', () => {
             cy.get('.family-migration-request-card', { timeout: 15000 }).should('be.visible');
             cy.get('.family-migration-request-card').within(() => {
                 cy.contains('requested to migrate to your #SHO family network').should('exist');
-                cy.get('button[id^="btnApproveMigReq-"]').should('exist').and('contain.text', 'Approve Migration').click();
+                cy.get('button[id^="btnApproveMigReq-"]').should('exist').and('contain.text', 'Approve Request').click();
             });
 
             // Assert AJAX approval response is 200 with success: true

@@ -99,7 +99,9 @@ describe('Chaos & Resiliency Testing', () => {
 
         // Fill Form
         cy.get('#eventName').type('Crash Test Event');
-        cy.get('#eventDate').type('2026-10-10');
+        // Must stay in the future or client-side validation blocks the POST (no hardcoded dates)
+        const futureDate = new Date(Date.now() + 60 * 86400000).toISOString().slice(0, 10);
+        cy.get('#eventDate').type(futureDate);
         cy.get('#eventType').select('Party');
         cy.get('#eventDescription').type('Chaos test event');
         cy.get('#eventFrequency').select('One-off');
@@ -142,7 +144,7 @@ describe('Chaos & Resiliency Testing', () => {
         });
 
         // The comment form is hidden per-post until the "Comment" toggle button is clicked
-        cy.contains('button', 'Comment').first().click({ force: true });
+        cy.get('button[aria-label="Comment on this post"]').first().click({ force: true });
         cy.get('input.comment-composer__input[placeholder*="Write a comment"], input[placeholder="Write a comment..."]').first().should('be.visible').type('Test comment{enter}');
 
         cy.wait('@commentTimeout');

@@ -5,6 +5,11 @@ describe('Kinship Suggestion Engine (People You May Know)', () => {
     Cypress.on('uncaught:exception', () => false);
 
     beforeEach(() => {
+        // The radar widget only renders while the member still has undismissed,
+        // unrequested candidates, and earlier runs' Connect/Dismiss clicks use
+        // them up. Reset before login so /profilePage is server-rendered with
+        // a fresh radar.
+        cy.task('resetKinshipRadar', 'cypress_test@myfamilyplatform.com');
         loginFully();
     });
 
@@ -32,8 +37,8 @@ describe('Kinship Suggestion Engine (People You May Know)', () => {
                 if ($cards.length > 0) {
                     // Each card should have a match badge and kinship type
                     cy.wrap($cards.first()).within(() => {
-                        cy.get('.badge').should('contain.text', 'Match');
-                        cy.get('.bi-diagram-2').should('exist'); // kinship type icon
+                        cy.get('.kin-match-pill').should('contain.text', 'Match');
+                        cy.get('.kin-type-label').invoke('text').should('have.length.gt', 0); // kinship type label
                     });
                 } else {
                     // Empty state message should be visible
@@ -183,26 +188,28 @@ describe('Kinship Suggestion Engine (People You May Know)', () => {
             // Assert modal is shown and contains no broken object strings
             cy.get('#addRelativeModal').should('be.visible');
             cy.get('#addRelativeModal').should('not.contain.text', '[object Object]');
+            cy.get('#addRelativeModal').should('contain.text', 'Invite Family Member');
 
-            // Select partner type
-            cy.contains('button', 'Partner / Spouse').click();
-            cy.get('#step2-partner').should('be.visible');
+            // Client-side validation: an empty first name yields a clean inline error
+            cy.get('#btnSubmitInviteFamily').click();
+            cy.get('#inviteFamilyError').scrollIntoView().should('be.visible').and('not.contain.text', '[object Object]');
+            cy.get('#inviteFamilyError').invoke('text').should('have.length.gt', 3);
 
-            // Remove client-side HTML5 required to test backend validation & defensive error parsing
-            cy.get('#addPartnerForm input[name="first_name"]').invoke('removeAttr', 'required');
-            cy.get('#submitPartnerBtn').click();
+            // Server-side validation errors can come back as an object of field messages;
+            // the modal must flatten them to text instead of printing [object Object].
+            cy.intercept('POST', '/api/invite/generate', {
+                statusCode: 422,
+                body: { status: 'error', message: { first_name: ['First name is invalid'], email: ['Email is invalid'] } },
+            }).as('inviteGenerate');
+            cy.get('#inviteFirstName').type('Defensive');
+            cy.get('#btnSubmitInviteFamily').click();
+            cy.wait('@inviteGenerate');
+            // Asserted on display state + text rather than viewport visibility: the alert sits at the
+            // top of the modal's scroll container, so it can be scrolled out of view by the long form.
+            cy.get('#inviteFamilyError').should('not.have.class', 'd-none').and('have.css', 'display', 'block')
+                .and('not.contain.text', '[object Object]')
+                .and('contain.text', 'First name is invalid');
 
-            // Assert error is displayed cleanly as text and never prints [object Object]
-            cy.get('#addRelativeError', { timeout: 10000 }).should('be.visible');
-            cy.get('#addRelativeError').should('not.contain.text', '[object Object]');
-            cy.get('#addRelativeError').invoke('text').should('have.length.gt', 3);
-
-            // Close modal. Bootstrap's [data-bs-dismiss] handler silently no-ops
-            // while the modal instance is still flagged `_isTransitioning` — a
-            // state that lingers on this branded modal under the dark-mode
-            // theme's CSS transitions — so a single .btn-close click can land in
-            // that window and leave the modal open. Retry the dismiss (the flag
-            // clears within a few hundred ms) until it's actually gone.
             const dismissAddRelativeModal = (attempt = 0) => {
                 cy.get('body').then(($body) => {
                     if (attempt >= 5 || !$body.find('#addRelativeModal.show').length) {

@@ -47,6 +47,25 @@ module.exports = defineConfig({
             await connection.end();
           }
         },
+        // Kinship Radar only renders while the member has undismissed, unrequested
+        // candidates, and the Connect/Dismiss specs consume them on every run.
+        // Restore the member to a fresh-radar state: drop their dismissals and the
+        // pending 'Request sent' rows they created, and reset radar settings.
+        async resetKinshipRadar(email) {
+          const connection = await connectDb();
+          try {
+            const [rows] = await connection.execute('SELECT id FROM account WHERE email = ? LIMIT 1', [email]);
+            const id = rows[0]?.id;
+            if (!id) return null;
+            const run = (sql, params) => connection.execute(sql, params).catch(() => null);
+            await run('DELETE FROM kinship_dismissed WHERE user_id = ?', [id]);
+            await run("DELETE FROM requestMgt WHERE requester_id = ? AND status = 'Request sent'", [id]);
+            await run('DELETE FROM user_radar_settings WHERE user_id = ?', [id]);
+            return id;
+          } finally {
+            await connection.end();
+          }
+        },
         // --- RFC-0004 birth-family E2E fixtures: fresh users in, everything they touched out. ---
         async seedE2EUsers(specs) {
           const connection = await connectDb();
