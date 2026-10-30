@@ -5,6 +5,16 @@
  * Persists user preference to localStorage and listens for system preference changes.
  */
 export function initDarkMode() {
+  const isPublicSurface = document.body?.classList.contains('public-layout') ||
+                          document.body?.getAttribute('data-surface') === 'light' ||
+                          document.querySelector('meta[name="page-scope"]')?.getAttribute('content') === 'public';
+
+  if (isPublicSurface) {
+    document.body?.classList.remove('dark-mode');
+    document.documentElement?.classList.remove('dark');
+    return;
+  }
+
   const toggleBtn = document.getElementById('darkModeToggle');
   const savedTheme = localStorage.getItem('familyPlatform_theme');
   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;

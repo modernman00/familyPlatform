@@ -93,6 +93,8 @@
   <link rel="icon" type="image/png" sizes="32x32" href="{{ getenv('APP_LOGO') }}">
   
   <!-- PWA Manifest & Mobile Meta -->
+  <meta name="page-scope" content="public">
+  <meta name="color-scheme" content="light">
   @include('partials.pwa-head')
   
   <!-- CSS -->
@@ -217,7 +219,7 @@
   @yield('extra_css')
 </head>
 
-<body data-page-id="@yield('data-page-id')">
+<body data-page-id="@yield('data-page-id')" data-surface="light" class="public-layout surface-light light-mode">
   @include('partials.pwa-splash')
   
   @include('includes.public_nav')

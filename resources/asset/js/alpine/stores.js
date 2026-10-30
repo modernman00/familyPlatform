@@ -62,6 +62,17 @@ export function initAlpineStores(Alpine) {
   Alpine.store('theme', {
     isDark: false,
     init() {
+      // Sovereign Invariant: Public landing and authentication pages are sovereign light surfaces
+      const isPublicSurface = document.body?.classList.contains('public-layout') ||
+                              document.body?.getAttribute('data-surface') === 'light' ||
+                              document.querySelector('meta[name="page-scope"]')?.getAttribute('content') === 'public';
+
+      if (isPublicSurface) {
+        this.isDark = false;
+        this.apply();
+        return;
+      }
+
       try {
         const savedTheme = localStorage.getItem('familyPlatform_theme');
         const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -74,6 +85,10 @@ export function initAlpineStores(Alpine) {
       // Listen for system changes if user hasn't explicitly overridden
       if (window.matchMedia) {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+          const isCurrentlyPublic = document.body?.classList.contains('public-layout') ||
+                                    document.body?.getAttribute('data-surface') === 'light' ||
+                                    document.querySelector('meta[name="page-scope"]')?.getAttribute('content') === 'public';
+          if (isCurrentlyPublic) return;
           if (!localStorage.getItem('familyPlatform_theme')) {
             this.isDark = e.matches;
             this.apply();
@@ -90,6 +105,16 @@ export function initAlpineStores(Alpine) {
     },
     apply() {
       if (typeof document === 'undefined') return;
+      const isPublicSurface = document.body?.classList.contains('public-layout') ||
+                              document.body?.getAttribute('data-surface') === 'light' ||
+                              document.querySelector('meta[name="page-scope"]')?.getAttribute('content') === 'public';
+
+      if (isPublicSurface) {
+        document.body?.classList.remove('dark-mode');
+        document.documentElement?.classList.remove('dark');
+        return;
+      }
+
       if (this.isDark) {
         document.body?.classList.add('dark-mode');
         document.documentElement?.classList.add('dark');
