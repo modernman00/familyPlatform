@@ -17,37 +17,42 @@ $pdo = Db::connect2();
 $service = new FamilyPlatformAccountService($pdo);
 $feedRepo = new FeedRepository($pdo);
 
-// 1. Verify ensureAccountExists
-echo "[1/6] Verifying Official Account Existence...\n";
+// 1. Verify ensureAccountExists and Env Resolution
+echo "[1/6] Verifying Official Account Existence and Env Resolution...\n";
+$expectedId = FamilyPlatformAccountService::getAccountId();
+$expectedEmail = FamilyPlatformAccountService::getAccountEmail();
+$expectedName = FamilyPlatformAccountService::getAccountName();
+$expectedFirst = FamilyPlatformAccountService::getAccountFirstName();
+
 $service->ensureAccountExists();
 
-$stmtAcct = $pdo->prepare("SELECT id, email, type, status FROM account WHERE id = ?");
-$stmtAcct->execute([FamilyPlatformAccountService::ACCOUNT_ID]);
+$stmtAcct = $pdo->prepare("SELECT id, email, type, status, firstName, lastName FROM account WHERE id = ?");
+$stmtAcct->execute([$expectedId]);
 $acct = $stmtAcct->fetch(PDO::FETCH_ASSOC);
 
-if (!$acct || $acct['email'] !== FamilyPlatformAccountService::ACCOUNT_EMAIL) {
-    echo "❌ FAIL: Official account not seeded correctly in account table!\n";
+if (!$acct || $acct['email'] !== $expectedEmail) {
+    echo "❌ FAIL: Official account not seeded correctly in account table! Expected {$expectedEmail}, got " . ($acct['email'] ?? 'none') . "\n";
     exit(1);
 }
 
 $stmtPers = $pdo->prepare("SELECT id, firstName, lastName, famCode FROM personal WHERE id = ?");
-$stmtPers->execute([FamilyPlatformAccountService::ACCOUNT_ID]);
+$stmtPers->execute([$expectedId]);
 $pers = $stmtPers->fetch(PDO::FETCH_ASSOC);
 
-if (!$pers || $pers['firstName'] !== 'Family') {
-    echo "❌ FAIL: Official account personal profile not found!\n";
+if (!$pers || $pers['firstName'] !== $expectedFirst) {
+    echo "❌ FAIL: Official account personal profile not found! Expected firstName {$expectedFirst}, got " . ($pers['firstName'] ?? 'none') . "\n";
     exit(1);
 }
 
 $stmtPic = $pdo->prepare("SELECT id, img FROM profilePics WHERE id = ?");
-$stmtPic->execute([FamilyPlatformAccountService::ACCOUNT_ID]);
+$stmtPic->execute([$expectedId]);
 $pic = $stmtPic->fetch(PDO::FETCH_ASSOC);
 
 if (!$pic) {
     echo "❌ FAIL: Official account avatar not found!\n";
     exit(1);
 }
-echo "  ✅ PASS: Official Account verified in account, personal, and profilePics.\n";
+echo "  ✅ PASS: Official Account verified in account, personal, and profilePics ({$expectedId} - {$expectedName} - {$expectedEmail}).\n";
 
 // 2. Verify Friendly Summariser (No Technical Jargon)
 echo "[2/6] Verifying Friendly Announcement Transformer (Jargon-Free)...\n";
@@ -81,7 +86,7 @@ $unrelatedFamCodes = ['UNRELATED_FAM_CODE_' . bin2hex(random_bytes(3))];
 $posts = $feedRepo->getFeedPosts($unrelatedUserId, $unrelatedFamCodes, 10, 0);
 $foundOfficial = false;
 foreach ($posts as $p) {
-    if ($p->postNo === $testPostNo && $p->id === FamilyPlatformAccountService::ACCOUNT_ID) {
+    if ($p->postNo === $testPostNo && $p->id === FamilyPlatformAccountService::getAccountId()) {
         $foundOfficial = true;
         if (!$p->isOfficialPost) {
             echo "❌ FAIL: PostDto isOfficialPost flag is false!\n";

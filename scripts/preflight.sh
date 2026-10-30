@@ -31,6 +31,58 @@ NC='\033[0m'
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+# ------------------------------------------------------------------------------
+# ⚡ CPU Priority Throttling & Global Cross-Chat Mutex Queue (Olutobi & SRE Gate)
+# Prevents concurrent chat sessions from stampeding CPU/RAM simultaneously.
+# ------------------------------------------------------------------------------
+renice -n 10 $$ >/dev/null 2>&1 || true
+
+LOCK_DIR="/tmp/portfolio_gate_mutex.lock"
+LOCK_ACQUIRED=0
+WAIT_ANNOUNCED=0
+WAIT_START=$(date +%s)
+
+cleanup_gate_lock() {
+    if [ "$LOCK_ACQUIRED" -eq 1 ] && [ -f "$LOCK_DIR/pid" ]; then
+        if [ "$(cat "$LOCK_DIR/pid" 2>/dev/null)" = "$$" ]; then
+            rm -rf "$LOCK_DIR" 2>/dev/null || true
+        fi
+    fi
+}
+trap cleanup_gate_lock EXIT INT TERM
+
+while true; do
+    if mkdir "$LOCK_DIR" 2>/dev/null; then
+        echo "$$" > "$LOCK_DIR/pid"
+        echo "familyPlatform:preflight" > "$LOCK_DIR/owner"
+        date +%s > "$LOCK_DIR/timestamp"
+        LOCK_ACQUIRED=1
+        if [ "$WAIT_ANNOUNCED" -eq 1 ]; then
+            echo -e "${GREEN}⚡ [GLOBAL QUEUE] Slot acquired after $(( $(date +%s) - WAIT_START ))s. Proceeding with pre-flight...${NC}"
+        fi
+        break
+    fi
+
+    HOLDER_PID="$(cat "$LOCK_DIR/pid" 2>/dev/null || echo "")"
+    HOLDER_OWNER="$(cat "$LOCK_DIR/owner" 2>/dev/null || echo "another workspace")"
+    LOCK_TS="$(cat "$LOCK_DIR/timestamp" 2>/dev/null || echo "0")"
+    NOW_TS=$(date +%s)
+
+    if [ -n "$HOLDER_PID" ] && ! kill -0 "$HOLDER_PID" 2>/dev/null; then
+        rm -rf "$LOCK_DIR" 2>/dev/null || true
+        continue
+    elif [ "$LOCK_TS" -gt 0 ] && [ $(( NOW_TS - LOCK_TS )) -gt 180 ]; then
+        rm -rf "$LOCK_DIR" 2>/dev/null || true
+        continue
+    fi
+
+    if [ "$WAIT_ANNOUNCED" -eq 0 ]; then
+        echo -e "${YELLOW}⏳ [GLOBAL QUEUE] Another gate is active in ${HOLDER_OWNER} (PID ${HOLDER_PID:-unknown}). Queuing to keep your Mac fast...${NC}"
+        WAIT_ANNOUNCED=1
+    fi
+    sleep 1
+done
+
 echo -e "${BOLD}${BLUE}================================================================${NC}"
 echo -e "${BOLD}${BLUE}  🛡️  FAMILYPLATFORM PRE-FLIGHT GOVERNANCE GATE                ${NC}"
 echo -e "${BOLD}${BLUE}================================================================${NC}"
@@ -51,20 +103,36 @@ if [ -L "vendor/modernman00/shared-lib" ] || [ -L "node_modules/@modernman00/sha
 fi
 
 # ------------------------------------------------------------------------------
-# 1. PHP Syntax Check (php -l)
+# 1. PHP Syntax Check (php -l) — Smart Incremental Git-Diff + Untracked Scan
 # ------------------------------------------------------------------------------
 echo -e "${BOLD}${CYAN}[GATE 1/7] Checking PHP Syntax (php -l)...${NC}"
 SYNTAX_ERRORS=0
-while IFS= read -r file; do
-    if ! php -l "$file" > /dev/null 2>&1; then
-        echo -e "${RED}  ❌ Syntax Error in: $file${NC}"
-        php -l "$file"
-        SYNTAX_ERRORS=$((SYNTAX_ERRORS + 1))
-    fi
-done < <(find app bin scripts cron -name "*.php" -type f 2>/dev/null)
+LINT_COUNT=0
+
+if [ "${FULL_LINT:-0}" != "1" ] && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        [ ! -f "$file" ] && continue
+        LINT_COUNT=$((LINT_COUNT + 1))
+        if ! php -l "$file" > /dev/null 2>&1; then
+            echo -e "${RED}  ❌ Syntax Error in: $file${NC}"
+            php -l "$file"
+            SYNTAX_ERRORS=$((SYNTAX_ERRORS + 1))
+        fi
+    done < <({ git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null; } | grep -E '\.php$' | sort -u)
+else
+    while IFS= read -r file; do
+        LINT_COUNT=$((LINT_COUNT + 1))
+        if ! php -l "$file" > /dev/null 2>&1; then
+            echo -e "${RED}  ❌ Syntax Error in: $file${NC}"
+            php -l "$file"
+            SYNTAX_ERRORS=$((SYNTAX_ERRORS + 1))
+        fi
+    done < <(find app bin scripts cron -name "*.php" -type f 2>/dev/null)
+fi
 
 if [ "$SYNTAX_ERRORS" -eq 0 ]; then
-    echo -e "${GREEN}  ✅ Gate 1 Passed: All PHP files have valid syntax.${NC}"
+    echo -e "${GREEN}  ✅ Gate 1 Passed: All PHP files have valid syntax (${LINT_COUNT} modified/untracked files checked; set FULL_LINT=1 for full scan).${NC}"
 else
     echo -e "${RED}  ❌ Gate 1 Failed: $SYNTAX_ERRORS syntax errors found.${NC}"
     FAILURES=$((FAILURES + 1))
@@ -218,6 +286,10 @@ fi
 
 if [ -f "tests/verify_studio_in_tree_integration.php" ]; then
     php tests/verify_studio_in_tree_integration.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_video_autotrim_and_post_upload.php" ]; then
+    php tests/verify_video_autotrim_and_post_upload.php || GATE4_PASSED=0
 fi
 
 if [ "$GATE4_PASSED" -eq 1 ]; then

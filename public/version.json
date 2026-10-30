@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(release): GEO & pSEO engine, PWA splash & UX refinements, sitemap automation, and preflight suites",
+    "title": "Fix(e2e): repair feed, kinship, event and invite flows; refresh stale Cypress specs",
     "notes": [
-        "Feat(release): GEO & pSEO engine, PWA splash & UX refinements, sitemap automation, and preflight suites",
-        "Feat(typography): self-host Outfit headings, native-first stack, apply notification utf8mb4 migration",
-        "Refactor(feed): clean up unused sharePostToSocialMedia and openSocialShareModal methods"
+        "Fix(e2e): repair feed, kinship, event and invite flows; refresh stale Cypress specs",
+        "Fix(official-posts): call ResilientAiChat as an instance with message array",
+        "Fix(security): annotate admin JSON responses for Semgrep and harden friendly_copy encoding"
     ],
-    "released_at": "2026-10-29",
-    "commit": "2bc5eef"
+    "released_at": "2026-10-30",
+    "commit": "08eebf2"
 }

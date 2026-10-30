@@ -28,8 +28,8 @@ final class HashtagService extends Db
             return [];
         }
 
-        // Match #tag starting with letter/digit/underscore, 2-40 chars long
-        if (!preg_match_all('/#([a-zA-Z0-9_]{2,40})/u', $text, $matches)) {
+        // Match #tag starting with letter, 2-40 chars long, not preceded by & (to avoid HTML entity clashes like &#039;)
+        if (!preg_match_all('/(?<![&\w])#([a-zA-Z][a-zA-Z0-9_]{1,39})(?!;)/u', $text, $matches)) {
             return [];
         }
 

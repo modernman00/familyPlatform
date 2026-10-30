@@ -136,6 +136,131 @@ final class TwoTruthsGameService
     }
 
     /**
+     * Batch fetch and format Two Truths games for a list of post IDs.
+     *
+     * @param array<int|string> $postIds
+     * @param string $userId
+     * @return array<int, array<string, mixed>> Keyed by post_no
+     */
+    public static function getGamesForPosts(array $postIds, string $userId): array
+    {
+        if (empty($postIds)) {
+            return [];
+        }
+
+        $cleanIds = array_values(array_filter(array_map('intval', $postIds), fn($id) => $id > 0));
+        if (empty($cleanIds)) {
+            return [];
+        }
+
+        $db = Db::connect2();
+        $placeholders = implode(',', array_fill(0, count($cleanIds), '?'));
+        $stmt = $db->prepare(
+            "SELECT id, famCode, author_id, author_name, post_no, title,
+                    statement_1, statement_2, statement_3, lie_index,
+                    reveal_story_1, reveal_story_2, reveal_story_3, photo_url,
+                    status, reveal_at, created_at
+             FROM family_game_two_truths
+             WHERE post_no IN ({$placeholders}) AND status IN ('active', 'revealed')"
+        );
+        $stmt->execute($cleanIds);
+        /** @var array<int, array<string, mixed>> $games */
+        $games = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        if (empty($games)) {
+            return [];
+        }
+
+        $gameIds = array_column($games, 'id');
+        $gamePlaceholders = implode(',', array_fill(0, count($gameIds), '?'));
+
+        // Batch fetch user votes for these games
+        $userVotes = [];
+        $uStmt = $db->prepare(
+            "SELECT game_id, guessed_lie_index, is_correct, points_awarded, voted_at
+             FROM family_game_two_truths_votes
+             WHERE game_id IN ({$gamePlaceholders}) AND user_id = ?"
+        );
+        $uParams = array_merge($gameIds, [$userId]);
+        $uStmt->execute($uParams);
+        while ($uv = $uStmt->fetch(PDO::FETCH_ASSOC)) {
+            $userVotes[(string)$uv['game_id']] = $uv;
+        }
+
+        // Batch fetch vote counts and distribution
+        $voteCounts = [];
+        $cStmt = $db->prepare(
+            "SELECT game_id, guessed_lie_index, COUNT(*) as cnt
+             FROM family_game_two_truths_votes
+             WHERE game_id IN ({$gamePlaceholders})
+             GROUP BY game_id, guessed_lie_index"
+        );
+        $cStmt->execute($gameIds);
+        while ($cr = $cStmt->fetch(PDO::FETCH_ASSOC)) {
+            $gId = (string)$cr['game_id'];
+            $idx = (int)$cr['guessed_lie_index'];
+            $cnt = (int)$cr['cnt'];
+            if (!isset($voteCounts[$gId])) {
+                $voteCounts[$gId] = [1 => 0, 2 => 0, 3 => 0, 'total' => 0];
+            }
+            $voteCounts[$gId][$idx] = $cnt;
+            $voteCounts[$gId]['total'] += $cnt;
+        }
+
+        $result = [];
+        foreach ($games as $game) {
+            $pNo = (int)($game['post_no'] ?? 0);
+            $gId = (string)$game['id'];
+            $isRevealed = ($game['status'] === 'revealed');
+            $userVote = $userVotes[$gId] ?? null;
+            $hasVoted = !empty($userVote);
+            $dist = $voteCounts[$gId] ?? [1 => 0, 2 => 0, 3 => 0, 'total' => 0];
+            $totalVotes = (int)($dist['total'] ?? 0);
+
+            $game['user_vote'] = $userVote;
+            $game['has_voted'] = $hasVoted;
+            $game['total_votes'] = $totalVotes;
+            $game['is_author'] = ((string)$game['author_id'] === $userId);
+
+            // Distribution percentages
+            $percentages = [
+                1 => $totalVotes > 0 ? (int)round(($dist[1] / $totalVotes) * 100) : 0,
+                2 => $totalVotes > 0 ? (int)round(($dist[2] / $totalVotes) * 100) : 0,
+                3 => $totalVotes > 0 ? (int)round(($dist[3] / $totalVotes) * 100) : 0,
+            ];
+            $counts = [
+                1 => (int)($dist[1] ?? 0),
+                2 => (int)($dist[2] ?? 0),
+                3 => (int)($dist[3] ?? 0),
+            ];
+
+            if (!$isRevealed) {
+                // Anti-cheat: mask the lie until revealed
+                unset($game['lie_index']);
+                unset($game['reveal_story_1']);
+                unset($game['reveal_story_2']);
+                unset($game['reveal_story_3']);
+                if ($hasVoted || $game['is_author']) {
+                    $game['vote_percentages'] = $percentages;
+                    $game['vote_counts'] = $counts;
+                } else {
+                    $game['vote_percentages'] = null;
+                    $game['vote_counts'] = null;
+                }
+            } else {
+                $game['vote_percentages'] = $percentages;
+                $game['vote_counts'] = $counts;
+                $correctIndex = (int)($game['lie_index'] ?? 0);
+                $game['correct_guesses'] = $counts[$correctIndex] ?? 0;
+            }
+
+            $result[$pNo] = $game;
+        }
+
+        return $result;
+    }
+
+    /**
      * Register a user's vote for which statement is the lie.
      *
      * @param string $gameId
@@ -209,17 +334,36 @@ final class TwoTruthsGameService
             throw $e;
         }
 
-        // 3. Count total votes
-        $cntStmt = $db->prepare("SELECT COUNT(*) FROM family_game_two_truths_votes WHERE game_id = ?");
+        // 3. Count total votes and distribution
+        $cntStmt = $db->prepare(
+            "SELECT guessed_lie_index, COUNT(*) as cnt
+             FROM family_game_two_truths_votes
+             WHERE game_id = ?
+             GROUP BY guessed_lie_index"
+        );
         $cntStmt->execute([$gameId]);
-        $totalVotes = (int)$cntStmt->fetchColumn();
+        $rows = $cntStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $totalVotes = 0;
+        $counts = [1 => 0, 2 => 0, 3 => 0];
+        foreach ($rows as $r) {
+            $idx = (int)$r['guessed_lie_index'];
+            $cnt = (int)$r['cnt'];
+            $counts[$idx] = $cnt;
+            $totalVotes += $cnt;
+        }
+        $percentages = [
+            1 => $totalVotes > 0 ? (int)round(($counts[1] / $totalVotes) * 100) : 0,
+            2 => $totalVotes > 0 ? (int)round(($counts[2] / $totalVotes) * 100) : 0,
+            3 => $totalVotes > 0 ? (int)round(($counts[3] / $totalVotes) * 100) : 0,
+        ];
 
         // 4. Real-time broadcast if Pusher is available
         if (class_exists(Pusher::class)) {
             try {
                 Pusher::broadcastToFamily($famCode, 'two-truths-voted', [
-                    'game_id'     => $gameId,
-                    'total_votes' => $totalVotes,
+                    'game_id'          => $gameId,
+                    'total_votes'      => $totalVotes,
+                    'vote_percentages' => $percentages,
                 ]);
             } catch (\Throwable $th) {
                 error_log('[TwoTruthsGameService] Pusher broadcast failed: ' . $th->getMessage());
@@ -227,9 +371,12 @@ final class TwoTruthsGameService
         }
 
         return [
-            'status'      => 'success',
-            'message'     => 'Your guess has been recorded! Check back on Sunday for the grand reveal.',
-            'total_votes' => $totalVotes,
+            'status'            => 'success',
+            'message'           => 'Your guess has been recorded! Check back on Sunday for the grand reveal.',
+            'total_votes'       => $totalVotes,
+            'guessed_lie_index' => $guessedLieIndex,
+            'vote_percentages'  => $percentages,
+            'vote_counts'       => $counts,
         ];
     }
 
@@ -313,11 +460,12 @@ final class TwoTruthsGameService
             . "1️⃣ {$statement1}\n"
             . "2️⃣ {$statement2}\n"
             . "3️⃣ {$statement3}\n\n"
-            . "Two of these are true life memories, but one is a complete lie. Can you spot it? Head over to The Fun Place Game Show arena to place your vote!";
+            . "Two of these are true life memories, but one is a complete lie. Can you spot it? Head over to The Fun Place Game Show arena to place your vote!\n\n"
+            . "👉 Play & Vote: /family/ai-hub?tab=trivia";
 
         $postStmt = $db->prepare(
             "INSERT INTO post (id, fullName, postMessage, postFamCode, post_time, post_status, date_created)
-             VALUES (?, ?, ?, ?, ?, 'publish', NOW())"
+             VALUES (?, ?, ?, ?, ?, 'published', NOW())"
         );
         $postTime = (string)milliSeconds();
         $postStmt->execute([
@@ -328,6 +476,26 @@ final class TwoTruthsGameService
             $postTime,
         ]);
         $postNo = (int)$db->lastInsertId();
+
+        // Explicitly guarantee status as 'published'
+        Post::updatePostByStatusAsPublished($postNo);
+
+        // Real-time broadcast to family feed via Pusher
+        if (class_exists(Pusher::class)) {
+            try {
+                Pusher::broadcastToFamily($famCode, 'new-post', [[
+                    'post_no'      => $postNo,
+                    'id'           => $authorId,
+                    'fullName'     => $authorName,
+                    'postMessage'  => $postMessage,
+                    'postFamCode'  => $famCode,
+                    'post_status'  => 'published',
+                    'date_created' => date('Y-m-d H:i:s'),
+                ]]);
+            } catch (\Throwable $th) {
+                error_log('[TwoTruthsGameService] Pusher new-post broadcast warning: ' . $th->getMessage());
+            }
+        }
 
         // Link post_no to the game
         $linkStmt = $db->prepare("UPDATE family_game_two_truths SET post_no = ? WHERE id = ?");

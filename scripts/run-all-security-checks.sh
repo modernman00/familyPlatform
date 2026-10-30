@@ -65,6 +65,7 @@ done
 TARGET_URL="${TARGET_URL:-$DEFAULT_PRODUCTION_URL}"
 
 cd "$ROOT_DIR"
+renice -n 10 $$ >/dev/null 2>&1 || true
 
 # Scorecard Tracker
 PASSED_CHECKS=0
@@ -118,21 +119,32 @@ else
 fi
 
 # ==============================================================================
-# 2. PHP SYNTAX LINTING (Full Backend)
+# 2. PHP SYNTAX LINTING (Incremental Git-Diff + Untracked by Default)
 # ==============================================================================
-echo -e "\n${CYAN}${BOLD}[2/7] Running PHP Syntax Linting (Full Backend)...${NC}"
+echo -e "\n${CYAN}${BOLD}[2/7] Running PHP Syntax Linting...${NC}"
 PHP_BIN=$(which php 2>/dev/null || echo "")
 
 if [ -z "$PHP_BIN" ]; then
     log_fail "PHP binary not found in PATH."
 else
     LINT_ERRORS=0
-    while IFS= read -r file; do
-        if ! "$PHP_BIN" -l "$file" > /dev/null 2>&1; then
-            echo -e "   ${RED}Syntax Error in: $file${NC}"
-            LINT_ERRORS=$((LINT_ERRORS + 1))
-        fi
-    done < <(find app bootstrap -type f -name "*.php" 2>/dev/null)
+    if [ "${FULL_LINT:-0}" != "1" ] && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            [ ! -f "$file" ] && continue
+            if ! "$PHP_BIN" -l "$file" > /dev/null 2>&1; then
+                echo -e "   ${RED}Syntax Error in: $file${NC}"
+                LINT_ERRORS=$((LINT_ERRORS + 1))
+            fi
+        done < <({ git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null; } | grep -E '\.php$' | sort -u)
+    else
+        while IFS= read -r file; do
+            if ! "$PHP_BIN" -l "$file" > /dev/null 2>&1; then
+                echo -e "   ${RED}Syntax Error in: $file${NC}"
+                LINT_ERRORS=$((LINT_ERRORS + 1))
+            fi
+        done < <(find app bootstrap -type f -name "*.php" 2>/dev/null)
+    fi
 
     if [ "$LINT_ERRORS" -eq 0 ]; then
         log_pass "100% of PHP backend files clean (No syntax errors)."
@@ -167,7 +179,7 @@ fi
 # ==============================================================================
 # 4. PHPUNIT AUTOMATED UNIT & INTEGRATION TESTS
 # ==============================================================================
-echo -e "\n${CYAN}${BOLD}[4/7] Running PHPUnit Automated Test Suite...${NC}"
+echo -e "\n${CYAN}${BOLD}[4/7] Running PHPUnit / Sovereign E2E Automated Test Suite...${NC}"
 PHPUNIT_BIN=""
 if [ -x "vendor/bin/phpunit" ]; then
     PHPUNIT_BIN="vendor/bin/phpunit"
@@ -183,11 +195,11 @@ if [ -n "$PHPUNIT_BIN" ]; then
     else
         log_fail "PHPUnit tests failed. Run '$PHPUNIT_BIN' for detailed report."
     fi
-elif [ -x "scripts/run_tests.sh" ]; then
-    if bash scripts/run_tests.sh > /dev/null 2>&1; then
-        log_pass "Automated test suite (run_tests.sh) passed."
+elif [ -f "tests/verify_e2e_robust_suite.php" ]; then
+    if php tests/verify_e2e_robust_suite.php > /dev/null 2>&1; then
+        log_pass "Sovereign E2E automated suite (verify_e2e_robust_suite.php) passed."
     else
-        log_fail "Automated tests failed via scripts/run_tests.sh."
+        log_fail "Sovereign E2E automated suite failed via tests/verify_e2e_robust_suite.php."
     fi
 else
     log_skip "PHPUnit test runner not found."

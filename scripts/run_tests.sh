@@ -2,6 +2,7 @@
 # GLOBAL TESTING MANDATE ENFORCEMENT
 
 set -e
+renice -n 10 $$ >/dev/null 2>&1 || true
 
 echo "======================================"
 echo "    Running Global Quality Gates      "
@@ -36,16 +37,23 @@ if grep -q "\"test\"" package.json 2>/dev/null && grep -q "\"jest\"" package.jso
     npm run test
 fi
 
-# 5. Priya's Gate: Cypress / E2E
+# 5. Priya's Gate: Sovereign E2E (Fast Deterministic) + Optional Browser E2E
 # Advisory (like PHPStan/Psalm above): the browser E2E suite is slow and, on a
 # loaded local box, flaky — it belongs in CI, not as a hard blocker on a
-# synchronous deploy. Report failures without aborting; PHPUnit is the hard gate.
-if grep -q "\"test:e2e\"" package.json 2>/dev/null; then
-    echo "--- 🤖 Priya's Gate: Cypress / E2E ---"
-    npm run test:e2e || echo "Cypress E2E reported failures! Review the run above (does not block deploy)."
-elif grep -q "\"playwright\"" package.json 2>/dev/null; then
-    echo "--- 🤖 Priya's Gate: Playwright ---"
-    npx playwright test || echo "Playwright reported failures! Review the run above (does not block deploy)."
+# synchronous deploy. Set RUN_BROWSER_E2E=1 to launch Cypress/Playwright locally.
+if [ -f "tests/verify_e2e_robust_suite.php" ]; then
+    echo "--- 🤖 Simi & Priya's Gate: Running Sovereign Robust E2E Suite ---"
+    php tests/verify_e2e_robust_suite.php
+fi
+
+if [ "${RUN_BROWSER_E2E:-0}" = "1" ]; then
+    if grep -q "\"test:e2e\"" package.json 2>/dev/null; then
+        echo "--- 🤖 Priya's Gate: Cypress / E2E ---"
+        npm run test:e2e || echo "Cypress E2E reported failures! Review the run above (does not block deploy)."
+    elif grep -q "\"playwright\"" package.json 2>/dev/null; then
+        echo "--- 🤖 Priya's Gate: Playwright ---"
+        npx playwright test || echo "Playwright reported failures! Review the run above (does not block deploy)."
+    fi
 fi
 
 echo "======================================"

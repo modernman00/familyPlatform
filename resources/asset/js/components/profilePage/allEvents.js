@@ -112,6 +112,10 @@ try {
 
             // Then & Now needs both photos before anything is sent.
             if (!isEditing && typeof window.__thenNowReady === 'function') await window.__thenNowReady();
+            // Ensure any staged or uploading video (including >30s auto-trim) finishes attaching before FormData is built.
+            if (!isEditing && typeof window.__ensurePendingVideoUploaded === 'function') {
+                await window.__ensurePendingVideoUploaded();
+            }
             const thenNow = !isEditing && typeof window.__getThenNowFiles === 'function' ? window.__getThenNowFiles() : null;
             if (!isEditing && document.getElementById('thenNowFlag')?.value === '1' && (!thenNow?.then || !thenNow?.now)) {
                 Swal.fire({

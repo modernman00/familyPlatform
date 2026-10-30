@@ -101,7 +101,7 @@
                                     : 'background: rgba(0,0,0,0.04); color: var(--text-color, #475569); border: 1px solid transparent; font-size: 0.72rem; min-height: 32px;'"
                                 @click="selectedMonth = m.key">
                             <span x-text="m.label"></span>
-                            <span class="badge rounded-pill bg-white text-dark ms-1" style="font-size: 0.65rem;" x-text="m.count"></span>
+                            <span class="badge rounded-pill ms-1 border" style="font-size: 0.65rem; background-color: var(--card-bg, #ffffff); color: var(--text-color, #0f172a);" x-text="m.count"></span>
                         </button>
                     </template>
                 </div>

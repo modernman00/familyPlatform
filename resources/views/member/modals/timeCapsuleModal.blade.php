@@ -229,7 +229,7 @@
                 <div class="text-muted small mb-2" style="font-size: 0.8rem;">
                     For: <strong>${escapeHtml(capsule.recipient_name)}</strong> • Unlock Date: <strong>${escapeHtml(capsule.unlock_date)}</strong>
                 </div>
-                <div class="p-2.5 rounded-3 ${capsule.is_unlocked ? 'bg-white border text-dark' : 'bg-light text-secondary font-monospace'}" style="font-size: 0.85rem; line-height: 1.5;">
+                <div class="p-2.5 rounded-3 capsule-message-box ${capsule.is_unlocked ? 'border' : 'font-monospace'}" style="font-size: 0.85rem; line-height: 1.5; background-color: var(--card-bg, #ffffff); color: var(--text-color, #0f172a);">
                     ${escapeHtml(capsule.message)}
                 </div>
             `;

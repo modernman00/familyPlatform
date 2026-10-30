@@ -54,6 +54,7 @@ export function profileFeed(opts = {}) {
         trendingHashtags: [],
         isHashtagFilterActive: false,
         votingPolls: {},
+        votingTwoTruths: {},
         viewedPostNos: new Set(),
         viewedCommentNos: new Set(),
         _postObserver: null,
@@ -186,6 +187,24 @@ export function profileFeed(opts = {}) {
             this.scrollToHashPost();
             this.observePostViews();
             this.observeCommentViews();
+            this.observeFeedVideos();
+
+            // Set up MutationObserver on feed container so newly added posts or infinite scroll batches
+            // automatically have their video autoplay and view observers attached
+            if (typeof MutationObserver !== 'undefined') {
+                const postContainer = document.getElementById('postIt');
+                if (postContainer) {
+                    this._feedMutationObserver = new MutationObserver(() => {
+                        this.observeFeedVideos();
+                        this.observePostViews();
+                        this.observeCommentViews();
+                    });
+                    this._feedMutationObserver.observe(postContainer, { childList: true, subtree: true });
+                }
+            }
+
+            // Expose globally for dynamic injections
+            window.observeFeedVideos = () => this.observeFeedVideos();
 
             // Expose filter helper globally for post pills
             window.filterByFamilyHashtag = (tag) => {
@@ -308,6 +327,7 @@ export function profileFeed(opts = {}) {
                     this.scrollToHashPost();
                     this.observePostViews();
                     this.observeCommentViews();
+                    this.observeFeedVideos();
                 } else if (this.posts.length === 0) {
                     this.posts = [];
                 }
@@ -333,6 +353,24 @@ export function profileFeed(opts = {}) {
             if (rawImg) {
                 profImg = (rawImg.startsWith('/') || rawImg.startsWith('http')) ? rawImg : `/resources/images/profile/${rawImg}`;
             }
+            const cleanMsg = this.decodeHtml(p?.postMessage || '');
+            let detectedVideo = extractVideoFromText(cleanMsg);
+            if (!detectedVideo) {
+                const videoFileFromSlots = this.extractVideoFromSlots(p);
+                if (videoFileFromSlots) {
+                    const slotUrl = (videoFileFromSlots.startsWith('/') || videoFileFromSlots.startsWith('http'))
+                        ? videoFileFromSlots
+                        : `/resources/videos/posts/${videoFileFromSlots}`;
+                    detectedVideo = {
+                        type: 'direct',
+                        videoId: null,
+                        embedUrl: slotUrl,
+                        originalUrl: videoFileFromSlots,
+                        trimStart: null,
+                        trimEnd: null,
+                    };
+                }
+            }
             const normalized = {
                 post_no: p?.post_no,
                 id: p?.id,
@@ -341,13 +379,14 @@ export function profileFeed(opts = {}) {
                 postFamCode: p?.postFamCode || '',
                 date_created: p?.date_created || new Date().toISOString(),
                 post_time: p?.post_time || p?.date_created || new Date().toISOString(),
-                postMessage: p?.postMessage || '',
-                displayMessage: this.normalizeEmojiText(cleanPostMessage(p?.postMessage || '', extractVideoFromText(p?.postMessage))),
-                video: extractVideoFromText(p?.postMessage),
+                postMessage: cleanMsg,
+                displayMessage: this.normalizeEmojiText(cleanPostMessage(cleanMsg, detectedVideo)),
+                video: detectedVideo,
                 link_preview: p?.link_preview || null,
                 post_likes: parseInt(p?.post_likes || 0, 10),
                 images: this.extractImages(p),
                 poll: p?.poll || null,
+                two_truths: p?.two_truths || null,
                 comparison: this.normalizeComparison(p?.comparison),
                 reactions: Array.isArray(p?.reactions) ? p.reactions : [],
                 user_reaction: p?.user_reaction || null,
@@ -380,7 +419,7 @@ export function profileFeed(opts = {}) {
                 id: c?.id,
                 fullName: c?.fullName || 'Family Member',
                 profileImg: img ? ((img.startsWith('/') || img.startsWith('http')) ? img : `/resources/images/profile/${img}`) : '/public/avatar/avatarM.png',
-                comment: this.normalizeEmojiText(rawComment),
+                comment: this.normalizeEmojiText(this.decodeHtml(rawComment)),
                 gif_url: isAllowedGifUrl(c?.gif_url) ? c.gif_url : '',
                 date_created: c?.date_created || '',
                 post_time: c?.post_time || '',
@@ -426,7 +465,18 @@ export function profileFeed(opts = {}) {
                 }
             });
 
-            return collected.filter(img => img && img !== 'null' && img !== 'undefined' && img !== 'none' && !img.includes('no_image'));
+            return collected.filter(img => img && img !== 'null' && img !== 'undefined' && img !== 'none' && !img.includes('no_image') && !/\.(mp4|webm|mov|ogg)(\?|#|$)/i.test(img));
+        },
+
+        extractVideoFromSlots(p) {
+            if (!p || typeof p !== 'object') return null;
+            for (let i = 0; i <= 5; i++) {
+                const val = p[`post_img${i}`];
+                if (val && typeof val === 'string' && /\.(mp4|webm|mov|ogg)(\?|#|$)/i.test(val.trim())) {
+                    return val.trim();
+                }
+            }
+            return null;
         },
 
         getPostImageUrl(img) {
@@ -453,14 +503,30 @@ export function profileFeed(opts = {}) {
             }
         },
 
+        decodeHtml(str) {
+            if (!str || typeof str !== 'string') return '';
+            let decoded = str;
+            // Decode multi-layer encoded entities (&amp;#... -> &#...)
+            for (let i = 0; i < 3 && /&amp;(?:#\d+|#x[0-9a-f]+|[a-z]+);/i.test(decoded); i++) {
+                decoded = decoded.replace(/&amp;(#\d+|#x[0-9a-f]+|[a-z]+);/gi, '&$1;');
+            }
+            return decoded
+                .replace(/&(?:#?0*39|#x0*27|apos);/gi, "'")
+                .replace(/&(?:#?0*34|#x0*22|quot);/gi, '"')
+                .replace(/&(?:#?0*60|#x0*3c|lt);/gi, '<')
+                .replace(/&(?:#?0*62|#x0*3e|gt);/gi, '>')
+                .replace(/&(?:#?0*38|#x0*26|amp);/gi, '&');
+        },
+
         escapeHtml(str) {
             if (!str) return '';
-            return String(str)
+            // Decode any existing entities first so pre-encoded strings (e.g. legacy &#039;) never double-encode to &amp;#039;
+            const clean = this.decodeHtml(String(str));
+            return clean
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
+                .replace(/"/g, '&quot;');
         },
 
         normalizeEmojiText(str) {
@@ -578,6 +644,83 @@ export function profileFeed(opts = {}) {
             }
         },
 
+        observeFeedVideos() {
+            if (typeof IntersectionObserver === 'undefined') return;
+
+            if (!this._feedVideoObserver) {
+                this._activePlayingFeedVideo = null;
+
+                this._feedVideoObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        const video = entry.target;
+                        if (!video || !(video instanceof HTMLVideoElement)) return;
+
+                        if (entry.isIntersecting && entry.intersectionRatio >= 0.45) {
+                            // Autoplay video when in view during scrolling
+                            if (!video._userManuallyPaused) {
+                                if (this._activePlayingFeedVideo && this._activePlayingFeedVideo !== video && !this._activePlayingFeedVideo.paused) {
+                                    this._activePlayingFeedVideo.pause();
+                                }
+                                this._activePlayingFeedVideo = video;
+
+                                if (!video.muted) {
+                                    video.muted = true;
+                                }
+                                video._autoPlaying = true;
+                                const playPromise = video.play();
+                                if (playPromise !== undefined) {
+                                    playPromise.catch(() => {
+                                        if (!video.muted) {
+                                            video.muted = true;
+                                            video.play().catch(() => {});
+                                        }
+                                    });
+                                }
+                            }
+                        } else if (!entry.isIntersecting || entry.intersectionRatio < 0.2) {
+                            // Stop playing video when scrolled out of view
+                            if (!video.paused) {
+                                video._autoPlaying = false;
+                                video.pause();
+                            }
+                            if (this._activePlayingFeedVideo === video) {
+                                this._activePlayingFeedVideo = null;
+                            }
+                            // Reset user pause lock when scrolled completely away so it can autoplay next time
+                            video._userManuallyPaused = false;
+                        }
+                    });
+                }, {
+                    threshold: [0.0, 0.2, 0.45, 0.75]
+                });
+            }
+
+            setTimeout(() => {
+                const videoEls = document.querySelectorAll('video.feed-post-video, .video-embed-container video');
+                videoEls.forEach(video => {
+                    if (!video.dataset.feedObserved) {
+                        video.dataset.feedObserved = 'true';
+                        video.playsInline = true;
+                        video.setAttribute('playsinline', '');
+                        video.setAttribute('webkit-playsinline', '');
+
+                        video.addEventListener('pause', () => {
+                            if (!video._autoPlaying) {
+                                video._userManuallyPaused = true;
+                            }
+                            video._autoPlaying = false;
+                        });
+
+                        video.addEventListener('play', () => {
+                            video._userManuallyPaused = false;
+                        });
+
+                        this._feedVideoObserver.observe(video);
+                    }
+                });
+            }, 300);
+        },
+
         async openPostViewersModal(post) {
             if (!post || !post.post_no) return;
             this.viewersType = 'post';
@@ -692,8 +835,8 @@ export function profileFeed(opts = {}) {
                 return `<span class="mention-chip" title="Mentioned: ${name}"><i class="bi bi-at"></i>${name}</span>`;
             });
 
-            // Hashtag pills
-            return safeText.replace(/#([a-zA-Z0-9_]{2,40})/g, (match, tag) => {
+            // Hashtag pills (require word boundary/whitespace or start, never preceded by & or inside an entity, must start with a letter)
+            return safeText.replace(/(?<![&\w])#([a-zA-Z][a-zA-Z0-9_]{1,39})(?!;)/gu, (match, tag) => {
                 const cleanTag = tag.toLowerCase();
                 return `<span class="badge family-tag-pill" role="button" tabindex="0" onclick="window.filterByFamilyHashtag('${cleanTag}')" title="Filter family memories by #${cleanTag}"><i class="bi bi-hash me-0.5"></i>${tag}</span>`;
             });
@@ -1129,7 +1272,7 @@ export function profileFeed(opts = {}) {
             if (!postNoInput || !textarea) return;
 
             postNoInput.value = post.post_no;
-            textarea.value = post.postMessage || '';
+            textarea.value = this.decodeHtml(post.postMessage || '');
             if (notice) notice.classList.remove('d-none');
 
             const modalTitle = document.getElementById('postModalLabel');
@@ -1138,6 +1281,36 @@ export function profileFeed(opts = {}) {
             const modalEl = document.getElementById('postModal');
             const instance = window.bootstrap?.Modal?.getOrCreateInstance(modalEl);
             instance?.show();
+        },
+
+        // Reposts one of the user's own earlier posts, with an optional reflection.
+        async repostPost(post) {
+            const result = await Swal.fire({
+                title: 'Repost this memory?',
+                text: 'It will appear again at the top of your family feed.',
+                input: 'textarea',
+                inputPlaceholder: 'Add your thoughts or reflection (optional)',
+                showCancelButton: true,
+                confirmButtonColor: '#a31621',
+                confirmButtonText: 'Repost',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: () => !Swal.isLoading(),
+                preConfirm: async (note) => {
+                    try {
+                        const res = await axios.post(
+                            `/post/${post.post_no}/repost`,
+                            { reflection_message: (note || '').trim() },
+                            this.csrfOptions
+                        );
+                        return res.data;
+                    } catch (err) {
+                        Swal.showValidationMessage(err?.response?.data?.message || 'Unable to repost. Please try again.');
+                        return false;
+                    }
+                }
+            });
+            if (!result.isConfirmed || !result.value) return;
+            Swal.fire({ icon: 'success', title: 'Reposted', timer: 1500, showConfirmButton: false });
         },
 
         async deletePost(postNo) {
@@ -1178,7 +1351,7 @@ export function profileFeed(opts = {}) {
 
         startEditComment(comment) {
             this.editingCommentNo = comment.comment_no;
-            this.editCommentText = comment.comment;
+            this.editCommentText = this.decodeHtml(comment.comment || '');
         },
 
         cancelEditComment() {
@@ -1656,6 +1829,59 @@ export function profileFeed(opts = {}) {
             }
         },
 
+        // ── Two Truths & a Lie (play directly from the feed) ──────────────
+        isVotingTwoTruths(postNo) {
+            return !!this.votingTwoTruths[postNo];
+        },
+
+        async voteTwoTruths(post, guess) {
+            const game = post?.two_truths;
+            if (!game || game.has_voted || game.is_author || game.status !== 'active') return;
+            if (this.votingTwoTruths[post.post_no]) return;
+
+            this.votingTwoTruths[post.post_no] = true;
+            const snapshot = JSON.parse(JSON.stringify(game));
+            // Optimistic lock-in so the tap feels instant
+            game.has_voted = true;
+            game.user_vote = { guessed_lie_index: guess };
+
+            try {
+                const token = getCsrfToken();
+                const response = await axios.post('/api/games/two-truths/vote', {
+                    game_id: game.id,
+                    guess,
+                    token,
+                    _token: token,
+                }, {
+                    headers: {
+                        ...(token ? { 'X-CSRF-TOKEN': token, 'X-XSRF-TOKEN': token } : {}),
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+                const data = response?.data || {};
+                if (data.status !== 'success') {
+                    throw new Error(data.message || 'Guess was not recorded');
+                }
+                game.total_votes = data.total_votes ?? (Number(game.total_votes || 0) + 1);
+                game.vote_percentages = data.vote_percentages || null;
+                game.vote_counts = data.vote_counts || null;
+                game.just_voted = true;
+                this.pulseHaptic?.();
+            } catch (err) {
+                const msg = err?.response?.data?.message || err.message || 'Could not record your guess.';
+                Object.keys(game).forEach(k => delete game[k]);
+                Object.assign(game, snapshot);
+                game.error_message = msg;
+                console.error('Failed to vote on Two Truths:', err);
+            } finally {
+                this.votingTwoTruths[post.post_no] = false;
+            }
+        },
+
+        twoTruthsPercent(game, idx) {
+            return Number(game?.vote_percentages?.[idx] ?? 0);
+        },
+
         initEventListeners() {
             window.addEventListener('post-created', (event) => {
                 const newPostData = event?.detail;
@@ -1664,6 +1890,7 @@ export function profileFeed(opts = {}) {
                     const existing = this.posts.find(p => String(p.post_no) === String(normalized.post_no));
                     if (!existing) {
                         this.posts.unshift(normalized);
+                        this.observeFeedVideos();
                     } else if (normalized.comparison && !existing.comparison) {
                         // The realtime broadcast can land first, without the Then & Now pair.
                         existing.comparison = normalized.comparison;
@@ -1682,6 +1909,7 @@ export function profileFeed(opts = {}) {
                     post.postMessage = postMessage;
                     post.displayMessage = this.normalizeEmojiText(cleanPostMessage(postMessage || '', extractVideoFromText(postMessage)));
                     post.video = extractVideoFromText(postMessage);
+                    this.observeFeedVideos();
                     if (link_preview !== undefined) {
                         post.link_preview = link_preview;
                     } else if (post.postMessage && !post.video) {
@@ -1961,11 +2189,30 @@ export function profileFeed(opts = {}) {
 
                 channel.bind('new-post', (data) => {
                     if (Array.isArray(data)) {
+                        let needsRefetch = false;
                         data.forEach(item => {
+                            // Game state is viewer-specific (has_voted / is_author), so
+                            // re-hydrate from the server instead of trusting the broadcast.
+                            if (String(item?.postMessage || '').includes('Two Truths & a Lie')) {
+                                needsRefetch = true;
+                                return;
+                            }
                             if (!this.posts.some(p => String(p.post_no) === String(item?.post_no))) {
                                 this.posts.unshift(this.normalizePost(item));
                             }
                         });
+                        this.observeFeedVideos();
+                        if (needsRefetch) this.fetchPosts();
+                    }
+                });
+
+                channel.bind('two-truths-voted', (data) => {
+                    const post = this.posts.find(p => p.two_truths && p.two_truths.id === data?.game_id);
+                    if (post) {
+                        post.two_truths.total_votes = data.total_votes;
+                        if (post.two_truths.has_voted || post.two_truths.is_author) {
+                            post.two_truths.vote_percentages = data.vote_percentages || post.two_truths.vote_percentages;
+                        }
                     }
                 });
 

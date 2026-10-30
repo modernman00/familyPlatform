@@ -36,7 +36,7 @@
                 <span id="kinModalScore" class="badge rounded-pill px-2.5 py-1 fw-bold" style="background: #a31621; color: #ffffff; font-size: 0.75rem;">
                   75% {{ __('kinship.match', 'Match') }}
                 </span>
-                <span id="kinModalType" class="badge rounded-pill bg-light text-dark border px-2.5 py-1 fw-semibold" style="font-size: 0.75rem;">
+                <span id="kinModalType" class="badge rounded-pill border px-2.5 py-1 fw-semibold kin-modal-type-badge" style="font-size: 0.75rem; background-color: var(--hover-color, #f1f5f9); color: var(--text-color, #0f172a);">
                   Potential Kin
                 </span>
               </div>
@@ -90,7 +90,7 @@
           <div class="d-flex align-items-start gap-2">
             <i class="bi bi-shield-lock-fill text-success fs-6 mt-0.5 flex-shrink-0"></i>
             <div>
-              <strong style="color: #166534;">The Walled Sanctuary Guarantee</strong>
+              <strong style="color: #166534;" class="kin-guarantee-title">The Walled Sanctuary Guarantee</strong>
               <p class="mb-0 text-secondary" style="font-size: 0.78rem;">
                 {{ __('kinship.privacy_note', 'Your connection is protected by the Walled Sanctuary guarantee. Your private data is never exposed.') }}
               </p>

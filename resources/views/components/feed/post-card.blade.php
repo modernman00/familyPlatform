@@ -1,5 +1,5 @@
 {{-- Scoped Feed Post Card Component --}}
-<div class="card border-0 shadow-sm mb-4 p-3 feed-post-card" :data-post-no="post.post_no" :id="'post' + post.post_no" :class="'post' + post.post_no" :style="(post.id === 'FAMILY_PLATFORM_OFFICIAL' || post.is_official) ? 'border-radius: 12px; background-color: var(--card-bg); border-left: 4px solid #059669 !important;' : (isUserTaggedInPost(post) ? 'border-radius: 12px; background-color: var(--card-bg); border-left: 4px solid #a31621 !important;' : 'border-radius: 8px; background-color: var(--card-bg);')">
+<div class="card border-0 shadow-sm mb-4 p-3 feed-post-card" :data-post-no="post.post_no" :id="'post' + post.post_no" :class="'post' + post.post_no" :style="(post.is_official || post.id === '{{ \App\services\FamilyPlatformAccountService::getAccountId() }}') ? 'border-radius: 12px; background-color: var(--card-bg); border-left: 4px solid #059669 !important;' : (isUserTaggedInPost(post) ? 'border-radius: 12px; background-color: var(--card-bg); border-left: 4px solid #a31621 !important;' : 'border-radius: 8px; background-color: var(--card-bg);')">
 
   <!-- Tagged with You Heritage Ribbon -->
   <template x-if="isUserTaggedInPost(post)">
@@ -24,7 +24,7 @@
         <div>
           <div class="d-flex align-items-center flex-wrap">
             <h6 class="mb-0 fw-semibold text-dark" style="font-size: 1.05rem;" x-text="post.fullName"></h6>
-            <template x-if="post.id === 'FAMILY_PLATFORM_OFFICIAL' || post.is_official">
+            <template x-if="post.is_official || post.id === '{{ \App\services\FamilyPlatformAccountService::getAccountId() }}'">
               <span class="badge rounded-pill text-white ms-1.5 px-2 py-0.5 d-inline-flex align-items-center gap-1 shadow-2xs" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); font-size: 0.72rem; font-weight: 600;" title="Verified FamilyPlatform Account">
                 <i class="bi bi-patch-check-fill" style="color: #ffffff; font-size: 0.75rem;"></i>
                 <span>{{ __('feed.official_badge', 'Official Update') }}</span>
@@ -75,7 +75,7 @@
           </div>
           <div class="d-flex align-items-center gap-2 mt-0.5">
             <small class="text-muted" style="font-size: 0.85rem;" x-text="formatDate(post.post_time || post.date_created)"></small>
-            <template x-if="post.id === 'FAMILY_PLATFORM_OFFICIAL' || post.is_official">
+            <template x-if="post.is_official || post.id === '{{ \App\services\FamilyPlatformAccountService::getAccountId() }}'">
               <span class="badge bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-pill" style="font-size: 0.78rem; font-weight: 600; padding: 2px 8px;">
                 ✨ {{ __('feed.platform_announcement', 'Platform Announcement') }}
               </span>
@@ -96,6 +96,11 @@
                   <li>
                     <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" @click.prevent="editPost(post)">
                       <i class="bi bi-pencil-square text-primary"></i> {{ __('feed.edit_post', 'Edit Post') }}
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" style="min-height: 44px;" @click.prevent="repostPost(post)">
+                      <i class="bi bi-arrow-repeat text-success"></i> {{ __('feed.repost_post', 'Repost') }}
                     </a>
                   </li>
                   <li>
@@ -128,6 +133,15 @@
     </div>
   </template>
 
+  <!-- Two Truths & a Lie Badge -->
+  <template x-if="post.two_truths || (post.postMessage && post.postMessage.includes('Two Truths & a Lie'))">
+    <div class="px-1 mb-2">
+      <span class="badge rounded-pill px-3 py-1.5 text-white shadow-sm d-inline-flex align-items-center gap-1.5" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.5px;">
+        <i class="bi bi-mask"></i> TWO TRUTHS &amp; A LIE
+      </span>
+    </div>
+  </template>
+
   <!-- Family Chronicle / Journal Badge -->
   <template x-if="post.postMessage && (post.postMessage.includes('Family Chronicle') || post.postMessage.includes('/familyJournal/'))">
     <div class="px-1 mb-2">
@@ -138,7 +152,7 @@
   </template>
 
   <!-- Post Text (Prominent for Text-Only Posts) -->
-  <template x-if="(post.displayMessage || (!post.video && post.postMessage)) && (!post.images || post.images.length === 0) && !post.video && !post.comparison">
+  <template x-if="!post.two_truths && (post.displayMessage || (!post.video && post.postMessage)) && (!post.images || post.images.length === 0) && !post.video && !post.comparison">
     <div class="post-content px-1 mb-3">
       <p class="mb-0" style="white-space: pre-line; font-size: 1.05rem; color: var(--text-main); line-height: 1.55; font-family: var(--font-sans, -apple-system, system-ui, sans-serif);" x-html="renderHashtags(post.displayMessage || post.postMessage)"></p>
       
@@ -243,7 +257,10 @@
 
         <!-- Main Media Stage -->
         <div class="position-relative overflow-hidden post-media-stage vse-skeleton-surface" 
-             :class="playingVoicePostNo === post.post_no ? 'photo-voice-playing' : ''"
+             :class="[
+               playingVoicePostNo === post.post_no ? 'photo-voice-playing' : '',
+               ((post.post_no || 0) % 3 === 0 ? 'living-drift-a' : ((post.post_no || 0) % 3 === 1 ? 'living-drift-b' : 'living-drift-c'))
+             ]"
              style="border-radius:12px; width:100%; max-height: 600px; background: rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: center;">
           <a href="#" 
              @click.prevent="typeof handleImageTap === 'function' ? handleImageTap(post, post.images, 0, $event) : openLightbox(post.images, 0)" 
@@ -255,7 +272,7 @@
               <source :srcset="getPostImageVariantUrl(post.images[0], 'avif')" type="image/avif">
               <source :srcset="getPostImageVariantUrl(post.images[0], 'webp')" type="image/webp">
               <img :src="(post.images[0] && (post.images[0].startsWith('/public/') || post.images[0].startsWith('/images/'))) ? post.images[0] : getPostImageUrl(post.images[0])" 
-                   class="post-media-first-img w-100 d-block"
+                   class="post-media-first-img living-canvas-img w-100 d-block"
                    style="border-radius: 12px; width: 100%; height: auto; max-height: 600px; object-fit: contain; cursor: pointer;" 
                    alt="Family post image" 
                    loading="lazy"
@@ -391,7 +408,10 @@
         </div>
 
         <div class="position-relative overflow-hidden post-media-stage vse-skeleton-surface" 
-             :class="playingVoicePostNo === post.post_no ? 'photo-voice-playing' : ''"
+             :class="[
+               playingVoicePostNo === post.post_no ? 'photo-voice-playing' : '',
+               ((post.post_no || 0) % 3 === 0 ? 'living-drift-a' : ((post.post_no || 0) % 3 === 1 ? 'living-drift-b' : 'living-drift-c'))
+             ]"
              style="border-radius:12px; aspect-ratio: 1 / 1; max-height: 540px; background: #0b0f19;">
           
           <!-- Floating Glassmorphic Slide Counter (1/3) -->
@@ -405,7 +425,9 @@
                style="scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; height: 100%;"
                @scroll.passive="currentIdx = Math.round($event.target.scrollLeft / ($event.target.clientWidth || 1))">
             <template x-for="(img, idx) in post.images" :key="idx">
-              <div class="flex-shrink-0 w-100 position-relative" style="scroll-snap-align: start; min-width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+              <div class="flex-shrink-0 w-100 position-relative carousel-slide-item" 
+                   :class="currentIdx === idx ? 'is-slide-active' : ''"
+                   style="scroll-snap-align: start; min-width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
                 <a href="#" 
                    @click.prevent="typeof handleImageTap === 'function' ? handleImageTap(post, post.images, idx, $event) : openLightbox(post.images, idx)" 
                    @dblclick.prevent.stop="triggerHeartBurst(post, idx)"
@@ -416,7 +438,7 @@
                     <source :srcset="getPostImageVariantUrl(img, 'avif')" type="image/avif">
                     <source :srcset="getPostImageVariantUrl(img, 'webp')" type="image/webp">
                     <img :src="(img && (img.startsWith('/public/') || img.startsWith('/images/'))) ? img : getPostImageUrl(img)" 
-                         class="post-media-first-img w-100 h-100"
+                         class="post-media-first-img living-canvas-img w-100 h-100"
                          style="border-radius: 12px; max-height: 540px; object-fit: contain; cursor: pointer;" 
                          alt="Family carousel slide" 
                          loading="lazy"
@@ -565,9 +587,31 @@
 
   <!-- Direct Video Stream -->
   <template x-if="post.video && post.video.type === 'direct'">
-    <div class="video-embed-container mb-3 px-1">
-      <div class="ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm border border-light-subtle" style="border-radius: 12px; max-height: 380px;">
-        <video :src="post.video.embedUrl" controls preload="metadata" style="width: 100%; height: 100%; object-fit: contain; background: #000;"></video>
+    <div class="video-embed-container mb-3 px-1 position-relative" x-data="{ isVideoMuted: true }">
+      <div class="ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm border border-light-subtle position-relative" style="border-radius: 12px; max-height: 380px; background: #000;">
+        <video class="feed-post-video w-100 h-100"
+               :src="post.video.embedUrl"
+               controls
+               playsinline
+               webkit-playsinline
+               muted
+               loop
+               preload="metadata"
+               @loadedmetadata="if (post.video && post.video.trimStart !== null && $el.currentTime < post.video.trimStart) { $el.currentTime = post.video.trimStart; }"
+               @play="if (post.video && post.video.trimStart !== null && ($el.currentTime < post.video.trimStart || (post.video.trimEnd !== null && $el.currentTime >= post.video.trimEnd))) { $el.currentTime = post.video.trimStart; }"
+               @timeupdate="if (post.video && post.video.trimEnd !== null && $el.currentTime >= post.video.trimEnd) { $el.currentTime = post.video.trimStart || 0; }"
+               @volumechange="isVideoMuted = $el.muted"
+               style="width: 100%; height: 100%; object-fit: contain; background: #000;"></video>
+
+        <!-- Quick 1-Tap Sound Toggle (Instagram / TikTok Feed Standard) -->
+        <button type="button" 
+                class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
+                @click.stop="const v = $el.closest('.video-embed-container').querySelector('video'); if (v) { v.muted = !v.muted; isVideoMuted = v.muted; }"
+                :title="isVideoMuted ? 'Unmute video' : 'Mute video'"
+                :aria-label="isVideoMuted ? 'Unmute video' : 'Mute video'"
+                style="top: 14px; right: 14px; z-index: 5; width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 9999px; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; transition: transform 0.15s ease, background 0.15s ease; white-space: nowrap; flex-shrink: 0;">
+          <i class="bi" :class="isVideoMuted ? 'bi-volume-mute-fill' : 'bi-volume-up-fill'" style="font-size: 1.15rem; color: #ffffff;"></i>
+        </button>
       </div>
     </div>
   </template>
@@ -634,6 +678,65 @@
     </div>
   </template>
 
+  <!-- Two Truths & a Lie: playable game card -->
+  <template x-if="post.two_truths">
+    <div class="tt-feed-card mx-1 mb-3" role="group" :aria-label="'Two Truths and a Lie: ' + (post.two_truths.title || '')">
+      <div class="tt-feed-head">
+        <div class="tt-feed-eyebrow"><i class="bi bi-mask"></i> Spot the lie</div>
+        <h6 class="tt-feed-title" :title="post.two_truths.title" x-text="post.two_truths.title"></h6>
+        <p class="tt-feed-sub mb-0">
+          <span x-text="post.two_truths.author_name || post.fullName"></span> says two are true and one is a lie.
+        </p>
+      </div>
+
+      <div class="tt-feed-options">
+        <template x-for="idx in [1, 2, 3]" :key="idx">
+          <button type="button"
+                  class="tt-opt"
+                  :class="{
+                    'is-picked': post.two_truths.user_vote && Number(post.two_truths.user_vote.guessed_lie_index) === idx,
+                    'is-lie': post.two_truths.status === 'revealed' && Number(post.two_truths.lie_index) === idx,
+                    'is-truth': post.two_truths.status === 'revealed' && Number(post.two_truths.lie_index) !== idx,
+                    'is-locked': post.two_truths.has_voted || post.two_truths.is_author || post.two_truths.status !== 'active'
+                  }"
+                  :disabled="post.two_truths.has_voted || post.two_truths.is_author || post.two_truths.status !== 'active' || isVotingTwoTruths(post.post_no)"
+                  @click="voteTwoTruths(post, idx)"
+                  :aria-label="'Statement ' + idx + ': ' + post.two_truths['statement_' + idx]">
+            <span class="tt-opt-num" x-text="idx"></span>
+            <span class="tt-opt-text" x-text="post.two_truths['statement_' + idx]"></span>
+            <template x-if="post.two_truths.vote_percentages">
+              <span class="tt-opt-pct" x-text="twoTruthsPercent(post.two_truths, idx) + '%'"></span>
+            </template>
+            <template x-if="post.two_truths.vote_percentages">
+              <span class="tt-opt-bar" :style="'width:' + twoTruthsPercent(post.two_truths, idx) + '%'"></span>
+            </template>
+            <span x-show="isVotingTwoTruths(post.post_no)" class="spinner-border spinner-border-sm tt-opt-spin" role="status" aria-hidden="true"></span>
+          </button>
+        </template>
+      </div>
+
+      <div class="tt-feed-foot">
+        <template x-if="post.two_truths.status === 'active' && !post.two_truths.has_voted && !post.two_truths.is_author">
+          <span class="tt-chip tt-chip-cta"><i class="bi bi-hand-index-thumb"></i> Tap the statement you think is the lie</span>
+        </template>
+        <template x-if="post.two_truths.has_voted && post.two_truths.status === 'active'">
+          <span class="tt-chip tt-chip-ok" :class="{ 'tt-pop': post.two_truths.just_voted }"><i class="bi bi-lock-fill"></i> Guess locked in. Reveal soon!</span>
+        </template>
+        <template x-if="post.two_truths.is_author && post.two_truths.status === 'active'">
+          <span class="tt-chip"><i class="bi bi-stars"></i> Your challenge is live</span>
+        </template>
+        <template x-if="post.two_truths.status === 'revealed' && post.two_truths.user_vote">
+          <span class="tt-chip" :class="Number(post.two_truths.user_vote.is_correct) === 1 ? 'tt-chip-ok' : ''">
+            <i class="bi bi-trophy-fill"></i>
+            <span x-text="Number(post.two_truths.user_vote.is_correct) === 1 ? ('You spotted it! +' + post.two_truths.user_vote.points_awarded + ' pts') : ('Fooled! +' + post.two_truths.user_vote.points_awarded + ' pts for playing')"></span>
+          </span>
+        </template>
+        <span class="tt-chip tt-chip-muted"><i class="bi bi-people-fill"></i> <span x-text="(post.two_truths.total_votes || 0) + ((post.two_truths.total_votes || 0) === 1 ? ' guess' : ' guesses')"></span></span>
+      </div>
+      <p class="tt-feed-error" x-show="post.two_truths.error_message" x-text="post.two_truths.error_message" role="alert"></p>
+    </div>
+  </template>
+
   <!-- Poll Section -->
   <template x-if="post.poll && post.poll.options && post.poll.options.length > 0">
     <div class="poll-container mt-2 p-3 bg-light rounded border border-light-subtle mb-3 mx-1">
@@ -668,7 +771,7 @@
 
   <!-- Actions Bar: Super-Premium Minimalist Action Row (Instagram/Apple Standard) -->
   <div class="d-flex align-items-center justify-content-between pt-2 pb-1 mb-1 feed-actions-row">
-    <div class="d-flex align-items-center gap-1">
+    <div class="d-flex align-items-center gap-2">
 
       <!-- Like Button with floating emoji reaction bar -->
       <div class="position-relative"
@@ -702,7 +805,7 @@
         </div>
 
         <!-- Like / Active Reaction Button (Spring Micro-Pop) -->
-        <button class="btn btn-action-glyph rounded-circle position-relative heirloom-trigger-btn"
+        <button class="btn btn-action-glyph btn-action-like rounded-circle position-relative heirloom-trigger-btn"
                 :class="post.user_reaction ? ('is-liked reaction-' + post.user_reaction) : ''"
                 type="button"
                 :title="post.user_reaction ? ('Reacted: ' + (emojiMap[post.user_reaction]?.label || 'Liked') + ' - Click to change reaction') : 'React with heirloom glass love and appreciation'"
@@ -725,7 +828,7 @@
       </div>
 
       <!-- Comment Button -->
-      <button class="btn btn-action-glyph rounded-circle"
+      <button class="btn btn-action-glyph btn-action-comment rounded-circle"
               style="min-width: 44px; min-height: 44px;"
               type="button"
               title="Write or view family comments on this post"
@@ -739,13 +842,14 @@
 
     <!-- Bookmark / Save Memory Button (Right-Aligned) -->
     <div>
-      <button class="btn btn-action-glyph rounded-circle"
+      <button class="btn btn-action-glyph btn-action-bookmark rounded-circle"
+              :class="post._saved ? 'is-saved' : ''"
               style="min-width: 44px; min-height: 44px;"
               type="button"
               title="Save memory to family collection"
               aria-label="Save this family memory"
               @click="window.__saveMemory ? window.__saveMemory(post.post_no) : (post._saved = !post._saved)">
-        <i :class="post._saved ? 'bi bi-bookmark-fill text-primary' : 'bi bi-bookmark'" style="font-size: 1.25rem; line-height: 1;"></i>
+        <i :class="post._saved ? 'bi bi-bookmark-fill' : 'bi bi-bookmark'" style="font-size: 1.25rem; line-height: 1;"></i>
       </button>
     </div>
   </div>

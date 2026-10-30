@@ -75,10 +75,15 @@ final class LinkPreviewService
         // 2. Separate URLs that are directly glued to trailing emojis (e.g. '👇https://...')
         $text = (string)preg_replace('/([^\s\n])(https?:\/\/)/iu', '$1 $2', $text);
 
-        // 3. Strip HTML tags
+        // 3. Strip raw HTML tags first
         $text = strip_tags($text);
 
-        // 4. Strip dangerous ASCII control characters (\x00-\x08, \x0B, \x0C, \x0E-\x1F, \x7F)
+        // 4. Decode HTML entities so DB stores canonical UTF-8 text (resolving &amp;#039;, &#039;, &039;, &apos;)
+        $text = (string)preg_replace('/&amp;(#\d+|#x[0-9a-f]+|[a-z]+);/iu', '&$1;', $text);
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = (string)preg_replace('/&(?:#?0*39|#x0*27|apos);/iu', "'", $text);
+
+        // 5. Strip dangerous ASCII control characters (\x00-\x08, \x0B, \x0C, \x0E-\x1F, \x7F)
         // Note: \x09 (tab) and \x0A (line feed) are explicitly preserved.
         $text = (string)preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $text);
 

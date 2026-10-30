@@ -69,26 +69,33 @@
                 <span>{{ $data['country'] ?? 'Global' }}</span>
             </p>
 
-            <!-- Family Code Tonal Pill(s) (Split into Married & Birth; hide Married Code if user does not have one) -->
-            <div class="d-flex flex-column align-items-center gap-2 mb-3 w-100" id="leftColumnDualFamilyCodes" role="group" aria-label="{{ __('profile.family_codes', 'Married and Birth Family Codes') }}">
-                @if($leftMarriedCode !== '')
-                    <a href="/organogram/{{ $data['id'] ?? '' }}?mode=canvas&amp;family_code={{ urlencode($leftMarriedCode) }}&amp;lineage=primary"
-                       class="family-code-pill family-code-pill--married text-decoration-none"
-                       id="marriedFamCodePill"
-                       title="{{ __('profile.view_married_tree_tooltip', 'View Married / Household Family Tree') }} (#{{ $leftMarriedCode }})">
-                        <small class="family-code-label me-1.5">{{ __('profile.married_family_code', 'Married Code') }}:</small>
-                        <span class="family-code-value">{{ $leftMarriedCode }}</span>
-                    </a>
-                @endif
-                @if($leftEffectiveBirthCode !== '')
-                    <a href="/organogram/{{ $data['id'] ?? '' }}?mode=canvas&amp;family_code={{ urlencode($leftEffectiveBirthCode) }}&amp;lineage={{ $leftMarriedCode !== '' ? 'birth' : 'primary' }}"
-                       class="family-code-pill {{ $leftMarriedCode !== '' ? 'family-code-pill--birth' : '' }} text-decoration-none"
-                       id="birthFamCodePill"
-                       title="{{ __('profile.view_birth_tree_tooltip', 'View Birth / Maiden Family Tree') }} (#{{ $leftEffectiveBirthCode }})">
-                        <small class="family-code-label {{ $leftMarriedCode !== '' ? 'family-code-label--birth' : '' }} me-1.5">{{ __('profile.birth_family_code', 'Birth Code') }}:</small>
-                        <span class="family-code-value {{ $leftMarriedCode !== '' ? 'family-code-value--birth' : '' }}">{{ $leftEffectiveBirthCode }}</span>
-                    </a>
-                @endif
+            <!-- Family Code Headline & Tonal Pill(s) (Headline with Married - XXX and Birth - XXX badges) -->
+            <div class="family-code-container d-flex flex-column align-items-center mb-3 w-100" id="leftColumnDualFamilyCodes" role="group" aria-label="{{ __('profile.family_codes', 'Married and Birth Family Codes') }}">
+                <span class="family-code-headline text-uppercase fw-bold mb-1.5" style="font-size: 0.72rem; letter-spacing: 0.08em; color: var(--text-muted, #64748b);">
+                    <i class="bi bi-qr-code me-1 opacity-75"></i>{{ $leftMarriedCode !== '' ? __('profile.family_codes_headline', 'Family Codes') : __('profile.family_code_headline', 'Family Code') }}
+                </span>
+                <div class="d-flex flex-column align-items-center gap-2 w-100">
+                    @if($leftMarriedCode !== '')
+                        <a href="/organogram/{{ $data['id'] ?? '' }}?mode=canvas&amp;family_code={{ urlencode($leftMarriedCode) }}&amp;lineage=primary"
+                           class="family-code-pill family-code-pill--married text-decoration-none"
+                           id="marriedFamCodePill"
+                           aria-label="{{ __('profile.married_family_code', 'Married Code') }}: {{ $leftMarriedCode }}"
+                           title="{{ __('profile.view_married_tree_tooltip', 'View Married / Household Family Tree') }} (#{{ $leftMarriedCode }})">
+                            <span class="family-code-label me-1.5">{{ __('profile.married_code_short', 'Married') }} -</span>
+                            <span class="family-code-value">{{ $leftMarriedCode }}</span>
+                        </a>
+                    @endif
+                    @if($leftEffectiveBirthCode !== '')
+                        <a href="/organogram/{{ $data['id'] ?? '' }}?mode=canvas&amp;family_code={{ urlencode($leftEffectiveBirthCode) }}&amp;lineage={{ $leftMarriedCode !== '' ? 'birth' : 'primary' }}"
+                           class="family-code-pill {{ $leftMarriedCode !== '' ? 'family-code-pill--birth' : '' }} text-decoration-none"
+                           id="birthFamCodePill"
+                           aria-label="{{ __('profile.birth_family_code', 'Birth Code') }}: {{ $leftEffectiveBirthCode }}"
+                           title="{{ __('profile.view_birth_tree_tooltip', 'View Birth / Maiden Family Tree') }} (#{{ $leftEffectiveBirthCode }})">
+                            <span class="family-code-label {{ $leftMarriedCode !== '' ? 'family-code-label--birth' : '' }} me-1.5">{{ __('profile.birth_code_short', 'Birth') }} -</span>
+                            <span class="family-code-value {{ $leftMarriedCode !== '' ? 'family-code-value--birth' : '' }}">{{ $leftEffectiveBirthCode }}</span>
+                        </a>
+                    @endif
+                </div>
             </div>
 
             {{-- Mobile/tablet only: collapsible Quick actions toggle (desktop always shows the buttons) --}}

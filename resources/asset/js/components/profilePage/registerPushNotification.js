@@ -13,6 +13,14 @@
  */
 import axios from 'axios';
 import { getCsrfToken } from '../global';
+import {
+  withPushTimeout as withTimeout,
+  urlBase64ToUint8Array,
+  isPushDismissedWithinCooldown,
+  recordPushDismissal,
+  clearPushDismissal,
+  ensureServiceWorkerReady as getReadyServiceWorker,
+} from '@modernman00/shared-js-lib';
 
 const VAPID_PUBLIC_KEY = process.env.MIX_VAPID_PUBLIC_KEY 
   || (typeof document !== 'undefined' ? document.querySelector('meta[name="vapid-public-key"]')?.getAttribute('content') : '') 
@@ -21,15 +29,6 @@ const PUSH_PROMPT_DISMISSED_KEY = 'push_prompt_dismissed';
 
 const pushSupported = () =>
   'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
-
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const raw = window.atob(base64);
-  const out = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; ++i) out[i] = raw.charCodeAt(i);
-  return out;
-}
 
 function keyToBase64(subscription, name) {
   return btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey(name))));
@@ -57,7 +56,7 @@ async function syncToServer(subscription) {
 
 // ---- import-time bootstrap: keep an existing grant in sync -----------------
 if (pushSupported()) {
-  navigator.serviceWorker.ready
+  getReadyServiceWorker()
     .then((swReg) => swReg.pushManager.getSubscription().then((sub) => {
       if (sub) return syncToServer(sub).catch((e) => console.warn('[push] resync failed', e?.response?.data?.message || e.message));
       if (Notification.permission === 'granted' && VAPID_PUBLIC_KEY) {
@@ -68,18 +67,31 @@ if (pushSupported()) {
 }
 
 async function doSubscribe(swReg) {
-  const sub = await swReg.pushManager.subscribe({
+  const subscribeAttempt = async () => swReg.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
   });
+
+  let sub;
+  try {
+    sub = await withTimeout(subscribeAttempt(), 10000, 'Push service subscription timed out');
+  } catch (err) {
+    if (err && err.name === 'InvalidStateError') {
+      const oldSub = await swReg.pushManager.getSubscription();
+      if (oldSub) await oldSub.unsubscribe();
+      sub = await withTimeout(subscribeAttempt(), 10000, 'Push service subscription timed out');
+    } else {
+      throw err;
+    }
+  }
   await syncToServer(sub);
   return sub;
 }
 
 function showPushPrompt() {
   if (!VAPID_PUBLIC_KEY || Notification.permission !== 'default') return;
-  if (localStorage.getItem(PUSH_PROMPT_DISMISSED_KEY)) return;
-  if (document.getElementById('push-permission-banner')) return;
+  if (isPushDismissedWithinCooldown(PUSH_PROMPT_DISMISSED_KEY)) return;
+  if (document.getElementById('push-permission-banner') || document.getElementById('push-notification-banner')) return;
 
   const banner = document.createElement('div');
   banner.id = 'push-permission-banner';
@@ -102,7 +114,7 @@ function showPushPrompt() {
   setTimeout(() => banner.classList.add('show'), 100);
 
   const dismiss = () => {
-    localStorage.setItem(PUSH_PROMPT_DISMISSED_KEY, String(Date.now()));
+    recordPushDismissal(PUSH_PROMPT_DISMISSED_KEY);
     banner.remove();
   };
 
@@ -113,6 +125,7 @@ function showPushPrompt() {
     button.textContent = 'Enabling...';
     const result = await enablePushNotifications();
     if (result.ok) {
+      clearPushDismissal(PUSH_PROMPT_DISMISSED_KEY);
       banner.remove();
       return;
     }
@@ -135,7 +148,7 @@ export function getPushState() {
 export async function isPushSubscribed() {
   if (!pushSupported()) return false;
   try {
-    const swReg = await navigator.serviceWorker.ready;
+    const swReg = await getReadyServiceWorker();
     return (await swReg.pushManager.getSubscription()) !== null;
   } catch {
     return false;
@@ -147,11 +160,17 @@ export async function enablePushNotifications() {
   if (!VAPID_PUBLIC_KEY) return { ok: false, reason: 'misconfigured' };
 
   let permission = Notification.permission;
-  if (permission === 'default') permission = await Notification.requestPermission();
+  if (permission === 'default') {
+    permission = await withTimeout(
+      Notification.requestPermission(),
+      20000,
+      'Notification permission prompt timed out'
+    );
+  }
   if (permission !== 'granted') return { ok: false, reason: permission }; // 'denied'
 
   try {
-    const swReg = await navigator.serviceWorker.ready;
+    const swReg = await getReadyServiceWorker();
     const existing = await swReg.pushManager.getSubscription();
     if (existing) {
       await syncToServer(existing);
@@ -161,14 +180,14 @@ export async function enablePushNotifications() {
     return { ok: true };
   } catch (err) {
     console.error('[push] enable failed', err);
-    return { ok: false, reason: 'error' };
+    return { ok: false, reason: 'error', message: err?.message || String(err) };
   }
 }
 
 export async function disablePushNotifications() {
   if (!pushSupported()) return { ok: true };
   try {
-    const swReg = await navigator.serviceWorker.ready;
+    const swReg = await getReadyServiceWorker();
     const sub = await swReg.pushManager.getSubscription();
     if (sub) {
       const endpoint = sub.endpoint;

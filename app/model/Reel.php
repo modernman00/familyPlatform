@@ -88,6 +88,112 @@ final class Reel extends Select
     }
 
     /**
+     * Group an array of reels by creator (user_id) preserving chronological order.
+     * Each creator group contains creator metadata, total reel count, and array of reels.
+     *
+     * @param array<int, array<string, mixed>> $reels
+     * @return array<int, array<string, mixed>>
+     */
+    public static function groupReelsByCreator(array $reels): array
+    {
+        $grouped = [];
+        foreach ($reels as $reel) {
+            $userId = (string)($reel['user_id'] ?? '');
+            if ($userId === '') {
+                continue;
+            }
+
+            if (!isset($grouped[$userId])) {
+                $grouped[$userId] = [
+                    'user_id' => $userId,
+                    'firstName' => (string)($reel['firstName'] ?? 'Family'),
+                    'lastName' => (string)($reel['lastName'] ?? 'Member'),
+                    'profilePics' => (string)($reel['profilePics'] ?? ''),
+                    'famCode' => (string)($reel['famCode'] ?? ''),
+                    'reels_count' => 0,
+                    'latest_reel' => $reel,
+                    'reels' => [],
+                    'is_birthday' => false,
+                    'categories' => [],
+                ];
+            }
+
+            $grouped[$userId]['reels'][] = $reel;
+            $grouped[$userId]['reels_count']++;
+            if (strtolower((string)($reel['category'] ?? '')) === 'birthday') {
+                $grouped[$userId]['is_birthday'] = true;
+            }
+            $cat = (string)($reel['category'] ?? '');
+            if ($cat !== '' && !in_array($cat, $grouped[$userId]['categories'], true)) {
+                $grouped[$userId]['categories'][] = $cat;
+            }
+        }
+
+        return array_values($grouped);
+    }
+
+    /**
+     * Arrange reels so that all moments from the same creator play consecutively (Instagram-style clustering).
+     * If $priorityReelId is specified, that reel's creator cluster is moved to the head of the feed.
+     *
+     * @param array<int, array<string, mixed>> $reels
+     * @param int|null $priorityReelId
+     * @return array<int, array<string, mixed>>
+     */
+    public static function clusterReelsByCreator(array $reels, ?int $priorityReelId = null): array
+    {
+        if (empty($reels)) {
+            return [];
+        }
+
+        $groups = self::groupReelsByCreator($reels);
+        $priorityUserId = null;
+
+        if ($priorityReelId !== null && $priorityReelId > 0) {
+            foreach ($reels as $r) {
+                if ((int)($r['id'] ?? 0) === $priorityReelId) {
+                    $priorityUserId = (string)($r['user_id'] ?? '');
+                    break;
+                }
+            }
+        }
+
+        $clustered = [];
+        $priorityCluster = [];
+
+        foreach ($groups as $group) {
+            $userReels = $group['reels'];
+            // If this is the priority creator and a specific reel was targeted, order their reels starting with the targeted reel
+            if ($priorityUserId !== null && (string)$group['user_id'] === $priorityUserId) {
+                if ($priorityReelId !== null && $priorityReelId > 0) {
+                    $targetIdx = -1;
+                    foreach ($userReels as $idx => $ur) {
+                        if ((int)($ur['id'] ?? 0) === $priorityReelId) {
+                            $targetIdx = $idx;
+                            break;
+                        }
+                    }
+                    if ($targetIdx > 0) {
+                        $targetReel = array_splice($userReels, $targetIdx, 1);
+                        array_unshift($userReels, $targetReel[0]);
+                    }
+                }
+                $priorityCluster = $userReels;
+            } else {
+                foreach ($userReels as $ur) {
+                    $clustered[] = $ur;
+                }
+            }
+        }
+
+        if (!empty($priorityCluster)) {
+            array_unshift($clustered, ...$priorityCluster);
+        }
+
+        return $clustered;
+    }
+
+    /**
      * Create a new Family Reel
      *
      * @param array<string, mixed> $data
@@ -420,7 +526,7 @@ final class Reel extends Select
         $pdo = self::connect2();
         $strUserId = (string)$userId;
         $sanitizedGif = self::sanitizeCommentGifUrl($gifUrl);
-        $cleanComment = trim($comment);
+        $cleanComment = trim(html_entity_decode((string)preg_replace('/&amp;(#\d+|#x[0-9a-f]+|[a-z]+);/iu', '&$1;', $comment), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
 
         if ($cleanComment === '' && $sanitizedGif === null) {
             throw new \InvalidArgumentException('Write a comment or pick a GIF.');
@@ -481,7 +587,7 @@ final class Reel extends Select
         try {
             $pdo = self::connect2();
             $strUserId = (string)$userId;
-            $cleanText = trim($newComment);
+            $cleanText = trim(html_entity_decode((string)preg_replace('/&amp;(#\d+|#x[0-9a-f]+|[a-z]+);/iu', '&$1;', $newComment), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
 
             if ($cleanText === '') {
                 return ['success' => false, 'code' => 400, 'message' => 'Comment text cannot be empty.'];

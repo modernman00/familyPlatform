@@ -614,6 +614,22 @@ final class NotificationController extends Select
                 return;
             }
 
+            // Red Team Cryptographic Key Hygiene Gate (RFC 8291 / Dr. Viktor Kovács Gate)
+            if (method_exists(\Src\PushNotificationService::class, 'isValidPushKeys')
+                && !\Src\PushNotificationService::isValidPushKeys($p256dhKey, $authKey)) {
+                msgException(422, 'Invalid cryptographic push subscription keys (p256dh / auth)');
+                return;
+            }
+
+            // Also sync to centralized user_push_subscriptions table with device telemetry if available
+            try {
+                \Src\PushNotificationService::registerSubscription($userId, $endpoint, $p256dhKey, $authKey, [
+                    'user_agent' => (string)($_SERVER['HTTP_USER_AGENT'] ?? ''),
+                ]);
+            } catch (\Throwable) {
+                // Non-blocking fallback
+            }
+
             $data = [
                 'id' => $userId,
                 'endpoint' => $endpoint,
@@ -855,7 +871,8 @@ final class NotificationController extends Select
                     message: $testBody,
                     url: $actionUrl,
                     title: $testTitle,
-                    tag: 'test-notification-' . time()
+                    tag: 'test-notification-' . time(),
+                    forceOutbound: true
                 );
             }
 

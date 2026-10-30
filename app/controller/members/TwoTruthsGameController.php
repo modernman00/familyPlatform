@@ -89,7 +89,10 @@ final class TwoTruthsGameController extends BaseController
                 return;
             }
 
-            CheckToken::tokenCheck();
+            /** @var array<string, mixed> $input */
+            $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+
+            self::validateCsrf(is_array($input) ? $input : null);
             Limiter::limit($userId . ':two_truths_vote');
 
             $familyCode = (string)($_SESSION['famCode'] ?? '');
@@ -98,9 +101,6 @@ final class TwoTruthsGameController extends BaseController
                 echo json_encode(['status' => 'error', 'message' => 'Access denied to this family network.']);
                 return;
             }
-
-            /** @var array<string, mixed> $input */
-            $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
 
             $gameId = trim((string)($input['game_id'] ?? ''));
             $guess = (int)($input['guess'] ?? 0);
@@ -155,7 +155,10 @@ final class TwoTruthsGameController extends BaseController
                 return;
             }
 
-            CheckToken::tokenCheck();
+            /** @var array<string, mixed> $input */
+            $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+
+            self::validateCsrf(is_array($input) ? $input : null);
             Limiter::limit($userId . ':two_truths_create');
 
             $familyCode = (string)($_SESSION['famCode'] ?? '');
@@ -164,9 +167,6 @@ final class TwoTruthsGameController extends BaseController
                 echo json_encode(['status' => 'error', 'message' => 'Access denied to this family network.']);
                 return;
             }
-
-            /** @var array<string, mixed> $input */
-            $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
 
             $userName = trim((string)(($_SESSION['firstName'] ?? '') . ' ' . ($_SESSION['lastName'] ?? '')));
 
@@ -208,7 +208,10 @@ final class TwoTruthsGameController extends BaseController
                 return;
             }
 
-            CheckToken::tokenCheck();
+            /** @var array<string, mixed> $input */
+            $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+
+            self::validateCsrf(is_array($input) ? $input : null);
             Limiter::limit($userId . ':two_truths_reveal');
 
             $familyCode = (string)($_SESSION['famCode'] ?? '');
@@ -218,8 +221,6 @@ final class TwoTruthsGameController extends BaseController
                 return;
             }
 
-            /** @var array<string, mixed> $input */
-            $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
             $gameId = trim((string)($input['game_id'] ?? ''));
 
             if ($gameId === '') {

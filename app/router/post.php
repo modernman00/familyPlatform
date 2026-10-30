@@ -51,11 +51,26 @@ $router->map(
   name: 'delete_post'
 );
 
+// REPOST AN EARLIER POST (author only)
+$router->map(
+  method: 'POST',
+  route: '/post/[i:postNo]/repost',
+  target: 'App\controller\members\PostMessage@repostPost',
+  name: 'repost_post'
+);
+
 $router->map(
   method: 'POST',
   route: '/api/video/direct-upload',
   target: 'App\controller\members\StreamController@getDirectUploadUrl',
   name: 'direct_video_upload'
+);
+
+$router->map(
+  method: 'POST',
+  route: '/api/video/upload-file',
+  target: 'App\controller\members\StreamController@uploadAndTrimVideo',
+  name: 'sovereign_video_upload_trim'
 );
 
 // FAMILY HASHTAGS & MEMORY PILLS API

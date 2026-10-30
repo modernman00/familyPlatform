@@ -54,14 +54,19 @@ export function parseVideoUrl(url) {
     };
   }
 
-  // 4. Direct HTML5 Video (.mp4, .webm, .ogg)
-  const directVideoRegex = /^https?:\/\/.+\.(mp4|webm|ogg)(\?.*)?$/i;
-  if (directVideoRegex.test(trimmed)) {
+  // 4. Direct HTML5 Video (.mp4, .webm, .ogg, .mov) — supports absolute http(s) and sovereign /resources/videos/ paths with optional #t=start,end
+  const directVideoRegex = /^(?:https?:\/\/[^\s"'<>]+|\/resources\/(?:videos|images)\/[^\s"'<>]+)\.(mp4|webm|ogg|mov)(?:\?[^\s"'<>#]*)?(?:#t=([0-9.]+)(?:,([0-9.]+))?)?$/i;
+  const directMatch = trimmed.match(directVideoRegex);
+  if (directMatch) {
+    const trimStart = directMatch[2] !== undefined ? parseFloat(directMatch[2]) : null;
+    const trimEnd = directMatch[3] !== undefined ? parseFloat(directMatch[3]) : null;
     return {
       type: 'direct',
       videoId: null,
       embedUrl: trimmed,
-      originalUrl: trimmed
+      originalUrl: trimmed,
+      trimStart: Number.isFinite(trimStart) ? trimStart : null,
+      trimEnd: Number.isFinite(trimEnd) ? trimEnd : null,
     };
   }
 
@@ -74,7 +79,7 @@ export function parseVideoUrl(url) {
 export function extractVideoFromText(text) {
   if (!text || typeof text !== 'string') return null;
 
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const urlRegex = /((?:https?:\/\/|\/resources\/(?:videos|images)\/)[^\s"'<>]+)/g;
   const matches = text.match(urlRegex);
   if (!matches) return null;
 

@@ -107,7 +107,7 @@ final class CommentReactionController
         $postAuthorId = trim((string) ($commentRow['post_author_id'] ?? ''));
 
         // 0. Official FamilyPlatform broadcast post (universally accessible)
-        if ($postAuthorId === \App\services\FamilyPlatformAccountService::ACCOUNT_ID) {
+        if ($postAuthorId === \App\services\FamilyPlatformAccountService::getAccountId()) {
           $hasAccess = true;
         }
 

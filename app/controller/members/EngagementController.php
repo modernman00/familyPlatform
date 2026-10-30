@@ -86,7 +86,7 @@ class EngagementController
             }
 
             // 0. Official FamilyPlatform broadcast post (universally accessible to all members)
-            if ((string)($post['id'] ?? '') === \App\services\FamilyPlatformAccountService::ACCOUNT_ID) {
+            if ((string)($post['id'] ?? '') === \App\services\FamilyPlatformAccountService::getAccountId()) {
                 return true;
             }
 

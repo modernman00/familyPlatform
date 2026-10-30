@@ -10,8 +10,8 @@ class CloudflareStreamService
 
     public function __construct()
     {
-        $this->accountId = (string) (getenv('CLOUDFLARE_STREAM_ACCOUNT_ID') ?: '');
-        $this->apiToken = (string) (getenv('CLOUDFLARE_STREAM_API_TOKEN') ?: '');
+        $this->accountId = (string) ($_ENV['CLOUDFLARE_STREAM_ACCOUNT_ID'] ?? $_SERVER['CLOUDFLARE_STREAM_ACCOUNT_ID'] ?? getenv('CLOUDFLARE_STREAM_ACCOUNT_ID') ?: '');
+        $this->apiToken = (string) ($_ENV['CLOUDFLARE_STREAM_API_TOKEN'] ?? $_SERVER['CLOUDFLARE_STREAM_API_TOKEN'] ?? getenv('CLOUDFLARE_STREAM_API_TOKEN') ?: '');
     }
 
     /**

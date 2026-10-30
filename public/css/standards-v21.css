@@ -123,31 +123,28 @@ body.dark-theme .modal-content,
 }
 
 /* 🌙 Global Dark-Mode Typography & Surface Contrast Guarantees (WCAG AA/AAA) */
-body.dark-mode .text-dark:not(.bg-warning):not(.btn-warning),
-body.dark-theme .text-dark:not(.bg-warning):not(.btn-warning),
-[data-bs-theme="dark"] .text-dark:not(.bg-warning):not(.btn-warning),
-body.dark-mode .text-body,
-body.dark-theme .text-body,
-[data-bs-theme="dark"] .text-body,
-body.dark-mode .text-black,
-body.dark-theme .text-black,
-[data-bs-theme="dark"] .text-black {
+body.dark-mode .text-dark:not(.bg-warning):not(.btn-warning):not(.bg-warning-subtle):not(.bg-info):not(.bg-light):not(.surface-light):not([data-surface="light"]):not(.badge-warning):not(.badge-light):not(.badge-info):not(.badge-white):not([data-theme="light"]):not(.badge.bg-warning):not(.badge.bg-light):not(.badge.bg-info):not(.badge.bg-white),
+body.dark-theme .text-dark:not(.bg-warning):not(.btn-warning):not(.bg-warning-subtle):not(.bg-info):not(.bg-light):not(.surface-light):not([data-surface="light"]):not(.badge-warning):not(.badge-light):not(.badge-info):not(.badge-white):not([data-theme="light"]):not(.badge.bg-warning):not(.badge.bg-light):not(.badge.bg-info):not(.badge.bg-white),
+[data-bs-theme="dark"] .text-dark:not(.bg-warning):not(.btn-warning):not(.bg-warning-subtle):not(.bg-info):not(.bg-light):not(.surface-light):not([data-surface="light"]):not(.badge-warning):not(.badge-light):not(.badge-info):not(.badge-white):not([data-theme="light"]):not(.badge.bg-warning):not(.badge.bg-light):not(.badge.bg-info):not(.badge.bg-white),
+body.dark-mode .text-body:not(.bg-warning):not(.btn-warning):not(.surface-light):not([data-surface="light"]),
+body.dark-theme .text-body:not(.bg-warning):not(.btn-warning):not(.surface-light):not([data-surface="light"]),
+[data-bs-theme="dark"] .text-body:not(.bg-warning):not(.btn-warning):not(.surface-light):not([data-surface="light"]),
+body.dark-mode .text-black:not(.bg-warning):not(.btn-warning):not(.surface-light):not([data-surface="light"]),
+body.dark-theme .text-black:not(.bg-warning):not(.btn-warning):not(.surface-light):not([data-surface="light"]),
+[data-bs-theme="dark"] .text-black:not(.bg-warning):not(.btn-warning):not(.surface-light):not([data-surface="light"]) {
   color: var(--text-main, #f8fafc) !important;
 }
 
-/* Preserve dark legibility on solid amber/yellow warning surfaces */
-body.dark-mode .bg-warning.text-dark,
-body.dark-mode .btn-warning.text-dark,
-body.dark-mode .bg-warning .text-dark,
-body.dark-mode .btn-warning .text-dark,
-body.dark-theme .bg-warning.text-dark,
-body.dark-theme .btn-warning.text-dark,
-body.dark-theme .bg-warning .text-dark,
-body.dark-theme .btn-warning .text-dark,
-[data-bs-theme="dark"] .bg-warning.text-dark,
-[data-bs-theme="dark"] .btn-warning.text-dark,
-[data-bs-theme="dark"] .bg-warning .text-dark,
-[data-bs-theme="dark"] .btn-warning .text-dark {
+/* Preserve dark legibility on solid amber/yellow & cyan warning surfaces and light surfaces */
+body.dark-mode :is(.bg-warning, .btn-warning, .bg-warning-subtle, .bg-info, .btn-info, .bg-info-subtle, .surface-light, [data-surface="light"], .badge-warning, .badge-info) :is(.text-dark, .text-black, strong, b, h1, h2, h3, h4, h5, h6),
+body.dark-mode .badge:is(.bg-warning, .bg-info).text-dark,
+body.dark-mode .badge:is(.bg-warning, .bg-info) .text-dark,
+body.dark-theme :is(.bg-warning, .btn-warning, .bg-warning-subtle, .bg-info, .btn-info, .bg-info-subtle, .surface-light, [data-surface="light"], .badge-warning, .badge-info) :is(.text-dark, .text-black, strong, b, h1, h2, h3, h4, h5, h6),
+body.dark-theme .badge:is(.bg-warning, .bg-info).text-dark,
+body.dark-theme .badge:is(.bg-warning, .bg-info) .text-dark,
+[data-bs-theme="dark"] :is(.bg-warning, .btn-warning, .bg-warning-subtle, .bg-info, .btn-info, .bg-info-subtle, .surface-light, [data-surface="light"], .badge-warning, .badge-info) :is(.text-dark, .text-black, strong, b, h1, h2, h3, h4, h5, h6),
+[data-bs-theme="dark"] .badge:is(.bg-warning, .bg-info).text-dark,
+[data-bs-theme="dark"] .badge:is(.bg-warning, .bg-info) .text-dark {
   color: #0f172a !important;
 }
 
@@ -247,6 +244,61 @@ body.dark-theme .badge.bg-white,
   background-color: #1e293b !important;
   color: #f8fafc !important;
   border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+/* 🔍 Form Controls, Select Options & Input Group Addons in Dark Mode */
+body.dark-mode select option,
+body.dark-theme select option,
+[data-bs-theme="dark"] select option {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .input-group-text,
+body.dark-theme .input-group-text,
+[data-bs-theme="dark"] .input-group-text {
+  background-color: #1e293b !important;
+  color: #cbd5e1 !important;
+  border-color: #334155 !important;
+}
+
+/* 🌙 Modal & Header Dark Mode Contrast Overrides */
+body.dark-mode #familyFlyerModal .modal-header,
+[data-bs-theme="dark"] #familyFlyerModal .modal-header {
+  background: linear-gradient(135deg, #272210 0%, #1e293b 100%) !important;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.25) !important;
+}
+body.dark-mode #familyFlyerModal .modal-title,
+[data-bs-theme="dark"] #familyFlyerModal .modal-title {
+  color: #f8fafc !important;
+}
+body.dark-mode #familyFlyerModal .modal-header .text-muted,
+[data-bs-theme="dark"] #familyFlyerModal .modal-header .text-muted {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode #lineageQuestModal .modal-header,
+[data-bs-theme="dark"] #lineageQuestModal .modal-header {
+  background: linear-gradient(135deg, #062a1b 0%, #1e293b 100%) !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.25) !important;
+}
+body.dark-mode #lineageQuestModal .modal-title,
+body.dark-mode #lineageQuestModal h6.text-dark,
+[data-bs-theme="dark"] #lineageQuestModal .modal-title,
+[data-bs-theme="dark"] #lineageQuestModal h6.text-dark {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .capsule-message-box,
+[data-bs-theme="dark"] .capsule-message-box {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .kin-guarantee-title,
+[data-bs-theme="dark"] .kin-guarantee-title {
+  color: #4ade80 !important;
 }
 
 /* Subtle Semantic Badges & Alerts in Dark Mode */
@@ -1910,11 +1962,11 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, 
 
 .ig-stories-scroll {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  padding: 2px 4px;
+  padding: 4px 6px;
 }
 .ig-stories-scroll::-webkit-scrollbar {
   display: none;
@@ -1924,10 +1976,11 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, 
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   text-decoration: none;
   flex-shrink: 0;
-  width: 66px;
+  width: 84px;
+  min-height: 110px;
   cursor: pointer;
   background: transparent;
   border: none;
@@ -1936,13 +1989,14 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, 
 
 .ig-story-avatar-wrap {
   position: relative;
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2.5px;
+  padding: 3px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .ig-story-avatar-wrap:active {
@@ -1966,11 +2020,11 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, 
 }
 
 .ig-story-avatar {
-  width: 55px;
-  height: 55px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #ffffff;
+  border: 2.5px solid #ffffff;
   display: block;
   background-color: #f1f5f9;
 }
@@ -1984,16 +2038,16 @@ body.dark-theme .ig-story-avatar {
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background-color: #0095f6;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #ffffff;
-  font-size: 13px;
+  border: 2.5px solid #ffffff;
+  font-size: 15px;
   font-weight: 700;
   box-shadow: 0 2px 6px rgba(0, 149, 246, 0.4);
 }
@@ -2002,16 +2056,40 @@ body.dark-theme .ig-story-plus-badge {
   border-color: #000000;
 }
 
-.ig-story-label {
+.ig-story-count-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #a31621 0%, #e11d48 100%);
+  color: #ffffff;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(163, 22, 33, 0.45);
+  z-index: 4;
+}
+body.dark-mode .ig-story-count-badge,
+body.dark-theme .ig-story-count-badge {
+  border-color: #0f172a;
+}
+
+.ig-story-label {
+  font-size: 12px;
+  font-weight: 600;
   color: var(--text-color, #262626);
-  max-width: 66px;
+  max-width: 84px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: center;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 /* 3. Edge-to-Edge Feed Post Cards on Mobile (< 768px) */
@@ -2102,22 +2180,93 @@ body.dark-theme .ig-story-plus-badge {
    ============================================================================== */
 .btn-action-glyph {
   background: transparent;
-  border: none;
+  border: 1.5px solid transparent;
+  border-radius: 50% !important;
   color: var(--text-main, #0f172a);
-  padding: 8px;
+  padding: 0;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   cursor: pointer;
-  transition: transform 120ms cubic-bezier(0.16, 1, 0.3, 1), opacity 120ms ease;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 180ms ease,
+              background-color 180ms ease,
+              box-shadow 180ms ease,
+              color 180ms ease;
   line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-.btn-action-glyph:hover {
-  opacity: 0.75;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 .btn-action-glyph:active {
-  transform: scale(0.86);
+  transform: scale(0.92);
 }
+@media (hover: hover) {
+  .btn-action-glyph:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* 🌹 Like / Reaction Action Button - Modern Rose Crimson Border & Tactile Surface */
+.btn-action-glyph.btn-action-like {
+  border-color: rgba(225, 29, 72, 0.28);
+  background: rgba(225, 29, 72, 0.05);
+  color: #e11d48;
+}
+@media (hover: hover) {
+  .btn-action-glyph.btn-action-like:hover {
+    border-color: #f43f5e;
+    background: rgba(225, 29, 72, 0.12);
+    box-shadow: 0 4px 14px rgba(225, 29, 72, 0.22);
+    color: #be123c;
+  }
+}
+.btn-action-glyph.btn-action-like.is-liked {
+  border-color: #e11d48;
+  background: rgba(225, 29, 72, 0.16);
+  box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.22), 0 4px 14px rgba(225, 29, 72, 0.28);
+  color: #e11d48 !important;
+}
+
+/* 💬 Comment Action Button - Modern Electric Azure / Sapphire Border & Tactile Surface */
+.btn-action-glyph.btn-action-comment {
+  border-color: rgba(37, 99, 235, 0.28);
+  background: rgba(37, 99, 235, 0.05);
+  color: #2563eb;
+}
+@media (hover: hover) {
+  .btn-action-glyph.btn-action-comment:hover {
+    border-color: #3b82f6;
+    background: rgba(37, 99, 235, 0.12);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.22);
+    color: #1d4ed8;
+  }
+}
+
+/* 🔖 Bookmark Action Button - Modern Royal Purple / Amethyst Border & Tactile Surface */
+.btn-action-glyph.btn-action-bookmark {
+  border-color: rgba(147, 51, 234, 0.28);
+  background: rgba(147, 51, 234, 0.05);
+  color: #9333ea;
+}
+@media (hover: hover) {
+  .btn-action-glyph.btn-action-bookmark:hover {
+    border-color: #a855f7;
+    background: rgba(147, 51, 234, 0.12);
+    box-shadow: 0 4px 14px rgba(147, 51, 234, 0.22);
+    color: #7e22ce;
+  }
+}
+.btn-action-glyph.btn-action-bookmark.is-saved {
+  border-color: #9333ea;
+  background: rgba(147, 51, 234, 0.16);
+  box-shadow: 0 0 0 2px rgba(147, 51, 234, 0.22), 0 4px 14px rgba(147, 51, 234, 0.28);
+  color: #9333ea !important;
+}
+
 @keyframes heartSpringPop {
   0% { transform: scale(1); }
   35% { transform: scale(1.38); }
@@ -2133,6 +2282,27 @@ body.dark-mode .btn-action-glyph,
 body.dark-theme .btn-action-glyph,
 [data-bs-theme="dark"] .btn-action-glyph {
   color: #f8fafc !important;
+}
+body.dark-mode .btn-action-glyph.btn-action-like,
+body.dark-theme .btn-action-glyph.btn-action-like,
+[data-bs-theme="dark"] .btn-action-glyph.btn-action-like {
+  border-color: rgba(251, 113, 133, 0.45);
+  background: rgba(225, 29, 72, 0.15);
+  color: #fb7185 !important;
+}
+body.dark-mode .btn-action-glyph.btn-action-comment,
+body.dark-theme .btn-action-glyph.btn-action-comment,
+[data-bs-theme="dark"] .btn-action-glyph.btn-action-comment {
+  border-color: rgba(96, 165, 250, 0.45);
+  background: rgba(37, 99, 235, 0.15);
+  color: #60a5fa !important;
+}
+body.dark-mode .btn-action-glyph.btn-action-bookmark,
+body.dark-theme .btn-action-glyph.btn-action-bookmark,
+[data-bs-theme="dark"] .btn-action-glyph.btn-action-bookmark {
+  border-color: rgba(192, 132, 252, 0.45);
+  background: rgba(147, 51, 234, 0.15);
+  color: #c084fc !important;
 }
 body.dark-mode .btn-action-glyph.is-liked i,
 body.dark-theme .btn-action-glyph.is-liked i,
@@ -2971,6 +3141,139 @@ body.dark-mode .heirloom-reaction-btn.active {
     background-position-x: -200%;
   }
 }
+
+/* ==============================================================================
+   📸 Living Canvas: Adaptive Cinematic Zoom & Tactile Lens Engine
+   Inspired by Leonardo Hotels Ken Burns with Viewport & Directional Intelligence
+   ============================================================================== */
+
+/* Stage boundary locks aspect ratio and clips zoom overflow with zero layout shifts */
+.post-media-stage {
+  position: relative;
+  overflow: hidden !important;
+  isolation: isolate;
+  contain: paint;
+}
+
+/* Base image styling with GPU hardware acceleration */
+.post-media-stage .post-media-first-img,
+.post-media-stage .living-canvas-img {
+  transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+  transform-origin: center center;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
+}
+
+/* 🌟 Viewport-Activated Living Motion: Only animates when active in viewport */
+.post-media-stage.is-living-active:not(.living-drift-b):not(.living-drift-c) .post-media-first-img,
+.post-media-stage.is-living-active.living-drift-a .post-media-first-img {
+  animation: livingCanvasDriftA 16s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+/* Alternating directional variations for visual richness across feed cards */
+.post-media-stage.is-living-active.living-drift-b .post-media-first-img {
+  animation: livingCanvasDriftB 18s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+.post-media-stage.is-living-active.living-drift-c .post-media-first-img {
+  animation: livingCanvasDriftC 20s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+/* Multi-image Carousel: Active slide inherits the living drift */
+.post-media-stage.is-living-active .carousel-slide-item.is-slide-active .living-canvas-img {
+  animation: livingCanvasDriftA 16s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+/* Ambient Backlight Aura breathes in theatre-grade synchrony with the photo */
+.feed-media-aura-container:has(.post-media-stage.is-living-active) .feed-media-aura-backdrop {
+  animation: livingCanvasAuraPulse 16s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+/* Keyframes: Cinematic slow breath zoom-in with subtle vertical pan */
+@keyframes livingCanvasDriftA {
+  0% {
+    transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+  }
+  50% {
+    transform: translate3d(-0.6%, -1.2%, 0) scale3d(1.055, 1.055, 1);
+  }
+  100% {
+    transform: translate3d(0.5%, -1.8%, 0) scale3d(1.085, 1.085, 1);
+  }
+}
+
+/* Keyframes: Cinematic slow breath zoom-out from gentle elevation */
+@keyframes livingCanvasDriftB {
+  0% {
+    transform: translate3d(0.8%, 0, 0) scale3d(1.08, 1.08, 1);
+  }
+  50% {
+    transform: translate3d(0, -0.8%, 0) scale3d(1.04, 1.04, 1);
+  }
+  100% {
+    transform: translate3d(-0.8%, 0.6%, 0) scale3d(1, 1, 1);
+  }
+}
+
+/* Keyframes: Gentle diagonal glide across wide heritage landscapes */
+@keyframes livingCanvasDriftC {
+  0% {
+    transform: translate3d(-1%, 0, 0) scale3d(1.02, 1.02, 1);
+  }
+  50% {
+    transform: translate3d(0, -1%, 0) scale3d(1.075, 1.075, 1);
+  }
+  100% {
+    transform: translate3d(1%, -0.5%, 0) scale3d(1.04, 1.04, 1);
+  }
+}
+
+/* Keyframes: Ambient Backlight Aura breathing pulse */
+@keyframes livingCanvasAuraPulse {
+  0% {
+    transform: scale(0.96) translateZ(0);
+    opacity: 0.38;
+    filter: blur(32px) saturate(160%) brightness(1.08);
+  }
+  100% {
+    transform: scale(1.04) translateZ(0);
+    opacity: 0.56;
+    filter: blur(42px) saturate(190%) brightness(1.22);
+  }
+}
+
+/* Desktop Hover Enhancement: Pauses auto-drift and smoothly yields to pointer */
+@media (hover: hover) {
+  .post-media-stage:hover .post-media-first-img,
+  .post-media-stage:hover .living-canvas-img {
+    animation-play-state: paused;
+  }
+}
+
+/* Mobile Touch-and-Hold / Active Inspection ("Peek & Magnify") */
+@media (hover: none) and (pointer: coarse) {
+  .post-media-stage:active .post-media-first-img,
+  .post-media-stage:active .living-canvas-img {
+    transform: scale3d(1.15, 1.15, 1) translate3d(0, 0, 0) !important;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    animation-play-state: paused !important;
+  }
+}
+
+/* 🛡️ Strict Accessibility Guard: Inviolable Reduced Motion Invariant */
+@media (prefers-reduced-motion: reduce) {
+  .post-media-stage.is-living-active .post-media-first-img,
+  .post-media-stage.is-living-active.living-drift-b .post-media-first-img,
+  .post-media-stage.is-living-active.living-drift-c .post-media-first-img,
+  .post-media-stage.is-living-active .carousel-slide-item.is-slide-active .living-canvas-img,
+  .feed-media-aura-container:has(.post-media-stage.is-living-active) .feed-media-aura-backdrop {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
 
 
 

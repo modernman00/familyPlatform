@@ -74,9 +74,9 @@
 
         @if(!$radarEnabled)
         <!-- Paused State -->
-        <div class="p-3 text-center rounded-3 my-2" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
+        <div class="p-3 text-center rounded-3 my-2" style="background-color: var(--card-bg, #f8fafc); border: 1px dashed var(--border-color, #cbd5e1);">
             <i class="bi bi-radar text-secondary" style="font-size: 1.75rem;"></i>
-            <h6 class="fw-bold mt-2 mb-1" style="font-size: 0.88rem; color: #0f172a;">{{ __('kinship.radar_paused_title', 'Kinship Radar is Paused') }}</h6>
+            <h6 class="fw-bold mt-2 mb-1" style="font-size: 0.88rem; color: var(--text-color, #0f172a);">{{ __('kinship.radar_paused_title', 'Kinship Radar is Paused') }}</h6>
             <p class="text-muted mb-3" style="font-size: 0.78rem;">{{ __('kinship.radar_paused_desc', 'Lineage scanning is currently disabled. Turn radar back on anytime to discover relatives.') }}</p>
             <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 btn-resume-radar btn-spin-on-click" data-spin="true" style="font-size: 0.78rem; min-height: 44px;">
                 <i class="bi bi-play-circle me-1"></i> {{ __('kinship.resume_radar', 'Resume Radar') }}

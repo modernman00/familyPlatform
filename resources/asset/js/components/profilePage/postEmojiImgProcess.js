@@ -311,7 +311,7 @@ window.__openThenNow = (replyToPostNo, opts = {}) => {
 
 
 // ----------------------------------------------------
-// 4. VIDEO EMBED & UPLOAD UI LOGIC
+// 4. VIDEO EMBED, AUTO-TRIM STUDIO & UPLOAD UI LOGIC
 // ----------------------------------------------------
 const addVideoBtn = document.getElementById('addVideoBtn');
 const videoContainer = document.getElementById('videoEmbedContainer');
@@ -325,8 +325,43 @@ const videoUploadStatus = document.getElementById('videoUploadStatus');
 const videoUploadPercent = document.getElementById('videoUploadPercent');
 const postMessageArea = document.getElementById('postMessage');
 
+// Auto-Trim Studio DOM elements
+const videoAutoTrimStudio = document.getElementById('videoAutoTrimStudio');
+const videoTrimPreviewPlayer = document.getElementById('videoTrimPreviewPlayer');
+const videoTrimStartRange = document.getElementById('videoTrimStartRange');
+const videoTrimEndRange = document.getElementById('videoTrimEndRange');
+const videoTrimStartLabel = document.getElementById('videoTrimStartLabel');
+const videoTrimEndLabel = document.getElementById('videoTrimEndLabel');
+const videoTrimDurationBadge = document.getElementById('videoTrimDurationBadge');
+const videoTrimMetaBadge = document.getElementById('videoTrimMetaBadge');
+const btnConfirmAutoTrim = document.getElementById('btnConfirmAutoTrim');
+const btnConfirmAutoTrimLabel = document.getElementById('btnConfirmAutoTrimLabel');
+const btnQuickTrimFirst30 = document.getElementById('btnQuickTrimFirst30');
+
+let stagedTrimFile = null;
+let stagedTrimDuration = null;
+let stagedTrimBlobUrl = null;
+let activeVideoUploadPromise = null;
+
+const cleanupTrimStudio = () => {
+    stagedTrimFile = null;
+    stagedTrimDuration = null;
+    if (stagedTrimBlobUrl) {
+        URL.revokeObjectURL(stagedTrimBlobUrl);
+        stagedTrimBlobUrl = null;
+    }
+    if (videoTrimPreviewPlayer) {
+        videoTrimPreviewPlayer.pause();
+        videoTrimPreviewPlayer.removeAttribute('src');
+    }
+    if (videoAutoTrimStudio) {
+        videoAutoTrimStudio.classList.add('d-none');
+    }
+};
+
 const closeVideoBuilder = () => {
     if (!videoContainer) return;
+    cleanupTrimStudio();
     videoContainer.classList.add('d-none');
     if (addVideoBtn) addVideoBtn.classList.remove('video-active');
     if (videoInput) videoInput.value = '';
@@ -335,6 +370,426 @@ const closeVideoBuilder = () => {
     if (videoLivePreview) {
         videoLivePreview.innerHTML = '';
         videoLivePreview.classList.add('d-none');
+    }
+};
+
+const syncTrimSlidersUI = (changedSlider = 'start') => {
+    if (!videoTrimStartRange || !videoTrimEndRange) return;
+    const maxDur = stagedTrimDuration && stagedTrimDuration > 0 ? stagedTrimDuration : 60;
+    let start = parseFloat(videoTrimStartRange.value) || 0;
+    let end = parseFloat(videoTrimEndRange.value) || Math.min(30, maxDur);
+
+    if (changedSlider === 'start') {
+        if (start >= maxDur - 0.5) {
+            start = Math.max(0, maxDur - 0.5);
+        }
+        if (end <= start) {
+            end = Math.min(maxDur, start + 30);
+        } else if ((end - start) > 30) {
+            end = Math.min(maxDur, start + 30);
+        }
+    } else {
+        if (end <= start + 0.5) {
+            end = Math.min(maxDur, start + 0.5);
+        }
+        if ((end - start) > 30) {
+            start = Math.max(0, end - 30);
+        }
+    }
+
+    start = Math.round(start * 10) / 10;
+    end = Math.round(end * 10) / 10;
+    const clipLen = Math.round(Math.max(0.5, end - start) * 10) / 10;
+
+    videoTrimStartRange.value = String(start);
+    videoTrimEndRange.value = String(end);
+
+    if (videoTrimStartLabel) videoTrimStartLabel.textContent = `${start.toFixed(1)}s`;
+    if (videoTrimEndLabel) videoTrimEndLabel.textContent = `${end.toFixed(1)}s`;
+    if (videoTrimDurationBadge) videoTrimDurationBadge.textContent = `Clip: ${clipLen.toFixed(1)}s / 30s max`;
+    if (btnConfirmAutoTrimLabel) {
+        btnConfirmAutoTrimLabel.textContent = `Auto-Trim (${start.toFixed(1)}s–${end.toFixed(1)}s) & Attach`;
+    }
+
+    if (videoTrimPreviewPlayer && Number.isFinite(start)) {
+        try {
+            videoTrimPreviewPlayer.currentTime = start;
+        } catch (_) { /* ignore seek before metadata */ }
+    }
+};
+
+if (videoTrimStartRange) {
+    videoTrimStartRange.addEventListener('input', () => syncTrimSlidersUI('start'));
+}
+if (videoTrimEndRange) {
+    videoTrimEndRange.addEventListener('input', () => syncTrimSlidersUI('end'));
+}
+if (videoTrimPreviewPlayer) {
+    videoTrimPreviewPlayer.addEventListener('timeupdate', () => {
+        const end = parseFloat(videoTrimEndRange?.value || '30');
+        const start = parseFloat(videoTrimStartRange?.value || '0');
+        if (Number.isFinite(end) && videoTrimPreviewPlayer.currentTime >= end) {
+            videoTrimPreviewPlayer.pause();
+            videoTrimPreviewPlayer.currentTime = Number.isFinite(start) ? start : 0;
+        }
+    });
+}
+
+const openAutoTrimStudioForFile = (file, duration) => {
+    cleanupTrimStudio();
+    stagedTrimFile = file;
+    stagedTrimDuration = duration;
+
+    if (videoContainer && videoContainer.classList.contains('d-none')) {
+        videoContainer.classList.remove('d-none');
+        if (addVideoBtn) addVideoBtn.classList.add('video-active');
+    }
+
+    if (!videoAutoTrimStudio) return;
+    const totalSec = Math.round(duration * 10) / 10;
+    const initialEnd = Math.min(30, totalSec);
+
+    if (videoTrimStartRange) {
+        videoTrimStartRange.min = '0';
+        videoTrimStartRange.max = String(Math.max(1, totalSec - 0.5));
+        videoTrimStartRange.value = '0';
+    }
+    if (videoTrimEndRange) {
+        videoTrimEndRange.min = '0.5';
+        videoTrimEndRange.max = String(totalSec);
+        videoTrimEndRange.value = String(initialEnd);
+    }
+    if (videoTrimMetaBadge) {
+        videoTrimMetaBadge.textContent = `Original: ${Math.round(totalSec)}s → Auto-Trim to 30s`;
+    }
+
+    stagedTrimBlobUrl = URL.createObjectURL(file);
+    if (videoTrimPreviewPlayer) {
+        videoTrimPreviewPlayer.src = stagedTrimBlobUrl;
+    }
+
+    syncTrimSlidersUI('start');
+    videoAutoTrimStudio.classList.remove('d-none');
+    scrollDrawerIntoView(videoAutoTrimStudio);
+};
+
+const renderAttachedVideoPreview = (streamUrl, trimStart = null, trimEnd = null) => {
+    if (videoInput) videoInput.value = streamUrl;
+
+    if (videoLivePreview) {
+        const parsed = parseVideoUrl(streamUrl);
+        if (parsed && (parsed.type === 'youtube' || parsed.type === 'vimeo' || parsed.type === 'cloudflare')) {
+            videoLivePreview.innerHTML = `<iframe src="${parsed.embedUrl}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>`;
+        } else {
+            videoLivePreview.innerHTML = `<video id="composerAttachedVideoEl" src="${streamUrl}" controls playsinline preload="metadata" style="width:100%; height:100%; object-fit:contain; background:#000;"></video>`;
+            const vidEl = document.getElementById('composerAttachedVideoEl');
+            const effStart = trimStart !== null ? trimStart : (parsed?.trimStart ?? null);
+            const effEnd = trimEnd !== null ? trimEnd : (parsed?.trimEnd ?? null);
+            if (vidEl && (effStart !== null || effEnd !== null)) {
+                vidEl.addEventListener('loadedmetadata', () => {
+                    if (effStart !== null && vidEl.currentTime < effStart) {
+                        vidEl.currentTime = effStart;
+                    }
+                });
+                vidEl.addEventListener('timeupdate', () => {
+                    if (effEnd !== null && vidEl.currentTime >= effEnd) {
+                        vidEl.pause();
+                        vidEl.currentTime = effStart || 0;
+                    }
+                });
+            }
+        }
+        videoLivePreview.classList.remove('d-none');
+    }
+
+    if (postMessageArea) {
+        // Replace any previous uploaded /resources/videos/posts/ URL or append new streamUrl
+        const cleanedCurrent = postMessageArea.value.replace(/(?:https?:\/\/[^\s"'<>]+|\/resources\/videos\/posts\/[^\s"'<>]+)\.(?:mp4|webm|ogg|mov)(?:#t=[0-9.,]+)?/gi, '').trim();
+        postMessageArea.value = cleanedCurrent ? `${cleanedCurrent}\n\n${streamUrl}` : streamUrl;
+    }
+};
+
+const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 30, originalDuration = null) => {
+    const runUpload = async () => {
+        if (!file) return null;
+
+        const safeStart = Math.max(0, parseFloat(trimStart) || 0);
+        const rawEnd = parseFloat(trimEnd) || (safeStart + 30);
+        const safeEnd = Math.min(safeStart + 30, rawEnd > safeStart ? rawEnd : safeStart + 30);
+        const clipLen = Math.round((safeEnd - safeStart) * 10) / 10;
+        const needsTrim = safeStart > 0 || (originalDuration && originalDuration > 30.5) || (originalDuration && safeEnd < originalDuration - 0.2);
+
+        if (videoUploadProgressWrapper) {
+            videoUploadProgressWrapper.classList.remove('d-none');
+            if (videoProgressBar) {
+                videoProgressBar.style.width = '12%';
+                videoProgressBar.classList.add('progress-bar-animated');
+            }
+            if (videoUploadStatus) {
+                videoUploadStatus.textContent = needsTrim
+                    ? `✂️ Auto-trimming video to ${clipLen}s (${safeStart.toFixed(1)}s–${safeEnd.toFixed(1)}s) & uploading...`
+                    : `Optimising & uploading ${clipLen}s family video...`;
+            }
+            if (videoUploadPercent) videoUploadPercent.textContent = '12%';
+        }
+
+        if (btnConfirmAutoTrim) {
+            btnConfirmAutoTrim.disabled = true;
+            if (window.ScoreTenantSpinner) window.ScoreTenantSpinner.start(btnConfirmAutoTrim);
+        }
+
+        const expirySelect = document.getElementById('videoExpirySelect');
+        const expirySeconds = expirySelect ? parseInt(expirySelect.value, 10) : 2592000;
+        const csrfToken = document.querySelector('input[name="token"]')?.value
+            || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+            || '';
+
+        try {
+            let targetUploadUrl = '/api/video/upload-file';
+            let useSovereignLocal = true;
+            let cfTokenData = null;
+
+            // Only attempt Cloudflare direct upload if no custom trim window is needed
+            if (!needsTrim) {
+                try {
+                    const tokenRes = await fetch('/api/video/direct-upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            maxDuration: 30,
+                            expirySeconds: expirySeconds
+                        })
+                    });
+                    cfTokenData = await tokenRes.json().catch(() => ({}));
+                    if (tokenRes.status === 403) {
+                        if (window.Swal) {
+                            window.Swal.fire({
+                                icon: 'warning',
+                                title: '👑 Premium Retention Required',
+                                text: cfTokenData.error || '1 Year and Permanent video retention are available exclusively for Premium members.',
+                                confirmButtonText: 'Select 30 Days',
+                                confirmButtonColor: '#1e6040'
+                            });
+                        }
+                        if (expirySelect) expirySelect.value = '2592000';
+                        throw new Error(cfTokenData.error || 'Premium retention required.');
+                    }
+                    if (tokenRes.ok && cfTokenData.success && cfTokenData.uploadUrl && !cfTokenData.fallbackLocal) {
+                        targetUploadUrl = cfTokenData.uploadUrl;
+                        useSovereignLocal = false;
+                    }
+                } catch (preErr) {
+                    if (String(preErr.message || '').includes('Premium')) {
+                        throw preErr;
+                    }
+                    useSovereignLocal = true;
+                    targetUploadUrl = '/api/video/upload-file';
+                }
+            }
+
+            const uploadResult = await new Promise((resolve, reject) => {
+                const formData = new FormData();
+                if (useSovereignLocal) {
+                    formData.append('video_file', file);
+                    formData.append('trim_start', String(safeStart));
+                    formData.append('trim_end', String(safeEnd));
+                    if (originalDuration) {
+                        formData.append('client_duration', String(originalDuration));
+                    }
+                    formData.append('expiry_seconds', String(expirySeconds));
+                    if (csrfToken) {
+                        formData.append('token', csrfToken);
+                    }
+                } else {
+                    formData.append('file', file);
+                }
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', targetUploadUrl, true);
+                if (useSovereignLocal && csrfToken) {
+                    xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+                }
+
+                xhr.upload.onprogress = (evt) => {
+                    if (evt.lengthComputable && videoProgressBar && videoUploadPercent) {
+                        const percent = Math.max(12, Math.round((evt.loaded / evt.total) * 100));
+                        videoProgressBar.style.width = `${percent}%`;
+                        videoUploadPercent.textContent = `${percent}%`;
+                    }
+                };
+
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        let parsedRes = {};
+                        try {
+                            parsedRes = JSON.parse(xhr.responseText || '{}');
+                        } catch (_) { /* ignore non-JSON from CF */ }
+                        resolve({ useSovereignLocal, parsedRes, cfTokenData });
+                    } else {
+                        let errMsg = 'Video upload failed. Please try again.';
+                        try {
+                            const errJson = JSON.parse(xhr.responseText || '{}');
+                            if (errJson.error) errMsg = errJson.error;
+                        } catch (_) { /* ignore */ }
+                        reject(new Error(errMsg));
+                    }
+                };
+
+                xhr.onerror = () => reject(new Error('Network error during video upload.'));
+                xhr.send(formData);
+            });
+
+            const finalStreamUrl = uploadResult.useSovereignLocal
+                ? (uploadResult.parsedRes?.streamUrl || uploadResult.parsedRes?.rawUrl)
+                : (uploadResult.cfTokenData?.streamUrl || `https://iframe.videodelivery.net/${uploadResult.cfTokenData?.videoId}`);
+
+            if (!finalStreamUrl) {
+                throw new Error('Server did not return a playable video stream URL.');
+            }
+
+            if (videoUploadStatus) {
+                videoUploadStatus.textContent = needsTrim
+                    ? `✅ Auto-trimmed to ${clipLen}s and attached to your post!`
+                    : '✅ Upload complete! Video ready to stream.';
+            }
+            if (videoProgressBar) {
+                videoProgressBar.style.width = '100%';
+                videoProgressBar.classList.remove('progress-bar-animated');
+            }
+
+            cleanupTrimStudio();
+            renderAttachedVideoPreview(finalStreamUrl, safeStart, safeEnd);
+            return finalStreamUrl;
+        } catch (err) {
+            console.warn('[VideoUpload] Upload/Auto-Trim error:', err);
+            if (videoUploadProgressWrapper) videoUploadProgressWrapper.classList.add('d-none');
+            (window.swalError || alert)(err?.message || 'Unable to upload video clip. Please try again.');
+            return null;
+        } finally {
+            if (btnConfirmAutoTrim) {
+                btnConfirmAutoTrim.disabled = false;
+                if (window.ScoreTenantSpinner) window.ScoreTenantSpinner.stop(btnConfirmAutoTrim);
+            }
+            activeVideoUploadPromise = null;
+        }
+    };
+
+    activeVideoUploadPromise = runUpload();
+    return activeVideoUploadPromise;
+};
+
+if (btnConfirmAutoTrim) {
+    btnConfirmAutoTrim.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!stagedTrimFile) return;
+        const start = parseFloat(videoTrimStartRange?.value || '0') || 0;
+        const end = parseFloat(videoTrimEndRange?.value || '30') || 30;
+        uploadVideoWithAutoTrim(stagedTrimFile, start, end, stagedTrimDuration);
+    });
+}
+
+if (btnQuickTrimFirst30) {
+    btnQuickTrimFirst30.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!stagedTrimFile) return;
+        if (videoTrimStartRange) videoTrimStartRange.value = '0';
+        if (videoTrimEndRange) videoTrimEndRange.value = String(Math.min(30, stagedTrimDuration || 30));
+        syncTrimSlidersUI('start');
+        uploadVideoWithAutoTrim(stagedTrimFile, 0, Math.min(30, stagedTrimDuration || 30), stagedTrimDuration);
+    });
+}
+
+const handleSelectedVideoFile = async (file) => {
+    if (!file) return;
+
+    if (videoContainer && videoContainer.classList.contains('d-none')) {
+        videoContainer.classList.remove('d-none');
+        if (addVideoBtn) addVideoBtn.classList.add('video-active');
+        scrollDrawerIntoView(videoContainer);
+    }
+
+    // Cap at 100MB
+    if (file.size > 100 * 1024 * 1024) {
+        (window.swalError || alert)('Video size exceeds 100MB. Please select a video under 100MB.');
+        if (videoDirectFileInput) videoDirectFileInput.value = '';
+        return;
+    }
+
+    // Inspect video duration via browser metadata
+    let clipDuration = null;
+    try {
+        clipDuration = await new Promise((resolve) => {
+            const tempVideo = document.createElement('video');
+            tempVideo.preload = 'metadata';
+            const blobUrl = URL.createObjectURL(file);
+            tempVideo.src = blobUrl;
+
+            tempVideo.onloadedmetadata = () => {
+                URL.revokeObjectURL(blobUrl);
+                resolve(Number.isFinite(tempVideo.duration) ? tempVideo.duration : null);
+            };
+
+            tempVideo.onerror = () => {
+                URL.revokeObjectURL(blobUrl);
+                resolve(null);
+            };
+        });
+    } catch (err) {
+        console.warn('Video duration check skipped:', err);
+    }
+
+    // If video exceeds 30 seconds, open the Auto-Trim Studio and offer 1-click Auto-Trim or Customise Window
+    if (clipDuration && clipDuration > 30.5) {
+        openAutoTrimStudioForFile(file, clipDuration);
+
+        if (window.Swal) {
+            const modalResult = await window.Swal.fire({
+                icon: 'info',
+                title: '✂️ Auto-Trim Video to 30 Seconds?',
+                html: `
+                    <div style="text-align: left; font-size: 0.94rem;">
+                        <p class="mb-2">Your selected video is <strong>${Math.round(clipDuration)} seconds</strong> long (maximum post clip length is <strong>30 seconds</strong>).</p>
+                        <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 14px; border-radius: 8px; margin: 12px 0;">
+                            <span style="color: #166534; font-weight: 700;">✨ Smart Auto-Trim Ready:</span>
+                            <span style="color: #15803d;">We can automatically trim this video to 30 seconds for you right now, or let you slide to pick your favourite 30-second moment.</span>
+                        </div>
+                    </div>
+                `,
+                showDenyButton: true,
+                showCancelButton: true,
+                confirmButtonText: '✂️ Auto-Trim First 30s Now',
+                denyButtonText: '🎚️ Customise 30s Window',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#a31621',
+                denyButtonColor: '#0f172a'
+            });
+
+            if (modalResult.isConfirmed) {
+                await uploadVideoWithAutoTrim(file, 0, 30, clipDuration);
+            } else if (modalResult.isDismissed) {
+                cleanupTrimStudio();
+                if (videoDirectFileInput) videoDirectFileInput.value = '';
+            }
+            // If isDenied ("Customise 30s Window"), the #videoAutoTrimStudio remains open for the user to adjust sliders!
+        }
+        return;
+    }
+
+    // Video is <= 30s: upload immediately
+    await uploadVideoWithAutoTrim(file, 0, clipDuration || 30, clipDuration);
+};
+
+window.__handleComposerVideoFile = handleSelectedVideoFile;
+
+// Ensure that if the user clicks "Post" while a video is still in the Auto-Trim Studio or uploading,
+// it finishes auto-trimming and attaching before the post form submits!
+window.__ensurePendingVideoUploaded = async () => {
+    if (activeVideoUploadPromise) {
+        await activeVideoUploadPromise;
+    } else if (stagedTrimFile) {
+        const start = parseFloat(videoTrimStartRange?.value || '0') || 0;
+        const end = parseFloat(videoTrimEndRange?.value || '30') || 30;
+        await uploadVideoWithAutoTrim(stagedTrimFile, start, end, stagedTrimDuration);
     }
 };
 
@@ -359,155 +814,11 @@ if (addVideoBtn && videoContainer) {
         });
     }
 
-    // Direct Video File Upload to Cloudflare Stream
     if (videoDirectFileInput) {
         videoDirectFileInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
+            const file = e.target.files?.[0];
             if (!file) return;
-
-            // Cap at 100MB
-            if (file.size > 100 * 1024 * 1024) {
-                (window.swalError || alert)('Video size exceeds 100MB. Please select a shorter video clip.');
-                videoDirectFileInput.value = '';
-                return;
-            }
-
-            // Enforce strict 30-second duration cap via browser metadata check
-            let clipDuration = null;
-            try {
-                clipDuration = await new Promise((resolve) => {
-                    const tempVideo = document.createElement('video');
-                    tempVideo.preload = 'metadata';
-                    const blobUrl = URL.createObjectURL(file);
-                    tempVideo.src = blobUrl;
-
-                    tempVideo.onloadedmetadata = () => {
-                        URL.revokeObjectURL(blobUrl);
-                        resolve(tempVideo.duration);
-                    };
-
-                    tempVideo.onerror = () => {
-                        URL.revokeObjectURL(blobUrl);
-                        resolve(null);
-                    };
-                });
-
-                if (clipDuration && clipDuration > 30.5) {
-                    if (window.Swal) {
-                        window.Swal.fire({
-                            icon: 'warning',
-                            title: '30-Second Video Limit',
-                            html: `
-                                <div style="text-align: left; font-size: 0.95rem;">
-                                    <p>Direct video uploads on FamilyPlatform are limited to a maximum of <strong>30 seconds</strong> to keep family feeds fast and engaging.</p>
-                                    <div style="background: #FFF3CD; border-left: 4px solid #FFC107; padding: 10px 14px; border-radius: 6px; margin: 12px 0;">
-                                        <span style="color: #856404; font-weight: 600;">Selected Video Duration:</span> 
-                                        <span style="color: #DC3545; font-weight: 700;">${Math.round(clipDuration)} seconds</span>
-                                    </div>
-                                    <p class="text-muted mb-0" style="font-size: 0.85rem;">Please trim your clip to 30 seconds or choose a shorter video.</p>
-                                </div>
-                            `,
-                            confirmButtonText: 'Understood',
-                            confirmButtonColor: '#0056b3'
-                        });
-                    } else {
-                        alert(`Video duration (${Math.round(clipDuration)}s) exceeds the maximum limit of 30 seconds. Please select or trim a shorter clip.`);
-                    }
-                    videoDirectFileInput.value = '';
-                    return;
-                }
-            } catch (err) {
-                console.warn('Video duration check skipped:', err);
-            }
-
-            if (videoUploadProgressWrapper) {
-                videoUploadProgressWrapper.classList.remove('d-none');
-                if (videoProgressBar) videoProgressBar.style.width = '10%';
-                const durationLabel = clipDuration ? `Clip: ${Math.round(clipDuration)}s • ` : '';
-                if (videoUploadStatus) videoUploadStatus.textContent = `${durationLabel}Requesting secure upload token...`;
-                if (videoUploadPercent) videoUploadPercent.textContent = '10%';
-            }
-
-            // Read selected video expiration
-            const expirySelect = document.getElementById('videoExpirySelect');
-            const expirySeconds = expirySelect ? parseInt(expirySelect.value, 10) : 2592000;
-
-            try {
-                const tokenRes = await fetch('/api/video/direct-upload', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        maxDuration: 30,
-                        expirySeconds: expirySeconds
-                    })
-                });
-
-                const tokenData = await tokenRes.json();
-
-                if (!tokenRes.ok || !tokenData.success || !tokenData.uploadUrl) {
-                    if (tokenRes.status === 403 && window.Swal) {
-                        window.Swal.fire({
-                            icon: 'warning',
-                            title: '👑 Premium Retention Required',
-                            text: tokenData.error || '1 Year and Permanent video retention are available exclusively for Premium members.',
-                            confirmButtonText: 'Select 30 Days',
-                            confirmButtonColor: '#1e6040'
-                        });
-                        if (expirySelect) expirySelect.value = '2592000';
-                    }
-                    throw new Error(tokenData.error || 'Failed to obtain direct upload URL.');
-                }
-
-                if (videoUploadStatus) videoUploadStatus.textContent = 'Uploading directly to Cloudflare edge...';
-                
-                const formData = new FormData();
-                formData.append('file', file);
-
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', tokenData.uploadUrl, true);
-
-                xhr.upload.onprogress = (evt) => {
-                    if (evt.lengthComputable && videoProgressBar && videoUploadPercent) {
-                        const percent = Math.round((evt.loaded / evt.total) * 100);
-                        videoProgressBar.style.width = `${percent}%`;
-                        videoUploadPercent.textContent = `${percent}%`;
-                    }
-                };
-
-                xhr.onload = () => {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        const streamUrl = tokenData.streamUrl || `https://iframe.videodelivery.net/${tokenData.videoId}`;
-                        if (videoUploadStatus) videoUploadStatus.textContent = 'Upload complete! Video ready to stream.';
-                        if (videoProgressBar) {
-                            videoProgressBar.style.width = '100%';
-                            videoProgressBar.classList.remove('progress-bar-animated');
-                        }
-                        if (videoInput) videoInput.value = streamUrl;
-
-                        if (videoLivePreview) {
-                            videoLivePreview.innerHTML = `<iframe src="${streamUrl}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>`;
-                            videoLivePreview.classList.remove('d-none');
-                        }
-
-                        if (postMessageArea && !postMessageArea.value.includes(streamUrl)) {
-                            postMessageArea.value = postMessageArea.value ? `${postMessageArea.value.trim()}\n\n${streamUrl}` : streamUrl;
-                        }
-                    } else {
-                        (window.swalError || alert)('Cloudflare upload error. Please try again.');
-                        if (videoUploadProgressWrapper) videoUploadProgressWrapper.classList.add('d-none');
-                    }
-                };
-
-                xhr.onerror = () => {
-                    (window.swalError || alert)('Network error during video upload. Please check your internet connection.');
-                    if (videoUploadProgressWrapper) videoUploadProgressWrapper.classList.add('d-none');
-                };
-
-                xhr.send(formData);
-            } catch (err) {
-                console.warn('[VideoUpload] Direct upload failed:', err);
-                if (videoUploadProgressWrapper) videoUploadProgressWrapper.classList.add('d-none');
-            }
+            await handleSelectedVideoFile(file);
         });
     }
 
@@ -535,18 +846,7 @@ if (addVideoBtn && videoContainer) {
             const parsed = parseVideoUrl(url);
 
             if (parsed) {
-                let previewHtml = '';
-                if (parsed.type === 'youtube' || parsed.type === 'vimeo' || parsed.type === 'cloudflare') {
-                    previewHtml = `<iframe src="${parsed.embedUrl}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>`;
-                } else if (parsed.type === 'direct') {
-                    previewHtml = `<video src="${parsed.embedUrl}" controls style="width:100%; height:100%; object-fit:contain; background:#000;"></video>`;
-                }
-                videoLivePreview.innerHTML = previewHtml;
-                videoLivePreview.classList.remove('d-none');
-
-                if (postMessageArea && !postMessageArea.value.includes(url)) {
-                    postMessageArea.value = postMessageArea.value ? `${postMessageArea.value.trim()}\n\n${url}` : url;
-                }
+                renderAttachedVideoPreview(url, parsed.trimStart ?? null, parsed.trimEnd ?? null);
             } else {
                 videoLivePreview.innerHTML = '';
                 videoLivePreview.classList.add('d-none');
@@ -1086,7 +1386,7 @@ window.__resetIosShareGuide = closeIosShareDrawer;
 const postModalElement = document.getElementById('postModal');
 if (postModalElement) {
     postModalElement.addEventListener('hidden.bs.modal', () => {
-        closeEmojiPicker();
+        closeEmojiDrawer();
         closeVideoBuilder();
         if (window.__resetGifPicker) window.__resetGifPicker();
         resetTagBuilder();

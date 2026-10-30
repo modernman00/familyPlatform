@@ -62,14 +62,15 @@ class PushNotificationClass extends VapidClass
         ?int $badgeCount = null,
         bool $isSilent = false,
         ?string $syncAction = null,
-        ?string $targetNotificationId = null
+        ?string $targetNotificationId = null,
+        bool $forceOutbound = false
     ): bool {
         if (empty($userId)) {
             return false;
         }
 
-        // Never push to real devices from local/dev/test environments.
-        if (Pusher::outboundBlocked()) {
+        // Never push to real devices from local/dev/test environments unless explicitly forced by self-test.
+        if ((!$forceOutbound || defined('TESTING_ENV')) && Pusher::outboundBlocked()) {
             return false;
         }
 

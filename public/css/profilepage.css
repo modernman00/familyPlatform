@@ -1494,6 +1494,21 @@ h1, h2, h3, h4, h5, h6 {
 /* ==========================================================================
    Family Code Tonal Pill (Theme-Adaptive)
    ========================================================================== */
+.family-code-headline {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted, #64748b);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.dark-mode .family-code-headline {
+  color: #94a3b8 !important;
+}
+
 .family-code-pill {
   background-color: var(--secondary-color);
   border: 1px solid #ecc7c9;
@@ -1507,6 +1522,9 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: center;
   white-space: nowrap;
   flex-shrink: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
   transition: all 0.2s ease;
 }
 
@@ -1526,11 +1544,11 @@ a.family-code-pill:active {
 
 .family-code-label {
   display: inline-block;
-  text-transform: uppercase;
-  font-weight: 700;
+  text-transform: none;
+  font-weight: 600;
   color: #a31621;
-  font-size: 0.78rem;
-  letter-spacing: 0.05em;
+  font-size: 0.9rem;
+  letter-spacing: normal;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -1540,9 +1558,10 @@ a.family-code-pill:active {
 }
 
 .family-code-value {
-  font-weight: 800;
+  font-weight: 600;
   color: #2a0a0d;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
+  letter-spacing: normal;
   white-space: nowrap;
 }
 
@@ -1589,6 +1608,11 @@ body.dark-mode .inputComment {
   background-color: #0f172a !important;
   color: #f8fafc !important;
   border-color: #334155 !important;
+}
+
+body.dark-mode select option {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
 }
 
 body.dark-mode input::placeholder,
@@ -1682,8 +1706,17 @@ body.dark-mode .skeleton-post div[style*="background: #e2e8f0"] {
   background: #334155 !important;
 }
 
-body.dark-mode .text-dark {
+/* 🛡️ Inviolable Ghost Typography Shield: Surface-Aware .text-dark Inversion */
+body.dark-mode .text-dark:not(.bg-warning):not(.btn-warning):not(.bg-warning-subtle):not(.bg-info):not(.bg-light):not(.surface-light):not([data-surface="light"]):not(.badge-warning):not(.badge-light):not(.badge-info):not(.badge-white):not([style*="background: #ffffff"]):not([style*="background:#ffffff"]):not([style*="background: white"]):not([style*="background: #fdf5f5"]):not([style*="background: #fefce8"]):not([style*="background: #f0fdf4"]) {
   color: #f8fafc !important;
+}
+
+/* Light Surface & Amber/Cyan Badge Protection */
+body.dark-mode :is(.bg-warning, .btn-warning, .bg-warning-subtle, .bg-info, .btn-info, .bg-info-subtle, .surface-light, [data-surface="light"], .badge-warning, .badge-info) .text-dark,
+body.dark-mode .badge.bg-warning.text-dark,
+body.dark-mode .badge.bg-info.text-dark,
+body.dark-mode [data-surface="light"] :is(.text-dark, .text-black, strong, b, h1, h2, h3, h4, h5, h6) {
+  color: #0f172a !important;
 }
 
 body.dark-mode .text-muted {
@@ -1828,6 +1861,49 @@ body.dark-mode .unclaimed-match-card .btn-dismiss,
   border-color: #64748b !important;
   color: #e2e8f0 !important;
   background: rgba(255, 255, 255, 0.05) !important;
+}
+
+body.dark-mode .wedding-anniversary-prompt-card,
+[data-bs-theme="dark"] .wedding-anniversary-prompt-card {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, #1e293b 65%, #1e293b 100%) !important;
+  background-color: #1e293b !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.5) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45), 0 0 16px rgba(245, 158, 11, 0.12) !important;
+}
+body.dark-mode .wedding-anniversary-prompt-card .anniversary-icon-circle,
+[data-bs-theme="dark"] .wedding-anniversary-prompt-card .anniversary-icon-circle {
+  background: rgba(245, 158, 11, 0.2) !important;
+  color: #fbbf24 !important;
+  border: 2px solid rgba(251, 191, 36, 0.65) !important;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.25) !important;
+}
+body.dark-mode .wedding-anniversary-prompt-card .anniversary-title,
+[data-bs-theme="dark"] .wedding-anniversary-prompt-card .anniversary-title {
+  color: #f8fafc !important;
+}
+body.dark-mode .wedding-anniversary-prompt-card .anniversary-desc,
+[data-bs-theme="dark"] .wedding-anniversary-prompt-card .anniversary-desc {
+  color: #cbd5e1 !important;
+}
+body.dark-mode .wedding-anniversary-prompt-card .anniversary-date-input,
+[data-bs-theme="dark"] .wedding-anniversary-prompt-card .anniversary-date-input {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.6) !important;
+  color-scheme: dark !important;
+}
+body.dark-mode .wedding-anniversary-prompt-card .anniversary-date-input::-webkit-calendar-picker-indicator,
+[data-bs-theme="dark"] .wedding-anniversary-prompt-card .anniversary-date-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.85) !important;
+  cursor: pointer;
+}
+body.dark-mode .wedding-anniversary-prompt-card .anniversary-dismiss-btn,
+[data-bs-theme="dark"] .wedding-anniversary-prompt-card .anniversary-dismiss-btn {
+  color: #94a3b8 !important;
+}
+body.dark-mode .wedding-anniversary-prompt-card .anniversary-dismiss-btn:hover,
+[data-bs-theme="dark"] .wedding-anniversary-prompt-card .anniversary-dismiss-btn:hover {
+  color: #f1f5f9 !important;
 }
 
 body.dark-mode .family-heritage-hub,
@@ -2369,3 +2445,41 @@ body.dark-mode .comment-composer__send.is-active {
   }
 }
 
+
+/* 🎭 TWO TRUTHS & A LIE: playable feed card */
+.tt-feed-card { border: 1px solid #fecaca; border-radius: 16px; background: linear-gradient(180deg, #fff7ed 0%, #ffffff 60%); overflow: hidden; }
+.tt-feed-head { padding: 16px; background: linear-gradient(135deg, #b8202c 0%, #7f1019 100%); color: #ffffff; }
+.tt-feed-eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #ffd700; }
+.tt-feed-title { margin: 4px 0; font-size: 1.125rem; font-weight: 700; color: #ffffff; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tt-feed-sub { font-size: 0.875rem; color: #fff7ed; }
+.tt-feed-options { display: flex; flex-direction: column; gap: 8px; padding: 16px; }
+.tt-opt { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 8px 12px; text-align: left; border: 2px solid #e2e8f0; border-radius: 12px; background: #ffffff; color: #0f172a; font-size: 0.875rem; line-height: 1.4; overflow: hidden; cursor: pointer; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease; }
+.tt-opt:focus-visible { outline: 2px solid #b8202c; outline-offset: 2px; }
+.tt-opt:active:not(:disabled) { transform: scale(.98); }
+@media (hover: hover) { .tt-opt:hover:not(:disabled) { border-color: #b8202c; box-shadow: 0 4px 12px rgba(184,32,44,.15); } }
+.tt-opt:disabled { cursor: default; }
+.tt-opt-num { flex: 0 0 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: #b8202c; color: #ffffff; font-weight: 700; z-index: 1; }
+.tt-opt-text { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; z-index: 1; }
+.tt-opt-pct { flex: 0 0 auto; font-weight: 700; z-index: 1; }
+.tt-opt-bar { position: absolute; inset: 0 auto 0 0; background: rgba(184,32,44,.12); transition: width .6s ease; z-index: 0; }
+.tt-opt-spin { z-index: 1; }
+.tt-opt.is-picked { border-color: #b8202c; background: #fff1f2; }
+.tt-opt.is-lie { border-color: #b8202c; background: #fee2e2; }
+.tt-opt.is-truth { border-color: #15803d; background: #f0fdf4; }
+.tt-opt.is-truth .tt-opt-num { background: #15803d; }
+.tt-feed-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0 16px 16px; }
+.tt-chip { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 4px 12px; border-radius: 999px; background: #f1f5f9; color: #334155; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+.tt-chip-cta { background: #b8202c; color: #ffffff; }
+.tt-chip-ok { background: #dcfce7; color: #14532d; }
+.tt-chip-muted { margin-left: auto; }
+.tt-pop { animation: ttPop .5s ease; }
+.tt-feed-error { margin: 0; padding: 0 16px 16px; font-size: 0.875rem; color: #b91c1c; }
+@keyframes ttPop { 0% { transform: scale(.8); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .tt-opt, .tt-opt-bar, .tt-pop { transition: none; animation: none; } }
+body.dark-mode .tt-feed-card { background: #0f172a; border-color: #7f1019; }
+body.dark-mode .tt-opt { background: #1e293b; border-color: #334155; color: #f8fafc; }
+body.dark-mode .tt-opt.is-picked, body.dark-mode .tt-opt.is-lie { background: #3b0d12; }
+body.dark-mode .tt-opt.is-truth { background: #052e16; }
+body.dark-mode .tt-chip { background: #1e293b; color: #e2e8f0; }
+body.dark-mode .tt-chip-cta { background: #b8202c; color: #ffffff; }
+body.dark-mode .tt-chip-ok { background: #14532d; color: #dcfce7; }

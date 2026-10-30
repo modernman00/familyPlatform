@@ -105,7 +105,7 @@ class FeedRepository
             }
             $params[] = $userId;
             $params[] = $userId;
-            $params[] = \App\services\FamilyPlatformAccountService::ACCOUNT_ID;
+            $params[] = \App\services\FamilyPlatformAccountService::getAccountId();
 
             if ($filter === 'tagged') {
                 $query .= " AND EXISTS (SELECT 1 FROM post_tags pt_filter WHERE pt_filter.post_no = post.post_no AND pt_filter.user_id = ?)";
@@ -202,7 +202,7 @@ class FeedRepository
                 $params = array_merge($params, $cleanedCodes);
             }
             $params[] = $userId;
-            $params[] = \App\services\FamilyPlatformAccountService::ACCOUNT_ID;
+            $params[] = \App\services\FamilyPlatformAccountService::getAccountId();
 
             $stmt = $this->db->prepare($query);
             foreach ($params as $key => $val) {
@@ -269,7 +269,7 @@ class FeedRepository
             }
             $params[] = $userId;
             $params[] = $userId;
-            $params[] = \App\services\FamilyPlatformAccountService::ACCOUNT_ID;
+            $params[] = \App\services\FamilyPlatformAccountService::getAccountId();
 
             if ($filter === 'tagged') {
                 $query .= " AND EXISTS (SELECT 1 FROM post_tags pt_filter WHERE pt_filter.post_no = post.post_no AND pt_filter.user_id = ?)";
@@ -395,10 +395,19 @@ class FeedRepository
             }
         }
 
+        // Batch hydrate Two Truths & a Lie games
+        $twoTruthsGames = [];
+        try {
+            $twoTruthsGames = \App\services\TwoTruthsGameService::getGamesForPosts($postIds, $userId);
+        } catch (\Throwable $ttEx) {
+            \error_log('[FeedRepository::hydrateEngagement twoTruths] ' . $ttEx->getMessage());
+        }
+
         foreach ($rows as &$post) {
             $pNo = (int)($post['post_no'] ?? 0);
             $post['poll'] = $polls[$pNo] ?? null;
             $post['comparison'] = $comparisons[$pNo] ?? null;
+            $post['two_truths'] = $twoTruthsGames[$pNo] ?? null;
             $post['post_tags'] = $postTagsByPostNo[$pNo] ?? [];
 
             // Fallback to author's family tree voice capsule if not directly set on post

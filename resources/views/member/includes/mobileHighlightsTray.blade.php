@@ -68,7 +68,7 @@ foreach(($eventData ?? []) as $event) {
                           style="background: linear-gradient(135deg, #a31621, #d97706); font-size: 0.72rem;">
                         <i class="bi bi-clock-history"></i> <span x-text="memories[0].years_ago_label || 'Memory Flashback'"></span>
                     </span>
-                    <span class="badge bg-white bg-opacity-75 text-dark border px-2 py-0.5 rounded-pill small" style="font-size: 0.72rem;" x-text="memories[0].formatted_date"></span>
+                    <span class="badge rounded-pill small border px-2 py-0.5" style="font-size: 0.72rem; background-color: var(--card-bg, #ffffff); color: var(--text-color, #0f172a);" x-text="memories[0].formatted_date"></span>
                 </div>
 
                 <!-- Media Preview -->

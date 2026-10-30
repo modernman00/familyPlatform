@@ -53,10 +53,13 @@ checkSplit(
     str_contains($leftCol, 'id="marriedFamCodePill"') &&
     str_contains($leftCol, 'id="birthFamCodePill"') &&
     str_contains($leftCol, '@if($leftMarriedCode !== \'\')') &&
+    str_contains($leftCol, 'family-code-headline') &&
+    str_contains($leftCol, 'married_code_short') &&
+    str_contains($leftCol, 'birth_code_short') &&
     str_contains($leftCol, 'married_family_code') &&
     str_contains($leftCol, 'birth_family_code'),
-    "leftColumn.blade.php splits into Married Code and Birth Code pills and hides Married Code when user does not have one.",
-    "leftColumn.blade.php missing split Married/Birth family code pills or conditional Married Code hiding",
+    "leftColumn.blade.php features 'FAMILY CODE(S)' headline with Married - and Birth - pills, hiding Married Code when user does not have one.",
+    "leftColumn.blade.php missing split Married/Birth family code pills, headline, or conditional Married Code hiding",
     $failures,
     $total
 );

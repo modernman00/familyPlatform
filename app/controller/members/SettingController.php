@@ -881,15 +881,17 @@ final class SettingController extends BaseController
 
         $userId = cleanSession((string)$_SESSION['id']);
 
-        // CSRF verification
-        $token = (string)($_POST['token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''));
-        if (empty($token) && !empty($_SERVER['HTTP_CONTENT_TYPE']) && str_contains($_SERVER['HTTP_CONTENT_TYPE'], 'application/json')) {
+        // Parse JSON payload if request is JSON-encoded
+        $contentType = (string)($_SERVER['HTTP_CONTENT_TYPE'] ?? ($_SERVER['CONTENT_TYPE'] ?? ''));
+        if (str_contains($contentType, 'application/json')) {
             $raw = json_decode((string)file_get_contents('php://input'), true);
             if (is_array($raw)) {
-                $token = (string)($raw['token'] ?? $token);
                 $_POST = array_merge($_POST, $raw);
             }
         }
+
+        // CSRF verification
+        $token = (string)($_POST['token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''));
 
         if (!empty($_SESSION['token']) && !hash_equals((string)$_SESSION['token'], $token)) {
             header('Content-Type: application/json; charset=utf-8');
@@ -919,9 +921,113 @@ final class SettingController extends BaseController
             http_response_code(400);
             echo json_encode([
                 'status' => 400,
-                'message' => 'Invalid wedding date. Please enter a valid date in YYYY-MM-DD format.'
+                'message' => 'Please enter a valid wedding date (e.g. DD/MM/YYYY, such as 14/06/2015, or select from the calendar).'
             ]);
         }
+    }
+
+    /**
+     * Resilient date normalizer accepting ISO (YYYY-MM-DD), UK/European (DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY),
+     * US (MM/DD/YYYY), 2-digit years, and natural textual dates (e.g. 20 June 2015, 20th June 2015).
+     * Strictly verifies calendar validity via checkdate() and returns clean YYYY-MM-DD or null.
+     */
+    public static function normalizeWeddingDate(string $raw): ?string
+    {
+        $clean = trim($raw);
+        if ($clean === '') {
+            return null;
+        }
+
+        // Remove ordinal suffixes (1st, 2nd, 3rd, 4th, 20th, etc.)
+        $clean = (string)preg_replace('/(\b\d{1,2})(?:st|nd|rd|th)\b/i', '$1', $clean);
+        // Normalize multiple spaces
+        $clean = (string)preg_replace('/\s+/', ' ', $clean);
+
+        $currentYear = (int)date('Y');
+        $minYear = 1900;
+        $maxYear = $currentYear + 1; // allow upcoming celebrations within next 12 months
+
+        // 1. ISO format: YYYY-MM-DD or YYYY/MM/DD or YYYY.MM.DD with optional single-digit month/day
+        if (preg_match('/^(\d{4})[-\/\.](\d{1,2})[-\/\.](\d{1,2})$/', $clean, $m)) {
+            $y = (int)$m[1];
+            $mon = (int)$m[2];
+            $day = (int)$m[3];
+            if ($y >= $minYear && $y <= $maxYear && checkdate($mon, $day, $y)) {
+                return sprintf('%04d-%02d-%02d', $y, $mon, $day);
+            }
+            return null;
+        }
+
+        // 2. UK / European format: DD/MM/YYYY or DD-MM-YYYY or DD.MM.YYYY with 4-digit year
+        if (preg_match('/^(\d{1,2})[-\/\.](\d{1,2})[-\/\.](\d{4})$/', $clean, $m)) {
+            $first = (int)$m[1];
+            $second = (int)$m[2];
+            $y = (int)$m[3];
+
+            if ($y >= $minYear && $y <= $maxYear) {
+                // Primary: assume DD/MM/YYYY (UK standard) if checkdate(month=$second, day=$first, year=$y) is valid
+                if (checkdate($second, $first, $y)) {
+                    return sprintf('%04d-%02d-%02d', $y, $second, $first);
+                }
+                // Fallback: MM/DD/YYYY (US standard) if first is valid month and second is valid day
+                if (checkdate($first, $second, $y)) {
+                    return sprintf('%04d-%02d-%02d', $y, $first, $second);
+                }
+            }
+            return null;
+        }
+
+        // 3. 2-digit year format: DD/MM/YY or DD-MM-YY or DD.MM.YY (e.g. 20/06/15 -> 2015)
+        if (preg_match('/^(\d{1,2})[-\/\.](\d{1,2})[-\/\.](\d{2})$/', $clean, $m)) {
+            $first = (int)$m[1];
+            $second = (int)$m[2];
+            $twoDigitYear = (int)$m[3];
+            $y = $twoDigitYear < 70 ? 2000 + $twoDigitYear : 1900 + $twoDigitYear;
+
+            if ($y >= $minYear && $y <= $maxYear) {
+                if (checkdate($second, $first, $y)) {
+                    return sprintf('%04d-%02d-%02d', $y, $second, $first);
+                }
+                if (checkdate($first, $second, $y)) {
+                    return sprintf('%04d-%02d-%02d', $y, $first, $second);
+                }
+            }
+            return null;
+        }
+
+        // 4. Textual formats (e.g. '20 June 2015', 'June 20, 2015', '20 Jun 2015')
+        $textualFormats = [
+            'j F Y', 'd F Y', 'j M Y', 'd M Y',
+            'F j, Y', 'F j Y', 'M j, Y', 'M j Y',
+            'Y F j', 'Y M j'
+        ];
+        foreach ($textualFormats as $fmt) {
+            $dt = \DateTimeImmutable::createFromFormat($fmt, $clean);
+            if ($dt) {
+                $errs = \DateTimeImmutable::getLastErrors();
+                if (empty($errs['warning_count']) && empty($errs['error_count'])) {
+                    $y = (int)$dt->format('Y');
+                    $mon = (int)$dt->format('m');
+                    $day = (int)$dt->format('d');
+                    if ($y >= $minYear && $y <= $maxYear && checkdate($mon, $day, $y)) {
+                        return $dt->format('Y-m-d');
+                    }
+                }
+            }
+        }
+
+        // 5. Fallback: strtotime with strict calendar validation
+        $ts = strtotime($clean);
+        if ($ts !== false) {
+            $y = (int)date('Y', $ts);
+            $mon = (int)date('m', $ts);
+            $day = (int)date('d', $ts);
+            if ($y >= $minYear && $y <= $maxYear && checkdate($mon, $day, $y)) {
+                return sprintf('%04d-%02d-%02d', $y, $mon, $day);
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -929,108 +1035,103 @@ final class SettingController extends BaseController
      */
     public static function syncWeddingAnniversary(\PDO $db, string $userId, string $weddingDate): bool
     {
-        $weddingDate = trim($weddingDate);
-        if ($weddingDate === '') {
+        $normalizedDate = self::normalizeWeddingDate($weddingDate);
+        if ($normalizedDate === null) {
             return false;
         }
 
-        // Validate Y-m-d format and calendar validity
-        $dt = \DateTimeImmutable::createFromFormat('Y-m-d', $weddingDate);
-        if (!$dt || $dt->format('Y-m-d') !== $weddingDate) {
-            return false;
-        }
+        $weddingDate = $normalizedDate;
+        $mYear = (int)substr($weddingDate, 0, 4);
 
-        $mYear = (int)$dt->format('Y');
-        $currentYear = (int)date('Y');
-        // Plausible range: 1900 up to next year (allow upcoming weddings within 12 months)
-        if ($mYear < 1900 || $mYear > $currentYear + 1) {
-            return false;
-        }
+        try {
+            // Fetch user node details
+            $nodeStmt = $db->prepare("SELECT id, family_code, first_name, last_name, gender, generation_level FROM family_nodes WHERE user_id = ? LIMIT 1");
+            $nodeStmt->execute([$userId]);
+            $node = $nodeStmt->fetch(\PDO::FETCH_ASSOC);
 
-        // Fetch user node details
-        $nodeStmt = $db->prepare("SELECT id, family_code, first_name, last_name, gender, generation_level FROM family_nodes WHERE user_id = ? LIMIT 1");
-        $nodeStmt->execute([$userId]);
-        $node = $nodeStmt->fetch(\PDO::FETCH_ASSOC);
+            $famCode = (string)($node['family_code'] ?? ($_SESSION['famCode'] ?? ''));
 
-        $famCode = (string)($node['family_code'] ?? ($_SESSION['famCode'] ?? ''));
-
-        if ($node) {
-            $nodeId = (int)$node['id'];
-            // Find current married union for this node
-            $uStmt = $db->prepare("
-                SELECT id FROM family_unions 
-                WHERE (partner_1_id = ? OR partner_2_id = ?) AND union_type = 'married' AND is_current = 1
-                ORDER BY id DESC LIMIT 1
-            ");
-            $uStmt->execute([$nodeId, $nodeId]);
-            $unionId = $uStmt->fetchColumn();
-
-            if ($unionId) {
-                $updU = $db->prepare("UPDATE family_unions SET marriage_date = ?, marriage_year = ? WHERE id = ?");
-                $updU->execute([$weddingDate, $mYear, (int)$unionId]);
-            } else {
-                // Create a placeholder spouse union so the date is safely anchored
-                $spouseGender = ($node['gender'] ?? 'Male') === 'Female' ? 'Male' : 'Female';
-                $spouseName = $spouseGender === 'Female' ? 'Wife' : 'Husband';
-                $genLevel = (int)($node['generation_level'] ?? 0);
-                $avatar = $spouseGender === 'Female' ? '/resources/images/profile/avatarF.png' : '/resources/images/profile/avatarM.png';
-
-                $insNode = $db->prepare("
-                    INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, is_placeholder)
-                    VALUES (?, ?, '', ?, ?, ?, 'Spouse', 1)
+            if ($node) {
+                $nodeId = (int)$node['id'];
+                // Find current married union for this node
+                $uStmt = $db->prepare("
+                    SELECT id FROM family_unions 
+                    WHERE (partner_1_id = ? OR partner_2_id = ?) AND union_type = 'married' AND is_current = 1
+                    ORDER BY id DESC LIMIT 1
                 ");
-                $insNode->execute([$famCode, $spouseName, $spouseGender, $genLevel, $avatar]);
-                $spouseNodeId = (int)$db->lastInsertId();
+                $uStmt->execute([$nodeId, $nodeId]);
+                $unionId = $uStmt->fetchColumn();
 
-                $insU = $db->prepare("
-                    INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, marriage_date, marriage_year, is_current)
-                    VALUES (?, ?, ?, 'married', ?, ?, 1)
-                ");
-                $insU->execute([$famCode, $nodeId, $spouseNodeId, $weddingDate, $mYear]);
+                if ($unionId) {
+                    $updU = $db->prepare("UPDATE family_unions SET marriage_date = ?, marriage_year = ? WHERE id = ?");
+                    $updU->execute([$weddingDate, $mYear, (int)$unionId]);
+                } else {
+                    // Create a placeholder spouse union so the date is safely anchored
+                    $spouseGender = ($node['gender'] ?? 'Male') === 'Female' ? 'Male' : 'Female';
+                    $spouseName = $spouseGender === 'Female' ? 'Wife' : 'Husband';
+                    $genLevel = (int)($node['generation_level'] ?? 0);
+                    $avatar = $spouseGender === 'Female' ? '/resources/images/profile/avatarF.png' : '/resources/images/profile/avatarM.png';
+
+                    $insNode = $db->prepare("
+                        INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, is_placeholder)
+                        VALUES (?, ?, '', ?, ?, ?, 'Spouse', 1)
+                    ");
+                    $insNode->execute([$famCode, $spouseName, $spouseGender, $genLevel, $avatar]);
+                    $spouseNodeId = (int)$db->lastInsertId();
+
+                    $insU = $db->prepare("
+                        INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, marriage_date, marriage_year, is_current)
+                        VALUES (?, ?, ?, 'married', ?, ?, 1)
+                    ");
+                    $insU->execute([$famCode, $nodeId, $spouseNodeId, $weddingDate, $mYear]);
+                }
             }
-        }
 
-        // Upsert into `events` table (yearly anniversary recurring event)
-        $chkEvt = $db->prepare("SELECT no FROM events WHERE id = ? AND eventType = 'Anniversary' LIMIT 1");
-        $chkEvt->execute([$userId]);
-        $existingNo = $chkEvt->fetchColumn();
+            // Upsert into `events` table (yearly anniversary recurring event)
+            $chkEvt = $db->prepare("SELECT no FROM events WHERE id = ? AND eventType = 'Anniversary' LIMIT 1");
+            $chkEvt->execute([$userId]);
+            $existingNo = $chkEvt->fetchColumn();
 
-        $userName = trim(($node['first_name'] ?? '') . ' ' . ($node['last_name'] ?? ''));
-        if ($userName === '') {
-            $userP = $db->prepare("SELECT firstName, lastName FROM personal WHERE id = ? LIMIT 1");
-            $userP->execute([$userId]);
-            $pRow = $userP->fetch(\PDO::FETCH_ASSOC);
-            $userName = trim(($pRow['firstName'] ?? '') . ' ' . ($pRow['lastName'] ?? ''));
-        }
-        if ($userName === '') {
-            $userName = 'Family Member';
-        }
+            $userName = trim(($node['first_name'] ?? '') . ' ' . ($node['last_name'] ?? ''));
+            if ($userName === '') {
+                $userP = $db->prepare("SELECT firstName, lastName FROM personal WHERE id = ? LIMIT 1");
+                $userP->execute([$userId]);
+                $pRow = $userP->fetch(\PDO::FETCH_ASSOC);
+                $userName = trim(($pRow['firstName'] ?? '') . ' ' . ($pRow['lastName'] ?? ''));
+            }
+            if ($userName === '') {
+                $userName = 'Family Member';
+            }
 
-        $eventName = "{$userName}'s Wedding Anniversary";
+            $eventName = "{$userName}'s Wedding Anniversary";
 
-        if ($existingNo) {
-            $updEvt = $db->prepare("
-                UPDATE events 
-                SET eventName = ?, eventDate = ?, eventFrequency = 'Yearly', updated_at = NOW() 
-                WHERE no = ?
+            if ($existingNo) {
+                $updEvt = $db->prepare("
+                    UPDATE events 
+                    SET eventName = ?, eventDate = ?, eventFrequency = 'Yearly', updated_at = NOW() 
+                    WHERE no = ?
+                ");
+                $updEvt->execute([$eventName, $weddingDate, $existingNo]);
+            } else {
+                $insEvt = $db->prepare("
+                    INSERT INTO events (id, eventName, eventDate, eventType, eventDescription, eventFrequency, eventCode, created_at, updated_at)
+                    VALUES (?, ?, ?, 'Anniversary', 'Wedding Anniversary celebration and milestone blessings', 'Yearly', ?, NOW(), NOW())
+                ");
+                $insEvt->execute([$userId, $eventName, $weddingDate, $famCode]);
+            }
+
+            // Ensure personal marital_status is 'Married'
+            $updPersonal = $db->prepare("
+                UPDATE personal 
+                SET marital_status = 'Married', updated_at = NOW() 
+                WHERE id = ? AND (marital_status IS NULL OR marital_status = '' OR marital_status = 'Single')
             ");
-            $updEvt->execute([$eventName, $weddingDate, $existingNo]);
-        } else {
-            $insEvt = $db->prepare("
-                INSERT INTO events (id, eventName, eventDate, eventType, eventDescription, eventFrequency, eventCode, created_at, updated_at)
-                VALUES (?, ?, ?, 'Anniversary', 'Wedding Anniversary celebration and milestone blessings', 'Yearly', ?, NOW(), NOW())
-            ");
-            $insEvt->execute([$userId, $eventName, $weddingDate, $famCode]);
+            $updPersonal->execute([$userId]);
+
+            return true;
+        } catch (\Throwable $e) {
+            error_log('[SettingController::syncWeddingAnniversary] Error: ' . $e->getMessage());
+            return false;
         }
-
-        // Ensure personal marital_status is 'Married'
-        $updPersonal = $db->prepare("
-            UPDATE personal 
-            SET marital_status = 'Married', updated_at = NOW() 
-            WHERE id = ? AND (marital_status IS NULL OR marital_status = '' OR marital_status = 'Single')
-        ");
-        $updPersonal->execute([$userId]);
-
-        return true;
     }
 }

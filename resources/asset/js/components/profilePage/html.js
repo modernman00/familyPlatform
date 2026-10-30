@@ -27,9 +27,9 @@ const renderVideoPlayer = (postMessage) => {
     `;
   } else if (video.type === 'direct') {
     return `
-      <div class="video-embed-container mb-3" style="border-radius: 12px; overflow: hidden; max-height: 420px;">
+      <div class="video-embed-container mb-3 position-relative" style="border-radius: 12px; overflow: hidden; max-height: 420px;">
         <div class="ratio ratio-16x9">
-          <video src="${esc(video.embedUrl)}" controls preload="metadata" style="width: 100%; height: 100%; object-fit: contain; background: #000; border-radius: 12px;"></video>
+          <video class="feed-post-video" src="${esc(video.embedUrl)}" controls playsinline webkit-playsinline muted loop preload="metadata" style="width: 100%; height: 100%; object-fit: contain; background: #000; border-radius: 12px;"></video>
         </div>
       </div>
     `;

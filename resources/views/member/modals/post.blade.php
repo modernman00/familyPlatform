@@ -114,17 +114,17 @@
                         <!-- 1. Video Embed Container -->
                         <div id="videoEmbedContainer" class="composer-drawer video-builder d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div class="d-flex align-items-center gap-2">
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
                                     <span class="fw-bold small text-danger"><i class="bi bi-play-circle-fill me-1"></i> Add Video</span>
                                     <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1" style="font-size: 0.7rem;">
-                                        <i class="bi bi-clock-history me-1"></i> Max 30s
+                                        <i class="bi bi-scissors me-1"></i> Smart 30s Auto-Trim
                                     </span>
                                 </div>
                                 <button type="button" id="removeVideoBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Remove video"></button>
                             </div>
-                            <div class="d-flex gap-2 align-items-center mb-2">
-                                <label for="videoDirectFileInput" class="btn btn-sm btn-outline-danger mb-0 d-flex align-items-center gap-1" style="cursor: pointer; border-radius: 8px; font-size: 0.8rem; padding: 5px 12px;">
-                                    <i class="bi bi-cloud-arrow-up-fill"></i> Upload Video (Max 30s)
+                            <div class="d-flex gap-2 align-items-center flex-wrap mb-2">
+                                <label for="videoDirectFileInput" class="btn btn-sm btn-outline-danger mb-0 d-inline-flex align-items-center gap-1" style="cursor: pointer; border-radius: 8px; font-size: 0.8rem; padding: 8px 14px; min-height: 44px; white-space: nowrap; flex-shrink: 0;">
+                                    <i class="bi bi-cloud-arrow-up-fill"></i> Upload Video (Auto-Trim to 30s)
                                 </label>
                                 <input type="file" id="videoDirectFileInput" accept="video/mp4,video/quicktime,video/webm" hidden>
                                 <span class="text-muted small">or paste video link below</span>
@@ -133,10 +133,54 @@
                                 <input type="url" id="postVideoInput" class="form-control form-control-sm" placeholder="Paste YouTube, Vimeo or Cloudflare Stream URL">
                             </div>
 
-                            <!-- 30-Second Rule Notification Banner -->
+                            <!-- 30-Second Rule & Auto-Trim Notification Banner -->
                             <div class="d-flex align-items-center gap-2 mt-2 px-2 py-1 rounded-2 bg-light-subtle border border-dashed border-secondary-subtle" style="font-size: 0.75rem;">
-                                <i class="bi bi-info-circle-fill text-danger"></i>
-                                <span class="text-secondary"><strong>Family Clip Rule:</strong> Direct video uploads are limited to a maximum of <strong>30 seconds</strong>.</span>
+                                <i class="bi bi-scissors text-danger"></i>
+                                <span class="text-secondary"><strong>Smart 30-Second Auto-Trim:</strong> Videos longer than 30 seconds can be automatically trimmed to a <strong>30-second</strong> family highlight clip on request.</span>
+                            </div>
+
+                            <!-- Interactive On-Demand Video Auto-Trim Studio -->
+                            <div id="videoAutoTrimStudio" class="d-none mt-3 p-3 rounded-3 border" style="background: #0f172a; color: #f8fafc; border-color: rgba(248, 250, 252, 0.16) !important;">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                                    <div class="d-flex align-items-center gap-1.5">
+                                        <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background-color: #a31621; color: #ffffff; font-size: 0.72rem;">
+                                            <i class="bi bi-scissors me-1"></i> Auto-Trim Studio
+                                        </span>
+                                        <span id="videoTrimMetaBadge" class="small" style="color: #cbd5e1; font-size: 0.75rem;">Select 30s highlight window</span>
+                                    </div>
+                                    <span id="videoTrimDurationBadge" class="badge rounded-pill bg-success text-white px-2.5 py-1" style="font-size: 0.72rem;">
+                                        Clip: 30.0s
+                                    </span>
+                                </div>
+
+                                <div class="ratio ratio-16x9 rounded-3 overflow-hidden mb-2 border border-secondary border-opacity-25" style="max-height: 190px; background: #000000;">
+                                    <video id="videoTrimPreviewPlayer" playsinline muted controls preload="metadata" style="width: 100%; height: 100%; object-fit: contain; background: #000000;"></video>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center small mb-1" style="font-size: 0.75rem; color: #e2e8f0;">
+                                        <span>Start Time: <strong id="videoTrimStartLabel" style="color: #fbbf24;">0.0s</strong></span>
+                                        <span>End Time: <strong id="videoTrimEndLabel" style="color: #fbbf24;">30.0s</strong></span>
+                                    </div>
+                                    <label for="videoTrimStartRange" class="visually-hidden">Trim Start Time (seconds)</label>
+                                    <input type="range" class="form-range mb-1" id="videoTrimStartRange" min="0" max="60" step="0.5" value="0">
+                                    <label for="videoTrimEndRange" class="visually-hidden">Trim End Time (seconds)</label>
+                                    <input type="range" class="form-range" id="videoTrimEndRange" min="1" max="30" step="0.5" value="30">
+                                    <div class="small" style="font-size: 0.72rem; color: #94a3b8;">
+                                        Drag sliders to customise your 30-second clip window, or tap Auto-Trim below.
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-2 flex-wrap mt-2 pt-2 border-top border-secondary border-opacity-25">
+                                    <button type="button" id="btnConfirmAutoTrim" class="btn btn-sm fw-bold rounded-pill px-3 py-2 d-inline-flex align-items-center gap-1.5 shadow-sm" style="background-color: #a31621; color: #ffffff !important; border: none; min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;">
+                                        <i class="bi bi-scissors"></i>
+                                        <span id="btnConfirmAutoTrimLabel">Auto-Trim to 30s &amp; Attach</span>
+                                    </button>
+                                    <button type="button" id="btnQuickTrimFirst30" class="btn btn-sm btn-outline-light rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1" style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0; font-size: 0.78rem;">
+                                        <i class="bi bi-lightning-charge-fill text-warning"></i>
+                                        <span>First 30s (0:00–0:30)</span>
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Dynamic Video Retention Expiration Control -->
@@ -158,7 +202,7 @@
                             
                             <div id="videoUploadProgressWrapper" class="d-none mt-2">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <small id="videoUploadStatus" class="text-danger fw-semibold" style="font-size: 0.75rem;">Uploading directly to Cloudflare...</small>
+                                    <small id="videoUploadStatus" class="text-danger fw-semibold" style="font-size: 0.75rem;">Optimising and uploading video clip...</small>
                                     <small id="videoUploadPercent" class="text-muted fw-bold" style="font-size: 0.75rem;">0%</small>
                                 </div>
                                 <div class="progress" style="height: 6px; border-radius: 4px;">

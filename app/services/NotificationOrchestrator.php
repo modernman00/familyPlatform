@@ -184,4 +184,110 @@ final class NotificationOrchestrator
     {
         return CentralOrchestrator::recordTelemetry($notificationId, $event, $clientMeta);
     }
+
+    /**
+     * Dispatch a notification with smart 3-minute (180s) tag coalescing.
+     *
+     * @param string $userId
+     * @param string $category
+     * @param string $priority
+     * @param string $title
+     * @param string $body
+     * @param string $actionUrl
+     * @param string $tag
+     * @param string|null $familyCode
+     * @param array<string, mixed>|null $metadata
+     * @param int $coalesceWindowSeconds
+     * @return string
+     */
+    public static function dispatchCoalesced(
+        string $userId,
+        string $category,
+        string $priority,
+        string $title,
+        string $body,
+        string $actionUrl = '/profilePage',
+        string $tag = 'general',
+        ?string $familyCode = null,
+        ?array $metadata = null,
+        int $coalesceWindowSeconds = 180
+    ): string {
+        $meta = $metadata ?? [];
+        $meta['coalesce'] = true;
+        $meta['coalesce_window_seconds'] = $coalesceWindowSeconds;
+
+        return self::dispatch(
+            userId: $userId,
+            category: $category,
+            priority: $priority,
+            title: $title,
+            body: $body,
+            actionUrl: $actionUrl,
+            tag: $tag,
+            familyCode: $familyCode,
+            metadata: $meta
+        );
+    }
+
+    /**
+     * Non-blocking asynchronous dispatch via PHP shutdown function.
+     *
+     * @param string $userId
+     * @param string $category
+     * @param string $priority
+     * @param string $title
+     * @param string $body
+     * @param string $actionUrl
+     * @param string $tag
+     * @param string|null $familyCode
+     * @param array<string, mixed>|null $metadata
+     * @return void
+     */
+    public static function dispatchAsync(
+        string $userId,
+        string $category,
+        string $priority,
+        string $title,
+        string $body,
+        string $actionUrl = '/profilePage',
+        string $tag = 'general',
+        ?string $familyCode = null,
+        ?array $metadata = null
+    ): void {
+        $userId = trim($userId);
+        if ($userId === '') {
+            return;
+        }
+
+        register_shutdown_function(static function () use (
+            $userId,
+            $category,
+            $priority,
+            $title,
+            $body,
+            $actionUrl,
+            $tag,
+            $familyCode,
+            $metadata
+        ): void {
+            if (function_exists('fastcgi_finish_request')) {
+                @fastcgi_finish_request();
+            }
+            try {
+                self::dispatch(
+                    userId: $userId,
+                    category: $category,
+                    priority: $priority,
+                    title: $title,
+                    body: $body,
+                    actionUrl: $actionUrl,
+                    tag: $tag,
+                    familyCode: $familyCode,
+                    metadata: $metadata
+                );
+            } catch (\Throwable $e) {
+                error_log('[NotificationOrchestrator] dispatchAsync error: ' . $e->getMessage());
+            }
+        });
+    }
 }

@@ -164,13 +164,103 @@ try {
         throw new \RuntimeException('Post number was not linked to custom game.');
     }
 
-    $feedStmt = $db->prepare("SELECT postMessage FROM post WHERE post_no = ?");
+    $feedStmt = $db->prepare("SELECT postMessage, post_status FROM post WHERE post_no = ?");
     $feedStmt->execute([$postNo]);
-    $feedMessage = (string)$feedStmt->fetchColumn();
+    $postRow = $feedStmt->fetch(\PDO::FETCH_ASSOC);
+    $feedMessage = (string)($postRow['postMessage'] ?? '');
+    $postStatus = (string)($postRow['post_status'] ?? '');
     if (strpos($feedMessage, 'Two Truths & a Lie') === false) {
         throw new \RuntimeException('Post message does not announce Two Truths & a Lie game.');
     }
-    echo "  ✅ PASSED: Custom game challenge created and announced on family feed (Post #{$postNo}).\n";
+    if ($postStatus !== 'published') {
+        throw new \RuntimeException("Post status must be 'published' to appear in family feed, got '{$postStatus}'");
+    }
+
+    // Verify FeedRepository returns the post for the family
+    $feedRepo = new \App\repository\FeedRepository();
+    $familyPosts = $feedRepo->getFeedPosts($authorId, [$testFamCode], 5, 0);
+    $foundInFeed = false;
+    foreach ($familyPosts as $fp) {
+        if ($fp->postNo === $postNo) {
+            $foundInFeed = true;
+            break;
+        }
+    }
+    if (!$foundInFeed) {
+        throw new \RuntimeException("Post #{$postNo} was not returned by FeedRepository for family {$testFamCode}!");
+    }
+
+    // Playable-in-feed contract: the feed row must carry a masked two_truths payload
+    foreach ($familyPosts as $fp) {
+        if ($fp->postNo !== $postNo) {
+            continue;
+        }
+        $tt = $fp->toArray()['two_truths'] ?? null;
+        if (!is_array($tt) || ($tt['id'] ?? '') !== $newGameId) {
+            throw new \RuntimeException('Feed post is missing its hydrated two_truths game payload.');
+        }
+        if (isset($tt['lie_index']) || isset($tt['reveal_story_1'])) {
+            throw new \RuntimeException('SECURITY BREACH: lie_index leaked in feed payload!');
+        }
+        if (empty($tt['is_author'])) {
+            throw new \RuntimeException('Author flag not set on feed payload for the creator.');
+        }
+    }
+    // A different family member sees an unvoted, playable card with hidden results
+    $viewerFeed = TwoTruthsGameService::getGamesForPosts([$postNo], $voterId1);
+    $vt = $viewerFeed[$postNo] ?? null;
+    if (!$vt || $vt['has_voted'] || $vt['vote_percentages'] !== null || isset($vt['lie_index'])) {
+        throw new \RuntimeException('Viewer feed payload must be unvoted with hidden results and no lie_index.');
+    }
+    // Voting returns live percentages for in-feed result bars
+    $feedVote = TwoTruthsGameService::castVote($newGameId, $testFamCode, $voterId1, 'Cousin Sarah', 2);
+    if (($feedVote['status'] ?? '') !== 'success' || !isset($feedVote['vote_percentages'][2]) || $feedVote['vote_percentages'][2] !== 100) {
+        throw new \RuntimeException('castVote must return vote_percentages for the feed result bars.');
+    }
+    echo "  ✅ PASSED: Custom game challenge created, announced with status 'published', and verified visible in family feed (Post #{$postNo}).\n";
+
+    // [TEST 6] Controller CSRF & Header Neutralization Gate
+    echo "[TEST 6] Verifying CSRF token validation and X-CSRF-TOKEN / JSON payload handling...\n";
+    $_SESSION['token'] = bin2hex(random_bytes(16));
+    $validToken = $_SESSION['token'];
+
+    // 6a. Missing/Empty CSRF token must throw UnauthorisedException
+    $rejected = false;
+    try {
+        \App\controller\BaseController::validateCsrf([]);
+    } catch (\Src\Exceptions\UnauthorisedException $e) {
+        $rejected = true;
+    }
+    if (!$rejected) {
+        throw new \RuntimeException('SECURITY BREACH: Empty payload failed to throw UnauthorisedException!');
+    }
+
+    // 6b. Forged CSRF token must throw UnauthorisedException
+    $forgedRejected = false;
+    try {
+        \App\controller\BaseController::validateCsrf(['token' => 'forged_token_val']);
+    } catch (\Src\Exceptions\UnauthorisedException $e) {
+        $forgedRejected = true;
+    }
+    if (!$forgedRejected) {
+        throw new \RuntimeException('SECURITY BREACH: Forged CSRF token failed to throw UnauthorisedException!');
+    }
+
+    // 6c. Valid token in JSON payload must succeed
+    \App\controller\BaseController::validateCsrf(['token' => $validToken]);
+    \App\controller\BaseController::validateCsrf(['_token' => $validToken]);
+
+    // 6d. Valid token in HTTP_X_CSRF_TOKEN header must succeed
+    $_SERVER['HTTP_X_CSRF_TOKEN'] = $validToken;
+    \App\controller\BaseController::validateCsrf([]);
+    unset($_SERVER['HTTP_X_CSRF_TOKEN']);
+
+    // 6e. Valid token in HTTP_X_XSRF_TOKEN header must succeed
+    $_SERVER['HTTP_X_XSRF_TOKEN'] = $validToken;
+    \App\controller\BaseController::validateCsrf([]);
+    unset($_SERVER['HTTP_X_XSRF_TOKEN']);
+
+    echo "  ✅ PASSED: CSRF gate verified: forged/missing tokens blocked, X-CSRF-TOKEN & JSON tokens successfully validated.\n";
 
 } finally {
     // Teardown test records
@@ -191,5 +281,5 @@ try {
 }
 
 echo "=================================================================\n";
-echo "🏆 ALL 5 TWO TRUTHS & A LIE VERIFICATION TESTS PASSED CLEANLY!\n";
+echo "🏆 ALL 6 TWO TRUTHS & A LIE VERIFICATION TESTS PASSED CLEANLY!\n";
 echo "=================================================================\n";

@@ -72,7 +72,8 @@ final class ProfilePage extends ProcessImg
             $_SESSION['famCode'] = $data['famCode'];
             $_SESSION['currentTime'] = time();
 
-            $recentReels = \App\model\Reel::getReelsFeed($this->id, (string)($data['famCode'] ?? ''), 10, 0);
+            $recentReels = \App\model\Reel::getReelsFeed($this->id, (string)($data['famCode'] ?? ''), 30, 0);
+            $groupedReels = \App\model\Reel::groupReelsByCreator($recentReels);
             $suggestedKin = \App\services\KinshipEngineService::getSuggestedKin($this->id, 5);
             $radarSettings = \App\services\KinshipEngineService::getRadarSettings($this->id);
 
@@ -99,6 +100,7 @@ final class ProfilePage extends ProcessImg
                 'pendingFamilyRequests' => $data['pendingFamilyRequests'] ?? [],
                 'pendingMigrations' => $data['pendingMigrations'] ?? [],
                 'recentReels' => $recentReels,
+                'groupedReels' => $groupedReels,
                 'suggestedKin' => $suggestedKin,
                 'radarSettings' => $radarSettings,
                 'adulthoodGraduation' => $adulthoodGraduation

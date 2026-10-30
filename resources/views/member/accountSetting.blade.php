@@ -728,7 +728,7 @@
                     </div>
                     <div class="col-md-6" id="wedding_date_div">
                       <label class="form-label fw-bold">💍 Wedding Date / Anniversary</label>
-                      <input type="date" class="form-control" id="spouse_wedding_date" name="wedding_date" value="{{ $accountData['wedding_date'] ?? $accountData['marriage_date'] ?? '' }}" max="{{ date('Y-m-d') }}" style="min-height: 44px; border-radius: 8px;">
+                      <input type="date" class="form-control" id="spouse_wedding_date" name="wedding_date" value="{{ $accountData['wedding_date'] ?? $accountData['marriage_date'] ?? '' }}" max="{{ date('Y-m-d', strtotime('+1 year')) }}" style="min-height: 44px; border-radius: 8px;">
                       <small class="text-muted" style="font-size: 0.78rem;">Powers automated anniversary cards and milestone countdowns.</small>
                     </div>
                   </div>

@@ -22,6 +22,8 @@ resources/views/layouts/achive
 public/images/journals/*
 !public/images/journals/.gitkeep
 resources/images
+resources/videos/
+*.xlsx
 public/img/*
 !public/img/logo
 !public/img/family-hub-hero.jpg

@@ -301,7 +301,7 @@
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <div class="d-flex align-items-center gap-1.5">
                                     <span class="badge rounded-pill fw-bold" style="background: rgba(212, 175, 55, 0.15); color: #8c6d1f; border: 1px solid rgba(212, 175, 55, 0.4); font-size: 0.7rem;"><i class="bi bi-compass-fill text-warning me-1"></i> Concierge Scout</span>
-                                    <span class="fw-bold" style="font-size: 0.85rem; color: #0f172a;">Curated Family Outings</span>
+                                    <span class="fw-bold" style="font-size: 0.85rem; color: var(--text-color, #0f172a);">Curated Family Outings</span>
                                 </div>
                                 <span class="badge bg-light text-secondary border small" style="font-size: 0.65rem;">Grounded &amp; Monetised</span>
                             </div>

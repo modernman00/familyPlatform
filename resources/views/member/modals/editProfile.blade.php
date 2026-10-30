@@ -340,7 +340,7 @@
                                         <p class="text-muted small mb-2" style="font-size: 0.82rem; line-height: 1.4;">
                                             Add your wedding date so your family network can celebrate your anniversary milestones and send greetings every year.
                                         </p>
-                                        <input type="date" class="form-control" id="wedding_date" name="wedding_date" value="{{ $data['wedding_date'] ?? $data['marriage_date'] ?? '' }}" max="{{ date('Y-m-d') }}" style="min-height: 44px; border-radius: 8px;">
+                                        <input type="date" class="form-control" id="wedding_date" name="wedding_date" value="{{ $data['wedding_date'] ?? $data['marriage_date'] ?? '' }}" max="{{ date('Y-m-d', strtotime('+1 year')) }}" style="min-height: 44px; border-radius: 8px;">
                                         <small id="wedding_date_error" class="text-danger ps-2 small"></small>
                                     </div>
                                 </div>

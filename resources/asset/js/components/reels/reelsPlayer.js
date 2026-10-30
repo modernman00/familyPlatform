@@ -484,9 +484,9 @@ class FamilyReelsPlayer {
 
         const initialFitClass = (aspectRatio === '16:9' || aspectRatio === 'cinema') ? 'fit-cinema' : '';
 
-        // Direct HTML5 Video File (MP4, WebM, MOV, server uploads)
+        // Direct HTML5 Video File (MP4, WebM, MOV, server uploads) - no 'loop' attribute so 'ended' fires for continuous autoplay
         return `
-        <video class="reel-video-element ${initialFitClass}" id="reelActiveVideo" playsinline webkit-playsinline loop preload="auto" ${this.isMuted ? 'muted' : ''} autoplay>
+        <video class="reel-video-element ${initialFitClass}" id="reelActiveVideo" playsinline webkit-playsinline preload="auto" ${this.isMuted ? 'muted' : ''} autoplay>
             <source src="${esc(trimmed)}" type="video/mp4">
             <source src="${esc(trimmed)}" type="video/webm">
             Your browser does not support HTML5 video.
@@ -531,10 +531,37 @@ class FamilyReelsPlayer {
         const mediaHtml = this.getMediaEmbed(reel.video_url, reel.aspect_ratio || '9:16');
         const isOwner = this.currentUserId && String(reel.user_id) === String(this.currentUserId);
         const totalReels = this.reels.length;
-        const posLabel = `${this.currentIndex + 1} / ${totalReels}`;
+
+        // Author grouping for Instagram-style multi-segment progress & consecutive moments
+        const currentAuthorId = String(reel.user_id || '');
+        const authorReels = this.reels.filter(r => String(r.user_id || '') === currentAuthorId);
+        const currentAuthorIndex = Math.max(0, authorReels.findIndex(r => String(r.id) === String(reel.id)));
+        const authorReelsCount = authorReels.length;
+        const posLabel = authorReelsCount > 1 
+            ? `${currentAuthorIndex + 1} of ${authorReelsCount} moments`
+            : `${this.currentIndex + 1} / ${totalReels}`;
+
+        let segmentsHtml = '';
+        if (authorReelsCount > 1) {
+            segmentsHtml = `
+            <div class="reel-progress-segments-container" id="reelProgressSegments" aria-label="Moments progress">
+                ${authorReels.map((_, idx) => {
+                    let fillClass = '';
+                    if (idx < currentAuthorIndex) fillClass = 'is-past';
+                    else if (idx > currentAuthorIndex) fillClass = 'is-future';
+                    return `
+                    <div class="reel-progress-segment-track" data-segment-idx="${idx}">
+                        <div class="reel-progress-segment-fill ${fillClass}" id="segmentFill_${idx}"></div>
+                    </div>`;
+                }).join('')}
+            </div>`;
+        }
 
         this.viewport.innerHTML = `
         <div class="reel-card-container" id="activeReelCard">
+            <!-- Instagram-Style Multi-Segment Progress Bars (Grouped Author Moments) -->
+            ${segmentsHtml}
+
             <!-- Ambient Blurred Backdrop for Cinema Mode (Landscape 16:9 Videos) -->
             <div class="reel-ambient-backdrop" id="reelAmbientBackdrop" style="background-image: url('${ambientThumbUrl}');"></div>
 
@@ -809,11 +836,42 @@ class FamilyReelsPlayer {
                 video.play().catch(console.error);
             });
 
-            // Progress Scrubber Update
+            // Progress Scrubber Update (Single + Multi-Segment Instagram Bars) & Continuous Autoplay Fallback
+            let autoAdvanced = false;
             video.addEventListener('timeupdate', () => {
-                if (progressFill && video.duration > 0) {
+                if (video.duration > 0) {
                     const pct = Math.min(100, Math.max(0, (video.currentTime / video.duration) * 100));
-                    progressFill.style.width = `${pct}%`;
+                    if (progressFill) {
+                        progressFill.style.width = `${pct}%`;
+                    }
+                    if (authorReelsCount > 1) {
+                        const activeSegment = document.getElementById(`segmentFill_${currentAuthorIndex}`);
+                        if (activeSegment) {
+                            activeSegment.style.width = `${pct}%`;
+                        }
+                    }
+
+                    // Autoplay threshold fallback if 'ended' event is delayed by edge mobile decoders
+                    if (!autoAdvanced && video.currentTime >= video.duration - 0.25 && video.duration > 1.5) {
+                        autoAdvanced = true;
+                        if (this.currentIndex < this.reels.length - 1) {
+                            this.nextReel();
+                        } else {
+                            this.showToast('You have reached the end of family reels!', 'info');
+                        }
+                    }
+                }
+            });
+
+            // Autoplay next reel till the end of the entire playlist when current reel finishes
+            video.addEventListener('ended', () => {
+                if (!autoAdvanced) {
+                    autoAdvanced = true;
+                    if (this.currentIndex < this.reels.length - 1) {
+                        this.nextReel();
+                    } else {
+                        this.showToast('You have reached the end of family reels!', 'info');
+                    }
                 }
             });
 
@@ -827,8 +885,20 @@ class FamilyReelsPlayer {
                 });
             }
 
-            // Tap on video to toggle play/pause
-            video.addEventListener('click', () => this.togglePlayPause());
+            // Tap navigation: Left 22% = Prev, Right 22% = Next, Center = Play/Pause
+            video.addEventListener('click', (e) => {
+                const rect = video.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const width = rect.width;
+
+                if (clickX < width * 0.22) {
+                    this.prevReel();
+                } else if (clickX > width * 0.78) {
+                    this.nextReel();
+                } else {
+                    this.togglePlayPause();
+                }
+            });
 
             // Desktop double-click to heart with pop animation
             video.addEventListener('dblclick', (e) => {

@@ -11,15 +11,34 @@ export const idInnerHTML = (id) => id(id).innerHTML
 export const warningSign = "\u26A0"; // danger warning sign
 
 /**
+ * Decodes HTML entities (e.g. &#039;, &#39;, &quot;, &amp;, &lt;, &gt;)
+ * and unrolls double-encoded entity prefixes (&amp;#039; -> &#039; -> ').
+ * @param {*} value
+ * @returns {string}
+ */
+export const decodeHtml = (value) => {
+    if (value === null || value === undefined) return '';
+    let decoded = String(value).replace(/&amp;(#\d+|#x[0-9a-f]+|[a-z]+);/gi, '&$1;');
+    return decoded
+        .replace(/&(?:#0*39|#x0*27|apos);/gi, "'")
+        .replace(/&(?:#0*34|#x0*22|quot);/gi, '"')
+        .replace(/&(?:#0*60|#x0*3c|lt);/gi, '<')
+        .replace(/&(?:#0*62|#x0*3e|gt);/gi, '>')
+        .replace(/&(?:#0*38|#x0*26|amp);/gi, '&');
+};
+
+/**
  * Escape a value for safe interpolation into an HTML template string.
  * Use this on every user-controlled field (names, bios, occupations, free text)
  * that ends up in an `.innerHTML = ` assignment \u2014 SEC-2.
+ * Decodes existing entities first so pre-encoded strings never double-encode.
  * @param {*} value
  * @returns {string}
  */
 export const esc = (value) => {
     if (value === null || value === undefined) return '';
-    return String(value)
+    const clean = decodeHtml(value);
+    return clean
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')

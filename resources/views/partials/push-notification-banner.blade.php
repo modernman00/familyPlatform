@@ -48,6 +48,37 @@
 
     const DISMISS_KEY = 'fp_push_banner_dismissed';
     const SUBSCRIBED_KEY = 'fp_push_subscribed';
+    const DISMISS_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000; // 3 days (72 hours)
+
+    function isDismissedWithinCooldown() {
+        try {
+            const raw = localStorage.getItem(DISMISS_KEY);
+            if (!raw) return false;
+            if (raw === 'true') {
+                // Migrate legacy boolean dismissal to a 3-day timestamp window
+                localStorage.setItem(DISMISS_KEY, String(Date.now()));
+                return true;
+            }
+            const dismissedAt = parseInt(raw, 10);
+            if (isNaN(dismissedAt) || dismissedAt <= 0) {
+                localStorage.removeItem(DISMISS_KEY);
+                return false;
+            }
+            if ((Date.now() - dismissedAt) < DISMISS_COOLDOWN_MS) {
+                return true;
+            }
+            localStorage.removeItem(DISMISS_KEY);
+            return false;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function recordDismissal() {
+        try {
+            localStorage.setItem(DISMISS_KEY, String(Date.now()));
+        } catch (e) {}
+    }
 
     const isIos = function() {
         const userAgent = window.navigator.userAgent.toLowerCase();
@@ -128,6 +159,38 @@
         });
     };
 
+    function withTimeout(promise, ms, timeoutMessage) {
+        return new Promise(function(resolve, reject) {
+            const timer = setTimeout(function() {
+                reject(new Error(timeoutMessage || 'Operation timed out'));
+            }, ms);
+            Promise.resolve(promise).then(
+                function(val) { clearTimeout(timer); resolve(val); },
+                function(err) { clearTimeout(timer); reject(err); }
+            );
+        });
+    }
+
+    function ensureServiceWorkerReady() {
+        if (!('serviceWorker' in navigator)) {
+            return Promise.reject(new Error('Service Workers are not supported in this browser.'));
+        }
+
+        return navigator.serviceWorker.getRegistration('/').then(function(reg) {
+            if (reg) return reg;
+            return navigator.serviceWorker.register('/sw.js', { scope: '/' });
+        }).then(function(reg) {
+            if (reg && reg.active) {
+                return reg;
+            }
+            return withTimeout(
+                navigator.serviceWorker.ready,
+                8000,
+                'Service Worker activation timed out. Please reload the page and try again.'
+            );
+        });
+    }
+
     window.subscribeUserToPush = function() {
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
             return Promise.reject(new Error('Push not supported'));
@@ -139,13 +202,41 @@
             return Promise.reject(new Error('VAPID key missing'));
         }
 
-        return navigator.serviceWorker.ready.then(function(registration) {
-            return registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(vapidKey)
+        return ensureServiceWorkerReady().then(function(registration) {
+            return registration.pushManager.getSubscription().then(function(existingSub) {
+                if (existingSub) {
+                    return existingSub;
+                }
+                const subscribePromise = registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(vapidKey)
+                }).catch(function(subErr) {
+                    // If a stale subscription with an old VAPID key exists, unsubscribe and retry once
+                    if (subErr && subErr.name === 'InvalidStateError') {
+                        return registration.pushManager.getSubscription().then(function(oldSub) {
+                            return oldSub ? oldSub.unsubscribe() : null;
+                        }).then(function() {
+                            return registration.pushManager.subscribe({
+                                userVisibleOnly: true,
+                                applicationServerKey: urlBase64ToUint8Array(vapidKey)
+                            });
+                        });
+                    }
+                    throw subErr;
+                });
+
+                return withTimeout(
+                    subscribePromise,
+                    10000,
+                    'Push service connection timed out. Check your internet connection or browser push settings (e.g., enable "Use Google services for push messaging" if using Brave).'
+                );
             });
         }).then(function(subscription) {
-            return window.sendSubscriptionToBackEnd(subscription);
+            return withTimeout(
+                window.sendSubscriptionToBackEnd(subscription),
+                8000,
+                'Server subscription sync timed out.'
+            );
         });
     };
 
@@ -157,14 +248,28 @@
             return Promise.reject(new Error('Permission previously denied by user'));
         }
 
-        return new Promise(function(resolve, reject) {
-            const permissionResult = Notification.requestPermission(function(result) {
-                resolve(result);
-            });
-            if (permissionResult) {
-                permissionResult.then(resolve, reject);
+        if (typeof window.Notification !== 'undefined' && Notification.permission === 'granted') {
+            return window.subscribeUserToPush();
+        }
+
+        const permissionPromise = new Promise(function(resolve, reject) {
+            try {
+                const permissionResult = Notification.requestPermission(function(result) {
+                    resolve(result);
+                });
+                if (permissionResult && typeof permissionResult.then === 'function') {
+                    permissionResult.then(resolve, reject);
+                }
+            } catch (err) {
+                reject(err);
             }
-        }).then(function(permissionResult) {
+        });
+
+        return withTimeout(
+            permissionPromise,
+            20000,
+            'Notification permission prompt was not answered. Please check the bell/lock icon in your browser address bar.'
+        ).then(function(permissionResult) {
             if (permissionResult !== 'granted') {
                 throw new Error('Permission not granted');
             }
@@ -228,7 +333,7 @@
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
         retryCount = retryCount || 0;
 
-        navigator.serviceWorker.ready.then(function(registration) {
+        ensureServiceWorkerReady().then(function(registration) {
             return registration.pushManager.getSubscription().then(function(existingSub) {
                 if (existingSub) {
                     return window.sendSubscriptionToBackEnd(existingSub);
@@ -242,7 +347,7 @@
             }
         }).catch(function(err) {
             console.warn('[Push] Auto-enrollment error, will retry:', err);
-            if (retryCount < 3) {
+            if (retryCount < 2) {
                 setTimeout(function() { forceEnsurePushSubscription(retryCount + 1); }, 3000);
             }
         });
@@ -272,7 +377,7 @@
 
         const dismissAction = function() {
             hideBanner(banner);
-            localStorage.setItem(DISMISS_KEY, 'true');
+            recordDismissal();
         };
 
         if (closeBtn) closeBtn.addEventListener('click', dismissAction);
@@ -280,9 +385,9 @@
 
         // 3. Inside the installed PWA:
         // Prompt if permission is 'default' so the installed app gets enrolled!
-        // Respect prior dismissal if user clicked 'Not Now'.
+        // Respect prior dismissal within the 3-day (72-hour) cooldown window if user clicked 'Not Now'.
         if (isStandalone) {
-            if (localStorage.getItem(DISMISS_KEY) === 'true') {
+            if (isDismissedWithinCooldown()) {
                 return;
             }
 
@@ -298,7 +403,7 @@
         } else {
             // For standard browser visitors:
             if (isIos()) {
-                if (localStorage.getItem(DISMISS_KEY) === 'true') return;
+                if (isDismissedWithinCooldown()) return;
 
                 const titleEl = banner.querySelector('.push-banner-title');
                 const textEl = banner.querySelector('.push-banner-text');
@@ -327,7 +432,7 @@
                 return;
             }
 
-            if (localStorage.getItem(DISMISS_KEY) === 'true') {
+            if (isDismissedWithinCooldown()) {
                 return;
             }
             if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
@@ -368,11 +473,26 @@
                 console.warn('[Push] Permission or subscription rejected:', err);
                 enableBtn.disabled = false;
                 enableBtn.innerHTML = '<i class="bi bi-bell-fill me-1.5"></i> Enable Notifications';
-                if (Notification.permission === 'denied') {
+                if (typeof window.Notification !== 'undefined' && Notification.permission === 'denied') {
                     dismissAction();
                     if (typeof window.showPushPermissionRecovery === 'function') {
                         window.showPushPermissionRecovery();
                     }
+                    return;
+                }
+                const errMsg = (err && err.message) ? String(err.message) : 'Could not activate push notifications.';
+                const isSslError = /ssl|certificate|SecurityError/i.test(errMsg) || (err && err.name === 'SecurityError');
+                const friendlyText = isSslError
+                    ? 'Your browser blocked the background Service Worker because the HTTPS certificate on this domain (' + window.location.hostname + ') is not trusted in your system Keychain. Trust the local root certificate and reload.'
+                    : errMsg;
+
+                if (window.Swal) {
+                    window.Swal.fire({
+                        icon: 'warning',
+                        title: 'Could Not Activate Alerts',
+                        text: friendlyText,
+                        confirmButtonColor: '#a31621'
+                    });
                 }
             });
         });

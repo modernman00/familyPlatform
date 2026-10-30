@@ -667,7 +667,7 @@ body.dark-mode .notif-item-desc {
 }
 
 body.dark-mode .notif-item-time {
-  color: #64748b !important;
+  color: #cbd5e1 !important;
 }
 
 body.dark-mode .notif-footer-stitch {
@@ -691,12 +691,18 @@ body.dark-mode .dropdown-menu {
   border-color: #334155 !important;
   color: #f8fafc !important;
 }
-body.dark-mode .dropdown-item {
+body.dark-mode .dropdown-item:not(.text-danger) {
   color: #cbd5e1 !important;
+}
+body.dark-mode .dropdown-item.text-danger {
+  color: #f87171 !important;
 }
 body.dark-mode .dropdown-item:hover {
   background: #334155 !important;
   color: #ffffff !important;
+}
+body.dark-mode #mainNavbar #themeStatusBadge.bg-warning {
+  color: #0f172a !important;
 }
 body.dark-mode .dropdown-divider {
   border-color: #334155 !important;

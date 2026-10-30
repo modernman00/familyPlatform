@@ -8,38 +8,151 @@
     0% { box-shadow: 0 0 0 4px rgba(163,22,33, 0.65); }
     100% { box-shadow: 0 0 0 0 rgba(163,22,33, 0); }
   }
+
+  /* Wedding Anniversary Prompt Banner - Light Mode Default */
+  .wedding-anniversary-prompt-card {
+    border-radius: 18px !important;
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%) !important;
+    border: 1.5px solid #f59e0b !important;
+    overflow: hidden;
+  }
+  .wedding-anniversary-prompt-card .anniversary-icon-circle {
+    width: 52px;
+    height: 52px;
+    background: #ffffff !important;
+    color: #b8202c !important;
+    font-size: 1.5rem;
+    border: 2px solid #fbbf24 !important;
+  }
+  .wedding-anniversary-prompt-card .anniversary-title {
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
+    color: #1e293b !important;
+  }
+  .wedding-anniversary-prompt-card .anniversary-desc {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: #334155 !important;
+  }
+  .wedding-anniversary-prompt-card .anniversary-date-input {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border: 1.5px solid #d97706 !important;
+    color-scheme: light;
+  }
+  .wedding-anniversary-prompt-card .anniversary-dismiss-btn {
+    color: #92400e !important;
+  }
+  .wedding-anniversary-prompt-card .anniversary-dismiss-btn:hover {
+    color: #78350f !important;
+    text-decoration: underline !important;
+  }
+
+  /* Wedding Anniversary Prompt Banner - Dark Mode (WCAG AA/AAA Guaranteed Contrast) */
+  body.dark-mode .wedding-anniversary-prompt-card,
+  body.dark-theme .wedding-anniversary-prompt-card,
+  [data-bs-theme="dark"] .wedding-anniversary-prompt-card,
+  html.dark .wedding-anniversary-prompt-card,
+  html.dark-mode .wedding-anniversary-prompt-card {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, #1e293b 65%, #1e293b 100%) !important;
+    background-color: #1e293b !important;
+    border: 1.5px solid rgba(245, 158, 11, 0.5) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45), 0 0 16px rgba(245, 158, 11, 0.12) !important;
+  }
+  body.dark-mode .wedding-anniversary-prompt-card .anniversary-icon-circle,
+  body.dark-theme .wedding-anniversary-prompt-card .anniversary-icon-circle,
+  [data-bs-theme="dark"] .wedding-anniversary-prompt-card .anniversary-icon-circle,
+  html.dark .wedding-anniversary-prompt-card .anniversary-icon-circle,
+  html.dark-mode .wedding-anniversary-prompt-card .anniversary-icon-circle {
+    background: rgba(245, 158, 11, 0.2) !important;
+    color: #fbbf24 !important;
+    border: 2px solid rgba(251, 191, 36, 0.65) !important;
+    box-shadow: 0 0 14px rgba(245, 158, 11, 0.25) !important;
+  }
+  body.dark-mode .wedding-anniversary-prompt-card .anniversary-title,
+  body.dark-theme .wedding-anniversary-prompt-card .anniversary-title,
+  [data-bs-theme="dark"] .wedding-anniversary-prompt-card .anniversary-title,
+  html.dark .wedding-anniversary-prompt-card .anniversary-title,
+  html.dark-mode .wedding-anniversary-prompt-card .anniversary-title {
+    color: #f8fafc !important;
+  }
+  body.dark-mode .wedding-anniversary-prompt-card .anniversary-desc,
+  body.dark-theme .wedding-anniversary-prompt-card .anniversary-desc,
+  [data-bs-theme="dark"] .wedding-anniversary-prompt-card .anniversary-desc,
+  html.dark .wedding-anniversary-prompt-card .anniversary-desc,
+  html.dark-mode .wedding-anniversary-prompt-card .anniversary-desc {
+    color: #cbd5e1 !important;
+  }
+  body.dark-mode .wedding-anniversary-prompt-card .anniversary-date-input,
+  body.dark-theme .wedding-anniversary-prompt-card .anniversary-date-input,
+  [data-bs-theme="dark"] .wedding-anniversary-prompt-card .anniversary-date-input,
+  html.dark .wedding-anniversary-prompt-card .anniversary-date-input,
+  html.dark-mode .wedding-anniversary-prompt-card .anniversary-date-input {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border: 1.5px solid rgba(245, 158, 11, 0.6) !important;
+    color-scheme: dark !important;
+  }
+  body.dark-mode .wedding-anniversary-prompt-card .anniversary-date-input::-webkit-calendar-picker-indicator,
+  body.dark-theme .wedding-anniversary-prompt-card .anniversary-date-input::-webkit-calendar-picker-indicator,
+  [data-bs-theme="dark"] .wedding-anniversary-prompt-card .anniversary-date-input::-webkit-calendar-picker-indicator,
+  html.dark .wedding-anniversary-prompt-card .anniversary-date-input::-webkit-calendar-picker-indicator,
+  html.dark-mode .wedding-anniversary-prompt-card .anniversary-date-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.85) !important;
+    cursor: pointer;
+  }
+  body.dark-mode .wedding-anniversary-prompt-card .anniversary-dismiss-btn,
+  body.dark-theme .wedding-anniversary-prompt-card .anniversary-dismiss-btn,
+  [data-bs-theme="dark"] .wedding-anniversary-prompt-card .anniversary-dismiss-btn,
+  html.dark .wedding-anniversary-prompt-card .anniversary-dismiss-btn,
+  html.dark-mode .wedding-anniversary-prompt-card .anniversary-dismiss-btn {
+    color: #94a3b8 !important;
+  }
+  body.dark-mode .wedding-anniversary-prompt-card .anniversary-dismiss-btn:hover,
+  body.dark-theme .wedding-anniversary-prompt-card .anniversary-dismiss-btn:hover,
+  [data-bs-theme="dark"] .wedding-anniversary-prompt-card .anniversary-dismiss-btn:hover,
+  html.dark .wedding-anniversary-prompt-card .anniversary-dismiss-btn:hover,
+  html.dark-mode .wedding-anniversary-prompt-card .anniversary-dismiss-btn:hover {
+    color: #f1f5f9 !important;
+  }
 </style>
 <div class="feed-column">
   <!-- Proactive Wedding Anniversary Prompt Banner (World-Class Milestone Onboarding) -->
   @if(!empty($data['needs_wedding_date_prompt']))
-  <div class="card mb-4 border-0 shadow-sm" id="weddingAnniversaryPromptCard" style="border-radius: 18px; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%); border: 1.5px solid #f59e0b !important; overflow: hidden;">
+  <div class="card mb-4 border-0 shadow-sm wedding-anniversary-prompt-card" id="weddingAnniversaryPromptCard">
     <div class="card-body p-4">
       <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
         <div class="d-flex align-items-start gap-3">
-          <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 52px; height: 52px; background: #ffffff; color: #b8202c; font-size: 1.5rem; border: 2px solid #fbbf24;">
+          <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0 anniversary-icon-circle">
             💍
           </div>
           <div>
             <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-              <h6 class="fw-bold mb-0 text-dark" style="font-size: 1.05rem; letter-spacing: -0.01em;">
+              <h6 class="fw-bold mb-0 anniversary-title">
                 Celebrate Your Marriage & Special Day
               </h6>
               <span class="badge bg-danger text-white px-2 py-0.5 rounded-pill" style="font-size: 0.68rem; letter-spacing: 0.04em;">
                 ANNIVERSARY MILESTONES
               </span>
             </div>
-            <p class="mb-3 text-dark" style="font-size: 0.88rem; line-height: 1.5; opacity: 0.9;">
+            <p class="mb-3 anniversary-desc">
               We noticed you are married! When is your wedding anniversary? Add your special date so your family network can celebrate your milestones, send personalised wishes, and receive memorable flashbacks every year.
             </p>
             <div class="d-flex align-items-center gap-2 flex-wrap">
-              <div class="d-flex align-items-center gap-2">
-                <label for="bannerWeddingDate" class="visually-hidden">Wedding Date</label>
-                <input type="date" 
-                       id="bannerWeddingDate" 
-                       name="banner_wedding_date" 
-                       max="{{ date('Y-m-d') }}" 
-                       class="form-control" 
-                       style="max-width: 185px; min-height: 44px; border-radius: 10px; border: 1.5px solid #d97706; background-color: #ffffff; color: #1e293b; font-weight: 500;">
+              <div class="d-flex align-items-start gap-2">
+                <div class="d-flex flex-column">
+                  <label for="bannerWeddingDate" class="visually-hidden">Wedding Date</label>
+                  <input type="date" 
+                         id="bannerWeddingDate" 
+                         name="banner_wedding_date" 
+                         max="{{ date('Y-m-d', strtotime('+1 year')) }}" 
+                         class="form-control anniversary-date-input" 
+                         style="max-width: 195px; min-height: 44px; border-radius: 10px; font-weight: 500;"
+                         placeholder="DD/MM/YYYY"
+                         aria-label="Wedding Date"
+                         aria-describedby="bannerAnniversaryHelp bannerAnniversaryError">
+                  <span id="bannerAnniversaryHelp" class="small text-muted mt-1" style="font-size: 0.76rem;">Select date or enter DD/MM/YYYY</span>
+                </div>
                 <button type="button" 
                         id="btnSaveBannerAnniversary" 
                         class="btn text-white fw-bold rounded-pill px-3 py-2 d-flex align-items-center gap-1 shadow-sm" 
@@ -51,7 +164,7 @@
                 </button>
               </div>
               <button type="button" 
-                      class="btn btn-link text-muted text-decoration-none small px-2 py-2" 
+                      class="btn btn-link text-decoration-none small px-2 py-2 anniversary-dismiss-btn" 
                       style="min-height: 44px; font-size: 0.82rem;" 
                       onclick="dismissAnniversaryBanner()">
                 Remind me later
@@ -89,9 +202,17 @@
       if (!input || !btn) return;
 
       var val = (input.value || '').trim();
+      if (!val && input.validity && input.validity.badInput) {
+        if (errBox) {
+          errBox.textContent = 'Please choose a valid wedding date from the calendar or enter as DD/MM/YYYY.';
+          errBox.style.display = 'block';
+        }
+        input.focus();
+        return;
+      }
       if (!val) {
         if (errBox) {
-          errBox.textContent = 'Please choose your wedding date to continue.';
+          errBox.textContent = 'Please select your wedding date from the calendar or enter DD/MM/YYYY to continue.';
           errBox.style.display = 'block';
         }
         input.focus();
@@ -143,7 +264,7 @@
             window.location.reload();
           }, 1200);
         } else {
-          var msg = res.message || 'Failed to save wedding anniversary. Please try again.';
+          var msg = res.message || 'Please enter a valid wedding date (e.g. DD/MM/YYYY or select from the calendar).';
           if (errBox) {
             errBox.textContent = msg;
             errBox.style.display = 'block';
@@ -629,6 +750,7 @@
           <!-- 3. Video -->
           <button type="button" class="btn composer-icon-btn shadow-xs"
                   data-bs-toggle="modal" data-bs-target="#postModal"
+                  onclick="setTimeout(function () { var vb = document.getElementById('addVideoBtn'); var vc = document.getElementById('videoEmbedContainer'); if (vc && vc.classList.contains('d-none') && vb) vb.click(); }, 120)"
                   title="Upload Video - Embed or share family video clips"
                   aria-label="{{ __('feed.video', 'Add a video to post') }}"
                   style="background: rgba(220, 38, 38, 0.1); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.2);">

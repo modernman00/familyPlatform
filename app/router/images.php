@@ -10,5 +10,8 @@ $router->map('GET', '/resources/images/post/[*:imgName]', 'App\controller\ServeI
 // Serve reel videos behind HTTP 206 streaming
 $router->map('GET', '/resources/videos/reels/[*:videoName]', 'App\controller\ServeImgController@StreamReel', 'serve_reel_video');
 
+// Serve post videos behind HTTP 206 streaming
+$router->map('GET', '/resources/videos/posts/[*:videoName]', 'App\controller\ServeImgController@StreamPostVideo', 'serve_post_video');
+
 // Serve reel thumbnails
 $router->map('GET', '/resources/images/reels/thumbs/[*:thumbName]', 'App\controller\ServeImgController@ReelThumb', 'serve_reel_thumb');

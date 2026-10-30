@@ -90,7 +90,7 @@
                     <img src="/images/logo/logo.png" alt="FamilyPlatform Logo" class="w-8 h-8 rounded-full border border-emerald-500/40 object-contain bg-white/10 p-0.5">
                     <div>
                         <h2 class="text-base font-bold text-white flex items-center gap-2">
-                            <span>Post as FamilyPlatform</span>
+                            <span>Post as {{ \App\services\FamilyPlatformAccountService::getAccountName() }}</span>
                             <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-semibold">
                                 <i class="fa-solid fa-badge-check text-[10px] mr-1"></i>Official Verified
                             </span>
@@ -217,7 +217,7 @@
                     <img src="/images/logo/logo.png" alt="Platform" class="w-10 h-10 rounded-full border border-gray-200 object-contain p-0.5 bg-gray-50">
                     <div>
                         <div class="flex items-center gap-1.5 flex-wrap">
-                            <h4 class="font-bold text-sm text-gray-900 leading-none">FamilyPlatform</h4>
+                            <h4 class="font-bold text-sm text-gray-900 leading-none">{{ \App\services\FamilyPlatformAccountService::getAccountName() }}</h4>
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white shadow-2xs" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%);">
                                 <i class="fa-solid fa-circle-check text-[9px]"></i>
                                 <span>Official Update</span>

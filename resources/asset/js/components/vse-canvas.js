@@ -121,13 +121,17 @@ class VisualSupremacyRuntime {
             entries.forEach((entry) => {
                 if (entry.isIntersecting) {
                     this.activeCards.add(entry.target);
+                    if (!this.reducedMotion && !this.isLowPowerMode) {
+                        entry.target.classList.add('is-living-active');
+                    }
                 } else {
                     this.activeCards.delete(entry.target);
+                    entry.target.classList.remove('is-living-active');
                     // Reset transform when scrolling out of viewport to save GPU compositing
                     this.resetCardTransform(entry.target);
                 }
             });
-        }, { threshold: 0.1 });
+        }, { threshold: 0.15 });
 
         // Auto-observe post-media-stage containers
         this.refreshObservedCards();
@@ -303,18 +307,21 @@ class VisualSupremacyRuntime {
 
     resetCardTransform(card) {
         if (!card) return;
-        const img = card.querySelector('.post-media-first-img');
+        const img = card.querySelector('.post-media-first-img') || card.querySelector('.living-canvas-img');
         if (img) {
             img.style.transform = '';
             img.style.willChange = 'auto';
-            img.style.transition = 'transform 0.3s ease-out';
+            img.style.transition = 'transform 0.4s ease-out';
         }
         card.style.removeProperty('--vse-glint-pos');
         card.classList.remove('has-glint');
     }
 
     resetTransforms() {
-        this.activeCards.forEach((card) => this.resetCardTransform(card));
+        this.activeCards.forEach((card) => {
+            card.classList.remove('is-living-active');
+            this.resetCardTransform(card);
+        });
         this.targetOrientation = { gamma: 0, beta: 0 };
         this.orientation = { gamma: 0, beta: 0 };
     }

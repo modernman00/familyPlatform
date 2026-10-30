@@ -53,6 +53,7 @@ final class PostDto implements JsonSerializable
         public readonly ?string $img,
         public readonly ?string $profileImg,
         public readonly ?array $poll = null,
+        public readonly ?array $twoTruths = null,
         public readonly array $reactions = [],
         public readonly ?array $linkPreview = null,
         public readonly array $postTags = [],
@@ -75,6 +76,11 @@ final class PostDto implements JsonSerializable
         $id = (string)($row['id'] ?? '');
         $fullName = (string)($row['fullName'] ?? ($row['fullname'] ?? 'Family Member'));
         $message = (string)($row['postMessage'] ?? ($row['content'] ?? ''));
+        if ($message !== '') {
+            $message = (string)preg_replace('/&amp;(#\d+|#x[0-9a-f]+|[a-z]+);/iu', '&$1;', $message);
+            $message = html_entity_decode($message, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $message = (string)preg_replace('/&(?:#?0*39|#x0*27|apos);/iu', "'", $message);
+        }
         $famCode = (string)($row['postFamCode'] ?? ($row['famCode'] ?? ''));
         $postLikes = max(0, (int)($row['post_likes'] ?? ($row['likes_count'] ?? 0)));
 
@@ -97,6 +103,9 @@ final class PostDto implements JsonSerializable
 
         /** @var array<string, mixed>|null $poll */
         $poll = isset($row['poll']) && is_array($row['poll']) ? $row['poll'] : null;
+
+        /** @var array<string, mixed>|null $twoTruths */
+        $twoTruths = isset($row['two_truths']) && is_array($row['two_truths']) ? $row['two_truths'] : null;
         
         /** @var array<int, mixed> $reactions */
         $reactions = isset($row['reactions']) && is_array($row['reactions']) ? array_values($row['reactions']) : [];
@@ -112,7 +121,7 @@ final class PostDto implements JsonSerializable
 
         $viewsCount = max(0, (int)($row['views_count'] ?? 0));
         $voiceCapsuleUrl = !empty($row['voice_capsule_url']) ? (string)$row['voice_capsule_url'] : null;
-        $isOfficialPost = ($id === \App\services\FamilyPlatformAccountService::ACCOUNT_ID) || !empty($row['is_official']);
+        $isOfficialPost = ($id === \App\services\FamilyPlatformAccountService::getAccountId()) || !empty($row['is_official']);
         if ($isOfficialPost && (empty($profileImg) || str_contains($profileImg, 'avatarM') || str_contains($profileImg, 'avatarF'))) {
             $profileImg = '/images/logo/logo.png';
         }
@@ -134,6 +143,7 @@ final class PostDto implements JsonSerializable
             img: $rawImg,
             profileImg: $profileImg,
             poll: $poll,
+            twoTruths: $twoTruths,
             reactions: $reactions,
             linkPreview: $linkPreview,
             postTags: $postTags,
@@ -170,6 +180,7 @@ final class PostDto implements JsonSerializable
         $arr['img'] = $this->img;
         $arr['profileImg'] = $this->profileImg;
         $arr['poll'] = $this->poll;
+        $arr['two_truths'] = $this->twoTruths;
         $arr['reactions'] = $this->reactions;
         $arr['link_preview'] = $this->linkPreview;
         $arr['post_tags'] = $this->postTags;

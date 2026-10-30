@@ -110,8 +110,23 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
     const rawSelectedFiles = Array.from(imageInput.files || []);
     if (!rawSelectedFiles.length) return;
 
+    // Route any video files selected via #imageUpload directly into the Video Auto-Trim & Upload Studio
+    const videoFiles = rawSelectedFiles.filter(f => (f.type && f.type.startsWith('video/')) || /\.(mp4|webm|mov|ogg)$/i.test(f.name || ''));
+    const imageOnlyFiles = rawSelectedFiles.filter(f => !videoFiles.includes(f));
+
+    if (videoFiles.length > 0 && typeof window.__handleComposerVideoFile === 'function') {
+      window.__handleComposerVideoFile(videoFiles[0]);
+    }
+
+    if (!imageOnlyFiles.length) {
+      if (accumulatedFiles.length === 0) {
+        imageInput.value = '';
+      }
+      return;
+    }
+
     // Check for raw file size limit (25MB max pre-compression limit)
-    const validRawFiles = rawSelectedFiles.filter(file => {
+    const validRawFiles = imageOnlyFiles.filter(file => {
       if (file.size > 25 * 1024 * 1024) {
         Swal.fire({
           icon: 'error',

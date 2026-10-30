@@ -58,6 +58,37 @@
             background: #374151;
             border-radius: 3px;
         }
+        /* 🛡️ Inviolable Admin Typography Invariant: Immunity to hardcoded dark inline text */
+        .w3-white, .w3-card, .w3-card-2, .w3-card-4, .w3-panel.w3-white {
+            background-color: #111827 !important;
+            color: #f3f4f6 !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
+        }
+        .w3-light-blue {
+            background-color: rgba(30, 58, 138, 0.25) !important;
+            color: #93c5fd !important;
+        }
+        .w3-light-grey {
+            background-color: #1f2937 !important;
+            color: #f3f4f6 !important;
+        }
+        .w3-table-all tr:nth-child(even) {
+            background-color: #111827 !important;
+        }
+        .w3-table-all tr:nth-child(odd) {
+            background-color: #0f172a !important;
+        }
+        .w3-table-all tr {
+            color: #f3f4f6 !important;
+            border-color: #374151 !important;
+        }
+        h1[style*="#1e293b"], h2[style*="#1e293b"], h3[style*="#1e293b"], h4[style*="#1e293b"], h5[style*="#1e293b"], h6[style*="#1e293b"],
+        p[style*="#1e293b"], span[style*="#1e293b"], div[style*="#1e293b"], ol[style*="#1e293b"],
+        h1[style*="#334155"], h2[style*="#334155"], h3[style*="#334155"], h4[style*="#334155"], h5[style*="#334155"], h6[style*="#334155"],
+        span[style*="#334155"], div[style*="#334155"],
+        h1[style*="#0f172a"], h2[style*="#0f172a"], h3[style*="#0f172a"], h4[style*="#0f172a"], h5[style*="#0f172a"], h6[style*="#0f172a"] {
+            color: #f3f4f6 !important;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#0b0f19] text-gray-100 antialiased selection:bg-emerald-500 selection:text-white">

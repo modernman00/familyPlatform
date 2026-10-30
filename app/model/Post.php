@@ -31,7 +31,13 @@ final class Post extends Select
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'comment', identifier1: "comment_no");
         $result = parent::selectFn2(query: $query, bind: [$commentNo]);
-        return $result[0] ?? [];
+        $row = $result[0] ?? [];
+        if (isset($row['comment']) && is_string($row['comment']) && $row['comment'] !== '') {
+            $row['comment'] = (string)preg_replace('/&amp;(#\d+|#x[0-9a-f]+|[a-z]+);/iu', '&$1;', $row['comment']);
+            $row['comment'] = html_entity_decode($row['comment'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $row['comment'] = (string)preg_replace('/&(?:#?0*39|#x0*27|apos);/iu', "'", $row['comment']);
+        }
+        return $row;
     }
 
 
@@ -141,7 +147,16 @@ final class Post extends Select
     static function getUnpublishedComment(): array
     {
         $query = "SELECT * FROM comment WHERE comment_status = ? ORDER BY comment_no DESC";
-        return parent::selectFn2(query: $query, bind: ["new"]);
+        $rows = parent::selectFn2(query: $query, bind: ["new"]);
+        foreach ($rows as &$row) {
+            if (isset($row['comment']) && is_string($row['comment']) && $row['comment'] !== '') {
+                $row['comment'] = (string)preg_replace('/&amp;(#\d+|#x[0-9a-f]+|[a-z]+);/iu', '&$1;', $row['comment']);
+                $row['comment'] = html_entity_decode($row['comment'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $row['comment'] = (string)preg_replace('/&(?:#?0*39|#x0*27|apos);/iu', "'", $row['comment']);
+            }
+        }
+        unset($row);
+        return $rows;
     }
 
     static function updatePostByStatusAsPublished($postNo): bool

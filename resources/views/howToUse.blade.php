@@ -601,6 +601,42 @@
           </div>
         </div>
 
+        <!-- Step 12: Smart Family Alerts & Instant Push Notifications -->
+        <div class="card border-0 shadow-sm mb-4 rounded-4 overflow-hidden">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center mb-3">
+              <span class="badge rounded-pill text-white px-3 py-2 me-3" style="background: #a31621;">Step 12</span>
+              <h2 class="h4 fw-bold mb-0 text-dark">Smart Family Alerts &amp; Bundled Notifications</h2>
+            </div>
+            <p class="lead text-secondary">
+              Stay connected to family milestones, birthdays, and new memories without notification fatigue.
+            </p>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge text-white mb-2" style="background: #a31621;">1-Tap Activation</span>
+                  <h6 class="fw-bold text-dark">Instant Lockscreen Alerts</h6>
+                  <p class="small text-muted mb-0">Tap <strong>Enable Notifications</strong> on the prompt banner or inside Account Settings to receive real-time updates on your phone or desktop.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge text-white mb-2" style="background: #0f766e;">3-Minute Smart Bundling</span>
+                  <h6 class="fw-bold text-dark">Calm, Grouped Updates</h6>
+                  <p class="small text-muted mb-0">When several relatives comment on the same family photo within minutes, alerts are automatically bundled into a single summary card so your phone does not buzz repeatedly.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge text-white mb-2" style="background: #334155;">3-Day Gentle Reminder</span>
+                  <h6 class="fw-bold text-dark">Flexible Opt-In</h6>
+                  <p class="small text-muted mb-0">If you tap <strong>Not Now</strong>, the banner stays hidden for 3 days before gently reminding you, and hides permanently once your device is subscribed.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Back to Organogram CTA -->
         <div class="text-center mt-5">
           <a href="/organogram" class="btn btn-lg fw-bold px-5 py-3 text-white shadow-sm" style="background: linear-gradient(135deg, #a31621 0%, #7a0e16 100%); border-radius: 50px;">

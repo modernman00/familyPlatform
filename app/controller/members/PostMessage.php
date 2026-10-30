@@ -575,6 +575,102 @@ final class PostMessage
     }
 
     /**
+     * Reposts one of the current user's own earlier posts to the live feed.
+     * Author-only (IDOR-safe), CSRF-protected, de-duplicated within 60 seconds.
+     */
+    public static function repostPost(int|string $postNo): void
+    {
+        try {
+            CheckToken::tokenCheck();
+
+            $userId = (string)($_SESSION['id'] ?? '');
+            if ($userId === '') {
+                throw new ForbiddenException('Please sign in to repost.');
+            }
+
+            $postNo = (int)$postNo;
+            $db = \Src\Db::connect2();
+
+            $stmt = $db->prepare(
+                "SELECT * FROM post WHERE post_no = ? AND date_deleted IS NULL AND post_status = 'published' LIMIT 1"
+            );
+            $stmt->execute([$postNo]);
+            $orig = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$orig) {
+                throw new ValidationException('That post could not be found.');
+            }
+            if ((string)($orig['id'] ?? '') !== $userId) {
+                throw new ForbiddenException('You can only repost your own earlier posts.');
+            }
+
+            // Always point at the root post so chains of reposts do not nest.
+            $rootNo = !empty($orig['repost_of_post_no']) ? (int)$orig['repost_of_post_no'] : $postNo;
+
+            $dupe = $db->prepare(
+                "SELECT 1 FROM post WHERE id = ? AND repost_of_post_no = ? AND date_created > (NOW() - INTERVAL 60 SECOND) LIMIT 1"
+            );
+            $dupe->execute([$userId, $rootNo]);
+            if ($dupe->fetchColumn()) {
+                throw new ValidationException('You have just reposted this. Please wait a minute before reposting again.');
+            }
+
+            $input = $_POST;
+            if (empty($input)) {
+                $decoded = json_decode((string)file_get_contents('php://input'), true);
+                $input = is_array($decoded) ? $decoded : [];
+            }
+            $reflection = \App\services\LinkPreviewService::sanitizePostMessage((string)($input['reflection_message'] ?? ''));
+
+            $famCode = (string)($orig['postFamCode'] ?? ($_SESSION['famCode'] ?? ''));
+            $message = $reflection !== '' ? $reflection : (string)($orig['postMessage'] ?? '');
+
+            $ins = $db->prepare(
+                "INSERT INTO post (id, fullName, postMessage, postFamCode, profileImg,
+                    post_img0, post_img1, post_img2, post_img3, post_img4, post_img5,
+                    post_time, post_status, repost_of_post_no, date_created)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'published', ?, CURRENT_TIMESTAMP)"
+            );
+            $ins->execute([
+                $userId,
+                (string)($orig['fullName'] ?? ''),
+                $message,
+                $famCode,
+                $orig['profileImg'] ?? null,
+                $orig['post_img0'] ?? null,
+                $orig['post_img1'] ?? null,
+                $orig['post_img2'] ?? null,
+                $orig['post_img3'] ?? null,
+                $orig['post_img4'] ?? null,
+                $orig['post_img5'] ?? null,
+                date('g:i a'),
+                $rootNo,
+            ]);
+            $newPostNo = (int)$db->lastInsertId();
+
+            try {
+                Pusher::broadcastToFamily($famCode, 'new-post', [[
+                    'post_no' => $newPostNo,
+                    'id' => $userId,
+                    'fullName' => (string)($orig['fullName'] ?? ''),
+                    'postMessage' => $message,
+                    'postFamCode' => $famCode,
+                    'post_img0' => $orig['post_img0'] ?? null,
+                    'repost_of_post_no' => $rootNo,
+                    'date_created' => date('Y-m-d H:i:s'),
+                ]]);
+            } catch (\Throwable $th) {
+                error_log('[PostMessage::repostPost pusher] ' . $th->getMessage());
+            }
+
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'success', 'message' => 'Post reposted', 'new_post_no' => $newPostNo]);
+        } catch (\Throwable $th) {
+            \showError($th);
+        }
+    }
+
+    /**
      * Updates a comment's status as published.
      * 
      * @param int $commentNo The comment number of the comment to update.

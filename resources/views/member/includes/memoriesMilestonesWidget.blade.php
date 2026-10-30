@@ -64,7 +64,7 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                                   style="background: linear-gradient(135deg, #a31621, #d97706); font-size: 0.74rem; white-space: nowrap;">
                                 <i class="bi bi-clock-history"></i> <span x-text="memories[0].years_ago_label"></span>
                             </span>
-                            <span class="badge bg-white bg-opacity-75 text-dark border px-2.5 py-1 rounded-pill small fw-semibold text-nowrap" style="font-size: 0.76rem;" x-text="memories[0].formatted_date"></span>
+                            <span class="badge rounded-pill small fw-semibold text-nowrap border px-2.5 py-1" style="font-size: 0.76rem; background-color: var(--card-bg, #ffffff); color: var(--text-color, #0f172a);" x-text="memories[0].formatted_date"></span>
                         </div>
 
                         <!-- Graphics-Rich Memory Media -->

@@ -2,6 +2,9 @@
     <!-- =========================================================
          Instagram Mirror: Mobile Stories Tray (< 768px Viewports)
          ========================================================= -->
+    @php
+        $effectiveCreatorGroups = $groupedReels ?? \App\model\Reel::groupReelsByCreator($recentReels ?? []);
+    @endphp
     <div class="ig-stories-tray d-md-none" id="igMobileStoriesTray">
         <div class="ig-stories-scroll">
             <!-- 1. Your Story / Add Moment (Instagram Self Avatar with Plus Badge) -->
@@ -17,22 +20,29 @@
                 <span class="ig-story-label">{{ __('feed.your_story', 'Your Story') }}</span>
             </div>
 
-            <!-- 2. Dynamic Family Stories Circles -->
-            @forelse(($recentReels ?? []) as $reelItem)
+            <!-- 2. Dynamic Family Stories Circles (Grouped by Creator - Instagram Standard) -->
+            @forelse($effectiveCreatorGroups as $creatorGroup)
                 @php
-                    $creatorAvatar = !empty($reelItem['profilePics']) ? (str_starts_with($reelItem['profilePics'], '/') ? $reelItem['profilePics'] : '/resources/images/profile/' . $reelItem['profilePics']) : '/resources/images/profile/avatarM.png';
-                    $creatorFirstName = ucwords(strtolower($reelItem['firstName'] ?? 'Family'));
-                    $isBirthday = strtolower($reelItem['category'] ?? '') === 'birthday';
+                    $creatorAvatar = !empty($creatorGroup['profilePics']) ? (str_starts_with($creatorGroup['profilePics'], '/') ? $creatorGroup['profilePics'] : '/resources/images/profile/' . $creatorGroup['profilePics']) : '/resources/images/profile/avatarM.png';
+                    $creatorFirstName = ucwords(strtolower($creatorGroup['firstName'] ?? 'Family'));
+                    $isBirthday = !empty($creatorGroup['is_birthday']);
+                    $reelsCount = (int)($creatorGroup['reels_count'] ?? 1);
+                    $firstReel = $creatorGroup['latest_reel'] ?? ($creatorGroup['reels'][0] ?? null);
+                    $firstReelId = (int)($firstReel['id'] ?? 0);
+                    $momentsLabel = $reelsCount > 1 ? "{$reelsCount} moments by {$creatorFirstName}" : "Story by {$creatorFirstName}";
                 @endphp
-                <a href="/reels?id={{ $reelItem['id'] }}" 
+                <a href="/reels?id={{ $firstReelId }}" 
                    class="ig-story-item"
-                   title="{{ !empty($reelItem['caption']) ? $reelItem['caption'] : $creatorFirstName . '\'s Story' }}">
+                   title="{{ $momentsLabel }}">
                     <div class="ig-story-avatar-wrap {{ $isBirthday ? 'is-gold' : 'is-active' }}">
                         <img src="{{ $creatorAvatar }}" 
                              alt="{{ $creatorFirstName }}" 
                              class="ig-story-avatar" 
                              loading="lazy" 
                              onerror="this.src='/resources/images/profile/avatarM.png'">
+                        @if($reelsCount > 1)
+                            <span class="ig-story-count-badge" title="{{ $reelsCount }} moments">{{ $reelsCount }}</span>
+                        @endif
                     </div>
                     <span class="ig-story-label">{{ $creatorFirstName }}</span>
                 </a>
@@ -102,13 +112,15 @@
                 </div>
             </div>
 
-        <!-- 2. Dynamic Video Cover Thumbnail Cards -->
-        @forelse(($recentReels ?? []) as $reelItem)
+        <!-- 2. Dynamic Video Cover Thumbnail Cards (Grouped by Creator - Instagram Standard) -->
+        @forelse($effectiveCreatorGroups as $creatorGroup)
             @php
-                $creatorAvatar = !empty($reelItem['profilePics']) ? (str_starts_with($reelItem['profilePics'], '/') ? $reelItem['profilePics'] : '/resources/images/profile/' . $reelItem['profilePics']) : '/resources/images/profile/avatarM.png';
+                $reelItem = $creatorGroup['latest_reel'] ?? ($creatorGroup['reels'][0] ?? []);
+                $reelsCount = (int)($creatorGroup['reels_count'] ?? 1);
+                $creatorAvatar = !empty($creatorGroup['profilePics']) ? (str_starts_with($creatorGroup['profilePics'], '/') ? $creatorGroup['profilePics'] : '/resources/images/profile/' . $creatorGroup['profilePics']) : '/resources/images/profile/avatarM.png';
                 $rawThumb = !empty($reelItem['thumbnail_url']) ? (string)$reelItem['thumbnail_url'] : '';
                 $coverThumb = (!empty($rawThumb) && !str_contains($rawThumb, 'placeholder.com')) ? $rawThumb : $creatorAvatar;
-                $creatorName = ucwords(strtolower($reelItem['firstName'] ?? 'Family'));
+                $creatorName = ucwords(strtolower($creatorGroup['firstName'] ?? 'Family'));
                 $tag = !empty($reelItem['category']) ? (string)$reelItem['category'] : 'Reel';
                 $tagSlug = strtolower($tag);
                 $videoUrl = !empty($reelItem['video_url']) ? (string)$reelItem['video_url'] : '';
@@ -117,17 +129,19 @@
                 $isLandscape = in_array($aspectRatio, ['16:9', 'cinema'], true);
                 $viewsCount = (int)($reelItem['views_count'] ?? 0);
                 $likesCount = (int)($reelItem['likes_count'] ?? 0);
-                $isOwner = isset($data['id']) && (string)$data['id'] === (string)($reelItem['user_id'] ?? '');
+                $isOwner = isset($data['id']) && (string)$data['id'] === (string)($creatorGroup['user_id'] ?? '');
+                $allCategories = implode(' ', array_map('strtolower', $creatorGroup['categories'] ?? [$tagSlug]));
             @endphp
             <a href="/reels?id={{ $reelItem['id'] }}"
-               class="reel-fb-card {{ $isLandscape ? 'is-landscape' : '' }}"
+               class="reel-fb-card {{ $isLandscape ? 'is-landscape' : '' }} {{ $reelsCount > 1 ? 'has-multiple-moments' : '' }}"
                data-reel-id="{{ $reelItem['id'] }}"
                data-reel-category="{{ $tagSlug }}"
+               data-reel-categories="{{ $allCategories }}"
                data-video-url="{{ $videoUrl }}"
                data-thumb-url="{{ $rawThumb }}"
                data-aspect="{{ $aspectRatio }}"
                data-is-owner="{{ $isOwner ? '1' : '0' }}"
-               title="{{ !empty($reelItem['caption']) ? $reelItem['caption'] : $creatorName . '\'s Family Reel' }}">
+               title="{{ !empty($reelItem['caption']) ? $reelItem['caption'] : $creatorName . '\'s Family Moments (' . $reelsCount . ')' }}">
 
                 <!-- Ambient Blurred Backdrop (prevents stretching or black bars on landscape 16:9 videos) -->
                 <div class="reel-fb-ambient-bg" style="background-image: url('{{ $coverThumb }}');"></div>
@@ -160,6 +174,11 @@
 
                 <!-- Top-Right Play / Activity Badge -->
                 <div class="reel-fb-play-badge">
+                    @if($reelsCount > 1)
+                        <span title="{{ $reelsCount }} moments by {{ $creatorName }}" class="badge rounded-pill bg-danger text-white border border-light me-1" style="font-size: 0.62rem; padding: 2px 6px;">
+                            <i class="bi bi-collection-play-fill me-1"></i>{{ $reelsCount }}
+                        </span>
+                    @endif
                     <span title="{{ $viewsCount }} views" class="d-inline-flex align-items-center gap-1">
                         <i class="bi bi-eye-fill text-info" style="font-size: 0.65rem;"></i>
                         <span>{{ $viewsCount }}</span>
@@ -178,6 +197,8 @@
                     <div class="reel-fb-creator">{{ $creatorName }}</div>
                     @if(!empty($reelItem['caption']))
                         <div class="reel-fb-caption-snippet">{{ $reelItem['caption'] }}</div>
+                    @elseif($reelsCount > 1)
+                        <div class="reel-fb-caption-snippet">{{ $reelsCount }} moments shared</div>
                     @endif
                 </div>
             </a>

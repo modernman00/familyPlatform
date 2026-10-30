@@ -97,6 +97,10 @@ return [
     // Profile & Kinship
     'profile.edit_profile' => 'Modifier le profil',
     'profile.family_code' => 'Code de famille',
+    'profile.family_code_headline' => 'Code de famille',
+    'profile.family_codes_headline' => 'Codes de famille',
+    'profile.married_code_short' => 'Marital',
+    'profile.birth_code_short' => 'Naissance',
     'profile.married_family_code' => 'Code marital',
     'profile.birth_family_code' => 'Code de naissance',
     'profile.family_codes' => 'Codes familiaux (marital et de naissance)',

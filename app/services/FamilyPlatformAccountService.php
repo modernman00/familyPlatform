@@ -36,55 +36,116 @@ class FamilyPlatformAccountService
     }
 
     /**
+     * Official account ID resolved dynamically from environment (OFFICIAL_ACCOUNT_ID).
+     */
+    public static function getAccountId(): string
+    {
+        $id = getenv('OFFICIAL_ACCOUNT_ID') ?: ($_ENV['OFFICIAL_ACCOUNT_ID'] ?? self::ACCOUNT_ID);
+        return trim((string)$id);
+    }
+
+    /**
+     * Official account email resolved dynamically from environment (OFFICIAL_ACCOUNT_EMAIL).
+     */
+    public static function getAccountEmail(): string
+    {
+        $email = getenv('OFFICIAL_ACCOUNT_EMAIL') ?: ($_ENV['OFFICIAL_ACCOUNT_EMAIL'] ?? self::ACCOUNT_EMAIL);
+        return trim((string)$email);
+    }
+
+    /**
+     * Official account display name resolved dynamically from environment (OFFICIAL_ACCOUNT_NAME).
+     */
+    public static function getAccountName(): string
+    {
+        $name = getenv('OFFICIAL_ACCOUNT_NAME') ?: ($_ENV['OFFICIAL_ACCOUNT_NAME'] ?? self::ACCOUNT_NAME);
+        return trim((string)$name);
+    }
+
+    /**
+     * First name component of the official account.
+     */
+    public static function getAccountFirstName(): string
+    {
+        $parts = explode(' ', self::getAccountName(), 2);
+        return $parts[0] !== '' ? $parts[0] : self::ACCOUNT_FIRST_NAME;
+    }
+
+    /**
+     * Last name component of the official account.
+     */
+    public static function getAccountLastName(): string
+    {
+        $parts = explode(' ', self::getAccountName(), 2);
+        return isset($parts[1]) && $parts[1] !== '' ? $parts[1] : self::ACCOUNT_LAST_NAME;
+    }
+
+    /**
      * Ensure the official FamilyPlatform account exists across account, personal, and profilePics.
      */
     public function ensureAccountExists(): void
     {
+        $accountId = self::getAccountId();
+        $accountEmail = self::getAccountEmail();
+        $firstName = self::getAccountFirstName();
+        $lastName = self::getAccountLastName();
+
         try {
             // 1. Account Table
             $stmtAcct = $this->db->prepare('SELECT id FROM account WHERE id = ? LIMIT 1');
-            $stmtAcct->execute([self::ACCOUNT_ID]);
+            $stmtAcct->execute([$accountId]);
             if (!$stmtAcct->fetchColumn()) {
                 $insAcct = $this->db->prepare(
                     'INSERT INTO account (id, email, firstName, lastName, type, status, is_premium)
                      VALUES (?, ?, ?, ?, ?, ?, 1)'
                 );
                 $insAcct->execute([
-                    self::ACCOUNT_ID,
-                    self::ACCOUNT_EMAIL,
-                    self::ACCOUNT_FIRST_NAME,
-                    self::ACCOUNT_LAST_NAME,
+                    $accountId,
+                    $accountEmail,
+                    $firstName,
+                    $lastName,
                     'official',
                     'active',
                 ]);
+            } else {
+                // Keep email, names synchronized with env if updated
+                $updAcct = $this->db->prepare(
+                    'UPDATE account SET email = ?, firstName = ?, lastName = ? WHERE id = ?'
+                );
+                $updAcct->execute([$accountEmail, $firstName, $lastName, $accountId]);
             }
 
             // 2. Personal Table
             $stmtPers = $this->db->prepare('SELECT id FROM personal WHERE id = ? LIMIT 1');
-            $stmtPers->execute([self::ACCOUNT_ID]);
+            $stmtPers->execute([$accountId]);
             if (!$stmtPers->fetchColumn()) {
                 $insPers = $this->db->prepare(
                     'INSERT INTO personal (id, firstName, lastName, famCode)
                      VALUES (?, ?, ?, ?)'
                 );
                 $insPers->execute([
-                    self::ACCOUNT_ID,
-                    self::ACCOUNT_FIRST_NAME,
-                    self::ACCOUNT_LAST_NAME,
+                    $accountId,
+                    $firstName,
+                    $lastName,
                     self::ACCOUNT_FAM_CODE,
                 ]);
+            } else {
+                $updPers = $this->db->prepare(
+                    'UPDATE personal SET firstName = ?, lastName = ? WHERE id = ?'
+                );
+                $updPers->execute([$firstName, $lastName, $accountId]);
             }
 
             // 3. ProfilePics Table
             $stmtPic = $this->db->prepare('SELECT id FROM profilePics WHERE id = ? LIMIT 1');
-            $stmtPic->execute([self::ACCOUNT_ID]);
+            $stmtPic->execute([$accountId]);
             if (!$stmtPic->fetchColumn()) {
                 $insPic = $this->db->prepare(
                     'INSERT INTO profilePics (id, img, buttonHTML)
                      VALUES (?, ?, ?)'
                 );
                 $insPic->execute([
-                    self::ACCOUNT_ID,
+                    $accountId,
                     self::DEFAULT_LOGO,
                     'Platform',
                 ]);
@@ -113,6 +174,8 @@ class FamilyPlatformAccountService
 
         $now = date('Y-m-d H:i:s');
         $timeMs = function_exists('milliSeconds') ? \milliSeconds() : (string)(int)(microtime(true) * 1000);
+        $accountId = self::getAccountId();
+        $accountName = self::getAccountName();
 
         $query = 'INSERT INTO post (
             id, fullName, postMessage, postFamCode, profileImg, post_img0,
@@ -121,8 +184,8 @@ class FamilyPlatformAccountService
 
         $stmt = $this->db->prepare($query);
         $stmt->execute([
-            self::ACCOUNT_ID,
-            self::ACCOUNT_NAME,
+            $accountId,
+            $accountName,
             $cleanMessage,
             self::ACCOUNT_FAM_CODE,
             self::DEFAULT_LOGO,
@@ -155,8 +218,8 @@ class FamilyPlatformAccountService
             if (class_exists('\Src\functionality\Pusher')) {
                 $postData = [
                     'post_no' => $postNo,
-                    'id' => self::ACCOUNT_ID,
-                    'fullName' => self::ACCOUNT_NAME,
+                    'id' => $accountId,
+                    'fullName' => $accountName,
                     'postMessage' => $cleanMessage,
                     'postFamCode' => self::ACCOUNT_FAM_CODE,
                     'profileImg' => '/images/logo/logo.png',
@@ -183,6 +246,7 @@ class FamilyPlatformAccountService
      */
     public function getOfficialPosts(int $limit = 50, int $offset = 0): array
     {
+        $accountId = self::getAccountId();
         $query = 'SELECT p.*,
                     (SELECT COUNT(*) FROM comment c WHERE c.post_no = p.post_no AND c.date_deleted IS NULL) as comments_count,
                     (SELECT COUNT(*) FROM post_reactions pr WHERE pr.post_no = p.post_no) as reactions_count
@@ -193,7 +257,7 @@ class FamilyPlatformAccountService
                   LIMIT ? OFFSET ?';
 
         $stmt = $this->db->prepare($query);
-        $stmt->bindValue(1, self::ACCOUNT_ID, PDO::PARAM_STR);
+        $stmt->bindValue(1, $accountId, PDO::PARAM_STR);
         $stmt->bindValue(2, $limit, PDO::PARAM_INT);
         $stmt->bindValue(3, $offset, PDO::PARAM_INT);
         $stmt->execute();
@@ -207,7 +271,7 @@ class FamilyPlatformAccountService
     public function countOfficialPosts(): int
     {
         $stmt = $this->db->prepare('SELECT COUNT(*) FROM post WHERE id = ? AND date_deleted IS NULL');
-        $stmt->execute([self::ACCOUNT_ID]);
+        $stmt->execute([self::getAccountId()]);
         return (int)$stmt->fetchColumn();
     }
 
@@ -218,6 +282,7 @@ class FamilyPlatformAccountService
      */
     public function getOfficialStats(): array
     {
+        $accountId = self::getAccountId();
         $query = 'SELECT 
                     COUNT(*) as total_posts,
                     COALESCE(SUM(views_count), 0) as total_views,
@@ -227,7 +292,7 @@ class FamilyPlatformAccountService
                   WHERE id = ? AND date_deleted IS NULL';
 
         $stmt = $this->db->prepare($query);
-        $stmt->execute([self::ACCOUNT_ID]);
+        $stmt->execute([$accountId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
         // Count total comments across all official posts
@@ -236,7 +301,7 @@ class FamilyPlatformAccountService
              JOIN post p ON c.post_no = p.post_no
              WHERE p.id = ? AND c.date_deleted IS NULL AND p.date_deleted IS NULL'
         );
-        $cmtStmt->execute([self::ACCOUNT_ID]);
+        $cmtStmt->execute([$accountId]);
         $totalComments = (int)$cmtStmt->fetchColumn();
 
         return [
@@ -262,7 +327,7 @@ class FamilyPlatformAccountService
             'UPDATE post SET postMessage = ?, date_updated = NOW()
              WHERE post_no = ? AND id = ? AND date_deleted IS NULL'
         );
-        return $stmt->execute([$cleanMessage, $postNo, self::ACCOUNT_ID]);
+        return $stmt->execute([$cleanMessage, $postNo, self::getAccountId()]);
     }
 
     /**
@@ -274,7 +339,7 @@ class FamilyPlatformAccountService
             'UPDATE post SET date_deleted = NOW()
              WHERE post_no = ? AND id = ? AND date_deleted IS NULL'
         );
-        return $stmt->execute([$postNo, self::ACCOUNT_ID]);
+        return $stmt->execute([$postNo, self::getAccountId()]);
     }
 
     /**

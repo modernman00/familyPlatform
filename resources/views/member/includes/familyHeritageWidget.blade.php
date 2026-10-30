@@ -68,11 +68,11 @@
                         <i class="bi bi-trophy-fill" style="font-size: 0.95rem;"></i>
                     </div>
                     <div>
-                        <div class="tile-title fw-bold" style="font-size: 0.92rem; color: #0f172a;">{{ __('heritage.sunday_trivia', 'Sunday Trivia') }}</div>
-                        <div class="tile-subtitle" style="font-size: 0.82rem; color: #475569; line-height: 1.35;">{{ __('heritage.play_weekly_challenge', 'Play weekly heritage challenge') }}</div>
+                        <div class="tile-title fw-bold" style="font-size: 0.92rem; color: var(--text-color, #0f172a);">{{ __('heritage.sunday_trivia', 'Sunday Trivia') }}</div>
+                        <div class="tile-subtitle" style="font-size: 0.82rem; color: var(--text-muted, #475569); line-height: 1.35;">{{ __('heritage.play_weekly_challenge', 'Play weekly heritage challenge') }}</div>
                     </div>
                 </div>
-                <i class="bi bi-chevron-right" style="color: #64748b;"></i>
+                <i class="bi bi-chevron-right" style="color: var(--text-muted, #64748b);"></i>
             </button>
 
             <button type="button" onclick="openFamilyFlyerModal()" class="btn heritage-action-tile w-100 p-2.5 d-flex align-items-center justify-content-between text-start shadow-xs transition-all" style="min-height: 54px;" title="Clan Flyer - Generate and download family tree status flyer for WhatsApp">
@@ -81,11 +81,11 @@
                         <i class="bi bi-card-image" style="font-size: 0.95rem;"></i>
                     </div>
                     <div>
-                        <div class="tile-title fw-bold" style="font-size: 0.92rem; color: #0f172a;">{{ __('heritage.clan_flyer', 'Clan Flyer') }}</div>
-                        <div class="tile-subtitle" style="font-size: 0.82rem; color: #475569; line-height: 1.35;">{{ __('heritage.whatsapp_status', 'WhatsApp Status') }}</div>
+                        <div class="tile-title fw-bold" style="font-size: 0.92rem; color: var(--text-color, #0f172a);">{{ __('heritage.clan_flyer', 'Clan Flyer') }}</div>
+                        <div class="tile-subtitle" style="font-size: 0.82rem; color: var(--text-muted, #475569); line-height: 1.35;">{{ __('heritage.whatsapp_status', 'WhatsApp Status') }}</div>
                     </div>
                 </div>
-                <i class="bi bi-chevron-right" style="color: #64748b;"></i>
+                <i class="bi bi-chevron-right" style="color: var(--text-muted, #64748b);"></i>
             </button>
 
             <button type="button" onclick="openTimeCapsuleModal()" class="btn heritage-action-tile w-100 p-2.5 d-flex align-items-center justify-content-between text-start shadow-xs transition-all" style="min-height: 54px;" title="Time Capsule - Seal photos, voice notes, and messages for future delivery">
@@ -94,11 +94,11 @@
                         <i class="bi bi-hourglass-split" style="font-size: 0.95rem;"></i>
                     </div>
                     <div>
-                        <div class="tile-title fw-bold" style="font-size: 0.92rem; color: #0f172a;">{{ __('heritage.time_capsule', 'Time Capsule') }}</div>
-                        <div class="tile-subtitle" style="font-size: 0.82rem; color: #475569; line-height: 1.35;">{{ __('heritage.future_milestones', 'Future Milestones') }}</div>
+                        <div class="tile-title fw-bold" style="font-size: 0.92rem; color: var(--text-color, #0f172a);">{{ __('heritage.time_capsule', 'Time Capsule') }}</div>
+                        <div class="tile-subtitle" style="font-size: 0.82rem; color: var(--text-muted, #475569); line-height: 1.35;">{{ __('heritage.future_milestones', 'Future Milestones') }}</div>
                     </div>
                 </div>
-                <i class="bi bi-chevron-right" style="color: #64748b;"></i>
+                <i class="bi bi-chevron-right" style="color: var(--text-muted, #64748b);"></i>
             </button>
         </div>
     </div>

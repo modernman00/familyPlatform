@@ -738,6 +738,35 @@ body.dark-theme .family-journal-card .badge,
 body.dark-mode .family-journal-card a.btn-link,
 body.dark-theme .family-journal-card a.btn-link,
 [data-bs-theme="dark"] .family-journal-card a.btn-link {
+    color: #818cf8 !important;
+}
+
+/* 🌙 Family AI Hub Navigation Bar & Two Truths Arena Dark Contrast */
+body.dark-mode #familyAiTabs,
+body.dark-theme #familyAiTabs,
+[data-bs-theme="dark"] #familyAiTabs {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+}
+body.dark-mode #familyAiTabs .nav-link:not(.active),
+body.dark-theme #familyAiTabs .nav-link:not(.active),
+[data-bs-theme="dark"] #familyAiTabs .nav-link:not(.active) {
+    color: #cbd5e1 !important;
+}
+body.dark-mode #familyAiTabs .nav-link:not(.active):hover,
+body.dark-theme #familyAiTabs .nav-link:not(.active):hover,
+[data-bs-theme="dark"] #familyAiTabs .nav-link:not(.active):hover {
+    background: #1e293b !important;
+    color: #f8fafc !important;
+}
+
+body.dark-mode .tt-statement-card,
+body.dark-theme .tt-statement-card,
+[data-bs-theme="dark"] .tt-statement-card {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
     color: #a5b4fc !important;
 }
 </style>
@@ -5272,7 +5301,11 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Casting Guess...';
         }
 
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || @json($_SESSION['token'] ?? '');
+        const formEl = document.getElementById('formCreateTwoTruths');
+        const csrfToken = formEl?.querySelector('input[name="token"], input[name="_token"]')?.value
+            || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+            || document.querySelector('meta[name="csrf-token"]')?.content
+            || @json($_SESSION['token'] ?? '');
 
         try {
             const res = await fetch('/api/games/two-truths/vote', {
@@ -5280,11 +5313,13 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
+                    'X-XSRF-TOKEN': csrfToken,
                 },
                 body: JSON.stringify({
                     game_id: activeTwoTruthsGameId,
                     guess: selectedTwoTruthsOpt,
-                    token: csrfToken
+                    token: csrfToken,
+                    _token: csrfToken
                 })
             });
 
@@ -5320,7 +5355,11 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Unmasking Lie...';
         }
 
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || @json($_SESSION['token'] ?? '');
+        const formEl = document.getElementById('formCreateTwoTruths');
+        const csrfToken = formEl?.querySelector('input[name="token"], input[name="_token"]')?.value
+            || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+            || document.querySelector('meta[name="csrf-token"]')?.content
+            || @json($_SESSION['token'] ?? '');
 
         try {
             const res = await fetch('/api/games/two-truths/reveal', {
@@ -5328,10 +5367,12 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
+                    'X-XSRF-TOKEN': csrfToken,
                 },
                 body: JSON.stringify({
                     game_id: gameId,
-                    token: csrfToken
+                    token: csrfToken,
+                    _token: csrfToken
                 })
             });
 
@@ -5380,7 +5421,11 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Publishing...';
         }
 
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || @json($_SESSION['token'] ?? '');
+        const formEl = document.getElementById('formCreateTwoTruths');
+        const csrfToken = formEl?.querySelector('input[name="token"], input[name="_token"]')?.value
+            || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+            || document.querySelector('meta[name="csrf-token"]')?.content
+            || @json($_SESSION['token'] ?? '');
 
         try {
             const res = await fetch('/api/games/two-truths/create', {
@@ -5388,6 +5433,7 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
+                    'X-XSRF-TOKEN': csrfToken,
                 },
                 body: JSON.stringify({
                     title: title,
@@ -5398,7 +5444,8 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
                     reveal_story_1: story1,
                     reveal_story_2: story2,
                     reveal_story_3: story3,
-                    token: csrfToken
+                    token: csrfToken,
+                    _token: csrfToken
                 })
             });
 
@@ -5430,7 +5477,7 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
         const st1 = @json($twoTruthsGame['statement_1'] ?? '');
         const st2 = @json($twoTruthsGame['statement_2'] ?? '');
         const st3 = @json($twoTruthsGame['statement_3'] ?? '');
-        const gameUrl = window.location.origin + '/member/family-ai#tab-trivia';
+        const gameUrl = window.location.origin + '/family/ai-hub?tab=trivia#two-truths';
 
         const text = `🎭 *Family Challenge: Two Truths & a Lie!*\n\n`
             + `${author} has laid down a challenge:\n`
@@ -5689,6 +5736,26 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
             alert('Post error: ' + err.message);
         }
     }
+
+    // 🎯 DEEP-LINKING ACTIVATION (Focus Two Truths & Game Show Tab)
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        const hash = window.location.hash;
+
+        if (tabParam === 'trivia' || tabParam === 'fun-place' || tabParam === 'game-show' || hash === '#tab-trivia' || hash === '#two-truths') {
+            const triviaTabBtn = document.getElementById('tab-trivia-btn');
+            if (triviaTabBtn) {
+                triviaTabBtn.click();
+                const subtabBtn = document.getElementById('subtab-twotruths-btn');
+                if (subtabBtn) subtabBtn.click();
+                const arena = document.getElementById('twoTruthsArenaCard');
+                if (arena) {
+                    setTimeout(() => arena.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+                }
+            }
+        }
+    });
 </script>
 
 {{-- Modal: Create Two Truths & a Lie Challenge --}}

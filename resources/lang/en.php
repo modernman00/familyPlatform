@@ -98,6 +98,10 @@ return [
     // Profile & Kinship
     'profile.edit_profile' => 'Edit Profile',
     'profile.family_code' => 'Family Code',
+    'profile.family_code_headline' => 'Family Code',
+    'profile.family_codes_headline' => 'Family Codes',
+    'profile.married_code_short' => 'Married',
+    'profile.birth_code_short' => 'Birth',
     'profile.married_family_code' => 'Married Code',
     'profile.birth_family_code' => 'Birth Code',
     'profile.family_codes' => 'Married and Birth Family Codes',

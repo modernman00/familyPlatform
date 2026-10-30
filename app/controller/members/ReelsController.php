@@ -127,23 +127,22 @@ final class ReelsController extends BaseController
             }
 
             $data = $this->membersData();
-            $initialReels = Reel::getReelsFeed($userId, $famCode, 30, 0);
+            $initialReels = Reel::getReelsFeed($userId, $famCode, 50, 0);
 
             if ($targetReel && !empty($targetReel['id'])) {
                 $alreadyInFeed = false;
                 foreach ($initialReels as $idx => $r) {
                     if ((int)$r['id'] === (int)$targetReel['id']) {
                         $alreadyInFeed = true;
-                        if ($idx > 0) {
-                            array_splice($initialReels, $idx, 1);
-                            array_unshift($initialReels, $targetReel);
-                        }
                         break;
                     }
                 }
                 if (!$alreadyInFeed && self::canAccessReel($targetReel, $userId)) {
                     array_unshift($initialReels, $targetReel);
                 }
+                $initialReels = Reel::clusterReelsByCreator($initialReels, (int)$targetReel['id']);
+            } else {
+                $initialReels = Reel::clusterReelsByCreator($initialReels);
             }
 
             // Track reel theater view
@@ -186,12 +185,13 @@ final class ReelsController extends BaseController
             $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
 
             $reels = Reel::getReelsFeed($userId, $famCode, $limit, $offset);
+            $clusteredReels = Reel::clusterReelsByCreator($reels);
 
             // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response (Content-Type: application/json); json_encode escapes the payload, never HTML-rendered.
             echo json_encode([
                 'status' => 'success',
-                'data' => $reels,
-                'count' => count($reels)
+                'data' => $clusteredReels,
+                'count' => count($clusteredReels)
             ]);
         } catch (\Throwable $e) {
             http_response_code(500);
