@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(feed): enhance then & now comparisons, ghost camera, and reactive modals",
+    "title": "Fix(ui): enforce contrast tokens and compile production assets",
     "notes": [
-        "Feat(feed): enhance then & now comparisons, ghost camera, and reactive modals",
-        "Fix(typography): unify family codes font size and style with sidebar actions",
-        "Fix(members): remove invalid a.firstName and a.lastName columns in AllMembersEmailByFamCode"
+        "Fix(ui): enforce contrast tokens and compile production assets",
+        "Fix(notifications): eliminate landing page push solicitation and add address bar quiet UI permission recovery",
+        "Feat(feed): enhance then & now comparisons, ghost camera, and reactive modals"
     ],
     "released_at": "2026-10-30",
-    "commit": "4c288b6"
+    "commit": "44402b3"
 }
