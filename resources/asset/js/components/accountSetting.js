@@ -607,9 +607,15 @@ processKidsSiblings(fName, famCode);
           paint(true, 'Push notifications are on for this device.');
           window.notify?.('Push notifications enabled', 'success');
         } else if (res.reason === 'denied') {
-          paint(false, 'You dismissed the browser prompt. Allow notifications to turn this on.');
+          paint(false, 'Notifications are blocked in your browser. Tap below to see how to allow them.');
+          if (typeof window.showPushPermissionRecovery === 'function') {
+            window.showPushPermissionRecovery();
+          }
         } else {
-          paint(false, 'Could not enable notifications. Please try again.');
+          paint(false, 'Could not enable notifications. Check your browser settings.');
+          if (typeof window.showPushPermissionRecovery === 'function') {
+            window.showPushPermissionRecovery();
+          }
         }
       } else {
         localStorage.setItem(PUSH_OPT_OUT_KEY, '1');

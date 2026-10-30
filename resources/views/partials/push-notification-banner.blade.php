@@ -2,6 +2,13 @@
   FamilyPlatform Push Notification & Standalone PWA Activation Legend
   Prompts users to activate push notifications and handles auto-sync for users who installed the app.
 --}}
+@php
+    // Push notifications are strictly for authenticated family members with an active session.
+    // Anonymous visitors on the landing page do not have accounts or family events to receive,
+    // and prompting unauthenticated guests triggers browser anti-spam / Quiet UI restrictions.
+    $authUserId = $_SESSION['id'] ?? null;
+@endphp
+@if(!empty($authUserId))
 <style>
     /* WCAG AA: explicit surface + text colours so the banner never inherits washed-out theme text */
     #push-notification-banner { display: none; max-width: 620px; position: fixed; top: 20px; left: 16px; right: 16px; z-index: 1060; border-radius: 16px; border: 1.5px solid rgba(163, 22, 33, 0.35); background: #ffffff; box-shadow: 0 16px 36px rgba(15, 23, 42, 0.25); font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif); }
@@ -120,6 +127,10 @@
 
         const token = getCsrfToken();
         const userId = document.querySelector('meta[name="user-id"]')?.getAttribute('content') || '';
+        if (!userId) {
+            console.warn('[Push] Unauthenticated session - push subscription deferred');
+            return Promise.resolve({ status: 'unauthenticated' });
+        }
         const p256dh = subscription.getKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))) : '';
         const auth = subscription.getKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth')))) : '';
 
@@ -241,14 +252,18 @@
     };
 
     window.askNotificationPermission = function() {
-        if (typeof window.Notification !== 'undefined' && Notification.permission === 'denied') {
+        if (!('Notification' in window)) {
+            return Promise.reject(new Error('Push notifications are not supported in this browser.'));
+        }
+
+        if (Notification.permission === 'denied') {
             if (typeof window.showPushPermissionRecovery === 'function') {
                 window.showPushPermissionRecovery();
             }
             return Promise.reject(new Error('Permission previously denied by user'));
         }
 
-        if (typeof window.Notification !== 'undefined' && Notification.permission === 'granted') {
+        if (Notification.permission === 'granted') {
             return window.subscribeUserToPush();
         }
 
@@ -271,7 +286,7 @@
             'Notification permission prompt was not answered. Please check the bell/lock icon in your browser address bar.'
         ).then(function(permissionResult) {
             if (permissionResult !== 'granted') {
-                throw new Error('Permission not granted');
+                throw new Error('Permission not granted (' + permissionResult + ')');
             }
             return window.subscribeUserToPush();
         });
@@ -283,43 +298,60 @@
 
         let instructionsHtml = '';
         if (isIOS) {
-            instructionsHtml = '<div class="text-start" style="font-size:0.92rem; line-height: 1.5;">' +
-                '<p>Notifications are currently blocked for FamilyPlatform on your iPhone or iPad:</p>' +
-                '<ol class="ps-3 mb-2">' +
-                '<li>Open your device <strong>Settings</strong> app.</li>' +
-                '<li>Scroll down to <strong>FamilyPlatform</strong> (or <strong>Safari</strong>).</li>' +
-                '<li>Tap <strong>Notifications</strong> and toggle on <strong>Allow Notifications</strong>.</li>' +
-                '<li>Return here and refresh the page to start receiving family updates.</li>' +
-                '</ol></div>';
+            instructionsHtml = '<div class="text-start" style="font-size:0.95rem; line-height: 1.6;">' +
+                '<p class="mb-2">Notifications are currently blocked for <strong>FamilyPlatform</strong> on your iPhone or iPad:</p>' +
+                '<div class="p-3 mb-2 rounded-3" style="background:#f8fafc; border:1px solid #cbd5e1;">' +
+                '<ol class="ps-3 mb-0 text-dark">' +
+                '<li class="mb-1">Open your device <strong>Settings</strong> app.</li>' +
+                '<li class="mb-1">Scroll down and tap <strong>FamilyPlatform</strong> (or <strong>Safari</strong>).</li>' +
+                '<li class="mb-1">Tap <strong>Notifications</strong> and toggle on <strong>Allow Notifications</strong>.</li>' +
+                '<li>Return here and tap <strong>Reload &amp; Activate</strong> below.</li>' +
+                '</ol></div></div>';
         } else if (isAndroid) {
-            instructionsHtml = '<div class="text-start" style="font-size:0.92rem; line-height: 1.5;">' +
-                '<p>Notifications are currently blocked in Chrome on your Android device:</p>' +
-                '<ol class="ps-3 mb-2">' +
-                '<li>Tap the <strong>tune/padlock icon</strong> on the left side of the address bar.</li>' +
-                '<li>Select <strong>Permissions</strong> or <strong>Site settings</strong>.</li>' +
-                '<li>Find <strong>Notifications</strong> and change to <strong>Allow</strong>.</li>' +
-                '<li>Reload this page to activate milestone alerts.</li>' +
-                '</ol></div>';
+            instructionsHtml = '<div class="text-start" style="font-size:0.95rem; line-height: 1.6;">' +
+                '<p class="mb-2">Notifications are currently blocked in Chrome on your Android device:</p>' +
+                '<div class="p-3 mb-2 rounded-3" style="background:#f8fafc; border:1px solid #cbd5e1;">' +
+                '<ol class="ps-3 mb-0 text-dark">' +
+                '<li class="mb-1">Tap the <strong>tune/padlock icon</strong> on the left side of the address bar.</li>' +
+                '<li class="mb-1">Select <strong>Permissions</strong> or <strong>Site settings</strong>.</li>' +
+                '<li class="mb-1">Find <strong>Notifications</strong> and change to <strong>Allow</strong>.</li>' +
+                '<li>Tap <strong>Reload &amp; Activate</strong> below to activate milestone alerts.</li>' +
+                '</ol></div></div>';
         } else {
-            instructionsHtml = '<div class="text-start" style="font-size:0.92rem; line-height: 1.5;">' +
-                '<p>Notifications are currently blocked in your desktop browser:</p>' +
-                '<ol class="ps-3 mb-2">' +
-                '<li>Click the <strong>padlock or view site info icon</strong> in the address bar (left of the URL).</li>' +
-                '<li>Change the <strong>Notifications</strong> permission from <em>Block</em> to <strong>Allow</strong>.</li>' +
-                '<li>Reload the page to connect real-time family alerts.</li>' +
-                '</ol></div>';
+            // Desktop Chrome, Brave, Edge, Firefox, Safari
+            instructionsHtml = '<div class="text-start" style="font-size:0.95rem; line-height: 1.6;">' +
+                '<p class="mb-2">Notification alerts are currently blocked by your browser for <strong>' + window.location.hostname + '</strong>:</p>' +
+                '<div class="p-3 mb-3 rounded-3" style="background:#f8fafc; border:1px solid #cbd5e1;">' +
+                '<p class="fw-bold text-dark mb-2"><i class="bi bi-shield-check text-danger me-1"></i> Quick 2-Step Fix in Address Bar:</p>' +
+                '<ol class="ps-3 mb-0 text-dark" style="font-weight: 500;">' +
+                '<li class="mb-2">Look at the address bar at the very top of your browser (next to <code>' + window.location.hostname + '</code>).</li>' +
+                '<li class="mb-2">Click the <span class="badge bg-dark text-white px-2 py-1"><i class="bi bi-bell-slash"></i> Notifications blocked</span> button or the <strong>padlock 🔒 / site settings</strong> icon.</li>' +
+                '<li class="mb-2">Switch <strong>Notifications</strong> from <em>Block</em> to <strong>Allow</strong>.</li>' +
+                '<li>Click the <strong>Reload &amp; Activate</strong> button below to instantly connect real-time family alerts!</li>' +
+                '</ol>' +
+                '</div>' +
+                '</div>';
         }
 
         if (window.Swal) {
             window.Swal.fire({
                 icon: 'info',
-                title: 'How to Re-Enable Notifications',
+                title: 'How to Allow Notification Alerts',
                 html: instructionsHtml,
                 confirmButtonColor: '#a31621',
-                confirmButtonText: 'Understood'
+                confirmButtonText: '<i class="bi bi-arrow-clockwise me-1"></i> Reload &amp; Activate',
+                showCancelButton: true,
+                cancelButtonText: 'I will do this later',
+                cancelButtonColor: '#64748b'
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    window.location.reload();
+                }
             });
         } else {
-            alert('Please enable notifications in your browser site settings and reload the page.');
+            if (confirm('Notifications are currently blocked by your browser. Please click the Notifications blocked icon or padlock in your address bar, switch to Allow, and click OK to reload.')) {
+                window.location.reload();
+            }
         }
     };
 
@@ -473,18 +505,26 @@
                 console.warn('[Push] Permission or subscription rejected:', err);
                 enableBtn.disabled = false;
                 enableBtn.innerHTML = '<i class="bi bi-bell-fill me-1.5"></i> Enable Notifications';
-                if (typeof window.Notification !== 'undefined' && Notification.permission === 'denied') {
+
+                const errMsg = (err && err.message) ? String(err.message) : '';
+                const isPermissionIssue = (
+                    (typeof window.Notification !== 'undefined' && (Notification.permission === 'denied' || Notification.permission === 'default')) ||
+                    errMsg.includes('Permission') ||
+                    errMsg.includes('denied')
+                );
+
+                if (isPermissionIssue) {
                     dismissAction();
                     if (typeof window.showPushPermissionRecovery === 'function') {
                         window.showPushPermissionRecovery();
                     }
                     return;
                 }
-                const errMsg = (err && err.message) ? String(err.message) : 'Could not activate push notifications.';
+
                 const isSslError = /ssl|certificate|SecurityError/i.test(errMsg) || (err && err.name === 'SecurityError');
                 const friendlyText = isSslError
                     ? 'Your browser blocked the background Service Worker because the HTTPS certificate on this domain (' + window.location.hostname + ') is not trusted in your system Keychain. Trust the local root certificate and reload.'
-                    : errMsg;
+                    : (errMsg || 'Could not activate push notifications.');
 
                 if (window.Swal) {
                     window.Swal.fire({
@@ -505,3 +545,4 @@
     }
 })();
 </script>
+@endif

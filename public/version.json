@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(e2e): repair feed, kinship, event and invite flows; refresh stale Cypress specs",
+    "title": "Feat(feed): enhance then & now comparisons, ghost camera, and reactive modals",
     "notes": [
-        "Fix(e2e): repair feed, kinship, event and invite flows; refresh stale Cypress specs",
-        "Fix(official-posts): call ResilientAiChat as an instance with message array",
-        "Fix(security): annotate admin JSON responses for Semgrep and harden friendly_copy encoding"
+        "Feat(feed): enhance then & now comparisons, ghost camera, and reactive modals",
+        "Fix(typography): unify family codes font size and style with sidebar actions",
+        "Fix(members): remove invalid a.firstName and a.lastName columns in AllMembersEmailByFamCode"
     ],
     "released_at": "2026-10-30",
-    "commit": "08eebf2"
+    "commit": "4c288b6"
 }

@@ -89,6 +89,8 @@ async function doSubscribe(swReg) {
 }
 
 function showPushPrompt() {
+  const userId = typeof document !== 'undefined' ? document.querySelector('meta[name="user-id"]')?.getAttribute('content') : '';
+  if (!userId) return;
   if (!VAPID_PUBLIC_KEY || Notification.permission !== 'default') return;
   if (isPushDismissedWithinCooldown(PUSH_PROMPT_DISMISSED_KEY)) return;
   if (document.getElementById('push-permission-banner') || document.getElementById('push-notification-banner')) return;
@@ -167,7 +169,12 @@ export async function enablePushNotifications() {
       'Notification permission prompt timed out'
     );
   }
-  if (permission !== 'granted') return { ok: false, reason: permission }; // 'denied'
+  if (permission !== 'granted') {
+    if (typeof window.showPushPermissionRecovery === 'function') {
+      window.showPushPermissionRecovery();
+    }
+    return { ok: false, reason: permission }; // 'denied'
+  }
 
   try {
     const swReg = await getReadyServiceWorker();

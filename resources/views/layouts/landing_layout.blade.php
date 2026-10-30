@@ -228,7 +228,9 @@
 
   @include('includes.public_footer')
 
-  @include('partials.push-notification-banner')
+  @if(!empty($_SESSION['id']))
+    @include('partials.push-notification-banner')
+  @endif
 
   @include('partials.cookie-banner')
 
