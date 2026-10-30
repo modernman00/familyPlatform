@@ -815,7 +815,7 @@
     </template>
 
     <!-- Active Family Hashtag Filter Stream Banner -->
-    <div x-cloak x-show="activeHashtagFilter" class="card border-0 shadow-sm mb-4 p-3" style="border-radius: 14px; background: linear-gradient(135deg, #fdf5f5 0%, #f5dede 100%); border-left: 4px solid #a31621 !important;">
+    <div x-cloak x-show="activeHashtagFilter" x-collapse class="card border-0 shadow-sm mb-4 p-3" style="border-radius: 14px; background: linear-gradient(135deg, #fdf5f5 0%, #f5dede 100%); border-left: 4px solid #a31621 !important;">
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div class="d-flex align-items-center gap-2">
           <span class="badge rounded-pill text-white px-3 py-1.5 shadow-xs" style="background: #a31621; font-size: 0.88rem; letter-spacing: 0.3px;">
@@ -830,7 +830,7 @@
     </div>
 
     <!-- Active Tagged With You Stream Banner -->
-    <div x-cloak x-show="activeStreamFilter === 'tagged'" class="card border-0 shadow-sm mb-4 p-3" style="border-radius: 14px; background: linear-gradient(135deg, #fdf5f5 0%, #f5dede 100%); border-left: 4px solid #a31621 !important;">
+    <div x-cloak x-show="activeStreamFilter === 'tagged'" x-collapse class="card border-0 shadow-sm mb-4 p-3" style="border-radius: 14px; background: linear-gradient(135deg, #fdf5f5 0%, #f5dede 100%); border-left: 4px solid #a31621 !important;">
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div class="d-flex align-items-center gap-2">
           <span class="badge rounded-pill text-white px-3 py-1.5 shadow-xs" style="background: #a31621; font-size: 0.88rem; letter-spacing: 0.3px;">

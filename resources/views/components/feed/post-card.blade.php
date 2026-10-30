@@ -179,36 +179,168 @@
     </div>
   </template>
 
-  <!-- Then & Now (before / after) -->
+  <!-- Then & Now (before / after) — Living 2.0 Suite -->
   <template x-if="post.comparison">
-    <div class="then-now px-1 mb-3" x-data="{ pos: 50, side: false }">
+    <div class="then-now px-1 mb-3"
+         x-data="{
+           pos: 50,
+           side: false,
+           mode: 'slider',
+           playingWarp: false,
+           warpTimer: null,
+           teased: false,
+           guessedYear: null,
+           startAutoTease(el) {
+             if (this.teased || typeof IntersectionObserver === 'undefined') return;
+             if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+             const obs = new IntersectionObserver((entries) => {
+               entries.forEach((entry) => {
+                 if (entry.isIntersecting && !this.teased) {
+                   this.teased = true;
+                   obs.disconnect();
+                   const keyframes = [50, 26, 74, 50];
+                   let stepIdx = 0;
+                   const stepMs = 340;
+                   const runStep = () => {
+                     if (stepIdx >= keyframes.length || this.playingWarp) return;
+                     const start = this.pos;
+                     const target = keyframes[stepIdx++];
+                     const t0 = performance.now();
+                     const tick = (now) => {
+                       const p = Math.min(1, (now - t0) / stepMs);
+                       const ease = 0.5 - Math.cos(p * Math.PI) / 2;
+                       this.pos = Math.round((start + (target - start) * ease) * 10) / 10;
+                       if (p < 1) requestAnimationFrame(tick);
+                       else runStep();
+                     };
+                     requestAnimationFrame(tick);
+                   };
+                   runStep();
+                 }
+               });
+             }, { threshold: 0.55 });
+             obs.observe(el);
+           },
+           toggleTimeWarp(postObj) {
+             if (this.playingWarp) {
+               this.playingWarp = false;
+               if (this.warpTimer) cancelAnimationFrame(this.warpTimer);
+               this.warpTimer = null;
+               return;
+             }
+             this.side = false;
+             this.mode = 'morph';
+             this.playingWarp = true;
+             if ((postObj.voice_capsule_url || postObj.voice_url) && playingVoicePostNo !== postObj.post_no) {
+               togglePlayVoiceCapsule(postObj);
+             }
+             const duration = 3600;
+             const t0 = performance.now();
+             const animate = (now) => {
+               if (!this.playingWarp) return;
+               const elapsed = (now - t0) % duration;
+               const progress = elapsed / duration;
+               // Smoothly oscillate 0 (Then) -> 100 (Now) -> 0 (Then)
+               this.pos = Math.round(((1 - Math.cos(progress * 2 * Math.PI)) / 2) * 100);
+               this.warpTimer = requestAnimationFrame(animate);
+             };
+             this.warpTimer = requestAnimationFrame(animate);
+           }
+         }"
+         x-init="startAutoTease($el)">
+
+      <!-- Stage (Slider Mode + Living Morph Cross-Dissolve Mode) -->
       <div class="then-now__stage vse-skeleton-surface" x-show="!side" style="aspect-ratio: 4 / 5; max-height: 520px;">
         <picture class="then-now__img" style="pointer-events: none; user-select: none; -webkit-user-drag: none;">
           <source :srcset="getPostImageVariantUrl(post.comparison.after_img, 'avif')" type="image/avif">
           <source :srcset="getPostImageVariantUrl(post.comparison.after_img, 'webp')" type="image/webp">
-          <img class="w-100 h-100 object-fit-cover" :src="getPostImageUrl(post.comparison.after_img)" alt="Now" loading="lazy" decoding="async" style="pointer-events: none; user-select: none; -webkit-user-drag: none;">
+          <img class="w-100 h-100 object-fit-cover"
+               :style="mode === 'morph' ? ('transform: scale(' + (1 + (pos / 1200)).toFixed(3) + '); transition: transform 0.12s linear; pointer-events: none; user-select: none; -webkit-user-drag: none;') : 'pointer-events: none; user-select: none; -webkit-user-drag: none;'"
+               :src="getPostImageUrl(post.comparison.after_img)" alt="Now" loading="lazy" decoding="async">
         </picture>
-        <picture class="then-now__img then-now__img--then" :style="'clip-path: inset(0 ' + (100 - pos) + '% 0 0)'" style="pointer-events: none; user-select: none; -webkit-user-drag: none;">
+        <picture class="then-now__img then-now__img--then"
+                 :style="mode === 'morph'
+                   ? ('opacity: ' + ((100 - pos) / 100).toFixed(3) + '; clip-path: none; -webkit-clip-path: none; pointer-events: none; user-select: none; -webkit-user-drag: none;')
+                   : ('clip-path: inset(0 ' + (100 - pos) + '% 0 0); -webkit-clip-path: inset(0 ' + (100 - pos) + '% 0 0); pointer-events: none; user-select: none; -webkit-user-drag: none;')">
           <source :srcset="getPostImageVariantUrl(post.comparison.before_img, 'avif')" type="image/avif">
           <source :srcset="getPostImageVariantUrl(post.comparison.before_img, 'webp')" type="image/webp">
           <img class="w-100 h-100 object-fit-cover" :src="getPostImageUrl(post.comparison.before_img)" alt="Then" loading="lazy" decoding="async" style="pointer-events: none; user-select: none; -webkit-user-drag: none;">
         </picture>
-        <span class="then-now__tag then-now__tag--then" x-text="post.comparison.before_label" style="pointer-events: none;"></span>
-        <span class="then-now__tag then-now__tag--now" x-text="post.comparison.after_label" style="pointer-events: none;"></span>
-        <div class="then-now__handle" :style="'left:' + pos + '%'" aria-hidden="true" style="pointer-events: none;"><i class="bi bi-arrows-expand-vertical"></i></div>
+
+        <!-- Then Tag (supports "Guess the Year" Mystery Veil) -->
+        <span class="then-now__tag then-now__tag--then"
+              x-text="(post.comparison.mystery_year && !guessedYear) ? '🎲 Guess Year?' : post.comparison.before_label"
+              style="pointer-events: none; z-index: 6;"></span>
+
+        <!-- Golden Time-Bridge Delta Pill / Genetic Echo Crown -->
+        <template x-if="post.comparison.delta_badge && (!post.comparison.mystery_year || guessedYear)">
+          <span class="then-now__delta-pill" x-text="post.comparison.delta_badge" style="pointer-events: none; z-index: 6;"></span>
+        </template>
+
+        <!-- Now Tag -->
+        <span class="then-now__tag then-now__tag--now" x-text="post.comparison.after_label" style="pointer-events: none; z-index: 6;"></span>
+
+        <!-- Slider Curtain Handle (visible in slider mode) -->
+        <div class="then-now__handle" x-show="mode === 'slider'" :style="'left:' + pos + '%'" aria-hidden="true" style="pointer-events: none;"><i class="bi bi-arrows-expand-vertical"></i></div>
+
         <input type="range" min="0" max="100" step="1" x-model.number="pos" class="then-now__range"
-               @input="(pos === 50 && typeof window.triggerHaptic === 'function') ? window.triggerHaptic('detent') : null"
+               @input="playingWarp = false; (pos === 50 && typeof window.triggerHaptic === 'function') ? window.triggerHaptic('detent') : null"
                aria-label="Drag to compare Then and Now" style="z-index: 5; touch-action: none;">
+
+        <!-- Interactive "Guess the Year" Mystery Overlay Bar -->
+        <template x-if="post.comparison.mystery_year && post.comparison.mystery_options && post.comparison.mystery_options.length > 0">
+          <div class="then-now__mystery-bar" style="z-index: 8;" @click.stop>
+            <template x-if="!guessedYear">
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-1.5 w-100">
+                <span class="small fw-bold text-white"><i class="bi bi-dice-5-fill text-warning me-1"></i>Which year was "Then"?</span>
+                <div class="d-flex align-items-center gap-1.5">
+                  <template x-for="yr in post.comparison.mystery_options" :key="yr">
+                    <button type="button" class="btn btn-sm rounded-pill fw-bold px-2.5 py-1 then-now__guess-chip"
+                            @click.stop="guessedYear = yr; celebrateThenNowGuess($event, yr === post.comparison.true_year)"
+                            x-text="yr"></button>
+                  </template>
+                </div>
+              </div>
+            </template>
+            <template x-if="guessedYear">
+              <div class="d-flex align-items-center justify-content-between w-100">
+                <span class="small fw-bold"
+                      :style="guessedYear === post.comparison.true_year ? 'color: #fce79a;' : 'color: #ffffff;'"
+                      x-text="guessedYear === post.comparison.true_year
+                        ? ('🎉 Spot on! It was ' + post.comparison.before_label + (post.comparison.delta_badge ? ' (' + post.comparison.delta_badge + ')' : ''))
+                        : ('✨ Nice try! It was ' + post.comparison.before_label + (post.comparison.delta_badge ? ' (' + post.comparison.delta_badge + ')' : ''))"></span>
+              </div>
+            </template>
+          </div>
+        </template>
+
+        <!-- Floating Voice Reflection Pill on Then & Now Stage -->
+        <template x-if="post.voice_capsule_url || post.voice_url">
+          <button type="button"
+                  class="voice-capsule-floating-pill"
+                  :class="playingVoicePostNo === post.post_no ? 'is-playing' : ''"
+                  style="z-index: 7;"
+                  @click.stop.prevent="togglePlayVoiceCapsule(post)"
+                  :aria-label="playingVoicePostNo === post.post_no ? 'Pause voice story' : 'Play voice story'">
+            <span class="voice-capsule-icon" aria-hidden="true">
+              <i class="bi" :class="playingVoicePostNo === post.post_no ? 'bi-pause-fill' : 'bi-mic-fill'"></i>
+            </span>
+            <span class="voice-capsule-label" x-text="playingVoicePostNo === post.post_no ? 'Playing Voice Story' : '15s Voice Story'"></span>
+          </button>
+        </template>
+
         <button type="button" class="position-absolute end-0 bottom-0 m-2 btn btn-sm btn-dark bg-opacity-75 text-white rounded-circle shadow-sm border border-white border-opacity-25 d-flex align-items-center justify-content-center"
-                style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; z-index: 6; cursor: pointer;"
-                @click.stop="window.__expandThenNow ? window.__expandThenNow(post.comparison, { fullName: post.fullName, post_desc: post.post_desc || post.postMessage, date_created: post.date_created, post_no: post.post_no }) : null"
+                style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; z-index: 8; cursor: pointer;"
+                @click.stop="window.__expandThenNow ? window.__expandThenNow(post.comparison, { fullName: post.fullName, post_desc: post.post_desc || post.postMessage, date_created: post.date_created, post_no: post.post_no, voice_capsule_url: post.voice_capsule_url }) : null"
                 aria-label="Expand comparison to full screen"
                 title="Expand comparison">
           <i class="bi bi-arrows-angle-expand" style="font-size: 0.9rem;"></i>
         </button>
       </div>
+
+      <!-- Side-by-Side Stage -->
       <div class="then-now__side" x-show="side" x-cloak>
-        <figure class="cursor-pointer" style="cursor: pointer;" @click="window.__expandThenNow ? window.__expandThenNow(post.comparison, { fullName: post.fullName, post_desc: post.post_desc || post.postMessage, date_created: post.date_created, post_no: post.post_no }) : null" title="Click to expand">
+        <figure class="cursor-pointer" style="cursor: pointer;" @click="window.__expandThenNow ? window.__expandThenNow(post.comparison, { fullName: post.fullName, post_desc: post.post_desc || post.postMessage, date_created: post.date_created, post_no: post.post_no, voice_capsule_url: post.voice_capsule_url }) : null" title="Click to expand">
           <picture>
             <source :srcset="getPostImageVariantUrl(post.comparison.before_img, 'avif')" type="image/avif">
             <source :srcset="getPostImageVariantUrl(post.comparison.before_img, 'webp')" type="image/webp">
@@ -216,7 +348,7 @@
           </picture>
           <figcaption x-text="post.comparison.before_label"></figcaption>
         </figure>
-        <figure class="cursor-pointer" style="cursor: pointer;" @click="window.__expandThenNow ? window.__expandThenNow(post.comparison, { fullName: post.fullName, post_desc: post.post_desc || post.postMessage, date_created: post.date_created, post_no: post.post_no }) : null" title="Click to expand">
+        <figure class="cursor-pointer" style="cursor: pointer;" @click="window.__expandThenNow ? window.__expandThenNow(post.comparison, { fullName: post.fullName, post_desc: post.post_desc || post.postMessage, date_created: post.date_created, post_no: post.post_no, voice_capsule_url: post.voice_capsule_url }) : null" title="Click to expand">
           <picture>
             <source :srcset="getPostImageVariantUrl(post.comparison.after_img, 'avif')" type="image/avif">
             <source :srcset="getPostImageVariantUrl(post.comparison.after_img, 'webp')" type="image/webp">
@@ -225,19 +357,46 @@
           <figcaption x-text="post.comparison.after_label"></figcaption>
         </figure>
       </div>
+
+      <!-- Action Dock: Slide / Morph / Time-Warp / Side-by-Side / Expand / Add Yours / Tappable Family Chain Facepile -->
       <div class="then-now__actions">
-        <button type="button" class="btn btn-sm btn-light border rounded-pill" @click="side = !side"
+        <button type="button" class="btn btn-sm btn-light border rounded-pill"
+                @click="playingWarp = false; side = !side; if (!side) mode = 'slider';"
                 x-text="side ? 'Slide to compare' : 'Side by side'"></button>
+
+        <button type="button" class="btn btn-sm border rounded-pill d-inline-flex align-items-center gap-1"
+                :class="playingWarp ? 'btn-dark text-white' : 'btn-light'"
+                @click="toggleTimeWarp(post)"
+                aria-label="Play Time-Warp morph animation">
+          <i class="bi" :class="playingWarp ? 'bi-pause-circle-fill text-warning' : 'bi-magic text-danger'"></i>
+          <span x-text="playingWarp ? 'Pause Warp' : 'Time-Warp'"></span>
+        </button>
+
         <button type="button" class="btn btn-sm btn-light border rounded-pill d-inline-flex align-items-center gap-1"
-                @click="window.__expandThenNow ? window.__expandThenNow(post.comparison, { fullName: post.fullName, post_desc: post.post_desc || post.postMessage, date_created: post.date_created, post_no: post.post_no }) : null"
+                @click="window.__expandThenNow ? window.__expandThenNow(post.comparison, { fullName: post.fullName, post_desc: post.post_desc || post.postMessage, date_created: post.date_created, post_no: post.post_no, voice_capsule_url: post.voice_capsule_url }) : null"
                 aria-label="Expand Then and Now comparison">
           <i class="bi bi-arrows-angle-expand"></i> {{ __('feed.expand_comparison', 'Expand') }}
         </button>
+
         <button type="button" class="btn btn-sm btn-primary rounded-pill" @click="window.__openThenNow(post.post_no)">
           <i class="bi bi-hourglass-split"></i> Add your Then &amp; Now
         </button>
-        <span class="small text-muted" x-show="post.comparison.answer_count > 0"
-              x-text="post.comparison.answer_count + (post.comparison.answer_count === 1 ? ' family member joined in' : ' family members joined in')"></span>
+
+        <!-- Tappable Family Time-Warp Chain Facepile Pill -->
+        <template x-if="post.comparison.answer_count > 0">
+          <button type="button"
+                  class="btn btn-sm rounded-pill d-inline-flex align-items-center gap-1.5 px-2.5 py-1 then-now__chain-pill"
+                  @click="window.__openThenNowChain ? window.__openThenNowChain(post.post_no) : null"
+                  :aria-label="'View ' + post.comparison.answer_count + ' family Then and Now responses'">
+            <span class="then-now__facepile d-inline-flex align-items-center">
+              <template x-for="(av, avIdx) in (post.comparison.chain_avatars || []).slice(0, 3)" :key="av.post_no || avIdx">
+                <img :src="av.profileImg" :alt="av.fullName" class="then-now__facepile-img" width="22" height="22">
+              </template>
+            </span>
+            <span class="small fw-semibold"
+                  x-text="post.comparison.answer_count + (post.comparison.answer_count === 1 ? ' family member joined in →' : ' family members joined in →')"></span>
+          </button>
+        </template>
       </div>
     </div>
   </template>
@@ -904,7 +1063,7 @@
   <!-- Comments Section -->
   <div class="comments-section pt-2">
     <!-- Dynamic Comment Form with emoji picker -->
-    <div x-show="activeCommentForms[post.post_no]" x-transition class="mb-3">
+    <div x-show="activeCommentForms[post.post_no]" x-collapse class="mb-3">
       <div class="position-relative">
         <!-- Emoji picker popup for comment input -->
         <div x-show="commentEmojiOpen[post.post_no]" x-cloak
@@ -991,7 +1150,7 @@
           </div>
         </div>
 
-        <div x-show="replyingTo[post.post_no]" x-cloak class="ps-2 mb-1 text-muted" style="font-size: 0.78rem;" data-testid="comment-replying-to">
+        <div x-show="replyingTo[post.post_no]" x-cloak x-collapse class="ps-2 mb-1 text-muted" style="font-size: 0.78rem;" data-testid="comment-replying-to">
           <div class="d-flex align-items-center gap-2">
             <span>Replying to <strong x-text="replyingTo[post.post_no]?.fullName"></strong></span>
             <button type="button" class="text-muted" style="background:none; border:none; padding:0 4px; cursor:pointer;" @click="cancelReply(post.post_no)" aria-label="Cancel reply">✕</button>

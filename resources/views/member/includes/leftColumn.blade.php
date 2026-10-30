@@ -64,9 +64,12 @@
                 {{ ucwords(strtolower($data['firstName'])) }} {{ ucwords(strtolower($data['lastName'])) }}
             </h4>
 
-            <p class="card-text mb-3" style="color: var(--text-muted); font-size: 0.85rem;">
-                <span class="me-1" style="font-size: 1.05rem;">{{ \App\classes\CountryCatalog::getFlag($data['country'] ?? '') }}</span>
-                <span>{{ $data['country'] ?? 'Global' }}</span>
+            @php
+                $leftUserCountry = trim((string)($data['country'] ?? ''));
+            @endphp
+            <p class="card-text mb-3 d-inline-flex align-items-center justify-content-center gap-1" style="color: var(--text-muted); font-size: 0.85rem;">
+                <span style="font-size: 1.05rem;">{{ \App\classes\CountryCatalog::getFlag($leftUserCountry) }}</span>
+                <span>{{ $leftUserCountry !== '' ? $leftUserCountry : __('profile.global', 'Global') }}</span>
             </p>
 
             <!-- Family Code Headline & Tonal Pill(s) (Headline with Married - XXX and Birth - XXX badges) -->

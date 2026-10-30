@@ -433,14 +433,79 @@ export function profileFeed(opts = {}) {
 
         normalizeComparison(c) {
             if (!c || typeof c !== 'object' || !c.before_img || !c.after_img) return null;
+            const beforeLabel = c.before_label || 'Then';
+            const afterLabel = c.after_label || 'Now';
+            const mode = c.comparison_mode === 'echo' ? 'echo' : 'classic';
+            const m1 = String(beforeLabel).match(/\b(19\d{2}|20\d{2})\b/);
+            const m2 = String(afterLabel).match(/\b(19\d{2}|20\d{2})\b/);
+            const y1 = m1 ? parseInt(m1[1], 10) : null;
+            const y2 = m2 ? parseInt(m2[1], 10) : null;
+            const yearsDelta = (typeof c.years_delta === 'number' && !Number.isNaN(c.years_delta))
+                ? c.years_delta
+                : ((y1 !== null && y2 !== null) ? Math.abs(y2 - y1) : null);
+
+            let deltaBadge = null;
+            if (mode === 'echo') {
+                deltaBadge = '🧬 Like Parent, Like Child';
+            } else if (yearsDelta !== null && yearsDelta > 0) {
+                deltaBadge = yearsDelta === 1 ? '⏳ 1 Year Apart' : `⏳ ${yearsDelta} Years Apart`;
+            }
+
+            const isMystery = Boolean(c.mystery_year) && y1 !== null;
+            let mysteryOptions = [];
+            if (isMystery && y1 !== null) {
+                const nowYear = new Date().getFullYear();
+                const decoyA = Math.max(1920, y1 - 4);
+                const decoyB = Math.min(nowYear, y1 + 3 === y1 ? y1 - 2 : y1 + 3);
+                const set = Array.from(new Set([decoyA, y1, decoyB]));
+                while (set.length < 3) {
+                    const extra = Math.max(1920, y1 - (set.length * 3));
+                    if (!set.includes(extra)) set.push(extra);
+                    else set.push(Math.min(nowYear, y1 + set.length));
+                }
+                mysteryOptions = set.sort((a, b) => a - b);
+            }
+
+            const rawAvatars = Array.isArray(c.chain_avatars) ? c.chain_avatars : [];
+            const chainAvatars = rawAvatars.map(av => {
+                const raw = av?.profileImg || '';
+                const imgUrl = raw
+                    ? ((raw.startsWith('/') || raw.startsWith('http')) ? raw : `/resources/images/profile/${raw}`)
+                    : '/public/avatar/avatarM.png';
+                return {
+                    post_no: av?.post_no || null,
+                    user_id: av?.user_id || '',
+                    fullName: av?.fullName || 'Family Member',
+                    profileImg: imgUrl,
+                };
+            });
+
             return {
                 before_img: String(c.before_img),
                 after_img: String(c.after_img),
-                before_label: c.before_label || 'Then',
-                after_label: c.after_label || 'Now',
+                before_label: beforeLabel,
+                after_label: afterLabel,
                 parent_post_no: c.parent_post_no || null,
                 answer_count: parseInt(c.answer_count || 0, 10) || 0,
+                comparison_mode: mode,
+                mystery_year: isMystery,
+                true_year: y1,
+                mystery_options: mysteryOptions,
+                years_delta: yearsDelta,
+                delta_badge: deltaBadge,
+                chain_avatars: chainAvatars,
             };
+        },
+
+        celebrateThenNowGuess(event, isCorrect) {
+            if (typeof window.triggerHaptic === 'function') {
+                window.triggerHaptic(isCorrect ? 'impact' : 'selection');
+            }
+            if (isCorrect && event?.currentTarget) {
+                try {
+                    triggerHeirloomBurst(event.currentTarget, 'celebrate');
+                } catch (_) {}
+            }
         },
 
         extractImages(p) {

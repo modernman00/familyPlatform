@@ -164,12 +164,26 @@ $router->map(
 
 
 
-// THEN & NOW: a member's before/after timeline (RFC-0003)
+// THEN & NOW: a member's before/after timeline, family chain & archive picker (RFC-0003 / Living 2.0)
 $router->map(
   method: 'GET',
   route: '/api/members/[a:userId]/then-now',
   target: 'App\controller\members\ThenNowController@memberTimeline',
   name: 'api_member_then_now'
+);
+
+$router->map(
+  method: 'GET',
+  route: '/api/posts/[i:postNo]/then-now-chain',
+  target: 'App\controller\members\ThenNowController@chainTimeline',
+  name: 'api_post_then_now_chain'
+);
+
+$router->map(
+  method: 'GET',
+  route: '/api/members/[a:userId]/then-now-archive',
+  target: 'App\controller\members\ThenNowController@memberArchivePhotos',
+  name: 'api_member_then_now_archive'
 );
 
 // POST VIEWS TRACKING & AUTHOR VIEWERS INSPECTION

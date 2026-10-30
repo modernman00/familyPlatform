@@ -1,6 +1,6 @@
 <!-- Invite Family & Phone Contacts Modal -->
-<div class="modal fade" id="inviteFamilyModal" tabindex="-1" aria-labelledby="inviteFamilyModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+<div class="modal fade" id="inviteFamilyModal" tabindex="-1" aria-labelledby="inviteFamilyModalLabel" aria-hidden="true" x-data="{ isOpen: false }" x-init="$el.addEventListener('show.bs.modal', () => isOpen = true); $el.addEventListener('hidden.bs.modal', () => isOpen = false);">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" x-trap="isOpen">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; max-height: calc(100vh - 3.5rem);">
             @include('csrf')
             

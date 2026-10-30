@@ -1,6 +1,12 @@
 'use strict';
 import axios from 'axios';
 import Alpine from 'alpinejs';
+import collapse from '@alpinejs/collapse';
+import focus from '@alpinejs/focus';
+import persist from '@alpinejs/persist';
+import morph from '@alpinejs/morph';
+import { initAlpineStores } from './alpine/stores';
+import { initAlpineMagics } from './alpine/magics';
 import { qSel, showError, initGlobalSwalAlerts, swalToast, swalSuccess, swalError, swalWarning, swalConfirm } from "@modernman00/shared-js-lib";
 import Swal from 'sweetalert2';
 import PWAManager from './components/pwa/pwaManager';
@@ -23,6 +29,14 @@ window.swalError = swalError;
 window.swalWarning = swalWarning;
 window.swalConfirm = swalConfirm;
 window.Alpine = Alpine;
+
+Alpine.plugin(collapse);
+Alpine.plugin(focus);
+Alpine.plugin(persist);
+Alpine.plugin(morph);
+
+initAlpineStores(Alpine);
+initAlpineMagics(Alpine);
 
 Alpine.data('profileFeed', profileFeed);
 Alpine.data('profileSidebar', profileSidebar);

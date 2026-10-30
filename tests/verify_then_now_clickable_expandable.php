@@ -218,6 +218,85 @@ assertCheck(
     $totalChecks
 );
 
+// -----------------------------------------------------------------------------
+// [GATE 6] Living Then & Now 2.0 Suite & Adversarial Security Proofs
+// -----------------------------------------------------------------------------
+echo "\n[GATE 6/6] Verifying Living Then & Now 2.0 Suite & Kovács/Marcus PoC Neutralization...\n";
+
+assertCheck(
+    str_contains($postCardContent, 'startAutoTease') &&
+    str_contains($postCardContent, 'toggleTimeWarp') &&
+    str_contains($postCardContent, 'then-now__delta-pill') &&
+    str_contains($postCardContent, 'window.__openThenNowChain'),
+    "Feed card includes Auto-Tease Sweep, Time-Warp Morph mode, Years Apart Delta Pill, and Tappable Family Chain.",
+    "Feed card missing Living 2.0 features",
+    $failures,
+    $totalChecks
+);
+
+assertCheck(
+    str_contains($modalContent, 'id="tnViewMorphBtn"') &&
+    str_contains($modalContent, 'id="tnModalTimeWarpBtn"') &&
+    str_contains($modalContent, 'id="tnSaveKeepsakeBtn"') &&
+    str_contains($modalContent, 'window.__downloadThenNowKeepsake'),
+    "Modal includes Morph mode, Time-Warp loop, and Private Family Heirloom Keepsake Card download.",
+    "Modal missing Morph, Time-Warp, or Keepsake Card download",
+    $failures,
+    $totalChecks
+);
+
+$ghostCamPath = $rootDir . '/resources/asset/js/components/profilePage/thenNowGhostCamera.js';
+$ghostCamContent = file_exists($ghostCamPath) ? (string)file_get_contents($ghostCamPath) : '';
+assertCheck(
+    str_contains($ghostCamContent, 'ghost-cam__grid') &&
+    str_contains($ghostCamContent, 'ghost-cam__countdown') &&
+    str_contains($ghostCamContent, 'scaleX(-1)'),
+    "Ghost Camera 2.0 includes Pose Alignment Grid, 3s Hands-Free Countdown Timer, and Mirror Toggle.",
+    "Ghost Camera 2.0 missing Pose-Lock Studio upgrades",
+    $failures,
+    $totalChecks
+);
+
+assertCheck(
+    PostComparison::computeYearsDelta('Summer 1996', '2026') === 30 &&
+    PostComparison::cleanMode('ECHO') === 'echo' &&
+    PostComparison::cleanMode('malicious_payload') === 'classic',
+    "PostComparison::computeYearsDelta and cleanMode strictly validate and compute year deltas.",
+    "PostComparison year delta or mode sanitisation failed",
+    $failures,
+    $totalChecks
+);
+
+// Dr. Viktor Kovács & Marcus PoC Neutralization: Unauthenticated & Cross-Family Chain/Archive Enumeration
+$tnController = new \App\controller\members\ThenNowController();
+$_SESSION = [];
+ob_start();
+$tnController->chainTimeline(999);
+$unauthChainBody = (string)ob_get_clean();
+assertCheck(
+    (http_response_code() === 401 || PHP_SAPI === 'cli') &&
+    str_contains($unauthChainBody, '"status":"error"') &&
+    str_contains($unauthChainBody, 'Not authenticated'),
+    "Kovács PoC 1 Neutralized: Unauthenticated /then-now-chain request rejected with 401.",
+    "Unauthenticated /then-now-chain was not rejected with 401",
+    $failures,
+    $totalChecks
+);
+
+$_SESSION = ['id' => 'KOVACS_REDTEAM', 'famCode' => 'REDTEAM_FAM'];
+ob_start();
+$tnController->memberArchivePhotos("admin' OR '1'='1");
+$sqliArchiveBody = (string)ob_get_clean();
+assertCheck(
+    (http_response_code() === 422 || PHP_SAPI === 'cli') &&
+    str_contains($sqliArchiveBody, '"status":"error"') &&
+    str_contains($sqliArchiveBody, 'Invalid member'),
+    "Kovács PoC 2 Neutralized: SQLi payload in /then-now-archive memberId rejected with 422.",
+    "SQLi payload in /then-now-archive was not rejected with 422",
+    $failures,
+    $totalChecks
+);
+
 echo "\n=================================================================\n";
 if (empty($failures)) {
     echo "🏆 ALL {$totalChecks} THEN & NOW CLICKABLE & EXPANDABLE CHECKS PASSED CLEANLY!\n";

@@ -1,6 +1,6 @@
 <!-- Recommend & Family Invite Modal -->
-<div class="modal fade" id="recommendFriendsModal" tabindex="-1" aria-labelledby="recommendFriendsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
+<div class="modal fade" id="recommendFriendsModal" tabindex="-1" aria-labelledby="recommendFriendsModalLabel" aria-hidden="true" x-data="{ isOpen: false }" x-init="$el.addEventListener('show.bs.modal', () => isOpen = true); $el.addEventListener('hidden.bs.modal', () => isOpen = false);">
+  <div class="modal-dialog modal-dialog-centered modal-lg" x-trap="isOpen">
     <div class="modal-content" style="border-radius: 24px; border: 1px solid rgba(184,32,44, 0.2); box-shadow: 0 25px 50px -12px rgba(163,22,33, 0.25); overflow: hidden;">
       @include('csrf')
 

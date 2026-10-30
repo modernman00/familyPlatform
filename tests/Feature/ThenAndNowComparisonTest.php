@@ -215,4 +215,76 @@ final class ThenAndNowComparisonTest extends TestCase
         $this->assertSame('success', $body['status']);
         $this->assertContains($no, array_column($body['data']['items'], 'post_no'));
     }
+
+    // ── Living Then & Now 2.0 Suite (Delta, Echo Mode, Mystery Year, Chain & Archive) ──
+
+    public function testYearsDeltaEchoModeAndMysteryYearHydrateCleanly(): void
+    {
+        $this->assertSame(28, PostComparison::computeYearsDelta('Summer 1998', '2026'));
+        $this->assertNull(PostComparison::computeYearsDelta('Childhood', 'Today'));
+
+        $no = $this->makePost('parent_1994.jpg', 'child_2026.jpg');
+        $this->assertTrue(PostComparison::createForPost($no, '1994', '2026', null, 'echo', true));
+
+        $row = PostComparison::getForPosts([$no])[$no] ?? null;
+        $this->assertNotNull($row);
+        $this->assertSame('echo', $row['comparison_mode']);
+        $this->assertTrue($row['mystery_year']);
+        $this->assertSame(32, $row['years_delta']);
+    }
+
+    public function testChainHydratesAvatarsAndEnforcesFamilyZeroTrustBoundary(): void
+    {
+        $root = $this->makeComparisonPost('PU_TL_MEMBER', 'PU_TL_FAM');
+        $reply = $this->makePost('r_then.jpg', 'r_now.jpg');
+        $this->pdo->prepare("UPDATE post SET id = 'PU_TL_COUSIN', fullName = 'Cousin Ayo', postFamCode = 'PU_TL_FAM' WHERE post_no = ?")->execute([$reply]);
+        $this->assertTrue(PostComparison::createForPost($reply, '2001', '2026', $root));
+
+        $batch = PostComparison::getForPosts([$root]);
+        $this->assertSame(1, $batch[$root]['answer_count']);
+        $this->assertNotEmpty($batch[$root]['chain_avatars']);
+        $this->assertSame('Cousin Ayo', $batch[$root]['chain_avatars'][0]['fullName']);
+
+        // Same family sees full chain (root + reply)
+        $chain = PostComparison::forChain($reply, 'PU_TL_VIEWER', ['PU_TL_FAM']);
+        $chainNos = $this->nos($chain);
+        $this->assertContains($root, $chainNos);
+        $this->assertContains($reply, $chainNos);
+
+        // Outsider from another family gets 0 items (IDOR blocked)
+        $outsiderChain = PostComparison::forChain($root, 'PU_OUTSIDER', ['OTHER_FAM_999']);
+        $this->assertSame([], $outsiderChain);
+    }
+
+    public function testArchivePhotosForMemberReturnsVaultPhotosAndBlocksCrossFamilyIdor(): void
+    {
+        $no = $this->makeComparisonPost('PU_TL_MEMBER', 'PU_TL_FAM');
+        $photos = PostComparison::archivePhotosForMember('PU_TL_MEMBER', 'PU_TL_VIEWER', ['PU_TL_FAM']);
+        $this->assertNotEmpty($photos);
+
+        $outsiderPhotos = PostComparison::archivePhotosForMember('PU_TL_MEMBER', 'PU_OUTSIDER', ['OTHER_FAM_999']);
+        $this->assertNotContains($no, array_column($outsiderPhotos, 'post_no'));
+    }
+
+    public function testChainAndArchiveEndpointsEnforceAuthAndValidation(): void
+    {
+        $controller = new ThenNowController();
+
+        $_SESSION = [];
+        ob_start();
+        $controller->chainTimeline(10);
+        $this->assertSame(401, http_response_code());
+        ob_end_clean();
+
+        $_SESSION = ['id' => 'PU_TL_VIEWER', 'famCode' => 'PU_TL_FAM'];
+        ob_start();
+        $controller->chainTimeline(0);
+        $this->assertSame(422, http_response_code());
+        ob_end_clean();
+
+        ob_start();
+        $controller->memberArchivePhotos("bad'id");
+        $this->assertSame(422, http_response_code());
+        ob_end_clean();
+    }
 }

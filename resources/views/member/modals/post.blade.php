@@ -342,6 +342,26 @@
                             </div>
                             <input type="hidden" name="then_now" id="thenNowFlag" value="">
                             <input type="hidden" name="reply_to_post" id="thenNowReplyTo" value="">
+                            <input type="hidden" name="comparison_mode" id="thenNowModeInput" value="classic">
+                            <input type="hidden" name="mystery_year" id="thenNowMysteryInput" value="0">
+                            <input type="hidden" name="then_now_voice_base64" id="thenNowVoiceInput" value="">
+
+                            <!-- Mode Selector: Time Travel vs Genetic Echo (Parent vs Child) -->
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2 px-1">
+                                <div class="btn-group p-0.5 rounded-pill bg-light border" role="group" aria-label="Comparison theme">
+                                    <button type="button" id="tnModeClassicBtn" class="btn btn-sm rounded-pill fw-semibold active px-2.5 py-1" style="font-size: 0.76rem; min-height: 36px; white-space: nowrap;">
+                                        ⏳ Time Travel
+                                    </button>
+                                    <button type="button" id="tnModeEchoBtn" class="btn btn-sm rounded-pill fw-semibold text-secondary px-2.5 py-1" style="font-size: 0.76rem; min-height: 36px; white-space: nowrap;">
+                                        🧬 Like Parent, Like Child
+                                    </button>
+                                </div>
+                                <button type="button" id="tnMysteryToggleBtn" class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center gap-1" style="font-size: 0.75rem; min-height: 36px; white-space: nowrap;" aria-pressed="false" title="Let relatives guess the Then year before revealing it">
+                                    <i class="bi bi-dice-5-fill text-warning"></i>
+                                    <span>Guess the Year</span>
+                                </button>
+                            </div>
+
                             <div class="then-now-slots">
                                 <div class="then-now-slot">
                                     <label for="thenImgInput" class="then-now-slot__pick" id="thenSlotPick">
@@ -350,6 +370,9 @@
                                     </label>
                                     <input type="file" id="thenImgInput" accept="image/*" hidden>
                                     <input type="text" name="then_label" class="poll-builder__option" placeholder="Then, e.g. 1998" maxlength="40" aria-label="Then year or label">
+                                    <button type="button" id="thenArchivePickBtn" class="btn btn-sm btn-light border rounded-pill w-100 mt-2" style="min-height:44px; white-space: nowrap;">
+                                        <i class="bi bi-collection-fill" style="color: #a31621;"></i> Pick from Family Archive
+                                    </button>
                                 </div>
                                 <div class="then-now-slot">
                                     <label for="nowImgInput" class="then-now-slot__pick" id="nowSlotPick">
@@ -358,8 +381,34 @@
                                     </label>
                                     <input type="file" id="nowImgInput" accept="image/*" hidden>
                                     <input type="text" name="now_label" class="poll-builder__option" placeholder="Now, e.g. 2026" maxlength="40" aria-label="Now year or label">
-                                    <button type="button" id="nowCameraBtn" class="btn btn-sm btn-light border rounded-pill w-100 mt-2" style="min-height:44px;">
+                                    <button type="button" id="nowCameraBtn" class="btn btn-sm btn-light border rounded-pill w-100 mt-2" style="min-height:44px; white-space: nowrap;">
                                         <i class="bi bi-camera-fill"></i> Match it with the camera
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Family Archive Photo Picker Drawer (for Then Slot) -->
+                            <div id="thenArchiveDrawer" class="d-none mt-2 p-2.5 rounded-3 border" style="background: var(--surface-bg, #f8fafc);">
+                                <div class="d-flex justify-content-between align-items-center mb-1.5">
+                                    <span class="small fw-bold text-dark"><i class="bi bi-clock-history me-1" style="color:#a31621;"></i> Tap an archive photo to set as "Then"</span>
+                                    <button type="button" id="closeThenArchiveBtn" class="btn-close" style="font-size: 0.65rem;" aria-label="Close archive picker"></button>
+                                </div>
+                                <div id="thenArchiveGrid" class="d-flex gap-2 overflow-x-auto py-1" style="min-height: 76px;"></div>
+                            </div>
+
+                            <!-- 15-Second Voice Reflection Studio -->
+                            <div class="mt-2.5 p-2 rounded-3 border d-flex align-items-center justify-content-between flex-wrap gap-2" style="background: rgba(163, 22, 33, 0.04); border-color: rgba(163, 22, 33, 0.16) !important;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="button" id="tnVoiceRecordBtn" class="btn btn-sm rounded-pill fw-semibold px-3 d-inline-flex align-items-center gap-1.5" style="background-color: #a31621; color: #ffffff !important; border: none; min-height: 40px; white-space: nowrap;">
+                                        <i class="bi bi-mic-fill"></i>
+                                        <span id="tnVoiceRecordLabel">Add 15s Voice Story</span>
+                                    </button>
+                                    <span id="tnVoiceStatusText" class="small text-muted" style="font-size: 0.76rem;">Tell the story behind these years</span>
+                                </div>
+                                <div id="tnVoicePreviewWrap" class="d-none align-items-center gap-1.5">
+                                    <audio id="tnVoiceAudioPreview" controls preload="metadata" style="height: 32px; max-width: 170px;"></audio>
+                                    <button type="button" id="tnVoiceClearBtn" class="btn btn-sm btn-outline-danger rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 34px; height: 34px;" aria-label="Remove voice story">
+                                        <i class="bi bi-trash3"></i>
                                     </button>
                                 </div>
                             </div>

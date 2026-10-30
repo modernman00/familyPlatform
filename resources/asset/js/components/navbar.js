@@ -5,11 +5,19 @@ import axios from "axios"
 
 // Update notification badge
 function updateNotificationBadge(count) {
+    const countNum = parseInt(count || '0', 10);
+    if (typeof window !== 'undefined' && window.Alpine && typeof window.Alpine.store === 'function') {
+        const notifStore = window.Alpine.store('notifications');
+        if (notifStore && typeof notifStore.setCount === 'function') {
+            notifStore.setCount(countNum);
+            return;
+        }
+    }
+
     const badge = id('notification_count');
     const headerBadge = id('header_notif_count');
     const mobileBadge = id('pwa_bottom_badge');
     
-    const countNum = parseInt(count || '0');
     const displayStr = countNum > 99 ? '99+' : (countNum > 0 ? countNum.toString() : '');
 
     if (badge) {

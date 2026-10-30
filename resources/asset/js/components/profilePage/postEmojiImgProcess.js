@@ -210,6 +210,25 @@ const closeThenNow = () => {
     if (addThenNowBtn) addThenNowBtn.classList.remove('thennow-active');
     if (thenNowFlag) thenNowFlag.value = '';
     if (thenNowReplyTo) thenNowReplyTo.value = '';
+    const modeInput = document.getElementById('thenNowModeInput');
+    if (modeInput) modeInput.value = 'classic';
+    const mysteryInput = document.getElementById('thenNowMysteryInput');
+    if (mysteryInput) mysteryInput.value = '0';
+    const mysteryBtn = document.getElementById('tnMysteryToggleBtn');
+    if (mysteryBtn) {
+        mysteryBtn.classList.remove('btn-dark', 'text-white');
+        mysteryBtn.classList.add('btn-light');
+        mysteryBtn.setAttribute('aria-pressed', 'false');
+    }
+    const voiceInput = document.getElementById('thenNowVoiceInput');
+    if (voiceInput) voiceInput.value = '';
+    const voicePreviewWrap = document.getElementById('tnVoicePreviewWrap');
+    if (voicePreviewWrap) {
+        voicePreviewWrap.classList.add('d-none');
+        voicePreviewWrap.classList.remove('d-flex');
+    }
+    const archiveDrawer = document.getElementById('thenArchiveDrawer');
+    if (archiveDrawer) archiveDrawer.classList.add('d-none');
     thenNowContainer.querySelectorAll('input[type="text"], input[type="file"]').forEach(i => (i.value = ''));
     setThenNowSlot('then', null);
     setThenNowSlot('now', null);
@@ -247,6 +266,181 @@ if (addThenNowBtn && thenNowContainer) {
             input.dataset.guessed = '1';
         }
     };
+
+    // Mode switcher: Classic Time Travel vs Genetic Echo (Like Parent, Like Child)
+    const modeInput = document.getElementById('thenNowModeInput');
+    const classicBtn = document.getElementById('tnModeClassicBtn');
+    const echoBtn = document.getElementById('tnModeEchoBtn');
+    const setMode = (mode) => {
+        if (modeInput) modeInput.value = mode;
+        const thenIn = labelInput('then');
+        const nowIn = labelInput('now');
+        if (mode === 'echo') {
+            classicBtn?.classList.remove('active');
+            classicBtn?.classList.add('text-secondary');
+            echoBtn?.classList.add('active');
+            echoBtn?.classList.remove('text-secondary');
+            if (thenIn) thenIn.placeholder = 'Parent, e.g. Mum at age 7 (1992)';
+            if (nowIn) nowIn.placeholder = 'Child, e.g. Tobi at age 7 (2026)';
+        } else {
+            echoBtn?.classList.remove('active');
+            echoBtn?.classList.add('text-secondary');
+            classicBtn?.classList.add('active');
+            classicBtn?.classList.remove('text-secondary');
+            if (thenIn) thenIn.placeholder = 'Then, e.g. 1998';
+            if (nowIn) nowIn.placeholder = 'Now, e.g. 2026';
+        }
+    };
+    classicBtn?.addEventListener('click', () => setMode('classic'));
+    echoBtn?.addEventListener('click', () => setMode('echo'));
+
+    // "Guess the Year" Mystery Veil toggle
+    const mysteryBtn = document.getElementById('tnMysteryToggleBtn');
+    const mysteryInput = document.getElementById('thenNowMysteryInput');
+    mysteryBtn?.addEventListener('click', () => {
+        const active = mysteryInput?.value !== '1';
+        if (mysteryInput) mysteryInput.value = active ? '1' : '0';
+        mysteryBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        mysteryBtn.classList.toggle('btn-dark', active);
+        mysteryBtn.classList.toggle('text-white', active);
+        mysteryBtn.classList.toggle('btn-light', !active);
+    });
+
+    // "Pick from Family Archive" quick drawer for the Then slot
+    const archiveBtn = document.getElementById('thenArchivePickBtn');
+    const archiveDrawer = document.getElementById('thenArchiveDrawer');
+    const archiveGrid = document.getElementById('thenArchiveGrid');
+    document.getElementById('closeThenArchiveBtn')?.addEventListener('click', () => {
+        archiveDrawer?.classList.add('d-none');
+    });
+    archiveBtn?.addEventListener('click', async () => {
+        if (!archiveDrawer || !archiveGrid) return;
+        if (!archiveDrawer.classList.contains('d-none')) {
+            archiveDrawer.classList.add('d-none');
+            return;
+        }
+        archiveDrawer.classList.remove('d-none');
+        archiveGrid.innerHTML = '<span class="small text-muted py-2 px-2">Loading your family archive photos…</span>';
+        try {
+            const uid = localStorage.getItem('requesterId') || 'me';
+            const res = await fetch(`/api/members/${encodeURIComponent(uid)}/then-now-archive`, {
+                headers: { Accept: 'application/json' },
+                credentials: 'same-origin',
+            });
+            const body = res.ok ? await res.json() : null;
+            const photos = Array.isArray(body?.data?.photos) ? body.data.photos : [];
+            if (!photos.length) {
+                archiveGrid.innerHTML = '<span class="small text-muted py-2 px-2">No older family archive photos found yet—pick one from your device above.</span>';
+                return;
+            }
+            archiveGrid.innerHTML = '';
+            photos.forEach((item) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn p-0 border rounded-3 overflow-hidden position-relative flex-shrink-0';
+                btn.style.cssText = 'width: 72px; height: 72px; background: #0f172a;';
+                btn.title = item.caption || (item.year ? `Photo from ${item.year}` : 'Select archive photo');
+                const imgUrl = `/resources/images/post/${encodeURIComponent(item.img)}`;
+                btn.innerHTML = `
+                    <img src="${imgUrl}" alt="Archive photo" style="width:100%;height:100%;object-fit:cover;">
+                    ${item.year ? `<span class="badge bg-dark bg-opacity-75 text-white position-absolute bottom-0 start-0 m-1" style="font-size:0.62rem;">${item.year}</span>` : ''}
+                `;
+                btn.addEventListener('click', async () => {
+                    thenNowWork.then = (async () => {
+                        try {
+                            const imgResp = await fetch(imgUrl, { credentials: 'same-origin' });
+                            const blob = await imgResp.blob();
+                            const file = new File([blob], item.img || `then-${Date.now()}.jpg`, { type: blob.type || 'image/jpeg' });
+                            setThenNowSlot('then', file);
+                            if (item.year) suggestYear('then', item.year);
+                            archiveDrawer.classList.add('d-none');
+                        } catch (_) {}
+                    })();
+                });
+                archiveGrid.appendChild(btn);
+            });
+        } catch (_) {
+            archiveGrid.innerHTML = '<span class="small text-muted py-2 px-2">Could not load archive photos.</span>';
+        }
+    });
+
+    // 15-Second Voice Reflection Studio inside Then & Now
+    const voiceBtn = document.getElementById('tnVoiceRecordBtn');
+    const voiceLabel = document.getElementById('tnVoiceRecordLabel');
+    const voiceStatus = document.getElementById('tnVoiceStatusText');
+    const voicePreviewWrap = document.getElementById('tnVoicePreviewWrap');
+    const voiceAudio = document.getElementById('tnVoiceAudioPreview');
+    const voiceClearBtn = document.getElementById('tnVoiceClearBtn');
+    const voiceHidden = document.getElementById('thenNowVoiceInput');
+    let mediaRecorder = null;
+    let voiceChunks = [];
+    let voiceTimer = null;
+
+    voiceClearBtn?.addEventListener('click', () => {
+        if (voiceHidden) voiceHidden.value = '';
+        if (voiceAudio) voiceAudio.removeAttribute('src');
+        if (voicePreviewWrap) {
+            voicePreviewWrap.classList.add('d-none');
+            voicePreviewWrap.classList.remove('d-flex');
+        }
+        if (voiceLabel) voiceLabel.textContent = 'Add 15s Voice Story';
+        if (voiceStatus) voiceStatus.textContent = 'Tell the story behind these years';
+    });
+
+    voiceBtn?.addEventListener('click', async () => {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+            return;
+        }
+        if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+            Swal.fire({ icon: 'info', title: 'Microphone unavailable', text: 'Voice recording is not supported in this browser.', confirmButtonColor: '#b8202c' });
+            return;
+        }
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            voiceChunks = [];
+            mediaRecorder = new MediaRecorder(stream);
+            let secondsLeft = 15;
+            if (voiceLabel) voiceLabel.textContent = `Stop (${secondsLeft}s)`;
+            if (voiceStatus) voiceStatus.textContent = 'Recording your reflection…';
+
+            voiceTimer = setInterval(() => {
+                secondsLeft -= 1;
+                if (secondsLeft > 0) {
+                    if (voiceLabel) voiceLabel.textContent = `Stop (${secondsLeft}s)`;
+                } else if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+            }, 1000);
+
+            mediaRecorder.ondataavailable = (ev) => {
+                if (ev.data && ev.data.size > 0) voiceChunks.push(ev.data);
+            };
+            mediaRecorder.onstop = () => {
+                if (voiceTimer) clearInterval(voiceTimer);
+                stream.getTracks().forEach((t) => t.stop());
+                const blob = new Blob(voiceChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    if (voiceHidden && typeof reader.result === 'string') {
+                        voiceHidden.value = reader.result;
+                    }
+                };
+                reader.readAsDataURL(blob);
+                if (voiceAudio) voiceAudio.src = URL.createObjectURL(blob);
+                if (voicePreviewWrap) {
+                    voicePreviewWrap.classList.remove('d-none');
+                    voicePreviewWrap.classList.add('d-flex');
+                }
+                if (voiceLabel) voiceLabel.textContent = 'Re-record Voice';
+                if (voiceStatus) voiceStatus.textContent = '15s voice reflection ready!';
+            };
+            mediaRecorder.start();
+        } catch (_) {
+            if (voiceStatus) voiceStatus.textContent = 'Microphone permission blocked.';
+        }
+    });
+
     ['then', 'now'].forEach((slot) => {
         document.getElementById(`${slot}ImgInput`)?.addEventListener('change', (e) => {
             const file = e.target?.files?.[0] || null;

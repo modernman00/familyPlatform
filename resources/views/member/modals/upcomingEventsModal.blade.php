@@ -4,7 +4,7 @@
 
 <!-- All Upcoming Family Events (Next 3 Months) Modal -->
 <div class="modal fade" id="allUpcomingEventsModal" tabindex="-1" aria-labelledby="allUpcomingEventsModalLabel" aria-hidden="true" x-data="allUpcomingEventsModal()">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" style="max-width: 860px;">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" style="max-width: 860px;" x-trap="isOpen">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; background-color: var(--card-bg, #ffffff); overflow: hidden;">
             
             <!-- Modal Header -->
@@ -391,6 +391,7 @@
 function allUpcomingEventsModal() {
     return {
         events: [],
+        isOpen: false,
         isLoading: false,
         searchQuery: '',
         selectedCategory: 'all',
@@ -411,7 +412,11 @@ function allUpcomingEventsModal() {
             const modalEl = document.getElementById('allUpcomingEventsModal');
             if (modalEl) {
                 modalEl.addEventListener('show.bs.modal', () => {
+                    this.isOpen = true;
                     this.loadUpcomingEvents();
+                });
+                modalEl.addEventListener('hidden.bs.modal', () => {
+                    this.isOpen = false;
                 });
             }
 

@@ -368,13 +368,67 @@ final class ProfilePage extends ProcessImg
                 if ($isThenNow) {
                     try {
                         $replyTo = (int)($_POST['reply_to_post'] ?? 0);
+                        $compMode = \App\model\PostComparison::cleanMode($_POST['comparison_mode'] ?? 'classic');
+                        $mysteryYear = !empty($_POST['mystery_year']) && (string)$_POST['mystery_year'] !== '0';
                         $linked = \App\model\PostComparison::createForPost(
                             (int)$result,
                             \App\model\PostComparison::cleanLabel($_POST['then_label'] ?? ''),
                             \App\model\PostComparison::cleanLabel($_POST['now_label'] ?? ''),
-                            $replyTo > 0 ? $replyTo : null
+                            $replyTo > 0 ? $replyTo : null,
+                            $compMode,
+                            $mysteryYear
                         );
-                        error_log((string)json_encode(['event' => 'then_now.created', 'post_no' => (int)$result, 'user_id' => is_string($id) ? $id : '', 'linked' => $linked, 'is_reply' => $replyTo > 0]));
+
+                        // Optional 15-second Then & Now Voice Reflection keepsake
+                        $rawVoiceBase64 = isset($_POST['then_now_voice_base64']) ? trim((string)$_POST['then_now_voice_base64']) : '';
+                        if ($rawVoiceBase64 !== '') {
+                            $dataPart = str_contains($rawVoiceBase64, ',') ? explode(',', $rawVoiceBase64, 2)[1] : $rawVoiceBase64;
+                            $audioBytes = base64_decode($dataPart, true);
+                            if (is_string($audioBytes) && strlen($audioBytes) > 0 && strlen($audioBytes) <= 5 * 1024 * 1024) {
+                                $allowedVoiceMimes = [
+                                    'audio/mpeg' => 'mp3',
+                                    'audio/mp3' => 'mp3',
+                                    'audio/ogg' => 'ogg',
+                                    'application/ogg' => 'ogg',
+                                    'audio/wav' => 'wav',
+                                    'audio/x-wav' => 'wav',
+                                    'audio/mp4' => 'm4a',
+                                    'video/mp4' => 'm4a',
+                                    'audio/x-m4a' => 'm4a',
+                                    'audio/webm' => 'webm',
+                                    'video/webm' => 'webm',
+                                ];
+                                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                                $detectedMime = $finfo !== false ? finfo_buffer($finfo, $audioBytes) : false;
+                                $ext = null;
+                                if (is_string($detectedMime) && isset($allowedVoiceMimes[$detectedMime])) {
+                                    $ext = $allowedVoiceMimes[$detectedMime];
+                                } elseif (
+                                    str_starts_with($audioBytes, 'RIFF') ||
+                                    str_starts_with($audioBytes, 'ID3') ||
+                                    str_starts_with($audioBytes, 'OggS') ||
+                                    str_starts_with($audioBytes, "\x1A\x45\xDF\xA3")
+                                ) {
+                                    $ext = 'webm';
+                                }
+                                if ($ext !== null) {
+                                    $voiceDir = dirname(__DIR__, 3) . '/public/resources/audio/voice_capsules';
+                                    if (!is_dir($voiceDir)) {
+                                        mkdir($voiceDir, 0755, true);
+                                    }
+                                    $voiceFilename = 'tn_vc_' . (int)$result . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
+                                    $voicePath = $voiceDir . '/' . basename($voiceFilename);
+                                    // nosemgrep: php.lang.security.injection.tainted-filename.tainted-filename
+                                    if (file_put_contents($voicePath, $audioBytes) !== false) {
+                                        $voiceRelativeUrl = '/resources/audio/voice_capsules/' . $voiceFilename;
+                                        $vStmt = \Src\Db::connect2()->prepare('UPDATE post SET voice_capsule_url = ? WHERE post_no = ?');
+                                        $vStmt->execute([$voiceRelativeUrl, (int)$result]);
+                                    }
+                                }
+                            }
+                        }
+
+                        error_log((string)json_encode(['event' => 'then_now.created', 'post_no' => (int)$result, 'user_id' => is_string($id) ? $id : '', 'linked' => $linked, 'is_reply' => $replyTo > 0, 'mode' => $compMode, 'mystery_year' => $mysteryYear]));
                     } catch (\Throwable $th) {
                         error_log('[ProfilePage::post then_now] ' . $th->getMessage());
                     }

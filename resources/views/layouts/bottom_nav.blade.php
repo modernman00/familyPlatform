@@ -107,7 +107,7 @@ body.dark-theme .pwa-tab-center-action .pwa-center-btn-bubble,
         <div class="pwa-tab-icon-wrap position-relative">
             <i class="bi bi-bell pwa-tab-icon-outline"></i>
             <i class="bi bi-bell-fill pwa-tab-icon-filled"></i>
-            <span class="pwa-tab-badge" id="pwa_bottom_badge" style="display: none;"></span>
+            <span class="pwa-tab-badge" id="pwa_bottom_badge" x-data x-cloak x-show="$store.notifications.hasUnread" x-text="$store.notifications.display" style="display: none;"></span>
         </div>
         <span class="pwa-tab-label">{{ __('nav.alerts', 'Alerts') }}</span>
     </a>

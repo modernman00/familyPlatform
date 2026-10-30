@@ -72,7 +72,7 @@
                     <button class="btn btn-icon-stitch" id="notificationBtn" title="{{ __('nav.notifications', 'View alerts and family notifications') }}" type="button">
                         <i class="bi bi-bell-fill"></i>
                     </button>
-                    <span class="notification-badge" id="notification_count"></span>
+                    <span class="notification-badge" id="notification_count" x-data x-cloak x-show="$store.notifications.hasUnread" x-text="$store.notifications.display"></span>
 
                     <!-- Google Stitch Notification Dropdown -->
                     <div class="notification-dropdown shadow-lg" id="notificationDropdown">
@@ -80,7 +80,7 @@
                         <div class="notif-header-stitch d-flex align-items-center gap-3">
                             <div class="notif-header-bubble position-relative">
                                 <i class="bi bi-bell-fill text-primary"></i>
-                                <span class="notif-header-badge" id="header_notif_count"></span>
+                                <span class="notif-header-badge" id="header_notif_count" x-data x-cloak x-show="$store.notifications.hasUnread" x-text="$store.notifications.display"></span>
                             </div>
                             <h5 class="mb-0 fw-bold notif-header-title">{{ __('nav.notifications', 'Notifications') }}</h5>
                         </div>
