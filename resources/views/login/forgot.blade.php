@@ -1,201 +1,96 @@
-@extends('layouts.landing_layout')
+@extends('forms.base')
+
 @section('title', 'Forgot Password')
+@section('data-page-id', 'forgot')
+@section('meta_description', 'Recover your FamilyPlatform account with a secure verification code.')
+
 @section('content')
 
-    @include('partials.loader', ['scriptOnly' => true])
+@include('partials.loader', ['scriptOnly' => true])
 
-    <style nonce="{{ $nonce }}">
-        body {
-            background-color: #F4F5FB !important;
-            font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
-        }
-
-        /* Override the outer Bootstrap container from forms.base */
-        .styleForm {
-            background: transparent !important;
-            box-shadow: none !important;
-            padding: 0 !important;
-        }
-        
-        .logo-container {
-            display: none !important;
-        }
-
-        .noDisplay {
-            display: none !important;
-        }
-
-        .stitch-auth-container {
-            max-width: 440px;
-            margin: 4rem auto 5rem;
-            background: #ffffff;
-            border-radius: 20px;
-            padding: 3rem 2.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
-            text-align: center;
-        }
-
-        .stitch-icon-badge {
-            width: 56px;
-            height: 56px;
-            margin: 0 auto 1.5rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: #8a1019;
-            background-color: #EEDDFF;
-        }
-
-        .stitch-title {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: #1A1A24;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.5px;
-        }
-
-        .stitch-subtitle {
-            font-size: 0.95rem;
-            color: #6B7280;
-            margin-bottom: 2rem;
-            line-height: 1.5;
-        }
-
-        /* Form Styles Overrides */
-        .styleform_form {
-            text-align: left;
-        }
-
-        .styleform_form .form-label {
-            font-weight: 600;
-            color: #374151;
-            font-size: 0.85rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .styleform_form .form-control {
-            border-radius: 8px;
-            border: 1px solid #D1D5DB;
-            padding: 0.75rem 1rem;
-            font-size: 0.95rem;
-            box-shadow: none;
-            margin-bottom: 1.5rem;
-        }
-        
-        .styleform_form .form-control::placeholder {
-            color: #9CA3AF;
-        }
-
-        .styleform_form .form-control:focus {
-            border-color: var(--brand-primary);
-            box-shadow: 0 0 0 3px rgba(184,32,44, 0.15);
-        }
-
-        .stitch-submit {
-            width: 100%;
-            background: linear-gradient(135deg, var(--brand-primary, #a31621) 0%, var(--brand-primary-dark, #8a1019) 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 0.6rem 1rem;
-            min-height: 44px;
-            font-size: 0.92rem;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-            cursor: pointer;
-            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            box-shadow: 0 2px 8px rgba(163,22,33, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .stitch-submit:hover {
-            background: linear-gradient(135deg, var(--brand-primary-light, #b8202c) 0%, var(--brand-primary, #a31621) 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 14px rgba(163,22,33, 0.32);
-        }
-
-        .stitch-submit:active {
-            transform: scale(0.98);
-        }
-
-        .stitch-footer {
-            margin-top: 2rem;
-            font-size: 0.95rem;
-            color: #6B7280;
-        }
-
-        .stitch-link {
-            color: var(--brand-primary);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .stitch-link:hover {
-            text-decoration: underline;
-        }
-
-        /* Hide the original BuildFormBStrap submit button if any */
-        .styleform_form #btn-forgot {
-            display: none !important;
-        }
-    </style>
-
-    <div class="stitch-auth-container">
-        <div class="text-center mb-4">
-            <img src="{{ getenv('APP_LOGO') }}" alt="logo" style="height: 64px;" class="mb-2">
-        </div>
-        
-        <div class="stitch-icon-badge">
-            <i class="bi bi-shield-check"></i>
-        </div>
-
-        <h1 class="stitch-title">Verify your identity</h1>
-        <p class="stitch-subtitle">Please enter your email address to receive a 6-digit security code.</p>
-
-        <form id="forgot" class="styleform_form">
-    @include('csrf')
-            @php
-                $formArray = [
-                    'forgot_notification' => 'showError',
-                    'email' => 'email', // email notification
-                    'token' => 'token'
-                ];
-
-                $form = new Src\BuildFormBStrap($formArray);
-                $form->genForm();
-            @endphp
-            
-            <div id="setLoader" class="loader noDisplay" style="margin: 0 auto; display: none;"></div>
-
-            <button type="button" class="stitch-submit" id="button">
-                Send Code <i class="bi bi-arrow-right"></i>
-            </button>
-        </form>
-
-        <div class="stitch-footer">
-            Remember your password? <a href="/login" class="stitch-link">Sign in instead</a>
-        </div>
+<div x-data="forgotComponent()" class="w-100 text-center text-lg-start">
+    <!-- Icon Badge -->
+    <div class="mb-3 d-inline-flex align-items-center justify-content-center" 
+         style="width: 56px; height: 56px; border-radius: 16px; background: rgba(163, 22, 33, 0.2); color: #f87171; border: 1px solid rgba(163, 22, 33, 0.35);">
+        <i class="fas fa-key fs-4"></i>
     </div>
 
-    <script nonce="{{ $nonce }}">
-        document.addEventListener("DOMContentLoaded", function() {
-            var emailInput = document.getElementById('email');
-            if (emailInput) {
-                emailInput.placeholder = 'you@example.com';
-            }
-            
-            document.querySelectorAll('.mb-3').forEach(function(el) {
-                el.classList.remove('mb-3');
-            });
-        });
-    </script>
+    <!-- Header -->
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1 text-white brand-font">Forgot Password</h2>
+        <p class="text-secondary mb-0" style="font-size: 0.95rem; color: #94a3b8 !important;">
+            Enter your registered email address to receive a secure 6-digit recovery code.
+        </p>
+    </div>
+
+    {{-- Session / URL status messages --}}
+    @isset($_GET['error'])
+    <div class="alert alert-danger border-0 rounded-3 py-3 mb-4 text-white" style="background-color: rgba(220, 38, 38, 0.25); border: 1px solid rgba(220, 38, 38, 0.5) !important;">
+        @if($_GET['error'] === 'not_found')
+            Email address not found in our family records.
+        @else
+            An error occurred. Please verify your email and try again.
+        @endif
+    </div>
+    @endisset
+
+    @isset($_GET['success'])
+    <div class="alert alert-success border-0 rounded-3 py-3 mb-4 text-white" style="background-color: rgba(16, 185, 129, 0.25); border: 1px solid rgba(16, 185, 129, 0.5) !important;">
+        Recovery code dispatched! Please check your email inbox.
+    </div>
+    @endisset
+
+    <!-- Error container for shared library / AJAX -->
+    <div id="forgot_notification" class="alert alert-danger py-2 px-3 small mb-3 noDisplay text-white" style="display: none; border-radius: 10px; background-color: #dc2626; border: none;">
+        <p id="showError" class="mb-0"></p>
+    </div>
+
+    <!-- Forgot Password Form -->
+    <form id="forgot" class="styleform_form mt-3" autocomplete="on">
+        @include('csrf')
+        <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
+
+        <!-- Email Address -->
+        <div class="mb-4">
+            <label class="form-label" for="email">Email Address</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                <input type="email" 
+                       name="email" 
+                       id="email" 
+                       class="form-control" 
+                       placeholder="name@family.com" 
+                       required 
+                       autofocus 
+                       autocomplete="email"
+                       x-model="email">
+            </div>
+            <p id="email_error" class="text-danger mt-1 small mb-0"></p>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="button" 
+                id="button" 
+                class="btn btn-primary w-100 py-3 fw-bold mb-4 rounded-3 d-flex justify-content-center align-items-center"
+                data-spin="true">
+            <span>Send Recovery Code</span> 
+            <i class="fas fa-arrow-right ms-2"></i>
+        </button>
+
+        <!-- Return to Sign In -->
+        <div class="text-center small text-secondary">
+            Remembered your password? 
+            <a href="/login" class="text-brand text-brand-hover fw-bold">Sign In</a>
+        </div>
+    </form>
+</div>
+
+<script nonce="{{ $nonce }}">
+function forgotComponent() {
+    return {
+        email: ''
+    };
+}
+</script>
 
 @endsection

@@ -731,8 +731,13 @@
 
   <!-- Embedded Video (YouTube, Vimeo, Cloud Stream) -->
   <template x-if="post.video && (post.video.type === 'youtube' || post.video.type === 'vimeo' || post.video.type === 'cloudflare')">
-    <div class="video-embed-container mb-3 px-1">
-      <div class="ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm border border-light-subtle" style="border-radius: 12px; max-height: 380px;">
+    <div class="video-embed-container mb-3 px-1"
+         x-data="{
+           isShort: (post.video.originalUrl && post.video.originalUrl.includes('/shorts/'))
+         }">
+      <div class="rounded-3 overflow-hidden shadow-sm border border-light-subtle mx-auto position-relative"
+           :class="isShort ? 'ratio ratio-9x16' : 'ratio ratio-16x9'"
+           :style="isShort ? 'border-radius: 14px; max-height: 560px; max-width: 380px; background: #07090e;' : 'border-radius: 14px; max-height: 440px; background: #07090e;'">
         <iframe :src="post.video.embedUrl" 
                 title="Video Player" 
                 frameborder="0" 
@@ -744,33 +749,239 @@
     </div>
   </template>
 
-  <!-- Direct Video Stream -->
+  <!-- Direct Video Stream (World-Class Instagram-Grade Adaptive Video Rendition) -->
   <template x-if="post.video && post.video.type === 'direct'">
-    <div class="video-embed-container mb-3 px-1 position-relative" x-data="{ isVideoMuted: true }">
-      <div class="ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm border border-light-subtle position-relative" style="border-radius: 12px; max-height: 380px; background: #000;">
-        <video class="feed-post-video w-100 h-100"
+    <div class="video-embed-container mb-3 px-1 position-relative" 
+         x-data="{
+           isVideoMuted: true,
+           isPlaying: false,
+           videoOrientation: 'portrait',
+           videoRatio: '4 / 5',
+           videoMaxHeight: '560px',
+           isPortrait: true,
+           hasMetadata: false,
+           progressPercent: 0,
+           currentTimeFormatted: '0:00',
+           durationFormatted: '0:00',
+           showPulse: false,
+           pulseIcon: 'bi-play-fill',
+           showControlsOverlay: false,
+           formatTime(sec) {
+             if (!sec || isNaN(sec)) return '0:00';
+             const m = Math.floor(sec / 60);
+             const s = Math.floor(sec % 60);
+             return m + ':' + (s < 10 ? '0' : '') + s;
+           },
+           detectVideoDimensions(el) {
+             if (!el || !el.videoWidth || !el.videoHeight) return;
+             this.hasMetadata = true;
+             const w = el.videoWidth;
+             const h = el.videoHeight;
+             const ratio = w / h;
+
+             if (ratio < 0.88) {
+               this.isPortrait = true;
+               this.videoOrientation = 'portrait';
+               if (ratio <= 0.65) {
+                 this.videoRatio = '9 / 16';
+                 this.videoMaxHeight = '580px';
+               } else {
+                 this.videoRatio = '4 / 5';
+                 this.videoMaxHeight = '540px';
+               }
+             } else if (ratio > 1.15) {
+               this.isPortrait = false;
+               this.videoOrientation = 'landscape';
+               this.videoRatio = (ratio >= 2.1) ? '21 / 9' : '16 / 9';
+               this.videoMaxHeight = '440px';
+             } else {
+               this.isPortrait = false;
+               this.videoOrientation = 'square';
+               this.videoRatio = '1 / 1';
+               this.videoMaxHeight = '480px';
+             }
+           },
+           togglePlayback(videoEl) {
+             if (!videoEl) return;
+             if (videoEl.paused) {
+               videoEl.play().then(() => {
+                 this.isPlaying = true;
+                 this.triggerPulse('bi-play-fill');
+               }).catch(() => {});
+             } else {
+               videoEl.pause();
+               this.isPlaying = false;
+               this.triggerPulse('bi-pause-fill');
+             }
+           },
+           triggerPulse(icon) {
+             this.pulseIcon = icon;
+             this.showPulse = true;
+             setTimeout(() => { this.showPulse = false; }, 500);
+           },
+           toggleMute(videoEl) {
+             if (!videoEl) return;
+             videoEl.muted = !videoEl.muted;
+             this.isVideoMuted = videoEl.muted;
+           },
+           handleTimeUpdate(videoEl) {
+             if (!videoEl) return;
+             const cur = videoEl.currentTime;
+             const dur = videoEl.duration;
+             if (dur && dur > 0) {
+               this.progressPercent = Math.min(100, Math.max(0, (cur / dur) * 100));
+               this.currentTimeFormatted = this.formatTime(cur);
+               this.durationFormatted = this.formatTime(dur);
+             }
+             if (post.video && post.video.trimEnd !== null && cur >= post.video.trimEnd) {
+               videoEl.currentTime = post.video.trimStart || 0;
+             }
+           },
+           seekVideo(event, videoEl) {
+             if (!videoEl || !videoEl.duration) return;
+             const rect = event.currentTarget.getBoundingClientRect();
+             const clickX = event.clientX - rect.left;
+             const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+             videoEl.currentTime = ratio * videoEl.duration;
+           }
+         }"
+         x-init="$nextTick(() => { const v = $el.querySelector('video'); if (v && v.videoWidth) detectVideoDimensions(v); })">
+      
+      <!-- Outer Adaptive Container with Ambient Studio Glow -->
+      <div class="video-rendition-frame position-relative overflow-hidden mx-auto shadow-sm"
+           @mouseenter="showControlsOverlay = true"
+           @mouseleave="showControlsOverlay = false"
+           :style="'aspect-ratio: ' + videoRatio + '; max-height: ' + videoMaxHeight + '; width: 100%; max-width: ' + (isPortrait ? (videoRatio === '9 / 16' ? '400px' : '460px') : '100%') + '; border-radius: 14px; background: #07090e; transition: aspect-ratio 0.25s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);'">
+
+        <!-- Ambient Studio Glow Backdrop (Instagram / YouTube Studio Ambient Mode) -->
+        <div class="position-absolute top-0 start-0 w-100 h-100 overflow-hidden" style="border-radius: 14px; pointer-events: none; z-index: 1;">
+          <div class="w-100 h-100" style="background: radial-gradient(circle at center, rgba(30, 41, 59, 0.55) 0%, rgba(7, 9, 14, 0.98) 100%);"></div>
+        </div>
+
+        <!-- Main Video Element -->
+        <video class="feed-post-video w-100 h-100 position-relative"
                :src="post.video.embedUrl"
-               controls
                playsinline
                webkit-playsinline
                muted
                loop
                preload="metadata"
-               @loadedmetadata="if (post.video && post.video.trimStart !== null && $el.currentTime < post.video.trimStart) { $el.currentTime = post.video.trimStart; }"
-               @play="if (post.video && post.video.trimStart !== null && ($el.currentTime < post.video.trimStart || (post.video.trimEnd !== null && $el.currentTime >= post.video.trimEnd))) { $el.currentTime = post.video.trimStart; }"
-               @timeupdate="if (post.video && post.video.trimEnd !== null && $el.currentTime >= post.video.trimEnd) { $el.currentTime = post.video.trimStart || 0; }"
+               @click.stop="togglePlayback($el)"
+               @loadedmetadata="
+                 detectVideoDimensions($el);
+                 if (post.video && post.video.trimStart !== null && $el.currentTime < post.video.trimStart) { 
+                   $el.currentTime = post.video.trimStart; 
+                 }
+               "
+               @play="
+                 isPlaying = true;
+                 if (post.video && post.video.trimStart !== null && ($el.currentTime < post.video.trimStart || (post.video.trimEnd !== null && $el.currentTime >= post.video.trimEnd))) { 
+                   $el.currentTime = post.video.trimStart; 
+                 }
+               "
+               @pause="isPlaying = false"
+               @timeupdate="handleTimeUpdate($el)"
                @volumechange="isVideoMuted = $el.muted"
-               style="width: 100%; height: 100%; object-fit: contain; background: #000;"></video>
+               style="width: 100%; height: 100%; object-fit: contain; z-index: 2; border-radius: 14px; cursor: pointer; background: transparent;"></video>
 
-        <!-- Quick 1-Tap Sound Toggle (Instagram / TikTok Feed Standard) -->
+        <!-- Instagram Animated Center Pulse Ripple (Play / Pause Feedback) -->
+        <div x-cloak x-show="showPulse" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-75"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-300"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-125"
+             class="position-absolute top-50 start-50 translate-middle pointer-events-none d-flex align-items-center justify-content-center"
+             style="z-index: 7; width: 72px; height: 72px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; box-shadow: 0 8px 24px rgba(0,0,0,0.45);">
+          <i class="bi fs-1" :class="pulseIcon" style="color: #ffffff;"></i>
+        </div>
+
+        <!-- Instagram Format Badge (Top-Left) -->
+        <div class="position-absolute d-inline-flex align-items-center gap-1.5 shadow-sm"
+             style="top: 14px; left: 14px; z-index: 6; pointer-events: none;">
+          <template x-if="isPortrait">
+            <span class="badge rounded-pill px-2.5 py-1.5 d-inline-flex align-items-center gap-1"
+                  style="background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.22); color: #ffffff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;">
+              <i class="bi bi-phone-fill text-info" style="font-size: 0.75rem;"></i>
+              <span>PORTRAIT HD</span>
+            </span>
+          </template>
+          <template x-if="!isPortrait && videoOrientation === 'landscape'">
+            <span class="badge rounded-pill px-2.5 py-1.5 d-inline-flex align-items-center gap-1"
+                  style="background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.22); color: #ffffff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;">
+              <i class="bi bi-badge-hd-fill text-warning" style="font-size: 0.75rem;"></i>
+              <span>SUPER HD</span>
+            </span>
+          </template>
+          <template x-if="!isPortrait && videoOrientation === 'square'">
+            <span class="badge rounded-pill px-2.5 py-1.5 d-inline-flex align-items-center gap-1"
+                  style="background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.22); color: #ffffff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;">
+              <i class="bi bi-square-fill text-success" style="font-size: 0.7rem;"></i>
+              <span>SQUARE HD</span>
+            </span>
+          </template>
+        </div>
+
+        <!-- Instagram 1-Tap Sound Toggle Pill (Top-Right) -->
         <button type="button" 
                 class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
-                @click.stop="const v = $el.closest('.video-embed-container').querySelector('video'); if (v) { v.muted = !v.muted; isVideoMuted = v.muted; }"
+                @click.stop="toggleMute($el.closest('.video-rendition-frame').querySelector('video'))"
                 :title="isVideoMuted ? 'Unmute video' : 'Mute video'"
                 :aria-label="isVideoMuted ? 'Unmute video' : 'Mute video'"
-                style="top: 14px; right: 14px; z-index: 5; width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 9999px; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; transition: transform 0.15s ease, background 0.15s ease; white-space: nowrap; flex-shrink: 0;">
+                style="top: 14px; right: 14px; z-index: 6; width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; transition: transform 0.15s ease, background 0.15s ease; white-space: nowrap; flex-shrink: 0;">
           <i class="bi" :class="isVideoMuted ? 'bi-volume-mute-fill' : 'bi-volume-up-fill'" style="font-size: 1.15rem; color: #ffffff;"></i>
         </button>
+
+        <!-- Instagram Bottom Overlay Controls & Progress Scrubber -->
+        <div class="position-absolute bottom-0 start-0 w-100" 
+             style="z-index: 6; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.35) 60%, transparent 100%); padding: 24px 12px 10px 12px;">
+          
+          <!-- Mini Control Strip: Play/Pause, Timestamps, Fullscreen -->
+          <div class="d-flex align-items-center justify-content-between text-white mb-1.5" style="font-size: 0.75rem; font-weight: 600;">
+            <div class="d-flex align-items-center gap-2">
+              <button type="button" 
+                      class="btn btn-link text-white p-0 d-inline-flex align-items-center justify-content-center text-decoration-none"
+                      @click.stop="togglePlayback($el.closest('.video-rendition-frame').querySelector('video'))"
+                      :title="isPlaying ? 'Pause video' : 'Play video'"
+                      :aria-label="isPlaying ? 'Pause video' : 'Play video'"
+                      style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; white-space: nowrap; flex-shrink: 0;">
+                <i class="bi fs-5" :class="isPlaying ? 'bi-pause-fill' : 'bi-play-fill'" style="color: #ffffff;"></i>
+              </button>
+              <span class="font-monospace" style="letter-spacing: 0.02em;">
+                <span x-text="currentTimeFormatted">0:00</span> / <span x-text="durationFormatted">0:00</span>
+              </span>
+            </div>
+
+            <div class="d-flex align-items-center gap-1.5">
+              <!-- Fullscreen Button -->
+              <button type="button" 
+                      class="btn btn-link text-white p-0 d-inline-flex align-items-center justify-content-center text-decoration-none"
+                      @click.stop="
+                        const v = $el.closest('.video-rendition-frame').querySelector('video');
+                        if (v) {
+                          if (v.requestFullscreen) { v.requestFullscreen(); }
+                          else if (v.webkitRequestFullscreen) { v.webkitRequestFullscreen(); }
+                        }
+                      "
+                      title="View Fullscreen"
+                      aria-label="View Fullscreen"
+                      style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; white-space: nowrap; flex-shrink: 0;">
+                <i class="bi bi-arrows-fullscreen" style="font-size: 0.95rem; color: #ffffff;"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Interactive Instagram Scrubber Bar -->
+          <div class="video-scrubber-track position-relative w-100" 
+               @click.stop="seekVideo($event, $el.closest('.video-rendition-frame').querySelector('video'))"
+               style="height: 6px; background: rgba(255, 255, 255, 0.28); border-radius: 9999px; cursor: pointer; overflow: hidden;">
+            <div class="video-scrubber-fill h-100" 
+                 :style="'width: ' + progressPercent + '%; background: #ffffff; border-radius: 9999px; box-shadow: 0 0 8px rgba(255, 255, 255, 0.85); transition: width 0.08s linear;'"></div>
+          </div>
+
+        </div>
+
       </div>
     </div>
   </template>

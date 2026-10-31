@@ -660,6 +660,24 @@ const openAutoTrimStudioForFile = (file, duration) => {
     stagedTrimBlobUrl = URL.createObjectURL(file);
     if (videoTrimPreviewPlayer) {
         videoTrimPreviewPlayer.src = stagedTrimBlobUrl;
+        videoTrimPreviewPlayer.addEventListener('loadedmetadata', () => {
+            if (videoTrimPreviewPlayer.videoWidth && videoTrimPreviewPlayer.videoHeight) {
+                const r = videoTrimPreviewPlayer.videoWidth / videoTrimPreviewPlayer.videoHeight;
+                const parent = videoTrimPreviewPlayer.parentElement;
+                if (parent) {
+                    if (r < 0.88) {
+                        parent.className = 'ratio ratio-4x3 rounded-3 overflow-hidden mb-2 border border-secondary border-opacity-25';
+                        parent.style.maxHeight = '240px';
+                        parent.style.maxWidth = r <= 0.65 ? '180px' : '220px';
+                        parent.style.margin = '0 auto';
+                    } else {
+                        parent.className = 'ratio ratio-16x9 rounded-3 overflow-hidden mb-2 border border-secondary border-opacity-25';
+                        parent.style.maxHeight = '190px';
+                        parent.style.maxWidth = '100%';
+                    }
+                }
+            }
+        }, { once: true });
     }
 
     syncTrimSlidersUI('start');
@@ -673,14 +691,31 @@ const renderAttachedVideoPreview = (streamUrl, trimStart = null, trimEnd = null)
     if (videoLivePreview) {
         const parsed = parseVideoUrl(streamUrl);
         if (parsed && (parsed.type === 'youtube' || parsed.type === 'vimeo' || parsed.type === 'cloudflare')) {
+            const isShort = parsed.originalUrl && parsed.originalUrl.includes('/shorts/');
+            videoLivePreview.className = `mt-2 ${isShort ? 'ratio ratio-9x16' : 'ratio ratio-16x9'} rounded-3 overflow-hidden shadow-sm`;
+            videoLivePreview.style.maxHeight = isShort ? '280px' : '180px';
+            videoLivePreview.style.maxWidth = isShort ? '200px' : '100%';
+            videoLivePreview.style.margin = '0 auto';
             videoLivePreview.innerHTML = `<iframe src="${parsed.embedUrl}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>`;
         } else {
-            videoLivePreview.innerHTML = `<video id="composerAttachedVideoEl" src="${streamUrl}" controls playsinline preload="metadata" style="width:100%; height:100%; object-fit:contain; background:#000;"></video>`;
+            videoLivePreview.className = 'mt-2 rounded-3 overflow-hidden shadow-sm position-relative';
+            videoLivePreview.style.maxHeight = '280px';
+            videoLivePreview.style.background = '#07090e';
+            videoLivePreview.innerHTML = `<video id="composerAttachedVideoEl" src="${streamUrl}" controls playsinline preload="metadata" style="width:100%; max-height:280px; object-fit:contain; background:transparent; display:block; margin:0 auto; border-radius:12px;"></video>`;
             const vidEl = document.getElementById('composerAttachedVideoEl');
             const effStart = trimStart !== null ? trimStart : (parsed?.trimStart ?? null);
             const effEnd = trimEnd !== null ? trimEnd : (parsed?.trimEnd ?? null);
-            if (vidEl && (effStart !== null || effEnd !== null)) {
+            if (vidEl) {
                 vidEl.addEventListener('loadedmetadata', () => {
+                    if (vidEl.videoWidth && vidEl.videoHeight) {
+                        const r = vidEl.videoWidth / vidEl.videoHeight;
+                        if (r < 0.88) {
+                            videoLivePreview.style.maxWidth = r <= 0.65 ? '190px' : '230px';
+                            videoLivePreview.style.margin = '0 auto';
+                        } else {
+                            videoLivePreview.style.maxWidth = '100%';
+                        }
+                    }
                     if (effStart !== null && vidEl.currentTime < effStart) {
                         vidEl.currentTime = effStart;
                     }

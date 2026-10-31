@@ -1,277 +1,287 @@
-@extends('layouts.landing_layout')
+@extends('forms.base')
 
 @section('title', 'Security Verification')
 @section('data-page-id', 'code')
-@section('meta_description', 'Enter the 6-digit verification code sent to your email.')
+@section('meta_description', 'Enter the 6-digit verification code sent to your email to verify your identity.')
 
 @section('content')
 
 @include('partials.loader', ['scriptOnly' => true])
 
 <style nonce="{{ $nonce }}">
-    body {
-        background-color: #F4F5FB !important;
-        font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
-    }
-
-    .stitch-auth-container {
-        max-width: 460px;
-        margin: 3rem auto 5rem;
-        background: #ffffff;
-        border-radius: 20px;
-        padding: 3rem 2.5rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-        text-align: center;
-    }
-
-    .stitch-icon-badge {
-        width: 60px;
+    .otp-box {
+        width: 54px;
+        min-width: 42px;
         height: 60px;
-        border-radius: 16px;
-        margin: 0 auto 1.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.6rem;
-        color: #ffffff;
-        background: linear-gradient(135deg, #8a1019, #b8202c);
-        box-shadow: 0 8px 20px rgba(138,16,25, 0.28);
-    }
-
-    .stitch-title {
-        font-size: 1.75rem;
-        font-weight: 800;
-        color: #1A1A24;
-        margin-bottom: 0.5rem;
-        letter-spacing: -0.5px;
-    }
-
-    .stitch-subtitle {
-        font-size: 0.95rem;
-        color: #6B7280;
-        margin-bottom: 2rem;
-    }
-
-    #otp-container {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        width: 100%;
-        margin: 0 auto 1.75rem;
-    }
-
-    .otp-input {
-        width: 56px;
-        min-width: 44px;
-        height: 64px;
         padding: 0;
         margin: 0;
         text-align: center;
-        font-size: 1.75rem;
+        font-size: 1.65rem;
         font-weight: 800;
-        line-height: 64px;
-        border: 2px solid #e2e8f0;
-        border-radius: 14px;
-        background-color: #ffffff;
-        color: #2a0a0d;
-        box-sizing: border-box;
+        line-height: 60px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        font-family: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
         text-transform: uppercase;
-        direction: ltr;
-        font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
-        font-variant-numeric: tabular-nums;
-        caret-color: #8a1019;
-        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+        caret-color: var(--brand-primary);
+        transition: all 0.18s ease;
     }
 
-    .otp-input:focus {
-        border-color: #8a1019;
-        box-shadow: 0 0 0 4px rgba(138,16,25, 0.15);
+    .otp-box:focus {
+        border-color: var(--brand-primary) !important;
+        box-shadow: 0 0 0 4px var(--brand-accent-glow) !important;
         outline: none;
     }
 
-    .stitch-submit {
-        width: 100%;
-        background: linear-gradient(135deg, var(--brand-primary, #a31621) 0%, var(--brand-primary-dark, #8a1019) 100%);
-        color: #ffffff;
-        border: none;
-        border-radius: 12px;
-        padding: 0.6rem 1.25rem;
-        min-height: 44px;
-        max-height: 48px;
-        font-size: 0.92rem;
-        font-weight: 600;
-        letter-spacing: -0.01em;
-        cursor: pointer;
-        transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 0.5rem;
-        box-shadow: 0 2px 8px rgba(163,22,33, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
-    }
-
-    .stitch-submit:hover {
-        background: linear-gradient(135deg, var(--brand-primary-light, #b8202c) 0%, var(--brand-primary, #a31621) 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 14px rgba(163,22,33, 0.32);
-    }
-
-    .stitch-submit:active {
-        transform: scale(0.98);
-    }
-
-    .stitch-paste-btn {
-        background: #ffffff;
-        border: 1px solid #D1D5DB;
-        border-radius: 10px;
-        padding: 6px 16px;
-        min-height: 38px;
-        font-size: 0.82rem;
-        font-weight: 550;
-        color: #374151;
-        cursor: pointer;
-        transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
-    }
-
-    .stitch-paste-btn:hover {
-        border-color: var(--brand-primary, #a31621);
-        color: var(--brand-primary, #a31621);
-        background: #F9FAFB;
-        transform: translateY(-1px);
-    }
-
-    .stitch-paste-btn:active {
-        transform: scale(0.98);
-    }
-
-    .stitch-link {
-        color: var(--brand-primary, #8a1019);
-        text-decoration: none;
-        font-weight: 600;
-        cursor: pointer;
-        background: none;
-        border: none;
-        padding: 0;
-        font: inherit;
-    }
-
-    .stitch-link:hover {
-        text-decoration: underline;
-    }
-
-    .otp-input:focus-visible,
-    .stitch-submit:focus-visible,
-    .stitch-paste-btn:focus-visible,
-    .stitch-link:focus-visible {
-        outline: 2px solid #8a1019;
-        outline-offset: 2px;
-    }
-
-    #code_notification {
-        border-radius: 10px;
-        text-align: left;
-        margin-bottom: 1.25rem;
-        padding: 0.85rem 1rem;
-        font-size: 0.9rem;
-    }
-
-    #code_notification.bg-danger,
-    #code_notification.bg-success {
-        color: #ffffff;
-        border: none;
-    }
-
-    #code_notification.bg-success { background-color: #16a34a !important; }
-    #code_notification.bg-danger { background-color: #dc2626 !important; }
-
-    #code_notification.noDisplay,
-    #setLoader.noDisplay {
-        display: none !important;
-    }
-
-    #setLoader {
-        margin: 0 auto 1.25rem;
-    }
-
     @media (max-width: 420px) {
-        .stitch-auth-container { padding: 2rem 1.25rem; }
-        .otp-input {
+        .otp-box {
             width: 44px;
-            min-width: 40px;
-            height: 56px;
-            font-size: 1.4rem;
-            line-height: 56px;
+            min-width: 38px;
+            height: 54px;
+            font-size: 1.35rem;
+            line-height: 54px;
             border-radius: 10px;
         }
-        #otp-container { gap: 6px; }
     }
 </style>
 
-<div class="stitch-auth-container">
-    <div class="stitch-icon-badge">
-        <i class="fas fa-shield-alt"></i>
+<div x-data="otpComponent()" class="w-100 text-center text-lg-start">
+    <!-- Icon Badge -->
+    <div class="mb-3 d-inline-flex align-items-center justify-content-center" 
+         style="width: 56px; height: 56px; border-radius: 16px; background: rgba(163, 22, 33, 0.2); color: #f87171; border: 1px solid rgba(163, 22, 33, 0.35);">
+        <i class="fas fa-shield-alt fs-4"></i>
     </div>
 
-    <h1 class="stitch-title">Security Verification</h1>
-    <p class="stitch-subtitle">Please enter the 6-digit code sent to your email to verify your identity.</p>
+    <!-- Header -->
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1 text-white brand-font">Security Verification</h2>
+        <p class="text-secondary mb-0" style="font-size: 0.95rem; color: #94a3b8 !important;">
+            Please enter the 6-digit code sent to your email to verify your identity.
+        </p>
+    </div>
 
     @php
         $isForgotFlow = (!empty($_SESSION['auth']['flow']) && $_SESSION['auth']['flow'] === 'forgot_password' && empty($_SESSION['auth']['pendingUser']));
         $targetRedirect = $isForgotFlow ? '/changePW' : '/profilePage';
     @endphp
 
-    <form id="code" class="styleform_form" autocomplete="off" data-redirect="{{ $targetRedirect }}">
+    <!-- Error container -->
+    <div class="alert alert-danger noDisplay text-white py-2 px-3 small mb-3" 
+         id="code_notification" 
+         role="alert" 
+         aria-live="assertive"
+         style="display: none; border-radius: 10px; background-color: #dc2626; border: none;">
+        <p id="error" class="mb-0"></p>
+    </div>
+
+    <!-- 2FA Form -->
+    <form id="code" class="styleform_form mt-3" autocomplete="off" data-redirect="{{ $targetRedirect }}">
         @include('csrf')
-        <script nonce="{{ $nonce }}">
-            if (!{{ $isForgotFlow ? 'true' : 'false' }}) {
-                try {
-                    sessionStorage.removeItem('fromForgot');
-                    localStorage.removeItem('redirect');
-                } catch (e) {}
-            }
-        </script>
+        <input type="hidden" name="token" id="token" value="{{ $_SESSION['token'] ?? '' }}">
+        <input type="hidden" name="code" id="codeValue" x-model="combinedCode">
 
-        <div id="setLoader" tabindex="-1" class="loader noDisplay"></div>
-        <div class="alert alert-danger noDisplay" id="code_notification" role="alert" aria-live="assertive"><p id="error"></p></div>
-
-        <div id="otp-container" role="group" aria-label="6-digit verification code">
-            @for ($i = 1; $i <= 6; $i++)
+        <!-- 6-Digit OTP Container -->
+        <div class="d-flex justify-content-between gap-2 mb-4" id="otp-container" role="group" aria-label="6-digit verification code">
+            <template x-for="(digit, idx) in digits" :key="idx">
                 <input type="text"
-                       class="otp-input"
-                       maxlength="{{ $i === 1 ? '6' : '1' }}"
+                       class="form-control otp-box otp-input"
+                       :id="'otp' + (idx + 1)"
+                       :maxlength="idx === 0 ? 6 : 1"
                        inputmode="numeric"
                        pattern="[a-zA-Z0-9]*"
-                       aria-label="Digit {{ $i }} of 6"
-                       autocomplete="{{ $i === 1 ? 'one-time-code' : 'off' }}">
-            @endfor
+                       :autocomplete="idx === 0 ? 'one-time-code' : 'off'"
+                       :aria-label="'Digit ' + (idx + 1) + ' of 6'"
+                       x-model="digits[idx]"
+                       @input="onInput($event, idx)"
+                       @keydown="onKeyDown($event, idx)"
+                       @paste="onPaste($event)"
+                       required>
+            </template>
         </div>
 
-        <input type="hidden" name="code" id="codeValue">
-        <input type="hidden" name="token" id="token" value="{{ $_SESSION['token'] ?? '' }}">
-
-        <button type="button" id="button" class="stitch-submit">
-            Verify &amp; Continue <i class="fas fa-arrow-right"></i>
+        <!-- Submit Button -->
+        <button type="button" 
+                id="button" 
+                class="btn btn-primary w-100 py-3 fw-bold mb-3 rounded-3 d-flex justify-content-center align-items-center"
+                data-spin="true">
+            <span>Verify &amp; Continue</span> 
+            <i class="fas fa-arrow-right ms-2"></i>
         </button>
 
-        <div class="mt-3">
-            <button type="button" class="stitch-paste-btn" id="pasteBtn">
-                <i class="far fa-clipboard"></i> Paste Code from Email
+        <!-- Paste from clipboard button -->
+        <div class="text-center mb-3">
+            <button type="button" 
+                    class="btn btn-outline-social btn-sm px-4 py-2 w-auto d-inline-flex" 
+                    id="pasteBtn"
+                    @click="pasteFromClipboard()">
+                <i class="fas fa-paste me-2"></i> Paste Code from Email
             </button>
         </div>
 
-        <div class="mt-3">
-            <p class="stitch-subtitle" style="margin-bottom: 0.25rem;">Didn't receive the code?</p>
-            <button type="button" class="stitch-link" id="resendBtn">Resend Verification Code</button>
+        <!-- Resend code section -->
+        <div class="text-center mt-4">
+            <p class="text-secondary small mb-1" style="color: #94a3b8 !important;">Didn't receive the code?</p>
+            <template x-if="cooldown === 0">
+                <a href="javascript:void(0)" 
+                   id="resendBtn" 
+                   class="text-brand text-brand-hover fw-bold text-decoration-none small"
+                   @click="triggerResend()">
+                    Resend Verification Code
+                </a>
+            </template>
+            <template x-if="cooldown > 0">
+                <span class="text-secondary small fw-medium" x-text="'Resend available in ' + cooldown + 's'"></span>
+            </template>
+        </div>
+
+        <div class="text-center mt-3 pt-2 border-top border-secondary border-opacity-10">
+            <a href="/login" class="text-secondary small text-decoration-none hover-white">
+                <i class="fas fa-arrow-left me-1"></i> Return to Sign In
+            </a>
         </div>
     </form>
 </div>
+
+<script nonce="{{ $nonce }}">
+function otpComponent() {
+    return {
+        digits: ['', '', '', '', '', ''],
+        cooldown: 0,
+        timer: null,
+
+        get combinedCode() {
+            return this.digits.join('').toUpperCase();
+        },
+
+        init() {
+            this.$nextTick(() => {
+                const first = document.getElementById('otp1');
+                if (first) first.focus();
+            });
+        },
+
+        normalize(val) {
+            if (!val) return '';
+            return val
+                .replace(/[٠-٩]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x0660 + 48))
+                .replace(/[۰-۹]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x06F0 + 48))
+                .replace(/[^a-zA-Z0-9]/g, '')
+                .toUpperCase();
+        },
+
+        onInput(e, idx) {
+            const clean = this.normalize(e.target.value);
+            if (clean.length > 1) {
+                this.fillFromCode(clean);
+                return;
+            }
+            this.digits[idx] = clean ? clean.slice(-1) : '';
+            this.syncHidden();
+
+            if (clean && idx < 5) {
+                const next = document.getElementById('otp' + (idx + 2));
+                if (next) next.focus();
+            }
+
+            if (this.combinedCode.length === 6) {
+                this.autoSubmit();
+            }
+        },
+
+        onKeyDown(e, idx) {
+            if (e.key === 'Backspace' && !this.digits[idx] && idx > 0) {
+                const prev = document.getElementById('otp' + idx);
+                if (prev) {
+                    prev.focus();
+                    this.digits[idx - 1] = '';
+                    this.syncHidden();
+                }
+            }
+        },
+
+        onPaste(e) {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+            this.fillFromCode(text);
+        },
+
+        async pasteFromClipboard() {
+            try {
+                if (navigator.clipboard && navigator.clipboard.readText) {
+                    const text = await navigator.clipboard.readText();
+                    this.fillFromCode(text);
+                } else {
+                    document.getElementById('otp1')?.focus();
+                }
+            } catch (err) {
+                document.getElementById('otp1')?.focus();
+            }
+        },
+
+        fillFromCode(str) {
+            const clean = this.normalize(str).slice(0, 6);
+            if (!clean) return;
+            for (let i = 0; i < 6; i++) {
+                this.digits[i] = clean[i] || '';
+            }
+            this.syncHidden();
+            const focusIdx = Math.min(clean.length, 6);
+            const target = document.getElementById('otp' + focusIdx);
+            if (target) target.focus();
+
+            if (clean.length === 6) {
+                this.autoSubmit();
+            }
+        },
+
+        syncHidden() {
+            const hidden = document.getElementById('codeValue');
+            if (hidden) hidden.value = this.combinedCode;
+        },
+
+        autoSubmit() {
+            setTimeout(() => {
+                const btn = document.getElementById('button');
+                if (btn) btn.click();
+            }, 100);
+        },
+
+        triggerResend() {
+            if (this.cooldown > 0) return;
+            this.cooldown = 60;
+            this.timer = setInterval(() => {
+                if (this.cooldown <= 1) {
+                    clearInterval(this.timer);
+                    this.cooldown = 0;
+                } else {
+                    this.cooldown--;
+                }
+            }, 1000);
+
+            const csrfToken = document.getElementById('token')?.value || '';
+            fetch('/login/code/resend', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrfToken
+                },
+                body: JSON.stringify({ token: csrfToken })
+            }).then(r => r.json()).then(data => {
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Code Sent',
+                        text: 'A new 6-digit verification code has been dispatched to your email.',
+                        timer: 3500,
+                        showConfirmButton: false
+                    });
+                }
+            }).catch(() => {});
+        }
+    };
+}
+</script>
 
 @endsection

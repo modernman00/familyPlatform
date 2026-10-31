@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(notifications): ensure sw.js deployment, htaccess rewrite, and browser unblocking guidance",
+    "title": "Feat(lineage): sovereign family tree migration grafting and preservation engine",
     "notes": [
+        "Feat(lineage): sovereign family tree migration grafting and preservation engine",
         "Fix(notifications): ensure sw.js deployment, htaccess rewrite, and browser unblocking guidance",
-        "Fix(contrast): neutralize Microsoft Edge dark-mode ghost typography on homepage and auth layouts",
-        "Fix(ui): enforce contrast tokens and compile production assets"
+        "Fix(contrast): neutralize Microsoft Edge dark-mode ghost typography on homepage and auth layouts"
     ],
     "released_at": "2026-10-31",
-    "commit": "92930fb"
+    "commit": "f206e06"
 }
