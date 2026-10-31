@@ -5,12 +5,13 @@
 # =============================================================================
 
 RewriteEngine On
-# Allow robots.txt, sitemap.xml, PWA icons and favicons directly (from root, public/, or public/img/favicon/)
+# Allow robots.txt, sitemap.xml, PWA service worker, manifest, and icons directly (from root, public/, or public/img/favicon/)
 RewriteRule ^(robots\.txt|sitemap\.xml)$ public/$1 [L]
+RewriteRule ^(manifest\.json|sw\.js|service-worker\.js|offline\.html)$ public/$1 [L]
 RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule ^(robots\.txt|sitemap\.xml|apple-touch-icon\.png|favicon\.ico|icon-[0-9x]+\.png)$ - [L]
+RewriteRule ^(robots\.txt|sitemap\.xml|manifest\.json|sw\.js|service-worker\.js|offline\.html|apple-touch-icon\.png|favicon\.ico|icon-[0-9x]+\.png)$ - [L]
 RewriteCond %{DOCUMENT_ROOT}/public/$1 -f
-RewriteRule ^(robots\.txt|sitemap\.xml|apple-touch-icon\.png|favicon\.ico|icon-[0-9x]+\.png)$ public/$1 [L]
+RewriteRule ^(robots\.txt|sitemap\.xml|manifest\.json|sw\.js|service-worker\.js|offline\.html|apple-touch-icon\.png|favicon\.ico|icon-[0-9x]+\.png)$ public/$1 [L]
 RewriteCond %{DOCUMENT_ROOT}/public/img/favicon/$1 -f
 RewriteRule ^(apple-touch-icon\.png|favicon\.ico)$ public/img/favicon/$1 [L]
 
@@ -102,6 +103,12 @@ RewriteRule "^resources/views(/|$)" - [F,L]
 
     # CORP: Prevents cross-origin resource theft
     Header always set Cross-Origin-Resource-Policy "cross-origin"
+
+    # W3C Service Worker Scope & Freshness Header
+    <FilesMatch "^(sw|service-worker)\.js$">
+        Header set Service-Worker-Allowed "/"
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+    </FilesMatch>
 </IfModule>
 
 # ---------------------------------------------------------------------------

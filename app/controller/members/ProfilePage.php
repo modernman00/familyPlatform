@@ -267,13 +267,15 @@ final class ProfilePage extends ProcessImg
                     'poll_question', 'poll_options', 'token', 'post_no',
                     'attached_gif_url', 'tagged_user_ids', 'shared_temp_images',
                     'then_now', 'then_label', 'now_label', 'reply_to_post',
+                    'comparison_mode', 'mystery_year', 'then_now_voice_base64',
                     'submit', 'button'
                 ],
                 optionalFields: [
                     'poll_question', 'poll_options', 'postMessage', 'post_no',
                     'attached_gif_url', 'tagged_user_ids', 'shared_temp_images',
                     'postFamCode', 'profileImg',
-                    'then_now', 'then_label', 'now_label', 'reply_to_post'
+                    'then_now', 'then_label', 'now_label', 'reply_to_post',
+                    'comparison_mode', 'mystery_year', 'then_now_voice_base64'
                 ]
             );
 

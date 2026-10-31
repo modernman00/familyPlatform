@@ -1,14 +1,8 @@
 {{-- 
   FamilyPlatform Push Notification & Standalone PWA Activation Legend
-  Prompts users to activate push notifications and handles auto-sync for users who installed the app.
+  Prompts users to activate push notifications, provides browser unblocking guidance,
+  and handles auto-sync for users who installed the app or authenticated.
 --}}
-@php
-    // Push notifications are strictly for authenticated family members with an active session.
-    // Anonymous visitors on the landing page do not have accounts or family events to receive,
-    // and prompting unauthenticated guests triggers browser anti-spam / Quiet UI restrictions.
-    $authUserId = $_SESSION['id'] ?? null;
-@endphp
-@if(!empty($authUserId))
 <style>
     /* WCAG AA: explicit surface + text colours so the banner never inherits washed-out theme text */
     #push-notification-banner { display: none; max-width: 620px; position: fixed; top: 20px; left: 16px; right: 16px; z-index: 1060; border-radius: 16px; border: 1.5px solid rgba(163, 22, 33, 0.35); background: #ffffff; box-shadow: 0 16px 36px rgba(15, 23, 42, 0.25); font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif); }
@@ -127,12 +121,20 @@
 
         const token = getCsrfToken();
         const userId = document.querySelector('meta[name="user-id"]')?.getAttribute('content') || '';
-        if (!userId) {
-            console.warn('[Push] Unauthenticated session - push subscription deferred');
-            return Promise.resolve({ status: 'unauthenticated' });
-        }
         const p256dh = subscription.getKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))) : '';
         const auth = subscription.getKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth')))) : '';
+
+        if (!userId) {
+            console.log('[Push] Guest session: Storing subscription locally until member login');
+            try {
+                localStorage.setItem('fp_pending_push_sub', JSON.stringify({
+                    endpoint: subscription.endpoint,
+                    keys: { p256dh: p256dh, auth: auth }
+                }));
+                localStorage.setItem(SUBSCRIBED_KEY, 'true');
+            } catch (e) {}
+            return Promise.resolve({ status: 'deferred' });
+        }
 
         const payload = {
             endpoint: subscription.endpoint,
@@ -365,6 +367,34 @@
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
         retryCount = retryCount || 0;
 
+        const userId = document.querySelector('meta[name="user-id"]')?.getAttribute('content') || '';
+        if (userId) {
+            try {
+                const pendingSub = localStorage.getItem('fp_pending_push_sub');
+                if (pendingSub) {
+                    const parsed = JSON.parse(pendingSub);
+                    if (parsed && parsed.endpoint) {
+                        parsed.id = userId;
+                        parsed.token = getCsrfToken();
+                        fetch('/pushNotification/subscription', {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN': parsed.token,
+                                'X-XSRF-TOKEN': parsed.token
+                            },
+                            body: JSON.stringify(parsed)
+                        }).then(function() {
+                            localStorage.removeItem('fp_pending_push_sub');
+                        }).catch(function() {});
+                    }
+                }
+            } catch (e) {}
+        }
+
         ensureServiceWorkerReady().then(function(registration) {
             return registration.pushManager.getSubscription().then(function(existingSub) {
                 if (existingSub) {
@@ -402,8 +432,43 @@
             return;
         }
 
-        // 2. If user explicitly blocked notifications in browser:
+        // 2. If user or browser blocked notifications in browser settings:
         if (typeof window.Notification !== 'undefined' && Notification.permission === 'denied') {
+            if (isDismissedWithinCooldown()) {
+                return;
+            }
+
+            const titleEl = banner.querySelector('.push-banner-title');
+            const textEl = banner.querySelector('.push-banner-text');
+            const iconWrap = banner.querySelector('.push-banner-icon');
+            if (titleEl) titleEl.textContent = 'Notifications Blocked in Browser';
+            if (textEl) textEl.textContent = 'Your browser is currently blocking notification alerts for FamilyPlatform. Click the lock icon or "Notifications blocked" in your address bar, switch to "Allow", and reload to activate.';
+            if (iconWrap) {
+                iconWrap.style.background = 'rgba(220, 53, 69, 0.15)';
+                iconWrap.innerHTML = '<i class="bi bi-bell-slash-fill fs-4 text-danger" style="line-height:1;"></i>';
+            }
+
+            enableBtn.classList.remove('btn-primary');
+            enableBtn.style.background = 'linear-gradient(135deg, #475569 0%, #1e293b 100%)';
+            enableBtn.innerHTML = '<i class="bi bi-gear-wide-connected me-1.5"></i> How to Unblock';
+            enableBtn.onclick = function(e) {
+                e.preventDefault();
+                if (typeof window.showPushPermissionRecovery === 'function') {
+                    window.showPushPermissionRecovery();
+                }
+            };
+
+            const dismissAction = function() {
+                hideBanner(banner);
+                recordDismissal();
+            };
+            if (closeBtn) closeBtn.addEventListener('click', dismissAction);
+            if (dismissBtn) dismissBtn.addEventListener('click', dismissAction);
+
+            setTimeout(function() {
+                banner.style.display = 'block';
+                banner.classList.add('show');
+            }, 800);
             return;
         }
 
@@ -488,16 +553,22 @@
                 localStorage.removeItem(DISMISS_KEY);
                 setTimeout(function() { hideBanner(banner); }, 1200);
 
+                const userId = document.querySelector('meta[name="user-id"]')?.getAttribute('content') || '';
+                const successTitle = 'Notifications Authorised! 🎉';
+                const successText = userId 
+                    ? 'You will now receive real-time alerts when family members post updates or celebrate milestones.'
+                    : 'Browser notifications are now authorised! Log in or create your family network to receive your family alerts.';
+
                 if (typeof window.showFloatingToast === 'function') {
                     window.showFloatingToast({
-                        title: 'Live Alerts Active! 🎉',
-                        body: 'You are now subscribed to real-time family updates and milestone alerts.'
+                        title: successTitle,
+                        body: successText
                     });
                 } else if (window.Swal) {
                     window.Swal.fire({
                         icon: 'success',
-                        title: 'Notifications Enabled! 🎉',
-                        text: 'You will now receive real-time updates when family members post or celebrate milestones.',
+                        title: successTitle,
+                        text: successText,
                         confirmButtonColor: '#a31621'
                     });
                 }
@@ -545,4 +616,3 @@
     }
 })();
 </script>
-@endif

@@ -228,11 +228,48 @@ try {
         "Failed to reject empty post: " . substr((string)$output6, 0, 150)
     );
 
+    // -------------------------------------------------------------
+    // TEST 7: Video post with full composer modal fields (including then_now_voice_base64)
+    // -------------------------------------------------------------
+    $videoUrl = '/resources/videos/posts/post_vid_test_' . bin2hex(random_bytes(4)) . '.mov#t=0,4.75';
+    $_POST = [
+        'token' => $token,
+        'post_no' => '',
+        'attached_gif_url' => '',
+        'postMessage' => $videoUrl,
+        'postFamCode' => $famCode,
+        'poll_question' => '',
+        'poll_options' => ['', ''],
+        'then_now' => '',
+        'reply_to_post' => '',
+        'comparison_mode' => 'classic',
+        'mystery_year' => '0',
+        'then_now_voice_base64' => '',
+        'then_label' => '',
+        'now_label' => '',
+    ];
+
+    ob_start();
+    $profilePage->post();
+    $output7 = ob_get_clean();
+    $res7 = json_decode((string)$output7, true);
+
+    $postNo7 = (int)($res7['message']['post_no'] ?? $res7['data']['post_no'] ?? $res7['message'] ?? 0);
+    if ($postNo7 > 0) $createdPostNos[] = $postNo7;
+
+    assertTest(
+        'Post creation with video URL and empty then_now_voice_base64 succeeds',
+        ($res7['status'] ?? '') === 'success' && $postNo7 > 0,
+        "Failed with: " . substr((string)$output7, 0, 150)
+    );
+
 } finally {
     // 🧹 Cleanup test fixtures
     if (!empty($createdPostNos)) {
-        $inClause = implode(',', array_map('intval', $createdPostNos));
-        $pdo->exec("DELETE FROM post WHERE post_no IN ({$inClause})");
+        $delStmt = $pdo->prepare("DELETE FROM post WHERE post_no = ?");
+        foreach ($createdPostNos as $pNo) {
+            $delStmt->execute([(int)$pNo]);
+        }
     }
     $pdo->prepare("DELETE FROM personal WHERE id = ?")->execute([$authorId]);
 }

@@ -469,22 +469,19 @@ touch "$SANDBOX/bootstrap/cache/.gitkeep"
 touch "$SANDBOX/bootstrap/log/.gitkeep"
 
 # Service Worker Cache Busting for PWA
-SW_FILE="$SANDBOX/public/service-worker.js"
-if [ -f "$SW_FILE" ]; then
-    SW_BUILD="v${RELEASE_ID}-${COMMIT:0:8}"
-    sed -i.bak -E "s|^const SW_VERSION = .*|const SW_VERSION = '${SW_BUILD}';|" "$SW_FILE"
-    rm -f "${SW_FILE}.bak"
-    echo "🔁 Stamped Service Worker: ${SW_BUILD}"
-fi
-
-SW_ROOT_FILE="$SANDBOX/service-worker.js"
+copy_item sw.js
 if [ -f "service-worker.js" ]; then
     copy_item service-worker.js
-    SW_BUILD="v${RELEASE_ID}-${COMMIT:0:8}"
-    sed -i.bak -E "s|^const SW_VERSION = .*|const SW_VERSION = '${SW_BUILD}';|" "$SW_ROOT_FILE"
-    rm -f "${SW_ROOT_FILE}.bak"
-    echo "🔁 Stamped Root Service Worker: ${SW_BUILD}"
 fi
+
+for TARGET_SW in "$SANDBOX/public/sw.js" "$SANDBOX/sw.js" "$SANDBOX/public/service-worker.js" "$SANDBOX/service-worker.js"; do
+    if [ -f "$TARGET_SW" ]; then
+        SW_BUILD="v${RELEASE_ID}-${COMMIT:0:8}"
+        sed -i.bak -E "s|^const SW_VERSION = .*|const SW_VERSION = '${SW_BUILD}';|" "$TARGET_SW"
+        rm -f "${TARGET_SW}.bak"
+        echo "🔁 Stamped Service Worker (${TARGET_SW##*/}): ${SW_BUILD}"
+    fi
+done
 
 # Local offline composer dump-autoload inside sandbox
 echo "⚡ Generating optimized production autoloader (--no-dev)..."
