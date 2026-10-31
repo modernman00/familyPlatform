@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(ui): enforce contrast tokens and compile production assets",
+    "title": "Fix(notifications): ensure sw.js deployment, htaccess rewrite, and browser unblocking guidance",
     "notes": [
-        "Fix(ui): enforce contrast tokens and compile production assets",
-        "Fix(notifications): eliminate landing page push solicitation and add address bar quiet UI permission recovery",
-        "Feat(feed): enhance then & now comparisons, ghost camera, and reactive modals"
+        "Fix(notifications): ensure sw.js deployment, htaccess rewrite, and browser unblocking guidance",
+        "Fix(contrast): neutralize Microsoft Edge dark-mode ghost typography on homepage and auth layouts",
+        "Fix(ui): enforce contrast tokens and compile production assets"
     ],
-    "released_at": "2026-10-30",
-    "commit": "44402b3"
+    "released_at": "2026-10-31",
+    "commit": "92930fb"
 }

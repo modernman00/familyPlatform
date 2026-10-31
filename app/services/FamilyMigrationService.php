@@ -460,17 +460,14 @@ final class FamilyMigrationService
             );
             $stmtFam->execute([$targetUserId, $cleanNewCode]);
 
-            // 5. Update old family code association if solo or clean up obsolete pending records
+            // 5. Update old family code association: preserve origin lineage access in user_families
             if ($cleanOldCode !== '' && $cleanOldCode !== $cleanNewCode) {
-                // If old code was only used by this user, mark it as migrated or remove from active codes
-                $checkOtherUsers = $this->pdo->prepare('SELECT COUNT(*) FROM personal WHERE famCode = ? AND id != ?');
-                $checkOtherUsers->execute([$cleanOldCode, $targetUserId]);
-                $otherUserCount = (int)$checkOtherUsers->fetchColumn();
-
-                if ($otherUserCount === 0) {
-                    $updOldFam = $this->pdo->prepare('UPDATE user_families SET status = "pending" WHERE user_id = ? AND family_code = ?');
-                    $updOldFam->execute([$targetUserId, $cleanOldCode]);
-                }
+                // Ensure member retains approved access to their origin lineage so they can toggle back in Organogram
+                $updOldFam = $this->pdo->prepare(
+                    'INSERT INTO user_families (user_id, family_code, status, role) VALUES (?, ?, "approved", "member")
+                     ON DUPLICATE KEY UPDATE status = "approved"'
+                );
+                $updOldFam->execute([$targetUserId, $cleanOldCode]);
             }
 
             // 6. Migrate user's existing posts so they appear in new family feed
@@ -482,16 +479,21 @@ final class FamilyMigrationService
                 $stmtEvents->execute([$cleanNewCode, $targetUserId, $cleanOldCode]);
             }
 
-            // 7. Auto-claim or initialize family node in the new family tree
+            // 7. Auto-claim or initialize family node in the new family tree & graft prior tree
             try {
                 $stmtMember = $this->pdo->prepare('SELECT * FROM personal WHERE id = ?');
                 $stmtMember->execute([$targetUserId]);
                 $pRow = $stmtMember->fetch(PDO::FETCH_ASSOC);
                 $memberData = is_array($pRow) ? $pRow : [];
 
-                FamilyClaimService::claimOrInitializeNode($cleanNewCode, $targetUserId, $memberData);
+                $newRootNodeId = FamilyClaimService::claimOrInitializeNode($cleanNewCode, $targetUserId, $memberData);
+
+                // Sovereign Tree Preservation & Grafting
+                if ($cleanOldCode !== '' && $cleanOldCode !== $cleanNewCode && $newRootNodeId > 0) {
+                    $this->graftMigratedFamilyTree($cleanOldCode, $cleanNewCode, $targetUserId, $newRootNodeId);
+                }
             } catch (\Throwable $nodeEx) {
-                error_log('[FamilyMigrationService] Node claim warning: ' . $nodeEx->getMessage());
+                error_log('[FamilyMigrationService] Node claim/graft warning: ' . $nodeEx->getMessage());
             }
 
             // 8. Commit database transaction
@@ -508,6 +510,9 @@ final class FamilyMigrationService
                 } elseif (!in_array($cleanNewCode, $currentCodes, true)) {
                     $currentCodes[] = $cleanNewCode;
                 }
+                if ($cleanOldCode !== '' && !in_array($cleanOldCode, $currentCodes, true)) {
+                    $currentCodes[] = $cleanOldCode;
+                }
                 $_SESSION['famCodes'] = $currentCodes;
             }
 
@@ -518,6 +523,86 @@ final class FamilyMigrationService
             }
             error_log('[FamilyMigrationService] executeAtomicMigration failed: ' . $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Grafts a migrating member's previously built family tree into their new family code.
+     * Merges their previous root node with their new root node and re-tags unions & children.
+     */
+    public function graftMigratedFamilyTree(string $oldCode, string $newCode, string $userId, int $newRootId): void
+    {
+        $oldCode = strtoupper(trim(str_replace('#', '', $oldCode)));
+        $newCode = strtoupper(trim(str_replace('#', '', $newCode)));
+        $userId = trim($userId);
+
+        if ($oldCode === '' || $newCode === '' || $oldCode === $newCode || $userId === '' || $newRootId <= 0) {
+            return;
+        }
+
+        // 1. Check if nodes exist in the old family code
+        $stmtCountOld = $this->pdo->prepare('SELECT COUNT(*) FROM family_nodes WHERE family_code = ?');
+        $stmtCountOld->execute([$oldCode]);
+        $oldNodeCount = (int)$stmtCountOld->fetchColumn();
+
+        if ($oldNodeCount === 0) {
+            return;
+        }
+
+        // 2. Locate member root node in old family code
+        $stmtOldRoot = $this->pdo->prepare('SELECT id FROM family_nodes WHERE family_code = ? AND user_id = ? LIMIT 1');
+        $stmtOldRoot->execute([$oldCode, $userId]);
+        $oldRootId = (int)$stmtOldRoot->fetchColumn();
+
+        // 3. Check if other registered users exist in the old family code
+        $stmtOtherUsers = $this->pdo->prepare('SELECT COUNT(*) FROM personal WHERE famCode = ? AND id != ?');
+        $stmtOtherUsers->execute([$oldCode, $userId]);
+        $otherUsersCount = (int)$stmtOtherUsers->fetchColumn();
+
+        // If the old code was solo / authored exclusively by this user, graft the entire tree
+        if ($otherUsersCount === 0) {
+            if ($oldRootId > 0 && $oldRootId !== $newRootId) {
+                // Re-point unions where old root is partner 1 or 2
+                $stmtU1 = $this->pdo->prepare('UPDATE family_unions SET partner_1_id = ? WHERE partner_1_id = ?');
+                $stmtU1->execute([$newRootId, $oldRootId]);
+
+                $stmtU2 = $this->pdo->prepare('UPDATE family_unions SET partner_2_id = ? WHERE partner_2_id = ?');
+                $stmtU2->execute([$newRootId, $oldRootId]);
+
+                // Re-point parent-child links
+                $stmtC1 = $this->pdo->prepare('UPDATE family_node_children SET parent_node_id = ? WHERE parent_node_id = ?');
+                $stmtC1->execute([$newRootId, $oldRootId]);
+
+                $stmtC2 = $this->pdo->prepare('UPDATE family_node_children SET child_id = ? WHERE child_id = ?');
+                $stmtC2->execute([$newRootId, $oldRootId]);
+
+                // Sync biographical details from old root to new root if new root has empty/default fields
+                $stmtSync = $this->pdo->prepare("
+                    UPDATE family_nodes n_new, family_nodes n_old
+                    SET n_new.bio = IF(n_new.bio IS NULL OR n_new.bio = '' OR n_new.bio = 'Primary Member', COALESCE(n_old.bio, n_new.bio), n_new.bio),
+                        n_new.birth_date = COALESCE(n_new.birth_date, n_old.birth_date),
+                        n_new.birth_year = COALESCE(n_new.birth_year, n_old.birth_year),
+                        n_new.birth_place = COALESCE(NULLIF(n_new.birth_place, ''), n_old.birth_place),
+                        n_new.occupation = COALESCE(NULLIF(n_new.occupation, ''), n_old.occupation),
+                        n_new.location = COALESCE(NULLIF(n_new.location, ''), n_old.location),
+                        n_new.voice_capsule_url = COALESCE(NULLIF(n_new.voice_capsule_url, ''), n_old.voice_capsule_url),
+                        n_new.avatar_url = COALESCE(NULLIF(n_new.avatar_url, ''), n_old.avatar_url)
+                    WHERE n_new.id = ? AND n_old.id = ?
+                ");
+                $stmtSync->execute([$newRootId, $oldRootId]);
+
+                // Delete redundant old root stub
+                $stmtDel = $this->pdo->prepare('DELETE FROM family_nodes WHERE id = ?');
+                $stmtDel->execute([$oldRootId]);
+            }
+
+            // Re-tag remaining nodes from old code to new code
+            $stmtMigrateNodes = $this->pdo->prepare('UPDATE family_nodes SET family_code = ? WHERE family_code = ?');
+            $stmtMigrateNodes->execute([$newCode, $oldCode]);
+
+            // Re-tag all unions from old code to new code
+            $stmtMigrateUnions = $this->pdo->prepare('UPDATE family_unions SET family_code = ? WHERE family_code = ?');
+            $stmtMigrateUnions->execute([$newCode, $oldCode]);
         }
     }
 

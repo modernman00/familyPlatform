@@ -270,6 +270,47 @@
           </div>
         </div>
 
+        <!-- Pillar 4d: Migrating Family Codes & Tree Preservation (RFC-0006) -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden" id="playbook-family-migration">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(163,22,33, 0.12); color: #a31621;">
+                <i class="bi bi-arrow-left-right fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">4d. Migrating Family Codes & Tree Preservation</h3>
+                <span class="badge" style="background:#a31621;">Zero Data Loss</span>
+              </div>
+            </div>
+            <p class="lead text-secondary">
+              When joining an existing family network or merging branches, your historical family tree is never lost. The system preserves access to your origin lineage and seamlessly grafts your ancestors, partners, and children into your new family organogram.
+            </p>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-primary mb-2">Step 1 &middot; Migration Invitation</span>
+                  <h6 class="fw-bold text-dark">Join or Nudge</h6>
+                  <p class="small text-muted mb-0">Accept a relative's migration nudge or request to join their family code. All previous feed posts, events, and milestone records transfer with you atomically.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-warning text-dark mb-2">Step 2 &middot; Automated Tree Grafting</span>
+                  <h6 class="fw-bold text-dark">Sub-Tree Integration</h6>
+                  <p class="small text-muted mb-0">The platform automatically grafts your previously built tree&mdash;parents, children, and partners&mdash;directly onto your node in the new family tree without duplicate root stubs.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-success mb-2">Step 3 &middot; Multi-Lineage Organogram</span>
+                  <h6 class="fw-bold text-dark">Switch Lineages Freely</h6>
+                  <p class="small text-muted mb-0">Your origin family code remains approved in your account. You can switch between your primary family tree and origin branches anytime using the Organogram header dropdown.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Pillar 5: Gamified Lineage Quests & WhatsApp Flywheel -->
         <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
           <div class="card-body p-4 p-md-5">
