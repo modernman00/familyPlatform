@@ -289,50 +289,63 @@ final class PostMessage
                 Post::updateCommentByStatusAsPublished($comment['comment_no']);
             }
 
-            // Authoritative family scope for the comment's post — drives both the
-            // private Pusher channel and the downstream push notification.
-            $data = Post::postByNo($newComment[0]['post_no']);
-            $famCode = checkInput($data['postFamCode'] ?? '');
-            $famCode = is_string($famCode) ? $famCode : '';
-
-            try {
-                Pusher::broadcastToFamily($famCode, 'new-comment', $newComment);
-                $senderFamCode = checkInput($_SESSION['famCode'] ?? '');
-                if (is_string($senderFamCode) && $senderFamCode !== '' && $senderFamCode !== $famCode) {
-                    Pusher::broadcastToFamily($senderFamCode, 'new-comment', $newComment);
+            // Red Team SEC-CVE-2026-CROSS-TENANT-COMMENT-LEAK Mitigation:
+            // Partition comments strictly by their verified post family code.
+            // Banish cross-comment fallback bleeding; drop orphan comments or posts lacking an authoritative family code.
+            $commentsByFamily = [];
+            foreach ($newComment as $comment) {
+                $commentPostNo = (int)($comment['post_no'] ?? 0);
+                if ($commentPostNo <= 0) {
+                    continue;
                 }
-            } catch (\Throwable $th) {
-                error_log("Pusher comment broadcast failed: " . $th->getMessage());
+                $postData = Post::postByNo($commentPostNo);
+                if (empty($postData)) {
+                    continue; // Skip orphan comments attached to non-existent posts
+                }
+                $rawFamCode = checkInput($postData['postFamCode'] ?? '');
+                $postFamCode = is_string($rawFamCode) ? trim($rawFamCode) : '';
+                if ($postFamCode === '') {
+                    continue; // Skip posts lacking a valid family partition
+                }
+
+                $commentsByFamily[$postFamCode][] = [
+                    'comment'  => $comment,
+                    'postData' => $postData,
+                ];
             }
 
-            // send push notification to all members with the same family code (excluding the comment author)
-            // Notify for EVERY comment in the batch (rapid successive comments used to be
-            // marked published but only the first one produced an in-app notification).
-            foreach ($newComment as $comment) {
-                $rawCommentAuthorId = \checkInput($comment['id'] ?? ($_SESSION['id'] ?? ''));
-                $commentAuthorId = is_string($rawCommentAuthorId) ? $rawCommentAuthorId : '';
+            foreach ($commentsByFamily as $familyCode => $familyItems) {
+                try {
+                    $familyComments = array_column($familyItems, 'comment');
+                    Pusher::broadcastToFamily($familyCode, 'new-comment', $familyComments);
+                } catch (\Throwable $th) {
+                    error_log("Pusher comment broadcast failed: " . $th->getMessage());
+                }
 
-                $commentPostNo = $comment['post_no'] ?? 0;
-                $postData = Post::postByNo($commentPostNo);
-                $commentFamCode = checkInput($postData['postFamCode'] ?? '');
-                $commentFamCode = is_string($commentFamCode) && $commentFamCode !== '' ? $commentFamCode : $famCode;
+                // Send push notifications strictly to members of this verified family code
+                foreach ($familyItems as $item) {
+                    $comment = $item['comment'];
+                    $rawCommentAuthorId = \checkInput($comment['id'] ?? ($_SESSION['id'] ?? ''));
+                    $commentAuthorId = is_string($rawCommentAuthorId) ? $rawCommentAuthorId : '';
+                    $commentPostNo = (int)($comment['post_no'] ?? 0);
 
-                $results = AllMembersData::AllMembersEmailByFamCode($commentFamCode, $commentAuthorId !== '' ? $commentAuthorId : null);
-                $url = self::buildCommentUrl($commentPostNo, $comment['comment_no'] ?? null);
-                $authorName = (string)($comment['fullName'] ?? 'A member');
+                    $results = AllMembersData::AllMembersEmailByFamCode($familyCode, $commentAuthorId !== '' ? $commentAuthorId : null);
+                    $url = self::buildCommentUrl($commentPostNo, $comment['comment_no'] ?? null);
+                    $authorName = (string)($comment['fullName'] ?? 'A member');
 
-                self::notifyMembersByPushNotification(
-                    results: $results,
-                    postId: $commentAuthorId !== '' ? $commentAuthorId : (string)($comment['id'] ?? ''),
-                    postOriginName: $authorName,
-                    url: $url,
-                    notificationMsg: "{$authorName} posted a new comment",
-                    notificationType: 'Comment',
-                    pushTitle: "💬 {$authorName}",
-                    // Same tag per post so rapid comments collapse on the lock screen.
-                    pushTag: 'comment-post-' . $commentPostNo,
-                    inAppTitle: 'New comment'
-                );
+                    self::notifyMembersByPushNotification(
+                        results: $results,
+                        postId: $commentAuthorId !== '' ? $commentAuthorId : (string)($comment['id'] ?? ''),
+                        postOriginName: $authorName,
+                        url: $url,
+                        notificationMsg: "{$authorName} posted a new comment",
+                        notificationType: 'Comment',
+                        pushTitle: "💬 {$authorName}",
+                        // Same tag per post so rapid comments collapse on the lock screen.
+                        pushTag: 'comment-post-' . $commentPostNo,
+                        inAppTitle: 'New comment'
+                    );
+                }
             }
         }
     }

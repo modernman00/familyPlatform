@@ -412,7 +412,9 @@ final class Register extends Db
                     }
                 }
 
-                SendEmailFunctionality::email("msg/appSub","We have received your application", $cleanData, 'member');
+                $welcomeFirstName = !empty($cleanData['firstName']) ? trim((string)$cleanData['firstName']) : 'Family Member';
+                $welcomeSubject = "Welcome to your family dynasty, {$welcomeFirstName}! 🌳 Your private sanctuary is ready";
+                SendEmailFunctionality::email("msg/appSub", $welcomeSubject, $cleanData, 'member');
 
                 if (isset($_SESSION['oauth_pending'])) {
                     unset($_SESSION['oauth_pending']);

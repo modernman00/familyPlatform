@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(lineage): sovereign family tree migration grafting and preservation engine",
+    "title": "Feat(media): implement adaptive aspect ratio video rendition, unified auth layouts, and production assets",
     "notes": [
+        "Feat(media): implement adaptive aspect ratio video rendition, unified auth layouts, and production assets",
         "Feat(lineage): sovereign family tree migration grafting and preservation engine",
-        "Fix(notifications): ensure sw.js deployment, htaccess rewrite, and browser unblocking guidance",
-        "Fix(contrast): neutralize Microsoft Edge dark-mode ghost typography on homepage and auth layouts"
+        "Fix(notifications): ensure sw.js deployment, htaccess rewrite, and browser unblocking guidance"
     ],
     "released_at": "2026-10-31",
-    "commit": "f206e06"
+    "commit": "523b6a5"
 }

@@ -69,13 +69,6 @@ final class RegisterTableData {
                 'profileImg' => $profileAvatar,
                 'id' => $cleanPostData['id'] ?? null
             ],
-            'comment' => [
-                'fullName' => $cleanPostData['firstName'] ?? null,
-                'comment' => "Your comment will show here",
-                'profileImg' => $profileAvatar,
-                'post_no' => 1000,
-                'id' => $cleanPostData['id'] ?? null
-            ],
             'profilePics' => [
                 'img' => $profileAvatar,
                 'id' => $cleanPostData['id'] ?? null
