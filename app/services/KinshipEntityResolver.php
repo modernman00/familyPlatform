@@ -485,7 +485,7 @@ final class KinshipEntityResolver
     /**
      * Check if two names are recognized diminutives / nicknames of each other
      */
-    private static function isDiminutiveMatch(string $nameA, string $nameB): bool
+    public static function isDiminutiveMatch(string $nameA, string $nameB): bool
     {
         $a = strtolower($nameA);
         $b = strtolower($nameB);
@@ -793,7 +793,7 @@ final class KinshipEntityResolver
     /**
      * Cycle detection helper: check if targetId is a descendant of ancestorId
      */
-    private static function isDescendant(\PDO $db, int $ancestorId, int $targetId): bool
+    public static function isDescendant(\PDO $db, int $ancestorId, int $targetId): bool
     {
         $visited = [];
         $queue = [$ancestorId];

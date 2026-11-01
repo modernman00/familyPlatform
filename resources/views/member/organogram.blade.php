@@ -235,6 +235,39 @@
                 </button>
             </div>
         </div>
+
+        <!-- Autonomous Constellation Alignment Banner ("Existing branch discovered in another family circle") -->
+        <div id="constellationMatchBanner" class="alert shadow-lg border-0 rounded-4 mb-4 d-none flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 gap-3" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 41, 59, 0.92) 100%); border: 1px solid rgba(245, 158, 11, 0.4); border-left: 5px solid #d97706 !important; backdrop-filter: blur(16px); z-index: 100; position: relative; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3) !important;">
+            <div class="d-flex flex-column flex-md-row align-items-center gap-3 w-100 text-center text-md-start">
+                <div class="d-flex align-items-center justify-content-center rounded-circle p-2" style="background: rgba(217, 119, 6, 0.15); min-width: 48px; min-height: 48px;">
+                    <i class="bi bi-diagram-3-fill fs-3" style="color: #f59e0b;"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1 justify-content-center justify-content-md-start">
+                        <span class="badge" style="background: #d97706; color: #ffffff; font-size: 0.75rem; letter-spacing: 0.5px;">
+                            <i class="bi bi-stars me-1"></i> BRANCH CONSTELLATION FOUND
+                        </span>
+                        <span id="constellationConfidenceBadge" class="badge bg-dark text-warning border border-warning" style="font-size: 0.75rem;">
+                            92% Match
+                        </span>
+                    </div>
+                    <h6 class="mb-1 fw-bold text-white fs-6" id="constellationHeadline">
+                        We found an existing branch for <span id="constellationParentsName" style="color: #f59e0b;">Parents</span> on FamilyPlatform.
+                    </h6>
+                    <p class="mb-0 text-white-50" id="constellationSubtitle" style="font-size: 0.88rem;">
+                        Connect branches to automatically inherit siblings and ancestral generations without retyping.
+                    </p>
+                </div>
+            </div>
+            <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 w-100 w-md-auto justify-content-center justify-content-md-end flex-shrink-0">
+                <button type="button" id="btnPreviewConstellation" onclick="openConstellationModal()" class="btn btn-sm px-4 py-2 fw-bold text-white shadow-sm text-nowrap" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); border-radius: 10px; font-size: 0.9rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-intersect me-1"></i> Preview &amp; Connect
+                </button>
+                <button type="button" id="btnDismissConstellation" onclick="dismissConstellationMatch()" class="btn btn-dark btn-sm px-3 py-2 fw-semibold text-light border border-secondary text-nowrap" style="border-radius: 10px; font-size: 0.88rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
+                    Dismiss
+                </button>
+            </div>
+        </div>
         @endif
 
         <!-- Mode 1: Dynamic Canvas View -->
@@ -826,6 +859,66 @@
                         <button type="button" class="btn btn-light btn-sm fw-semibold px-3 py-2 flex-grow-1" data-bs-dismiss="modal" style="border-radius: 10px;">Cancel</button>
                         <button type="button" id="btnExecuteClaim" onclick="executeClaimMatch()" class="btn btn-primary btn-sm fw-bold px-4 py-2 flex-grow-1 text-white" style="background: linear-gradient(135deg, #a31621 0%, #8a1019 100%); border: none; border-radius: 10px;">
                             Confirm & Connect
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Constellation Branch Merge Confirmation Modal -->
+        <div class="modal fade" id="constellationMergeModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+            <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff;">
+                    <div class="modal-header border-0 pb-0 pt-4 px-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: rgba(217, 119, 6, 0.12); width: 40px; height: 40px;">
+                                <i class="bi bi-diagram-3-fill fs-5" style="color: #d97706;"></i>
+                            </div>
+                            <div>
+                                <h5 class="modal-title fw-bold text-dark mb-0 fs-6">Connect Family Branch</h5>
+                                <p class="text-muted small mb-0">Cross-Studio Lineage Alignment</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="text-center mb-3">
+                            <div class="badge bg-warning text-dark px-3 py-1 rounded-pill mb-2 fw-bold" id="constellationModalBadge">92% Match Score</div>
+                            <h5 class="fw-bold text-dark mb-1" id="constellationModalTitle">Matching Parents Branch</h5>
+                            <p class="text-muted small" id="constellationModalFamily">From another family circle on FamilyPlatform</p>
+                        </div>
+
+                        <div class="card bg-light border-0 rounded-3 p-3 mb-3">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-muted small fw-semibold">Mapped Parents:</span>
+                                <span class="fw-bold text-dark small" id="constellationModalParents">-</span>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-muted small fw-semibold">Matched Siblings:</span>
+                                <span class="fw-bold text-dark small" id="constellationModalSiblings">-</span>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="text-muted small fw-semibold">New Relatives to Inherit:</span>
+                                <span class="badge bg-success small" id="constellationModalNovelBadge">0 Relatives</span>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info border-0 text-start p-3 mb-0" style="border-radius: 12px; font-size: 0.85rem; background-color: #eff6ff;">
+                            <div class="d-flex align-items-start gap-2 text-dark">
+                                <i class="bi bi-shield-check text-primary fs-5"></i>
+                                <div>
+                                    <strong>Zero Data Overwrite Protection:</strong>
+                                    <div class="text-muted mt-1">
+                                        Your personal tree and custom entries will remain safe. New relatives and ancestral generations will be grafted as connected nodes, and half-siblings will be cleanly isolated.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0 pb-4 px-4 d-flex gap-2">
+                        <button type="button" class="btn btn-light btn-sm fw-semibold px-3 py-2 flex-grow-1" data-bs-dismiss="modal" style="border-radius: 10px;">Cancel</button>
+                        <button type="button" id="btnExecuteConstellationMerge" onclick="executeConstellationMerge()" class="btn btn-warning btn-sm fw-bold px-4 py-2 flex-grow-1 text-dark" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: none; border-radius: 10px;">
+                            <i class="bi bi-check2-circle me-1"></i> Connect &amp; Inherit Branch
                         </button>
                     </div>
                 </div>
@@ -4329,8 +4422,147 @@
         }
     };
 
+    // =========================================================================
+    // Autonomous Constellation Alignment Engine ("Branch Found in Another Studio")
+    // =========================================================================
+    let currentConstellationMatch = null;
+
+    async function checkConstellationMatches() {
+        try {
+            const resp = await fetch('/member/organogram/constellation-matches', {
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!resp.ok) return;
+            const res = await resp.json();
+            if (res.status === 'success' && res.data && res.data.matches && res.data.matches.length > 0) {
+                currentConstellationMatch = res.data.matches[0];
+                const banner = document.getElementById('constellationMatchBanner');
+                const badge = document.getElementById('constellationConfidenceBadge');
+                const parents = document.getElementById('constellationParentsName');
+
+                if (badge) badge.textContent = `${currentConstellationMatch.confidence_percentage}% Match`;
+                if (parents) {
+                    parents.textContent = `${currentConstellationMatch.partners.father} & ${currentConstellationMatch.partners.mother}`;
+                }
+                if (banner) {
+                    banner.classList.remove('d-none');
+                    banner.classList.add('d-flex');
+                }
+            }
+        } catch (e) {
+            console.debug('Constellation match check: no pending match found');
+        }
+    }
+
+    window.openConstellationModal = function() {
+        if (!currentConstellationMatch) return;
+        const badge = document.getElementById('constellationModalBadge');
+        const parents = document.getElementById('constellationModalParents');
+        const siblings = document.getElementById('constellationModalSiblings');
+        const novelBadge = document.getElementById('constellationModalNovelBadge');
+        const fam = document.getElementById('constellationModalFamily');
+
+        if (badge) badge.textContent = `${currentConstellationMatch.confidence_percentage}% Match Score`;
+        if (parents) parents.textContent = `${currentConstellationMatch.partners.father} & ${currentConstellationMatch.partners.mother}`;
+        if (siblings) {
+            const sibs = currentConstellationMatch.matched_relatives.siblings || [];
+            siblings.textContent = sibs.length > 0 ? sibs.join(', ') : 'Direct Parents';
+        }
+        if (novelBadge) {
+            novelBadge.textContent = `+${currentConstellationMatch.new_relatives_count} Relatives & Ancestors`;
+        }
+        if (fam) fam.textContent = `From ${currentConstellationMatch.target_family_name}`;
+
+        const modalEl = document.getElementById('constellationMergeModal');
+        if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        }
+    };
+
+    window.executeConstellationMerge = async function() {
+        if (!currentConstellationMatch) return;
+        const btn = document.getElementById('btnExecuteConstellationMerge');
+        if (btn) {
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Merging Branch...';
+            btn.disabled = true;
+        }
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ $_SESSION['token'] ?? '' }}';
+
+        try {
+            const formData = new FormData();
+            formData.append('target_union_id', currentConstellationMatch.target_union_id);
+            formData.append('token', csrfToken);
+
+            const resp = await fetch('/member/organogram/editor/constellation-merge', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: formData
+            });
+
+            const res = await resp.json();
+            if (resp.ok && res.status === 'success') {
+                const modalEl = document.getElementById('constellationMergeModal');
+                if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+                    bootstrap.Modal.getInstance(modalEl)?.hide();
+                }
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Branch Connected!',
+                        text: res.data?.message || 'Your family tree has been successfully enriched with the connected branch.',
+                        confirmButtonColor: '#d97706'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    window.location.reload();
+                }
+            } else {
+                alert(res.message || 'Unable to connect branch. Please try again.');
+                if (btn) {
+                    btn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Connect &amp; Inherit Branch';
+                    btn.disabled = false;
+                }
+            }
+        } catch (e) {
+            alert('A network error occurred. Please try again.');
+            if (btn) {
+                btn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Connect &amp; Inherit Branch';
+                btn.disabled = false;
+            }
+        }
+    };
+
+    window.dismissConstellationMatch = async function() {
+        if (!currentConstellationMatch) return;
+        const banner = document.getElementById('constellationMatchBanner');
+        if (banner) banner.style.display = 'none';
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ $_SESSION['token'] ?? '' }}';
+
+        try {
+            const formData = new FormData();
+            formData.append('target_union_id', currentConstellationMatch.target_union_id);
+            formData.append('token', csrfToken);
+
+            await fetch('/member/organogram/editor/constellation-dismiss', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: formData
+            });
+        } catch (e) {}
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
         checkPendingKinshipMatches();
+        checkConstellationMatches();
     });
 </script>
 

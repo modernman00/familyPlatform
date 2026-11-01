@@ -43,4 +43,10 @@ $router->map('POST', '/api/v1/admin/api-keys', 'App\controller\api\KinshipApiCon
 $router->map('GET', '/api/lineage/quests', 'App\controller\members\LineageQuestController@getQuests', 'API_LINEAGE_QUESTS');
 $router->map('POST', '/api/lineage/quest-token', 'App\controller\members\LineageQuestController@generateQuestToken', 'API_LINEAGE_QUEST_TOKEN');
 
+// Autonomous Constellation Alignment & Cross-Studio Lineage Merging
+$router->map('GET', '/member/organogram/constellation-matches', 'App\controller\members\OrganogramEditorController@getConstellationMatches', 'MEMBER_ORGANOGRAM_CONSTELLATION_MATCHES');
+$router->map('POST', '/member/organogram/editor/constellation-merge', 'App\controller\members\OrganogramEditorController@mergeConstellation', 'MEMBER_ORGANOGRAM_CONSTELLATION_MERGE');
+$router->map('POST', '/member/organogram/editor/constellation-dismiss', 'App\controller\members\OrganogramEditorController@dismissConstellation', 'MEMBER_ORGANOGRAM_CONSTELLATION_DISMISS');
+
+
 

@@ -757,10 +757,31 @@ final class NotificationController extends Select
             $userChannel = \App\classes\Pusher::userChannel($userId);
             \App\services\NotificationOrchestrator::updatePresence($userId, $userChannel, true);
 
-            msgSuccess(200, 'Presence updated');
+            $unreadCount = \App\services\NotificationOrchestrator::getUnreadCount($userId);
+            msgSuccess(200, 'Presence updated', ['unread_count' => $unreadCount]);
         } catch (\Throwable $e) {
             error_log('[NotificationController] presence error: ' . $e->getMessage());
             msgException(500, 'Failed to update presence');
+        }
+    }
+
+    /**
+     * Meta/Facebook Standard: Synchronises real-time unread count for OS app badging and tab counters.
+     */
+    public static function getUnreadCountSync(): void
+    {
+        try {
+            $userId = isset($_SESSION['id']) ? cleanSession((string) $_SESSION['id']) : '';
+            if (!is_string($userId) || $userId === '') {
+                msgSuccess(200, 'Unread count', ['unread_count' => 0]);
+                return;
+            }
+
+            $unreadCount = \App\services\NotificationOrchestrator::getUnreadCount($userId);
+            msgSuccess(200, 'Unread count', ['unread_count' => $unreadCount]);
+        } catch (\Throwable $e) {
+            error_log('[NotificationController] unread count error: ' . $e->getMessage());
+            msgSuccess(200, 'Unread count fallback', ['unread_count' => 0]);
         }
     }
 

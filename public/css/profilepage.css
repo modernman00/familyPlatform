@@ -2483,3 +2483,25 @@ body.dark-mode .tt-opt.is-truth { background: #052e16; }
 body.dark-mode .tt-chip { background: #1e293b; color: #e2e8f0; }
 body.dark-mode .tt-chip-cta { background: #b8202c; color: #ffffff; }
 body.dark-mode .tt-chip-ok { background: #14532d; color: #dcfce7; }
+
+/* ==========================================================================
+   🎬 Native Video Browser Overlay Elimination (WebKit / Blink / Gecko)
+   ========================================================================== */
+video.feed-post-video::-webkit-media-controls-start-playback-button,
+video.feed-post-video::-webkit-media-controls-overlay-play-button,
+video.feed-post-video::-webkit-media-controls-play-button,
+.video-rendition-frame video::-webkit-media-controls-start-playback-button,
+.video-rendition-frame video::-webkit-media-controls-overlay-play-button,
+.video-rendition-frame video::-webkit-media-controls-play-button,
+.video-embed-container video::-webkit-media-controls-start-playback-button,
+.video-embed-container video::-webkit-media-controls-overlay-play-button,
+.video-embed-container video::-webkit-media-controls-play-button {
+  display: none !important;
+  -webkit-appearance: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+

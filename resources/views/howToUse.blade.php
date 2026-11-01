@@ -340,7 +340,7 @@
           </div>
         </div>
 
-        <!-- Pillar 6: Sunday Family Trivia & "Guess Who" -->
+        <!-- Pillar 6: Sunday Family Rituals, Superlatives & "Guess Who" -->
         <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
           <div class="card-body p-4 p-md-5">
             <div class="d-flex align-items-center gap-3 mb-3">
@@ -348,22 +348,22 @@
                 <i class="bi bi-trophy-fill fs-4"></i>
               </div>
               <div>
-                <h3 class="fw-bold mb-0 text-dark">6. Sunday Family Trivia &amp; "Guess Who"</h3>
+                <h3 class="fw-bold mb-0 text-dark">6. Sunday Family Rituals, Superlatives &amp; "Guess Who"</h3>
                 <span class="badge bg-warning text-dark">Weekly Ritual</span>
               </div>
             </div>
 
             <p class="lead text-secondary">
-              Every Sunday, FamilyPlatform automatically drops an authentic heritage trivia poll generated directly from your family's records. Test how well cousins know their roots, vote in the feed, and debate in the comments!
+              Every Sunday, FamilyPlatform automatically drops a lively, authentic family poll — rotating across hilarious Family Superlatives (voting on real relatives), Relative Spotlights, cultural debates, and WhatsApp group lore. Vote in the feed, see live results, and debate with the clan in the comments!
             </p>
 
             <div class="p-3 rounded-3 bg-light border">
               <div class="d-flex align-items-center gap-2 mb-1">
                 <i class="bi bi-stars text-warning fs-5"></i>
-                <span class="fw-bold text-dark">Custom "Guess Who" Challenges</span>
+                <span class="fw-bold text-dark">Custom "Guess Who" &amp; Banter Challenges</span>
               </div>
               <p class="small text-muted mb-0">
-                Any family member can post a throwback photo challenge using the <strong>"👶 Guess Who"</strong> or <strong>"🧠 Family Lore"</strong> templates in the post composer to spark spirited multi-generational debates.
+                Any family member can also post their own throwback photo challenge or poll using the <strong>"👶 Guess Who"</strong> or <strong>"🧠 Family Lore"</strong> templates in the post composer to spark spirited multi-generational debates.
               </p>
             </div>
           </div>

@@ -30,7 +30,7 @@
     Here is your Sunday evening wrap-up from your private <strong>{{ $famCode }}</strong> family sanctuary on FamilyPlatform.
 </p>
 
-<!-- 1. Sunday Family Trivia Section -->
+<!-- 1. Sunday Family Trivia & Banter Section -->
 @if(!empty($trivia))
 @php
     $triviaPostNo = !empty($trivia['post_no']) ? (int)$trivia['post_no'] : null;
@@ -38,24 +38,24 @@
         ? "{$baseUrl}/profilePage?post_no={$triviaPostNo}#post{$triviaPostNo}" 
         : "{$baseUrl}/profilePage";
 @endphp
-<div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 5px solid #f59e0b; padding: 20px 24px; border-radius: 12px; margin-bottom: 26px;">
-    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-        <span style="font-size: 20px;">🧠</span>
-        <h4 style="margin: 0; color: #92400e; font-size: 17px; font-weight: 700;">
-            <a href="{{ $triviaUrl }}" target="_blank" style="color: #92400e; text-decoration: none;">This Week's Sunday Family Trivia</a>
+<div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1px solid #fde68a; border-left: 6px solid #d97706; padding: 22px 24px; border-radius: 14px; margin-bottom: 26px; box-shadow: 0 2px 8px rgba(217, 119, 6, 0.08);">
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+        <span style="font-size: 22px;">🏆</span>
+        <h4 style="margin: 0; color: #92400e; font-size: 17px; font-weight: 700; letter-spacing: -0.2px;">
+            <a href="{{ $triviaUrl }}" target="_blank" style="color: #92400e; text-decoration: none;">This Week's Sunday Family Ritual &amp; Poll</a>
         </h4>
     </div>
-    <p style="margin: 0 0 16px 0; color: #78350f; font-size: 15px; font-weight: 600; line-height: 1.5;">
-        <a href="{{ $triviaUrl }}" target="_blank" style="color: #78350f; text-decoration: none;">{{ $trivia['question'] ?? 'Test how well you know our family roots!' }}</a>
+    <p style="margin: 0 0 18px 0; color: #78350f; font-size: 16px; font-weight: 600; line-height: 1.5;">
+        <a href="{{ $triviaUrl }}" target="_blank" style="color: #78350f; text-decoration: none;">{{ $trivia['question'] ?? 'Vote in this week\'s family poll and join the debate!' }}</a>
     </p>
 
     <!-- Vote Button -->
     <table border="0" cellpadding="0" cellspacing="0" style="margin: 0;">
         <tr>
-            <td align="center" style="border-radius: 8px; background: #d97706;">
+            <td align="center" style="border-radius: 10px; background: #d97706; box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);">
                 <a href="{{ $triviaUrl }}" 
                    target="_blank" 
-                   style="font-size: 14px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 8px; padding: 10px 20px; border: 1px solid #d97706; display: inline-block; font-weight: 700;">
+                   style="font-size: 14px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 10px; padding: 12px 24px; border: 1px solid #d97706; display: inline-block; font-weight: 700; min-height: 44px; box-sizing: border-box; line-height: 20px;">
                     👉 Vote in Feed &amp; See Results
                 </a>
             </td>

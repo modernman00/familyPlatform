@@ -117,6 +117,13 @@ $router->map(
 );
 
 $router->map(
+  method: 'GET',
+  route: '/api/notifications/unread-count',
+  target: 'App\controller\NotificationController@getUnreadCountSync',
+  name: 'notificationGetUnreadCount'
+);
+
+$router->map(
   method: 'POST',
   route: '/api/pusher/webhook',
   target: 'App\controller\NotificationController@handlePusherWebhook',

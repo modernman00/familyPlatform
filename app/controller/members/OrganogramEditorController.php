@@ -2080,5 +2080,122 @@ final class OrganogramEditorController extends BaseController
             showError($th);
         }
     }
+
+    /**
+     * GET: Retrieve high-confidence cross-studio constellation alignment matches
+     */
+    public function getConstellationMatches(): void
+    {
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            if ($userId === '') {
+                msgException(401, 'Please sign in to view lineage matches.');
+                return;
+            }
+
+            $db = Db::connect2();
+            $ctx = $this->resolveEditorFamilyContext($db);
+            $familyCode = $ctx['family_code'];
+
+            if (empty($familyCode)) {
+                msgException(403, 'Unauthorized family tree context.');
+                return;
+            }
+
+            $matches = \App\services\ConstellationAlignmentService::findMatchesForUser($familyCode, $userId);
+
+            msgSuccess(200, [
+                'matches' => $matches,
+                'family_code' => $familyCode,
+            ]);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    /**
+     * POST: Merge and graft a verified constellation branch into the active tree
+     */
+    public function mergeConstellation(): void
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                msgException(405, 'Method Not Allowed');
+                return;
+            }
+
+            $userId = (string)($_SESSION['id'] ?? '');
+            if ($userId === '') {
+                msgException(401, 'Unauthorized Access');
+                return;
+            }
+
+            $targetUnionId = (int)($_POST['target_union_id'] ?? 0);
+            if ($targetUnionId <= 0) {
+                msgException(400, 'Invalid Target Union ID');
+                return;
+            }
+
+            $db = Db::connect2();
+            $ctx = $this->resolveEditorFamilyContext($db);
+            $familyCode = $ctx['family_code'];
+
+            if (empty($familyCode)) {
+                msgException(403, 'Unauthorized family tree access');
+                return;
+            }
+
+            \Src\Limiter::limit($userId . ':constellation_merge');
+
+            $res = \App\services\LineageMergeService::mergeConstellationBranch($familyCode, $userId, $targetUnionId);
+
+            if (!$res['success']) {
+                msgException($res['code'], $res['message']);
+                return;
+            }
+
+            msgSuccess(200, $res);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    /**
+     * POST: Persistently dismiss a constellation alignment recommendation
+     */
+    public function dismissConstellation(): void
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                msgException(405, 'Method Not Allowed');
+                return;
+            }
+
+            $userId = (string)($_SESSION['id'] ?? '');
+            if ($userId === '') {
+                msgException(401, 'Unauthorized Access');
+                return;
+            }
+
+            $targetUnionId = (int)($_POST['target_union_id'] ?? 0);
+            if ($targetUnionId <= 0) {
+                msgException(400, 'Invalid Target Union ID');
+                return;
+            }
+
+            $db = Db::connect2();
+            $ctx = $this->resolveEditorFamilyContext($db);
+            $familyCode = $ctx['family_code'];
+
+            $dismissed = \App\services\ConstellationAlignmentService::dismissMatch($familyCode, $userId, $targetUnionId);
+
+            msgSuccess(200, [
+                'success' => $dismissed,
+                'message' => 'Lineage suggestion dismissed.',
+            ]);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
 }
 

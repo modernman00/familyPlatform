@@ -426,7 +426,8 @@ self.addEventListener('push', (event) => {
         (client) => client.visibilityState === 'visible' && client.focused
       );
 
-      if (isAppFocused && data.isSilent) {
+      // Meta/Facebook Standard: If app is actively focused in foreground, suppress OS system popup
+      if (isAppFocused) {
         return;
       }
 

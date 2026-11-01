@@ -162,7 +162,8 @@
     </form>
 
     <!-- Child Sign-In Modal (Alpine Managed with Focus Trap & Smooth Transitions) -->
-    <div x-show="childModalOpen" 
+    <div id="childSignInModal"
+         x-show.important="childModalOpen" 
          x-cloak 
          x-trap.noscroll="childModalOpen"
          @keydown.escape.window="childModalOpen = false"

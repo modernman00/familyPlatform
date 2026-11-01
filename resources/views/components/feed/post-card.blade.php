@@ -884,18 +884,12 @@
                @volumechange="isVideoMuted = $el.muted"
                style="width: 100%; height: 100%; object-fit: contain; z-index: 2; border-radius: 14px; cursor: pointer; background: transparent;"></video>
 
-        <!-- Instagram Animated Center Pulse Ripple (Play / Pause Feedback) -->
-        <div x-cloak x-show="showPulse" 
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 scale-75"
-             x-transition:enter-end="opacity-100 scale-100"
-             x-transition:leave="transition ease-in duration-300"
-             x-transition:leave-start="opacity-100 scale-100"
-             x-transition:leave-end="opacity-0 scale-125"
-             class="position-absolute top-50 start-50 translate-middle pointer-events-none d-flex align-items-center justify-content-center"
-             style="z-index: 7; width: 72px; height: 72px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; box-shadow: 0 8px 24px rgba(0,0,0,0.45);">
-          <i class="bi fs-1" :class="pulseIcon" style="color: #ffffff;"></i>
-        </div>
+        <!-- Center Play/Pause Ripple Removed: prevents redundant persistent play icon over video -->
+        <template x-if="false && showPulse">
+          <div class="position-absolute top-50 start-50 translate-middle pointer-events-none" style="display: none !important;">
+            <i class="bi" :class="pulseIcon"></i>
+          </div>
+        </template>
 
         <!-- Instagram Format Badge (Top-Left) -->
         <div class="position-absolute d-inline-flex align-items-center gap-1.5 shadow-sm"
@@ -1071,6 +1065,7 @@
                   }"
                   :disabled="post.two_truths.has_voted || post.two_truths.is_author || post.two_truths.status !== 'active' || isVotingTwoTruths(post.post_no)"
                   @click="voteTwoTruths(post, idx)"
+                  :title="post.two_truths.is_author ? 'As the storyteller, you cannot vote on your own challenge. Other family members can vote directly here!' : (post.two_truths.has_voted ? 'Your guess is locked in' : 'Tap to guess this statement as the lie')"
                   :aria-label="'Statement ' + idx + ': ' + post.two_truths['statement_' + idx]">
             <span class="tt-opt-num" x-text="idx"></span>
             <span class="tt-opt-text" x-text="post.two_truths['statement_' + idx]"></span>
@@ -1093,7 +1088,7 @@
           <span class="tt-chip tt-chip-ok" :class="{ 'tt-pop': post.two_truths.just_voted }"><i class="bi bi-lock-fill"></i> Guess locked in. Reveal soon!</span>
         </template>
         <template x-if="post.two_truths.is_author && post.two_truths.status === 'active'">
-          <span class="tt-chip"><i class="bi bi-stars"></i> Your challenge is live</span>
+          <span class="tt-chip" title="Other family members can vote directly on this post in the feed"><i class="bi bi-stars"></i> Your challenge is live &bull; family can vote here</span>
         </template>
         <template x-if="post.two_truths.status === 'revealed' && post.two_truths.user_vote">
           <span class="tt-chip" :class="Number(post.two_truths.user_vote.is_correct) === 1 ? 'tt-chip-ok' : ''">
