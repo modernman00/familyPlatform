@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(kinship): implement autonomous constellation alignment and cross-studio lineage grafting",
+    "title": "Fix(kinship): enforce generation-integrity invariant and relocate members misfiled under grandparent union",
     "notes": [
+        "Fix(kinship): enforce generation-integrity invariant and relocate members misfiled under grandparent union",
         "Feat(kinship): implement autonomous constellation alignment and cross-studio lineage grafting",
-        "Fix(security): neutralize cross-tenant comment push notification leak and remove phantom registration starter comment (SEC-CVE-2026-CROSS-TENANT-COMMENT-LEAK)",
-        "Feat(media): implement adaptive aspect ratio video rendition, unified auth layouts, and production assets"
+        "Fix(security): neutralize cross-tenant comment push notification leak and remove phantom registration starter comment (SEC-CVE-2026-CROSS-TENANT-COMMENT-LEAK)"
     ],
     "released_at": "2026-11-02",
-    "commit": "3fa3daa"
+    "commit": "381b2ed"
 }

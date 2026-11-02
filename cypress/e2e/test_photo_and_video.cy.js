@@ -63,10 +63,12 @@ describe('Mixed Media & Multiple Video Posts: Photos and Videos in One Post', ()
         // 4. Attach first video
         cy.get('#imageUpload').selectFile('cypress/fixtures/test_video.webm', { force: true });
         cy.get('.swal2-confirm', { timeout: 10000 }).should('be.visible').click();
+        cy.get('.swal2-popup', { timeout: 10000 }).should('not.exist');
 
         // 5. Attach second video
         cy.get('#imageUpload').selectFile('cypress/fixtures/test_video_2.webm', { force: true });
         cy.get('.swal2-confirm', { timeout: 10000 }).should('be.visible').click();
+        cy.get('.swal2-popup', { timeout: 10000 }).should('not.exist');
 
         // 6. Verify preview shows 1 photo, 2 videos
         cy.get('#imagePreviewContainer', { timeout: 15000 }).scrollIntoView().should('be.visible');
