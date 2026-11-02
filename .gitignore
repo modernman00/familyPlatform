@@ -62,8 +62,10 @@ deployment_audit.log
 # Crypto / Keys
 *.cert
 # Databases
-*.sqlite
 *.sql
+!migrations/*.sqlite
+*.sql
+!migrations/*.sql
 # Logs & Dumps
 npm-debug.log*
 yarn-error.log*

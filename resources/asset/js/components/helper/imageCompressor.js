@@ -29,9 +29,9 @@ export async function compressImageFile(file, options = {}) {
     }
 
     const {
-        maxWidth = 1920,
-        maxHeight = 1920,
-        quality = 0.82,
+        maxWidth = 2560,
+        maxHeight = 2560,
+        quality = 0.92,
         mimeType = 'image/jpeg'
     } = options;
 

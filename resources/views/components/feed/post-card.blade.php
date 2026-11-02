@@ -152,7 +152,7 @@
   </template>
 
   <!-- Post Text (Prominent for Text-Only Posts) -->
-  <template x-if="!post.two_truths && (post.displayMessage || (!post.video && post.postMessage)) && (!post.images || post.images.length === 0) && !post.video && !post.comparison">
+  <template x-if="!post.two_truths && (post.displayMessage || (!post.video && (!post.videos || post.videos.length === 0) && post.postMessage)) && (!post.images || post.images.length === 0) && !post.video && (!post.videos || post.videos.length === 0) && !post.comparison">
     <div class="post-content px-1 mb-3">
       <p class="mb-0" style="white-space: pre-line; font-size: 1.05rem; color: var(--text-main); line-height: 1.55; font-family: var(--font-sans, -apple-system, system-ui, sans-serif);" x-html="renderHashtags(post.displayMessage || post.postMessage)"></p>
       
@@ -403,7 +403,23 @@
 
   <!-- Single Post Image (Hero Adaptive Natural Aspect Bleed with Ambient Aura) -->
   <template x-if="post.images && post.images.length === 1 && !post.comparison">
-    <div class="mb-3 px-1">
+    <div class="mb-3 px-1"
+         x-data="{
+           singleAspect: 'auto',
+           onSingleImageLoad(el) {
+             if (el.naturalWidth && el.naturalHeight) {
+               const r = el.naturalWidth / el.naturalHeight;
+               const clamped = Math.min(1.91, Math.max(0.80, r));
+               this.singleAspect = clamped.toFixed(4) + ' / 1';
+             }
+           }
+         }"
+         x-init="$nextTick(() => {
+           const singleImg = $el.querySelector('img.post-media-first-img');
+           if (singleImg && singleImg.complete && singleImg.naturalWidth && singleImg.naturalHeight) {
+             onSingleImageLoad(singleImg);
+           }
+         })">
       <div class="position-relative feed-media-aura-container">
         <!-- Ambient Dynamic Backlight Glow (Cinematic Aura) -->
         <div class="feed-media-aura-backdrop" aria-hidden="true">
@@ -420,20 +436,21 @@
                playingVoicePostNo === post.post_no ? 'photo-voice-playing' : '',
                ((post.post_no || 0) % 3 === 0 ? 'living-drift-a' : ((post.post_no || 0) % 3 === 1 ? 'living-drift-b' : 'living-drift-c'))
              ]"
-             style="border-radius:12px; width:100%; max-height: 600px; background: rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: center;">
+             :style="'border-radius:12px; width:100%; max-height: 600px; aspect-ratio: ' + (singleAspect !== 'auto' ? singleAspect : 'unset') + '; background: rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: center;'">
           <a href="#" 
              @click.prevent="typeof handleImageTap === 'function' ? handleImageTap(post, post.images, 0, $event) : openLightbox(post.images, 0)" 
              @dblclick.prevent.stop="triggerHeartBurst(post, 0)"
              role="button" 
              aria-label="View enlarged photo or double tap to like" 
-             style="display:block; overflow:hidden; border-radius:12px; position:relative; width:100%;">
-            <picture class="w-100 d-block" style="border-radius: 12px; overflow: hidden;">
+             style="display:block; overflow:hidden; border-radius:12px; position:relative; width:100%; height:100%;">
+            <picture class="w-100 h-100 d-block" style="border-radius: 12px; overflow: hidden; height: 100%;">
               <source :srcset="getPostImageVariantUrl(post.images[0], 'avif')" type="image/avif">
               <source :srcset="getPostImageVariantUrl(post.images[0], 'webp')" type="image/webp">
               <img :src="(post.images[0] && (post.images[0].startsWith('/public/') || post.images[0].startsWith('/images/'))) ? post.images[0] : getPostImageUrl(post.images[0])" 
-                   class="post-media-first-img living-canvas-img w-100 d-block"
-                   style="border-radius: 12px; width: 100%; height: auto; max-height: 600px; object-fit: contain; cursor: pointer;" 
+                   class="post-media-first-img living-canvas-img w-100 h-100"
+                   style="border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: cover; object-position: center; cursor: pointer; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;" 
                    alt="Family post image" 
+                   @load="onSingleImageLoad($event.target)"
                    loading="lazy"
                    decoding="async">
             </picture>
@@ -555,7 +572,41 @@
 
   <!-- Multi-Image Instagram Swipeable Carousel (> 1 images) -->
   <template x-if="post.images && post.images.length > 1 && !post.comparison">
-    <div class="mb-3 px-1 post-carousel-wrapper" x-data="{ currentIdx: 0 }">
+    <div class="mb-3 px-1 post-carousel-wrapper" 
+         x-data="{ 
+           currentIdx: 0,
+           carouselAspect: '1 / 1',
+           onCarouselImageLoad(el, idx) {
+             if (idx === 0 && el.naturalWidth && el.naturalHeight) {
+               const r = el.naturalWidth / el.naturalHeight;
+               const clamped = Math.min(1.91, Math.max(0.80, r));
+               this.carouselAspect = clamped.toFixed(4) + ' / 1';
+             }
+           },
+           nextSlide() {
+             if (this.currentIdx < post.images.length - 1) {
+               this.goToSlide(this.currentIdx + 1);
+             }
+           },
+           prevSlide() {
+             if (this.currentIdx > 0) {
+               this.goToSlide(this.currentIdx - 1);
+             }
+           },
+           goToSlide(idx) {
+             const track = this.$refs.carouselTrack;
+             if (track) {
+               track.scrollTo({ left: idx * track.clientWidth, behavior: 'smooth' });
+             }
+             this.currentIdx = idx;
+           }
+         }"
+         x-init="$nextTick(() => {
+           const firstImg = $refs.carouselTrack?.querySelector('img');
+           if (firstImg && firstImg.complete && firstImg.naturalWidth && firstImg.naturalHeight) {
+             onCarouselImageLoad(firstImg, 0);
+           }
+         })">
       <div class="position-relative feed-media-aura-container">
         <!-- Ambient Dynamic Backlight Glow for Carousel -->
         <div class="feed-media-aura-backdrop" aria-hidden="true">
@@ -571,17 +622,47 @@
                playingVoicePostNo === post.post_no ? 'photo-voice-playing' : '',
                ((post.post_no || 0) % 3 === 0 ? 'living-drift-a' : ((post.post_no || 0) % 3 === 1 ? 'living-drift-b' : 'living-drift-c'))
              ]"
-             style="border-radius:12px; aspect-ratio: 1 / 1; max-height: 540px; background: #0b0f19;">
+             :style="'border-radius:12px; aspect-ratio: ' + carouselAspect + '; max-height: 600px; width: 100%; background: #0b0f19;'">
           
-          <!-- Floating Glassmorphic Slide Counter (1/3) -->
-          <div class="position-absolute top-0 end-0 m-2.5 px-2.5 py-1 rounded-pill shadow-sm"
-               style="background: rgba(15, 23, 42, 0.72); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #ffffff; font-size: 0.75rem; font-weight: 600; z-index: 10; letter-spacing: 0.02em;">
-            <span x-text="(currentIdx + 1) + '/' + post.images.length"></span>
+          <!-- Fanciful Instagram Multi-Photo Stacked Badge -->
+          <div class="position-absolute top-0 end-0 m-3 carousel-fanciful-badge"
+               title="Multiple photos in carousel"
+               aria-label="Multiple photos in post">
+            <svg class="carousel-cards-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+              <rect x="7" y="3" width="14" height="14" rx="3" fill="rgba(255, 255, 255, 0.22)" stroke="#ffd700" stroke-width="1.3" opacity="0.9" />
+              <rect x="3" y="7" width="14" height="14" rx="3" fill="#0f172a" stroke="#ffffff" stroke-width="1.5" />
+              <circle cx="7.5" cy="11.5" r="1.3" fill="#ffd700" />
+              <path d="M4.5 18l3.8-4.5 2.7 3.2 2.2-2.3 3.3 3.6h-12z" fill="#ffffff" opacity="0.9" />
+            </svg>
+            <span class="carousel-counter-text" x-text="(currentIdx + 1) + ' / ' + post.images.length"></span>
           </div>
+
+          <!-- Desktop / Touch Navigation Chevrons -->
+          <button type="button" 
+                  class="carousel-nav-btn carousel-nav-prev" 
+                  x-show="currentIdx > 0" 
+                  x-cloak 
+                  @click.stop.prevent="prevSlide()"
+                  aria-label="Previous photo in carousel">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <button type="button" 
+                  class="carousel-nav-btn carousel-nav-next" 
+                  x-show="currentIdx < post.images.length - 1" 
+                  x-cloak 
+                  @click.stop.prevent="nextSlide()"
+                  aria-label="Next photo in carousel">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
 
           <!-- Snap-Scroll Track -->
           <div class="d-flex overflow-auto post-carousel-track" 
-               style="scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; height: 100%;"
+               x-ref="carouselTrack"
+               style="scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; height: 100%; width: 100%;"
                @scroll.passive="currentIdx = Math.round($event.target.scrollLeft / ($event.target.clientWidth || 1))">
             <template x-for="(img, idx) in post.images" :key="idx">
               <div class="flex-shrink-0 w-100 position-relative carousel-slide-item" 
@@ -593,13 +674,14 @@
                    role="button" 
                    aria-label="View enlarged photo or double tap to like" 
                    style="display:block; overflow:hidden; border-radius:12px; position:relative; width:100%; height:100%;">
-                  <picture class="w-100 h-100 d-block" style="border-radius: 12px; overflow: hidden;">
+                  <picture class="w-100 h-100 d-block" style="border-radius: 12px; overflow: hidden; height: 100%;">
                     <source :srcset="getPostImageVariantUrl(img, 'avif')" type="image/avif">
                     <source :srcset="getPostImageVariantUrl(img, 'webp')" type="image/webp">
                     <img :src="(img && (img.startsWith('/public/') || img.startsWith('/images/'))) ? img : getPostImageUrl(img)" 
                          class="post-media-first-img living-canvas-img w-100 h-100"
-                         style="border-radius: 12px; max-height: 540px; object-fit: contain; cursor: pointer;" 
+                         style="border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: cover; object-position: center; cursor: pointer; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;" 
                          alt="Family carousel slide" 
+                         @load="onCarouselImageLoad($event.target, idx)"
                          loading="lazy"
                          decoding="async">
                   </picture>
@@ -721,16 +803,172 @@
       </div>
 
       <!-- Instagram Dynamic Animated Pagination Dots -->
-      <div class="d-flex justify-content-center align-items-center gap-1.5 mt-2 post-carousel-dots" aria-hidden="true">
+      <div class="d-flex justify-content-center align-items-center gap-1.5 mt-2 post-carousel-dots" aria-label="Photo carousel pagination">
         <template x-for="(img, dIdx) in post.images" :key="dIdx">
-          <span class="carousel-dot" :class="currentIdx === dIdx ? 'is-active' : ''"></span>
+          <button type="button" 
+                  class="carousel-dot border-0 p-0" 
+                  :class="currentIdx === dIdx ? 'is-active' : ''"
+                  @click.stop.prevent="goToSlide(dIdx)"
+                  :aria-label="'Go to photo ' + (dIdx + 1)"
+                  style="cursor: pointer;"></button>
+        </template>
+      </div>
+    </div>
+  </template>
+
+  <!-- Multiple Videos Horizontal Track (Up to 3 Videos side-by-side) -->
+  <template x-if="post.videos && post.videos.length > 1">
+    <div class="multi-video-horizontal-container mb-3 px-1 position-relative"
+         x-data="{
+           activeVidIdx: 0,
+           scrollToCard(idx) {
+             const track = this.$refs.videoScrollTrack;
+             if (!track) return;
+             const card = track.children[idx];
+             if (card) {
+               card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+               this.activeVidIdx = idx;
+             }
+           },
+           onScroll(e) {
+             const track = e.target;
+             const cardWidth = track.firstElementChild ? track.firstElementChild.offsetWidth : 300;
+             if (cardWidth > 0) {
+               const idx = Math.round(track.scrollLeft / cardWidth);
+               this.activeVidIdx = Math.max(0, Math.min(idx, (post.videos ? post.videos.length - 1 : 0)));
+             }
+           }
+         }">
+      <!-- Header Badge / Counter -->
+      <div class="d-flex align-items-center justify-content-between mb-1.5 px-1">
+        <span class="badge rounded-pill px-2.5 py-1 d-inline-flex align-items-center gap-1.5"
+              style="background: rgba(15, 23, 42, 0.08); color: var(--text-main, #0f172a); font-size: 0.75rem; font-weight: 600;">
+          <i class="bi bi-camera-reels-fill text-danger"></i>
+          <span x-text="post.videos.length + ' Videos'"></span>
+        </span>
+        <div class="d-flex align-items-center gap-1.5">
+          <template x-for="(v, vIdx) in post.videos" :key="'dot-' + vIdx">
+            <span class="rounded-pill transition-all"
+                  :style="activeVidIdx === vIdx 
+                    ? 'width: 18px; height: 6px; background: #a31621;' 
+                    : 'width: 6px; height: 6px; background: rgba(15, 23, 42, 0.25); cursor: pointer;'"
+                  @click.stop="scrollToCard(vIdx)"></span>
+          </template>
+        </div>
+      </div>
+
+      <!-- Horizontal Scrollable Track -->
+      <div class="multi-video-scroll-track d-flex gap-3 overflow-x-auto pb-2"
+           x-ref="videoScrollTrack"
+           @scroll.passive="onScroll($event)"
+           style="scroll-snap-type: x mandatory; scrollbar-width: thin; -webkit-overflow-scrolling: touch; scroll-padding: 0 4px;">
+        <template x-for="(vid, vIdx) in post.videos" :key="vIdx">
+          <div class="multi-video-card flex-shrink-0 position-relative rounded-3 overflow-hidden shadow-sm border border-light-subtle"
+               style="scroll-snap-align: start; width: 82%; max-width: 360px; min-width: 260px; background: #07090e;"
+               x-data="{
+                 isMuted: true,
+                 isPlaying: false,
+                 progressPercent: 0,
+                 togglePlay(vEl) {
+                   if (!vEl) return;
+                   if (vEl.paused) {
+                     const track = $el.closest('.multi-video-scroll-track');
+                     if (track) {
+                       track.querySelectorAll('video').forEach(other => {
+                         if (other !== vEl && !other.paused) other.pause();
+                       });
+                     }
+                     vEl.play().catch(() => {});
+                     this.isPlaying = true;
+                   } else {
+                     vEl.pause();
+                     this.isPlaying = false;
+                   }
+                 },
+                 toggleMute(vEl) {
+                   if (!vEl) return;
+                   vEl.muted = !vEl.muted;
+                   this.isMuted = vEl.muted;
+                 },
+                 onTimeUpdate(vEl) {
+                   if (!vEl || !vEl.duration) return;
+                   this.progressPercent = Math.min(100, Math.max(0, (vEl.currentTime / vEl.duration) * 100));
+                   if (vid.trimEnd !== null && vEl.currentTime >= vid.trimEnd) {
+                     vEl.currentTime = vid.trimStart || 0;
+                   }
+                 }
+               }">
+            <!-- Badge: Video Number & Type -->
+            <div class="position-absolute top-0 start-0 m-2.5 d-flex align-items-center gap-1.5" style="z-index: 5; pointer-events: none;">
+              <span class="badge rounded-pill px-2 py-1 shadow-sm d-inline-flex align-items-center gap-1"
+                    style="background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); color: #ffffff; font-size: 0.7rem; font-weight: 600;">
+                <i class="bi bi-play-circle-fill text-warning"></i>
+                <span x-text="'Video ' + (vIdx + 1)"></span>
+              </span>
+            </div>
+
+            <!-- Mute/Unmute Pill Top-Right (44x44px minimum touch target) -->
+            <button type="button"
+                    class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
+                    @click.stop="toggleMute($el.closest('.multi-video-card').querySelector('video'))"
+                    :title="isMuted ? 'Unmute video' : 'Mute video'"
+                    :aria-label="isMuted ? 'Unmute video' : 'Mute video'"
+                    style="top: 8px; right: 8px; z-index: 6; width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 9999px; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
+              <i class="bi" :class="isMuted ? 'bi-volume-mute-fill' : 'bi-volume-up-fill'" style="font-size: 1rem; color: #ffffff;"></i>
+            </button>
+
+            <!-- Video Player (Direct Stream or Embedded) -->
+            <template x-if="vid.type === 'direct'">
+              <div class="position-relative w-100" style="aspect-ratio: 4 / 5; max-height: 440px; background: #07090e;">
+                <video class="w-100 h-100 object-fit-contain"
+                       :src="vid.embedUrl"
+                       playsinline
+                       webkit-playsinline
+                       muted
+                       loop
+                       preload="metadata"
+                       @click.stop="togglePlay($el)"
+                       @play="isPlaying = true"
+                       @pause="isPlaying = false"
+                       @timeupdate="onTimeUpdate($el)"></video>
+
+                <!-- Center Play Indicator (when paused) -->
+                <div class="position-absolute top-50 start-50 translate-middle pointer-events-none"
+                     x-show="!isPlaying"
+                     style="z-index: 4; pointer-events: none;">
+                  <span class="d-inline-flex align-items-center justify-content-center rounded-circle shadow-lg"
+                        style="width: 54px; height: 54px; background: rgba(15, 23, 42, 0.72); backdrop-filter: blur(6px); border: 1px solid rgba(255, 255, 255, 0.25);">
+                    <i class="bi bi-play-fill text-white fs-3 ms-1"></i>
+                  </span>
+                </div>
+
+                <!-- Bottom Scrubber Bar -->
+                <div class="position-absolute bottom-0 start-0 w-100" style="height: 4px; background: rgba(255, 255, 255, 0.2); z-index: 5;">
+                  <div class="h-100" :style="'width: ' + progressPercent + '%; background: #ffffff; transition: width 0.1s linear;'"></div>
+                </div>
+              </div>
+            </template>
+
+            <!-- Embedded Third-Party (YouTube / Vimeo / Cloudflare) -->
+            <template x-if="vid.type !== 'direct'">
+              <div class="w-100 position-relative" style="aspect-ratio: 16 / 9; max-height: 340px; background: #07090e;">
+                <iframe :src="vid.embedUrl"
+                        title="Video Player"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen
+                        loading="lazy"
+                        style="width: 100%; height: 100%; border: none;"></iframe>
+              </div>
+            </template>
+          </div>
         </template>
       </div>
     </div>
   </template>
 
   <!-- Embedded Video (YouTube, Vimeo, Cloud Stream) -->
-  <template x-if="post.video && (post.video.type === 'youtube' || post.video.type === 'vimeo' || post.video.type === 'cloudflare')">
+  <template x-if="(!post.videos || post.videos.length <= 1) && post.video && (post.video.type === 'youtube' || post.video.type === 'vimeo' || post.video.type === 'cloudflare')">
     <div class="video-embed-container mb-3 px-1"
          x-data="{
            isShort: (post.video.originalUrl && post.video.originalUrl.includes('/shorts/'))
@@ -750,7 +988,7 @@
   </template>
 
   <!-- Direct Video Stream (World-Class Instagram-Grade Adaptive Video Rendition) -->
-  <template x-if="post.video && post.video.type === 'direct'">
+  <template x-if="(!post.videos || post.videos.length <= 1) && post.video && post.video.type === 'direct'">
     <div class="video-embed-container mb-3 px-1 position-relative" 
          x-data="{
            isVideoMuted: true,
@@ -1251,7 +1489,7 @@
   </div>
 
   <!-- Instagram Inline Caption Format (Under Likes / Action Row for Posts with Media) -->
-  <template x-if="(post.displayMessage || (!post.video && post.postMessage)) && ((post.images && post.images.length > 0) || post.video || post.comparison)">
+  <template x-if="(post.displayMessage || (!post.video && (!post.videos || post.videos.length === 0) && post.postMessage)) && ((post.images && post.images.length > 0) || post.video || (post.videos && post.videos.length > 0) || post.comparison)">
     <div class="post-caption-block px-1 mb-2 pt-1" style="font-size: 0.95rem; line-height: 1.5;">
       <a :href="'/member/profilePage?id=' + post.id" class="fw-bold text-decoration-none me-1.5" style="color: var(--text-main, #0f172a); font-weight: 600;" x-text="post.fullName"></a>
       <span class="post-caption-text" style="white-space: pre-line; color: var(--text-main);" x-html="renderHashtags(post.displayMessage || post.postMessage)"></span>

@@ -2,7 +2,7 @@ import axios from 'axios';
 import Pusher from 'pusher-js';
 import { format } from 'timeago.js';
 import Swal from 'sweetalert2';
-import { extractVideoFromText, cleanPostMessage } from './videoParser';
+import { extractVideoFromText, extractVideosFromText, cleanPostMessage } from './videoParser';
 import { getCsrfToken } from '../global';
 import { getPostImageUrl, getProfileImageUrl, getPostImageVariantUrl } from '../helper/imageUrls';
 import { FAMILY_GIFS, GIF_CATEGORIES, isAllowedGifUrl } from './gifCatalog';
@@ -354,23 +354,26 @@ export function profileFeed(opts = {}) {
                 profImg = (rawImg.startsWith('/') || rawImg.startsWith('http')) ? rawImg : `/resources/images/profile/${rawImg}`;
             }
             const cleanMsg = this.decodeHtml(p?.postMessage || '');
-            let detectedVideo = extractVideoFromText(cleanMsg);
-            if (!detectedVideo) {
-                const videoFileFromSlots = this.extractVideoFromSlots(p);
-                if (videoFileFromSlots) {
-                    const slotUrl = (videoFileFromSlots.startsWith('/') || videoFileFromSlots.startsWith('http'))
-                        ? videoFileFromSlots
-                        : `/resources/videos/posts/${videoFileFromSlots}`;
-                    detectedVideo = {
-                        type: 'direct',
-                        videoId: null,
-                        embedUrl: slotUrl,
-                        originalUrl: videoFileFromSlots,
-                        trimStart: null,
-                        trimEnd: null,
-                    };
+            let detectedVideos = extractVideosFromText(cleanMsg, 3);
+            if (!detectedVideos || detectedVideos.length === 0) {
+                const videoFilesFromSlots = this.extractVideosFromSlots(p);
+                if (videoFilesFromSlots && videoFilesFromSlots.length > 0) {
+                    detectedVideos = videoFilesFromSlots.map(videoFile => {
+                        const slotUrl = (videoFile.startsWith('/') || videoFile.startsWith('http'))
+                            ? videoFile
+                            : `/resources/videos/posts/${videoFile}`;
+                        return {
+                            type: 'direct',
+                            videoId: null,
+                            embedUrl: slotUrl,
+                            originalUrl: videoFile,
+                            trimStart: null,
+                            trimEnd: null,
+                        };
+                    });
                 }
             }
+            const primaryVideo = detectedVideos.length > 0 ? detectedVideos[0] : null;
             const normalized = {
                 post_no: p?.post_no,
                 id: p?.id,
@@ -380,8 +383,9 @@ export function profileFeed(opts = {}) {
                 date_created: p?.date_created || new Date().toISOString(),
                 post_time: p?.post_time || p?.date_created || new Date().toISOString(),
                 postMessage: cleanMsg,
-                displayMessage: this.normalizeEmojiText(cleanPostMessage(cleanMsg, detectedVideo)),
-                video: detectedVideo,
+                displayMessage: this.normalizeEmojiText(cleanPostMessage(cleanMsg, detectedVideos)),
+                video: primaryVideo,
+                videos: detectedVideos,
                 link_preview: p?.link_preview || null,
                 post_likes: parseInt(p?.post_likes || 0, 10),
                 images: this.extractImages(p),
@@ -533,15 +537,22 @@ export function profileFeed(opts = {}) {
             return collected.filter(img => img && img !== 'null' && img !== 'undefined' && img !== 'none' && !img.includes('no_image') && !/\.(mp4|webm|mov|ogg)(\?|#|$)/i.test(img));
         },
 
-        extractVideoFromSlots(p) {
-            if (!p || typeof p !== 'object') return null;
+        extractVideosFromSlots(p) {
+            if (!p || typeof p !== 'object') return [];
+            const collected = [];
             for (let i = 0; i <= 5; i++) {
                 const val = p[`post_img${i}`];
                 if (val && typeof val === 'string' && /\.(mp4|webm|mov|ogg)(\?|#|$)/i.test(val.trim())) {
-                    return val.trim();
+                    collected.push(val.trim());
+                    if (collected.length >= 3) break;
                 }
             }
-            return null;
+            return collected;
+        },
+
+        extractVideoFromSlots(p) {
+            const vids = this.extractVideosFromSlots(p);
+            return vids.length > 0 ? vids[0] : null;
         },
 
         getPostImageUrl(img) {
@@ -1972,8 +1983,9 @@ export function profileFeed(opts = {}) {
                 const post = this.posts.find(p => String(p.post_no) === String(postNo));
                 if (post) {
                     post.postMessage = postMessage;
-                    post.displayMessage = this.normalizeEmojiText(cleanPostMessage(postMessage || '', extractVideoFromText(postMessage)));
-                    post.video = extractVideoFromText(postMessage);
+                    post.videos = extractVideosFromText(postMessage || '', 3);
+                    post.video = post.videos.length > 0 ? post.videos[0] : null;
+                    post.displayMessage = this.normalizeEmojiText(cleanPostMessage(postMessage || '', post.videos));
                     this.observeFeedVideos();
                     if (link_preview !== undefined) {
                         post.link_preview = link_preview;

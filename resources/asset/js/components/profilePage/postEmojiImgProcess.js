@@ -536,6 +536,20 @@ let stagedTrimFile = null;
 let stagedTrimDuration = null;
 let stagedTrimBlobUrl = null;
 let activeVideoUploadPromise = null;
+let attachedVideoList = [];
+const activeVideoUploadPromises = new Map();
+
+const syncAttachedVideoInputs = () => {
+    const urls = attachedVideoList.map(v => v.streamUrl).filter(Boolean);
+    const attachedVideoInput = document.getElementById('attachedVideoUrl');
+    if (attachedVideoInput) {
+        attachedVideoInput.value = urls[0] || '';
+    }
+    const attachedVideoUrlsInput = document.getElementById('attachedVideoUrls');
+    if (attachedVideoUrlsInput) {
+        attachedVideoUrlsInput.value = urls.length > 0 ? JSON.stringify(urls) : '';
+    }
+};
 
 const cleanupTrimStudio = () => {
     stagedTrimFile = null;
@@ -556,6 +570,11 @@ const cleanupTrimStudio = () => {
 const closeVideoBuilder = () => {
     if (!videoContainer) return;
     cleanupTrimStudio();
+    stagedTrimFile = null;
+    stagedTrimDuration = null;
+    activeVideoUploadPromise = null;
+    activeVideoUploadPromises.clear();
+    attachedVideoList = [];
     videoContainer.classList.add('d-none');
     if (addVideoBtn) addVideoBtn.classList.remove('video-active');
     if (videoInput) videoInput.value = '';
@@ -565,7 +584,47 @@ const closeVideoBuilder = () => {
         videoLivePreview.innerHTML = '';
         videoLivePreview.classList.add('d-none');
     }
+    syncAttachedVideoInputs();
+    if (postMessageArea) {
+        postMessageArea.value = postMessageArea.value.replace(/(?:https?:\/\/[^\s"'<>]+|\/resources\/videos\/posts\/[^\s"'<>]+)\.(?:mp4|webm|ogg|mov)(?:#t=[0-9.,]+)?/gi, '').replace(/\n\s*\n\s*\n/g, '\n\n').trim();
+    }
+    if (typeof window.__onComposerVideoRemoved === 'function') {
+        window.__onComposerVideoRemoved();
+    }
 };
+
+const removeComposerVideo = (targetId) => {
+    if (targetId === undefined || targetId === null) {
+        closeVideoBuilder();
+        return;
+    }
+
+    const targetIdx = typeof targetId === 'number'
+        ? targetId
+        : attachedVideoList.findIndex(v => v.id === targetId || v.streamUrl === targetId);
+
+    if (targetIdx >= 0) {
+        const removed = attachedVideoList[targetIdx];
+        attachedVideoList.splice(targetIdx, 1);
+        syncAttachedVideoInputs();
+
+        if (postMessageArea && removed?.streamUrl) {
+            postMessageArea.value = postMessageArea.value.replace(removed.streamUrl, '').replace(/\n\s*\n\s*\n/g, '\n\n').trim();
+        }
+
+        if (typeof window.__onComposerVideoRemoved === 'function') {
+            window.__onComposerVideoRemoved(targetId);
+        }
+
+        if (attachedVideoList.length === 0) {
+            closeVideoBuilder();
+        } else {
+            const nextVid = attachedVideoList[attachedVideoList.length - 1];
+            if (nextVid && videoInput) videoInput.value = nextVid.streamUrl;
+        }
+    }
+};
+window.__removeComposerVideo = removeComposerVideo;
 
 const syncTrimSlidersUI = (changedSlider = 'start') => {
     if (!videoTrimStartRange || !videoTrimEndRange) return;
@@ -685,8 +744,41 @@ const openAutoTrimStudioForFile = (file, duration) => {
     scrollDrawerIntoView(videoAutoTrimStudio);
 };
 
-const renderAttachedVideoPreview = (streamUrl, trimStart = null, trimEnd = null) => {
+const renderAttachedVideoPreview = (streamUrl, trimStart = null, trimEnd = null, videoId = null) => {
     if (videoInput) videoInput.value = streamUrl;
+
+    const vidId = videoId || `vid_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    const existingIdx = videoId ? attachedVideoList.findIndex(v => v.id === videoId) : -1;
+    const entry = {
+        id: vidId,
+        streamUrl,
+        trimStart,
+        trimEnd
+    };
+
+    if (existingIdx >= 0) {
+        attachedVideoList[existingIdx] = entry;
+    } else {
+        const urlIdx = attachedVideoList.findIndex(v => v.streamUrl === streamUrl);
+        if (urlIdx >= 0) {
+            attachedVideoList[urlIdx] = entry;
+        } else if (attachedVideoList.length < 3) {
+            attachedVideoList.push(entry);
+        }
+    }
+
+    syncAttachedVideoInputs();
+
+    if (typeof window.__onComposerVideoUpdated === 'function') {
+        window.__onComposerVideoUpdated({
+            id: vidId,
+            streamUrl,
+            file: stagedTrimFile,
+            trimStart,
+            trimEnd,
+            uploading: false
+        });
+    }
 
     if (videoLivePreview) {
         const parsed = parseVideoUrl(streamUrl);
@@ -732,13 +824,19 @@ const renderAttachedVideoPreview = (streamUrl, trimStart = null, trimEnd = null)
     }
 
     if (postMessageArea) {
-        // Replace any previous uploaded /resources/videos/posts/ URL or append new streamUrl
+        // Remove existing video URLs and re-append all attached videos cleanly
         const cleanedCurrent = postMessageArea.value.replace(/(?:https?:\/\/[^\s"'<>]+|\/resources\/videos\/posts\/[^\s"'<>]+)\.(?:mp4|webm|ogg|mov)(?:#t=[0-9.,]+)?/gi, '').trim();
-        postMessageArea.value = cleanedCurrent ? `${cleanedCurrent}\n\n${streamUrl}` : streamUrl;
+        const allUrls = attachedVideoList.map(v => v.streamUrl).filter(Boolean);
+        if (allUrls.length > 0) {
+            postMessageArea.value = cleanedCurrent ? `${cleanedCurrent}\n\n${allUrls.join('\n')}` : allUrls.join('\n');
+        } else {
+            postMessageArea.value = cleanedCurrent;
+        }
     }
 };
 
-const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 30, originalDuration = null) => {
+const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 30, originalDuration = null, videoId = null) => {
+    const vidId = videoId || file?._stagedVidId || `vid_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
     const runUpload = async () => {
         if (!file) return null;
 
@@ -887,11 +985,14 @@ const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 30, originalDura
             }
 
             cleanupTrimStudio();
-            renderAttachedVideoPreview(finalStreamUrl, safeStart, safeEnd);
+            renderAttachedVideoPreview(finalStreamUrl, safeStart, safeEnd, vidId);
             return finalStreamUrl;
         } catch (err) {
             console.warn('[VideoUpload] Upload/Auto-Trim error:', err);
             if (videoUploadProgressWrapper) videoUploadProgressWrapper.classList.add('d-none');
+            if (typeof window.__onComposerVideoRemoved === 'function') {
+                window.__onComposerVideoRemoved(vidId);
+            }
             (window.swalError || alert)(err?.message || 'Unable to upload video clip. Please try again.');
             return null;
         } finally {
@@ -899,12 +1000,17 @@ const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 30, originalDura
                 btnConfirmAutoTrim.disabled = false;
                 if (window.ScoreTenantSpinner) window.ScoreTenantSpinner.stop(btnConfirmAutoTrim);
             }
-            activeVideoUploadPromise = null;
+            activeVideoUploadPromises.delete(vidId);
+            if (activeVideoUploadPromise === uploadPromise) {
+                activeVideoUploadPromise = null;
+            }
         }
     };
 
-    activeVideoUploadPromise = runUpload();
-    return activeVideoUploadPromise;
+    const uploadPromise = runUpload();
+    activeVideoUploadPromises.set(vidId, uploadPromise);
+    activeVideoUploadPromise = uploadPromise;
+    return uploadPromise;
 };
 
 if (btnConfirmAutoTrim) {
@@ -931,6 +1037,14 @@ if (btnQuickTrimFirst30) {
 const handleSelectedVideoFile = async (file) => {
     if (!file) return;
 
+    if (attachedVideoList.length >= 3) {
+        (window.swalError || alert)('Maximum of 3 videos reached. Remove a video to upload another.');
+        return;
+    }
+
+    const vidId = `vid_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    file._stagedVidId = vidId;
+
     if (videoContainer && videoContainer.classList.contains('d-none')) {
         videoContainer.classList.remove('d-none');
         if (addVideoBtn) addVideoBtn.classList.add('video-active');
@@ -944,7 +1058,19 @@ const handleSelectedVideoFile = async (file) => {
         return;
     }
 
-    // Inspect video duration via browser metadata
+    stagedTrimFile = file;
+    stagedTrimDuration = null;
+
+    if (typeof window.__onComposerVideoStaged === 'function') {
+        window.__onComposerVideoStaged({
+            id: vidId,
+            file,
+            blobUrl: URL.createObjectURL(file),
+            uploading: true
+        });
+    }
+
+    // Inspect video duration via browser metadata with guaranteed timeout race
     let clipDuration = null;
     try {
         clipDuration = await new Promise((resolve) => {
@@ -953,19 +1079,32 @@ const handleSelectedVideoFile = async (file) => {
             const blobUrl = URL.createObjectURL(file);
             tempVideo.src = blobUrl;
 
+            const timer = setTimeout(() => {
+                URL.revokeObjectURL(blobUrl);
+                resolve(null);
+            }, 1500);
+
             tempVideo.onloadedmetadata = () => {
+                clearTimeout(timer);
                 URL.revokeObjectURL(blobUrl);
                 resolve(Number.isFinite(tempVideo.duration) ? tempVideo.duration : null);
             };
 
             tempVideo.onerror = () => {
+                clearTimeout(timer);
                 URL.revokeObjectURL(blobUrl);
                 resolve(null);
             };
+
+            try {
+                tempVideo.load();
+            } catch (_) {}
         });
     } catch (err) {
         console.warn('Video duration check skipped:', err);
     }
+
+    stagedTrimDuration = clipDuration;
 
     // If video exceeds 30 seconds, open the Auto-Trim Studio and offer 1-click Auto-Trim or Customise Window
     if (clipDuration && clipDuration > 30.5) {
@@ -994,10 +1133,9 @@ const handleSelectedVideoFile = async (file) => {
             });
 
             if (modalResult.isConfirmed) {
-                await uploadVideoWithAutoTrim(file, 0, 30, clipDuration);
+                await uploadVideoWithAutoTrim(file, 0, 30, clipDuration, vidId);
             } else if (modalResult.isDismissed) {
-                cleanupTrimStudio();
-                if (videoDirectFileInput) videoDirectFileInput.value = '';
+                removeComposerVideo(vidId);
             }
             // If isDenied ("Customise 30s Window"), the #videoAutoTrimStudio remains open for the user to adjust sliders!
         }
@@ -1005,7 +1143,7 @@ const handleSelectedVideoFile = async (file) => {
     }
 
     // Video is <= 30s: upload immediately
-    await uploadVideoWithAutoTrim(file, 0, clipDuration || 30, clipDuration);
+    await uploadVideoWithAutoTrim(file, 0, clipDuration || 30, clipDuration, vidId);
 };
 
 window.__handleComposerVideoFile = handleSelectedVideoFile;
@@ -1013,12 +1151,14 @@ window.__handleComposerVideoFile = handleSelectedVideoFile;
 // Ensure that if the user clicks "Post" while a video is still in the Auto-Trim Studio or uploading,
 // it finishes auto-trimming and attaching before the post form submits!
 window.__ensurePendingVideoUploaded = async () => {
-    if (activeVideoUploadPromise) {
+    if (activeVideoUploadPromises.size > 0) {
+        await Promise.all(Array.from(activeVideoUploadPromises.values()));
+    } else if (activeVideoUploadPromise) {
         await activeVideoUploadPromise;
     } else if (stagedTrimFile) {
         const start = parseFloat(videoTrimStartRange?.value || '0') || 0;
         const end = parseFloat(videoTrimEndRange?.value || '30') || 30;
-        await uploadVideoWithAutoTrim(stagedTrimFile, start, end, stagedTrimDuration);
+        await uploadVideoWithAutoTrim(stagedTrimFile, start, end, stagedTrimDuration, stagedTrimFile._stagedVidId);
     }
 };
 
@@ -1045,9 +1185,17 @@ if (addVideoBtn && videoContainer) {
 
     if (videoDirectFileInput) {
         videoDirectFileInput.addEventListener('change', async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            await handleSelectedVideoFile(file);
+            const files = Array.from(e.target.files || []);
+            if (!files.length) return;
+            const remaining = Math.max(0, 3 - attachedVideoList.length);
+            if (files.length > remaining) {
+                (window.swalError || alert)(`You can attach up to 3 videos per post. ${remaining === 0 ? 'Video limit reached.' : `Only ${remaining} video(s) will be added.`}`);
+            }
+            const toProcess = files.slice(0, remaining);
+            for (const f of toProcess) {
+                await handleSelectedVideoFile(f);
+            }
+            videoDirectFileInput.value = '';
         });
     }
 
@@ -1079,6 +1227,11 @@ if (addVideoBtn && videoContainer) {
             } else {
                 videoLivePreview.innerHTML = '';
                 videoLivePreview.classList.add('d-none');
+                const attachedVideoInput = document.getElementById('attachedVideoUrl');
+                if (attachedVideoInput) attachedVideoInput.value = '';
+                if (typeof window.__onComposerVideoRemoved === 'function') {
+                    window.__onComposerVideoRemoved();
+                }
             }
         });
     }

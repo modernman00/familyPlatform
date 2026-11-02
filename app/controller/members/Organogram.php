@@ -1458,90 +1458,10 @@ final class Organogram extends SingleCustomerData
     private function healOrphanedGen0Members(\PDO $db, string $familyCode, string $rootUserId): void
     {
         try {
-            // Find the primary ancestral/parent union in this family
-            $findParentUnion = $db->prepare("
-                SELECT fu.id, fu.partner_1_id, fu.partner_2_id, p1.last_name AS p1_last, p2.last_name AS p2_last, COUNT(fnc.id) AS child_count
-                FROM family_unions fu
-                LEFT JOIN family_nodes p1 ON p1.id = fu.partner_1_id
-                LEFT JOIN family_nodes p2 ON p2.id = fu.partner_2_id
-                LEFT JOIN family_node_children fnc ON fnc.union_id = fu.id
-                WHERE fu.family_code = ?
-                  AND (p1.generation_level = -1 OR p2.generation_level = -1 OR LOWER(COALESCE(p1.bio, '')) LIKE '%father%' OR LOWER(COALESCE(p2.bio, '')) LIKE '%mother%')
-                GROUP BY fu.id
-                ORDER BY child_count DESC
-                LIMIT 1
-            ");
-            $findParentUnion->execute([$familyCode]);
-            /** @var array<string, mixed>|false $parentUnion */
-            $parentUnion = $findParentUnion->fetch(\PDO::FETCH_ASSOC);
-
-            if (!$parentUnion || empty($parentUnion['id'])) {
-                return;
-            }
-
-            $parentUnionId = (int)$parentUnion['id'];
-            $p1Id = (int)$parentUnion['partner_1_id'];
-            $p2Id = (int)$parentUnion['partner_2_id'];
-            $p1Last = strtolower(trim((string)($parentUnion['p1_last'] ?? '')));
-            $p2Last = strtolower(trim((string)($parentUnion['p2_last'] ?? '')));
-            $cleanFam = strtolower(trim($familyCode));
-
-            // Find all Gen 0 nodes in this family that have NO parent link in family_node_children
-            $orphansStmt = $db->prepare("
-                SELECT fn.id, fn.user_id, fn.first_name, fn.last_name, fn.bio
-                FROM family_nodes fn
-                LEFT JOIN family_node_children fnc ON fnc.child_id = fn.id
-                WHERE fn.family_code = ?
-                  AND fn.generation_level = 0
-                  AND fn.is_placeholder = 0
-                  AND fnc.id IS NULL
-            ");
-            $orphansStmt->execute([$familyCode]);
-            /** @var array<int, array<string, mixed>> $orphans */
-            $orphans = $orphansStmt->fetchAll(\PDO::FETCH_ASSOC);
-
-            if (empty($orphans)) {
-                return;
-            }
-
-            $insChild = $db->prepare("
-                INSERT INTO family_node_children (union_id, child_id, relationship_type)
-                VALUES (?, ?, 'biological')
-            ");
-
-            foreach ($orphans as $orphan) {
-                $orphanId = (int)$orphan['id'];
-                if ($orphanId === $p1Id || $orphanId === $p2Id) {
-                    continue;
-                }
-
-                $bio = strtolower(trim((string)($orphan['bio'] ?? '')));
-                if (str_contains($bio, 'spouse') || str_contains($bio, 'partner')) {
-                    continue;
-                }
-
-                // Check if this orphan is already a spouse of an existing child in a marriage union
-                $partnerChk = $db->prepare("
-                    SELECT COUNT(*) FROM family_unions fu
-                    WHERE fu.family_code = ?
-                      AND ((fu.partner_1_id = ? AND fu.partner_2_id != ?) OR (fu.partner_2_id = ? AND fu.partner_1_id != ?))
-                      AND EXISTS (SELECT 1 FROM family_node_children fnc WHERE fnc.union_id = ? AND (fnc.child_id = fu.partner_1_id OR fnc.child_id = fu.partner_2_id))
-                ");
-                $partnerChk->execute([$familyCode, $orphanId, $orphanId, $orphanId, $orphanId, $parentUnionId]);
-                if ((int)$partnerChk->fetchColumn() > 0) {
-                    continue;
-                }
-
-                $isRoot = (!empty($rootUserId) && (string)($orphan['user_id'] ?? '') === (string)$rootUserId);
-                $isPrimaryOrSibling = str_contains($bio, 'primary') || str_contains($bio, 'sibling');
-
-                $orphanLast = strtolower(trim((string)($orphan['last_name'] ?? '')));
-                $surnameMatches = ($orphanLast !== '' && ($orphanLast === $p1Last || $orphanLast === $p2Last || str_contains($cleanFam, $orphanLast) || str_contains($orphanLast, $cleanFam)));
-
-                if ($isRoot || ($isPrimaryOrSibling && $surnameMatches)) {
-                    $insChild->execute([$parentUnionId, $orphanId]);
-                }
-            }
+            // Delegated to the integrity service: members attach ONLY to a generation -1 union that is
+            // proven by surname evidence. The previous "union with the most children" heuristic could pick
+            // the grandparents' union and mis-file a member as their parent's sibling.
+            \App\services\FamilyGraphIntegrityService::attachOrphanedGen0($db, $familyCode, $rootUserId);
         } catch (\Throwable $e) {
             error_log('[Organogram::healOrphanedGen0Members] warning: ' . $e->getMessage());
         }

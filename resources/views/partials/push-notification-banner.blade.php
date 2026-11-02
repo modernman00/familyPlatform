@@ -209,13 +209,21 @@
             return Promise.reject(new Error('Push not supported'));
         }
 
-        const vapidKey = getVapidPublicKey();
-        if (!vapidKey) {
-            console.warn('[Push] VAPID key not configured in environment');
-            return Promise.reject(new Error('VAPID key missing'));
-        }
+        const localKey = getVapidPublicKey();
+        const resolveKey = (localKey && localKey !== '')
+            ? Promise.resolve(localKey)
+            : fetch('/api/notifications/vapid-public-key')
+                .then(function(r) { return r.json(); })
+                .then(function(j) { return j.publicKey || (j.message && j.message.publicKey) || ''; })
+                .catch(function() { return ''; });
 
-        return ensureServiceWorkerReady().then(function(registration) {
+        return resolveKey.then(function(vapidKey) {
+            if (!vapidKey) {
+                console.warn('[Push] VAPID key not configured in environment');
+                return Promise.reject(new Error('VAPID key missing'));
+            }
+
+            return ensureServiceWorkerReady().then(function(registration) {
             return registration.pushManager.getSubscription().then(function(existingSub) {
                 if (existingSub) {
                     return existingSub;

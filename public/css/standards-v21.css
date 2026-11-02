@@ -2216,10 +2216,10 @@ body.dark-theme .ig-story-count-badge {
   .feed-post-card .post-media-stage a,
   .feed-post-card .post-media-first-img {
     border-radius: 0 !important;
-    max-height: 580px !important;
+    max-height: 600px !important;
     width: 100% !important;
-    height: auto !important;
-    object-fit: contain;
+    height: 100% !important;
+    object-fit: cover !important;
   }
 }
 
@@ -2759,11 +2759,113 @@ body.dark-theme .family-tooltip-container,
 }
 
 /* ==============================================================================
-   🌟 Super-Premium Instagram Multi-Image Carousel & Pagination Dots
+   🌟 Super-Premium Instagram Multi-Image Carousel, Fanciful Badge & Navigation
    ============================================================================== */
 .post-carousel-track::-webkit-scrollbar {
   display: none !important;
 }
+
+/* Super HD Crisp Image Rendering */
+.post-media-stage img,
+.post-media-first-img,
+.living-canvas-img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
+}
+
+/* Fanciful Glassmorphic Multi-Photo Stacked Cards Badge */
+.carousel-fanciful-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  background: rgba(15, 23, 42, 0.82) !important;
+  backdrop-filter: blur(16px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+  padding: 5px 12px !important;
+  z-index: 12 !important;
+  pointer-events: none !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease !important;
+}
+
+.carousel-fanciful-badge .carousel-cards-icon {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+  flex-shrink: 0;
+}
+
+.carousel-fanciful-badge .carousel-counter-text {
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  line-height: 1 !important;
+}
+
+/* Interactive Navigation Chevrons */
+.carousel-nav-btn {
+  position: absolute !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 15 !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(15, 23, 42, 0.75) !important;
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  border-radius: 50% !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+  cursor: pointer !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, opacity 0.2s ease !important;
+  outline: none !important;
+  padding: 0 !important;
+  opacity: 0.88;
+}
+
+.carousel-nav-btn:hover {
+  background: rgba(15, 23, 42, 0.94) !important;
+  transform: translateY(-50%) scale(1.08) !important;
+  opacity: 1 !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45) !important;
+}
+
+.carousel-nav-btn:active {
+  transform: translateY(-50%) scale(0.94) !important;
+}
+
+.carousel-nav-prev {
+  left: 10px !important;
+}
+
+.carousel-nav-next {
+  right: 10px !important;
+}
+
+.post-carousel-dots {
+  background: rgba(15, 23, 42, 0.08);
+  padding: 4px 10px;
+  border-radius: 9999px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+body.dark-mode .post-carousel-dots,
+body.dark-theme .post-carousel-dots,
+[data-bs-theme="dark"] .post-carousel-dots {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .carousel-dot {
   width: 6px;
   height: 6px;
@@ -2772,18 +2874,21 @@ body.dark-theme .family-tooltip-container,
   opacity: 0.55;
   transition: width 200ms cubic-bezier(0.16, 1, 0.3, 1), background-color 200ms ease, opacity 200ms ease;
   display: inline-block;
+  cursor: pointer;
 }
+
 .carousel-dot.is-active {
-  width: 18px;
+  width: 20px;
   border-radius: 4px;
   opacity: 1;
   background: var(--brand-primary, #a31621);
 }
+
 body.dark-mode .carousel-dot.is-active,
 body.dark-theme .carousel-dot.is-active,
 [data-bs-theme="dark"] .carousel-dot.is-active {
   background: var(--brand-primary, #ff4d61);
-  box-shadow: 0 0 6px var(--brand-primary-glow, rgba(255, 77, 97, 0.4));
+  box-shadow: 0 0 8px var(--brand-primary-glow, rgba(255, 77, 97, 0.5));
 }
 
 /* ==============================================================================

@@ -74,31 +74,57 @@ export function parseVideoUrl(url) {
 }
 
 /**
- * Extract video URL from post message text if present
+ * Extract first video URL from post message text if present (backwards-compatible)
  */
 export function extractVideoFromText(text) {
-  if (!text || typeof text !== 'string') return null;
-
-  const urlRegex = /((?:https?:\/\/|\/resources\/(?:videos|images)\/)[^\s"'<>]+)/g;
-  const matches = text.match(urlRegex);
-  if (!matches) return null;
-
-  for (const url of matches) {
-    const parsed = parseVideoUrl(url);
-    if (parsed) return parsed;
-  }
-
-  return null;
+  const vids = extractVideosFromText(text, 1);
+  return vids.length > 0 ? vids[0] : null;
 }
 
 /**
- * Strip raw video URL from post text if a player is rendered,
+ * Extract up to max video URLs from post message text
+ */
+export function extractVideosFromText(text, max = 3) {
+  if (!text || typeof text !== 'string') return [];
+
+  const urlRegex = /((?:https?:\/\/|\/resources\/(?:videos|images)\/)[^\s"'<>]+)/g;
+  const matches = text.match(urlRegex);
+  if (!matches) return [];
+
+  const videos = [];
+  const seenUrls = new Set();
+
+  for (const url of matches) {
+    if (videos.length >= max) break;
+    if (seenUrls.has(url)) continue;
+    const parsed = parseVideoUrl(url);
+    if (parsed) {
+      videos.push(parsed);
+      seenUrls.add(url);
+    }
+  }
+
+  return videos;
+}
+
+/**
+ * Strip raw video URLs from post text if players are rendered,
  * leaving only user-written caption/comment text.
  */
-export function cleanPostMessage(text, video) {
+export function cleanPostMessage(text, videoOrVideos) {
   if (!text || typeof text !== 'string') return '';
-  if (!video || !video.originalUrl) return text;
+  if (!videoOrVideos) return text;
 
-  const cleaned = text.replace(video.originalUrl, '').trim();
-  return cleaned;
+  let cleaned = text;
+  if (Array.isArray(videoOrVideos)) {
+    videoOrVideos.forEach(v => {
+      if (v?.originalUrl) {
+        cleaned = cleaned.replace(v.originalUrl, '');
+      }
+    });
+  } else if (videoOrVideos?.originalUrl) {
+    cleaned = cleaned.replace(videoOrVideos.originalUrl, '');
+  }
+
+  return cleaned.trim();
 }

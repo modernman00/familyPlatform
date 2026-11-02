@@ -38,6 +38,8 @@
                     <input type="hidden" name="token" value="{{ $token }}">
                     <input type="hidden" name="post_no" id="editPostNo" value="">
                     <input type="hidden" name="attached_gif_url" id="attachedGifUrlInput" value="">
+                    <input type="hidden" name="attached_video_url" id="attachedVideoUrl" value="">
+                    <input type="hidden" name="attached_video_urls" id="attachedVideoUrls" value="">
 
                     <textarea class="composer-text form-control border-0 bg-transparent shadow-none px-0" data-emoji-target
                         placeholder="{{ __('feed.share_prompt', 'Share a moment with your family...') }}" name="postMessage" id="postMessage"
@@ -115,18 +117,18 @@
                         <div id="videoEmbedContainer" class="composer-drawer video-builder d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <div class="d-flex align-items-center gap-2 flex-wrap">
-                                    <span class="fw-bold small text-danger"><i class="bi bi-play-circle-fill me-1"></i> Add Video</span>
+                                    <span class="fw-bold small text-danger"><i class="bi bi-play-circle-fill me-1"></i> Add Videos (Max 3)</span>
                                     <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1" style="font-size: 0.7rem;">
                                         <i class="bi bi-scissors me-1"></i> Smart 30s Auto-Trim
                                     </span>
                                 </div>
-                                <button type="button" id="removeVideoBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Remove video"></button>
+                                <button type="button" id="removeVideoBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Remove videos"></button>
                             </div>
                             <div class="d-flex gap-2 align-items-center flex-wrap mb-2">
                                 <label for="videoDirectFileInput" class="btn btn-sm btn-outline-danger mb-0 d-inline-flex align-items-center gap-1" style="cursor: pointer; border-radius: 8px; font-size: 0.8rem; padding: 8px 14px; min-height: 44px; white-space: nowrap; flex-shrink: 0;">
-                                    <i class="bi bi-cloud-arrow-up-fill"></i> Upload Video (Auto-Trim to 30s)
+                                    <i class="bi bi-cloud-arrow-up-fill"></i> Upload Videos (Up to 3, Auto-Trim to 30s)
                                 </label>
-                                <input type="file" id="videoDirectFileInput" accept="video/mp4,video/quicktime,video/webm" hidden>
+                                <input type="file" id="videoDirectFileInput" accept="video/mp4,video/quicktime,video/webm" multiple hidden>
                                 <span class="text-muted small">or paste video link below</span>
                             </div>
                             <div class="input-group input-group-sm mb-1">

@@ -520,6 +520,25 @@ final class NotificationController extends Select
 
 
     /**
+     * Hands out the VAPID public key for browser PushManager subscription.
+     * Provides parity with ExecMind's /push/vapid-public-key API endpoint.
+     */
+    public static function vapidPublicKey(): void
+    {
+        $publicKey = trim((string) ($_ENV['VAPID_PUBLIC_KEY'] ?? $_SERVER['VAPID_PUBLIC_KEY'] ?? (getenv('VAPID_PUBLIC_KEY') ?: ($_ENV['MIX_VAPID_PUBLIC_KEY'] ?? ''))), "'\"");
+        http_response_code(200);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'status' => 'success',
+            'publicKey' => $publicKey,
+            'message' => ['publicKey' => $publicKey]
+        ]);
+        if (!defined('TESTING_ENV')) {
+            exit;
+        }
+    }
+
+    /**
      * Posts subscriber data to the server.
      *
      * This function takes the request body as a JSON object and expects the following

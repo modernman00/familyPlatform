@@ -405,10 +405,30 @@ self.addEventListener('push', (event) => {
     }
   }
 
-  // C. Intelligent Foreground Check: Suppress OS noise if app is focused & open
+  // C. Unconditional OS Notification Dispatch (ExecMind / Tier-1 PWA Gold Standard)
+  const options = {
+    body: data.body,
+    icon: data.icon || '/public/img/favicon/android-chrome-192x192.png',
+    badge: data.badge || '/public/img/favicon/favicon-32x32.png',
+    tag: data.tag || 'family-alert',
+    renotify: true,
+    data: {
+      id: data.targetNotificationId || data.id,
+      url: data.url || '/profilePage'
+    },
+    vibrate: data.isSilent ? [] : [100, 50, 100],
+    silent: !!data.isSilent,
+    actions: [
+      { action: 'open', title: 'Open' },
+      { action: 'mark_read', title: 'Mark as Read' }
+    ]
+  };
+
+  pushPromises.push(self.registration.showNotification(data.title, options));
+
+  // D. Broadcast to all open client windows (for live in-app toasts & bell counter updates)
   pushPromises.push(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // Broadcast to on-app UI toast and sync channels for all open windows
       if (syncBroadcastChannel) {
         syncBroadcastChannel.postMessage({
           type: 'ON_APP_NOTIFICATION',
@@ -421,37 +441,7 @@ self.addEventListener('push', (event) => {
           payload: data
         });
       });
-
-      const isAppFocused = clientList.some(
-        (client) => client.visibilityState === 'visible' && client.focused
-      );
-
-      // Meta/Facebook Standard: If app is actively focused in foreground, suppress OS system popup
-      if (isAppFocused) {
-        return;
-      }
-
-      // App is in background/locked: Show native OS notification
-      const options = {
-        body: data.body,
-        icon: data.icon || '/public/img/favicon/android-chrome-192x192.png',
-        badge: data.badge || '/public/img/favicon/favicon-32x32.png',
-        tag: data.tag || 'family-alert',
-        renotify: true,
-        data: {
-          id: data.targetNotificationId || data.id,
-          url: data.url || '/profilePage'
-        },
-        vibrate: data.isSilent ? [] : [100, 50, 100],
-        silent: !!data.isSilent,
-        actions: [
-          { action: 'open', title: 'Open' },
-          { action: 'mark_read', title: 'Mark as Read' }
-        ]
-      };
-
-      return self.registration.showNotification(data.title, options);
-    })
+    }).catch(() => {})
   );
 
   event.waitUntil(Promise.all(pushPromises));
@@ -483,7 +473,12 @@ self.addEventListener('notificationclick', (event) => {
   }
 
   // Default / 'open' action: Bring PWA to focus or open new standalone window
-  event.waitUntil(
+  const clickPromises = [];
+  if ('clearAppBadge' in navigator) {
+    clickPromises.push(navigator.clearAppBadge().catch(() => {}));
+  }
+
+  clickPromises.push(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
@@ -508,6 +503,8 @@ self.addEventListener('notificationclick', (event) => {
       }
     })
   );
+
+  event.waitUntil(Promise.all(clickPromises));
 });
 
 /**

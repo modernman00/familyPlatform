@@ -223,6 +223,71 @@ final class ProfilePage extends ProcessImg
                 $attachedGif = null;
             }
 
+            // Attached video support & SSRF hardening (Dr. Viktor Kovács & Marcus) - up to max 3 videos
+            $rawVideoUrls = [];
+            if (!empty($_POST['attached_video_urls'])) {
+                if (is_array($_POST['attached_video_urls'])) {
+                    $rawVideoUrls = $_POST['attached_video_urls'];
+                } elseif (is_string($_POST['attached_video_urls'])) {
+                    $decoded = json_decode($_POST['attached_video_urls'], true);
+                    if (is_array($decoded)) {
+                        $rawVideoUrls = $decoded;
+                    } else {
+                        $rawVideoUrls = [$_POST['attached_video_urls']];
+                    }
+                }
+            }
+            if (!empty($_POST['attached_video_url'])) {
+                $rawVideoUrls[] = $_POST['attached_video_url'];
+            }
+
+            $validVideos = [];
+            $hasVideo = false;
+            foreach ($rawVideoUrls as $vidUrl) {
+                if (count($validVideos) >= 3) {
+                    break;
+                }
+                if (!is_string($vidUrl)) {
+                    continue;
+                }
+                $trimmedVid = trim($vidUrl);
+                if ($trimmedVid === '' || strlen($trimmedVid) > 2048 || in_array($trimmedVid, $validVideos, true)) {
+                    continue;
+                }
+
+                $isLocalVideo = str_starts_with($trimmedVid, '/resources/videos/posts/') && preg_match('#^/resources/videos/posts/[a-zA-Z0-9_\-\.]+(?:\#t=[0-9.,]+)?$#', $trimmedVid);
+                $isValidExternal = false;
+                if (!$isLocalVideo && filter_var($trimmedVid, FILTER_VALIDATE_URL)) {
+                    $parsed = parse_url($trimmedVid);
+                    $scheme = strtolower($parsed['scheme'] ?? '');
+                    $host = strtolower($parsed['host'] ?? '');
+                    if (in_array($scheme, ['https', 'http'], true)
+                        && !empty($host)
+                        && !in_array($host, ['localhost', '127.0.0.1', '::1', '0.0.0.0'], true)
+                        && !str_starts_with($host, '169.254.')
+                        && !str_starts_with($host, '10.')
+                        && !str_starts_with($host, '192.168.')
+                    ) {
+                        $isValidExternal = true;
+                    }
+                }
+
+                if ($isLocalVideo || $isValidExternal) {
+                    $validVideos[] = $trimmedVid;
+                }
+            }
+
+            if (!empty($validVideos)) {
+                $hasVideo = true;
+                foreach ($validVideos as $vUrl) {
+                    if (!str_contains($cleanMultiLineMessage, $vUrl)) {
+                        $cleanMultiLineMessage = !empty($cleanMultiLineMessage)
+                            ? $cleanMultiLineMessage . "\n\n" . $vUrl
+                            : $vUrl;
+                    }
+                }
+            }
+
             // "Then & Now" (RFC-0002): exactly two uploaded photos, nothing else attached.
             $isThenNow = ($_POST['then_now'] ?? '') === '1';
             if ($isThenNow) {
@@ -238,8 +303,8 @@ final class ProfilePage extends ProcessImg
             $hasImage = $hasDirectImage || !empty($sharedTempImages) || $hasGif;
             $hasPoll = !empty($_POST['poll_question']);
 
-            if (empty($cleanMultiLineMessage) && !$hasImage && !$hasPoll) {
-                throw new \Src\Exceptions\ValidationException("Please add some text, an image, or a poll to your post.");
+            if (empty($cleanMultiLineMessage) && !$hasImage && !$hasPoll && !$hasVideo) {
+                throw new \Src\Exceptions\ValidationException("Please add some text, an image, a video, or a poll to your post.");
             }
 
             $id = checkInput(data: $_SESSION['id']);
@@ -265,14 +330,14 @@ final class ProfilePage extends ProcessImg
                 isCaptcha: false,
                 removeKeys: [
                     'poll_question', 'poll_options', 'token', 'post_no',
-                    'attached_gif_url', 'tagged_user_ids', 'shared_temp_images',
+                    'attached_gif_url', 'attached_video_url', 'attached_video_urls', 'tagged_user_ids', 'shared_temp_images',
                     'then_now', 'then_label', 'now_label', 'reply_to_post',
                     'comparison_mode', 'mystery_year', 'then_now_voice_base64',
                     'submit', 'button'
                 ],
                 optionalFields: [
                     'poll_question', 'poll_options', 'postMessage', 'post_no',
-                    'attached_gif_url', 'tagged_user_ids', 'shared_temp_images',
+                    'attached_gif_url', 'attached_video_url', 'attached_video_urls', 'tagged_user_ids', 'shared_temp_images',
                     'postFamCode', 'profileImg',
                     'then_now', 'then_label', 'now_label', 'reply_to_post',
                     'comparison_mode', 'mystery_year', 'then_now_voice_base64'

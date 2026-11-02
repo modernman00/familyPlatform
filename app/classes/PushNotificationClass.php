@@ -69,8 +69,10 @@ class PushNotificationClass extends VapidClass
             return false;
         }
 
-        // Never push to real devices from local/dev/test environments unless explicitly forced by self-test.
-        if ((!$forceOutbound || defined('TESTING_ENV')) && Pusher::outboundBlocked()) {
+        // Never push to real devices during automated test suites.
+        // For development/local environments, allow push if forceOutbound is true OR ALLOW_OUTBOUND_NOTIFICATIONS/ALLOW_OUTBOUND_PUSH is set.
+        $allowPush = strtolower(trim((string) ($_ENV['ALLOW_OUTBOUND_PUSH'] ?? $_ENV['ALLOW_OUTBOUND_NOTIFICATIONS'] ?? (getenv('ALLOW_OUTBOUND_PUSH') ?: (getenv('ALLOW_OUTBOUND_NOTIFICATIONS') ?: ''))), "'\""));
+        if (defined('TESTING_ENV') || (!$forceOutbound && $allowPush !== 'true' && $allowPush !== '1' && Pusher::outboundBlocked())) {
             return false;
         }
 

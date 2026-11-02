@@ -67,6 +67,21 @@ $router->map(
   name: 'pusherAuth'
 );
 
+// VAPID public key endpoint for browser PushManager subscription (parity with ExecMind)
+$router->map(
+  method: 'GET',
+  route: '/push/vapid-public-key',
+  target: 'App\controller\NotificationController@vapidPublicKey',
+  name: 'pushVapidPublicKey'
+);
+
+$router->map(
+  method: 'GET',
+  route: '/api/notifications/vapid-public-key',
+  target: 'App\controller\NotificationController@vapidPublicKey',
+  name: 'apiNotificationsVapidPublicKey'
+);
+
 $router->map(
   method: 'POST',
   route: '/pushNotification/subscription',

@@ -36,14 +36,18 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
   if (!imageInput || !previewContainer || !previewList) return;
 
   let accumulatedFiles = [];
+  let attachedVideos = [];
 
   // Helper to update the UI and input files
   const updatePreviews = (files) => {
-    accumulatedFiles = files;
-    selectedFilesStore = files;
+    accumulatedFiles = files || [];
+    selectedFilesStore = accumulatedFiles;
     previewList.innerHTML = ''; // Clear previous previews
 
-    if (files.length === 0) {
+    const hasImages = accumulatedFiles.length > 0;
+    const hasVideo = attachedVideos.length > 0;
+
+    if (!hasImages && !hasVideo) {
       previewContainer.classList.add('d-none');
       if (fileNamesDisplay) fileNamesDisplay.textContent = '';
       imageInput.value = ''; // Clear input if no files
@@ -54,7 +58,7 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
     const dataTransfer = new DataTransfer();
     let totalBytes = 0;
 
-    files.forEach((file, index) => {
+    accumulatedFiles.forEach((file, index) => {
       dataTransfer.items.add(file);
       totalBytes += file.size;
 
@@ -86,12 +90,87 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
       previewList.appendChild(wrapper);
     });
 
-    // "+" tile to add more photos (max 5)
-    if (files.length < 5) {
+    // If videos are attached or being uploaded, render video thumbnail cards alongside photos (max 3)
+    attachedVideos.forEach((vid, vIdx) => {
+      const videoWrapper = document.createElement('div');
+      videoWrapper.className = 'composer-thumb composer-thumb--video position-relative';
+      videoWrapper.style.backgroundColor = '#0f172a';
+      videoWrapper.style.borderRadius = '10px';
+      videoWrapper.style.overflow = 'hidden';
+      videoWrapper.style.display = 'flex';
+      videoWrapper.style.alignItems = 'center';
+      videoWrapper.style.justifyContent = 'center';
+
+      if (vid.file) {
+        totalBytes += vid.file.size;
+      }
+
+      // If we have a local video file, blob URL, or stream URL, render inline video thumbnail
+      if (vid.streamUrl || vid.blobUrl || vid.file) {
+        const vidPreview = document.createElement('video');
+        vidPreview.muted = true;
+        vidPreview.preload = 'metadata';
+        vidPreview.playsInline = true;
+        vidPreview.style.width = '100%';
+        vidPreview.style.height = '100%';
+        vidPreview.style.objectFit = 'cover';
+        if (vid.streamUrl) {
+          vidPreview.src = vid.streamUrl;
+        } else if (vid.blobUrl) {
+          vidPreview.src = vid.blobUrl;
+        } else if (vid.file) {
+          try {
+            vidPreview.src = URL.createObjectURL(vid.file);
+          } catch (_) {}
+        }
+        videoWrapper.appendChild(vidPreview);
+      }
+
+      // Center play icon overlay
+      const playIcon = document.createElement('span');
+      playIcon.className = 'position-absolute text-white shadow-sm';
+      playIcon.style.pointerEvents = 'none';
+      playIcon.innerHTML = '<i class="bi bi-play-circle-fill fs-3" style="color: #ffffff; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));"></i>';
+      videoWrapper.appendChild(playIcon);
+
+      // Video badge indicator
+      const badge = document.createElement('span');
+      badge.className = 'badge position-absolute bottom-0 start-0 m-1 px-1.5 py-0.5 rounded-pill';
+      badge.style.fontSize = '0.65rem';
+      badge.style.backgroundColor = 'rgba(163, 22, 33, 0.9)';
+      badge.style.color = '#ffffff';
+      badge.innerHTML = vid.uploading
+        ? '<span class="spinner-border spinner-border-sm me-0.5" style="width: 8px; height: 8px;"></span> Uploading...'
+        : `<i class="bi bi-camera-video-fill me-0.5"></i> Video ${attachedVideos.length > 1 ? (vIdx + 1) : ''}`;
+      videoWrapper.appendChild(badge);
+
+      // Remove video button
+      const removeVidBtn = document.createElement('button');
+      removeVidBtn.type = 'button';
+      removeVidBtn.className = 'composer-thumb__remove';
+      removeVidBtn.setAttribute('aria-label', `Remove video ${vIdx + 1}`);
+      removeVidBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
+      removeVidBtn.onclick = (e) => {
+        e.preventDefault();
+        const targetId = vid.id || vid.streamUrl || vIdx;
+        if (typeof window.__removeComposerVideo === 'function') {
+          window.__removeComposerVideo(targetId);
+        } else {
+          attachedVideos = attachedVideos.filter((_, i) => i !== vIdx);
+          updatePreviews(accumulatedFiles);
+        }
+      };
+      videoWrapper.appendChild(removeVidBtn);
+
+      previewList.appendChild(videoWrapper);
+    });
+
+    // "+" tile to add more photos or videos (max 5 images and max 3 videos)
+    if (accumulatedFiles.length < 5 || attachedVideos.length < 3) {
       const addTile = document.createElement('label');
       addTile.className = 'composer-thumb composer-thumb--add';
       addTile.htmlFor = fileInputId;
-      addTile.setAttribute('aria-label', 'Add more photos');
+      addTile.setAttribute('aria-label', 'Add more photos or videos');
       addTile.innerHTML = '<i class="bi bi-plus-lg"></i><span>Add</span>';
       previewList.appendChild(addTile);
     }
@@ -99,28 +178,106 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
     // Update the file input with the new list of files
     imageInput.files = dataTransfer.files;
 
-    // Show file names and reveal preview container with optimized total size
+    // Show media count and reveal preview container with British English formatting
     if (fileNamesDisplay) {
-      fileNamesDisplay.innerHTML = `<strong>${files.length} photo${files.length > 1 ? 's' : ''}</strong> <small>· ${formatFileSize(totalBytes)}</small>`;
+      let countLabel = '';
+      const vCount = attachedVideos.length;
+      const iCount = accumulatedFiles.length;
+
+      if (iCount > 0 && vCount > 0) {
+        countLabel = `<strong>${iCount} photo${iCount > 1 ? 's' : ''}, ${vCount} video${vCount > 1 ? 's' : ''}</strong> <small>· ${formatFileSize(totalBytes)}</small>`;
+      } else if (iCount > 0) {
+        countLabel = `<strong>${iCount} photo${iCount > 1 ? 's' : ''}</strong> <small>· ${formatFileSize(totalBytes)}</small>`;
+      } else if (vCount > 0) {
+        countLabel = `<strong>${vCount} video${vCount > 1 ? 's' : ''}</strong>${totalBytes > 0 ? ` <small>· ${formatFileSize(totalBytes)}</small>` : ''}`;
+      }
+      fileNamesDisplay.innerHTML = countLabel;
     }
     previewContainer.classList.remove('d-none');
+  };
+
+  // Listen for video lifecycle events from postEmojiImgProcess.js
+  window.__onComposerVideoStaged = (data) => {
+    if (!data) return;
+    const existingIdx = attachedVideos.findIndex(v => (v.id && data.id && v.id === data.id) || (v.file && data.file && v.file.name === data.file.name && v.file.size === data.file.size));
+    if (existingIdx >= 0) {
+      attachedVideos[existingIdx] = { ...attachedVideos[existingIdx], ...data };
+    } else if (attachedVideos.length < 3) {
+      attachedVideos.push(data);
+    }
+    updatePreviews(accumulatedFiles);
+  };
+
+  window.__onComposerVideoUpdated = (data) => {
+    if (!data) return;
+    const existingIdx = attachedVideos.findIndex(v => (v.id && data.id && v.id === data.id) || (v.streamUrl && data.streamUrl && v.streamUrl === data.streamUrl) || (v.file && data.file && v.file.name === data.file.name && v.file.size === data.file.size));
+    if (existingIdx >= 0) {
+      attachedVideos[existingIdx] = { ...attachedVideos[existingIdx], ...data, uploading: false };
+    } else if (attachedVideos.length < 3) {
+      attachedVideos.push({ ...data, uploading: false });
+    }
+    updatePreviews(accumulatedFiles);
+  };
+
+  window.__onComposerVideoRemoved = (target) => {
+    if (target === undefined || target === null) {
+      attachedVideos = [];
+    } else if (typeof target === 'number') {
+      attachedVideos = attachedVideos.filter((_, i) => i !== target);
+    } else {
+      attachedVideos = attachedVideos.filter(v => v.id !== target && v.streamUrl !== target);
+    }
+    updatePreviews(accumulatedFiles);
   };
 
   imageInput.addEventListener('change', async () => {
     const rawSelectedFiles = Array.from(imageInput.files || []);
     if (!rawSelectedFiles.length) return;
 
-    // Route any video files selected via #imageUpload directly into the Video Auto-Trim & Upload Studio
+    // Route any video files selected via #imageUpload directly into the Video Auto-Trim & Upload Studio (max 3 videos)
     const videoFiles = rawSelectedFiles.filter(f => (f.type && f.type.startsWith('video/')) || /\.(mp4|webm|mov|ogg)$/i.test(f.name || ''));
     const imageOnlyFiles = rawSelectedFiles.filter(f => !videoFiles.includes(f));
 
-    if (videoFiles.length > 0 && typeof window.__handleComposerVideoFile === 'function') {
-      window.__handleComposerVideoFile(videoFiles[0]);
+    if (videoFiles.length > 0) {
+      const remainingAllowance = 3 - attachedVideos.length;
+      if (remainingAllowance <= 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Maximum 3 Videos',
+          text: 'You can upload up to 3 videos per post.',
+          timer: 3000,
+          showConfirmButton: false
+        });
+      } else {
+        const allowedVideos = videoFiles.slice(0, remainingAllowance);
+        if (videoFiles.length > remainingAllowance) {
+          Swal.fire({
+            icon: 'info',
+            title: 'Maximum 3 Videos',
+            text: `Only ${remainingAllowance} more video${remainingAllowance > 1 ? 's' : ''} can be attached to this post.`,
+            timer: 3500,
+            showConfirmButton: false
+          });
+        }
+        allowedVideos.forEach(vFile => {
+          if (typeof window.__handleComposerVideoFile === 'function') {
+            window.__handleComposerVideoFile(vFile);
+          }
+        });
+      }
     }
 
     if (!imageOnlyFiles.length) {
       if (accumulatedFiles.length === 0) {
         imageInput.value = '';
+      } else {
+        // Re-sync imageInput.files with accumulatedFiles so imageInput does not drop previously chosen photos!
+        const dataTransfer = new DataTransfer();
+        accumulatedFiles.forEach(file => dataTransfer.items.add(file));
+        imageInput.files = dataTransfer.files;
+      }
+      if (attachedVideos.length > 0 || accumulatedFiles.length > 0) {
+        updatePreviews(accumulatedFiles);
       }
       return;
     }
@@ -142,15 +299,15 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
 
     if (!validRawFiles.length) return;
 
-    // Show quick optimizing status if files are chosen
+    // Show quick optimising status if files are chosen (en-GB)
     if (fileNamesDisplay) {
-      fileNamesDisplay.textContent = 'Optimizing photos for instant upload...';
+      fileNamesDisplay.textContent = 'Optimising photos for instant upload...';
       previewContainer.classList.remove('d-none');
     }
 
-    // High-speed parallel client-side compression (downscales to max 1920px Retina standard)
+    // High-speed parallel client-side compression (optimised for Super HD 2.5K Retina clarity at 0.92 quality)
     const compressedFiles = await Promise.all(
-      validRawFiles.map(file => compressImageFile(file, { maxWidth: 1920, maxHeight: 1920, quality: 0.82 }))
+      validRawFiles.map(file => compressImageFile(file, { maxWidth: 2560, maxHeight: 2560, quality: 0.92 }))
     );
 
     // Merge newly selected files with existing accumulated files (deduplicating by name and size)
@@ -177,6 +334,10 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
     const closePreviewBtn = id(closePreviewBtnId); // Button to clear image previews
     if (closePreviewBtn) {
       closePreviewBtn.addEventListener('click', () => {
+        if (typeof window.__removeComposerVideo === 'function') {
+          window.__removeComposerVideo();
+        }
+        attachedVideoState = null;
         updatePreviews([]); // Clear all
       });
     }

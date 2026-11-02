@@ -356,7 +356,7 @@ final class VisualSupremacyService
             // No --cicp override: avifenc preserves the source ICC profile, so
             // P3 sources stay P3 and sRGB sources are never mis-tagged.
             $exitCode = self::runWithTimeout(
-                [$avifencBin, '-s', '6', '-q', '80', $sourcePath, $fullPath],
+                [$avifencBin, '-s', '6', '-q', '88', $sourcePath, $fullPath],
                 self::SUBPROCESS_TIMEOUT_SECONDS
             );
             if ($exitCode === 0 && file_exists($fullPath) && filesize($fullPath) > 0) {
@@ -370,7 +370,7 @@ final class VisualSupremacyService
             try {
                 $gdImg = self::createGdResource($sourcePath);
                 if ($gdImg !== null) {
-                    $saved = @imageavif($gdImg, $fullPath, 80);
+                    $saved = @imageavif($gdImg, $fullPath, 85);
                     imagedestroy($gdImg);
                     if ($saved && file_exists($fullPath) && filesize($fullPath) > 0) {
                         return $targetFile;
@@ -396,7 +396,7 @@ final class VisualSupremacyService
             try {
                 $gdImg = self::createGdResource($sourcePath);
                 if ($gdImg !== null) {
-                    $saved = @imagewebp($gdImg, $fullPath, 85);
+                    $saved = @imagewebp($gdImg, $fullPath, 92);
                     imagedestroy($gdImg);
                     if ($saved && file_exists($fullPath) && filesize($fullPath) > 0) {
                         return $targetFile;

@@ -64,6 +64,9 @@ try {
             if (typeof window.__resetThenNow === 'function') {
                 window.__resetThenNow();
             }
+            if (typeof window.__resetVideoBuilder === 'function') {
+                window.__resetVideoBuilder();
+            }
         });
     }
 
