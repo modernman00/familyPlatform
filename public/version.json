@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(kinship): enforce generation-integrity invariant and relocate members misfiled under grandparent union",
+    "title": "Fix(kinship): decommission silent auto-linking, stage unplaced members, and correctly rewire Fayokanmi and Segun",
     "notes": [
-        "Fix(kinship): enforce generation-integrity invariant and relocate members misfiled under grandparent union",
-        "Feat(kinship): implement autonomous constellation alignment and cross-studio lineage grafting",
-        "Fix(security): neutralize cross-tenant comment push notification leak and remove phantom registration starter comment (SEC-CVE-2026-CROSS-TENANT-COMMENT-LEAK)"
+        "Fix(kinship): decommission silent auto-linking, stage unplaced members, and correctly rewire Fayokanmi and Segun",
+        "Feat(feed): enable multi-video uploads with horizontal side-by-side feed display and studio previews",
+        "Fix(kinship): enforce generation-integrity invariant and relocate members misfiled under grandparent union"
     ],
     "released_at": "2026-11-02",
-    "commit": "381b2ed"
+    "commit": "76df9f2"
 }

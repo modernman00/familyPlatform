@@ -1011,6 +1011,200 @@
              x-text="(lightboxIndex + 1) + ' / ' + lightboxImages.length"></div>
     </div>
 
+    <!-- Premium Full Video Mode Theatre Modal -->
+    <div x-cloak x-show="videoModalOpen" 
+         id="fullVideoModalRoot"
+         class="full-video-modal-overlay"
+         style="position: fixed; inset: 0; z-index: 10500; background: rgba(5, 7, 12, 0.96); backdrop-filter: blur(16px); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: clamp(12px, 2.5vw, 24px); user-select: none; touch-action: manipulation;"
+         x-transition:enter="transition ease-out duration-250"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         @keydown.escape.window="if (videoModalOpen) closeVideoModal()"
+         @keydown.right.window="if (videoModalOpen) nextVideoModal()"
+         @keydown.left.window="if (videoModalOpen) prevVideoModal()"
+         @keydown.space.window="if (videoModalOpen) { $event.preventDefault(); toggleVideoModalPlay(); }"
+         role="dialog"
+         aria-modal="true"
+         aria-label="Full video player">
+        
+        <!-- Modal Top Bar -->
+        <div class="w-100 d-flex align-items-center justify-content-between px-2 py-1" style="z-index: 10502; max-width: 1200px;">
+            <!-- Left: Badge & Counter -->
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge rounded-pill px-3 py-1.5 d-inline-flex align-items-center gap-1.5 shadow-sm"
+                      style="background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.22); color: #ffffff; font-size: 0.82rem; font-weight: 600;">
+                    <i class="bi bi-camera-reels-fill text-danger"></i>
+                    <span x-text="videoModalVideos.length > 1 ? ('Video ' + (videoModalIndex + 1) + ' of ' + videoModalVideos.length) : 'Full Video Mode'"></span>
+                </span>
+                <span class="badge rounded-pill px-2.5 py-1 text-white-50 d-none d-sm-inline-block"
+                      style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.72rem; letter-spacing: 0.05em; font-weight: 700;">
+                    HD THEATRE
+                </span>
+            </div>
+
+            <!-- Centre: Multi-Video Indicators -->
+            <div class="d-flex align-items-center gap-1.5" x-show="videoModalVideos && videoModalVideos.length > 1">
+                <template x-for="(v, idx) in videoModalVideos" :key="'vm-dot-' + idx">
+                    <span class="rounded-pill transition-all"
+                          :style="videoModalIndex === idx 
+                            ? 'width: 22px; height: 6px; background: #a31621;' 
+                            : 'width: 6px; height: 6px; background: rgba(255, 255, 255, 0.35); cursor: pointer;'"
+                          @click.stop="pauseVideoModalPlayback(); videoModalIndex = idx; syncVideoModalPlayback();"></span>
+                </template>
+            </div>
+
+            <!-- Right: Actions (Fullscreen & Close) -->
+            <div class="d-flex align-items-center gap-2">
+                <!-- Toggle Native Fullscreen Button -->
+                <button type="button" 
+                        class="btn d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
+                        @click.stop="toggleNativeFullscreen()"
+                        title="Toggle full screen"
+                        aria-label="Toggle full screen"
+                        style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 50%; background: rgba(255, 255, 255, 0.16); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; transition: all 0.2s ease;">
+                    <i class="bi" :class="videoModalFullscreen ? 'bi-fullscreen-exit' : 'bi-arrows-fullscreen'" style="font-size: 1rem; color: #ffffff;"></i>
+                </button>
+
+                <!-- Close Button -->
+                <button type="button" 
+                        class="btn d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
+                        @click.stop="closeVideoModal()" 
+                        title="Close full video view (Esc)"
+                        aria-label="Close full video view"
+                        style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 50%; background: rgba(255, 255, 255, 0.16); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; transition: all 0.2s ease;">
+                    <i class="bi bi-x-lg" style="font-size: 1.15rem; color: #ffffff;"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Centre Media Stage (With Prev/Next floating buttons) -->
+        <div class="w-100 d-flex align-items-center justify-content-center position-relative flex-grow-1 my-2" 
+             style="max-width: 1200px; max-height: 78vh;"
+             @click.self="closeVideoModal()">
+            
+            <!-- Previous Video Navigation Arrow -->
+            <button type="button" 
+                    @click.stop="prevVideoModal()" 
+                    x-show="videoModalVideos && videoModalVideos.length > 1" 
+                    title="Previous video"
+                    aria-label="Previous video"
+                    class="btn position-absolute start-0 top-50 translate-middle-y d-inline-flex align-items-center justify-content-center p-0 rounded-circle shadow-lg"
+                    style="z-index: 10503; width: 48px; height: 48px; min-width: 48px; min-height: 48px; background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; margin-left: clamp(4px, 1.5vw, 16px);">
+                <i class="bi bi-chevron-left" style="font-size: 1.3rem;"></i>
+            </button>
+
+            <!-- Video Host Container -->
+            <div id="fullVideoModalStage" 
+                 class="position-relative d-flex align-items-center justify-content-center w-100 h-100 overflow-hidden" 
+                 style="max-width: 94vw; max-height: 76vh;">
+                
+                <template x-if="videoModalVideos[videoModalIndex] && videoModalVideos[videoModalIndex].type === 'direct'">
+                    <div class="position-relative w-100 h-100 d-flex align-items-center justify-content-center">
+                        <video class="w-100 h-100"
+                               :src="videoModalVideos[videoModalIndex]?.embedUrl"
+                               playsinline
+                               webkit-playsinline
+                               preload="auto"
+                               @click.stop="toggleVideoModalPlay()"
+                               @dblclick.stop="toggleNativeFullscreen()"
+                               @play="videoModalPlaying = true"
+                               @pause="videoModalPlaying = false"
+                               @timeupdate="onVideoModalTimeUpdate($el)"
+                               style="max-width: 100%; max-height: 76vh; object-fit: contain; border-radius: 14px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9); background: #000000; cursor: pointer;"></video>
+                        
+                        <!-- Center Play Ripple when paused -->
+                        <div class="position-absolute top-50 start-50 translate-middle pointer-events-none"
+                             x-show="!videoModalPlaying"
+                             style="z-index: 4; pointer-events: none;">
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle shadow-lg"
+                                  style="width: 72px; height: 72px; background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(8px); border: 1.5px solid rgba(255, 255, 255, 0.35);">
+                                <i class="bi bi-play-fill text-white" style="font-size: 2.2rem; margin-left: 4px;"></i>
+                            </span>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="videoModalVideos[videoModalIndex] && videoModalVideos[videoModalIndex].type !== 'direct'">
+                    <div class="position-relative w-100 h-100 d-flex align-items-center justify-content-center" style="aspect-ratio: 16 / 9; max-height: 76vh; width: min(94vw, 1080px);">
+                        <iframe :src="videoModalVideos[videoModalIndex]?.embedUrl"
+                                title="Full video player"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowfullscreen
+                                style="width: 100%; height: 100%; border-radius: 14px; border: none; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);"></iframe>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Next Video Navigation Arrow -->
+            <button type="button" 
+                    @click.stop="nextVideoModal()" 
+                    x-show="videoModalVideos && videoModalVideos.length > 1" 
+                    title="Next video"
+                    aria-label="Next video"
+                    class="btn position-absolute end-0 top-50 translate-middle-y d-inline-flex align-items-center justify-content-center p-0 rounded-circle shadow-lg"
+                    style="z-index: 10503; width: 48px; height: 48px; min-width: 48px; min-height: 48px; background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; margin-right: clamp(4px, 1.5vw, 16px);">
+                <i class="bi bi-chevron-right" style="font-size: 1.3rem;"></i>
+            </button>
+        </div>
+
+        <!-- Bottom Controls Bar (Direct Video Controls) -->
+        <div class="w-100 px-3 py-2" style="max-width: 900px; z-index: 10502;">
+            <template x-if="videoModalVideos[videoModalIndex] && videoModalVideos[videoModalIndex].type === 'direct'">
+                <div class="p-2.5 px-3 rounded-4 shadow-lg border border-white-subtle"
+                     style="background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.18);">
+                    
+                    <!-- Progress Scrubber -->
+                    <div class="video-modal-scrubber-track position-relative w-100 mb-2"
+                         @click.stop="seekVideoModal($event)"
+                         style="height: 6px; background: rgba(255, 255, 255, 0.22); border-radius: 9999px; cursor: pointer;">
+                        <div class="h-100 rounded-pill"
+                             :style="'width: ' + videoModalProgress + '%; background: linear-gradient(90deg, #a31621, #e11d48); transition: width 0.08s linear;'"></div>
+                    </div>
+
+                    <!-- Controls Row -->
+                    <div class="d-flex align-items-center justify-content-between text-white">
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Play / Pause -->
+                            <button type="button" 
+                                    class="btn btn-link text-white p-0 d-inline-flex align-items-center justify-content-center text-decoration-none"
+                                    @click.stop="toggleVideoModalPlay()"
+                                    :title="videoModalPlaying ? 'Pause video' : 'Play video'"
+                                    :aria-label="videoModalPlaying ? 'Pause video' : 'Play video'"
+                                    style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 50%;">
+                                <i class="bi" :class="videoModalPlaying ? 'bi-pause-fill' : 'bi-play-fill'" style="font-size: 1.4rem; color: #ffffff;"></i>
+                            </button>
+
+                            <!-- Sound Mute/Unmute -->
+                            <button type="button" 
+                                    class="btn btn-link text-white p-0 d-inline-flex align-items-center justify-content-center text-decoration-none"
+                                    @click.stop="toggleVideoModalMute()"
+                                    :title="videoModalMuted ? 'Unmute video' : 'Mute video'"
+                                    :aria-label="videoModalMuted ? 'Unmute video' : 'Mute video'"
+                                    style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 50%;">
+                                <i class="bi" :class="videoModalMuted ? 'bi-volume-mute-fill' : 'bi-volume-up-fill'" style="font-size: 1.2rem; color: #ffffff;"></i>
+                            </button>
+
+                            <!-- Timestamps -->
+                            <span class="font-monospace ms-1" style="font-size: 0.8rem; letter-spacing: 0.03em;">
+                                <span x-text="videoModalCurrentTime">0:00</span> / <span x-text="videoModalDuration">0:00</span>
+                            </span>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-white-50 d-none d-md-inline" style="font-size: 0.76rem;">
+                                Space to play/pause &bull; Esc to close &bull; Arrows to navigate
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
     <!-- Author Viewers Roster Modal (Post & Comment Views) -->
     <div x-cloak x-show="isViewersModalOpen"
          class="viewers-modal-overlay"

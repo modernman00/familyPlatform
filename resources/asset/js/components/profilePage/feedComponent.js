@@ -19,6 +19,15 @@ export function profileFeed(opts = {}) {
         lightboxIndex: 0,
         lightboxLoading: false,
         lightboxError: false,
+        videoModalOpen: false,
+        videoModalVideos: [],
+        videoModalIndex: 0,
+        videoModalMuted: false,
+        videoModalPlaying: true,
+        videoModalProgress: 0,
+        videoModalCurrentTime: '0:00',
+        videoModalDuration: '0:00',
+        videoModalFullscreen: false,
         touchStartX: 0,
         touchStartY: 0,
         heartBursts: {},
@@ -2132,6 +2141,193 @@ export function profileFeed(opts = {}) {
             this.lightboxDragY = 0;
             this.lightboxDragging = false;
             document.body.style.overflow = ''; // Restore background scrolling
+        },
+
+        openVideoModal(videos, index = 0, initialMuted = false) {
+            let list = [];
+            if (Array.isArray(videos)) {
+                list = videos.filter(v => v && (v.embedUrl || typeof v === 'string'));
+            } else if (videos && typeof videos === 'object') {
+                list = [videos];
+            } else if (typeof videos === 'string') {
+                list = [{ type: 'direct', embedUrl: videos, originalUrl: videos }];
+            }
+
+            if (list.length === 0) return;
+
+            // Normalize entries
+            list = list.map(v => {
+                if (typeof v === 'string') {
+                    return {
+                        type: 'direct',
+                        videoId: null,
+                        embedUrl: (v.startsWith('/') || v.startsWith('http')) ? v : `/resources/videos/posts/${v}`,
+                        originalUrl: v
+                    };
+                }
+                return v;
+            });
+
+            const safeIndex = (index >= 0 && index < list.length) ? index : 0;
+            this.videoModalVideos = list;
+            this.videoModalIndex = safeIndex;
+            this.videoModalMuted = !!initialMuted;
+            this.videoModalPlaying = true;
+            this.videoModalProgress = 0;
+            this.videoModalCurrentTime = '0:00';
+            this.videoModalDuration = '0:00';
+            this.videoModalOpen = true;
+            document.body.style.overflow = 'hidden';
+
+            this.$nextTick(() => {
+                this.syncVideoModalPlayback();
+            });
+        },
+
+        closeVideoModal() {
+            this.pauseVideoModalPlayback();
+            this.videoModalOpen = false;
+            this.videoModalVideos = [];
+            this.videoModalIndex = 0;
+            this.videoModalPlaying = false;
+            document.body.style.overflow = '';
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                try {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                } catch (e) {}
+            }
+        },
+
+        syncVideoModalPlayback() {
+            const container = document.getElementById('fullVideoModalStage');
+            if (!container) return;
+            const vEl = container.querySelector('video');
+            if (vEl) {
+                vEl.muted = this.videoModalMuted;
+                const activeVid = this.videoModalVideos[this.videoModalIndex];
+                if (activeVid && typeof activeVid.trimStart === 'number' && activeVid.trimStart > 0) {
+                    vEl.currentTime = activeVid.trimStart;
+                } else {
+                    vEl.currentTime = 0;
+                }
+                const playPromise = vEl.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        this.videoModalPlaying = true;
+                    }).catch(() => {
+                        this.videoModalPlaying = false;
+                    });
+                }
+            }
+        },
+
+        pauseVideoModalPlayback() {
+            const container = document.getElementById('fullVideoModalStage');
+            if (!container) return;
+            const vEl = container.querySelector('video');
+            if (vEl) {
+                try { vEl.pause(); } catch (e) {}
+            }
+        },
+
+        nextVideoModal() {
+            if (this.videoModalVideos.length > 1) {
+                this.pauseVideoModalPlayback();
+                this.videoModalIndex = (this.videoModalIndex + 1) % this.videoModalVideos.length;
+                this.videoModalProgress = 0;
+                this.$nextTick(() => {
+                    this.syncVideoModalPlayback();
+                });
+            }
+        },
+
+        prevVideoModal() {
+            if (this.videoModalVideos.length > 1) {
+                this.pauseVideoModalPlayback();
+                this.videoModalIndex = (this.videoModalIndex - 1 + this.videoModalVideos.length) % this.videoModalVideos.length;
+                this.videoModalProgress = 0;
+                this.$nextTick(() => {
+                    this.syncVideoModalPlayback();
+                });
+            }
+        },
+
+        toggleVideoModalPlay() {
+            const container = document.getElementById('fullVideoModalStage');
+            if (!container) return;
+            const vEl = container.querySelector('video');
+            if (vEl) {
+                if (vEl.paused) {
+                    vEl.play().catch(() => {});
+                    this.videoModalPlaying = true;
+                } else {
+                    vEl.pause();
+                    this.videoModalPlaying = false;
+                }
+            }
+        },
+
+        toggleVideoModalMute() {
+            const container = document.getElementById('fullVideoModalStage');
+            if (!container) return;
+            const vEl = container.querySelector('video');
+            if (vEl) {
+                vEl.muted = !vEl.muted;
+                this.videoModalMuted = vEl.muted;
+            } else {
+                this.videoModalMuted = !this.videoModalMuted;
+            }
+        },
+
+        seekVideoModal(event) {
+            const track = event.currentTarget;
+            const container = document.getElementById('fullVideoModalStage');
+            if (!track || !container) return;
+            const vEl = container.querySelector('video');
+            if (!vEl || !vEl.duration) return;
+            const rect = track.getBoundingClientRect();
+            const clickX = Math.max(0, Math.min(event.clientX - rect.left, rect.width));
+            const ratio = clickX / rect.width;
+            vEl.currentTime = ratio * vEl.duration;
+        },
+
+        onVideoModalTimeUpdate(vEl) {
+            if (!vEl || !vEl.duration) return;
+            this.videoModalProgress = Math.min(100, Math.max(0, (vEl.currentTime / vEl.duration) * 100));
+            this.videoModalCurrentTime = this.formatVideoTime(vEl.currentTime);
+            this.videoModalDuration = this.formatVideoTime(vEl.duration);
+
+            const activeVid = this.videoModalVideos[this.videoModalIndex];
+            if (activeVid && typeof activeVid.trimEnd === 'number' && vEl.currentTime >= activeVid.trimEnd) {
+                vEl.currentTime = (typeof activeVid.trimStart === 'number' ? activeVid.trimStart : 0);
+            }
+        },
+
+        formatVideoTime(seconds) {
+            if (isNaN(seconds) || seconds < 0) return '0:00';
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        },
+
+        toggleNativeFullscreen() {
+            const el = document.getElementById('fullVideoModalRoot') || document.documentElement;
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (el.requestFullscreen) {
+                    el.requestFullscreen();
+                } else if (el.webkitRequestFullscreen) {
+                    el.webkitRequestFullscreen();
+                }
+                this.videoModalFullscreen = true;
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+                this.videoModalFullscreen = false;
+            }
         },
 
         nextLightboxImage() {

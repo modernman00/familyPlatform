@@ -927,6 +927,16 @@
               </span>
             </div>
 
+            <!-- Full Video Mode Button Top-Right (44x44px minimum touch target) -->
+            <button type="button"
+                    class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
+                    @click.stop="openVideoModal(post.videos, vIdx, isMuted)"
+                    :title="'Play Video ' + (vIdx + 1) + ' in full video mode'"
+                    :aria-label="'Play Video ' + (vIdx + 1) + ' in full video mode'"
+                    style="top: 8px; right: 58px; z-index: 6; width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 9999px; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
+              <i class="bi bi-arrows-fullscreen" style="font-size: 0.95rem; color: #ffffff;"></i>
+            </button>
+
             <!-- Mute/Unmute Pill Top-Right (44x44px minimum touch target) -->
             <button type="button"
                     class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
@@ -948,6 +958,7 @@
                        loop
                        preload="metadata"
                        @click.stop="togglePlay($el)"
+                       @dblclick.stop="openVideoModal(post.videos, vIdx, isMuted)"
                        @play="isPlaying = true"
                        @pause="isPlaying = false"
                        @timeupdate="onTimeUpdate($el)"></video>
@@ -961,6 +972,17 @@
                     <i class="bi bi-play-fill text-white fs-3 ms-1"></i>
                   </span>
                 </div>
+
+                <!-- Floating Full Video Pill (Bottom-Right, 44x44px min hit target area) -->
+                <button type="button"
+                        class="btn position-absolute d-inline-flex align-items-center gap-1.5 px-3 py-1.5 shadow-sm"
+                        @click.stop="openVideoModal(post.videos, vIdx, isMuted)"
+                        :title="'Play Video ' + (vIdx + 1) + ' in full video mode'"
+                        :aria-label="'Play Video ' + (vIdx + 1) + ' in full video mode'"
+                        style="bottom: 12px; right: 8px; z-index: 6; border-radius: 9999px; background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; font-size: 0.75rem; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; min-height: 36px;">
+                  <i class="bi bi-arrows-fullscreen text-white" style="font-size: 0.8rem;"></i>
+                  <span>Full Video</span>
+                </button>
 
                 <!-- Bottom Scrubber Bar -->
                 <div class="position-absolute bottom-0 start-0 w-100" style="height: 4px; background: rgba(255, 255, 255, 0.2); z-index: 5;">
@@ -979,6 +1001,15 @@
                         allowfullscreen
                         loading="lazy"
                         style="width: 100%; height: 100%; border: none;"></iframe>
+                <!-- Embedded Full Video Mode Button -->
+                <button type="button"
+                        class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
+                        @click.stop="openVideoModal(post.videos, vIdx, false)"
+                        :title="'Play Video ' + (vIdx + 1) + ' in full video mode'"
+                        :aria-label="'Play Video ' + (vIdx + 1) + ' in full video mode'"
+                        style="top: 8px; right: 8px; z-index: 6; width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
+                  <i class="bi bi-arrows-fullscreen" style="font-size: 0.95rem; color: #ffffff;"></i>
+                </button>
               </div>
             </template>
           </div>
