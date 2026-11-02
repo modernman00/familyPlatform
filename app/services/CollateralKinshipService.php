@@ -595,6 +595,30 @@ final class CollateralKinshipService
         // 7. Compute Mathematical Ahnentafel Pedigree for 360° Fan Chart
         $ahnentafelWedges = self::computeAhnentafelPedigree($annotatedNodes, $finalUnions, $finalChildren, $egoNodeId);
 
+        // 8. Collect Unplaced Family Members (Registered or Added without parent/partner links)
+        $unplacedMembers = [];
+        foreach ($nodesById as $candId => $candNode) {
+            if (!isset($selectedNodes[$candId]) && empty($candNode['is_placeholder'])) {
+                $cFirst = trim((string)($candNode['first_name'] ?? ''));
+                $cLast = trim((string)($candNode['last_name'] ?? ''));
+                $cFullName = trim($cFirst . ' ' . $cLast);
+                $cSex = (($candNode['gender'] ?? 'Male') === 'Male') ? 'avatarM.png' : 'avatarF.png';
+                $cAvatar = !empty($candNode['avatar_url']) ? (string)$candNode['avatar_url'] : "/resources/images/profile/{$cSex}";
+
+                $unplacedMembers[] = [
+                    'id' => (int)$candNode['id'],
+                    'user_id' => $candNode['user_id'] ?? null,
+                    'first_name' => $cFirst,
+                    'last_name' => $cLast,
+                    'full_name' => $cFullName,
+                    'gender' => (string)($candNode['gender'] ?? 'Male'),
+                    'avatar_url' => $cAvatar,
+                    'bio' => $candNode['bio'] ?? 'Unplaced Member',
+                    'created_at' => $candNode['created_at'] ?? null,
+                ];
+            }
+        }
+
         return [
             'family_code' => $familyCode,
             'root_node_id' => $egoNodeId,
@@ -602,6 +626,7 @@ final class CollateralKinshipService
             'nodes' => array_values($annotatedNodes),
             'unions' => $finalUnions,
             'children' => $finalChildren,
+            'unplaced_members' => $unplacedMembers,
             'ahnentafel' => $ahnentafelWedges,
             'total_generations' => (function() use ($annotatedNodes) {
                 $genLevels = array_map(fn($n) => (int)($n['generation_level'] ?? 0), $annotatedNodes);

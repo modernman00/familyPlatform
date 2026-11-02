@@ -22,75 +22,39 @@ use PDO;
 final class FamilyGraphIntegrityService
 {
     /**
-     * Attach orphaned generation-0 members to the correct parent union.
+     * ATG Governance Invariant: Zero-Silent-Graft Rule.
+     * Automated background attachment of unlinked members to any parent union is strictly decommissioned.
      *
-     * @return int Number of members attached
+     * @return int Always 0 under the Zero-Silent-Graft invariant
      */
     public static function attachOrphanedGen0(PDO $db, string $familyCode, string $rootUserId): int
     {
-        if ($familyCode === '') {
-            return 0;
-        }
+        return 0;
+    }
 
-        $candidates = self::parentUnionCandidates($db, $familyCode);
-        if ($candidates === []) {
-            return 0;
-        }
-
-        $orphansStmt = $db->prepare('
-            SELECT fn.id, fn.user_id, fn.first_name, fn.last_name, fn.bio
+    /**
+     * Get unplaced members in a family who have not yet been connected to any parent or partner union.
+     * These members appear in the Unplaced Members Tray / Staging Dock on the canvas.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function getUnplacedMembers(PDO $db, string $familyCode): array
+    {
+        $stmt = $db->prepare('
+            SELECT fn.id, fn.user_id, fn.first_name, fn.last_name, fn.gender, fn.avatar_url, fn.bio, fn.created_at
             FROM family_nodes fn
             LEFT JOIN family_node_children fnc ON fnc.child_id = fn.id
+            LEFT JOIN family_unions fu ON (fu.partner_1_id = fn.id OR fu.partner_2_id = fn.id) AND fu.family_code = fn.family_code
             WHERE fn.family_code = ?
-              AND fn.generation_level = 0
               AND fn.is_placeholder = 0
               AND fnc.id IS NULL
+              AND fu.id IS NULL
+            ORDER BY fn.id ASC
         ');
-        $orphansStmt->execute([$familyCode]);
-        /** @var list<array<string, mixed>> $orphans */
-        $orphans = $orphansStmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $insChild = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
-        $attached = 0;
-
-        foreach ($orphans as $orphan) {
-            $orphanId = (int)$orphan['id'];
-            $bio = strtolower(trim((string)($orphan['bio'] ?? '')));
-
-            if (str_contains($bio, 'spouse') || str_contains($bio, 'partner')) {
-                continue;
-            }
-
-            $isRoot = ($rootUserId !== '' && (string)($orphan['user_id'] ?? '') === $rootUserId);
-            $isPrimaryOrSibling = str_contains($bio, 'primary') || str_contains($bio, 'sibling');
-            if (!$isRoot && !$isPrimaryOrSibling) {
-                continue;
-            }
-
-            $union = self::pickUnionForSurname($candidates, (string)($orphan['last_name'] ?? ''), $orphanId);
-            if ($union === null) {
-                continue;
-            }
-
-            $unionId = (int)$union['id'];
-
-            // A node that is already a spouse of one of this union's children is an in-law, not a child.
-            $partnerChk = $db->prepare('
-                SELECT COUNT(*) FROM family_unions fu
-                WHERE fu.family_code = ?
-                  AND ((fu.partner_1_id = ? AND fu.partner_2_id <> ?) OR (fu.partner_2_id = ? AND fu.partner_1_id <> ?))
-                  AND EXISTS (SELECT 1 FROM family_node_children fnc WHERE fnc.union_id = ? AND (fnc.child_id = fu.partner_1_id OR fnc.child_id = fu.partner_2_id))
-            ');
-            $partnerChk->execute([$familyCode, $orphanId, $orphanId, $orphanId, $orphanId, $unionId]);
-            if ((int)$partnerChk->fetchColumn() > 0) {
-                continue;
-            }
-
-            $insChild->execute([$unionId, $orphanId]);
-            $attached++;
-        }
-
-        return $attached;
+        $stmt->execute([$familyCode]);
+        /** @var list<array<string, mixed>> $rows */
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $rows;
     }
 
     /**

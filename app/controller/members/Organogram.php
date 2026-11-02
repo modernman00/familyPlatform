@@ -1271,7 +1271,7 @@ final class Organogram extends SingleCustomerData
 
         if ($hasExistingUnions) {
             $this->healOrphanedElders($db, $familyCode);
-            $this->healOrphanedGen0Members($db, $familyCode, $rootUserId);
+            // ATG Governance: healOrphanedGen0Members decommissioned under the Zero-Silent-Graft Invariant.
             return;
         }
 
@@ -1452,19 +1452,15 @@ final class Organogram extends SingleCustomerData
     }
 
     /**
-     * Self-heals orphaned generation 0 members (e.g. root user or siblings who joined an existing family)
-     * by connecting them to the primary ancestral/parent union in the family graph.
+     * Invariant: Zero-Silent-Graft Rule.
+     * We NEVER auto-attach unlinked members to any parent union in the background.
+     * Members without parent links remain in the Staging Dock / Unplaced Members Tray
+     * until explicitly placed via guided confirmation.
      */
     private function healOrphanedGen0Members(\PDO $db, string $familyCode, string $rootUserId): void
     {
-        try {
-            // Delegated to the integrity service: members attach ONLY to a generation -1 union that is
-            // proven by surname evidence. The previous "union with the most children" heuristic could pick
-            // the grandparents' union and mis-file a member as their parent's sibling.
-            \App\services\FamilyGraphIntegrityService::attachOrphanedGen0($db, $familyCode, $rootUserId);
-        } catch (\Throwable $e) {
-            error_log('[Organogram::healOrphanedGen0Members] warning: ' . $e->getMessage());
-        }
+        // Decommissioned: silent parent guessing based on surname or child count is strictly forbidden.
+        return;
     }
 
     /**
