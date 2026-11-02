@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(media): implement adaptive aspect ratio video rendition, unified auth layouts, and production assets",
+    "title": "Feat(kinship): implement autonomous constellation alignment and cross-studio lineage grafting",
     "notes": [
-        "Feat(media): implement adaptive aspect ratio video rendition, unified auth layouts, and production assets",
-        "Feat(lineage): sovereign family tree migration grafting and preservation engine",
-        "Fix(notifications): ensure sw.js deployment, htaccess rewrite, and browser unblocking guidance"
+        "Feat(kinship): implement autonomous constellation alignment and cross-studio lineage grafting",
+        "Fix(security): neutralize cross-tenant comment push notification leak and remove phantom registration starter comment (SEC-CVE-2026-CROSS-TENANT-COMMENT-LEAK)",
+        "Feat(media): implement adaptive aspect ratio video rendition, unified auth layouts, and production assets"
     ],
-    "released_at": "2026-10-31",
-    "commit": "523b6a5"
+    "released_at": "2026-11-02",
+    "commit": "3fa3daa"
 }
