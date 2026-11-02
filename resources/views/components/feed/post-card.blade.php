@@ -821,13 +821,34 @@
     <div class="multi-video-horizontal-container mb-3 px-1 position-relative"
          x-data="{
            activeVidIdx: 0,
-           scrollToCard(idx) {
+           scrollToCard(idx, autoPlay = false) {
              const track = this.$refs.videoScrollTrack;
              if (!track) return;
-             const card = track.children[idx];
+             const safeIdx = Math.max(0, Math.min(idx, (post.videos ? post.videos.length - 1 : 0)));
+             const card = track.children[safeIdx];
              if (card) {
                card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-               this.activeVidIdx = idx;
+               this.activeVidIdx = safeIdx;
+               if (autoPlay) {
+                 setTimeout(() => {
+                   const targetVid = card.querySelector('video');
+                   if (targetVid) {
+                     track.querySelectorAll('video').forEach(other => {
+                       if (other !== targetVid && !other.paused) other.pause();
+                     });
+                     targetVid.muted = true;
+                     targetVid.play().catch(() => {});
+                   }
+                 }, 350);
+               }
+             }
+           },
+           onVideoEnded(curIdx, vEl) {
+             if (!post.videos || post.videos.length <= 1) return;
+             if (curIdx < post.videos.length - 1) {
+               this.scrollToCard(curIdx + 1, true);
+             } else {
+               this.scrollToCard(0, true);
              }
            },
            onScroll(e) {
@@ -914,7 +935,7 @@
                    if (!vEl || !vEl.duration) return;
                    this.progressPercent = Math.min(100, Math.max(0, (vEl.currentTime / vEl.duration) * 100));
                    if (vid.trimEnd !== null && vEl.currentTime >= vid.trimEnd) {
-                     vEl.currentTime = vid.trimStart || 0;
+                     onVideoEnded(vIdx, vEl);
                    }
                  }
                }">
@@ -955,12 +976,12 @@
                        playsinline
                        webkit-playsinline
                        muted
-                       loop
                        preload="metadata"
                        @click.stop="togglePlay($el)"
                        @dblclick.stop="openVideoModal(post.videos, vIdx, isMuted)"
                        @play="isPlaying = true"
                        @pause="isPlaying = false"
+                       @ended="onVideoEnded(vIdx, $el)"
                        @timeupdate="onTimeUpdate($el)"></video>
 
                 <!-- Center Play Indicator (when paused) -->
@@ -1034,6 +1055,14 @@
                 allowfullscreen 
                 loading="lazy"
                 style="width: 100%; height: 100%; border: none;"></iframe>
+        <button type="button"
+                class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
+                @click.stop="openVideoModal([post.video], 0, false)"
+                title="Play in full video mode"
+                aria-label="Play in full video mode"
+                style="top: 10px; right: 10px; z-index: 6; width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
+          <i class="bi bi-arrows-fullscreen" style="font-size: 1.05rem; color: #ffffff;"></i>
+        </button>
       </div>
     </div>
   </template>
@@ -1156,6 +1185,7 @@
                loop
                preload="metadata"
                @click.stop="togglePlayback($el)"
+               @dblclick.stop="openVideoModal([post.video], 0, isVideoMuted)"
                @loadedmetadata="
                  detectVideoDimensions($el);
                  if (post.video && post.video.trimStart !== null && $el.currentTime < post.video.trimStart) { 
@@ -1206,6 +1236,16 @@
           </template>
         </div>
 
+        <!-- Full Video Mode Pill Top-Right (44x44px minimum touch target) -->
+        <button type="button" 
+                class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
+                @click.stop="openVideoModal([post.video], 0, isVideoMuted)"
+                title="Play in full video mode"
+                aria-label="Play in full video mode"
+                style="top: 14px; right: 68px; z-index: 6; width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; transition: transform 0.15s ease, background 0.15s ease; white-space: nowrap; flex-shrink: 0;">
+          <i class="bi bi-arrows-fullscreen" style="font-size: 1.05rem; color: #ffffff;"></i>
+        </button>
+
         <!-- Instagram 1-Tap Sound Toggle Pill (Top-Right) -->
         <button type="button" 
                 class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
@@ -1228,7 +1268,7 @@
                       @click.stop="togglePlayback($el.closest('.video-rendition-frame').querySelector('video'))"
                       :title="isPlaying ? 'Pause video' : 'Play video'"
                       :aria-label="isPlaying ? 'Pause video' : 'Play video'"
-                      style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; white-space: nowrap; flex-shrink: 0;">
+                      style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; white-space: nowrap; flex-shrink: 0;">
                 <i class="bi fs-5" :class="isPlaying ? 'bi-pause-fill' : 'bi-play-fill'" style="color: #ffffff;"></i>
               </button>
               <span class="font-monospace" style="letter-spacing: 0.02em;">
@@ -1237,20 +1277,14 @@
             </div>
 
             <div class="d-flex align-items-center gap-1.5">
-              <!-- Fullscreen Button -->
+              <!-- Full Video Mode Button (44x44px minimum touch target) -->
               <button type="button" 
                       class="btn btn-link text-white p-0 d-inline-flex align-items-center justify-content-center text-decoration-none"
-                      @click.stop="
-                        const v = $el.closest('.video-rendition-frame').querySelector('video');
-                        if (v) {
-                          if (v.requestFullscreen) { v.requestFullscreen(); }
-                          else if (v.webkitRequestFullscreen) { v.webkitRequestFullscreen(); }
-                        }
-                      "
-                      title="View Fullscreen"
-                      aria-label="View Fullscreen"
-                      style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; white-space: nowrap; flex-shrink: 0;">
-                <i class="bi bi-arrows-fullscreen" style="font-size: 0.95rem; color: #ffffff;"></i>
+                      @click.stop="openVideoModal([post.video], 0, isVideoMuted)"
+                      title="Play in full video mode"
+                      aria-label="Play in full video mode"
+                      style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; white-space: nowrap; flex-shrink: 0;">
+                <i class="bi bi-arrows-fullscreen" style="font-size: 1rem; color: #ffffff;"></i>
               </button>
             </div>
           </div>

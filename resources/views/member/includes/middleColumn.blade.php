@@ -1112,6 +1112,7 @@
                                @dblclick.stop="toggleNativeFullscreen()"
                                @play="videoModalPlaying = true"
                                @pause="videoModalPlaying = false"
+                               @ended="onVideoModalEnded()"
                                @timeupdate="onVideoModalTimeUpdate($el)"
                                style="max-width: 100%; max-height: 76vh; object-fit: contain; border-radius: 14px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9); background: #000000; cursor: pointer;"></video>
                         

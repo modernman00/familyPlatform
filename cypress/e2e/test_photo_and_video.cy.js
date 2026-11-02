@@ -87,8 +87,30 @@ describe('Mixed Media & Multiple Video Posts: Photos and Videos in One Post', ()
             cy.get('img.post-media-first-img, img.card-img-top, picture img').should('exist');
             cy.get('.multi-video-scroll-track').should('exist').and('be.visible');
             cy.get('.multi-video-card').should('have.length', 2);
+
+            // First video is present with autoplay/playsinline and advances sequentially
+            cy.get('.multi-video-card').first().find('video').should('have.attr', 'playsinline');
+
+            // 10. Click Full Video Mode button
+            cy.get('.multi-video-card').first().find('button[aria-label*="full video mode"]').first().click({ force: true });
         });
 
-        cy.screenshot('multiple_videos_horizontal_verified_success');
+        // 11. Verify Full Video Mode Theatre Modal opens
+        cy.get('#fullVideoModalRoot', { timeout: 10000 }).should('be.visible').within(() => {
+            cy.contains('Video 1 of 2').should('exist');
+            cy.get('#fullVideoModalStage video').should('exist');
+
+            // Navigate to next video in full mode
+            cy.get('button[aria-label="Next video"]').click();
+            cy.contains('Video 2 of 2').should('exist');
+
+            // Close full video mode
+            cy.get('button[aria-label="Close full video view"]').click();
+        });
+
+        // Modal closed
+        cy.get('#fullVideoModalRoot').should('not.be.visible');
+
+        cy.screenshot('multiple_videos_horizontal_and_full_mode_success');
     });
 });

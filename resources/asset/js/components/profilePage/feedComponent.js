@@ -789,8 +789,61 @@ export function profileFeed(opts = {}) {
                 });
             }
 
+            if (!this._feedMultiVideoObserver) {
+                this._feedMultiVideoObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        const container = entry.target;
+                        if (!container) return;
+
+                        if (entry.isIntersecting && entry.intersectionRatio >= 0.35) {
+                            // Container in view: autoplay from the first video
+                            const track = container.querySelector('.multi-video-scroll-track');
+                            if (!track) return;
+                            const firstCard = track.querySelector('.multi-video-card');
+                            const firstVideo = firstCard ? firstCard.querySelector('video') : null;
+                            if (firstVideo && !firstVideo._userManuallyPaused) {
+                                const anyPlaying = Array.from(track.querySelectorAll('video')).some(v => !v.paused);
+                                if (!anyPlaying) {
+                                    if (this._activePlayingFeedVideo && this._activePlayingFeedVideo !== firstVideo && !this._activePlayingFeedVideo.paused) {
+                                        this._activePlayingFeedVideo.pause();
+                                    }
+                                    this._activePlayingFeedVideo = firstVideo;
+                                    firstVideo.muted = true;
+                                    firstVideo._autoPlaying = true;
+                                    firstVideo.play().catch(() => {});
+                                }
+                            }
+                        } else if (!entry.isIntersecting || entry.intersectionRatio < 0.15) {
+                            // Scrolled away: pause all videos in this multi-video container
+                            const track = container.querySelector('.multi-video-scroll-track');
+                            if (track) {
+                                track.querySelectorAll('video').forEach(v => {
+                                    if (!v.paused) {
+                                        v._autoPlaying = false;
+                                        v.pause();
+                                    }
+                                    v._userManuallyPaused = false;
+                                });
+                            }
+                        }
+                    });
+                }, {
+                    threshold: [0.0, 0.15, 0.35, 0.7]
+                });
+            }
+
             setTimeout(() => {
-                const videoEls = document.querySelectorAll('video.feed-post-video, .video-embed-container video');
+                // Observe multi-video containers for sequential autoplay
+                const multiContainers = document.querySelectorAll('.multi-video-horizontal-container');
+                multiContainers.forEach(mc => {
+                    if (!mc.dataset.multiFeedObserved) {
+                        mc.dataset.multiFeedObserved = 'true';
+                        this._feedMultiVideoObserver.observe(mc);
+                    }
+                });
+
+                // Observe single videos (excluding those inside multi-video cards)
+                const videoEls = document.querySelectorAll('video.feed-post-video:not(.multi-video-card video), .video-embed-container:not(.multi-video-horizontal-container) video');
                 videoEls.forEach(video => {
                     if (!video.dataset.feedObserved) {
                         video.dataset.feedObserved = 'true';
@@ -2300,7 +2353,32 @@ export function profileFeed(opts = {}) {
 
             const activeVid = this.videoModalVideos[this.videoModalIndex];
             if (activeVid && typeof activeVid.trimEnd === 'number' && vEl.currentTime >= activeVid.trimEnd) {
-                vEl.currentTime = (typeof activeVid.trimStart === 'number' ? activeVid.trimStart : 0);
+                this.onVideoModalEnded();
+            }
+        },
+
+        onVideoModalEnded() {
+            if (this.videoModalVideos && this.videoModalVideos.length > 1) {
+                if (this.videoModalIndex < this.videoModalVideos.length - 1) {
+                    this.nextVideoModal();
+                } else {
+                    // Loop back to the first video
+                    this.pauseVideoModalPlayback();
+                    this.videoModalIndex = 0;
+                    this.videoModalProgress = 0;
+                    this.$nextTick(() => {
+                        this.syncVideoModalPlayback();
+                    });
+                }
+            } else {
+                // Single video: loop playback
+                const container = document.getElementById('fullVideoModalStage');
+                const vEl = container ? container.querySelector('video') : null;
+                if (vEl) {
+                    const activeVid = this.videoModalVideos[this.videoModalIndex];
+                    vEl.currentTime = (activeVid && typeof activeVid.trimStart === 'number') ? activeVid.trimStart : 0;
+                    vEl.play().catch(() => {});
+                }
             }
         },
 
