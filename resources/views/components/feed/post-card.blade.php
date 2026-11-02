@@ -832,7 +832,7 @@
            },
            onScroll(e) {
              const track = e.target;
-             const cardWidth = track.firstElementChild ? track.firstElementChild.offsetWidth : 300;
+             const cardWidth = track.firstElementChild ? track.firstElementChild.offsetWidth : 260;
              if (cardWidth > 0) {
                const idx = Math.round(track.scrollLeft / cardWidth);
                this.activeVidIdx = Math.max(0, Math.min(idx, (post.videos ? post.videos.length - 1 : 0)));
@@ -844,7 +844,7 @@
         <span class="badge rounded-pill px-2.5 py-1 d-inline-flex align-items-center gap-1.5"
               style="background: rgba(15, 23, 42, 0.08); color: var(--text-main, #0f172a); font-size: 0.75rem; font-weight: 600;">
           <i class="bi bi-camera-reels-fill text-danger"></i>
-          <span x-text="post.videos.length + ' Videos'"></span>
+          <span x-text="'Video ' + (activeVidIdx + 1) + ' of ' + post.videos.length"></span>
         </span>
         <div class="d-flex align-items-center gap-1.5">
           <template x-for="(v, vIdx) in post.videos" :key="'dot-' + vIdx">
@@ -857,14 +857,34 @@
         </div>
       </div>
 
+      <!-- Left / Previous Navigation Arrow -->
+      <button type="button"
+              class="btn position-absolute start-0 top-50 translate-middle-y shadow d-inline-flex align-items-center justify-content-center p-0 rounded-circle"
+              style="z-index: 10; width: 44px; height: 44px; min-width: 44px; min-height: 44px; background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(8px); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); margin-left: 6px;"
+              x-show="activeVidIdx > 0"
+              @click.stop="scrollToCard(activeVidIdx - 1)"
+              aria-label="Previous video">
+        <i class="bi bi-chevron-left" style="font-size: 1.1rem;"></i>
+      </button>
+
+      <!-- Right / Next Navigation Arrow -->
+      <button type="button"
+              class="btn position-absolute end-0 top-50 translate-middle-y shadow d-inline-flex align-items-center justify-content-center p-0 rounded-circle"
+              style="z-index: 10; width: 44px; height: 44px; min-width: 44px; min-height: 44px; background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(8px); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); margin-right: 6px;"
+              x-show="activeVidIdx < post.videos.length - 1"
+              @click.stop="scrollToCard(activeVidIdx + 1)"
+              aria-label="Next video">
+        <i class="bi bi-chevron-right" style="font-size: 1.1rem;"></i>
+      </button>
+
       <!-- Horizontal Scrollable Track -->
-      <div class="multi-video-scroll-track d-flex gap-3 overflow-x-auto pb-2"
+      <div class="multi-video-scroll-track d-flex gap-2.5 overflow-x-auto pb-2"
            x-ref="videoScrollTrack"
            @scroll.passive="onScroll($event)"
            style="scroll-snap-type: x mandatory; scrollbar-width: thin; -webkit-overflow-scrolling: touch; scroll-padding: 0 4px;">
         <template x-for="(vid, vIdx) in post.videos" :key="vIdx">
           <div class="multi-video-card flex-shrink-0 position-relative rounded-3 overflow-hidden shadow-sm border border-light-subtle"
-               style="scroll-snap-align: start; width: 82%; max-width: 360px; min-width: 260px; background: #07090e;"
+               :style="'scroll-snap-align: start; flex: 0 0 auto; width: ' + (post.videos.length === 2 ? 'clamp(240px, 48.5%, 360px)' : 'clamp(210px, 44%, 300px)') + '; background: #07090e;'"
                x-data="{
                  isMuted: true,
                  isPlaying: false,

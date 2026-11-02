@@ -259,11 +259,11 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
             showConfirmButton: false
           });
         }
-        allowedVideos.forEach(vFile => {
+        for (const vFile of allowedVideos) {
           if (typeof window.__handleComposerVideoFile === 'function') {
-            window.__handleComposerVideoFile(vFile);
+            await window.__handleComposerVideoFile(vFile);
           }
-        });
+        }
       }
     }
 

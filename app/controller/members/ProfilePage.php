@@ -179,6 +179,7 @@ final class ProfilePage extends ProcessImg
      */
     public function post(): void
     {
+        $tRequestStart = microtime(true);
         try {
             // // header('Content-Type: text/event-stream');
             // // header('Cache-Control: no-cache');
@@ -410,28 +411,6 @@ final class ProfilePage extends ProcessImg
                     unset($_SESSION['pwa_shared_target']);
                 }
 
-                // Run Next-Gen Visual Supremacy Engine (VSE) on all uploaded post images
-                try {
-                    $postBaseDir = realpath(__DIR__ . '/../../../resources/images/post');
-                    if ($postBaseDir && is_dir($postBaseDir)) {
-                        $postRecord = Post::postByNo($result);
-                        if (is_array($postRecord)) {
-                            for ($i = 0; $i < 6; $i++) {
-                                $imgCol = 'post_img' . $i;
-                                $imgVal = trim((string)($postRecord[$imgCol] ?? ''));
-                                if ($imgVal !== '' && !str_starts_with($imgVal, 'http://') && !str_starts_with($imgVal, 'https://')) {
-                                    $localImagePath = rtrim($postBaseDir, '/\\') . DIRECTORY_SEPARATOR . basename($imgVal);
-                                    if (file_exists($localImagePath) && is_file($localImagePath)) {
-                                        \App\services\VisualSupremacyService::processInPlace($localImagePath);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } catch (\Throwable $e) {
-                    error_log('[VisualSupremacyService::post] ' . $e->getMessage());
-                }
-
                 if ($isThenNow) {
                     try {
                         $replyTo = (int)($_POST['reply_to_post'] ?? 0);
@@ -443,7 +422,8 @@ final class ProfilePage extends ProcessImg
                             \App\model\PostComparison::cleanLabel($_POST['now_label'] ?? ''),
                             $replyTo > 0 ? $replyTo : null,
                             $compMode,
-                            $mysteryYear
+                            $mysteryYear,
+                            deferVse: true
                         );
 
                         // Optional 15-second Then & Now Voice Reflection keepsake
@@ -543,16 +523,6 @@ final class ProfilePage extends ProcessImg
                     }
                 }
 
-                // Trigger background notifications server-side. The post is already
-                // saved at this point, so a notification failure (e.g. email/SMTP)
-                // must never turn a successful post into a failed response.
-                try {
-                    \App\controller\members\PostMessage::getNewPostAndEmail($result);
-                    \App\controller\members\PostMessage::getNewPostPusher($result);
-                } catch (\Throwable $th) {
-                    error_log((string) $th);
-                }
-
                 // Synchronise family hashtags & memory pills
                 try {
                     $famCode = (string)($_SESSION['famCode'] ?? '');
@@ -611,7 +581,81 @@ final class ProfilePage extends ProcessImg
                     $newPost['post_tags'] = !empty($postTags) ? $postTags : \App\controller\members\TagController::getPostTags((int)$result);
                 }
 
+                $prepDuration = round((microtime(true) - $tRequestStart) * 1000, 2);
+                if (!headers_sent()) {
+                    header("Server-Timing: prep;dur={$prepDuration};desc=\"Post Insertion & Staging\"");
+                }
+
                 msgSuccess(200, $newPost ?: $result);
+
+                // Fast-Response Decoupling: Flush 200 OK JSON response immediately to browser
+                // so composer closes and feed updates within ~1-2s, releasing session lock.
+                if (function_exists('fastcgi_finish_request')) {
+                    while (ob_get_level() > 0) {
+                        ob_end_flush();
+                    }
+                    flush();
+                    if (session_status() === PHP_SESSION_ACTIVE) {
+                        session_write_close();
+                    }
+                    fastcgi_finish_request();
+                    ignore_user_abort(true);
+                }
+
+                // ── BACKGROUND POST-RESPONSE PIPELINE (Track 1 Decoupled Execution) ──
+
+                // Step 1: Pusher real-time broadcast to active family members (~150ms)
+                $tPusherStart = microtime(true);
+                try {
+                    \App\controller\members\PostMessage::getNewPostPusher($result);
+                } catch (\Throwable $th) {
+                    error_log('[PostMessage::getNewPostPusher background] ' . $th->getMessage());
+                }
+                $pusherDuration = round((microtime(true) - $tPusherStart) * 1000, 2);
+
+                // Step 2: Visual Supremacy Engine - Generate AVIF + WebP variants losslessly
+                $tVseStart = microtime(true);
+                try {
+                    $postBaseDir = realpath(__DIR__ . '/../../../resources/images/post');
+                    if ($postBaseDir && is_dir($postBaseDir)) {
+                        $postRecord = Post::postByNo($result);
+                        if (is_array($postRecord)) {
+                            for ($i = 0; $i < 6; $i++) {
+                                $imgCol = 'post_img' . $i;
+                                $imgVal = trim((string)($postRecord[$imgCol] ?? ''));
+                                if ($imgVal !== '' && !str_starts_with($imgVal, 'http://') && !str_starts_with($imgVal, 'https://')) {
+                                    $localImagePath = rtrim($postBaseDir, '/\\') . DIRECTORY_SEPARATOR . basename($imgVal);
+                                    if (file_exists($localImagePath) && is_file($localImagePath)) {
+                                        \App\services\VisualSupremacyService::processInPlace($localImagePath);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    error_log('[VisualSupremacyService::post background] ' . $e->getMessage());
+                }
+                $vseDuration = round((microtime(true) - $tVseStart) * 1000, 2);
+
+                // Step 3: Outbound Email Fan-out (SMTP loop to all family members)
+                $tEmailStart = microtime(true);
+                try {
+                    \App\controller\members\PostMessage::getNewPostAndEmail($result);
+                } catch (\Throwable $th) {
+                    error_log('[PostMessage::getNewPostAndEmail background] ' . $th->getMessage());
+                }
+                $emailDuration = round((microtime(true) - $tEmailStart) * 1000, 2);
+
+                $totalBgDuration = round((microtime(true) - $tRequestStart) * 1000, 2);
+                error_log(sprintf(
+                    '[ProfilePage::post] Post #%d saved in %0.1fms. Background: Pusher %0.1fms, VSE %0.1fms, Email %0.1fms (Total: %0.1fms)',
+                    (int)$result,
+                    $prepDuration,
+                    $pusherDuration,
+                    $vseDuration,
+                    $emailDuration,
+                    $totalBgDuration
+                ));
             }
 
         } catch (\Throwable $th) {

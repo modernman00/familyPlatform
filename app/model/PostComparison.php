@@ -90,7 +90,8 @@ final class PostComparison extends Db
         ?string $afterLabel,
         ?int $parentPostNo = null,
         string $comparisonMode = 'classic',
-        bool $mysteryYear = false
+        bool $mysteryYear = false,
+        bool $deferVse = false
     ): bool {
         self::ensureColumns();
         $post = Post::postByNo($postNo);
@@ -106,21 +107,24 @@ final class PostComparison extends Db
         }
         [$before, $after] = $stored;
 
-        // Ensure Next-Gen Visual Supremacy Engine (AVIF/WebP/Display P3) variants exist for comparison pair
-        try {
-            $postImgDir = realpath(__DIR__ . '/../../resources/images/post');
-            if ($postImgDir && is_dir($postImgDir) && class_exists(\App\services\VisualSupremacyService::class)) {
-                foreach ([$before, $after] as $imgFile) {
-                    $base = basename($imgFile);
-                    $fullPath = rtrim($postImgDir, '/\\') . DIRECTORY_SEPARATOR . $base;
-                    $stem = pathinfo($fullPath, PATHINFO_DIRNAME) . DIRECTORY_SEPARATOR . pathinfo($fullPath, PATHINFO_FILENAME);
-                    if (is_file($fullPath) && (!is_file($stem . '.avif') || !is_file($stem . '.webp'))) {
-                        \App\services\VisualSupremacyService::processInPlace($fullPath);
+        // Ensure Next-Gen Visual Supremacy Engine (AVIF/WebP/Display P3) variants exist for retrospective comparisons,
+        // unless deferred to background processing by the caller pipeline.
+        if (!$deferVse) {
+            try {
+                $postImgDir = realpath(__DIR__ . '/../../resources/images/post');
+                if ($postImgDir && is_dir($postImgDir) && class_exists(\App\services\VisualSupremacyService::class)) {
+                    foreach ([$before, $after] as $imgFile) {
+                        $base = basename($imgFile);
+                        $fullPath = rtrim($postImgDir, '/\\') . DIRECTORY_SEPARATOR . $base;
+                        $stem = pathinfo($fullPath, PATHINFO_DIRNAME) . DIRECTORY_SEPARATOR . pathinfo($fullPath, PATHINFO_FILENAME);
+                        if (is_file($fullPath) && (!is_file($stem . '.avif') || !is_file($stem . '.webp'))) {
+                            \App\services\VisualSupremacyService::processInPlace($fullPath);
+                        }
                     }
                 }
+            } catch (\Throwable $e) {
+                error_log('[PostComparison::createForPost VSE] ' . $e->getMessage());
             }
-        } catch (\Throwable $e) {
-            error_log('[PostComparison::createForPost VSE] ' . $e->getMessage());
         }
 
         if ($parentPostNo !== null && !self::isComparison($parentPostNo)) {

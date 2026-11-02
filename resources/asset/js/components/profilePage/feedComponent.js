@@ -540,14 +540,23 @@ export function profileFeed(opts = {}) {
         extractVideosFromSlots(p) {
             if (!p || typeof p !== 'object') return [];
             const collected = [];
-            for (let i = 0; i <= 5; i++) {
-                const val = p[`post_img${i}`];
-                if (val && typeof val === 'string' && /\.(mp4|webm|mov|ogg)(\?|#|$)/i.test(val.trim())) {
-                    collected.push(val.trim());
-                    if (collected.length >= 3) break;
-                }
+            if (Array.isArray(p.images)) {
+                p.images.forEach(img => {
+                    if (img && typeof img === 'string' && /\.(mp4|webm|mov|ogg)(\?|#|$)/i.test(img.trim())) {
+                        const clean = img.trim();
+                        if (!collected.includes(clean)) collected.push(clean);
+                    }
+                });
             }
-            return collected;
+            Object.keys(p).forEach(k => {
+                if (k.startsWith('post_img') && p[k] !== null && p[k] !== '' && typeof p[k] === 'string') {
+                    const val = p[k].trim();
+                    if (val && /\.(mp4|webm|mov|ogg)(\?|#|$)/i.test(val) && !collected.includes(val)) {
+                        collected.push(val);
+                    }
+                }
+            });
+            return collected.slice(0, 3);
         },
 
         extractVideoFromSlots(p) {
