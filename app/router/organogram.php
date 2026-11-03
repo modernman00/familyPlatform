@@ -48,5 +48,9 @@ $router->map('GET', '/member/organogram/constellation-matches', 'App\controller\
 $router->map('POST', '/member/organogram/editor/constellation-merge', 'App\controller\members\OrganogramEditorController@mergeConstellation', 'MEMBER_ORGANOGRAM_CONSTELLATION_MERGE');
 $router->map('POST', '/member/organogram/editor/constellation-dismiss', 'App\controller\members\OrganogramEditorController@dismissConstellation', 'MEMBER_ORGANOGRAM_CONSTELLATION_DISMISS');
 
+// Unplaced Kin Staging & Guided Relational Placement
+$router->map('POST', '/member/organogram/editor/connect-unplaced-member', 'App\controller\members\OrganogramEditorController@connectUnplacedMember', 'MEMBER_ORGANOGRAM_CONNECT_UNPLACED_MEMBER');
+
+
 
 

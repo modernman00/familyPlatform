@@ -2197,5 +2197,346 @@ final class OrganogramEditorController extends BaseController
             showError($th);
         }
     }
+
+    /**
+     * POST: Guided Relational Placement for Unplaced Family Members.
+     * Connects an unplaced family node to its verified biological/marital branch
+     * with explicit user-confirmed relationship and parent/sibling anchor.
+     */
+    public function connectUnplacedMember(): void
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                msgException(405, 'Method Not Allowed');
+                return;
+            }
+
+            $userId = (string)($_SESSION['id'] ?? '');
+            if ($userId === '') {
+                msgException(401, 'Unauthorized Access');
+                return;
+            }
+
+            $rawBody = file_get_contents('php://input');
+            $jsonInput = is_string($rawBody) && $rawBody !== '' ? (json_decode($rawBody, true) ?: []) : [];
+
+            $nodeId = (int)($_POST['node_id'] ?? ($jsonInput['node_id'] ?? 0));
+            $relationship = strtolower(trim((string)($_POST['relationship'] ?? ($jsonInput['relationship'] ?? ''))));
+            $anchorId = (int)($_POST['anchor_id'] ?? ($jsonInput['anchor_id'] ?? 0));
+            $genderOverride = trim((string)($_POST['gender'] ?? ($jsonInput['gender'] ?? '')));
+
+            if ($nodeId <= 0) {
+                msgException(400, 'Invalid Member Node ID.');
+                return;
+            }
+
+            $allowedRelationships = ['sibling', 'half_sibling', 'nephew_niece', 'child', 'cousin', 'uncle_aunt'];
+            if (!in_array($relationship, $allowedRelationships, true)) {
+                msgException(400, 'Please select a valid family relationship.');
+                return;
+            }
+
+            \Src\Limiter::limit($userId . ':connect_unplaced');
+
+            $db = Db::connect2();
+            $ctx = $this->resolveEditorFamilyContext($db, 0, $nodeId, $jsonInput);
+            $familyCode = $ctx['family_code'];
+
+            if ($familyCode === '') {
+                msgException(403, 'Unauthorized family tree access.');
+                return;
+            }
+
+            // IDOR / BOLA Check: Ensure the unplaced node belongs to the active family code
+            $stmtNode = $db->prepare('SELECT id, first_name, last_name, gender, generation_level, family_code FROM family_nodes WHERE id = ? AND family_code = ? LIMIT 1');
+            $stmtNode->execute([$nodeId, $familyCode]);
+            $targetNode = $stmtNode->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$targetNode) {
+                msgException(403, 'Permission Denied: Member does not belong to your family tree.');
+                return;
+            }
+
+            // Verify anchor node if provided
+            $anchorNode = null;
+            if ($anchorId > 0) {
+                if ($anchorId === $nodeId) {
+                    msgException(400, 'A member cannot be anchored to themselves.');
+                    return;
+                }
+                $stmtAnchor = $db->prepare('SELECT id, first_name, last_name, gender, generation_level FROM family_nodes WHERE id = ? AND family_code = ? LIMIT 1');
+                $stmtAnchor->execute([$anchorId, $familyCode]);
+                $anchorNode = $stmtAnchor->fetch(\PDO::FETCH_ASSOC);
+
+                if (!$anchorNode) {
+                    msgException(403, 'Permission Denied: Selected relative does not belong to your family tree.');
+                    return;
+                }
+            }
+
+            // Resolve Ego (Primary / Root Node for this tree)
+            $stmtEgo = $db->prepare('SELECT id, first_name, last_name, gender, generation_level FROM family_nodes WHERE family_code = ? AND user_id = ? LIMIT 1');
+            $stmtEgo->execute([$familyCode, $userId]);
+            $egoNode = $stmtEgo->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$egoNode) {
+                $stmtFallback = $db->prepare('SELECT id, first_name, last_name, gender, generation_level FROM family_nodes WHERE family_code = ? AND generation_level = 0 ORDER BY id ASC LIMIT 1');
+                $stmtFallback->execute([$familyCode]);
+                $egoNode = $stmtFallback->fetch(\PDO::FETCH_ASSOC);
+            }
+
+            $db->beginTransaction();
+
+            try {
+                // Clean any existing stale parent links for this unplaced node
+                $delLinks = $db->prepare('DELETE FROM family_node_children WHERE child_id = ?');
+                $delLinks->execute([$nodeId]);
+
+                $targetUnionId = 0;
+                $targetGenLevel = 0;
+                $targetBio = 'Relative';
+
+                if ($relationship === 'sibling') {
+                    $refNode = $anchorNode ?: $egoNode;
+                    if (!$refNode) {
+                        $db->rollBack();
+                        msgException(400, 'Unable to locate your primary node to attach a sibling.');
+                        return;
+                    }
+
+                    $refId = (int)$refNode['id'];
+                    $refGen = (int)$refNode['generation_level'];
+
+                    // Find the parent union of the reference node
+                    $stmtPUnion = $db->prepare('
+                        SELECT u.id
+                        FROM family_node_children c
+                        JOIN family_unions u ON u.id = c.union_id
+                        WHERE c.child_id = ? AND u.family_code = ?
+                        LIMIT 1
+                    ');
+                    $stmtPUnion->execute([$refId, $familyCode]);
+                    $targetUnionId = (int)$stmtPUnion->fetchColumn();
+
+                    if ($targetUnionId <= 0) {
+                        // Create placeholder parents at refGen - 1 and link refNode + nodeId
+                        $pGen = $refGen - 1;
+                        $insF = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio, is_placeholder) VALUES (?, 'Father', 'Male', ?, '/resources/images/profile/avatarM.png', 'Father', 1)");
+                        $insF->execute([$familyCode, $pGen]);
+                        $fatherId = (int)$db->lastInsertId();
+
+                        $insM = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio, is_placeholder) VALUES (?, 'Mother', 'Female', ?, '/resources/images/profile/avatarF.png', 'Mother', 1)");
+                        $insM->execute([$familyCode, $pGen]);
+                        $motherId = (int)$db->lastInsertId();
+
+                        $insU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'married', 1)");
+                        $insU->execute([$familyCode, $fatherId, $motherId]);
+                        $targetUnionId = (int)$db->lastInsertId();
+
+                        $insRefLink = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
+                        $insRefLink->execute([$targetUnionId, $refId]);
+                    }
+
+                    $targetGenLevel = $refGen;
+                    $targetBio = 'Sibling';
+                } elseif ($relationship === 'half_sibling') {
+                    if (!$anchorNode) {
+                        $db->rollBack();
+                        msgException(400, 'Please select which parent you share with this half-sibling.');
+                        return;
+                    }
+
+                    $parentId = (int)$anchorNode['id'];
+                    $parentGen = (int)$anchorNode['generation_level'];
+
+                    // Find or create an isolated single-parent union for the shared parent
+                    $stmtHalfU = $db->prepare('
+                        SELECT id FROM family_unions
+                        WHERE family_code = ?
+                          AND partner_1_id = ?
+                          AND (partner_2_id = ? OR partner_2_id = 0)
+                        ORDER BY id ASC
+                        LIMIT 1
+                    ');
+                    $stmtHalfU->execute([$familyCode, $parentId, $parentId]);
+                    $targetUnionId = (int)$stmtHalfU->fetchColumn();
+
+                    if ($targetUnionId <= 0) {
+                        $insHalfU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'partner', 0)");
+                        $insHalfU->execute([$familyCode, $parentId, $parentId]);
+                        $targetUnionId = (int)$db->lastInsertId();
+                    }
+
+                    $targetGenLevel = $parentGen + 1;
+                    $targetBio = 'Half-sibling';
+                } elseif ($relationship === 'nephew_niece') {
+                    if (!$anchorNode) {
+                        $db->rollBack();
+                        msgException(400, 'Please select which sibling is the parent of this nephew or niece.');
+                        return;
+                    }
+
+                    $siblingId = (int)$anchorNode['id'];
+                    $siblingGen = (int)$anchorNode['generation_level'];
+
+                    $stmtSibU = $db->prepare('
+                        SELECT id FROM family_unions
+                        WHERE family_code = ?
+                          AND (partner_1_id = ? OR partner_2_id = ?)
+                        ORDER BY is_current DESC, id ASC
+                        LIMIT 1
+                    ');
+                    $stmtSibU->execute([$familyCode, $siblingId, $siblingId]);
+                    $targetUnionId = (int)$stmtSibU->fetchColumn();
+
+                    if ($targetUnionId <= 0) {
+                        $insSibU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'partner', 1)");
+                        $insSibU->execute([$familyCode, $siblingId, $siblingId]);
+                        $targetUnionId = (int)$db->lastInsertId();
+                    }
+
+                    $targetGenLevel = $siblingGen + 1;
+                    $targetBio = 'Child';
+                } elseif ($relationship === 'child') {
+                    $parentNode = $anchorNode ?: $egoNode;
+                    if (!$parentNode) {
+                        $db->rollBack();
+                        msgException(400, 'Please select the parent for this child.');
+                        return;
+                    }
+
+                    $parentId = (int)$parentNode['id'];
+                    $parentGen = (int)$parentNode['generation_level'];
+
+                    $stmtChildU = $db->prepare('
+                        SELECT id FROM family_unions
+                        WHERE family_code = ?
+                          AND (partner_1_id = ? OR partner_2_id = ?)
+                        ORDER BY is_current DESC, id ASC
+                        LIMIT 1
+                    ');
+                    $stmtChildU->execute([$familyCode, $parentId, $parentId]);
+                    $targetUnionId = (int)$stmtChildU->fetchColumn();
+
+                    if ($targetUnionId <= 0) {
+                        $insChildU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'partner', 1)");
+                        $insChildU->execute([$familyCode, $parentId, $parentId]);
+                        $targetUnionId = (int)$db->lastInsertId();
+                    }
+
+                    $targetGenLevel = $parentGen + 1;
+                    $targetBio = 'Child';
+                } elseif ($relationship === 'cousin') {
+                    if (!$anchorNode) {
+                        $db->rollBack();
+                        msgException(400, 'Please select which uncle or aunt is the parent of this cousin.');
+                        return;
+                    }
+
+                    $uncleAuntId = (int)$anchorNode['id'];
+                    $uncleAuntGen = (int)$anchorNode['generation_level'];
+
+                    $stmtUaU = $db->prepare('
+                        SELECT id FROM family_unions
+                        WHERE family_code = ?
+                          AND (partner_1_id = ? OR partner_2_id = ?)
+                        ORDER BY is_current DESC, id ASC
+                        LIMIT 1
+                    ');
+                    $stmtUaU->execute([$familyCode, $uncleAuntId, $uncleAuntId]);
+                    $targetUnionId = (int)$stmtUaU->fetchColumn();
+
+                    if ($targetUnionId <= 0) {
+                        $insUaU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'partner', 1)");
+                        $insUaU->execute([$familyCode, $uncleAuntId, $uncleAuntId]);
+                        $targetUnionId = (int)$db->lastInsertId();
+                    }
+
+                    $targetGenLevel = $uncleAuntGen + 1;
+                    $targetBio = 'Cousin';
+                } elseif ($relationship === 'uncle_aunt') {
+                    if (!$anchorNode) {
+                        $db->rollBack();
+                        msgException(400, 'Please select which parent is the sibling of this uncle or aunt.');
+                        return;
+                    }
+
+                    $parentId = (int)$anchorNode['id'];
+                    $parentGen = (int)$anchorNode['generation_level'];
+
+                    // Find the grandparent union where $parentId is a child
+                    $stmtGpU = $db->prepare('
+                        SELECT u.id
+                        FROM family_node_children c
+                        JOIN family_unions u ON u.id = c.union_id
+                        WHERE c.child_id = ? AND u.family_code = ?
+                        LIMIT 1
+                    ');
+                    $stmtGpU->execute([$parentId, $familyCode]);
+                    $targetUnionId = (int)$stmtGpU->fetchColumn();
+
+                    if ($targetUnionId <= 0) {
+                        $gpGen = $parentGen - 1;
+                        $insGf = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio, is_placeholder) VALUES (?, 'Grandfather', 'Male', ?, '/resources/images/profile/avatarM.png', 'Grandfather', 1)");
+                        $insGf->execute([$familyCode, $gpGen]);
+                        $gfId = (int)$db->lastInsertId();
+
+                        $insGm = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio, is_placeholder) VALUES (?, 'Grandmother', 'Female', ?, '/resources/images/profile/avatarF.png', 'Grandmother', 1)");
+                        $insGm->execute([$familyCode, $gpGen]);
+                        $gmId = (int)$db->lastInsertId();
+
+                        $insGpU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'married', 1)");
+                        $insGpU->execute([$familyCode, $gfId, $gmId]);
+                        $targetUnionId = (int)$db->lastInsertId();
+
+                        $insParentLink = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
+                        $insParentLink->execute([$targetUnionId, $parentId]);
+                    }
+
+                    $targetGenLevel = $parentGen;
+                    $targetBio = 'Uncle/Aunt';
+                }
+
+                if ($targetUnionId <= 0) {
+                    $db->rollBack();
+                    msgException(400, 'Could not resolve a valid family branch union for this placement.');
+                    return;
+                }
+
+                // Update the member's generation level, bio, and optional gender
+                if (in_array($genderOverride, ['Male', 'Female'], true)) {
+                    $updNode = $db->prepare('UPDATE family_nodes SET generation_level = ?, bio = ?, gender = ? WHERE id = ? AND family_code = ?');
+                    $updNode->execute([$targetGenLevel, $targetBio, $genderOverride, $nodeId, $familyCode]);
+                } else {
+                    $updNode = $db->prepare('UPDATE family_nodes SET generation_level = ?, bio = ? WHERE id = ? AND family_code = ?');
+                    $updNode->execute([$targetGenLevel, $targetBio, $nodeId, $familyCode]);
+                }
+
+                // Insert the verified biological link
+                $insLink = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
+                $insLink->execute([$targetUnionId, $nodeId]);
+
+                $db->commit();
+
+                $fullName = trim((string)($targetNode['first_name'] ?? '') . ' ' . (string)($targetNode['last_name'] ?? ''));
+
+                msgSuccess(200, [
+                    'success' => true,
+                    'node_id' => $nodeId,
+                    'union_id' => $targetUnionId,
+                    'generation_level' => $targetGenLevel,
+                    'relationship' => $relationship,
+                    'message' => "{$fullName} has been accurately placed on your family tree.",
+                ]);
+            } catch (\Throwable $e) {
+                if ($db->inTransaction()) {
+                    $db->rollBack();
+                }
+                throw $e;
+            }
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
 }
 

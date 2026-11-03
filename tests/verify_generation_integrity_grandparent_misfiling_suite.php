@@ -211,6 +211,36 @@ try {
         expect($a[$oluyomi]['ego_relation'] === 'Paternal Grandfather', "Oluyomi expected Paternal Grandfather, got " . $a[$oluyomi]['ego_relation']);
     });
 
+    // TEST 10: CollateralKinshipService::buildCollateralGraph returns unplaced_members payload for Staging Dock
+    runStep("CollateralKinshipService::buildCollateralGraph returns Taiwo in unplaced_members payload", function () use ($fam, $uidWally, $taiwo) {
+        $subgraph = CollateralKinshipService::buildCollateralGraph($fam, $uidWally);
+        expect(isset($subgraph['unplaced_members']) && is_array($subgraph['unplaced_members']), 'Expected unplaced_members array in subgraph payload');
+        $unplacedIds = array_map(fn($m) => (int)$m['id'], $subgraph['unplaced_members']);
+        expect(in_array($taiwo, $unplacedIds, true), 'Expected Taiwo in subgraph unplaced_members array');
+    });
+
+    // TEST 11: Guided Relational Placement accurately links unplaced member when confirmed by user
+    runStep("Guided Relational Placement: linking Taiwo as Olusola's son transitions him from unplaced to Nephew", function () use ($db, $fam, $uidWally, $wally, $olusola, $taiwo, $graph) {
+        // Simulate Guided Relational Placement (nephew_niece anchored to Olusola)
+        $insU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'partner', 1)");
+        $insU->execute([$fam, $olusola, $olusola]);
+        $sholaUnion = (int)$db->lastInsertId();
+
+        $updN = $db->prepare("UPDATE family_nodes SET generation_level = 1, bio = 'Child' WHERE id = ? AND family_code = ?");
+        $updN->execute([$taiwo, $fam]);
+
+        $insL = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
+        $insL->execute([$sholaUnion, $taiwo]);
+
+        // Verify Taiwo is no longer in unplaced_members and now computes as Nephew
+        $subgraphAfter = CollateralKinshipService::buildCollateralGraph($fam, $uidWally);
+        $unplacedIdsAfter = array_map(fn($m) => (int)$m['id'], $subgraphAfter['unplaced_members']);
+        expect(!in_array($taiwo, $unplacedIdsAfter, true), 'Taiwo should no longer be in unplaced_members after guided placement');
+
+        $aAfter = KinshipCalculatorService::calculateEgoKinship($graph($fam), $wally);
+        expect($aAfter[$taiwo]['ego_relation'] === 'Nephew', "Taiwo expected Nephew after placement under Olusola, got " . $aAfter[$taiwo]['ego_relation']);
+    });
+
 } finally {
     $db->prepare('DELETE FROM family_node_children WHERE union_id IN (SELECT id FROM family_unions WHERE family_code = ?)')->execute([$fam]);
     $db->prepare('DELETE FROM family_unions WHERE family_code = ?')->execute([$fam]);

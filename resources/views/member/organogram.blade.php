@@ -268,6 +268,36 @@
                 </button>
             </div>
         </div>
+
+        <!-- Unplaced Kin Staging Dock (Zero Silent Auto-Grafting — Explicit User Confirmation) -->
+        <div id="unplacedMembersDock" class="alert shadow-lg border-0 rounded-4 mb-4 d-none flex-column mx-3 mt-3 p-3 gap-3" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 41, 59, 0.92) 100%); border: 1px solid rgba(56, 189, 248, 0.35); border-left: 5px solid #0284c7 !important; backdrop-filter: blur(16px); z-index: 100; position: relative; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3) !important;">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 w-100">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-circle p-2 flex-shrink-0" style="background: rgba(2, 132, 199, 0.18); min-width: 48px; min-height: 48px;">
+                        <i class="bi bi-person-plus-fill fs-3" style="color: #38bdf8;"></i>
+                    </div>
+                    <div>
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                            <span class="badge" style="background: #0284c7; color: #ffffff; font-size: 0.75rem; letter-spacing: 0.5px;">
+                                <i class="bi bi-shield-check me-1"></i> AWAITING YOUR CONFIRMATION
+                            </span>
+                            <span id="unplacedMembersCountBadge" class="badge bg-dark text-info border border-info" style="font-size: 0.75rem;">
+                                1 Unplaced Relative
+                            </span>
+                        </div>
+                        <h6 class="mb-1 fw-bold text-white fs-6">
+                            Unplaced Family Members in Your Circle
+                        </h6>
+                        <p class="mb-0 text-white-50" style="font-size: 0.88rem;">
+                            We never guess where relatives belong based on surname alone. Confirm how each relative fits into your family so we can place them accurately on your tree.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div id="unplacedMembersList" class="d-flex flex-wrap align-items-center gap-2 pt-2 border-top" style="border-color: rgba(148, 163, 184, 0.2) !important;">
+                <!-- Populated dynamically via checkUnplacedMembers() -->
+            </div>
+        </div>
         @endif
 
         <!-- Mode 1: Dynamic Canvas View -->
@@ -921,6 +951,87 @@
                             <i class="bi bi-check2-circle me-1"></i> Connect &amp; Inherit Branch
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guided Relational Placement Modal for Unplaced Family Members -->
+        <div class="modal fade" id="connectUnplacedModal" tabindex="-1" aria-hidden="true" style="z-index: 1065;">
+            <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff;">
+                    <form id="connectUnplacedForm" onsubmit="event.preventDefault(); executeConnectUnplacedMember();">
+                        @csrf
+                        <input type="hidden" id="connectUnplacedNodeId" name="node_id" value="">
+                        <div class="modal-header border-0 pb-0 pt-4 px-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: rgba(2, 132, 199, 0.12); width: 42px; height: 42px;">
+                                    <i class="bi bi-diagram-3-fill fs-5" style="color: #0284c7;"></i>
+                                </div>
+                                <div>
+                                    <h5 class="modal-title fw-bold text-dark mb-0 fs-6">Place Relative on Family Tree</h5>
+                                    <p class="text-muted small mb-0">Verified Kinship Qualification</p>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <!-- Target Member Summary Card -->
+                            <div class="d-flex align-items-center gap-3 p-3 rounded-4 mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                                <img id="connectUnplacedMemberAvatar" src="/resources/images/profile/avatarM.png" alt="Relative Avatar" class="rounded-circle object-fit-cover flex-shrink-0" style="width: 52px; height: 52px; border: 2px solid #0284c7;">
+                                <div class="flex-grow-1 min-w-0">
+                                    <span class="badge bg-info text-dark mb-1" style="font-size: 0.7rem; font-weight: 700;">UNPLACED RELATIVE</span>
+                                    <h6 class="fw-bold text-dark mb-0 text-truncate" id="connectUnplacedMemberName">Relative Name</h6>
+                                    <p class="text-muted small mb-0">How does this person fit into your family?</p>
+                                </div>
+                            </div>
+
+                            <!-- Step 1: Select Primary Relationship to Ego -->
+                            <div class="mb-3">
+                                <label for="connectRelationshipSelect" class="form-label fw-bold text-dark small mb-1">
+                                    1. Relationship to You <span class="text-danger">*</span>
+                                </label>
+                                <select id="connectRelationshipSelect" name="relationship" class="form-select" style="border-radius: 12px; min-height: 44px; font-size: 0.92rem;" onchange="onConnectRelationshipChange()" required>
+                                    <option value="" disabled selected>Select relationship...</option>
+                                    <option value="sibling">Full Brother / Sister (shares both parents)</option>
+                                    <option value="half_sibling">Half-Brother / Half-Sister (shares one parent)</option>
+                                    <option value="nephew_niece">Nephew / Niece (child of your brother or sister)</option>
+                                    <option value="child">Son / Daughter (your direct child)</option>
+                                    <option value="cousin">First Cousin (child of your uncle or aunt)</option>
+                                    <option value="uncle_aunt">Uncle / Aunt (sibling of your father or mother)</option>
+                                </select>
+                            </div>
+
+                            <!-- Step 2: Contextual Anchor Qualification (Parent / Sibling / Uncle / Aunt) -->
+                            <div id="connectAnchorContainer" class="mb-3 d-none">
+                                <label for="connectAnchorSelect" id="connectAnchorLabel" class="form-label fw-bold text-dark small mb-1">
+                                    2. Which Relative Connects Them? <span class="text-danger">*</span>
+                                </label>
+                                <select id="connectAnchorSelect" name="anchor_id" class="form-select" style="border-radius: 12px; min-height: 44px; font-size: 0.92rem;">
+                                    <option value="">Select connecting relative...</option>
+                                </select>
+                                <div id="connectAnchorHelp" class="form-text text-muted small mt-1">
+                                    For example, select which brother or sister is their parent.
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Gender Verification -->
+                            <div class="mb-2">
+                                <label for="connectGenderSelect" class="form-label fw-bold text-dark small mb-1">
+                                    Gender (for accurate kinship badge)
+                                </label>
+                                <select id="connectGenderSelect" name="gender" class="form-select" style="border-radius: 12px; min-height: 44px; font-size: 0.92rem;">
+                                    <option value="Male">Male (Brother / Nephew / Uncle / Son)</option>
+                                    <option value="Female">Female (Sister / Niece / Aunt / Daughter)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0 pb-4 px-4 d-flex gap-2">
+                            <button type="button" class="btn btn-light btn-sm fw-semibold px-3 py-2 flex-grow-1" data-bs-dismiss="modal" style="border-radius: 10px; min-height: 44px; white-space: nowrap;">Cancel</button>
+                            <button type="submit" id="btnExecuteConnectUnplaced" class="btn btn-primary btn-sm fw-bold px-4 py-2 flex-grow-1 text-white" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border: none; border-radius: 10px; min-height: 44px; white-space: nowrap;">
+                                <i class="bi bi-check2-circle me-1"></i> Confirm &amp; Place on Tree
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -4560,9 +4671,287 @@
         } catch (e) {}
     };
 
+    // =========================================================================
+    // UNPLACED KIN STAGING DOCK & GUIDED RELATIONAL PLACEMENT
+    // =========================================================================
+    let currentUnplacedMember = null;
+
+    function checkUnplacedMembers() {
+        if (window.__IS_READ_ONLY__) return;
+        const unplaced = (typeof graphData !== 'undefined' && Array.isArray(graphData.unplaced_members))
+            ? graphData.unplaced_members
+            : [];
+
+        const dock = document.getElementById('unplacedMembersDock');
+        const listEl = document.getElementById('unplacedMembersList');
+        const countBadge = document.getElementById('unplacedMembersCountBadge');
+
+        if (!dock || !listEl || unplaced.length === 0) {
+            if (dock) {
+                dock.classList.add('d-none');
+                dock.classList.remove('d-flex');
+            }
+            return;
+        }
+
+        if (countBadge) {
+            countBadge.textContent = unplaced.length === 1
+                ? '1 Unplaced Relative'
+                : `${unplaced.length} Unplaced Relatives`;
+        }
+
+        listEl.innerHTML = unplaced.map(member => {
+            const safeName = String(member.full_name || member.first_name || 'Relative')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+            const safeAvatar = String(member.avatar_url || '/resources/images/profile/avatarM.png')
+                .replace(/"/g, '&quot;');
+            const memberId = parseInt(member.id, 10) || 0;
+
+            return `
+                <div class="d-inline-flex align-items-center gap-2 p-2 rounded-3" style="background: rgba(30, 41, 59, 0.85); border: 1px solid rgba(56, 189, 248, 0.3);">
+                    <img src="${safeAvatar}" alt="${safeName}" class="rounded-circle object-fit-cover flex-shrink-0" style="width: 36px; height: 36px; border: 1.5px solid #38bdf8;">
+                    <div class="me-1">
+                        <div class="fw-bold text-white" style="font-size: 0.85rem; line-height: 1.2;">${safeName}</div>
+                        <div class="text-info" style="font-size: 0.72rem;">Needs branch placement</div>
+                    </div>
+                    <button type="button" onclick="openConnectUnplacedModal(${memberId})" class="btn btn-sm fw-bold text-white px-3 py-1 text-nowrap" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border: none; border-radius: 8px; min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-diagram-3 me-1"></i> Place on Tree
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+        dock.classList.remove('d-none');
+        dock.classList.add('d-flex');
+    }
+
+    window.openConnectUnplacedModal = function(memberId) {
+        const unplaced = (typeof graphData !== 'undefined' && Array.isArray(graphData.unplaced_members))
+            ? graphData.unplaced_members
+            : [];
+        const member = unplaced.find(m => parseInt(m.id, 10) === parseInt(memberId, 10));
+        if (!member) return;
+
+        currentUnplacedMember = member;
+
+        const nodeIdInput = document.getElementById('connectUnplacedNodeId');
+        const nameEl = document.getElementById('connectUnplacedMemberName');
+        const avatarEl = document.getElementById('connectUnplacedMemberAvatar');
+        const relSelect = document.getElementById('connectRelationshipSelect');
+        const genderSelect = document.getElementById('connectGenderSelect');
+        const anchorContainer = document.getElementById('connectAnchorContainer');
+
+        if (nodeIdInput) nodeIdInput.value = member.id;
+        if (nameEl) nameEl.textContent = member.full_name || member.first_name || 'Relative';
+        if (avatarEl) avatarEl.src = member.avatar_url || '/resources/images/profile/avatarM.png';
+        if (relSelect) relSelect.value = '';
+        if (genderSelect) genderSelect.value = (member.gender === 'Female') ? 'Female' : 'Male';
+        if (anchorContainer) anchorContainer.classList.add('d-none');
+
+        const modalEl = document.getElementById('connectUnplacedModal');
+        if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        }
+    };
+
+    window.onConnectRelationshipChange = function() {
+        const relSelect = document.getElementById('connectRelationshipSelect');
+        const anchorContainer = document.getElementById('connectAnchorContainer');
+        const anchorLabel = document.getElementById('connectAnchorLabel');
+        const anchorSelect = document.getElementById('connectAnchorSelect');
+        const anchorHelp = document.getElementById('connectAnchorHelp');
+
+        if (!relSelect || !anchorContainer || !anchorSelect) return;
+
+        const rel = relSelect.value;
+        const allNodes = (typeof graphData !== 'undefined' && Array.isArray(graphData.nodes))
+            ? graphData.nodes.filter(n => !n.is_placeholder && parseInt(n.id, 10) !== parseInt(currentUnplacedMember?.id || 0, 10))
+            : [];
+
+        if (rel === 'sibling' || rel === 'child' || !rel) {
+            anchorContainer.classList.add('d-none');
+            anchorSelect.removeAttribute('required');
+            anchorSelect.innerHTML = '<option value="">Not required</option>';
+            return;
+        }
+
+        let candidates = [];
+        if (rel === 'nephew_niece') {
+            if (anchorLabel) anchorLabel.innerHTML = '2. Which Brother or Sister is Their Parent? <span class="text-danger">*</span>';
+            if (anchorHelp) anchorHelp.textContent = 'Select the sibling who is the father or mother of this nephew or niece.';
+            candidates = allNodes.filter(n => {
+                const badge = String(n.relationship_badge || '').toLowerCase();
+                return (parseInt(n.generation_level, 10) === 0 && !n.is_root && !badge.includes('wife') && !badge.includes('husband') && !badge.includes('spouse'))
+                    || badge.includes('brother')
+                    || badge.includes('sister')
+                    || badge.includes('sibling');
+            });
+            if (candidates.length === 0) {
+                candidates = allNodes.filter(n => parseInt(n.generation_level, 10) === 0 && !n.is_root);
+            }
+        } else if (rel === 'half_sibling') {
+            if (anchorLabel) anchorLabel.innerHTML = '2. Which Parent Do You Share? <span class="text-danger">*</span>';
+            if (anchorHelp) anchorHelp.textContent = 'Select whether you share the same father or the same mother with this half-sibling.';
+            candidates = allNodes.filter(n => {
+                const badge = String(n.relationship_badge || '').toLowerCase();
+                return badge === 'father' || badge === 'mother' || badge === 'parent';
+            });
+            if (candidates.length === 0) {
+                candidates = allNodes.filter(n => parseInt(n.generation_level, 10) === -1);
+            }
+        } else if (rel === 'cousin') {
+            if (anchorLabel) anchorLabel.innerHTML = '2. Which Uncle or Aunt is Their Parent? <span class="text-danger">*</span>';
+            if (anchorHelp) anchorHelp.textContent = 'Select the uncle or aunt who is the parent of this cousin.';
+            candidates = allNodes.filter(n => {
+                const badge = String(n.relationship_badge || '').toLowerCase();
+                return badge.includes('uncle') || badge.includes('aunt') || badge.includes('sibling');
+            });
+            if (candidates.length === 0) {
+                candidates = allNodes.filter(n => parseInt(n.generation_level, 10) === -1);
+            }
+        } else if (rel === 'uncle_aunt') {
+            if (anchorLabel) anchorLabel.innerHTML = '2. Which Parent is Their Sibling? <span class="text-danger">*</span>';
+            if (anchorHelp) anchorHelp.textContent = 'Select whether they are your father\'s sibling (paternal) or mother\'s sibling (maternal).';
+            candidates = allNodes.filter(n => {
+                const badge = String(n.relationship_badge || '').toLowerCase();
+                return badge === 'father' || badge === 'mother' || badge === 'parent';
+            });
+            if (candidates.length === 0) {
+                candidates = allNodes.filter(n => parseInt(n.generation_level, 10) === -1);
+            }
+        }
+
+        if (candidates.length === 0) {
+            candidates = allNodes;
+        }
+
+        anchorSelect.innerHTML = '<option value="" disabled selected>Select relative...</option>' + candidates.map(c => {
+            const fullName = `${c.first_name || ''} ${c.last_name || ''}`.trim() || 'Relative';
+            const badge = c.relationship_badge ? ` (${c.relationship_badge})` : '';
+            const safeLabel = (fullName + badge)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+            return `<option value="${parseInt(c.id, 10)}">${safeLabel}</option>`;
+        }).join('');
+
+        anchorSelect.setAttribute('required', 'required');
+        anchorContainer.classList.remove('d-none');
+    };
+
+    window.executeConnectUnplacedMember = async function() {
+        const nodeId = document.getElementById('connectUnplacedNodeId')?.value;
+        const relationship = document.getElementById('connectRelationshipSelect')?.value;
+        const anchorSelect = document.getElementById('connectAnchorSelect');
+        const anchorContainer = document.getElementById('connectAnchorContainer');
+        const gender = document.getElementById('connectGenderSelect')?.value || 'Male';
+        const btn = document.getElementById('btnExecuteConnectUnplaced');
+
+        if (!nodeId || !relationship) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'warning', title: 'Selection Required', text: 'Please select how this relative fits into your family.' });
+            }
+            return;
+        }
+
+        const needsAnchor = anchorContainer && !anchorContainer.classList.contains('d-none');
+        const anchorId = needsAnchor ? (anchorSelect?.value || '') : '';
+        if (needsAnchor && !anchorId) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'warning', title: 'Connecting Relative Required', text: 'Please select which relative connects them to your branch.' });
+            }
+            return;
+        }
+
+        const originalBtnHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            if (window.ScoreTenantSpinner && typeof window.ScoreTenantSpinner.start === 'function') {
+                window.ScoreTenantSpinner.start(btn);
+            } else {
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Placing on Tree...';
+                btn.disabled = true;
+            }
+        }
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ $_SESSION['token'] ?? '' }}';
+
+        try {
+            const formData = new FormData();
+            formData.append('node_id', nodeId);
+            formData.append('relationship', relationship);
+            if (anchorId) formData.append('anchor_id', anchorId);
+            formData.append('gender', gender);
+            formData.append('family_code', window.__FAMILY_CODE__ || '');
+            formData.append('token', csrfToken);
+
+            const resp = await fetch('/member/organogram/editor/connect-unplaced-member', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: formData
+            });
+
+            const res = await resp.json();
+            if (resp.ok && (res.status === 'success' || res.data?.success)) {
+                const modalEl = document.getElementById('connectUnplacedModal');
+                if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+                    bootstrap.Modal.getInstance(modalEl)?.hide();
+                }
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Relative Placed!',
+                        text: res.data?.message || 'Your family tree has been updated.',
+                        confirmButtonColor: '#0284c7'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    window.location.reload();
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Unable to Place Relative',
+                        text: res.message || res.data?.message || 'Please check your selection and try again.'
+                    });
+                }
+                if (btn) {
+                    if (window.ScoreTenantSpinner && typeof window.ScoreTenantSpinner.stop === 'function') {
+                        window.ScoreTenantSpinner.stop(btn);
+                    }
+                    btn.innerHTML = originalBtnHtml;
+                    btn.disabled = false;
+                }
+            }
+        } catch (e) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Network Error',
+                    text: 'A network error occurred while saving. Please try again.'
+                });
+            }
+            if (btn) {
+                if (window.ScoreTenantSpinner && typeof window.ScoreTenantSpinner.stop === 'function') {
+                    window.ScoreTenantSpinner.stop(btn);
+                }
+                btn.innerHTML = originalBtnHtml;
+                btn.disabled = false;
+            }
+        }
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
         checkPendingKinshipMatches();
         checkConstellationMatches();
+        checkUnplacedMembers();
     });
 </script>
 
