@@ -92,7 +92,10 @@ final class RouteDispatch
             $_SESSION['famCode'] = (string) $stmt->fetchColumn();
         }
 
-        if (!in_array($controller, $publicControllers, true)) {
+        $isVapidKeyRoute = ($controller === 'App\controller\NotificationController' && $method === 'vapidPublicKey')
+            || (isset($_SERVER['REQUEST_URI']) && str_contains($_SERVER['REQUEST_URI'], 'vapid-public-key'));
+
+        if (!in_array($controller, $publicControllers, true) && !$isVapidKeyRoute) {
             if (empty($_SESSION['id'])) {
                 $tokenName = $_ENV['COOKIE_TOKEN_LOGIN'] ?? 'familyCookie';
                 $isJsonRequest = (isset($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'))
