@@ -891,18 +891,33 @@ final class NotificationController extends Select
             $testBody = "Test notification received successfully at {$timestamp}! Push notifications are operating normally.";
             $actionUrl = '/profilePage';
 
-            // Insert durable in-app notification row
-            $insertStmt = $db->prepare("
-                INSERT INTO notification 
-                (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
-                VALUES ('system', ?, 'Family Platform', ?, 'Test', ?, ?, 'new', NOW())
-            ");
-            $insertStmt->execute([
-                $userId,
-                $testTitle,
-                $testBody,
-                $actionUrl
-            ]);
+            // Insert durable in-app notification row (defensive schema fallback)
+            try {
+                $insertStmt = $db->prepare("
+                    INSERT INTO notification 
+                    (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                    VALUES ('system', ?, 'Family Platform', ?, 'Test', ?, ?, 'new', NOW())
+                ");
+                $insertStmt->execute([
+                    $userId,
+                    $testTitle,
+                    $testBody,
+                    $actionUrl
+                ]);
+            } catch (\Throwable $dbErr) {
+                try {
+                    $fallbackInsert = $db->prepare("
+                        INSERT INTO notification 
+                        (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, notification_status, notification_date)
+                        VALUES ('system', ?, 'Family Platform', ?, 'Test', ?, 'new', NOW())
+                    ");
+                    $fallbackInsert->execute([
+                        $userId,
+                        $testTitle,
+                        $testBody
+                    ]);
+                } catch (\Throwable) {}
+            }
 
             // Dispatch PWA Web Push if endpoints exist
             $pushSent = false;
