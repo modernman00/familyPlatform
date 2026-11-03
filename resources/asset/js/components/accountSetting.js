@@ -441,7 +441,13 @@ processKidsSiblings(fName, famCode);
   const paint = (on, note) => {
     toggle.checked = on;
     if (label) label.textContent = on ? 'ON' : 'OFF';
-    if (hint) hint.textContent = note || DEFAULT_HINT;
+    if (hint) {
+      if (typeof note === 'string' && note.includes('<')) {
+        hint.innerHTML = note;
+      } else {
+        hint.textContent = note || DEFAULT_HINT;
+      }
+    }
   };
 
   const state = getPushState();
@@ -557,10 +563,14 @@ processKidsSiblings(fName, famCode);
             testFeedback.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> ' + msg;
           }
           if (window.Swal) {
+            const hasBrowserBlock = (typeof Notification !== 'undefined' && Notification.permission === 'denied');
+            const alertText = hasBrowserBlock
+              ? msg + '\n\n(Note: Notifications are currently blocked in this browser. To see OS banners on this device, allow notifications in your browser address bar).'
+              : msg;
             window.Swal.fire({
               icon: 'success',
               title: 'Test Alert Sent! 🎉',
-              text: msg,
+              text: alertText,
               confirmButtonColor: '#a31621'
             });
           }
@@ -599,7 +609,19 @@ processKidsSiblings(fName, famCode);
             testFeedback.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Device endpoint successfully registered with server.';
           }
         } else {
-          updateBadge('warning', 'Re-sync Skipped');
+          if (res.reason === 'denied' || (typeof Notification !== 'undefined' && Notification.permission === 'denied')) {
+            updateBadge('error', 'Blocked by Browser');
+            if (testFeedback) {
+              testFeedback.style.display = 'block';
+              testFeedback.className = 'small mt-2 text-danger';
+              testFeedback.innerHTML = '<i class="bi bi-exclamation-octagon-fill me-1"></i> Notifications are blocked in your browser settings. Tap the tune/lock icon in your address bar to allow notifications, then reload.';
+            }
+            if (typeof window.showPushPermissionRecovery === 'function') {
+              window.showPushPermissionRecovery();
+            }
+          } else {
+            updateBadge('warning', 'Re-sync Skipped');
+          }
         }
       } catch (err) {
         showError(err);
