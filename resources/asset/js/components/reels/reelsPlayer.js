@@ -2093,11 +2093,11 @@ class FamilyReelsPlayer {
         const handleFileSelected = (file) => {
             if (!file) return;
 
-            if (file.size > 100 * 1024 * 1024) {
+            if (file.size > 1024 * 1024 * 1024) {
                 if (typeof Swal !== 'undefined') {
-                    Swal.fire({ icon: 'warning', title: 'File Too Large', text: 'Video file size exceeds the 100MB limit.' });
+                    Swal.fire({ icon: 'warning', title: 'File Too Large', text: 'Video file size exceeds the 1GB limit.' });
                 } else {
-                    alert('Video file size exceeds 100MB limit.');
+                    alert('Video file size exceeds 1GB limit.');
                 }
                 if (fileInput) fileInput.value = '';
                 return;

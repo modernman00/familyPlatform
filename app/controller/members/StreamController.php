@@ -141,14 +141,30 @@ class StreamController
             $trimStart = $_POST['trim_start'] ?? 0.0;
             $trimEnd = $_POST['trim_end'] ?? 30.0;
             $clientDuration = $_POST['client_duration'] ?? null;
+            $uploadId = isset($_POST['upload_id']) && is_scalar($_POST['upload_id']) ? trim((string)$_POST['upload_id']) : '';
+            $totalChunks = isset($_POST['total_chunks']) && is_numeric($_POST['total_chunks']) ? (int)$_POST['total_chunks'] : 1;
+            $chunkIndex = isset($_POST['chunk_index']) && is_numeric($_POST['chunk_index']) ? (int)$_POST['chunk_index'] : 0;
 
-            $result = \App\services\VideoAutoTrimService::processUploadAndTrim(
-                file: $file,
-                userId: $userId,
-                trimStart: is_scalar($trimStart) ? (float)$trimStart : 0.0,
-                trimEnd: is_scalar($trimEnd) ? (float)$trimEnd : 30.0,
-                clientDuration: is_scalar($clientDuration) ? (float)$clientDuration : null
-            );
+            if ($uploadId !== '' && $totalChunks > 1) {
+                $result = \App\services\VideoAutoTrimService::processChunkedUpload(
+                    file: $file,
+                    userId: $userId,
+                    uploadId: $uploadId,
+                    chunkIndex: $chunkIndex,
+                    totalChunks: $totalChunks,
+                    trimStart: is_scalar($trimStart) ? (float)$trimStart : 0.0,
+                    trimEnd: is_scalar($trimEnd) ? (float)$trimEnd : 30.0,
+                    clientDuration: is_scalar($clientDuration) ? (float)$clientDuration : null
+                );
+            } else {
+                $result = \App\services\VideoAutoTrimService::processUploadAndTrim(
+                    file: $file,
+                    userId: $userId,
+                    trimStart: is_scalar($trimStart) ? (float)$trimStart : 0.0,
+                    trimEnd: is_scalar($trimEnd) ? (float)$trimEnd : 30.0,
+                    clientDuration: is_scalar($clientDuration) ? (float)$clientDuration : null
+                );
+            }
 
             http_response_code(200);
             // nosemgrep: php.lang.security.injection.echoed-request.echoed-request

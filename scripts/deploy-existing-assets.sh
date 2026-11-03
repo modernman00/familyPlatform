@@ -69,11 +69,13 @@ echo "✅ Deploy lock acquired."
 SANDBOX=$(mktemp -d "/tmp/${APP_NAME}_deploy_XXXXXX")
 
 echo -e "\n📦 [2/5] Preparing existing assets for deployment..."
-for item in app bootstrap cron migrations public resources vendor composer.json composer.lock index.php offline.html .htaccess; do
+for item in app bootstrap cron migrations public resources vendor composer.json composer.lock index.php offline.html sw.js .htaccess; do
     if [ -e "$item" ]; then
         cp -R "$item" "$SANDBOX/" 2>/dev/null || true
     fi
 done
+mkdir -p "$SANDBOX/scripts"
+cp scripts/run_migrations.php "$SANDBOX/scripts/" 2>/dev/null || true
 if [ -f "manifest.json" ]; then
     cp manifest.json "$SANDBOX/" 2>/dev/null || true
 fi
@@ -129,7 +131,7 @@ rsync -azL \
     --exclude='bootstrap/cache/*' \
     --exclude='bootstrap/log/*.log' \
     --exclude='bootstrap/log/*' \
-    --exclude='scripts' \
+    --exclude='scripts/*.sh' \
     --exclude='releases' \
     --exclude='backups' \
     --exclude='shared' \
@@ -166,6 +168,12 @@ find "${REMOTE_ROOT}" -maxdepth 2 -not -path "*/storage/*" -type f | xargs chmod
 chmod -R 775 "${REMOTE_ROOT}/storage" 2>/dev/null || true
 chmod -R 775 "${REMOTE_ROOT}/bootstrap/log" 2>/dev/null || true
 chmod 775 "${REMOTE_ROOT}/bootstrap/cache" 2>/dev/null || true
+chmod 755 "${REMOTE_ROOT}/scripts" 2>/dev/null || true
+
+if [ -f "${REMOTE_ROOT}/scripts/run_migrations.php" ]; then
+    echo "🗄️  Executing automated database migrations..."
+    /usr/local/bin/php "${REMOTE_ROOT}/scripts/run_migrations.php" || true
+fi
 
 rm -rf "${REMOTE_ROOT}/storage/framework/views/"* 2>/dev/null || true
 rm -f "${REMOTE_ROOT}/bootstrap/cache/"*.bladec 2>/dev/null || true

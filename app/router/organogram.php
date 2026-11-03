@@ -51,6 +51,12 @@ $router->map('POST', '/member/organogram/editor/constellation-dismiss', 'App\con
 // Unplaced Kin Staging & Guided Relational Placement
 $router->map('POST', '/member/organogram/editor/connect-unplaced-member', 'App\controller\members\OrganogramEditorController@connectUnplacedMember', 'MEMBER_ORGANOGRAM_CONNECT_UNPLACED_MEMBER');
 
+// Family Tree Viewers Tracking & Granular Per-Person Access Control
+$router->map('GET', '/member/organogram/tree-viewers', 'App\controller\members\Organogram@getTreeViewers', 'MEMBER_ORGANOGRAM_TREE_VIEWERS');
+$router->map('GET', '/member/organogram/access-settings', 'App\controller\members\Organogram@getAccessSettings', 'MEMBER_ORGANOGRAM_ACCESS_SETTINGS');
+$router->map('POST', '/member/organogram/access-settings', 'App\controller\members\Organogram@saveAccessPolicy', 'MEMBER_ORGANOGRAM_SAVE_ACCESS_POLICY');
+$router->map('POST', '/member/organogram/access-rule', 'App\controller\members\Organogram@setPersonAccessRule', 'MEMBER_ORGANOGRAM_SET_PERSON_ACCESS_RULE');
+
 
 
 

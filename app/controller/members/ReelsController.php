@@ -275,8 +275,8 @@ final class ReelsController extends BaseController
                     throw new Exception('Invalid video format. Supported formats: MP4, WebM, QuickTime (MOV).', 400);
                 }
 
-                if ($file['size'] > 100 * 1024 * 1024) { // 100MB limit
-                    throw new Exception('Video file exceeds maximum allowed size (100MB).', 400);
+                if ($file['size'] > 1024 * 1024 * 1024) { // 1GB limit
+                    throw new Exception('Video file exceeds maximum allowed size (1GB).', 400);
                 }
 
                 $ext = $allowedMimes[$mimeType];

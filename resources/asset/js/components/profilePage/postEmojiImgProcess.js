@@ -599,6 +599,13 @@ const removeComposerVideo = (targetId) => {
         return;
     }
 
+    if (stagedTrimFile && (stagedTrimFile._stagedVidId === targetId || targetId === 'staged')) {
+        cleanupTrimStudio();
+        if (activeVideoUploadPromises.has(targetId)) {
+            activeVideoUploadPromises.delete(targetId);
+        }
+    }
+
     const targetIdx = typeof targetId === 'number'
         ? targetId
         : attachedVideoList.findIndex(v => v.id === targetId || v.streamUrl === targetId);
@@ -623,6 +630,8 @@ const removeComposerVideo = (targetId) => {
             if (nextVid && videoInput) videoInput.value = nextVid.streamUrl;
             renderAllAttachedVideoPreviews();
         }
+    } else if (attachedVideoList.length === 0 && !stagedTrimFile) {
+        closeVideoBuilder();
     }
 };
 window.__removeComposerVideo = removeComposerVideo;
@@ -874,7 +883,8 @@ const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 30, originalDura
         const rawEnd = parseFloat(trimEnd) || (safeStart + 30);
         const safeEnd = Math.min(safeStart + 30, rawEnd > safeStart ? rawEnd : safeStart + 30);
         const clipLen = Math.round((safeEnd - safeStart) * 10) / 10;
-        const needsTrim = safeStart > 0 || (originalDuration && originalDuration > 30.5) || (originalDuration && safeEnd < originalDuration - 0.2);
+        const isLargeFile = file.size > 50 * 1024 * 1024;
+        const needsTrim = safeStart > 0 || (originalDuration && originalDuration > 30.5) || (originalDuration && safeEnd < originalDuration - 0.2) || isLargeFile;
 
         if (videoUploadProgressWrapper) {
             videoUploadProgressWrapper.classList.remove('d-none');
@@ -944,23 +954,8 @@ const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 30, originalDura
                 }
             }
 
-            const uploadResult = await new Promise((resolve, reject) => {
-                const formData = new FormData();
-                if (useSovereignLocal) {
-                    formData.append('video_file', file);
-                    formData.append('trim_start', String(safeStart));
-                    formData.append('trim_end', String(safeEnd));
-                    if (originalDuration) {
-                        formData.append('client_duration', String(originalDuration));
-                    }
-                    formData.append('expiry_seconds', String(expirySeconds));
-                    if (csrfToken) {
-                        formData.append('token', csrfToken);
-                    }
-                } else {
-                    formData.append('file', file);
-                }
-
+            const CHUNK_SIZE = 15 * 1024 * 1024; // 15MB chunks bypass proxy/Cloudflare 100MB single-request limits
+            const sendSingleOrChunkRequest = (formData, onChunkProgress) => new Promise((resolve, reject) => {
                 const xhr = new XMLHttpRequest();
                 xhr.open('POST', targetUploadUrl, true);
                 if (useSovereignLocal && csrfToken) {
@@ -968,10 +963,8 @@ const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 30, originalDura
                 }
 
                 xhr.upload.onprogress = (evt) => {
-                    if (evt.lengthComputable && videoProgressBar && videoUploadPercent) {
-                        const percent = Math.max(12, Math.round((evt.loaded / evt.total) * 100));
-                        videoProgressBar.style.width = `${percent}%`;
-                        videoUploadPercent.textContent = `${percent}%`;
+                    if (evt.lengthComputable && typeof onChunkProgress === 'function') {
+                        onChunkProgress(evt.loaded, evt.total);
                     }
                 };
 
@@ -996,6 +989,66 @@ const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 30, originalDura
                 xhr.send(formData);
             });
 
+            let uploadResult;
+            if (useSovereignLocal && file.size > 20 * 1024 * 1024) {
+                const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+                const uploadId = `vidchunk_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+
+                for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+                    const startByte = chunkIndex * CHUNK_SIZE;
+                    const endByte = Math.min(file.size, startByte + CHUNK_SIZE);
+                    const chunkBlob = file.slice(startByte, endByte, file.type || 'video/mp4');
+
+                    const formData = new FormData();
+                    formData.append('video_file', chunkBlob, file.name || 'video.mp4');
+                    formData.append('upload_id', uploadId);
+                    formData.append('chunk_index', String(chunkIndex));
+                    formData.append('total_chunks', String(totalChunks));
+                    formData.append('trim_start', String(safeStart));
+                    formData.append('trim_end', String(safeEnd));
+                    if (originalDuration) {
+                        formData.append('client_duration', String(originalDuration));
+                    }
+                    formData.append('expiry_seconds', String(expirySeconds));
+                    if (csrfToken) {
+                        formData.append('token', csrfToken);
+                    }
+
+                    uploadResult = await sendSingleOrChunkRequest(formData, (loadedInChunk) => {
+                        if (videoProgressBar && videoUploadPercent) {
+                            const overallLoaded = startByte + loadedInChunk;
+                            const percent = Math.min(99, Math.max(12, Math.round((overallLoaded / file.size) * 100)));
+                            videoProgressBar.style.width = `${percent}%`;
+                            videoUploadPercent.textContent = `${percent}%`;
+                        }
+                    });
+                }
+            } else {
+                const formData = new FormData();
+                if (useSovereignLocal) {
+                    formData.append('video_file', file);
+                    formData.append('trim_start', String(safeStart));
+                    formData.append('trim_end', String(safeEnd));
+                    if (originalDuration) {
+                        formData.append('client_duration', String(originalDuration));
+                    }
+                    formData.append('expiry_seconds', String(expirySeconds));
+                    if (csrfToken) {
+                        formData.append('token', csrfToken);
+                    }
+                } else {
+                    formData.append('file', file);
+                }
+
+                uploadResult = await sendSingleOrChunkRequest(formData, (loaded, total) => {
+                    if (videoProgressBar && videoUploadPercent) {
+                        const percent = Math.max(12, Math.round((loaded / total) * 100));
+                        videoProgressBar.style.width = `${percent}%`;
+                        videoUploadPercent.textContent = `${percent}%`;
+                    }
+                });
+            }
+
             const finalStreamUrl = uploadResult.useSovereignLocal
                 ? (uploadResult.parsedRes?.streamUrl || uploadResult.parsedRes?.rawUrl)
                 : (uploadResult.cfTokenData?.streamUrl || `https://iframe.videodelivery.net/${uploadResult.cfTokenData?.videoId}`);
@@ -1019,6 +1072,7 @@ const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 30, originalDura
             return finalStreamUrl;
         } catch (err) {
             console.warn('[VideoUpload] Upload/Auto-Trim error:', err);
+            cleanupTrimStudio();
             if (videoUploadProgressWrapper) videoUploadProgressWrapper.classList.add('d-none');
             if (typeof window.__onComposerVideoRemoved === 'function') {
                 window.__onComposerVideoRemoved(vidId);
@@ -1081,9 +1135,9 @@ const handleSelectedVideoFile = async (file) => {
         scrollDrawerIntoView(videoContainer);
     }
 
-    // Cap at 100MB
-    if (file.size > 100 * 1024 * 1024) {
-        (window.swalError || alert)('Video size exceeds 100MB. Please select a video under 100MB.');
+    // Allow large source videos up to 1GB (1024MB) since Smart Auto-Trim slices them to a 30-second highlight clip
+    if (file.size > 1024 * 1024 * 1024) {
+        (window.swalError || alert)('Video size exceeds 1GB. Please select a video under 1GB.');
         if (videoDirectFileInput) videoDirectFileInput.value = '';
         return;
     }
@@ -1112,7 +1166,7 @@ const handleSelectedVideoFile = async (file) => {
             const timer = setTimeout(() => {
                 URL.revokeObjectURL(blobUrl);
                 resolve(null);
-            }, 1500);
+            }, 4000);
 
             tempVideo.onloadedmetadata = () => {
                 clearTimeout(timer);
@@ -1136,17 +1190,21 @@ const handleSelectedVideoFile = async (file) => {
 
     stagedTrimDuration = clipDuration;
 
-    // If video exceeds 30 seconds, open the Auto-Trim Studio and offer 1-click Auto-Trim or Customise Window
-    if (clipDuration && clipDuration > 30.5) {
-        openAutoTrimStudioForFile(file, clipDuration);
+    // If video exceeds 30 seconds (or is a large >80MB file whose duration metadata deferred), open the Auto-Trim Studio
+    if ((clipDuration && clipDuration > 30.5) || (!clipDuration && file.size > 80 * 1024 * 1024)) {
+        const effectiveDuration = clipDuration && clipDuration > 30.5 ? clipDuration : 60;
+        openAutoTrimStudioForFile(file, effectiveDuration);
 
         if (window.Swal) {
+            const durationSummary = clipDuration
+                ? `Your selected video is <strong>${Math.round(clipDuration)} seconds</strong> long (${(file.size / (1024 * 1024)).toFixed(1)} MB).`
+                : `Your selected video is <strong>${(file.size / (1024 * 1024)).toFixed(1)} MB</strong>.`;
             const modalResult = await window.Swal.fire({
                 icon: 'info',
                 title: '✂️ Auto-Trim Video to 30 Seconds?',
                 html: `
                     <div style="text-align: left; font-size: 0.94rem;">
-                        <p class="mb-2">Your selected video is <strong>${Math.round(clipDuration)} seconds</strong> long (maximum post clip length is <strong>30 seconds</strong>).</p>
+                        <p class="mb-2">${durationSummary} Maximum post clip length is <strong>30 seconds</strong>.</p>
                         <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 14px; border-radius: 8px; margin: 12px 0;">
                             <span style="color: #166534; font-weight: 700;">✨ Smart Auto-Trim Ready:</span>
                             <span style="color: #15803d;">We can automatically trim this video to 30 seconds for you right now, or let you slide to pick your favourite 30-second moment.</span>
@@ -1163,9 +1221,11 @@ const handleSelectedVideoFile = async (file) => {
             });
 
             if (modalResult.isConfirmed) {
-                await uploadVideoWithAutoTrim(file, 0, 30, clipDuration, vidId);
+                await uploadVideoWithAutoTrim(file, 0, 30, effectiveDuration, vidId);
             } else if (modalResult.isDismissed) {
                 removeComposerVideo(vidId);
+                cleanupTrimStudio();
+                if (videoDirectFileInput) videoDirectFileInput.value = '';
             }
             // If isDenied ("Customise 30s Window"), the #videoAutoTrimStudio remains open for the user to adjust sliders!
         }
@@ -1181,14 +1241,28 @@ window.__handleComposerVideoFile = handleSelectedVideoFile;
 // Ensure that if the user clicks "Post" while a video is still in the Auto-Trim Studio or uploading,
 // it finishes auto-trimming and attaching before the post form submits!
 window.__ensurePendingVideoUploaded = async () => {
-    if (activeVideoUploadPromises.size > 0) {
-        await Promise.all(Array.from(activeVideoUploadPromises.values()));
-    } else if (activeVideoUploadPromise) {
-        await activeVideoUploadPromise;
-    } else if (stagedTrimFile) {
-        const start = parseFloat(videoTrimStartRange?.value || '0') || 0;
-        const end = parseFloat(videoTrimEndRange?.value || '30') || 30;
-        await uploadVideoWithAutoTrim(stagedTrimFile, start, end, stagedTrimDuration, stagedTrimFile._stagedVidId);
+    try {
+        if (activeVideoUploadPromises.size > 0) {
+            await Promise.race([
+                Promise.all(Array.from(activeVideoUploadPromises.values())),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Video upload timed out. Please check your connection and try again.')), 120000))
+            ]);
+        } else if (activeVideoUploadPromise) {
+            await Promise.race([
+                activeVideoUploadPromise,
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Video upload timed out. Please check your connection and try again.')), 120000))
+            ]);
+        } else if (stagedTrimFile) {
+            const start = parseFloat(videoTrimStartRange?.value || '0') || 0;
+            const end = parseFloat(videoTrimEndRange?.value || '30') || 30;
+            const res = await uploadVideoWithAutoTrim(stagedTrimFile, start, end, stagedTrimDuration, stagedTrimFile._stagedVidId);
+            if (!res) {
+                throw new Error('Video auto-trim upload could not be completed.');
+            }
+        }
+    } catch (e) {
+        cleanupTrimStudio();
+        throw e;
     }
 };
 

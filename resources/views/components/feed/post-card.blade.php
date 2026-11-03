@@ -1610,10 +1610,10 @@
   </template>
 
   <!-- Comments Section -->
-  <div class="comments-section pt-2">
+  <div class="comments-section pt-2" style="overflow: visible;">
     <!-- Dynamic Comment Form with emoji picker -->
-    <div x-show="activeCommentForms[post.post_no]" x-collapse class="mb-3">
-      <div class="position-relative">
+    <div x-show="activeCommentForms[post.post_no]" x-transition class="mb-3" style="overflow: visible;">
+      <div class="position-relative" style="overflow: visible;">
         <!-- Emoji picker popup for comment input -->
         <div x-show="commentEmojiOpen[post.post_no]" x-cloak
              x-transition.opacity.duration.120ms
@@ -1726,13 +1726,13 @@
                      @paste="handleCommentPaste(post.post_no, $event)"
                      @keydown="handleCommentKeydown(post.post_no, $event)">
               <button type="button" class="comment-composer__tool"
-                      @click="toggleCommentEmoji(post.post_no)"
+                      @click.stop="toggleCommentEmoji(post.post_no)"
                       :aria-expanded="commentEmojiOpen[post.post_no] ? 'true' : 'false'"
                       title="Add Emoji - Express with emoji reactions in this comment" aria-label="Add emoji">
                 <i class="bi bi-emoji-smile"></i>
               </button>
               <button type="button" class="comment-composer__tool"
-                      @click="toggleCommentGif(post.post_no)"
+                      @click.stop="toggleCommentGif(post.post_no)"
                       :aria-expanded="commentGifOpen[post.post_no] ? 'true' : 'false'"
                       data-testid="comment-gif-btn"
                       title="Add GIF - Search and attach an animated GIF to your comment" aria-label="Add GIF">

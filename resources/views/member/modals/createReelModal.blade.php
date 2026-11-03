@@ -31,7 +31,7 @@
                             <div id="dropzonePrompt">
                                 <i class="bi bi-cloud-arrow-up-fill fs-2 text-primary"></i>
                                 <div class="fw-bold text-dark small mt-1">Click or drag video file here</div>
-                                <div class="text-muted" style="font-size: 0.75rem;">MP4, WebM, MOV up to 100MB (Portrait or Landscape)</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">MP4, WebM, MOV (Auto-Trim Ready · Portrait or Landscape)</div>
                             </div>
                             <div id="dropzoneSelected" class="d-none">
                                 <i class="bi bi-file-earmark-play-fill fs-2 text-success"></i>

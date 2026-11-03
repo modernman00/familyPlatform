@@ -221,7 +221,81 @@ assertCheck(
     "Adversarial PoC 3 Neutralised: Tampered parameters (trim_start=-50, trim_end=999999) strictly clamped to [0.0s, 30.0s]"
 );
 
+// PoC 4: Chunked Upload Path-Traversal Attack on upload_id + Multi-Chunk Reassembly & Auto-Trim
+$fullMp4Binary = buildSyntheticMp4(95.0, 1000, str_repeat("A", 2048));
+$halfPoint = (int) floor(strlen($fullMp4Binary) / 2);
+$chunk0Tmp = tempnam(sys_get_temp_dir(), 'chk0_') . '.part';
+$chunk1Tmp = tempnam(sys_get_temp_dir(), 'chk1_') . '.part';
+file_put_contents($chunk0Tmp, substr($fullMp4Binary, 0, $halfPoint));
+file_put_contents($chunk1Tmp, substr($fullMp4Binary, $halfPoint));
+
+$traversalBlocked = false;
+try {
+    VideoAutoTrimService::processChunkedUpload(
+        ['name' => 'large_4k.mp4', 'tmp_name' => $chunk0Tmp, 'size' => filesize($chunk0Tmp), 'error' => UPLOAD_ERR_OK],
+        'member_test_1',
+        '../../etc/passwd',
+        0,
+        2,
+        0.0,
+        30.0,
+        95.0
+    );
+} catch (ValidationException $e) {
+    $traversalBlocked = true;
+}
+assertCheck(
+    $traversalBlocked === true,
+    "Adversarial PoC 4 Neutralised: Path-traversal upload_id ('../../etc/passwd') rejected with ValidationException"
+);
+
+$validUploadId = 'vidchunk_test_' . bin2hex(random_bytes(4));
+$resChunk0 = VideoAutoTrimService::processChunkedUpload(
+    ['name' => 'large_4k.mp4', 'tmp_name' => $chunk0Tmp, 'size' => filesize($chunk0Tmp), 'error' => UPLOAD_ERR_OK],
+    'member_test_1',
+    $validUploadId,
+    0,
+    2,
+    5.0,
+    45.0,
+    95.0
+);
+$resChunk1 = VideoAutoTrimService::processChunkedUpload(
+    ['name' => 'large_4k.mp4', 'tmp_name' => $chunk1Tmp, 'size' => filesize($chunk1Tmp), 'error' => UPLOAD_ERR_OK],
+    'member_test_1',
+    $validUploadId,
+    1,
+    2,
+    5.0,
+    45.0,
+    95.0
+);
+@unlink($chunk0Tmp);
+@unlink($chunk1Tmp);
+$createdChunkVideo = dirname(__DIR__) . '/resources/videos/posts/' . basename((string) ($resChunk1['fileName'] ?? ''));
+if (is_file($createdChunkVideo)) {
+    @unlink($createdChunkVideo);
+}
+assertCheck(
+    ($resChunk0['chunkComplete'] ?? false) === true
+    && ($resChunk1['success'] ?? false) === true
+    && ($resChunk1['trimStart'] ?? null) === 5.0
+    && ($resChunk1['trimEnd'] ?? null) === 35.0
+    && ($resChunk1['duration'] ?? null) === 30.0
+    && VideoAutoTrimService::MAX_FILE_SIZE_BYTES >= 1024 * 1024 * 1024,
+    "Large Video Chunked Upload + 30s Auto-Trim Pipeline reassembles multi-part chunks and clamps [5.0s, 45.0s] -> [5.0s, 35.0s] (1GB source cap)"
+);
+
 echo "\n=== [5/6] Verifying Frontend & Blade Auto-Trim Studio Integration ===\n";
+
+$composerJsContent = (string) file_get_contents(__DIR__ . '/../resources/asset/js/components/profilePage/postEmojiImgProcess.js');
+assertCheck(
+    !str_contains($composerJsContent, 'Video size exceeds 100MB')
+    && str_contains($composerJsContent, '1024 * 1024 * 1024')
+    && str_contains($composerJsContent, 'upload_id')
+    && str_contains($composerJsContent, 'total_chunks'),
+    "postEmojiImgProcess.js removes premature 100MB pre-trim block and streams large videos via 15MB chunks up to 1GB"
+);
 
 $postModalContent = (string) file_get_contents(__DIR__ . '/../resources/views/member/modals/post.blade.php');
 assertCheck(

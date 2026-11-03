@@ -71,11 +71,16 @@ try {
     }
 
     document.addEventListener('click', async (e) => {
+        const submitBtn = e.target.closest('#submitPost, .submitPost');
         const elementId = e.target.id;
 
         // SUBMIT THE NEW POST (from modal)
-        if (elementId && elementId.includes("submitPost")) {
+        if (submitBtn) {
             e.preventDefault();
+            if (submitBtn.disabled || submitBtn.getAttribute('aria-busy') === 'true') {
+                return;
+            }
+
             const formExtra = id('formPostMessageModal');
             if (!formExtra) return;
 
@@ -83,87 +88,118 @@ try {
             // to edit an existing post instead of creating a new one.
             const editPostNo = document.getElementById('editPostNo')?.value;
             const isEditing = !!editPostNo;
-
-            // Validate poll if it's being created
-            const pollContainer = document.getElementById('pollCreationContainer');
-            if (pollContainer && !pollContainer.classList.contains('d-none')) {
-                const pollQuestion = formExtra.querySelector('input[name="poll_question"]')?.value?.trim();
-                const pollOptions = Array.from(formExtra.querySelectorAll('input[name="poll_options[]"]'))
-                    .map(input => input.value.trim())
-                    .filter(val => val.length > 0);
-
-                if (!pollQuestion) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Poll Incomplete',
-                        text: 'Please enter a poll question.',
-                        confirmButtonColor: '#4ade80'
-                    });
-                    return;
-                }
-
-                if (pollOptions.length < 2) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Poll Incomplete',
-                        text: 'Please provide at least 2 poll options.',
-                        confirmButtonColor: '#4ade80'
-                    });
-                    return;
-                }
-            }
-
-            // Then & Now needs both photos before anything is sent.
-            if (!isEditing && typeof window.__thenNowReady === 'function') await window.__thenNowReady();
-            // Ensure any staged or uploading video (including >30s auto-trim) finishes attaching before FormData is built.
-            if (!isEditing && typeof window.__ensurePendingVideoUploaded === 'function') {
-                await window.__ensurePendingVideoUploaded();
-            }
-            const thenNow = !isEditing && typeof window.__getThenNowFiles === 'function' ? window.__getThenNowFiles() : null;
-            if (!isEditing && document.getElementById('thenNowFlag')?.value === '1' && (!thenNow?.then || !thenNow?.now)) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Then & Now Incomplete',
-                    text: 'Please pick both a Then photo and a Now photo.',
-                    confirmButtonColor: '#4ade80'
-                });
-                return;
-            }
-
-            let formData;
-            if (!isEditing) {
-                formData = new FormData(formExtra);
-                const requesterFamCodeValue = localStorage.getItem('requesterFamCode');
-                formData.append('postFamCode', requesterFamCodeValue);
-
-                // Explicitly ensure all accumulated image files are appended directly to formData
-                const selectedFiles = getSelectedPostFiles();
-                const fileInput = document.getElementById('imageUpload');
-                const rawFiles = (selectedFiles && selectedFiles.length > 0)
-                    ? selectedFiles
-                    : (fileInput && fileInput.files ? Array.from(fileInput.files) : []);
-
-                if (thenNow) {
-                    formData.delete('post_img[]');
-                    formData.delete('post_img');
-                    formData.append('post_img[]', thenNow.then, thenNow.then.name);
-                    formData.append('post_img[]', thenNow.now, thenNow.now.name);
-                } else if (rawFiles.length > 0) {
-                    formData.delete('post_img[]');
-                    formData.delete('post_img');
-                    rawFiles.forEach((file) => {
-                        formData.append('post_img[]', file, file.name);
-                    });
-                }
-            }
-
-            // Change button to spinner
-            const submitBtn = id(elementId);
             const originalBtnText = submitBtn.innerHTML;
-            submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${isEditing ? 'Saving...' : 'Posting...'}`;
-            submitBtn.disabled = true;
+
+            // Immediate visual feedback with spinner
+            if (window.ScoreTenantSpinner) {
+                window.ScoreTenantSpinner.start(submitBtn);
+            } else {
+                submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${isEditing ? 'Saving...' : 'Posting...'}`;
+                submitBtn.disabled = true;
+            }
 
             try {
+                // Validate poll if it's being created
+                const pollContainer = document.getElementById('pollCreationContainer');
+                if (pollContainer && !pollContainer.classList.contains('d-none')) {
+                    const pollQuestion = formExtra.querySelector('input[name="poll_question"]')?.value?.trim();
+                    const pollOptions = Array.from(formExtra.querySelectorAll('input[name="poll_options[]"]'))
+                        .map(input => input.value.trim())
+                        .filter(val => val.length > 0);
+
+                    if (!pollQuestion) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Poll Incomplete',
+                            text: 'Please enter a poll question.',
+                            confirmButtonColor: '#a31621'
+                        });
+                        return;
+                    }
+
+                    if (pollOptions.length < 2) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Poll Incomplete',
+                            text: 'Please provide at least 2 poll options.',
+                            confirmButtonColor: '#a31621'
+                        });
+                        return;
+                    }
+                }
+
+                // Ensure any staged or uploading video (including >30s auto-trim) finishes attaching before FormData is built.
+                if (!isEditing && typeof window.__ensurePendingVideoUploaded === 'function') {
+                    await window.__ensurePendingVideoUploaded();
+                }
+
+                // Then & Now needs both photos before anything is sent.
+                if (!isEditing && typeof window.__thenNowReady === 'function') {
+                    await window.__thenNowReady();
+                }
+
+                const thenNow = !isEditing && typeof window.__getThenNowFiles === 'function' ? window.__getThenNowFiles() : null;
+                if (!isEditing && document.getElementById('thenNowFlag')?.value === '1' && (!thenNow?.then || !thenNow?.now)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Then & Now Incomplete',
+                        text: 'Please pick both a Then photo and a Now photo.',
+                        confirmButtonColor: '#a31621'
+                    });
+                    return;
+                }
+
+                // Prevent empty post submission with friendly tactile prompt
+                if (!isEditing) {
+                    const postMsgVal = (id('postMessage')?.value || '').trim();
+                    const selectedFiles = getSelectedPostFiles();
+                    const fileInput = document.getElementById('imageUpload');
+                    const hasRawFiles = (selectedFiles && selectedFiles.length > 0) || (fileInput && fileInput.files && fileInput.files.length > 0);
+                    const hasThenNow = document.getElementById('thenNowFlag')?.value === '1' && thenNow?.then && thenNow?.now;
+                    const hasPoll = pollContainer && !pollContainer.classList.contains('d-none');
+                    const attachedVidInput = document.getElementById('attachedVideoUrl')?.value || '';
+                    const attachedVidsInput = document.getElementById('attachedVideoUrls')?.value || '';
+                    const hasAttachedVideo = attachedVidInput !== '' || (attachedVidsInput !== '' && attachedVidsInput !== '[]');
+                    const hasGif = Boolean(document.getElementById('attachedGifUrl')?.value);
+
+                    if (!postMsgVal && !hasRawFiles && !hasThenNow && !hasPoll && !hasAttachedVideo && !hasGif) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Empty Post',
+                            text: 'Please add some text, an image, a video, or a poll before posting.',
+                            confirmButtonColor: '#a31621'
+                        });
+                        return;
+                    }
+                }
+
+                let formData;
+                if (!isEditing) {
+                    formData = new FormData(formExtra);
+                    const requesterFamCodeValue = localStorage.getItem('requesterFamCode');
+                    formData.append('postFamCode', requesterFamCodeValue);
+
+                    // Explicitly ensure all accumulated image files are appended directly to formData
+                    const selectedFiles = getSelectedPostFiles();
+                    const fileInput = document.getElementById('imageUpload');
+                    const rawFiles = (selectedFiles && selectedFiles.length > 0)
+                        ? selectedFiles
+                        : (fileInput && fileInput.files ? Array.from(fileInput.files) : []);
+
+                    if (thenNow) {
+                        formData.delete('post_img[]');
+                        formData.delete('post_img');
+                        formData.append('post_img[]', thenNow.then, thenNow.then.name);
+                        formData.append('post_img[]', thenNow.now, thenNow.now.name);
+                    } else if (rawFiles.length > 0) {
+                        formData.delete('post_img[]');
+                        formData.delete('post_img');
+                        rawFiles.forEach((file) => {
+                            formData.append('post_img[]', file, file.name);
+                        });
+                    }
+                }
+
                 // Editing is text-only, so it goes as JSON to a PUT endpoint rather
                 // than the multipart POST the create flow uses (images/poll aren't
                 // part of the edit payload — see PostMessage::updatePost).
@@ -206,7 +242,7 @@ try {
                     const closePreview = document.getElementById('closeImagePreview');
                     if (closePreview) closePreview.click();
 
-                    // Reset the poll builder after a successful submission
+                    // Reset composer builders after a successful submission
                     if (typeof window.__resetPollBuilder === 'function') {
                         window.__resetPollBuilder();
                     }
@@ -219,9 +255,12 @@ try {
                     if (typeof window.__resetGifPicker === 'function') {
                         window.__resetGifPicker();
                     }
+                    if (typeof window.__resetVideoBuilder === 'function') {
+                        window.__resetVideoBuilder();
+                    }
                     const addOptBtn = document.getElementById('addPollOptionBtn');
                     if (addOptBtn) addOptBtn.style.display = '';
-                    
+
                     Swal.fire({
                         toast: true,
                         position: 'top-end',
@@ -242,8 +281,12 @@ try {
                     html: typeof rawMsg === 'string' ? rawMsg.replace(/\n/g, '<br>') : rawMsg,
                 });
             } finally {
-                submitBtn.innerHTML = originalBtnText;
-                submitBtn.disabled = false;
+                if (window.ScoreTenantSpinner) {
+                    window.ScoreTenantSpinner.stop(submitBtn);
+                } else {
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                }
             }
         } 
         // add/delete to/from the notificatn bar 

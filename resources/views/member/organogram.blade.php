@@ -31,6 +31,14 @@
                             Explore your family heritage, partners, and lineage. Click any person to see their details and full profile.
                         @endif
                     </p>
+                    <div class="d-flex align-items-center gap-2 flex-wrap mt-2">
+                        <span class="badge rounded-pill px-3 py-1.5 d-inline-flex align-items-center gap-1.5" style="background: rgba(16, 185, 129, 0.16); border: 1px solid rgba(16, 185, 129, 0.45); color: #34d399; font-weight: 700; font-size: 0.78rem;">
+                            <i class="bi bi-shield-lock-fill"></i> Same Family Code Only (#{{ $familyCode }})
+                        </span>
+                        <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-bold d-inline-flex align-items-center gap-1.5" onclick="openWhoViewedTreeModal()" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; font-size: 0.78rem; min-height: 34px;">
+                            <i class="bi bi-eye-fill"></i> Viewed by <span id="headerViewersBadge">{{ $treeViewersData['unique_viewers'] ?? 0 }}</span> family members
+                        </button>
+                    </div>
                     @php
                         $currentViewMode = $_GET['mode'] ?? 'canvas';
                         $otherHeldCodes = array_diff($heldCodes ?? [], array_filter([$primaryFamCode ?? '', $maternalFamCode ?? '', $wifeFamCode ?? '']));
@@ -64,6 +72,14 @@
                     @if(empty($isSelf) && empty($graphData['has_built_tree']))
                     <button type="button" class="btn btn-warning text-dark px-3 py-2 fw-bold d-inline-flex align-items-center shadow-sm btn-prompt-tree-action" id="btnHeaderPromptBuildTree" onclick="window.promptMemberToBuildTree()" style="border-radius: 50px; min-height: 44px; white-space: nowrap;" title="Invite relative to connect their branch of the family tree">
                         <i class="bi bi-envelope-heart-fill me-2 text-dark"></i> Invite {{ explode(' ', trim($data['firstName'] ?? 'Them'))[0] }} to Connect Branch
+                    </button>
+                    @endif
+                    <button type="button" class="btn-action" id="btnWhoViewedTree" onclick="openWhoViewedTreeModal()" title="See relatives who viewed your family tree" style="border-color: rgba(56, 189, 248, 0.45); color: #38bdf8;">
+                        <i class="bi bi-eye-fill text-info"></i> Viewers (<span id="btnHeaderViewersCount">{{ $treeViewersData['unique_viewers'] ?? 0 }}</span>)
+                    </button>
+                    @if(empty($isReadOnly))
+                    <button type="button" class="btn-action" id="btnTreeAccessControl" onclick="openTreeAccessControlModal()" title="Limit or manage family tree access to specific persons" style="border-color: rgba(245, 158, 11, 0.45); color: #fbbf24;">
+                        <i class="bi bi-shield-lock-fill text-warning"></i> Limit Access
                     </button>
                     @endif
                     <button type="button" class="btn-action" onclick="centerOnMe()" title="Focus on Me">
@@ -145,6 +161,37 @@
 
     <!-- Tree Workspace Container -->
     <div class="organogram-container">
+
+        <!-- High-Visibility Family Tree Security & Viewers Banner (Requirements 1, 2, 3, 4) -->
+        <div id="treeSecurityBanner" class="alert shadow-lg border-0 rounded-4 mb-3 mx-3 d-flex flex-column flex-md-row align-items-center justify-content-between p-3 gap-3" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 41, 59, 0.94) 100%); border: 1px solid rgba(56, 189, 248, 0.35); border-left: 5px solid #38bdf8 !important; backdrop-filter: blur(16px); box-shadow: 0 16px 36px rgba(0,0,0,0.4);">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); font-size: 1.25rem;">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                        <h6 class="mb-0 fw-bold text-white fs-6">Family Tree Visibility & Privacy Guard</h6>
+                        <span class="badge rounded-pill px-2.5 py-0.5" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.45); font-size: 0.7rem; font-weight: 700;">#{{ $familyCode }} ONLY</span>
+                        <span class="badge rounded-pill px-2.5 py-0.5" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); font-size: 0.7rem; font-weight: 700;">
+                            POLICY: {{ strtoupper(str_replace('_', ' ', $treeAccessData['access_mode'] ?? 'FAMILY ALL')) }}
+                        </span>
+                    </div>
+                    <p class="mb-0 text-white-50" style="font-size: 0.85rem; line-height: 1.45;">
+                        Your tree is <strong>strictly private to family code #{{ $familyCode }}</strong>. External contacts cannot view it. You can see everyone who viewed your tree and limit access to specific relatives anytime.
+                    </p>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-shrink-0 flex-wrap">
+                <button type="button" class="btn btn-outline-info rounded-pill px-3 py-2 fw-bold d-inline-flex align-items-center gap-1.5 text-nowrap" onclick="openWhoViewedTreeModal()" style="min-height: 44px; font-size: 0.85rem;">
+                    <i class="bi bi-eye-fill"></i> Who Viewed Tree (<span id="bannerViewersCount">{{ $treeViewersData['unique_viewers'] ?? 0 }}</span>)
+                </button>
+                @if(empty($isReadOnly))
+                <button type="button" class="btn btn-warning text-dark rounded-pill px-3 py-2 fw-bold d-inline-flex align-items-center gap-1.5 text-nowrap" onclick="openTreeAccessControlModal()" style="min-height: 44px; font-size: 0.85rem;">
+                    <i class="bi bi-person-slash"></i> Limit Access
+                </button>
+                @endif
+            </div>
+        </div>
 
         <!-- Integrated Family Studio Discovery Announcement Banner -->
         <div id="treeStudioDiscoveryBanner" class="alert shadow-lg border-0 rounded-4 mb-3 mx-3 d-flex flex-column flex-md-row align-items-center justify-content-between p-3 gap-3" style="background: linear-gradient(135deg, rgba(30, 10, 15, 0.95) 0%, rgba(138, 16, 25, 0.95) 100%); border: 1px solid rgba(251, 191, 36, 0.4); border-left: 5px solid #fbbf24 !important; backdrop-filter: blur(16px); box-shadow: 0 16px 36px rgba(0,0,0,0.4);">
@@ -849,6 +896,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         <!-- Claim Match Confirmation Modal -->
         <div class="modal fade" id="claimMatchModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
             <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
@@ -1119,6 +1167,7 @@
     </div>
 </div>
 
+@include('member.includes.treeAccessModals')
 @include('component.swalAlert')
 <script src="/public/js/vendor/kinshiptree.js?v=9.5"></script>
 <script>

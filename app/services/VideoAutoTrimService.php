@@ -18,7 +18,8 @@ use Src\Exceptions\ValidationException;
 final class VideoAutoTrimService
 {
     public const MAX_CLIP_DURATION = 30.0;
-    public const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024; // 100MB
+    public const MAX_FILE_SIZE_BYTES = 1024 * 1024 * 1024; // 1GB (1024MB) pre-trim source cap
+    public const MAX_CHUNKS = 100;
 
     /**
      * Allowed video MIME types mapped to safe canonical extensions.
@@ -90,6 +91,7 @@ final class VideoAutoTrimService
      * @param float|int|string|null $trimStart
      * @param float|int|string|null $trimEnd
      * @param float|int|string|null $clientDuration
+     * @param bool $isAssembledChunk
      * @return array{
      *   success: bool,
      *   videoId: string,
@@ -109,7 +111,8 @@ final class VideoAutoTrimService
         string $userId,
         float|int|string|null $trimStart = 0.0,
         float|int|string|null $trimEnd = 30.0,
-        float|int|string|null $clientDuration = null
+        float|int|string|null $clientDuration = null,
+        bool $isAssembledChunk = false
     ): array {
         $tmpName = isset($file['tmp_name']) && is_string($file['tmp_name']) ? $file['tmp_name'] : '';
         $error = isset($file['error']) ? (int)$file['error'] : UPLOAD_ERR_NO_FILE;
@@ -120,10 +123,10 @@ final class VideoAutoTrimService
         }
 
         if ($size <= 0 || $size > self::MAX_FILE_SIZE_BYTES) {
-            throw new ValidationException('Video size must be between 1 byte and 100MB.');
+            throw new ValidationException('Video size must be between 1 byte and 1GB.');
         }
 
-        if (!is_uploaded_file($tmpName) && !self::isTestEnvironment()) {
+        if (!$isAssembledChunk && !is_uploaded_file($tmpName) && !self::isTestEnvironment()) {
             throw new ValidationException('Untrusted file upload source.');
         }
 
@@ -161,9 +164,16 @@ final class VideoAutoTrimService
         $fileName = $videoId . '.' . $ext;
         $destPath = $targetDir . '/' . $fileName;
 
-        $moved = is_uploaded_file($tmpName)
-            ? move_uploaded_file($tmpName, $destPath)
-            : copy($tmpName, $destPath);
+        if ($isAssembledChunk) {
+            $moved = @rename($tmpName, $destPath) || copy($tmpName, $destPath);
+            if (is_file($tmpName)) {
+                @unlink($tmpName); // nosemgrep: php.lang.security.unlink-use.unlink-use
+            }
+        } else {
+            $moved = is_uploaded_file($tmpName)
+                ? move_uploaded_file($tmpName, $destPath)
+                : copy($tmpName, $destPath);
+        }
 
         if (!$moved || !is_file($destPath)) {
             throw new \RuntimeException('Failed to store uploaded video file.');
@@ -171,7 +181,7 @@ final class VideoAutoTrimService
 
         // Attempt lossless hardware/ffmpeg slice if ffmpeg binary is available on host
         $physicallyTrimmed = false;
-        if ($window['isTrimmed']) {
+        if ($window['isTrimmed'] || $size > 50 * 1024 * 1024) {
             $physicallyTrimmed = self::tryFfmpegTrim($destPath, $window['start'], $window['duration'], $ext);
         }
 
@@ -201,6 +211,125 @@ final class VideoAutoTrimService
             'physicallyTrimmed' => $physicallyTrimmed,
             'autoTrimmed'       => $window['isTrimmed'],
         ];
+    }
+
+    /**
+     * Reassemble a multi-chunk video upload (for large >20MB videos up to 1GB) and auto-trim on the final chunk.
+     *
+     * @param array<string, mixed> $file
+     * @param string $userId
+     * @param string $uploadId
+     * @param int $chunkIndex
+     * @param int $totalChunks
+     * @param float|int|string|null $trimStart
+     * @param float|int|string|null $trimEnd
+     * @param float|int|string|null $clientDuration
+     * @return array<string, mixed>
+     */
+    public static function processChunkedUpload(
+        array $file,
+        string $userId,
+        string $uploadId,
+        int $chunkIndex,
+        int $totalChunks,
+        float|int|string|null $trimStart = 0.0,
+        float|int|string|null $trimEnd = 30.0,
+        float|int|string|null $clientDuration = null
+    ): array {
+        if (!preg_match('/^[a-zA-Z0-9_-]{8,64}$/', $uploadId)) {
+            throw new ValidationException('Invalid chunk upload identifier.');
+        }
+
+        if ($totalChunks < 1 || $totalChunks > self::MAX_CHUNKS || $chunkIndex < 0 || $chunkIndex >= $totalChunks) {
+            throw new ValidationException('Invalid video chunk sequence.');
+        }
+
+        $tmpName = isset($file['tmp_name']) && is_string($file['tmp_name']) ? $file['tmp_name'] : '';
+        $error = isset($file['error']) ? (int)$file['error'] : UPLOAD_ERR_NO_FILE;
+        $chunkSize = isset($file['size']) ? (int)$file['size'] : 0;
+
+        if ($error !== UPLOAD_ERR_OK || $tmpName === '' || !is_file($tmpName) || $chunkSize <= 0) {
+            throw new ValidationException('No valid video chunk was uploaded.');
+        }
+
+        if (!is_uploaded_file($tmpName) && !self::isTestEnvironment()) {
+            throw new ValidationException('Untrusted chunk upload source.');
+        }
+
+        $safeUser = preg_replace('/[^a-zA-Z0-9_-]/', '', $userId) ?: 'member';
+        $stagingPath = sys_get_temp_dir() . '/fp_vidchunk_' . $safeUser . '_' . $uploadId . '.part';
+
+        if ($chunkIndex === 0) {
+            if (is_file($stagingPath)) {
+                @unlink($stagingPath); // nosemgrep: php.lang.security.unlink-use.unlink-use
+            }
+
+            // Early polyglot check on the first chunk
+            $headHandle = fopen($tmpName, 'rb');
+            if ($headHandle !== false) {
+                $headBytes = (string)fread($headHandle, 4096);
+                fclose($headHandle);
+                if (stripos($headBytes, '<?php') !== false || stripos($headBytes, '<?=') !== false) {
+                    throw new ValidationException('Malicious payload detected in video upload.');
+                }
+            }
+        } elseif (!is_file($stagingPath)) {
+            throw new ValidationException('Upload session expired or out-of-order chunk received.');
+        }
+
+        $inStream = @fopen($tmpName, 'rb');
+        $outStream = @fopen($stagingPath, 'ab');
+        if ($inStream === false || $outStream === false) {
+            if (is_resource($inStream)) {
+                fclose($inStream);
+            }
+            if (is_resource($outStream)) {
+                fclose($outStream);
+            }
+            throw new \RuntimeException('Unable to write video upload chunk.');
+        }
+
+        stream_copy_to_stream($inStream, $outStream);
+        fclose($inStream);
+        fclose($outStream);
+
+        clearstatcache(true, $stagingPath);
+        $accumulatedSize = (int)@filesize($stagingPath);
+
+        if ($accumulatedSize <= 0 || $accumulatedSize > self::MAX_FILE_SIZE_BYTES) {
+            @unlink($stagingPath); // nosemgrep: php.lang.security.unlink-use.unlink-use
+            throw new ValidationException('Video size must be between 1 byte and 1GB.');
+        }
+
+        if ($chunkIndex < $totalChunks - 1) {
+            return [
+                'success'          => true,
+                'chunkComplete'    => true,
+                'chunkIndex'       => $chunkIndex,
+                'totalChunks'      => $totalChunks,
+                'accumulatedBytes' => $accumulatedSize,
+            ];
+        }
+
+        try {
+            return self::processUploadAndTrim(
+                file: [
+                    'name'     => (string)($file['name'] ?? 'video.mp4'),
+                    'tmp_name' => $stagingPath,
+                    'size'     => $accumulatedSize,
+                    'error'    => UPLOAD_ERR_OK,
+                ],
+                userId: $userId,
+                trimStart: $trimStart,
+                trimEnd: $trimEnd,
+                clientDuration: $clientDuration,
+                isAssembledChunk: true
+            );
+        } finally {
+            if (is_file($stagingPath)) {
+                @unlink($stagingPath); // nosemgrep: php.lang.security.unlink-use.unlink-use
+            }
+        }
     }
 
     /**

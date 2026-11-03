@@ -96,9 +96,12 @@ final class Organogram extends SingleCustomerData
                 } elseif ($wifeFamCode !== '' && $requestedCode === $wifeFamCode) {
                     $familyCode = $wifeFamCode;
                     $activeLineageScope = 'inlaw';
-                } elseif (BaseController::sessionSharesFamily($requestedCode) || BaseController::sessionCanViewMember($idStr, $requestedCode) || in_array($requestedCode, $heldCodes, true)) {
+                } elseif (BaseController::sessionSharesFamily($requestedCode)) {
                     $familyCode = $requestedCode;
                     $activeLineageScope = ($wifeFamCode !== '' && $requestedCode === $wifeFamCode) ? 'inlaw' : 'other';
+                } else {
+                    $familyCode = $requestedCode;
+                    $activeLineageScope = 'other';
                 }
             } elseif ($requestedLineage === 'birth' || $requestedLineage === 'maternal') {
                 if ($hasMaternalCode) {
@@ -113,6 +116,14 @@ final class Organogram extends SingleCustomerData
             } elseif ($requestedLineage === 'primary' || $requestedLineage === 'marital') {
                 $familyCode = $primaryFamCode;
                 $activeLineageScope = 'primary';
+            } else {
+                $viewerSessionId = (string)($_SESSION['id'] ?? '');
+                $familyCode = \App\services\FamilyTreeAccessService::resolveSharedFamilyCode(
+                    $viewerSessionId,
+                    $idStr,
+                    $familyCode,
+                    array_values(array_filter(array_merge([$maternalFamCode, $wifeFamCode], $heldCodes)))
+                );
             }
 
             $maritalSurname = trim((string)($data['lastName'] ?? ''));
@@ -122,12 +133,22 @@ final class Organogram extends SingleCustomerData
                 $maidenSurname = !empty($cleanBirth) ? ucfirst(strtolower($cleanBirth)) : $maritalSurname;
             }
 
-            // Access control: viewable by members of that family OR approved connected kin.
-            if (!BaseController::sessionCanViewMember($idStr, $familyCode)) {
+            // Strict Access Control:
+            // 1. Family tree can ONLY be viewed by a family member sharing the same family code.
+            // 2. Tree owner's granular per-person access restrictions ('family_all', 'specific_persons', 'only_me').
+            $viewerId = (string)($_SESSION['id'] ?? '');
+            $treeAccessCheck = \App\services\FamilyTreeAccessService::canViewFamilyTree($viewerId, $idStr, $familyCode);
+            if (!$treeAccessCheck['allowed']) {
                 http_response_code(403);
-                echo json_encode(['error' => 'You can only view trees of your own family or approved connections.']);
+                echo json_encode([
+                    'error' => $treeAccessCheck['reason'],
+                    'code' => $treeAccessCheck['code'],
+                ]);
                 exit;
             }
+
+            // Record viewer audit trail (Requirement 1: Users see who viewed their family tree)
+            \App\services\FamilyTreeAccessService::recordTreeView($viewerId, $idStr, $familyCode);
 
             $isReadOnly = !BaseController::sessionSharesFamily($familyCode);
 
@@ -257,6 +278,14 @@ final class Organogram extends SingleCustomerData
             $rootUnions = $studioData['rootUnions'];
             $pendingRelRequests = $studioData['pendingRelRequests'];
 
+            $ownerContextId = $viewerId !== '' ? $viewerId : $idStr;
+            $treeViewersData = \App\services\FamilyTreeAccessService::getTreeViewers($ownerContextId);
+            $treeAccessData = \App\services\FamilyTreeAccessService::getFamilyMembersForAccessControl(
+                $ownerContextId,
+                $primaryFamCode,
+                array_values(array_filter(array_merge([$maternalFamCode, $wifeFamCode], $heldCodes)))
+            );
+
             view('member/organogram', compact(
                 'orgData',
                 'data',
@@ -283,7 +312,9 @@ final class Organogram extends SingleCustomerData
                 'stats',
                 'rootNodeId',
                 'rootUnions',
-                'pendingRelRequests'
+                'pendingRelRequests',
+                'treeViewersData',
+                'treeAccessData'
             ));
         } catch (\Throwable $th) {
             showError($th);
@@ -478,9 +509,12 @@ final class Organogram extends SingleCustomerData
                 } elseif ($wifeFamCode !== '' && $requestedCode === $wifeFamCode) {
                     $familyCode = $wifeFamCode;
                     $activeLineageScope = 'inlaw';
-                } elseif (BaseController::sessionSharesFamily($requestedCode) || BaseController::sessionCanViewMember($idStr, $requestedCode) || in_array($requestedCode, $heldCodes, true)) {
+                } elseif (BaseController::sessionSharesFamily($requestedCode)) {
                     $familyCode = $requestedCode;
                     $activeLineageScope = ($wifeFamCode !== '' && $requestedCode === $wifeFamCode) ? 'inlaw' : 'other';
+                } else {
+                    $familyCode = $requestedCode;
+                    $activeLineageScope = 'other';
                 }
             } elseif ($requestedLineage === 'birth' || $requestedLineage === 'maternal') {
                 if ($hasMaternalCode) {
@@ -495,6 +529,14 @@ final class Organogram extends SingleCustomerData
             } elseif ($requestedLineage === 'primary' || $requestedLineage === 'marital') {
                 $familyCode = $primaryFamCode;
                 $activeLineageScope = 'primary';
+            } else {
+                $viewerSessionId = (string)($_SESSION['id'] ?? '');
+                $familyCode = \App\services\FamilyTreeAccessService::resolveSharedFamilyCode(
+                    $viewerSessionId,
+                    $idStr,
+                    $familyCode,
+                    array_values(array_filter(array_merge([$maternalFamCode, $wifeFamCode], $heldCodes)))
+                );
             }
 
             $maritalSurname = trim((string)($data['lastName'] ?? ''));
@@ -504,10 +546,17 @@ final class Organogram extends SingleCustomerData
                 $maidenSurname = !empty($cleanBirth) ? ucfirst(strtolower($cleanBirth)) : $maritalSurname;
             }
 
-            // Access control: viewable by members of that family OR approved connected kin.
-            if (!BaseController::sessionCanViewMember($idStr, $familyCode)) {
-                throw new ForbiddenException('You can only view family studios of your own family or approved connections.');
+            // Access control:
+            // 1. Family tree can ONLY be viewed by a family member sharing the same family code.
+            // 2. Tree owner's granular per-person access restrictions ('family_all', 'specific_persons', 'only_me').
+            $viewerId = (string)($_SESSION['id'] ?? '');
+            $treeAccessCheck = \App\services\FamilyTreeAccessService::canViewFamilyTree($viewerId, $idStr, $familyCode);
+            if (!$treeAccessCheck['allowed']) {
+                throw new ForbiddenException($treeAccessCheck['reason']);
             }
+
+            // Record viewer audit trail
+            \App\services\FamilyTreeAccessService::recordTreeView($viewerId, $idStr, $familyCode);
 
             $isReadOnly = !BaseController::sessionSharesFamily($familyCode);
 
@@ -621,6 +670,14 @@ final class Organogram extends SingleCustomerData
             $rootUnions = $studioData['rootUnions'];
             $pendingRelRequests = $studioData['pendingRelRequests'];
 
+            $ownerContextId = $viewerId !== '' ? $viewerId : $idStr;
+            $treeViewersData = \App\services\FamilyTreeAccessService::getTreeViewers($ownerContextId);
+            $treeAccessData = \App\services\FamilyTreeAccessService::getFamilyMembersForAccessControl(
+                $ownerContextId,
+                $primaryFamCode,
+                array_values(array_filter(array_merge([$maternalFamCode, $wifeFamCode], $heldCodes)))
+            );
+
             $orgData = [
                 'spouse'   => $spouse[0] ?? null,
                 'father'   => $father[0] ?? null,
@@ -653,7 +710,9 @@ final class Organogram extends SingleCustomerData
                 'motherMaidenSurname',
                 'motherBirthFamCode',
                 'paternalSurname',
-                'wifeFamCode'
+                'wifeFamCode',
+                'treeViewersData',
+                'treeAccessData'
             ));
         } catch (\Throwable $th) {
             showError($th);
@@ -722,7 +781,9 @@ final class Organogram extends SingleCustomerData
                     $familyCode = $primaryFamCode;
                 } elseif ($wifeFamCode !== '' && $requestedCode === $wifeFamCode) {
                     $familyCode = $wifeFamCode;
-                } elseif (BaseController::sessionSharesFamily($requestedCode) || BaseController::sessionCanViewMember($idStr, $requestedCode) || in_array($requestedCode, $heldCodes, true)) {
+                } elseif (BaseController::sessionSharesFamily($requestedCode)) {
+                    $familyCode = $requestedCode;
+                } else {
                     $familyCode = $requestedCode;
                 }
             } elseif ($requestedLineage === 'birth' || $requestedLineage === 'maternal') {
@@ -735,6 +796,14 @@ final class Organogram extends SingleCustomerData
                 }
             } elseif ($requestedLineage === 'primary' || $requestedLineage === 'marital') {
                 $familyCode = $primaryFamCode;
+            } else {
+                $viewerSessionId = (string)($_SESSION['id'] ?? '');
+                $familyCode = \App\services\FamilyTreeAccessService::resolveSharedFamilyCode(
+                    $viewerSessionId,
+                    $idStr,
+                    $familyCode,
+                    array_values(array_filter(array_merge([$maternalFamCode, $wifeFamCode], $heldCodes)))
+                );
             }
             } catch (\Throwable) {
                 // Keep primary family code
@@ -746,12 +815,22 @@ final class Organogram extends SingleCustomerData
                 exit;
             }
 
-            // Access control: viewable by members of that family OR approved connected kin.
-            if (!BaseController::sessionCanViewMember($idStr, $familyCode)) {
+            // Access control:
+            // 1. Family tree can ONLY be viewed by a family member sharing the same family code.
+            // 2. Tree owner's granular per-person access restrictions ('family_all', 'specific_persons', 'only_me').
+            $viewerId = (string)($_SESSION['id'] ?? '');
+            $treeAccessCheck = \App\services\FamilyTreeAccessService::canViewFamilyTree($viewerId, $idStr, $familyCode);
+            if (!$treeAccessCheck['allowed']) {
                 http_response_code(403);
-                echo json_encode(['error' => 'You can only view trees of your own family or approved connections.']);
+                echo json_encode([
+                    'error' => $treeAccessCheck['reason'],
+                    'code' => $treeAccessCheck['code'],
+                ]);
                 exit;
             }
+
+            // Record viewer audit trail
+            \App\services\FamilyTreeAccessService::recordTreeView($viewerId, $idStr, $familyCode);
 
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
             $this->repairOrphanedFamilyGraph($familyCode, $idStr);
@@ -813,14 +892,21 @@ final class Organogram extends SingleCustomerData
                 return;
             }
 
-            // Access control: viewable by members of that family OR approved connected kin.
-            // Must pass BOTH checks: either same family OR (has valid connection AND user not empty)
-            $isOwnFamily = BaseController::sessionSharesFamily($nodeFamCode);
-            $isApprovedConnection = !empty($nodeUserId) && BaseController::sessionCanViewMember($nodeUserId, $nodeFamCode);
-
-            if (!$isOwnFamily && !$isApprovedConnection) {
-                msgException(403, 'Access denied: You do not have permission to view this node');
+            // Strict Access Control:
+            // 1. Nodes can only be viewed by a family member sharing the same family code.
+            // 2. If node belongs to a user who restricted the viewer, deny access.
+            $viewerId = (string)($_SESSION['id'] ?? '');
+            if (!\App\services\FamilyTreeAccessService::userSharesFamilyCode($viewerId, $nodeFamCode)) {
+                msgException(403, 'Access denied: You can only view nodes of your own family code');
                 return;
+            }
+
+            if ($nodeUserId !== '' && !hash_equals($viewerId, $nodeUserId)) {
+                $check = \App\services\FamilyTreeAccessService::canViewFamilyTree($viewerId, $nodeUserId, $nodeFamCode);
+                if (!$check['allowed']) {
+                    msgException(403, 'Access denied: ' . $check['reason']);
+                    return;
+                }
             }
 
             $isReadOnly = !BaseController::sessionSharesFamily($nodeFamCode);
@@ -1989,5 +2075,187 @@ final class Organogram extends SingleCustomerData
             'banner_subtitle'      => $subtitle,
             'is_flourishing'       => ($primaryMissing === 'flourishing')
         ];
+    }
+
+    /**
+     * API: Get list of relatives who viewed the user's family tree.
+     * GET /member/organogram/tree-viewers
+     */
+    public function getTreeViewers(): void
+    {
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=UTF-8');
+        }
+
+        $userId = (string)($_SESSION['id'] ?? '');
+        if ($userId === '') {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'error' => 'Please sign in to view your family tree viewers.']);
+            return;
+        }
+
+        try {
+            $famCode = (string)($_GET['family_code'] ?? '');
+            $data = \App\services\FamilyTreeAccessService::getTreeViewers($userId, $famCode !== '' ? $famCode : null);
+            echo json_encode(['success' => true] + $data);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Unable to retrieve viewers at this time.']);
+        }
+    }
+
+    /**
+     * API: Get current access control configuration and member roster for the authenticated user.
+     * GET /member/organogram/access-settings
+     */
+    public function getAccessSettings(): void
+    {
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=UTF-8');
+        }
+
+        $userId = (string)($_SESSION['id'] ?? '');
+        if ($userId === '') {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'error' => 'Please sign in to manage family tree access settings.']);
+            return;
+        }
+
+        try {
+            $memberData = BaseController::findMemberById($userId);
+            $primaryFamCode = (string)($memberData['famCode'] ?? ($_SESSION['famCode'] ?? ''));
+
+            $heldCodes = [];
+            try {
+                $ufStmt = Db::connect2()->prepare("SELECT DISTINCT family_code FROM user_families WHERE user_id = ? AND status = 'approved'");
+                $ufStmt->execute([$userId]);
+                $heldCodes = $ufStmt->fetchAll(\PDO::FETCH_COLUMN) ?: [];
+            } catch (\Throwable) {}
+
+            $data = \App\services\FamilyTreeAccessService::getFamilyMembersForAccessControl($userId, $primaryFamCode, $heldCodes);
+            echo json_encode(['success' => true] + $data);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Unable to load access settings.']);
+        }
+    }
+
+    /**
+     * API: Save updated family tree access control policy.
+     * POST /member/organogram/access-settings
+     */
+    public function saveAccessPolicy(): void
+    {
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=UTF-8');
+        }
+
+        try {
+            Limiter::limit($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
+        } catch (\Throwable) {
+            http_response_code(429);
+            echo json_encode(['success' => false, 'error' => 'Too many requests. Please slow down.']);
+            return;
+        }
+
+        try {
+            $input = GetRequestData::getRequestData();
+        } catch (\Throwable) {
+            $input = $_POST;
+        }
+
+        try {
+            BaseController::validateCsrf($input);
+        } catch (\Throwable) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Invalid or missing CSRF security token.']);
+            return;
+        }
+
+        $userId = (string)($_SESSION['id'] ?? '');
+        if ($userId === '') {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'error' => 'Please sign in to update family tree access settings.']);
+            return;
+        }
+
+        $accessMode = (string)($input['access_mode'] ?? $_POST['access_mode'] ?? \App\services\FamilyTreeAccessService::MODE_FAMILY_ALL);
+        $rawAllowed = $input['allowed_user_ids'] ?? $_POST['allowed_user_ids'] ?? [];
+        $rawDenied = $input['denied_user_ids'] ?? $_POST['denied_user_ids'] ?? [];
+
+        $allowedUserIds = is_array($rawAllowed) ? array_map('strval', $rawAllowed) : array_filter(array_map('trim', explode(',', (string)$rawAllowed)));
+        $deniedUserIds = is_array($rawDenied) ? array_map('strval', $rawDenied) : array_filter(array_map('trim', explode(',', (string)$rawDenied)));
+
+        $result = \App\services\FamilyTreeAccessService::saveAccessControlPolicy(
+            $userId,
+            $accessMode,
+            $allowedUserIds,
+            $deniedUserIds
+        );
+
+        if (!$result['success']) {
+            http_response_code(500);
+        }
+        echo json_encode($result);
+    }
+
+    /**
+     * API: Toggle or update access rule for a single family member.
+     * POST /member/organogram/access-rule
+     */
+    public function setPersonAccessRule(): void
+    {
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=UTF-8');
+        }
+
+        try {
+            Limiter::limit($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
+        } catch (\Throwable) {
+            http_response_code(429);
+            echo json_encode(['success' => false, 'error' => 'Too many requests. Please slow down.']);
+            return;
+        }
+
+        try {
+            $input = GetRequestData::getRequestData();
+        } catch (\Throwable) {
+            $input = $_POST;
+        }
+
+        try {
+            BaseController::validateCsrf($input);
+        } catch (\Throwable) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Invalid or missing CSRF security token.']);
+            return;
+        }
+
+        $userId = (string)($_SESSION['id'] ?? '');
+        if ($userId === '') {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'error' => 'Please sign in to update member access.']);
+            return;
+        }
+
+        $targetUserId = trim((string)($input['target_user_id'] ?? $_POST['target_user_id'] ?? ''));
+        $action = trim((string)($input['action'] ?? $_POST['action'] ?? 'default'));
+
+        if ($targetUserId === '') {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Target member ID is required.']);
+            return;
+        }
+
+        $result = \App\services\FamilyTreeAccessService::setPersonAccessRule(
+            $userId,
+            $targetUserId,
+            $action
+        );
+
+        if (!$result['success']) {
+            http_response_code(422);
+        }
+        echo json_encode($result);
     }
 }

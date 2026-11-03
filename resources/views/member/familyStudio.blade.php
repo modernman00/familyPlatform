@@ -428,6 +428,14 @@
                     <button type="button" class="btn btn-outline-light fw-bold px-3 px-sm-4 py-2" onclick="openStudioAddModal()" style="border-radius: 12px; min-height: 44px; font-size: 0.9rem;">
                         <i class="bi bi-person-plus-fill me-2"></i>Add Family Member
                     </button>
+                    <button type="button" class="btn btn-outline-light fw-bold px-3 px-sm-4 py-2 d-inline-flex align-items-center gap-1" onclick="openWhoViewedTreeModal()" style="border-radius: 12px; min-height: 44px; font-size: 0.9rem; border-color: rgba(56, 189, 248, 0.45); color: #7dd3fc;">
+                        <i class="bi bi-eye-fill text-info"></i>Who Viewed (<span id="studioViewersCount">{{ $treeViewersData['unique_viewers'] ?? 0 }}</span>)
+                    </button>
+                    @if(empty($isReadOnly))
+                    <button type="button" class="btn btn-warning text-dark fw-bold px-3 px-sm-4 py-2 d-inline-flex align-items-center gap-1" onclick="openTreeAccessControlModal()" style="border-radius: 12px; min-height: 44px; font-size: 0.9rem;">
+                        <i class="bi bi-shield-lock-fill"></i>Limit Access
+                    </button>
+                    @endif
                 </div>
             </div>
 
@@ -2469,4 +2477,5 @@
         });
     }
 </script>
+@include('member.includes.treeAccessModals')
 @endsection

@@ -55,6 +55,28 @@ describe('GIFs in comments', () => {
             .find('[data-testid="comment-gif"]').should('have.attr', 'src').and('match', /^https:\/\/media\d*\.giphy\.com\//);
     });
 
+    it('opens emoji picker, inserts emoji into comment input, and posts successfully', () => {
+        const marker = `Cypress Emoji Comment ${Date.now()}`;
+        createFreshPost(marker);
+        cy.intercept('POST', '**/postCommentProfile').as('commentReq');
+
+        cy.contains(marker).parents('.card').within(() => {
+            cy.get('button[aria-label="Comment on this post"]').click();
+
+            cy.get('button[aria-label="Add emoji"]').click();
+            cy.get('[data-testid="comment-emoji-picker"]').should('be.visible')
+                .find('.comment-emoji-btn').first().click();
+
+            cy.get('input.comment-composer__input').should('not.have.value', '');
+            cy.get('button[aria-label="Post comment"]').click();
+        });
+
+        cy.wait('@commentReq', { timeout: 90000 }).its('response.statusCode').should('eq', 200);
+
+        cy.contains(marker).parents('.card').find('.comment-bubble-text', { timeout: 60000 })
+            .should('be.visible');
+    });
+
     it('rejects a non-Giphy gif_url server-side (no tracking-pixel vector)', () => {
         const marker = `Cypress GIF Reject ${Date.now()}`;
         createFreshPost(marker);
