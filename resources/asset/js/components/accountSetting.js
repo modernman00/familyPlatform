@@ -538,11 +538,20 @@ processKidsSiblings(fName, famCode);
         });
         const data = await res.json();
 
+        const extractString = (val, fallback) => {
+          if (typeof val === 'string' && val.trim() !== '') return val;
+          if (val && typeof val === 'object') {
+            if (typeof val.message === 'string' && val.message.trim() !== '') return val.message;
+            if (typeof val.body === 'string' && val.body.trim() !== '') return val.body;
+            if (typeof val.content === 'string' && val.content.trim() !== '') return val.content;
+            try { return JSON.stringify(val); } catch (e) {}
+          }
+          return fallback;
+        };
+
         if (res.ok && data.status === 'success') {
           const rawMsg = data.message || data.data?.message;
-          const msg = typeof rawMsg === 'string'
-            ? rawMsg
-            : (rawMsg?.message || (rawMsg?.endpoints_registered ? `Test notification dispatched to ${rawMsg.endpoints_registered} registered device(s).` : 'Test alert sent successfully!'));
+          const msg = extractString(rawMsg, data.endpoints_registered ? `Test notification dispatched to ${data.endpoints_registered} registered device(s).` : 'Test alert sent successfully!');
           if (testFeedback) {
             testFeedback.className = 'small mt-2 text-success fw-medium';
             testFeedback.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> ' + msg;
@@ -556,13 +565,14 @@ processKidsSiblings(fName, famCode);
             });
           }
         } else {
-          const errMsg = typeof data.message === 'string' ? data.message : (data.message?.message || 'Could not dispatch test notification');
+          const errMsg = extractString(data.message, 'Could not dispatch test notification');
           throw new Error(errMsg);
         }
       } catch (err) {
         if (testFeedback) {
           testFeedback.className = 'small mt-2 text-danger fw-medium';
-          testFeedback.innerHTML = '<i class="bi bi-exclamation-circle-fill me-1"></i> ' + (err.message || 'Test dispatch failed');
+          const errText = (typeof err?.message === 'string' && err.message !== '[object Object]') ? err.message : 'Test dispatch failed';
+          testFeedback.innerHTML = '<i class="bi bi-exclamation-circle-fill me-1"></i> ' + errText;
         }
       } finally {
         testBtn.disabled = false;
