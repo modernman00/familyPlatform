@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(kinship): decommission silent auto-linking, stage unplaced members, and correctly rewire Fayokanmi and Segun",
+    "title": "Sec(hardening): Red Team & BRATS zero-trust hardening across broadcasting, magic auth, roundtable, weekly reels & push",
     "notes": [
-        "Fix(kinship): decommission silent auto-linking, stage unplaced members, and correctly rewire Fayokanmi and Segun",
-        "Feat(feed): enable multi-video uploads with horizontal side-by-side feed display and studio previews",
-        "Fix(kinship): enforce generation-integrity invariant and relocate members misfiled under grandparent union"
+        "Sec(hardening): Red Team & BRATS zero-trust hardening across broadcasting, magic auth, roundtable, weekly reels & push",
+        "Feat(kinship): implement unplaced kin staging dock and guided relational placement modal",
+        "Style(feed): reduce fullscreen and volume icon dimensions and remove floating full video pill"
     ],
-    "released_at": "2026-11-02",
-    "commit": "76df9f2"
+    "released_at": "2026-11-03",
+    "commit": "0ac4fcbe"
 }
