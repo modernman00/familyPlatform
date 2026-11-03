@@ -33,6 +33,57 @@ class FamilyRoundTableService
     }
 
     /**
+     * AI Safety & Prompt Injection Guardrail (ATG Pod 1: Dr. Priya Nair).
+     * Strips HTML, neutralises adversarial LLM role-hijacking / system-override sequences,
+     * and enforces strict character bounds.
+     */
+    public static function sanitizePromptInput(string $raw, int $maxLength = 2000): string
+    {
+        $clean = trim(strip_tags($raw));
+        // Neutralise common prompt-injection delimiters and instruction-override attacks
+        $patterns = [
+            '/<\|im_start\|>|<\|im_end\|>|<\|endoftext\|>|\[INST\]|\[\/INST\]|<<SYS>>|<\/SYS>>|<\/?system>/i',
+            '/ignore\s+(?:all\s+)?(?:previous|prior|above)\s+(?:instructions|prompts|rules|directives)/i',
+            '/disregard\s+(?:all\s+)?(?:previous|prior|above)\s+(?:instructions|prompts|rules|directives)/i',
+            '/you\s+are\s+now\s+(?:in\s+)?(?:developer|jailbreak|unrestricted|dan)\s+mode/i',
+        ];
+        $clean = (string)preg_replace($patterns, '[redacted]', $clean);
+        $clean = mb_substr($clean, 0, $maxLength);
+        return htmlspecialchars($clean, ENT_QUOTES, 'UTF-8');
+    }
+
+    /**
+     * Sanitises LLM-generated JSON fields before persistence or UI rendering
+     * to prevent second-order stored XSS via manipulated model outputs.
+     *
+     * @param array<string, mixed> $rawPlan
+     * @param string $partyA
+     * @param string $partyB
+     * @return array<string, string>
+     */
+    private static function sanitizeActionPlan(array $rawPlan, string $partyA, string $partyB): array
+    {
+        $cleanPlan = [];
+        foreach ($rawPlan as $k => $v) {
+            if (!is_scalar($v)) {
+                continue;
+            }
+            $safeKey = mb_substr(trim(strip_tags((string)$k)), 0, 120);
+            $safeVal = mb_substr(trim(strip_tags((string)$v)), 0, 600);
+            if ($safeKey !== '' && $safeVal !== '') {
+                $cleanPlan[$safeKey] = $safeVal;
+            }
+        }
+        if (empty($cleanPlan)) {
+            $cleanPlan = [
+                $partyA => 'Commits to active listening and transparent communication.',
+                $partyB => 'Commits to collaborative check-ins before assumptions form.',
+            ];
+        }
+        return $cleanPlan;
+    }
+
+    /**
      * File a new dispute docket before the Family RoundTable.
      *
      * @param string $famCode Family Code
@@ -57,9 +108,9 @@ class FamilyRoundTableService
         string $category,
         string $grievance
     ): array {
-        $cleanTitle = trim(htmlspecialchars($title, ENT_QUOTES, 'UTF-8'));
-        $cleanGrievance = trim(htmlspecialchars($grievance, ENT_QUOTES, 'UTF-8'));
-        $cleanCategory = trim(htmlspecialchars($category, ENT_QUOTES, 'UTF-8')) ?: 'general_harmony';
+        $cleanTitle = self::sanitizePromptInput($title, 200);
+        $cleanGrievance = self::sanitizePromptInput($grievance, 2000);
+        $cleanCategory = self::sanitizePromptInput($category, 80) ?: 'general_harmony';
 
         if ($cleanTitle === '' || $cleanGrievance === '') {
             return ['success' => false, 'error' => 'A title and grievance statement are required.'];
@@ -208,7 +259,7 @@ class FamilyRoundTableService
      */
     public function submitStatement(string $disputeId, string $userId, string $statement, ?string $famCode = null): array
     {
-        $cleanStatement = trim(htmlspecialchars($statement, ENT_QUOTES, 'UTF-8'));
+        $cleanStatement = self::sanitizePromptInput($statement, 2000);
         if ($cleanStatement === '') {
             return ['success' => false, 'error' => 'Your statement cannot be empty.'];
         }
@@ -505,10 +556,10 @@ class FamilyRoundTableService
         bool $isThirdParty = false,
         ?string $initiatorName = null
     ): array {
-        $nameA = htmlspecialchars(trim($partyAName), ENT_QUOTES, 'UTF-8');
-        $claimA = htmlspecialchars(trim($partyAClaim), ENT_QUOTES, 'UTF-8');
-        $nameB = htmlspecialchars(trim($partyBName), ENT_QUOTES, 'UTF-8');
-        $claimB = htmlspecialchars(trim($partyBClaim), ENT_QUOTES, 'UTF-8');
+        $nameA = self::sanitizePromptInput($partyAName, 100);
+        $claimA = self::sanitizePromptInput($partyAClaim, 1500);
+        $nameB = self::sanitizePromptInput($partyBName, 100);
+        $claimB = self::sanitizePromptInput($partyBClaim, 1500);
 
         if ($nameA === '' || $nameB === '' || $claimA === '' || $claimB === '') {
             return [
@@ -646,19 +697,17 @@ PROMPT;
         }
 
         if (is_array($parsed) && !empty($parsed['finding_of_fact'])) {
-            $bridge = (string)($parsed['reconciliatory_bridge'] ?? '');
+            $bridge = mb_substr(trim(strip_tags((string)($parsed['reconciliatory_bridge'] ?? ''))), 0, 1500);
             if (!preg_match('/reconcil|harmony|bond|peace|unity|kinship|concord/i', $bridge)) {
                 $bridge = trim($bridge . " This accord restores family kinship, domestic unity, and lasting peace.");
             }
+            $rawActionPlan = is_array($parsed['restorative_action_plan'] ?? null) ? $parsed['restorative_action_plan'] : [];
             return [
-                'verdict_title' => (string)($parsed['verdict_title'] ?? "The RoundTable Accord: {$partyA} & {$partyB}"),
-                'finding_of_fact' => (string)($parsed['finding_of_fact'] ?? ''),
+                'verdict_title' => mb_substr(trim(strip_tags((string)($parsed['verdict_title'] ?? "The RoundTable Accord: {$partyA} & {$partyB}"))), 0, 255),
+                'finding_of_fact' => mb_substr(trim(strip_tags((string)($parsed['finding_of_fact'] ?? ''))), 0, 2000),
                 'reconciliatory_bridge' => $bridge,
-                'restorative_action_plan' => is_array($parsed['restorative_action_plan'] ?? null) ? $parsed['restorative_action_plan'] : [
-                    $partyA => 'Commits to active listening and transparent communication.',
-                    $partyB => 'Commits to collaborative check-ins before assumptions form.',
-                ],
-                'yommy_wisdom' => (string)($parsed['yommy_wisdom'] ?? 'At the Family RoundTable, there are no losers; only kin who found their way back to harmony.'),
+                'restorative_action_plan' => self::sanitizeActionPlan($rawActionPlan, $partyA, $partyB),
+                'yommy_wisdom' => mb_substr(trim(strip_tags((string)($parsed['yommy_wisdom'] ?? 'At the Family RoundTable, there are no losers; only kin who found their way back to harmony.'))), 0, 500),
             ];
         }
 

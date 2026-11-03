@@ -401,16 +401,22 @@
     </div>
   </template>
 
-  <!-- Single Post Image (Hero Adaptive Natural Aspect Bleed with Ambient Aura) -->
+  <!-- Single Post Image (Hero Adaptive Natural Aspect Bleed with Ambient Aura & ATG Saliency Focal Engine) -->
   <template x-if="post.images && post.images.length === 1 && !post.comparison">
     <div class="mb-3 px-1"
          x-data="{
            singleAspect: 'auto',
+           singleFocal: '50% 34%',
            onSingleImageLoad(el) {
-             if (el.naturalWidth && el.naturalHeight) {
+             if (window.AtgMediaSupremacy && typeof window.AtgMediaSupremacy.analyzeImage === 'function') {
+               const info = window.AtgMediaSupremacy.analyzeImage(el);
+               this.singleAspect = info.aspectRatio;
+               this.singleFocal = info.focalPosition;
+             } else if (el.naturalWidth && el.naturalHeight) {
                const r = el.naturalWidth / el.naturalHeight;
                const clamped = Math.min(1.91, Math.max(0.80, r));
                this.singleAspect = clamped.toFixed(4) + ' / 1';
+               this.singleFocal = r < 0.92 ? '50% 28%' : '50% 38%';
              }
            }
          }"
@@ -436,7 +442,7 @@
                playingVoicePostNo === post.post_no ? 'photo-voice-playing' : '',
                ((post.post_no || 0) % 3 === 0 ? 'living-drift-a' : ((post.post_no || 0) % 3 === 1 ? 'living-drift-b' : 'living-drift-c'))
              ]"
-             :style="'border-radius:12px; width:100%; max-height: 600px; aspect-ratio: ' + (singleAspect !== 'auto' ? singleAspect : 'unset') + '; background: rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: center;'">
+             :style="'border-radius:12px; width:100%; max-height: 600px; aspect-ratio: ' + (singleAspect !== 'auto' ? singleAspect : 'unset') + '; background: rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: center; transition: aspect-ratio 0.35s cubic-bezier(0.16, 1, 0.3, 1);'">
           <a href="#" 
              @click.prevent="typeof handleImageTap === 'function' ? handleImageTap(post, post.images, 0, $event) : openLightbox(post.images, 0)" 
              @dblclick.prevent.stop="triggerHeartBurst(post, 0)"
@@ -448,7 +454,7 @@
               <source :srcset="getPostImageVariantUrl(post.images[0], 'webp')" type="image/webp">
               <img :src="(post.images[0] && (post.images[0].startsWith('/public/') || post.images[0].startsWith('/images/'))) ? post.images[0] : getPostImageUrl(post.images[0])" 
                    class="post-media-first-img living-canvas-img w-100 h-100"
-                   style="border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: cover; object-position: center; cursor: pointer; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;" 
+                   :style="'border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: cover; object-position: ' + singleFocal + '; cursor: pointer; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;'" 
                    alt="Family post image" 
                    @load="onSingleImageLoad($event.target)"
                    loading="lazy"
@@ -576,11 +582,25 @@
          x-data="{ 
            currentIdx: 0,
            carouselAspect: '1 / 1',
+           slideAspects: {},
+           slideFocals: {},
            onCarouselImageLoad(el, idx) {
-             if (idx === 0 && el.naturalWidth && el.naturalHeight) {
+             if (window.AtgMediaSupremacy && typeof window.AtgMediaSupremacy.analyzeImage === 'function') {
+               const info = window.AtgMediaSupremacy.analyzeImage(el);
+               this.slideAspects[idx] = info.aspectRatio;
+               this.slideFocals[idx] = info.focalPosition;
+               if (idx === 0 || idx === this.currentIdx) {
+                 this.carouselAspect = info.aspectRatio;
+               }
+             } else if (el.naturalWidth && el.naturalHeight) {
                const r = el.naturalWidth / el.naturalHeight;
                const clamped = Math.min(1.91, Math.max(0.80, r));
-               this.carouselAspect = clamped.toFixed(4) + ' / 1';
+               const aspectStr = clamped.toFixed(4) + ' / 1';
+               this.slideAspects[idx] = aspectStr;
+               this.slideFocals[idx] = r < 0.92 ? '50% 28%' : '50% 38%';
+               if (idx === 0 || idx === this.currentIdx) {
+                 this.carouselAspect = aspectStr;
+               }
              }
            },
            nextSlide() {
@@ -599,18 +619,23 @@
                track.scrollTo({ left: idx * track.clientWidth, behavior: 'smooth' });
              }
              this.currentIdx = idx;
+             if (this.slideAspects[idx]) {
+               this.carouselAspect = this.slideAspects[idx];
+             }
            }
          }"
          x-init="$nextTick(() => {
-           const firstImg = $refs.carouselTrack?.querySelector('img');
-           if (firstImg && firstImg.complete && firstImg.naturalWidth && firstImg.naturalHeight) {
-             onCarouselImageLoad(firstImg, 0);
-           }
+           const imgs = $refs.carouselTrack?.querySelectorAll('img') || [];
+           imgs.forEach((imgEl, i) => {
+             if (imgEl && imgEl.complete && imgEl.naturalWidth && imgEl.naturalHeight) {
+               onCarouselImageLoad(imgEl, i);
+             }
+           });
          })">
       <div class="position-relative feed-media-aura-container">
-        <!-- Ambient Dynamic Backlight Glow for Carousel -->
+        <!-- Ambient Dynamic Backlight Glow for Carousel (Synchronised to Active Slide) -->
         <div class="feed-media-aura-backdrop" aria-hidden="true">
-          <img :src="(post.images[0] && (post.images[0].startsWith('/public/') || post.images[0].startsWith('/images/'))) ? post.images[0] : getPostImageUrl(post.images[0])" 
+          <img :src="((post.images[currentIdx] || post.images[0]) && ((post.images[currentIdx] || post.images[0]).startsWith('/public/') || (post.images[currentIdx] || post.images[0]).startsWith('/images/'))) ? (post.images[currentIdx] || post.images[0]) : getPostImageUrl(post.images[currentIdx] || post.images[0])" 
                alt="" 
                loading="lazy" 
                decoding="async" 
@@ -622,18 +647,24 @@
                playingVoicePostNo === post.post_no ? 'photo-voice-playing' : '',
                ((post.post_no || 0) % 3 === 0 ? 'living-drift-a' : ((post.post_no || 0) % 3 === 1 ? 'living-drift-b' : 'living-drift-c'))
              ]"
-             :style="'border-radius:12px; aspect-ratio: ' + carouselAspect + '; max-height: 600px; width: 100%; background: #0b0f19;'">
+             :style="'border-radius:12px; aspect-ratio: ' + (slideAspects[currentIdx] || carouselAspect) + '; max-height: 600px; width: 100%; background: #0b0f19; transition: aspect-ratio 0.38s cubic-bezier(0.16, 1, 0.3, 1);'">
           
-          <!-- Fanciful Instagram Multi-Photo Stacked Badge -->
+          <!-- Fanciful Instagram Multi-Photo 3-Layer Luxury Stacked Badge -->
           <div class="position-absolute top-0 end-0 m-3 carousel-fanciful-badge"
-               title="Multiple photos in carousel"
+               title="Multiple photos in carousel — swipe or tap arrows to view all"
                aria-label="Multiple photos in post">
-            <svg class="carousel-cards-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
-              <rect x="7" y="3" width="14" height="14" rx="3" fill="rgba(255, 255, 255, 0.22)" stroke="#ffd700" stroke-width="1.3" opacity="0.9" />
-              <rect x="3" y="7" width="14" height="14" rx="3" fill="#0f172a" stroke="#ffffff" stroke-width="1.5" />
-              <circle cx="7.5" cy="11.5" r="1.3" fill="#ffd700" />
-              <path d="M4.5 18l3.8-4.5 2.7 3.2 2.2-2.3 3.3 3.6h-12z" fill="#ffffff" opacity="0.9" />
+            <svg class="carousel-cards-icon" viewBox="0 0 26 26" width="18" height="18" fill="none" aria-hidden="true">
+              <!-- Deepest 3rd card (gold shimmer fan) -->
+              <rect x="9" y="2" width="14" height="14" rx="3.2" fill="rgba(255, 215, 0, 0.22)" stroke="#ffd700" stroke-width="1.3" opacity="0.85" />
+              <!-- Middle 2nd card -->
+              <rect x="5.5" y="5.5" width="14" height="14" rx="3.2" fill="rgba(30, 41, 59, 0.9)" stroke="#fde047" stroke-width="1.4" />
+              <!-- Front Hero card -->
+              <rect x="2" y="9" width="14.5" height="14.5" rx="3.4" fill="#0f172a" stroke="#ffffff" stroke-width="1.7" />
+              <!-- Golden Sun & Mountain Panorama inside Front Card -->
+              <circle cx="6.8" cy="13.8" r="1.6" fill="#ffd700" />
+              <path d="M3.6 20.8l3.8-4.6 2.7 3.1 2.2-2.3 2.8 3.8H3.6z" fill="#ffffff" opacity="0.95" />
             </svg>
+            <span class="carousel-badge-dot" aria-hidden="true"></span>
             <span class="carousel-counter-text" x-text="(currentIdx + 1) + ' / ' + post.images.length"></span>
           </div>
 
@@ -679,7 +710,7 @@
                     <source :srcset="getPostImageVariantUrl(img, 'webp')" type="image/webp">
                     <img :src="(img && (img.startsWith('/public/') || img.startsWith('/images/'))) ? img : getPostImageUrl(img)" 
                          class="post-media-first-img living-canvas-img w-100 h-100"
-                         style="border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: cover; object-position: center; cursor: pointer; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;" 
+                         :style="'border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: cover; object-position: ' + (slideFocals[idx] || '50% 34%') + '; cursor: pointer; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;'" 
                          alt="Family carousel slide" 
                          @load="onCarouselImageLoad($event.target, idx)"
                          loading="lazy"

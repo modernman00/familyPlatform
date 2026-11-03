@@ -42,6 +42,12 @@ final class OnboardingFollowupService
     public const EVENT_DAY49_REUNION = 'reunion_planner_day49';
     public const EVENT_DAY60_DYNASTY = 'dynasty_snapshot_day60';
 
+    // Inactivity & Dormancy Re-Engagement Lifecycle Events
+    public const EVENT_INACTIVITY_TIER1_GHOST    = 'inactivity_tier1_one_name';
+    public const EVENT_INACTIVITY_TIER2_DELEGATE = 'inactivity_tier2_delegate_copilot';
+    public const EVENT_INACTIVITY_TIER3_BANTER   = 'inactivity_tier3_sunday_banter';
+    public const EVENT_INACTIVITY_TIER4_DEEP     = 'inactivity_tier4_deep_dormant_magic';
+
     /**
      * Run all automated onboarding touchpoints across eligible cohorts.
      *
@@ -74,6 +80,9 @@ final class OnboardingFollowupService
         $d49 = self::processDay49ReunionPlanner($dryRun, $forceUserId);
         $d60 = self::processDay60DynastySnapshot($dryRun, $forceUserId);
 
+        // Process all 4 Inactivity Dormancy Tiers (Ghost, Delegate, Banter, Deep Hibernation)
+        $inactivity = self::runAllInactivityTouchpoints($dryRun, $forceUserId);
+
         return [
             'day1_processed'  => $d1,
             'day3_processed'  => $d3,
@@ -85,6 +94,10 @@ final class OnboardingFollowupService
             'day42_processed' => $d42,
             'day49_processed' => $d49,
             'day60_processed' => $d60,
+            'tier1_ghost_processed'    => $inactivity['tier1_ghost_processed'],
+            'tier2_delegate_processed' => $inactivity['tier2_delegate_processed'],
+            'tier3_banter_processed'   => $inactivity['tier3_banter_processed'],
+            'tier4_deep_processed'     => $inactivity['tier4_deep_processed'],
             'dry_run'         => $dryRun,
         ];
     }
@@ -938,12 +951,12 @@ final class OnboardingFollowupService
                 LEFT JOIN contact c ON a.id = c.id
                 LEFT JOIN user_lifecycle_events e ON a.id = e.user_id AND e.event_type = ?
                 WHERE a.deleted_at IS NULL
-                  AND a.status = ?
+                  AND a.status IN (\'active\', \'approved\', \'verified\')
                   AND a.id = ?
                   AND e.id IS NULL
             ';
             $stmt = $db->prepare($sql);
-            $stmt->execute([$eventType, 'approved', $forceUserId]);
+            $stmt->execute([$eventType, $forceUserId]);
             /** @var array<int, array<string, mixed>> $res */
             $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
             return $res;
@@ -957,13 +970,13 @@ final class OnboardingFollowupService
                 LEFT JOIN contact c ON a.id = c.id
                 LEFT JOIN user_lifecycle_events e ON a.id = e.user_id AND e.event_type = ?
                 WHERE a.deleted_at IS NULL
-                  AND a.status = ?
+                  AND a.status IN (\'active\', \'approved\', \'verified\')
                   AND a.created_at <= ?
                   AND a.created_at >= ?
                   AND e.id IS NULL
             ';
             $stmt = $db->prepare($sql);
-            $stmt->execute([$eventType, 'approved', $minAgeDate, $maxAgeDate]);
+            $stmt->execute([$eventType, $minAgeDate, $maxAgeDate]);
             /** @var array<int, array<string, mixed>> $res */
             $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
             return $res;
@@ -976,12 +989,12 @@ final class OnboardingFollowupService
             LEFT JOIN contact c ON a.id = c.id
             LEFT JOIN user_lifecycle_events e ON a.id = e.user_id AND e.event_type = ?
             WHERE a.deleted_at IS NULL
-              AND a.status = ?
+              AND a.status IN (\'active\', \'approved\', \'verified\')
               AND a.created_at <= ?
               AND e.id IS NULL
         ';
         $stmt = $db->prepare($sql);
-        $stmt->execute([$eventType, 'approved', $minAgeDate]);
+        $stmt->execute([$eventType, $minAgeDate]);
         /** @var array<int, array<string, mixed>> $res */
         $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $res;
@@ -1009,5 +1022,346 @@ final class OnboardingFollowupService
         } catch (Throwable $e) {
             error_log("[OnboardingFollowupService] Failed to record lifecycle event: " . $e->getMessage());
         }
+    }
+
+    /**
+     * Run all automated inactivity & dormancy re-engagement touchpoints.
+     *
+     * @param bool $dryRun If true, computes matches without sending emails or push alerts
+     * @param string|null $forceUserId If set, executes for this specific user
+     * @return array{
+     *     tier1_ghost_processed: int,
+     *     tier2_delegate_processed: int,
+     *     tier3_banter_processed: int,
+     *     tier4_deep_processed: int,
+     *     dry_run: bool
+     * }
+     */
+    public static function runAllInactivityTouchpoints(bool $dryRun = false, ?string $forceUserId = null): array
+    {
+        $t1 = self::processInactivityTier1Ghost($dryRun, $forceUserId);
+        $t2 = self::processInactivityTier2Delegate($dryRun, $forceUserId);
+        $t3 = self::processInactivityTier3SundayBanter($dryRun, $forceUserId);
+        $t4 = self::processInactivityTier4DeepDormant($dryRun, $forceUserId);
+
+        return [
+            'tier1_ghost_processed'    => $t1,
+            'tier2_delegate_processed' => $t2,
+            'tier3_banter_processed'   => $t3,
+            'tier4_deep_processed'     => $t4,
+            'dry_run'                  => $dryRun,
+        ];
+    }
+
+    /**
+     * Inactivity Tier 1: Ghost Pioneers (48h–7d inactive, 0 nodes, 0 posts)
+     * Micro-Action: Start with just one name
+     */
+    public static function processInactivityTier1Ghost(bool $dryRun = false, ?string $forceUserId = null): int
+    {
+        $candidates = InactivityScoringService::fetchCandidatesForTier(
+            self::EVENT_INACTIVITY_TIER1_GHOST,
+            $forceUserId
+        );
+        $processed = 0;
+
+        foreach ($candidates as $user) {
+            $userId    = (string)$user['id'];
+            $email     = (string)($user['email'] ?? '');
+            $famCode   = (string)($user['famCode'] ?? '');
+            $firstName = (string)($user['firstName'] ?? 'Family Member');
+            $lastName  = (string)($user['lastName'] ?? '');
+
+            if (empty($email) || empty($famCode)) {
+                continue;
+            }
+
+            if (!$dryRun) {
+                $magicUrl = MagicAuthService::generateMagicUrl(
+                    $userId,
+                    '/organogram?action=add_first',
+                    72,
+                    ['campaign' => self::EVENT_INACTIVITY_TIER1_GHOST]
+                );
+
+                try {
+                    $emailData = [
+                        'id'        => $userId,
+                        'firstName' => $firstName,
+                        'lastName'  => $lastName,
+                        'email'     => $email,
+                        'famCode'   => $famCode,
+                        'magicUrl'  => $magicUrl,
+                    ];
+                    SendEmailFunctionality::email(
+                        'msg/lifecycle/inactivity_tier1_one_name',
+                        "{$firstName}, start with just one name — your family sanctuary awaits",
+                        $emailData,
+                        'member'
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Tier 1 Inactivity Email error for user {$userId}: " . $e->getMessage());
+                }
+
+                try {
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'onboarding',
+                        priority: 'high',
+                        title: '🌱 Start with Just One Name',
+                        body: "Hello {$firstName}! You do not need to map four generations today. Add just one person you cherish in 15 seconds.",
+                        actionUrl: '/organogram?action=add_first',
+                        tag: 'inactivity-tier1',
+                        familyCode: $famCode,
+                        metadata: ['event' => self::EVENT_INACTIVITY_TIER1_GHOST]
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Tier 1 Inactivity Push error for user {$userId}: " . $e->getMessage());
+                }
+
+                self::recordLifecycleEvent($userId, self::EVENT_INACTIVITY_TIER1_GHOST, 'omni', [
+                    'email'    => $email,
+                    'fam_code' => $famCode,
+                ]);
+            }
+
+            $processed++;
+        }
+
+        return $processed;
+    }
+
+    /**
+     * Inactivity Tier 2: Stalled Explorers (7d–14d inactive, <= 1 node, 0 posts)
+     * Micro-Action: WhatsApp Co-Pilot Delegation
+     */
+    public static function processInactivityTier2Delegate(bool $dryRun = false, ?string $forceUserId = null): int
+    {
+        $candidates = InactivityScoringService::fetchCandidatesForTier(
+            self::EVENT_INACTIVITY_TIER2_DELEGATE,
+            $forceUserId
+        );
+        $processed = 0;
+
+        foreach ($candidates as $user) {
+            $userId    = (string)$user['id'];
+            $email     = (string)($user['email'] ?? '');
+            $famCode   = (string)($user['famCode'] ?? '');
+            $firstName = (string)($user['firstName'] ?? 'Family Member');
+            $lastName  = (string)($user['lastName'] ?? '');
+
+            if (empty($email) || empty($famCode)) {
+                continue;
+            }
+
+            if (!$dryRun) {
+                $magicUrl = MagicAuthService::generateMagicUrl(
+                    $userId,
+                    '/organogram',
+                    72,
+                    ['campaign' => self::EVENT_INACTIVITY_TIER2_DELEGATE]
+                );
+
+                try {
+                    $emailData = [
+                        'id'        => $userId,
+                        'firstName' => $firstName,
+                        'lastName'  => $lastName,
+                        'email'     => $email,
+                        'famCode'   => $famCode,
+                        'magicUrl'  => $magicUrl,
+                    ];
+                    SendEmailFunctionality::email(
+                        'msg/lifecycle/inactivity_tier2_delegate_copilot',
+                        "Too busy to build your family tree alone? Delegate the torch",
+                        $emailData,
+                        'member'
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Tier 2 Inactivity Email error for user {$userId}: " . $e->getMessage());
+                }
+
+                try {
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'onboarding',
+                        priority: 'medium',
+                        title: '🤝 Invite a Family Co-Pilot',
+                        body: 'Preserving family history should not be a solo job. Invite a sibling or parent on WhatsApp to help build your tree.',
+                        actionUrl: '/organogram',
+                        tag: 'inactivity-tier2',
+                        familyCode: $famCode,
+                        metadata: ['event' => self::EVENT_INACTIVITY_TIER2_DELEGATE]
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Tier 2 Inactivity Push error for user {$userId}: " . $e->getMessage());
+                }
+
+                self::recordLifecycleEvent($userId, self::EVENT_INACTIVITY_TIER2_DELEGATE, 'omni', [
+                    'email'    => $email,
+                    'fam_code' => $famCode,
+                ]);
+            }
+
+            $processed++;
+        }
+
+        return $processed;
+    }
+
+    /**
+     * Inactivity Tier 3: Dormant Banter (14d–30d inactive)
+     * Micro-Action: Lighthearted Sunday Banter Poll
+     */
+    public static function processInactivityTier3SundayBanter(bool $dryRun = false, ?string $forceUserId = null): int
+    {
+        $candidates = InactivityScoringService::fetchCandidatesForTier(
+            self::EVENT_INACTIVITY_TIER3_BANTER,
+            $forceUserId
+        );
+        $processed = 0;
+
+        foreach ($candidates as $user) {
+            $userId    = (string)$user['id'];
+            $email     = (string)($user['email'] ?? '');
+            $famCode   = (string)($user['famCode'] ?? '');
+            $firstName = (string)($user['firstName'] ?? 'Family Member');
+            $lastName  = (string)($user['lastName'] ?? '');
+
+            if (empty($email) || empty($famCode)) {
+                continue;
+            }
+
+            if (!$dryRun) {
+                $magicUrl = MagicAuthService::generateMagicUrl(
+                    $userId,
+                    '/profilePage',
+                    72,
+                    ['campaign' => self::EVENT_INACTIVITY_TIER3_BANTER]
+                );
+
+                try {
+                    $emailData = [
+                        'id'        => $userId,
+                        'firstName' => $firstName,
+                        'lastName'  => $lastName,
+                        'email'     => $email,
+                        'famCode'   => $famCode,
+                        'magicUrl'  => $magicUrl,
+                    ];
+                    SendEmailFunctionality::email(
+                        'msg/lifecycle/inactivity_tier3_sunday_banter',
+                        "Quick question: Who actually makes the best Sunday roast in your family?",
+                        $emailData,
+                        'member'
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Tier 3 Inactivity Email error for user {$userId}: " . $e->getMessage());
+                }
+
+                try {
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'social',
+                        priority: 'medium',
+                        title: '🍗 Family Banter Time!',
+                        body: 'Who is the best cook in your family? Settle the debate on this week\'s family poll.',
+                        actionUrl: '/profilePage',
+                        tag: 'inactivity-tier3',
+                        familyCode: $famCode,
+                        metadata: ['event' => self::EVENT_INACTIVITY_TIER3_BANTER]
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Tier 3 Inactivity Push error for user {$userId}: " . $e->getMessage());
+                }
+
+                self::recordLifecycleEvent($userId, self::EVENT_INACTIVITY_TIER3_BANTER, 'omni', [
+                    'email'    => $email,
+                    'fam_code' => $famCode,
+                ]);
+            }
+
+            $processed++;
+        }
+
+        return $processed;
+    }
+
+    /**
+     * Inactivity Tier 4: Deep Hibernation (30d+ inactive)
+     * Micro-Action: Loss Aversion & 1-Click Ephemeral Magic Link
+     */
+    public static function processInactivityTier4DeepDormant(bool $dryRun = false, ?string $forceUserId = null): int
+    {
+        $candidates = InactivityScoringService::fetchCandidatesForTier(
+            self::EVENT_INACTIVITY_TIER4_DEEP,
+            $forceUserId
+        );
+        $processed = 0;
+
+        foreach ($candidates as $user) {
+            $userId    = (string)$user['id'];
+            $email     = (string)($user['email'] ?? '');
+            $famCode   = (string)($user['famCode'] ?? '');
+            $firstName = (string)($user['firstName'] ?? 'Family Member');
+            $lastName  = (string)($user['lastName'] ?? '');
+
+            if (empty($email) || empty($famCode)) {
+                continue;
+            }
+
+            if (!$dryRun) {
+                $magicUrl = MagicAuthService::generateMagicUrl(
+                    $userId,
+                    '/organogram',
+                    72,
+                    ['campaign' => self::EVENT_INACTIVITY_TIER4_DEEP]
+                );
+
+                try {
+                    $emailData = [
+                        'id'        => $userId,
+                        'firstName' => $firstName,
+                        'lastName'  => $lastName,
+                        'email'     => $email,
+                        'famCode'   => $famCode,
+                        'magicUrl'  => $magicUrl,
+                    ];
+                    SendEmailFunctionality::email(
+                        'msg/lifecycle/inactivity_tier4_deep_dormant_magic',
+                        "{$firstName}, your family sanctuary is still reserved — 1-click access (no password needed)",
+                        $emailData,
+                        'member'
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Tier 4 Inactivity Email error for user {$userId}: " . $e->getMessage());
+                }
+
+                try {
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'onboarding',
+                        priority: 'high',
+                        title: '🏛️ Your Family Space is Reserved',
+                        body: "Hello {$firstName}! Your family sanctuary is safely reserved. Preserving one memory takes under 2 minutes.",
+                        actionUrl: '/organogram',
+                        tag: 'inactivity-tier4',
+                        familyCode: $famCode,
+                        metadata: ['event' => self::EVENT_INACTIVITY_TIER4_DEEP]
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Tier 4 Inactivity Push error for user {$userId}: " . $e->getMessage());
+                }
+
+                self::recordLifecycleEvent($userId, self::EVENT_INACTIVITY_TIER4_DEEP, 'omni', [
+                    'email'    => $email,
+                    'fam_code' => $famCode,
+                ]);
+            }
+
+            $processed++;
+        }
+
+        return $processed;
     }
 }

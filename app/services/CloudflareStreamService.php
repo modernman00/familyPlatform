@@ -15,11 +15,37 @@ class CloudflareStreamService
     }
 
     /**
-     * Check if Cloudflare Stream credentials are configured
+     * Check if Cloudflare Stream credentials are configured and structurally valid
      */
     public function isConfigured(): bool
     {
-        return !empty($this->accountId) && !empty($this->apiToken);
+        return !empty($this->accountId)
+            && !empty($this->apiToken)
+            && (bool)preg_match('/^[a-zA-Z0-9_\-]{16,64}$/', $this->accountId);
+    }
+
+    /**
+     * Resolve allowed CORS origins for Cloudflare Stream direct uploads
+     *
+     * @return list<string>
+     */
+    private function getAllowedOrigins(): array
+    {
+        $rawAppUrl = (string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com');
+        $host = parse_url($rawAppUrl, PHP_URL_HOST);
+        $origins = [];
+        if (is_string($host) && $host !== '') {
+            $origins[] = $host;
+            if (!str_starts_with($host, 'www.') && $host !== 'localhost' && $host !== '127.0.0.1') {
+                $origins[] = 'www.' . $host;
+            }
+        }
+        $env = strtolower(trim((string)($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'production'), "'\""));
+        if (in_array($env, ['local', 'development', 'dev', 'testing'], true)) {
+            $origins[] = 'localhost';
+            $origins[] = '127.0.0.1';
+        }
+        return !empty($origins) ? array_values(array_unique($origins)) : ['myfamilyplatform.com'];
     }
 
     /**
@@ -44,7 +70,7 @@ class CloudflareStreamService
         $payloadData = [
             'maxDurationSeconds' => $maxDurationSeconds,
             'requireSignedURLs' => false,
-            'allowedOrigins' => ['*'],
+            'allowedOrigins' => $this->getAllowedOrigins(),
         ];
 
         // If expirySeconds > 0, set expiration date. If 0 (permanent), omit expiry.
@@ -74,7 +100,9 @@ class CloudflareStreamService
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $curlError = curl_error($ch);
-        curl_close($ch);
+        if (\PHP_VERSION_ID < 80500) {
+            @curl_close($ch);
+        }
 
         if ($response === false || !empty($curlError)) {
             error_log("[CloudflareStream] cURL Error: {$curlError}");
@@ -94,7 +122,61 @@ class CloudflareStreamService
         }
 
         $errorMsg = $data['errors'][0]['message'] ?? 'Failed to generate video upload URL';
+        if (!empty($data['messages'][0]['message'])) {
+            $errorMsg .= ' (' . $data['messages'][0]['message'] . ')';
+        }
         error_log("[CloudflareStream] API Error ({$httpCode}): {$errorMsg}");
+
+        if ($httpCode === 401 || $httpCode === 403 || str_contains(strtolower($errorMsg), 'authoriz') || str_contains(strtolower($errorMsg), 'authoris')) {
+            $this->notifyAdminOfStreamFailure($errorMsg, $httpCode);
+        }
+
         return ['success' => false, 'error' => $errorMsg];
+    }
+
+    /**
+     * Notify platform administrator via shared-lib email when Cloudflare credentials fail
+     */
+    private function notifyAdminOfStreamFailure(string $errorMessage, int $httpCode): void
+    {
+        // Never send external email alerts in local test environment unless explicitly enabled
+        if (function_exists('isTestEnv') && \isTestEnv()) {
+            return;
+        }
+
+        // Throttled to at most once per 24 hours to prevent inbox spamming
+        $lockFile = sys_get_temp_dir() . '/cf_stream_auth_alert.lock';
+        if (file_exists($lockFile) && (time() - filemtime($lockFile)) < 86400) {
+            return;
+        }
+        @touch($lockFile);
+
+        try {
+            $adminEmail = (string)($_ENV['ADMIN_EMAIL'] ?? getenv('ADMIN_EMAIL') ?: 'general@myfamilyplatform.com');
+            if (empty($adminEmail)) {
+                return;
+            }
+
+            $subject = '🚨 [CRITICAL ALERT] Cloudflare Stream API Token Authorisation Failure';
+            $data = [
+                'email' => $adminEmail,
+                'name' => 'Wally',
+                'isFunctional' => true,
+                'error' => $errorMessage,
+                'httpCode' => $httpCode,
+                'accountId' => $this->accountId,
+                'time' => date('Y-m-d H:i:s T'),
+            ];
+
+            if (class_exists('\Src\ToSendEmail')) {
+                \Src\ToSendEmail::sendEmailGeneral([
+                    'viewPath' => 'msg.admin.cloudflareStreamAlert',
+                    'data' => $data,
+                    'subject' => $subject,
+                ], 'admin');
+            }
+        } catch (\Throwable $e) {
+            error_log('[CloudflareStream Alert Error] ' . $e->getMessage());
+        }
     }
 }

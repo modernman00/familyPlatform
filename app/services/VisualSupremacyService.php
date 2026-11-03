@@ -370,6 +370,7 @@ final class VisualSupremacyService
             try {
                 $gdImg = self::createGdResource($sourcePath);
                 if ($gdImg !== null) {
+                    self::applySuperHdUnsharpMask($gdImg);
                     $saved = @imageavif($gdImg, $fullPath, 85);
                     imagedestroy($gdImg);
                     if ($saved && file_exists($fullPath) && filesize($fullPath) > 0) {
@@ -396,6 +397,7 @@ final class VisualSupremacyService
             try {
                 $gdImg = self::createGdResource($sourcePath);
                 if ($gdImg !== null) {
+                    self::applySuperHdUnsharpMask($gdImg);
                     $saved = @imagewebp($gdImg, $fullPath, 92);
                     imagedestroy($gdImg);
                     if ($saved && file_exists($fullPath) && filesize($fullPath) > 0) {
@@ -408,6 +410,27 @@ final class VisualSupremacyService
         }
 
         return null;
+    }
+
+    /**
+     * ATG Sovereign Perceptual Unsharp Mask (Pod 1 & Pod 4: Dr. Chen Wei & Callum Wright)
+     * Applies a calibrated 3x3 high-frequency sharpening convolution kernel in C-level GD
+     * to restore micro-contrast (glasses frames, eyes, facial hair, fabric weave) without haloing.
+     *
+     * @param \GdImage|resource $gdImg
+     */
+    public static function applySuperHdUnsharpMask($gdImg): void
+    {
+        if (!function_exists('imageconvolution') || !$gdImg) {
+            return;
+        }
+
+        $sharpenKernel = [
+            [0.0, -1.0, 0.0],
+            [-1.0, 20.0, -1.0],
+            [0.0, -1.0, 0.0],
+        ];
+        @imageconvolution($gdImg, $sharpenKernel, 16.0, 0.0);
     }
 
     /**

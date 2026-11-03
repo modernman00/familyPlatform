@@ -79,7 +79,7 @@ echo "\n[3/5] Testing Service Worker (public/sw.js) Architecture...\n";
 $swCode = (string)file_get_contents(__DIR__ . '/../public/sw.js');
 
 assertCheck(!str_contains($swCode, 'if (isAppFocused)'), 'Foreground suppression (isAppFocused early exit) removed');
-assertCheck(str_contains($swCode, 'self.registration.showNotification(data.title, options)'), 'Unconditional showNotification call present');
+assertCheck(str_contains($swCode, 'self.registration.showNotification(notificationTitle, options)') || str_contains($swCode, 'self.registration.showNotification(data.title, options)'), 'Unconditional showNotification call present');
 assertCheck(str_contains($swCode, 'clearAppBadge'), 'Web Badging API clearAppBadge integrated in notificationclick');
 
 // 4. Test PWA Register Self-Healing Partial

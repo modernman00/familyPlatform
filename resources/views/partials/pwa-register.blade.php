@@ -160,3 +160,4 @@
   }
 })();
 </script>
+{!! function_exists('renderBiometricPasskeyPrompt') ? renderBiometricPasskeyPrompt($nonce ?? null) : '' !!}

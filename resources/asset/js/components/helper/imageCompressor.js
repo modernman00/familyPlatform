@@ -7,7 +7,56 @@
  */
 
 /**
- * Compresses an image File or Blob using HTML5 Canvas.
+ * ATG Sovereign Multi-Pass Super-Sampling & Perceptual Clarity Renderer
+ * (Pod 3 & Pod 4: Maya Lindqvist & Callum Wright)
+ * Prevents single-step bilinear aliasing when downscaling high-megapixel camera photos
+ * by stepping down in 50% octave stages and applying subtle perceptual micro-contrast.
+ */
+export function drawAtgSuperSampledImage(ctx, source, srcW, srcH, dstW, dstH) {
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    if (typeof ctx.filter === 'string') {
+        ctx.filter = 'contrast(1.025) saturate(1.03)';
+    }
+
+    // Multi-pass octave step-down if downscaling by > 1.75x for DSLR/Instagram sharpness
+    if (srcW > dstW * 1.75 && srcH > dstH * 1.75 && typeof document !== 'undefined') {
+        let curW = Math.round(srcW * 0.5);
+        let curH = Math.round(srcH * 0.5);
+        const stepCanvas = document.createElement('canvas');
+        stepCanvas.width = curW;
+        stepCanvas.height = curH;
+        const stepCtx = stepCanvas.getContext('2d');
+
+        if (stepCtx) {
+            stepCtx.imageSmoothingEnabled = true;
+            stepCtx.imageSmoothingQuality = 'high';
+            stepCtx.drawImage(source, 0, 0, curW, curH);
+
+            while (curW * 0.5 > dstW * 1.35 && curH * 0.5 > dstH * 1.35) {
+                const nextW = Math.round(curW * 0.5);
+                const nextH = Math.round(curH * 0.5);
+                stepCtx.drawImage(stepCanvas, 0, 0, curW, curH, 0, 0, nextW, nextH);
+                curW = nextW;
+                curH = nextH;
+            }
+
+            ctx.drawImage(stepCanvas, 0, 0, curW, curH, 0, 0, dstW, dstH);
+            if (typeof ctx.filter === 'string') {
+                ctx.filter = 'none';
+            }
+            return;
+        }
+    }
+
+    ctx.drawImage(source, 0, 0, dstW, dstH);
+    if (typeof ctx.filter === 'string') {
+        ctx.filter = 'none';
+    }
+}
+
+/**
  * 
  * @param {File|Blob} file - The original image file
  * @param {Object} options - Compression options
@@ -29,9 +78,9 @@ export async function compressImageFile(file, options = {}) {
     }
 
     const {
-        maxWidth = 2560,
-        maxHeight = 2560,
-        quality = 0.92,
+        maxWidth = 2048,
+        maxHeight = 2048,
+        quality = 0.85,
         mimeType = 'image/jpeg'
     } = options;
 
@@ -80,7 +129,7 @@ export async function compressImageFile(file, options = {}) {
                 ctx.fillRect(0, 0, width, height);
             }
 
-            ctx.drawImage(bitmap, 0, 0, width, height);
+            drawAtgSuperSampledImage(ctx, bitmap, bitmap.width, bitmap.height, width, height);
             bitmap.close();
 
             return await new Promise((resolve) => {
@@ -152,7 +201,7 @@ export async function compressImageFile(file, options = {}) {
                         ctx.fillRect(0, 0, width, height);
                     }
 
-                    ctx.drawImage(img, 0, 0, width, height);
+                    drawAtgSuperSampledImage(ctx, img, img.naturalWidth || width, img.naturalHeight || height, width, height);
 
                     canvas.toBlob(
                         (blob) => {

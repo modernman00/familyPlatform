@@ -355,11 +355,28 @@ self.addEventListener('push', (event) => {
   if (event.data) {
     try {
       const payload = event.data.json();
-      data = { ...data, ...payload };
+      const inner = (payload && typeof payload === 'object') ? (payload.notification || payload.data || {}) : {};
+      data = { ...data, ...payload, ...inner };
     } catch (e) {
       data.body = event.data.text();
     }
   }
+
+  // Defensive String Coercion: Prevent any [object Object] rendering
+  const safeExtractString = (val, fallback) => {
+    if (typeof val === 'string' && val.trim() !== '') return val;
+    if (val && typeof val === 'object') {
+      if (typeof val.body === 'string' && val.body.trim() !== '') return val.body;
+      if (typeof val.message === 'string' && val.message.trim() !== '') return val.message;
+      if (typeof val.title === 'string' && val.title.trim() !== '') return val.title;
+      if (typeof val.content === 'string' && val.content.trim() !== '') return val.content;
+      try { return JSON.stringify(val); } catch (e) {}
+    }
+    return fallback;
+  };
+
+  const notificationTitle = safeExtractString(data.title, 'FamilyPlatform Live Alert 🔔');
+  const notificationBody = safeExtractString(data.body, 'You have a new update.');
 
   // A. Cross-Device Dismissal Sync Event
   if (data.syncAction === 'CLOSE_NOTIFICATION') {
@@ -407,14 +424,14 @@ self.addEventListener('push', (event) => {
 
   // C. Unconditional OS Notification Dispatch (ExecMind / Tier-1 PWA Gold Standard)
   const options = {
-    body: data.body,
-    icon: data.icon || '/public/img/favicon/android-chrome-192x192.png',
-    badge: data.badge || '/public/img/favicon/favicon-32x32.png',
-    tag: data.tag || 'family-alert',
+    body: notificationBody,
+    icon: (typeof data.icon === 'string' && data.icon) ? data.icon : '/public/img/favicon/android-chrome-192x192.png',
+    badge: (typeof data.badge === 'string' && data.badge) ? data.badge : '/public/img/favicon/favicon-32x32.png',
+    tag: (typeof data.tag === 'string' && data.tag) ? data.tag : 'family-alert',
     renotify: true,
     data: {
       id: data.targetNotificationId || data.id,
-      url: data.url || '/profilePage'
+      url: (typeof data.url === 'string' && data.url) ? data.url : '/profilePage'
     },
     vibrate: data.isSilent ? [] : [100, 50, 100],
     silent: !!data.isSilent,
@@ -424,21 +441,27 @@ self.addEventListener('push', (event) => {
     ]
   };
 
-  pushPromises.push(self.registration.showNotification(data.title, options));
+  pushPromises.push(self.registration.showNotification(notificationTitle, options));
 
   // D. Broadcast to all open client windows (for live in-app toasts & bell counter updates)
+  const broadcastPayload = {
+    ...data,
+    title: notificationTitle,
+    body: notificationBody
+  };
+
   pushPromises.push(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       if (syncBroadcastChannel) {
         syncBroadcastChannel.postMessage({
           type: 'ON_APP_NOTIFICATION',
-          payload: data
+          payload: broadcastPayload
         });
       }
       clientList.forEach((client) => {
         client.postMessage({
           type: 'ON_APP_NOTIFICATION',
-          payload: data
+          payload: broadcastPayload
         });
       });
     }).catch(() => {})

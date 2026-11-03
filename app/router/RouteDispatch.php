@@ -58,6 +58,7 @@ final class RouteDispatch
             'App\controller\login\Code',
             'App\controller\login\Forgot',
             'App\controller\login\PassChange',
+            'App\controller\login\MagicAuthController',
             'App\controller\ClearCache',
             'App\controller\login\OAuthController',
             'App\controller\BlogController',
@@ -76,6 +77,7 @@ final class RouteDispatch
             'App\controller\About',
             'App\controller\PublicToolsController',
             'App\controller\members\OmniSearchController',
+            'App\controller\RealtimeBroadcastingController', // Sovereign Realtime Broadcasting SSE & Auth for FamilyPlatform
         ];
 
         if (\class_exists('\App\controller\BaseController')) {

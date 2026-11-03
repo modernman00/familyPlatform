@@ -140,6 +140,9 @@
             <button class="nav-link rounded-pill fw-semibold py-2 px-3 small" id="mode-instant-btn" data-bs-toggle="pill" data-bs-target="#court-mode-instant" type="button" role="tab" style="min-height: 44px;">
                 <i class="bi bi-lightning-charge-fill me-1 text-warning"></i> Quick 2-Minute Peacemaker
             </button>
+            <button class="nav-link rounded-pill fw-semibold py-2 px-3 small" id="mode-pinball-btn" data-bs-toggle="pill" data-bs-target="#court-mode-pinball" type="button" role="tab" style="min-height: 44px;">
+                <i class="bi bi-controller me-1 text-info"></i> Kinship Quest Arcade
+            </button>
         </div>
         <div class="d-inline-flex align-items-center gap-2 px-3 py-1 bg-light rounded-pill small text-muted">
             <i class="bi bi-peace text-success"></i> Reconciliatory &bull; Firm &bull; Non-Punitive
@@ -414,6 +417,11 @@
                 </div>
             </div>
         </div>
+
+        {{-- MODE C: KINSHIP QUEST CHORE ARCADE --}}
+        <div class="tab-pane fade" id="court-mode-pinball" role="tabpanel">
+            @include('components.kinship_quest_pinball')
+        </div>
     </div>
 </div>
 
@@ -518,6 +526,21 @@
     let activeDisputeId = null;
     const selectedWitnesses = new Map();
 
+    function escapeRoundTableHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str == null ? '' : String(str);
+        return div.innerHTML;
+    }
+
+    function getRoundTableCsrfToken() {
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta && meta.getAttribute('content')) {
+            return meta.getAttribute('content');
+        }
+        const input = document.querySelector('input[name="token"]') || document.querySelector('input[name="_token"]');
+        return input ? input.value : '';
+    }
+
     function handleWitnessSelectChange(selectEl) {
         const val = selectEl.value;
         if (!val) return;
@@ -546,7 +569,9 @@
             badge.style.background = '#f1f5f9';
             badge.style.color = '#1e1b4b';
             badge.style.border = '1px solid #cbd5e1';
-            badge.innerHTML = `<i class="bi bi-eye text-primary"></i> <span>${name}</span> <button type="button" class="btn-close" style="font-size: 0.65rem;" aria-label="Remove" onclick="removeSelectedWitness('${id}')"></button>`;
+            const safeName = escapeRoundTableHtml(name);
+            const safeId = escapeRoundTableHtml(id);
+            badge.innerHTML = `<i class="bi bi-eye text-primary"></i> <span>${safeName}</span> <button type="button" class="btn-close" style="font-size: 0.65rem;" aria-label="Remove" onclick="removeSelectedWitness('${safeId}')"></button>`;
             container.appendChild(badge);
         });
     }
@@ -608,9 +633,13 @@
         }
 
         try {
+            const csrfToken = getRoundTableCsrfToken();
             const res = await fetch('/api/roundtable/file-dispute', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
                 body: JSON.stringify({
                     is_third_party: isThirdParty,
                     party_a_id: partyA,
@@ -618,7 +647,8 @@
                     witness_ids: witnessIds,
                     title: title,
                     category: category,
-                    grievance: grievance
+                    grievance: grievance,
+                    token: csrfToken
                 })
             });
 
@@ -706,15 +736,18 @@
 
                 const row = document.createElement('div');
                 row.className = 'p-3 rounded-3 border bg-white shadow-xs';
+                const safeAuthor = escapeRoundTableHtml(authorName);
+                const safeCreatedAt = escapeRoundTableHtml(st.created_at || '');
+                const safeStatement = escapeRoundTableHtml(st.statement || '');
                 row.innerHTML = `
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <div class="d-flex align-items-center gap-2">
-                            <span class="fw-bold small text-dark">${authorName}</span>
+                            <span class="fw-bold small text-dark">${safeAuthor}</span>
                             ${roleBadge}
                         </div>
-                        <small class="text-muted" style="font-size: 0.72rem;">${st.created_at || ''}</small>
+                        <small class="text-muted" style="font-size: 0.72rem;">${safeCreatedAt}</small>
                     </div>
-                    <p class="text-muted small mb-0 lh-base">${st.statement || ''}</p>
+                    <p class="text-muted small mb-0 lh-base">${safeStatement}</p>
                 `;
                 sList.appendChild(row);
             });
@@ -736,7 +769,7 @@
                 for (const [key, val] of Object.entries(plan)) {
                     const planRow = document.createElement('div');
                     planRow.className = 'p-2 rounded-2 bg-white bg-opacity-10 text-light small d-flex align-items-start gap-2';
-                    planRow.innerHTML = `<span class="badge bg-warning text-dark fw-bold">${key}:</span> <span>${val}</span>`;
+                    planRow.innerHTML = `<span class="badge bg-warning text-dark fw-bold">${escapeRoundTableHtml(key)}:</span> <span>${escapeRoundTableHtml(val)}</span>`;
                     planBox.appendChild(planRow);
                 }
 
@@ -789,15 +822,18 @@
         }
 
         try {
+            const csrfToken = getRoundTableCsrfToken();
             const res = await fetch('/api/roundtable/submit-statement', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken
                 },
                 body: JSON.stringify({
                     dispute_id: activeDisputeId,
-                    statement: text
+                    statement: text,
+                    token: csrfToken
                 })
             });
 
@@ -842,13 +878,18 @@
         }
 
         try {
+            const csrfToken = getRoundTableCsrfToken();
             const res = await fetch('/api/roundtable/adjudicate', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken
                 },
-                body: JSON.stringify({ dispute_id: activeDisputeId })
+                body: JSON.stringify({
+                    dispute_id: activeDisputeId,
+                    token: csrfToken
+                })
             });
 
             const data = await res.json();
@@ -886,15 +927,20 @@
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Deliberating Accord...';
 
         try {
+            const csrfToken = getRoundTableCsrfToken();
             const res = await fetch('/api/roundtable/arbitrate-instant', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
                 body: JSON.stringify({
                     party_a_name: document.getElementById('party-a-name').value,
                     party_a_claim: document.getElementById('party-a-claim').value,
                     party_b_name: document.getElementById('party-b-name').value,
                     party_b_claim: document.getElementById('party-b-claim').value,
-                    context: document.getElementById('dispute-context').value
+                    context: document.getElementById('dispute-context').value,
+                    token: csrfToken
                 })
             });
             const data = await res.json();
@@ -910,7 +956,7 @@
                 for (const [person, task] of Object.entries(data.compromise_action_plan || {})) {
                     const row = document.createElement('div');
                     row.className = 'd-flex align-items-center justify-content-between p-2 bg-light rounded-3';
-                    row.innerHTML = `<span class="fw-bold small text-dark">${person}:</span><span class="small text-muted">${task}</span>`;
+                    row.innerHTML = `<span class="fw-bold small text-dark">${escapeRoundTableHtml(person)}:</span><span class="small text-muted">${escapeRoundTableHtml(task)}</span>`;
                     planList.appendChild(row);
                 }
 

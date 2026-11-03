@@ -118,7 +118,11 @@
 
   // 6. Floating In-App Toast Renderer
   function showFloatingToast(payload) {
-    if (!payload || !payload.title) return;
+    if (!payload) return;
+    const rawTitle = payload.title;
+    const rawBody = payload.body;
+    const toastTitle = typeof rawTitle === 'string' ? rawTitle : (rawTitle?.title || rawTitle?.name || 'FamilyPlatform');
+    const toastBody = typeof rawBody === 'string' ? rawBody : (rawBody?.body || rawBody?.message || rawBody?.content || '');
 
     const existing = document.getElementById('pwa-notification-toast');
     if (existing) {
@@ -159,10 +163,10 @@
       <img src="${iconSrc}" alt="Icon" style="width: 42px; height: 42px; border-radius: 10px; object-fit: cover; flex-shrink: 0;" />
       <div style="flex: 1; min-width: 0;">
         <div style="font-weight: 600; font-size: 14px; line-height: 1.2; color: #fff; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-          ${escapeHtml(payload.title)}
+          ${escapeHtml(toastTitle)}
         </div>
         <div style="font-size: 13px; color: #cbd5e1; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-          ${escapeHtml(payload.body || '')}
+          ${escapeHtml(toastBody || '')}
         </div>
       </div>
       <button type="button" id="pwa-toast-close" style="background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; padding: 4px 8px; line-height: 1;" aria-label="Close">

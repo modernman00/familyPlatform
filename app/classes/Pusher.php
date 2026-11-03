@@ -68,14 +68,24 @@ class Pusher
 
     public static function broadcast(string $theChannel, string $theEvent, array $theData): void
     {
+        // 1. Primary Attempt: Pusher (Free Tier)
         try {
             $pusher = self::pusher();
-            if ($pusher === null) {
-                return;
+            if ($pusher !== null) {
+                $pusher->trigger($theChannel, $theEvent, $theData);
             }
-            $pusher->trigger($theChannel, $theEvent, $theData);
         } catch (\Throwable $e) {
-            error_log("[Pusher] Broadcast to {$theChannel} failed: " . $e->getMessage());
+            error_log("[Pusher] Broadcast to {$theChannel} failed: " . $e->getMessage() . ". Defaulting to SovereignBroadcaster.");
+        }
+
+        // 2. Local Fallback & Synchronisation Rail: SovereignBroadcaster
+        try {
+            if (class_exists('\\Src\\Realtime\\SovereignBroadcaster')) {
+                $broadcaster = new \Src\Realtime\SovereignBroadcaster();
+                $broadcaster->trigger($theChannel, $theEvent, $theData);
+            }
+        } catch (\Throwable $e) {
+            error_log("[SovereignBroadcaster] Broadcast to {$theChannel} failed: " . $e->getMessage());
         }
     }
 
@@ -109,15 +119,8 @@ class Pusher
             error_log("Pusher::broadcastToFamily called with an empty famCode for event '{$event}'");
             return;
         }
-        try {
-            $pusher = self::pusher();
-            if ($pusher === null) {
-                return;
-            }
-            $pusher->trigger(self::familyChannel($famCode), $event, $data);
-        } catch (\Throwable $e) {
-            error_log("[Pusher] broadcastToFamily to famCode '{$famCode}' failed: " . $e->getMessage());
-        }
+
+        self::broadcast(self::familyChannel($famCode), $event, $data);
     }
 
     /**

@@ -673,6 +673,9 @@
   <!-- Family Reels & Stories Tray -->
   @includeIf('member.includes.reelsTray')
 
+  <!-- Weekly Activity Video Reel Approval Card (Curated Highlights) -->
+  @includeIf('member.includes.weeklyReelApprovalCard')
+
   <!-- 60-Second Onboarding Checklist (Alpine.js - auto hides when complete) -->
   @includeIf('member.includes.onboardingChecklistWidget')
 

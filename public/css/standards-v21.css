@@ -2765,43 +2765,53 @@ body.dark-theme .family-tooltip-container,
   display: none !important;
 }
 
-/* Super HD Crisp Image Rendering */
+/* Super HD Crisp Image Rendering & ATG GPU Convolution Unsharp Lens */
 .post-media-stage img,
 .post-media-first-img,
 .living-canvas-img {
   image-rendering: -webkit-optimize-contrast;
   image-rendering: high-quality;
+  filter: url(#atg-super-hd-lens) contrast(1.025) saturate(1.04);
 }
 
-/* Fanciful Glassmorphic Multi-Photo Stacked Cards Badge */
+/* Fanciful Glassmorphic Multi-Photo 3-Layer Luxury Stacked Cards Badge */
 .carousel-fanciful-badge {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 7px !important;
-  background: rgba(15, 23, 42, 0.82) !important;
-  backdrop-filter: blur(16px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(190%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  gap: 8px !important;
+  background: rgba(10, 15, 29, 0.88) !important;
+  backdrop-filter: blur(18px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(200%) !important;
+  border: 1.5px solid rgba(255, 215, 0, 0.55) !important;
   border-radius: 9999px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.55), 0 0 12px rgba(255, 215, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
   color: #ffffff !important;
-  padding: 5px 12px !important;
+  padding: 6px 14px !important;
   z-index: 12 !important;
   pointer-events: none !important;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease !important;
 }
 
 .carousel-fanciful-badge .carousel-cards-icon {
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.75));
+  flex-shrink: 0;
+}
+
+.carousel-fanciful-badge .carousel-badge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ffd700;
+  box-shadow: 0 0 6px rgba(255, 215, 0, 0.85);
   flex-shrink: 0;
 }
 
 .carousel-fanciful-badge .carousel-counter-text {
-  font-size: 0.75rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.04em !important;
+  font-size: 0.8rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.05em !important;
   color: #ffffff !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
   line-height: 1 !important;
 }
 

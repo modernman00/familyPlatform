@@ -586,7 +586,7 @@ final class NotificationController extends Select
                 $csrfValid = hash_equals((string)$_COOKIE['XSRF-TOKEN'], $requestToken);
             }
 
-            if (!$csrfValid && empty($_SESSION['id'])) {
+            if (!$csrfValid && (!empty($sessionToken) || empty($_SESSION['id']))) {
                 msgException(401, 'Unauthorized CSRF Token');
                 return;
             }
@@ -656,12 +656,13 @@ final class NotificationController extends Select
                 'authKey' => $authKey
             ];
 
-            // Check if subscription already exists for this endpoint
-            $existingSubscription = Select::selectFn2('SELECT * FROM pushNotification WHERE endpoint = ?', [$endpoint]);
+            // Check if subscription already exists for this endpoint and user (prevent cross-user endpoint hijacking)
+            $existingSubscription = Select::selectFn2('SELECT * FROM pushNotification WHERE endpoint = ? AND id = ?', [$endpoint, $userId]);
 
             if (!empty($existingSubscription)) {
-                $update = new Update('pushNotification');
-                $update->makeUpdate($data, 'endpoint');
+                $dbUpd = \Src\Db::connect2();
+                $updStmt = $dbUpd->prepare('UPDATE pushNotification SET p256dhKey = ?, authKey = ? WHERE endpoint = ? AND id = ?');
+                $updStmt->execute([$p256dhKey, $authKey, $endpoint, $userId]);
             } else {
                 // Table Hygiene: Limit active registered devices per user to 10 by pruning oldest
                 $userEndpoints = Select::selectFn2('SELECT no FROM pushNotification WHERE id = ? ORDER BY no ASC', [$userId]);
@@ -928,14 +929,21 @@ final class NotificationController extends Select
                 }
             } catch (\Throwable) {}
 
-            msgSuccess(200, [
+            $textMessage = $endpointCount > 0 
+                ? "Test notification dispatched to {$endpointCount} registered device(s)." 
+                : "In-app test notification created. Note: 0 push endpoints are registered on the server for your account. Please tap 'Enable Notifications' on this device.";
+
+            http_response_code(200);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
                 'status' => 'success',
                 'endpoints_registered' => $endpointCount,
                 'push_dispatched' => $pushSent,
-                'message' => $endpointCount > 0 
-                    ? "Test notification dispatched to {$endpointCount} registered device(s)." 
-                    : "In-app test notification created. Note: 0 push endpoints are registered on the server for your account. Please tap 'Enable Notifications' on this device."
+                'message' => $textMessage
             ]);
+            if (!defined('TESTING_ENV')) {
+                exit;
+            }
         } catch (\Src\Exceptions\HttpException $e) {
             throw $e;
         } catch (\Throwable $e) {

@@ -3,6 +3,9 @@
 $router->map('GET', '/login', 'App\controller\login\Login@show', 'login');
 $router->map('POST', '/login', 'App\controller\login\Login@login', 'Customer Login');
 
+// 1-Click Ephemeral Magic Auth Route for Dormant Re-Engagement
+$router->map('GET', '/auth/magic', 'App\controller\login\MagicAuthController@consume', 'magicAuth');
+
 // OAuth Routes
 $router->map('GET', '/auth/google', 'App\controller\login\OAuthController@googleRedirect', 'googleAuth');
 $router->map('GET', '/auth/google/callback', 'App\controller\login\OAuthController@googleCallback', 'googleCallback');
@@ -13,6 +16,7 @@ $router->map('POST', '/auth/apple/callback', 'App\controller\login\OAuthControll
 $router->map('GET', '/auth/apple/callback', 'App\controller\login\OAuthController@appleCallback', 'appleCallbackGet');
 
 // WebAuthn Routes
+$router->map('GET|POST', '/webauthn/status', 'Src\functionality\WebAuthnFunctionality@getPasskeyStatus', 'WebAuthn Status');
 $router->map('GET|POST', '/webauthn/register/options', 'Src\functionality\WebAuthnFunctionality@getRegistrationOptions', 'WebAuthn Register Options');
 $router->map('POST', '/webauthn/register', 'Src\functionality\WebAuthnFunctionality@registerDevice', 'WebAuthn Register');
 $router->map('GET|POST', '/webauthn/login/options', 'Src\functionality\WebAuthnFunctionality@getLoginOptions', 'WebAuthn Login Options');

@@ -305,9 +305,9 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
       previewContainer.classList.remove('d-none');
     }
 
-    // High-speed parallel client-side compression (optimised for Super HD 2.5K Retina clarity at 0.92 quality)
+    // High-speed parallel client-side compression (balanced 2K Retina clarity at 0.85 quality for instant uploads)
     const compressedFiles = await Promise.all(
-      validRawFiles.map(file => compressImageFile(file, { maxWidth: 2560, maxHeight: 2560, quality: 0.92 }))
+      validRawFiles.map(file => compressImageFile(file, { maxWidth: 2048, maxHeight: 2048, quality: 0.85 }))
     );
 
     // Merge newly selected files with existing accumulated files (deduplicating by name and size)

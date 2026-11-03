@@ -44,9 +44,13 @@ echo "====================================================================\n";
 try {
     $results = OnboardingFollowupService::runAllTouchpoints($isDryRun, $forceUserId);
 
-    echo "[+] Day 1 Lineage Kickstart:  {$results['day1_processed']} users processed\n";
-    echo "[+] Day 3 Living Voice Audio: {$results['day3_processed']} users processed\n";
-    echo "[+] Day 7 Referral Flywheel:  {$results['day7_processed']} users processed\n";
+    echo "[+] Day 1 Lineage Kickstart:   {$results['day1_processed']} users processed\n";
+    echo "[+] Day 3 Living Voice Audio:  {$results['day3_processed']} users processed\n";
+    echo "[+] Day 7 Referral Flywheel:   {$results['day7_processed']} users processed\n";
+    echo "[+] Tier 1 Ghost Pioneer:      {$results['tier1_ghost_processed']} users processed\n";
+    echo "[+] Tier 2 Co-Pilot Delegate:  {$results['tier2_delegate_processed']} users processed\n";
+    echo "[+] Tier 3 Sunday Banter:      {$results['tier3_banter_processed']} users processed\n";
+    echo "[+] Tier 4 Deep Hibernation:   {$results['tier4_deep_processed']} users processed\n";
     echo "====================================================================\n";
     echo "[SUCCESS] Lifecycle cohort run completed successfully.\n";
     exit(0);

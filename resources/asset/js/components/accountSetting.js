@@ -539,7 +539,10 @@ processKidsSiblings(fName, famCode);
         const data = await res.json();
 
         if (res.ok && data.status === 'success') {
-          const msg = data.data?.message || data.message || 'Test notification sent!';
+          const rawMsg = data.message || data.data?.message;
+          const msg = typeof rawMsg === 'string'
+            ? rawMsg
+            : (rawMsg?.message || (rawMsg?.endpoints_registered ? `Test notification dispatched to ${rawMsg.endpoints_registered} registered device(s).` : 'Test alert sent successfully!'));
           if (testFeedback) {
             testFeedback.className = 'small mt-2 text-success fw-medium';
             testFeedback.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> ' + msg;
@@ -553,7 +556,8 @@ processKidsSiblings(fName, famCode);
             });
           }
         } else {
-          throw new Error(data.message || 'Could not dispatch test notification');
+          const errMsg = typeof data.message === 'string' ? data.message : (data.message?.message || 'Could not dispatch test notification');
+          throw new Error(errMsg);
         }
       } catch (err) {
         if (testFeedback) {

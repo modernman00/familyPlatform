@@ -327,7 +327,164 @@ class VisualSupremacyRuntime {
     }
 }
 
+/**
+ * ATG Sovereign Saliency, Biometric Face-Region Focal & Super-HD Lens Engine
+ * (ATG Pods 1, 3 & 4: Dr. Chen Wei, Tobi Adeleke, Maya Lindqvist, Callum Wright, Dami Ogunleye)
+ */
+class AtgMediaSupremacyEngine {
+    constructor() {
+        this.cache = new Map();
+        this.probeCanvas = null;
+        this.probeCtx = null;
+        this.svgInjected = false;
+    }
+
+    ensureSuperHdSvgFilter() {
+        if (this.svgInjected || typeof document === 'undefined' || !document.body) return;
+        if (document.getElementById('atg-super-hd-lens')) {
+            this.svgInjected = true;
+            return;
+        }
+        try {
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;';
+            wrapper.setAttribute('aria-hidden', 'true');
+            wrapper.innerHTML = `
+                <svg width="0" height="0" aria-hidden="true">
+                  <defs>
+                    <filter id="atg-super-hd-lens" color-interpolation-filters="sRGB">
+                      <feConvolveMatrix order="3 3" preserveAlpha="true" kernelMatrix="0 -0.065 0 -0.065 1.26 -0.065 0 -0.065 0"/>
+                    </filter>
+                  </defs>
+                </svg>
+            `;
+            document.body.appendChild(wrapper);
+            this.svgInjected = true;
+        } catch (_) {}
+    }
+
+    analyzeImage(imgEl) {
+        this.ensureSuperHdSvgFilter();
+
+        if (!imgEl || !imgEl.naturalWidth || !imgEl.naturalHeight) {
+            return {
+                aspectRatio: '1 / 1',
+                numericRatio: 1.0,
+                focalPosition: '50% 35%'
+            };
+        }
+
+        const srcKey = imgEl.currentSrc || imgEl.src || '';
+        if (srcKey && this.cache.has(srcKey)) {
+            return this.cache.get(srcKey);
+        }
+
+        const w = imgEl.naturalWidth;
+        const h = imgEl.naturalHeight;
+        const rawRatio = w / h;
+        // Clamp strictly to Instagram feed standard bounds: 4:5 (0.80) portrait to 1.91:1 landscape
+        const clampedRatio = Math.min(1.91, Math.max(0.80, rawRatio));
+        const aspectRatio = clampedRatio.toFixed(4) + ' / 1';
+
+        // Default biometric rule-of-thirds fallback (protects portrait heads from top-clipping)
+        let focalX = 50;
+        let focalY = rawRatio < 0.92 ? 28 : (rawRatio > 1.2 ? 42 : 36);
+
+        try {
+            if (typeof document !== 'undefined') {
+                const S = 48;
+                if (!this.probeCanvas) {
+                    this.probeCanvas = document.createElement('canvas');
+                    this.probeCanvas.width = S;
+                    this.probeCanvas.height = S;
+                    this.probeCtx = this.probeCanvas.getContext('2d', { willReadFrequently: true });
+                }
+
+                if (this.probeCtx) {
+                    this.probeCtx.clearRect(0, 0, S, S);
+                    this.probeCtx.drawImage(imgEl, 0, 0, S, S);
+                    const data = this.probeCtx.getImageData(0, 0, S, S).data;
+
+                    let sumW = 0;
+                    let sumX = 0;
+                    let sumY = 0;
+
+                    for (let y = 2; y < S - 2; y++) {
+                        const normY = y / S;
+                        // Suppress top 8% ceiling lights/glare and bottom 15% torso/floor
+                        if (normY < 0.08 || normY > 0.85) continue;
+
+                        // Upper-third biometric attention prior for human faces
+                        const verticalPrior = (normY >= 0.16 && normY <= 0.56) ? 1.65 : 0.75;
+
+                        for (let x = 2; x < S - 2; x++) {
+                            const idx = (y * S + x) * 4;
+                            const r = data[idx];
+                            const g = data[idx + 1];
+                            const b = data[idx + 2];
+
+                            // Skip blown-out ceiling spotlights or pitch-black borders
+                            const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+                            if (lum > 242 || lum < 12) continue;
+
+                            // Sobel local gradient energy (eyes, glasses frames, smiles, bowties)
+                            const idxRight = (y * S + (x + 1)) * 4;
+                            const idxDown = ((y + 1) * S + x) * 4;
+                            const gradX = Math.abs(r - data[idxRight]) + Math.abs(g - data[idxRight + 1]);
+                            const gradY = Math.abs(r - data[idxDown]) + Math.abs(g - data[idxDown + 1]);
+                            const edgeEnergy = (gradX + gradY) * 0.5;
+
+                            // Inclusive human skin-tone chrominance detector (covers all melanin tones)
+                            const minGB = Math.min(g, b);
+                            const isSkinChrominance = (r > 55 && g > 32 && b > 18 && r > g && g >= b * 0.85 && (r - minGB) > 12 && (r - g) < 95);
+                            const skinBoost = isSkinChrominance ? 2.4 : 1.0;
+
+                            const weight = (edgeEnergy + 8) * skinBoost * verticalPrior;
+                            sumW += weight;
+                            sumX += (x / S) * 100 * weight;
+                            sumY += normY * 100 * weight;
+                        }
+                    }
+
+                    if (sumW > 0) {
+                        const detectedX = sumX / sumW;
+                        const detectedY = sumY / sumW;
+                        focalX = Math.round(Math.min(75, Math.max(25, detectedX)));
+                        // For portraits, keep vertical focal point anchored in [20%, 42%] so heads never clip
+                        const maxY = rawRatio < 0.95 ? 42 : 58;
+                        focalY = Math.round(Math.min(maxY, Math.max(18, detectedY)));
+                    }
+                }
+            }
+        } catch (_) {
+            // Cross-origin taint or canvas unavailable: keep biometric rule-of-thirds fallback
+        }
+
+        const result = {
+            aspectRatio,
+            numericRatio: clampedRatio,
+            focalPosition: `${focalX}% ${focalY}%`
+        };
+
+        if (srcKey) {
+            if (this.cache.size > 200) {
+                const firstKey = this.cache.keys().next().value;
+                this.cache.delete(firstKey);
+            }
+            this.cache.set(srcKey, result);
+        }
+
+        return result;
+    }
+}
+
+export const atgMediaSupremacy = new AtgMediaSupremacyEngine();
+if (typeof window !== 'undefined') {
+    window.AtgMediaSupremacy = atgMediaSupremacy;
+}
+
 export const vseRuntime = new VisualSupremacyRuntime();
 export function initVisualSupremacy() {
+    atgMediaSupremacy.ensureSuperHdSvgFilter();
     vseRuntime.init();
 }

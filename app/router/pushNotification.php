@@ -67,6 +67,20 @@ $router->map(
   name: 'pusherAuth'
 );
 
+// Sovereign Realtime Broadcasting Routes (SSE Stream & Channel Auth)
+$router->map(
+  method: 'GET',
+  route: '/api/broadcasting/events',
+  target: 'App\controller\RealtimeBroadcastingController@stream',
+  name: 'api_broadcasting_events'
+);
+$router->map(
+  method: 'POST',
+  route: '/api/broadcasting/auth',
+  target: 'App\controller\RealtimeBroadcastingController@auth',
+  name: 'api_broadcasting_auth'
+);
+
 // VAPID public key endpoint for browser PushManager subscription (parity with ExecMind)
 $router->map(
   method: 'GET',

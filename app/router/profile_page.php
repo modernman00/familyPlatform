@@ -51,6 +51,7 @@ $router->map('POST', '/api/roundtable/submit-statement', 'App\controller\members
 $router->map('POST', '/api/roundtable/adjudicate', 'App\controller\members\FamilyRoundTableController@adjudicate', 'api_roundtable_adjudicate');
 $router->map('GET', '/api/roundtable/dispute/[*:id]', 'App\controller\members\FamilyRoundTableController@getDisputeDetails', 'api_roundtable_get_dispute');
 $router->map('POST', '/api/roundtable/arbitrate-instant', 'App\controller\members\FamilyRoundTableController@arbitrateInstant', 'api_roundtable_arbitrate_instant');
+$router->map('POST', '/api/roundtable/record-chore-points', 'App\controller\members\FamilyRoundTableController@recordChorePoints', 'api_roundtable_record_chore_points');
 
 // Backward-compatible aliases for tribunal endpoints
 $router->map('POST', '/api/fun-place/file-dispute', 'App\controller\members\FamilyRoundTableController@fileDispute', 'alias_fun_place_file_dispute');

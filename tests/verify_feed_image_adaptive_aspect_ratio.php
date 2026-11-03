@@ -73,9 +73,20 @@ if (!str_contains($standardsCssContent, '.carousel-fanciful-badge') || !str_cont
     $errors[] = "standards-v21.css is missing .carousel-fanciful-badge or .carousel-nav-btn classes!";
 }
 
-// Check 10: Super HD image-rendering optimizations are present in CSS
-if (!str_contains($standardsCssContent, 'image-rendering: -webkit-optimize-contrast')) {
-    $errors[] = "standards-v21.css is missing Super HD image-rendering optimizations!";
+// Check 10: Super HD image-rendering & ATG GPU Convolution Lens optimizations are present in CSS
+if (!str_contains($standardsCssContent, 'image-rendering: -webkit-optimize-contrast') || !str_contains($standardsCssContent, '#atg-super-hd-lens')) {
+    $errors[] = "standards-v21.css is missing Super HD image-rendering or #atg-super-hd-lens GPU convolution filter!";
+}
+
+// Check 11: ATG Fluid Per-Slide Aspect Morphing & Saliency Focal Points in post-card.blade.php
+if (!str_contains($postCardContent, 'slideAspects') || !str_contains($postCardContent, 'slideFocals') || !str_contains($postCardContent, 'AtgMediaSupremacy')) {
+    $errors[] = "post-card.blade.php is missing ATG Fluid Per-Slide Aspect Morphing (slideAspects / slideFocals / AtgMediaSupremacy)!";
+}
+
+// Check 12: ATG Server-Side C-Level Unsharp Mask in VisualSupremacyService.php
+$vseServiceContent = file_get_contents(__DIR__ . '/../app/services/VisualSupremacyService.php');
+if (!str_contains($vseServiceContent, 'applySuperHdUnsharpMask') || !str_contains($vseServiceContent, 'imageconvolution')) {
+    $errors[] = "VisualSupremacyService.php is missing ATG applySuperHdUnsharpMask C-level convolution!";
 }
 
 if (!empty($errors)) {

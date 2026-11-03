@@ -80,6 +80,9 @@ final class ProfilePage extends ProcessImg
             // Check and process 18th birthday graduation milestone
             $adulthoodGraduation = \App\services\AdulthoodTransitionService::checkAndProcessUserGraduation($this->id);
 
+            // Fetch any pending weekly activity reel awaiting approval
+            $pendingWeeklyReel = \App\services\WeeklyActivityVideoCuratorService::getPendingReel((string)$this->id, (string)($data['famCode'] ?? ''));
+
             view('member/profilePage', [
                 'data' => $data['memberData'],
                 'primaryFamCode' => $data['primaryFamCode'] ?? ($data['famCode'] ?? ''),
@@ -103,7 +106,8 @@ final class ProfilePage extends ProcessImg
                 'groupedReels' => $groupedReels,
                 'suggestedKin' => $suggestedKin,
                 'radarSettings' => $radarSettings,
-                'adulthoodGraduation' => $adulthoodGraduation
+                'adulthoodGraduation' => $adulthoodGraduation,
+                'pendingWeeklyReel' => $pendingWeeklyReel
             ]);
 
         } catch (\Throwable $th) {
