@@ -1911,6 +1911,16 @@
                 </button>
               </div>
 
+              <!-- Dedicated Mobile Touch Emoji Reaction Trigger (Brings Emojis to Life on PWA) -->
+              <button type="button"
+                      class="comment-meta-btn text-muted d-inline-flex d-md-none align-items-center justify-content-center p-0"
+                      @click.stop="toggleCommentReactionBar(c.comment_no, !activeCommentReactionBars[c.comment_no])"
+                      title="React with emoji"
+                      aria-label="React with emoji to this comment"
+                      style="min-width: 32px; min-height: 32px; font-size: 0.95rem; line-height: 1;">
+                <span aria-hidden="true">✨</span>
+              </button>
+
               <button type="button" class="comment-meta-btn text-muted" data-testid="comment-reply-btn" @click="startReply(post, c)">Reply</button>
               <template x-if="canEditComment(c)">
                 <button type="button" class="comment-meta-btn text-muted" @click="startEditComment(c)">Edit</button>

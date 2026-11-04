@@ -123,6 +123,7 @@
             console.log('[PWA] Service Worker installed/waiting:', reg.scope);
           } else if (reg.active) {
             console.log('[PWA] Service Worker active:', reg.scope);
+            try { reg.update(); } catch (_) {}
           }
 
           reg.addEventListener('updatefound', function() {

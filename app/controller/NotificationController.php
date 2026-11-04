@@ -539,6 +539,80 @@ final class NotificationController extends Select
     }
 
     /**
+     * Defensively verify CSRF token across custom headers, JSON payload, and form posts.
+     * Prevents false-positive drops on FastCGI environments, PWA background sync, and mobile browsers.
+     *
+     * @param array<string, mixed> $inputData Parsed JSON request payload
+     * @return bool True if valid CSRF token is provided, false otherwise
+     */
+    private static function verifyCsrf(array $inputData = []): bool
+    {
+        $sessionToken = (string) ($_SESSION['token'] ?? '');
+        $cookieToken = (string) ($_COOKIE['XSRF-TOKEN'] ?? '');
+
+        // If session token is missing but valid 64-hex cookie token exists, re-anchor session token
+        if ($sessionToken === '' && $cookieToken !== '' && preg_match('/^[0-9a-f]{64}$/Di', $cookieToken)) {
+            $sessionToken = $cookieToken;
+            $_SESSION['token'] = $cookieToken;
+        }
+
+        // 1. Extract token provided by the client (NEVER from $_COOKIE)
+        $clientToken = (string) (
+            $_SERVER['HTTP_X_XSRF_TOKEN'] 
+            ?? $_SERVER['HTTP_X_CSRF_TOKEN'] 
+            ?? $_SERVER['HTTP_CSRF_TOKEN'] 
+            ?? ''
+        );
+
+        if ($clientToken === '' && function_exists('getallheaders')) {
+            $headers = getallheaders();
+            $clientToken = (string) (
+                $headers['X-XSRF-TOKEN'] 
+                ?? $headers['X-CSRF-TOKEN'] 
+                ?? $headers['X-XSRF-Token'] 
+                ?? $headers['X-CSRF-Token'] 
+                ?? $headers['x-xsrf-token'] 
+                ?? $headers['x-csrf-token'] 
+                ?? ''
+            );
+        }
+
+        // Fall back to JSON payload or form post data
+        if ($clientToken === '') {
+            $clientToken = (string) (
+                $inputData['token'] 
+                ?? ($inputData['csrf_token'] 
+                ?? ($inputData['_token'] 
+                ?? ($_POST['token'] 
+                ?? ($_POST['csrf_token'] 
+                ?? ($_POST['_token'] ?? '')))))
+            );
+        }
+
+        if ($clientToken === '') {
+            return false;
+        }
+
+        $decodedClientToken = urldecode($clientToken);
+
+        // 2. Validate against session token using constant-time comparison
+        if ($sessionToken !== '') {
+            if (hash_equals($sessionToken, $clientToken) || hash_equals($sessionToken, $decodedClientToken)) {
+                return true;
+            }
+        }
+
+        // 3. Validate against double-submit XSRF-TOKEN cookie using constant-time comparison
+        if ($cookieToken !== '') {
+            if (hash_equals($cookieToken, $clientToken) || hash_equals($cookieToken, $decodedClientToken)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Posts subscriber data to the server.
      *
      * This function takes the request body as a JSON object and expects the following
@@ -573,20 +647,15 @@ final class NotificationController extends Select
                 } catch (\Throwable) {}
             }
 
-            // Robust CSRF verification across headers and JSON payload
-            $sessionToken = $_SESSION['token'] ?? '';
-            $requestToken = $_SERVER['HTTP_X_XSRF_TOKEN'] 
-                ?? $_SERVER['HTTP_X_CSRF_TOKEN'] 
-                ?? $_SERVER['HTTP_CSRF_TOKEN'] 
-                ?? ($_COOKIE['XSRF-TOKEN'] ?? '')
-                ?? ($inputData['token'] ?? ($_POST['token'] ?? ''));
-
-            $csrfValid = (!empty($sessionToken) && is_string($requestToken) && hash_equals($sessionToken, $requestToken));
-            if (!$csrfValid && !empty($_COOKIE['XSRF-TOKEN']) && is_string($requestToken)) {
-                $csrfValid = hash_equals((string)$_COOKIE['XSRF-TOKEN'], $requestToken);
+            $sessionUserId = isset($_SESSION['id']) ? cleanSession((string)$_SESSION['id']) : '';
+            if (empty($sessionUserId)) {
+                msgException(401, 'User authentication required for push subscription');
+                return;
             }
+            $userId = $sessionUserId;
 
-            if (!$csrfValid && (!empty($sessionToken) || empty($_SESSION['id']))) {
+            // Robust CSRF verification across headers and JSON payload
+            if (!self::verifyCsrf($inputData)) {
                 msgException(401, 'Unauthorized CSRF Token');
                 return;
             }
@@ -600,13 +669,6 @@ final class NotificationController extends Select
                 msgException(422, 'Invalid subscription data');
                 return;
             }
-
-            $sessionUserId = isset($_SESSION['id']) ? cleanSession((string)$_SESSION['id']) : '';
-            if (empty($sessionUserId)) {
-                msgException(401, 'User authentication required for push subscription');
-                return;
-            }
-            $userId = $sessionUserId;
 
             // Red Team Anti-Flooding: Rate-limit subscription registration per user session (max 10 / min)
             $rateKey = 'push_sub_rate_' . $userId;
@@ -864,21 +926,14 @@ final class NotificationController extends Select
                 return;
             }
 
-            // CSRF validation
-            $sessionToken = $_SESSION['token'] ?? '';
-            $requestToken = $_SERVER['HTTP_X_XSRF_TOKEN'] 
-                ?? $_SERVER['HTTP_X_CSRF_TOKEN'] 
-                ?? $_SERVER['HTTP_CSRF_TOKEN'] 
-                ?? ($_POST['token'] ?? '');
+            $rawInput = (string)file_get_contents('php://input');
+            $input = json_decode($rawInput !== '' ? $rawInput : '', true);
+            $inputData = is_array($input) ? $input : [];
 
-            if (empty($sessionToken) || !is_string($requestToken) || !hash_equals($sessionToken, $requestToken)) {
-                $rawInput = file_get_contents('php://input');
-                $input = json_decode($rawInput !== false ? $rawInput : '', true);
-                $bodyToken = is_array($input) && !empty($input['token']) ? (string)$input['token'] : '';
-                if (empty($sessionToken) || !hash_equals($sessionToken, $bodyToken)) {
-                    msgException(401, 'Unauthorized CSRF Token');
-                    return;
-                }
+            // CSRF validation
+            if (!self::verifyCsrf($inputData)) {
+                msgException(401, 'Unauthorized CSRF Token');
+                return;
             }
 
             $db = \Src\Db::connect2();

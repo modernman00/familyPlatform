@@ -1097,7 +1097,7 @@ export function profileFeed(opts = {}) {
 
             // Render 3D family emojis (:family_roots_3d:, :family_crest_3d:, etc.)
             safeText = safeText.replace(/:(family_[a-z0-9_]+_3d|ancestor_[a-z0-9_]+_3d|memory_capsule_3d|kinship_pride_3d|wisdom_scroll_3d|generations_link_3d|family_toast_3d|baby_cradle_3d|wedding_vows_3d|laugh_tears_3d|star_struck_3d|family_house_3d):/gi, (match, emojiId) => {
-                return `<span class="atg-emoji-container atg-live-emoji" role="button" tabindex="0" onclick="event.stopPropagation(); window.AtgEmojiEngine && window.AtgEmojiEngine.openArViewer('${emojiId}')"><img src="/img/emoji/${emojiId}.svg?v=20261103c" class="atg-3d-emoji" loading="lazy" width="26" height="26" alt="${emojiId}" title="Tap to view in 3D / AR"></span>`;
+                return `<span class="atg-emoji-container atg-live-emoji" role="button" tabindex="0" onclick="event.stopPropagation(); window.AtgEmojiEngine && window.AtgEmojiEngine.openArViewer('${emojiId}')"><img src="/public/img/emoji/${emojiId}.svg?v=20261104a" onerror="this.src='/img/emoji/${emojiId}.svg?v=20261104a'" class="atg-3d-emoji" loading="lazy" width="26" height="26" alt="${emojiId}" title="Tap to view in 3D / AR"></span>`;
             });
 
             // Linkify URLs into secure clickable links
@@ -2131,6 +2131,7 @@ export function profileFeed(opts = {}) {
                 .slice(0, 3)
                 .map(([label, count]) => ({
                     label: label,
+                    type: label,
                     emoji: map[label] ?? '👍',
                     count: Number(count)
                 }));

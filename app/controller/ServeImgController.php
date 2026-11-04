@@ -47,6 +47,10 @@ final class ServeImgController {
                                 $filePath = $newVariantPath;
                                 break 2;
                             }
+                            // Defensive Fallback (David Structural Safety Gate):
+                            // If VSE generation fails (e.g. missing avifenc on production host),
+                            // NEVER return 404 to an HTML5 <picture> element! Fall back to source.
+                            $filePath = $sourceCandidate;
                         }
                     }
                 }
@@ -105,6 +109,8 @@ final class ServeImgController {
             __DIR__ . '/../../resources/images/post/',
             __DIR__ . '/../../resources/images/',
             __DIR__ . '/../../resources/images/profile/',
+            __DIR__ . '/../../public/images/',
+            __DIR__ . '/../../public/images/journals/',
         ];
 
         $filePath = null;
@@ -133,6 +139,10 @@ final class ServeImgController {
                                 $filePath = $newVariantPath;
                                 break 2;
                             }
+                            // Defensive Fallback (David Structural Safety Gate):
+                            // If VSE generation fails (e.g. missing avifenc on production host),
+                            // NEVER return 404 to an HTML5 <picture> element! Fall back to source.
+                            $filePath = $sourceCandidate;
                         }
                     }
                 }
