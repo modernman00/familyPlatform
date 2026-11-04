@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(feed): integrate kinship resolution for tagged post members and polish multi-video scroll controls",
+    "title": "Feat(feed): implement detached background post worker, local video SSD caching and instant feed updates",
     "notes": [
+        "Feat(feed): implement detached background post worker, local video SSD caching and instant feed updates",
         "Feat(feed): integrate kinship resolution for tagged post members and polish multi-video scroll controls",
-        "Fix(pwa): eliminate 302 navigation redirects in RouteDispatch and bypass SW navigation when online",
-        "Fix(pwa): resolve navigation redirect TypeError with cleanRedirect, add PWA self-healing rescue, and prevent offline lockup"
+        "Fix(pwa): eliminate 302 navigation redirects in RouteDispatch and bypass SW navigation when online"
     ],
     "released_at": "2026-11-04",
-    "commit": "659506cf"
+    "commit": "677ca32b"
 }
