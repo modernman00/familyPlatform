@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(pwa): resolve navigation redirect TypeError with cleanRedirect, add PWA self-healing rescue, and prevent offline lockup",
+    "title": "Fix(pwa): eliminate 302 navigation redirects in RouteDispatch and bypass SW navigation when online",
     "notes": [
+        "Fix(pwa): eliminate 302 navigation redirects in RouteDispatch and bypass SW navigation when online",
         "Fix(pwa): resolve navigation redirect TypeError with cleanRedirect, add PWA self-healing rescue, and prevent offline lockup",
-        "Fix(pwa): add auto-reconnect polling in offline shell, relax navigation timeout to 5000ms, and support HEAD requests on root",
-        "Fix(secops): align semgrep sast rules, sanitize query limit interpolation, and strengthen crypto"
+        "Fix(pwa): add auto-reconnect polling in offline shell, relax navigation timeout to 5000ms, and support HEAD requests on root"
     ],
     "released_at": "2026-11-04",
-    "commit": "acce3727"
+    "commit": "d5cb59a3"
 }
