@@ -6,9 +6,15 @@
             <!-- Modern Brand Radial Mesh Cover -->
             <div class="cover-photo"
                 style="height: 120px; background: linear-gradient(135deg, #2a0a0d 0%, #2a0a0d 40%, #8a1019 80%, #b8202c 100%); position: relative;">
+                @if(!empty($isPendingApproval))
+                <span class="position-absolute top-0 end-0 m-3 badge bg-warning text-dark fw-bold px-2.5 py-1 rounded-pill shadow-xs" style="font-size: 0.72rem; letter-spacing: 0.04em;">
+                    <i class="bi bi-hourglass-split me-1"></i> PENDING APPROVAL
+                </span>
+                @else
                 <span class="position-absolute top-0 end-0 m-3 badge bg-white bg-opacity-25 text-white fw-bold px-2 py-1 rounded-pill" style="font-size: 0.7rem; letter-spacing: 0.04em;">
                     <i class="bi bi-shield-check text-warning"></i> {{ __('profile.verified', 'VERIFIED') }}
                 </span>
+                @endif
             </div>
             @php
                 $leftPrimaryCode = ltrim((string)($primaryFamCode ?? ($data['primaryFamCode'] ?? ($data['famCode'] ?? ''))), '#');
@@ -34,8 +40,8 @@
                          data-can-edit="true"
                          style="width: 105px; height: 105px; border-radius: 50%; border: 4px solid var(--card-bg); object-fit: cover; background: var(--card-bg); margin: 0 auto; display: block;">
                     
-                    <!-- Zoom Cue -->
-                    <div class="avatar-zoom-cue" aria-hidden="true" title="Enlarge photo" style="right: auto; left: 0; bottom: 0;">
+                    <!-- Zoom Cue (subtle on hover only) -->
+                    <div class="avatar-zoom-cue" aria-hidden="true" title="Enlarge photo">
                         <i class="bi bi-arrows-angle-expand"></i>
                     </div>
 
@@ -107,6 +113,7 @@
                 <i class="bi bi-chevron-down profile-quick-chevron" aria-hidden="true"></i>
             </button>
 
+            @if(empty($isPendingApproval))
             <div id="profileQuickActions" class="profile-quick-actions d-flex flex-row flex-wrap flex-lg-column gap-2 px-2 w-100">
                 <a href="/family/hub" class="btn fw-bold flex-fill text-decoration-none text-center shadow-sm" style="background: linear-gradient(135deg, #6d28d9 0%, #db2777 100%); color: #ffffff !important; border: none; border-radius: 12px; padding: 10px 12px; font-size: 0.92rem; box-shadow: 0 4px 14px rgba(109, 40, 217, 0.3); min-height: 44px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; flex-shrink: 0;" title="Family Hub - Access shared family applications and tools">
                     <i class="bi bi-grid-fill me-1.5 text-warning"></i> {{ __('profile.family_hub', 'Family Hub') }}
@@ -119,6 +126,10 @@
                 <button type="button" class="btn btn-primary text-white fw-bold shadow-sm flex-fill" style="background-color: var(--primary-color, #a31621); border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Edit Profile - Update your personal bio, photo, and details">
                     <i class="bi bi-pencil-square me-1.5"></i> {{ __('profile.edit_profile', 'Edit Profile') }}
                 </button>
+
+                <a href="/member/emoji-studio" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" title="3D Avatar & Emoji Studio - Create your 3D persona and use bespoke family emojis">
+                    <i class="bi bi-palette-fill me-1.5" style="color: #f59e0b;"></i> 3D Avatar Studio
+                </a>
 
                 <a href="/accountSetting#family-connections" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" title="Family Connections - Manage friends, requests, and kin links">
                     <i class="bi bi-people-fill me-1.5" style="color: #2563eb;"></i> {{ __('profile.family_connections', 'Family Connections') }}
@@ -168,6 +179,20 @@
                     <i class="bi bi-book-half me-1.5" style="color: #0284c7;"></i> {{ __('profile.how_to_use', 'How to Use Guide') }}
                 </a>
             </div>
+            @else
+            <div id="profileQuickActions" class="profile-quick-actions d-flex flex-row flex-wrap flex-lg-column gap-2 px-2 w-100">
+                <button type="button" class="btn btn-primary text-white fw-bold shadow-sm flex-fill" style="background-color: var(--primary-color, #a31621); border-radius: 12px; padding: 10px 12px; font-size: 0.92rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Edit Profile - Update your personal bio, photo, and details">
+                    <i class="bi bi-pencil-square me-1.5"></i> {{ __('profile.edit_profile', 'Edit Profile') }}
+                </button>
+
+                <div class="p-3 text-center rounded-3 mt-1" style="background: rgba(163, 22, 33, 0.05); border: 1px dashed rgba(163, 22, 33, 0.25);">
+                    <i class="bi bi-shield-lock-fill text-muted fs-4"></i>
+                    <p class="text-muted small mb-0 mt-1" style="font-size: 0.82rem;">
+                        Lineage tree, photo gallery, and journal unlock upon approval.
+                    </p>
+                </div>
+            </div>
+            @endif
 
             <style>
             .highlight-section-pulse {

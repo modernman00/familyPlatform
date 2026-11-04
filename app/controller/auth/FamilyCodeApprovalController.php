@@ -292,8 +292,9 @@ class FamilyCodeApprovalController
         }
 
         try {
+            $approverId = !empty($_SESSION['id']) ? (string)$_SESSION['id'] : null;
             // Execute atomic multi-table approval transaction
-            if (!$this->approvalService->approveRequest($id)) {
+            if (!$this->approvalService->approveRequest($id, $approverId)) {
                 if ($wantsHtml) {
                     $app = [
                         'decision' => 'declined',
@@ -476,6 +477,97 @@ class FamilyCodeApprovalController
         }
     }
 
+
+    /**
+     * Nudge approver or family
+     * POST /api/family-code/nudge
+     */
+    public function nudgeApprover(): void
+    {
+        header('Content-Type: application/json');
+
+        $userId = (string)($_SESSION['id'] ?? '');
+        if ($userId === '') {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'error' => 'Authentication required.']);
+            return;
+        }
+
+        try {
+            Limiter::limit("nudge_{$userId}");
+        } catch (\Throwable $e) {
+            http_response_code(429);
+            echo json_encode(['success' => false, 'error' => 'Too many nudge attempts. Please wait a moment.']);
+            return;
+        }
+
+        $rawInput = file_get_contents('php://input');
+        $input = is_string($rawInput) && $rawInput !== '' ? json_decode($rawInput, true) : [];
+        if (!is_array($input)) $input = [];
+
+        $requestId = !empty($input['request_id']) ? (int)$input['request_id'] : 0;
+        if ($requestId <= 0) {
+            $userReq = $this->approvalService->getUserPendingRequest($userId);
+            if ($userReq) {
+                $requestId = (int)$userReq['no'];
+            }
+        }
+
+        if ($requestId <= 0) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'No active pending approval request found.']);
+            return;
+        }
+
+        $result = $this->approvalService->nudgeApprover($requestId, $userId);
+        if (!$result['success']) {
+            http_response_code(429);
+        } else {
+            http_response_code(200);
+        }
+        echo json_encode($result);
+    }
+
+    /**
+     * Check approval status for currently logged-in user
+     * GET /api/family-code/status
+     */
+    public function checkApprovalStatus(): void
+    {
+        header('Content-Type: application/json');
+
+        $userId = (string)($_SESSION['id'] ?? '');
+        if ($userId === '') {
+            http_response_code(401);
+            echo json_encode(['status' => 'unauthenticated']);
+            return;
+        }
+
+        $pendingReq = $this->approvalService->getUserPendingRequest($userId);
+        if ($pendingReq) {
+            echo json_encode([
+                'status' => 'pending',
+                'pending_data' => $pendingReq
+            ]);
+            return;
+        }
+
+        // Check if approved in user_families
+        $stmt = $this->pdo->prepare("SELECT family_code FROM user_families WHERE user_id = ? AND status = 'approved' LIMIT 1");
+        $stmt->execute([$userId]);
+        $approvedCode = $stmt->fetchColumn();
+
+        if ($approvedCode) {
+            echo json_encode([
+                'status' => 'approved',
+                'family_code' => $approvedCode,
+                'redirect' => '/profilePage'
+            ]);
+            return;
+        }
+
+        echo json_encode(['status' => 'none']);
+    }
 
     /**
      * Get user info by ID

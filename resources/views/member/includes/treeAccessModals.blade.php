@@ -186,6 +186,28 @@
                     </label>
                 </div>
 
+                <!-- Cultural Respect & Elder Privacy (Parent First Name Initials) -->
+                <div class="p-3 rounded-3 mb-4" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(56, 189, 248, 0.35);">
+                    <div class="d-flex align-items-center justify-content-between gap-3">
+                        <div class="d-flex align-items-start gap-2.5">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 mt-0.5" style="width: 36px; height: 36px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); font-size: 1.1rem;">
+                                <i class="bi bi-person-badge-fill"></i>
+                            </div>
+                            <div>
+                                <label for="checkHideParentFirstName" class="fw-bold text-white mb-0.5 cursor-pointer fs-6 d-block">
+                                    Cultural Respect: Show Initial Only for Parent First Names
+                                </label>
+                                <p class="text-white-50 small mb-0" style="font-size: 0.8rem; line-height: 1.45;">
+                                    In many cultural traditions, displaying or addressing elders' first names is avoided. When enabled, your parents will appear on the family tree and dossiers with their initial only (e.g. <em>A. Olaogun</em> instead of <em>Adeola Olaogun</em>).
+                                </p>
+                            </div>
+                        </div>
+                        <div class="form-check form-switch m-0 flex-shrink-0">
+                            <input class="form-check-input" type="checkbox" role="switch" id="checkHideParentFirstName" name="hide_parent_first_name" value="1" {{ !empty($treeAccessData['hide_parent_first_name']) ? 'checked' : '' }} onchange="onHideParentFirstNameChanged(this.checked)" style="width: 2.75em; height: 1.5em; cursor: pointer;">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Per-Person Access List Container -->
                 <div id="perPersonSection" class="{{ $currentAccessMode === 'only_me' ? 'd-none' : '' }}">
                     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -263,6 +285,7 @@
     // Current in-memory state for access policy modal
     window.__treeAccessState = {
         mode: '{{ $currentAccessMode }}',
+        hideParentFirstName: Boolean({{ !empty($treeAccessData['hide_parent_first_name']) ? 'true' : 'false' }}),
         allowedUserIds: new Set({!! json_encode(array_values(array_filter(array_map(function($m) { return !empty($m['is_allowed']) ? (string)$m['user_id'] : null; }, $familyMembersList)))) !!}),
         deniedUserIds: new Set({!! json_encode(array_values(array_filter(array_map(function($m) { return empty($m['is_allowed']) ? (string)$m['user_id'] : null; }, $familyMembersList)))) !!}),
         csrfToken: '{{ $_SESSION['token'] ?? '' }}'
@@ -314,20 +337,78 @@
         }
     };
 
+    window.onHideParentFirstNameChanged = function(checked) {
+        window.__treeAccessState.hideParentFirstName = Boolean(checked);
+    };
+
     window.filterWhoViewedList = function() {
         const q = (document.getElementById('whoViewedSearchInput')?.value || '').trim().toLowerCase();
-        document.querySelectorAll('#whoViewedListContainer .viewer-entry-card').forEach(card => {
-            const name = card.getAttribute('data-name') || '';
-            card.style.display = (name.includes(q) || q === '') ? 'flex' : 'none';
+        const cards = document.querySelectorAll('#whoViewedListContainer .viewer-entry-card');
+        let visibleCount = 0;
+        cards.forEach(card => {
+            const name = (card.getAttribute('data-name') || '').toLowerCase();
+            const matches = q === '' || name.includes(q);
+            if (matches) {
+                card.classList.remove('d-none');
+                card.style.setProperty('display', 'flex', 'important');
+                visibleCount++;
+            } else {
+                card.classList.add('d-none');
+                card.style.setProperty('display', 'none', 'important');
+            }
         });
+
+        let noMatch = document.getElementById('noWhoViewedMatch');
+        if (!noMatch) {
+            noMatch = document.createElement('div');
+            noMatch.id = 'noWhoViewedMatch';
+            noMatch.className = 'text-center py-4 text-white-50 small d-none';
+            noMatch.innerHTML = '<i class="bi bi-search me-1"></i> No viewers match your search.';
+            const cont = document.getElementById('whoViewedListContainer');
+            if (cont) cont.appendChild(noMatch);
+        }
+        if (visibleCount === 0 && q !== '') {
+            noMatch.classList.remove('d-none');
+            noMatch.style.setProperty('display', 'block', 'important');
+        } else {
+            noMatch.classList.add('d-none');
+            noMatch.style.setProperty('display', 'none', 'important');
+        }
     };
 
     window.filterAccessControlList = function() {
         const q = (document.getElementById('accessControlSearchInput')?.value || '').trim().toLowerCase();
-        document.querySelectorAll('#accessMembersList .access-member-row').forEach(row => {
-            const name = row.getAttribute('data-name') || '';
-            row.style.display = (name.includes(q) || q === '') ? 'flex' : 'none';
+        const rows = document.querySelectorAll('#accessMembersList .access-member-row');
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const name = (row.getAttribute('data-name') || '').toLowerCase();
+            const matches = q === '' || name.includes(q);
+            if (matches) {
+                row.classList.remove('d-none');
+                row.style.setProperty('display', 'flex', 'important');
+                visibleCount++;
+            } else {
+                row.classList.add('d-none');
+                row.style.setProperty('display', 'none', 'important');
+            }
         });
+
+        let noMatch = document.getElementById('noAccessMembersMatch');
+        if (!noMatch) {
+            noMatch = document.createElement('div');
+            noMatch.id = 'noAccessMembersMatch';
+            noMatch.className = 'text-center py-4 text-white-50 small d-none';
+            noMatch.innerHTML = '<i class="bi bi-search me-1"></i> No family relatives match your search.';
+            const listContainer = document.getElementById('accessMembersList');
+            if (listContainer) listContainer.appendChild(noMatch);
+        }
+        if (visibleCount === 0 && q !== '') {
+            noMatch.classList.remove('d-none');
+            noMatch.style.setProperty('display', 'block', 'important');
+        } else {
+            noMatch.classList.add('d-none');
+            noMatch.style.setProperty('display', 'none', 'important');
+        }
     };
 
     window.toggleMemberPermissionInModal = function(userId, btn) {
@@ -420,6 +501,7 @@
         try {
             const fd = new FormData();
             fd.append('access_mode', window.__treeAccessState.mode);
+            fd.append('hide_parent_first_name', window.__treeAccessState.hideParentFirstName ? '1' : '0');
             fd.append('allowed_user_ids', Array.from(window.__treeAccessState.allowedUserIds).join(','));
             fd.append('denied_user_ids', Array.from(window.__treeAccessState.deniedUserIds).join(','));
             fd.append('token', window.__treeAccessState.csrfToken);
@@ -451,6 +533,13 @@
                 const modal = bootstrap.Modal.getInstance(document.getElementById('treeAccessControlModal'));
                 if (modal) modal.hide();
                 refreshWhoViewedData();
+                
+                // If the user modified the cultural initial setting, reload tree data so parent names reflect immediately
+                setTimeout(() => {
+                    if (typeof window.location.reload === 'function') {
+                        window.location.reload();
+                    }
+                }, 800);
             } else {
                 if (window.Swal) {
                     Swal.fire('Error', data.error || 'Failed to save access policy.', 'error');
@@ -544,7 +633,14 @@
             if (!data.success) return;
 
             window.__treeAccessState.mode = data.access_mode || 'family_all';
+            window.__treeAccessState.hideParentFirstName = Boolean(data.hide_parent_first_name);
             window.onAccessModeChanged(window.__treeAccessState.mode);
+
+            // Sync cultural checkbox
+            const chkParent = document.getElementById('checkHideParentFirstName');
+            if (chkParent) {
+                chkParent.checked = window.__treeAccessState.hideParentFirstName;
+            }
 
             if (Array.isArray(data.members)) {
                 window.__treeAccessState.allowedUserIds = new Set(
@@ -553,10 +649,66 @@
                 window.__treeAccessState.deniedUserIds = new Set(
                     data.members.filter(m => !m.is_allowed).map(m => String(m.user_id))
                 );
+
+                renderAccessMembersRoster(data.members);
             }
         } catch (e) {
             console.error('refreshTreeAccessSettingsData error:', e);
         }
+    }
+
+    function renderAccessMembersRoster(members) {
+        const cont = document.getElementById('accessMembersList');
+        if (!cont) return;
+
+        const countLabel = document.getElementById('accessMemberCountLabel');
+        if (countLabel) {
+            countLabel.textContent = `${members.length} ${members.length === 1 ? 'member' : 'members'} in family`;
+        }
+
+        if (members.length === 0) {
+            cont.innerHTML = `<div class="text-center py-4 text-white-50 small">No other members currently found under family code #{{ $effectiveFamCode }}.</div>`;
+            return;
+        }
+
+        cont.innerHTML = members.map(m => {
+            const uid = escHtml(m.user_id);
+            const name = escHtml(m.full_name || 'Family Member');
+            const avatar = escHtml(m.avatar_url || '/resources/images/profile/avatarM.png');
+            const isAllowed = Boolean(m.is_allowed);
+            const views = m.view_count || 0;
+
+            const viewsHtml = views > 0 ? `<span class="text-info"><i class="bi bi-eye"></i> Viewed ${views}x</span> &middot; ` : '';
+            const statusClass = isAllowed ? 'text-success' : 'text-danger';
+            const statusLabel = isAllowed ? 'Has Access' : 'Access Limited';
+            const btnClass = isAllowed ? 'btn-outline-danger' : 'btn-outline-success';
+            const btnIcon = isAllowed ? 'bi-slash-circle' : 'bi-check-circle';
+            const btnLabel = isAllowed ? 'Limit Access' : 'Grant Access';
+            const borderColor = isAllowed ? '#10b981' : '#ef4444';
+
+            return `
+                <div class="access-member-row p-2.5 rounded-3 d-flex align-items-center justify-content-between gap-2" data-name="${name.toLowerCase()}" data-user-id="${uid}" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div class="d-flex align-items-center gap-2.5 overflow-hidden">
+                        <img src="${avatar}" alt="${name}" class="rounded-circle object-fit-cover flex-shrink-0" style="width: 38px; height: 38px; border: 2px solid ${borderColor};" onerror="this.src='/resources/images/profile/avatarM.png'">
+                        <div class="overflow-hidden">
+                            <div class="fw-bold text-white text-truncate" style="font-size: 0.86rem;" title="${name}">${name}</div>
+                            <div class="text-white-50 small text-truncate" style="font-size: 0.72rem;">
+                                ${viewsHtml}
+                                <span class="badge-status-text ${statusClass} fw-semibold">${statusLabel}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <button type="button" class="btn btn-sm ${btnClass} rounded-pill px-3 py-1 fw-bold btn-member-access-toggle" onclick="toggleMemberPermissionInModal('${uid}', this)" style="min-height: 44px; font-size: 0.76rem; white-space: nowrap; flex-shrink: 0;">
+                            <i class="bi ${btnIcon} me-1"></i> ${btnLabel}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Re-apply any active search filter
+        filterAccessControlList();
     }
 
     function escHtml(str) {

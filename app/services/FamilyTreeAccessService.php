@@ -61,11 +61,20 @@ final class FamilyTreeAccessService
                     `user_id` VARCHAR(100) NOT NULL,
                     `access_mode` VARCHAR(32) NOT NULL DEFAULT 'family_all',
                     `notify_on_view` TINYINT(1) NOT NULL DEFAULT 1,
+                    `hide_parent_first_name` TINYINT(1) NOT NULL DEFAULT 0,
                     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     PRIMARY KEY (`user_id`),
                     KEY `idx_access_mode` (`access_mode`)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             ");
+
+            // Ensure hide_parent_first_name exists if table pre-existed
+            try {
+                $colChk = $db->query("SHOW COLUMNS FROM `family_tree_privacy_settings` LIKE 'hide_parent_first_name'");
+                if (!$colChk->fetch()) {
+                    $db->exec("ALTER TABLE `family_tree_privacy_settings` ADD COLUMN `hide_parent_first_name` TINYINT(1) NOT NULL DEFAULT 0 AFTER `notify_on_view`");
+                }
+            } catch (\Throwable) {}
 
             $db->exec("
                 CREATE TABLE IF NOT EXISTS `family_tree_access_rules` (
@@ -213,6 +222,7 @@ final class FamilyTreeAccessService
             'user_id' => $treeOwnerId,
             'access_mode' => self::MODE_FAMILY_ALL,
             'notify_on_view' => true,
+            'hide_parent_first_name' => false,
         ];
 
         if ($treeOwnerId === '') {
@@ -222,7 +232,7 @@ final class FamilyTreeAccessService
         try {
             $db = $pdo ?? Db::connect2();
             $stmt = $db->prepare(
-                "SELECT access_mode, notify_on_view FROM family_tree_privacy_settings WHERE user_id = ? LIMIT 1"
+                "SELECT access_mode, notify_on_view, COALESCE(hide_parent_first_name, 0) AS hide_parent_first_name FROM family_tree_privacy_settings WHERE user_id = ? LIMIT 1"
             );
             $stmt->execute([$treeOwnerId]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -236,6 +246,7 @@ final class FamilyTreeAccessService
                     'user_id' => $treeOwnerId,
                     'access_mode' => $mode,
                     'notify_on_view' => (bool)((int)($row['notify_on_view'] ?? 1)),
+                    'hide_parent_first_name' => (bool)((int)($row['hide_parent_first_name'] ?? 0)),
                 ];
             }
         } catch (\Throwable $e) {
@@ -812,6 +823,7 @@ final class FamilyTreeAccessService
 
             return [
                 'access_mode' => $accessMode,
+                'hide_parent_first_name' => (bool)($settings['hide_parent_first_name'] ?? false),
                 'family_codes' => $codeList,
                 'members' => $members,
                 'allowed_count' => $allowedCount,
@@ -821,6 +833,7 @@ final class FamilyTreeAccessService
             error_log('[FamilyTreeAccessService::getFamilyMembersForAccessControl] ' . $e->getMessage());
             return [
                 'access_mode' => $accessMode,
+                'hide_parent_first_name' => (bool)($settings['hide_parent_first_name'] ?? false),
                 'family_codes' => $codeList,
                 'members' => [],
                 'allowed_count' => 0,
@@ -836,14 +849,16 @@ final class FamilyTreeAccessService
      * @param string $accessMode 'family_all' | 'specific_persons' | 'only_me'
      * @param array<int, string> $allowedUserIds
      * @param array<int, string> $deniedUserIds
+     * @param bool $hideParentFirstName Option to show initial only for parents' first names
      * @param PDO|null $pdo
-     * @return array{success: bool, access_mode: string, allowed_count: int, denied_count: int, message: string}
+     * @return array{success: bool, access_mode: string, hide_parent_first_name: bool, allowed_count: int, denied_count: int, message: string}
      */
     public static function saveAccessControlPolicy(
         string $treeOwnerId,
         string $accessMode,
         array $allowedUserIds = [],
         array $deniedUserIds = [],
+        bool $hideParentFirstName = false,
         ?PDO $pdo = null
     ): array {
         self::ensureSchema($pdo);
@@ -853,6 +868,7 @@ final class FamilyTreeAccessService
             return [
                 'success' => false,
                 'access_mode' => self::MODE_FAMILY_ALL,
+                'hide_parent_first_name' => false,
                 'allowed_count' => 0,
                 'denied_count' => 0,
                 'message' => 'Authentication required.',
@@ -871,11 +887,11 @@ final class FamilyTreeAccessService
             }
 
             $stmtMode = $db->prepare("
-                INSERT INTO family_tree_privacy_settings (user_id, access_mode, notify_on_view, updated_at)
-                VALUES (?, ?, 1, NOW())
-                ON DUPLICATE KEY UPDATE access_mode = VALUES(access_mode), updated_at = NOW()
+                INSERT INTO family_tree_privacy_settings (user_id, access_mode, notify_on_view, hide_parent_first_name, updated_at)
+                VALUES (?, ?, 1, ?, NOW())
+                ON DUPLICATE KEY UPDATE access_mode = VALUES(access_mode), hide_parent_first_name = VALUES(hide_parent_first_name), updated_at = NOW()
             ");
-            $stmtMode->execute([$treeOwnerId, $accessMode]);
+            $stmtMode->execute([$treeOwnerId, $accessMode, $hideParentFirstName ? 1 : 0]);
 
             // Clear and replace explicit rules for this owner
             $delStmt = $db->prepare("DELETE FROM family_tree_access_rules WHERE tree_owner_id = ?");
@@ -913,6 +929,7 @@ final class FamilyTreeAccessService
             return [
                 'success' => true,
                 'access_mode' => $accessMode,
+                'hide_parent_first_name' => $hideParentFirstName,
                 'allowed_count' => $allowedCount,
                 'denied_count' => $deniedCount,
                 'message' => 'Family tree access settings updated successfully.',
@@ -1065,5 +1082,73 @@ final class FamilyTreeAccessService
             return $days . ($days === 1 ? ' day ago' : ' days ago');
         }
         return date('j M Y, H:i', $ts);
+    }
+
+    /**
+     * Format a name with initial only for the first name (e.g. "Adeola Olaogun" -> "A. Olaogun").
+     * Respects cultural traditions where elders' or parents' first names are not displayed in full.
+     *
+     * @return array{first_name: string, full_name: string, initial: string}
+     */
+    public static function formatInitialOnlyFirstName(string $firstName, string $lastName): array
+    {
+        $first = trim($firstName);
+        $last = trim($lastName);
+
+        if ($first === '') {
+            return [
+                'first_name' => '',
+                'full_name' => $last,
+                'initial' => '',
+            ];
+        }
+
+        // Extract first Unicode letter
+        $initial = mb_strtoupper(mb_substr($first, 0, 1, 'UTF-8'), 'UTF-8');
+        $maskedFirst = $initial . '.';
+        $maskedFull = $last !== '' ? ($maskedFirst . ' ' . $last) : $maskedFirst;
+
+        return [
+            'first_name' => $maskedFirst,
+            'full_name' => $maskedFull,
+            'initial' => $initial,
+        ];
+    }
+
+    /**
+     * Apply parent first name masking across graph nodes for cultural privacy.
+     *
+     * @param array<int, array<string, mixed>> $nodes
+     * @param int $egoNodeId
+     * @param bool $hideParentFirstName
+     * @return array<int, array<string, mixed>>
+     */
+    public static function maskParentNamesInGraph(array $nodes, int $egoNodeId, bool $hideParentFirstName): array
+    {
+        if (!$hideParentFirstName || empty($nodes)) {
+            return $nodes;
+        }
+
+        foreach ($nodes as &$node) {
+            $cat = (string)($node['kinship_category'] ?? '');
+            $relation = (string)($node['ego_relation'] ?? '');
+            $isParent = in_array($cat, ['parent', 'step_parent'], true)
+                || in_array(strtolower($relation), ['father', 'mother', 'parent', 'stepfather', 'stepmother'], true);
+
+            if ($isParent) {
+                $rawFirst = (string)($node['first_name'] ?? '');
+                $rawLast = (string)($node['last_name'] ?? '');
+                if ($rawFirst !== '') {
+                    $masked = self::formatInitialOnlyFirstName($rawFirst, $rawLast);
+                    $node['first_name'] = $masked['first_name'];
+                    $node['full_name'] = $masked['full_name'];
+                    $node['is_parent_name_masked'] = true;
+                    $node['cultural_initial'] = $masked['initial'];
+                }
+            }
+        }
+        unset($node);
+
+        return $nodes;
     }
 }

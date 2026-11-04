@@ -68,21 +68,13 @@ class NotificationService
             error_log('[NotificationService] Email send failed: ' . $e->getMessage());
         }
 
-        // In-app push notification to the approver & all active family members
+        // In-app push notification to the designated approver initially (escalates to whole family after 20 mins)
         try {
             // Write to durable notification table for in-app navbar bell & dropdown
             $requesterName = $emailData['requesterName'] ?: 'Someone';
-
             $cleanCode = strtoupper(trim(str_replace('#', '', $familyCode)));
-            $approvalService = new \App\service\FamilyCodeApprovalService($this->pdo);
-            $familyMembers = $approvalService->getFamilyMembersForCode($cleanCode);
 
             $targetRecipients = [$approverId];
-            foreach ($familyMembers as $member) {
-                if (!empty($member['id'])) {
-                    $targetRecipients[] = (string)$member['id'];
-                }
-            }
             $targetRecipients = array_values(array_unique(array_filter($targetRecipients)));
 
             $stmt = $this->pdo->prepare("
@@ -113,20 +105,6 @@ class NotificationService
                 title: "New Family Join Request",
                 tag: "family-approval-request-{$requestId}"
             );
-
-            // Broadcast real-time update to family channel via Pusher if available
-            try {
-                if (class_exists(\App\classes\Pusher::class)) {
-                    \App\classes\Pusher::broadcastToFamily($cleanCode, 'new-family-request', [
-                        'requestId' => $requestId,
-                        'requesterName' => $requesterName,
-                        'familyCode' => $familyCode,
-                        'message' => "{$requesterName} wants to join your {$familyCode} family network."
-                    ]);
-                }
-            } catch (\Throwable $pusherErr) {
-                // non-blocking
-            }
         } catch (\Throwable $e) {
             error_log('[NotificationService] Push notification failed: ' . $e->getMessage());
         }
@@ -237,6 +215,164 @@ class NotificationService
         $stmt->execute([$userId]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['email'] ?? null;
+    }
+
+    /**
+     * Send a friendly nudge to the designated approver when prompted by a pending member.
+     *
+     * @param array{id?: string, firstName?: string, lastName?: string, email?: string} $requesterInfo
+     */
+    public function sendApproverNudgeNotification(
+        string $approverId,
+        array $requesterInfo,
+        int $requestId,
+        string $familyCode,
+        string $approvalToken = ''
+    ): void {
+        $approverData = $this->getApproverInfo($approverId);
+        if (!$approverData) {
+            return;
+        }
+
+        $requesterName = trim(($requesterInfo['firstName'] ?? '') . ' ' . ($requesterInfo['lastName'] ?? ''));
+        if ($requesterName === '') {
+            $requesterName = 'A family member';
+        }
+
+        $baseUrl = rtrim((string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: ''), '/');
+        $actionUrl = "/profilePage#familyJoinReq-{$requestId}";
+
+        // 1. In-app notification
+        try {
+            $stmt = $this->pdo->prepare("
+                INSERT INTO notification 
+                (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                VALUES (?, ?, ?, 'Approval Nudge', 'Family Request', ?, ?, 'new', NOW())
+            ");
+            $requesterId = !empty($requesterInfo['id']) ? (string)$requesterInfo['id'] : 'system';
+            $stmt->execute([
+                $requesterId,
+                $approverId,
+                $requesterName,
+                "{$requesterName} sent you a friendly nudge to approve their request to join your {$familyCode} family network.",
+                $actionUrl
+            ]);
+        } catch (\Throwable $e) {
+            error_log('[NotificationService] In-app nudge failed: ' . $e->getMessage());
+        }
+
+        // 2. Mobile push notification
+        try {
+            \App\classes\PushNotificationClass::sendPushNotification(
+                userId: $approverId,
+                message: "👋 {$requesterName} sent you a friendly nudge to approve their family join request.",
+                url: "/profilePage",
+                title: "Family Approval Nudge",
+                tag: "family-nudge-{$requestId}"
+            );
+        } catch (\Throwable $e) {
+            error_log('[NotificationService] Push nudge failed: ' . $e->getMessage());
+        }
+
+        // 3. Email notification
+        if (!empty($approverData['email'])) {
+            try {
+                if (!\App\classes\Pusher::outboundBlocked()) {
+                    $emailData = [
+                        'id' => $approverId,
+                        'firstName' => $approverData['firstName'] ?? 'Family Member',
+                        'requesterName' => $requesterName,
+                        'familyCode' => $familyCode,
+                        'approveUrl' => $baseUrl . "/api/family-code/approve/{$requestId}?token={$approvalToken}",
+                        'denyUrl' => $baseUrl . "/api/family-code/deny/{$requestId}?token={$approvalToken}"
+                    ];
+                    \App\controller\email\SendEmailFunctionality::email(
+                        'msg/familyApprovalRequest',
+                        "Reminder: {$requesterName} is waiting for your approval",
+                        $emailData,
+                        'member'
+                    );
+                }
+            } catch (\Throwable $e) {
+                error_log('[NotificationService] Nudge email failed: ' . $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Broadcast an approval escalation to ALL approved members with the same family code
+     * after 20 minutes have passed without the original inviter approving.
+     *
+     * @param array{id?: string, firstName?: string, lastName?: string, email?: string} $requesterInfo
+     */
+    public function sendFamilyEscalationBroadcast(
+        int $requestId,
+        string $familyCode,
+        array $requesterInfo,
+        string $approvalToken = ''
+    ): void {
+        $requesterName = trim(($requesterInfo['firstName'] ?? '') . ' ' . ($requesterInfo['lastName'] ?? ''));
+        if ($requesterName === '') {
+            $requesterName = 'A family member';
+        }
+
+        $cleanCode = strtoupper(trim(str_replace('#', '', $familyCode)));
+        $approvalService = new \App\service\FamilyCodeApprovalService($this->pdo);
+        $familyMembers = $approvalService->getFamilyMembersForCode($cleanCode);
+
+        $requesterId = !empty($requesterInfo['id']) ? (string)$requesterInfo['id'] : '';
+        $actionUrl = "/profilePage#familyJoinReq-{$requestId}";
+
+        $stmt = $this->pdo->prepare("
+            INSERT INTO notification 
+            (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+            VALUES (?, ?, ?, 'Family Request Escalation', 'Family Request', ?, ?, 'new', NOW())
+        ");
+
+        foreach ($familyMembers as $member) {
+            $recipientId = (string)($member['id'] ?? '');
+            if ($recipientId === '' || $recipientId === $requesterId) {
+                continue;
+            }
+
+            try {
+                $stmt->execute([
+                    $requesterId ?: 'system',
+                    $recipientId,
+                    $requesterName,
+                    "{$requesterName} is waiting to join your {$cleanCode} family network. Any family member can now review and approve.",
+                    $actionUrl
+                ]);
+            } catch (\Throwable $e) {
+                error_log('[NotificationService] In-app escalation failed for ' . $recipientId . ': ' . $e->getMessage());
+            }
+
+            try {
+                \App\classes\PushNotificationClass::sendPushNotification(
+                    userId: $recipientId,
+                    message: "🔔 {$requesterName} is waiting to join your family network ({$cleanCode}). Tap to approve or deny.",
+                    url: "/profilePage",
+                    title: "Family Join Request Broadcast",
+                    tag: "family-escalation-{$requestId}"
+                );
+            } catch (\Throwable $e) {
+                // non-blocking
+            }
+        }
+
+        // Broadcast to Pusher family channel
+        try {
+            if (class_exists(\App\classes\Pusher::class)) {
+                \App\classes\Pusher::broadcastToFamily($cleanCode, 'family-request-escalated', [
+                    'requestId' => $requestId,
+                    'requesterName' => $requesterName,
+                    'familyCode' => $cleanCode,
+                    'message' => "{$requesterName} is waiting to join your {$cleanCode} family network. Any family member can now approve."
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // non-blocking
+        }
     }
 
     /**

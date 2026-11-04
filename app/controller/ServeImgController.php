@@ -455,4 +455,132 @@ final class ServeImgController {
         fclose($fp);
         exit;
     }
+
+    /**
+     * Stream an external linked video (e.g. Google Photos MP4 stream) behind a sovereign
+     * same-origin HTTP 206 Byte-Range streaming proxy with HMAC cryptographic validation.
+     *
+     * @return never
+     */
+    public function StreamExternalVideo(): never
+    {
+        $targetUrl = (string)($_GET['url'] ?? '');
+        $signature = (string)($_GET['sig'] ?? '');
+
+        if ($targetUrl === '' || $signature === '') {
+            http_response_code(400);
+            header('Content-Type: text/plain');
+            echo 'Target video URL and cryptographic signature are required.';
+            exit;
+        }
+
+        // 1. HMAC Verification (Constant-Time)
+        if (!\App\services\LinkPreviewService::verifyStreamSignature($targetUrl, $signature)) {
+            http_response_code(403);
+            header('Content-Type: text/plain');
+            echo 'Access denied: invalid or tampered video stream signature.';
+            exit;
+        }
+
+        // 2. Strict SSRF Hardening (Dr. Viktor Kovács & Marcus Gate)
+        $parsed = parse_url($targetUrl);
+        $scheme = strtolower($parsed['scheme'] ?? '');
+        $host = strtolower($parsed['host'] ?? '');
+
+        if ($scheme !== 'https' || empty($host)) {
+            http_response_code(400);
+            header('Content-Type: text/plain');
+            echo 'Invalid stream protocol.';
+            exit;
+        }
+
+        $isGoogleHost = preg_match('#^(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|googlevideo\.com)$#i', $host) === 1;
+        if (!$isGoogleHost) {
+            http_response_code(403);
+            header('Content-Type: text/plain');
+            echo 'Access denied: untrusted remote media host.';
+            exit;
+        }
+
+        // 3. Release Session Lock to prevent blocking concurrent browser requests
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+
+        // 4. Clean all output buffers before binary streaming
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        // 5. Initialize cURL pipeline
+        $ch = curl_init();
+        if ($ch === false) {
+            http_response_code(500);
+            header('Content-Type: text/plain');
+            echo 'Internal streaming initialization error.';
+            exit;
+        }
+
+        $headers = [
+            'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept: video/webm,video/ogg,video/*;q=0.9,application/ogg;q=0.7,audio/*;q=0.6,*/*;q=0.5',
+        ];
+
+        $isHeadRequest = strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'HEAD';
+
+        // Forward Client Range Header
+        $clientRange = $_SERVER['HTTP_RANGE'] ?? null;
+        if (!$isHeadRequest && !empty($clientRange) && preg_match('/^bytes=\s*(\d*-\d*)$/i', $clientRange, $rm)) {
+            curl_setopt($ch, CURLOPT_RANGE, $rm[1]);
+        }
+
+        if ($isHeadRequest) {
+            curl_setopt($ch, CURLOPT_NOBODY, true);
+        }
+
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $targetUrl,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_TIMEOUT => 120,
+            CURLOPT_HTTPHEADER => $headers,
+            CURLOPT_HEADERFUNCTION => function ($ch, $headerLine) {
+                $trimmed = trim($headerLine);
+                if ($trimmed === '') {
+                    return strlen($headerLine);
+                }
+                if (preg_match('#^HTTP/[0-9.]+\s+(\d+)\s*(.*)$#i', $trimmed, $sm)) {
+                    http_response_code((int)$sm[1]);
+                    return strlen($headerLine);
+                }
+                $lower = strtolower($trimmed);
+                if (str_starts_with($lower, 'content-type:')
+                    || str_starts_with($lower, 'content-range:')
+                    || str_starts_with($lower, 'content-length:')
+                    || str_starts_with($lower, 'accept-ranges:')
+                ) {
+                    header($trimmed, false);
+                }
+                return strlen($headerLine);
+            },
+            CURLOPT_WRITEFUNCTION => function ($ch, $chunk) {
+                if (connection_aborted()) {
+                    return 0; // Abort cURL transfer immediately if client disconnected
+                }
+                echo $chunk;
+                if (ob_get_level() > 0) {
+                    ob_flush();
+                }
+                flush();
+                return strlen($chunk);
+            },
+        ]);
+
+        header('Cache-Control: private, max-age=3600');
+        header('Accept-Ranges: bytes');
+
+        curl_exec($ch);
+        curl_close($ch);
+        exit;
+    }
 }

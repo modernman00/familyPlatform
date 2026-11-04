@@ -126,11 +126,11 @@ final class Organogram extends SingleCustomerData
                 );
             }
 
-            $maritalSurname = trim((string)($data['lastName'] ?? ''));
-            $maidenSurname = trim((string)($data['maiden_name'] ?? ''));
+            $maritalSurname = \App\services\NameFormatterService::formatName(trim((string)($data['lastName'] ?? '')));
+            $maidenSurname = \App\services\NameFormatterService::formatName(trim((string)($data['maiden_name'] ?? '')));
             if ($maidenSurname === '' && $maternalFamCode !== '') {
                 $cleanBirth = preg_replace('/[0-9]+/', '', $maternalFamCode);
-                $maidenSurname = !empty($cleanBirth) ? ucfirst(strtolower($cleanBirth)) : $maritalSurname;
+                $maidenSurname = !empty($cleanBirth) ? \App\services\NameFormatterService::formatName($cleanBirth) : $maritalSurname;
             }
 
             // Strict Access Control:
@@ -159,6 +159,16 @@ final class Organogram extends SingleCustomerData
 
             // Fetch 6-generation graph data
             $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
+            $ownerPrivacy = \App\services\FamilyTreeAccessService::getPrivacySettings($idStr);
+            $hideParentFirst = !empty($ownerPrivacy['hide_parent_first_name']);
+            if ($hideParentFirst && !empty($graphData['nodes'])) {
+                $graphData['nodes'] = \App\services\FamilyTreeAccessService::maskParentNamesInGraph(
+                    $graphData['nodes'],
+                    (int)($graphData['root_node_id'] ?? 0),
+                    true
+                );
+            }
+            $graphData['hideParentFirstName'] = $hideParentFirst;
             $graphData['isReadOnly'] = $isReadOnly;
             $graphData['activeLineageScope'] = $activeLineageScope;
             $graphData['primaryFamCode'] = $primaryFamCode;
@@ -220,8 +230,11 @@ final class Organogram extends SingleCustomerData
                 $mgpStmt->execute([$familyCode, $paternalSurname]);
                 $mgpLast = trim((string)($mgpStmt->fetchColumn() ?: ''));
                 if ($mgpLast !== '') {
-                    $motherMaidenSurname = $mgpLast;
+                    $motherMaidenSurname = \App\services\NameFormatterService::formatName($mgpLast);
                 }
+            }
+            if ($motherMaidenSurname !== '') {
+                $motherMaidenSurname = \App\services\NameFormatterService::formatName($motherMaidenSurname);
             }
 
             $graphData['motherMaidenSurname'] = $motherMaidenSurname;
@@ -539,11 +552,11 @@ final class Organogram extends SingleCustomerData
                 );
             }
 
-            $maritalSurname = trim((string)($data['lastName'] ?? ''));
-            $maidenSurname = trim((string)($data['maiden_name'] ?? ''));
+            $maritalSurname = \App\services\NameFormatterService::formatName(trim((string)($data['lastName'] ?? '')));
+            $maidenSurname = \App\services\NameFormatterService::formatName(trim((string)($data['maiden_name'] ?? '')));
             if ($maidenSurname === '' && $maternalFamCode !== '') {
                 $cleanBirth = preg_replace('/[0-9]+/', '', $maternalFamCode);
-                $maidenSurname = !empty($cleanBirth) ? ucfirst(strtolower($cleanBirth)) : $maritalSurname;
+                $maidenSurname = !empty($cleanBirth) ? \App\services\NameFormatterService::formatName($cleanBirth) : $maritalSurname;
             }
 
             // Access control:
@@ -625,8 +638,11 @@ final class Organogram extends SingleCustomerData
                 $mgpStmt->execute([$familyCode, $paternalSurname]);
                 $mgpLast = trim((string)($mgpStmt->fetchColumn() ?: ''));
                 if ($mgpLast !== '') {
-                    $motherMaidenSurname = $mgpLast;
+                    $motherMaidenSurname = \App\services\NameFormatterService::formatName($mgpLast);
                 }
+            }
+            if ($motherMaidenSurname !== '') {
+                $motherMaidenSurname = \App\services\NameFormatterService::formatName($motherMaidenSurname);
             }
 
             $graphData['motherMaidenSurname'] = $motherMaidenSurname;
@@ -836,6 +852,16 @@ final class Organogram extends SingleCustomerData
             $this->repairOrphanedFamilyGraph($familyCode, $idStr);
             \App\services\KinshipEntityResolver::healDuplicateNodes($familyCode);
             $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
+            $ownerPrivacy = \App\services\FamilyTreeAccessService::getPrivacySettings($idStr);
+            $hideParentFirst = !empty($ownerPrivacy['hide_parent_first_name']);
+            if ($hideParentFirst && !empty($graphData['nodes'])) {
+                $graphData['nodes'] = \App\services\FamilyTreeAccessService::maskParentNamesInGraph(
+                    $graphData['nodes'],
+                    (int)($graphData['root_node_id'] ?? 0),
+                    true
+                );
+            }
+            $graphData['hideParentFirstName'] = $hideParentFirst;
             $graphData['isReadOnly'] = !BaseController::sessionSharesFamily($familyCode);
 
             msgSuccess(200, $graphData);
@@ -911,6 +937,22 @@ final class Organogram extends SingleCustomerData
 
             $isReadOnly = !BaseController::sessionSharesFamily($nodeFamCode);
             $node['isReadOnly'] = $isReadOnly;
+
+            // Cultural Privacy: If parent first names should be masked as initials
+            $ownerPrivacy = \App\services\FamilyTreeAccessService::getPrivacySettings($viewerId);
+            if (!empty($ownerPrivacy['hide_parent_first_name'])) {
+                $bio = strtolower((string)($node['bio'] ?? ''));
+                $gen = (int)($node['generation_level'] ?? 0);
+                if ($bio === 'father' || $bio === 'mother' || $bio === 'parent' || $gen === -1) {
+                    $masked = \App\services\FamilyTreeAccessService::formatInitialOnlyFirstName(
+                        (string)($node['first_name'] ?? ''),
+                        (string)($node['last_name'] ?? '')
+                    );
+                    $node['first_name'] = $masked['first_name'];
+                    $node['full_name'] = $masked['full_name'];
+                    $node['is_parent_name_masked'] = true;
+                }
+            }
 
             if ($isReadOnly) {
                 // Privacy redaction for connected kin: mask contact and exact birth dates of living nodes
@@ -2182,6 +2224,7 @@ final class Organogram extends SingleCustomerData
         $accessMode = (string)($input['access_mode'] ?? $_POST['access_mode'] ?? \App\services\FamilyTreeAccessService::MODE_FAMILY_ALL);
         $rawAllowed = $input['allowed_user_ids'] ?? $_POST['allowed_user_ids'] ?? [];
         $rawDenied = $input['denied_user_ids'] ?? $_POST['denied_user_ids'] ?? [];
+        $hideParentFirstName = !empty($input['hide_parent_first_name'] ?? $_POST['hide_parent_first_name'] ?? 0);
 
         $allowedUserIds = is_array($rawAllowed) ? array_map('strval', $rawAllowed) : array_filter(array_map('trim', explode(',', (string)$rawAllowed)));
         $deniedUserIds = is_array($rawDenied) ? array_map('strval', $rawDenied) : array_filter(array_map('trim', explode(',', (string)$rawDenied)));
@@ -2190,7 +2233,8 @@ final class Organogram extends SingleCustomerData
             $userId,
             $accessMode,
             $allowedUserIds,
-            $deniedUserIds
+            $deniedUserIds,
+            $hideParentFirstName
         );
 
         if (!$result['success']) {

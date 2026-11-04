@@ -82,6 +82,14 @@ class FeedRepository
             $hasFamCodes = !empty($cleanedCodes);
             $inQuery = $hasFamCodes ? implode(',', array_fill(0, count($cleanedCodes), '?')) : "''";
 
+            $targetCheck = $hasFamCodes
+                ? "EXISTS (SELECT 1 FROM post_family_targets pft WHERE pft.post_no = post.post_no AND pft.family_code IN ($inQuery))"
+                : "1 = 0";
+
+            $legacyCodeCheck = $hasFamCodes
+                ? "post.postFamCode IN ($inQuery)"
+                : "1 = 0";
+
             $query = "SELECT COUNT(*) as total
                 FROM post
                 LEFT JOIN (
@@ -89,23 +97,34 @@ class FeedRepository
                     FROM requestMgt
                     WHERE requester_id IS NOT NULL AND requester_id = ?
                 ) AS rm ON post.id = rm.approver_id
-                WHERE (";
-
-            if ($hasFamCodes) {
-                $query .= "post.postFamCode IN ($inQuery) OR ";
-            }
-
-            $query .= "post.id = rm.approver_id OR post.id = ? OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_no = post.post_no AND pt.user_id = ?) OR post.id = ?)
+                WHERE (
+                    post.id = ?
+                    OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_no = post.post_no AND pt.user_id = ?)
+                    OR post.id = ?
+                    OR (
+                        EXISTS (SELECT 1 FROM post_family_targets pft_all WHERE pft_all.post_no = post.post_no)
+                        AND {$targetCheck}
+                    )
+                    OR (
+                        NOT EXISTS (SELECT 1 FROM post_family_targets pft_none WHERE pft_none.post_no = post.post_no)
+                        AND (
+                            {$legacyCodeCheck}
+                            OR post.id = rm.approver_id
+                        )
+                    )
+                )
                 AND post.post_status = 'published'
                 AND post.date_deleted IS NULL";
 
-            $params = [$userId];
+            $params = [
+                $userId,
+                $userId,
+                $userId,
+                \App\services\FamilyPlatformAccountService::getAccountId()
+            ];
             if ($hasFamCodes) {
-                $params = array_merge($params, $cleanedCodes);
+                $params = array_merge($params, $cleanedCodes, $cleanedCodes);
             }
-            $params[] = $userId;
-            $params[] = $userId;
-            $params[] = \App\services\FamilyPlatformAccountService::getAccountId();
 
             if ($filter === 'tagged') {
                 $query .= " AND EXISTS (SELECT 1 FROM post_tags pt_filter WHERE pt_filter.post_no = post.post_no AND pt_filter.user_id = ?)";
@@ -153,6 +172,10 @@ class FeedRepository
 
             $rows = [$row];
             if ($currentUserId !== null) {
+                $audienceSvc = new \App\services\FamilyPostAudienceService($this->db);
+                if (!$audienceSvc->canUserAccessPost($postNo, $currentUserId)) {
+                    return null;
+                }
                 $this->hydrateEngagement($rows, $currentUserId);
             }
 
@@ -177,6 +200,14 @@ class FeedRepository
             $hasFamCodes = !empty($cleanedCodes);
             $inQuery = $hasFamCodes ? implode(',', array_fill(0, count($cleanedCodes), '?')) : "''";
 
+            $targetCheck = $hasFamCodes
+                ? "EXISTS (SELECT 1 FROM post_family_targets pft WHERE pft.post_no = post.post_no AND pft.family_code IN ($inQuery))"
+                : "1 = 0";
+
+            $legacyCodeCheck = $hasFamCodes
+                ? "post.postFamCode IN ($inQuery)"
+                : "1 = 0";
+
             $query = "SELECT post.*, pp.img, rm.requester_id, rm.approver_id, rm.status, rm.requesterCode
                 FROM post
                 LEFT JOIN profilePics pp ON post.id = pp.id
@@ -185,24 +216,34 @@ class FeedRepository
                     FROM requestMgt
                     WHERE requester_id IS NOT NULL AND requester_id = ?
                 ) AS rm ON post.id = rm.approver_id
-                WHERE (";
-
-            if ($hasFamCodes) {
-                $query .= "post.postFamCode IN ($inQuery) OR ";
-            }
-
-            $query .= "post.id = rm.approver_id OR post.id = ? OR post.id = ?) 
+                WHERE (
+                    post.id = ?
+                    OR post.id = ?
+                    OR (
+                        EXISTS (SELECT 1 FROM post_family_targets pft_all WHERE pft_all.post_no = post.post_no)
+                        AND {$targetCheck}
+                    )
+                    OR (
+                        NOT EXISTS (SELECT 1 FROM post_family_targets pft_none WHERE pft_none.post_no = post.post_no)
+                        AND (
+                            {$legacyCodeCheck}
+                            OR post.id = rm.approver_id
+                        )
+                    )
+                ) 
                 AND post.post_status = 'published'
                 AND post.date_created >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
                 AND post.date_created < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), INTERVAL 1 DAY)
                 ORDER BY post.date_created DESC";
 
-            $params = [$userId];
+            $params = [
+                $userId,
+                $userId,
+                \App\services\FamilyPlatformAccountService::getAccountId()
+            ];
             if ($hasFamCodes) {
-                $params = array_merge($params, $cleanedCodes);
+                $params = array_merge($params, $cleanedCodes, $cleanedCodes);
             }
-            $params[] = $userId;
-            $params[] = \App\services\FamilyPlatformAccountService::getAccountId();
 
             $stmt = $this->db->prepare($query);
             foreach ($params as $key => $val) {
@@ -245,6 +286,14 @@ class FeedRepository
             $hasFamCodes = !empty($cleanedCodes);
             $inQuery = $hasFamCodes ? implode(',', array_fill(0, count($cleanedCodes), '?')) : "''";
 
+            $targetCheck = $hasFamCodes
+                ? "EXISTS (SELECT 1 FROM post_family_targets pft WHERE pft.post_no = post.post_no AND pft.family_code IN ($inQuery))"
+                : "1 = 0";
+
+            $legacyCodeCheck = $hasFamCodes
+                ? "post.postFamCode IN ($inQuery)"
+                : "1 = 0";
+
             $query = "SELECT post.*, pp.img, rm.requester_id, rm.approver_id, rm.status, rm.requesterCode
                 FROM post
                 LEFT JOIN profilePics pp ON post.id = pp.id
@@ -253,23 +302,34 @@ class FeedRepository
                     FROM requestMgt
                     WHERE requester_id IS NOT NULL AND requester_id = ?
                 ) AS rm ON post.id = rm.approver_id
-                WHERE (";
-
-            if ($hasFamCodes) {
-                $query .= "post.postFamCode IN ($inQuery) OR ";
-            }
-
-            $query .= "post.id = rm.approver_id OR post.id = ? OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_no = post.post_no AND pt.user_id = ?) OR post.id = ?)
+                WHERE (
+                    post.id = ?
+                    OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_no = post.post_no AND pt.user_id = ?)
+                    OR post.id = ?
+                    OR (
+                        EXISTS (SELECT 1 FROM post_family_targets pft_all WHERE pft_all.post_no = post.post_no)
+                        AND {$targetCheck}
+                    )
+                    OR (
+                        NOT EXISTS (SELECT 1 FROM post_family_targets pft_none WHERE pft_none.post_no = post.post_no)
+                        AND (
+                            {$legacyCodeCheck}
+                            OR post.id = rm.approver_id
+                        )
+                    )
+                )
                 AND post.post_status = 'published'
                 AND post.date_deleted IS NULL";
 
-            $params = [$userId];
+            $params = [
+                $userId,
+                $userId,
+                $userId,
+                \App\services\FamilyPlatformAccountService::getAccountId()
+            ];
             if ($hasFamCodes) {
-                $params = array_merge($params, $cleanedCodes);
+                $params = array_merge($params, $cleanedCodes, $cleanedCodes);
             }
-            $params[] = $userId;
-            $params[] = $userId;
-            $params[] = \App\services\FamilyPlatformAccountService::getAccountId();
 
             if ($filter === 'tagged') {
                 $query .= " AND EXISTS (SELECT 1 FROM post_tags pt_filter WHERE pt_filter.post_no = post.post_no AND pt_filter.user_id = ?)";
@@ -433,6 +493,91 @@ class FeedRepository
             // Hydrate OpenGraph link preview (from fast cache or auto-recovery)
             $msg = (string)($post['postMessage'] ?? ($post['content'] ?? ''));
             $post['link_preview'] = !empty($msg) ? \App\services\LinkPreviewService::getPreviewForPostText($msg) : null;
+
+            // Promote linked photos (Google Photos, iCloud, direct image links) to native post images (Multi-Image Support)
+            $hasLocalImg = false;
+            $existingExternalImages = [];
+            $existingExternalVideos = [];
+            for ($i = 0; $i < 6; $i++) {
+                $imgVal = (string)($post['post_img' . $i] ?? '');
+                if (!empty($imgVal)) {
+                    if (!str_starts_with($imgVal, 'http://') && !str_starts_with($imgVal, 'https://')) {
+                        $hasLocalImg = true;
+                    } else {
+                        if (\App\classes\VideoParser::isVideoUrl($imgVal)) {
+                            $existingExternalVideos[] = $imgVal;
+                        } else {
+                            $existingExternalImages[] = $imgVal;
+                        }
+                    }
+                }
+            }
+
+            if (!$hasLocalImg) {
+                $extractedAssets = \App\services\LinkPreviewService::extractPhotoAssetsFromText($msg, 6);
+                $finalImages = !empty($extractedAssets['images']) ? $extractedAssets['images'] : $existingExternalImages;
+                $finalVideos = !empty($extractedAssets['videos']) ? $extractedAssets['videos'] : $existingExternalVideos;
+
+                if (!empty($finalImages)) {
+                    $post['images'] = $finalImages;
+                    foreach ($finalImages as $slotIdx => $imgUrl) {
+                        $post['post_img' . $slotIdx] = $imgUrl;
+                    }
+                }
+
+                if (!empty($finalVideos)) {
+                    $formattedVideos = [];
+                    foreach ($finalVideos as $vUrl) {
+                        $thumb = null;
+                        if (preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|ggpht\.com)/#i', $vUrl)) {
+                            $thumb = preg_replace('/=.*$/i', '=s1600', $vUrl);
+                        }
+                        $formattedVideos[] = [
+                            'type' => 'direct',
+                            'videoId' => null,
+                            'thumbnailUrl' => $thumb,
+                            'embedUrl' => \App\services\LinkPreviewService::getProxiedVideoUrl($vUrl),
+                            'originalUrl' => $vUrl,
+                            'trimStart' => null,
+                            'trimEnd' => null,
+                        ];
+                    }
+                    $post['videos'] = $formattedVideos;
+                    $post['video'] = $formattedVideos[0];
+                }
+
+                if ($post['link_preview'] === null && ($extractedAssets['preview'] ?? null) !== null) {
+                    $post['link_preview'] = $extractedAssets['preview'];
+                }
+
+                if (!empty($extractedAssets['cleaned_message'])) {
+                    $post['displayMessage'] = $extractedAssets['cleaned_message'];
+                } elseif (!empty($finalImages) || !empty($finalVideos)) {
+                    $post['displayMessage'] = \App\services\LinkPreviewService::cleanPhotoLinkFromMessage(
+                        $msg,
+                        array_merge($finalImages, $finalVideos)
+                    );
+                }
+            } elseif (!empty($existingExternalVideos) && empty($post['videos'])) {
+                $formattedVideos = [];
+                foreach ($existingExternalVideos as $vUrl) {
+                    $thumb = null;
+                    if (preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|ggpht\.com)/#i', $vUrl)) {
+                        $thumb = preg_replace('/=.*$/i', '=s1600', $vUrl);
+                    }
+                    $formattedVideos[] = [
+                        'type' => 'direct',
+                        'videoId' => null,
+                        'thumbnailUrl' => $thumb,
+                        'embedUrl' => \App\services\LinkPreviewService::getProxiedVideoUrl($vUrl),
+                        'originalUrl' => $vUrl,
+                        'trimStart' => null,
+                        'trimEnd' => null,
+                    ];
+                }
+                $post['videos'] = $formattedVideos;
+                $post['video'] = $formattedVideos[0];
+            }
         }
         unset($post);
     }

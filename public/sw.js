@@ -186,13 +186,14 @@ self.addEventListener('fetch', (event) => {
     url.pathname.startsWith('/signout') ||
     url.pathname.includes('/tests/clear-rate-limit');
 
-  if (isSensitiveEndpoint) {
-    // Do NOT call event.respondWith here. For auth / register / wallet / admin
-    // we want the browser's native networking (redirects, cookies, OAuth hops,
-    // form POSTs). `event.respondWith(fetch(request))` added nothing but a
-    // failure mode: any transient fetch rejection — or a navigation redirect
-    // the SW can't replay — surfaced as "FetchEvent ... promise was rejected"
-    // / "TypeError: Failed to fetch" and the page silently did nothing.
+  if (
+    isSensitiveEndpoint ||
+    request.destination === 'video' ||
+    request.destination === 'audio' ||
+    url.pathname.startsWith('/resources/videos') ||
+    request.headers.has('range')
+  ) {
+    // Direct browser networking for video streaming and sensitive endpoints
     return;
   }
 

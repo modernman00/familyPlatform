@@ -105,6 +105,7 @@
   <link rel="stylesheet" href="/public/css/main.css?v={{ assetVersion('css/main.css') }}">
   <link rel="stylesheet" href="/public/css/standards-v21.css?v={{ assetVersion('css/standards-v21.css') }}">
   <link rel="stylesheet" href="/public/css/profile-photo-viewer.css?v={{ assetVersion('css/profile-photo-viewer.css') }}">
+  <link rel="stylesheet" href="/public/css/atg-emoji.css?v={{ assetVersion('css/atg-emoji.css') }}">
   @stack('styles')
 </head>
 
@@ -146,7 +147,9 @@
   <script nonce="{{ $nonce }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>
   <script nonce="{{ $nonce }}" src="/public/js/profilePhotoViewer.js?v={{ assetVersion('js/profilePhotoViewer.js') }}" defer></script>
   <script nonce="{{ $nonce }}" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
+  <script nonce="{{ $nonce }}" src="/public/js/atg-emoji-engine.js?v={{ assetVersion('js/atg-emoji-engine.js') }}" defer></script>
 
+  @include('components.atgArViewerModal')
   @include('component.submitSpinner')
   @include('partials.pwa-register')
   @stack('scripts')

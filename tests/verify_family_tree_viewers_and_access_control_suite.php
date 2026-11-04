@@ -189,6 +189,7 @@ try {
             FamilyTreeAccessService::MODE_SPECIFIC_PERSONS,
             [$relative2Id], // only relative2 allowlisted
             [],
+            false,
             $pdo
         );
         $checkAllowlist1 = FamilyTreeAccessService::canViewFamilyTree($relative1Id, $ownerId, $ownerFamCode, $pdo);
@@ -206,6 +207,7 @@ try {
             FamilyTreeAccessService::MODE_ONLY_ME,
             [$relative2Id],
             [],
+            false,
             $pdo
         );
         $checkOnlyMe = FamilyTreeAccessService::canViewFamilyTree($relative2Id, $ownerId, $ownerFamCode, $pdo);
@@ -322,6 +324,149 @@ try {
         $resp4 = json_decode($raw4, true) ?: [];
         if (!($resp4['success'] ?? false) || ($resp4['rule_type'] ?? '') !== 'deny') {
             throw new Exception("Valid setPersonAccessRule failed.");
+        }
+    });
+
+    // 7. Modal search filtering implementation
+    runTest('7. Modal search filtering logic and DOM binding verification', function() {
+        $modalsBlade = (string)file_get_contents(dirname(__DIR__) . '/resources/views/member/includes/treeAccessModals.blade.php');
+
+        if (!str_contains($modalsBlade, 'id="accessControlSearchInput"')) {
+            throw new Exception("Missing accessControlSearchInput in treeAccessModals.blade.php");
+        }
+        if (!str_contains($modalsBlade, 'id="whoViewedSearchInput"')) {
+            throw new Exception("Missing whoViewedSearchInput in treeAccessModals.blade.php");
+        }
+        if (!str_contains($modalsBlade, 'filterAccessControlList')) {
+            throw new Exception("Missing filterAccessControlList implementation");
+        }
+        if (!str_contains($modalsBlade, 'filterWhoViewedList')) {
+            throw new Exception("Missing filterWhoViewedList implementation");
+        }
+        // Verify important display override to bypass Bootstrap .d-flex specificity
+        if (!str_contains($modalsBlade, "setProperty('display'") && !str_contains($modalsBlade, 'setProperty("display"')) {
+            throw new Exception("filterAccessControlList must use setProperty('display', ..., 'important') to override Bootstrap .d-flex.");
+        }
+    });
+
+    // 8. Cultural privacy: Option to show initial only for parents' first name
+    runTest('8. Cultural privacy: Option to show initial only for parents first names (e.g. A. Olaogun)', function() use ($pdo, $ownerId) {
+        // 8a. Test formatting helper
+        $formatted = FamilyTreeAccessService::formatInitialOnlyFirstName('Adeola', 'Olaogun');
+        if ($formatted['first_name'] !== 'A.' || $formatted['full_name'] !== 'A. Olaogun') {
+            throw new Exception("formatInitialOnlyFirstName failed: expected 'A. Olaogun', got '{$formatted['full_name']}'");
+        }
+
+        $formattedSingle = FamilyTreeAccessService::formatInitialOnlyFirstName('Folake', '');
+        if ($formattedSingle['first_name'] !== 'F.' || $formattedSingle['full_name'] !== 'F.') {
+            throw new Exception("formatInitialOnlyFirstName single name failed: expected 'F.', got '{$formattedSingle['full_name']}'");
+        }
+
+        // 8b. Test graph node masking
+        $testNodes = [
+            [
+                'id' => 101,
+                'first_name' => 'Adeola',
+                'last_name' => 'Olaogun',
+                'full_name' => 'Adeola Olaogun',
+                'kinship_category' => 'parent',
+                'ego_relation' => 'Father'
+            ],
+            [
+                'id' => 102,
+                'first_name' => 'Folake',
+                'last_name' => 'Olaogun',
+                'full_name' => 'Folake Olaogun',
+                'kinship_category' => 'parent',
+                'ego_relation' => 'Mother'
+            ],
+            [
+                'id' => 103,
+                'first_name' => 'Babajide',
+                'last_name' => 'Olaogun',
+                'full_name' => 'Babajide Olaogun',
+                'kinship_category' => 'sibling',
+                'ego_relation' => 'Brother'
+            ]
+        ];
+
+        // When hide_parent_first_name = false: no change
+        $unmasked = FamilyTreeAccessService::maskParentNamesInGraph($testNodes, 1, false);
+        if ($unmasked[0]['first_name'] !== 'Adeola') {
+            throw new Exception("Parent first name should not be masked when hide_parent_first_name is false.");
+        }
+
+        // When hide_parent_first_name = true: parent first names masked to initials, siblings untouched
+        $masked = FamilyTreeAccessService::maskParentNamesInGraph($testNodes, 1, true);
+        if ($masked[0]['first_name'] !== 'A.' || $masked[0]['full_name'] !== 'A. Olaogun') {
+            throw new Exception("Father first name should be masked to initial 'A.'. Got {$masked[0]['full_name']}");
+        }
+        if ($masked[1]['first_name'] !== 'F.' || $masked[1]['full_name'] !== 'F. Olaogun') {
+            throw new Exception("Mother first name should be masked to initial 'F.'. Got {$masked[1]['full_name']}");
+        }
+        if ($masked[2]['first_name'] !== 'Babajide' || $masked[2]['full_name'] !== 'Babajide Olaogun') {
+            throw new Exception("Sibling first name must remain in full. Got {$masked[2]['full_name']}");
+        }
+
+        // 8c. Test saving and retrieving preference via database
+        FamilyTreeAccessService::saveAccessControlPolicy(
+            $ownerId,
+            FamilyTreeAccessService::MODE_FAMILY_ALL,
+            [],
+            [],
+            true, // hideParentFirstName
+            $pdo
+        );
+
+        $settings = FamilyTreeAccessService::getPrivacySettings($ownerId, $pdo);
+        if (empty($settings['hide_parent_first_name'])) {
+            throw new Exception("Expected hide_parent_first_name to be true in privacy settings.");
+        }
+
+        // Toggle back to false
+        FamilyTreeAccessService::saveAccessControlPolicy(
+            $ownerId,
+            FamilyTreeAccessService::MODE_FAMILY_ALL,
+            [],
+            [],
+            false,
+            $pdo
+        );
+        $settings2 = FamilyTreeAccessService::getPrivacySettings($ownerId, $pdo);
+        if (!empty($settings2['hide_parent_first_name'])) {
+            throw new Exception("Expected hide_parent_first_name to be false after toggle.");
+        }
+    });
+
+    // 9. Unplaced relatives tray: names and avatars link to the person's profile
+    runTest('9. Unplaced relative name links to profile (registered) or details popup (unregistered)', function() {
+        $blade = (string)file_get_contents(dirname(__DIR__) . '/resources/views/member/organogram.blade.php');
+        $css = (string)file_get_contents(dirname(__DIR__) . '/public/css/organogram.css');
+
+        foreach ([
+            '/allMembers/seeProfile/${encodeURIComponent(userId)}' => 'registered profile URL',
+            'unplaced-profile-link' => 'profile link class on the name',
+            'window.viewUnplacedMemberProfile' => 'fallback details popup for unregistered relatives',
+        ] as $needle => $label) {
+            if (!str_contains($blade, $needle)) {
+                throw new Exception("Missing {$label} in organogram.blade.php");
+            }
+        }
+        // External profile links must not leak the opener
+        if (!str_contains($blade, 'target="_blank" rel="noopener noreferrer"')) {
+            throw new Exception('Profile link must open in a new tab with rel="noopener noreferrer"');
+        }
+        // userId must be URL-encoded, never interpolated raw into the href
+        if (str_contains($blade, '/allMembers/seeProfile/${userId}')) {
+            throw new Exception('Profile href must use encodeURIComponent(userId)');
+        }
+        if (!str_contains($css, '.unplaced-profile-link:focus-visible')) {
+            throw new Exception('Missing keyboard focus style for .unplaced-profile-link');
+        }
+        // Route the link targets must exist
+        $routes = (string)file_get_contents(dirname(__DIR__) . '/app/router/allMembersRoute.php');
+        if (!str_contains($routes, '/allMembers/seeProfile/[a:id]')) {
+            throw new Exception('Profile route /allMembers/seeProfile/[a:id] is not registered');
         }
     });
 

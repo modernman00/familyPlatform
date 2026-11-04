@@ -337,7 +337,6 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
         if (typeof window.__removeComposerVideo === 'function') {
           window.__removeComposerVideo();
         }
-        attachedVideoState = null;
         updatePreviews([]); // Clear all
       });
     }

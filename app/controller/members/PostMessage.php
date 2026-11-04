@@ -242,11 +242,19 @@ final class PostMessage
                 } catch (\Throwable $cmpEx) {
                     error_log('[PostMessage::getNewPostPusher comparison] ' . $cmpEx->getMessage());
                 }
-                $targetFamCode = !empty($post['postFamCode']) ? (string)$post['postFamCode'] : (is_string($famCode) ? $famCode : '');
-                try {
-                    Pusher::broadcastToFamily($targetFamCode, 'new-post', [$post]);
-                } catch (\Throwable $th) {
-                    error_log("Pusher post broadcast failed: " . $th->getMessage());
+                $audienceSvc = new \App\services\FamilyPostAudienceService();
+                $targetFamCodes = $audienceSvc->getPostTargetCodes((int)$postNoOverride);
+                if (empty($targetFamCodes)) {
+                    $rawCode = !empty($post['postFamCode']) ? (string)$post['postFamCode'] : (is_string($famCode) ? $famCode : '');
+                    $targetFamCodes = array_filter(array_map('trim', explode(',', $rawCode)));
+                }
+                foreach ($targetFamCodes as $targetFamCode) {
+                    if ($targetFamCode === '') continue;
+                    try {
+                        Pusher::broadcastToFamily($targetFamCode, 'new-post', [$post]);
+                    } catch (\Throwable $th) {
+                        error_log("Pusher post broadcast failed for family $targetFamCode: " . $th->getMessage());
+                    }
                 }
                 return;
             }
@@ -727,10 +735,32 @@ final class PostMessage
                 $postOriginName = is_string($data['fullName'] ?? null) ? $data['fullName'] : '';
                 $rawId = checkInput($data['id']);
                 $id = is_string($rawId) ? $rawId : '';
-                $famCode = checkInput($data['postFamCode']);
-                $famCode = is_string($famCode) ? $famCode : '';
+                $rawFamCode = checkInput($data['postFamCode']);
+                $famCode = is_string($rawFamCode) ? $rawFamCode : '';
 
-                $results = AllMembersData::AllMembersEmailByFamCode($famCode, $id);
+                $audienceSvc = new \App\services\FamilyPostAudienceService();
+                $targetFamCodes = $audienceSvc->getPostTargetCodes((int)$postNo);
+                if (empty($targetFamCodes) && $famCode !== '') {
+                    $targetFamCodes = array_filter(array_map('trim', explode(',', $famCode)));
+                }
+                if (empty($targetFamCodes) && $famCode !== '') {
+                    $targetFamCodes = [$famCode];
+                }
+
+                $allResults = [];
+                $seenEmails = [];
+                foreach ($targetFamCodes as $tFamCode) {
+                    if ($tFamCode === '') continue;
+                    $famMembers = AllMembersData::AllMembersEmailByFamCode($tFamCode, $id);
+                    foreach ($famMembers as $m) {
+                        $eKey = strtolower(trim((string)($m['email'] ?? '')));
+                        if ($eKey !== '' && !isset($seenEmails[$eKey])) {
+                            $seenEmails[$eKey] = true;
+                            $allResults[] = $m;
+                        }
+                    }
+                }
+                $results = $allResults;
                 $url = self::buildPostUrl($postNo);
                 $rawPostMessage = is_string($data['postMessage'] ?? null) ? (string) $data['postMessage'] : '';
 
@@ -1155,6 +1185,67 @@ final class PostMessage
                 'comment_no' => $commentNo,
                 'views_count' => $viewsCount,
                 'viewers' => $viewers,
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * API: Get Single Post JSON by post_no (for direct notification deep-linking and dynamic hydration).
+     *
+     * @param int|string|null $postNo
+     */
+    public static function getSinglePost(int|string|null $postNo = null): void
+    {
+        if (empty($_SESSION['id'])) {
+            try {
+                SignIn::verify('users');
+            } catch (\Throwable $e) {
+                http_response_code(401);
+                header('Content-Type: application/json');
+                echo json_encode(['status' => 'error', 'message' => 'Unauthorised']);
+                return;
+            }
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            $postNo = (int)($postNo ?: ($_GET['post_no'] ?? 0));
+
+            if ($postNo <= 0 || empty($userId)) {
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Invalid post number']);
+                return;
+            }
+
+            $repo = new \App\repository\FeedRepository();
+            $postDto = $repo->getPostByNo($postNo, $userId);
+
+            if (!$postDto) {
+                // SecOps Gating (Marcus Red Team): Check if post actually exists to distinguish 403 vs 404
+                $existsStmt = \Src\Db::connect2()->prepare('SELECT 1 FROM post WHERE post_no = ? AND date_deleted IS NULL LIMIT 1');
+                $existsStmt->execute([$postNo]);
+                if ($existsStmt->fetchColumn() !== false) {
+                    http_response_code(403);
+                    echo json_encode(['status' => 'error', 'message' => 'You do not have permission to view this post.']);
+                    return;
+                }
+
+                http_response_code(404);
+                echo json_encode(['status' => 'error', 'message' => 'Post not found or has been removed']);
+                return;
+            }
+
+            $postArray = $postDto->toArray();
+            $postArray['comparison'] = \App\model\PostComparison::getForPosts([$postNo])[$postNo] ?? null;
+            $postArray['post_tags'] = \App\controller\members\TagController::getPostTags($postNo);
+
+            echo json_encode([
+                'status' => 'success',
+                'data' => $postArray,
             ]);
         } catch (\Throwable $e) {
             http_response_code(500);

@@ -51,6 +51,17 @@ final class ApprovalController extends BaseController
                     error_log('[ApprovalController] Approval confirmation notification warning: ' . $pushEx->getMessage());
                 }
 
+                // Broadcast family join announcement to all members with the same family code
+                try {
+                    \App\services\FamilyJoinAnnouncementService::broadcastNewMemberAnnouncement(
+                        (string)$familyCode,
+                        (string)$userId,
+                        (string)($_SESSION['id'] ?? '')
+                    );
+                } catch (\Throwable $annEx) {
+                    error_log('[ApprovalController] Join announcement warning: ' . $annEx->getMessage());
+                }
+
                 msgSuccess(200, "Application successfully approved.");
             } catch (\Exception $e) {
                 $db->rollBack();

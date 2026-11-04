@@ -34,6 +34,13 @@ final class PostLikeController extends Db
             }
 
             $pdo = parent::connect2();
+
+            // SecOps Target Audience Gate (Marcus Red Team): verify liker has access to this post
+            $audienceService = new \App\services\FamilyPostAudienceService($pdo);
+            if (!$audienceService->canUserAccessPost((int)$postNo, (string)$userId)) {
+                msgException(403, "You do not have permission to react to this post.");
+                return;
+            }
             
             // Check if user already reacted
             $stmt = $pdo->prepare("SELECT id, reaction_type FROM post_reactions WHERE post_no = :postNo AND user_id = :userId");

@@ -51,7 +51,8 @@
 .avatar-container .avatar-zoom-cue {
     position: absolute;
     bottom: 2px;
-    right: calc(50% - 50px);
+    left: 4px;
+    right: auto;
     width: 28px;
     height: 28px;
     border-radius: 50%;
@@ -63,14 +64,15 @@
     font-size: 0.78rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     border: 2px solid #ffffff;
-    opacity: 0.95;
+    opacity: 0;
     pointer-events: none;
     transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-.avatar-container:hover .avatar-zoom-cue {
+.avatar-container:hover .avatar-zoom-cue,
+.avatar-container:focus-within .avatar-zoom-cue {
     transform: scale(1.12);
-    opacity: 1;
+    opacity: 0.95;
 }
 
 /* -------------------------------------------------------------

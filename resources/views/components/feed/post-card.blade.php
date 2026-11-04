@@ -73,7 +73,7 @@
               </span>
             </template>
           </div>
-          <div class="d-flex align-items-center gap-2 mt-0.5">
+          <div class="d-flex align-items-center gap-2 mt-0.5 flex-wrap">
             <small class="text-muted" style="font-size: 0.85rem;" x-text="formatDate(post.post_time || post.date_created)"></small>
             <template x-if="post.is_official || post.id === '{{ \App\services\FamilyPlatformAccountService::getAccountId() }}'">
               <span class="badge bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-pill" style="font-size: 0.78rem; font-weight: 600; padding: 2px 8px;">
@@ -81,7 +81,12 @@
               </span>
             </template>
             <template x-if="!(post.id === 'FAMILY_PLATFORM_OFFICIAL' || post.is_official) && post.postFamCode">
-              <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill" style="font-size: 0.78rem; font-weight: normal; padding: 2px 8px;" x-text="(window.__ ? window.__('feed.family_label', 'Family') : 'Family') + ': ' + post.postFamCode"></span>
+              <span class="badge rounded-pill" 
+                    :class="post.target_scope === 'birth' ? 'bg-danger-subtle text-danger-emphasis border border-danger-subtle' : (post.target_scope === 'married' ? 'bg-success-subtle text-success-emphasis border border-success-subtle' : 'bg-secondary-subtle text-secondary-emphasis')" 
+                    style="font-size: 0.78rem; font-weight: normal; padding: 2px 8px;">
+                <i class="bi me-1" :class="post.target_scope === 'birth' ? 'bi-heart-pulse-fill' : (post.target_scope === 'married' ? 'bi-house-heart-fill' : 'bi-people')"></i>
+                <span x-text="(post.target_scope === 'birth' ? 'Birth Family: ' : (post.target_scope === 'married' ? 'Married Family: ' : (window.__ ? window.__('feed.family_label', 'Family') : 'Family') + ': ')) + post.postFamCode"></span>
+              </span>
             </template>
           </div>
         </div>
@@ -151,10 +156,12 @@
     </div>
   </template>
 
+
+
   <!-- Post Text (Prominent for Text-Only Posts) -->
-  <template x-if="!post.two_truths && (post.displayMessage || (!post.video && (!post.videos || post.videos.length === 0) && post.postMessage)) && (!post.images || post.images.length === 0) && !post.video && (!post.videos || post.videos.length === 0) && !post.comparison">
+  <template x-if="!post.two_truths && (getMediaCaption(post) || post.ar_emoji) && (!post.images || post.images.length === 0) && !post.video && (!post.videos || post.videos.length === 0) && !post.comparison">
     <div class="post-content px-1 mb-3">
-      <p class="mb-0" style="white-space: pre-line; font-size: 1.05rem; color: var(--text-main); line-height: 1.55; font-family: var(--font-sans, -apple-system, system-ui, sans-serif);" x-html="renderHashtags(post.displayMessage || post.postMessage)"></p>
+      <p class="mb-0" style="white-space: pre-line; font-size: 1.05rem; color: var(--text-main); line-height: 1.55; font-family: var(--font-sans, -apple-system, system-ui, sans-serif);" x-html="renderHashtags(getMediaCaption(post), post.ar_emoji)"></p>
       
       <!-- On-Demand Post Translation Toggle for Diaspora Viewers -->
       <div class="mt-1 d-flex align-items-center gap-2" x-show="window.APP_LOCALE && window.APP_LOCALE !== 'en'">
@@ -884,11 +891,20 @@
            },
            onScroll(e) {
              const track = e.target;
-             const cardWidth = track.firstElementChild ? track.firstElementChild.offsetWidth : 260;
-             if (cardWidth > 0) {
-               const idx = Math.round(track.scrollLeft / cardWidth);
-               this.activeVidIdx = Math.max(0, Math.min(idx, (post.videos ? post.videos.length - 1 : 0)));
-             }
+             const children = Array.from(track.children || []);
+             if (!children.length) return;
+             const scrollCenter = track.scrollLeft + track.clientWidth / 2;
+             let closestIdx = 0;
+             let minDiff = Infinity;
+             children.forEach((child, i) => {
+               const childCenter = child.offsetLeft + child.offsetWidth / 2;
+               const diff = Math.abs(scrollCenter - childCenter);
+               if (diff < minDiff) {
+                 minDiff = diff;
+                 closestIdx = i;
+               }
+             });
+             this.activeVidIdx = Math.max(0, Math.min(closestIdx, (post.videos ? post.videos.length - 1 : 0)));
            }
          }">
       <!-- Header Badge / Counter -->
@@ -936,11 +952,27 @@
            style="scroll-snap-type: x mandatory; scrollbar-width: thin; -webkit-overflow-scrolling: touch; scroll-padding: 0 4px;">
         <template x-for="(vid, vIdx) in post.videos" :key="vIdx">
           <div class="multi-video-card flex-shrink-0 position-relative rounded-3 overflow-hidden shadow-sm border border-light-subtle"
-               :style="'scroll-snap-align: start; flex: 0 0 auto; width: ' + (post.videos.length === 2 ? 'clamp(240px, 48.5%, 360px)' : 'clamp(210px, 44%, 300px)') + '; background: #07090e;'"
+               :style="'scroll-snap-align: start; flex: 0 0 auto; width: ' + (isCardLandscape ? 'clamp(300px, 82%, 540px)' : (post.videos.length === 2 ? 'clamp(240px, 48.5%, 360px)' : 'clamp(210px, 44%, 300px)')) + '; background: #07090e; transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);'"
                x-data="{
                  isMuted: true,
                  isPlaying: false,
                  progressPercent: 0,
+                 isCardLandscape: (vid.type !== 'direct'),
+                 cardAspect: (vid.type !== 'direct' ? '16 / 9' : '4 / 5'),
+                 detectCardDimensions(el) {
+                   if (!el || !el.videoWidth || !el.videoHeight) return;
+                   const r = el.videoWidth / el.videoHeight;
+                   if (r > 1.15) {
+                     this.isCardLandscape = true;
+                     this.cardAspect = (el.videoWidth / el.videoHeight).toFixed(4) + ' / 1';
+                   } else if (r < 0.88) {
+                     this.isCardLandscape = false;
+                     this.cardAspect = (r <= 0.65) ? '9 / 16' : '4 / 5';
+                   } else {
+                     this.isCardLandscape = false;
+                     this.cardAspect = '1 / 1';
+                   }
+                 },
                  togglePlay(vEl) {
                    if (!vEl) return;
                    if (vEl.paused) {
@@ -969,7 +1001,8 @@
                      onVideoEnded(vIdx, vEl);
                    }
                  }
-               }">
+               }"
+               x-init="$nextTick(() => { const v = $el.querySelector('video'); if (v && v.videoWidth) detectCardDimensions(v); })">
             <!-- Badge: Video Number & Type -->
             <div class="position-absolute top-0 start-0 m-2.5 d-flex align-items-center gap-1.5" style="z-index: 5; pointer-events: none;">
               <span class="badge rounded-pill px-2 py-1 shadow-sm d-inline-flex align-items-center gap-1"
@@ -1001,19 +1034,36 @@
 
             <!-- Video Player (Direct Stream or Embedded) -->
             <template x-if="vid.type === 'direct'">
-              <div class="position-relative w-100" style="aspect-ratio: 4 / 5; max-height: 440px; background: #07090e;">
-                <video class="w-100 h-100 object-fit-contain"
+              <div class="position-relative w-100 overflow-hidden" :style="'aspect-ratio: ' + cardAspect + '; max-height: 480px; background: #07090e; transition: aspect-ratio 0.25s cubic-bezier(0.16, 1, 0.3, 1);'">
+                <!-- Ambient Glow Backdrop for Subtle Edge Fill -->
+                <div class="position-absolute top-0 start-0 w-100 h-100 overflow-hidden" style="pointer-events: none; z-index: 1;">
+                  <div class="w-100 h-100" style="background: radial-gradient(circle at center, rgba(30, 41, 59, 0.45) 0%, rgba(7, 9, 14, 0.98) 100%);"></div>
+                </div>
+
+                <!-- High-Res Poster Thumbnail Overlay (Guarantees zero dark/black screen while paused) -->
+                <img x-show="!isPlaying && vid.thumbnailUrl"
+                     :src="vid.thumbnailUrl"
+                     class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover pointer-events-none"
+                     style="z-index: 3;"
+                     loading="lazy"
+                     alt="Video thumbnail preview"
+                     x-on:error="$el.style.display = 'none'">
+
+                <video referrerpolicy="no-referrer" class="w-100 h-100 object-fit-contain position-relative"
                        :src="vid.embedUrl"
+                       :poster="vid.thumbnailUrl || ''"
                        playsinline
                        webkit-playsinline
                        muted
                        preload="metadata"
+                       @loadedmetadata="detectCardDimensions($el)"
                        @click.stop="togglePlay($el)"
                        @dblclick.stop="openVideoModal(post.videos, vIdx, isMuted)"
                        @play="isPlaying = true"
                        @pause="isPlaying = false"
                        @ended="onVideoEnded(vIdx, $el)"
-                       @timeupdate="onTimeUpdate($el)"></video>
+                       @timeupdate="onTimeUpdate($el)"
+                       style="z-index: 2;"></video>
 
                 <!-- Center Play Indicator (when paused) -->
                 <div class="position-absolute top-50 start-50 translate-middle pointer-events-none"
@@ -1078,8 +1128,8 @@
         <button type="button"
                 class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
                 @click.stop="openVideoModal([post.video], 0, false)"
-                title="Play in full video mode"
-                aria-label="Play in full video mode"
+                title="View Fullscreen in full video mode"
+                aria-label="View Fullscreen in full video mode"
                 style="top: 10px; right: 10px; z-index: 6; width: 34px; height: 34px; min-width: 34px; min-height: 34px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
           <i class="bi bi-arrows-fullscreen" style="font-size: 0.82rem; color: #ffffff;"></i>
         </button>
@@ -1130,8 +1180,8 @@
              } else if (ratio > 1.15) {
                this.isPortrait = false;
                this.videoOrientation = 'landscape';
-               this.videoRatio = (ratio >= 2.1) ? '21 / 9' : '16 / 9';
-               this.videoMaxHeight = '440px';
+               this.videoRatio = (ratio >= 2.1) ? '21 / 9' : (ratio.toFixed(4) + ' / 1');
+               this.videoMaxHeight = '500px';
              } else {
                this.isPortrait = false;
                this.videoOrientation = 'square';
@@ -1196,9 +1246,19 @@
           <div class="w-100 h-100" style="background: radial-gradient(circle at center, rgba(30, 41, 59, 0.55) 0%, rgba(7, 9, 14, 0.98) 100%);"></div>
         </div>
 
+        <!-- High-Res Video Poster Overlay when paused (Guarantees zero dark/black screen) -->
+        <img x-show="!isPlaying && post.video && post.video.thumbnailUrl"
+             :src="post.video.thumbnailUrl"
+             class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover pointer-events-none"
+             style="z-index: 3; border-radius: 14px;"
+             loading="lazy"
+             alt="Video preview thumbnail"
+             x-on:error="$el.style.display = 'none'">
+
         <!-- Main Video Element -->
-        <video class="feed-post-video w-100 h-100 position-relative"
+        <video referrerpolicy="no-referrer" class="feed-post-video w-100 h-100 position-relative"
                :src="post.video.embedUrl"
+               :poster="post.video.thumbnailUrl || ''"
                playsinline
                webkit-playsinline
                muted
@@ -1260,8 +1320,8 @@
         <button type="button" 
                 class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
                 @click.stop="openVideoModal([post.video], 0, isVideoMuted)"
-                title="Play in full video mode"
-                aria-label="Play in full video mode"
+                title="View Fullscreen in full video mode"
+                aria-label="View Fullscreen in full video mode"
                 style="top: 12px; right: 52px; z-index: 6; width: 34px; height: 34px; min-width: 34px; min-height: 34px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; transition: transform 0.15s ease, background 0.15s ease; white-space: nowrap; flex-shrink: 0;">
           <i class="bi bi-arrows-fullscreen" style="font-size: 0.82rem; color: #ffffff;"></i>
         </button>
@@ -1323,8 +1383,8 @@
     </div>
   </template>
 
-  <!-- Full Graphics OpenGraph Social Card (16:9) -->
-  <template x-if="post.link_preview && (post.link_preview.image || post.link_preview.title) && !(post.postMessage || '').includes('/familyJournal/')">
+  <!-- Full Graphics OpenGraph Social Card (16:9) (Suppressed for Linked Native Photos) -->
+  <template x-if="post.link_preview && (post.link_preview.image || post.link_preview.title) && !(post.postMessage || '').includes('/familyJournal/') && !post.link_preview.is_photo_link && (!post.images || post.images.length === 0)">
     <div class="link-preview-container mb-3 px-1">
       <a :href="post.link_preview.url" 
          target="_blank" 
@@ -1498,12 +1558,14 @@
              @mouseenter="keepPostReactionBar(post.post_no, true)"
              @mouseleave="keepPostReactionBar(post.post_no, false)"
              class="reaction-bar-float heirloom-glass-dock"
+             :data-post-bar="post.post_no"
              style="position:absolute; bottom:calc(100% + 8px); left:0; transform:none; display:flex; gap:6px; z-index:100; white-space:nowrap;">
           <template x-for="type in Object.keys(emojiMap)" :key="type">
             <button type="button"
-                    @click="reactToPost(post.post_no, type)"
+                    @click="reactToPost(post.post_no, type, $event)"
                     :title="emojiMap[type].label"
                     :aria-label="emojiMap[type].label"
+                    :data-reaction-type="type"
                     :class="post.user_reaction === type ? 'heirloom-reaction-btn active' : 'heirloom-reaction-btn'"
                     :style="'--heirloom-glow:' + (emojiMap[type].glow || 'rgba(225,29,72,0.45)')">
               <span class="heirloom-glass-glyph d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(type, 34)"></span>
@@ -1518,10 +1580,11 @@
                 type="button"
                 :title="post.user_reaction ? ('Reacted: ' + (emojiMap[post.user_reaction]?.label || 'Liked') + ' - Click to change reaction') : 'React with heirloom glass love and appreciation'"
                 :aria-label="post.user_reaction ? ('Reacted ' + (emojiMap[post.user_reaction]?.label || 'Liked')) : 'Like this post'"
-                @click="onPostLikeClick(post.post_no, post.user_reaction || 'love')"
-                @touchstart.passive="startPostLongPress(post.post_no)"
-                @touchend="cancelPostLongPress()"
-                @touchmove="cancelPostLongPress()"
+                @click="onPostLikeClick(post.post_no, post.user_reaction || 'love', $event)"
+                @touchstart="startPostLongPress(post.post_no, $event)"
+                @touchend="endPostTouch(post.post_no, $event)"
+                @touchmove="handlePostTouchMove(post.post_no, $event)"
+                @touchcancel="cancelPostLongPress()"
                 style="min-width: 44px; min-height: 44px;">
           <!-- 1. Default Unreacted: Crisp Outline Heart -->
           <template x-if="!post.user_reaction">
@@ -1594,10 +1657,10 @@
   </div>
 
   <!-- Instagram Inline Caption Format (Under Likes / Action Row for Posts with Media) -->
-  <template x-if="(post.displayMessage || (!post.video && (!post.videos || post.videos.length === 0) && post.postMessage)) && ((post.images && post.images.length > 0) || post.video || (post.videos && post.videos.length > 0) || post.comparison)">
+  <template x-if="(getMediaCaption(post) || post.ar_emoji) && ((post.images && post.images.length > 0) || post.video || (post.videos && post.videos.length > 0) || post.comparison)">
     <div class="post-caption-block px-1 mb-2 pt-1" style="font-size: 0.95rem; line-height: 1.5;">
       <a :href="'/member/profilePage?id=' + post.id" class="fw-bold text-decoration-none me-1.5" style="color: var(--text-main, #0f172a); font-weight: 600;" x-text="post.fullName"></a>
-      <span class="post-caption-text" style="white-space: pre-line; color: var(--text-main);" x-html="renderHashtags(post.displayMessage || post.postMessage)"></span>
+      <span class="post-caption-text" style="white-space: pre-line; color: var(--text-main);" x-html="renderHashtags(getMediaCaption(post), post.ar_emoji)"></span>
 
       <!-- On-Demand Post Translation Toggle for Diaspora Viewers -->
       <div class="mt-1 d-flex align-items-center gap-2" x-show="window.APP_LOCALE && window.APP_LOCALE !== 'en'">
@@ -1814,12 +1877,14 @@
                      @mouseenter="keepCommentReactionBar(c.comment_no, true)"
                      @mouseleave="keepCommentReactionBar(c.comment_no, false)"
                      class="comment-reaction-float-bar heirloom-glass-dock"
+                     :data-comment-bar="c.comment_no"
                      role="toolbar" aria-label="Choose a comment reaction"
                      style="position:absolute; bottom:calc(100% + 6px); left:0; display:flex; gap:4px; z-index:100; white-space:nowrap; padding:6px 10px;">
                   <template x-for="type in ['love', 'like', 'haha', 'shock', 'sad', 'celebrate']" :key="type">
                     <button type="button"
-                            @click.stop="reactToComment(post.post_no, c.comment_no, type)"
+                            @click.stop="reactToComment(post.post_no, c.comment_no, type, $event)"
                             :title="emojiMap[type]?.label || type"
+                            :data-reaction-type="type"
                             :class="(c.userReaction === type || (type === 'shock' && c.userReaction === 'wow')) ? 'heirloom-reaction-btn active' : 'heirloom-reaction-btn'"
                             :style="'--heirloom-glow:' + (emojiMap[type]?.glow || 'rgba(225,29,72,0.45)')"
                             style="min-width:44px; min-height:44px; padding:4px;">
@@ -1831,10 +1896,11 @@
 
                 <!-- Like text button -->
                 <button type="button"
-                        @click="onCommentLikeClick(post.post_no, c.comment_no, c.userReaction || 'like')"
-                        @touchstart.passive="startCommentLongPress(c.comment_no)"
-                        @touchend="cancelCommentLongPress()"
-                        @touchmove="cancelCommentLongPress()"
+                        @click="onCommentLikeClick(post.post_no, c.comment_no, c.userReaction || 'like', $event)"
+                        @touchstart="startCommentLongPress(c.comment_no, $event)"
+                        @touchend="endCommentTouch(post.post_no, c.comment_no, $event)"
+                        @touchmove="handleCommentTouchMove(c.comment_no, $event)"
+                        @touchcancel="cancelCommentLongPress()"
                         class="comment-meta-btn d-inline-flex align-items-center"
                         :class="c.userReaction ? 'fw-semibold' : 'text-muted'"
                         :style="c.userReaction ? ('color:' + getReactionColor(c.userReaction)) : ''">

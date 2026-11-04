@@ -299,6 +299,26 @@ export function profileFeed(opts = {}) {
                     setTimeout(() => target.classList.remove(highlightClass), 2500);
                 } else if (attempts >= maxAttempts) {
                     clearInterval(interval);
+                    // 5. Fallback: If targeted post was not in initial batch (e.g. older tagged post from notification), fetch dynamically
+                    if (!isComment && targetId.startsWith('post')) {
+                        const pNo = parseInt(targetId.replace('post', ''), 10);
+                        if (pNo > 0 && !this.posts.some(p => parseInt(p?.post_no, 10) === pNo)) {
+                            axios.get(`/api/posts/${pNo}`).then(res => {
+                                if (res?.data?.status === 'success' && res?.data?.data) {
+                                    const postData = this.normalizePost(res.data.data);
+                                    this.posts.unshift(postData);
+                                    setTimeout(() => {
+                                        const el = document.getElementById(targetId) || document.querySelector(`[data-post-no="${pNo}"]`);
+                                        if (el) {
+                                            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            el.classList.add('highlighted-post');
+                                            setTimeout(() => el.classList.remove('highlighted-post'), 2500);
+                                        }
+                                    }, 120);
+                                }
+                            }).catch(() => {});
+                        }
+                    }
                 }
             }, 100);
         },
@@ -363,17 +383,35 @@ export function profileFeed(opts = {}) {
                 profImg = (rawImg.startsWith('/') || rawImg.startsWith('http')) ? rawImg : `/resources/images/profile/${rawImg}`;
             }
             const cleanMsg = this.decodeHtml(p?.postMessage || '');
-            let detectedVideos = extractVideosFromText(cleanMsg, 3);
+            let detectedVideos = (Array.isArray(p?.videos) && p.videos.length > 0)
+                ? p.videos
+                : extractVideosFromText(cleanMsg, 3);
             if (!detectedVideos || detectedVideos.length === 0) {
                 const videoFilesFromSlots = this.extractVideosFromSlots(p);
                 if (videoFilesFromSlots && videoFilesFromSlots.length > 0) {
                     detectedVideos = videoFilesFromSlots.map(videoFile => {
-                        const slotUrl = (videoFile.startsWith('/') || videoFile.startsWith('http'))
-                            ? videoFile
-                            : `/resources/videos/posts/${videoFile}`;
+                        let slotUrl = null;
+                        let matchThumb = null;
+                        if (Array.isArray(p?.videos)) {
+                            const match = p.videos.find(v => v && (v.originalUrl === videoFile || v.embedUrl === videoFile));
+                            if (match && match.embedUrl) {
+                                slotUrl = match.embedUrl;
+                            }
+                            if (match && match.thumbnailUrl) {
+                                matchThumb = match.thumbnailUrl;
+                            }
+                        }
+                        if (!slotUrl) {
+                            slotUrl = (videoFile.startsWith('/') || videoFile.startsWith('http'))
+                                ? videoFile
+                                : `/resources/videos/posts/${videoFile}`;
+                        }
+                        const thumb = matchThumb
+                            || (videoFile.includes('googleusercontent.com') ? videoFile.replace(/=.*$/i, '=s1600') : null);
                         return {
                             type: 'direct',
                             videoId: null,
+                            thumbnailUrl: thumb,
                             embedUrl: slotUrl,
                             originalUrl: videoFile,
                             trimStart: null,
@@ -383,6 +421,10 @@ export function profileFeed(opts = {}) {
                 }
             }
             const primaryVideo = detectedVideos.length > 0 ? detectedVideos[0] : null;
+            const initialDisplay = p?.displayMessage 
+                ? this.normalizeEmojiText(p.displayMessage) 
+                : this.normalizeEmojiText(cleanPostMessage(cleanMsg, detectedVideos));
+
             const normalized = {
                 post_no: p?.post_no,
                 id: p?.id,
@@ -392,7 +434,7 @@ export function profileFeed(opts = {}) {
                 date_created: p?.date_created || new Date().toISOString(),
                 post_time: p?.post_time || p?.date_created || new Date().toISOString(),
                 postMessage: cleanMsg,
-                displayMessage: this.normalizeEmojiText(cleanPostMessage(cleanMsg, detectedVideos)),
+                displayMessage: initialDisplay,
                 video: primaryVideo,
                 videos: detectedVideos,
                 link_preview: p?.link_preview || null,
@@ -408,7 +450,33 @@ export function profileFeed(opts = {}) {
                 post_tags: Array.isArray(p?.post_tags) ? p.post_tags : [],
                 views_count: parseInt(p?.views_count || 0, 10),
                 voice_capsule_url: p?.voice_capsule_url || null,
+                ar_emoji: p?.ar_emoji || (() => {
+                    const m = cleanMsg.match(/:([a-z0-9_]+_3d):/i);
+                    return m ? m[1] : null;
+                })(),
             };
+
+            // Linked photo hydration (Google Photos, iCloud, direct image assets without local uploads)
+            if (normalized.images.length === 0) {
+                if (normalized.link_preview && (normalized.link_preview.is_photo_link || normalized.link_preview.is_google_photo)) {
+                    const photoAsset = normalized.link_preview.photo_url || normalized.link_preview.image;
+                    if (photoAsset && !normalized.images.includes(photoAsset)) {
+                        normalized.images.push(photoAsset);
+                    }
+                }
+                const directImgRegex = /https?:\/\/[^\s<>"']+\.(?:jpe?g|png|webp|avif|gif)(?:\?[^\s<>"']*)?/gi;
+                const directMatches = cleanMsg.match(directImgRegex);
+                if (directMatches) {
+                    directMatches.forEach(m => {
+                        if (!normalized.images.includes(m) && normalized.images.length < 6) {
+                            normalized.images.push(m);
+                        }
+                    });
+                }
+            }
+
+            // Always guarantee displayMessage has all raw media links stripped
+            normalized.displayMessage = this.getMediaCaption(normalized);
 
             // Progressive enhancement: lazy unfurl link preview if server hasn't pre-hydrated
             if (!normalized.link_preview && normalized.postMessage && !normalized.video) {
@@ -521,6 +589,15 @@ export function profileFeed(opts = {}) {
             }
         },
 
+        isVideoAsset(url) {
+            if (!url || typeof url !== 'string') return false;
+            const clean = url.trim();
+            if (/\.(mp4|webm|mov|ogg)(\?|#|$)/i.test(clean)) return true;
+            if (clean.includes('googleusercontent.com') && /=(m18|m22|m37|dv)/i.test(clean)) return true;
+            if (clean.includes('googlevideo.com')) return true;
+            return false;
+        },
+
         extractImages(p) {
             if (!p || typeof p !== 'object') return [];
             const collected = [];
@@ -543,15 +620,21 @@ export function profileFeed(opts = {}) {
                 }
             });
 
-            return collected.filter(img => img && img !== 'null' && img !== 'undefined' && img !== 'none' && !img.includes('no_image') && !/\.(mp4|webm|mov|ogg)(\?|#|$)/i.test(img));
+            return collected.filter(img => img && img !== 'null' && img !== 'undefined' && img !== 'none' && !img.includes('no_image') && !this.isVideoAsset(img));
         },
 
         extractVideosFromSlots(p) {
             if (!p || typeof p !== 'object') return [];
             const collected = [];
+            if (Array.isArray(p.videos)) {
+                p.videos.forEach(v => {
+                    const u = typeof v === 'string' ? v : (v?.embedUrl || v?.originalUrl || '');
+                    if (u && !collected.includes(u.trim())) collected.push(u.trim());
+                });
+            }
             if (Array.isArray(p.images)) {
                 p.images.forEach(img => {
-                    if (img && typeof img === 'string' && /\.(mp4|webm|mov|ogg)(\?|#|$)/i.test(img.trim())) {
+                    if (this.isVideoAsset(img)) {
                         const clean = img.trim();
                         if (!collected.includes(clean)) collected.push(clean);
                     }
@@ -560,7 +643,7 @@ export function profileFeed(opts = {}) {
             Object.keys(p).forEach(k => {
                 if (k.startsWith('post_img') && p[k] !== null && p[k] !== '' && typeof p[k] === 'string') {
                     const val = p[k].trim();
-                    if (val && /\.(mp4|webm|mov|ogg)(\?|#|$)/i.test(val) && !collected.includes(val)) {
+                    if (this.isVideoAsset(val) && !collected.includes(val)) {
                         collected.push(val);
                     }
                 }
@@ -632,6 +715,42 @@ export function profileFeed(opts = {}) {
                 .replace(/\u2665(?!\uFE0F)/g, '\u2764\uFE0F')
                 // Convert standalone ASCII heart '<3' to '❤️'
                 .replace(/(^|\s)<3(?=\s|$|[.,!?])/g, '$1❤️');
+        },
+
+        getMediaCaption(post) {
+            if (!post) return '';
+            let text = (post.displayMessage !== undefined && post.displayMessage !== null)
+                ? String(post.displayMessage)
+                : String(post.postMessage || '');
+
+            if (!text.trim()) return '';
+
+            // Strip photo service links
+            text = text.replace(/https?:\/\/(?:photos\.app\.goo\.gl|photos\.google\.com)\/[^\s<>"']+/gi, '');
+            text = text.replace(/https?:\/\/(?:www\.)?(?:icloud\.com\/photos|i\.imgur\.com|imgur\.com|ibb\.co|postimg\.cc)\/[^\s<>"']+/gi, '');
+            // Strip direct image URLs
+            text = text.replace(/https?:\/\/[^\s<>"']+\.(?:jpe?g|png|webp|avif|gif)(?:\?[^\s<>"']*)?/gi, '');
+            // Strip video URLs
+            text = text.replace(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v[=_]?)|youtu\.be\/)[a-zA-Z0-9_-]{11}/gi, '');
+            text = text.replace(/(?:https?:\/\/)?(?:player\.)?vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/[^\/]*\/videos\/|album\/\d+\/video\/|video\/|)\d+(?:$|\/|\?)/gi, '');
+            text = text.replace(/(?:https?:\/\/)?(?:iframe\.videodelivery\.net|watch\.cloudflarestream\.com|customer-[a-zA-Z0-9_-]+\.cloudflarestream\.com)\/[a-zA-Z0-9]{32}/gi, '');
+            text = text.replace(/(?:https?:\/\/[^\s"'<>]+|\/resources\/(?:videos|images)\/[^\s"'<>]+)\.(?:mp4|webm|ogg|mov)(?:\?[^\s"'<>#]*)?(?:#t=[0-9.]+(?:,[0-9.]+)?)?/gi, '');
+
+            // Strip original/canonical preview URLs if link preview exists
+            if (post.link_preview) {
+                if (post.link_preview.original_url) text = text.split(post.link_preview.original_url).join('');
+                if (post.link_preview.url) text = text.split(post.link_preview.url).join('');
+            }
+            if (post.video && post.video.originalUrl) {
+                text = text.split(post.video.originalUrl).join('');
+            }
+            if (Array.isArray(post.videos)) {
+                post.videos.forEach(v => {
+                    if (v && v.originalUrl) text = text.split(v.originalUrl).join('');
+                });
+            }
+
+            return this.normalizeEmojiText(text.trim());
         },
 
         observePostViews() {
@@ -967,9 +1086,19 @@ export function profileFeed(opts = {}) {
             }
         },
 
-        renderHashtags(message) {
+        renderHashtags(message, arEmoji = null) {
+            message = message || '';
+            // Attached 3D emoji sits inline at the end of the caption, like a typed emoji.
+            if (arEmoji && /^[a-z0-9_]+_3d$/i.test(arEmoji) && !message.includes(':' + arEmoji + ':')) {
+                message = (message.trim() ? message.replace(/\s+$/, '') + ' ' : '') + ':' + arEmoji + ':';
+            }
             if (!message) return '';
             let safeText = this.escapeHtml(message);
+
+            // Render 3D family emojis (:family_roots_3d:, :family_crest_3d:, etc.)
+            safeText = safeText.replace(/:(family_[a-z0-9_]+_3d|ancestor_[a-z0-9_]+_3d|memory_capsule_3d|kinship_pride_3d|wisdom_scroll_3d|generations_link_3d|family_toast_3d|baby_cradle_3d|wedding_vows_3d|laugh_tears_3d|star_struck_3d|family_house_3d):/gi, (match, emojiId) => {
+                return `<span class="atg-emoji-container atg-live-emoji" role="button" tabindex="0" onclick="event.stopPropagation(); window.AtgEmojiEngine && window.AtgEmojiEngine.openArViewer('${emojiId}')"><img src="/img/emoji/${emojiId}.svg?v=20261103c" class="atg-3d-emoji" loading="lazy" width="26" height="26" alt="${emojiId}" title="Tap to view in 3D / AR"></span>`;
+            });
 
             // Linkify URLs into secure clickable links
             safeText = safeText.replace(/(https?:\/\/[^\s<>"']+)/gi, (match) => {
@@ -998,10 +1127,42 @@ export function profileFeed(opts = {}) {
             try {
                 const res = await axios.get(`/api/link-preview?url=${encodeURIComponent(url)}`);
                 if (res?.data?.status === 'success' && res?.data?.data) {
+                    const d = res.data.data;
                     // `post` may be the raw object from normalizePost(); assigning to it
                     // bypasses Alpine's proxy, so write to the reactive copy in this.posts.
                     const target = this.posts?.find(p => p?.post_no === post.post_no) || post;
-                    target.link_preview = res.data.data;
+                    target.link_preview = d;
+
+                    // If linked album contains multiple photos or videos, promote to native multi-media carousel
+                    if (Array.isArray(d.album_images) && d.album_images.length > 0) {
+                        target.images = d.album_images;
+                    } else if ((!target.images || target.images.length === 0) && (d.is_photo_link || d.is_google_photo) && (d.photo_url || d.image) && !d.is_video) {
+                        const photoAsset = d.photo_url || d.image;
+                        target.images = [photoAsset];
+                    }
+
+                    if (Array.isArray(d.album_videos) && d.album_videos.length > 0) {
+                        target.videos = d.album_videos.map(vUrl => ({
+                            type: 'direct',
+                            videoId: null,
+                            thumbnailUrl: vUrl.replace(/=.*$/i, '=s1600'),
+                            embedUrl: `/member/stream-video?url=${encodeURIComponent(vUrl)}`,
+                            originalUrl: vUrl,
+                            trimStart: null,
+                            trimEnd: null
+                        }));
+                        target.video = target.videos[0];
+                    }
+
+                    if (d.is_photo_link || d.is_google_photo || d.album_images?.length || d.album_videos?.length) {
+                        const origUrl = d.original_url || url || '';
+                        const canonUrl = d.url || '';
+                        let cleanText = target.displayMessage || target.postMessage || '';
+                        if (origUrl) cleanText = cleanText.split(origUrl).join('');
+                        if (canonUrl) cleanText = cleanText.split(canonUrl).join('');
+                        cleanText = cleanText.replace(/https?:\/\/(?:photos\.app\.goo\.gl|photos\.google\.com)\/[^\s<>"']+/gi, '');
+                        target.displayMessage = this.normalizeEmojiText(cleanText.trim());
+                    }
                 }
             } catch (_) {
                 // Silently ignore if unresolvable
@@ -1622,15 +1783,75 @@ export function profileFeed(opts = {}) {
         },
 
         // ── Touch support: long-press reveals the reaction bar on mobile,
-        // since hover/mouseenter never fires on touch devices ────────────
-        startPostLongPress(postNo) {
+        // with touch-scrubbing across gems (iOS/Facebook parity) ─────────
+        startPostLongPress(postNo, ev) {
             this._postLongPressFired = false;
+            this._postActiveHoveredReaction = null;
+            if (ev?.touches?.[0]) {
+                this._postTouchStartX = ev.touches[0].clientX;
+                this._postTouchStartY = ev.touches[0].clientY;
+            }
             clearTimeout(this._postLongPressTimer);
             this._postLongPressTimer = setTimeout(() => {
                 this._postLongPressFired = true;
                 this.activeReactionBars[postNo] = true;
                 if (typeof window.triggerHaptic === 'function') window.triggerHaptic('selection');
-            }, 450);
+            }, 350);
+        },
+
+        handlePostTouchMove(postNo, ev) {
+            if (!ev?.touches?.[0]) return;
+            const touch = ev.touches[0];
+            const isBarOpen = !!this.activeReactionBars[postNo];
+
+            if (!isBarOpen) {
+                const dx = Math.abs(touch.clientX - (this._postTouchStartX || touch.clientX));
+                const dy = Math.abs(touch.clientY - (this._postTouchStartY || touch.clientY));
+                if (dx > 10 || dy > 10) {
+                    this.cancelPostLongPress();
+                }
+                return;
+            }
+
+            if (ev.cancelable) ev.preventDefault();
+
+            const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+            const btn = targetEl?.closest?.('.heirloom-reaction-btn');
+            const dock = document.querySelector(`.reaction-bar-float[data-post-bar="${postNo}"]`) ||
+                         targetEl?.closest?.('.reaction-bar-float');
+
+            if (btn && btn.dataset?.reactionType) {
+                const reactionType = btn.dataset.reactionType;
+                if (this._postActiveHoveredReaction !== reactionType) {
+                    this._postActiveHoveredReaction = reactionType;
+                    if (typeof window.triggerHaptic === 'function') window.triggerHaptic('selection');
+                }
+                if (dock) {
+                    dock.querySelectorAll('.heirloom-reaction-btn').forEach(b => {
+                        b.classList.toggle('touch-active', b === btn);
+                    });
+                }
+            } else {
+                this._postActiveHoveredReaction = null;
+                if (dock) {
+                    dock.querySelectorAll('.heirloom-reaction-btn').forEach(b => b.classList.remove('touch-active'));
+                }
+            }
+        },
+
+        endPostTouch(postNo, ev) {
+            this.cancelPostLongPress();
+            const dock = document.querySelector(`.reaction-bar-float[data-post-bar="${postNo}"]`);
+            if (dock) {
+                dock.querySelectorAll('.heirloom-reaction-btn').forEach(b => b.classList.remove('touch-active'));
+            }
+
+            if (this._postLongPressFired && this._postActiveHoveredReaction) {
+                const chosen = this._postActiveHoveredReaction;
+                this._postActiveHoveredReaction = null;
+                this._postLongPressFired = false;
+                this.reactToPost(postNo, chosen, ev);
+            }
         },
 
         cancelPostLongPress() {
@@ -1639,29 +1860,89 @@ export function profileFeed(opts = {}) {
 
         // Plain tap likes the post; a long-press that already opened the
         // bar suppresses the tap so it doesn't also toggle the like.
-        onPostLikeClick(postNo, reactionType) {
+        onPostLikeClick(postNo, reactionType, ev = null) {
             if (this._postLongPressFired) {
                 this._postLongPressFired = false;
                 return;
             }
-            this.reactToPost(postNo, reactionType);
+            this.reactToPost(postNo, reactionType, ev);
         },
 
-        startCommentLongPress(commentNo) {
+        startCommentLongPress(commentNo, ev) {
             this._commentLongPressFired = false;
+            this._commentActiveHoveredReaction = null;
+            if (ev?.touches?.[0]) {
+                this._commentTouchStartX = ev.touches[0].clientX;
+                this._commentTouchStartY = ev.touches[0].clientY;
+            }
             clearTimeout(this._commentLongPressTimer);
             this._commentLongPressTimer = setTimeout(() => {
                 this._commentLongPressFired = true;
                 this.activeCommentReactionBars[commentNo] = true;
                 if (typeof window.triggerHaptic === 'function') window.triggerHaptic('selection');
-            }, 450);
+            }, 350);
+        },
+
+        handleCommentTouchMove(commentNo, ev) {
+            if (!ev?.touches?.[0]) return;
+            const touch = ev.touches[0];
+            const isBarOpen = !!this.activeCommentReactionBars[commentNo];
+
+            if (!isBarOpen) {
+                const dx = Math.abs(touch.clientX - (this._commentTouchStartX || touch.clientX));
+                const dy = Math.abs(touch.clientY - (this._commentTouchStartY || touch.clientY));
+                if (dx > 10 || dy > 10) {
+                    this.cancelCommentLongPress();
+                }
+                return;
+            }
+
+            if (ev.cancelable) ev.preventDefault();
+
+            const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+            const btn = targetEl?.closest?.('.heirloom-reaction-btn');
+            const dock = document.querySelector(`.comment-reaction-float-bar[data-comment-bar="${commentNo}"]`) ||
+                         targetEl?.closest?.('.comment-reaction-float-bar');
+
+            if (btn && btn.dataset?.reactionType) {
+                const reactionType = btn.dataset.reactionType;
+                if (this._commentActiveHoveredReaction !== reactionType) {
+                    this._commentActiveHoveredReaction = reactionType;
+                    if (typeof window.triggerHaptic === 'function') window.triggerHaptic('selection');
+                }
+                if (dock) {
+                    dock.querySelectorAll('.heirloom-reaction-btn').forEach(b => {
+                        b.classList.toggle('touch-active', b === btn);
+                    });
+                }
+            } else {
+                this._commentActiveHoveredReaction = null;
+                if (dock) {
+                    dock.querySelectorAll('.heirloom-reaction-btn').forEach(b => b.classList.remove('touch-active'));
+                }
+            }
+        },
+
+        endCommentTouch(postNo, commentNo, ev) {
+            this.cancelCommentLongPress();
+            const dock = document.querySelector(`.comment-reaction-float-bar[data-comment-bar="${commentNo}"]`);
+            if (dock) {
+                dock.querySelectorAll('.heirloom-reaction-btn').forEach(b => b.classList.remove('touch-active'));
+            }
+
+            if (this._commentLongPressFired && this._commentActiveHoveredReaction) {
+                const chosen = this._commentActiveHoveredReaction;
+                this._commentActiveHoveredReaction = null;
+                this._commentLongPressFired = false;
+                this.reactToComment(postNo, commentNo, chosen, ev);
+            }
         },
 
         cancelCommentLongPress() {
             clearTimeout(this._commentLongPressTimer);
         },
 
-        onCommentLikeClick(postNo, commentNo, reactionType) {
+        onCommentLikeClick(postNo, commentNo, reactionType, ev = null) {
             if (this._commentLongPressFired) {
                 this._commentLongPressFired = false;
                 return;
@@ -1679,7 +1960,7 @@ export function profileFeed(opts = {}) {
             const comment = post?.comments?.find(c => String(c.comment_no) === String(commentNo));
             // If already reacted, toggle off with current reaction; if unreacted, default to 'like' (Topaz Thumb)
             const targetType = comment?.userReaction || 'like';
-            this.reactToComment(postNo, commentNo, targetType);
+            this.reactToComment(postNo, commentNo, targetType, ev);
         },
 
         // ── Comment emoji picker for text input ─────────────────────────────
@@ -1759,7 +2040,7 @@ export function profileFeed(opts = {}) {
         },
 
         // ── React to a comment with an emoji ───────────────────────────────
-        async reactToComment(postNo, commentNo, reactionType) {
+        async reactToComment(postNo, commentNo, reactionType, ev = null) {
             const post = this.posts.find(p => String(p.post_no) === String(postNo));
             if (!post) return;
             const comment = post.comments.find(c => String(c.comment_no) === String(commentNo));
@@ -1796,7 +2077,7 @@ export function profileFeed(opts = {}) {
                 nextReactions[targetKey] = Number(nextReactions[targetKey] || 0) + 1;
                 comment.totalReactions = Number(comment.totalReactions || 0) + 1;
                 comment.userReaction = cleanType;
-                triggerHeirloomBurst(cleanType, window.event || null);
+                triggerHeirloomBurst(cleanType, ev || (typeof window !== 'undefined' ? window.event : null));
             }
             comment.reactions = nextReactions;
 
@@ -1856,7 +2137,7 @@ export function profileFeed(opts = {}) {
         },
 
         // ── React to a post with an emoji (post-level reactions) ────────────
-        async reactToPost(postNo, reactionType) {
+        async reactToPost(postNo, reactionType, ev = null) {
             const post = this.posts.find(p => String(p.post_no) === String(postNo));
             if (!post) return;
 
@@ -1873,7 +2154,7 @@ export function profileFeed(opts = {}) {
             post.user_reaction = (post.user_reaction === reactionType) ? null : reactionType;
 
             if (post.user_reaction) {
-                triggerHeirloomBurst(post.user_reaction, window.event || null);
+                triggerHeirloomBurst(post.user_reaction, ev || (typeof window !== 'undefined' ? window.event : null));
             }
 
             // Optimistic like counter bump
@@ -2033,6 +2314,14 @@ export function profileFeed(opts = {}) {
             window.addEventListener('post-created', (event) => {
                 const newPostData = event?.detail;
                 if (newPostData && typeof newPostData === 'object') {
+                    // Reset active stream filters so the user immediately sees their newly posted post
+                    if (this.activeStreamFilter && this.activeStreamFilter !== 'all') {
+                        this.activeStreamFilter = 'all';
+                    }
+                    if (this.activeHashtag) {
+                        this.activeHashtag = '';
+                    }
+
                     const normalized = this.normalizePost(newPostData);
                     const existing = this.posts.find(p => String(p.post_no) === String(normalized.post_no));
                     if (!existing) {
@@ -2042,8 +2331,31 @@ export function profileFeed(opts = {}) {
                         // The realtime broadcast can land first, without the Then & Now pair.
                         existing.comparison = normalized.comparison;
                     }
+
+                    // Smoothly scroll and navigate directly to the newly posted post in the feed
+                    const postNo = normalized.post_no;
+                    if (postNo) {
+                        this.$nextTick(() => {
+                            let attempts = 0;
+                            const interval = setInterval(() => {
+                                attempts++;
+                                const target = document.getElementById('post' + postNo);
+                                if (target) {
+                                    clearInterval(interval);
+                                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    target.classList.add('highlighted-post');
+                                    setTimeout(() => target.classList.remove('highlighted-post'), 2500);
+                                } else if (attempts >= 25) {
+                                    clearInterval(interval);
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }
+                            }, 50);
+                        });
+                    }
                 } else {
-                    this.fetchPosts();
+                    this.fetchPosts().then(() => {
+                        this.scrollToHashPost();
+                    });
                 }
             });
 
@@ -2668,5 +2980,39 @@ export function profileFeed(opts = {}) {
                 console.warn('Pusher initialization skipped:', e);
             }
         }
+    };
+}
+
+if (typeof window !== 'undefined') {
+    window.getMediaCaption = function(post) {
+        if (!post) return '';
+        let text = (post.displayMessage !== undefined && post.displayMessage !== null)
+            ? String(post.displayMessage)
+            : String(post.postMessage || '');
+
+        if (!text.trim()) return '';
+
+        text = text.replace(/https?:\/\/(?:photos\.app\.goo\.gl|photos\.google\.com)\/[^\s<>"']+/gi, '');
+        text = text.replace(/https?:\/\/(?:www\.)?(?:icloud\.com\/photos|i\.imgur\.com|imgur\.com|ibb\.co|postimg\.cc)\/[^\s<>"']+/gi, '');
+        text = text.replace(/https?:\/\/[^\s<>"']+\.(?:jpe?g|png|webp|avif|gif)(?:\?[^\s<>"']*)?/gi, '');
+        text = text.replace(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v[=_]?)|youtu\.be\/)[a-zA-Z0-9_-]{11}/gi, '');
+        text = text.replace(/(?:https?:\/\/)?(?:player\.)?vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/[^\/]*\/videos\/|album\/\d+\/video\/|video\/|)\d+(?:$|\/|\?)/gi, '');
+        text = text.replace(/(?:https?:\/\/)?(?:iframe\.videodelivery\.net|watch\.cloudflarestream\.com|customer-[a-zA-Z0-9_-]+\.cloudflarestream\.com)\/[a-zA-Z0-9]{32}/gi, '');
+        text = text.replace(/(?:https?:\/\/[^\s"'<>]+|\/resources\/(?:videos|images)\/[^\s"'<>]+)\.(?:mp4|webm|ogg|mov)(?:\?[^\s"'<>#]*)?(?:#t=[0-9.]+(?:,[0-9.]+)?)?/gi, '');
+
+        if (post.link_preview) {
+            if (post.link_preview.original_url) text = text.split(post.link_preview.original_url).join('');
+            if (post.link_preview.url) text = text.split(post.link_preview.url).join('');
+        }
+        if (post.video && post.video.originalUrl) {
+            text = text.split(post.video.originalUrl).join('');
+        }
+        if (Array.isArray(post.videos)) {
+            post.videos.forEach(v => {
+                if (v && v.originalUrl) text = text.split(v.originalUrl).join('');
+            });
+        }
+
+        return text.trim();
     };
 }

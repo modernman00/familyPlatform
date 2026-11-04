@@ -174,8 +174,11 @@ final class OrganogramEditorController extends BaseController
 
             $genLevel = (int)$baseNode['generation_level'];
 
-            $firstName = trim((string)($_POST['first_name'] ?? ''));
-            $lastName = trim((string)($_POST['last_name'] ?? ''));
+            $rawFirst = trim((string)($_POST['first_name'] ?? ''));
+            $rawLast = trim((string)($_POST['last_name'] ?? ''));
+            $nameParts = $this->formatIncomingName($rawFirst, $rawLast, (string)($_POST['title'] ?? ''));
+            $firstName = $nameParts['first_name'];
+            $lastName = $nameParts['last_name'];
             $email = trim((string)($_POST['email'] ?? ''));
             $mobile = trim((string)($_POST['mobile'] ?? ''));
             $gender = trim((string)($_POST['gender'] ?? 'Female'));
@@ -384,8 +387,11 @@ final class OrganogramEditorController extends BaseController
 
             $childGenLevel = (int)$union['generation_level'] + 1;
 
-            $firstName = trim((string)($_POST['first_name'] ?? ''));
-            $lastName = trim((string)($_POST['last_name'] ?? ''));
+            $rawFirst = trim((string)($_POST['first_name'] ?? ''));
+            $rawLast = trim((string)($_POST['last_name'] ?? ''));
+            $nameParts = $this->formatIncomingName($rawFirst, $rawLast, (string)($_POST['title'] ?? ''));
+            $firstName = $nameParts['first_name'];
+            $lastName = $nameParts['last_name'];
             $email = trim((string)($_POST['email'] ?? ''));
             $mobile = trim((string)($_POST['mobile'] ?? ''));
             $gender = trim((string)($_POST['gender'] ?? 'Male'));
@@ -514,11 +520,21 @@ final class OrganogramEditorController extends BaseController
 
             $fatherFirst = trim((string)($_POST['father_first_name'] ?? ''));
             $fatherLast = trim((string)($_POST['father_last_name'] ?? ''));
+            if ($fatherFirst !== '' || $fatherLast !== '') {
+                $fParts = $this->formatIncomingName($fatherFirst, $fatherLast, (string)($_POST['father_title'] ?? ''));
+                $fatherFirst = $fParts['first_name'];
+                $fatherLast = $fParts['last_name'];
+            }
             $fatherEmail = trim((string)($_POST['father_email'] ?? ''));
             $fatherMobile = trim((string)($_POST['father_mobile'] ?? ''));
 
             $motherFirst = trim((string)($_POST['mother_first_name'] ?? ''));
             $motherLast = trim((string)($_POST['mother_last_name'] ?? ''));
+            if ($motherFirst !== '' || $motherLast !== '') {
+                $mParts = $this->formatIncomingName($motherFirst, $motherLast, (string)($_POST['mother_title'] ?? ''));
+                $motherFirst = $mParts['first_name'];
+                $motherLast = $mParts['last_name'];
+            }
             $motherEmail = trim((string)($_POST['mother_email'] ?? ''));
             $motherMobile = trim((string)($_POST['mother_mobile'] ?? ''));
 
@@ -656,8 +672,11 @@ final class OrganogramEditorController extends BaseController
 
             $genLevel = (int)$baseNode['generation_level'];
 
-            $firstName = trim((string)($_POST['first_name'] ?? ''));
-            $lastName = trim((string)($_POST['last_name'] ?? ''));
+            $rawFirst = trim((string)($_POST['first_name'] ?? ''));
+            $rawLast = trim((string)($_POST['last_name'] ?? ''));
+            $nameParts = $this->formatIncomingName($rawFirst, $rawLast, (string)($_POST['title'] ?? ''));
+            $firstName = $nameParts['first_name'];
+            $lastName = $nameParts['last_name'];
             $email = trim((string)($_POST['email'] ?? ''));
             $mobile = trim((string)($_POST['mobile'] ?? ''));
             $gender = trim((string)($_POST['gender'] ?? 'Male'));
@@ -822,9 +841,15 @@ final class OrganogramEditorController extends BaseController
                 return;
             }
 
-            $firstName = trim((string)($_POST['first_name'] ?? ($jsonInput['first_name'] ?? '')));
-            $lastName = trim((string)($_POST['last_name'] ?? ($jsonInput['last_name'] ?? '')));
+            $rawFirst = trim((string)($_POST['first_name'] ?? ($jsonInput['first_name'] ?? '')));
+            $rawLast = trim((string)($_POST['last_name'] ?? ($jsonInput['last_name'] ?? '')));
+            $nameParts = $this->formatIncomingName($rawFirst, $rawLast, (string)($_POST['title'] ?? ($jsonInput['title'] ?? '')));
+            $firstName = $nameParts['first_name'];
+            $lastName = $nameParts['last_name'];
             $maidenName = trim((string)($_POST['maiden_name'] ?? ($jsonInput['maiden_name'] ?? '')));
+            if ($maidenName !== '') {
+                $maidenName = \App\services\NameFormatterService::formatName($maidenName);
+            }
             $email = trim((string)($_POST['email'] ?? ($jsonInput['email'] ?? '')));
             $mobile = trim((string)($_POST['mobile'] ?? ($jsonInput['mobile'] ?? '')));
             $gender = trim((string)($_POST['gender'] ?? ($jsonInput['gender'] ?? '')));
@@ -1166,9 +1191,15 @@ final class OrganogramEditorController extends BaseController
                 return;
             }
 
-            $firstName = trim((string)($_POST['first_name'] ?? ($jsonInput['first_name'] ?? '')));
-            $lastName = trim((string)($_POST['last_name'] ?? ($jsonInput['last_name'] ?? '')));
+            $rawFirst = trim((string)($_POST['first_name'] ?? ($jsonInput['first_name'] ?? '')));
+            $rawLast = trim((string)($_POST['last_name'] ?? ($jsonInput['last_name'] ?? '')));
+            $nameParts = $this->formatIncomingName($rawFirst, $rawLast, (string)($_POST['title'] ?? ($jsonInput['title'] ?? '')));
+            $firstName = $nameParts['first_name'];
+            $lastName = $nameParts['last_name'];
             $maidenName = trim((string)($_POST['maiden_name'] ?? ($jsonInput['maiden_name'] ?? '')));
+            if ($maidenName !== '') {
+                $maidenName = \App\services\NameFormatterService::formatName($maidenName);
+            }
             $email = trim((string)($_POST['email'] ?? ($jsonInput['email'] ?? '')));
             $mobile = trim((string)($_POST['mobile'] ?? ($jsonInput['mobile'] ?? '')));
             $gender = trim((string)($_POST['gender'] ?? ($jsonInput['gender'] ?? '')));
@@ -1522,9 +1553,15 @@ final class OrganogramEditorController extends BaseController
                 return;
             }
 
-            $firstName = trim((string)($_POST['first_name'] ?? ($jsonInput['first_name'] ?? '')));
-            $lastName = trim((string)($_POST['last_name'] ?? ($jsonInput['last_name'] ?? '')));
+            $rawFirst = trim((string)($_POST['first_name'] ?? ($jsonInput['first_name'] ?? '')));
+            $rawLast = trim((string)($_POST['last_name'] ?? ($jsonInput['last_name'] ?? '')));
+            $nameParts = $this->formatIncomingName($rawFirst, $rawLast, (string)($_POST['title'] ?? ($jsonInput['title'] ?? '')));
+            $firstName = $nameParts['first_name'];
+            $lastName = $nameParts['last_name'];
             $maidenName = trim((string)($_POST['maiden_name'] ?? ($jsonInput['maiden_name'] ?? '')));
+            if ($maidenName !== '') {
+                $maidenName = \App\services\NameFormatterService::formatName($maidenName);
+            }
             $email = trim((string)($_POST['email'] ?? ($jsonInput['email'] ?? '')));
             $mobile = trim((string)($_POST['mobile'] ?? ($jsonInput['mobile'] ?? '')));
             $gender = trim((string)($_POST['gender'] ?? ($jsonInput['gender'] ?? '')));
@@ -1995,7 +2032,11 @@ final class OrganogramEditorController extends BaseController
                 return;
             }
             $nodeId = (int)($_POST['node_id'] ?? 0);
-            $first = trim((string)($_POST['first_name'] ?? ''));
+            $rawFirst = trim((string)($_POST['first_name'] ?? ''));
+            $rawLast = trim((string)($_POST['last_name'] ?? ''));
+            $nameParts = $this->formatIncomingName($rawFirst, $rawLast, (string)($_POST['title'] ?? ''));
+            $first = $nameParts['first_name'];
+            $last = $nameParts['last_name'];
             if ($nodeId <= 0 || $first === '') {
                 msgException(400, 'Please enter a first name.');
                 return;
@@ -2012,7 +2053,7 @@ final class OrganogramEditorController extends BaseController
                 $familyCode,
                 $nodeId,
                 $first,
-                (string)($_POST['last_name'] ?? ''),
+                $last,
                 trim((string)($_POST['email'] ?? '')) ?: null,
                 trim((string)($_POST['mobile'] ?? '')) ?: null
             );
@@ -2230,7 +2271,7 @@ final class OrganogramEditorController extends BaseController
                 return;
             }
 
-            $allowedRelationships = ['sibling', 'half_sibling', 'nephew_niece', 'child', 'cousin', 'uncle_aunt'];
+            $allowedRelationships = ['parent', 'grandparent', 'great_grandparent', 'sibling', 'half_sibling', 'nephew_niece', 'child', 'cousin', 'uncle_aunt', 'partner', 'spouse'];
             if (!in_array($relationship, $allowedRelationships, true)) {
                 msgException(400, 'Please select a valid family relationship.');
                 return;
@@ -2296,7 +2337,276 @@ final class OrganogramEditorController extends BaseController
                 $targetGenLevel = 0;
                 $targetBio = 'Relative';
 
-                if ($relationship === 'sibling') {
+                if ($relationship === 'parent') {
+                    $childNode = $anchorNode ?: $egoNode;
+                    if (!$childNode) {
+                        $db->rollBack();
+                        msgException(400, 'Unable to locate the child node to attach this parent to.');
+                        return;
+                    }
+
+                    $childId = (int)$childNode['id'];
+                    $childGen = (int)$childNode['generation_level'];
+
+                    if ($childId === $nodeId) {
+                        $db->rollBack();
+                        msgException(400, 'A member cannot be their own parent.');
+                        return;
+                    }
+
+                    if (\App\services\FamilyGraphIntegrityService::wouldFormCycle($db, $familyCode, $nodeId, $childId)) {
+                        $db->rollBack();
+                        msgException(400, 'Placement rejected: This connection would introduce a circular ancestry cycle.');
+                        return;
+                    }
+
+                    $targetGender = in_array($genderOverride, ['Male', 'Female'], true) ? $genderOverride : ($targetNode['gender'] ?? 'Male');
+                    $targetBio = ($targetGender === 'Female') ? 'Mother' : 'Father';
+                    $targetGenLevel = $childGen - 1;
+
+                    // Check if child already has a parent union
+                    $stmtPUnion = $db->prepare('
+                        SELECT u.id, u.partner_1_id, u.partner_2_id
+                        FROM family_node_children c
+                        JOIN family_unions u ON u.id = c.union_id
+                        WHERE c.child_id = ? AND u.family_code = ?
+                        LIMIT 1
+                    ');
+                    $stmtPUnion->execute([$childId, $familyCode]);
+                    $existingUnion = $stmtPUnion->fetch(\PDO::FETCH_ASSOC);
+
+                    if ($existingUnion) {
+                        $targetUnionId = (int)$existingUnion['id'];
+                        $p1 = (int)$existingUnion['partner_1_id'];
+                        $p2 = (int)$existingUnion['partner_2_id'];
+
+                        if ($p1 === $p2 || $p2 === 0) {
+                            $updUnion = $db->prepare("UPDATE family_unions SET partner_2_id = ?, union_type = 'married', is_current = 1 WHERE id = ?");
+                            $updUnion->execute([$nodeId, $targetUnionId]);
+                        } else {
+                            $stmtP1 = $db->prepare("SELECT id, gender, is_placeholder FROM family_nodes WHERE id = ?");
+                            $stmtP1->execute([$p1]);
+                            $p1Row = $stmtP1->fetch(\PDO::FETCH_ASSOC);
+
+                            $stmtP2 = $db->prepare("SELECT id, gender, is_placeholder FROM family_nodes WHERE id = ?");
+                            $stmtP2->execute([$p2]);
+                            $p2Row = $stmtP2->fetch(\PDO::FETCH_ASSOC);
+
+                            $replaced = false;
+                            if ($p1Row && !empty($p1Row['is_placeholder']) && ($p1Row['gender'] === $targetGender || empty($p2Row['is_placeholder']))) {
+                                $updUnion = $db->prepare("UPDATE family_unions SET partner_1_id = ? WHERE id = ?");
+                                $updUnion->execute([$nodeId, $targetUnionId]);
+                                $db->prepare("DELETE FROM family_nodes WHERE id = ? AND is_placeholder = 1")->execute([$p1]);
+                                $replaced = true;
+                            } elseif ($p2Row && !empty($p2Row['is_placeholder']) && ($p2Row['gender'] === $targetGender || empty($p1Row['is_placeholder']))) {
+                                $updUnion = $db->prepare("UPDATE family_unions SET partner_2_id = ? WHERE id = ?");
+                                $updUnion->execute([$nodeId, $targetUnionId]);
+                                $delP2 = $db->prepare("DELETE FROM family_nodes WHERE id = ? AND is_placeholder = 1");
+                                $delP2->execute([$p2]);
+                                $replaced = true;
+                            }
+
+                            if (!$replaced && $p1 !== $nodeId && $p2 !== $nodeId) {
+                                $insNewUnion = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'married', 1)");
+                                $insNewUnion->execute([$familyCode, $nodeId, $nodeId]);
+                                $targetUnionId = (int)$db->lastInsertId();
+
+                                $insChildLink = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
+                                $insChildLink->execute([$targetUnionId, $childId]);
+                            }
+                        }
+                    } else {
+                        $insUnion = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'married', 1)");
+                        $insUnion->execute([$familyCode, $nodeId, $nodeId]);
+                        $targetUnionId = (int)$db->lastInsertId();
+
+                        $insChildLink = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
+                        $insChildLink->execute([$targetUnionId, $childId]);
+                    }
+                } elseif ($relationship === 'grandparent') {
+                    $parentRef = $anchorNode ?: null;
+                    if (!$parentRef) {
+                        $stmtP = $db->prepare("SELECT id, first_name, last_name, gender, generation_level FROM family_nodes WHERE family_code = ? AND generation_level = -1 ORDER BY id ASC LIMIT 1");
+                        $stmtP->execute([$familyCode]);
+                        $parentRef = $stmtP->fetch(\PDO::FETCH_ASSOC) ?: $egoNode;
+                    }
+
+                    if (!$parentRef) {
+                        $db->rollBack();
+                        msgException(400, 'Unable to locate a parent or root node to anchor this grandparent.');
+                        return;
+                    }
+
+                    $targetGender = in_array($genderOverride, ['Male', 'Female'], true) ? $genderOverride : ($targetNode['gender'] ?? 'Male');
+                    $targetBio = ($targetGender === 'Female') ? 'Grandmother' : 'Grandfather';
+
+                    $refGen = (int)$parentRef['generation_level'];
+                    if ($refGen === 0) {
+                        $stmtEgoP = $db->prepare('
+                            SELECT u.id, u.partner_1_id, u.partner_2_id
+                            FROM family_node_children c
+                            JOIN family_unions u ON u.id = c.union_id
+                            WHERE c.child_id = ? AND u.family_code = ?
+                            LIMIT 1
+                        ');
+                        $stmtEgoP->execute([(int)$parentRef['id'], $familyCode]);
+                        $egoPUnion = $stmtEgoP->fetch(\PDO::FETCH_ASSOC);
+
+                        $intermediateParentId = 0;
+                        if ($egoPUnion) {
+                            $intermediateParentId = (int)$egoPUnion['partner_1_id'];
+                        } else {
+                            $insP = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio, is_placeholder) VALUES (?, 'Father', 'Male', -1, '/resources/images/profile/avatarM.png', 'Father', 1)");
+                            $insP->execute([$familyCode]);
+                            $intermediateParentId = (int)$db->lastInsertId();
+
+                            $insPU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'married', 1)");
+                            $insPU->execute([$familyCode, $intermediateParentId, $intermediateParentId]);
+                            $pUnionId = (int)$db->lastInsertId();
+
+                            $insLinkEgo = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
+                            $insLinkEgo->execute([$pUnionId, (int)$parentRef['id']]);
+                        }
+                        $childId = $intermediateParentId;
+                        $targetGenLevel = -2;
+                    } else {
+                        $childId = (int)$parentRef['id'];
+                        $targetGenLevel = $refGen - 1;
+                    }
+
+                    if (\App\services\FamilyGraphIntegrityService::wouldFormCycle($db, $familyCode, $nodeId, $childId)) {
+                        $db->rollBack();
+                        msgException(400, 'Placement rejected: This connection would introduce a circular ancestry cycle.');
+                        return;
+                    }
+
+                    $stmtGpU = $db->prepare('
+                        SELECT u.id, u.partner_1_id, u.partner_2_id
+                        FROM family_node_children c
+                        JOIN family_unions u ON u.id = c.union_id
+                        WHERE c.child_id = ? AND u.family_code = ?
+                        LIMIT 1
+                    ');
+                    $stmtGpU->execute([$childId, $familyCode]);
+                    $existingGpU = $stmtGpU->fetch(\PDO::FETCH_ASSOC);
+
+                    if ($existingGpU) {
+                        $targetUnionId = (int)$existingGpU['id'];
+                        $p1 = (int)$existingGpU['partner_1_id'];
+                        $p2 = (int)$existingGpU['partner_2_id'];
+
+                        if ($p1 === $p2 || $p2 === 0) {
+                            $updUnion = $db->prepare("UPDATE family_unions SET partner_2_id = ?, union_type = 'married', is_current = 1 WHERE id = ?");
+                            $updUnion->execute([$nodeId, $targetUnionId]);
+                        } else {
+                            $stmtP1 = $db->prepare("SELECT id, gender, is_placeholder FROM family_nodes WHERE id = ?");
+                            $stmtP1->execute([$p1]);
+                            $p1Row = $stmtP1->fetch(\PDO::FETCH_ASSOC);
+
+                            $stmtP2 = $db->prepare("SELECT id, gender, is_placeholder FROM family_nodes WHERE id = ?");
+                            $stmtP2->execute([$p2]);
+                            $p2Row = $stmtP2->fetch(\PDO::FETCH_ASSOC);
+
+                            if ($p1Row && !empty($p1Row['is_placeholder'])) {
+                                $updGpP1 = $db->prepare("UPDATE family_unions SET partner_1_id = ? WHERE id = ?");
+                                $updGpP1->execute([$nodeId, $targetUnionId]);
+                                $delGpP1 = $db->prepare("DELETE FROM family_nodes WHERE id = ? AND is_placeholder = 1");
+                                $delGpP1->execute([$p1]);
+                            } elseif ($p2Row && !empty($p2Row['is_placeholder'])) {
+                                $updGpP2 = $db->prepare("UPDATE family_unions SET partner_2_id = ? WHERE id = ?");
+                                $updGpP2->execute([$nodeId, $targetUnionId]);
+                                $delGpP2 = $db->prepare("DELETE FROM family_nodes WHERE id = ? AND is_placeholder = 1");
+                                $delGpP2->execute([$p2]);
+                            }
+                        }
+                    } else {
+                        $insGpU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'married', 1)");
+                        $insGpU->execute([$familyCode, $nodeId, $nodeId]);
+                        $targetUnionId = (int)$db->lastInsertId();
+
+                        $insGpLink = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
+                        $insGpLink->execute([$targetUnionId, $childId]);
+                    }
+                } elseif ($relationship === 'great_grandparent') {
+                    $gpRef = $anchorNode ?: null;
+                    if (!$gpRef) {
+                        $stmtGp = $db->prepare("SELECT id, first_name, last_name, gender, generation_level FROM family_nodes WHERE family_code = ? AND generation_level = -2 ORDER BY id ASC LIMIT 1");
+                        $stmtGp->execute([$familyCode]);
+                        $gpRef = $stmtGp->fetch(\PDO::FETCH_ASSOC);
+                        if (!$gpRef) {
+                            $stmtP = $db->prepare("SELECT id, first_name, last_name, gender, generation_level FROM family_nodes WHERE family_code = ? AND generation_level = -1 ORDER BY id ASC LIMIT 1");
+                            $stmtP->execute([$familyCode]);
+                            $gpRef = $stmtP->fetch(\PDO::FETCH_ASSOC) ?: $egoNode;
+                        }
+                    }
+
+                    if (!$gpRef) {
+                        $db->rollBack();
+                        msgException(400, 'Unable to locate a grandparent or ancestral node to anchor this great-grandparent.');
+                        return;
+                    }
+
+                    $targetGender = in_array($genderOverride, ['Male', 'Female'], true) ? $genderOverride : ($targetNode['gender'] ?? 'Male');
+                    $targetBio = ($targetGender === 'Female') ? 'Great-Grandmother' : 'Great-Grandfather';
+
+                    $refGen = (int)$gpRef['generation_level'];
+                    $childId = (int)$gpRef['id'];
+                    $targetGenLevel = $refGen - 1;
+
+                    if (\App\services\FamilyGraphIntegrityService::wouldFormCycle($db, $familyCode, $nodeId, $childId)) {
+                        $db->rollBack();
+                        msgException(400, 'Placement rejected: This connection would introduce a circular ancestry cycle.');
+                        return;
+                    }
+
+                    $stmtGgpU = $db->prepare('
+                        SELECT u.id, u.partner_1_id, u.partner_2_id
+                        FROM family_node_children c
+                        JOIN family_unions u ON u.id = c.union_id
+                        WHERE c.child_id = ? AND u.family_code = ?
+                        LIMIT 1
+                    ');
+                    $stmtGgpU->execute([$childId, $familyCode]);
+                    $existingGgpU = $stmtGgpU->fetch(\PDO::FETCH_ASSOC);
+
+                    if ($existingGgpU) {
+                        $targetUnionId = (int)$existingGgpU['id'];
+                        $p1 = (int)$existingGgpU['partner_1_id'];
+                        $p2 = (int)$existingGgpU['partner_2_id'];
+
+                        if ($p1 === $p2 || $p2 === 0) {
+                            $updGgpU = $db->prepare("UPDATE family_unions SET partner_2_id = ?, union_type = 'married', is_current = 1 WHERE id = ?");
+                            $updGgpU->execute([$nodeId, $targetUnionId]);
+                        } else {
+                            $stmtP1 = $db->prepare("SELECT id, gender, is_placeholder FROM family_nodes WHERE id = ?");
+                            $stmtP1->execute([$p1]);
+                            $p1Row = $stmtP1->fetch(\PDO::FETCH_ASSOC);
+
+                            $stmtP2 = $db->prepare("SELECT id, gender, is_placeholder FROM family_nodes WHERE id = ?");
+                            $stmtP2->execute([$p2]);
+                            $p2Row = $stmtP2->fetch(\PDO::FETCH_ASSOC);
+
+                            if ($p1Row && !empty($p1Row['is_placeholder'])) {
+                                $updGgpP1 = $db->prepare("UPDATE family_unions SET partner_1_id = ? WHERE id = ?");
+                                $updGgpP1->execute([$nodeId, $targetUnionId]);
+                                $delGgpP1 = $db->prepare("DELETE FROM family_nodes WHERE id = ? AND is_placeholder = 1");
+                                $delGgpP1->execute([$p1]);
+                            } elseif ($p2Row && !empty($p2Row['is_placeholder'])) {
+                                $updGgpP2 = $db->prepare("UPDATE family_unions SET partner_2_id = ? WHERE id = ?");
+                                $updGgpP2->execute([$nodeId, $targetUnionId]);
+                                $delGgpP2 = $db->prepare("DELETE FROM family_nodes WHERE id = ? AND is_placeholder = 1");
+                                $delGgpP2->execute([$p2]);
+                            }
+                        }
+                    } else {
+                        $insGgpU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'married', 1)");
+                        $insGgpU->execute([$familyCode, $nodeId, $nodeId]);
+                        $targetUnionId = (int)$db->lastInsertId();
+
+                        $insGgpLink = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
+                        $insGgpLink->execute([$targetUnionId, $childId]);
+                    }
+                } elseif ($relationship === 'sibling') {
                     $refNode = $anchorNode ?: $egoNode;
                     if (!$refNode) {
                         $db->rollBack();
@@ -2495,6 +2805,108 @@ final class OrganogramEditorController extends BaseController
 
                     $targetGenLevel = $parentGen;
                     $targetBio = 'Uncle/Aunt';
+                } elseif ($relationship === 'partner' || $relationship === 'spouse') {
+                    $partnerTarget = $anchorNode ?: $egoNode;
+                    if (!$partnerTarget) {
+                        $db->rollBack();
+                        msgException(400, 'Unable to locate a family member to partner with.');
+                        return;
+                    }
+
+                    $partnerTargetId = (int)$partnerTarget['id'];
+                    $partnerTargetGen = (int)$partnerTarget['generation_level'];
+
+                    if ($partnerTargetId === $nodeId) {
+                        $db->rollBack();
+                        msgException(400, 'A member cannot be partnered with themselves.');
+                        return;
+                    }
+
+                    // Check if partnerTarget is already parent/child of nodeId to prevent invalid cycles
+                    if (\App\services\FamilyGraphService::areParentAndChild($db, $partnerTargetId, $nodeId)) {
+                        $db->rollBack();
+                        msgException(400, 'A member cannot be partnered with their own parent or child.');
+                        return;
+                    }
+
+                    // 1. Check if a union already exists between partnerTarget and nodeId
+                    $stmtExistingU = $db->prepare('
+                        SELECT id FROM family_unions
+                        WHERE family_code = ?
+                          AND ((partner_1_id = ? AND partner_2_id = ?) OR (partner_1_id = ? AND partner_2_id = ?))
+                        LIMIT 1
+                    ');
+                    $stmtExistingU->execute([$familyCode, $partnerTargetId, $nodeId, $nodeId, $partnerTargetId]);
+                    $targetUnionId = (int)$stmtExistingU->fetchColumn();
+
+                    if ($targetUnionId <= 0) {
+                        // 2. Check if partnerTarget has a single-parent union (p1 == p2 or p2 == 0) or placeholder partner
+                        $stmtPlaceholderU = $db->prepare('
+                            SELECT u.id, u.partner_1_id, u.partner_2_id, fn.is_placeholder
+                            FROM family_unions u
+                            LEFT JOIN family_nodes fn ON fn.id = (CASE WHEN u.partner_1_id = ? THEN u.partner_2_id ELSE u.partner_1_id END)
+                            WHERE u.family_code = ?
+                              AND (u.partner_1_id = ? OR u.partner_2_id = ?)
+                            ORDER BY u.is_current DESC, u.id ASC
+                        ');
+                        $stmtPlaceholderU->execute([$partnerTargetId, $familyCode, $partnerTargetId, $partnerTargetId]);
+                        $unions = $stmtPlaceholderU->fetchAll(\PDO::FETCH_ASSOC);
+
+                        $reusedUnionId = 0;
+                        $placeholderToDelete = 0;
+
+                        foreach ($unions as $u) {
+                            $p1 = (int)$u['partner_1_id'];
+                            $p2 = (int)$u['partner_2_id'];
+
+                            if ($p1 === $p2 || $p2 === 0) {
+                                $reusedUnionId = (int)$u['id'];
+                                $updSingle = $db->prepare("UPDATE family_unions SET partner_2_id = ?, union_type = 'married', is_current = 1 WHERE id = ?");
+                                $updSingle->execute([$nodeId, $reusedUnionId]);
+                                break;
+                            }
+
+                            $otherId = ($p1 === $partnerTargetId) ? $p2 : $p1;
+                            if (!empty($u['is_placeholder'])) {
+                                $reusedUnionId = (int)$u['id'];
+                                if ($p1 === $partnerTargetId) {
+                                    $updPlace = $db->prepare("UPDATE family_unions SET partner_2_id = ?, union_type = 'married', is_current = 1 WHERE id = ?");
+                                } else {
+                                    $updPlace = $db->prepare("UPDATE family_unions SET partner_1_id = ?, union_type = 'married', is_current = 1 WHERE id = ?");
+                                }
+                                $updPlace->execute([$nodeId, $reusedUnionId]);
+                                $placeholderToDelete = $otherId;
+                                break;
+                            }
+                        }
+
+                        if ($reusedUnionId > 0) {
+                            $targetUnionId = $reusedUnionId;
+                            if ($placeholderToDelete > 0) {
+                                $chkOther = $db->prepare('
+                                    SELECT (
+                                        (SELECT COUNT(*) FROM family_unions WHERE (partner_1_id = ? OR partner_2_id = ?) AND id <> ?) +
+                                        (SELECT COUNT(*) FROM family_node_children WHERE child_id = ?)
+                                    ) as total
+                                ');
+                                $chkOther->execute([$placeholderToDelete, $placeholderToDelete, $targetUnionId, $placeholderToDelete]);
+                                if ((int)$chkOther->fetchColumn() === 0) {
+                                    $db->prepare('DELETE FROM family_nodes WHERE id = ? AND is_placeholder = 1')->execute([$placeholderToDelete]);
+                                }
+                            }
+                        } else {
+                            $insUnion = $db->prepare("
+                                INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current)
+                                VALUES (?, ?, ?, 'married', 1)
+                            ");
+                            $insUnion->execute([$familyCode, $partnerTargetId, $nodeId]);
+                            $targetUnionId = (int)$db->lastInsertId();
+                        }
+                    }
+
+                    $targetGenLevel = $partnerTargetGen;
+                    $targetGender = in_array($genderOverride, ['Male', 'Female'], true) ? $genderOverride : ($targetNode['gender'] ?? 'Female');
+                    $targetBio = ($targetGender === 'Female') ? 'Wife' : (($targetGender === 'Male') ? 'Husband' : 'Partner/Spouse');
                 }
 
                 if ($targetUnionId <= 0) {
@@ -2512,9 +2924,25 @@ final class OrganogramEditorController extends BaseController
                     $updNode->execute([$targetGenLevel, $targetBio, $nodeId, $familyCode]);
                 }
 
-                // Insert the verified biological link
-                $insLink = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
-                $insLink->execute([$targetUnionId, $nodeId]);
+                // Insert the verified biological link (partners/spouses and ancestor placements are not children of their union)
+                if (!in_array($relationship, ['partner', 'spouse', 'parent', 'grandparent', 'great_grandparent'], true)) {
+                    // Adversarial Cycle Prevention Guard (Marcus & Viktor Red Team Invariant)
+                    $stmtParents = $db->prepare('SELECT partner_1_id, partner_2_id FROM family_unions WHERE id = ? AND family_code = ?');
+                    $stmtParents->execute([$targetUnionId, $familyCode]);
+                    $unionRow = $stmtParents->fetch(\PDO::FETCH_ASSOC);
+                    if ($unionRow) {
+                        foreach ([(int)$unionRow['partner_1_id'], (int)$unionRow['partner_2_id']] as $pId) {
+                            if ($pId > 0 && \App\services\FamilyGraphIntegrityService::wouldFormCycle($db, $familyCode, $pId, $nodeId)) {
+                                $db->rollBack();
+                                msgException(400, 'Placement rejected: This connection would introduce a circular ancestry cycle.');
+                                return;
+                            }
+                        }
+                    }
+
+                    $insLink = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
+                    $insLink->execute([$targetUnionId, $nodeId]);
+                }
 
                 $db->commit();
 
@@ -2537,6 +2965,23 @@ final class OrganogramEditorController extends BaseController
         } catch (\Throwable $th) {
             showError($th);
         }
+    }
+
+    /**
+     * Normalise and sentence-case incoming relative names and cultural titles
+     * @param string $first
+     * @param string $last
+     * @param string|null $title Optional cultural or professional title (e.g. Chief, Prof., Dr., King)
+     * @return array{first_name: string, last_name: string, full_name: string}
+     */
+    private function formatIncomingName(string $first, string $last, ?string $title = null): array
+    {
+        $cleanTitle = trim((string)($title ?? ''));
+        $first = trim($first);
+        if ($cleanTitle !== '' && stripos($first, $cleanTitle) === false) {
+            $first = $cleanTitle . ' ' . $first;
+        }
+        return \App\services\NameFormatterService::formatFirstAndLast($first, $last);
     }
 }
 

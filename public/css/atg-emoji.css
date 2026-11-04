@@ -1,0 +1,599 @@
+/**
+ * ATG Sovereign 3D Emoji & Avatar Studio Styles
+ * Developed by Advanced Technology Group (ATG Pods 3 & 4)
+ * Compliant with Global Design Standards v2.1 & WCAG AA Contrast
+ */
+
+/* -------------------------------------------------------------------------
+ * 3D Micro-Tilt & Tactile Physics
+ * ------------------------------------------------------------------------- */
+.atg-emoji-container {
+    perspective: 800px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transform-style: preserve-3d;
+}
+
+.atg-3d-emoji {
+    display: inline-block;
+    vertical-align: middle;
+    transform: translateZ(0);
+    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), filter 0.2s ease;
+    will-change: transform;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.atg-3d-emoji:hover {
+    transform: perspective(600px) scale3d(1.1, 1.1, 1.1) translateZ(12px);
+    filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.35));
+}
+
+.atg-3d-emoji:active {
+    transform: perspective(600px) scale3d(0.96, 0.96, 0.96) translateZ(0);
+}
+
+/* -------------------------------------------------------------------------
+ * 3D Avatar Studio Dashboard Layout
+ * ------------------------------------------------------------------------- */
+.atg-studio-wrapper {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 24px 16px;
+}
+
+.atg-studio-header {
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.atg-studio-title {
+    font-size: 1.875rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.atg-studio-subtitle {
+    font-size: 0.95rem;
+    color: #475569;
+    max-width: 600px;
+    margin: 8px auto 0;
+    line-height: 1.5;
+}
+
+.atg-studio-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(180, 83, 9, 0.3);
+}
+
+.atg-studio-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 28px;
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .atg-studio-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* -------------------------------------------------------------------------
+ * Left Stage: 3D Live Interactive Stage
+ * ------------------------------------------------------------------------- */
+.atg-preview-stage {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+    position: sticky;
+    top: 24px;
+}
+
+.atg-canvas-viewport {
+    width: 256px;
+    height: 256px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    position: relative;
+    perspective: 700px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+}
+
+.atg-canvas-viewport:active {
+    cursor: grabbing;
+}
+
+.atg-avatar-svg {
+    border-radius: 50%;
+    transform-style: preserve-3d;
+    transition: transform 0.08s ease-out;
+    filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.25));
+}
+
+.atg-preview-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.atg-btn-primary {
+    background: linear-gradient(135deg, #a31621 0%, #7d1018 100%);
+    color: #ffffff !important;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(163, 22, 33, 0.35);
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.atg-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(163, 22, 33, 0.45);
+}
+
+.atg-btn-primary:active {
+    transform: scale(0.98);
+}
+
+.atg-btn-secondary {
+    background: #f1f5f9;
+    color: #334155 !important;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.15s ease;
+}
+
+.atg-btn-secondary:hover {
+    background: #e2e8f0;
+}
+
+/* -------------------------------------------------------------------------
+ * Right Stage: Trait Selectors & Customisation Tabs
+ * ------------------------------------------------------------------------- */
+.atg-controls-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+}
+
+.atg-tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.atg-tab-btn {
+    background: transparent;
+    border: none;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #64748b;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-height: 44px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.atg-tab-btn.active {
+    color: #a31621;
+    background: #fee2e2;
+}
+
+.atg-trait-section {
+    margin-bottom: 28px;
+}
+
+.atg-trait-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #475569;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.atg-swatches-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+}
+
+.atg-trait-pill {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.atg-trait-pill:hover {
+    border-color: #cbd5e1;
+    background: #f1f5f9;
+}
+
+.atg-trait-pill.active {
+    border-color: #a31621;
+    background: #fff1f2;
+    color: #991b1b;
+    font-weight: 700;
+    box-shadow: 0 0 0 2px rgba(163, 22, 33, 0.2);
+}
+
+.atg-color-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+/* -------------------------------------------------------------------------
+ * Specialized 3D Emojis Catalog Grid
+ * ------------------------------------------------------------------------- */
+.atg-catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.atg-emoji-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.atg-emoji-card:hover {
+    border-color: #a31621;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(163, 22, 33, 0.15);
+}
+
+.atg-emoji-card-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 10px;
+    white-space: nowrap;
+}
+
+.atg-emoji-card-meaning {
+    font-size: 0.72rem;
+    color: #64748b;
+    margin-top: 4px;
+    line-height: 1.3;
+}
+
+
+/* -------------------------------------------------------------------------
+ * Augmented Reality (AR) & 3D Holographic Viewer Styles
+ * ------------------------------------------------------------------------- */
+@keyframes arFloat {
+    0%, 100% {
+        transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+    }
+    50% {
+        transform: translateY(-12px) rotateX(6deg) rotateY(-8deg);
+    }
+}
+
+@keyframes arPulseRing {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.15);
+        opacity: 0.3;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0.8;
+    }
+}
+
+.ar-floating-emoji {
+    animation: arFloat 4s ease-in-out infinite;
+}
+
+.atg-ar-modal .modal-content {
+    background: #ffffff !important;
+    border: 1.5px solid rgba(245, 158, 11, 0.25) !important;
+    color: #0f172a !important;
+}
+
+.atg-ar-stage-container {
+    width: 100%;
+    height: 380px;
+    background: radial-gradient(circle at 50% 35%, #ffffff 0%, #fffbeb 55%, #fef3c7 100%) !important;
+    border: 1.5px solid rgba(245, 158, 11, 0.3) !important;
+    box-shadow: inset 0 2px 10px rgba(245, 158, 11, 0.08) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+}
+
+.atg-ar-stage-container:active {
+    cursor: grabbing;
+}
+
+.atg-ar-floating-object {
+    position: relative;
+    z-index: 10;
+    perspective: 800px;
+    transform-style: preserve-3d;
+    transition: transform 0.08s ease-out;
+}
+
+.atg-3d-emoji-render {
+    width: 180px;
+    height: 180px;
+    filter: drop-shadow(0 14px 28px rgba(217, 119, 6, 0.22)) !important;
+    pointer-events: none;
+}
+
+.ar-mode-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(245, 158, 11, 0.35) !important;
+    color: #92400e !important;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 20;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.ar-reticle-ring {
+    width: 120px;
+    height: 120px;
+    border: 2px dashed rgba(217, 119, 6, 0.8) !important;
+    border-radius: 50%;
+    animation: arPulseRing 3s ease-in-out infinite;
+}
+
+.ar-reticle-instruction {
+    position: absolute;
+    bottom: 16px;
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: #92400e !important;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(245, 158, 11, 0.35) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.atg-ar-ctrl-btn {
+    background: #ffffff;
+    color: #334155 !important;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: all 0.15s ease;
+}
+
+.atg-ar-ctrl-btn:hover {
+    background: #f8fafc;
+    border-color: #f59e0b;
+    color: #0f172a !important;
+    transform: translateY(-1px);
+}
+
+.atg-ar-ctrl-btn.active {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+    border-color: #f59e0b !important;
+    color: #92400e !important;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+
+/* -------------------------------------------------------------------------
+ * Integrated Feed Header 3D AR Pill (Same-Line Luxury Social Integration)
+ * ------------------------------------------------------------------------- */
+.atg-integrated-ar-pill {
+    transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.atg-integrated-ar-pill:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(245, 158, 11, 0.25) !important;
+    border-color: #f59e0b !important;
+}
+
+.atg-integrated-ar-pill:active {
+    transform: scale(0.97);
+}
+
+.ar-post-badge-container {
+    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s ease;
+}
+
+.ar-post-badge-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(245, 158, 11, 0.2) !important;
+}
+
+/* Inline, living 3D emoji inside post captions (sits flush on the text line) */
+.atg-live-emoji {
+    display: inline-block;
+    vertical-align: 0.23em;
+    margin: 0 0.15em;
+    line-height: 1;
+    min-width: 26px;
+    min-height: 26px;
+    cursor: pointer;
+    animation: atgLiveBob 2.6s ease-in-out infinite;
+    transform-origin: 50% 85%;
+}
+.atg-live-emoji .atg-3d-emoji {
+    width: 1.55em;
+    height: 1.55em;
+    vertical-align: top;
+    filter: drop-shadow(0 2px 3px rgba(217, 119, 6, 0.3));
+}
+.atg-live-emoji:hover { animation: atgLiveWiggle 0.6s ease-in-out infinite; }
+.atg-live-emoji:active { transform: scale(0.94); }
+.atg-live-emoji:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; border-radius: 6px; }
+@keyframes atgLiveBob {
+    0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+    25% { transform: translateY(-2px) rotate(-4deg) scale(1.04); }
+    50% { transform: translateY(0) rotate(0deg) scale(1); }
+    75% { transform: translateY(-1px) rotate(4deg) scale(1.04); }
+}
+@keyframes atgLiveWiggle {
+    0%, 100% { transform: rotate(0) scale(1.15); }
+    25% { transform: rotate(-12deg) scale(1.2); }
+    75% { transform: rotate(12deg) scale(1.2); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .atg-live-emoji, .atg-live-emoji:hover { animation: none; }
+}
+
+/* -------------------------------------------------------------------------
+ * ATG Living 3D Emoji Rich Composer Editor
+ * ------------------------------------------------------------------------- */
+.composer-editor-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+#postMessageEditor {
+    min-height: 58px;
+    max-height: 220px;
+    overflow-y: auto;
+    outline: none;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 1.05rem;
+    line-height: 1.55;
+    color: var(--text-main, #0f172a);
+    font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+    cursor: text;
+}
+
+#postMessageEditor:empty::before {
+    content: attr(data-placeholder);
+    color: #94a3b8;
+    pointer-events: none;
+    display: block;
+}
+
+#postMessageEditor:focus:empty::before {
+    color: #cbd5e1;
+}
+
+#postMessageEditor .atg-live-emoji {
+    display: inline-block;
+    vertical-align: 0.23em;
+    margin: 0 0.15em;
+    line-height: 1;
+    cursor: default;
+    user-select: all;
+    animation: atgLiveBob 2.6s ease-in-out infinite;
+}
+
+#postMessageEditor .atg-live-emoji img {
+    pointer-events: none;
+    vertical-align: top;
+    filter: drop-shadow(0 2px 3px rgba(217, 119, 6, 0.3));
+}
+

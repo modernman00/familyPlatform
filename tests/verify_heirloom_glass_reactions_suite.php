@@ -94,6 +94,18 @@ assertCondition(strpos($commentController, "FROM requestMgt") !== false, "Commen
 $feedCompFile = file_get_contents(__DIR__ . '/../resources/asset/js/components/profilePage/feedComponent.js');
 assertCondition(strpos($feedCompFile, "comment.reactions = nextReactions;") !== false, "feedComponent.js reassigns comment.reactions reference for instant Alpine reactivity");
 
+// 10. Verify Mobile Touchscreen Parity (Zero Stale Emojis Invariant)
+$heirloomJsFile = file_get_contents(__DIR__ . '/../resources/asset/js/components/profilePage/heirloomGlassReactions.js');
+assertCondition(strpos($heirloomJsFile, "source.touches") !== false && strpos($heirloomJsFile, "source.changedTouches") !== false, "heirloomGlassReactions.js detects touch coordinates for 3D particle fountain burst");
+assertCondition(strpos($postCardFile, "reactToComment(post.post_no, c.comment_no, type, \$event)") !== false, "post-card.blade.php passes touch event coordinates to reactToComment");
+assertCondition(strpos($postCardFile, "handleCommentTouchMove(c.comment_no, \$event)") !== false, "post-card.blade.php binds handleCommentTouchMove for mobile touch scrubbing");
+assertCondition(strpos($postCardFile, "endCommentTouch(post.post_no, c.comment_no, \$event)") !== false, "post-card.blade.php binds endCommentTouch for touch-release reaction selection");
+assertCondition(strpos($feedCompFile, "handleCommentTouchMove") !== false, "feedComponent.js implements handleCommentTouchMove touch scrub tracking");
+assertCondition(strpos($feedCompFile, "elementFromPoint") !== false, "feedComponent.js uses elementFromPoint for precision thumb scrub hit testing");
+assertCondition(strpos($cssFile, ".heirloom-reaction-btn.touch-active") !== false, "standards-v21.css defines .heirloom-reaction-btn.touch-active for mobile elevation and glow");
+$scssFile = file_get_contents(__DIR__ . '/../resources/asset/scss/profilepage.scss');
+assertCondition(strpos($scssFile, "min-height: 44px") !== false && strpos($scssFile, "min-width: 44px") !== false, "profilepage.scss enforces 44px touch targets on in-comment emoji buttons (Fitts's Law)");
+
 echo "\n=================================================================\n";
 echo "🏆 ALL {$totalChecks}/{$totalChecks} HEIRLOOM GLASS REACTION CHECKS PASSED!\n";
 echo "=================================================================\n";

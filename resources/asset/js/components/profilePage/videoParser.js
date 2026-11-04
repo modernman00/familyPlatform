@@ -70,6 +70,24 @@ export function parseVideoUrl(url) {
     };
   }
 
+  // 5. Google Photos Video Stream (=m18, =m22, =m37, =dv) or Google Video Stream
+  const gpVideoRegex = /^(https?:\/\/(?:lh[3-6]\.googleusercontent\.com|[^/]+\.googlevideo\.com)[^\s"'<>]+(?:=(?:m18|m22|m37|dv)|videoplayback[^\s"'<>]*))$/i;
+  const gpMatch = trimmed.match(gpVideoRegex);
+  if (gpMatch) {
+    const poster = trimmed.includes('googleusercontent.com')
+      ? trimmed.replace(/=.*$/i, '=s1600')
+      : null;
+    return {
+      type: 'direct',
+      videoId: null,
+      thumbnailUrl: poster,
+      embedUrl: trimmed,
+      originalUrl: trimmed,
+      trimStart: null,
+      trimEnd: null,
+    };
+  }
+
   return null;
 }
 

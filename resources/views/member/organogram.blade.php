@@ -101,7 +101,7 @@
                     <button type="button" class="btn-action" onclick="openTimeCapsuleModal()" title="Digital Time Capsule Vault" style="border-color: rgba(184,32,44, 0.4); color: #ef6b73;">
                         <i class="bi bi-hourglass-split text-primary"></i> Time Capsule
                     </button>
-                    <button type="button" id="configureFamilyBtn" class="btn-action" onclick="switchTreeViewMode('studio')" title="Open Family Studio to update relatives & lineage directly on this page">
+                    <button type="button" id="configureFamilyBtn" class="btn-action" onclick="openFamilyStudio()" title="Open Family Studio to update relatives & lineage directly on this page">
                         <i class="bi bi-stars text-warning"></i> Lineage Studio
                     </button>
                     <button type="button" class="btn-action" id="manageRelativesBtn" onclick="openManageRelativesModal()" title="Remove unrecognised names from family tree" style="border-color: rgba(239, 68, 68, 0.4); color: #ef4444;">
@@ -122,11 +122,14 @@
     <div class="tree-mode-switcher-container text-center mb-1 d-flex flex-wrap align-items-center justify-content-center gap-2">
         @if(empty($isReadOnly))
         <div class="d-flex align-items-center gap-2 flex-shrink-0 tree-quick-actions">
-            <button type="button" onclick="openInviteFamilyModal()" class="btn btn-primary fw-bold text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #a31621 0%, #b8202c 100%); border: none; border-radius: 10px; min-height: 44px; font-size: 0.9rem;">
-                <i class="bi bi-send-fill me-1"></i> Invite Family
+            <button type="button" onclick="openInviteFamilyModal()" class="btn btn-primary fw-bold text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center rounded-pill" style="background: linear-gradient(135deg, #a31621 0%, #b8202c 100%); border: none; min-height: 44px; font-size: 0.88rem; padding: 8px 16px;">
+                <i class="bi bi-send-fill me-1.5"></i> Invite Family
             </button>
-            <button type="button" onclick="openLineageQuestModal()" class="btn btn-success fw-bold text-white text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center" style="border-radius: 10px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; min-height: 44px; font-size: 0.9rem;">
-                <i class="bi bi-whatsapp me-1"></i> WhatsApp Quests
+            <button type="button" onclick="openLineageQuestModal()" class="btn btn-success fw-bold text-white text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center rounded-pill" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; min-height: 44px; font-size: 0.88rem; padding: 8px 16px;">
+                <i class="bi bi-whatsapp me-1.5"></i> WhatsApp Quests
+            </button>
+            <button type="button" onclick="toggleHowToBuildGuide()" class="btn btn-outline-warning text-warning fw-bold text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center rounded-pill" id="btnToggleHowToBuildGuide" title="How to build and create your family tree" style="border-color: rgba(245, 158, 11, 0.45); min-height: 44px; font-size: 0.88rem; padding: 8px 16px;">
+                <i class="bi bi-compass-fill me-1.5"></i> How to Build Tree
             </button>
         </div>
         @endif
@@ -151,7 +154,7 @@
                 <i class="bi bi-globe-americas text-info"></i>
                 <span>Dynasty Globe</span>
             </button>
-            <button type="button" id="btnModeStudio" class="layout-segment-btn" onclick="switchTreeViewMode('studio')" title="Family Studio: Curate and update relatives, unions, and lineage directly">
+            <button type="button" id="btnModeStudio" class="layout-segment-btn" onclick="openFamilyStudio()" title="Family Studio: Curate and update relatives, unions, and lineage directly">
                 <i class="bi bi-stars text-warning"></i>
                 <span>Family Studio</span>
                 <span class="badge bg-warning text-dark ms-1 px-1.5 py-0.5 rounded-pill" style="font-size: 0.68rem; font-weight: 700;">Update Tree</span>
@@ -162,60 +165,161 @@
     <!-- Tree Workspace Container -->
     <div class="organogram-container">
 
-        <!-- High-Visibility Family Tree Security & Viewers Banner (Requirements 1, 2, 3, 4) -->
-        <div id="treeSecurityBanner" class="alert shadow-lg border-0 rounded-4 mb-3 mx-3 d-flex flex-column flex-md-row align-items-center justify-content-between p-3 gap-3" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 41, 59, 0.94) 100%); border: 1px solid rgba(56, 189, 248, 0.35); border-left: 5px solid #38bdf8 !important; backdrop-filter: blur(16px); box-shadow: 0 16px 36px rgba(0,0,0,0.4);">
-            <div class="d-flex align-items-center gap-3">
-                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); font-size: 1.25rem;">
+        <!-- High-Visibility Family Tree Security & Viewers Ribbon -->
+        <div id="treeSecurityBanner" class="alert shadow-sm border-0 rounded-3 mb-2 mx-2 mx-lg-3 d-flex flex-column flex-md-row align-items-center justify-content-between tree-security-ribbon" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.94) 0%, rgba(30, 41, 59, 0.92) 100%); border: 1px solid rgba(56, 189, 248, 0.28) !important; border-left: 4px solid #38bdf8 !important; backdrop-filter: blur(16px);">
+            <div class="d-flex align-items-center gap-2.5 tree-ribbon-content">
+                <div class="tree-banner-icon-badge rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35);">
                     <i class="bi bi-shield-check"></i>
                 </div>
-                <div>
-                    <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-                        <h6 class="mb-0 fw-bold text-white fs-6">Family Tree Visibility & Privacy Guard</h6>
-                        <span class="badge rounded-pill px-2.5 py-0.5" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.45); font-size: 0.7rem; font-weight: 700;">#{{ $familyCode }} ONLY</span>
-                        <span class="badge rounded-pill px-2.5 py-0.5" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); font-size: 0.7rem; font-weight: 700;">
+                <div class="flex-grow-1 min-w-0">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="fw-bold text-white fs-6 tree-banner-title">Tree Visibility &amp; Privacy Guard</span>
+                        <span class="badge rounded-pill px-2 py-0.5" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.45); font-size: 0.7rem; font-weight: 700;">#{{ $familyCode }} ONLY</span>
+                        <span class="badge rounded-pill px-2 py-0.5" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); font-size: 0.7rem; font-weight: 700;">
                             POLICY: {{ strtoupper(str_replace('_', ' ', $treeAccessData['access_mode'] ?? 'FAMILY ALL')) }}
                         </span>
+                        <span class="tree-banner-desc text-white-50 ms-1 d-none d-lg-inline" style="font-size: 0.8rem;">
+                            Strictly private to family code #{{ $familyCode }}. External contacts cannot view.
+                        </span>
                     </div>
-                    <p class="mb-0 text-white-50" style="font-size: 0.85rem; line-height: 1.45;">
-                        Your tree is <strong>strictly private to family code #{{ $familyCode }}</strong>. External contacts cannot view it. You can see everyone who viewed your tree and limit access to specific relatives anytime.
+                    <p class="mb-0 text-white-50 d-lg-none mt-1" style="font-size: 0.82rem; line-height: 1.4;">
+                        Your tree is <strong>strictly private to family code #{{ $familyCode }}</strong>. External contacts cannot view it.
                     </p>
                 </div>
             </div>
-            <div class="d-flex align-items-center gap-2 flex-shrink-0 flex-wrap">
-                <button type="button" class="btn btn-outline-info rounded-pill px-3 py-2 fw-bold d-inline-flex align-items-center gap-1.5 text-nowrap" onclick="openWhoViewedTreeModal()" style="min-height: 44px; font-size: 0.85rem;">
+            <div class="d-flex align-items-center gap-2 flex-shrink-0 tree-ribbon-actions justify-content-center justify-content-md-end flex-wrap mt-2 mt-md-0">
+                <button type="button" class="btn btn-outline-info rounded-pill px-3 py-1.5 fw-bold d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0 text-nowrap" onclick="openWhoViewedTreeModal()" style="min-height: 38px; font-size: 0.82rem;">
                     <i class="bi bi-eye-fill"></i> Who Viewed Tree (<span id="bannerViewersCount">{{ $treeViewersData['unique_viewers'] ?? 0 }}</span>)
                 </button>
                 @if(empty($isReadOnly))
-                <button type="button" class="btn btn-warning text-dark rounded-pill px-3 py-2 fw-bold d-inline-flex align-items-center gap-1.5 text-nowrap" onclick="openTreeAccessControlModal()" style="min-height: 44px; font-size: 0.85rem;">
+                <button type="button" class="btn btn-warning text-dark rounded-pill px-3 py-1.5 fw-bold d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0 text-nowrap" onclick="openTreeAccessControlModal()" style="min-height: 38px; font-size: 0.82rem;">
                     <i class="bi bi-person-slash"></i> Limit Access
                 </button>
                 @endif
             </div>
         </div>
 
-        <!-- Integrated Family Studio Discovery Announcement Banner -->
-        <div id="treeStudioDiscoveryBanner" class="alert shadow-lg border-0 rounded-4 mb-3 mx-3 d-flex flex-column flex-md-row align-items-center justify-content-between p-3 gap-3" style="background: linear-gradient(135deg, rgba(30, 10, 15, 0.95) 0%, rgba(138, 16, 25, 0.95) 100%); border: 1px solid rgba(251, 191, 36, 0.4); border-left: 5px solid #fbbf24 !important; backdrop-filter: blur(16px); box-shadow: 0 16px 36px rgba(0,0,0,0.4);">
-            <div class="d-flex align-items-center gap-3">
-                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 46px; height: 46px; background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.45); font-size: 1.25rem;">
+        <!-- Integrated Family Studio Discovery Announcement Ribbon -->
+        <div id="treeStudioDiscoveryBanner" class="alert shadow-sm border-0 rounded-3 mb-2 mx-2 mx-lg-3 d-flex flex-column flex-md-row align-items-center justify-content-between tree-studio-ribbon" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.92) 100%); border: 1px solid rgba(251, 191, 36, 0.35) !important; border-left: 4px solid #fbbf24 !important; backdrop-filter: blur(16px);">
+            <div class="d-flex align-items-center gap-2.5 tree-ribbon-content">
+                <div class="tree-banner-icon-badge rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.35);">
                     <i class="bi bi-stars"></i>
                 </div>
-                <div>
-                    <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-                        <h6 class="mb-0 fw-bold text-white fs-6">Family Studio is now inside your Family Tree!</h6>
-                        <span class="badge bg-warning text-dark rounded-pill px-2 py-0.5" style="font-size: 0.68rem; font-weight: 800; letter-spacing: 0.04em;">NEW</span>
+                <div class="flex-grow-1 min-w-0">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="fw-bold text-white fs-6 tree-banner-title">Family Studio is now inside your Family Tree!</span>
+                        <span class="badge bg-warning text-dark rounded-pill px-2 py-0.5" style="font-size: 0.65rem; font-weight: 800; letter-spacing: 0.04em;">NEW</span>
+                        <span class="tree-banner-desc text-white-50 ms-1 d-none d-lg-inline" style="font-size: 0.8rem;">
+                            No need to leave the page. Switch between viewing your interactive tree and curating relatives in Family Studio.
+                        </span>
                     </div>
-                    <p class="mb-0 text-white-50" style="font-size: 0.88rem; line-height: 1.45;">
-                        You no longer have to navigate away to update your tree. Easily switch between seeing your interactive tree and adding or curating relatives directly in <strong>Family Studio</strong>!
+                    <p class="mb-0 text-white-50 d-lg-none mt-1" style="font-size: 0.82rem; line-height: 1.4;">
+                        Curate relatives, unions, and lineage directly in <strong>Family Studio</strong> without leaving this page!
                     </p>
                 </div>
             </div>
-            <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                <button type="button" class="btn btn-warning text-dark px-3 py-2 fw-bold d-inline-flex align-items-center gap-1 shadow-sm" onclick="switchTreeViewMode('studio')" style="border-radius: 50px; min-height: 44px; font-size: 0.88rem; white-space: nowrap;">
+            <div class="d-flex align-items-center gap-2 flex-shrink-0 tree-ribbon-actions justify-content-between justify-content-md-end mt-2 mt-md-0">
+                <button type="button" class="btn btn-warning text-dark px-3 py-1.5 fw-bold d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm flex-grow-1 flex-md-grow-0 rounded-pill" onclick="openFamilyStudio()" style="min-height: 38px; font-size: 0.82rem; white-space: nowrap;">
                     <i class="bi bi-pencil-square"></i> Open Family Studio
                 </button>
-                <button type="button" class="btn btn-outline-light text-white-50 px-2.5 py-2 border-0" onclick="dismissTreeStudioDiscoveryBanner()" title="Dismiss announcement" style="border-radius: 50px; min-height: 44px; min-width: 44px;">
-                    <i class="bi bi-x-lg"></i>
+                <button type="button" class="btn btn-outline-light text-white-50 px-2 py-1.5 border-0 flex-shrink-0 rounded-circle" onclick="dismissTreeStudioDiscoveryBanner()" title="Dismiss announcement" aria-label="Dismiss announcement" style="width: 36px; height: 36px; min-height: 36px; min-width: 36px; display: inline-flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-x-lg" style="font-size: 0.85rem;"></i>
                 </button>
+            </div>
+        </div>
+
+        @php
+            $hasBuiltTree = !empty($graphData['has_built_tree']);
+            $shouldShowGuide = empty($hasBuiltTree) && !empty($isSelf);
+        @endphp
+
+        <!-- How to Build Your Family Tree Quick Guide Banner (Visible for New Users & Toggleable) -->
+        <div id="howToBuildTreeGuideBanner" class="tree-how-to-guide-card alert border-0 mb-3 mx-2 mx-sm-3 p-3 p-sm-4 position-relative {{ $shouldShowGuide ? '' : 'd-none' }}" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 100%); border: 1.5px solid rgba(245, 158, 11, 0.45) !important; border-left: 5px solid #f59e0b !important; border-radius: 18px; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-3 pb-2 border-bottom" style="border-color: rgba(245, 158, 11, 0.25) !important;">
+                <div class="d-flex align-items-center gap-3 tree-ribbon-content">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1.5px solid rgba(245, 158, 11, 0.45); font-size: 1.35rem;">
+                        <i class="bi bi-compass-fill"></i>
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2 flex-wrap mb-0.5">
+                            <h5 class="mb-0 fw-bold text-white fs-5">How to Build Your Family Tree</h5>
+                            <span class="badge rounded-pill px-2.5 py-1" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); font-size: 0.72rem; font-weight: 700;">
+                                3 SIMPLE STEPS
+                            </span>
+                        </div>
+                        <p class="mb-0 text-white-50" style="font-size: 0.88rem; line-height: 1.4;">
+                            Follow these 3 easy steps to establish your lineage, connect your family circle, and bring your living heritage to life.
+                        </p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-shrink-0 tree-ribbon-actions justify-content-between justify-content-md-end">
+                    <button type="button" class="btn btn-warning text-dark px-3.5 py-2 fw-bold d-inline-flex align-items-center justify-content-center gap-2 shadow-sm flex-grow-1 flex-md-grow-0" onclick="openFamilyStudio({ openAddModal: true })" style="border-radius: 50px; min-height: 44px; font-size: 0.9rem; white-space: nowrap;">
+                        <i class="bi bi-magic"></i> Start in Family Studio
+                    </button>
+                    <button type="button" class="btn btn-outline-light text-white-50 px-2.5 py-2 border-0 flex-shrink-0" onclick="dismissHowToBuildGuide()" title="Hide guide" aria-label="Hide guide" style="border-radius: 50px; min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3-Step Guided Walkthrough Grid -->
+            <div class="row g-2.5 g-sm-3">
+                <div class="col-12 col-md-4">
+                    <div class="guide-step-card p-3 rounded-3 h-100 d-flex flex-column justify-content-between" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div>
+                            <div class="d-flex align-items-center gap-2.5 mb-2">
+                                <span class="badge rounded-circle d-inline-flex align-items-center justify-content-center text-dark fw-bold" style="width: 28px; height: 28px; background: #fbbf24; font-size: 0.85rem;">1</span>
+                                <h6 class="mb-0 text-white fw-bold fs-6">Anchor Your Parents</h6>
+                            </div>
+                            <p class="mb-3 text-white-50" style="font-size: 0.83rem; line-height: 1.45;">
+                                Add your father and mother. This establishes your generational root and unlocks ancestral lineage back to grandparents.
+                            </p>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-outline-warning w-100 fw-bold d-inline-flex align-items-center justify-content-center gap-1.5" onclick="openFamilyStudio({ openAddModal: true })" style="min-height: 42px; border-radius: 8px; font-size: 0.82rem;">
+                                <i class="bi bi-person-plus-fill"></i> Add Parents in Studio
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="guide-step-card p-3 rounded-3 h-100 d-flex flex-column justify-content-between" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div>
+                            <div class="d-flex align-items-center gap-2.5 mb-2">
+                                <span class="badge rounded-circle d-inline-flex align-items-center justify-content-center text-dark fw-bold" style="width: 28px; height: 28px; background: #38bdf8; font-size: 0.85rem;">2</span>
+                                <h6 class="mb-0 text-white fw-bold fs-6">Add Partner &amp; Children</h6>
+                            </div>
+                            <p class="mb-3 text-white-50" style="font-size: 0.83rem; line-height: 1.45;">
+                                Connect your spouse or partner, then add your children. This constructs your central branch and descending dynasty.
+                            </p>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-outline-info w-100 fw-bold d-inline-flex align-items-center justify-content-center gap-1.5 text-white" onclick="openFamilyStudio({ openAddModal: true })" style="min-height: 42px; border-radius: 8px; font-size: 0.82rem; border-color: rgba(56, 189, 248, 0.5);">
+                                <i class="bi bi-people-fill"></i> Add Partner &amp; Kids
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="guide-step-card p-3 rounded-3 h-100 d-flex flex-column justify-content-between" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div>
+                            <div class="d-flex align-items-center gap-2.5 mb-2">
+                                <span class="badge rounded-circle d-inline-flex align-items-center justify-content-center text-dark fw-bold" style="width: 28px; height: 28px; background: #34d399; font-size: 0.85rem;">3</span>
+                                <h6 class="mb-0 text-white fw-bold fs-6">Connect Relatives &amp; Invite</h6>
+                            </div>
+                            <p class="mb-3 text-white-50" style="font-size: 0.83rem; line-height: 1.45;">
+                                Add your brothers and sisters, or use WhatsApp Quests to invite family members so they can add photos and audio capsules.
+                            </p>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-outline-success w-100 fw-bold d-inline-flex align-items-center justify-content-center gap-1.5 text-white" onclick="openInviteFamilyModal()" style="min-height: 42px; border-radius: 8px; font-size: 0.82rem; border-color: rgba(52, 211, 153, 0.5);">
+                                <i class="bi bi-send-fill"></i> Invite Relatives
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -273,7 +377,7 @@
                     </p>
                 </div>
             </div>
-            <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 w-100 w-md-auto justify-content-center justify-content-md-end flex-shrink-0">
+            <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 tree-ribbon-actions justify-content-center justify-content-md-end flex-shrink-0">
                 <button type="button" id="btnConfirmMatch" onclick="openClaimMatchModal()" class="btn btn-sm px-4 py-2 fw-bold text-white shadow-sm text-nowrap" style="background: linear-gradient(135deg, #a31621 0%, #8a1019 100%); border-radius: 10px; font-size: 0.9rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
                     <i class="bi bi-check2-circle me-1"></i> Yes, Connect My Account
                 </button>
@@ -306,7 +410,7 @@
                     </p>
                 </div>
             </div>
-            <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 w-100 w-md-auto justify-content-center justify-content-md-end flex-shrink-0">
+            <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 tree-ribbon-actions justify-content-center justify-content-md-end flex-shrink-0">
                 <button type="button" id="btnPreviewConstellation" onclick="openConstellationModal()" class="btn btn-sm px-4 py-2 fw-bold text-white shadow-sm text-nowrap" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); border-radius: 10px; font-size: 0.9rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
                     <i class="bi bi-intersect me-1"></i> Preview &amp; Connect
                 </button>
@@ -317,31 +421,34 @@
         </div>
 
         <!-- Unplaced Kin Staging Dock (Zero Silent Auto-Grafting — Explicit User Confirmation) -->
-        <div id="unplacedMembersDock" class="alert shadow-lg border-0 rounded-4 mb-4 d-none flex-column mx-3 mt-3 p-3 gap-3" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 41, 59, 0.92) 100%); border: 1px solid rgba(56, 189, 248, 0.35); border-left: 5px solid #0284c7 !important; backdrop-filter: blur(16px); z-index: 100; position: relative; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3) !important;">
-            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 w-100">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="d-flex align-items-center justify-content-center rounded-circle p-2 flex-shrink-0" style="background: rgba(2, 132, 199, 0.18); min-width: 48px; min-height: 48px;">
-                        <i class="bi bi-person-plus-fill fs-3" style="color: #38bdf8;"></i>
+        <div id="unplacedMembersDock" class="alert shadow-sm border-0 rounded-3 mb-2.5 mx-2 mx-lg-3 mt-2 d-none flex-column tree-unplaced-dock" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 41, 59, 0.92) 100%); border: 1px solid rgba(56, 189, 248, 0.3) !important; border-left: 4px solid #0284c7 !important; backdrop-filter: blur(16px); z-index: 100; position: relative;">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 w-100">
+                <div class="d-flex align-items-center gap-2.5">
+                    <div class="tree-banner-icon-badge rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="background: rgba(2, 132, 199, 0.15); color: #38bdf8; border: 1px solid rgba(2, 132, 199, 0.35);">
+                        <i class="bi bi-person-fill-add"></i>
                     </div>
                     <div>
-                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                            <span class="badge" style="background: #0284c7; color: #ffffff; font-size: 0.75rem; letter-spacing: 0.5px;">
-                                <i class="bi bi-shield-check me-1"></i> AWAITING YOUR CONFIRMATION
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="badge rounded-pill" style="background: #0284c7; color: #ffffff; font-size: 0.68rem; letter-spacing: 0.04em; font-weight: 700;">
+                                AWAITING CONFIRMATION
                             </span>
-                            <span id="unplacedMembersCountBadge" class="badge bg-dark text-info border border-info" style="font-size: 0.75rem;">
+                            <span id="unplacedMembersCountBadge" class="badge rounded-pill" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.45); font-size: 0.7rem; font-weight: 700;">
                                 1 Unplaced Relative
                             </span>
+                            <h6 class="mb-0 fw-bold text-white fs-6 tree-banner-title">
+                                Unplaced Family Members in Your Circle
+                            </h6>
+                            <span class="tree-banner-desc text-white-50 ms-1 d-none d-lg-inline" style="font-size: 0.8rem;">
+                                Confirm how each relative fits into your family to accurately place them on your tree.
+                            </span>
                         </div>
-                        <h6 class="mb-1 fw-bold text-white fs-6">
-                            Unplaced Family Members in Your Circle
-                        </h6>
-                        <p class="mb-0 text-white-50" style="font-size: 0.88rem;">
-                            We never guess where relatives belong based on surname alone. Confirm how each relative fits into your family so we can place them accurately on your tree.
+                        <p class="mb-0 text-white-50 d-lg-none mt-1" style="font-size: 0.82rem; line-height: 1.4;">
+                            Confirm how each relative fits into your family to place them accurately on your tree.
                         </p>
                     </div>
                 </div>
             </div>
-            <div id="unplacedMembersList" class="d-flex flex-wrap align-items-center gap-2 pt-2 border-top" style="border-color: rgba(148, 163, 184, 0.2) !important;">
+            <div id="unplacedMembersList" class="d-flex flex-wrap align-items-stretch gap-2 pt-2 border-top w-100 mt-2" style="border-color: rgba(148, 163, 184, 0.15) !important;">
                 <!-- Populated dynamically via checkUnplacedMembers() -->
             </div>
         </div>
@@ -396,9 +503,14 @@
                 <div id="personDetailsCard">
                     <div class="card-header-flex">
                         <img id="cardAvatar" src="/resources/images/profile/avatarM.png" alt="Avatar" class="card-avatar" onerror="this.src='/resources/images/profile/avatarM.png'">
-                        <button type="button" class="close-btn" onclick="closePersonCard()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:1.1rem;" title="Close">
-                            <i class="bi bi-x-lg"></i>
-                        </button>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" id="cardHeaderRemoveBtn" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center justify-content-center p-0" onclick="removeSelectedCardNode()" title="Remove this relative from tree" aria-label="Remove from Tree" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; border-radius: 50%; border-color: rgba(239, 68, 68, 0.5); color: #f87171; background: rgba(239, 68, 68, 0.15); display: none;">
+                                <i class="bi bi-trash3-fill" style="font-size: 0.9rem;"></i>
+                            </button>
+                            <button type="button" class="close-btn" onclick="closePersonCard()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:1.1rem;" title="Close">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
                     </div>
                     <div id="cardRole" class="card-title">Family Member</div>
                     <div id="cardName" class="card-name">Family Relative</div>
@@ -517,7 +629,7 @@
                                 <p class="text-white-50 mb-4" style="max-width: 500px;">
                                     Your family tree is currently empty. Start building your lineage by adding your parents, partner, siblings, or children!
                                 </p>
-                                <button type="button" onclick="switchTreeViewMode('studio')" class="btn btn-success px-4 py-2 fw-bold" style="border-radius: 50px; min-height: 44px; display: inline-flex; align-items: center;">
+                                <button type="button" onclick="openFamilyStudio({ openAddModal: true })" class="btn btn-success px-4 py-2 fw-bold" style="border-radius: 50px; min-height: 44px; display: inline-flex; align-items: center;">
                                     <i class="bi bi-plus-circle me-1"></i> Add Relatives in Studio
                                 </button>
                             </div>
@@ -608,7 +720,7 @@
                         <p class="text-white-50 mb-4" style="max-width: 500px;">
                             Your family tree is currently empty. Start building your lineage by adding your parents, partner, siblings, or children!
                         </p>
-                        <button type="button" onclick="switchTreeViewMode('studio')" class="btn btn-success px-4 py-2 fw-bold" style="border-radius: 50px; min-height: 44px; display: inline-flex; align-items: center;">
+                        <button type="button" onclick="openFamilyStudio({ openAddModal: true })" class="btn btn-success px-4 py-2 fw-bold" style="border-radius: 50px; min-height: 44px; display: inline-flex; align-items: center;">
                             <i class="bi bi-plus-circle me-1"></i> Add Relatives in Studio
                         </button>
                     </div>
@@ -769,9 +881,12 @@
                     <div class="modal-body">
                         <div class="alert alert-danger d-none" id="fillParentError"></div>
                         <div class="row g-3">
-                            <div class="col-6"><label class="form-label small fw-semibold" for="fillParentFirst">First name *</label>
+                            <div class="col-12 col-sm-4">
+                                @include('components.lineage.culturalTitleSelect', ['name' => 'title', 'id' => 'fillParentTitleSelect', 'showLabel' => true, 'label' => 'Title (Optional)'])
+                            </div>
+                            <div class="col-6 col-sm-4"><label class="form-label small fw-semibold" for="fillParentFirst">First name *</label>
                                 <input type="text" class="form-control" id="fillParentFirst" name="first_name" required></div>
-                            <div class="col-6"><label class="form-label small fw-semibold" for="fillParentLast">Last name</label>
+                            <div class="col-6 col-sm-4"><label class="form-label small fw-semibold" for="fillParentLast">Last name</label>
                                 <input type="text" class="form-control" id="fillParentLast" name="last_name"></div>
                             <div class="col-12"><label class="form-label small fw-semibold" for="fillParentEmail">Email (optional)</label>
                                 <input type="email" class="form-control" id="fillParentEmail" name="email"></div>
@@ -1040,6 +1155,10 @@
                                 </label>
                                 <select id="connectRelationshipSelect" name="relationship" class="form-select" style="border-radius: 12px; min-height: 44px; font-size: 0.92rem;" onchange="onConnectRelationshipChange()" required>
                                     <option value="" disabled selected>Select relationship...</option>
+                                    <option value="parent">Father / Mother (Parent)</option>
+                                    <option value="grandparent">Grandfather / Grandmother (Grandparent)</option>
+                                    <option value="great_grandparent">Great-Grandfather / Great-Grandmother (Great-Grandparent)</option>
+                                    <option value="partner">Husband / Wife / Partner (Spouse)</option>
                                     <option value="sibling">Full Brother / Sister (shares both parents)</option>
                                     <option value="half_sibling">Half-Brother / Half-Sister (shares one parent)</option>
                                     <option value="nephew_niece">Nephew / Niece (child of your brother or sister)</option>
@@ -1068,8 +1187,8 @@
                                     Gender (for accurate kinship badge)
                                 </label>
                                 <select id="connectGenderSelect" name="gender" class="form-select" style="border-radius: 12px; min-height: 44px; font-size: 0.92rem;">
-                                    <option value="Male">Male (Brother / Nephew / Uncle / Son)</option>
-                                    <option value="Female">Female (Sister / Niece / Aunt / Daughter)</option>
+                                    <option value="Male">Male (Husband / Brother / Nephew / Uncle / Son)</option>
+                                    <option value="Female">Female (Wife / Sister / Niece / Aunt / Daughter)</option>
                                 </select>
                             </div>
                         </div>
@@ -1169,7 +1288,7 @@
 
 @include('member.includes.treeAccessModals')
 @include('component.swalAlert')
-<script src="/public/js/vendor/kinshiptree.js?v=9.5"></script>
+<script src="/public/js/vendor/kinshiptree.js?v=9.6"></script>
 <script>
     window.__ROOT_USER_ID__ = '{{ $data['id'] ?? '' }}';
     window.__LOGGED_IN_USER_ID__ = '{{ $_SESSION['id'] ?? '' }}';
@@ -1411,9 +1530,9 @@
                     }, {})
             }));
 
-            // Break a full name onto (at most) two balanced lines so it fits the card
+            // Break a full name onto (at most) two balanced lines so it fits the card (ensuring Capital-First sentence naming)
             function splitNameLines(full) {
-                full = (full || '').trim().replace(/\s+/g, ' ');
+                full = (typeof formatPersonName === 'function' ? formatPersonName(full) : (full || '')).trim().replace(/\s+/g, ' ');
                 if (full.length <= 15 || full.indexOf(' ') === -1) return [full, ''];
                 const parts = full.split(' ');
                 let bestIdx = 1, bestDiff = Infinity;
@@ -1426,15 +1545,18 @@
                 return [parts.slice(0, bestIdx).join(' '), parts.slice(bestIdx).join(' ')];
             }
 
+            const initialRootId = String((graphData && graphData.root_node_id) || getGraphNodeId(window.__ROOT_USER_ID__, '') || '');
+
             graphData.nodes.forEach(node => {
                 const parents = childToParents[node.id] || {};
-                const nameLines = splitNameLines(node.full_name);
+                const formattedName = typeof formatPersonName === 'function' ? formatPersonName(node.full_name) : node.full_name;
+                const nameLines = splitNameLines(formattedName);
                 familyTreeNodes.push({
                     id: node.id,
                     pids: nodeToPids[node.id] || [],
                     fid: parents.fid || undefined,
                     mid: parents.mid || undefined,
-                    name: node.full_name,
+                    name: formattedName,
                     nameL1: nameLines[0],
                     nameL2: nameLines[1],
                     gender: (node.gender || 'Male').toLowerCase(),
@@ -1442,6 +1564,7 @@
                     title: node.ego_relation || node.bio || 'Family Member',
                     ego_relation: node.ego_relation || '',
                     legacyId: node.user_id,
+                    is_root: Boolean(node.is_root || (String(node.id) === String(initialRootId))),
                     generation_level: (typeof node.generation_level !== 'undefined') ? Number(node.generation_level) : undefined,
                     voice_capsule_url: node.voice_capsule_url || null,
                     is_placeholder: Boolean(node.is_placeholder),
@@ -1530,7 +1653,7 @@
                     </div>
 
                     <div class="d-flex flex-wrap justify-content-center gap-3">
-                        <button type="button" onclick="switchTreeViewMode('studio')" class="btn btn-warning px-4 py-2.5 fw-bold text-dark shadow-sm d-inline-flex align-items-center gap-2" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
+                        <button type="button" onclick="openFamilyStudio({ openAddModal: true })" class="btn btn-warning px-4 py-2.5 fw-bold text-dark shadow-sm d-inline-flex align-items-center gap-2" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
                             <i class="bi bi-plus-circle-fill"></i> Add Your Parents &amp; Siblings in Studio
                         </button>
                         <button type="button" class="btn btn-outline-light px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2" style="border-radius: 50px; min-height: 44px; white-space: nowrap; border-color: rgba(255,255,255,0.35);" data-bs-toggle="modal" data-bs-target="#inviteFamilyModal">
@@ -1587,6 +1710,7 @@
                 mouseScrool: FamilyTree.action.zoom,
                 scaleInitial: "family",
                 rootId: initialRootId,
+                isReadOnly: Boolean(window.__IS_READ_ONLY__) || Boolean(graphData && graphData.isReadOnly),
                 nodeBinding: {
                     field_0: "nameL1",
                     field_1: "nameL2",
@@ -1704,6 +1828,13 @@
                 const b = document.getElementById('treeStudioDiscoveryBanner');
                 if (b) b.classList.add('d-none');
             }
+            if (localStorage.getItem('fp_dismiss_guide_banner') === 'true') {
+                window.__fpDismissedGuideBanner = true;
+                const g = document.getElementById('howToBuildTreeGuideBanner');
+                if (g && (typeof graphData !== 'undefined' && graphData && graphData.has_built_tree)) {
+                    g.classList.add('d-none');
+                }
+            }
         } catch(_) {}
     });
 
@@ -1748,7 +1879,39 @@
             const modalInstance = bootstrap.Modal.getInstance(modalEl);
             if (modalInstance) modalInstance.hide();
         }
+        openFamilyStudio();
+    };
+
+    window.openFamilyStudio = function(options) {
+        options = options || {};
         switchTreeViewMode('studio');
+        if (options.openAddModal && typeof window.openStudioAddModal === 'function') {
+            setTimeout(function() {
+                window.openStudioAddModal();
+            }, 300);
+        }
+    };
+
+    window.toggleHowToBuildGuide = function() {
+        const banner = document.getElementById('howToBuildTreeGuideBanner');
+        if (!banner) return;
+        if (banner.classList.contains('d-none')) {
+            banner.classList.remove('d-none');
+            window.__fpDismissedGuideBanner = false;
+            try { localStorage.removeItem('fp_dismiss_guide_banner'); } catch(_) {}
+            banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+            banner.classList.add('d-none');
+            window.__fpDismissedGuideBanner = true;
+            try { localStorage.setItem('fp_dismiss_guide_banner', 'true'); } catch(_) {}
+        }
+    };
+
+    window.dismissHowToBuildGuide = function() {
+        const banner = document.getElementById('howToBuildTreeGuideBanner');
+        if (banner) banner.classList.add('d-none');
+        window.__fpDismissedGuideBanner = true;
+        try { localStorage.setItem('fp_dismiss_guide_banner', 'true'); } catch(_) {}
     };
 
     window.switchTreeViewMode = function(mode) {
@@ -1765,6 +1928,12 @@
         const btnGlobe = document.getElementById('btnModeGlobe');
         const btnStudio = document.getElementById('btnModeStudio');
         const discoBanner = document.getElementById('treeStudioDiscoveryBanner');
+        const securityBanner = document.getElementById('treeSecurityBanner');
+        const unplacedDock = document.getElementById('unplacedMembersDock');
+        const promptBanner = document.getElementById('promptBuildTreeBanner');
+        const kinshipBanner = document.getElementById('kinshipAutoMatchBanner');
+        const constellationBanner = document.getElementById('constellationMatchBanner');
+        const guideBanner = document.getElementById('howToBuildTreeGuideBanner');
 
         window.trackTreeAnalytics('tree_view_mode_switched', null, { mode: mode });
 
@@ -1793,7 +1962,22 @@
             if (globeContainer) globeContainer.classList.add('d-none');
             if (legend) legend.classList.add('d-none');
             if (discoBanner) discoBanner.classList.add('d-none');
-            if (studioContainer) studioContainer.classList.remove('d-none');
+
+            // Hide tree-canvas specific alerts while in studio so Family Studio is not pushed down 400px
+            if (securityBanner) securityBanner.classList.add('d-none');
+            if (unplacedDock) { unplacedDock.classList.add('d-none'); unplacedDock.classList.remove('d-flex'); }
+            if (promptBanner) promptBanner.classList.add('d-none');
+            if (kinshipBanner) kinshipBanner.classList.add('d-none');
+            if (constellationBanner) constellationBanner.classList.add('d-none');
+            if (guideBanner) guideBanner.classList.add('d-none');
+
+            if (studioContainer) {
+                studioContainer.classList.remove('d-none');
+                // Smoothly scroll directly into Family Studio so the user lands immediately in the workspace
+                setTimeout(function() {
+                    studioContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 50);
+            }
 
             if (btnCanvas) btnCanvas.classList.remove('active');
             if (btnLineage) btnLineage.classList.remove('active');
@@ -1802,103 +1986,113 @@
             if (btnGlobe) btnGlobe.classList.remove('active');
             if (btnStudio) btnStudio.classList.add('active');
             try { localStorage.setItem('fp_tree_view_mode', 'studio'); } catch(_) {}
-        } else if (mode === 'globe') {
-            if (studioContainer) studioContainer.classList.add('d-none');
-            if (canvasContainer) canvasContainer.classList.add('d-none');
-            if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
-            if (fanChartContainer) fanChartContainer.classList.add('d-none');
-            if (legend) legend.classList.add('d-none');
-            if (globeContainer) {
-                globeContainer.classList.remove('d-none');
-                if (typeof window.initDynastyGlobe === 'function') {
-                    window.initDynastyGlobe();
-                }
+        } else {
+            // Restoring non-studio view: restore canvas-specific alerts if active
+            if (securityBanner && !window.__fpDismissedSecurityBanner) securityBanner.classList.remove('d-none');
+            if (guideBanner && !window.__fpDismissedGuideBanner) guideBanner.classList.remove('d-none');
+            if (unplacedDock && window.__fpHasUnplacedMembers) {
+                unplacedDock.classList.remove('d-none');
+                unplacedDock.classList.add('d-flex');
             }
-            if (btnCanvas) btnCanvas.classList.remove('active');
-            if (btnLineage) btnLineage.classList.remove('active');
-            if (btnPedigree) btnPedigree.classList.remove('active');
-            if (btnFanChart) btnFanChart.classList.remove('active');
-            if (btnStudio) btnStudio.classList.remove('active');
-            if (btnGlobe) btnGlobe.classList.add('active');
-            try { localStorage.setItem('fp_tree_view_mode', 'globe'); } catch(_) {}
-        } else if (mode === 'fanchart') {
-            if (studioContainer) studioContainer.classList.add('d-none');
-            if (canvasContainer) canvasContainer.classList.add('d-none');
-            if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
-            if (globeContainer) globeContainer.classList.add('d-none');
-            if (legend) legend.classList.add('d-none');
-            if (fanChartContainer) {
-                fanChartContainer.classList.remove('d-none');
-                if (typeof window.renderRadialFanChart === 'function') {
-                    window.renderRadialFanChart();
-                }
-            }
-            if (btnCanvas) btnCanvas.classList.remove('active');
-            if (btnLineage) btnLineage.classList.remove('active');
-            if (btnPedigree) btnPedigree.classList.remove('active');
-            if (btnGlobe) btnGlobe.classList.remove('active');
-            if (btnStudio) btnStudio.classList.remove('active');
-            if (btnFanChart) btnFanChart.classList.add('active');
-            try { localStorage.setItem('fp_tree_view_mode', 'fanchart'); } catch(_) {}
-        } else if (mode === 'pedigree') {
-            if (studioContainer) studioContainer.classList.add('d-none');
-            if (canvasContainer) canvasContainer.classList.add('d-none');
-            if (fanChartContainer) fanChartContainer.classList.add('d-none');
-            if (globeContainer) globeContainer.classList.add('d-none');
-            if (legend) legend.classList.add('d-none');
-            if (pedigreeContainer) {
-                pedigreeContainer.classList.remove('d-none');
-                renderPedigreeOutline();
-            }
-            if (btnCanvas) btnCanvas.classList.remove('active');
-            if (btnLineage) btnLineage.classList.remove('active');
-            if (btnFanChart) btnFanChart.classList.remove('active');
-            if (btnGlobe) btnGlobe.classList.remove('active');
-            if (btnStudio) btnStudio.classList.remove('active');
-            if (btnPedigree) btnPedigree.classList.add('active');
-            try { localStorage.setItem('fp_tree_view_mode', 'pedigree'); } catch(_) {}
-        } else if (mode === 'lineage') {
-            if (studioContainer) studioContainer.classList.add('d-none');
-            if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
-            if (fanChartContainer) fanChartContainer.classList.add('d-none');
-            if (globeContainer) globeContainer.classList.add('d-none');
-            if (canvasContainer) {
-                canvasContainer.classList.remove('d-none');
-                if (window.family && typeof window.family.traceLineage === 'function') {
-                    const firstChild = familyTreeNodes.find(n => n.fid || n.mid);
-                    if (firstChild) {
-                        window.traceKinshipToSelected(firstChild.id, firstChild.name);
+
+            if (mode === 'globe') {
+                if (studioContainer) studioContainer.classList.add('d-none');
+                if (canvasContainer) canvasContainer.classList.add('d-none');
+                if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
+                if (fanChartContainer) fanChartContainer.classList.add('d-none');
+                if (legend) legend.classList.add('d-none');
+                if (globeContainer) {
+                    globeContainer.classList.remove('d-none');
+                    if (typeof window.initDynastyGlobe === 'function') {
+                        window.initDynastyGlobe();
                     }
                 }
-            }
-            if (legend) legend.classList.remove('d-none');
-            if (btnPedigree) btnPedigree.classList.remove('active');
-            if (btnFanChart) btnFanChart.classList.remove('active');
-            if (btnGlobe) btnGlobe.classList.remove('active');
-            if (btnCanvas) btnCanvas.classList.remove('active');
-            if (btnStudio) btnStudio.classList.remove('active');
-            if (btnLineage) btnLineage.classList.add('active');
-            try { localStorage.setItem('fp_tree_view_mode', 'lineage'); } catch(_) {}
-        } else {
-            if (studioContainer) studioContainer.classList.add('d-none');
-            if (typeof window.clearLineageTrace === 'function') window.clearLineageTrace();
-            if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
-            if (fanChartContainer) fanChartContainer.classList.add('d-none');
-            if (globeContainer) globeContainer.classList.add('d-none');
-            if (canvasContainer) {
-                canvasContainer.classList.remove('d-none');
-                if (window.family) {
-                    setTimeout(() => window.family.fit(), 100);
+                if (btnCanvas) btnCanvas.classList.remove('active');
+                if (btnLineage) btnLineage.classList.remove('active');
+                if (btnPedigree) btnPedigree.classList.remove('active');
+                if (btnFanChart) btnFanChart.classList.remove('active');
+                if (btnStudio) btnStudio.classList.remove('active');
+                if (btnGlobe) btnGlobe.classList.add('active');
+                try { localStorage.setItem('fp_tree_view_mode', 'globe'); } catch(_) {}
+            } else if (mode === 'fanchart') {
+                if (studioContainer) studioContainer.classList.add('d-none');
+                if (canvasContainer) canvasContainer.classList.add('d-none');
+                if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
+                if (globeContainer) globeContainer.classList.add('d-none');
+                if (legend) legend.classList.add('d-none');
+                if (fanChartContainer) {
+                    fanChartContainer.classList.remove('d-none');
+                    if (typeof window.renderRadialFanChart === 'function') {
+                        window.renderRadialFanChart();
+                    }
                 }
+                if (btnCanvas) btnCanvas.classList.remove('active');
+                if (btnLineage) btnLineage.classList.remove('active');
+                if (btnPedigree) btnPedigree.classList.remove('active');
+                if (btnGlobe) btnGlobe.classList.remove('active');
+                if (btnStudio) btnStudio.classList.remove('active');
+                if (btnFanChart) btnFanChart.classList.add('active');
+                try { localStorage.setItem('fp_tree_view_mode', 'fanchart'); } catch(_) {}
+            } else if (mode === 'pedigree') {
+                if (studioContainer) studioContainer.classList.add('d-none');
+                if (canvasContainer) canvasContainer.classList.add('d-none');
+                if (fanChartContainer) fanChartContainer.classList.add('d-none');
+                if (globeContainer) globeContainer.classList.add('d-none');
+                if (legend) legend.classList.add('d-none');
+                if (pedigreeContainer) {
+                    pedigreeContainer.classList.remove('d-none');
+                    renderPedigreeOutline();
+                }
+                if (btnCanvas) btnCanvas.classList.remove('active');
+                if (btnLineage) btnLineage.classList.remove('active');
+                if (btnFanChart) btnFanChart.classList.remove('active');
+                if (btnGlobe) btnGlobe.classList.remove('active');
+                if (btnStudio) btnStudio.classList.remove('active');
+                if (btnPedigree) btnPedigree.classList.add('active');
+                try { localStorage.setItem('fp_tree_view_mode', 'pedigree'); } catch(_) {}
+            } else if (mode === 'lineage') {
+                if (studioContainer) studioContainer.classList.add('d-none');
+                if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
+                if (fanChartContainer) fanChartContainer.classList.add('d-none');
+                if (globeContainer) globeContainer.classList.add('d-none');
+                if (canvasContainer) {
+                    canvasContainer.classList.remove('d-none');
+                    if (window.family && typeof window.family.traceLineage === 'function') {
+                        const firstChild = familyTreeNodes.find(n => n.fid || n.mid);
+                        if (firstChild) {
+                            window.traceKinshipToSelected(firstChild.id, firstChild.name);
+                        }
+                    }
+                }
+                if (legend) legend.classList.remove('d-none');
+                if (btnPedigree) btnPedigree.classList.remove('active');
+                if (btnFanChart) btnFanChart.classList.remove('active');
+                if (btnGlobe) btnGlobe.classList.remove('active');
+                if (btnCanvas) btnCanvas.classList.remove('active');
+                if (btnStudio) btnStudio.classList.remove('active');
+                if (btnLineage) btnLineage.classList.add('active');
+                try { localStorage.setItem('fp_tree_view_mode', 'lineage'); } catch(_) {}
+            } else {
+                if (studioContainer) studioContainer.classList.add('d-none');
+                if (typeof window.clearLineageTrace === 'function') window.clearLineageTrace();
+                if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
+                if (fanChartContainer) fanChartContainer.classList.add('d-none');
+                if (globeContainer) globeContainer.classList.add('d-none');
+                if (canvasContainer) {
+                    canvasContainer.classList.remove('d-none');
+                    if (window.family) {
+                        setTimeout(() => window.family.fit(), 100);
+                    }
+                }
+                if (legend) legend.classList.remove('d-none');
+                if (btnPedigree) btnPedigree.classList.remove('active');
+                if (btnFanChart) btnFanChart.classList.remove('active');
+                if (btnGlobe) btnGlobe.classList.remove('active');
+                if (btnLineage) btnLineage.classList.remove('active');
+                if (btnStudio) btnStudio.classList.remove('active');
+                if (btnCanvas) btnCanvas.classList.add('active');
+                try { localStorage.setItem('fp_tree_view_mode', 'canvas'); } catch(_) {}
             }
-            if (legend) legend.classList.remove('d-none');
-            if (btnPedigree) btnPedigree.classList.remove('active');
-            if (btnFanChart) btnFanChart.classList.remove('active');
-            if (btnGlobe) btnGlobe.classList.remove('active');
-            if (btnLineage) btnLineage.classList.remove('active');
-            if (btnStudio) btnStudio.classList.remove('active');
-            if (btnCanvas) btnCanvas.classList.add('active');
-            try { localStorage.setItem('fp_tree_view_mode', 'canvas'); } catch(_) {}
         }
     };
 
@@ -2219,10 +2413,15 @@
         }
 
         const isRootUser = (String(node.legacyId) === String(window.__ROOT_USER_ID__)) || 
-                           (String(node.id) === String(getGraphNodeId(window.__ROOT_USER_ID__, '')));
+                           (String(node.id) === String(getGraphNodeId(window.__ROOT_USER_ID__, ''))) ||
+                           Boolean(node.is_root);
+        const headerRemoveBtn = document.getElementById('cardHeaderRemoveBtn');
+        if (headerRemoveBtn) {
+            headerRemoveBtn.style.display = (isRootUser || isReadOnlyTree || node.is_placeholder) ? 'none' : 'inline-flex';
+        }
         const removeWrapper = document.getElementById('cardRemoveActionWrapper');
         if (removeWrapper) {
-            removeWrapper.style.display = (isRootUser || isReadOnlyTree) ? 'none' : 'block';
+            removeWrapper.style.display = (isRootUser || isReadOnlyTree || node.is_placeholder) ? 'none' : 'block';
         }
 
         // Spouse / In-Law Extended Family Branch Progressive Disclosure Control
@@ -2325,25 +2524,37 @@
         }
 
         const performDelete = () => {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ $_SESSION['token'] ?? '' }}';
             const formData = new FormData();
             formData.append('node_id', nodeId);
+            formData.append('family_code', window.__FAMILY_CODE__ || '');
+            formData.append('token', csrfToken);
 
             fetch('/member/organogram/editor/delete', {
                 method: 'POST',
                 body: formData,
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                }
             })
             .then(res => res.json())
             .then(data => {
                 const isOk = (data.ok === true || data.status === 200 || data.status === 'success' || data.statusCode === 200);
                 if (isOk) {
+                    if (typeof closePersonCard === 'function') closePersonCard();
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             title: 'Removed!',
                             text: `${nodeName || 'Relative'} has been removed from your family tree.`,
                             icon: 'success',
                             timer: 1600,
-                            showConfirmButton: false
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                const container = document.querySelector('.swal2-container');
+                                if (container) container.style.zIndex = '100000';
+                            }
                         }).then(() => {
                             window.location.reload();
                         });
@@ -4727,9 +4938,17 @@
 
     function checkUnplacedMembers() {
         if (window.__IS_READ_ONLY__) return;
-        const unplaced = (typeof graphData !== 'undefined' && Array.isArray(graphData.unplaced_members))
+        let unplaced = (typeof graphData !== 'undefined' && Array.isArray(graphData.unplaced_members))
             ? graphData.unplaced_members
             : [];
+
+        try {
+            const storageKey = `dismissed_unplaced_${window.__FAMILY_CODE__ || 'default'}`;
+            const dismissed = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            if (Array.isArray(dismissed) && dismissed.length > 0) {
+                unplaced = unplaced.filter(m => !dismissed.includes(parseInt(m.id, 10)));
+            }
+        } catch (e) {}
 
         const dock = document.getElementById('unplacedMembersDock');
         const listEl = document.getElementById('unplacedMembersList');
@@ -4749,8 +4968,11 @@
                 : `${unplaced.length} Unplaced Relatives`;
         }
 
+        window.__fpHasUnplacedMembers = true;
         listEl.innerHTML = unplaced.map(member => {
-            const safeName = String(member.full_name || member.first_name || 'Relative')
+            const rawName = member.full_name || member.first_name || 'Relative';
+            const cleanName = typeof formatPersonName === 'function' ? formatPersonName(rawName) : rawName;
+            const safeName = String(cleanName)
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
@@ -4758,16 +4980,52 @@
             const safeAvatar = String(member.avatar_url || '/resources/images/profile/avatarM.png')
                 .replace(/"/g, '&quot;');
             const memberId = parseInt(member.id, 10) || 0;
+            const userId = member.user_id ? String(member.user_id) : '';
+            const rec = member.quick_recommendation;
+
+            const profileHref = userId
+                ? `/allMembers/seeProfile/${encodeURIComponent(userId)}`
+                : `javascript:viewUnplacedMemberProfile(${memberId})`;
+            const profileTarget = userId ? 'target="_blank" rel="noopener noreferrer"' : '';
+            const profileTitle = userId
+                ? `View ${safeName}&#39;s profile (opens in new tab)`
+                : `View details for ${safeName}`;
+
+            const recBadge = rec
+                ? `<div class="d-flex align-items-center gap-1 mt-0.5"><span class="badge text-white" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 6px;"><i class="bi bi-lightning-charge-fill me-1"></i>${rec.badge}</span></div>`
+                : `<div class="text-info" style="font-size: 0.72rem;">Needs branch placement</div>`;
+
+            const quickSnapBtn = rec
+                ? `
+                    <button type="button" onclick="quickSnapUnplacedMember(${memberId}, this)" class="btn btn-sm fw-bold text-white px-2.5 py-1 text-nowrap" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; border-radius: 8px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" title="1-Tap Quick-Snap as ${rec.relationship_label}">
+                        <i class="bi bi-lightning-charge-fill"></i> Quick-Snap
+                    </button>
+                `
+                : '';
+
+            const isPlaceholderName = !safeName || safeName.toLowerCase() === 'not provided' || safeName.toLowerCase() === 'not set';
+            const displayTitle = isPlaceholderName
+                ? (rec ? rec.badge : 'Relative') + ' <span class="text-white-50" style="font-size: 0.72rem; font-weight: normal;">(Name unassigned)</span>'
+                : safeName;
 
             return `
-                <div class="d-inline-flex align-items-center gap-2 p-2 rounded-3" style="background: rgba(30, 41, 59, 0.85); border: 1px solid rgba(56, 189, 248, 0.3);">
-                    <img src="${safeAvatar}" alt="${safeName}" class="rounded-circle object-fit-cover flex-shrink-0" style="width: 36px; height: 36px; border: 1.5px solid #38bdf8;">
+                <div class="d-inline-flex align-items-center rounded-3 unplaced-member-card" id="unplacedCard_${memberId}">
+                    <a href="${profileHref}" ${profileTarget} title="${profileTitle}" class="flex-shrink-0 text-decoration-none">
+                        <img src="${safeAvatar}" alt="${safeName}" class="rounded-circle object-fit-cover" style="border: 1.5px solid #38bdf8; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+                    </a>
                     <div class="me-1">
-                        <div class="fw-bold text-white" style="font-size: 0.85rem; line-height: 1.2;">${safeName}</div>
-                        <div class="text-info" style="font-size: 0.72rem;">Needs branch placement</div>
+                        <a href="${profileHref}" ${profileTarget} title="${profileTitle}" class="fw-bold text-white text-nowrap text-decoration-none unplaced-profile-link" style="line-height: 1.2; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;">
+                            <span style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${safeName}">${displayTitle}</span>
+                            <i class="bi bi-box-arrow-up-right text-info" style="font-size: 0.68rem; opacity: 0.85;"></i>
+                        </a>
+                        ${recBadge}
                     </div>
-                    <button type="button" onclick="openConnectUnplacedModal(${memberId})" class="btn btn-sm fw-bold text-white px-3 py-1 text-nowrap" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border: none; border-radius: 8px; min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center;">
+                    ${quickSnapBtn}
+                    <button type="button" onclick="openConnectUnplacedModal(${memberId})" class="btn btn-sm fw-bold text-white text-nowrap" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border: none; display: inline-flex; align-items: center; justify-content: center;">
                         <i class="bi bi-diagram-3 me-1"></i> Place on Tree
+                    </button>
+                    <button type="button" onclick="cancelUnplacedMember(${memberId})" class="btn btn-sm p-0 d-inline-flex align-items-center justify-content-center flex-shrink-0 btn-unplaced-cancel text-white-50" title="Dismiss or remove ${safeName}" aria-label="Dismiss ${safeName}">
+                        <i class="bi bi-x-lg" style="font-size: 0.95rem;"></i>
                     </button>
                 </div>
             `;
@@ -4776,6 +5034,158 @@
         dock.classList.remove('d-none');
         dock.classList.add('d-flex');
     }
+
+    // Unregistered relatives have no profile page, so show their stored details instead.
+    window.viewUnplacedMemberProfile = function(memberId) {
+        const unplaced = (typeof graphData !== 'undefined' && Array.isArray(graphData.unplaced_members))
+            ? graphData.unplaced_members
+            : [];
+        const member = unplaced.find(m => parseInt(m.id, 10) === parseInt(memberId, 10));
+        if (!member || typeof Swal === 'undefined') return;
+
+        const esc = (v) => String(v ?? '')
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        const avatar = esc(member.avatar_url || '/resources/images/profile/avatarM.png');
+
+        Swal.fire({
+            title: esc(member.full_name || member.first_name || 'Relative'),
+            html: `
+                <img src="${avatar}" alt="" style="width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 3px solid #38bdf8;" class="mb-3">
+                <p class="mb-1"><strong>Gender:</strong> ${esc(member.gender || 'Not set')}</p>
+                <p class="mb-1"><strong>Note:</strong> ${esc(member.bio || 'Unplaced Member')}</p>
+                <p class="text-muted small mb-0">This relative has not joined yet, so there is no full profile to view.</p>
+            `,
+            confirmButtonText: 'Close',
+            confirmButtonColor: '#0284c7'
+        });
+    };
+
+    window.cancelUnplacedMember = function(memberId) {
+        if (!memberId) return;
+        const unplaced = (typeof graphData !== 'undefined' && Array.isArray(graphData.unplaced_members))
+            ? graphData.unplaced_members
+            : [];
+        const member = unplaced.find(m => parseInt(m.id, 10) === parseInt(memberId, 10));
+        const cleanName = member ? (member.full_name || member.first_name || 'Relative') : 'Relative';
+
+        const performCancel = async () => {
+            const cardEl = document.getElementById(`unplacedCard_${memberId}`);
+            if (cardEl) {
+                cardEl.style.opacity = '0.4';
+                cardEl.style.pointerEvents = 'none';
+            }
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ $_SESSION['token'] ?? '' }}';
+            const formData = new FormData();
+            formData.append('node_id', memberId);
+            formData.append('family_code', window.__FAMILY_CODE__ || '');
+            formData.append('token', csrfToken);
+
+            try {
+                const resp = await fetch('/member/organogram/editor/delete', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+
+                const data = await resp.json();
+                const isOk = (resp.ok && (data.ok === true || data.status === 200 || data.status === 'success' || data.statusCode === 200));
+
+                if (isOk) {
+                    // Update in-memory unplaced list
+                    if (typeof graphData !== 'undefined' && Array.isArray(graphData.unplaced_members)) {
+                        graphData.unplaced_members = graphData.unplaced_members.filter(m => parseInt(m.id, 10) !== parseInt(memberId, 10));
+                    }
+                    // Persist dismissal in localStorage
+                    try {
+                        const storageKey = `dismissed_unplaced_${window.__FAMILY_CODE__ || 'default'}`;
+                        const existing = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                        if (!existing.includes(parseInt(memberId, 10))) {
+                            existing.push(parseInt(memberId, 10));
+                            localStorage.setItem(storageKey, JSON.stringify(existing));
+                        }
+                    } catch (e) {}
+
+                    // Refresh tray UI
+                    checkUnplacedMembers();
+
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Cancelled',
+                            text: `${cleanName} has been removed from your unplaced family circle.`,
+                            icon: 'success',
+                            timer: 1600,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                const container = document.querySelector('.swal2-container');
+                                if (container) container.style.zIndex = '100000';
+                            }
+                        });
+                    }
+                } else {
+                    if (cardEl) {
+                        cardEl.style.opacity = '1';
+                        cardEl.style.pointerEvents = 'auto';
+                    }
+                    const errMsg = data.message || data.error || 'Failed to cancel unplaced relative.';
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Unable to Cancel',
+                            text: errMsg,
+                            icon: 'error',
+                            confirmButtonColor: '#0284c7'
+                        });
+                    } else {
+                        alert(errMsg);
+                    }
+                }
+            } catch (err) {
+                if (cardEl) {
+                    cardEl.style.opacity = '1';
+                    cardEl.style.pointerEvents = 'auto';
+                }
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Network Error',
+                        text: 'A network error occurred while cancelling relative. Please try again.',
+                        icon: 'error',
+                        confirmButtonColor: '#0284c7'
+                    });
+                } else {
+                    alert('A network error occurred while cancelling relative.');
+                }
+            }
+        };
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: `Cancel ${cleanName}?`,
+                text: `Do you want to remove ${cleanName} from your unplaced family members? They will not appear in this circle.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '<i class="bi bi-x-circle me-1"></i> Yes, cancel relative',
+                cancelButtonText: 'Keep',
+                didOpen: () => {
+                    const container = document.querySelector('.swal2-container');
+                    if (container) container.style.zIndex = '100000';
+                }
+            }).then(result => {
+                if (result.isConfirmed) {
+                    performCancel();
+                }
+            });
+        } else {
+            if (confirm(`Do you want to remove ${cleanName} from your unplaced family members?`)) {
+                performCancel();
+            }
+        }
+    };
 
     window.openConnectUnplacedModal = function(memberId) {
         const unplaced = (typeof graphData !== 'undefined' && Array.isArray(graphData.unplaced_members))
@@ -4796,9 +5206,22 @@
         if (nodeIdInput) nodeIdInput.value = member.id;
         if (nameEl) nameEl.textContent = member.full_name || member.first_name || 'Relative';
         if (avatarEl) avatarEl.src = member.avatar_url || '/resources/images/profile/avatarM.png';
-        if (relSelect) relSelect.value = '';
         if (genderSelect) genderSelect.value = (member.gender === 'Female') ? 'Female' : 'Male';
-        if (anchorContainer) anchorContainer.classList.add('d-none');
+
+        // Pre-select quick recommendation if available
+        if (member.quick_recommendation && relSelect) {
+            relSelect.value = member.quick_recommendation.relationship || '';
+            if (member.quick_recommendation.gender && genderSelect) {
+                genderSelect.value = member.quick_recommendation.gender;
+            }
+            window.onConnectRelationshipChange();
+            if (member.quick_recommendation.anchor_id && document.getElementById('connectAnchorSelect')) {
+                document.getElementById('connectAnchorSelect').value = String(member.quick_recommendation.anchor_id);
+            }
+        } else {
+            if (relSelect) relSelect.value = '';
+            if (anchorContainer) anchorContainer.classList.add('d-none');
+        }
 
         const modalEl = document.getElementById('connectUnplacedModal');
         if (modalEl && window.bootstrap && window.bootstrap.Modal) {
@@ -4828,7 +5251,41 @@
         }
 
         let candidates = [];
-        if (rel === 'nephew_niece') {
+        if (rel === 'parent') {
+            if (anchorLabel) anchorLabel.innerHTML = '2. Whose Father or Mother Are They? <span class="text-danger">*</span>';
+            if (anchorHelp) anchorHelp.textContent = 'Select who their child is (e.g. You, your brother/sister, etc.).';
+            const rootNode = allNodes.find(n => n.is_root || String(n.id) === String(window.__ROOT_USER_ID__));
+            const otherNodes = allNodes.filter(n => (!n.is_root && String(n.id) !== String(window.__ROOT_USER_ID__)) && (parseInt(n.generation_level, 10) >= 0));
+            candidates = rootNode ? [rootNode, ...otherNodes] : allNodes;
+        } else if (rel === 'grandparent') {
+            if (anchorLabel) anchorLabel.innerHTML = '2. Which Parent is Their Child? <span class="text-danger">*</span>';
+            if (anchorHelp) anchorHelp.textContent = 'Select whether they are your father\'s parent (paternal) or mother\'s parent (maternal).';
+            candidates = allNodes.filter(n => {
+                const badge = String(n.relationship_badge || '').toLowerCase();
+                return badge === 'father' || badge === 'mother' || badge === 'parent' || parseInt(n.generation_level, 10) === -1;
+            });
+            if (candidates.length === 0) {
+                const rootNode = allNodes.find(n => n.is_root || String(n.id) === String(window.__ROOT_USER_ID__));
+                candidates = rootNode ? [rootNode] : allNodes;
+            }
+        } else if (rel === 'great_grandparent') {
+            if (anchorLabel) anchorLabel.innerHTML = '2. Which Grandparent is Their Child? <span class="text-danger">*</span>';
+            if (anchorHelp) anchorHelp.textContent = 'Select which grandfather or grandmother is the child of this great-grandparent.';
+            candidates = allNodes.filter(n => {
+                const badge = String(n.relationship_badge || '').toLowerCase();
+                return badge.includes('grandfather') || badge.includes('grandmother') || badge.includes('grandparent') || parseInt(n.generation_level, 10) === -2;
+            });
+            if (candidates.length === 0) {
+                candidates = allNodes.filter(n => {
+                    const badge = String(n.relationship_badge || '').toLowerCase();
+                    return badge === 'father' || badge === 'mother' || badge === 'parent' || parseInt(n.generation_level, 10) === -1;
+                });
+            }
+            if (candidates.length === 0) {
+                const rootNode = allNodes.find(n => n.is_root || String(n.id) === String(window.__ROOT_USER_ID__));
+                candidates = rootNode ? [rootNode] : allNodes;
+            }
+        } else if (rel === 'nephew_niece') {
             if (anchorLabel) anchorLabel.innerHTML = '2. Which Brother or Sister is Their Parent? <span class="text-danger">*</span>';
             if (anchorHelp) anchorHelp.textContent = 'Select the sibling who is the father or mother of this nephew or niece.';
             candidates = allNodes.filter(n => {
@@ -4871,6 +5328,12 @@
             if (candidates.length === 0) {
                 candidates = allNodes.filter(n => parseInt(n.generation_level, 10) === -1);
             }
+        } else if (rel === 'partner') {
+            if (anchorLabel) anchorLabel.innerHTML = '2. Whose Partner or Spouse Are They? <span class="text-danger">*</span>';
+            if (anchorHelp) anchorHelp.textContent = 'Select who this person is married or partnered with (e.g. You, your brother, your child, etc.).';
+            const rootNode = allNodes.find(n => n.is_root || String(n.id) === String(window.__ROOT_USER_ID__));
+            const otherNodes = allNodes.filter(n => !n.is_root && String(n.id) !== String(window.__ROOT_USER_ID__));
+            candidates = rootNode ? [rootNode, ...otherNodes] : allNodes;
         }
 
         if (candidates.length === 0) {
@@ -4878,8 +5341,9 @@
         }
 
         anchorSelect.innerHTML = '<option value="" disabled selected>Select relative...</option>' + candidates.map(c => {
+            const isEgo = Boolean(c.is_root || String(c.id) === String(window.__ROOT_USER_ID__));
             const fullName = `${c.first_name || ''} ${c.last_name || ''}`.trim() || 'Relative';
-            const badge = c.relationship_badge ? ` (${c.relationship_badge})` : '';
+            const badge = isEgo ? ' (You)' : (c.relationship_badge ? ` (${c.relationship_badge})` : '');
             const safeLabel = (fullName + badge)
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
@@ -4887,17 +5351,48 @@
             return `<option value="${parseInt(c.id, 10)}">${safeLabel}</option>`;
         }).join('');
 
+        if (rel === 'partner' || rel === 'parent') {
+            const rootCand = candidates.find(c => c.is_root || String(c.id) === String(window.__ROOT_USER_ID__));
+            if (rootCand) {
+                anchorSelect.value = String(rootCand.id);
+            }
+        } else if (rel === 'grandparent' || rel === 'great_grandparent') {
+            if (candidates.length > 0) {
+                anchorSelect.value = String(candidates[0].id);
+            }
+        }
+
         anchorSelect.setAttribute('required', 'required');
         anchorContainer.classList.remove('d-none');
     };
 
-    window.executeConnectUnplacedMember = async function() {
-        const nodeId = document.getElementById('connectUnplacedNodeId')?.value;
-        const relationship = document.getElementById('connectRelationshipSelect')?.value;
+    window.quickSnapUnplacedMember = async function(memberId, btnEl) {
+        const unplaced = (typeof graphData !== 'undefined' && Array.isArray(graphData.unplaced_members))
+            ? graphData.unplaced_members
+            : [];
+        const member = unplaced.find(m => parseInt(m.id, 10) === parseInt(memberId, 10));
+        if (!member || !member.quick_recommendation) return;
+
+        const rec = member.quick_recommendation;
+        const cleanName = member.full_name || member.first_name || 'Relative';
+
+        await window.executeConnectUnplacedMember({
+            nodeId: memberId,
+            relationship: rec.relationship,
+            anchorId: rec.anchor_id || '',
+            gender: rec.gender || member.gender || 'Male',
+            btnEl: btnEl,
+            successMessage: `${cleanName} has been quick-snapped onto your family tree as your ${rec.relationship_label}.`
+        });
+    };
+
+    window.executeConnectUnplacedMember = async function(directParams = null) {
+        const nodeId = directParams ? directParams.nodeId : document.getElementById('connectUnplacedNodeId')?.value;
+        const relationship = directParams ? directParams.relationship : document.getElementById('connectRelationshipSelect')?.value;
         const anchorSelect = document.getElementById('connectAnchorSelect');
         const anchorContainer = document.getElementById('connectAnchorContainer');
-        const gender = document.getElementById('connectGenderSelect')?.value || 'Male';
-        const btn = document.getElementById('btnExecuteConnectUnplaced');
+        const gender = directParams ? directParams.gender : (document.getElementById('connectGenderSelect')?.value || 'Male');
+        const btn = directParams?.btnEl || document.getElementById('btnExecuteConnectUnplaced');
 
         if (!nodeId || !relationship) {
             if (typeof Swal !== 'undefined') {
@@ -4955,7 +5450,7 @@
                     Swal.fire({
                         icon: 'success',
                         title: 'Relative Placed!',
-                        text: res.data?.message || 'Your family tree has been updated.',
+                        text: (directParams && directParams.successMessage) || res.data?.message || 'Your family tree has been updated.',
                         confirmButtonColor: '#0284c7'
                     }).then(() => {
                         window.location.reload();

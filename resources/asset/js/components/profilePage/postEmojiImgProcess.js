@@ -40,7 +40,9 @@ export const closeEmojiDrawer = () => {
 
 export const openEmojiDrawer = () => {
     if (!emojiDrawer) return;
-    // Close other drawers if open
+    if (typeof window.closeAllComposerDrawers === 'function') {
+        window.closeAllComposerDrawers('emojiPickerDrawer');
+    }
     if (typeof closeGifDrawer === 'function') closeGifDrawer();
     const videoDrawer = document.getElementById('videoEmbedContainer');
     if (videoDrawer) videoDrawer.classList.add('d-none');
@@ -113,6 +115,9 @@ if (addPollBtn && pollContainer) {
         e.preventDefault();
         const isHidden = pollContainer.classList.contains('d-none');
         if (isHidden) {
+            if (typeof window.closeAllComposerDrawers === 'function') {
+                window.closeAllComposerDrawers('pollCreationContainer');
+            }
             pollContainer.classList.remove('d-none');
             addPollBtn.classList.add('poll-active');
             scrollDrawerIntoView(pollContainer);
@@ -808,6 +813,8 @@ const renderAllAttachedVideoPreviews = () => {
             iframeWrap.className = 'ratio ratio-16x9 w-100';
             iframeWrap.style.maxHeight = '200px';
             iframeWrap.innerHTML = `<iframe src="${parsed.embedUrl}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>`;
+            card.style.width = attachedVideoList.length === 1 ? '100%' : 'calc(75% - 4px)';
+            card.style.maxWidth = '360px';
             card.appendChild(iframeWrap);
         } else {
             const vidWrap = document.createElement('div');
@@ -815,6 +822,26 @@ const renderAllAttachedVideoPreviews = () => {
             vidWrap.style.aspectRatio = '4 / 5';
             vidWrap.style.maxHeight = '220px';
             vidWrap.innerHTML = `<video src="${entry.streamUrl}" controls playsinline preload="metadata" style="width:100%; height:100%; object-fit:contain; display:block;"></video>`;
+            const vidEl = vidWrap.querySelector('video');
+            if (vidEl) {
+                vidEl.addEventListener('loadedmetadata', () => {
+                    if (vidEl.videoWidth && vidEl.videoHeight) {
+                        const r = vidEl.videoWidth / vidEl.videoHeight;
+                        if (r > 1.15) {
+                            card.style.width = attachedVideoList.length === 1 ? '100%' : 'calc(75% - 4px)';
+                            card.style.maxWidth = '360px';
+                            vidWrap.style.aspectRatio = '16 / 9';
+                            vidWrap.style.maxHeight = '210px';
+                        } else if (r < 0.88) {
+                            vidWrap.style.aspectRatio = (r <= 0.65) ? '9 / 16' : '4 / 5';
+                            vidWrap.style.maxHeight = '240px';
+                        } else {
+                            vidWrap.style.aspectRatio = '1 / 1';
+                            vidWrap.style.maxHeight = '220px';
+                        }
+                    }
+                }, { once: true });
+            }
             card.appendChild(vidWrap);
         }
 
@@ -1271,6 +1298,9 @@ if (addVideoBtn && videoContainer) {
         e.preventDefault();
         const isHidden = videoContainer.classList.contains('d-none');
         if (isHidden) {
+            if (typeof window.closeAllComposerDrawers === 'function') {
+                window.closeAllComposerDrawers('videoEmbedContainer');
+            }
             videoContainer.classList.remove('d-none');
             addVideoBtn.classList.add('video-active');
             scrollDrawerIntoView(videoContainer);
@@ -1520,6 +1550,9 @@ if (addGifBtn && gifDrawer) {
         e.preventDefault();
         const isHidden = gifDrawer.classList.contains('d-none');
         if (isHidden) {
+            if (typeof window.closeAllComposerDrawers === 'function') {
+                window.closeAllComposerDrawers('gifPickerDrawer');
+            }
             closeEmojiDrawer();
             gifDrawer.classList.remove('d-none');
             addGifBtn.classList.add('gif-active');
@@ -1781,6 +1814,9 @@ if (addTagBtn && tagContainer) {
         e.preventDefault();
         const isHidden = tagContainer.classList.contains('d-none');
         if (isHidden) {
+            if (typeof window.closeAllComposerDrawers === 'function') {
+                window.closeAllComposerDrawers('tagPeopleContainer');
+            }
             tagContainer.classList.remove('d-none');
             addTagBtn.classList.add('tag-active');
             scrollDrawerIntoView(tagContainer);
@@ -1902,4 +1938,9 @@ if (postModalElement) {
         closePoll();
         closeIosShareDrawer();
     });
+}
+
+if (typeof window !== 'undefined') {
+    window.parseVideoUrl = parseVideoUrl;
+    window.renderAttachedVideoPreview = renderAttachedVideoPreview;
 }

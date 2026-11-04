@@ -83,6 +83,9 @@ final class ProfilePage extends ProcessImg
             // Fetch any pending weekly activity reel awaiting approval
             $pendingWeeklyReel = \App\services\WeeklyActivityVideoCuratorService::getPendingReel((string)$this->id, (string)($data['famCode'] ?? ''));
 
+            // Dual-Lineage post audiences (all, birth, married codes)
+            $postAudiences = (new \App\services\FamilyPostAudienceService())->resolveUserAudiences((string)$this->id);
+
             view('member/profilePage', [
                 'data' => $data['memberData'],
                 'primaryFamCode' => $data['primaryFamCode'] ?? ($data['famCode'] ?? ''),
@@ -91,6 +94,7 @@ final class ProfilePage extends ProcessImg
                 'maritalSurname' => $data['maritalSurname'] ?? ($data['memberData']['lastName'] ?? ''),
                 'maidenSurname' => $data['maidenSurname'] ?? ($data['memberData']['maiden_name'] ?? ''),
                 'birthFamily' => $data['birthFamily'] ?? ['state' => 'none', 'code' => '', 'origin' => null, 'pending' => null],
+                'postAudiences' => $postAudiences,
                 'allData' => $data['posts'],
                 'comment' => $data['comments'],
                 'post2Id' => $data['post2Id'],
@@ -107,7 +111,9 @@ final class ProfilePage extends ProcessImg
                 'suggestedKin' => $suggestedKin,
                 'radarSettings' => $radarSettings,
                 'adulthoodGraduation' => $adulthoodGraduation,
-                'pendingWeeklyReel' => $pendingWeeklyReel
+                'pendingWeeklyReel' => $pendingWeeklyReel,
+                'isPendingApproval' => $data['isPendingApproval'] ?? false,
+                'pendingApprovalData' => $data['pendingApprovalData'] ?? null
             ]);
 
         } catch (\Throwable $th) {
@@ -318,13 +324,47 @@ final class ProfilePage extends ProcessImg
                 $userFamCode = trim((string)$_POST['postFamCode']);
             }
 
+            // Dual-Lineage Post Audience Scope (All vs. Birth vs. Married)
+            $audienceService = new \App\services\FamilyPostAudienceService();
+            $userAudiences = $audienceService->resolveUserAudiences((string)$id);
+            $rawScope = trim((string)($_POST['target_scope'] ?? ''));
+            if (!in_array($rawScope, ['all', 'birth', 'married'], true)) {
+                $rawScope = $userAudiences['default_scope'] ?? 'all';
+            }
+            $explicitCode = !empty($_POST['target_fam_code']) ? trim((string)$_POST['target_fam_code']) : (!empty($_POST['postFamCode']) ? trim((string)$_POST['postFamCode']) : null);
+            unset($_POST['target_scope'], $_POST['target_fam_code'], $_REQUEST['target_scope'], $_REQUEST['target_fam_code']);
+
+            // Read attached 3D Augmented Reality (AR) Emoji upfront for single atomic insert
+            $arEmoji = !empty($_POST['ar_emoji']) ? trim((string)$_POST['ar_emoji']) : (!empty($_POST['attached_ar_emoji']) ? trim((string)$_POST['attached_ar_emoji']) : null);
+            if ($arEmoji === null && preg_match('/:([a-z0-9_]+_3d):/i', $cleanMultiLineMessage, $m)) {
+                $arEmoji = $m[1];
+            }
+            if ($arEmoji !== null && !preg_match('/^[a-z0-9_]+$/i', $arEmoji)) {
+                $arEmoji = null;
+            }
+
             $newInput = [
                 'id' => $id,
                 'fullName' => $_SESSION['fName'] . " " . $_SESSION['lName'],
                 'profileImg' => Post::getProfilePicsById($id) ?: 'avatarM.png',
                 'post_time' => milliSeconds(),
-                'postFamCode' => $userFamCode
+                'postFamCode' => $userFamCode,
             ];
+            if ($arEmoji !== null) {
+                $newInput['ar_emoji'] = $arEmoji;
+            }
+
+            $removeKeys = [
+                'poll_question', 'poll_options', 'token', 'post_no',
+                'attached_gif_url', 'attached_video_url', 'attached_video_urls', 'tagged_user_ids', 'shared_temp_images',
+                'then_now', 'then_label', 'now_label', 'reply_to_post',
+                'comparison_mode', 'mystery_year', 'then_now_voice_base64',
+                'attached_ar_emoji', 'target_scope', 'target_fam_code',
+                'submit', 'button'
+            ];
+            if ($arEmoji === null) {
+                $removeKeys[] = 'ar_emoji';
+            }
 
            $result =  SubmitPostData::submitToOneTablenImage(
                 table: 'post',
@@ -333,25 +373,28 @@ final class ProfilePage extends ProcessImg
                 sourceFileTable: 'post',
                 newInput: $newInput,
                 isCaptcha: false,
-                removeKeys: [
-                    'poll_question', 'poll_options', 'token', 'post_no',
-                    'attached_gif_url', 'attached_video_url', 'attached_video_urls', 'tagged_user_ids', 'shared_temp_images',
-                    'then_now', 'then_label', 'now_label', 'reply_to_post',
-                    'comparison_mode', 'mystery_year', 'then_now_voice_base64',
-                    'submit', 'button'
-                ],
+                removeKeys: $removeKeys,
                 optionalFields: [
                     'poll_question', 'poll_options', 'postMessage', 'post_no',
                     'attached_gif_url', 'attached_video_url', 'attached_video_urls', 'tagged_user_ids', 'shared_temp_images',
                     'postFamCode', 'profileImg',
                     'then_now', 'then_label', 'now_label', 'reply_to_post',
-                    'comparison_mode', 'mystery_year', 'then_now_voice_base64'
+                    'comparison_mode', 'mystery_year', 'then_now_voice_base64',
+                    'ar_emoji', 'attached_ar_emoji',
+                    'target_scope', 'target_fam_code'
                 ]
             );
 
     
             if ($result) {
                 $_SESSION["LAST_INSERT_ID_POST"] = $result;
+
+                // Dual-Lineage Post Audience Assignment (All vs. Birth vs. Married)
+                try {
+                    $audienceService->assignPostTargets((int)$result, (string)$id, $rawScope, $explicitCode);
+                } catch (\Throwable $audEx) {
+                    error_log('[ProfilePage::post assignPostTargets] ' . $audEx->getMessage());
+                }
 
                 // Promote attached GIF to primary post image if no local image uploaded,
                 // or into the next available image slot if local images were uploaded.
@@ -376,17 +419,44 @@ final class ProfilePage extends ProcessImg
                             identifierAnswer: $result
                         );
                     }
+                } elseif (!$hasDirectImage && empty($sharedTempImages)) {
+                    // Promote linked Google Photos or direct photo/video URLs to native post media (Multi-Media Zero-Storage pipeline)
+                    // High-Performance Gate: Only run URL extractor if text actually contains link schemes
+                    if (str_contains($cleanMultiLineMessage, 'http://') || str_contains($cleanMultiLineMessage, 'https://')) {
+                        $extractedMedia = \App\services\LinkPreviewService::extractPhotoAssetsFromText($cleanMultiLineMessage, 6);
+                        $mediaSlots = [];
+                        foreach ($extractedMedia['images'] ?? [] as $imgAsset) {
+                            if (count($mediaSlots) < 6) {
+                                $mediaSlots[] = (string)$imgAsset;
+                            }
+                        }
+                        foreach ($extractedMedia['videos'] ?? [] as $vidAsset) {
+                            if (count($mediaSlots) < 6) {
+                                $mediaSlots[] = (string)$vidAsset;
+                            }
+                        }
+
+                        if (!empty($mediaSlots)) {
+                            foreach ($mediaSlots as $slotIdx => $mediaAsset) {
+                                (new \Src\Update('post'))->updateTable(
+                                    column: 'post_img' . $slotIdx,
+                                    columnAnswer: $mediaAsset,
+                                    identifier: 'post_no',
+                                    identifierAnswer: $result
+                                );
+                            }
+                            $cleanMultiLineMessage = $extractedMedia['cleaned_message'];
+                        }
+                    }
                 }
 
-                // Preserve multi-line captions and full URLs without being squashed by checkInput
-                if ($cleanMultiLineMessage !== '') {
-                    (new \Src\Update('post'))->updateTable(
-                        column: 'postMessage',
-                        columnAnswer: $cleanMultiLineMessage,
-                        identifier: 'post_no',
-                        identifierAnswer: $result
-                    );
-                }
+                // Preserve multi-line captions with photo/video links stripped (even if empty, ensure raw media link is not retained)
+                (new \Src\Update('post'))->updateTable(
+                    column: 'postMessage',
+                    columnAnswer: $cleanMultiLineMessage,
+                    identifier: 'post_no',
+                    identifierAnswer: $result
+                );
 
                 // Promote staged media from PWA Web Share Target into persistent storage
                 if (!empty($sharedTempImages)) {
@@ -485,9 +555,6 @@ final class ProfilePage extends ProcessImg
                     }
                 }
 
-                // Warm up link preview cache if a URL is present
-                \App\services\LinkPreviewService::getPreviewForPostText($cleanMultiLineMessage);
-
                 // Handle Poll Data
                 $pollQuestion = isset($_POST['poll_question']) ? htmlspecialchars(trim($_POST['poll_question']), ENT_QUOTES, 'UTF-8') : null;
                 $pollOptionsRaw = $_POST['poll_options'] ?? [];
@@ -566,21 +633,24 @@ final class ProfilePage extends ProcessImg
                     error_log('[ProfilePage::post tags] ' . $tagEx->getMessage());
                 }
 
-                // Return the full post row (not just its id) so the composer can prepend it
-                // to the feed immediately instead of waiting on a full posts re-fetch.
-                $newPost = Post::postByNo($result);
+                // Return the fully hydrated post DTO (not just the raw row) so the composer
+                // unshifts the complete post with native video players, high-res photos, and proxied streams.
+                $repo = new \App\repository\FeedRepository();
+                $authorUserId = is_string($id) ? $id : (string)($_SESSION['id'] ?? '');
+                $postDto = $repo->getPostByNo((int)$result, $authorUserId);
+                $newPost = $postDto ? $postDto->toArray() : Post::postByNo($result);
 
                 // Filter out internal database timestamps to prevent data leakage
-                $newPost = array_diff_key($newPost, array_flip([
-                    'likes_updated_at',
-                    // 'date_created', // Keep this so frontend doesn't break
-                    'date_updated',
-                    'date_deleted'
-                ]));
-
-                // Attach hydrated link preview for immediate feed presentation
                 if (is_array($newPost)) {
-                    $newPost['link_preview'] = \App\services\LinkPreviewService::getPreviewForPostText($cleanMultiLineMessage);
+                    $newPost = array_diff_key($newPost, array_flip([
+                        'likes_updated_at',
+                        'date_updated',
+                        'date_deleted'
+                    ]));
+                    $newPost['ar_emoji'] = $arEmoji ?: ($newPost['ar_emoji'] ?? null);
+                    if (empty($newPost['link_preview']) && (str_contains($cleanMultiLineMessage, 'http://') || str_contains($cleanMultiLineMessage, 'https://'))) {
+                        $newPost['link_preview'] = \App\services\LinkPreviewService::getPreviewForPostText($cleanMultiLineMessage);
+                    }
                     $newPost['comparison'] = \App\model\PostComparison::getForPosts([(int)$result])[(int)$result] ?? null;
                     $newPost['post_tags'] = !empty($postTags) ? $postTags : \App\controller\members\TagController::getPostTags((int)$result);
                 }
@@ -590,21 +660,47 @@ final class ProfilePage extends ProcessImg
                     header("Server-Timing: prep;dur={$prepDuration};desc=\"Post Insertion & Staging\"");
                 }
 
-                msgSuccess(200, $newPost ?: $result);
+                $jsonPayload = json_encode([
+                    'message' => $newPost ?: $result,
+                    'token'   => null,
+                    'status'  => 'success',
+                ], JSON_UNESCAPED_SLASHES);
 
-                // Fast-Response Decoupling: Flush 200 OK JSON response immediately to browser
-                // so composer closes and feed updates within ~1-2s, releasing session lock.
-                if (function_exists('fastcgi_finish_request')) {
+                if (isTestEnv()) {
+                    $GLOBALS['__testResponse'] = [
+                        'code' => 200,
+                        'message' => $newPost ?: $result,
+                        'token' => null,
+                        'status' => 'success',
+                    ];
+                }
+                if (!headers_sent()) {
+                    header('Content-Type: application/json');
+                    header('Connection: close');
+                    if ($jsonPayload !== false) {
+                        header('Content-Length: ' . strlen($jsonPayload));
+                    }
+                }
+                http_response_code(200);
+                echo $jsonPayload;
+
+                // Fast-Response Decoupling: Release PHP session lock immediately so concurrent
+                // requests/navigation unblock without waiting for background tasks.
+                if (session_status() === PHP_SESSION_ACTIVE) {
+                    session_write_close();
+                }
+
+                if (php_sapi_name() !== 'cli') {
                     while (ob_get_level() > 0) {
                         ob_end_flush();
                     }
                     flush();
-                    if (session_status() === PHP_SESSION_ACTIVE) {
-                        session_write_close();
+
+                    if (function_exists('fastcgi_finish_request')) {
+                        fastcgi_finish_request();
                     }
-                    fastcgi_finish_request();
-                    ignore_user_abort(true);
                 }
+                ignore_user_abort(true);
 
                 // ── BACKGROUND POST-RESPONSE PIPELINE (Track 1 Decoupled Execution) ──
 
@@ -696,6 +792,16 @@ final class ProfilePage extends ProcessImg
 
             $rawComment = (string) ($_POST['comment'] ?? '');
             $cleanComment = \App\services\LinkPreviewService::sanitizePostMessage($rawComment);
+
+            // SecOps Target Audience Gate (Marcus Red Team): verify commenter has access to this post
+            $targetPostNo = (int) ($_POST['post_no'] ?? 0);
+            if ($targetPostNo > 0) {
+                $audienceService = new \App\services\FamilyPostAudienceService();
+                if (!$audienceService->canUserAccessPost($targetPostNo, (string)$id)) {
+                    msgException(403, 'You do not have permission to comment on this post.');
+                    return;
+                }
+            }
 
             if ($gifUrl === null && $cleanComment === '') {
                 throw new \Src\Exceptions\ValidationException('Write a comment or pick a GIF/sticker.');

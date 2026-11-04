@@ -470,14 +470,10 @@ final class CollateralKinshipService
             if (!isset($nodesById[$nId])) continue;
             $n = $nodesById[$nId];
 
-            $first = trim((string)($n['first_name'] ?? ''));
-            $last = trim((string)($n['last_name'] ?? ''));
-            if ($last !== '' && (strcasecmp($first, $last) === 0 || str_ends_with(strtolower($first), ' ' . strtolower($last)))) {
-                $fullName = $first;
-            } else {
-                $fullName = trim($first . ' ' . $last);
-            }
-            $fullName = trim((string)preg_replace('/\b(\w+)\s+\1\b/iu', '$1', $fullName));
+            $nameParts = NameFormatterService::formatFirstAndLast($n['first_name'] ?? '', $n['last_name'] ?? '');
+            $first = $nameParts['first_name'];
+            $last = $nameParts['last_name'];
+            $fullName = $nameParts['full_name'];
 
             $sex = (($n['gender'] ?? 'Male') === 'Male') ? 'avatarM.png' : 'avatarF.png';
             $avatar = !empty($n['avatar_url']) ? (string)$n['avatar_url'] : "/resources/images/profile/{$sex}";
@@ -488,7 +484,7 @@ final class CollateralKinshipService
                 'first_name' => $first,
                 'last_name' => $last,
                 'full_name' => $fullName,
-                'maiden_name' => $n['maiden_name'] ?? null,
+                'maiden_name' => !empty($n['maiden_name']) ? NameFormatterService::formatName((string)$n['maiden_name']) : null,
                 'gender' => (string)($n['gender'] ?? 'Male'),
                 'birth_date' => $n['birth_date'] ?? null,
                 'birth_year' => isset($n['birth_year']) ? (int)$n['birth_year'] : null,
@@ -589,6 +585,14 @@ final class CollateralKinshipService
         ];
         $annotatedNodes = KinshipCalculatorService::calculateEgoKinship($rawGraph, $egoNodeId);
 
+        // Cultural Respect & Elder Privacy: Conceal parent full first names if enabled by tree owner
+        try {
+            $privacy = FamilyTreeAccessService::getPrivacySettings($rootUserId, $db);
+            if (!empty($privacy['hide_parent_first_name'])) {
+                $annotatedNodes = FamilyTreeAccessService::maskParentNamesInGraph($annotatedNodes, $egoNodeId, true);
+            }
+        } catch (\Throwable) {}
+
         // Check if tree has actually been built (more than just a lonely root with no parents/unions/children)
         $hasBuiltTree = (count($annotatedNodes) > 1) || !empty($finalUnions) || !empty($finalChildren);
 
@@ -599,11 +603,38 @@ final class CollateralKinshipService
         $unplacedMembers = [];
         foreach ($nodesById as $candId => $candNode) {
             if (!isset($selectedNodes[$candId]) && empty($candNode['is_placeholder'])) {
-                $cFirst = trim((string)($candNode['first_name'] ?? ''));
-                $cLast = trim((string)($candNode['last_name'] ?? ''));
-                $cFullName = trim($cFirst . ' ' . $cLast);
+                $cParts = NameFormatterService::formatFirstAndLast($candNode['first_name'] ?? '', $candNode['last_name'] ?? '');
+                $cFirst = $cParts['first_name'];
+                $cLast = $cParts['last_name'];
+                $cFullName = $cParts['full_name'];
                 $cSex = (($candNode['gender'] ?? 'Male') === 'Male') ? 'avatarM.png' : 'avatarF.png';
                 $cAvatar = !empty($candNode['avatar_url']) ? (string)$candNode['avatar_url'] : "/resources/images/profile/{$cSex}";
+
+                $rec = null;
+                $candLast = strtolower(trim((string)$cLast));
+                $egoLast = strtolower(trim((string)($egoNode['last_name'] ?? '')));
+
+                if ($candLast !== '' && $candLast === $egoLast) {
+                    $isFem = ($candNode['gender'] ?? 'Male') === 'Female';
+                    $rec = [
+                        'relationship' => 'sibling',
+                        'relationship_label' => $isFem ? 'Sister' : 'Brother',
+                        'anchor_id' => $egoNodeId,
+                        'gender' => $isFem ? 'Female' : 'Male',
+                        'badge' => $isFem ? 'Likely Sister' : 'Likely Brother',
+                        'confidence' => 'high'
+                    ];
+                } elseif (preg_match('/\b(wife|spouse|husband|partner)\b/i', (string)($candNode['bio'] ?? ''))) {
+                    $isFem = ($candNode['gender'] ?? 'Female') === 'Female';
+                    $rec = [
+                        'relationship' => 'partner',
+                        'relationship_label' => $isFem ? 'Wife' : 'Husband',
+                        'anchor_id' => $egoNodeId,
+                        'gender' => $isFem ? 'Female' : 'Male',
+                        'badge' => 'Suggested Partner',
+                        'confidence' => 'high'
+                    ];
+                }
 
                 $unplacedMembers[] = [
                     'id' => (int)$candNode['id'],
@@ -615,6 +646,7 @@ final class CollateralKinshipService
                     'avatar_url' => $cAvatar,
                     'bio' => $candNode['bio'] ?? 'Unplaced Member',
                     'created_at' => $candNode['created_at'] ?? null,
+                    'quick_recommendation' => $rec,
                 ];
             }
         }

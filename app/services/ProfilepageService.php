@@ -32,7 +32,8 @@ final class ProfilepageService
             throw new NotFoundException("User not found");
         }
 
-        $famCodeClean = checkInput($memberData['famCode']);
+        $rawFamCode = $memberData['famCode'] ?? null;
+        $famCodeClean = ($rawFamCode !== null && $rawFamCode !== '') ? checkInput($rawFamCode) : '';
         $famCode = is_string($famCodeClean) ? strtoupper(trim(ltrim($famCodeClean, '#'))) : '';
         $primaryFamCode = $famCode;
 
@@ -99,6 +100,25 @@ final class ProfilepageService
             || !empty($memberData['spouse_name']);
         $memberData['needs_wedding_date_prompt'] = ($isMarried && empty($marriageDate));
 
+        $approvalService = new \App\service\FamilyCodeApprovalService(\Src\Db::connect2());
+
+        // Dynamic 20-minute escalation: broadcast any overdue pending requests to all family members
+        try {
+            $approvalService->escalateOverdueRequests(null, 5);
+        } catch (\Throwable $escErr) {
+            error_log('[ProfilepageService] Escalation check warning: ' . $escErr->getMessage());
+        }
+
+        // Check if the current user has an active pending approval request (unapproved status)
+        $userPendingRequest = null;
+        try {
+            $userPendingRequest = $approvalService->getUserPendingRequest($userId);
+        } catch (\Throwable $penErr) {
+            error_log('[ProfilepageService] User pending request check error: ' . $penErr->getMessage());
+        }
+
+        $isPendingApproval = ($userPendingRequest !== null);
+
         $famCodes = $_SESSION['famCodes'] ?? ($famCode !== '' ? [$famCode] : []);
         if (!is_array($famCodes)) {
             $famCodes = [$famCodes];
@@ -109,14 +129,25 @@ final class ProfilepageService
         if ($hasMaternalCode && !in_array($maternalFamCode, $famCodes, true)) {
             $famCodes[] = $maternalFamCode;
         }
-        $_SESSION['famCodes'] = array_values(array_unique(array_filter(array_map('strval', $famCodes))));
+
+        if ($isPendingApproval) {
+            // When pending, strip all family codes from active session so private feeds fail closed
+            $famCodes = [];
+            $_SESSION['famCodes'] = [];
+            $_SESSION['famCode'] = '';
+            $_SESSION['is_pending_approval'] = true;
+        } else {
+            $_SESSION['famCodes'] = array_values(array_unique(array_filter(array_map('strval', $famCodes))));
+            unset($_SESSION['is_pending_approval']);
+        }
 
         $pendingFamilyRequests = [];
-        try {
-            $pendingFamilyRequests = (new \App\service\FamilyCodeApprovalService(\Src\Db::connect2()))
-                ->getPendingApprovalsWithDetails($userId, $famCode);
-        } catch (\Throwable $e) {
-            error_log('[ProfilepageService] Failed to load pending family requests: ' . $e->getMessage());
+        if (!$isPendingApproval) {
+            try {
+                $pendingFamilyRequests = $approvalService->getPendingApprovalsWithDetails($userId, $famCode);
+            } catch (\Throwable $e) {
+                error_log('[ProfilepageService] Failed to load pending family requests: ' . $e->getMessage());
+            }
         }
 
         $pendingMigrations = [
@@ -124,14 +155,16 @@ final class ProfilepageService
             'incomingRequests' => [],
             'totalPendingCount' => 0
         ];
-        try {
-            $pendingMigrations = (new \App\services\FamilyMigrationService(\Src\Db::connect2()))
-                ->getPendingMigrationsForUser($userId, $famCode);
-        } catch (\Throwable $e) {
-            error_log('[ProfilepageService] Failed to load pending migrations: ' . $e->getMessage());
+        if (!$isPendingApproval) {
+            try {
+                $pendingMigrations = (new \App\services\FamilyMigrationService(\Src\Db::connect2()))
+                    ->getPendingMigrationsForUser($userId, $famCode);
+            } catch (\Throwable $e) {
+                error_log('[ProfilepageService] Failed to load pending migrations: ' . $e->getMessage());
+            }
         }
 
-        $allFamilyMembers = (new DataAll())->getAllMembers($userId);
+        $allFamilyMembers = !$isPendingApproval ? (new DataAll())->getAllMembers($userId) : [];
         $familyRoster = array_values(array_map(static fn(array $m): array => [
             'id' => (string)($m['id'] ?? ''),
             'firstName' => (string)($m['firstName'] ?? ''),
@@ -148,17 +181,19 @@ final class ProfilepageService
             'maritalSurname' => $maritalSurname,
             'maidenSurname' => $maidenSurname,
             'birthFamily' => $birthFamily,
-            'friendRequests' => DataAll::getFriendRequestData($userId, "Request sent"),
-            'posts' => $this->feedRepo->getFeedPostsAsArray($userId, (array)$famCodes, 50, 0),
-            'comments' => Post::getAllCommentProfilePics(),
-            'events' => DataAll::getEventDataByFamCode((array)$famCodes),
+            'friendRequests' => !$isPendingApproval ? DataAll::getFriendRequestData($userId, "Request sent") : [],
+            'posts' => !$isPendingApproval ? $this->feedRepo->getFeedPostsAsArray($userId, (array)$famCodes, 50, 0) : [],
+            'comments' => !$isPendingApproval ? Post::getAllCommentProfilePics() : [],
+            'events' => !$isPendingApproval ? DataAll::getEventDataByFamCode((array)$famCodes) : [],
             'post2Id' => Post::postLink2Id($userId),
             'pics' => Post::getAllPostPics($userId),
             'totalFamilyMembers' => count($allFamilyMembers),
             'familyRoster' => $familyRoster,
-            'unclaimedMatch' => FamilyClaimService::findFuzzyUnclaimedMatches($famCode, $userId, $memberData),
+            'unclaimedMatch' => !$isPendingApproval ? FamilyClaimService::findFuzzyUnclaimedMatches($famCode, $userId, $memberData) : null,
             'pendingFamilyRequests' => $pendingFamilyRequests,
             'pendingMigrations' => $pendingMigrations,
+            'isPendingApproval' => $isPendingApproval,
+            'pendingApprovalData' => $userPendingRequest,
         ];
     }
 }

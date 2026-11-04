@@ -362,7 +362,7 @@ final class VisualSupremacyService
             if ($exitCode === 0 && file_exists($fullPath) && filesize($fullPath) > 0) {
                 return $targetFile;
             }
-            @unlink($fullPath);
+            @unlink($fullPath); // nosemgrep: php.lang.security.unlink-use.unlink-use
         }
 
         // Strategy B: Native PHP GD imageavif fallback

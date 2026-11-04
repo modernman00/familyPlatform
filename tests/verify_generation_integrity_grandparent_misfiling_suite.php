@@ -241,6 +241,71 @@ try {
         expect($aAfter[$taiwo]['ego_relation'] === 'Nephew', "Taiwo expected Nephew after placement under Olusola, got " . $aAfter[$taiwo]['ego_relation']);
     });
 
+    // TEST 12: Partner Placement: unplaced member placed as partner links via family_unions and transitions from unplaced to Spouse
+    runStep("Partner Placement: unplaced member placed as partner links via family_unions and transitions to Spouse", function () use ($db, $fam, $uidWally, $wally, $graph) {
+        // Create an unplaced female member (e.g. Ronke)
+        $insRonke = $db->prepare("INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, bio) VALUES (?, 'Ronke', 'Olaogun', 'Female', 0, 'Partner')");
+        $insRonke->execute([$fam]);
+        $ronkeId = (int)$db->lastInsertId();
+
+        // Verify Ronke is initially in unplaced_members
+        $subgraphBefore = CollateralKinshipService::buildCollateralGraph($fam, $uidWally);
+        $unplacedIds = array_map(fn($m) => (int)$m['id'], $subgraphBefore['unplaced_members']);
+        expect(in_array($ronkeId, $unplacedIds, true), 'Expected Ronke in unplaced_members before placement');
+
+        // Simulate connecting as partner to Wally
+        $insU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'married', 1)");
+        $insU->execute([$fam, $wally, $ronkeId]);
+        $unionId = (int)$db->lastInsertId();
+
+        $updRonke = $db->prepare("UPDATE family_nodes SET generation_level = 0, bio = 'Wife' WHERE id = ? AND family_code = ?");
+        $updRonke->execute([$ronkeId, $fam]);
+
+        // Verify Ronke is no longer unplaced
+        $subgraphAfter = CollateralKinshipService::buildCollateralGraph($fam, $uidWally);
+        $unplacedIdsAfter = array_map(fn($m) => (int)$m['id'], $subgraphAfter['unplaced_members']);
+        expect(!in_array($ronkeId, $unplacedIdsAfter, true), 'Ronke should no longer be unplaced after being connected as partner');
+
+        // Verify kinship calculation classifies Ronke as Wife
+        $a = KinshipCalculatorService::calculateEgoKinship($graph($fam), $wally);
+        expect($a[$ronkeId]['ego_relation'] === 'Wife', "Ronke expected Wife, got " . ($a[$ronkeId]['ego_relation'] ?? 'null'));
+    });
+
+    // TEST 13: Adversarial Cycle Neutralization: wouldFormCycle prevents ancestral loops
+    runStep("Adversarial Cycle Neutralization: wouldFormCycle blocks circular ancestry injections", function () use ($db, $fam, $wally, $oluyomi, $femi) {
+        // Self cycle: Wally cannot be child of Wally
+        expect(FamilyGraphIntegrityService::wouldFormCycle($db, $fam, $wally, $wally) === true, 'Self-cycle must be blocked');
+
+        // Ancestor cycle: Oluyomi (Grandfather) cannot be child of Wally (Grandson)
+        expect(FamilyGraphIntegrityService::wouldFormCycle($db, $fam, $wally, $oluyomi) === true, 'Descendant-as-parent cycle must be blocked');
+
+        // Valid non-cycle: A new child under Wally is NOT a cycle
+        $newChildId = 999999;
+        expect(FamilyGraphIntegrityService::wouldFormCycle($db, $fam, $wally, $newChildId) === false, 'Legitimate child placement should not be flagged as cycle');
+    });
+
+    // TEST 14: 1-Tap Quick-Snap: unplaced member with matching surname gets intelligent recommendation
+    runStep("1-Tap Quick-Snap: unplaced member with matching surname receives intelligent recommendation", function () use ($db, $fam, $uidWally) {
+        $insSister = $db->prepare("INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, bio) VALUES (?, 'Bimbo', 'Olaogun', 'Female', 0, 'Sister')");
+        $insSister->execute([$fam]);
+        $sisterId = (int)$db->lastInsertId();
+
+        $subgraph = CollateralKinshipService::buildCollateralGraph($fam, $uidWally);
+        $unplaced = $subgraph['unplaced_members'] ?? [];
+        $bimbo = null;
+        foreach ($unplaced as $u) {
+            if ((int)$u['id'] === $sisterId) {
+                $bimbo = $u;
+                break;
+            }
+        }
+
+        expect($bimbo !== null, 'Expected Bimbo in unplaced_members');
+        expect(isset($bimbo['quick_recommendation']) && is_array($bimbo['quick_recommendation']), 'Expected quick_recommendation array for Bimbo');
+        expect($bimbo['quick_recommendation']['relationship'] === 'sibling', "Expected relationship 'sibling', got " . ($bimbo['quick_recommendation']['relationship'] ?? 'none'));
+        expect($bimbo['quick_recommendation']['badge'] === 'Likely Sister', "Expected badge 'Likely Sister', got " . ($bimbo['quick_recommendation']['badge'] ?? 'none'));
+    });
+
 } finally {
     $db->prepare('DELETE FROM family_node_children WHERE union_id IN (SELECT id FROM family_unions WHERE family_code = ?)')->execute([$fam]);
     $db->prepare('DELETE FROM family_unions WHERE family_code = ?')->execute([$fam]);

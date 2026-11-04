@@ -1,10 +1,11 @@
 @php
-    // 1) Decide the display name safely across all your node types
-    $displayName =
+    // 1) Decide the display name safely across all your node types (strictly sentence-cased Capital-First)
+    $rawName =
         $dataDB['fullName']
             ?? $dataDB['name']
             ?? trim(($dataDB['firstName'] ?? '') . ' ' . ($dataDB['lastName'] ?? ''))
             ?: 'Name not provided';
+    $displayName = \App\services\NameFormatterService::formatName($rawName);
 
     // 2) Gender class/icon safety
     $gender = $dataDB['gender'] ?? 'neutral';

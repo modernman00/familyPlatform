@@ -250,6 +250,17 @@ final class ChildAccountService
 
             $db->commit();
 
+            // Broadcast family join announcement to all members of this family code
+            try {
+                \App\services\FamilyJoinAnnouncementService::broadcastNewMemberAnnouncement(
+                    $nodeFamCode,
+                    $childUserId,
+                    $parentUserId
+                );
+            } catch (\Throwable $annEx) {
+                error_log('[ChildAccountService] Child join announcement warning: ' . $annEx->getMessage());
+            }
+
             return [
                 'status' => 'success',
                 'message' => 'Child account provisioned successfully.',

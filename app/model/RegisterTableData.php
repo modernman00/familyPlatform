@@ -14,12 +14,14 @@ final class RegisterTableData {
   public static function createRegisterTable(array $cleanPostData): array {
         // Access the cleanPostData directly, as it's promoted to a class property
         $profileAvatar = (isset($cleanPostData['gender']) && $cleanPostData['gender'] === "Male") ? "avatarM.png" : "avatarF.png";
+        $familyStatus = $cleanPostData['familyStatus'] ?? 'pending';
+        $isApproved = ($familyStatus === 'approved');
         
         $tables = [
             'personal' =>  [
                 'firstName' => $cleanPostData['firstName'] ?? null,
                 'lastName' => $cleanPostData['lastName'] ?? null,
-                'famCode' => $cleanPostData['famCode'] ?? null,
+                'famCode' => $isApproved ? ($cleanPostData['famCode'] ?? null) : null,
                 'kids' => $cleanPostData['children'] ?? null,
                 'gender' => $cleanPostData['gender'] ?? null,
                 'siblings' => $cleanPostData['sibling'] ?? null,

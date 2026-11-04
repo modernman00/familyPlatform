@@ -60,7 +60,11 @@ final class PostDto implements JsonSerializable
         public readonly array $rawAttributes = [],
         public readonly int $viewsCount = 0,
         public readonly ?string $voiceCapsuleUrl = null,
-        public readonly bool $isOfficialPost = false
+        public readonly bool $isOfficialPost = false,
+        public readonly ?string $arEmoji = null,
+        public readonly array $videos = [],
+        public readonly ?array $video = null,
+        public readonly string $targetScope = 'all'
     ) {}
 
     /**
@@ -116,11 +120,113 @@ final class PostDto implements JsonSerializable
             $linkPreview = \App\services\LinkPreviewService::getPreviewForPostText($message);
         }
 
+        // Linked Media Promotion (e.g. Google Photos, direct image/video assets, multi-item support)
+        $hasLocalUpload = false;
+        $existingExternalImages = [];
+        $existingExternalVideos = [];
+        for ($i = 0; $i < 6; $i++) {
+            $colVal = trim((string)($row['post_img' . $i] ?? ''));
+            if ($colVal !== '' && $colVal !== 'null' && $colVal !== 'undefined') {
+                if (!str_starts_with($colVal, 'http://') && !str_starts_with($colVal, 'https://')) {
+                    $hasLocalUpload = true;
+                } else {
+                    if (\App\classes\VideoParser::isVideoUrl($colVal)) {
+                        $existingExternalVideos[] = $colVal;
+                    } else {
+                        $existingExternalImages[] = $colVal;
+                    }
+                }
+            }
+        }
+
+        $rowVideos = [];
+        if (!$hasLocalUpload) {
+            $extractedAssets = \App\services\LinkPreviewService::extractPhotoAssetsFromText($message, 6);
+            $finalImages = !empty($extractedAssets['images']) ? $extractedAssets['images'] : $existingExternalImages;
+            $finalVideos = !empty($extractedAssets['videos']) ? $extractedAssets['videos'] : $existingExternalVideos;
+
+            if (!empty($finalImages)) {
+                $row['images'] = $finalImages;
+                foreach ($finalImages as $slotIdx => $imgUrl) {
+                    $row['post_img' . $slotIdx] = $imgUrl;
+                }
+            }
+
+            if (!empty($finalVideos)) {
+                $rowVideos = array_map(function ($v) {
+                    $thumb = null;
+                    if (preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|ggpht\.com)/#i', $v)) {
+                        $thumb = preg_replace('/=.*$/i', '=s1600', $v);
+                    }
+                    return [
+                        'type' => 'direct',
+                        'videoId' => null,
+                        'thumbnailUrl' => $thumb,
+                        'embedUrl' => \App\services\LinkPreviewService::getProxiedVideoUrl($v),
+                        'originalUrl' => $v,
+                        'trimStart' => null,
+                        'trimEnd' => null,
+                    ];
+                }, $finalVideos);
+                $row['videos'] = $rowVideos;
+                $row['video'] = $rowVideos[0];
+            }
+
+            if ($linkPreview === null && ($extractedAssets['preview'] ?? null) !== null) {
+                $linkPreview = $extractedAssets['preview'];
+            }
+
+            if (!empty($extractedAssets['cleaned_message'])) {
+                $row['displayMessage'] = $extractedAssets['cleaned_message'];
+            } elseif (!empty($finalImages) || !empty($finalVideos)) {
+                $row['displayMessage'] = \App\services\LinkPreviewService::cleanPhotoLinkFromMessage(
+                    $message,
+                    array_merge($finalImages, $finalVideos)
+                );
+            }
+        } elseif (!empty($existingExternalVideos)) {
+            $rowVideos = array_map(function ($v) {
+                $thumb = null;
+                if (preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|ggpht\.com)/#i', $v)) {
+                    $thumb = preg_replace('/=.*$/i', '=s1600', $v);
+                }
+                return [
+                    'type' => 'direct',
+                    'videoId' => null,
+                    'thumbnailUrl' => $thumb,
+                    'embedUrl' => \App\services\LinkPreviewService::getProxiedVideoUrl($v),
+                    'originalUrl' => $v,
+                    'trimStart' => null,
+                    'trimEnd' => null,
+                ];
+            }, $existingExternalVideos);
+            $row['videos'] = $rowVideos;
+            $row['video'] = $rowVideos[0];
+        }
+
+        // Hydrate images array from post_img0..5 slots if not already hydrated, filtering out video streams
+        if (empty($row['images'])) {
+            $slotImages = [];
+            for ($i = 0; $i < 6; $i++) {
+                $colVal = trim((string)($row['post_img' . $i] ?? ''));
+                if ($colVal !== '' && $colVal !== 'null' && $colVal !== 'undefined' && !\App\classes\VideoParser::isVideoUrl($colVal)) {
+                    $slotImages[] = $colVal;
+                }
+            }
+            if (!empty($slotImages)) {
+                $row['images'] = $slotImages;
+            }
+        }
+
         /** @var array<int, mixed> $postTags */
         $postTags = isset($row['post_tags']) && is_array($row['post_tags']) ? array_values($row['post_tags']) : [];
 
         $viewsCount = max(0, (int)($row['views_count'] ?? 0));
         $voiceCapsuleUrl = !empty($row['voice_capsule_url']) ? (string)$row['voice_capsule_url'] : null;
+        $arEmoji = !empty($row['ar_emoji']) ? (string)$row['ar_emoji'] : null;
+        if ($arEmoji === null && preg_match('/:([a-z0-9_]+_3d):/i', $message, $m)) {
+            $arEmoji = $m[1];
+        }
         $isOfficialPost = ($id === \App\services\FamilyPlatformAccountService::getAccountId()) || !empty($row['is_official']);
         if ($isOfficialPost && (empty($profileImg) || str_contains($profileImg, 'avatarM') || str_contains($profileImg, 'avatarF'))) {
             $profileImg = '/images/logo/logo.png';
@@ -150,7 +256,11 @@ final class PostDto implements JsonSerializable
             rawAttributes: $row,
             viewsCount: $viewsCount,
             voiceCapsuleUrl: $voiceCapsuleUrl,
-            isOfficialPost: $isOfficialPost
+            isOfficialPost: $isOfficialPost,
+            arEmoji: $arEmoji,
+            videos: $rowVideos,
+            video: $rowVideos[0] ?? null,
+            targetScope: (string)($row['target_scope'] ?? 'all')
         );
     }
 
@@ -185,8 +295,25 @@ final class PostDto implements JsonSerializable
         $arr['link_preview'] = $this->linkPreview;
         $arr['post_tags'] = $this->postTags;
         $arr['views_count'] = $this->viewsCount;
+        $arr['target_scope'] = $this->targetScope;
         $arr['voice_capsule_url'] = $this->voiceCapsuleUrl;
         $arr['is_official'] = $this->isOfficialPost;
+        $arr['ar_emoji'] = $this->arEmoji;
+        $arr['videos'] = $this->videos;
+        $arr['video'] = $this->video;
+
+        if (isset($this->rawAttributes['images'])) {
+            $arr['images'] = $this->rawAttributes['images'];
+        }
+        for ($i = 0; $i < 6; $i++) {
+            if (isset($this->rawAttributes['post_img' . $i])) {
+                $arr['post_img' . $i] = $this->rawAttributes['post_img' . $i];
+            }
+        }
+        if (isset($this->rawAttributes['displayMessage'])) {
+            $arr['displayMessage'] = $this->rawAttributes['displayMessage'];
+            $arr['cleanMessage'] = $this->rawAttributes['displayMessage'];
+        }
 
         return $arr;
     }

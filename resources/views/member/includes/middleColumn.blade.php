@@ -117,6 +117,9 @@
   }
 </style>
 <div class="feed-column">
+  @if(!empty($isPendingApproval))
+    @include('member.includes.pendingApprovalHoldingCard')
+  @else
   <!-- Proactive Wedding Anniversary Prompt Banner (World-Class Milestone Onboarding) -->
   @if(!empty($data['needs_wedding_date_prompt']))
   <div class="card mb-4 border-0 shadow-sm wedding-anniversary-prompt-card" id="weddingAnniversaryPromptCard">
@@ -295,9 +298,16 @@
               <i class="bi bi-person-plus-fill"></i>
             </div>
             <div>
-              <h6 class="fw-bold mb-1 text-dark" style="font-size: 1rem;">
-                👋 <strong>{{ htmlspecialchars($joinReq['requesterName'] ?? 'New Member') }}</strong> {{ __('family.wants_to_join', 'wants to join your :code family network', ['code' => htmlspecialchars($joinReq['family_code'] ?? '')]) }}
-              </h6>
+              <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                <h6 class="fw-bold mb-0 text-dark" style="font-size: 1rem;">
+                  👋 <strong>{{ htmlspecialchars($joinReq['requesterName'] ?? 'New Member') }}</strong> {{ __('family.wants_to_join', 'wants to join your :code family network', ['code' => htmlspecialchars($joinReq['family_code'] ?? '')]) }}
+                </h6>
+                @if(!empty($joinReq['is_escalated']))
+                  <span class="badge rounded-pill px-2.5 py-1" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-size: 0.76rem;">
+                    <i class="bi bi-broadcast me-1"></i> Family Broadcast Escalation
+                  </span>
+                @endif
+              </div>
               <p class="mb-0 text-muted" style="font-size: 0.88rem;">
                 {{ __('family.join_desc', 'Requested to connect on FamilyPlatform. Approve to grant immediate access to your family tree and updates.') }}
               </p>
@@ -1106,7 +1116,15 @@
                 
                 <template x-if="videoModalVideos[videoModalIndex] && videoModalVideos[videoModalIndex].type === 'direct'">
                     <div class="position-relative w-100 h-100 d-flex align-items-center justify-content-center">
-                        <video class="w-100 h-100"
+                        <!-- High-Res Video Poster Overlay when paused in modal -->
+                        <img x-show="!videoModalPlaying && videoModalVideos[videoModalIndex]?.thumbnailUrl"
+                             :src="videoModalVideos[videoModalIndex]?.thumbnailUrl"
+                             class="position-absolute top-0 start-0 w-100 h-100 object-fit-contain pointer-events-none"
+                             style="z-index: 2; border-radius: 14px;"
+                             alt="Full video preview"
+                             x-on:error="$el.style.display = 'none'">
+
+                        <video referrerpolicy="no-referrer" class="w-100 h-100"
                                :src="videoModalVideos[videoModalIndex]?.embedUrl"
                                playsinline
                                webkit-playsinline
@@ -1347,7 +1365,7 @@
 
   <!-- The Modal Structure (Hidden by default) for the post image modal -->
   @includeIf('member.modals.postImg')
-
+  @endif
 
   <style>
     @keyframes pulse {

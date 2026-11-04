@@ -611,14 +611,21 @@ class AllMembersData extends InnerJoin
             
             $famCodes = array_column($results, 'family_code');
             
-            // Fallback to legacy personal table if no rows exist in user_families (for transition safety)
+            // Fallback to legacy personal table ONLY if no rows exist in user_families (for transition safety).
+            // If the user has records in user_families (such as 'pending'), DO NOT fall back to prevent leaking unapproved codes.
             if (empty($famCodes)) {
-                $legacyQuery = "SELECT famCode FROM personal WHERE id = :id";
-                $legacyStatement = parent::connect2()->prepare($legacyQuery);
-                $legacyStatement->execute(['id' => $id]);
-                $legacyResult = $legacyStatement->fetch(PDO::FETCH_ASSOC);
-                if ($legacyResult) {
-                    $famCodes[] = $legacyResult['famCode'];
+                $hasUfStmt = parent::connect2()->prepare("SELECT COUNT(*) FROM user_families WHERE user_id = ?");
+                $hasUfStmt->execute([$id]);
+                $hasAnyUserFamilyRow = ((int)$hasUfStmt->fetchColumn()) > 0;
+
+                if (!$hasAnyUserFamilyRow) {
+                    $legacyQuery = "SELECT famCode FROM personal WHERE id = :id";
+                    $legacyStatement = parent::connect2()->prepare($legacyQuery);
+                    $legacyStatement->execute(['id' => $id]);
+                    $legacyResult = $legacyStatement->fetch(PDO::FETCH_ASSOC);
+                    if ($legacyResult && !empty($legacyResult['famCode'])) {
+                        $famCodes[] = $legacyResult['famCode'];
+                    }
                 }
             }
 

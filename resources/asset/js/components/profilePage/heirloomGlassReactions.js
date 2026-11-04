@@ -330,7 +330,11 @@ export function triggerHeirloomBurst(type, source = null) {
   let y = window.innerHeight / 2;
 
   if (source) {
-    if (typeof source.clientX === 'number' && source.clientX > 0) {
+    const touch = source.touches?.[0] || source.changedTouches?.[0];
+    if (touch && typeof touch.clientX === 'number') {
+      x = touch.clientX;
+      y = touch.clientY;
+    } else if (typeof source.clientX === 'number' && source.clientX > 0) {
       x = source.clientX;
       y = source.clientY;
     } else if (source.target && typeof source.target.getBoundingClientRect === 'function') {

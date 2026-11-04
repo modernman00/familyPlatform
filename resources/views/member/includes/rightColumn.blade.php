@@ -36,6 +36,7 @@ foreach(($eventData ?? []) as $event) {
 
 <!-- Right Column - Sidebar -->
 <div class="sidebar-column" x-data="upcomingEvents({{ json_encode($enrichedEvents) }})">
+    @if(empty($isPendingApproval))
     <!-- Suggested Kin & In-Laws (Kinship Radar) — Desktop only (mobile version is in feed column) -->
     @if(!empty($suggestedKin))
     <div class="d-none d-lg-block">
@@ -284,4 +285,17 @@ foreach(($eventData ?? []) as $event) {
             <i class="bi bi-arrow-right-circle-fill me-1.5" style="color: #a31621;"></i> View Directory
         </a>
     </div>
+    @else
+    <!-- Holding State Info Card for Pending Users -->
+    <div class="card border-0 shadow-sm p-4 mb-4 text-center" style="border-radius: 18px; background-color: var(--card-bg, #ffffff);">
+        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-3" 
+             style="width: 52px; height: 52px; background: rgba(163, 22, 33, 0.08); color: #a31621; font-size: 1.5rem;">
+            <i class="bi bi-calendar2-heart"></i>
+        </div>
+        <h6 class="fw-bold mb-1 text-dark" style="font-size: 1.05rem;">Family Hub Confidential</h6>
+        <p class="text-muted small mb-0" style="font-size: 0.88rem; line-height: 1.5;">
+            Upcoming family birthdays, wedding anniversaries, photo albums, and the connected member directory will automatically appear here once your family membership is approved.
+        </p>
+    </div>
+    @endif
 </div>

@@ -23,6 +23,12 @@
     border: 1px solid rgba(245, 158, 11, 0.35) !important;
     border-left: 5px solid #f59e0b !important;
   }
+  body.dark-mode .family-announcement-card.announcement-celebration,
+  [data-bs-theme="dark"] .family-announcement-card.announcement-celebration {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, #1e293b 100%) !important;
+    border: 1px solid rgba(16, 185, 129, 0.35) !important;
+    border-left: 5px solid #10b981 !important;
+  }
   body.dark-mode .family-announcement-card h5,
   [data-bs-theme="dark"] .family-announcement-card h5 {
     color: #f8fafc !important;
@@ -45,18 +51,22 @@
         @foreach($activeAnnouncements as $announcement)
             @php
                 $prio = (string)($announcement['priority'] ?? 'important');
+                $type = (string)($announcement['type'] ?? 'general');
                 $isUrgent = ($prio === 'urgent');
                 $isNormal = ($prio === 'normal');
+                $isCelebration = ($type === 'celebration');
                 
-                $bgColor = $isUrgent 
-                    ? 'linear-gradient(135deg, #fff1f2 0%, #fee2e2 100%)' 
-                    : ($isNormal ? 'linear-gradient(135deg, #fdf5f5 0%, #f5dede 100%)' : 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)');
+                $bgColor = $isCelebration
+                    ? 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)'
+                    : ($isUrgent 
+                        ? 'linear-gradient(135deg, #fff1f2 0%, #fee2e2 100%)' 
+                        : ($isNormal ? 'linear-gradient(135deg, #fdf5f5 0%, #f5dede 100%)' : 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)'));
                 
-                $borderLeftColor = $isUrgent ? '#ef4444' : ($isNormal ? '#a31621' : '#f59e0b');
-                $textColor = $isUrgent ? '#991b1b' : ($isNormal ? '#8a1019' : '#92400e');
-                $iconClass = $isUrgent ? 'bi-exclamation-octagon-fill text-danger' : ($isNormal ? 'bi-megaphone-fill text-primary' : 'bi-pin-angle-fill text-warning');
-                $badgeText = $isUrgent ? 'URGENT NOTICE' : ($isNormal ? 'FAMILY BULLETIN' : 'IMPORTANT ANNOUNCEMENT');
-                $badgeClass = $isUrgent ? 'bg-danger text-white' : ($isNormal ? 'bg-primary text-white' : 'bg-warning text-dark');
+                $borderLeftColor = $isCelebration ? '#10b981' : ($isUrgent ? '#ef4444' : ($isNormal ? '#a31621' : '#f59e0b'));
+                $textColor = $isCelebration ? '#065f46' : ($isUrgent ? '#991b1b' : ($isNormal ? '#8a1019' : '#92400e'));
+                $iconClass = $isCelebration ? 'bi-stars text-success' : ($isUrgent ? 'bi-exclamation-octagon-fill text-danger' : ($isNormal ? 'bi-megaphone-fill text-primary' : 'bi-pin-angle-fill text-warning'));
+                $badgeText = $isCelebration ? 'CELEBRATION' : ($isUrgent ? 'URGENT NOTICE' : ($isNormal ? 'FAMILY BULLETIN' : 'IMPORTANT ANNOUNCEMENT'));
+                $badgeClass = $isCelebration ? 'bg-success text-white' : ($isUrgent ? 'bg-danger text-white' : ($isNormal ? 'bg-primary text-white' : 'bg-warning text-dark'));
                 
                 $annAuthorName = trim((string)($announcement['firstName'] ?? 'Family') . ' ' . (string)($announcement['lastName'] ?? 'Member'));
                 $annDate = !empty($announcement['created_at']) ? date('M j, g:i A', strtotime((string)$announcement['created_at'])) : 'Recent';
@@ -67,7 +77,7 @@
                 $annWhatsappUrl = 'https://api.whatsapp.com/send?text=' . rawurlencode($annWhatsappText);
             @endphp
 
-            <div class="card mb-3 border-0 shadow-sm family-announcement-card {{ $isUrgent ? 'announcement-urgent' : ($isNormal ? 'announcement-normal' : 'announcement-important') }}" id="announcementCard-{{ $announcement['id'] }}"
+            <div class="card mb-3 border-0 shadow-sm family-announcement-card {{ $isCelebration ? 'announcement-celebration' : ($isUrgent ? 'announcement-urgent' : ($isNormal ? 'announcement-normal' : 'announcement-important')) }}" id="announcementCard-{{ $announcement['id'] }}"
                  style="border-radius: 16px; background: {{ $bgColor }}; border-left: 5px solid {{ $borderLeftColor }} !important;">
                 <div class="card-body p-3 p-sm-4">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">

@@ -33,6 +33,7 @@ public/js/*
 !public/js/pwa-notifications.js
 !public/js/pwa-install.js
 !public/js/telemetry.js
+!public/js/atg-emoji-engine.js
 olaogun.test-key.pem
 olaogun.test.pem 
 

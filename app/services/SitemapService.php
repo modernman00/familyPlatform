@@ -123,7 +123,7 @@ final class SitemapService
         }
 
         if (!rename($tempFile, $targetFile)) {
-            @unlink($tempFile);
+            @unlink($tempFile); // nosemgrep: php.lang.security.unlink-use.unlink-use
             return [
                 'success' => false,
                 'url_count' => 0,

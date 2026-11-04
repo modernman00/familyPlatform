@@ -16,6 +16,12 @@ $router->map('POST', '/api/family-code/verify-inviter', 'App\controller\auth\Fam
 // Complete registration with approval request
 $router->map('POST', '/api/family-code/complete-registration', 'App\controller\auth\FamilyCodeApprovalController@completeRegistration', 'FAMILY_CODE_COMPLETE_REGISTRATION');
 
+// Nudge approvers or family
+$router->map('POST', '/api/family-code/nudge', 'App\controller\auth\FamilyCodeApprovalController@nudgeApprover', 'FAMILY_CODE_NUDGE');
+
+// Check approval status
+$router->map('GET', '/api/family-code/status', 'App\controller\auth\FamilyCodeApprovalController@checkApprovalStatus', 'FAMILY_CODE_STATUS');
+
 // Approve a family code request
 $router->map('GET|POST', '/api/family-code/approve/[i:requestId]', 'App\controller\auth\FamilyCodeApprovalController@approveRequest', 'FAMILY_CODE_APPROVE');
 

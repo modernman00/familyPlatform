@@ -89,6 +89,19 @@ class FamilyCodeApprovalReminder
     }
 
     /**
+     * Escalate requests older than 20 minutes to all members of the family code.
+     * Should run frequently (e.g. every 5 minutes).
+     */
+    public function escalateOverdueRequests(): int
+    {
+        $escalatedCount = $this->approvalService->escalateOverdueRequests();
+        if ($escalatedCount > 0) {
+            error_log("Family code approval: Escalated {$escalatedCount} overdue pending requests to family broadcast.");
+        }
+        return $escalatedCount;
+    }
+
+    /**
      * Run all reminder tasks
      * @return array<string, int>
      */
@@ -96,7 +109,8 @@ class FamilyCodeApprovalReminder
     {
         return [
             'reminders_sent' => $this->sendPendingReminders(),
-            'requests_expired' => $this->expirePendingRequests()
+            'requests_expired' => $this->expirePendingRequests(),
+            'requests_escalated' => $this->escalateOverdueRequests()
         ];
     }
 

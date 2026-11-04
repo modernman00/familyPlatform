@@ -317,9 +317,9 @@ export const handleNotificationClickNavigation = (targetUrl, e) => {
         const parsed = new URL(targetUrl, window.location.origin);
         const currentPath = window.location.pathname.toLowerCase().replace(/\/$/, '');
         const targetPath = parsed.pathname.toLowerCase().replace(/\/$/, '');
+        const isFeedPath = (p) => p === '' || p === '/' || p === '/profilepage' || p === '/member/profilepage';
         const isCurrentPage = (currentPath === targetPath) || 
-            (currentPath === '' && targetPath === '/profilepage') ||
-            (currentPath === '/profilepage' && targetPath === '');
+            (isFeedPath(currentPath) && isFeedPath(targetPath));
 
         if (isCurrentPage) {
             if (e && typeof e.preventDefault === 'function') {

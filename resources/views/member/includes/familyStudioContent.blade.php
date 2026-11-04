@@ -541,7 +541,7 @@
                                     @if(!empty($fatherNode['is_deceased']))
                                         <span class="badge bg-secondary ms-1" style="font-size: 0.7rem;"><i class="bi bi-flower1"></i> Deceased</span>
                                     @endif
-                                    <h4 class="relative-name text-truncate">{{ ucwords(strtolower($fatherNode['first_name'] . ' ' . $fatherNode['last_name'])) }}</h4>
+                                    <h4 class="relative-name text-truncate">{{ \App\services\NameFormatterService::formatFirstAndLast($fatherNode['first_name'], $fatherNode['last_name'])['full_name'] }}</h4>
                                     <div class="relative-subtext text-truncate">{{ $fatherNode['email'] ?: 'No email on record' }}</div>
                                 </div>
                             </div>
@@ -608,10 +608,10 @@
                                     @if(!empty($motherNode['is_deceased']))
                                         <span class="badge bg-secondary ms-1" style="font-size: 0.7rem;"><i class="bi bi-flower1"></i> Deceased</span>
                                     @endif
-                                    <h4 class="relative-name text-truncate">{{ ucwords(strtolower($motherNode['first_name'] . ' ' . $motherNode['last_name'])) }}</h4>
+                                    <h4 class="relative-name text-truncate">{{ \App\services\NameFormatterService::formatFirstAndLast($motherNode['first_name'], $motherNode['last_name'])['full_name'] }}</h4>
                                     <div class="text-primary fw-semibold small card-maiden-name {{ empty($motherNode['maiden_name']) ? 'd-none' : '' }}">
                                         @if(!empty($motherNode['maiden_name']))
-                                            née {{ ucwords(strtolower($motherNode['maiden_name'])) }}
+                                            née {{ \App\services\NameFormatterService::formatName($motherNode['maiden_name']) }}
                                         @endif
                                     </div>
                                     <div class="relative-subtext text-truncate">{{ $motherNode['email'] ?: 'No email on record' }}</div>
@@ -736,7 +736,7 @@
                                 <span class="role-chip role-chip-root">
                                     <i class="bi bi-star-fill text-warning"></i> You (Root)
                                 </span>
-                                <h4 class="relative-name text-truncate">{{ ucwords(strtolower(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? ''))) }}</h4>
+                                <h4 class="relative-name text-truncate">{{ \App\services\NameFormatterService::formatFirstAndLast($data['firstName'] ?? '', $data['lastName'] ?? '')['full_name'] }}</h4>
                                 <div class="relative-subtext text-truncate">{{ $data['email'] ?? '' }}</div>
                             </div>
                         </div>
@@ -790,10 +790,10 @@
                                     @if(!empty($member['is_deceased']))
                                         <span class="badge bg-secondary ms-1" style="font-size: 0.7rem;"><i class="bi bi-flower1"></i> Deceased</span>
                                     @endif
-                                    <h4 class="relative-name text-truncate">{{ ucwords(strtolower($member['first_name'] . ' ' . $member['last_name'])) }}</h4>
+                                    <h4 class="relative-name text-truncate">{{ \App\services\NameFormatterService::formatFirstAndLast($member['first_name'], $member['last_name'])['full_name'] }}</h4>
                                     <div class="text-primary fw-semibold small card-maiden-name {{ empty($member['maiden_name']) ? 'd-none' : '' }}">
                                         @if(!empty($member['maiden_name']))
-                                            née {{ ucwords(strtolower($member['maiden_name'])) }}
+                                            née {{ \App\services\NameFormatterService::formatName($member['maiden_name']) }}
                                         @endif
                                     </div>
                                     <div class="relative-subtext text-truncate">{{ $member['email'] ?: 'No email on record' }}</div>
@@ -876,7 +876,7 @@
                                     @if(!empty($child['is_deceased']))
                                         <span class="badge bg-secondary ms-1" style="font-size: 0.7rem;"><i class="bi bi-flower1"></i> Deceased</span>
                                     @endif
-                                    <h4 class="relative-name text-truncate">{{ ucwords(strtolower($child['first_name'] . ' ' . $child['last_name'])) }}</h4>
+                                    <h4 class="relative-name text-truncate">{{ \App\services\NameFormatterService::formatFirstAndLast($child['first_name'], $child['last_name'])['full_name'] }}</h4>
                                     <div class="relative-subtext text-truncate">{{ $child['email'] ?: 'No email on record' }}</div>
                                 </div>
                             </div>
@@ -1061,6 +1061,12 @@
                         <input type="hidden" name="lineage_code" class="studio-lineage-code-input" value="{{ ($activeLineageScope ?? 'primary') === 'maternal' ? ($maternalFamCode ?? '') : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}">
                         <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-heart-fill me-2 text-danger"></i>Partner / Spouse Details</h6>
                         <div class="mb-3">
+                            @include('components.lineage.culturalTitleSelect', ['name' => 'title', 'id' => 'studioPartnerTitle', 'showLabel' => true, 'label' => 'Title (Optional)'])
+                        </div>
+                        <div class="mb-3">
+                            @include('components.lineage.culturalTitleSelect', ['name' => 'title', 'id' => 'studioUncleTitle', 'showLabel' => true, 'label' => 'Title (Optional)'])
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label small fw-semibold">First Name *</label>
                             <input type="text" name="first_name" class="form-control" placeholder="First name" required>
                         </div>
@@ -1139,6 +1145,9 @@
                             </div>
                         </div>
                         <div class="mb-3">
+                            @include('components.lineage.culturalTitleSelect', ['name' => 'title', 'id' => 'studioChildTitle', 'showLabel' => true, 'label' => 'Title (Optional)'])
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label small fw-semibold">First Name *</label>
                             <input type="text" name="first_name" class="form-control" placeholder="Child's first name" required>
                         </div>
@@ -1171,6 +1180,9 @@
                         <input type="hidden" name="lineage_scope" class="studio-lineage-scope-input" value="{{ $activeLineageScope ?? 'primary' }}">
                         <input type="hidden" name="lineage_code" class="studio-lineage-code-input" value="{{ ($activeLineageScope ?? 'primary') === 'maternal' ? ($maternalFamCode ?? '') : ($primaryFamCode ?? ($data['famCode'] ?? '')) }}">
                         <h6 class="fw-bold mb-3 text-warning"><i class="bi bi-people-fill me-2"></i><span id="studioSiblingHeading">Sibling Details</span></h6>
+                        <div class="mb-3">
+                            @include('components.lineage.culturalTitleSelect', ['name' => 'title', 'id' => 'studioSiblingTitle', 'showLabel' => true, 'label' => 'Title (Optional)'])
+                        </div>
                         <div class="mb-3">
                             <label class="form-label small fw-semibold">First Name *</label>
                             <input type="text" name="first_name" class="form-control" placeholder="Sibling's first name" required>
@@ -1234,21 +1246,27 @@
                             @endif
                         </div>
                         <div class="row g-2 mb-3">
-                            <div class="col-6">
+                            <div class="col-12 col-md-4">
+                                @include('components.lineage.culturalTitleSelect', ['name' => 'father_title', 'id' => 'studioFatherTitle', 'showLabel' => true, 'label' => 'Father Title'])
+                            </div>
+                            <div class="col-6 col-md-4">
                                 <label class="form-label small fw-semibold">Father First Name</label>
                                 <input type="text" name="father_first_name" class="form-control" placeholder="Father first name">
                             </div>
-                            <div class="col-6">
+                            <div class="col-6 col-md-4">
                                 <label class="form-label small fw-semibold">Father Last Name</label>
                                 <input type="text" name="father_last_name" class="form-control" placeholder="Father last name">
                             </div>
                         </div>
                         <div class="row g-2 mb-3">
-                            <div class="col-6">
+                            <div class="col-12 col-md-4">
+                                @include('components.lineage.culturalTitleSelect', ['name' => 'mother_title', 'id' => 'studioMotherTitle', 'showLabel' => true, 'label' => 'Mother Title'])
+                            </div>
+                            <div class="col-6 col-md-4">
                                 <label class="form-label small fw-semibold">Mother First Name</label>
                                 <input type="text" name="mother_first_name" class="form-control" placeholder="Mother first name">
                             </div>
-                            <div class="col-6">
+                            <div class="col-6 col-md-4">
                                 <label class="form-label small fw-semibold">Mother Last Name</label>
                                 <input type="text" name="mother_last_name" class="form-control" placeholder="Mother last name">
                             </div>
@@ -1313,6 +1331,9 @@
                             </div>
                         </div>
 
+                        <div class="mb-3">
+                            @include('components.lineage.culturalTitleSelect', ['name' => 'title', 'id' => 'studioUncleTitle', 'showLabel' => true, 'label' => 'Title (Optional)'])
+                        </div>
                         <div class="mb-3">
                             <label class="form-label small fw-semibold">First Name *</label>
                             <input type="text" name="first_name" class="form-control" placeholder="First name" required>
@@ -1386,6 +1407,9 @@
                         </div>
 
                         <div class="mb-3">
+                            @include('components.lineage.culturalTitleSelect', ['name' => 'title', 'id' => 'studioUncleTitle', 'showLabel' => true, 'label' => 'Title (Optional)'])
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label small fw-semibold">First Name *</label>
                             <input type="text" name="first_name" class="form-control" placeholder="First name" required>
                         </div>
@@ -1438,11 +1462,14 @@
                     <div id="studioEditError" class="alert alert-danger d-none" style="border-radius: var(--stitch-radius-md);"></div>
 
                     <div class="row g-2 mb-3">
-                        <div class="col-6">
+                        <div class="col-12 col-md-4">
+                            @include('components.lineage.culturalTitleSelect', ['name' => 'title', 'id' => 'editTitle', 'showLabel' => true, 'label' => 'Title (Optional)'])
+                        </div>
+                        <div class="col-6 col-md-4">
                             <label class="form-label small fw-semibold">First Name *</label>
                             <input type="text" name="first_name" id="editFirstName" class="form-control" required>
                         </div>
-                        <div class="col-6">
+                        <div class="col-6 col-md-4">
                             <label class="form-label small fw-semibold">Last Name</label>
                             <input type="text" name="last_name" id="editLastName" class="form-control">
                         </div>
@@ -1520,6 +1547,9 @@
 <script>
     function toTitleCase(str) {
         if (!str) return '';
+        if (typeof formatPersonName === 'function') {
+            return formatPersonName(str);
+        }
         return str.toLowerCase().replace(/(?:^|\s|-)\S/g, function(a) { return a.toUpperCase(); });
     }
 
@@ -1825,7 +1855,22 @@
                 if (data.status === 'success' && data.message && data.message.node) {
                     const n = data.message.node;
                     document.getElementById('editNodeId').value = n.id;
-                    document.getElementById('editFirstName').value = n.first_name || '';
+                    let currentTitle = '';
+                    let currentFirst = n.first_name || '';
+                    const titleEl = document.getElementById('editTitle');
+                    if (titleEl) {
+                        const opts = Array.from(titleEl.options).map(o => o.value).filter(Boolean);
+                        opts.sort((a, b) => b.length - a.length);
+                        for (const opt of opts) {
+                            if (currentFirst.toLowerCase().startsWith(opt.toLowerCase() + ' ') || currentFirst.toLowerCase() === opt.toLowerCase()) {
+                                currentTitle = opt;
+                                currentFirst = currentFirst.slice(opt.length).trim();
+                                break;
+                            }
+                        }
+                        titleEl.value = currentTitle;
+                    }
+                    document.getElementById('editFirstName').value = currentFirst;
                     document.getElementById('editLastName').value = n.last_name || '';
                     document.getElementById('editMaidenName').value = n.maiden_name || '';
                     document.getElementById('editEmail').value = n.email || '';

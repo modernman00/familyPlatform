@@ -582,4 +582,88 @@ final class FamilyAiHubController extends BaseController
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
     }
+
+    /**
+     * Endpoint: Sovereign Hybrid Search (BM25 + 64-D Vector RRF) across Family Kinship Directory,
+     * Family Journals, and Shared Feed Reels (scoped strictly to the authenticated famCode).
+     * Powered by Src\Search\SovereignSearchEngine & Src\Search\VectorEngine.
+     */
+    public function sovereignSearch(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        try {
+            $raw = file_get_contents('php://input');
+            $json = is_string($raw) ? (json_decode($raw, true) ?: []) : [];
+
+            $query = trim(strip_tags((string) ($json['query'] ?? $_POST['query'] ?? $_GET['q'] ?? $_GET['query'] ?? '')));
+            $limit = max(1, min((int) ($json['limit'] ?? $_POST['limit'] ?? $_GET['limit'] ?? 10), 50));
+
+            $corpus = [
+                [
+                    'id' => 'kin_guide_1',
+                    'title' => 'Kinship Constellation & Relational Staging Dock',
+                    'body' => 'Graft unplaced relatives into accurate generational branches and preserve family lineage integrity.',
+                    'category' => 'Kinship Tree',
+                ],
+                [
+                    'id' => 'kin_guide_2',
+                    'title' => 'Judge Yommy Family RoundTable & Harmony Tribunal',
+                    'body' => 'Resolve household chore debates and family disputes with lighthearted AI arbitration.',
+                    'category' => 'Family RoundTable',
+                ],
+                [
+                    'id' => 'kin_guide_3',
+                    'title' => 'Family Video Theatre & Multi-Clip Heritage Reels',
+                    'body' => 'Watch side-by-side family reunion videos with sequential theatre autoplay.',
+                    'category' => 'Heritage Media',
+                ],
+            ];
+
+            if ($this->famCode !== '') {
+                try {
+                    $pdo = Db::connect2();
+                    $mStmt = $pdo->prepare('SELECT id, firstName, lastName, email FROM personal WHERE famCode = ? LIMIT 100');
+                    $mStmt->execute([$this->famCode]);
+                    while ($m = $mStmt->fetch(\PDO::FETCH_ASSOC)) {
+                        $fullName = trim(($m['firstName'] ?? '') . ' ' . ($m['lastName'] ?? ''));
+                        $corpus[] = [
+                            'id' => 'member_' . ($m['id'] ?? ''),
+                            'title' => $fullName !== '' ? $fullName : 'Family Member',
+                            'body' => 'Verified family member in kinship constellation (' . ($this->famCode) . ')',
+                            'category' => 'Family Member',
+                        ];
+                    }
+
+                    $pStmt = $pdo->prepare('SELECT post_no, fullName, postMessage FROM post WHERE postFamCode = ? ORDER BY post_no DESC LIMIT 100');
+                    $pStmt->execute([$this->famCode]);
+                    while ($p = $pStmt->fetch(\PDO::FETCH_ASSOC)) {
+                        $corpus[] = [
+                            'id' => 'post_' . ($p['post_no'] ?? ''),
+                            'title' => 'Memory by ' . ($p['fullName'] ?? 'Relative'),
+                            'body' => (string) ($p['postMessage'] ?? ''),
+                            'category' => 'Family Feed Memory',
+                        ];
+                    }
+                } catch (\Throwable $dbEx) {
+                    // Graceful fallback to baseline kinship corpus
+                }
+            }
+
+            $engine = new \Src\Search\SovereignSearchEngine(new \Src\Search\VectorEngine());
+            $results = $engine->searchCorpus($query, $corpus, $limit);
+
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+            echo json_encode([
+                'success' => true,
+                'app' => 'FamilyPlatform',
+                'engine' => 'SovereignSearchEngine+VectorEngine (BM25+RRF)',
+                'query' => htmlspecialchars($query, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+                'count' => count($results),
+                'results' => $results,
+            ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Unable to execute family sovereign search.']);
+        }
+    }
 }

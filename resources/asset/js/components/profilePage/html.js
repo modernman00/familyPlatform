@@ -32,7 +32,7 @@ const renderVideoPlayer = (postMessage) => {
       <div class="video-embed-container mb-3 position-relative" style="border-radius: 14px; overflow: hidden; background: #07090e; box-shadow: 0 4px 14px rgba(0,0,0,0.12);">
         <div class="video-rendition-frame position-relative mx-auto overflow-hidden" 
              style="border-radius: 14px; background: radial-gradient(circle at center, rgba(30, 41, 59, 0.55) 0%, rgba(7, 9, 14, 0.98) 100%);">
-          <video class="feed-post-video w-100" 
+          <video referrerpolicy="no-referrer" class="feed-post-video w-100" 
                  src="${esc(video.embedUrl)}" 
                  controls 
                  playsinline 

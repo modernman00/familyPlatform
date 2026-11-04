@@ -40,6 +40,7 @@ include_once __DIR__ . "/familyMigrationRoute.php";
 include_once __DIR__ . "/childAccountRoute.php";
 include_once __DIR__ . "/omniSearchRoute.php";
 include_once __DIR__ . "/weeklyReelRoute.php";
+include_once __DIR__ . "/emojiRoute.php";
 
 // Internationalization & Diaspora Language Switching
 $router->map('GET|POST|HEAD', '/locale/[a:locale]', 'App\controller\LocaleController@switch', 'LOCALE_SWITCH');

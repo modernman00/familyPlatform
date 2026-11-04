@@ -176,8 +176,12 @@ try {
                 let formData;
                 if (!isEditing) {
                     formData = new FormData(formExtra);
-                    const requesterFamCodeValue = localStorage.getItem('requesterFamCode');
-                    formData.append('postFamCode', requesterFamCodeValue);
+                    if (!formData.has('postFamCode') || !formData.get('postFamCode')) {
+                        const requesterFamCodeValue = localStorage.getItem('requesterFamCode');
+                        if (requesterFamCodeValue) {
+                            formData.append('postFamCode', requesterFamCodeValue);
+                        }
+                    }
 
                     // Explicitly ensure all accumulated image files are appended directly to formData
                     const selectedFiles = getSelectedPostFiles();
@@ -232,15 +236,20 @@ try {
                         ? response.data.message
                         : null;
 
-                    // Close the modal first so the feed underneath is immediately
-                    // interactive, then hand the new post to the Alpine feed.
+                    // Close the modal first so the feed underneath is immediately interactive
                     closePostModal();
-                    window.dispatchEvent(new CustomEvent('post-created', { detail: newPostData }));
+
+                    const postNo = newPostData?.post_no;
 
                     formExtra.reset();
                     clearSelectedPostFiles();
                     const closePreview = document.getElementById('closeImagePreview');
                     if (closePreview) closePreview.click();
+
+                    const arPreview = document.getElementById('attachedArEmojiPreview');
+                    if (arPreview) arPreview.classList.add('d-none');
+                    const arInput = document.getElementById('attachedArEmojiInput');
+                    if (arInput) arInput.value = '';
 
                     // Reset composer builders after a successful submission
                     if (typeof window.__resetPollBuilder === 'function') {
@@ -260,6 +269,15 @@ try {
                     }
                     const addOptBtn = document.getElementById('addPollOptionBtn');
                     if (addOptBtn) addOptBtn.style.display = '';
+
+                    const targetUrl = '/member/profilePage' + (postNo ? '#post' + postNo : '');
+
+                    // Smooth redirect just like ordinary text/image posting
+                    window.location.assign(targetUrl);
+                    if (window.location.pathname.toLowerCase().includes('profilepage')) {
+                        window.location.reload();
+                    }
+                    return;
 
                     Swal.fire({
                         toast: true,

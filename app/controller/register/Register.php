@@ -251,12 +251,14 @@ final class Register extends Db
             );
 
             // Determine initial family status.
-            // Server-side gate: If joining existing family (not creating), MUST be pending.
-            // Do NOT trust client-side joining_via_invitation flag—verify by checking
-            // if the family code was PRE-POPULATED (from invite token or existing family).
-            $existingFamCode = !empty($cleanData['famCode']);
-            $wasInviteParameter = !empty($_GET['invite']) || !empty($_GET['invite_token']) || !empty($_GET['famCode']);
-            $joiningViaInvitation = $existingFamCode && ($wasInviteParameter || !empty($input['temporary_code']));
+            // Server-side invariant: If the family code already exists in the database,
+            // the status MUST be 'pending' without exception.
+            // Only brand new families founded by the user (generating a fresh, unused code) can start as 'approved'.
+            $candidateFamCode = trim((string)($cleanData['famCode'] ?? ''));
+            $approvalServiceCheck = new \App\service\FamilyCodeApprovalService(self::connect2());
+            $isExistingFamily = $candidateFamCode !== '' && $approvalServiceCheck->familyCodeExists($candidateFamCode);
+
+            $joiningViaInvitation = $isExistingFamily;
             $cleanData['familyStatus'] = $joiningViaInvitation ? 'pending' : 'approved';
 
             // create sessions and some variables
@@ -320,17 +322,32 @@ final class Register extends Db
                     }
                 }
 
-                // Immediate Auto-Claim & Tree Node initialization
-                try {
-                    $claimNodeId = !empty($input['claim_node']) ? (int)$input['claim_node'] : null;
-                    \App\services\FamilyClaimService::claimOrInitializeNode(
-                        (string)$cleanData['famCode'],
-                        (string)$cleanData['id'],
-                        $cleanData,
-                        $claimNodeId
-                    );
-                } catch (\Throwable $e) {
-                    error_log("FamilyClaimService registration error: " . $e->getMessage());
+                // Immediate Auto-Claim & Tree Node initialization ONLY for approved creators of a new family.
+                // Pending members will have their node claimed upon approval in FamilyCodeApprovalService::approveRequest().
+                if ($cleanData['familyStatus'] === 'approved') {
+                    try {
+                        $claimNodeId = !empty($input['claim_node']) ? (int)$input['claim_node'] : null;
+                        \App\services\FamilyClaimService::claimOrInitializeNode(
+                            (string)$cleanData['famCode'],
+                            (string)$cleanData['id'],
+                            $cleanData,
+                            $claimNodeId
+                        );
+                    } catch (\Throwable $e) {
+                        error_log("FamilyClaimService registration error: " . $e->getMessage());
+                    }
+                }
+
+                // If registered with immediate approved status, broadcast join announcement if other family members exist
+                if (!$joiningViaInvitation && !empty($cleanData['famCode'])) {
+                    try {
+                        \App\services\FamilyJoinAnnouncementService::broadcastNewMemberAnnouncement(
+                            (string)$cleanData['famCode'],
+                            (string)$cleanData['id']
+                        );
+                    } catch (\Throwable $annEx) {
+                        error_log('[Register.php] Direct join announcement warning: ' . $annEx->getMessage());
+                    }
                 }
 
                 // If joining via invitation, create the approval request & notify the inviter
@@ -423,15 +440,25 @@ final class Register extends Db
                         session_regenerate_id(true);
                     }
 
+                    sessSet('id', $cleanData['id']);
                     sessSet('manager_id', $cleanData['id']);
-                    sessSet('famCode', $cleanData['famCode']);
+                    sessSet('loggedIn', true);
 
-                    \Src\JwtHandler::issueLoginCookie(['id' => $cleanData['id'], 'role' => 'users']);
-
-                    msgSuccess(200, "Registration complete. Redirecting to your profile...", "/profilePage");
+                    if ($joiningViaInvitation) {
+                        sessSet('famCode', '');
+                        sessSet('famCodes', []);
+                        sessSet('is_pending_approval', true);
+                        \Src\JwtHandler::issueLoginCookie(['id' => $cleanData['id'], 'role' => 'users']);
+                        msgSuccess(200, "Registration complete! You can sign in while awaiting approval.", "/profilePage");
+                    } else {
+                        sessSet('famCode', $cleanData['famCode']);
+                        sessSet('famCodes', [(string)$cleanData['famCode']]);
+                        \Src\JwtHandler::issueLoginCookie(['id' => $cleanData['id'], 'role' => 'users']);
+                        msgSuccess(200, "Registration complete. Redirecting to your profile...", "/profilePage");
+                    }
                 } else {
                     if ($joiningViaInvitation) {
-                        $successMsg = "Hello $firstName - Your registration is complete! An approval request has been sent to your family member. Once they approve, you'll have access to the family network.";
+                        $successMsg = "Hello $firstName - Your registration is complete! An approval request has been sent to your family member. You can sign in to view your approval status, nudge your approver, and personalise your profile.";
                         msgSuccess(200, $successMsg, "/login");
                     } else {
                         // Creating a new family — auto-login immediately and redirect to dashboard

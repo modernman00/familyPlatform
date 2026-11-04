@@ -47,6 +47,47 @@ class FamilyCodeApprovalService
         }
 
         $this->ensureBirthFamilySchema();
+        $this->ensureEscalationSchema();
+    }
+
+    /**
+     * Ensure broadcasted_at, last_nudged_at, and nudge_count columns exist for 20-min escalation & nudging.
+     */
+    private function ensureEscalationSchema(): void
+    {
+        static $done = false;
+        if ($done) {
+            return;
+        }
+        $done = true;
+
+        try {
+            $has = $this->pdo->query(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'family_approval_requests' AND COLUMN_NAME = 'broadcasted_at'"
+            );
+            if ($has !== false && (int)$has->fetchColumn() === 0) {
+                $this->pdo->exec("ALTER TABLE `family_approval_requests` ADD COLUMN `broadcasted_at` TIMESTAMP NULL DEFAULT NULL AFTER `reminder_sent_at`");
+            }
+
+            $hasNudge = $this->pdo->query(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'family_approval_requests' AND COLUMN_NAME = 'last_nudged_at'"
+            );
+            if ($hasNudge !== false && (int)$hasNudge->fetchColumn() === 0) {
+                $this->pdo->exec("ALTER TABLE `family_approval_requests` ADD COLUMN `last_nudged_at` TIMESTAMP NULL DEFAULT NULL AFTER `broadcasted_at`");
+            }
+
+            $hasCount = $this->pdo->query(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'family_approval_requests' AND COLUMN_NAME = 'nudge_count'"
+            );
+            if ($hasCount !== false && (int)$hasCount->fetchColumn() === 0) {
+                $this->pdo->exec("ALTER TABLE `family_approval_requests` ADD COLUMN `nudge_count` INT NOT NULL DEFAULT 0 AFTER `last_nudged_at`");
+            }
+        } catch (\Throwable $e) {
+            error_log('[FamilyCodeApprovalService] escalation schema warning: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -386,7 +427,58 @@ class FamilyCodeApprovalService
     }
 
     /**
+     * Get the active pending join request for a specific user.
+     * Used to render their holding dashboard, time status, and nudge controls.
+     * @return array<string, mixed>|null
+     */
+    public function getUserPendingRequest(string $userId): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT far.*, p.firstName, p.lastName, c.email, c.mobile
+             FROM family_approval_requests far
+             LEFT JOIN personal p ON p.id = far.id
+             LEFT JOIN contact c ON c.id = far.id
+             WHERE far.id = ? AND far.status = "pending"
+             ORDER BY far.created_at DESC
+             LIMIT 1'
+        );
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            return null;
+        }
+
+        $createdAtTs = strtotime((string)$row['created_at']) ?: time();
+        $secondsSinceCreated = max(0, time() - $createdAtTs);
+        $isBroadcasted = !empty($row['broadcasted_at']) || ($secondsSinceCreated >= 1200);
+        $secondsUntilBroadcast = max(0, 1200 - $secondsSinceCreated);
+        $minutesUntilBroadcast = (int)ceil($secondsUntilBroadcast / 60);
+
+        $lastNudgedTs = !empty($row['last_nudged_at']) ? (strtotime((string)$row['last_nudged_at']) ?: 0) : 0;
+        $secondsSinceNudge = $lastNudgedTs > 0 ? (time() - $lastNudgedTs) : 999999;
+        $cooldownRemaining = max(0, 300 - $secondsSinceNudge); // 5 minutes cooldown (300s)
+
+        $inviterName = trim(($row['inviter_first_name'] ?? '') . ' ' . ($row['inviter_last_name'] ?? ''));
+        if ($inviterName === '') {
+            $inviterName = 'Family Administrator';
+        }
+
+        $row['seconds_since_created'] = $secondsSinceCreated;
+        $row['is_broadcasted'] = $isBroadcasted;
+        $row['seconds_until_broadcast'] = $secondsUntilBroadcast;
+        $row['minutes_until_broadcast'] = $minutesUntilBroadcast;
+        $row['seconds_since_nudge'] = $secondsSinceNudge;
+        $row['nudge_cooldown_remaining'] = $cooldownRemaining;
+        $row['can_nudge'] = ($cooldownRemaining === 0);
+        $row['inviter_name'] = $inviterName;
+
+        return $row;
+    }
+
+    /**
      * Get pending approval requests with requester details (for display on Profile Page)
+     * If request is >= 20 mins old or has broadcasted_at, ANY member of that family code can view and approve.
+     * Excludes the viewer themselves (far.id != $userId).
      * @return array<int, array<string, mixed>>
      */
     public function getPendingApprovalsWithDetails(string $userId, ?string $familyCode = null): array
@@ -397,21 +489,40 @@ class FamilyCodeApprovalService
                  FROM family_approval_requests far
                  LEFT JOIN personal p ON p.id = far.id
                  LEFT JOIN profilePics pp ON pp.id = far.id
-                 WHERE (far.approver_id = ? OR (far.approver_id IS NULL AND UPPER(TRIM(REPLACE(far.family_code, "#", ""))) = UPPER(TRIM(REPLACE(?, "#", "")))))
-                   AND far.status = "pending"
+                 WHERE far.status = "pending"
+                   AND far.id != ?
+                   AND (
+                       far.approver_id = ?
+                       OR (
+                           (far.approver_id IS NULL OR far.created_at <= DATE_SUB(NOW(), INTERVAL 20 MINUTE) OR far.broadcasted_at IS NOT NULL)
+                           AND UPPER(TRIM(REPLACE(far.family_code, "#", ""))) = UPPER(TRIM(REPLACE(?, "#", "")))
+                       )
+                   )
                  ORDER BY far.created_at DESC'
             );
-            $stmt->execute([$userId, $familyCode]);
+            $stmt->execute([$userId, $userId, $familyCode]);
         } else {
             $stmt = $this->pdo->prepare(
                 'SELECT far.*, p.firstName AS reqFirstName, p.lastName AS reqLastName, pp.img AS reqImg
                  FROM family_approval_requests far
                  LEFT JOIN personal p ON p.id = far.id
                  LEFT JOIN profilePics pp ON pp.id = far.id
-                 WHERE far.approver_id = ? AND far.status = "pending"
+                 WHERE far.status = "pending"
+                   AND far.id != ?
+                   AND (
+                       far.approver_id = ?
+                       OR (
+                           (far.created_at <= DATE_SUB(NOW(), INTERVAL 20 MINUTE) OR far.broadcasted_at IS NOT NULL)
+                           AND EXISTS (
+                               SELECT 1 FROM user_families uf 
+                               WHERE uf.user_id = ? AND uf.status = "approved" 
+                                 AND UPPER(TRIM(REPLACE(uf.family_code, "#", ""))) = UPPER(TRIM(REPLACE(far.family_code, "#", "")))
+                           )
+                       )
+                   )
                  ORDER BY far.created_at DESC'
             );
-            $stmt->execute([$userId]);
+            $stmt->execute([$userId, $userId, $userId]);
         }
 
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
@@ -425,10 +536,168 @@ class FamilyCodeApprovalService
             $row['requesterName'] = $reqName;
             $row['img'] = $row['reqImg'] ?? 'avatarM.png';
             $row['approval_token'] = $this->generateApprovalToken((int)$row['no']);
+
+            $createdAtTs = strtotime((string)$row['created_at']) ?: time();
+            $row['is_escalated'] = (time() - $createdAtTs >= 1200) || !empty($row['broadcasted_at']);
+
             $results[] = $row;
         }
 
         return $results;
+    }
+
+    /**
+     * Nudge approver or entire family if >= 20 mins have elapsed.
+     * Enforces a 5-minute cooldown between nudges.
+     * @return array{success: bool, message: string, broadcasted?: bool, next_nudge_in?: int}
+     */
+    public function nudgeApprover(int $requestId, string $requesterUserId): array
+    {
+        $request = $this->getApprovalRequest($requestId);
+        if (!$request || (string)$request['id'] !== $requesterUserId || $request['status'] !== 'pending') {
+            return ['success' => false, 'message' => 'Pending approval request not found.'];
+        }
+
+        $lastNudgedTs = !empty($request['last_nudged_at']) ? (strtotime((string)$request['last_nudged_at']) ?: 0) : 0;
+        $secondsSinceNudge = $lastNudgedTs > 0 ? (time() - $lastNudgedTs) : 999999;
+        if ($secondsSinceNudge < 300) {
+            $wait = 300 - $secondsSinceNudge;
+            $mins = (int)ceil($wait / 60);
+            return [
+                'success' => false,
+                'message' => "Please wait {$mins} minute" . ($mins > 1 ? 's' : '') . " before nudging again.",
+                'next_nudge_in' => $wait
+            ];
+        }
+
+        $createdAtTs = strtotime((string)$request['created_at']) ?: time();
+        $isOverdue = (time() - $createdAtTs) >= 1200 || !empty($request['broadcasted_at']);
+
+        // Fetch requester details
+        $stmtUser = $this->pdo->prepare('SELECT p.firstName, p.lastName, c.email FROM personal p LEFT JOIN contact c ON c.id = p.id WHERE p.id = ?');
+        $stmtUser->execute([$requesterUserId]);
+        $requesterData = $stmtUser->fetch(PDO::FETCH_ASSOC) ?: [];
+        $requesterInfo = [
+            'id' => $requesterUserId,
+            'firstName' => $requesterData['firstName'] ?? '',
+            'lastName' => $requesterData['lastName'] ?? '',
+            'email' => $requesterData['email'] ?? ''
+        ];
+
+        $token = $this->generateApprovalToken($requestId);
+        $familyCode = (string)$request['family_code'];
+
+        $notificationService = new NotificationService($this->pdo);
+
+        if ($isOverdue) {
+            // Overdue (>= 20 mins): Broadcast to the entire family!
+            if (empty($request['broadcasted_at'])) {
+                $this->pdo->prepare('UPDATE family_approval_requests SET broadcasted_at = NOW() WHERE no = ?')->execute([$requestId]);
+            }
+            $notificationService->sendFamilyEscalationBroadcast($requestId, $familyCode, $requesterInfo, $token);
+            $broadcasted = true;
+            $msg = "Nudge broadcasted to all family members of #{$familyCode}! Any verified family member can now approve your request.";
+        } else {
+            // Under 20 mins: Nudge specific approver
+            $effectiveApproverId = (string)($request['approver_id'] ?? '');
+            if ($effectiveApproverId === '') {
+                $inviter = $this->findMatchingInviter(
+                    $familyCode,
+                    (string)($request['inviter_first_name'] ?? ''),
+                    (string)($request['inviter_last_name'] ?? ''),
+                    (string)($request['inviter_email_or_mobile'] ?? '')
+                );
+                if ($inviter) {
+                    $effectiveApproverId = (string)$inviter['id'];
+                }
+            }
+
+            if ($effectiveApproverId !== '') {
+                $notificationService->sendApproverNudgeNotification($effectiveApproverId, $requesterInfo, $requestId, $familyCode, $token);
+            }
+            $broadcasted = false;
+            $inviterName = trim(($request['inviter_first_name'] ?? '') . ' ' . ($request['inviter_last_name'] ?? ''));
+            $inviterLabel = $inviterName !== '' ? $inviterName : 'your inviter';
+            $msg = "Friendly nudge sent to {$inviterLabel}! We have reminded them to approve your request.";
+        }
+
+        // Record nudge timestamp
+        $this->pdo->prepare('UPDATE family_approval_requests SET last_nudged_at = NOW(), nudge_count = nudge_count + 1 WHERE no = ?')
+            ->execute([$requestId]);
+
+        return [
+            'success' => true,
+            'message' => $msg,
+            'broadcasted' => $broadcasted,
+            'next_nudge_in' => 300
+        ];
+    }
+
+    /**
+     * Find pending requests older than 20 minutes that haven't been broadcasted yet,
+     * and broadcast them to all family members of the same code.
+     * @return int Count of escalated requests
+     */
+    public function escalateOverdueRequests(?int $specificRequestId = null, int $limit = 50): int
+    {
+        if ($specificRequestId !== null) {
+            $stmt = $this->pdo->prepare(
+                'SELECT no, id, family_code, inviter_first_name, inviter_last_name
+                 FROM family_approval_requests
+                 WHERE no = ?
+                   AND status = "pending"
+                   AND (broadcasted_at IS NULL)
+                   AND created_at <= DATE_SUB(NOW(), INTERVAL 20 MINUTE)
+                 LIMIT 1'
+            );
+            $stmt->execute([$specificRequestId]);
+        } else {
+            $stmt = $this->pdo->prepare(
+                'SELECT no, id, family_code, inviter_first_name, inviter_last_name
+                 FROM family_approval_requests
+                 WHERE status = "pending"
+                   AND (broadcasted_at IS NULL)
+                   AND created_at <= DATE_SUB(NOW(), INTERVAL 20 MINUTE)
+                 ORDER BY no DESC
+                 LIMIT ?'
+            );
+            $stmt->bindValue(1, max(1, min($limit, 100)), PDO::PARAM_INT);
+            $stmt->execute();
+        }
+        $overdue = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        if (empty($overdue)) {
+            return 0;
+        }
+
+        $notificationService = new NotificationService($this->pdo);
+        $escalatedCount = 0;
+
+        foreach ($overdue as $req) {
+            $reqId = (int)$req['no'];
+            $userId = (string)$req['id'];
+            $famCode = (string)$req['family_code'];
+
+            // Mark broadcasted_at
+            $this->pdo->prepare('UPDATE family_approval_requests SET broadcasted_at = NOW() WHERE no = ?')
+                ->execute([$reqId]);
+
+            // Get requester info
+            $stmtUser = $this->pdo->prepare('SELECT p.firstName, p.lastName, c.email FROM personal p LEFT JOIN contact c ON c.id = p.id WHERE p.id = ?');
+            $stmtUser->execute([$userId]);
+            $uRow = $stmtUser->fetch(PDO::FETCH_ASSOC) ?: [];
+            $requesterInfo = [
+                'id' => $userId,
+                'firstName' => $uRow['firstName'] ?? '',
+                'lastName' => $uRow['lastName'] ?? '',
+                'email' => $uRow['email'] ?? ''
+            ];
+
+            $token = $this->generateApprovalToken($reqId);
+            $notificationService->sendFamilyEscalationBroadcast($reqId, $famCode, $requesterInfo, $token);
+            $escalatedCount++;
+        }
+
+        return $escalatedCount;
     }
 
     /**
@@ -466,6 +735,25 @@ class FamilyCodeApprovalService
             if ($inviter) {
                 $effectiveApproverId = (string)$inviter['id'];
             }
+        }
+
+        // If caller is specified and differs from the original inviter, check if 20-min escalation applies:
+        // Any approved member of the family can approve once 20 minutes have passed or request was broadcasted.
+        if ($approverId && $effectiveApproverId && $approverId !== $effectiveApproverId) {
+            $cleanCode = strtoupper(trim(str_replace('#', '', (string)$request['family_code'])));
+            $stmtChkFam = $this->pdo->prepare(
+                'SELECT 1 FROM user_families WHERE user_id = ? AND UPPER(TRIM(REPLACE(family_code, "#", ""))) = ? AND status = "approved" LIMIT 1'
+            );
+            $stmtChkFam->execute([$approverId, $cleanCode]);
+            $isApprovedFamilyMember = (bool)$stmtChkFam->fetchColumn();
+
+            if (!$isApprovedFamilyMember) {
+                error_log("[FamilyCodeApprovalService] approveRequest denied: user {$approverId} is not an approved member of {$cleanCode}");
+                return false;
+            }
+
+            // Approver is a verified family member
+            $effectiveApproverId = $approverId;
         }
 
         try {
@@ -544,6 +832,25 @@ class FamilyCodeApprovalService
                 \App\services\FamilyClaimService::claimOrInitializeNode($cleanCode, $userId, $memberData);
             } catch (\Throwable $nodeEx) {
                 error_log('[FamilyCodeApprovalService] Node auto-claim warning: ' . $nodeEx->getMessage());
+            }
+
+            // 8. Broadcast family join announcement to all members with the same family code
+            try {
+                \App\services\FamilyJoinAnnouncementService::broadcastNewMemberAnnouncement(
+                    $cleanCode,
+                    $userId,
+                    $effectiveApproverId
+                );
+            } catch (\Throwable $annEx) {
+                error_log('[FamilyCodeApprovalService] Join announcement warning: ' . $annEx->getMessage());
+            }
+
+            // 9. Send welcome & approval confirmation notification to the newly approved member
+            try {
+                $notifService = new NotificationService($this->pdo);
+                $notifService->sendApprovalConfirmationNotification($userId, $cleanCode);
+            } catch (\Throwable $confEx) {
+                error_log('[FamilyCodeApprovalService] Approval confirmation notification warning: ' . $confEx->getMessage());
             }
 
             return true;
@@ -699,6 +1006,16 @@ class FamilyCodeApprovalService
             \App\services\FamilyClaimService::claimOrInitializeNode($cleanCode, $userId, $memberData);
         } catch (\Throwable $nodeEx) {
             error_log('[FamilyCodeApprovalService] Node auto-claim warning: ' . $nodeEx->getMessage());
+        }
+
+        // 7. Broadcast family join announcement to all members with the same family code
+        try {
+            \App\services\FamilyJoinAnnouncementService::broadcastNewMemberAnnouncement(
+                $cleanCode,
+                $userId
+            );
+        } catch (\Throwable $annEx) {
+            error_log('[FamilyCodeApprovalService::linkUserToFamily] Join announcement warning: ' . $annEx->getMessage());
         }
 
         return true;
@@ -866,6 +1183,16 @@ class FamilyCodeApprovalService
             \App\services\FamilyClaimService::claimOrInitializeNode($clean, $userId, is_array($pRow) ? $pRow : []);
         } catch (\Throwable $nodeEx) {
             error_log('[FamilyCodeApprovalService] Birth-link node claim warning: ' . $nodeEx->getMessage());
+        }
+
+        // Broadcast family join announcement to all members of the birth family circle
+        try {
+            \App\services\FamilyJoinAnnouncementService::broadcastNewMemberAnnouncement(
+                $clean,
+                $userId
+            );
+        } catch (\Throwable $annEx) {
+            error_log('[FamilyCodeApprovalService::linkBirthFamily] Join announcement warning: ' . $annEx->getMessage());
         }
 
         error_log((string)json_encode(['event' => 'birth_code.linked', 'user_id' => $userId, 'code' => $clean]));

@@ -1,5 +1,15 @@
 @php
     $token = $_SESSION['token'] ?? '';
+    if (!isset($postAudiences) && !empty($_SESSION['id'])) {
+        $postAudiences = (new \App\services\FamilyPostAudienceService())->resolveUserAudiences((string)$_SESSION['id']);
+    }
+    $canChooseAudience = !empty($postAudiences['can_choose']);
+    $hasDualLineage = !empty($postAudiences['has_dual_lineage']);
+    $defaultScope = $postAudiences['default_scope'] ?? 'all';
+    $birthCodes = $postAudiences['birth'] ?? (!empty($maternalFamCode) ? [$maternalFamCode] : []);
+    $marriedCodes = $postAudiences['married'] ?? (!empty($primaryFamCode) ? [$primaryFamCode] : []);
+    $allCodes = $postAudiences['all'] ?? array_merge($marriedCodes, $birthCodes);
+    $activeFamCode = $primaryFamCode ?? ($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
 @endphp
 <div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
@@ -27,9 +37,64 @@
                                     is with <span id="composerTagHeaderNames" class="fw-semibold text-primary"></span>
                                 </span>
                             </h6>
-                            <span class="composer-audience">
-                                <i class="bi bi-shield-check"></i> {{ __('modal.shared_with_family', 'Shared with Family') }}
-                            </span>
+                            @if($canChooseAudience)
+                                <div class="dropdown d-inline-block mt-1" id="composerAudienceDropdown">
+                                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5 py-1 dropdown-toggle d-inline-flex align-items-center gap-1.5"
+                                            type="button" 
+                                            id="composerAudienceBtn" 
+                                            data-bs-toggle="dropdown" 
+                                            aria-expanded="false" 
+                                            style="font-size: 0.78rem; font-weight: 500; min-height: 32px; border-color: rgba(148, 163, 184, 0.4); background: rgba(248, 250, 252, 0.8);">
+                                        <i class="bi bi-people-fill text-primary" id="composerAudienceIcon"></i>
+                                        <span id="composerAudienceLabel">All (Birth &amp; Married)</span>
+                                    </button>
+                                    <ul class="dropdown-menu shadow-sm rounded-3 py-2 border-0" aria-labelledby="composerAudienceBtn" style="min-width: 290px; font-size: 0.85rem;">
+                                        <li><h6 class="dropdown-header text-uppercase text-muted fw-bold" style="font-size: 0.68rem; letter-spacing: 0.5px;">Who should see this post?</h6></li>
+                                        <li>
+                                            <button type="button" class="dropdown-item d-flex align-items-start gap-2 py-2 active" data-scope="all" onclick="selectPostAudience('all', 'All (Birth &amp; Married)', 'bi-people-fill text-primary', '')">
+                                                <i class="bi bi-people-fill text-primary fs-5 mt-0.5"></i>
+                                                <div>
+                                                    <div class="fw-semibold">All Family Circles</div>
+                                                    <small class="text-muted d-block text-wrap">Broadcast to all birth &amp; married members ({{ implode(', ', array_map(fn($c) => '#' . $c, $allCodes)) }})</small>
+                                                </div>
+                                            </button>
+                                        </li>
+                                        @if(!empty($birthCodes))
+                                        <li>
+                                            <button type="button" class="dropdown-item d-flex align-items-start gap-2 py-2" data-scope="birth" onclick="selectPostAudience('birth', 'Birth Family Only', 'bi-heart-pulse-fill text-danger', '{{ $birthCodes[0] ?? '' }}')">
+                                                <i class="bi bi-heart-pulse-fill text-danger fs-5 mt-0.5"></i>
+                                                <div>
+                                                    <div class="fw-semibold">Birth / Maiden Family</div>
+                                                    <small class="text-muted d-block text-wrap">Visible only to your birth family ({{ implode(', ', array_map(fn($c) => '#' . $c, $birthCodes)) }})</small>
+                                                </div>
+                                            </button>
+                                        </li>
+                                        @endif
+                                        @if(!empty($marriedCodes))
+                                        <li>
+                                            <button type="button" class="dropdown-item d-flex align-items-start gap-2 py-2" data-scope="married" onclick="selectPostAudience('married', 'Married Family Only', 'bi-house-heart-fill text-success', '{{ $marriedCodes[0] ?? '' }}')">
+                                                <i class="bi bi-house-heart-fill text-success fs-5 mt-0.5"></i>
+                                                <div>
+                                                    <div class="fw-semibold">Married / Household Family</div>
+                                                    <small class="text-muted d-block text-wrap">Visible only to your married household ({{ implode(', ', array_map(fn($c) => '#' . $c, $marriedCodes)) }})</small>
+                                                </div>
+                                            </button>
+                                        </li>
+                                        @endif
+                                    </ul>
+                                </div>
+                            @else
+                                <div class="d-inline-flex align-items-center gap-1.5 mt-1">
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-2.5 py-1" style="font-size: 0.78rem;">
+                                        <i class="bi bi-shield-check text-primary me-1"></i> Family: #{{ $activeFamCode }}
+                                    </span>
+                                    @if(empty($hasMaternalCode))
+                                    <a href="/member/settings?tab=lineage" class="text-decoration-none small text-muted" style="font-size: 0.75rem;" title="Link or create a birth family code to enable dual-lineage posting">
+                                        <i class="bi bi-plus-circle me-0.5"></i> Add Birth Family
+                                    </a>
+                                    @endif
+                                </div>
+                            @endif
                         </div>
                     </div>
 
@@ -37,13 +102,24 @@
 
                     <input type="hidden" name="token" value="{{ $token }}">
                     <input type="hidden" name="post_no" id="editPostNo" value="">
+                    <input type="hidden" name="target_scope" id="composerTargetScope" value="{{ $defaultScope }}">
+                    <input type="hidden" name="target_fam_code" id="composerTargetFamCode" value="" disabled>
                     <input type="hidden" name="attached_gif_url" id="attachedGifUrlInput" value="">
                     <input type="hidden" name="attached_video_url" id="attachedVideoUrl" value="">
                     <input type="hidden" name="attached_video_urls" id="attachedVideoUrls" value="">
 
-                    <textarea class="composer-text form-control border-0 bg-transparent shadow-none px-0" data-emoji-target
-                        placeholder="{{ __('feed.share_prompt', 'Share a moment with your family...') }}" name="postMessage" id="postMessage"
-                        rows="2"></textarea>
+                    <div class="composer-editor-wrapper position-relative w-100">
+                        <div class="composer-text form-control border-0 bg-transparent shadow-none px-0"
+                            id="postMessageEditor"
+                            contenteditable="true"
+                            role="textbox"
+                            aria-multiline="true"
+                            data-placeholder="{{ __('feed.share_prompt', 'Share a moment with your family...') }}"
+                            style="min-height: 58px; max-height: 220px; overflow-y: auto; outline: none; white-space: pre-wrap; word-break: break-word; font-size: 1.05rem; line-height: 1.55; color: var(--text-main, #0f172a);"></div>
+                        <textarea class="d-none" data-emoji-target
+                            placeholder="{{ __('feed.share_prompt', 'Share a moment with your family...') }}" name="postMessage" id="postMessage"
+                            rows="2"></textarea>
+                    </div>
 
                     <!-- Smart Family Hashtags Quick Pill Suggestions (single swipeable row) -->
                     <div class="composer-tags" aria-label="Family topics, tap to add">
@@ -113,32 +189,29 @@
                     <!-- Interactive Composer Action Drawers Container (Directly Above Toolbar) -->
                     <div id="composerActiveDrawers" class="mb-3">
 
-                        <!-- 1. Video Embed Container -->
+                        <!-- 1. Video Embed & Auto-Trim Container (Direct Upload Focus) -->
                         <div id="videoEmbedContainer" class="composer-drawer video-builder d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <div class="d-flex align-items-center gap-2 flex-wrap">
-                                    <span class="fw-bold small text-danger"><i class="bi bi-play-circle-fill me-1"></i> Add Videos (Max 3)</span>
+                                    <span class="fw-bold small" style="color: #a31621 !important;"><i class="bi bi-camera-video-fill me-1"></i> Upload Videos (Max 3)</span>
                                     <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1" style="font-size: 0.7rem;">
                                         <i class="bi bi-scissors me-1"></i> Smart 30s Auto-Trim
                                     </span>
                                 </div>
-                                <button type="button" id="removeVideoBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Remove videos"></button>
+                                <button type="button" id="removeVideoBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Close video upload drawer"></button>
                             </div>
                             <div class="d-flex gap-2 align-items-center flex-wrap mb-2">
-                                <label for="videoDirectFileInput" class="btn btn-sm btn-outline-danger mb-0 d-inline-flex align-items-center gap-1" style="cursor: pointer; border-radius: 8px; font-size: 0.8rem; padding: 8px 14px; min-height: 44px; white-space: nowrap; flex-shrink: 0;">
-                                    <i class="bi bi-cloud-arrow-up-fill"></i> Upload Videos (Up to 3, Auto-Trim to 30s)
+                                <label for="videoDirectFileInput" class="btn btn-sm fw-semibold mb-0 d-inline-flex align-items-center gap-1.5 shadow-xs" style="cursor: pointer; border-radius: 8px; font-size: 0.82rem; padding: 9px 16px; min-height: 44px; white-space: nowrap; flex-shrink: 0; background-color: #a31621; color: #ffffff !important; border: none;">
+                                    <i class="bi bi-cloud-arrow-up-fill fs-6"></i> Upload Videos (Up to 3, Auto-Trim to 30s)
                                 </label>
                                 <input type="file" id="videoDirectFileInput" accept="video/mp4,video/quicktime,video/webm" multiple hidden>
-                                <span class="text-muted small">or paste video link below</span>
-                            </div>
-                            <div class="input-group input-group-sm mb-1">
-                                <input type="url" id="postVideoInput" class="form-control form-control-sm" placeholder="Paste YouTube, Vimeo or Cloudflare Stream URL">
+                                <input type="url" id="postVideoInput" class="d-none" placeholder="" aria-hidden="true">
                             </div>
 
                             <!-- 30-Second Rule & Auto-Trim Notification Banner -->
-                            <div class="d-flex align-items-center gap-2 mt-2 px-2 py-1 rounded-2 bg-light-subtle border border-dashed border-secondary-subtle" style="font-size: 0.75rem;">
+                            <div class="d-flex align-items-center gap-2 mt-2 px-2.5 py-1.5 rounded-2 bg-light-subtle border border-dashed border-secondary-subtle" style="font-size: 0.75rem;">
                                 <i class="bi bi-scissors text-danger"></i>
-                                <span class="text-secondary"><strong>Smart 30-Second Auto-Trim:</strong> Videos longer than 30 seconds can be automatically trimmed to a <strong>30-second</strong> family highlight clip on request.</span>
+                                <span class="text-secondary"><strong>Smart 30-Second Auto-Trim:</strong> Videos from your device longer than 30 seconds can be automatically trimmed in the highlight studio. To share web video links (YouTube, Vimeo, etc.), use the <strong>Link Photos &amp; Videos</strong> tool below.</span>
                             </div>
 
                             <!-- Interactive On-Demand Video Auto-Trim Studio -->
@@ -215,15 +288,61 @@
                             <div id="videoLivePreview" class="mt-2 d-none ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm" style="max-height: 180px;"></div>
                         </div>
 
-                        <!-- 2. Race-Conscious Emoji Picker Drawer -->
+                        <!-- 2. Integrated Emoji Picker Drawer (Standard & 3D Family AR Emojis) -->
                         <div id="emojiPickerDrawer" class="composer-drawer d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
-                            <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
-                                <span class="fw-bold small d-flex align-items-center gap-1.5" style="color: #a31621 !important;">
-                                    <i class="bi bi-emoji-smile-fill fs-5"></i> Choose an Emoji
-                                </span>
+                            <div class="d-flex justify-content-between align-items-center mb-2.5 pb-2 border-bottom flex-wrap gap-2">
+                                <div class="btn-group p-0.5 rounded-pill bg-light border" role="tablist" aria-label="Emoji type selector">
+                                    <button type="button" id="emojiTabStandardBtn" class="btn btn-sm rounded-pill fw-bold active px-3 py-1" style="font-size: 0.76rem;">
+                                        😀 Standard Emojis
+                                    </button>
+                                    <button type="button" id="emojiTab3dBtn" class="btn btn-sm rounded-pill fw-semibold text-secondary px-3 py-1" style="font-size: 0.76rem;">
+                                        ✨ 3D Family Emojis
+                                    </button>
+                                </div>
                                 <button type="button" id="closeEmojiDrawerBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Close emoji picker"></button>
                             </div>
-                            <div id="emojiListPost" role="listbox"></div>
+
+                            <!-- Tab 1: Standard Diverse Emojis Pane -->
+                            <div id="standardEmojiTabPane">
+                                <div id="emojiListPost" role="listbox"></div>
+                            </div>
+
+                            <!-- Tab 2: ATG Specialised 3D & Augmented Reality (AR) Emojis Pane -->
+                            <div id="atg3dEmojiTabPane" class="d-none">
+                                <!-- Mode Toggle: Attach as AR Badge vs Insert in Text -->
+                                <div class="d-flex align-items-center justify-content-between gap-2 mb-2.5 pb-2 border-bottom flex-wrap">
+                                    <div class="btn-group p-0.5 rounded-pill bg-light border" role="group">
+                                        <button type="button" id="atgModeAttachBtn" class="btn btn-sm rounded-pill fw-bold active px-3 py-1" style="font-size: 0.75rem;">
+                                            🌟 Attach as Post's AR Emoji
+                                        </button>
+                                        <button type="button" id="atgModeInsertBtn" class="btn btn-sm rounded-pill fw-semibold text-secondary px-3 py-1" style="font-size: 0.75rem;">
+                                            ✍️ Insert in Caption
+                                        </button>
+                                    </div>
+                                    <span class="text-muted small" style="font-size: 0.72rem;" id="atgModeHelpText">
+                                        Click an emoji to attach it as this post's interactive AR badge.
+                                    </span>
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2" id="atg3dEmojiComposerList" style="max-height: 260px; overflow-y: auto;">
+                                    @php
+                                        $atgEmojiCatalog = \App\services\AtgEmojiService::EMOJI_CATALOG;
+                                    @endphp
+                                    @foreach ($atgEmojiCatalog as $e)
+                                        <button type="button" 
+                                                class="btn btn-sm btn-light border p-1 rounded-3 d-inline-flex flex-column align-items-center atg-post-emoji-btn" 
+                                                data-emoji-id="{{ $e['id'] }}"
+                                                data-shortcode=":{{ $e['id'] }}:" 
+                                                data-title="{{ $e['title'] }}"
+                                                data-desc="{{ $e['meaning'] }}"
+                                                style="width: 82px; min-height: 78px; text-decoration: none;" 
+                                                title="{{ $e['title'] }}: {{ $e['meaning'] }}">
+                                            <img src="/img/emoji/{{ $e['id'] }}.svg?v=20261103c" onerror="this.src='/img/emoji/{{ $e['id'] }}.png?v=20261103c'" width="42" height="42" loading="lazy" class="atg-3d-emoji" alt="{{ $e['title'] }}">
+                                            <span class="text-truncate w-100 text-center fw-semibold text-secondary mt-1" style="font-size: 0.65rem;">{{ $e['title'] }}</span>
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
                         </div>
 
                         <!-- 3. Family GIF Picker Drawer -->
@@ -445,6 +564,53 @@
                             </p>
                         </div>
 
+                        <!-- 7. Linked Media Drawer (Zero-Storage Architecture: Photos & Videos) -->
+                        <div id="googlePhotoDrawer" class="composer-drawer d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
+                            <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                                <span class="fw-bold small d-flex align-items-center gap-1.5" style="color: #a31621 !important;">
+                                    <i class="bi bi-link-45deg fs-5"></i> Link Photos &amp; Videos (Zero Storage)
+                                </span>
+                                <button type="button" id="closeGooglePhotoDrawerBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Close media drawer"></button>
+                            </div>
+                            <p class="small text-muted mb-2" style="font-size: 0.8rem; line-height: 1.45;">
+                                Post high-resolution photos or videos directly from <strong>Google Photos, iCloud, YouTube, Vimeo, or direct web links</strong>. Multiple links will form a swipeable carousel with <strong>zero server storage</strong> used:
+                            </p>
+                            <div class="input-group input-group-sm mb-2">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-radius: 8px 0 0 8px;">
+                                    <i class="bi bi-link-45deg"></i>
+                                </span>
+                                <input type="text" id="googlePhotoLinkInput" class="form-control form-control-sm border-start-0 shadow-none" placeholder="Paste link(s), e.g. Google Photos, iCloud, YouTube, Vimeo, web links..." style="border-radius: 0 8px 8px 0;">
+                                <button type="button" id="btnAttachGooglePhoto" class="btn btn-sm btn-primary fw-semibold px-3" style="border-radius: 8px; margin-left: 6px; min-height: 38px;">Attach</button>
+                            </div>
+                            <div class="p-2.5 rounded-2 bg-light-subtle border border-dashed border-secondary-subtle" style="font-size: 0.74rem; line-height: 1.45;">
+                                <i class="bi bi-lightbulb-fill text-warning me-1"></i>
+                                <strong>How to get link:</strong> In <strong>Google Photos</strong> or <strong>iCloud</strong>, select photo(s) &rarr; tap <strong>Share</strong> &rarr; tap <strong>Create link</strong> (or copy image address) &rarr; paste here!
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="ar_emoji" id="attachedArEmojiInput" value="">
+
+                        <!-- Attached 3D AR Emoji Preview Strip -->
+                        <div id="attachedArEmojiPreview" class="d-none mb-3 p-2.5 rounded-3 d-flex align-items-center justify-content-between" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(217, 119, 6, 0.16) 100%); border: 1.5px solid rgba(245, 158, 11, 0.45); box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1);">
+                            <div class="d-flex align-items-center gap-2.5">
+                                <span id="attachedArEmojiIcon" class="atg-3d-emoji" style="transform: scale(0.85); display: inline-block;"></span>
+                                <div>
+                                    <span class="badge rounded-pill text-white fw-bold px-2 py-0.5" style="background: linear-gradient(135deg, #f59e0b, #d97706); font-size: 0.68rem; letter-spacing: 0.04em;">
+                                        ✨ FEATURED 3D AR EMOJI ATTACHED
+                                    </span>
+                                    <span class="text-secondary small fw-bold d-block mt-0.5" id="attachedArEmojiTitle"></span>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-1.5">
+                                <button type="button" class="btn btn-sm btn-outline-warning text-dark py-0.5 px-2 rounded-pill fw-bold" id="previewAttachedArBtn" style="font-size: 0.72rem;">
+                                    View in AR
+                                </button>
+                                <button type="button" class="btn btn-sm btn-link text-danger p-0 text-decoration-none ms-1" id="removeAttachedArEmojiBtn" title="Remove 3D AR Emoji" aria-label="Remove 3D AR Emoji">
+                                    <i class="bi bi-x-circle-fill fs-5"></i>
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
 
                     <!-- Composer action tools dock -->
@@ -455,12 +621,16 @@
                             </label>
                             <input type="file" name="post_img[]" id="imageUpload" accept="image/*,video/*" multiple hidden>
 
-                            <button type="button" class="btn-composer-action composer-tool action-emoji" id="emojiPost" title="Add Emoji - Express feelings with diverse emoji reactions" aria-label="Add emoji">
+                            <button type="button" class="btn-composer-action composer-tool action-link-media" id="addGooglePhotoBtn" title="Link Photos &amp; Videos - Share high-resolution photos or videos from Google Photos, iCloud, YouTube, Vimeo, or web links (Zero Storage)" aria-label="Link photos and videos" style="color: #a31621;">
+                                <i class="bi bi-link-45deg fs-5"></i>
+                            </button>
+
+                            <button type="button" class="btn-composer-action composer-tool action-emoji" id="emojiPost" title="Add Emoji - Express feelings with diverse standard and 3D family emojis" aria-label="Add emoji">
                                 <i class="bi bi-emoji-smile-fill"></i>
                             </button>
 
-                            <button type="button" class="btn-composer-action composer-tool action-video" id="addVideoBtn" title="Embed Video - Share family videos from YouTube, Vimeo, or your device" aria-label="Add video">
-                                <i class="bi bi-play-btn-fill"></i>
+                            <button type="button" class="btn-composer-action composer-tool action-video" id="addVideoBtn" title="Upload Video - Share family video clips with smart 30s auto-trim" aria-label="Upload video">
+                                <i class="bi bi-camera-video-fill"></i>
                             </button>
 
                             <button type="button" class="btn-composer-action composer-tool action-gif gif-btn" id="addGifBtn" title="Add GIF - Search and attach fun animated family GIFs" aria-label="Add GIF">
@@ -551,6 +721,26 @@
 </div>
 
 <script>
+// Global Drawer Mutual Exclusivity Coordinator (Prevents crowded modal drawers)
+window.closeAllComposerDrawers = function(exceptId) {
+    const drawers = [
+        'videoEmbedContainer',
+        'emojiPickerDrawer',
+        'gifPickerDrawer',
+        'tagPeopleContainer',
+        'pollCreationContainer',
+        'thenNowContainer',
+        'iosShareDrawer',
+        'googlePhotoDrawer'
+    ];
+    drawers.forEach(id => {
+        if (id !== exceptId) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('d-none');
+        }
+    });
+};
+
 window.copyFamilyShareEndpoint = function(famCode, userToken) {
     let text = window.location.origin + '/api/media/native-share?fam_code=' + encodeURIComponent(famCode);
     if (userToken) {
@@ -666,12 +856,21 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
                     if (res?.status === 'success' && res?.data && (res.data.title || res.data.image)) {
                         const d = res.data;
                         lastFetchedUrl = url;
-                        if (titleEl) titleEl.textContent = d.title || '';
-                        if (descEl) descEl.textContent = d.description || '';
-                        if (urlEl) urlEl.textContent = d.url || url;
-                        if (domainBadge) domainBadge.textContent = d.is_party_event ? 'PartyPlatform' : (d.domain || 'Link');
-                        if (siteNameEl) siteNameEl.textContent = d.site_name || d.domain || '';
-                        if (ctaEl) ctaEl.textContent = d.cta_label || 'View Event / RSVP →';
+                        if (d.is_photo_link || d.is_google_photo) {
+                            if (titleEl) titleEl.textContent = 'Linked Photo (Zero Storage)';
+                            if (descEl) descEl.textContent = 'This photo will appear natively on the family feed with zero storage used. The link will be automatically hidden from the caption.';
+                            if (urlEl) urlEl.textContent = d.original_url || d.url || url;
+                            if (domainBadge) domainBadge.textContent = d.is_google_photo ? 'Google Photos' : 'Linked Photo';
+                            if (siteNameEl) siteNameEl.textContent = d.site_name || 'Google Photos';
+                            if (ctaEl) ctaEl.textContent = 'Native Photo Card';
+                        } else {
+                            if (titleEl) titleEl.textContent = d.title || '';
+                            if (descEl) descEl.textContent = d.description || '';
+                            if (urlEl) urlEl.textContent = d.url || url;
+                            if (domainBadge) domainBadge.textContent = d.is_party_event ? 'PartyPlatform' : (d.domain || 'Link');
+                            if (siteNameEl) siteNameEl.textContent = d.site_name || d.domain || '';
+                            if (ctaEl) ctaEl.textContent = d.cta_label || 'View Event / RSVP →';
+                        }
                         if (imgEl && imgWrapper) {
                             if (d.image) {
                                 imgEl.src = d.image;
@@ -689,4 +888,454 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
         });
     }
 })();
+
+// Integrated Emoji Picker (Tabs: Standard Emojis + 3D Family AR Emojis) & Rich Composer Editor
+(function() {
+    const tabStandardBtn = document.getElementById('emojiTabStandardBtn');
+    const tab3dBtn = document.getElementById('emojiTab3dBtn');
+    const standardPane = document.getElementById('standardEmojiTabPane');
+    const atg3dPane = document.getElementById('atg3dEmojiTabPane');
+    const textarea = document.getElementById('postMessage');
+    const editor = document.getElementById('postMessageEditor');
+    
+    const modeAttachBtn = document.getElementById('atgModeAttachBtn');
+    const modeInsertBtn = document.getElementById('atgModeInsertBtn');
+    const modeHelpText = document.getElementById('atgModeHelpText');
+    const attachedInput = document.getElementById('attachedArEmojiInput');
+    const previewStrip = document.getElementById('attachedArEmojiPreview');
+    const previewIcon = document.getElementById('attachedArEmojiIcon');
+    const previewTitle = document.getElementById('attachedArEmojiTitle');
+    const removeBtn = document.getElementById('removeAttachedArEmojiBtn');
+    const previewArBtn = document.getElementById('previewAttachedArBtn');
+
+    let currentMode = 'attach'; // 'attach' | 'insert'
+
+    const ATG_EMOJI_REGEX = /:(family_[a-z0-9_]+_3d|ancestor_[a-z0-9_]+_3d|memory_capsule_3d|kinship_pride_3d|wisdom_scroll_3d|generations_link_3d|family_toast_3d|baby_cradle_3d|wedding_vows_3d|laugh_tears_3d|star_struck_3d|family_house_3d):/gi;
+
+    // Helper: Build live emoji element
+    function createLiveEmojiSpan(emojiId, title) {
+        const span = document.createElement('span');
+        span.className = 'atg-emoji-container atg-live-emoji';
+        span.contentEditable = 'false';
+        span.dataset.emojiId = emojiId;
+        span.title = title || emojiId.replace(/_/g, ' ');
+        span.innerHTML = `<img src="/img/emoji/${emojiId}.svg?v=20261103c" onerror="this.src='/img/emoji/${emojiId}.png?v=20261103c'" class="atg-3d-emoji" width="26" height="26" alt="${emojiId}" style="pointer-events:none; vertical-align:middle;">`;
+        return span;
+    }
+
+    // Sync Editor -> Hidden Textarea (serializes emojis as :shortcode:)
+    let isInternalSync = false;
+    window.syncEditorToTextarea = function() {
+        if (!editor || !textarea) return;
+        isInternalSync = true;
+        try {
+            let text = '';
+            function traverse(node) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    text += node.textContent;
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    const el = node;
+                    if (el.hasAttribute('data-emoji-id')) {
+                        text += ':' + el.getAttribute('data-emoji-id') + ':';
+                        return;
+                    }
+                    if (el.tagName === 'BR') {
+                        text += '\n';
+                        return;
+                    }
+                    const isBlock = ['DIV', 'P', 'LI'].includes(el.tagName);
+                    if (isBlock && text.length > 0 && !text.endsWith('\n')) {
+                        text += '\n';
+                    }
+                    for (let child = el.firstChild; child; child = child.nextSibling) {
+                        traverse(child);
+                    }
+                }
+            }
+            for (let child = editor.firstChild; child; child = child.nextSibling) {
+                traverse(child);
+            }
+            textarea.value = text;
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        } finally {
+            isInternalSync = false;
+        }
+    };
+
+    // Sync Hidden Textarea -> Editor (turns :shortcode: into living 3D emoji spans)
+    window.syncTextareaToEditor = function() {
+        // While user is actively typing in the editor or during internal sync, never overwrite editor DOM!
+        if (!editor || !textarea || isInternalSync || document.activeElement === editor) return;
+        const raw = textarea.value || '';
+        if (!raw.trim()) {
+            editor.innerHTML = '';
+            return;
+        }
+        let safe = raw
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/\n/g, '<br>');
+
+        const atgRegex = /:(family_[a-z0-9_]+_3d|ancestor_[a-z0-9_]+_3d|memory_capsule_3d|kinship_pride_3d|wisdom_scroll_3d|generations_link_3d|family_toast_3d|baby_cradle_3d|wedding_vows_3d|laugh_tears_3d|star_struck_3d|family_house_3d):/gi;
+        safe = safe.replace(atgRegex, (match, emojiId) => {
+            return `<span class="atg-emoji-container atg-live-emoji" contenteditable="false" data-emoji-id="${emojiId}"><img src="/img/emoji/${emojiId}.svg?v=20261103c" onerror="this.src='/img/emoji/${emojiId}.png?v=20261103c'" class="atg-3d-emoji" width="26" height="26" alt="${emojiId}" style="pointer-events:none; vertical-align:middle;"></span>`;
+        });
+
+        isInternalSync = true;
+        editor.innerHTML = safe;
+        isInternalSync = false;
+    };
+
+    // Intercept programmatic writes to textarea.value so editor updates instantly
+    try {
+        const protoDesc = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value');
+        if (protoDesc) {
+            Object.defineProperty(textarea, 'value', {
+                get: function() {
+                    return protoDesc.get.call(this);
+                },
+                set: function(newVal) {
+                    protoDesc.set.call(this, newVal);
+                    window.syncTextareaToEditor();
+                }
+            });
+        }
+    } catch (_) {}
+
+    textarea.addEventListener('input', () => window.syncTextareaToEditor());
+
+    // Insert Live 3D Emoji at current cursor in the Editor
+    window.insertAtgEmojiIntoComposer = function(emojiId, title) {
+        if (!editor) return;
+        editor.focus();
+
+        const emojiSpan = createLiveEmojiSpan(emojiId, title);
+        const spaceNode = document.createTextNode('\u00A0');
+
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+            const range = sel.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(spaceNode);
+            range.insertNode(emojiSpan);
+            range.setStartAfter(spaceNode);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        } else {
+            editor.appendChild(emojiSpan);
+            editor.appendChild(spaceNode);
+            const range = document.createRange();
+            range.setStartAfter(spaceNode);
+            range.collapse(true);
+            const newSel = window.getSelection();
+            newSel.removeAllRanges();
+            newSel.addRange(range);
+        }
+
+        window.syncEditorToTextarea();
+    };
+
+    // Editor input listener: convert typed :emoji_3d: live and sync
+    if (editor) {
+        editor.addEventListener('input', function() {
+            // Auto-convert any typed shortcodes like :family_crest_3d:
+            const shortcodeRegex = /:(family_[a-z0-9_]+_3d|ancestor_[a-z0-9_]+_3d|memory_capsule_3d|kinship_pride_3d|wisdom_scroll_3d|generations_link_3d|family_toast_3d|baby_cradle_3d|wedding_vows_3d|laugh_tears_3d|star_struck_3d|family_house_3d):/i;
+            const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, null);
+            let textNode;
+            while ((textNode = walker.nextNode())) {
+                const match = shortcodeRegex.exec(textNode.nodeValue);
+                if (match) {
+                    const fullMatch = match[0];
+                    const emojiId = match[1];
+                    const idx = match.index;
+                    const before = textNode.nodeValue.substring(0, idx);
+                    const after = textNode.nodeValue.substring(idx + fullMatch.length);
+
+                    const span = createLiveEmojiSpan(emojiId, emojiId);
+                    const parent = textNode.parentNode;
+
+                    if (before) parent.insertBefore(document.createTextNode(before), textNode);
+                    parent.insertBefore(span, textNode);
+                    const afterNode = document.createTextNode(after || '\u00A0');
+                    parent.insertBefore(afterNode, textNode);
+                    parent.removeChild(textNode);
+
+                    // Place cursor after new emoji
+                    const sel = window.getSelection();
+                    const range = document.createRange();
+                    range.setStartAfter(afterNode);
+                    range.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    break;
+                }
+            }
+
+            window.syncEditorToTextarea();
+        });
+
+        // Strip rich HTML on paste to keep editor clean text + 3D emojis
+        editor.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+            if (document.queryCommandSupported('insertText')) {
+                document.execCommand('insertText', false, text);
+            } else {
+                const sel = window.getSelection();
+                if (sel && sel.rangeCount > 0) {
+                    const range = sel.getRangeAt(0);
+                    range.deleteContents();
+                    range.insertNode(document.createTextNode(text));
+                }
+            }
+            editor.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+    }
+
+    if (tabStandardBtn && tab3dBtn && standardPane && atg3dPane) {
+        tabStandardBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            tabStandardBtn.classList.add('active', 'fw-bold');
+            tabStandardBtn.classList.remove('text-secondary');
+            tab3dBtn.classList.remove('active', 'fw-bold');
+            tab3dBtn.classList.add('text-secondary');
+            standardPane.classList.remove('d-none');
+            atg3dPane.classList.add('d-none');
+        });
+
+        tab3dBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            tab3dBtn.classList.add('active', 'fw-bold');
+            tab3dBtn.classList.remove('text-secondary');
+            tabStandardBtn.classList.remove('active', 'fw-bold');
+            tabStandardBtn.classList.add('text-secondary');
+            atg3dPane.classList.remove('d-none');
+            standardPane.classList.add('d-none');
+        });
+    }
+
+    if (modeAttachBtn && modeInsertBtn) {
+        modeAttachBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            currentMode = 'attach';
+            modeAttachBtn.classList.add('active', 'fw-bold');
+            modeAttachBtn.classList.remove('text-secondary');
+            modeInsertBtn.classList.remove('active', 'fw-bold');
+            modeInsertBtn.classList.add('text-secondary');
+            if (modeHelpText) modeHelpText.textContent = 'Click an emoji to attach it as this post\'s interactive AR badge.';
+        });
+
+        modeInsertBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            currentMode = 'insert';
+            modeInsertBtn.classList.add('active', 'fw-bold');
+            modeInsertBtn.classList.remove('text-secondary');
+            modeAttachBtn.classList.remove('active', 'fw-bold');
+            modeAttachBtn.classList.add('text-secondary');
+            if (modeHelpText) modeHelpText.textContent = 'Click an emoji to insert it into your caption.';
+        });
+    }
+
+    // Handle clicking on a 3D emoji in the integrated drawer
+    document.querySelectorAll('.atg-post-emoji-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const emojiId = this.dataset.emojiId;
+            const title = this.dataset.title;
+            const desc = this.dataset.desc;
+
+            // In ALL modes, insert the living 3D emoji visually into the text caption so users see how it looks!
+            window.insertAtgEmojiIntoComposer(emojiId, title);
+
+            if (currentMode === 'attach') {
+                // Also attach as featured AR badge on post
+                if (attachedInput) attachedInput.value = emojiId;
+                if (previewTitle) previewTitle.textContent = `${title} — ${desc}`;
+                if (previewIcon) {
+                    previewIcon.innerHTML = `<img src="/img/emoji/${emojiId}.svg?v=20261103c" onerror="this.src='/img/emoji/${emojiId}.png?v=20261103c'" style="width:40px;height:40px;vertical-align:middle;">`;
+                }
+                if (previewStrip) previewStrip.classList.remove('d-none');
+
+                const drawer = document.getElementById('emojiPickerDrawer');
+                if (drawer) drawer.classList.add('d-none');
+
+                if (window.Swal) {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                    Toast.fire({
+                        icon: 'success',
+                        title: `✨ Attached 3D AR Emoji: ${title}`
+                    });
+                }
+            } else {
+                if (window.Swal) {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 1600,
+                        timerProgressBar: true
+                    });
+                    Toast.fire({
+                        icon: 'success',
+                        title: `Added ${title}`
+                    });
+                }
+            }
+        });
+    });
+
+    if (removeBtn) {
+        removeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (attachedInput) attachedInput.value = '';
+            if (previewStrip) previewStrip.classList.add('d-none');
+        });
+    }
+
+    if (previewArBtn) {
+        previewArBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const emojiId = attachedInput ? attachedInput.value : '';
+            if (emojiId && window.AtgEmojiEngine) {
+                window.AtgEmojiEngine.openArViewer(emojiId);
+            }
+        });
+    }
+})();
+
+// Unified Media Link Drawer Toggle & Attach (Zero-Storage Architecture: Photos & Videos)
+(function() {
+    const btn = document.getElementById('addGooglePhotoBtn');
+    const drawer = document.getElementById('googlePhotoDrawer');
+    const closeBtn = document.getElementById('closeGooglePhotoDrawerBtn');
+    const input = document.getElementById('googlePhotoLinkInput');
+    const attachBtn = document.getElementById('btnAttachGooglePhoto');
+    const textarea = document.getElementById('postMessage');
+
+    function toggleDrawer() {
+        if (!drawer) return;
+        const isHidden = drawer.classList.contains('d-none');
+        if (isHidden) {
+            if (window.closeAllComposerDrawers) window.closeAllComposerDrawers('googlePhotoDrawer');
+            drawer.classList.remove('d-none');
+            try { drawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch(_) {}
+            if (input) setTimeout(() => input.focus(), 80);
+        } else {
+            drawer.classList.add('d-none');
+        }
+    }
+
+    if (btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            toggleDrawer();
+        });
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (drawer) drawer.classList.add('d-none');
+        });
+    }
+
+    function attachLink() {
+        if (!input || !textarea) return;
+        const raw = input.value.trim();
+        if (!raw) return;
+
+        // Support pasting multiple links separated by spaces, commas, or newlines
+        const links = raw.split(/[\s,]+/).map(s => s.trim()).filter(s => s.startsWith('http://') || s.startsWith('https://'));
+        const toAppend = links.length > 0 ? links : [raw];
+
+        let currentVal = textarea.value.trim();
+        toAppend.forEach(link => {
+            if (!currentVal.includes(link)) {
+                currentVal = currentVal ? `${currentVal}\n${link}` : link;
+            }
+
+            // If a video link is entered, also render attached video embed preview if available
+            if (typeof window.parseVideoUrl === 'function' && typeof window.renderAttachedVideoPreview === 'function') {
+                const parsedVid = window.parseVideoUrl(link);
+                if (parsedVid && (parsedVid.type === 'youtube' || parsedVid.type === 'vimeo' || parsedVid.type === 'cloudflare')) {
+                    try {
+                        window.renderAttachedVideoPreview(link, parsedVid.trimStart ?? null, parsedVid.trimEnd ?? null);
+                    } catch (_) {}
+                }
+            }
+        });
+        textarea.value = currentVal;
+
+        input.value = '';
+        if (drawer) drawer.classList.add('d-none');
+        textarea.focus();
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+
+        if (window.Swal) {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2400,
+                timerProgressBar: true
+            });
+            Toast.fire({
+                icon: 'success',
+                title: toAppend.length > 1 ? `${toAppend.length} Media links attached (Zero Storage)` : 'Media link attached (Zero Storage)'
+            });
+        }
+    }
+
+    if (attachBtn) {
+        attachBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            attachLink();
+        });
+    }
+
+    if (input) {
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                attachLink();
+            }
+        });
+    }
+})();
+
+window.selectPostAudience = function(scope, label, iconClass, famCode) {
+    const scopeInput = document.getElementById('composerTargetScope');
+    if (scopeInput) scopeInput.value = scope;
+    const codeInput = document.getElementById('composerTargetFamCode');
+    if (codeInput) {
+        if (famCode) {
+            codeInput.value = famCode;
+            codeInput.disabled = false;
+        } else {
+            codeInput.value = '';
+            codeInput.disabled = true;
+        }
+    }
+    const labelEl = document.getElementById('composerAudienceLabel');
+    if (labelEl) labelEl.textContent = label;
+    const iconEl = document.getElementById('composerAudienceIcon');
+    if (iconEl) iconEl.className = 'bi ' + iconClass;
+    
+    document.querySelectorAll('#composerAudienceDropdown .dropdown-item').forEach(item => {
+        if (item.getAttribute('data-scope') === scope) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+};
 </script>

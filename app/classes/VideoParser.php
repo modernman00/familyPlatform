@@ -76,7 +76,38 @@ final class VideoParser
             ];
         }
 
+        // 5. Google Photos direct video stream (=m22, =m18, =m37, =dv or googlevideo.com)
+        $gpVideoRegex = '/^(?:https?:\/\/[^\s"\'<>]*(?:googleusercontent\.com\/[^\s"\'<>]*=(?:m18|m22|m37|dv)|googlevideo\.com\/videoplayback[^\s"\'<>]*))$/i';
+        if (preg_match($gpVideoRegex, $trimmed) === 1) {
+            return [
+                'type' => 'direct',
+                'videoId' => null,
+                'thumbnailUrl' => null,
+                'originalUrl' => $trimmed,
+                'trimStart' => null,
+                'trimEnd' => null,
+            ];
+        }
+
         return null;
+    }
+
+    /**
+     * Check if a given URL is a supported video URL or direct video stream.
+     *
+     * @param string|null $url
+     * @return bool
+     */
+    public static function isVideoUrl(?string $url): bool
+    {
+        if ($url === null || trim($url) === '') {
+            return false;
+        }
+        $trimmed = trim($url);
+        if (preg_match('/(\.(mp4|webm|ogg|mov)(\?.*)?$)|(googleusercontent\.com\/[^\s"\'<>]*=(?:m18|m22|m37|dv))|(googlevideo\.com\/videoplayback)/i', $trimmed) === 1) {
+            return true;
+        }
+        return self::parseVideoUrl($trimmed) !== null;
     }
 
     /**

@@ -1,0 +1,15 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * ATG 3D Emoji & Avatar Studio Routes
+ * Developed by Advanced Technology Group (ATG Pods 3 & 4)
+ */
+
+$router->map('GET', '/member/emoji-studio', 'App\controller\members\AtgEmojiController@studio', 'atg_emoji_studio');
+$router->map('GET', '/member/emojiStudio', 'App\controller\members\AtgEmojiController@studio', 'atg_emoji_studio_alias');
+$router->map('GET', '/api/emoji/catalog', 'App\controller\members\AtgEmojiController@catalog', 'api_emoji_catalog');
+$router->map('POST', '/api/emoji/render-avatar', 'App\controller\members\AtgEmojiController@renderAvatar', 'api_emoji_render_avatar');
+$router->map('GET', '/api/emoji/svg/[*:id]', 'App\controller\members\AtgEmojiController@renderEmojiSvg', 'api_emoji_render_svg');
+$router->map('POST', '/api/emoji/save-avatar', 'App\controller\members\AtgEmojiController@saveAvatar', 'api_emoji_save_avatar');

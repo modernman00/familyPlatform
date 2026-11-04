@@ -199,12 +199,16 @@ final class Login
             }
 
             $getFamCode = AllMembersDataModel::getFamCode($memberId !== '' ? $memberId : $adminId);
-            $famCode = $getFamCode['famCode'] ?? '';
+            $famCodes = $getFamCode['famCode'] ?? [];
+            if (!is_array($famCodes)) {
+                $famCodes = $famCodes !== '' ? [$famCodes] : [];
+            }
 
             // Store all approved family codes in the session
-            $_SESSION['famCodes'] = $famCode;
+            $_SESSION['famCodes'] = $famCodes;
+            $_SESSION['famCode'] = !empty($famCodes) ? (string)$famCodes[0] : '';
 
-            msgSuccess(201, $result['message'] ?? 'Login successful', $famCode);
+            msgSuccess(201, $result['message'] ?? 'Login successful', $famCodes);
         } catch (\Throwable $th) {
             showError($th);
         }

@@ -501,20 +501,21 @@ runJourney("E2E Extended Kinship: Dual-Lineage Uncle/Aunt & In-Law Traversal Lif
         $nodesByName = [];
         foreach ($graph['nodes'] as $n) {
             $nodesByName[$n['first_name']] = $n;
+            $nodesByName[strtolower(trim($n['first_name']))] = $n;
         }
 
-        if (!isset($nodesByName['E2E Pa InLaw'])) {
+        $filNode = $nodesByName['E2E Pa InLaw'] ?? $nodesByName[strtolower('E2E Pa InLaw')] ?? null;
+        if (!$filNode) {
             throw new \Exception("E2E In-Law Verification: Father-in-law was not indexed in Wife's collateral graph.");
         }
-        $filNode = $nodesByName['E2E Pa InLaw'];
         if (($filNode['kinship_category'] ?? '') !== 'in_law' && !str_contains((string)($filNode['ego_relation'] ?? ''), 'Father-in-law')) {
             throw new \Exception("E2E In-Law Verification: Expected Father-in-law relation, got: " . json_encode($filNode));
         }
 
-        if (!isset($nodesByName['E2E Bro InLaw'])) {
+        $bilNode = $nodesByName['E2E Bro InLaw'] ?? $nodesByName[strtolower('E2E Bro InLaw')] ?? null;
+        if (!$bilNode) {
             throw new \Exception("E2E In-Law Verification: Brother-in-law was not indexed in Wife's collateral graph.");
         }
-        $bilNode = $nodesByName['E2E Bro InLaw'];
         if (($bilNode['kinship_category'] ?? '') !== 'in_law' && !str_contains((string)($bilNode['ego_relation'] ?? ''), 'Brother-in-law')) {
             throw new \Exception("E2E In-Law Verification: Expected Brother-in-law relation, got: " . json_encode($bilNode));
         }

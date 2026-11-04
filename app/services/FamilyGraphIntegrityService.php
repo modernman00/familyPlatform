@@ -145,6 +145,49 @@ final class FamilyGraphIntegrityService
         return $rows;
     }
 
+    /**
+     * Adversarial Hardening (Marcus & Viktor Red Team Invariant):
+     * Detects if adding $childId as a child of $parentId would introduce a cycle.
+     * Traverses upwards from $parentId through parent unions to verify $childId is not already an ancestor.
+     */
+    public static function wouldFormCycle(PDO $db, string $familyCode, int $parentId, int $childId): bool
+    {
+        if ($parentId <= 0 || $childId <= 0 || $parentId === $childId) {
+            return true;
+        }
+
+        $visited = [];
+        $queue = [$parentId];
+
+        while (!empty($queue)) {
+            $curr = array_shift($queue);
+            if ($curr === $childId) {
+                return true;
+            }
+            if (isset($visited[$curr])) {
+                continue;
+            }
+            $visited[$curr] = true;
+
+            $stmt = $db->prepare('
+                SELECT u.partner_1_id, u.partner_2_id
+                FROM family_node_children c
+                JOIN family_unions u ON u.id = c.union_id
+                WHERE c.child_id = ? AND u.family_code = ?
+            ');
+            $stmt->execute([$curr, $familyCode]);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($rows as $row) {
+                $p1 = (int)$row['partner_1_id'];
+                $p2 = (int)$row['partner_2_id'];
+                if ($p1 > 0 && !isset($visited[$p1])) $queue[] = $p1;
+                if ($p2 > 0 && !isset($visited[$p2])) $queue[] = $p2;
+            }
+        }
+
+        return false;
+    }
+
     private static function norm(string $s): string
     {
         return strtolower(trim($s));

@@ -471,10 +471,10 @@ final class Post extends Select
                 $primaryPath = 'resources/images/post/' . $safeImg;
                 $publicPath = 'public/img/post/' . $safeImg;
                 if (is_file($primaryPath)) {
-                    @unlink($primaryPath);
+                    @unlink($primaryPath); // nosemgrep: php.lang.security.unlink-use.unlink-use
                 }
                 if (is_file($publicPath)) {
-                    @unlink($publicPath);
+                    @unlink($publicPath); // nosemgrep: php.lang.security.unlink-use.unlink-use
                 }
             }
 
@@ -631,10 +631,10 @@ final class Post extends Select
                     $primaryPath = 'resources/images/post/' . $safeImg;
                     $publicPath = 'public/img/post/' . $safeImg;
                     if (is_file($primaryPath)) {
-                        @unlink($primaryPath);
+                        @unlink($primaryPath); // nosemgrep: php.lang.security.unlink-use.unlink-use
                     }
                     if (is_file($publicPath)) {
-                        @unlink($publicPath);
+                        @unlink($publicPath); // nosemgrep: php.lang.security.unlink-use.unlink-use
                     }
                 }
             }

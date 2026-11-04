@@ -3003,7 +3003,8 @@ body.dark-mode .heirloom-glass-dock {
 }
 
 .heirloom-reaction-btn:hover,
-.heirloom-reaction-btn:focus-visible {
+.heirloom-reaction-btn:focus-visible,
+.heirloom-reaction-btn.touch-active {
   transform: translateY(-8px) scale(1.36) !important;
   filter: drop-shadow(0 12px 18px var(--heirloom-glow, rgba(225, 29, 72, 0.45))) !important;
   z-index: 10 !important;
@@ -3012,6 +3013,15 @@ body.dark-mode .heirloom-glass-dock {
 .heirloom-reaction-btn:active {
   transform: scale(0.94) !important;
   transition-duration: 0.08s !important;
+}
+
+@media (hover: none) {
+  .heirloom-reaction-btn:active,
+  .heirloom-reaction-btn.touch-active {
+    transform: translateY(-8px) scale(1.36) !important;
+    filter: drop-shadow(0 12px 18px var(--heirloom-glow, rgba(225, 29, 72, 0.45))) !important;
+    z-index: 10 !important;
+  }
 }
 
 .heirloom-reaction-btn.active {
@@ -3023,7 +3033,7 @@ body.dark-mode .heirloom-reaction-btn.active {
   background: rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Floating Label Tooltip on Hover */
+/* Floating Label Tooltip on Hover & Touch Scrub */
 .heirloom-tooltip-pill {
   position: absolute !important;
   bottom: calc(100% + 6px) !important;
@@ -3043,7 +3053,8 @@ body.dark-mode .heirloom-reaction-btn.active {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
 }
 
-.heirloom-reaction-btn:hover .heirloom-tooltip-pill {
+.heirloom-reaction-btn:hover .heirloom-tooltip-pill,
+.heirloom-reaction-btn.touch-active .heirloom-tooltip-pill {
   opacity: 1 !important;
   transform: translateX(-50%) translateY(0) scale(1) !important;
 }

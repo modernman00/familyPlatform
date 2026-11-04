@@ -204,25 +204,32 @@
               Married women keep two family circles: the household they live in and the family they were born into. Your household code never changes; your birth family gets its own code.
             </p>
             <div class="row g-3">
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <div class="p-3 border rounded-3 bg-light h-100">
                   <span class="badge bg-primary mb-2">Step 1 &middot; Settings &rarr; Family Network</span>
                   <h6 class="fw-bold text-dark">Create or link</h6>
                   <p class="small text-muted mb-0"><strong>Create</strong> a new code from your maiden name if your parents and siblings are not here yet, or <strong>link</strong> to an existing code by naming a family member who can confirm you.</p>
                 </div>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <div class="p-3 border rounded-3 bg-light h-100">
                   <span class="badge bg-warning text-dark mb-2">Step 2 &middot; Verification</span>
                   <h6 class="fw-bold text-dark">Only families you belong to</h6>
                   <p class="small text-muted mb-0">A code you created is yours for good. A linked code needs approval from a real member of that family, and you can unlink it any time without deleting their tree.</p>
                 </div>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <div class="p-3 border rounded-3 bg-light h-100">
-                  <span class="badge bg-success mb-2">Step 3 &middot; Parents &amp; Siblings tabs</span>
+                  <span class="badge bg-success mb-2">Step 3 &middot; Lineage Trees</span>
                   <h6 class="fw-bold text-dark">Invite with the right code</h6>
                   <p class="small text-muted mb-0">Choose <em>My Birth / Maiden Family</em> when adding parents or siblings. Invitations and new relatives land in your birth family tree, not your household tree.</p>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-info text-dark mb-2">Step 4 &middot; Post Composer</span>
+                  <h6 class="fw-bold text-dark">Target audience control</h6>
+                  <p class="small text-muted mb-0">Decide if your post broadcasts to <strong>All Families</strong>, <strong>Birth Family Only</strong>, or <strong>Married Family Only</strong> to keep heritage stories private.</p>
                 </div>
               </div>
             </div>
@@ -678,6 +685,42 @@
           </div>
         </div>
 
+        <!-- Step 13: Automatic Family Join Announcements -->
+        <div class="card border-0 shadow-sm mb-4 rounded-4 overflow-hidden">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center mb-3">
+              <span class="badge rounded-pill text-white px-3 py-2 me-3" style="background: #10b981;">Step 13</span>
+              <h2 class="h4 fw-bold mb-0 text-dark">Collective Join Announcements &amp; Family Welcoming</h2>
+            </div>
+            <p class="lead text-secondary">
+              Whenever a new relative joins your family circle using your shared Family Code, every family member is instantly notified.
+            </p>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-success text-white mb-2">Pinned Bulletin</span>
+                  <h6 class="fw-bold text-dark">Prominent Dashboard Announcement</h6>
+                  <p class="small text-muted mb-0">A celebratory bulletin appears at the top of every co-member's feed, highlighting the new relative's name and welcoming them to the dynasty.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-primary text-white mb-2">Live Timeline</span>
+                  <h6 class="fw-bold text-dark">Celebratory Feed Milestone</h6>
+                  <p class="small text-muted mb-0">A welcome milestone is automatically posted to the shared family timeline, allowing relatives to comment, react, and extend warm blessings.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge text-white mb-2" style="background: #a31621;">Instant Delivery</span>
+                  <h6 class="fw-bold text-dark">Push &amp; In-App Notifications</h6>
+                  <p class="small text-muted mb-0">All family members who share the family code receive instant in-app bell notifications and lockscreen push alerts so nobody misses a reunion moment.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Back to Organogram CTA -->
         <div class="text-center mt-5">
           <a href="/organogram" class="btn btn-lg fw-bold px-5 py-3 text-white shadow-sm" style="background: linear-gradient(135deg, #a31621 0%, #7a0e16 100%); border-radius: 50px;">
@@ -760,6 +803,14 @@
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Each family operates in a cryptographically isolated tenant. Relatives join using your unique Family Code or invite token, granting them access exclusively to your family tree and private feed."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What happens when someone joins our family with our Family Code?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "An automatic celebration announcement is broadcast to all existing members with that Family Code. A pinned bulletin appears on every member dashboard, a welcome milestone is published to the shared feed, and in-app notifications and push alerts are delivered to all co-members."
           }
         }
       ]

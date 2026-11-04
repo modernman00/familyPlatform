@@ -125,6 +125,20 @@ $router->map(
   name: 'api_posts_remove_tag'
 );
 
+$router->map(
+  method: 'GET',
+  route: '/api/posts/[i:postNo]',
+  target: 'App\controller\members\PostMessage@getSinglePost',
+  name: 'api_posts_get_single'
+);
+
+$router->map(
+  method: 'GET',
+  route: '/post/[i:postNo]',
+  target: 'App\controller\members\PostMessage@getSinglePost',
+  name: 'post_get_single_alias'
+);
+
 // Native iOS / Apple Photos Share Sheet Endpoints
 $router->map(
   method: 'POST',
