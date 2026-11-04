@@ -31,8 +31,24 @@
     filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.35));
 }
 
-.atg-3d-emoji:active {
-    transform: perspective(600px) scale3d(0.96, 0.96, 0.96) translateZ(0);
+.atg-3d-emoji:active,
+.atg-3d-emoji.touch-active {
+    transform: perspective(600px) scale3d(1.12, 1.12, 1.12) translateZ(10px);
+    filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.35));
+}
+
+/* Mobile Touchscreen Ambient 3D Kinetics (Zero-Friction Living Motion) */
+@media (hover: none) and (prefers-reduced-motion: no-preference) {
+    .atg-emoji-card .atg-3d-emoji,
+    .atg-3d-emoji.ambient-alive {
+        animation: atgMobileAmbientFloat 4s ease-in-out infinite alternate;
+    }
+}
+
+@keyframes atgMobileAmbientFloat {
+    0% { transform: perspective(600px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1); }
+    50% { transform: perspective(600px) rotateX(5deg) rotateY(-7deg) scale3d(1.04, 1.04, 1.04); }
+    100% { transform: perspective(600px) rotateX(-5deg) rotateY(6deg) scale3d(1.02, 1.02, 1.02); }
 }
 
 /* -------------------------------------------------------------------------
@@ -530,8 +546,9 @@
     vertical-align: top;
     filter: drop-shadow(0 2px 3px rgba(217, 119, 6, 0.3));
 }
-.atg-live-emoji:hover { animation: atgLiveWiggle 0.6s ease-in-out infinite; }
-.atg-live-emoji:active { transform: scale(0.94); }
+.atg-live-emoji:hover,
+.atg-live-emoji:active,
+.atg-live-emoji.touch-active { animation: atgLiveWiggle 0.6s ease-in-out infinite; }
 .atg-live-emoji:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; border-radius: 6px; }
 @keyframes atgLiveBob {
     0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }

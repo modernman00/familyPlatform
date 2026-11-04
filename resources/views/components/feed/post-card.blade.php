@@ -90,41 +90,48 @@
             </template>
           </div>
         </div>
-        <template x-if="isOwnPost(post) || isUserTaggedInPost(post)">
-          <div class="dropdown">
-            <button class="btn btn-sm btn-link text-muted p-1 rounded-circle" type="button" :id="'kebab' + post.post_no" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;" title="Post options - Edit or remove this post" aria-label="Post options">
-              <i class="bi bi-three-dots" style="font-size: 1.25rem;"></i>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" :aria-labelledby="'kebab' + post.post_no" style="border-radius: 12px; font-size: 0.9rem; min-width: 160px;">
-              <template x-if="isOwnPost(post)">
-                <div>
-                  <li>
-                    <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" @click.prevent="editPost(post)">
-                      <i class="bi bi-pencil-square text-primary"></i> {{ __('feed.edit_post', 'Edit Post') }}
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" style="min-height: 44px;" @click.prevent="repostPost(post)">
-                      <i class="bi bi-arrow-repeat text-success"></i> {{ __('feed.repost_post', 'Repost') }}
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger" href="#" @click.prevent="deletePost(post.post_no)">
-                      <i class="bi bi-trash3"></i> {{ __('feed.delete_post', 'Delete Post') }}
-                    </a>
-                  </li>
-                </div>
-              </template>
-              <template x-if="isUserTaggedInPost(post)">
+        <div class="dropdown">
+          <button class="btn btn-sm btn-link text-muted p-1 rounded-circle d-inline-flex align-items-center justify-content-center" type="button" :id="'kebab' + post.post_no" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none; width: 34px; height: 34px; min-width: 44px; min-height: 44px;" title="Post options" aria-label="Post options">
+            <i class="bi bi-three-dots" style="font-size: 1.25rem;"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" :aria-labelledby="'kebab' + post.post_no" style="border-radius: 12px; font-size: 0.9rem; min-width: 170px;">
+            <template x-if="isOwnPost(post)">
+              <div>
                 <li>
-                  <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-warning" href="#" @click.prevent="untagSelfFromPost(post)">
-                    <i class="bi bi-tag-fill"></i> {{ __('feed.remove_tag', 'Remove Tag from Post') }}
+                  <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" style="min-height: 44px;" @click.prevent="editPost(post)">
+                    <i class="bi bi-pencil-square text-primary"></i> {{ __('feed.edit_post', 'Edit Post') }}
                   </a>
                 </li>
-              </template>
-            </ul>
-          </div>
-        </template>
+                <li>
+                  <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" style="min-height: 44px;" @click.prevent="repostPost(post)">
+                    <i class="bi bi-arrow-repeat text-success"></i> {{ __('feed.repost_post', 'Repost') }}
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger" href="#" style="min-height: 44px;" @click.prevent="deletePost(post.post_no)">
+                    <i class="bi bi-trash3"></i> {{ __('feed.delete_post', 'Delete Post') }}
+                  </a>
+                </li>
+              </div>
+            </template>
+            <template x-if="isUserTaggedInPost(post)">
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-warning" href="#" style="min-height: 44px;" @click.prevent="untagSelfFromPost(post)">
+                  <i class="bi bi-tag-fill"></i> {{ __('feed.remove_tag', 'Remove Tag from Post') }}
+                </a>
+              </li>
+            </template>
+            <!-- Optional On-Demand Translation Trigger -->
+            <template x-if="post.displayMessage || post.postMessage">
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" style="min-height: 44px;" @click.prevent="window.toggleTranslatePost ? window.toggleTranslatePost(post) : null">
+                  <i class="bi bi-translate text-primary"></i>
+                  <span x-text="post._isTranslated ? (window.__ ? window.__('feed.see_original', 'See original') : 'See original') : (window.__ ? window.__('feed.translate_post', 'Translate post') : 'Translate post')"></span>
+                </a>
+              </li>
+            </template>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -163,12 +170,26 @@
     <div class="post-content px-1 mb-3">
       <p class="mb-0" style="white-space: pre-line; font-size: 1.05rem; color: var(--text-main); line-height: 1.55; font-family: var(--font-sans, -apple-system, system-ui, sans-serif);" x-html="renderHashtags(getMediaCaption(post), post.ar_emoji)"></p>
       
-      <!-- On-Demand Post Translation Toggle for Diaspora Viewers -->
-      <div class="mt-1 d-flex align-items-center gap-2" x-show="window.APP_LOCALE && window.APP_LOCALE !== 'en'">
-        <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none d-inline-flex align-items-center gap-1" style="font-size: 0.8rem; color: var(--brand-primary, #a31621); font-weight: 600;" @click="window.toggleTranslatePost ? window.toggleTranslatePost(post) : null">
-          <i class="bi bi-translate"></i>
-          <span x-text="post._isTranslated ? (window.__ ? window.__('feed.see_original', 'See original') : 'See original') : (post._isTranslating ? (window.__ ? window.__('feed.translating', 'Translating...') : 'Translating...') : (window.__ ? window.__('feed.translate', 'Translate') : 'Translate'))"></span>
-        </button>
+      <!-- Active Translation Status Pill (Only Visible Once User Requested Translation) -->
+      <div class="mt-1.5 d-flex align-items-center gap-2" x-show="post._isTranslated || post._isTranslating" x-cloak>
+        <span class="badge bg-light text-muted border d-inline-flex align-items-center gap-1.5 py-1 px-2" style="font-size: 0.78rem; font-weight: 500;">
+          <i class="bi bi-translate text-primary"></i>
+          <template x-if="post._isTranslating">
+            <span class="d-inline-flex align-items-center gap-1">
+              <span class="spinner-border spinner-border-sm text-primary" role="status" style="width: 11px; height: 11px; border-width: 1.5px;"></span>
+              <span x-text="window.__ ? window.__('feed.translating', 'Translating...') : 'Translating...'"></span>
+            </span>
+          </template>
+          <template x-if="post._isTranslated">
+            <span class="d-inline-flex align-items-center gap-1">
+              <span x-text="(window.__ ? window.__('feed.translated_label', 'Translated') : 'Translated') + (post._detectedSource ? ' (' + post._detectedSource.toUpperCase() + ')' : '')"></span>
+              &bull;
+              <button type="button" class="btn btn-sm btn-link p-0 text-decoration-underline text-primary fw-semibold" style="font-size: 0.78rem;" @click="window.toggleTranslatePost(post)">
+                <span x-text="window.__ ? window.__('feed.see_original', 'See original') : 'See original'"></span>
+              </button>
+            </span>
+          </template>
+        </span>
       </div>
     </div>
   </template>
@@ -949,10 +970,10 @@
       <div class="multi-video-scroll-track d-flex gap-2.5 overflow-x-auto pb-2"
            x-ref="videoScrollTrack"
            @scroll.passive="onScroll($event)"
-           style="scroll-snap-type: x mandatory; scrollbar-width: thin; -webkit-overflow-scrolling: touch; scroll-padding: 0 4px;">
+           style="scroll-snap-type: x mandatory; scrollbar-width: thin; -webkit-overflow-scrolling: touch; scroll-padding: 0 4px; height: clamp(340px, 50vh, 460px);">
         <template x-for="(vid, vIdx) in post.videos" :key="vIdx">
-          <div class="multi-video-card flex-shrink-0 position-relative rounded-3 overflow-hidden shadow-sm border border-light-subtle"
-               :style="'scroll-snap-align: start; flex: 0 0 auto; width: ' + (isCardLandscape ? 'clamp(300px, 82%, 540px)' : (post.videos.length === 2 ? 'clamp(240px, 48.5%, 360px)' : 'clamp(210px, 44%, 300px)')) + '; background: #07090e; transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);'"
+          <div class="multi-video-card flex-shrink-0 position-relative rounded-3 overflow-hidden shadow-sm border border-light-subtle d-flex flex-column h-100"
+               :style="'scroll-snap-align: start; flex: 0 0 auto; width: ' + (isCardLandscape ? 'clamp(300px, 82%, 520px)' : (post.videos.length === 2 ? 'clamp(240px, 48.5%, 360px)' : 'clamp(210px, 44%, 300px)')) + '; height: 100%; background: transparent; transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);'"
                x-data="{
                  isMuted: true,
                  isPlaying: false,
@@ -967,7 +988,7 @@
                      this.cardAspect = (el.videoWidth / el.videoHeight).toFixed(4) + ' / 1';
                    } else if (r < 0.88) {
                      this.isCardLandscape = false;
-                     this.cardAspect = (r <= 0.65) ? '9 / 16' : '4 / 5';
+                     this.cardAspect = (r <= 0.65) ? '9 / 16' : (el.videoWidth / el.videoHeight).toFixed(4) + ' / 1';
                    } else {
                      this.isCardLandscape = false;
                      this.cardAspect = '1 / 1';
@@ -982,8 +1003,9 @@
                          if (other !== vEl && !other.paused) other.pause();
                        });
                      }
-                     vEl.play().catch(() => {});
-                     this.isPlaying = true;
+                     vEl.play().then(() => {
+                       this.isPlaying = true;
+                     }).catch(() => {});
                    } else {
                      vEl.pause();
                      this.isPlaying = false;
@@ -1034,22 +1056,17 @@
 
             <!-- Video Player (Direct Stream or Embedded) -->
             <template x-if="vid.type === 'direct'">
-              <div class="position-relative w-100 overflow-hidden" :style="'aspect-ratio: ' + cardAspect + '; max-height: 480px; background: #07090e; transition: aspect-ratio 0.25s cubic-bezier(0.16, 1, 0.3, 1);'">
-                <!-- Ambient Glow Backdrop for Subtle Edge Fill -->
-                <div class="position-absolute top-0 start-0 w-100 h-100 overflow-hidden" style="pointer-events: none; z-index: 1;">
-                  <div class="w-100 h-100" style="background: radial-gradient(circle at center, rgba(30, 41, 59, 0.45) 0%, rgba(7, 9, 14, 0.98) 100%);"></div>
-                </div>
-
+              <div class="position-relative w-100 h-100 flex-grow-1 overflow-hidden" style="min-height: 320px; background: transparent;">
                 <!-- High-Res Poster Thumbnail Overlay (Guarantees zero dark/black screen while paused) -->
                 <img x-show="!isPlaying && vid.thumbnailUrl"
                      :src="vid.thumbnailUrl"
-                     class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover pointer-events-none"
-                     style="z-index: 3;"
+                     class="position-absolute top-0 start-0 w-100 h-100 pointer-events-none"
+                     style="z-index: 3; object-fit: cover !important; width: 100%; height: 100%; position: absolute; inset: 0;"
                      loading="lazy"
                      alt="Video thumbnail preview"
                      x-on:error="$el.style.display = 'none'">
 
-                <video referrerpolicy="no-referrer" class="w-100 h-100 object-fit-contain position-relative"
+                <video referrerpolicy="no-referrer" class="w-100 h-100 position-absolute top-0 start-0"
                        :src="vid.embedUrl"
                        :poster="vid.thumbnailUrl || ''"
                        playsinline
@@ -1063,17 +1080,7 @@
                        @pause="isPlaying = false"
                        @ended="onVideoEnded(vIdx, $el)"
                        @timeupdate="onTimeUpdate($el)"
-                       style="z-index: 2;"></video>
-
-                <!-- Center Play Indicator (when paused) -->
-                <div class="position-absolute top-50 start-50 translate-middle pointer-events-none"
-                     x-show="!isPlaying"
-                     style="z-index: 4; pointer-events: none;">
-                  <span class="d-inline-flex align-items-center justify-content-center rounded-circle shadow-lg"
-                        style="width: 54px; height: 54px; background: rgba(15, 23, 42, 0.72); backdrop-filter: blur(6px); border: 1px solid rgba(255, 255, 255, 0.25);">
-                    <i class="bi bi-play-fill text-white fs-3 ms-1"></i>
-                  </span>
-                </div>
+                       style="object-fit: cover !important; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 2; cursor: pointer; border-radius: 12px; background: transparent;"></video>
 
                 <!-- Bottom Scrubber Bar -->
                 <div class="position-absolute bottom-0 start-0 w-100" style="height: 4px; background: rgba(255, 255, 255, 0.2); z-index: 5;">
@@ -1084,7 +1091,7 @@
 
             <!-- Embedded Third-Party (YouTube / Vimeo / Cloudflare) -->
             <template x-if="vid.type !== 'direct'">
-              <div class="w-100 position-relative" style="aspect-ratio: 16 / 9; max-height: 340px; background: #07090e;">
+              <div class="w-100 h-100 position-relative flex-grow-1" style="background: transparent;">
                 <iframe :src="vid.embedUrl"
                         title="Video Player"
                         frameborder="0"
@@ -1144,9 +1151,11 @@
            isVideoMuted: true,
            isPlaying: false,
            videoOrientation: 'portrait',
-           videoRatio: '4 / 5',
-           videoMaxHeight: '560px',
+           videoRatio: '9 / 16',
+           videoMaxHeight: '580px',
            isPortrait: true,
+           viewMode: 'cinema',
+           showHookCard: true,
            hasMetadata: false,
            progressPercent: 0,
            currentTimeFormatted: '0:00',
@@ -1160,6 +1169,20 @@
              const s = Math.floor(sec % 60);
              return m + ':' + (s < 10 ? '0' : '') + s;
            },
+           getDerivedHook(raw) {
+             if (!raw || typeof raw !== 'string') return '';
+             let clean = raw.replace(/https?:\/\/[^\s]+/g, '').trim();
+             if (!clean) return '';
+             const lines = clean.split(/\r?\n|[.!?]\s+/).map(s => s.trim()).filter(Boolean);
+             const first = lines[0] || clean;
+             if (first.length <= 80) return first;
+             const truncated = first.substring(0, 75);
+             const lastSpace = truncated.lastIndexOf(' ');
+             return (lastSpace > 25 ? truncated.substring(0, lastSpace) : truncated) + '...';
+           },
+           toggleViewMode() {
+             this.viewMode = (this.viewMode === 'reel') ? 'cinema' : 'reel';
+           },
            detectVideoDimensions(el) {
              if (!el || !el.videoWidth || !el.videoHeight) return;
              this.hasMetadata = true;
@@ -1170,17 +1193,12 @@
              if (ratio < 0.88) {
                this.isPortrait = true;
                this.videoOrientation = 'portrait';
-               if (ratio <= 0.65) {
-                 this.videoRatio = '9 / 16';
-                 this.videoMaxHeight = '580px';
-               } else {
-                 this.videoRatio = '4 / 5';
-                 this.videoMaxHeight = '540px';
-               }
+               this.videoRatio = (ratio <= 0.65) ? '9 / 16' : ((w / h).toFixed(4) + ' / 1');
+               this.videoMaxHeight = (ratio <= 0.65) ? '620px' : '560px';
              } else if (ratio > 1.15) {
                this.isPortrait = false;
                this.videoOrientation = 'landscape';
-               this.videoRatio = (ratio >= 2.1) ? '21 / 9' : (ratio.toFixed(4) + ' / 1');
+               this.videoRatio = (w / h).toFixed(4) + ' / 1';
                this.videoMaxHeight = '500px';
              } else {
                this.isPortrait = false;
@@ -1194,12 +1212,10 @@
              if (videoEl.paused) {
                videoEl.play().then(() => {
                  this.isPlaying = true;
-                 this.triggerPulse('bi-play-fill');
                }).catch(() => {});
              } else {
                videoEl.pause();
                this.isPlaying = false;
-               this.triggerPulse('bi-pause-fill');
              }
            },
            triggerPulse(icon) {
@@ -1235,27 +1251,22 @@
          }"
          x-init="$nextTick(() => { const v = $el.querySelector('video'); if (v && v.videoWidth) detectVideoDimensions(v); })">
       
-      <!-- Outer Adaptive Container with Ambient Studio Glow -->
+      <!-- Outer Adaptive Container: Zero Black Space Guarantee -->
       <div class="video-rendition-frame position-relative overflow-hidden mx-auto shadow-sm"
            @mouseenter="showControlsOverlay = true"
            @mouseleave="showControlsOverlay = false"
-           :style="'aspect-ratio: ' + videoRatio + '; max-height: ' + videoMaxHeight + '; width: 100%; max-width: ' + (isPortrait ? (videoRatio === '9 / 16' ? '400px' : '460px') : '100%') + '; border-radius: 14px; background: #07090e; transition: aspect-ratio 0.25s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);'">
-
-        <!-- Ambient Studio Glow Backdrop (Instagram / YouTube Studio Ambient Mode) -->
-        <div class="position-absolute top-0 start-0 w-100 h-100 overflow-hidden" style="border-radius: 14px; pointer-events: none; z-index: 1;">
-          <div class="w-100 h-100" style="background: radial-gradient(circle at center, rgba(30, 41, 59, 0.55) 0%, rgba(7, 9, 14, 0.98) 100%);"></div>
-        </div>
+           :style="'aspect-ratio: ' + (viewMode === 'reel' ? (isPortrait ? videoRatio : '9 / 16') : videoRatio) + '; max-height: ' + (viewMode === 'reel' ? '580px' : videoMaxHeight) + '; width: 100%; max-width: ' + (isPortrait ? (videoRatio === '9 / 16' ? '380px' : '440px') : (viewMode === 'reel' ? '380px' : '100%')) + '; border-radius: 16px; background: transparent; transition: aspect-ratio 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);'">
 
         <!-- High-Res Video Poster Overlay when paused (Guarantees zero dark/black screen) -->
         <img x-show="!isPlaying && post.video && post.video.thumbnailUrl"
              :src="post.video.thumbnailUrl"
-             class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover pointer-events-none"
-             style="z-index: 3; border-radius: 14px;"
+             class="position-absolute top-0 start-0 w-100 h-100 pointer-events-none"
+             style="z-index: 3; border-radius: 16px; object-fit: cover !important;"
              loading="lazy"
              alt="Video preview thumbnail"
              x-on:error="$el.style.display = 'none'">
 
-        <!-- Main Video Element -->
+        <!-- Main Video Element (Full-Bleed Cover: Zero Black Space) -->
         <video referrerpolicy="no-referrer" class="feed-post-video w-100 h-100 position-relative"
                :src="post.video.embedUrl"
                :poster="post.video.thumbnailUrl || ''"
@@ -1281,34 +1292,59 @@
                @pause="isPlaying = false"
                @timeupdate="handleTimeUpdate($el)"
                @volumechange="isVideoMuted = $el.muted"
-               style="width: 100%; height: 100%; object-fit: contain; z-index: 2; border-radius: 14px; cursor: pointer; background: transparent;"></video>
+               style="width: 100%; height: 100%; object-fit: cover !important; z-index: 2; border-radius: 16px; cursor: pointer; background: transparent;"></video>
 
-        <!-- Center Play/Pause Ripple Removed: prevents redundant persistent play icon over video -->
-        <template x-if="false && showPulse">
-          <div class="position-absolute top-50 start-50 translate-middle pointer-events-none" style="display: none !important;">
-            <i class="bi" :class="pulseIcon"></i>
+        <!-- Kinetic Hook Card (Instagram-Style High-Impact Title Card) -->
+        <template x-if="showHookCard && (post.video?.hookText || getDerivedHook(post.displayMessage || post.postMessage))">
+          <div class="position-absolute start-50 translate-middle-x px-3"
+               :style="isPortrait ? 'bottom: 74px; width: 92%; max-width: 320px; z-index: 5;' : 'top: 52px; width: 90%; max-width: 310px; z-index: 5;'"
+               x-transition:enter="transition ease-out duration-300"
+               x-transition:enter-start="opacity-0 translate-y-3 scale-95"
+               x-transition:enter-end="opacity-100 translate-y-0 scale-100">
+            <div class="cine-hook-card text-center p-3 shadow-lg position-relative"
+                 @click.stop="showHookCard = false"
+                 title="Tap to hide title card"
+                 style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1.5px solid rgba(255, 255, 255, 0.85); border-radius: 18px; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.42); cursor: pointer; transition: transform 0.15s ease;"
+                 onmouseover="this.style.transform='scale(1.02)'"
+                 onmouseout="this.style.transform='scale(1)'">
+              <span class="d-block"
+                    style="font-family: 'Playfair Display', Georgia, -apple-system, BlinkMacSystemFont, 'Segoe UI', serif; font-size: clamp(0.92rem, 2.7vw, 1.12rem); font-weight: 800; color: #0f172a; line-height: 1.28; letter-spacing: -0.01em;"
+                    x-text="post.video?.hookText || getDerivedHook(post.displayMessage || post.postMessage)"></span>
+            </div>
           </div>
         </template>
 
-        <!-- Instagram Format Badge (Top-Left) -->
+        <!-- Format Badge & 1-Tap Reel/Cinema Switcher (Top-Left) -->
         <div class="position-absolute d-inline-flex align-items-center gap-1.5 shadow-sm"
-             style="top: 14px; left: 14px; z-index: 6; pointer-events: none;">
+             style="top: 14px; left: 14px; z-index: 6;">
           <template x-if="isPortrait">
-            <span class="badge rounded-pill px-2.5 py-1.5 d-inline-flex align-items-center gap-1"
+            <span class="badge rounded-pill px-2.5 py-1.5 d-inline-flex align-items-center gap-1 pointer-events-none"
                   style="background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.22); color: #ffffff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;">
               <i class="bi bi-phone-fill text-info" style="font-size: 0.75rem;"></i>
               <span>PORTRAIT HD</span>
             </span>
           </template>
           <template x-if="!isPortrait && videoOrientation === 'landscape'">
-            <span class="badge rounded-pill px-2.5 py-1.5 d-inline-flex align-items-center gap-1"
-                  style="background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.22); color: #ffffff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;">
-              <i class="bi bi-badge-hd-fill text-warning" style="font-size: 0.75rem;"></i>
-              <span>SUPER HD</span>
-            </span>
+            <div class="d-inline-flex align-items-center gap-1">
+              <span class="badge rounded-pill px-2.5 py-1.5 d-inline-flex align-items-center gap-1 pointer-events-none"
+                    style="background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.22); color: #ffffff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;">
+                <i class="bi bi-badge-hd-fill text-warning" style="font-size: 0.75rem;"></i>
+                <span>SUPER HD</span>
+              </span>
+              <!-- 1-Tap Reel / Cinema Mode Switcher -->
+              <button type="button" 
+                      class="btn d-inline-flex align-items-center gap-1 px-2.5 py-1 rounded-pill shadow-sm"
+                      @click.stop="toggleViewMode()"
+                      :title="viewMode === 'reel' ? 'Switch to Cinema 16:9 view' : 'Switch to Immersive Reel 9:16 view'"
+                      :aria-label="viewMode === 'reel' ? 'Switch to Cinema 16:9 view' : 'Switch to Immersive Reel 9:16 view'"
+                      style="background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; font-size: 0.7rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; min-height: 28px;">
+                <i class="bi" :class="viewMode === 'reel' ? 'bi-aspect-ratio text-info' : 'bi-phone text-warning'"></i>
+                <span x-text="viewMode === 'reel' ? 'REEL' : 'CINEMA'"></span>
+              </button>
+            </div>
           </template>
           <template x-if="!isPortrait && videoOrientation === 'square'">
-            <span class="badge rounded-pill px-2.5 py-1.5 d-inline-flex align-items-center gap-1"
+            <span class="badge rounded-pill px-2.5 py-1.5 d-inline-flex align-items-center gap-1 pointer-events-none"
                   style="background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.22); color: #ffffff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;">
               <i class="bi bi-square-fill text-success" style="font-size: 0.7rem;"></i>
               <span>SQUARE HD</span>
@@ -1662,12 +1698,26 @@
       <a :href="'/member/profilePage?id=' + post.id" class="fw-bold text-decoration-none me-1.5" style="color: var(--text-main, #0f172a); font-weight: 600;" x-text="post.fullName"></a>
       <span class="post-caption-text" style="white-space: pre-line; color: var(--text-main);" x-html="renderHashtags(getMediaCaption(post), post.ar_emoji)"></span>
 
-      <!-- On-Demand Post Translation Toggle for Diaspora Viewers -->
-      <div class="mt-1 d-flex align-items-center gap-2" x-show="window.APP_LOCALE && window.APP_LOCALE !== 'en'">
-        <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none d-inline-flex align-items-center gap-1" style="font-size: 0.8rem; color: var(--brand-primary, #a31621); font-weight: 600;" @click="window.toggleTranslatePost ? window.toggleTranslatePost(post) : null">
-          <i class="bi bi-translate"></i>
-          <span x-text="post._isTranslated ? (window.__ ? window.__('feed.see_original', 'See original') : 'See original') : (post._isTranslating ? (window.__ ? window.__('feed.translating', 'Translating...') : 'Translating...') : (window.__ ? window.__('feed.translate', 'Translate') : 'Translate'))"></span>
-        </button>
+      <!-- Active Translation Status Pill (Only Visible Once User Requested Translation) -->
+      <div class="mt-1.5 d-flex align-items-center gap-2" x-show="post._isTranslated || post._isTranslating" x-cloak>
+        <span class="badge bg-light text-muted border d-inline-flex align-items-center gap-1.5 py-1 px-2" style="font-size: 0.78rem; font-weight: 500;">
+          <i class="bi bi-translate text-primary"></i>
+          <template x-if="post._isTranslating">
+            <span class="d-inline-flex align-items-center gap-1">
+              <span class="spinner-border spinner-border-sm text-primary" role="status" style="width: 11px; height: 11px; border-width: 1.5px;"></span>
+              <span x-text="window.__ ? window.__('feed.translating', 'Translating...') : 'Translating...'"></span>
+            </span>
+          </template>
+          <template x-if="post._isTranslated">
+            <span class="d-inline-flex align-items-center gap-1">
+              <span x-text="(window.__ ? window.__('feed.translated_label', 'Translated') : 'Translated') + (post._detectedSource ? ' (' + post._detectedSource.toUpperCase() + ')' : '')"></span>
+              &bull;
+              <button type="button" class="btn btn-sm btn-link p-0 text-decoration-underline text-primary fw-semibold" style="font-size: 0.78rem;" @click="window.toggleTranslatePost(post)">
+                <span x-text="window.__ ? window.__('feed.see_original', 'See original') : 'See original'"></span>
+              </button>
+            </span>
+          </template>
+        </span>
       </div>
     </div>
   </template>

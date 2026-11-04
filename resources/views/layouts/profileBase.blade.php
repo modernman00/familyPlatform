@@ -12,7 +12,7 @@
     window.__ = function(k, fb) { return (window.__TRANSLATIONS__ && window.__TRANSLATIONS__[k]) || fb || k; };
     window.trans = window.__;
 
-    window.toggleTranslatePost = function(post) {
+    window.toggleTranslatePost = function(post, forcedTarget) {
       if (!post) return;
       if (post._isTranslated) {
         post.displayMessage = post._origDisplayMessage || post.displayMessage;
@@ -20,17 +20,32 @@
         return;
       }
       const textToTranslate = post.displayMessage || post.postMessage;
-      if (!textToTranslate) return;
+      if (!textToTranslate || !String(textToTranslate).trim()) {
+        if (window.Swal) {
+          window.Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'info',
+            title: 'No text available to translate.',
+            showConfirmButton: false,
+            timer: 2500
+          });
+        }
+        return;
+      }
 
-      if (post._translatedMessage) {
-        post._origDisplayMessage = post.displayMessage || post.postMessage;
+      // If already fetched and cached on this client object for this target, toggle directly
+      if (post._translatedMessage && !forcedTarget) {
+        post._origDisplayMessage = post._origDisplayMessage || post.displayMessage || post.postMessage;
         post.displayMessage = post._translatedMessage;
         post._isTranslated = true;
         return;
       }
 
       post._isTranslating = true;
-      const targetLang = window.APP_LOCALE || 'en';
+      let targetLang = forcedTarget || window.APP_LOCALE || 'en';
+      if (targetLang === 'us') targetLang = 'en';
+
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
       
       fetch('/api/translate', {
@@ -42,22 +57,72 @@
         },
         body: JSON.stringify({
           text: textToTranslate,
-          target: targetLang
+          target: targetLang,
+          token: csrfToken
         })
       })
       .then(res => res.json())
       .then(data => {
         post._isTranslating = false;
         if (data.success && data.translation) {
-          post._origDisplayMessage = post.displayMessage || post.postMessage;
+          if (data.already_in_target && targetLang === 'en' && !forcedTarget) {
+            // Post is already in English. Ask viewer which foreign language they wish to translate into
+            if (window.Swal) {
+              window.Swal.fire({
+                title: window.__ ? window.__('feed.translate_post_title', 'Translate Post') : 'Translate Post',
+                text: window.__ ? window.__('feed.already_english', 'This post is already written in English. Which language would you like to translate it into?') : 'This post is already written in English. Which language would you like to translate it into?',
+                input: 'select',
+                inputOptions: {
+                  'fr': 'Français (French)',
+                  'es': 'Español (Spanish)',
+                  'yo': 'Yorùbá (Yoruba)',
+                  'de': 'Deutsch (German)',
+                  'pt': 'Português (Portuguese)',
+                  'it': 'Italiano (Italian)'
+                },
+                inputPlaceholder: 'Select a language...',
+                showCancelButton: true,
+                confirmButtonColor: '#a31621',
+                confirmButtonText: window.__ ? window.__('feed.translate_btn', 'Translate') : 'Translate'
+              }).then(result => {
+                if (result.isConfirmed && result.value) {
+                  window.toggleTranslatePost(post, result.value);
+                }
+              });
+              return;
+            }
+          }
+          post._origDisplayMessage = post._origDisplayMessage || post.displayMessage || post.postMessage;
           post._translatedMessage = data.translation;
           post.displayMessage = data.translation;
+          post._detectedSource = data.detected_source || '';
           post._isTranslated = true;
+        } else {
+          if (window.Swal) {
+            window.Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'error',
+              title: data.error || 'Could not translate post at this moment.',
+              showConfirmButton: false,
+              timer: 3000
+            });
+          }
         }
       })
       .catch(err => {
         console.error('Translation error:', err);
         post._isTranslating = false;
+        if (window.Swal) {
+          window.Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: 'Translation network error.',
+            showConfirmButton: false,
+            timer: 3000
+          });
+        }
       });
     };
   </script>

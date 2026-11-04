@@ -37,19 +37,20 @@
         },
 
         /**
-         * Bind 60fps 3D micro-tilt physics to all 3D emojis across the page.
+         * Bind 60fps 3D micro-tilt physics to all 3D emojis across desktop and mobile.
          */
         bindMicroTilt: function () {
             document.querySelectorAll('.atg-3d-emoji, [data-atg-3d="true"]').forEach(el => {
                 if (el.dataset.tiltBound) return;
                 el.dataset.tiltBound = 'true';
 
+                // Desktop mouse events
                 el.addEventListener('mousemove', function (e) {
                     const rect = this.getBoundingClientRect();
                     const cx = rect.left + rect.width / 2;
                     const cy = rect.top + rect.height / 2;
-                    const dx = (e.clientX - cx) / (rect.width / 2);
-                    const dy = (e.clientY - cy) / (rect.height / 2);
+                    const dx = (e.clientX - cx) / (rect.width / 2 || 1);
+                    const dy = (e.clientY - cy) / (rect.height / 2 || 1);
 
                     const tiltX = Math.max(-25, Math.min(25, dy * -20));
                     const tiltY = Math.max(-25, Math.min(25, dx * 20));
@@ -60,6 +61,46 @@
                 el.addEventListener('mouseleave', function () {
                     this.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1) translateZ(0)';
                 });
+
+                // Mobile touch events with spring-back physics
+                el.addEventListener('touchstart', function (e) {
+                    if (e.touches && e.touches.length === 1) {
+                        this.classList.add('touch-active');
+                        this.style.transition = 'transform 0.1s ease-out, filter 0.1s ease-out';
+                        const touch = e.touches[0];
+                        const rect = this.getBoundingClientRect();
+                        const cx = rect.left + rect.width / 2;
+                        const cy = rect.top + rect.height / 2;
+                        const dx = (touch.clientX - cx) / (rect.width / 2 || 1);
+                        const dy = (touch.clientY - cy) / (rect.height / 2 || 1);
+                        const tiltX = Math.max(-22, Math.min(22, dy * -18));
+                        const tiltY = Math.max(-22, Math.min(22, dx * 18));
+                        this.style.transform = `perspective(600px) rotateX(${tiltX.toFixed(1)}deg) rotateY(${tiltY.toFixed(1)}deg) scale3d(1.12, 1.12, 1.12) translateZ(12px)`;
+                    }
+                }, { passive: true });
+
+                el.addEventListener('touchmove', function (e) {
+                    if (e.touches && e.touches.length === 1) {
+                        const touch = e.touches[0];
+                        const rect = this.getBoundingClientRect();
+                        const cx = rect.left + rect.width / 2;
+                        const cy = rect.top + rect.height / 2;
+                        const dx = (touch.clientX - cx) / (rect.width / 2 || 1);
+                        const dy = (touch.clientY - cy) / (rect.height / 2 || 1);
+                        const tiltX = Math.max(-25, Math.min(25, dy * -20));
+                        const tiltY = Math.max(-25, Math.min(25, dx * 20));
+                        this.style.transform = `perspective(600px) rotateX(${tiltX.toFixed(1)}deg) rotateY(${tiltY.toFixed(1)}deg) scale3d(1.15, 1.15, 1.15) translateZ(12px)`;
+                    }
+                }, { passive: true });
+
+                const resetTouch = function () {
+                    this.classList.remove('touch-active');
+                    this.style.transition = 'transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), filter 0.35s ease';
+                    this.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1) translateZ(0)';
+                };
+
+                el.addEventListener('touchend', resetTouch, { passive: true });
+                el.addEventListener('touchcancel', resetTouch, { passive: true });
             });
         },
 

@@ -454,6 +454,11 @@ export function profileFeed(opts = {}) {
                     const m = cleanMsg.match(/:([a-z0-9_]+_3d):/i);
                     return m ? m[1] : null;
                 })(),
+                _isTranslated: false,
+                _isTranslating: false,
+                _translatedMessage: null,
+                _origDisplayMessage: null,
+                _detectedSource: '',
             };
 
             // Linked photo hydration (Google Photos, iCloud, direct image assets without local uploads)

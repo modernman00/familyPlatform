@@ -153,7 +153,8 @@ final class PostDto implements JsonSerializable
             }
 
             if (!empty($finalVideos)) {
-                $rowVideos = array_map(function ($v) {
+                $hook = self::deriveHookFromMessage($message ?? ($row['postMessage'] ?? ''));
+                $rowVideos = array_map(function ($v) use ($hook) {
                     $thumb = null;
                     if (preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|ggpht\.com)/#i', $v)) {
                         $thumb = preg_replace('/=.*$/i', '=s1600', $v);
@@ -166,6 +167,8 @@ final class PostDto implements JsonSerializable
                         'originalUrl' => $v,
                         'trimStart' => null,
                         'trimEnd' => null,
+                        'hookText' => $hook,
+                        'aspectMode' => 'reel',
                     ];
                 }, $finalVideos);
                 $row['videos'] = $rowVideos;
@@ -185,7 +188,8 @@ final class PostDto implements JsonSerializable
                 );
             }
         } elseif (!empty($existingExternalVideos)) {
-            $rowVideos = array_map(function ($v) {
+            $hook = self::deriveHookFromMessage($message ?? ($row['postMessage'] ?? ''));
+            $rowVideos = array_map(function ($v) use ($hook) {
                 $thumb = null;
                 if (preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|ggpht\.com)/#i', $v)) {
                     $thumb = preg_replace('/=.*$/i', '=s1600', $v);
@@ -198,6 +202,8 @@ final class PostDto implements JsonSerializable
                     'originalUrl' => $v,
                     'trimStart' => null,
                     'trimEnd' => null,
+                    'hookText' => $hook,
+                    'aspectMode' => 'reel',
                 ];
             }, $existingExternalVideos);
             $row['videos'] = $rowVideos;
@@ -316,6 +322,37 @@ final class PostDto implements JsonSerializable
         }
 
         return $arr;
+    }
+
+    /**
+     * Intelligently derives a punchy viral/story title hook from post message content.
+     * Respects British English conventions and bounds length to prevent DOM overflow.
+     */
+    public static function deriveHookFromMessage(?string $raw): ?string
+    {
+        if (empty($raw)) {
+            return null;
+        }
+        $clean = preg_replace('#https?://[^\s]+#i', '', $raw);
+        $clean = trim((string)$clean);
+        if ($clean === '') {
+            return null;
+        }
+        // Extract first sentence or paragraph
+        $parts = preg_split('/[\r\n]+|[.!?]\s+/', $clean);
+        if (!is_array($parts) || empty($parts)) {
+            return null;
+        }
+        $candidate = trim((string)$parts[0]);
+        if ($candidate === '') {
+            return null;
+        }
+        if (mb_strlen($candidate) <= 80) {
+            return $candidate;
+        }
+        $sub = mb_substr($candidate, 0, 75);
+        $lastSpace = mb_strrpos($sub, ' ');
+        return ($lastSpace !== false && $lastSpace > 25 ? mb_substr($sub, 0, $lastSpace) : $sub) . '...';
     }
 
     /**

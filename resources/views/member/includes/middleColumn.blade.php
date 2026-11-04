@@ -1115,12 +1115,39 @@
                  style="max-width: 94vw; max-height: 76vh;">
                 
                 <template x-if="videoModalVideos[videoModalIndex] && videoModalVideos[videoModalIndex].type === 'direct'">
-                    <div class="position-relative w-100 h-100 d-flex align-items-center justify-content-center">
+                    <div class="position-relative w-100 h-100 d-flex align-items-center justify-content-center overflow-hidden" style="border-radius: 16px;">
+                        <!-- Ambient Liquid Canvas in Full Video Theatre -->
+                        <div class="position-absolute top-0 start-0 w-100 h-100 overflow-hidden pointer-events-none" style="z-index: 1;">
+                            <video referrerpolicy="no-referrer"
+                                   class="modal-ambient-video w-100 h-100"
+                                   :src="videoModalVideos[videoModalIndex]?.embedUrl"
+                                   muted
+                                   playsinline
+                                   webkit-playsinline
+                                   loop
+                                   preload="metadata"
+                                   style="object-fit: cover; filter: blur(48px) brightness(0.65) saturate(1.5); transform: scale(1.35); opacity: 0.82;"></video>
+                            <div class="position-absolute top-0 start-0 w-100 h-100" style="background: radial-gradient(circle at center, transparent 35%, rgba(5, 7, 12, 0.82) 100%);"></div>
+                        </div>
+
+                        <!-- Kinetic Hook Card in Full Modal -->
+                        <template x-if="videoModalVideos[videoModalIndex]?.hookText">
+                            <div class="position-absolute start-50 translate-middle-x px-3 pointer-events-none"
+                                 style="top: 24px; width: 90%; max-width: 440px; z-index: 6;">
+                                <div class="text-center p-3 shadow-lg"
+                                     style="background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1.5px solid rgba(255, 255, 255, 0.85); border-radius: 18px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);">
+                                    <span class="d-block"
+                                          style="font-family: 'Playfair Display', Georgia, -apple-system, BlinkMacSystemFont, serif; font-size: clamp(0.95rem, 3vw, 1.2rem); font-weight: 800; color: #0f172a; line-height: 1.3;"
+                                          x-text="videoModalVideos[videoModalIndex]?.hookText"></span>
+                                </div>
+                            </div>
+                        </template>
+
                         <!-- High-Res Video Poster Overlay when paused in modal -->
                         <img x-show="!videoModalPlaying && videoModalVideos[videoModalIndex]?.thumbnailUrl"
                              :src="videoModalVideos[videoModalIndex]?.thumbnailUrl"
                              class="position-absolute top-0 start-0 w-100 h-100 object-fit-contain pointer-events-none"
-                             style="z-index: 2; border-radius: 14px;"
+                             style="z-index: 3; border-radius: 14px;"
                              alt="Full video preview"
                              x-on:error="$el.style.display = 'none'">
 
@@ -1131,21 +1158,23 @@
                                preload="auto"
                                @click.stop="toggleVideoModalPlay()"
                                @dblclick.stop="toggleNativeFullscreen()"
-                               @play="videoModalPlaying = true"
-                               @pause="videoModalPlaying = false"
+                               @play="
+                                   videoModalPlaying = true;
+                                   const bg = $el.closest('.full-video-modal-overlay')?.querySelector('.modal-ambient-video');
+                                   if (bg && bg.paused) { bg.currentTime = $el.currentTime; bg.play().catch(() => {}); }
+                               "
+                               @pause="
+                                   videoModalPlaying = false;
+                                   const bg = $el.closest('.full-video-modal-overlay')?.querySelector('.modal-ambient-video');
+                                   if (bg && !bg.paused) bg.pause();
+                               "
                                @ended="onVideoModalEnded()"
-                               @timeupdate="onVideoModalTimeUpdate($el)"
-                               style="max-width: 100%; max-height: 76vh; object-fit: contain; border-radius: 14px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9); background: #000000; cursor: pointer;"></video>
-                        
-                        <!-- Center Play Ripple when paused -->
-                        <div class="position-absolute top-50 start-50 translate-middle pointer-events-none"
-                             x-show="!videoModalPlaying"
-                             style="z-index: 4; pointer-events: none;">
-                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle shadow-lg"
-                                  style="width: 72px; height: 72px; background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(8px); border: 1.5px solid rgba(255, 255, 255, 0.35);">
-                                <i class="bi bi-play-fill text-white" style="font-size: 2.2rem; margin-left: 4px;"></i>
-                            </span>
-                        </div>
+                               @timeupdate="
+                                   onVideoModalTimeUpdate($el);
+                                   const bg = $el.closest('.full-video-modal-overlay')?.querySelector('.modal-ambient-video');
+                                   if (bg && Math.abs(bg.currentTime - $el.currentTime) > 0.35) bg.currentTime = $el.currentTime;
+                               "
+                               style="max-width: 100%; max-height: 76vh; object-fit: contain; border-radius: 14px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9); background: transparent; cursor: pointer; z-index: 4;"></video>
                     </div>
                 </template>
 

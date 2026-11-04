@@ -148,47 +148,80 @@
       Retry Connection
     </button>
 
+    <div style="margin-top: 14px;">
+      <a href="/login?pwa_rescue=1" style="color: #a31621; font-size: 0.88rem; font-weight: 600; text-decoration: none;">
+        Go to Sign In &rarr;
+      </a>
+    </div>
+
     <div class="footer-text">
       FamilyPlatform PWA &bull; Offline Resilience
     </div>
   </div>
 
   <script>
+    // 1. Immediately signal all active Service Workers to update in the background
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(regs) {
+        for (var i = 0; i < regs.length; i++) {
+          regs[i].update().catch(function() {});
+        }
+      }).catch(function() {});
+    }
+
+    // 2. Active Retry Button Handler
     async function retryConnection() {
-      const btn = document.querySelector('.retry-btn');
-      const originalText = btn.innerHTML;
+      var btn = document.querySelector('.retry-btn');
+      var originalText = btn.innerHTML;
       btn.innerHTML = 'Connecting...';
       btn.disabled = true;
+
+      // Clear dynamic cache entries that might be holding stale/broken redirects
+      if ('caches' in window) {
+        try {
+          var keys = await caches.keys();
+          for (var j = 0; j < keys.length; j++) {
+            if (keys[j].indexOf('dynamic') !== -1) {
+              await caches.delete(keys[j]);
+            }
+          }
+        } catch (_) {}
+      }
+
+      // Check live server health
       try {
-        const res = await fetch('/api/health?t=' + Date.now(), { method: 'GET', cache: 'no-store' });
+        var res = await fetch('/api/health?t=' + Date.now(), { method: 'GET', cache: 'no-store' });
         if (res.ok) {
-          window.location.reload();
+          window.location.replace('/?pwa_rescue=' + Date.now());
           return;
         }
       } catch (_) {}
 
+      // Fallback: If device is online, navigate directly with bypass token
       if (navigator.onLine) {
-        window.location.reload();
+        window.location.replace('/?pwa_rescue=' + Date.now());
       } else {
-        setTimeout(() => {
+        setTimeout(function() {
           btn.innerHTML = 'Still offline &bull; Tap to retry';
           btn.disabled = false;
-        }, 1000);
+        }, 1200);
       }
     }
 
-    // Auto-reconnect watchdog: poll /api/health every 2.5s and reload when server is reachable
-    setInterval(async () => {
+    // 3. Automated background poll: checks /api/health every 2 seconds and auto-navigates
+    var pollInterval = setInterval(async function() {
       try {
-        const res = await fetch('/api/health?t=' + Date.now(), { method: 'GET', cache: 'no-store' });
+        var res = await fetch('/api/health?t=' + Date.now(), { method: 'GET', cache: 'no-store' });
         if (res.ok) {
-          window.location.reload();
+          clearInterval(pollInterval);
+          window.location.replace('/?pwa_rescue=' + Date.now());
         }
       } catch (_) {}
-    }, 2500);
+    }, 2000);
 
-    window.addEventListener('online', () => {
-      window.location.reload();
+    // 4. Listen for device online event
+    window.addEventListener('online', function() {
+      window.location.replace('/?pwa_rescue=' + Date.now());
     });
   </script>
 </body>

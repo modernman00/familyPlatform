@@ -13,7 +13,7 @@
 
 'use strict';
 
-const SW_VERSION = 'v2.3.0';
+const SW_VERSION = 'v2.4.0';
 const STATIC_CACHE = `fp-static-${SW_VERSION}`;
 const DYNAMIC_CACHE = `fp-dynamic-${SW_VERSION}`;
 const IMAGE_CACHE = `fp-images-${SW_VERSION}`;
@@ -75,7 +75,17 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    }).then(() => self.clients.claim())
+    }).then(() => self.clients.claim()).then(async () => {
+      // Self-Healing PWA Rescue: Refresh any window clients stuck on offline.html or stale homescreen
+      try {
+        const clientList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+        for (const client of clientList) {
+          if (client.url && (client.url.includes('offline') || client.url.includes('source=pwa_homescreen'))) {
+            client.navigate('/?pwa_rescue=' + Date.now());
+          }
+        }
+      } catch (_) {}
+    })
   );
 });
 
@@ -167,6 +177,11 @@ self.addEventListener('fetch', (event) => {
 
   // Non-GET requests (POST, PUT, DELETE) are strictly Network-Only
   if (request.method !== 'GET') {
+    return;
+  }
+
+  // Emergency PWA rescue parameter: bypass Service Worker completely for native recovery
+  if (url.searchParams.has('pwa_rescue') || url.searchParams.has('pwa_bypass') || url.searchParams.has('pwa_retry')) {
     return;
   }
 
@@ -286,7 +301,7 @@ async function staleWhileRevalidateStrategy(request, cacheName) {
 }
 
 // Helper: 3000ms Timeout Promise Race (Safari & Weak Mobile Network White Screen Protection)
-function fetchWithTimeout(request, timeoutMs = 5000) {
+function fetchWithTimeout(request, timeoutMs = 12000) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       reject(new Error('[SW] Navigation network timeout (3000ms threshold) exceeded'));
@@ -305,17 +320,45 @@ function fetchWithTimeout(request, timeoutMs = 5000) {
 }
 
 /**
+ * Reset internal 'redirected: true' flag to prevent FetchEvent TypeError
+ * on navigation requests where request.redirect is 'manual' (W3C Fetch Spec).
+ */
+async function cleanRedirect(response) {
+  if (!response.redirected) {
+    return response;
+  }
+  const cloned = response.clone();
+  const body = await cloned.blob();
+  const headers = new Headers(cloned.headers);
+  return new Response(body, {
+    headers: headers,
+    status: cloned.status,
+    statusText: cloned.statusText,
+  });
+}
+
+/**
  * Strategy: Network-First with /offline.html Fallback & 3000ms Navigation Timeout Race
  */
 async function networkFirstWithFallback(request) {
   try {
-    const networkResponse = await fetchWithTimeout(request, 5000);
+    const networkResponse = await fetchWithTimeout(request, 12000);
+
+    // If response was redirected (e.g. 302 /profilePage -> /login), clean it
+    // so the browser does not reject event.respondWith() with a TypeError
+    if (networkResponse && networkResponse.redirected) {
+      return await cleanRedirect(networkResponse);
+    }
+
     if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaqueredirect')) {
-      const cache = await caches.open(DYNAMIC_CACHE);
-      cache.put(request, networkResponse.clone());
+      try {
+        const cache = await caches.open(DYNAMIC_CACHE);
+        cache.put(request, networkResponse.clone());
+      } catch (_) {}
     }
     return networkResponse;
   } catch (err) {
+    console.warn('[SW] Navigation fetch failed, falling back to cache/offline:', err);
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
       return cachedResponse;

@@ -3067,8 +3067,22 @@ body.dark-mode .heirloom-reaction-btn.active {
   shape-rendering: geometricPrecision !important;
   text-rendering: geometricPrecision !important;
   image-rendering: -webkit-optimize-contrast !important;
-  transform: translateZ(0);
-  backface-visibility: hidden;
+  will-change: transform;
+}
+
+@media (min-width: 769px) and (hover: hover) {
+  .heirloom-glass-svg {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+}
+
+/* Ensure SVG keyframe transforms resolve against the SVG viewBox across all mobile WebKit and Chromium engines */
+.heirloom-glass-svg g,
+.heirloom-glass-svg path,
+.heirloom-glass-svg circle {
+  transform-box: view-box;
+  -webkit-transform-box: view-box;
 }
 
 /* Floating Comment Reaction Dock & Active Like Glyph Ergonomics */
@@ -3212,14 +3226,20 @@ body.dark-mode .heirloom-reaction-btn.active {
     animation: hgSadTearDrop 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
-  /* 6. CELEBRATE: Spinning Golden Starburst & Orbiting Diamond Sparkles */
+  /* 6. CELEBRATE: Spinning Golden Starburst & Orbiting Diamond Sparkles (Mobile WebKit & Desktop Hardware Accelerated) */
   .heirloom-celebrate .hg-celebrate-star {
+    transform-box: view-box;
+    -webkit-transform-box: view-box;
     transform-origin: 20px 20.5px;
     animation: hgCelebrateStarSpin 3.2s linear infinite;
+    will-change: transform;
   }
   .heirloom-celebrate .hg-celebrate-orbit {
+    transform-box: view-box;
+    -webkit-transform-box: view-box;
     transform-origin: 20px 20px;
     animation: hgCelebrateOrbitPulse 1.4s ease-in-out infinite alternate;
+    will-change: transform;
   }
 }
 

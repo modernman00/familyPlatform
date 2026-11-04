@@ -526,6 +526,7 @@ class FeedRepository
                 }
 
                 if (!empty($finalVideos)) {
+                    $hook = \App\dto\PostDto::deriveHookFromMessage($msg ?? ($post['postMessage'] ?? ''));
                     $formattedVideos = [];
                     foreach ($finalVideos as $vUrl) {
                         $thumb = null;
@@ -540,6 +541,8 @@ class FeedRepository
                             'originalUrl' => $vUrl,
                             'trimStart' => null,
                             'trimEnd' => null,
+                            'hookText' => $hook,
+                            'aspectMode' => 'reel',
                         ];
                     }
                     $post['videos'] = $formattedVideos;
@@ -559,6 +562,7 @@ class FeedRepository
                     );
                 }
             } elseif (!empty($existingExternalVideos) && empty($post['videos'])) {
+                $hook = \App\dto\PostDto::deriveHookFromMessage($msg ?? ($post['postMessage'] ?? ''));
                 $formattedVideos = [];
                 foreach ($existingExternalVideos as $vUrl) {
                     $thumb = null;
@@ -573,6 +577,8 @@ class FeedRepository
                         'originalUrl' => $vUrl,
                         'trimStart' => null,
                         'trimEnd' => null,
+                        'hookText' => $hook,
+                        'aspectMode' => 'reel',
                     ];
                 }
                 $post['videos'] = $formattedVideos;

@@ -104,10 +104,12 @@ RewriteRule "^resources/views(/|$)" - [F,L]
     # CORP: Prevents cross-origin resource theft
     Header always set Cross-Origin-Resource-Policy "cross-origin"
 
-    # W3C Service Worker Scope & Freshness Header
-    <FilesMatch "^(sw|service-worker)\.js$">
+    # W3C Service Worker Scope & Freshness Header + Offline Shell Freshness
+    <FilesMatch "^(sw|service-worker)\.js$|^offline\.html$">
         Header set Service-Worker-Allowed "/"
         Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
     </FilesMatch>
 </IfModule>
 
