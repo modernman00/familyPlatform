@@ -154,24 +154,38 @@
   </div>
 
   <script>
-    function retryConnection() {
+    async function retryConnection() {
+      const btn = document.querySelector('.retry-btn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = 'Connecting...';
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/health?t=' + Date.now(), { method: 'GET', cache: 'no-store' });
+        if (res.ok) {
+          window.location.reload();
+          return;
+        }
+      } catch (_) {}
+
       if (navigator.onLine) {
         window.location.reload();
       } else {
-        const btn = document.querySelector('.retry-btn');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = 'Checking network...';
-        btn.disabled = true;
         setTimeout(() => {
-          if (navigator.onLine) {
-            window.location.reload();
-          } else {
-            btn.innerHTML = 'Still offline &bull; Try again';
-            btn.disabled = false;
-          }
-        }, 1200);
+          btn.innerHTML = 'Still offline &bull; Tap to retry';
+          btn.disabled = false;
+        }, 1000);
       }
     }
+
+    // Auto-reconnect watchdog: poll /api/health every 2.5s and reload when server is reachable
+    setInterval(async () => {
+      try {
+        const res = await fetch('/api/health?t=' + Date.now(), { method: 'GET', cache: 'no-store' });
+        if (res.ok) {
+          window.location.reload();
+        }
+      } catch (_) {}
+    }, 2500);
 
     window.addEventListener('online', () => {
       window.location.reload();

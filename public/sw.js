@@ -286,10 +286,10 @@ async function staleWhileRevalidateStrategy(request, cacheName) {
 }
 
 // Helper: 3000ms Timeout Promise Race (Safari & Weak Mobile Network White Screen Protection)
-function fetchWithTimeout(request, timeoutMs = 3000) {
+function fetchWithTimeout(request, timeoutMs = 5000) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
-      reject(new Error('[SW] Navigation network timeout (3000ms) exceeded'));
+      reject(new Error('[SW] Navigation network timeout (3000ms threshold) exceeded'));
     }, timeoutMs);
 
     fetch(request)
@@ -309,8 +309,8 @@ function fetchWithTimeout(request, timeoutMs = 3000) {
  */
 async function networkFirstWithFallback(request) {
   try {
-    const networkResponse = await fetchWithTimeout(request, 3000);
-    if (networkResponse && networkResponse.status === 200) {
+    const networkResponse = await fetchWithTimeout(request, 5000);
+    if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaqueredirect')) {
       const cache = await caches.open(DYNAMIC_CACHE);
       cache.put(request, networkResponse.clone());
     }
