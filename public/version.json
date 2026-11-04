@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(pwa): eliminate 302 navigation redirects in RouteDispatch and bypass SW navigation when online",
+    "title": "Feat(feed): integrate kinship resolution for tagged post members and polish multi-video scroll controls",
     "notes": [
+        "Feat(feed): integrate kinship resolution for tagged post members and polish multi-video scroll controls",
         "Fix(pwa): eliminate 302 navigation redirects in RouteDispatch and bypass SW navigation when online",
-        "Fix(pwa): resolve navigation redirect TypeError with cleanRedirect, add PWA self-healing rescue, and prevent offline lockup",
-        "Fix(pwa): add auto-reconnect polling in offline shell, relax navigation timeout to 5000ms, and support HEAD requests on root"
+        "Fix(pwa): resolve navigation redirect TypeError with cleanRedirect, add PWA self-healing rescue, and prevent offline lockup"
     ],
     "released_at": "2026-11-04",
-    "commit": "d5cb59a3"
+    "commit": "659506cf"
 }
