@@ -880,31 +880,81 @@
     <div class="multi-video-horizontal-container mb-3 px-1 position-relative"
          x-data="{
            activeVidIdx: 0,
-           scrollToCard(idx, autoPlay = false) {
+           _isProgrammaticScroll: false,
+           _scrollEndTimer: null,
+           getCards() {
              const track = this.$refs.videoScrollTrack;
-             if (!track) return;
-             const safeIdx = Math.max(0, Math.min(idx, (post.videos ? post.videos.length - 1 : 0)));
-             const card = track.children[safeIdx];
+             return track ? Array.from(track.querySelectorAll('.multi-video-card')) : [];
+           },
+           playCardVideo(idx) {
+             const cards = this.getCards();
+             const card = cards[idx];
+             if (!card) return;
+             const targetVid = card.querySelector('video');
+             document.querySelectorAll('video').forEach(other => {
+               if (other !== targetVid && !other.paused) {
+                 other.pause();
+               }
+             });
+             if (!targetVid) return;
+             targetVid.muted = true;
+             targetVid.playsInline = true;
+             targetVid._userManuallyPaused = false;
+             const attemptPlay = () => {
+               const p = targetVid.play();
+               if (p !== undefined) {
+                 p.catch(() => {
+                   targetVid.muted = true;
+                   targetVid.play().catch(() => {});
+                 });
+               }
+             };
+             if (targetVid.readyState >= 2) {
+               attemptPlay();
+             } else {
+               const onReady = () => {
+                 targetVid.removeEventListener('loadeddata', onReady);
+                 targetVid.removeEventListener('canplay', onReady);
+                 if (this.activeVidIdx === idx) {
+                   attemptPlay();
+                 }
+               };
+               targetVid.addEventListener('loadeddata', onReady, { once: true });
+               targetVid.addEventListener('canplay', onReady, { once: true });
+               if (targetVid.networkState === 0 || targetVid.readyState === 0) {
+                 try { targetVid.load(); } catch (_) {}
+               }
+               attemptPlay();
+             }
+           },
+           scrollToCard(idx, autoPlay = true) {
+             const track = this.$refs.videoScrollTrack;
+             const cards = this.getCards();
+             if (!track || !cards.length) return;
+             const safeIdx = Math.max(0, Math.min(idx, cards.length - 1));
+             const card = cards[safeIdx];
              if (card) {
-               card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+               this._isProgrammaticScroll = true;
                this.activeVidIdx = safeIdx;
+               const targetLeft = Math.max(0, card.offsetLeft - 4);
+               track.scrollTo({ left: targetLeft, behavior: 'smooth' });
                if (autoPlay) {
+                 this.playCardVideo(safeIdx);
                  setTimeout(() => {
-                   const targetVid = card.querySelector('video');
-                   if (targetVid) {
-                     track.querySelectorAll('video').forEach(other => {
-                       if (other !== targetVid && !other.paused) other.pause();
-                     });
-                     targetVid.muted = true;
-                     targetVid.play().catch(() => {});
-                   }
-                 }, 350);
+                   this._isProgrammaticScroll = false;
+                   this.playCardVideo(safeIdx);
+                 }, 420);
+               } else {
+                 setTimeout(() => {
+                   this._isProgrammaticScroll = false;
+                 }, 420);
                }
              }
            },
            onVideoEnded(curIdx, vEl) {
-             if (!post.videos || post.videos.length <= 1) return;
-             if (curIdx < post.videos.length - 1) {
+             const cards = this.getCards();
+             if (cards.length <= 1) return;
+             if (curIdx < cards.length - 1) {
                this.scrollToCard(curIdx + 1, true);
              } else {
                this.scrollToCard(0, true);
@@ -912,22 +962,53 @@
            },
            onScroll(e) {
              const track = e.target;
-             const children = Array.from(track.children || []);
-             if (!children.length) return;
-             const scrollCenter = track.scrollLeft + track.clientWidth / 2;
-             let closestIdx = 0;
-             let minDiff = Infinity;
-             children.forEach((child, i) => {
-               const childCenter = child.offsetLeft + child.offsetWidth / 2;
-               const diff = Math.abs(scrollCenter - childCenter);
-               if (diff < minDiff) {
-                 minDiff = diff;
-                 closestIdx = i;
+             const cards = this.getCards();
+             if (!cards.length) return;
+             if (!this._isProgrammaticScroll) {
+               const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+               let closestIdx = 0;
+               if (maxScroll > 0 && track.scrollLeft >= maxScroll - 16) {
+                 closestIdx = cards.length - 1;
+               } else {
+                 let minDiff = Infinity;
+                 cards.forEach((child, i) => {
+                   const diff = Math.abs(track.scrollLeft - child.offsetLeft);
+                   if (diff < minDiff) {
+                     minDiff = diff;
+                     closestIdx = i;
+                   }
+                 });
                }
-             });
-             this.activeVidIdx = Math.max(0, Math.min(closestIdx, (post.videos ? post.videos.length - 1 : 0)));
+               const newIdx = Math.max(0, Math.min(closestIdx, cards.length - 1));
+               if (newIdx !== this.activeVidIdx) {
+                 this.activeVidIdx = newIdx;
+                 this.playCardVideo(newIdx);
+               }
+             }
+             if (this._scrollEndTimer) clearTimeout(this._scrollEndTimer);
+             this._scrollEndTimer = setTimeout(() => {
+               this._isProgrammaticScroll = false;
+               this.playCardVideo(this.activeVidIdx);
+             }, 180);
+           },
+           initMultiVideoObserver() {
+             if (typeof IntersectionObserver === 'undefined') return;
+             const obs = new IntersectionObserver((entries) => {
+               entries.forEach(entry => {
+                 if (entry.isIntersecting && entry.intersectionRatio >= 0.35) {
+                   this.playCardVideo(this.activeVidIdx);
+                 } else if (!entry.isIntersecting || entry.intersectionRatio < 0.15) {
+                   this.getCards().forEach(c => {
+                     const v = c.querySelector('video');
+                     if (v && !v.paused) v.pause();
+                   });
+                 }
+               });
+             }, { threshold: [0.0, 0.15, 0.35, 0.65] });
+             obs.observe(this.$el);
            }
-         }">
+         }"
+         x-init="$nextTick(() => initMultiVideoObserver())">
       <!-- Header Badge / Counter -->
       <div class="d-flex align-items-center justify-content-between mb-1.5 px-1">
         <span class="badge rounded-pill px-2.5 py-1 d-inline-flex align-items-center gap-1.5"
@@ -941,7 +1022,7 @@
                   :style="activeVidIdx === vIdx 
                     ? 'width: 18px; height: 6px; background: #a31621;' 
                     : 'width: 6px; height: 6px; background: rgba(15, 23, 42, 0.25); cursor: pointer;'"
-                  @click.stop="scrollToCard(vIdx)"></span>
+                  @click.stop.prevent="scrollToCard(vIdx, true)"></span>
           </template>
         </div>
       </div>
@@ -949,21 +1030,21 @@
       <!-- Left / Previous Navigation Arrow -->
       <button type="button"
               class="btn position-absolute start-0 top-50 translate-middle-y shadow d-inline-flex align-items-center justify-content-center p-0 rounded-circle"
-              style="z-index: 10; width: 44px; height: 44px; min-width: 44px; min-height: 44px; background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(8px); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); margin-left: 6px;"
+              style="z-index: 20; width: 44px; height: 44px; min-width: 44px; min-height: 44px; background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(8px); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); margin-left: 6px; pointer-events: auto;"
               x-show="activeVidIdx > 0"
-              @click.stop="scrollToCard(activeVidIdx - 1)"
+              @click.stop.prevent="scrollToCard(activeVidIdx - 1, true)"
               aria-label="Previous video">
-        <i class="bi bi-chevron-left" style="font-size: 1.1rem;"></i>
+        <i class="bi bi-chevron-left" style="font-size: 1.1rem; pointer-events: none;"></i>
       </button>
 
       <!-- Right / Next Navigation Arrow -->
       <button type="button"
               class="btn position-absolute end-0 top-50 translate-middle-y shadow d-inline-flex align-items-center justify-content-center p-0 rounded-circle"
-              style="z-index: 10; width: 44px; height: 44px; min-width: 44px; min-height: 44px; background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(8px); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); margin-right: 6px;"
+              style="z-index: 20; width: 44px; height: 44px; min-width: 44px; min-height: 44px; background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(8px); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); margin-right: 6px; pointer-events: auto;"
               x-show="activeVidIdx < post.videos.length - 1"
-              @click.stop="scrollToCard(activeVidIdx + 1)"
+              @click.stop.prevent="scrollToCard(activeVidIdx + 1, true)"
               aria-label="Next video">
-        <i class="bi bi-chevron-right" style="font-size: 1.1rem;"></i>
+        <i class="bi bi-chevron-right" style="font-size: 1.1rem; pointer-events: none;"></i>
       </button>
 
       <!-- Horizontal Scrollable Track -->
@@ -1072,7 +1153,7 @@
                        playsinline
                        webkit-playsinline
                        muted
-                       preload="metadata"
+                       preload="auto"
                        @loadedmetadata="detectCardDimensions($el)"
                        @click.stop="togglePlay($el)"
                        @dblclick.stop="openVideoModal(post.videos, vIdx, isMuted)"

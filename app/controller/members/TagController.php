@@ -276,6 +276,23 @@ class TagController
             $stmt->execute([$postNo]);
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+            $viewerId = '';
+            try {
+                $viewerId = self::getAuthenticatedUserId();
+            } catch (Throwable) {
+                $viewerId = isset($_SESSION['id']) ? (string)$_SESSION['id'] : '';
+            }
+            if ($viewerId === '' && !empty($rows[0]['tagged_by'])) {
+                $viewerId = (string)$rows[0]['tagged_by'];
+            }
+
+            $kinshipMap = [];
+            if ($viewerId !== '' && !empty($rows)) {
+                $targetIds = array_values(array_unique(array_filter(array_map('strval', array_column($rows, 'user_id')))));
+                $feedRepo = new \App\repository\FeedRepository($pdo);
+                $kinshipMap = $feedRepo->batchResolveKinship($viewerId, $targetIds);
+            }
+
             $tags = [];
             foreach ($rows as $row) {
                 $img = $row['img'] ?? null;
@@ -285,14 +302,16 @@ class TagController
                         ? (string)$img
                         : "/resources/images/profile/{$img}";
                 }
+                $uId = (string)$row['user_id'];
 
                 $tags[] = [
-                    'user_id' => (string)$row['user_id'],
+                    'user_id' => $uId,
                     'fullName' => trim(($row['firstName'] ?? '') . ' ' . ($row['lastName'] ?? '')),
                     'firstName' => (string)($row['firstName'] ?? ''),
                     'lastName' => (string)($row['lastName'] ?? ''),
                     'profileImg' => $profImg,
-                    'tagged_by' => (string)$row['tagged_by']
+                    'tagged_by' => (string)$row['tagged_by'],
+                    'kinship' => $kinshipMap[$uId] ?? 'Family Member'
                 ];
             }
 

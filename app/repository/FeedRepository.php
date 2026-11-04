@@ -595,7 +595,7 @@ class FeedRepository
      * @param array<string> $targetUserIds
      * @return array<string, string> Map of userId => kinship title
      */
-    private function batchResolveKinship(string $currentUserId, array $targetUserIds): array
+    public function batchResolveKinship(string $currentUserId, array $targetUserIds): array
     {
         if (empty($targetUserIds) || $currentUserId === '') {
             return [];
@@ -618,81 +618,187 @@ class FeedRepository
         }
 
         try {
-            // Check direct siblings in 1 query
-            $inSib = implode(',', array_fill(0, count($unresolved), '?'));
-            $sibSql = sprintf(
-                "SELECT sibling_linked FROM sibling WHERE id = ? AND sibling_linked IN (%s)",
-                $inSib
+            // 1. Primary Authoritative Resolution: DAG BFS Traversal via KinshipCalculatorService
+            // Matches the exact genealogical calculation used by the interactive Family Tree.
+            $egoNodesStmt = $this->db->prepare(
+                "SELECT id, family_code, generation_level FROM family_nodes WHERE user_id = ? AND COALESCE(is_erased, 0) = 0 ORDER BY id ASC"
             );
-            $sibStmt = $this->db->prepare($sibSql);
-            $sibStmt->execute(array_merge([$currentUserId], $unresolved));
-            while ($row = $sibStmt->fetch(PDO::FETCH_ASSOC)) {
-                $linkedId = (string)($row['sibling_linked'] ?? '');
-                if ($linkedId !== '') {
-                    $results[$linkedId] = 'Sibling';
+            $egoNodesStmt->execute([$currentUserId]);
+            $egoNodes = $egoNodesStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+            // Fetch personal names of target users for secondary name-matching if a tree node is unlinked
+            $inTarget = implode(',', array_fill(0, count($unresolved), '?'));
+            $personalSql = sprintf(
+                "SELECT id, firstName, lastName, gender FROM personal WHERE id IN (%s)",
+                $inTarget
+            );
+            $personalStmt = $this->db->prepare($personalSql);
+            $personalStmt->execute($unresolved);
+            $targetPersonalMap = [];
+            while ($pRow = $personalStmt->fetch(PDO::FETCH_ASSOC)) {
+                $pId = (string)($pRow['id'] ?? '');
+                if ($pId !== '') {
+                    $targetPersonalMap[$pId] = [
+                        'first' => strtolower(trim((string)($pRow['firstName'] ?? ''))),
+                        'last'  => strtolower(trim((string)($pRow['lastName'] ?? ''))),
+                        'gender' => strtolower(trim((string)($pRow['gender'] ?? ''))),
+                    ];
                 }
             }
 
-            // Check direct children in 1 query
-            $childSql = sprintf(
-                "SELECT children_linked FROM children WHERE id = ? AND children_linked IN (%s)",
-                $inSib
-            );
-            $childStmt = $this->db->prepare($childSql);
-            $childStmt->execute(array_merge([$currentUserId], $unresolved));
-            while ($row = $childStmt->fetch(PDO::FETCH_ASSOC)) {
-                $linkedId = (string)($row['children_linked'] ?? '');
-                if ($linkedId !== '') {
-                    $results[$linkedId] = 'Child';
+            $visitedFamCodes = [];
+            foreach ($egoNodes as $egoRow) {
+                $egoNodeId = (int)($egoRow['id'] ?? 0);
+                $famCode = trim((string)($egoRow['family_code'] ?? ''));
+                if ($egoNodeId <= 0 || $famCode === '' || isset($visitedFamCodes[$famCode])) {
+                    continue;
+                }
+                $visitedFamCodes[$famCode] = true;
+
+                $nodesStmt = $this->db->prepare(
+                    "SELECT id, user_id, first_name, last_name, gender, generation_level, is_deceased, is_placeholder, placeholder_label
+                     FROM family_nodes
+                     WHERE family_code = ? AND COALESCE(is_erased, 0) = 0
+                     ORDER BY generation_level ASC, id ASC"
+                );
+                $nodesStmt->execute([$famCode]);
+                $rawNodes = $nodesStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+                if (empty($rawNodes)) {
+                    continue;
+                }
+
+                $unionsStmt = $this->db->prepare(
+                    "SELECT id, partner_1_id, partner_2_id, union_type, is_current FROM family_unions WHERE family_code = ?"
+                );
+                $unionsStmt->execute([$famCode]);
+                $rawUnions = $unionsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+                $childrenStmt = $this->db->prepare(
+                    "SELECT fnc.union_id, fnc.child_id, fnc.relationship_type
+                     FROM family_node_children fnc
+                     INNER JOIN family_unions fu ON fu.id = fnc.union_id
+                     WHERE fu.family_code = ?"
+                );
+                $childrenStmt->execute([$famCode]);
+                $rawChildren = $childrenStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+                $decorated = \App\services\KinshipCalculatorService::calculateEgoKinship([
+                    'nodes'    => $rawNodes,
+                    'unions'   => $rawUnions,
+                    'children' => $rawChildren,
+                ], $egoNodeId);
+
+                // Pass A: Direct user_id match on the calculated family graph
+                foreach ($decorated as $dNode) {
+                    $dUid = trim((string)($dNode['user_id'] ?? ''));
+                    if ($dUid === '' || !in_array($dUid, $unresolved, true)) {
+                        continue;
+                    }
+                    $rel = trim((string)($dNode['ego_relation'] ?? ''));
+                    if ($rel !== '' && !in_array($rel, ['Relative', 'Extended Relative', 'You (Primary Member)'], true)) {
+                        $results[$dUid] = $rel;
+                    }
+                }
+
+                // Pass B: Name match within the same family graph for nodes whose user_id is not yet linked
+                foreach ($unresolved as $uId) {
+                    if (isset($results[$uId]) || !isset($targetPersonalMap[$uId])) {
+                        continue;
+                    }
+                    $tFirst = $targetPersonalMap[$uId]['first'];
+                    $tLast  = $targetPersonalMap[$uId]['last'];
+                    if ($tFirst === '') {
+                        continue;
+                    }
+                    foreach ($decorated as $dNode) {
+                        $nFirst = strtolower(trim((string)($dNode['first_name'] ?? '')));
+                        $nLast  = strtolower(trim((string)($dNode['last_name'] ?? '')));
+                        if ($nFirst === $tFirst && ($tLast === '' || $nLast === '' || $nLast === $tLast)) {
+                            $rel = trim((string)($dNode['ego_relation'] ?? ''));
+                            if ($rel !== '' && !in_array($rel, ['Relative', 'Extended Relative', 'You (Primary Member)'], true)) {
+                                $results[$uId] = $rel;
+                                break;
+                            }
+                        }
+                    }
                 }
             }
 
-            // Check if viewer is a child of target in 1 query
-            $parentSql = sprintf(
-                "SELECT id FROM children WHERE id IN (%s) AND children_linked = ?",
-                $inSib
-            );
-            $parentStmt = $this->db->prepare($parentSql);
-            $parentStmt->execute(array_merge($unresolved, [$currentUserId]));
-            while ($row = $parentStmt->fetch(PDO::FETCH_ASSOC)) {
-                $parentId = (string)($row['id'] ?? '');
-                if ($parentId !== '') {
-                    $results[$parentId] = 'Parent';
-                }
-            }
-
-            // Check generation difference from family_nodes if available
+            // 2. Secondary Fallback: Check legacy tables for any remaining unresolved targets
             $stillUnresolved = array_values(array_filter($unresolved, fn($id) => !isset($results[$id])));
             if (!empty($stillUnresolved)) {
-                $nodeStmt = $this->db->prepare("SELECT generation_level FROM family_nodes WHERE user_id = ? LIMIT 1");
-                $nodeStmt->execute([$currentUserId]);
-                $viewerGen = $nodeStmt->fetchColumn();
+                $inSib = implode(',', array_fill(0, count($stillUnresolved), '?'));
+                $sibSql = sprintf(
+                    "SELECT sibling_linked FROM sibling WHERE id = ? AND sibling_linked IN (%s)",
+                    $inSib
+                );
+                $sibStmt = $this->db->prepare($sibSql);
+                $sibStmt->execute(array_merge([$currentUserId], $stillUnresolved));
+                while ($row = $sibStmt->fetch(PDO::FETCH_ASSOC)) {
+                    $linkedId = (string)($row['sibling_linked'] ?? '');
+                    if ($linkedId !== '') {
+                        $g = $targetPersonalMap[$linkedId]['gender'] ?? '';
+                        $results[$linkedId] = $g === 'male' ? 'Brother' : ($g === 'female' ? 'Sister' : 'Sibling');
+                    }
+                }
 
-                if ($viewerGen !== false && $viewerGen !== null) {
-                    $viewerGenInt = (int)$viewerGen;
+                $childSql = sprintf(
+                    "SELECT children_linked FROM children WHERE id = ? AND children_linked IN (%s)",
+                    $inSib
+                );
+                $childStmt = $this->db->prepare($childSql);
+                $childStmt->execute(array_merge([$currentUserId], $stillUnresolved));
+                while ($row = $childStmt->fetch(PDO::FETCH_ASSOC)) {
+                    $linkedId = (string)($row['children_linked'] ?? '');
+                    if ($linkedId !== '' && !isset($results[$linkedId])) {
+                        $g = $targetPersonalMap[$linkedId]['gender'] ?? '';
+                        $results[$linkedId] = $g === 'male' ? 'Son' : ($g === 'female' ? 'Daughter' : 'Child');
+                    }
+                }
+
+                $parentSql = sprintf(
+                    "SELECT id FROM children WHERE id IN (%s) AND children_linked = ?",
+                    $inSib
+                );
+                $parentStmt = $this->db->prepare($parentSql);
+                $parentStmt->execute(array_merge($stillUnresolved, [$currentUserId]));
+                while ($row = $parentStmt->fetch(PDO::FETCH_ASSOC)) {
+                    $parentId = (string)($row['id'] ?? '');
+                    if ($parentId !== '' && !isset($results[$parentId])) {
+                        $g = $targetPersonalMap[$parentId]['gender'] ?? '';
+                        $results[$parentId] = $g === 'male' ? 'Father' : ($g === 'female' ? 'Mother' : 'Parent');
+                    }
+                }
+            }
+
+            // 3. Tertiary Fallback: Same-family generation_level delta (Note: -1 is parent/older, +1 is child/younger)
+            $stillUnresolved = array_values(array_filter($unresolved, fn($id) => !isset($results[$id])));
+            if (!empty($stillUnresolved) && !empty($egoNodes)) {
+                $viewerFamCode = trim((string)($egoNodes[0]['family_code'] ?? ''));
+                $viewerGenInt  = (int)($egoNodes[0]['generation_level'] ?? 0);
+                if ($viewerFamCode !== '') {
                     $inNode = implode(',', array_fill(0, count($stillUnresolved), '?'));
                     $targetNodeSql = sprintf(
-                        "SELECT user_id, generation_level, gender FROM family_nodes WHERE user_id IN (%s)",
+                        "SELECT user_id, generation_level, gender FROM family_nodes WHERE family_code = ? AND user_id IN (%s) AND COALESCE(is_erased, 0) = 0",
                         $inNode
                     );
                     $targetNodeStmt = $this->db->prepare($targetNodeSql);
-                    $targetNodeStmt->execute($stillUnresolved);
+                    $targetNodeStmt->execute(array_merge([$viewerFamCode], $stillUnresolved));
                     while ($tNode = $targetNodeStmt->fetch(PDO::FETCH_ASSOC)) {
                         $tUid = (string)($tNode['user_id'] ?? '');
                         $tGen = (int)($tNode['generation_level'] ?? 0);
                         $gender = strtolower((string)($tNode['gender'] ?? ''));
+                        // In family_nodes: lower generation_level = older generation (-1 = Parent, 0 = Ego, +1 = Child/Nephew)
                         $diff = $tGen - $viewerGenInt;
 
-                        if ($diff === 0) {
-                            $results[$tUid] = 'Cousin';
-                        } elseif ($diff === 1) {
+                        if ($diff === -1) {
                             $results[$tUid] = $gender === 'female' ? 'Aunt' : ($gender === 'male' ? 'Uncle' : 'Elder Kin');
-                        } elseif ($diff >= 2) {
+                        } elseif ($diff <= -2) {
                             $results[$tUid] = $gender === 'female' ? 'Grandmother' : ($gender === 'male' ? 'Grandfather' : 'Grandparent');
-                        } elseif ($diff === -1) {
+                        } elseif ($diff === 1) {
                             $results[$tUid] = $gender === 'female' ? 'Niece' : ($gender === 'male' ? 'Nephew' : 'Niece/Nephew');
-                        } else {
-                            $results[$tUid] = 'Grandchild';
+                        } elseif ($diff >= 2) {
+                            $results[$tUid] = $gender === 'female' ? 'Granddaughter' : ($gender === 'male' ? 'Grandson' : 'Grandchild');
                         }
                     }
                 }

@@ -920,22 +920,38 @@ export function profileFeed(opts = {}) {
                         if (!container) return;
 
                         if (entry.isIntersecting && entry.intersectionRatio >= 0.35) {
-                            // Container in view: autoplay from the first video
+                            // Container in view: autoplay the currently visible card in the horizontal track
                             const track = container.querySelector('.multi-video-scroll-track');
                             if (!track) return;
-                            const firstCard = track.querySelector('.multi-video-card');
-                            const firstVideo = firstCard ? firstCard.querySelector('video') : null;
-                            if (firstVideo && !firstVideo._userManuallyPaused) {
-                                const anyPlaying = Array.from(track.querySelectorAll('video')).some(v => !v.paused);
-                                if (!anyPlaying) {
-                                    if (this._activePlayingFeedVideo && this._activePlayingFeedVideo !== firstVideo && !this._activePlayingFeedVideo.paused) {
-                                        this._activePlayingFeedVideo.pause();
+                            const cards = Array.from(track.querySelectorAll('.multi-video-card'));
+                            if (!cards.length) return;
+                            const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+                            let activeCard = cards[0];
+                            if (maxScroll > 0 && track.scrollLeft >= maxScroll - 16) {
+                                activeCard = cards[cards.length - 1];
+                            } else {
+                                let minDiff = Infinity;
+                                cards.forEach(c => {
+                                    const diff = Math.abs(track.scrollLeft - c.offsetLeft);
+                                    if (diff < minDiff) {
+                                        minDiff = diff;
+                                        activeCard = c;
                                     }
-                                    this._activePlayingFeedVideo = firstVideo;
-                                    firstVideo.muted = true;
-                                    firstVideo._autoPlaying = true;
-                                    firstVideo.play().catch(() => {});
+                                });
+                            }
+                            const targetVideo = activeCard ? activeCard.querySelector('video') : null;
+                            if (targetVideo && !targetVideo._userManuallyPaused) {
+                                cards.forEach(c => {
+                                    const v = c.querySelector('video');
+                                    if (v && v !== targetVideo && !v.paused) v.pause();
+                                });
+                                if (this._activePlayingFeedVideo && this._activePlayingFeedVideo !== targetVideo && !this._activePlayingFeedVideo.paused) {
+                                    this._activePlayingFeedVideo.pause();
                                 }
+                                this._activePlayingFeedVideo = targetVideo;
+                                targetVideo.muted = true;
+                                targetVideo._autoPlaying = true;
+                                targetVideo.play().catch(() => {});
                             }
                         } else if (!entry.isIntersecting || entry.intersectionRatio < 0.15) {
                             // Scrolled away: pause all videos in this multi-video container
