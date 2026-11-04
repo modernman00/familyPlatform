@@ -117,7 +117,7 @@ class FamilyPostAudienceService
             $ufStmt = $this->pdo->prepare(
                 "SELECT uf.family_code, fc.kind
                  FROM user_families uf
-                 LEFT JOIN family_codes fc ON fc.code = UPPER(TRIM(REPLACE(uf.family_code, '#', '')))
+                 LEFT JOIN family_codes fc ON fc.code COLLATE utf8mb4_unicode_ci = UPPER(TRIM(REPLACE(uf.family_code, '#', ''))) COLLATE utf8mb4_unicode_ci
                  WHERE uf.user_id = ? AND uf.status = 'approved'"
             );
             $ufStmt->execute([$userId]);

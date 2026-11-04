@@ -228,6 +228,11 @@ final class ServeImgController {
         $start = 0;
         $end = $fileSize - 1;
 
+        if (function_exists('apache_setenv')) {
+            @apache_setenv('no-gzip', '1');
+        }
+        @ini_set('zlib.output_compression', 'Off');
+
         header('Accept-Ranges: bytes');
         header('Content-Type: ' . $mimeType);
         header('Cache-Control: private, max-age=3600');
@@ -402,6 +407,11 @@ final class ServeImgController {
         $start = 0;
         $end = $fileSize - 1;
 
+        if (function_exists('apache_setenv')) {
+            @apache_setenv('no-gzip', '1');
+        }
+        @ini_set('zlib.output_compression', 'Off');
+
         header('Accept-Ranges: bytes');
         header('Content-Type: ' . $mimeType);
         header('Cache-Control: private, max-age=3600');
@@ -517,7 +527,19 @@ final class ServeImgController {
             session_write_close();
         }
 
-        // 4. Clean all output buffers before binary streaming
+        // 3b. Sovereign Local SSD Cache Fast-Path (ATG Zero-Latency & Token-Expiry Shield)
+        $cacheFileName = 'ext_' . md5($targetUrl) . '.mp4';
+        $cacheFilePath = __DIR__ . '/../../resources/videos/posts/' . $cacheFileName;
+        if (is_file($cacheFilePath) && filesize($cacheFilePath) > 4096) {
+            $this->StreamPostVideo($cacheFileName);
+        }
+
+        // 4. Clean all output buffers and disable compression before binary streaming
+        if (function_exists('apache_setenv')) {
+            @apache_setenv('no-gzip', '1');
+        }
+        @ini_set('zlib.output_compression', 'Off');
+
         while (ob_get_level() > 0) {
             ob_end_clean();
         }
@@ -548,19 +570,29 @@ final class ServeImgController {
             curl_setopt($ch, CURLOPT_NOBODY, true);
         }
 
+        $currentUpstreamStatus = 200;
+
         curl_setopt_array($ch, [
             CURLOPT_URL => $targetUrl,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
             CURLOPT_TIMEOUT => 120,
             CURLOPT_HTTPHEADER => $headers,
-            CURLOPT_HEADERFUNCTION => function ($ch, $headerLine) {
+            CURLOPT_HEADERFUNCTION => function ($ch, $headerLine) use (&$currentUpstreamStatus) {
                 $trimmed = trim($headerLine);
                 if ($trimmed === '') {
                     return strlen($headerLine);
                 }
                 if (preg_match('#^HTTP/[0-9.]+\s+(\d+)\s*(.*)$#i', $trimmed, $sm)) {
-                    http_response_code((int)$sm[1]);
+                    $currentUpstreamStatus = (int)$sm[1];
+                    // Only forward final non-redirect status codes to client
+                    if ($currentUpstreamStatus < 300 || $currentUpstreamStatus >= 400) {
+                        http_response_code($currentUpstreamStatus);
+                    }
+                    return strlen($headerLine);
+                }
+                // Never forward Content-Type or Content-Length from intermediate 3xx redirect hops
+                if ($currentUpstreamStatus >= 300 && $currentUpstreamStatus < 400) {
                     return strlen($headerLine);
                 }
                 $lower = strtolower($trimmed);
@@ -569,7 +601,7 @@ final class ServeImgController {
                     || str_starts_with($lower, 'content-length:')
                     || str_starts_with($lower, 'accept-ranges:')
                 ) {
-                    header($trimmed, false);
+                    header($trimmed, true);
                 }
                 return strlen($headerLine);
             },

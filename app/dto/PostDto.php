@@ -116,7 +116,8 @@ final class PostDto implements JsonSerializable
 
         /** @var array<string, mixed>|null $linkPreview */
         $linkPreview = isset($row['link_preview']) && is_array($row['link_preview']) ? $row['link_preview'] : null;
-        if ($linkPreview === null && !empty($message)) {
+        $alreadyHydratedLinkPreview = array_key_exists('link_preview', $row);
+        if ($linkPreview === null && !$alreadyHydratedLinkPreview && !empty($message) && (str_contains($message, 'http://') || str_contains($message, 'https://'))) {
             $linkPreview = \App\services\LinkPreviewService::getPreviewForPostText($message);
         }
 
@@ -139,8 +140,11 @@ final class PostDto implements JsonSerializable
             }
         }
 
-        $rowVideos = [];
-        if (!$hasLocalUpload) {
+        $rowVideos = isset($row['videos']) && is_array($row['videos']) ? $row['videos'] : [];
+        $hasPreExtractedMedia = !empty($rowVideos) || !empty($row['images']) || !empty($existingExternalImages) || !empty($existingExternalVideos);
+        $hasExternalLinkInMessage = !empty($message) && (str_contains($message, 'http://') || str_contains($message, 'https://'));
+
+        if (!$hasLocalUpload && !$hasPreExtractedMedia && $hasExternalLinkInMessage) {
             $extractedAssets = \App\services\LinkPreviewService::extractPhotoAssetsFromText($message, 6);
             $finalImages = !empty($extractedAssets['images']) ? $extractedAssets['images'] : $existingExternalImages;
             $finalVideos = !empty($extractedAssets['videos']) ? $extractedAssets['videos'] : $existingExternalVideos;
@@ -157,7 +161,7 @@ final class PostDto implements JsonSerializable
                 $rowVideos = array_map(function ($v) use ($hook) {
                     $thumb = null;
                     if (preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|ggpht\.com)/#i', $v)) {
-                        $thumb = preg_replace('/=.*$/i', '=s1600', $v);
+                        $thumb = preg_replace('/=.*$/i', '=s1600-no', $v);
                     }
                     return [
                         'type' => 'direct',
@@ -175,7 +179,11 @@ final class PostDto implements JsonSerializable
                 $row['video'] = $rowVideos[0];
             }
 
-            if ($linkPreview === null && ($extractedAssets['preview'] ?? null) !== null) {
+            if (!empty($finalImages) || !empty($finalVideos)) {
+                if (!empty($linkPreview['is_google_photo']) || !empty($linkPreview['is_photo_link'])) {
+                    $linkPreview = null;
+                }
+            } elseif ($linkPreview === null && ($extractedAssets['preview'] ?? null) !== null) {
                 $linkPreview = $extractedAssets['preview'];
             }
 
@@ -187,12 +195,12 @@ final class PostDto implements JsonSerializable
                     array_merge($finalImages, $finalVideos)
                 );
             }
-        } elseif (!empty($existingExternalVideos)) {
+        } elseif (!empty($existingExternalVideos) && empty($rowVideos)) {
             $hook = self::deriveHookFromMessage($message ?? ($row['postMessage'] ?? ''));
             $rowVideos = array_map(function ($v) use ($hook) {
                 $thumb = null;
                 if (preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|ggpht\.com)/#i', $v)) {
-                    $thumb = preg_replace('/=.*$/i', '=s1600', $v);
+                    $thumb = preg_replace('/=.*$/i', '=s1600-no', $v);
                 }
                 return [
                     'type' => 'direct',
@@ -333,7 +341,8 @@ final class PostDto implements JsonSerializable
         if (empty($raw)) {
             return null;
         }
-        $clean = preg_replace('#https?://[^\s]+#i', '', $raw);
+        $clean = preg_replace('#(?:https?://|/resources/(?:videos|images)/)[^\s"\'<>]+#i', '', $raw);
+        $clean = preg_replace('/#[a-zA-Z0-9_]+/', '', (string)$clean);
         $clean = trim((string)$clean);
         if ($clean === '') {
             return null;

@@ -492,7 +492,8 @@ class FeedRepository
 
             // Hydrate OpenGraph link preview (from fast cache or auto-recovery)
             $msg = (string)($post['postMessage'] ?? ($post['content'] ?? ''));
-            $post['link_preview'] = !empty($msg) ? \App\services\LinkPreviewService::getPreviewForPostText($msg) : null;
+            $hasExternalUrl = $msg !== '' && (str_contains($msg, 'http://') || str_contains($msg, 'https://'));
+            $post['link_preview'] = $hasExternalUrl ? \App\services\LinkPreviewService::getPreviewForPostText($msg) : null;
 
             // Promote linked photos (Google Photos, iCloud, direct image links) to native post images (Multi-Image Support)
             $hasLocalImg = false;
@@ -513,7 +514,8 @@ class FeedRepository
                 }
             }
 
-            if (!$hasLocalImg) {
+            $alreadyHasExtractedMedia = !empty($existingExternalImages) || !empty($existingExternalVideos);
+            if (!$hasLocalImg && !$alreadyHasExtractedMedia && $hasExternalUrl) {
                 $extractedAssets = \App\services\LinkPreviewService::extractPhotoAssetsFromText($msg, 6);
                 $finalImages = !empty($extractedAssets['images']) ? $extractedAssets['images'] : $existingExternalImages;
                 $finalVideos = !empty($extractedAssets['videos']) ? $extractedAssets['videos'] : $existingExternalVideos;
@@ -531,7 +533,7 @@ class FeedRepository
                     foreach ($finalVideos as $vUrl) {
                         $thumb = null;
                         if (preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|ggpht\.com)/#i', $vUrl)) {
-                            $thumb = preg_replace('/=.*$/i', '=s1600', $vUrl);
+                            $thumb = preg_replace('/=.*$/i', '=s1600-no', $vUrl);
                         }
                         $formattedVideos[] = [
                             'type' => 'direct',
@@ -549,7 +551,11 @@ class FeedRepository
                     $post['video'] = $formattedVideos[0];
                 }
 
-                if ($post['link_preview'] === null && ($extractedAssets['preview'] ?? null) !== null) {
+                if (!empty($finalImages) || !empty($finalVideos)) {
+                    if (!empty($post['link_preview']['is_google_photo']) || !empty($post['link_preview']['is_photo_link'])) {
+                        $post['link_preview'] = null;
+                    }
+                } elseif ($post['link_preview'] === null && ($extractedAssets['preview'] ?? null) !== null) {
                     $post['link_preview'] = $extractedAssets['preview'];
                 }
 
@@ -561,13 +567,40 @@ class FeedRepository
                         array_merge($finalImages, $finalVideos)
                     );
                 }
+            } elseif (!$hasLocalImg && $alreadyHasExtractedMedia) {
+                if (!empty($existingExternalImages)) {
+                    $post['images'] = $existingExternalImages;
+                }
+                if (!empty($existingExternalVideos) && empty($post['videos'])) {
+                    $hook = \App\dto\PostDto::deriveHookFromMessage($msg ?? ($post['postMessage'] ?? ''));
+                    $formattedVideos = [];
+                    foreach ($existingExternalVideos as $vUrl) {
+                        $thumb = null;
+                        if (preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|ggpht\.com)/#i', $vUrl)) {
+                            $thumb = preg_replace('/=.*$/i', '=s1600-no', $vUrl);
+                        }
+                        $formattedVideos[] = [
+                            'type' => 'direct',
+                            'videoId' => null,
+                            'thumbnailUrl' => $thumb,
+                            'embedUrl' => \App\services\LinkPreviewService::getProxiedVideoUrl($vUrl),
+                            'originalUrl' => $vUrl,
+                            'trimStart' => null,
+                            'trimEnd' => null,
+                            'hookText' => $hook,
+                            'aspectMode' => 'reel',
+                        ];
+                    }
+                    $post['videos'] = $formattedVideos;
+                    $post['video'] = $formattedVideos[0];
+                }
             } elseif (!empty($existingExternalVideos) && empty($post['videos'])) {
                 $hook = \App\dto\PostDto::deriveHookFromMessage($msg ?? ($post['postMessage'] ?? ''));
                 $formattedVideos = [];
                 foreach ($existingExternalVideos as $vUrl) {
                     $thumb = null;
                     if (preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|ggpht\.com)/#i', $vUrl)) {
-                        $thumb = preg_replace('/=.*$/i', '=s1600', $vUrl);
+                        $thumb = preg_replace('/=.*$/i', '=s1600-no', $vUrl);
                     }
                     $formattedVideos[] = [
                         'type' => 'direct',

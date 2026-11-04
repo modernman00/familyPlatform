@@ -648,8 +648,24 @@ final class ProfilePage extends ProcessImg
                         'date_deleted'
                     ]));
                     $newPost['ar_emoji'] = $arEmoji ?: ($newPost['ar_emoji'] ?? null);
-                    if (empty($newPost['link_preview']) && (str_contains($cleanMultiLineMessage, 'http://') || str_contains($cleanMultiLineMessage, 'https://'))) {
-                        $newPost['link_preview'] = \App\services\LinkPreviewService::getPreviewForPostText($cleanMultiLineMessage);
+                    if (empty($newPost['link_preview'])) {
+                        if (
+                            !empty($extractedMedia['preview'])
+                            && empty($newPost['images'])
+                            && empty($newPost['videos'])
+                            && empty($newPost['video'])
+                            && empty($extractedMedia['preview']['is_google_photo'])
+                            && empty($extractedMedia['preview']['is_photo_link'])
+                        ) {
+                            $newPost['link_preview'] = $extractedMedia['preview'];
+                        } elseif (
+                            empty($newPost['images'])
+                            && empty($newPost['videos'])
+                            && empty($newPost['video'])
+                            && (str_contains($cleanMultiLineMessage, 'http://') || str_contains($cleanMultiLineMessage, 'https://'))
+                        ) {
+                            $newPost['link_preview'] = \App\services\LinkPreviewService::getPreviewForPostText($cleanMultiLineMessage);
+                        }
                     }
                     $newPost['comparison'] = \App\model\PostComparison::getForPosts([(int)$result])[(int)$result] ?? null;
                     $newPost['post_tags'] = !empty($postTags) ? $postTags : \App\controller\members\TagController::getPostTags((int)$result);
@@ -674,8 +690,13 @@ final class ProfilePage extends ProcessImg
                         'status' => 'success',
                     ];
                 }
+                if (function_exists('apache_setenv')) {
+                    @apache_setenv('no-gzip', '1');
+                }
+                @ini_set('zlib.output_compression', 'Off');
                 if (!headers_sent()) {
                     header('Content-Type: application/json');
+                    header('Content-Encoding: none');
                     header('Connection: close');
                     if ($jsonPayload !== false) {
                         header('Content-Length: ' . strlen($jsonPayload));
@@ -703,7 +724,27 @@ final class ProfilePage extends ProcessImg
                 ignore_user_abort(true);
 
                 // ── BACKGROUND POST-RESPONSE PIPELINE (Track 1 Decoupled Execution) ──
+                // Under Apache mpm_prefork (mod_php), fastcgi_finish_request() is unavailable and
+                // inline post-response execution holds the HTTP connection open for 15-24s (SMTP + video cache).
+                // Spawning a detached CLI worker guarantees ~150ms HTTP completion.
+                $workerScript = realpath(__DIR__ . '/../../../scripts/post_background_worker.php');
+                if (!isTestEnv() && $workerScript && is_file($workerScript) && function_exists('exec')) {
+                    $cmd = sprintf(
+                        '%s %s %d > /dev/null 2>&1 &',
+                        escapeshellarg(PHP_BINARY ?: 'php'),
+                        escapeshellarg($workerScript),
+                        (int)$result
+                    );
+                    @exec($cmd);
+                    error_log(sprintf(
+                        '[ProfilePage::post] Post #%d saved in %0.1fms (Detached background worker spawned).',
+                        (int)$result,
+                        $prepDuration
+                    ));
+                    return;
+                }
 
+                // Fallback inline pipeline (used in test suites or environments where exec is disabled)
                 // Step 1: Pusher real-time broadcast to active family members (~150ms)
                 $tPusherStart = microtime(true);
                 try {
@@ -713,22 +754,27 @@ final class ProfilePage extends ProcessImg
                 }
                 $pusherDuration = round((microtime(true) - $tPusherStart) * 1000, 2);
 
-                // Step 2: Visual Supremacy Engine - Generate AVIF + WebP variants losslessly
+                // Step 2: Visual Supremacy Engine & External Video SSD Cache
                 $tVseStart = microtime(true);
                 try {
                     $postBaseDir = realpath(__DIR__ . '/../../../resources/images/post');
-                    if ($postBaseDir && is_dir($postBaseDir)) {
-                        $postRecord = Post::postByNo($result);
-                        if (is_array($postRecord)) {
-                            for ($i = 0; $i < 6; $i++) {
-                                $imgCol = 'post_img' . $i;
-                                $imgVal = trim((string)($postRecord[$imgCol] ?? ''));
-                                if ($imgVal !== '' && !str_starts_with($imgVal, 'http://') && !str_starts_with($imgVal, 'https://')) {
+                    $postRecord = Post::postByNo($result);
+                    if (is_array($postRecord)) {
+                        for ($i = 0; $i < 6; $i++) {
+                            $imgCol = 'post_img' . $i;
+                            $imgVal = trim((string)($postRecord[$imgCol] ?? ''));
+                            if ($imgVal === '') {
+                                continue;
+                            }
+                            if (!str_starts_with($imgVal, 'http://') && !str_starts_with($imgVal, 'https://')) {
+                                if ($postBaseDir && is_dir($postBaseDir) && !str_starts_with($imgVal, '/resources/videos/')) {
                                     $localImagePath = rtrim($postBaseDir, '/\\') . DIRECTORY_SEPARATOR . basename($imgVal);
                                     if (file_exists($localImagePath) && is_file($localImagePath)) {
                                         \App\services\VisualSupremacyService::processInPlace($localImagePath);
                                     }
                                 }
+                            } elseif (str_contains($imgVal, 'googleusercontent.com') && preg_match('/=(?:m18|m22|m37|dv)/i', $imgVal)) {
+                                \App\services\LinkPreviewService::cacheExternalVideoLocally($imgVal);
                             }
                         }
                     }

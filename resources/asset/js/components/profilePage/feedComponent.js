@@ -407,7 +407,7 @@ export function profileFeed(opts = {}) {
                                 : `/resources/videos/posts/${videoFile}`;
                         }
                         const thumb = matchThumb
-                            || (videoFile.includes('googleusercontent.com') ? videoFile.replace(/=.*$/i, '=s1600') : null);
+                            || (videoFile.includes('googleusercontent.com') ? videoFile.replace(/=.*$/i, '=s1600-no') : null);
                         return {
                             type: 'direct',
                             videoId: null,
@@ -462,8 +462,14 @@ export function profileFeed(opts = {}) {
             };
 
             // Linked photo hydration (Google Photos, iCloud, direct image assets without local uploads)
-            if (normalized.images.length === 0) {
-                if (normalized.link_preview && (normalized.link_preview.is_photo_link || normalized.link_preview.is_google_photo)) {
+            // Never promote OpenGraph preview image into post.images when the post is a video or multi-video album
+            if (normalized.images.length === 0 && (!normalized.videos || normalized.videos.length === 0) && !normalized.video) {
+                if (
+                    normalized.link_preview
+                    && (normalized.link_preview.is_photo_link || normalized.link_preview.is_google_photo)
+                    && !normalized.link_preview.is_video
+                    && (!normalized.link_preview.album_videos || normalized.link_preview.album_videos.length === 0)
+                ) {
                     const photoAsset = normalized.link_preview.photo_url || normalized.link_preview.image;
                     if (photoAsset && !normalized.images.includes(photoAsset)) {
                         normalized.images.push(photoAsset);
@@ -1157,7 +1163,15 @@ export function profileFeed(opts = {}) {
                     // If linked album contains multiple photos or videos, promote to native multi-media carousel
                     if (Array.isArray(d.album_images) && d.album_images.length > 0) {
                         target.images = d.album_images;
-                    } else if ((!target.images || target.images.length === 0) && (d.is_photo_link || d.is_google_photo) && (d.photo_url || d.image) && !d.is_video) {
+                    } else if (
+                        (!target.images || target.images.length === 0)
+                        && (!target.videos || target.videos.length === 0)
+                        && !target.video
+                        && (d.is_photo_link || d.is_google_photo)
+                        && (d.photo_url || d.image)
+                        && !d.is_video
+                        && (!d.album_videos || d.album_videos.length === 0)
+                    ) {
                         const photoAsset = d.photo_url || d.image;
                         target.images = [photoAsset];
                     }
@@ -1166,7 +1180,7 @@ export function profileFeed(opts = {}) {
                         target.videos = d.album_videos.map(vUrl => ({
                             type: 'direct',
                             videoId: null,
-                            thumbnailUrl: vUrl.replace(/=.*$/i, '=s1600'),
+                            thumbnailUrl: vUrl.replace(/=.*$/i, '=s1600-no'),
                             embedUrl: `/member/stream-video?url=${encodeURIComponent(vUrl)}`,
                             originalUrl: vUrl,
                             trimStart: null,

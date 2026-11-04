@@ -840,8 +840,8 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
                 return;
             }
 
-            const url = urlMatch[1].replace(/[.,;:!?)]+$/, '');
-            if (url === dismissedUrl || url === lastFetchedUrl) {
+            const url = urlMatch[1].replace(/:[a-z0-9_]+_3d:.*$/i, '').replace(/[.,;:!?)]+$/, '');
+            if (!url || url === dismissedUrl || url === lastFetchedUrl) {
                 return;
             }
 
@@ -936,7 +936,10 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
                 } else if (node.nodeType === Node.ELEMENT_NODE) {
                     const el = node;
                     if (el.hasAttribute('data-emoji-id')) {
-                        text += ':' + el.getAttribute('data-emoji-id') + ':';
+                        if (text.length > 0 && !/\s$/.test(text)) {
+                            text += ' ';
+                        }
+                        text += ':' + el.getAttribute('data-emoji-id') + ': ';
                         return;
                     }
                     if (el.tagName === 'BR') {
@@ -955,7 +958,7 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
             for (let child = editor.firstChild; child; child = child.nextSibling) {
                 traverse(child);
             }
-            textarea.value = text;
+            textarea.value = text.replace(/\u00A0/g, ' ').replace(/ {2,}/g, ' ');
             textarea.dispatchEvent(new Event('input', { bubbles: true }));
         } finally {
             isInternalSync = false;

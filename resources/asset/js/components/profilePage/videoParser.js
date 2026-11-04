@@ -75,7 +75,7 @@ export function parseVideoUrl(url) {
   const gpMatch = trimmed.match(gpVideoRegex);
   if (gpMatch) {
     const poster = trimmed.includes('googleusercontent.com')
-      ? trimmed.replace(/=.*$/i, '=s1600')
+      ? trimmed.replace(/=.*$/i, '=s1600-no')
       : null;
     return {
       type: 'direct',

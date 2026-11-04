@@ -1058,11 +1058,13 @@
                x-data="{
                  isMuted: true,
                  isPlaying: false,
+                 hasCardMetadata: false,
                  progressPercent: 0,
                  isCardLandscape: (vid.type !== 'direct'),
                  cardAspect: (vid.type !== 'direct' ? '16 / 9' : '4 / 5'),
                  detectCardDimensions(el) {
                    if (!el || !el.videoWidth || !el.videoHeight) return;
+                   this.hasCardMetadata = true;
                    const r = el.videoWidth / el.videoHeight;
                    if (r > 1.15) {
                      this.isCardLandscape = true;
@@ -1138,8 +1140,8 @@
             <!-- Video Player (Direct Stream or Embedded) -->
             <template x-if="vid.type === 'direct'">
               <div class="position-relative w-100 h-100 flex-grow-1 overflow-hidden" style="min-height: 320px; background: transparent;">
-                <!-- High-Res Poster Thumbnail Overlay (Guarantees zero dark/black screen while paused) -->
-                <img x-show="!isPlaying && vid.thumbnailUrl"
+                <!-- High-Res Poster Thumbnail Overlay (Before video frames load) -->
+                <img x-show="!isPlaying && !hasCardMetadata && vid.thumbnailUrl"
                      :src="vid.thumbnailUrl"
                      class="position-absolute top-0 start-0 w-100 h-100 pointer-events-none"
                      style="z-index: 3; object-fit: cover !important; width: 100%; height: 100%; position: absolute; inset: 0;"
@@ -1149,12 +1151,13 @@
 
                 <video referrerpolicy="no-referrer" class="w-100 h-100 position-absolute top-0 start-0"
                        :src="vid.embedUrl"
-                       :poster="vid.thumbnailUrl || ''"
+                       :poster="!hasCardMetadata ? (vid.thumbnailUrl || '') : ''"
                        playsinline
                        webkit-playsinline
                        muted
                        preload="auto"
                        @loadedmetadata="detectCardDimensions($el)"
+                       @loadeddata="hasCardMetadata = true; detectCardDimensions($el)"
                        @click.stop="togglePlay($el)"
                        @dblclick.stop="openVideoModal(post.videos, vIdx, isMuted)"
                        @play="isPlaying = true"
@@ -1328,9 +1331,35 @@
              const clickX = event.clientX - rect.left;
              const ratio = Math.max(0, Math.min(1, clickX / rect.width));
              videoEl.currentTime = ratio * videoEl.duration;
+           },
+           initSingleVideoObserver() {
+             const v = this.$el.querySelector('video');
+             if (v && v.videoWidth) this.detectVideoDimensions(v);
+             if (typeof IntersectionObserver === 'undefined') return;
+             const obs = new IntersectionObserver((entries) => {
+               entries.forEach(entry => {
+                 const vidEl = this.$el.querySelector('video');
+                 if (!vidEl) return;
+                 if (entry.isIntersecting && entry.intersectionRatio >= 0.35) {
+                   if (vidEl.paused) {
+                     document.querySelectorAll('video.feed-post-video').forEach(other => {
+                       if (other !== vidEl && !other.paused) other.pause();
+                     });
+                     vidEl.muted = this.isVideoMuted;
+                     vidEl.play().then(() => { this.isPlaying = true; }).catch(() => {});
+                   }
+                 } else if (!entry.isIntersecting || entry.intersectionRatio < 0.15) {
+                   if (!vidEl.paused) {
+                     vidEl.pause();
+                     this.isPlaying = false;
+                   }
+                 }
+               });
+             }, { threshold: [0.0, 0.15, 0.35, 0.65] });
+             obs.observe(this.$el);
            }
          }"
-         x-init="$nextTick(() => { const v = $el.querySelector('video'); if (v && v.videoWidth) detectVideoDimensions(v); })">
+         x-init="$nextTick(() => initSingleVideoObserver())">
       
       <!-- Outer Adaptive Container: Zero Black Space Guarantee -->
       <div class="video-rendition-frame position-relative overflow-hidden mx-auto shadow-sm"
@@ -1338,8 +1367,8 @@
            @mouseleave="showControlsOverlay = false"
            :style="'aspect-ratio: ' + (viewMode === 'reel' ? (isPortrait ? videoRatio : '9 / 16') : videoRatio) + '; max-height: ' + (viewMode === 'reel' ? '580px' : videoMaxHeight) + '; width: 100%; max-width: ' + (isPortrait ? (videoRatio === '9 / 16' ? '380px' : '440px') : (viewMode === 'reel' ? '380px' : '100%')) + '; border-radius: 16px; background: transparent; transition: aspect-ratio 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);'">
 
-        <!-- High-Res Video Poster Overlay when paused (Guarantees zero dark/black screen) -->
-        <img x-show="!isPlaying && post.video && post.video.thumbnailUrl"
+        <!-- High-Res Video Poster Overlay before stream metadata loads (Guarantees zero dark/black screen) -->
+        <img x-show="!isPlaying && !hasMetadata && post.video && post.video.thumbnailUrl"
              :src="post.video.thumbnailUrl"
              class="position-absolute top-0 start-0 w-100 h-100 pointer-events-none"
              style="z-index: 3; border-radius: 16px; object-fit: cover !important;"
@@ -1350,12 +1379,12 @@
         <!-- Main Video Element (Full-Bleed Cover: Zero Black Space) -->
         <video referrerpolicy="no-referrer" class="feed-post-video w-100 h-100 position-relative"
                :src="post.video.embedUrl"
-               :poster="post.video.thumbnailUrl || ''"
+               :poster="!hasMetadata ? (post.video.thumbnailUrl || '') : ''"
                playsinline
                webkit-playsinline
                muted
                loop
-               preload="metadata"
+               preload="auto"
                @click.stop="togglePlayback($el)"
                @dblclick.stop="openVideoModal([post.video], 0, isVideoMuted)"
                @loadedmetadata="
@@ -1364,6 +1393,7 @@
                    $el.currentTime = post.video.trimStart; 
                  }
                "
+               @loadeddata="hasMetadata = true; detectVideoDimensions($el)"
                @play="
                  isPlaying = true;
                  if (post.video && post.video.trimStart !== null && ($el.currentTime < post.video.trimStart || (post.video.trimEnd !== null && $el.currentTime >= post.video.trimEnd))) { 
@@ -1374,26 +1404,6 @@
                @timeupdate="handleTimeUpdate($el)"
                @volumechange="isVideoMuted = $el.muted"
                style="width: 100%; height: 100%; object-fit: cover !important; z-index: 2; border-radius: 16px; cursor: pointer; background: transparent;"></video>
-
-        <!-- Kinetic Hook Card (Instagram-Style High-Impact Title Card) -->
-        <template x-if="showHookCard && (post.video?.hookText || getDerivedHook(post.displayMessage || post.postMessage))">
-          <div class="position-absolute start-50 translate-middle-x px-3"
-               :style="isPortrait ? 'bottom: 74px; width: 92%; max-width: 320px; z-index: 5;' : 'top: 52px; width: 90%; max-width: 310px; z-index: 5;'"
-               x-transition:enter="transition ease-out duration-300"
-               x-transition:enter-start="opacity-0 translate-y-3 scale-95"
-               x-transition:enter-end="opacity-100 translate-y-0 scale-100">
-            <div class="cine-hook-card text-center p-3 shadow-lg position-relative"
-                 @click.stop="showHookCard = false"
-                 title="Tap to hide title card"
-                 style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1.5px solid rgba(255, 255, 255, 0.85); border-radius: 18px; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.42); cursor: pointer; transition: transform 0.15s ease;"
-                 onmouseover="this.style.transform='scale(1.02)'"
-                 onmouseout="this.style.transform='scale(1)'">
-              <span class="d-block"
-                    style="font-family: 'Playfair Display', Georgia, -apple-system, BlinkMacSystemFont, 'Segoe UI', serif; font-size: clamp(0.92rem, 2.7vw, 1.12rem); font-weight: 800; color: #0f172a; line-height: 1.28; letter-spacing: -0.01em;"
-                    x-text="post.video?.hookText || getDerivedHook(post.displayMessage || post.postMessage)"></span>
-            </div>
-          </div>
-        </template>
 
         <!-- Format Badge & 1-Tap Reel/Cinema Switcher (Top-Left) -->
         <div class="position-absolute d-inline-flex align-items-center gap-1.5 shadow-sm"
@@ -1500,8 +1510,8 @@
     </div>
   </template>
 
-  <!-- Full Graphics OpenGraph Social Card (16:9) (Suppressed for Linked Native Photos) -->
-  <template x-if="post.link_preview && (post.link_preview.image || post.link_preview.title) && !(post.postMessage || '').includes('/familyJournal/') && !post.link_preview.is_photo_link && (!post.images || post.images.length === 0)">
+  <!-- Full Graphics OpenGraph Social Card (16:9) (Suppressed for Linked Native Photos & Videos) -->
+  <template x-if="post.link_preview && (post.link_preview.image || post.link_preview.title) && !(post.postMessage || '').includes('/familyJournal/') && !post.link_preview.is_photo_link && !post.link_preview.is_google_photo && !post.link_preview.is_video && (!post.images || post.images.length === 0) && (!post.videos || post.videos.length === 0) && !post.video">
     <div class="link-preview-container mb-3 px-1">
       <a :href="post.link_preview.url" 
          target="_blank" 

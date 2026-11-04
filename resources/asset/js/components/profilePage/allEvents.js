@@ -270,23 +270,31 @@ try {
                     const addOptBtn = document.getElementById('addPollOptionBtn');
                     if (addOptBtn) addOptBtn.style.display = '';
 
-                    const targetUrl = '/member/profilePage' + (postNo ? '#post' + postNo : '');
+                    const isOnFeedPage = Boolean(document.getElementById('postIt')) || window.location.pathname.toLowerCase().includes('profilepage');
+                    if (isOnFeedPage && newPostData) {
+                        window.dispatchEvent(new CustomEvent('post-created', { detail: newPostData }));
+                        setTimeout(() => {
+                            const newCard = postNo ? document.getElementById('post' + postNo) : null;
+                            const feedRoot = newCard || document.getElementById('postIt');
+                            if (feedRoot && typeof feedRoot.scrollIntoView === 'function') {
+                                feedRoot.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                        }, 80);
 
-                    // Smooth redirect just like ordinary text/image posting
-                    window.location.assign(targetUrl);
-                    if (window.location.pathname.toLowerCase().includes('profilepage')) {
-                        window.location.reload();
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Post published successfully',
+                            showConfirmButton: false,
+                            timer: 2500
+                        });
+                        return;
                     }
-                    return;
 
-                    Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: 'success',
-                        title: 'Post published successfully',
-                        showConfirmButton: false,
-                        timer: 3000
-                    });
+                    const targetUrl = '/member/profilePage' + (postNo ? '#post' + postNo : '');
+                    window.location.assign(targetUrl);
+                    return;
                 } else {
                     throw new Error(response?.data?.message || 'Failed to publish post');
                 }

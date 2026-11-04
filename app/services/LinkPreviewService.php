@@ -75,10 +75,13 @@ final class LinkPreviewService
             return '';
         }
 
-        // 1. Normalize line breaks to standard \n
+        // 1. Normalize line breaks to standard \n and non-breaking spaces (\u00A0) to standard spaces
         $text = str_replace(["\r\n", "\r"], "\n", $raw);
+        $text = str_replace("\xC2\xA0", ' ', $text);
 
-        // 2. Separate URLs that are directly glued to trailing emojis (e.g. '👇https://...')
+        // 2. Separate URLs that are directly glued to leading/trailing emojis or :..._3d: shortcodes
+        $text = (string)preg_replace('/(:[a-z0-9_]+_3d:)(https?:\/\/)/iu', '$1 $2', $text);
+        $text = (string)preg_replace('/(https?:\/\/[^\s<>"\'`:]+)(:[a-z0-9_]+_3d:)/iu', '$1 $2', $text);
         $text = (string)preg_replace('/([^\s\n])(https?:\/\/)/iu', '$1 $2', $text);
 
         // 3. Strip raw HTML tags first
@@ -118,11 +121,15 @@ final class LinkPreviewService
             return [];
         }
 
-        if (preg_match_all('/(https?:\/\/[^\s<>"\'`]+)/iu', $text, $matches)) {
+        $normalizedText = str_replace("\xC2\xA0", ' ', $text);
+        $normalizedText = (string)preg_replace('/(https?:\/\/[^\s<>"\'`:]+)(:[a-z0-9_]+_3d:)/iu', '$1 $2', $normalizedText);
+
+        if (preg_match_all('/(https?:\/\/[^\s<>"\'`]+)/iu', $normalizedText, $matches)) {
             $urls = [];
             $seen = [];
             foreach ($matches[1] as $raw) {
-                $cleaned = rtrim(trim($raw), '.,;:!?)]}');
+                $cleaned = (string)preg_replace('/:[a-z0-9_]+_3d:.*$/i', '', trim($raw));
+                $cleaned = rtrim($cleaned, '.,;:!?)]}');
                 if ($cleaned !== '' && !isset($seen[$cleaned])) {
                     $seen[$cleaned] = true;
                     $urls[] = $cleaned;
@@ -899,11 +906,11 @@ final class LinkPreviewService
 
         $isPhotoLink = ($isGooglePhoto || $isDirectImage) && !empty($rawImage) && !$isGoogleVideo;
 
-        // High resolution Google CDN asset elevation (Silas & Marcus Standard: =s1600 retina quality)
+        // High resolution Google CDN asset elevation (Silas & Marcus Standard: =s1600 retina quality; -no strips Google's baked play icon on videos)
         $photoUrl = $rawImage;
         if ($isGooglePhoto && !empty($rawImage)) {
             if (preg_match('#^https://(?:lh[3-6]\.googleusercontent\.com|[^/]+\.ggpht\.com)/#i', $rawImage)) {
-                $photoUrl = preg_replace('/=.*$/i', '=s1600', $rawImage);
+                $photoUrl = preg_replace('/=.*$/i', $isGoogleVideo ? '=s1600-no' : '=s1600', $rawImage);
             }
         }
 
@@ -1027,11 +1034,79 @@ final class LinkPreviewService
 
         // Only proxy external Google video streams that block browser cross-origin requests
         if (preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|googlevideo\.com)/#i', $trimmed)) {
+            $cacheFileName = 'ext_' . md5($trimmed) . '.mp4';
+            $cacheFilePath = __DIR__ . '/../../resources/videos/posts/' . $cacheFileName;
+            if (is_file($cacheFilePath) && filesize($cacheFilePath) > 4096) {
+                return '/resources/videos/posts/' . $cacheFileName;
+            }
             $sig = self::signStreamUrl($trimmed);
             return '/resources/videos/external-stream?url=' . rawurlencode($trimmed) . '&sig=' . $sig;
         }
 
         return $trimmed;
+    }
+
+    /**
+     * Asynchronously or on-demand persists an external Google Photos video stream
+     * to local SSD storage (`resources/videos/posts/ext_<hash>.mp4`) so playback
+     * is instantaneous (<2ms HTTP 206 Byte-Range) and immune to Google token expiry.
+     */
+    public static function cacheExternalVideoLocally(string $url): ?string
+    {
+        $trimmed = trim($url);
+        if ($trimmed === '' || !preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|googlevideo\.com)/#i', $trimmed)) {
+            return null;
+        }
+
+        $targetDir = __DIR__ . '/../../resources/videos/posts';
+        if (!is_dir($targetDir)) {
+            @mkdir($targetDir, 0755, true);
+        }
+
+        $cacheFileName = 'ext_' . md5($trimmed) . '.mp4';
+        $finalPath = $targetDir . '/' . $cacheFileName;
+        if (is_file($finalPath) && filesize($finalPath) > 4096) {
+            return '/resources/videos/posts/' . $cacheFileName;
+        }
+
+        $tmpPath = $finalPath . '.tmp.' . getmypid();
+        $fp = @fopen($tmpPath, 'wb');
+        if ($fp === false) {
+            return null;
+        }
+
+        $ch = curl_init($trimmed);
+        if ($ch === false) {
+            fclose($fp);
+            @unlink($tmpPath);
+            return null;
+        }
+
+        curl_setopt_array($ch, [
+            CURLOPT_FILE => $fp,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_TIMEOUT => 45,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_USERAGENT => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            CURLOPT_HTTPHEADER => [
+                'Accept: video/mp4,video/*;q=0.9,*/*;q=0.5',
+            ],
+        ]);
+
+        $ok = curl_exec($ch);
+        $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $contentType = strtolower((string)curl_getinfo($ch, CURLINFO_CONTENT_TYPE));
+        curl_close($ch);
+        fclose($fp);
+
+        if ($ok && ($status === 200 || $status === 206) && is_file($tmpPath) && filesize($tmpPath) > 4096 && !str_contains($contentType, 'text/html')) {
+            @rename($tmpPath, $finalPath);
+            return '/resources/videos/posts/' . $cacheFileName;
+        }
+
+        @unlink($tmpPath);
+        return null;
     }
 
     /**

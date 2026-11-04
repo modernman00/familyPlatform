@@ -890,14 +890,10 @@ const renderAttachedVideoPreview = (streamUrl, trimStart = null, trimEnd = null,
     renderAllAttachedVideoPreviews();
 
     if (postMessageArea) {
-        // Remove existing video URLs and re-append all attached videos cleanly
-        const cleanedCurrent = postMessageArea.value.replace(/(?:https?:\/\/[^\s"'<>]+|\/resources\/videos\/posts\/[^\s"'<>]+)\.(?:mp4|webm|ogg|mov)(?:#t=[0-9.,]+)?/gi, '').trim();
-        const allUrls = attachedVideoList.map(v => v.streamUrl).filter(Boolean);
-        if (allUrls.length > 0) {
-            postMessageArea.value = cleanedCurrent ? `${cleanedCurrent}\n\n${allUrls.join('\n')}` : allUrls.join('\n');
-        } else {
-            postMessageArea.value = cleanedCurrent;
-        }
+        // Keep user caption clean — never inject raw /resources/videos/posts/ paths into visible textarea
+        // (#attachedVideoUrl and #attachedVideoUrls hidden inputs carry the video URLs to the backend)
+        const cleanedCurrent = postMessageArea.value.replace(/\/resources\/(?:videos|images)\/[^\s"'<>]+/gi, '').trim();
+        postMessageArea.value = cleanedCurrent;
     }
 };
 
@@ -943,17 +939,21 @@ const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 30, originalDura
             let useSovereignLocal = true;
             let cfTokenData = null;
 
-            // Only attempt Cloudflare direct upload if no custom trim window is needed
-            if (!needsTrim) {
+            // Only attempt Cloudflare direct upload if no custom trim window is needed and CF Stream is not known to be in local fallback mode
+            if (!needsTrim && !window.__cfStreamFallbackLocal) {
                 try {
+                    const abortCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+                    const abortTimer = abortCtrl ? setTimeout(() => abortCtrl.abort(), 1200) : null;
                     const tokenRes = await fetch('/api/video/direct-upload', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
+                        signal: abortCtrl ? abortCtrl.signal : undefined,
                         body: JSON.stringify({
                             maxDuration: 30,
                             expirySeconds: expirySeconds
                         })
                     });
+                    if (abortTimer) clearTimeout(abortTimer);
                     cfTokenData = await tokenRes.json().catch(() => ({}));
                     if (tokenRes.status === 403) {
                         if (window.Swal) {
@@ -967,6 +967,9 @@ const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 30, originalDura
                         }
                         if (expirySelect) expirySelect.value = '2592000';
                         throw new Error(cfTokenData.error || 'Premium retention required.');
+                    }
+                    if (cfTokenData && cfTokenData.fallbackLocal) {
+                        window.__cfStreamFallbackLocal = true;
                     }
                     if (tokenRes.ok && cfTokenData.success && cfTokenData.uploadUrl && !cfTokenData.fallbackLocal) {
                         targetUploadUrl = cfTokenData.uploadUrl;
@@ -1193,7 +1196,7 @@ const handleSelectedVideoFile = async (file) => {
             const timer = setTimeout(() => {
                 URL.revokeObjectURL(blobUrl);
                 resolve(null);
-            }, 4000);
+            }, 1200);
 
             tempVideo.onloadedmetadata = () => {
                 clearTimeout(timer);

@@ -1130,21 +1130,8 @@
                             <div class="position-absolute top-0 start-0 w-100 h-100" style="background: radial-gradient(circle at center, transparent 35%, rgba(5, 7, 12, 0.82) 100%);"></div>
                         </div>
 
-                        <!-- Kinetic Hook Card in Full Modal -->
-                        <template x-if="videoModalVideos[videoModalIndex]?.hookText">
-                            <div class="position-absolute start-50 translate-middle-x px-3 pointer-events-none"
-                                 style="top: 24px; width: 90%; max-width: 440px; z-index: 6;">
-                                <div class="text-center p-3 shadow-lg"
-                                     style="background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1.5px solid rgba(255, 255, 255, 0.85); border-radius: 18px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);">
-                                    <span class="d-block"
-                                          style="font-family: 'Playfair Display', Georgia, -apple-system, BlinkMacSystemFont, serif; font-size: clamp(0.95rem, 3vw, 1.2rem); font-weight: 800; color: #0f172a; line-height: 1.3;"
-                                          x-text="videoModalVideos[videoModalIndex]?.hookText"></span>
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- High-Res Video Poster Overlay when paused in modal -->
-                        <img x-show="!videoModalPlaying && videoModalVideos[videoModalIndex]?.thumbnailUrl"
+                        <!-- High-Res Video Poster Overlay before stream metadata loads -->
+                        <img x-show="!videoModalPlaying && (!videoModalDuration || videoModalDuration === '0:00') && videoModalVideos[videoModalIndex]?.thumbnailUrl"
                              :src="videoModalVideos[videoModalIndex]?.thumbnailUrl"
                              class="position-absolute top-0 start-0 w-100 h-100 object-fit-contain pointer-events-none"
                              style="z-index: 3; border-radius: 14px;"
