@@ -107,7 +107,7 @@ final class RouteDispatch
                     if ($isJsonRequest) {
                         throw new UnauthorisedException("Unauthorized");
                     }
-                    redirect('login');
+                    (new \App\controller\login\Login)->show();
                     return;
                 }
 
@@ -116,7 +116,7 @@ final class RouteDispatch
                     if ($isJsonRequest) {
                         throw new UnauthorisedException("Unauthorized");
                     }
-                    redirect('login');
+                    (new \App\controller\login\Login)->show();
                     return;
                 }
                 $id = checkInput($VerifyJWT['id']);
@@ -152,7 +152,8 @@ final class RouteDispatch
         } else {
             error_log('UNAUTHORISED REDIRECT: ' . $e->getMessage());
             // Do NOT call session_destroy() here — transient auth misses must never wipe the active session
-            redirect('login');
+            (new \App\controller\login\Login)->show();
+            return;
         }
     } catch (\Src\Exceptions\ValidationException $e) {
         $isApi = false;

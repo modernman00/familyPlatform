@@ -242,8 +242,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // D. HTML Document Pages & Feeds -> Network-First with Offline Fallback
+  // D. HTML Document Pages & Feeds -> Direct Native Browser Networking when Online
   if (request.mode === 'navigate' || request.headers.get('accept')?.includes('text/html')) {
+    // If online, bypass Service Worker navigation interception to allow pure native browser networking.
+    // This completely eliminates any possibility of Service Worker fetch failures, redirect TypeErrors, or timeout drops!
+    if (self.navigator && self.navigator.onLine !== false) {
+      return;
+    }
     event.respondWith(networkFirstWithFallback(request));
     return;
   }

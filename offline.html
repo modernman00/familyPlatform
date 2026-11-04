@@ -176,14 +176,12 @@
       btn.innerHTML = 'Connecting...';
       btn.disabled = true;
 
-      // Clear dynamic cache entries that might be holding stale/broken redirects
+      // Clear all cache storages completely
       if ('caches' in window) {
         try {
           var keys = await caches.keys();
           for (var j = 0; j < keys.length; j++) {
-            if (keys[j].indexOf('dynamic') !== -1) {
-              await caches.delete(keys[j]);
-            }
+            await caches.delete(keys[j]);
           }
         } catch (_) {}
       }
@@ -192,14 +190,14 @@
       try {
         var res = await fetch('/api/health?t=' + Date.now(), { method: 'GET', cache: 'no-store' });
         if (res.ok) {
-          window.location.replace('/?pwa_rescue=' + Date.now());
+          window.location.replace('/login?source=pwa_retry&t=' + Date.now());
           return;
         }
       } catch (_) {}
 
       // Fallback: If device is online, navigate directly with bypass token
       if (navigator.onLine) {
-        window.location.replace('/?pwa_rescue=' + Date.now());
+        window.location.replace('/login?source=pwa_retry&t=' + Date.now());
       } else {
         setTimeout(function() {
           btn.innerHTML = 'Still offline &bull; Tap to retry';
@@ -214,14 +212,14 @@
         var res = await fetch('/api/health?t=' + Date.now(), { method: 'GET', cache: 'no-store' });
         if (res.ok) {
           clearInterval(pollInterval);
-          window.location.replace('/?pwa_rescue=' + Date.now());
+          window.location.replace('/login?source=pwa_retry&t=' + Date.now());
         }
       } catch (_) {}
     }, 2000);
 
     // 4. Listen for device online event
     window.addEventListener('online', function() {
-      window.location.replace('/?pwa_rescue=' + Date.now());
+      window.location.replace('/login?source=pwa_retry&t=' + Date.now());
     });
   </script>
 </body>

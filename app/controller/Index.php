@@ -23,7 +23,7 @@ final class Index
             || (\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('users'));
 
         if ($isUser) {
-            redirect('/profilePage');
+            (new \App\controller\members\ProfilePage)->index();
             return;
         }
 
