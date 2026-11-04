@@ -21,13 +21,14 @@ final class FamilyJournal extends Select
      */
     public static function getFamilyJournals(string $familyCode, int $limit = 20, int $offset = 0): array
     {
-        $query = "SELECT fj.*, p.firstName, p.lastName, pp.img AS author_avatar
+        $baseQuery = "SELECT fj.*, p.firstName, p.lastName, pp.img AS author_avatar
                   FROM family_journals fj
                   LEFT JOIN personal p ON fj.author_id = p.id
                   LEFT JOIN profilePics pp ON fj.author_id = pp.id
                   WHERE fj.family_code = ? AND fj.status = 'published'
                   ORDER BY fj.created_at DESC
-                  LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
+                  LIMIT %d OFFSET %d";
+        $query = sprintf($baseQuery, (int)$limit, (int)$offset);
 
         /** @var array<int, array<string, mixed>> $result */
         $result = parent::selectFn2(query: $query, bind: [$familyCode]);

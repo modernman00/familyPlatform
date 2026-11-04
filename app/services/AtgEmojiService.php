@@ -336,7 +336,7 @@ class AtgEmojiService
         }
         $back = self::BACKDROPS[$backKey];
 
-        $uid = 'atg_av_' . substr(md5(json_encode($traits) . $safeSize), 0, 8);
+        $uid = 'atg_av_' . substr(hash('sha256', json_encode($traits) . $safeSize), 0, 8);
 
         $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="' . $safeSize . '" height="' . $safeSize . '" class="atg-avatar-svg">';
         $svg .= '<defs>';

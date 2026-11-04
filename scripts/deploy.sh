@@ -323,7 +323,12 @@ fi
 
 if command -v semgrep > /dev/null 2>&1; then
     echo -e "\n🛡️  Running Semgrep SecOps Scan..."
-    semgrep scan --config="p/phpcs-security-audit" --config="p/owasp-top-ten" --error --quiet app/ index.php 2>/dev/null || {
+    SEMGREP_ARGS=(--config=p/phpcs-security-audit --config=p/owasp-top-ten)
+    if [ -f ".semgrep.yml" ]; then
+        SEMGREP_ARGS=(--config=.semgrep.yml)
+        echo "   ↳ Custom portfolio rules: .semgrep.yml"
+    fi
+    semgrep scan "${SEMGREP_ARGS[@]}" --error --quiet app/ index.php 2>/dev/null || {
         echo "🛑 FATAL: Semgrep identified structural security vulnerabilities."
         exit 1
     }

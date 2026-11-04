@@ -16,7 +16,7 @@ final class FamilyAnnouncement extends Select
      */
     public static function getActiveAnnouncements(string $familyCode, int $limit = 5): array
     {
-        $query = "SELECT fa.*, p.firstName, p.lastName, pp.img AS author_avatar
+        $baseQuery = "SELECT fa.*, p.firstName, p.lastName, pp.img AS author_avatar
                   FROM family_announcements fa
                   LEFT JOIN personal p ON fa.author_id = p.id
                   LEFT JOIN profilePics pp ON fa.author_id = pp.id
@@ -25,7 +25,8 @@ final class FamilyAnnouncement extends Select
                   ORDER BY fa.is_pinned DESC, 
                            CASE fa.priority WHEN 'urgent' THEN 1 WHEN 'important' THEN 2 ELSE 3 END ASC,
                            fa.created_at DESC
-                  LIMIT " . (int)$limit;
+                  LIMIT %d";
+        $query = sprintf($baseQuery, (int)$limit);
 
         /** @var array<int, array<string, mixed>> $result */
         $result = parent::selectFn2(query: $query, bind: [$familyCode]);
