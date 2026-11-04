@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(secops): align semgrep sast rules, sanitize query limit interpolation, and strengthen crypto",
+    "title": "Fix(pwa): add auto-reconnect polling in offline shell, relax navigation timeout to 5000ms, and support HEAD requests on root",
     "notes": [
+        "Fix(pwa): add auto-reconnect polling in offline shell, relax navigation timeout to 5000ms, and support HEAD requests on root",
         "Fix(secops): align semgrep sast rules, sanitize query limit interpolation, and strengthen crypto",
-        "Feat(pwa): harden push notification auth, image fallback routing, and mobile reaction touch targets",
-        "Feat(core): family approval escalation, 3D AR emojis, dual-lineage audience, and media link drawer"
+        "Feat(pwa): harden push notification auth, image fallback routing, and mobile reaction touch targets"
     ],
     "released_at": "2026-11-04",
-    "commit": "036aac2a"
+    "commit": "4ad1e019"
 }
