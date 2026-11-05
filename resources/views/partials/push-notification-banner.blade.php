@@ -49,6 +49,17 @@
 
     const DISMISS_KEY = 'fp_push_banner_dismissed';
     const SUBSCRIBED_KEY = 'fp_push_subscribed';
+
+    // Perf: never let the banner compete with the first paint / main-thread work. Wait for the page
+    // load event, then the requested delay, then an idle slot (max 4s) before revealing it.
+    function showBannerWhenIdle(fn, minDelay) {
+        const run = function () {
+            setTimeout(function () {
+                if ('requestIdleCallback' in window) { requestIdleCallback(fn, { timeout: 4000 }); } else { fn(); }
+            }, minDelay);
+        };
+        if (document.readyState === 'complete') { run(); } else { window.addEventListener('load', run, { once: true }); }
+    }
     const DISMISS_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000; // 3 days (72 hours)
 
     function isDismissedWithinCooldown() {
@@ -474,7 +485,7 @@
             if (closeBtn) closeBtn.addEventListener('click', dismissAction);
             if (dismissBtn) dismissBtn.addEventListener('click', dismissAction);
 
-            setTimeout(function() {
+            showBannerWhenIdle(function() {
                 banner.style.display = 'block';
                 banner.classList.add('show');
             }, 800);
@@ -502,7 +513,7 @@
             if (titleEl) titleEl.textContent = 'Activate Family Notifications';
             if (textEl) textEl.textContent = 'Enable notifications to receive instant lockscreen alerts for family posts, birthdays, and messages.';
 
-            setTimeout(function() {
+            showBannerWhenIdle(function() {
                 banner.style.display = 'block';
                 banner.classList.add('show');
             }, 1200);
@@ -531,7 +542,7 @@
                     }
                 });
 
-                setTimeout(function() {
+                showBannerWhenIdle(function() {
                     banner.style.display = 'block';
                     banner.classList.add('show');
                 }, 2000);
@@ -544,7 +555,7 @@
             if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
                 return;
             }
-            setTimeout(function() {
+            showBannerWhenIdle(function() {
                 banner.style.display = 'block';
                 banner.classList.add('show');
             }, 1800);

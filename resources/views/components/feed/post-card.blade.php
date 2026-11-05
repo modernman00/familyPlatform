@@ -1687,7 +1687,8 @@
              class="reaction-bar-float heirloom-glass-dock"
              :data-post-bar="post.post_no"
              style="position:absolute; bottom:calc(100% + 8px); left:0; transform:none; display:flex; gap:6px; z-index:100; white-space:nowrap;">
-          <template x-for="type in Object.keys(emojiMap)" :key="type">
+          {{-- Perf: build the 6 glass-gem SVG buttons only once this post's picker has first been opened --}}
+          <template x-for="type in ((post.post_no in activeReactionBars) ? Object.keys(emojiMap) : [])" :key="type">
             <button type="button"
                     @click="reactToPost(post.post_no, type, $event)"
                     :title="emojiMap[type].label"
@@ -2021,7 +2022,8 @@
                      :data-comment-bar="c.comment_no"
                      role="toolbar" aria-label="Choose a comment reaction"
                      style="position:absolute; bottom:calc(100% + 6px); left:0; display:flex; gap:4px; z-index:100; white-space:nowrap; padding:6px 10px;">
-                  <template x-for="type in ['love', 'like', 'haha', 'shock', 'sad', 'celebrate']" :key="type">
+                  {{-- Perf: build the 6 glass-gem SVG buttons only once this comment's picker has first been opened --}}
+                  <template x-for="type in ((c.comment_no in activeCommentReactionBars) ? ['love', 'like', 'haha', 'shock', 'sad', 'celebrate'] : [])" :key="type">
                     <button type="button"
                             @click.stop="reactToComment(post.post_no, c.comment_no, type, $event)"
                             :title="emojiMap[type]?.label || type"

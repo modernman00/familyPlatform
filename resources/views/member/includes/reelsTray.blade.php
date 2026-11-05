@@ -161,7 +161,9 @@
                            loop
                            playsinline
                            webkit-playsinline
-                           preload="metadata"></video>
+                           poster="{{ $coverThumb }}"
+                           {{-- Perf: only the first two tiles probe their video; the rest stay on the cover image until opened --}}
+                           preload="{{ $loop->index < 2 ? 'metadata' : 'none' }}"></video>
                 @endif
 
                 <!-- Legibility Dark Gradient -->
