@@ -940,6 +940,13 @@
         @include('components.feed.post-card')
       </template>
     </div>
+
+    <!-- Infinite scroll sentinel: loads the next page of posts shortly before it scrolls into view -->
+    <div x-cloak x-show="feedHasMore" aria-live="polite" class="text-center py-3">
+      <div x-init="if ('IntersectionObserver' in window) { new IntersectionObserver((entries) => { if (entries[0].isIntersecting) loadMorePosts(); }, { rootMargin: '600px 0px' }).observe($el); }"
+           style="height: 1px;"></div>
+      <span x-show="isLoadingMore" class="text-muted small">Loading more family moments…</span>
+    </div>
     
     <!-- Premium Alpine Lightbox Modal with Drag-to-Dismiss Gesture -->
     <div x-cloak x-show="lightboxOpen" 

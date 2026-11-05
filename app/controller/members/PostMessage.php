@@ -59,9 +59,12 @@ final class PostMessage
 
             // Get pagination & filter parameters
             $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
-            $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 50;
+            $page = max(1, $page);
+            // Cap page size so one request can never pull the whole feed; keeps legacy default of 50.
+            $limit = isset($_GET['limit']) ? max(1, min(50, (int) $_GET['limit'])) : 50;
             $filter = isset($_GET['filter']) ? trim((string)$_GET['filter']) : '';
-            $offset = ($page - 1) * $limit;
+            // Optional explicit offset lets infinite-scroll continue exactly after what is already loaded.
+            $offset = isset($_GET['offset']) ? max(0, (int) $_GET['offset']) : ($page - 1) * $limit;
 
             // 1. Get visible posts with pagination across multiple families via unified FeedRepository
             $feedRepo = new \App\repository\FeedRepository();
@@ -89,7 +92,8 @@ final class PostMessage
                             'total' => $total,
                             'per_page' => $limit,
                             'current_page' => $page,
-                            'last_page' => $lastPage
+                            'last_page' => $lastPage,
+                            'has_more' => false
                         ]
                     ]
                 );
@@ -164,7 +168,8 @@ final class PostMessage
                         'total' => $total,
                         'per_page' => $limit,
                         'current_page' => $page,
-                        'last_page' => $lastPage
+                        'last_page' => $lastPage,
+                        'has_more' => ($offset + count($posts)) < $total
                     ]
                 ]
             );

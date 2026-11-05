@@ -12,6 +12,10 @@ import { HEIRLOOM_REACTIONS, getHeirloomGlassSvg, triggerHeirloomBurst } from '.
 export function profileFeed(opts = {}) {
     return {
         posts: [],
+        feedPageSize: 10,
+        feedHasMore: false,
+        isLoadingMore: false,
+        _serverLoaded: 0,
         isLoading: true,
         errorMessage: '',
         lightboxOpen: false,
@@ -333,7 +337,8 @@ export function profileFeed(opts = {}) {
                 try {
                     const cachedPosts = await window.offlineSync.getCachedFeed();
                     if (Array.isArray(cachedPosts) && cachedPosts.length > 0 && this.posts.length === 0) {
-                        this.posts = cachedPosts.map(p => this.normalizePost(p));
+                        // Only hydrate the first page from cache; the rest streams in on scroll.
+                        this.posts = cachedPosts.slice(0, this.feedPageSize).map(p => this.normalizePost(p));
                         this.isLoading = false;
                     }
                 } catch (cacheErr) {
@@ -343,11 +348,16 @@ export function profileFeed(opts = {}) {
 
             // 2. Fetch fresh updates from server
             try {
-                const url = filter ? `/post/getAllPostCommentByFamCode?filter=${encodeURIComponent(filter)}` : '/post/getAllPostCommentByFamCode';
-                const response = await axios.get(url);
+                // Refreshes keep the depth already scrolled (min one page, max 50) so the list doesn't collapse.
+                const depth = Math.min(50, Math.max(this.feedPageSize, this._serverLoaded || 0));
+                const params = new URLSearchParams({ limit: String(depth), offset: '0' });
+                if (filter) params.set('filter', filter);
+                const response = await axios.get(`/post/getAllPostCommentByFamCode?${params.toString()}`);
                 const rawPosts = response?.data?.message?.message;
                 
                 if (Array.isArray(rawPosts)) {
+                    this._serverLoaded = rawPosts.length;
+                    this.feedHasMore = !!response?.data?.message?.pagination?.has_more;
                     this.posts = rawPosts.map(p => this.normalizePost(p));
                     // Update offline store in background if main stream
                     if (!filter && window.offlineSync && typeof window.offlineSync.cacheFeed === 'function') {
@@ -370,8 +380,40 @@ export function profileFeed(opts = {}) {
             }
         },
 
+        async loadMorePosts() {
+            if (this.isLoadingMore || !this.feedHasMore || this.isLoading || this.posts.length === 0) return;
+            this.isLoadingMore = true;
+            try {
+                const filter = this.activeStreamFilter === 'tagged' ? 'tagged' : '';
+                const params = new URLSearchParams({ limit: String(this.feedPageSize), offset: String(this._serverLoaded) });
+                if (filter) params.set('filter', filter);
+                const response = await axios.get(`/post/getAllPostCommentByFamCode?${params.toString()}`);
+                const raw = response?.data?.message?.message;
+                if (Array.isArray(raw)) {
+                    const seen = new Set(this.posts.map(p => String(p.post_no)));
+                    const fresh = raw.filter(p => !seen.has(String(p.post_no))).map(p => this.normalizePost(p));
+                    this.posts = this.posts.concat(fresh);
+                    this._serverLoaded += raw.length;
+                    this.feedHasMore = raw.length > 0 && !!response?.data?.message?.pagination?.has_more;
+                    this.$nextTick(() => {
+                        this.observePostViews();
+                        this.observeCommentViews();
+                        this.observeFeedVideos();
+                    });
+                } else {
+                    this.feedHasMore = false;
+                }
+            } catch (err) {
+                console.warn('[Feed] Load more failed:', err);
+            } finally {
+                this.isLoadingMore = false;
+            }
+        },
+
         async setStreamFilter(filterType) {
             this.activeStreamFilter = filterType;
+            this._serverLoaded = 0;
+            this.feedHasMore = false;
             this.isLoading = true;
             await this.fetchPosts({ filter: filterType === 'tagged' ? 'tagged' : '' });
         },
