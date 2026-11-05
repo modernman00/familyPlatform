@@ -59,6 +59,50 @@
         </div>
     </div>
 
+    <!-- Field Core Web Vitals (RUM p75) & Mobile Viewport Distribution -->
+    <div class="w3-row-padding w3-margin-bottom" style="margin:0 -8px 20px -8px;">
+        <div class="w3-quarter" style="padding:0 8px;">
+            <div style="background:rgba(30, 41, 59, 0.85); border:1px solid #38bdf8; border-radius:12px; padding:18px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:#bae6fd; font-size:12px; font-weight:700; text-transform:uppercase;">Field INP (p75 Tap Latency)</span>
+                    <i class="fa fa-hand-o-up" style="color:#38bdf8; font-size:18px;"></i>
+                </div>
+                <h2 id="rumInpP75" style="margin:10px 0 4px 0; font-weight:800; color:#f8fafc; font-size:28px;">-- ms</h2>
+                <div style="font-size:12px; color:#94a3b8;">Target: &le; 200ms</div>
+            </div>
+        </div>
+        <div class="w3-quarter" style="padding:0 8px;">
+            <div style="background:rgba(30, 41, 59, 0.85); border:1px solid #a855f7; border-radius:12px; padding:18px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:#e9d5ff; font-size:12px; font-weight:700; text-transform:uppercase;">Field LCP (p75 Render)</span>
+                    <i class="fa fa-bolt" style="color:#a855f7; font-size:18px;"></i>
+                </div>
+                <h2 id="rumLcpP75" style="margin:10px 0 4px 0; font-weight:800; color:#f8fafc; font-size:28px;">-- ms</h2>
+                <div style="font-size:12px; color:#94a3b8;">Target: &le; 2500ms</div>
+            </div>
+        </div>
+        <div class="w3-quarter" style="padding:0 8px;">
+            <div style="background:rgba(30, 41, 59, 0.85); border:1px solid #14b8a6; border-radius:12px; padding:18px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:#99f6e4; font-size:12px; font-weight:700; text-transform:uppercase;">Field CLS (Layout Stability)</span>
+                    <i class="fa fa-columns" style="color:#14b8a6; font-size:18px;"></i>
+                </div>
+                <h2 id="rumClsAvg" style="margin:10px 0 4px 0; font-weight:800; color:#f8fafc; font-size:28px;">--</h2>
+                <div style="font-size:12px; color:#94a3b8;">Target: &le; 0.10</div>
+            </div>
+        </div>
+        <div class="w3-quarter" style="padding:0 8px;">
+            <div style="background:rgba(30, 41, 59, 0.85); border:1px solid #fb923c; border-radius:12px; padding:18px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:#fed7aa; font-size:12px; font-weight:700; text-transform:uppercase;">Long Tasks (&gt;50ms Jank)</span>
+                    <i class="fa fa-microchip" style="color:#fb923c; font-size:18px;"></i>
+                </div>
+                <h2 id="rumLongTasks" style="margin:10px 0 4px 0; font-weight:800; color:#f8fafc; font-size:28px;">--</h2>
+                <div id="rumViewportDist" style="font-size:12px; color:#94a3b8;">Mobile profiles: --</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Hotspot Tables -->
     <div style="display:flex; gap:16px; margin-bottom:24px; flex-wrap:wrap;">
         <!-- Top Rage Click Targets -->
@@ -114,7 +158,7 @@
                         <th style="padding:10px 8px;">Event</th>
                         <th style="padding:10px 8px;">URL Path</th>
                         <th style="padding:10px 8px;">Viewport</th>
-                        <th style="padding:10px 8px;">Anonymized IP</th>
+                        <th style="padding:10px 8px;">Anonymised IP</th>
                         <th style="padding:10px 8px;">Timestamp</th>
                     </tr>
                 </thead>
@@ -141,6 +185,19 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('rageClicks').textContent = data.rage_clicks_count || 0;
             document.getElementById('deadClicks').textContent = data.dead_clicks_count || 0;
             document.getElementById('funnelSteps').textContent = data.funnel_steps_count || 0;
+
+            if (data.rum_vitals) {
+                const rv = data.rum_vitals;
+                document.getElementById('rumInpP75').textContent = (rv.inp_p75_ms || 0) + ' ms';
+                document.getElementById('rumLcpP75').textContent = (rv.lcp_p75_ms || 0) + ' ms';
+                document.getElementById('rumClsAvg').textContent = Number(rv.cls_avg || 0).toFixed(3);
+                document.getElementById('rumLongTasks').textContent = (rv.longtasks_total || 0) + ' (max ' + (rv.max_longtask_ms || 0) + 'ms)';
+                if (rv.viewport_profiles) {
+                    const vp = rv.viewport_profiles;
+                    document.getElementById('rumViewportDist').textContent =
+                        `375px:${vp.compact_375 || 0} | 390px:${vp.standard_390 || 0} | 412px:${vp.large_412 || 0}`;
+                }
+            }
 
             // Render Rage Table
             const rageTbody = document.getElementById('rageTableBody');
@@ -192,6 +249,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (evt === 'rage_click') return '<span style="background:rgba(239, 68, 68, 0.2); color:#ef4444; padding:3px 8px; border-radius:12px; font-weight:600; font-size:11px;">Rage Click</span>';
         if (evt === 'dead_click') return '<span style="background:rgba(245, 158, 11, 0.2); color:#f59e0b; padding:3px 8px; border-radius:12px; font-weight:600; font-size:11px;">Dead Click</span>';
         if (evt === 'funnel_step') return '<span style="background:rgba(16, 185, 129, 0.2); color:#10b981; padding:3px 8px; border-radius:12px; font-weight:600; font-size:11px;">Funnel Step</span>';
+        if (evt === 'rum_vitals') return '<span style="background:rgba(56, 189, 248, 0.2); color:#38bdf8; padding:3px 8px; border-radius:12px; font-weight:600; font-size:11px;">RUM Vitals</span>';
         return `<span style="background:rgba(239,107,115, 0.2); color:#ef6b73; padding:3px 8px; border-radius:12px; font-weight:600; font-size:11px;">${escapeHtml(evt)}</span>`;
     }
 

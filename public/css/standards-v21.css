@@ -3499,17 +3499,19 @@ body.dark-mode .heirloom-reaction-btn.active {
   }
 }
 
-/* Keyframes: Ambient Backlight Aura breathing pulse */
+/* Keyframes: Ambient Backlight Aura breathing pulse (Compositor-Only 60fps — Zero Per-Frame Blur Re-Raster) */
+.feed-media-aura-backdrop {
+  filter: blur(36px) saturate(175%) brightness(1.14);
+  will-change: transform, opacity;
+}
 @keyframes livingCanvasAuraPulse {
   0% {
-    transform: scale(0.96) translateZ(0);
+    transform: scale3d(0.96, 0.96, 1);
     opacity: 0.38;
-    filter: blur(32px) saturate(160%) brightness(1.08);
   }
   100% {
-    transform: scale(1.04) translateZ(0);
+    transform: scale3d(1.04, 1.04, 1);
     opacity: 0.56;
-    filter: blur(42px) saturate(190%) brightness(1.22);
   }
 }
 
@@ -3565,6 +3567,88 @@ video.feed-post-video::-webkit-media-controls-play-button,
   width: 0 !important;
   height: 0 !important;
 }
+
+/* ==========================================================================
+   📱 Best-in-Class Mobile Rendering, Battery & Ergonomics Suite (v2.2)
+   1. Off-Screen Feed Virtualisation (content-visibility: auto)
+   2. iOS Safari Input Auto-Zoom Shield (font-size >= 16px on coarse pointer)
+   3. Mobile Bottom-Sheet Modals (Natural Thumb Zone Architecture)
+   4. Scroll Chaining & Accidental Pull-to-Refresh Guard (overscroll-behavior)
+   ========================================================================== */
+
+/* 1. Off-Screen Feed Virtualisation: Skips layout & paint for below-fold cards */
+.post-card:nth-of-type(n+3),
+.feed-post-card:nth-of-type(n+3),
+.timeline-post-card:nth-of-type(n+3),
+.member-card-item:nth-of-type(n+7) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 420px;
+}
+
+/* Disable containment while a dropdown or input inside the card is active */
+.post-card:focus-within,
+.feed-post-card:focus-within,
+.post-card:has(.dropdown-menu.show),
+.feed-post-card:has(.dropdown-menu.show) {
+  content-visibility: visible;
+}
+
+/* 2. iOS Safari Input Auto-Zoom Prevention: Enforces >= 16px on touch inputs */
+@media (max-width: 767.98px) and (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+  select,
+  textarea,
+  .form-control,
+  .form-select {
+    font-size: max(16px, 1rem) !important;
+  }
+}
+
+/* 3. Mobile Bottom-Sheet Modals: Docks dialogs in the Natural Thumb Arc (< 768px) */
+@media (max-width: 767.98px) {
+  .modal.fade .modal-dialog:not(.modal-fullscreen) {
+    display: flex;
+    align-items: flex-end;
+    min-height: 100%;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    transform: translate3d(0, 100%, 0);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  .modal.show .modal-dialog:not(.modal-fullscreen) {
+    transform: translate3d(0, 0, 0) !important;
+  }
+  .modal .modal-dialog:not(.modal-fullscreen) > .modal-content {
+    width: 100%;
+    max-height: 90dvh;
+    border-radius: 20px 20px 0 0 !important;
+    border-bottom: none !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.24) !important;
+  }
+  .modal .modal-dialog:not(.modal-fullscreen) > .modal-content::before {
+    content: "";
+    display: block;
+    width: 36px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.45);
+    margin: 8px auto 2px auto;
+    flex-shrink: 0;
+  }
+}
+
+/* 4. Scroll Chaining & Accidental Pull-to-Refresh Isolation */
+.modal-body,
+.offcanvas-body,
+.dropdown-menu,
+.comment-scroll-container,
+.notifications-dropdown {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
 
 
 

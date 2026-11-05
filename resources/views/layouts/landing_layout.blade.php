@@ -247,6 +247,7 @@
   <script type="text/javascript" src="/public/js/index.js?v=1.0.2"></script>
   <script type="text/javascript" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
   <script type="text/javascript" src="/public/js/smart-nav-scroll.js?v={{ assetVersion('js/smart-nav-scroll.js') }}" defer></script>
+  <script type="text/javascript" src="/public/js/telemetry.js?v={{ assetVersion('js/telemetry.js') }}" defer></script>
   
   @yield('extra_js')
 

@@ -299,9 +299,9 @@
             </div>
             <div>
               <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-                <h6 class="fw-bold mb-0 text-dark" style="font-size: 1rem;">
+                <h3 class="fw-bold mb-0 text-dark" style="font-size: 1rem;">
                   👋 <strong>{{ htmlspecialchars($joinReq['requesterName'] ?? 'New Member') }}</strong> {{ __('family.wants_to_join', 'wants to join your :code family network', ['code' => htmlspecialchars($joinReq['family_code'] ?? '')]) }}
-                </h6>
+                </h3>
                 @if(!empty($joinReq['is_escalated']))
                   <span class="badge rounded-pill px-2.5 py-1" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-size: 0.76rem;">
                     <i class="bi bi-broadcast me-1"></i> Family Broadcast Escalation
@@ -1132,7 +1132,7 @@
                                    playsinline
                                    webkit-playsinline
                                    loop
-                                   preload="metadata"
+                                   preload="none"
                                    style="object-fit: cover; filter: blur(48px) brightness(0.65) saturate(1.5); transform: scale(1.35); opacity: 0.82;"></video>
                             <div class="position-absolute top-0 start-0 w-100 h-100" style="background: radial-gradient(circle at center, transparent 35%, rgba(5, 7, 12, 0.82) 100%);"></div>
                         </div>
@@ -1149,7 +1149,7 @@
                                :src="videoModalVideos[videoModalIndex]?.embedUrl"
                                playsinline
                                webkit-playsinline
-                               preload="auto"
+                               preload="none"
                                @click.stop="toggleVideoModalPlay()"
                                @dblclick.stop="toggleNativeFullscreen()"
                                @play="

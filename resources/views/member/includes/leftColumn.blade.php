@@ -88,7 +88,6 @@
                         <a href="/organogram/{{ $data['id'] ?? '' }}?mode=canvas&amp;family_code={{ urlencode($leftMarriedCode) }}&amp;lineage=primary"
                            class="family-code-pill family-code-pill--married text-decoration-none"
                            id="marriedFamCodePill"
-                           aria-label="{{ __('profile.married_family_code', 'Married Code') }}: {{ $leftMarriedCode }}"
                            title="{{ __('profile.view_married_tree_tooltip', 'View Married / Household Family Tree') }} (#{{ $leftMarriedCode }})">
                             <span class="family-code-label me-1.5">{{ __('profile.married_code_short', 'Married') }} -</span>
                             <span class="family-code-value">{{ $leftMarriedCode }}</span>
@@ -98,7 +97,6 @@
                         <a href="/organogram/{{ $data['id'] ?? '' }}?mode=canvas&amp;family_code={{ urlencode($leftEffectiveBirthCode) }}&amp;lineage={{ $leftMarriedCode !== '' ? 'birth' : 'primary' }}"
                            class="family-code-pill {{ $leftMarriedCode !== '' ? 'family-code-pill--birth' : '' }} text-decoration-none"
                            id="birthFamCodePill"
-                           aria-label="{{ __('profile.birth_family_code', 'Birth Code') }}: {{ $leftEffectiveBirthCode }}"
                            title="{{ __('profile.view_birth_tree_tooltip', 'View Birth / Maiden Family Tree') }} (#{{ $leftEffectiveBirthCode }})">
                             <span class="family-code-label {{ $leftMarriedCode !== '' ? 'family-code-label--birth' : '' }} me-1.5">{{ __('profile.birth_code_short', 'Birth') }} -</span>
                             <span class="family-code-value {{ $leftMarriedCode !== '' ? 'family-code-value--birth' : '' }}">{{ $leftEffectiveBirthCode }}</span>

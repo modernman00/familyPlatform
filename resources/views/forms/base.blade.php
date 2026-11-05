@@ -458,6 +458,7 @@
     <script type="text/javascript" src="/public/js/manifest.js?v=1.0.2"></script>
     <script type="text/javascript" src="/public/js/vendor.js?v=1.0.2"></script>
     <script type="text/javascript" src="/public/js/index.js?v=1.0.2"></script>
+    <script type="text/javascript" src="/public/js/telemetry.js?v={{ assetVersion('js/telemetry.js') }}" defer></script>
 
     @include('component.submitSpinner')
     @include('partials.pwa-register')

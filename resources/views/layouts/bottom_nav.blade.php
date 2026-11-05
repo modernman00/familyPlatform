@@ -13,6 +13,7 @@
     transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease !important;
     touch-action: manipulation !important;
     -webkit-tap-highlight-color: transparent !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .pwa-bottom-nav.nav-hidden {
     transform: translate3d(0, 105%, 0) !important;
@@ -79,6 +80,7 @@ body.dark-theme .pwa-tab-item,
 .pwa-tab-center-action {
     touch-action: manipulation !important;
     -webkit-tap-highlight-color: transparent !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .pwa-tab-center-action:active .pwa-center-btn-bubble {
     transform: scale(0.92);
@@ -163,6 +165,24 @@ body.dark-theme .pwa-tab-center-action .pwa-center-btn-bubble,
             }
             if (t.classList.contains('active')) {
                 t.setAttribute('aria-current', 'page');
+            }
+
+            // Data-Saver-Aware Speculative Tab Prefetching on pointerdown (80-120ms head start)
+            var href = t.getAttribute('href');
+            if (href && href.charAt(0) === '/' && !t.classList.contains('active')) {
+                t.addEventListener('pointerdown', function() {
+                    var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                    if (conn && (conn.saveData || conn.effectiveType === '2g' || conn.effectiveType === 'slow-2g')) {
+                        return;
+                    }
+                    if (!document.querySelector('link[rel="prefetch"][href="' + href + '"]')) {
+                        var link = document.createElement('link');
+                        link.rel = 'prefetch';
+                        link.href = href;
+                        link.as = 'document';
+                        document.head.appendChild(link);
+                    }
+                }, { once: true, passive: true });
             }
         });
 

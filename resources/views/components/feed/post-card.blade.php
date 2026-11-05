@@ -83,6 +83,7 @@
             <template x-if="!(post.id === 'FAMILY_PLATFORM_OFFICIAL' || post.is_official) && post.postFamCode">
               <span class="badge rounded-pill" 
                     :class="post.target_scope === 'birth' ? 'bg-danger-subtle text-danger-emphasis border border-danger-subtle' : (post.target_scope === 'married' ? 'bg-success-subtle text-success-emphasis border border-success-subtle' : 'bg-secondary-subtle text-secondary-emphasis')" 
+                    :style="post.target_scope === 'birth' ? 'color: #7f1d1d !important; background-color: #fee2e2 !important; border-color: #fca5a5 !important;' : (post.target_scope === 'married' ? 'color: #14532d !important; background-color: #dcfce7 !important; border-color: #86efac !important;' : '')"
                     style="font-size: 0.78rem; font-weight: normal; padding: 2px 8px;">
                 <i class="bi me-1" :class="post.target_scope === 'birth' ? 'bi-heart-pulse-fill' : (post.target_scope === 'married' ? 'bi-house-heart-fill' : 'bi-people')"></i>
                 <span x-text="(post.target_scope === 'birth' ? 'Birth Family: ' : (post.target_scope === 'married' ? 'Married Family: ' : (window.__ ? window.__('feed.family_label', 'Family') : 'Family') + ': ')) + post.postFamCode"></span>
@@ -1155,7 +1156,7 @@
                        playsinline
                        webkit-playsinline
                        muted
-                       preload="metadata"
+                       preload="none"
                        @loadedmetadata="detectCardDimensions($el)"
                        @loadeddata="hasCardMetadata = true; detectCardDimensions($el)"
                        @click.stop="togglePlay($el)"
@@ -1384,7 +1385,7 @@
                webkit-playsinline
                muted
                loop
-               preload="metadata"
+               preload="none"
                @click.stop="togglePlayback($el)"
                @dblclick.stop="openVideoModal([post.video], 0, isVideoMuted)"
                @loadedmetadata="

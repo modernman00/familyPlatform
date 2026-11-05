@@ -185,12 +185,9 @@
 
   @include('layouts.navbar')
 
-  {{-- <div class="container-main"> --}}
-
+  <main id="main-content" role="main">
     @yield('content')
-
-
-    {{-- </div> --}}
+  </main>
 
   {{-- Rendered before the app scripts so the profile-page chunk (which may execute
        from prefetch cache before the parser gets here) always finds this markup. --}}
@@ -213,7 +210,7 @@
   <script nonce="{{ $nonce }}" src="/public/js/manifest.js?v={{ assetVersion('js/manifest.js') }}"></script>
   <script nonce="{{ $nonce }}" src="/public/js/vendor.js?v={{ assetVersion('js/vendor.js') }}"></script>
   <script nonce="{{ $nonce }}" src="/public/js/index.js?v={{ assetVersion('js/index.js') }}"></script>
-  <script nonce="{{ $nonce }}" src="/public/js/telemetry.js?v=1.0.0"></script>
+  <script nonce="{{ $nonce }}" src="/public/js/telemetry.js?v={{ assetVersion('js/telemetry.js') }}" defer></script>
   <script nonce="{{ $nonce }}" src="/public/js/pwa-notifications.js?v=1.0.0" defer></script>
   <script nonce="{{ $nonce }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>
   <script nonce="{{ $nonce }}" src="/public/js/profilePhotoViewer.js?v={{ assetVersion('js/profilePhotoViewer.js') }}" defer></script>

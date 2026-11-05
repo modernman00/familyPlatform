@@ -130,9 +130,9 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-lg-end shadow-lg border-0 py-2 stitch-user-dropdown" aria-labelledby="userMenu" style="border-radius: 16px; min-width: 200px;">
                         <li>
-                            <a class="dropdown-item py-2 px-3 fw-medium text-primary" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" title="Invite family relatives and friends to join your family network">
+                            <button type="button" class="dropdown-item py-2 px-3 fw-medium text-primary text-start w-100 border-0 bg-transparent" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" title="Invite family relatives and friends to join your family network">
                                 <i class="bi bi-person-plus-fill me-2 text-warning"></i> {{ __('nav.invite_others', 'Invite Others') }}
-                            </a>
+                            </button>
                         </li>
                         <li class="profileNav">
                             <a class="dropdown-item py-2 px-3 fw-medium" href="/profile" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Edit your personal profile information">
@@ -145,16 +145,16 @@
                             </a>
                         </li>
                         <li id="pwaAmbientInstallLi" style="display: none;">
-                            <a class="dropdown-item py-2 px-3 fw-medium text-success d-flex align-items-center justify-content-between pwa-ambient-install-trigger" href="javascript:void(0)" id="pwaAmbientInstallBtn" title="Install FamilyPlatform app on your device for fast access & alerts">
+                            <button type="button" class="dropdown-item py-2 px-3 fw-medium text-success d-flex align-items-center justify-content-between pwa-ambient-install-trigger text-start w-100 border-0 bg-transparent" id="pwaAmbientInstallBtn" title="Install FamilyPlatform app on your device for fast access & alerts">
                                 <span><i class="bi bi-download me-2 text-success"></i> Install App</span>
                                 <span class="badge bg-success-subtle text-success" style="font-size: 0.72rem;">Native App</span>
-                            </a>
+                            </button>
                         </li>
                         <li>
-                            <a class="dropdown-item py-2 px-3 fw-medium d-flex align-items-center justify-content-between" href="javascript:void(0)" id="darkModeToggle" role="button" title="Toggle between dark and light appearance modes">
+                            <button type="button" class="dropdown-item py-2 px-3 fw-medium d-flex align-items-center justify-content-between text-start w-100 border-0 bg-transparent" id="darkModeToggle" title="Toggle between dark and light appearance modes">
                                 <span><i class="bi bi-moon-stars-fill me-2 text-warning"></i> {{ __('nav.theme_mode', 'Theme Mode') }}</span>
                                 <span class="badge bg-secondary-subtle text-secondary" id="themeStatusBadge" style="font-size: 0.72rem;">Toggle</span>
-                            </a>
+                            </button>
                         </li>
                         <li><hr class="dropdown-divider my-1"></li>
                         <li>

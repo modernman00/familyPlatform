@@ -10,6 +10,7 @@
 #   5. Sovereign Robust E2E User Journey Gate (tests/verify_e2e_robust_suite.php)
 #   6. Automated PHPUnit Test Suite
 #   7. Dr. Viktor Kovács & Marcus Adversarial Enterprise Security Attack Gate (scripts/run-all-security-checks.sh)
+#   8. Sovereign Whole-Site Google Lighthouse & Quality Gate (vendor/bin/scan-site --lighthouse --max-urls=5)
 #
 # Exit Code: 0 = PASS (Ready to commit/deploy), 1 = BLOCKED (Must fix errors)
 # ==============================================================================
@@ -105,7 +106,7 @@ fi
 # ------------------------------------------------------------------------------
 # 1. PHP Syntax Check (php -l) — Smart Incremental Git-Diff + Untracked Scan
 # ------------------------------------------------------------------------------
-echo -e "${BOLD}${CYAN}[GATE 1/7] Checking PHP Syntax (php -l)...${NC}"
+echo -e "${BOLD}${CYAN}[GATE 1/8] Checking PHP Syntax (php -l)...${NC}"
 SYNTAX_ERRORS=0
 LINT_COUNT=0
 
@@ -142,7 +143,7 @@ echo ""
 # ------------------------------------------------------------------------------
 # 2. David's PHPStan Level 8 Static Analysis Gate
 # ------------------------------------------------------------------------------
-echo -e "${BOLD}${CYAN}[GATE 2/7] Running PHPStan Level 8 Analysis...${NC}"
+echo -e "${BOLD}${CYAN}[GATE 2/8] Running PHPStan Level 8 Analysis...${NC}"
 if [ -x "vendor/bin/phpstan" ]; then
     if vendor/bin/phpstan analyse --level=8; then
         echo -e "${GREEN}  ✅ Gate 2 Passed: Zero PHPStan Level 8 errors.${NC}"
@@ -158,7 +159,7 @@ echo ""
 # ------------------------------------------------------------------------------
 # 3. Semgrep Security & Vulnerability Scan
 # ------------------------------------------------------------------------------
-echo -e "${BOLD}${CYAN}[GATE 3/7] Running Semgrep Security Scan...${NC}"
+echo -e "${BOLD}${CYAN}[GATE 3/8] Running Semgrep Security Scan...${NC}"
 if command -v semgrep >/dev/null 2>&1; then
     SEMGREP_CFG="--config=auto"
     if [ -f ".semgrep.yml" ]; then
@@ -177,7 +178,7 @@ echo ""
 # ------------------------------------------------------------------------------
 # 4. Engineering Must-Haves, PWA & Stability Suites (TAT & BRATS Gate)
 # ------------------------------------------------------------------------------
-echo -e "${BOLD}${CYAN}[GATE 4/7] Verifying Engineering Must-Haves, PWA & Stability Suites...${NC}"
+echo -e "${BOLD}${CYAN}[GATE 4/8] Verifying Engineering Must-Haves, PWA & Stability Suites...${NC}"
 GATE4_PASSED=1
 if [ -f "scripts/verify_engineering_must_haves.php" ]; then
     php scripts/verify_engineering_must_haves.php || GATE4_PASSED=0
@@ -303,7 +304,7 @@ echo ""
 # ------------------------------------------------------------------------------
 # 5. Sovereign Robust E2E User Journey Gate (Mandatory & Non-Skippable)
 # ------------------------------------------------------------------------------
-echo -e "${BOLD}${CYAN}[GATE 5/7] Running Sovereign Robust E2E User Journey Gate...${NC}"
+echo -e "${BOLD}${CYAN}[GATE 5/8] Running Sovereign Robust E2E User Journey Gate...${NC}"
 if [ ! -f "tests/verify_e2e_robust_suite.php" ]; then
     echo -e "${RED}  ❌ FATAL: Sovereign E2E suite missing at tests/verify_e2e_robust_suite.php. Skipping is strictly forbidden.${NC}"
     FAILURES=$((FAILURES + 1))
@@ -320,7 +321,7 @@ echo ""
 # ------------------------------------------------------------------------------
 # 6. Automated PHPUnit Test Suite
 # ------------------------------------------------------------------------------
-echo -e "${BOLD}${CYAN}[GATE 6/7] Running PHPUnit Test Suite...${NC}"
+echo -e "${BOLD}${CYAN}[GATE 6/8] Running PHPUnit Test Suite...${NC}"
 if [ -x "vendor/bin/phpunit" ]; then
     if php -d memory_limit=1G vendor/bin/phpunit; then
         echo -e "${GREEN}  ✅ Gate 6 Passed: All PHPUnit tests succeeded.${NC}"
@@ -336,7 +337,7 @@ echo ""
 # ------------------------------------------------------------------------------
 # 7. Dr. Viktor Kovács & Marcus Adversarial Enterprise Security Attack Gate
 # ------------------------------------------------------------------------------
-echo -e "${BOLD}${CYAN}[GATE 7/7] Running Dr. Viktor Kovács & Marcus Adversarial Enterprise Security Attack Gate...${NC}"
+echo -e "${BOLD}${CYAN}[GATE 7/8] Running Dr. Viktor Kovács & Marcus Adversarial Enterprise Security Attack Gate...${NC}"
 if [ -f "scripts/dast-guest-builder-idor.sh" ]; then
     if bash scripts/dast-guest-builder-idor.sh; then
         echo -e "${GREEN}  ✅ Gate 7 Passed: Marcus & Ghost Red Team IDOR gauntlet passed.${NC}"
@@ -353,6 +354,24 @@ elif [ -f "scripts/run-all-security-checks.sh" ]; then
     fi
 else
     echo -e "${YELLOW}  ⚠️  Red team security script not found.${NC}"
+fi
+echo ""
+
+# ------------------------------------------------------------------------------
+# 8. Sovereign Whole-Site Google Lighthouse & Quality Gate (CEO Mandate)
+# ------------------------------------------------------------------------------
+echo -e "${BOLD}${CYAN}[GATE 8/8] Running Sovereign Whole-Site Lighthouse & Quality Gate...${NC}"
+if [ -x "vendor/bin/scan-site" ] || [ -f "vendor/modernman00/shared-lib/bin/scan-site" ]; then
+    SCAN_CMD="vendor/bin/scan-site"
+    [ ! -x "$SCAN_CMD" ] && SCAN_CMD="php vendor/modernman00/shared-lib/bin/scan-site"
+    if $SCAN_CMD --lighthouse --max-urls=5 --min-score=75; then
+        echo -e "${GREEN}  ✅ Gate 8 Passed: Whole-site Lighthouse audit passed (threshold >= 75).${NC}"
+    else
+        echo -e "${RED}  ❌ Gate 8 Failed: Whole-site Lighthouse audit reported scores below threshold.${NC}"
+        FAILURES=$((FAILURES + 1))
+    fi
+else
+    echo -e "${YELLOW}  ⚠️  scan-site binary not found. Skipping Gate 8.${NC}"
 fi
 echo ""
 

@@ -113,5 +113,47 @@ final class TelemetrySecurityTest extends SocialFeedTestCase
         $this->assertArrayHasKey('total_events', $json['data'] ?? []);
         $this->assertArrayHasKey('rage_clicks_count', $json['data'] ?? []);
         $this->assertArrayHasKey('dead_clicks_count', $json['data'] ?? []);
+        $this->assertArrayHasKey('rum_vitals', $json['data'] ?? []);
+    }
+
+    /**
+     * Test 5: RUM Core Web Vitals (INP, LCP, CLS, Long Tasks & Mobile Viewport Profile) aggregate cleanly
+     */
+    public function testRumVitalsIngestAndPercentileAggregation(): void
+    {
+        $_POST = [
+            'event' => 'rum_vitals',
+            'url' => '/profilePage',
+            'viewport_width' => 390,
+            'viewport_height' => 844,
+            'metadata' => [
+                'lcp_ms' => 720,
+                'inp_ms' => 48,
+                'cls_score' => '0.012',
+                'longtask_count' => 1,
+                'max_longtask_ms' => 62,
+                'viewport_profile' => 'standard_390',
+                'pwa_mode' => 'standalone',
+            ],
+        ];
+        $_SERVER['REMOTE_ADDR'] = '82.165.197.99';
+
+        ob_start();
+        $this->controller->recordEvent();
+        $ingestOut = ob_get_clean();
+        $ingestJson = json_decode((string)$ingestOut, true);
+        $this->assertSame('success', $ingestJson['status'] ?? null);
+
+        ob_start();
+        $this->controller->getStats();
+        $statsOut = ob_get_clean();
+        $statsJson = json_decode((string)$statsOut, true);
+
+        $this->assertSame('success', $statsJson['status'] ?? null);
+        $rum = $statsJson['data']['rum_vitals'] ?? [];
+        $this->assertGreaterThanOrEqual(1, $rum['samples_count'] ?? 0);
+        $this->assertGreaterThanOrEqual(48, $rum['inp_p75_ms'] ?? 0);
+        $this->assertGreaterThanOrEqual(720, $rum['lcp_p75_ms'] ?? 0);
+        $this->assertGreaterThanOrEqual(1, $rum['viewport_profiles']['standard_390'] ?? 0);
     }
 }

@@ -6,7 +6,7 @@
     <div class="card-body px-3 px-sm-4 py-3">
         <h5 class="fw-bold mb-1" style="font-size: 1.05rem;"><i class="bi bi-hourglass-split me-1" style="color:#b8202c;"></i> {{ __('profile.then_and_now', 'Then & Now') }}</h5>
         <p class="mb-3" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569); line-height: 1.5;">Before and after photos {{ !empty($memberName) ? 'of ' . e($memberName) : '' }} from the family feed.</p>
-        <div class="then-now-timeline__list d-flex gap-3 overflow-auto pb-1" role="list"></div>
+        <div class="then-now-timeline__list d-flex gap-3 overflow-auto pb-1" role="region" aria-label="Then and Now timeline"></div>
         <div class="then-now-empty-state text-center py-3 d-none" id="thenNowEmptyState">
             <p class="mb-2" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569);">No Then &amp; Now comparisons yet.</p>
             <button type="button" class="btn btn-sm text-white rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm"
