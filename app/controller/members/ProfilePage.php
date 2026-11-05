@@ -64,7 +64,9 @@ final class ProfilePage extends ProcessImg
     {
         try {
 
-            $data = $this->profileService->getProfileData($this->id);
+            // The profile view renders its feed client-side via the feed API, so skip the
+            // legacy server-side posts/comments/pics payload (unused by the template).
+            $data = $this->profileService->getProfileData($this->id, false);
 
             // clean session assignment
             $_SESSION['fName'] = $data['memberData']['firstName'];

@@ -2879,7 +2879,11 @@ export function profileFeed(opts = {}) {
                 const channel = this.pusher.subscribe(`private-family-${famCode}`);
 
                 // Real-time notifications: subscribe to user-specific private channel & family channel
-                const userSlug = (this.currentUserId || localStorage.getItem('requesterId') || '').toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+                const rawUserId = this.currentUserId
+                    || document.querySelector('meta[name="user-id"]')?.getAttribute('content')
+                    || localStorage.getItem('requesterId')
+                    || '';
+                const userSlug = String(rawUserId).replace(/[^A-Za-z0-9_-]/g, '');
                 if (userSlug) {
                     try {
                         const userChannel = this.pusher.subscribe(`private-user-${userSlug}`);

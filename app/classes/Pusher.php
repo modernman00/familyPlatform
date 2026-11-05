@@ -161,14 +161,31 @@ class Pusher
         $allowed = false;
 
         if (preg_match('/^private-user-(.+)$/', $channel, $m)) {
-            $allowed = hash_equals(self::slug($userId), $m[1]);
+            $expectedUserSlug = self::slug($userId);
+            $allowed = $expectedUserSlug !== '' && (
+                hash_equals($expectedUserSlug, $m[1]) ||
+                hash_equals(strtolower($expectedUserSlug), strtolower($m[1]))
+            );
         } elseif (preg_match('/^private-family-(.+)$/', $channel, $m)) {
             foreach (self::sessionFamCodes() as $fc) {
-                if (hash_equals(self::slug($fc), $m[1])) {
+                $fcSlug = self::slug($fc);
+                if ($fcSlug !== '' && (
+                    hash_equals($fcSlug, $m[1]) ||
+                    hash_equals(strtolower($fcSlug), strtolower($m[1]))
+                )) {
                     $allowed = true;
                     break;
                 }
             }
+            if (!$allowed && class_exists('\App\controller\BaseController')) {
+                $allowed = \App\controller\BaseController::sessionSharesFamily($m[1]);
+            }
+        }
+
+        if (function_exists('releaseSessionLock')) {
+            \releaseSessionLock();
+        } elseif (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
         }
 
         if (!$allowed) {

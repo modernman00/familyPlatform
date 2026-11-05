@@ -13,7 +13,7 @@
 
 'use strict';
 
-const SW_VERSION = 'v2.4.0';
+const SW_VERSION = 'v2.5.0';
 const STATIC_CACHE = `fp-static-${SW_VERSION}`;
 const DYNAMIC_CACHE = `fp-dynamic-${SW_VERSION}`;
 const IMAGE_CACHE = `fp-images-${SW_VERSION}`;
@@ -143,6 +143,12 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // Only http(s) requests are cacheable; browser-extension (chrome-extension:) and other
+  // schemes make Cache.put() throw, so let the browser handle them natively.
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return;
+  }
+
   // Web Share Target Level 2: Intercept OS gallery media share POST
   if (request.method === 'POST' && (url.pathname === '/share-target' || url.pathname === '/share-target/')) {
     event.respondWith((async () => {
@@ -213,13 +219,19 @@ self.addEventListener('fetch', (event) => {
   }
 
   // B. Images & Avatars (including VSE Display P3 AVIF/WebP Ladders) -> Cache-First Strategy
-  const isImage =
-    request.destination === 'image' ||
+  const hasImageExtension = /\.(png|jpg|jpeg|svg|webp|avif|gif|ico)$/i.test(url.pathname);
+  const isImagePath =
     url.pathname.startsWith('/resources/images') ||
     url.pathname.startsWith('/media/posts') ||
     url.pathname.startsWith('/public/img') ||
     url.pathname.startsWith('/img') ||
-    /\.(png|jpg|jpeg|svg|webp|avif|gif|ico)$/i.test(url.pathname);
+    url.pathname.startsWith('/public/avatar');
+  const isHtmlRoute =
+    url.pathname === '/' ||
+    url.pathname.toLowerCase().startsWith('/profilepage') ||
+    url.pathname.toLowerCase().startsWith('/member/profilepage');
+
+  const isImage = !isHtmlRoute && (request.destination === 'image' || isImagePath || hasImageExtension);
 
   if (isImage) {
     event.respondWith(cacheFirstStrategy(request, IMAGE_CACHE, MAX_IMAGE_CACHE_ENTRIES));
@@ -228,14 +240,16 @@ self.addEventListener('fetch', (event) => {
 
   // C. Static CSS, JS & Web Fonts -> Stale-While-Revalidate Strategy
   const isStaticAsset =
-    request.destination === 'style' ||
-    request.destination === 'script' ||
-    request.destination === 'font' ||
-    url.hostname.includes('fonts.googleapis.com') ||
-    url.hostname.includes('fonts.gstatic.com') ||
-    url.hostname.includes('kit.fontawesome.com') ||
-    url.hostname.includes('cdn.jsdelivr.net') ||
-    /\.(css|js|woff2?|ttf|eot)$/i.test(url.pathname);
+    !isHtmlRoute && (
+      request.destination === 'style' ||
+      request.destination === 'script' ||
+      request.destination === 'font' ||
+      url.hostname.includes('fonts.googleapis.com') ||
+      url.hostname.includes('fonts.gstatic.com') ||
+      url.hostname.includes('kit.fontawesome.com') ||
+      url.hostname.includes('cdn.jsdelivr.net') ||
+      /\.(css|js|woff2?|ttf|eot)$/i.test(url.pathname)
+    );
 
   if (isStaticAsset) {
     event.respondWith(staleWhileRevalidateStrategy(request, STATIC_CACHE));
@@ -243,7 +257,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // D. HTML Document Pages & Feeds -> Direct Native Browser Networking when Online
-  if (request.mode === 'navigate' || request.headers.get('accept')?.includes('text/html')) {
+  if (request.mode === 'navigate' || request.headers.get('accept')?.includes('text/html') || isHtmlRoute) {
     // If online, bypass Service Worker navigation interception to allow pure native browser networking.
     // This completely eliminates any possibility of Service Worker fetch failures, redirect TypeErrors, or timeout drops!
     if (self.navigator && self.navigator.onLine !== false) {
@@ -253,9 +267,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Default: Network-First
+  // Default: When online, let the browser handle dynamic/API requests natively; when offline, return cached or valid Response
+  if (self.navigator && self.navigator.onLine !== false) {
+    return;
+  }
   event.respondWith(
-    fetch(request).catch(() => caches.match(request))
+    fetch(request)
+      .then((res) => (res instanceof Response ? res : new Response('', { status: 504, statusText: 'Offline' })))
+      .catch(async () => {
+        const cached = await caches.match(request);
+        return cached instanceof Response
+          ? cached
+          : new Response(JSON.stringify({ status: 'error', message: 'Offline' }), {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: { 'Content-Type': 'application/json' }
+            });
+      })
   );
 });
 
@@ -263,46 +291,57 @@ self.addEventListener('fetch', (event) => {
  * Strategy: Cache-First with Expiration
  */
 async function cacheFirstStrategy(request, cacheName, maxEntries = 60) {
-  const cachedResponse = await caches.match(request);
-  if (cachedResponse) {
-    return cachedResponse;
-  }
-
   try {
-    const networkResponse = await fetch(request);
-    if (networkResponse && networkResponse.status === 200) {
-      const cache = await caches.open(cacheName);
-      cache.put(request, networkResponse.clone());
-      limitCacheSize(cacheName, maxEntries);
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse instanceof Response) {
+      return cachedResponse;
     }
-    return networkResponse;
+
+    const networkResponse = await fetch(request);
+    if (networkResponse instanceof Response && networkResponse.status === 200) {
+      const contentType = networkResponse.headers.get('content-type') || '';
+      if (!contentType.includes('text/html')) {
+        const cache = await caches.open(cacheName);
+        cache.put(request, networkResponse.clone());
+        limitCacheSize(cacheName, maxEntries);
+      }
+    }
+    if (networkResponse instanceof Response) {
+      return networkResponse;
+    }
   } catch (err) {
     // If image fails and not in cache, fallback to default avatar for avatar requests
     if (request.url.includes('avatar') || request.url.includes('profile')) {
       const fallback = await caches.match('/resources/images/avatarM.png');
-      if (fallback) return fallback;
+      if (fallback instanceof Response) return fallback;
     }
-    return new Response('', { status: 404, statusText: 'Not Found' });
   }
+  return new Response('', { status: 404, statusText: 'Not Found' });
 }
 
 /**
  * Strategy: Stale-While-Revalidate
  */
 async function staleWhileRevalidateStrategy(request, cacheName) {
-  const cache = await caches.open(cacheName);
-  const cachedResponse = await cache.match(request);
+  try {
+    const cache = await caches.open(cacheName);
+    const cachedResponse = await cache.match(request);
 
-  const fetchPromise = fetch(request)
-    .then((networkResponse) => {
-      if (networkResponse && networkResponse.status === 200) {
-        cache.put(request, networkResponse.clone());
-      }
-      return networkResponse;
-    })
-    .catch(() => cachedResponse);
+    const fetchPromise = fetch(request)
+      .then((networkResponse) => {
+        if (networkResponse instanceof Response && networkResponse.status === 200) {
+          cache.put(request, networkResponse.clone());
+        }
+        return networkResponse instanceof Response
+          ? networkResponse
+          : (cachedResponse instanceof Response ? cachedResponse : new Response('', { status: 504, statusText: 'Offline' }));
+      })
+      .catch(() => (cachedResponse instanceof Response ? cachedResponse : new Response('', { status: 504, statusText: 'Offline' })));
 
-  return cachedResponse || fetchPromise;
+    return cachedResponse instanceof Response ? cachedResponse : fetchPromise;
+  } catch (err) {
+    return new Response('', { status: 504, statusText: 'Offline' });
+  }
 }
 
 // Helper: 3000ms Timeout Promise Race (Safari & Weak Mobile Network White Screen Protection)

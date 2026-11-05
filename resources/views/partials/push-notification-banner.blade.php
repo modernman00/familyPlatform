@@ -224,40 +224,41 @@
             }
 
             return ensureServiceWorkerReady().then(function(registration) {
-            return registration.pushManager.getSubscription().then(function(existingSub) {
-                if (existingSub) {
-                    return existingSub;
-                }
-                const subscribePromise = registration.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array(vapidKey)
-                }).catch(function(subErr) {
-                    // If a stale subscription with an old VAPID key exists, unsubscribe and retry once
-                    if (subErr && subErr.name === 'InvalidStateError') {
-                        return registration.pushManager.getSubscription().then(function(oldSub) {
-                            return oldSub ? oldSub.unsubscribe() : null;
-                        }).then(function() {
-                            return registration.pushManager.subscribe({
-                                userVisibleOnly: true,
-                                applicationServerKey: urlBase64ToUint8Array(vapidKey)
-                            });
-                        });
+                return registration.pushManager.getSubscription().then(function(existingSub) {
+                    if (existingSub) {
+                        return existingSub;
                     }
-                    throw subErr;
-                });
+                    const subscribePromise = registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: urlBase64ToUint8Array(vapidKey)
+                    }).catch(function(subErr) {
+                        // If a stale subscription with an old VAPID key exists, unsubscribe and retry once
+                        if (subErr && subErr.name === 'InvalidStateError') {
+                            return registration.pushManager.getSubscription().then(function(oldSub) {
+                                return oldSub ? oldSub.unsubscribe() : null;
+                            }).then(function() {
+                                return registration.pushManager.subscribe({
+                                    userVisibleOnly: true,
+                                    applicationServerKey: urlBase64ToUint8Array(vapidKey)
+                                });
+                            });
+                        }
+                        throw subErr;
+                    });
 
+                    return withTimeout(
+                        subscribePromise,
+                        10000,
+                        'Push service connection timed out. Check your internet connection or browser push settings (e.g., enable "Use Google services for push messaging" if using Brave).'
+                    );
+                });
+            }).then(function(subscription) {
                 return withTimeout(
-                    subscribePromise,
-                    10000,
-                    'Push service connection timed out. Check your internet connection or browser push settings (e.g., enable "Use Google services for push messaging" if using Brave).'
+                    window.sendSubscriptionToBackEnd(subscription),
+                    8000,
+                    'Server subscription sync timed out.'
                 );
             });
-        }).then(function(subscription) {
-            return withTimeout(
-                window.sendSubscriptionToBackEnd(subscription),
-                8000,
-                'Server subscription sync timed out.'
-            );
         });
     };
 

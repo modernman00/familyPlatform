@@ -991,7 +991,7 @@
             </div>
 
             <!-- Image View -->
-            <img :src="getPostImageUrl(lightboxImages[lightboxIndex])" 
+            <img :src="lightboxOpen && lightboxImages.length ? (getPostImageUrl(lightboxImages[lightboxIndex]) || null) : null" 
                  x-on:load="lightboxLoading = false; lightboxError = false;"
                  x-on:error="lightboxLoading = false; lightboxError = true;"
                  x-show="!lightboxError"

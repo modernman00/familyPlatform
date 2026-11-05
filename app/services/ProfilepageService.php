@@ -21,7 +21,7 @@ final class ProfilepageService
     /**
      * @return array<string, mixed>
      */
-    public function getProfileData(string $userId): array
+    public function getProfileData(string $userId, bool $includeFeedPayload = true): array
     {
         $setData = new SingleCustomerData();
 
@@ -182,11 +182,11 @@ final class ProfilepageService
             'maidenSurname' => $maidenSurname,
             'birthFamily' => $birthFamily,
             'friendRequests' => !$isPendingApproval ? DataAll::getFriendRequestData($userId, "Request sent") : [],
-            'posts' => !$isPendingApproval ? $this->feedRepo->getFeedPostsAsArray($userId, (array)$famCodes, 50, 0) : [],
-            'comments' => !$isPendingApproval ? Post::getAllCommentProfilePics() : [],
+            'posts' => ($includeFeedPayload && !$isPendingApproval) ? $this->feedRepo->getFeedPostsAsArray($userId, (array)$famCodes, 50, 0) : [],
+            'comments' => ($includeFeedPayload && !$isPendingApproval) ? Post::getAllCommentProfilePics() : [],
             'events' => !$isPendingApproval ? DataAll::getEventDataByFamCode((array)$famCodes) : [],
-            'post2Id' => Post::postLink2Id($userId),
-            'pics' => Post::getAllPostPics($userId),
+            'post2Id' => $includeFeedPayload ? Post::postLink2Id($userId) : [],
+            'pics' => $includeFeedPayload ? Post::getAllPostPics($userId) : [],
             'totalFamilyMembers' => count($allFamilyMembers),
             'familyRoster' => $familyRoster,
             'unclaimedMatch' => !$isPendingApproval ? FamilyClaimService::findFuzzyUnclaimedMatches($famCode, $userId, $memberData) : null,

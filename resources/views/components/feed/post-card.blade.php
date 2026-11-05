@@ -1151,11 +1151,11 @@
 
                 <video referrerpolicy="no-referrer" class="w-100 h-100 position-absolute top-0 start-0"
                        :src="vid.embedUrl"
-                       :poster="!hasCardMetadata ? (vid.thumbnailUrl || '') : ''"
+                       :poster="(!hasCardMetadata && vid.thumbnailUrl) ? vid.thumbnailUrl : null"
                        playsinline
                        webkit-playsinline
                        muted
-                       preload="auto"
+                       preload="metadata"
                        @loadedmetadata="detectCardDimensions($el)"
                        @loadeddata="hasCardMetadata = true; detectCardDimensions($el)"
                        @click.stop="togglePlay($el)"
@@ -1379,12 +1379,12 @@
         <!-- Main Video Element (Full-Bleed Cover: Zero Black Space) -->
         <video referrerpolicy="no-referrer" class="feed-post-video w-100 h-100 position-relative"
                :src="post.video.embedUrl"
-               :poster="!hasMetadata ? (post.video.thumbnailUrl || '') : ''"
+               :poster="(!hasMetadata && post.video && post.video.thumbnailUrl) ? post.video.thumbnailUrl : null"
                playsinline
                webkit-playsinline
                muted
                loop
-               preload="auto"
+               preload="metadata"
                @click.stop="togglePlayback($el)"
                @dblclick.stop="openVideoModal([post.video], 0, isVideoMuted)"
                @loadedmetadata="
@@ -1914,7 +1914,7 @@
           <div class="comment-composer__field">
             <!-- Selected GIF preview (inside the field, like Facebook) -->
             <div x-show="commentGifs[post.post_no]" x-cloak class="comment-composer__gif" data-testid="comment-gif-preview">
-              <img :src="commentGifs[post.post_no]" alt="Selected GIF"
+              <img :src="commentGifs[post.post_no] || null" alt="Selected GIF"
                    style="display:block; width:auto; height:auto; max-width:200px; max-height:120px; object-fit:contain;"
                    x-on:error="clearCommentGif(post.post_no)">
               <button type="button" @click="clearCommentGif(post.post_no)" aria-label="Remove GIF">
