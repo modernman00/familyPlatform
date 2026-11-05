@@ -670,21 +670,6 @@ final class NotificationController extends Select
                 return;
             }
 
-            // Red Team Anti-Flooding: Rate-limit subscription registration per user session (max 10 / min)
-            $rateKey = 'push_sub_rate_' . $userId;
-            $currentTime = time();
-            if (!isset($_SESSION[$rateKey]) || !is_array($_SESSION[$rateKey])) {
-                $_SESSION[$rateKey] = [];
-            }
-            $_SESSION[$rateKey] = array_filter($_SESSION[$rateKey], static function($t) use ($currentTime) {
-                return is_int($t) && ($currentTime - $t) < 60;
-            });
-            if (count($_SESSION[$rateKey]) >= 10) {
-                msgException(429, 'Too many subscription requests. Please try again shortly.');
-                return;
-            }
-            $_SESSION[$rateKey][] = $currentTime;
-
             $endpoint = (string)$inputData['endpoint'];
             $p256dhKey = (string)$inputData['keys']['p256dh'];
             $authKey = (string)$inputData['keys']['auth'];
@@ -702,45 +687,96 @@ final class NotificationController extends Select
                 return;
             }
 
+            // Extreme Flood Circuit-Breaker: Limit total subscription pings per session (max 60 / min)
+            $floodKey = 'push_sub_total_rate_' . $userId;
+            $currentTime = time();
+            if (!isset($_SESSION[$floodKey]) || !is_array($_SESSION[$floodKey])) {
+                $_SESSION[$floodKey] = [];
+            }
+            $_SESSION[$floodKey] = array_filter($_SESSION[$floodKey], static function($t) use ($currentTime) {
+                return is_int($t) && ($currentTime - $t) < 60;
+            });
+            if (count($_SESSION[$floodKey]) >= 60) {
+                msgException(429, 'Too many subscription requests. Please try again shortly.');
+                return;
+            }
+            $_SESSION[$floodKey][] = $currentTime;
+
+            // Check if subscription already exists for this endpoint and user (prevent cross-user endpoint hijacking)
+            $existingSubscription = Select::selectFn2(
+                'SELECT no, p256dhKey, authKey, updated_at FROM pushNotification WHERE endpoint = ? AND id = ?',
+                [$endpoint, $userId]
+            );
+
+            if (!empty($existingSubscription)) {
+                $currentSub = $existingSubscription[0];
+                // Idempotent Keep-Alive: If endpoint and keys are completely identical, return 200 without lock churn
+                if (
+                    hash_equals((string)($currentSub['p256dhKey'] ?? ''), $p256dhKey) &&
+                    hash_equals((string)($currentSub['authKey'] ?? ''), $authKey)
+                ) {
+                    $lastUpdated = !empty($currentSub['updated_at']) ? strtotime((string)$currentSub['updated_at']) : 0;
+                    if ($lastUpdated === 0 || ($currentTime - $lastUpdated) > 21600) {
+                        try {
+                            $dbUpd = \Src\Db::connect2();
+                            $updStmt = $dbUpd->prepare('UPDATE pushNotification SET updated_at = CURRENT_TIMESTAMP WHERE no = ?');
+                            $updStmt->execute([(int)$currentSub['no']]);
+                        } catch (\Throwable) {}
+                    }
+                    msgSuccess(200, 'Subscription already up to date');
+                    return;
+                }
+
+                // Keys updated for existing endpoint
+                $dbUpd = \Src\Db::connect2();
+                $updStmt = $dbUpd->prepare('UPDATE pushNotification SET p256dhKey = ?, authKey = ?, updated_at = CURRENT_TIMESTAMP WHERE no = ?');
+                $updStmt->execute([$p256dhKey, $authKey, (int)$currentSub['no']]);
+
+                try {
+                    \Src\PushNotificationService::registerSubscription($userId, $endpoint, $p256dhKey, $authKey, [
+                        'user_agent' => (string)($_SERVER['HTTP_USER_AGENT'] ?? ''),
+                    ]);
+                } catch (\Throwable) {}
+
+                msgSuccess(200, 'Subscription updated successfully');
+                return;
+            }
+
+            // Red Team Anti-Flooding: Rate-limit NEW subscription registration per user session (max 10 / min)
+            $rateKey = 'push_sub_new_rate_' . $userId;
+            if (!isset($_SESSION[$rateKey]) || !is_array($_SESSION[$rateKey])) {
+                $_SESSION[$rateKey] = [];
+            }
+            $_SESSION[$rateKey] = array_filter($_SESSION[$rateKey], static function($t) use ($currentTime) {
+                return is_int($t) && ($currentTime - $t) < 60;
+            });
+            if (count($_SESSION[$rateKey]) >= 10) {
+                msgException(429, 'Too many subscription requests. Please try again shortly.');
+                return;
+            }
+            $_SESSION[$rateKey][] = $currentTime;
+
+            // Table Hygiene: Limit active registered devices per user to 10 by pruning oldest
+            $userEndpoints = Select::selectFn2('SELECT no FROM pushNotification WHERE id = ? ORDER BY no ASC', [$userId]);
+            if (count($userEndpoints) >= 10) {
+                $excess = count($userEndpoints) - 9;
+                $dbPrune = \Src\Db::connect2();
+                for ($i = 0; $i < $excess; $i++) {
+                    $delStmt = $dbPrune->prepare('DELETE FROM pushNotification WHERE no = ?');
+                    $delStmt->execute([(int)$userEndpoints[$i]['no']]);
+                }
+            }
+
+            $db = \Src\Db::connect2();
+            $stmt = $db->prepare('INSERT INTO pushNotification (id, endpoint, p256dhKey, authKey) VALUES (?, ?, ?, ?)');
+            $stmt->execute([$userId, $endpoint, $p256dhKey, $authKey]);
+
             // Also sync to centralized user_push_subscriptions table with device telemetry if available
             try {
                 \Src\PushNotificationService::registerSubscription($userId, $endpoint, $p256dhKey, $authKey, [
                     'user_agent' => (string)($_SERVER['HTTP_USER_AGENT'] ?? ''),
                 ]);
-            } catch (\Throwable) {
-                // Non-blocking fallback
-            }
-
-            $data = [
-                'id' => $userId,
-                'endpoint' => $endpoint,
-                'p256dhKey' => $p256dhKey,
-                'authKey' => $authKey
-            ];
-
-            // Check if subscription already exists for this endpoint and user (prevent cross-user endpoint hijacking)
-            $existingSubscription = Select::selectFn2('SELECT * FROM pushNotification WHERE endpoint = ? AND id = ?', [$endpoint, $userId]);
-
-            if (!empty($existingSubscription)) {
-                $dbUpd = \Src\Db::connect2();
-                $updStmt = $dbUpd->prepare('UPDATE pushNotification SET p256dhKey = ?, authKey = ? WHERE endpoint = ? AND id = ?');
-                $updStmt->execute([$p256dhKey, $authKey, $endpoint, $userId]);
-            } else {
-                // Table Hygiene: Limit active registered devices per user to 10 by pruning oldest
-                $userEndpoints = Select::selectFn2('SELECT no FROM pushNotification WHERE id = ? ORDER BY no ASC', [$userId]);
-                if (count($userEndpoints) >= 10) {
-                    $excess = count($userEndpoints) - 9;
-                    $dbPrune = \Src\Db::connect2();
-                    for ($i = 0; $i < $excess; $i++) {
-                        $delStmt = $dbPrune->prepare('DELETE FROM pushNotification WHERE no = ?');
-                        $delStmt->execute([(int)$userEndpoints[$i]['no']]);
-                    }
-                }
-
-                $db = \Src\Db::connect2();
-                $stmt = $db->prepare('INSERT INTO pushNotification (id, endpoint, p256dhKey, authKey) VALUES (?, ?, ?, ?)');
-                $stmt->execute([$userId, $endpoint, $p256dhKey, $authKey]);
-            }
+            } catch (\Throwable) {}
 
             msgSuccess(200, 'Subscription saved successfully');
         } catch (\Src\Exceptions\HttpException $e) {

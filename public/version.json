@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(feed): implement detached background post worker, local video SSD caching and instant feed updates",
+    "title": "Perf(feed): paginate the profile feed with infinite scroll",
     "notes": [
-        "Feat(feed): implement detached background post worker, local video SSD caching and instant feed updates",
-        "Feat(feed): integrate kinship resolution for tagged post members and polish multi-video scroll controls",
-        "Fix(pwa): eliminate 302 navigation redirects in RouteDispatch and bypass SW navigation when online"
+        "Perf(feed): paginate the profile feed with infinite scroll",
+        "Perf(profile): cut page weight and server work on /profilePage",
+        "Feat(feed): implement detached background post worker, local video SSD caching and instant feed updates"
     ],
-    "released_at": "2026-11-04",
-    "commit": "677ca32b"
+    "released_at": "2026-11-05",
+    "commit": "99896791"
 }

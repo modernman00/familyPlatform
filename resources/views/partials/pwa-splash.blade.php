@@ -366,19 +366,20 @@ html.fp-pwa-splash-active #fp-pwa-splash {
         // otherwise if page load exceeds 750ms, transition into slow network mode with spinner.
         var slowTimer = setTimeout(activateSlowNetworkMode, isSlowConnection ? 250 : 750);
 
-        // Extended failsafe watchdog so user is never blocked even if an asset hangs (6.5s)
-        var watchdog = setTimeout(dismissSplash, 6500);
+        // Snappy dismissal: Never block the user behind an opaque splash
+        // Watchdog failsafe capped at 900ms max so user is NEVER trapped
+        var watchdog = setTimeout(dismissSplash, 900);
 
-        if (document.readyState === 'complete') {
+        function scheduleDismissal() {
             clearTimeout(slowTimer);
-            setTimeout(dismissSplash, 350);
+            setTimeout(dismissSplash, 180);
+        }
+
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+            scheduleDismissal();
         } else {
-            window.addEventListener('load', function() {
-                clearTimeout(slowTimer);
-                clearTimeout(watchdog);
-                var delay = splash.classList.contains('fp-pwa-splash-slow-active') ? 350 : 250;
-                setTimeout(dismissSplash, delay);
-            }, { once: true });
+            document.addEventListener('DOMContentLoaded', scheduleDismissal, { once: true });
+            window.addEventListener('load', scheduleDismissal, { once: true });
         }
     } catch (err) {
         var el = document.getElementById('fp-pwa-splash');

@@ -13,7 +13,7 @@
 
 'use strict';
 
-const SW_VERSION = 'v2.5.0';
+const SW_VERSION = 'v2.5.1';
 const STATIC_CACHE = `fp-static-${SW_VERSION}`;
 const DYNAMIC_CACHE = `fp-dynamic-${SW_VERSION}`;
 const IMAGE_CACHE = `fp-images-${SW_VERSION}`;
@@ -76,11 +76,11 @@ self.addEventListener('activate', (event) => {
         })
       );
     }).then(() => self.clients.claim()).then(async () => {
-      // Self-Healing PWA Rescue: Refresh any window clients stuck on offline.html or stale homescreen
+      // Self-Healing PWA Rescue: Refresh any window clients stuck on offline.html
       try {
         const clientList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
         for (const client of clientList) {
-          if (client.url && (client.url.includes('offline') || client.url.includes('source=pwa_homescreen'))) {
+          if (client.url && client.url.includes('offline.html')) {
             client.navigate('/?pwa_rescue=' + Date.now());
           }
         }
@@ -386,7 +386,7 @@ async function cleanRedirect(response) {
  */
 async function networkFirstWithFallback(request) {
   try {
-    const networkResponse = await fetchWithTimeout(request, 12000);
+    const networkResponse = await fetchWithTimeout(request, 2500);
 
     // If response was redirected (e.g. 302 /profilePage -> /login), clean it
     // so the browser does not reject event.respondWith() with a TypeError

@@ -34,6 +34,7 @@ public/js/*
 !public/js/pwa-install.js
 !public/js/telemetry.js
 !public/js/atg-emoji-engine.js
+!public/js/smart-nav-scroll.js
 olaogun.test-key.pem
 olaogun.test.pem 
 
