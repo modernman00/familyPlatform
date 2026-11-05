@@ -529,6 +529,54 @@ runJourney("E2E Extended Kinship: Dual-Lineage Uncle/Aunt & In-Law Traversal Lif
     }
 });
 
+// ------------------------------------------------------------------------------
+// JOURNEY 8: Auth Forms Loader Contract (regression guard for "Element not found")
+// shared-js-lib processAll.js calls showLoader/clearLoader('setLoader') on every
+// auth submit; a missing #setLoader aborts login/forgot/code/changePW entirely.
+// ------------------------------------------------------------------------------
+runJourney("E2E Auth Forms: #setLoader Contract for shared-js-lib Submit Handlers", function() use ($rootDir) {
+    // 1. Partial must emit #setLoader even in scriptOnly mode.
+    $partial = (string) file_get_contents($rootDir . '/resources/views/partials/loader.blade.php');
+    if (!preg_match('/@else\s*.*?id="\{\{\s*\$targetLoaderId\s*\}\}".*?@endunless/s', $partial)) {
+        throw new \Exception('partials/loader.blade.php no longer renders #setLoader in scriptOnly mode.');
+    }
+
+    // 2. Every auth view must include the loader partial.
+    foreach (['login', 'forgot', 'code', 'passChange'] as $view) {
+        $src = (string) file_get_contents($rootDir . "/resources/views/login/{$view}.blade.php");
+        if (!str_contains($src, "@include('partials.loader'")) {
+            throw new \Exception("login/{$view}.blade.php is missing @include('partials.loader').");
+        }
+    }
+
+    // 3. Every routed auth JS entry must keep the client-side fallback.
+    foreach ([
+        'acctMgt/login.js', 'acctMgt/code.js', 'acctMgt/forgot.js', 'acctMgt/changePW.js',
+        'forgotPwd/index.js', 'changePW/index.js',
+    ] as $js) {
+        $src = (string) file_get_contents($rootDir . "/resources/asset/js/components/{$js}");
+        if (!str_contains($src, "dummyLoader.id = 'setLoader'")) {
+            throw new \Exception("components/{$js} lost its #setLoader fallback.");
+        }
+    }
+
+    // 4. Rendered HTML check against the live virtual host.
+    $base = rtrim((string) ($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://olaogun.test'), '/');
+    foreach (['/login', '/login/forgot?verify=1'] as $path) {
+        $ctx = stream_context_create([
+            'http' => ['timeout' => 5, 'follow_location' => 0, 'ignore_errors' => true],
+            'ssl'  => ['verify_peer' => false, 'verify_peer_name' => false],
+        ]);
+        $html = @file_get_contents($base . $path, false, $ctx);
+        if ($html === false) {
+            throw new \Exception("Could not fetch {$base}{$path} to verify rendered #setLoader.");
+        }
+        if (substr_count($html, 'id="setLoader"') !== 1) {
+            throw new \Exception("{$path} must render exactly one #setLoader element.");
+        }
+    }
+});
+
 echo "\n=================================================================\n";
 if ($failed === 0) {
     echo "🏆 ALL {$passed} E2E ROBUST USER JOURNEYS PASSED CLEANLY!\n";

@@ -3,9 +3,9 @@
     "title": "Xx",
     "notes": [
         "Xx",
-        "Perf(layout): preconnect to CDNs and defer the Font Awesome kit on the profile layout",
-        "Perf(profile): trim DOM weight (notifications, events, GIF grid) and stop idle shimmer"
+        "Perf/a11y(profile): stop reel tiles pre-downloading video, fix touch targets, contrast and meta description",
+        "Perf(layout): preconnect to CDNs and defer the Font Awesome kit on the profile layout"
     ],
     "released_at": "2026-11-05",
-    "commit": "072f401f"
+    "commit": "18cdcce0"
 }
