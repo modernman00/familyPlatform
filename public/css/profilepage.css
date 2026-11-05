@@ -1684,6 +1684,11 @@ body.dark-mode .composer-prompt {
   border-color: #334155 !important;
   color: #94a3b8 !important;
 }
+/* Prompt text colour lives in CSS (not inline) so dark mode can override it: 7:1 light, 12:1 dark */
+.composer-prompt > span { color: #475569; }
+body.dark-mode .composer-prompt > span,
+body.dark-theme .composer-prompt > span,
+[data-bs-theme="dark"] .composer-prompt > span { color: #cbd5e1 !important; }
 body.dark-mode .composer-prompt:hover {
   background-color: #1e293b !important;
   border-color: #a31621 !important;
