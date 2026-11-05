@@ -135,5 +135,10 @@ Options -Indexes
   ExpiresByType application/pdf "access plus 1 month"
   ExpiresByType text/x-javascript "access plus 1 month"
   ExpiresByType image/x-icon "access plus 1 year"
+  # Web fonts: paths are versioned (e.g. /public/lib/bootstrap-icons-1.10.3/), so cache for a year
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType application/font-woff2 "access plus 1 year"
+  ExpiresByType application/font-woff "access plus 1 year"
   ExpiresDefault "access plus 2 days"
 </IfModule>
