@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Perf(feed): paginate the profile feed with infinite scroll",
+    "title": "Xx",
     "notes": [
-        "Perf(feed): paginate the profile feed with infinite scroll",
-        "Perf(profile): cut page weight and server work on /profilePage",
-        "Feat(feed): implement detached background post worker, local video SSD caching and instant feed updates"
+        "Xx",
+        "Perf(layout): preconnect to CDNs and defer the Font Awesome kit on the profile layout",
+        "Perf(profile): trim DOM weight (notifications, events, GIF grid) and stop idle shimmer"
     ],
     "released_at": "2026-11-05",
-    "commit": "99896791"
+    "commit": "072f401f"
 }

@@ -216,6 +216,7 @@
                                class="form-control" 
                                placeholder="e.g. sammy_o" 
                                required 
+                               autocomplete="username" 
                                x-model="childUsername">
                     </div>
                 </div>
@@ -232,6 +233,7 @@
                                maxlength="8" 
                                required 
                                style="letter-spacing: 0.2em;" 
+                               autocomplete="current-password" 
                                x-model="childPin">
                     </div>
                 </div>

@@ -40,6 +40,9 @@
         <span class="text-muted fw-semibold small loader-status-text">{{ $targetLoaderText }}</span>
     </div>
 </div>
+@else
+<!-- Hidden compatibility element for legacy shared-js-lib showLoader/clearLoader -->
+<div id="{{ $targetLoaderId }}" style="display: none;" class="d-none" aria-hidden="true"></div>
 @endunless
 
 <script nonce="{{ $nonce ?? '' }}">
