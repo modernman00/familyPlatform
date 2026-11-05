@@ -126,6 +126,10 @@
       });
     };
   </script>
+  {{-- Perf: open the third-party connections early so the render-blocking CSS/JS below skip DNS+TLS setup --}}
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://kit.fontawesome.com" crossorigin>
+  <link rel="dns-prefetch" href="https://ka-f.fontawesome.com">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
 
@@ -156,7 +160,8 @@
   <link rel="apple-touch-startup-image" href="/public/img/favicon/android-chrome-512x512.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)">
   <link rel="apple-touch-startup-image" href="/public/img/favicon/android-chrome-512x512.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)">
 
-  <script src="https://kit.fontawesome.com/e78379d4a3.js" crossorigin="anonymous"></script>
+  {{-- Perf: defer (was parser-blocking, ~1s render delay). Few Font Awesome icons are used on this page; they upgrade as soon as the kit runs. --}}
+  <script defer src="https://kit.fontawesome.com/e78379d4a3.js" crossorigin="anonymous"></script>
 
   <title>@yield('title')</title>
   @stack('meta')
