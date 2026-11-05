@@ -142,7 +142,11 @@
     if (r) r.addEventListener('click', function () { decide('necessary'); });
   }
 
-  if (document.readyState === 'loading') {
+  // Perf: the banner markup sits directly above this script, so reveal it now. Waiting for
+  // DOMContentLoaded put it behind the large synchronous bundles and made it the late LCP element.
+  if (document.getElementById('cookieBanner')) {
+    init();
+  } else if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
