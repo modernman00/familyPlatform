@@ -7,7 +7,7 @@
   --brand-accent-gold: #f59e0b;
   --brand-surface: #ffffff;
   --brand-text-dark: #0f172a;
-  --brand-text-muted: #64748b;
+  --brand-text-muted: #475569;
   --brand-border: #e2e8f0;
   --stitch-radius-pill: 9999px;
   --stitch-radius-md: 14px;
@@ -25,6 +25,19 @@
   padding-left: env(safe-area-inset-left, 0px);
   padding-right: env(safe-area-inset-right, 0px);
   z-index: 1030;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.brand-navbar-stitch.nav-hidden {
+  transform: translate3d(0, -100%, 0) !important;
+  box-shadow: none !important;
+}
+
+.brand-navbar-stitch:focus-within {
+  transform: translate3d(0, 0, 0) !important;
 }
 
 /* Brand Typography & Logo */
@@ -58,19 +71,26 @@
 
 /* Navigation Links */
 .stitch-nav-link {
-  color: var(--brand-text-muted) !important;
+  color: #334155 !important;
   font-weight: 600;
   font-size: 0.88rem;
-  padding: 0.5rem 0.9rem !important;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.55rem 0.95rem !important;
   border-radius: var(--stitch-radius-pill);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   white-space: nowrap !important;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.stitch-nav-link:active {
+  transform: scale(0.96);
 }
 .stitch-nav-link i {
-  color: #64748b;
+  color: #475569;
   font-size: 0.95rem;
   transition: color 0.2s ease, transform 0.2s ease;
 }
@@ -102,8 +122,10 @@
 }
 
 .btn-icon-stitch {
-  width: 40px;
-  height: 40px;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 1px solid var(--brand-border);
   background: #ffffff;
@@ -113,7 +135,13 @@
   justify-content: center;
   position: relative;
   overflow: visible !important;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+.btn-icon-stitch:active {
+  transform: scale(0.94);
 }
 .btn-icon-stitch:hover {
   background: var(--brand-primary-container);
@@ -124,7 +152,9 @@
 
 /* Toggler Button: Hidden on Desktop (>= 992px), Visible on Mobile (< 992px) */
 .navbar-toggler {
-  padding: 0.45rem 0.65rem !important;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem !important;
   border-radius: var(--stitch-radius-md, 12px) !important;
   background-color: var(--brand-surface, #ffffff) !important;
   border: 1px solid var(--brand-border, #e2e8f0) !important;
@@ -134,6 +164,11 @@
   justify-content: center !important;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.navbar-toggler:active {
+  transform: scale(0.94) !important;
 }
 
 @media (min-width: 992px) {
@@ -194,15 +229,23 @@
   color: #1e293b !important;
   border: 1px solid var(--brand-border);
   border-radius: var(--stitch-radius-pill);
-  padding: 0.35rem 0.85rem 0.35rem 0.4rem;
+  min-height: 44px;
+  padding: 0.35rem 0.85rem 0.35rem 0.5rem;
   font-size: 0.84rem;
   font-weight: 600;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   backdrop-filter: blur(8px);
   overflow: visible !important;
   max-width: none !important;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-user-stitch:active {
+  transform: scale(0.96);
 }
 .btn-user-stitch .user-name-label {
   display: inline-block;
@@ -714,13 +757,15 @@ body.dark-mode .dropdown-divider {
   border: 1px solid var(--brand-border, #e2e8f0);
   border-radius: var(--stitch-radius-pill, 9999px);
   padding: 0.35rem 0.85rem;
-  min-height: 40px;
-  color: var(--brand-text-muted, #64748b);
+  min-height: 44px;
+  color: var(--brand-text-muted, #475569);
   font-size: 0.84rem;
-  font-weight: 500;
+  font-weight: 550;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 .btn-omni-search-trigger:hover {
   background: #f8fafc;

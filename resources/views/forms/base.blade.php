@@ -87,7 +87,7 @@
         }
 
         .form-label {
-            color: #94a3b8 !important;
+            color: #cbd5e1 !important;
             font-weight: 600 !important;
             font-size: 0.8rem !important;
             letter-spacing: 0.05em !important;
@@ -113,7 +113,7 @@
         .input-group-text {
             background-color: transparent !important;
             border: none !important;
-            color: #94a3b8 !important;
+            color: #64748b !important;
             padding-left: 1.15rem !important;
             padding-right: 0.65rem !important;
             display: flex;
@@ -139,7 +139,7 @@
         }
 
         .form-control::placeholder {
-            color: #94a3b8 !important;
+            color: #64748b !important;
         }
 
         /* Primary Button */
@@ -366,7 +366,7 @@
                         <h1 class="display-6 fw-bold text-white mb-3 brand-font" style="line-height: 1.15; letter-spacing: -0.02em;">
                             Preserve your heritage, cherish every family moment.
                         </h1>
-                        <p class="text-secondary mb-4" style="color: #94a3b8 !important; font-size: 1.02rem; line-height: 1.6;">
+                        <p class="text-secondary mb-4" style="color: #cbd5e1 !important; font-size: 1.02rem; line-height: 1.6;">
                             Connect across generations with interactive family lineage trees, private encrypted messaging, and shared heirloom photo archives.
                         </p>
                     </div>
@@ -379,7 +379,7 @@
                             </div>
                             <div>
                                 <h6 class="text-white fw-bold mb-0" style="font-size: 0.95rem;">Interactive Family Tree Visualiser</h6>
-                                <p class="small text-secondary mb-0" style="color: #94a3b8 !important;">Map complex relationships, ancestral roots, and multi-generational lineages.</p>
+                                <p class="small text-secondary mb-0" style="color: #cbd5e1 !important;">Map complex relationships, ancestral roots, and multi-generational lineages.</p>
                             </div>
                         </div>
 
@@ -389,7 +389,7 @@
                             </div>
                             <div>
                                 <h6 class="text-white fw-bold mb-0" style="font-size: 0.95rem;">100% Private &amp; Zero Ad-Tracking</h6>
-                                <p class="small text-secondary mb-0" style="color: #94a3b8 !important;">Your family stories, photos, and messages are strictly confidential.</p>
+                                <p class="small text-secondary mb-0" style="color: #cbd5e1 !important;">Your family stories, photos, and messages are strictly confidential.</p>
                             </div>
                         </div>
 
@@ -399,7 +399,7 @@
                             </div>
                             <div>
                                 <h6 class="text-white fw-bold mb-0" style="font-size: 0.95rem;">Heirloom Memory &amp; Event Archive</h6>
-                                <p class="small text-secondary mb-0" style="color: #94a3b8 !important;">Chronicle weddings, milestones, and family journals for generations to come.</p>
+                                <p class="small text-secondary mb-0" style="color: #cbd5e1 !important;">Chronicle weddings, milestones, and family journals for generations to come.</p>
                             </div>
                         </div>
                     </div>
@@ -409,15 +409,15 @@
                 <div class="z-1 row g-4 border-top border-secondary border-opacity-25 pt-4">
                     <div class="col-4">
                         <h4 class="fw-bold text-white mb-1 brand-font">AES-256</h4>
-                        <p class="small text-secondary mb-0" style="color: #94a3b8 !important;">Vault Encryption</p>
+                        <p class="small text-secondary mb-0" style="color: #cbd5e1 !important;">Vault Encryption</p>
                     </div>
                     <div class="col-4 border-start border-secondary border-opacity-25 ps-4">
                         <h4 class="fw-bold text-white mb-1 brand-font">100%</h4>
-                        <p class="small text-secondary mb-0" style="color: #94a3b8 !important;">Ad-Free Privacy</p>
+                        <p class="small text-secondary mb-0" style="color: #cbd5e1 !important;">Ad-Free Privacy</p>
                     </div>
                     <div class="col-4 border-start border-secondary border-opacity-25 ps-4">
                         <h4 class="fw-bold text-white mb-1 brand-font">Heritage</h4>
-                        <p class="small text-secondary mb-0" style="color: #94a3b8 !important;">Generational Care</p>
+                        <p class="small text-secondary mb-0" style="color: #cbd5e1 !important;">Generational Care</p>
                     </div>
                 </div>
             </div>

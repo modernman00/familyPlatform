@@ -57,7 +57,7 @@
     <!-- Header -->
     <div class="mb-4">
         <h2 class="fw-bold mb-1 text-white brand-font">Security Verification</h2>
-        <p class="text-secondary mb-0" style="font-size: 0.95rem; color: #94a3b8 !important;">
+        <p class="text-secondary mb-0" style="font-size: 0.95rem; color: #cbd5e1 !important;">
             Please enter the 6-digit code sent to your email to verify your identity.
         </p>
     </div>
@@ -122,7 +122,7 @@
 
         <!-- Resend code section -->
         <div class="text-center mt-4">
-            <p class="text-secondary small mb-1" style="color: #94a3b8 !important;">Didn't receive the code?</p>
+            <p class="text-secondary small mb-1" style="color: #cbd5e1 !important;">Didn't receive the code?</p>
             <template x-if="cooldown === 0">
                 <a href="javascript:void(0)" 
                    id="resendBtn" 

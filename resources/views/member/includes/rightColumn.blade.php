@@ -100,7 +100,7 @@ foreach(($eventData ?? []) as $event) {
             <!-- Dynamic Events List -->
             <template x-if="events.length > 0">
                 <div class="d-flex flex-column gap-3">
-                    <template x-for="event in events" :key="event.no">
+                    <template x-for="event in visibleEvents" :key="event.no">
                         <div class="event-card" :id="'linkNotification' + event.no">
                             <div class="p-3 rounded-3" style="background-color: var(--card-bg, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
                                 <div class="d-flex flex-column">
@@ -197,6 +197,15 @@ foreach(($eventData ?? []) as $event) {
                             </div>
                         </div>
                     </template>
+                    {{-- Perf: render only the first events up front; the rest are revealed on demand --}}
+                    <button type="button"
+                            x-show="events.length > eventsLimit"
+                            x-cloak
+                            @click="eventsLimit += 10"
+                            class="btn btn-sm btn-outline-secondary rounded-pill fw-semibold"
+                            style="min-height: 44px;">
+                        <span x-text="'Show ' + Math.min(10, events.length - eventsLimit) + ' more events'"></span>
+                    </button>
                 </div>
             </template>
         </div>

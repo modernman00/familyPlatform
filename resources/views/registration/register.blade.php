@@ -451,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     <div class="d-flex flex-wrap align-items-center gap-3" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 12px 18px;">
                         <div class="d-flex align-items-center gap-2">
-                            <span style="color: #94a3b8; font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Family Code:</span>
+                            <span style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Family Code:</span>
                             <strong style="color: #fbbf24; font-size: 1rem; letter-spacing: 0.06em; font-family: monospace;">{{ htmlspecialchars($inviteFamCode ?: 'PRE-SET') }}</strong>
                         </div>
                         <div style="height: 16px; width: 1px; background: rgba(255,255,255,0.2);"></div>

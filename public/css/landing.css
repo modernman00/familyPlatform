@@ -39,6 +39,19 @@ body {
     padding-left: env(safe-area-inset-left, 0px);
     padding-right: env(safe-area-inset-right, 0px);
     box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, box-shadow 0.2s ease;
+    will-change: transform;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.public-navbar.nav-hidden {
+    transform: translate3d(0, -100%, 0) !important;
+    box-shadow: none !important;
+}
+
+.public-navbar:focus-within {
+    transform: translate3d(0, 0, 0) !important;
 }
 
 .public-navbar .navbar-brand img {
@@ -48,10 +61,20 @@ body {
 }
 
 .public-navbar .nav-link {
-    color: var(--text-muted);
-    font-weight: 500;
+    color: #334155;
+    font-weight: 600;
+    font-size: 0.92rem;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
     padding: 0.5rem 1rem;
-    transition: color 0.2s ease;
+    transition: color 0.2s ease, transform 0.15s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.public-navbar .nav-link:active {
+    transform: scale(0.96);
 }
 
 .public-navbar .nav-link:hover, .public-navbar .nav-link.active {
@@ -59,11 +82,24 @@ body {
 }
 
 .public-navbar .navbar-toggler {
-    padding: 0.45rem 0.65rem !important;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.5rem 0.75rem !important;
     border-radius: 12px !important;
     background-color: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.public-navbar .navbar-toggler:active {
+    transform: scale(0.94);
 }
 
 .public-navbar .navbar-toggler-icon {
@@ -288,7 +324,7 @@ body.dark-mode .public-footer .footer-link,
 body.dark-theme .public-footer .footer-link,
 [data-theme="dark"] .public-footer .footer-link,
 [data-bs-theme="dark"] .public-footer .footer-link {
-    color: #94a3b8 !important;
+    color: #cbd5e1 !important;
 }
 
 body.dark-mode .public-footer .footer-link:hover,
@@ -316,10 +352,11 @@ body.dark-theme .public-footer .footer-bottom,
 }
 
 .footer-link {
-    color: var(--text-muted);
+    color: #334155;
     text-decoration: none;
     display: block;
     margin-bottom: 0.75rem;
+    font-weight: 500;
     transition: color 0.2s ease;
 }
 

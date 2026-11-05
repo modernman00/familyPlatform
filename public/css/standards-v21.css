@@ -188,6 +188,15 @@ body.dark-theme .bg-warning-subtle :is(p, span, label, small, .text-muted, .text
   color: #475569 !important;
 }
 
+/* WCAG AA Inviolable Text Contrast Rule: Ensure muted text meets >= 4.5:1 on light canvas */
+:root {
+  --bs-secondary-color: #475569;
+}
+.text-muted,
+.form-text {
+  color: var(--text-muted-aa, #475569) !important;
+}
+
 body.dark-mode .text-muted,
 body.dark-theme .text-muted,
 [data-bs-theme="dark"] .text-muted,

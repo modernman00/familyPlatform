@@ -18,7 +18,7 @@
     <!-- Header -->
     <div class="mb-4">
         <h2 class="fw-bold mb-1 text-white brand-font">Forgot Password</h2>
-        <p class="text-secondary mb-0" style="font-size: 0.95rem; color: #94a3b8 !important;">
+        <p class="text-secondary mb-0" style="font-size: 0.95rem; color: #cbd5e1 !important;">
             Enter your registered email address to receive a secure 6-digit recovery code.
         </p>
     </div>

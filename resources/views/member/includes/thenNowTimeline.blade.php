@@ -47,7 +47,9 @@
         srcWebp.type = 'image/webp';
         var i = document.createElement('img');
         i.src = img(name); i.alt = alt; i.loading = 'lazy'; i.decoding = 'async';
-        i.onerror = function () { f.style.visibility = 'hidden'; };
+        // Perf: stop the infinite shimmer once the image has settled (it previously ran forever).
+        i.onload = function () { imgWrapper.classList.remove('vse-skeleton-surface'); };
+        i.onerror = function () { imgWrapper.classList.remove('vse-skeleton-surface'); f.style.visibility = 'hidden'; };
         pic.appendChild(srcAvif);
         pic.appendChild(srcWebp);
         pic.appendChild(i);

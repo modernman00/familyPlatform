@@ -73,6 +73,16 @@
       }
 
       if (subscription) {
+        var currentEndpoint = subscription.endpoint;
+        var now = Date.now();
+        var syncKey = 'fp_last_push_sync';
+        try {
+          var cachedSync = JSON.parse(localStorage.getItem(syncKey) || 'null');
+          if (cachedSync && cachedSync.endpoint === currentEndpoint && (now - cachedSync.time) < 12 * 60 * 60 * 1000) {
+            return true;
+          }
+        } catch (_) {}
+
         var subJson = subscription.toJSON ? subscription.toJSON() : subscription;
         var token = getCsrfToken();
         var userId = document.querySelector('meta[name="user-id"]')?.getAttribute('content') || '';
@@ -80,7 +90,7 @@
         var auth = subJson.keys ? subJson.keys.auth : '';
 
         var payload = {
-          endpoint: subscription.endpoint,
+          endpoint: currentEndpoint,
           id: userId,
           token: token,
           keys: {
@@ -103,7 +113,10 @@
         });
 
         if (res.ok) {
-          try { localStorage.setItem('fp_push_subscribed', 'true'); } catch (e) {}
+          try {
+            localStorage.setItem(syncKey, JSON.stringify({ endpoint: currentEndpoint, time: now }));
+            localStorage.setItem('fp_push_subscribed', 'true');
+          } catch (e) {}
           return true;
         }
       }
@@ -152,10 +165,15 @@
       }
     });
 
-    // Re-sync push subscription whenever tab regains visibility/focus
+    // Re-sync push subscription whenever tab regains visibility/focus (throttled to at most once per 60s)
+    var lastVisibilitySync = 0;
     document.addEventListener('visibilitychange', function() {
       if (document.visibilityState === 'visible' && 'Notification' in window && Notification.permission === 'granted') {
-        window.syncPushSubscription().catch(function() {});
+        var now = Date.now();
+        if (now - lastVisibilitySync > 60000) {
+          lastVisibilitySync = now;
+          window.syncPushSubscription().catch(function() {});
+        }
       }
     });
   }

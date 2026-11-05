@@ -134,6 +134,8 @@ export const addToNotificationTab = (data, position = 'afterbegin') => {
     }
 };
 
+const NOTIFICATION_RENDER_LIMIT = 25;
+
 const fetchUserNotifications = () => {
     // Only attempt to poll/fetch notifications if notification UI elements exist on the page
     const hasNotificationUI = document.getElementById('notificationBtn') || document.querySelector('.notification_tab');
@@ -159,7 +161,9 @@ const fetchUserNotifications = () => {
 
                 // Backend returns notifications ordered newest-first (DESC);
                 // append in sequence ('beforeend') so the newest stays at the top.
-                data.forEach(element => {
+                // Perf: the badge above still counts every unread item, but only the newest
+                // NOTIFICATION_RENDER_LIMIT are built into the dropdown (it was ~3.7k DOM nodes).
+                data.slice(0, NOTIFICATION_RENDER_LIMIT).forEach(element => {
                     addToNotificationTab(element, 'beforeend');
                 });
 

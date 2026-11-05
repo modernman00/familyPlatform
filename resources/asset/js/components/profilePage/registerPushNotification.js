@@ -36,9 +36,19 @@ function keyToBase64(subscription, name) {
 
 async function syncToServer(subscription) {
   if (!subscription || !subscription.endpoint) return;
+  const currentEndpoint = subscription.endpoint;
+  const now = Date.now();
+  const syncKey = 'fp_last_push_sync';
+  try {
+    const cached = JSON.parse(localStorage.getItem(syncKey) || 'null');
+    if (cached && cached.endpoint === currentEndpoint && (now - cached.time) < 12 * 60 * 60 * 1000) {
+      return;
+    }
+  } catch (_) {}
+
   const token = getCsrfToken();
   const payload = {
-    endpoint: subscription.endpoint,
+    endpoint: currentEndpoint,
     token: token,
     keys: {
       p256dh: keyToBase64(subscription, 'p256dh'),
@@ -52,6 +62,10 @@ async function syncToServer(subscription) {
       'X-CSRF-TOKEN': token,
     },
   });
+  try {
+    localStorage.setItem(syncKey, JSON.stringify({ endpoint: currentEndpoint, time: now }));
+    localStorage.setItem('fp_push_subscribed', 'true');
+  } catch (_) {}
 }
 
 // ---- import-time bootstrap: keep an existing grant in sync -----------------

@@ -10,6 +10,12 @@
     will-change: transform;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+.pwa-bottom-nav.nav-hidden {
+    transform: translate3d(0, 105%, 0) !important;
 }
 body.dark-mode .pwa-bottom-nav, 
 body.dark-theme .pwa-bottom-nav,
@@ -24,8 +30,20 @@ body.dark-theme .pwa-bottom-nav,
 
 /* Active Tab Micro-Dot & Tonal Icon Fill */
 .pwa-tab-item {
-    color: var(--text-tertiary, #94a3b8) !important;
+    color: var(--text-tertiary, #475569) !important;
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
     transition: color 150ms ease, transform 120ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pwa-tab-item:active {
+    transform: scale(0.92);
+}
+body.dark-mode .pwa-tab-item, 
+body.dark-theme .pwa-tab-item,
+[data-bs-theme="dark"] .pwa-tab-item { 
+    color: #94a3b8 !important;
 }
 .pwa-tab-item .pwa-tab-icon-outline { display: inline-block; }
 .pwa-tab-item .pwa-tab-icon-filled { display: none; }
@@ -42,6 +60,10 @@ body.dark-theme .pwa-bottom-nav,
     color: var(--brand-primary, #a31621) !important;
     font-weight: 700;
 }
+.pwa-tab-label {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
 .pwa-tab-item.active .pwa-tab-icon-wrap::after {
     content: '';
     position: absolute;
@@ -54,10 +76,18 @@ body.dark-theme .pwa-bottom-nav,
     background-color: var(--brand-primary, #a31621);
     box-shadow: 0 0 6px var(--brand-primary-glow, rgba(163, 22, 33, 0.5));
 }
+.pwa-tab-center-action {
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+.pwa-tab-center-action:active .pwa-center-btn-bubble {
+    transform: scale(0.92);
+}
 .pwa-tab-center-action .pwa-center-btn-bubble {
     background: var(--brand-primary-gradient, linear-gradient(135deg, #a31621 0%, #8a1019 100%)) !important;
     border: 3px solid var(--surface-card, #ffffff) !important;
     box-shadow: 0 4px 14px var(--brand-primary-glow, rgba(163, 22, 33, 0.42)) !important;
+    transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 body.dark-mode .pwa-tab-center-action .pwa-center-btn-bubble,
 body.dark-theme .pwa-tab-center-action .pwa-center-btn-bubble,

@@ -61,7 +61,7 @@
                 </button>
 
                 <!-- Recommend / Invite Others Button -->
-                <button class="btn btn-sm d-flex align-items-center gap-1 px-3 py-1 fw-bold text-white rounded-pill shadow-sm" id="btnOpenRecommendModal" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" style="background: linear-gradient(135deg, #b8202c 0%, #a31621 100%); font-size: 0.85rem;" type="button" title="Invite family relatives and friends to join your network">
+                <button class="btn btn-sm d-flex align-items-center gap-1 px-3 py-1 fw-bold text-white rounded-pill shadow-sm" id="btnOpenRecommendModal" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" style="background: linear-gradient(135deg, #b8202c 0%, #a31621 100%); font-size: 0.85rem; min-height: 44px; touch-action: manipulation;" type="button" title="Invite family relatives and friends to join your network">
                     <i class="bi bi-person-plus-fill text-warning"></i>
                     <span class="d-none d-xl-inline">{{ __('nav.invite_others', 'Invite Others') }}</span>
                     <span class="d-inline d-xl-none">{{ __('nav.invite', 'Invite') }}</span>
@@ -106,7 +106,7 @@
                         $supportedLocales = \App\classes\I18n::getSupportedLocales();
                         $currLocale = $supportedLocales[$activeLocale] ?? $supportedLocales['en'];
                     @endphp
-                    <button class="btn btn-sm d-flex align-items-center gap-1 px-2 py-1 rounded-pill border" type="button" id="langMenu" data-bs-toggle="dropdown" data-bs-display="dynamic" aria-expanded="false" style="background: var(--card-bg, #fff); font-size: 0.85rem;" title="{{ __('nav.change_language', 'Change Language / Select locale') }}">
+                    <button class="btn btn-sm d-flex align-items-center gap-1 px-2.5 py-1 rounded-pill border" type="button" id="langMenu" data-bs-toggle="dropdown" data-bs-display="dynamic" aria-expanded="false" style="background: var(--card-bg, #fff); font-size: 0.85rem; min-height: 44px; touch-action: manipulation;" title="{{ __('nav.change_language', 'Change Language / Select locale') }}">
                         <span style="font-size: 1.1rem;">{{ $currLocale['flag'] }}</span>
                         <span class="d-none d-md-inline fw-semibold text-uppercase" style="font-size: 0.78rem;">{{ $activeLocale }}</span>
                     </button>

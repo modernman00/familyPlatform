@@ -75,6 +75,16 @@ class PWAManager {
 
   syncSubscriptionToServer(subscription) {
     if (!subscription || !subscription.endpoint) return;
+    const currentEndpoint = subscription.endpoint;
+    const now = Date.now();
+    const syncKey = 'fp_last_push_sync';
+    try {
+      const cached = JSON.parse(localStorage.getItem(syncKey) || 'null');
+      if (cached && cached.endpoint === currentEndpoint && (now - cached.time) < 12 * 60 * 60 * 1000) {
+        return; // Already synchronized recently
+      }
+    } catch (_) {}
+
     const tokenMeta = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     const userId = document.querySelector('meta[name="user-id"]')?.getAttribute('content') || '';
     const p256dh = subscription.getKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))) : '';
@@ -91,7 +101,7 @@ class PWAManager {
         'X-XSRF-TOKEN': tokenMeta
       },
       body: JSON.stringify({
-        endpoint: subscription.endpoint,
+        endpoint: currentEndpoint,
         id: userId,
         token: tokenMeta,
         keys: { p256dh, auth }
@@ -99,7 +109,10 @@ class PWAManager {
     }).then((res) => res.json().catch(() => ({ status: 'ok' })))
       .then((data) => {
         if (data && data.status !== 'error') {
-          try { localStorage.setItem('fp_push_subscribed', 'true'); } catch (e) {}
+          try {
+            localStorage.setItem(syncKey, JSON.stringify({ endpoint: currentEndpoint, time: now }));
+            localStorage.setItem('fp_push_subscribed', 'true');
+          } catch (e) {}
         }
       }).catch(() => {});
   }

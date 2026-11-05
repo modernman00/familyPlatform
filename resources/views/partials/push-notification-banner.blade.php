@@ -134,12 +134,15 @@
         const userId = document.querySelector('meta[name="user-id"]')?.getAttribute('content') || '';
         const p256dh = subscription.getKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))) : '';
         const auth = subscription.getKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth')))) : '';
+        const currentEndpoint = subscription.endpoint;
+        const now = Date.now();
+        const syncKey = 'fp_last_push_sync';
 
         if (!userId) {
             console.log('[Push] Guest session: Storing subscription locally until member login');
             try {
                 localStorage.setItem('fp_pending_push_sub', JSON.stringify({
-                    endpoint: subscription.endpoint,
+                    endpoint: currentEndpoint,
                     keys: { p256dh: p256dh, auth: auth }
                 }));
                 localStorage.setItem(SUBSCRIBED_KEY, 'true');
@@ -147,8 +150,15 @@
             return Promise.resolve({ status: 'deferred' });
         }
 
+        try {
+            const cached = JSON.parse(localStorage.getItem(syncKey) || 'null');
+            if (cached && cached.endpoint === currentEndpoint && (now - cached.time) < 12 * 60 * 60 * 1000) {
+                return Promise.resolve({ status: 'success', cached: true });
+            }
+        } catch (_) {}
+
         const payload = {
-            endpoint: subscription.endpoint,
+            endpoint: currentEndpoint,
             id: userId,
             token: token,
             keys: {
@@ -176,7 +186,10 @@
             return res.json().catch(function() { return { status: 'ok' }; });
         }).then(function(data) {
             if (data && (data.status === 'success' || data.code === 200 || data.status === 'ok')) {
-                localStorage.setItem(SUBSCRIBED_KEY, 'true');
+                try {
+                    localStorage.setItem(syncKey, JSON.stringify({ endpoint: currentEndpoint, time: now }));
+                    localStorage.setItem(SUBSCRIBED_KEY, 'true');
+                } catch (e) {}
                 console.log('[Push] Subscription synchronized and registered in database:', data);
             }
             return data;

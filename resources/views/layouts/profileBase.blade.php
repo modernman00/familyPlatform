@@ -213,6 +213,7 @@
   <script nonce="{{ $nonce }}" src="/public/js/profilePhotoViewer.js?v={{ assetVersion('js/profilePhotoViewer.js') }}" defer></script>
   <script nonce="{{ $nonce }}" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
   <script nonce="{{ $nonce }}" src="/public/js/atg-emoji-engine.js?v={{ assetVersion('js/atg-emoji-engine.js') }}" defer></script>
+  <script nonce="{{ $nonce }}" src="/public/js/smart-nav-scroll.js?v={{ assetVersion('js/smart-nav-scroll.js') }}" defer></script>
 
   @include('components.atgArViewerModal')
   @include('component.submitSpinner')

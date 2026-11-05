@@ -1863,7 +1863,8 @@
             </template>
           </div>
           <div class="d-flex flex-wrap gap-2 overflow-y-auto" style="max-height:200px;">
-            <template x-for="g in filteredCommentGifs()" :key="g.id">
+            {{-- Perf: only build the GIF grid while this post's picker is open (~30 hidden <img> per post otherwise) --}}
+            <template x-for="g in (commentGifOpen[post.post_no] ? filteredCommentGifs() : [])" :key="g.id">
               <div class="gif-item-card" :title="g.title" role="button" tabindex="0"
                    @click="selectCommentGif(post.post_no, g.url)"
                    @keydown.enter="selectCommentGif(post.post_no, g.url)">

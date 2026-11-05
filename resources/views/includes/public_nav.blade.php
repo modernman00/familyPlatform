@@ -77,7 +77,7 @@
             $supportedLocales = \App\classes\I18n::getSupportedLocales();
             $currLocale = $supportedLocales[$activeLocale] ?? $supportedLocales['en'];
           @endphp
-          <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 px-2 py-1 rounded-pill" type="button" id="publicLangMenu" data-bs-toggle="dropdown" aria-expanded="false" title="{{ __('nav.change_language', 'Change Language') }}">
+          <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 px-2.5 py-1 rounded-pill" type="button" id="publicLangMenu" data-bs-toggle="dropdown" aria-expanded="false" style="min-height: 44px; touch-action: manipulation;" title="{{ __('nav.change_language', 'Change Language') }}">
             <span>{{ $currLocale['flag'] }}</span>
             <span class="fw-semibold text-uppercase" style="font-size: 0.78rem;">{{ $activeLocale }}</span>
           </button>

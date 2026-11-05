@@ -27,7 +27,7 @@
     <!-- Header Titles -->
     <div class="mb-4">
         <h2 class="fw-bold mb-1 text-white brand-font">{{ __('auth.sign_in_title', 'Welcome back') }}</h2>
-        <p class="text-secondary mb-0" style="font-size: 0.95rem; color: #94a3b8 !important;">
+        <p class="text-secondary mb-0" style="font-size: 0.95rem; color: #cbd5e1 !important;">
             {{ __('auth.welcome_back_subtitle', 'Sign in to your private family sanctuary') }}
         </p>
     </div>

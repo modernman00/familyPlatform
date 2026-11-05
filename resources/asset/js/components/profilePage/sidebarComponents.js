@@ -81,6 +81,8 @@ export function profileSidebar(initialData) {
 export function upcomingEvents(initialEvents) {
     return {
         events: Array.isArray(initialEvents) ? initialEvents : [],
+        eventsLimit: 6,
+        get visibleEvents() { return this.events.slice(0, this.eventsLimit); },
         currentUserId: localStorage.getItem('requesterId') || '',
         pusher: null,
 
