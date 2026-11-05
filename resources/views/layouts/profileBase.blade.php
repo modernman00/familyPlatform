@@ -130,8 +130,8 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preconnect" href="https://kit.fontawesome.com" crossorigin>
   <link rel="dns-prefetch" href="https://ka-f.fontawesome.com">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+  <link href="/public/lib/bootstrap-5.3.0-alpha1/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/public/lib/bootstrap-icons-1.10.3/bootstrap-icons.css">
 
   <!-- PWA & Mobile Web App Capabilities -->
   @include('partials.pwa-head')
