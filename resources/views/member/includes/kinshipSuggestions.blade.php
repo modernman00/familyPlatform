@@ -86,7 +86,7 @@
 
         <!-- Filter Pills Bar (Exact Reference Match) -->
         <div class="d-flex align-items-center gap-2 mb-3 kin-filter-bar overflow-x-auto text-nowrap" style="scrollbar-width: none; gap: 8px;">
-            <span class="text-muted fw-normal kin-filter-label" style="font-size: 0.75rem; color: #94a3b8 !important; margin-right: 4px; flex-shrink: 0;">{{ __('kinship.filter_label', 'Filter:') }}</span>
+            <span class="text-muted fw-normal kin-filter-label" style="font-size: 0.75rem; color: #64748b !important; margin-right: 4px; flex-shrink: 0;">{{ __('kinship.filter_label', 'Filter:') }}</span>
             <button type="button" 
                     @click="activeFilter = 'all'" 
                     class="btn btn-sm rounded-pill btn-filter-kin" 

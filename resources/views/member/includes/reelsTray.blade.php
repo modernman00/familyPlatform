@@ -162,8 +162,8 @@
                            playsinline
                            webkit-playsinline
                            poster="{{ $coverThumb }}"
-                           {{-- Perf: only the first two tiles probe their video; the rest stay on the cover image until opened --}}
-                           preload="{{ $loop->index < 2 ? 'metadata' : 'none' }}"></video>
+                           {{-- Perf: never probe on load. .mov index data sits at the end of the file, so even metadata pulled ~10 MB. The cover image is the poster; the video loads when the tile is played/opened. --}}
+                           preload="none"></video>
                 @endif
 
                 <!-- Legibility Dark Gradient -->

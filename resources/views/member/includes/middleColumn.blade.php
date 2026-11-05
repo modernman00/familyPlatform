@@ -709,7 +709,7 @@
 
         <div role="button" tabindex="0" class="composer-prompt flex-grow-1 rounded-pill px-3 py-3 text-truncate" data-bs-toggle="modal" data-bs-target="#postModal"
           style="background-color: #f1f5f9; border: 1.5px solid #cbd5e1; cursor: text; transition: all 0.2s ease-in-out;">
-          <span style="color: #64748b; font-size: 0.95rem; font-weight: 500;">{{ __('feed.share_prompt', 'Share a moment with your family...') }}</span>
+          <span style="color: #475569; font-size: 0.95rem; font-weight: 500;">{{ __('feed.share_prompt', 'Share a moment with your family...') }}</span>
         </div>
       </div>
 

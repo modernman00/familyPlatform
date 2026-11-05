@@ -20,7 +20,7 @@
     <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4">
         <!-- Top Row: ACTIVE badge -->
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="badge rounded-pill bg-success-subtle text-success px-2.5 py-1 fw-bold d-inline-flex align-items-center gap-1.5" style="font-size: 0.72rem; font-weight: 700; line-height: 1;">
+            <span class="badge rounded-pill bg-success-subtle text-success px-2.5 py-1 fw-bold d-inline-flex align-items-center gap-1.5" style="color: #0f5132 !important; font-size: 0.72rem; font-weight: 700; line-height: 1;">
                 <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #059669; display: inline-block;"></span>
                 ACTIVE
             </span>
@@ -53,9 +53,9 @@
                 <span class="badge bg-success" style="font-size: 0.75rem;" id="sideWidgetScoreBadge">--%</span>
             </div>
             <div class="progress mb-2" style="height: 6px; background: rgba(16, 185, 129, 0.15); border-radius: 999px;">
-                <div id="sideWidgetProgressBar" class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;"></div>
+                <div id="sideWidgetProgressBar" class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" aria-label="Family heritage progress" style="width: 0%;"></div>
             </div>
-            <button type="button" onclick="openLineageQuestModal()" class="btn btn-sm btn-success w-100 py-1.5 fw-bold text-white shadow-xs d-flex align-items-center justify-content-center gap-1.5" style="border-radius: 10px; font-size: 0.875rem; min-height: 44px; background: #059669; color: #ffffff !important; border: none;" title="Solve WhatsApp Quests - Fill missing tree branches with WhatsApp family quizzes">
+            <button type="button" onclick="openLineageQuestModal()" class="btn btn-sm btn-success w-100 py-1.5 fw-bold text-white shadow-xs d-flex align-items-center justify-content-center gap-1.5" style="border-radius: 10px; font-size: 0.875rem; min-height: 44px; background: #047857; color: #ffffff !important; border: none;" title="Solve WhatsApp Quests - Fill missing tree branches with WhatsApp family quizzes">
                 <i class="bi bi-whatsapp"></i> {{ __('heritage.solve_quests', 'Solve WhatsApp Quests') }}
             </button>
         </div>

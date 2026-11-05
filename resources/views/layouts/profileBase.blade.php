@@ -164,6 +164,7 @@
   <script defer src="https://kit.fontawesome.com/e78379d4a3.js" crossorigin="anonymous"></script>
 
   <title>@yield('title')</title>
+  <meta name="description" content="@yield('meta_description', 'Your private family space on FamilyPlatform: share moments, stay connected and keep your family history together.')">
   @stack('meta')
 
   <link rel="manifest" href="/manifest.json">
