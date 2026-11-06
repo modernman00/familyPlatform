@@ -644,6 +644,90 @@ img.rounded-circle {
   transform: scale(0.99);
 }
 
+/* ── Facebook-Style Suggested Kin & In-Laws Carousel ── */
+.kin-carousel-viewport {
+  position: relative;
+}
+.kinship-carousel-track {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  padding: 4px 2px 14px 2px;
+}
+.kinship-carousel-track::-webkit-scrollbar {
+  display: none;
+}
+.kin-carousel-arrow {
+  position: absolute;
+  top: 40%;
+  transform: translateY(-50%);
+  z-index: 8;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.kin-carousel-arrow:hover {
+  background: #f8fafc;
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+  color: #8B152B;
+}
+.kin-carousel-arrow:active {
+  transform: translateY(-50%) scale(0.96);
+}
+.kinship-item-card--carousel {
+  flex: 0 0 240px;
+  min-width: 240px;
+  max-width: 240px;
+  scroll-snap-align: start;
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+.kinship-item-card--carousel:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.12);
+}
+.kin-portrait-container {
+  height: 210px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  background: #0f172a;
+}
+.kin-portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  display: block;
+  transition: transform 0.4s ease;
+}
+.kinship-item-card--carousel:hover .kin-portrait-img {
+  transform: scale(1.04);
+}
+.kin-feed-carousel-wrapper {
+  animation: fadeInKinCarousel 0.35s ease-out;
+}
+@keyframes fadeInKinCarousel {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .kinship-radar-widget .kin-heading {
   color: #0f172a;
 }
@@ -2120,6 +2204,37 @@ body.dark-theme .kin-heritage-clue,
   background-color: rgba(254, 240, 138, 0.1) !important;
   border-color: rgba(254, 240, 138, 0.25) !important;
   color: #fef08a !important;
+}
+
+body.dark-mode .kin-carousel-arrow,
+body.dark-theme .kin-carousel-arrow,
+[data-bs-theme="dark"] .kin-carousel-arrow {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark-mode .kin-carousel-arrow:hover,
+body.dark-theme .kin-carousel-arrow:hover,
+[data-bs-theme="dark"] .kin-carousel-arrow:hover {
+  background-color: #334155 !important;
+  color: #fca5a5 !important;
+}
+
+body.dark-mode .kinship-item-card--carousel .btn-dismiss-kin,
+body.dark-theme .kinship-item-card--carousel .btn-dismiss-kin,
+[data-bs-theme="dark"] .kinship-item-card--carousel .btn-dismiss-kin {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .kinship-item-card--carousel .btn-dismiss-kin:hover,
+body.dark-theme .kinship-item-card--carousel .btn-dismiss-kin:hover,
+[data-bs-theme="dark"] .kinship-item-card--carousel .btn-dismiss-kin:hover {
+  background-color: #334155 !important;
+  color: #ffffff !important;
 }
 
 body.dark-mode .kin-lineage-breadcrumb,

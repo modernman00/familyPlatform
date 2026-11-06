@@ -2269,3 +2269,165 @@ body[data-page-id="organogram"] .tree-mode-switcher-container { margin-bottom: 4
 #cardHeaderRemoveBtn:active {
     transform: scale(0.95);
 }
+
+/* =======================================================
+   TREE HEADER v3 — compact hero + single toolbar
+   One entry point per action; tree visible above the fold.
+   ======================================================= */
+body[data-page-id="organogram"] .organogram-header.tree-hero {
+    background: rgba(15, 23, 42, 0.92) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 14px 20px !important;
+    margin-bottom: 0 !important;
+}
+.tree-hero::before { height: 2px; }
+.tree-hero__row {
+    max-width: 1700px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.tree-hero__titles { min-width: 0; }
+body[data-page-id="organogram"] .tree-hero .organogram-title {
+    font-size: clamp(1.25rem, 1rem + 1vw, 1.6rem);
+    font-weight: 800;
+    line-height: 1.2;
+    margin: 0;
+    color: #f8fafc !important;
+    text-shadow: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.tree-hero__meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.tree-meta-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    min-height: 32px; padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    color: #cbd5e1;
+    font-size: 0.78rem; font-weight: 600;
+    cursor: pointer;
+    transition: background-color .15s, border-color .15s, color .15s;
+}
+.tree-meta-chip:hover { background: rgba(255, 255, 255, 0.08); color: #f8fafc; }
+.tree-meta-chip--private i { color: #34d399; }
+.tree-meta-chip:focus-visible,
+.tree-btn:focus-visible,
+.tree-scope__item:focus-visible { outline: 2px solid #fbbf24; outline-offset: 2px; }
+
+.tree-hero__actions { display: flex; align-items: center; gap: 8px; flex: 0 1 auto; }
+.tree-hero .tree-search { min-width: 0; width: 280px; }
+body[data-page-id="organogram"] .tree-hero .member-search-input {
+    min-height: 44px;
+    border-radius: 12px;
+    box-shadow: none !important;
+}
+.tree-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 44px; padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+    color: #f8fafc;
+    font-size: 0.88rem; font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color .15s, border-color .15s, transform .1s;
+}
+.tree-btn:hover { background: rgba(255, 255, 255, 0.1); }
+.tree-btn:active { transform: scale(0.98); }
+.tree-btn--primary { background: #b8202c; border-color: #b8202c; color: #fff; }
+.tree-btn--primary:hover { background: #a31621; border-color: #a31621; }
+.tree-btn--icon { width: 44px; padding: 0; font-size: 1.15rem; }
+
+.tree-menu {
+    min-width: 240px;
+    padding: 6px;
+    border-radius: 14px;
+    background: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+.tree-menu .dropdown-header { color: #64748b; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 8px 12px 4px; }
+.tree-menu .dropdown-item {
+    display: flex; align-items: center; gap: 10px;
+    min-height: 44px; padding: 8px 12px;
+    border-radius: 10px;
+    color: #e2e8f0; font-size: 0.88rem; font-weight: 500;
+}
+.tree-menu .dropdown-item i { color: #94a3b8; width: 18px; text-align: center; }
+.tree-menu .dropdown-item:hover,
+.tree-menu .dropdown-item:focus { background: rgba(255, 255, 255, 0.08); color: #fff; }
+.tree-menu .dropdown-divider { border-color: rgba(255, 255, 255, 0.08); margin: 4px 0; }
+
+/* Toolbar: lineage scope (left) + view modes (right) */
+body[data-page-id="organogram"] .tree-mode-switcher-container.tree-toolbar {
+    max-width: 1700px;
+    margin: 0 auto !important;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.tree-scope, .tree-toolbar .layout-segmented-control {
+    display: inline-flex; align-items: center; gap: 2px;
+    padding: 3px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.tree-scope::-webkit-scrollbar { display: none; }
+.tree-scope__item, .tree-toolbar .layout-segment-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    min-height: 40px; padding: 0 12px;
+    border-radius: 9px;
+    border: 1px solid transparent !important;
+    color: #94a3b8;
+    font-size: 0.82rem; font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    background: transparent;
+    box-shadow: none !important;
+}
+.tree-scope__item small { font-size: 0.7rem; color: #64748b; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.tree-scope__item:hover, .tree-toolbar .layout-segment-btn:hover { color: #f8fafc; background: rgba(255, 255, 255, 0.06); }
+.tree-scope__item.is-active,
+.tree-toolbar .layout-segment-btn.active {
+    background: rgba(184, 32, 44, 0.85) !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+}
+.tree-scope__item.is-active small { color: rgba(255, 255, 255, 0.75); }
+.tree-toolbar .layout-segment-btn--studio { margin-left: 4px; position: relative; }
+.tree-toolbar .layout-segment-btn--studio::before {
+    content: ''; position: absolute; left: -4px; top: 8px; bottom: 8px;
+    width: 1px; background: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 991.98px) {
+    .tree-hero__actions { width: 100%; }
+    .tree-hero .tree-search { flex: 1 1 auto; width: auto; }
+}
+@media (max-width: 768px) {
+    body[data-page-id="organogram"] .organogram-header.tree-hero { padding: 12px 12px !important; }
+    .tree-hero__row { gap: 10px; }
+    .tree-btn--primary span { display: none; }
+    .tree-btn--primary { width: 44px; padding: 0; }
+    body[data-page-id="organogram"] .tree-mode-switcher-container.tree-toolbar { padding: 8px 12px; gap: 8px; }
+    .tree-scope, .tree-toolbar .layout-segmented-control { width: 100%; border-radius: 12px; }
+    .tree-toolbar .layout-segment-btn { padding: 0 10px; font-size: 0.78rem; }
+}

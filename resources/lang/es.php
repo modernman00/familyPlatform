@@ -235,6 +235,13 @@ return [
     'milestones.title' => 'Recuerdos e Hitos',
     'milestones.subtitle' => 'Recuerdos de este día y celebraciones familiares',
     'milestones.gathering' => 'Reuniendo recuerdos familiares...',
+    'memories.create_then_now' => 'Crear un Antes y Ahora',
+
+    // Kinship Contact Sync
+    'kinship.upload_contacts_title' => 'Sube tus contactos',
+    'kinship.upload_contacts_desc' => 'Descubre quién más está en FamilyPlatform y elige con qué familiares conectar.',
+    'kinship.upload_contacts_btn' => 'Subir',
+    'kinship.dismiss_contacts_card' => 'Descartar sugerencias de contactos',
 
     // Family Connection & Migration Requests
     'family.wants_to_join' => 'quiere unirse a tu red familiar :code',

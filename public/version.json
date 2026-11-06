@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(video): eliminate white flash, remove video numbering, and launch Twitter/X full-screen video mode",
+    "title": "Feat(media-viewer): fix author profile avatar and add per-image/video emoji reactions, comment drawer, and bookmark",
     "notes": [
+        "Feat(media-viewer): fix author profile avatar and add per-image/video emoji reactions, comment drawer, and bookmark",
         "Feat(video): eliminate white flash, remove video numbering, and launch Twitter/X full-screen video mode",
-        "Feat(mobile): mobile viewport audit, smart nav scroll, push rate limits, and asset production build",
-        "UI design standards v2.1 and telemetry telemetry enhancements"
+        "Feat(mobile): mobile viewport audit, smart nav scroll, push rate limits, and asset production build"
     ],
     "released_at": "2026-11-06",
-    "commit": "7b5775b0"
+    "commit": "3e3ed980"
 }

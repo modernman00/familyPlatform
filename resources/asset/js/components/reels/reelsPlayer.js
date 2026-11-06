@@ -265,7 +265,7 @@ class FamilyReelsPlayer {
                 }, { once: true });
             }
 
-            // Silent Hover Preview
+            // Silent Hover Preview (Desktop)
             card.addEventListener('mouseenter', () => {
                 video.play().catch(() => {});
             });
@@ -273,6 +273,33 @@ class FamilyReelsPlayer {
                 video.pause();
             });
         });
+
+        // 3. Always-On Video Preview (Facebook format on both Mobile & Desktop)
+        // Autoplay silent video preview when card is scrolled into view; pause when out of view
+        if ('IntersectionObserver' in window) {
+            const previewObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const card = entry.target;
+                    const video = card.querySelector('.reel-fb-video-thumb');
+                    if (!video) return;
+
+                    if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+                        video.play().catch(() => {});
+                    } else if (!entry.isIntersecting || entry.intersectionRatio < 0.2) {
+                        video.pause();
+                    }
+                });
+            }, {
+                root: null,
+                threshold: [0.2, 0.5]
+            });
+
+            cards.forEach(card => {
+                if (card.querySelector('.reel-fb-video-thumb')) {
+                    previewObserver.observe(card);
+                }
+            });
+        }
     }
 
     async init() {

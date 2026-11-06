@@ -37,14 +37,9 @@ foreach(($eventData ?? []) as $event) {
 <!-- Right Column - Sidebar -->
 <div class="sidebar-column" x-data="upcomingEvents({{ json_encode($enrichedEvents) }})">
     @if(empty($isPendingApproval))
-    <!-- Suggested Kin & In-Laws (Kinship Radar) — Desktop only (mobile version is in feed column) -->
+    <!-- Suggested Kin & In-Laws: Primary home is in the main feed carousel -->
     @if(!empty($suggestedKin))
-    <div class="d-none d-lg-block">
-        {{-- BladeOne's default includeScope=false means include-passed variables leak
-             globally into every include that runs afterward - middleColumn.blade.php's
-             kinshipWidgetId => 'kinshipRadarWidgetMobile' would otherwise still be set
-             here, giving this desktop copy the mobile id too. Explicitly reset it so the
-             `?? 'kinshipRadarWidget'` default in the partial actually applies. --}}
+    <div class="d-none">
         @includeIf('member.includes.kinshipSuggestions', ['kinshipWidgetId' => null])
     </div>
     @endif

@@ -2063,12 +2063,19 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, 
   }
 
   .reels-tray-wrapper {
-    background: transparent !important;
-    border: none !important;
-    border-radius: 0 !important;
-    padding: 0 !important;
-    margin-bottom: 12px !important;
-    box-shadow: none !important;
+    background: var(--bg-surface, #ffffff) !important;
+    border: 1px solid var(--border-subtle, #e2e8f0) !important;
+    border-radius: 18px !important;
+    padding: 12px 14px !important;
+    margin-bottom: 16px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  }
+  body.dark-mode .reels-tray-wrapper,
+  body.dark-theme .reels-tray-wrapper,
+  [data-bs-theme="dark"] .reels-tray-wrapper {
+    background: var(--bg-surface, #161616) !important;
+    border-color: var(--border-subtle, #262626) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
   }
 }
 

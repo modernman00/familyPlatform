@@ -99,15 +99,15 @@ graph TD
   - Activity / Heart notification badge (with unread count badge in `--accent-heart`).
   - Direct Messages / Family Chat paper plane icon.
 
-### 5.2 Family Moments & Stories Reel
-- **Container:** Horizontal scroll container with momentum scrolling (`-webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory;`).
-- **Padding:** `px-4 py-2`.
-- **Avatar Sizing:** `56x56px` circular avatar (`rounded-full`).
-- **Border Rings:**
-  - *New Family Story:* Multi-colour gradient ring (`2px` border with `linear-gradient(45deg, #FF3040, #F77737, #FCAF45)`).
-  - *Birthday / Special Milestone:* Radiant gold gradient ring (`linear-gradient(45deg, #FFD700, #FFA500)`).
-  - *Viewed Story:* Subtle outline (`1.5px solid var(--border-subtle)`).
-- **Label:** First name truncated at 8 characters with full name on tap; font-size `11px`.
+### 5.2 Family Moments & Reels Tray (Unified Always-On Facebook Format)
+- **Unified Architecture:** Mobile and Desktop deliver the identical, always-on Facebook Reels Card Carousel format. Circular Instagram stories are retired.
+- **Container:** Dedicated surface card container (`.reels-tray-wrapper`) with horizontal momentum scrolling (`-webkit-overflow-scrolling: touch; scroll-snap-type: x proximity;`).
+- **Header:** Icon badge, "Family Reels & Stories" title, responsive "New" button ($\ge 44\text{px}$ touch target), and "Watch All" link.
+- **Category Filter Bar:** Quick filter pills (All, Milestones, Reunions, Stories, Kids, Weddings, Night Out, Weekend Out, Holidays, Birthdays) with smooth horizontal touch scroll.
+- **Card Format (Facebook Mirror across Mobile & Desktop):**
+  - *Create Reel Split Card:* Current user avatar top 65%, prominent primary plus badge overlapping divider, "Create Reel" label on bottom 35%.
+  - *Video Cards:* 9:16 vertical cover cards (130×220px on mobile, 136×226px on desktop) with ambient blurred backdrop, creator avatar bubble (top-left), view/like counts (top-right), category hashtag, creator name, and caption preview.
+  - *Always-On Live Video Preview:* Silent looping video preview (`muted loop playsinline`) triggered by `IntersectionObserver` when scrolled into view on both mobile and desktop (plus desktop `mouseenter` hover).
 
 ### 5.3 Post Card Component (Feed)
 - **Container:** Borderless on full-bleed mobile or `border-b border-[var(--border-subtle)]` with zero excess padding.

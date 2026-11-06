@@ -809,9 +809,9 @@
   </div>
 
 
-  <!-- Kinship Radar: Mobile-Only (visible < 992px, hidden on desktop where sidebar shows it) -->
+  <!-- Suggested Kin & In-Laws: Facebook-Style Horizontal Carousel (Visible in feed across mobile & desktop) -->
   @if(!empty($suggestedKin))
-  <div class="d-lg-none">
+  <div class="w-100 mb-4 kin-feed-carousel-wrapper">
     @includeIf('member.includes.kinshipSuggestions', ['kinshipWidgetId' => 'kinshipRadarWidgetMobile'])
   </div>
   @endif

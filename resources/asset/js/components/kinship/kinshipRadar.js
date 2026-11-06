@@ -14,6 +14,46 @@ export function initKinshipRadar() {
 
     initKinshipDetailsModal();
     initKinshipRadarSettingsModal();
+
+    // Check if Contacts Lead Card was dismissed by the user (RFC-0038)
+    try {
+        if (localStorage.getItem('fp_contacts_lead_card_dismissed') === 'true') {
+            document.querySelectorAll('#kinContactsUploadCard').forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+    } catch (_) {}
+}
+
+async function handleContactsLeadCardClick(btn) {
+    if (window.ScoreTenantSpinner) window.ScoreTenantSpinner.start(btn);
+    // If native Contact Picker is supported, trigger it; else open #inviteFamilyModal
+    if ('contacts' in navigator && 'ContactsManager' in window && navigator.contacts?.select) {
+        try {
+            const props = ['name', 'tel'];
+            const opts = { multiple: true };
+            const contacts = await navigator.contacts.select(props, opts);
+            if (Array.isArray(contacts) && contacts.length > 0) {
+                const modalEl = document.getElementById('inviteFamilyModal');
+                if (modalEl && window.bootstrap?.Modal) {
+                    window.bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                }
+                if (typeof window.renderSelectedContacts === 'function') {
+                    window.selectedContacts = contacts;
+                    window.renderSelectedContacts();
+                }
+                if (window.ScoreTenantSpinner) window.ScoreTenantSpinner.stop(btn);
+                return;
+            }
+        } catch (_) {
+            // Cancelled or unsupported, fall through to modal
+        }
+    }
+    const modalEl = document.getElementById('inviteFamilyModal');
+    if (modalEl && window.bootstrap?.Modal) {
+        window.bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    }
+    if (window.ScoreTenantSpinner) window.ScoreTenantSpinner.stop(btn);
 }
 
 function getCsrfToken() {
@@ -44,7 +84,7 @@ export function removeKinCardAcrossWidgets(targetUserId) {
                 if (widget && widget.querySelectorAll('.kinship-item-card').length === 0) {
                     widget.style.display = 'none';
                     const wrapper = widget.parentElement;
-                    if (wrapper && (wrapper.classList.contains('d-lg-none') || wrapper.classList.contains('d-none'))) {
+                    if (wrapper && (wrapper.classList.contains('d-lg-none') || wrapper.classList.contains('d-none') || wrapper.classList.contains('kin-feed-carousel-wrapper'))) {
                         wrapper.style.display = 'none';
                     }
                 }
@@ -413,6 +453,84 @@ function bindKinshipRadarContainer(container) {
                     card.style.display = 'none';
                 }
             });
+            return;
+        }
+
+        // 0b. Handle Carousel Navigation Arrows
+        const prevArrow = e.target.closest('.kin-carousel-arrow-prev');
+        if (prevArrow) {
+            e.stopPropagation();
+            const track = container.querySelector('.kinship-carousel-track, .kinship-suggestions-scroll');
+            if (track) track.scrollBy({ left: -260, behavior: 'smooth' });
+            return;
+        }
+
+        const nextArrow = e.target.closest('.kin-carousel-arrow-next');
+        if (nextArrow) {
+            e.stopPropagation();
+            const track = container.querySelector('.kinship-carousel-track, .kinship-suggestions-scroll');
+            if (track) track.scrollBy({ left: 260, behavior: 'smooth' });
+            return;
+        }
+
+        // 0c. Handle Dismiss Entire Widget Button
+        const closeWidgetBtn = e.target.closest('.btn-close-kin-widget');
+        if (closeWidgetBtn) {
+            e.stopPropagation();
+            container.style.transition = 'all 0.25s ease';
+            container.style.opacity = '0';
+            container.style.transform = 'scale(0.97)';
+            setTimeout(() => {
+                container.style.display = 'none';
+                const wrapper = container.closest('.kin-feed-carousel-wrapper');
+                if (wrapper) wrapper.style.display = 'none';
+            }, 250);
+            return;
+        }
+
+        // 0d. Handle "See all" Button
+        const seeAllBtn = e.target.closest('.btn-see-all-kin');
+        if (seeAllBtn) {
+            e.stopPropagation();
+            const firstCard = container.querySelector('.kinship-item-card:not([style*="display: none"])');
+            if (firstCard) {
+                const rawData = firstCard.getAttribute('data-kin');
+                if (rawData) {
+                    try {
+                        const kin = JSON.parse(rawData);
+                        openKinshipDetailsModal(kin);
+                    } catch (err) {
+                        console.error('[KinshipRadar] Failed to parse kin payload for See All:', err);
+                    }
+                }
+            }
+            return;
+        }
+
+        // 0e. Handle "Upload Contacts" Lead Card Action Button (RFC-0038)
+        const uploadLeadBtn = e.target.closest('.btn-upload-contacts-lead');
+        if (uploadLeadBtn) {
+            e.stopPropagation();
+            handleContactsLeadCardClick(uploadLeadBtn);
+            return;
+        }
+
+        // 0f. Handle Dismiss Contacts Lead Card
+        const dismissLeadBtn = e.target.closest('.btn-dismiss-contacts-lead');
+        if (dismissLeadBtn) {
+            e.stopPropagation();
+            const leadCard = document.getElementById('kinContactsUploadCard');
+            if (leadCard) {
+                leadCard.style.transition = 'all 0.2s ease';
+                leadCard.style.opacity = '0';
+                leadCard.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    leadCard.style.display = 'none';
+                    try {
+                        localStorage.setItem('fp_contacts_lead_card_dismissed', 'true');
+                    } catch (_) {}
+                }, 200);
+            }
             return;
         }
 

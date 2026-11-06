@@ -265,7 +265,8 @@ final class KinshipEngineService
                             'confidence_score' => $confidencePct,
                             'kinship_type'     => $kinshipType,
                             'reasons'          => $matchReasons,
-                            'primary_reason'   => $matchReasons[0] ?? 'Shared family heritage network'
+                            'primary_reason'   => $matchReasons[0] ?? 'Shared family heritage network',
+                            'mutual_kin_count' => $mutualCount,
                         ];
                     }
                 }

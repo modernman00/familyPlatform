@@ -125,6 +125,25 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                             <i class="bi bi-heart-pulse-fill text-warning me-1"></i> <span x-text="memories[0].meaningful_prompt || 'A cherished moment etched forever in our family story.'"></span>
                         </div>
 
+                        <!-- 1-Tap Then & Now Comparison Trigger (RFC-0038 / Facebook-Style Flashback Bridge) -->
+                        <template x-if="memories[0].primary_image">
+                            <div class="mt-2.5 mb-2.5 pt-2 border-top border-light-subtle d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <button type="button" 
+                                        class="btn btn-sm btn-primary rounded-pill fw-bold px-3 py-2 text-white shadow-xs d-inline-flex align-items-center gap-2 btn-spin-on-click"
+                                        data-spin="true"
+                                        @click="launchThenNowComparison(memories[0])"
+                                        title="{{ __('memories.create_then_now', 'Create Then & Now') }}"
+                                        aria-label="{{ __('memories.create_then_now', 'Create Then & Now') }}"
+                                        style="min-height: 44px; white-space: nowrap; flex-shrink: 0; font-size: 0.84rem; background: linear-gradient(135deg, #a31621 0%, #b8202c 50%, #d97706 100%); border: none;">
+                                    <i class="bi bi-hourglass-split fs-6"></i>
+                                    <span>{{ __('memories.create_then_now', 'Create Then & Now') }}</span>
+                                </button>
+                                <span class="text-muted small d-inline-flex align-items-center gap-1" style="font-size: 0.74rem;">
+                                    <i class="bi bi-camera-fill text-warning"></i> Pair with today
+                                </span>
+                            </div>
+                        </template>
+
                         <div class="pt-2 border-top border-light-subtle d-flex align-items-center justify-content-between flex-wrap gap-2">
                             <!-- Author Attribution -->
                             <div class="d-flex align-items-center gap-2">
@@ -345,6 +364,23 @@ if (typeof window.memoriesMilestonesWidget !== 'function') {
                 } finally {
                     this.loading = false;
                     this.loaded = true;
+                }
+            },
+
+            launchThenNowComparison(memory) {
+                if (!memory) return;
+                const thenImg = memory.primary_image ? '/resources/images/post/' + encodeURIComponent(memory.primary_image) : '';
+                const formattedDate = memory.formatted_date || (memory.year_taken ? String(memory.year_taken) : '');
+                const dateLabel = formattedDate ? 'Then: ' + formattedDate : (memory.years_ago_label ? 'Then: ' + memory.years_ago_label : 'Then');
+                const caption = 'Reflecting on ' + (memory.years_ago_label || 'this day') + ' (' + formattedDate + ') and comparing with today! #ThenAndNow';
+
+                if (typeof window.__openThenNow === 'function') {
+                    window.__openThenNow('', {
+                        thenImgUrl: thenImg,
+                        thenImgFilename: memory.primary_image || 'then-archive.jpg',
+                        thenYear: dateLabel,
+                        caption: caption
+                    });
                 }
             }
         };

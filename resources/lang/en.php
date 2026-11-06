@@ -258,6 +258,8 @@ return [
     'kinship.family_branch' => 'Family Branch',
     'kinship.view_family_tree' => 'View in Family Tree',
     'kinship.connect_with' => 'Connect with',
+    'kinship.remove' => 'Remove',
+    'kinship.see_all' => 'See all',
     'kinship.privacy_note' => 'Your connection is protected by the Walled Sanctuary guarantee. Your private data is never exposed.',
 
     // Events & Milestones
@@ -271,6 +273,13 @@ return [
     'milestones.title' => 'Memories & Milestones',
     'milestones.subtitle' => 'On this day flashbacks & family celebrations',
     'milestones.gathering' => 'Gathering family memories...',
+    'memories.create_then_now' => 'Create Then & Now',
+
+    // Kinship Contact Sync
+    'kinship.upload_contacts_title' => 'Upload your contacts',
+    'kinship.upload_contacts_desc' => 'See who is also on FamilyPlatform and choose which relatives to connect with.',
+    'kinship.upload_contacts_btn' => 'Upload',
+    'kinship.dismiss_contacts_card' => 'Dismiss contact suggestions',
 
     // Family Connection & Migration Requests
     'family.wants_to_join' => 'wants to join your :code family network',

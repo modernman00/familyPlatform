@@ -489,11 +489,40 @@ window.__getThenNowFiles = () => (
 window.__resetThenNow = closeThenNow;
 // Resolves once any photo still being compressed is ready; Post waits on this.
 window.__thenNowReady = () => Promise.all([thenNowWork.then, thenNowWork.now]);
-// Used by the "Add your Then & Now" button on a feed card.
+// Used by the "Add your Then & Now" button on a feed card or Flashback Memory prompt.
 window.__openThenNow = (replyToPostNo, opts = {}) => {
     const modalEl = document.getElementById('postModal');
     if (modalEl && window.bootstrap?.Modal) window.bootstrap.Modal.getOrCreateInstance(modalEl).show();
     openThenNow(replyToPostNo);
+
+    // Support pre-populating Then slot from an archival memory
+    if (opts?.thenImgUrl) {
+        thenNowWork.then = (async () => {
+            try {
+                const imgResp = await fetch(opts.thenImgUrl, { credentials: 'same-origin' });
+                if (!imgResp.ok) throw new Error('Could not load memory image');
+                const blob = await imgResp.blob();
+                const filename = opts.thenImgFilename || `then-archive-${Date.now()}.jpg`;
+                const file = new File([blob], filename, { type: blob.type || 'image/jpeg' });
+                setThenNowSlot('then', file);
+                if (opts.thenYear) {
+                    const labelInput = document.querySelector('input[name="then_label"]');
+                    if (labelInput) {
+                        labelInput.value = String(opts.thenYear);
+                        labelInput.dataset.guessed = '1';
+                    }
+                }
+                const nowLabelInput = document.querySelector('input[name="now_label"]');
+                if (nowLabelInput && !nowLabelInput.value.trim()) {
+                    nowLabelInput.value = 'Now';
+                    nowLabelInput.dataset.guessed = '1';
+                }
+            } catch (err) {
+                console.warn('[ThenNow] Failed to load archive photo:', err);
+            }
+        })();
+    }
+
     // Milestone prompts hand over a ready-made caption; never overwrite what is already typed.
     const caption = typeof opts?.caption === 'string' ? opts.caption : '';
     const box = document.getElementById('postMessage');

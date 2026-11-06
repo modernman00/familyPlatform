@@ -384,6 +384,38 @@
             color: #64748b;
             font-weight: 500;
         }
+
+        /* Lineage tree selector (Add Family Member wizard) — explicit colours so no inherited white text */
+        #studioLineageScopeBanner { background: var(--stitch-surface-container); border: 1px solid var(--stitch-outline); color: #0f172a; }
+        #studioLineageScopeBanner .studio-lineage-title { color: #0f172a; font-size: .85rem; }
+        #studioLineageScopeBanner .studio-lineage-option {
+            flex: 1 1 200px; min-height: 56px; cursor: pointer;
+            display: flex; align-items: center; gap: .75rem;
+            padding: .65rem .9rem; border-radius: var(--stitch-radius-md);
+            background: #ffffff; border: 1.5px solid var(--stitch-outline-variant);
+            color: #0f172a; transition: border-color .15s, background-color .15s, box-shadow .15s;
+        }
+        #studioLineageScopeBanner .studio-lineage-option:hover { border-color: var(--stitch-primary); }
+        #studioLineageScopeBanner .studio-lineage-option input[type="radio"] {
+            width: 1.15rem; height: 1.15rem; flex-shrink: 0; margin: 0; accent-color: var(--stitch-primary);
+        }
+        #studioLineageScopeBanner .studio-lineage-icon {
+            width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: var(--stitch-primary-container); color: var(--stitch-primary); font-size: 1rem;
+        }
+        #studioLineageScopeBanner .studio-lineage-text { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+        #studioLineageScopeBanner .studio-lineage-name { color: #0f172a !important; font-weight: 700; font-size: .88rem; }
+        #studioLineageScopeBanner .studio-lineage-code { color: #64748b !important; font-size: .74rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+        #studioLineageScopeBanner .studio-lineage-option:has(input:checked) {
+            border-color: var(--stitch-primary); background: var(--stitch-primary-container);
+            box-shadow: 0 0 0 3px rgba(163, 22, 33, .12);
+        }
+        #studioLineageScopeBanner .studio-lineage-option:has(input:checked) .studio-lineage-icon { background: var(--stitch-primary); color: #ffffff; }
+        #studioLineageScopeBanner .studio-lineage-option:has(input:checked) .studio-lineage-name { color: var(--stitch-on-primary-container) !important; }
+        #studioLineageScopeBanner .studio-lineage-option:has(input:focus-visible) { outline: 2px solid var(--stitch-primary); outline-offset: 2px; }
+        #studioLineageScopeBanner #studioLineageScopeHelp { color: #475569 !important; font-size: .78rem; }
+        #studioLineageScopeBanner #studioLineageScopeHelp strong { color: #0f172a; }
     </style>
 @endpush
 
@@ -945,9 +977,9 @@
 
                 @if(!empty($hasMaternalCode) && !empty($maternalFamCode))
                 <!-- Lineage Family Code Selector (Marital / Household vs. Birth / Maiden Family) -->
-                <div id="studioLineageScopeBanner" class="mb-3 p-3 rounded-3" style="background:#f8fafc;border:1px solid #e2e8f0;">
+                <div id="studioLineageScopeBanner" class="mb-3 p-3 rounded-3">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-1 mb-2">
-                        <div class="fw-bold small text-dark">
+                        <div class="fw-bold studio-lineage-title">
                             <i class="bi bi-signpost-split me-1 text-primary"></i>Which family tree does this relative belong to?
                         </div>
                         <span class="badge bg-primary rounded-pill" id="studioActiveCodeBadge" style="font-size: 0.72rem;">
@@ -955,16 +987,18 @@
                         </span>
                     </div>
                     <div class="d-flex flex-wrap gap-2" role="radiogroup" aria-label="Target family tree">
-                        <label class="studio-lineage-option d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 border bg-white" style="cursor:pointer;min-height:44px;font-size:.82rem;white-space:nowrap;flex-shrink:0;">
+                        <label class="studio-lineage-option">
                             <input type="radio" name="studio_lineage_scope_radio" value="primary" data-code="{{ $primaryFamCode ?? ($data['famCode'] ?? '') }}" data-surname="{{ $maritalSurname ?? ($data['lastName'] ?? '') }}" {{ ($activeLineageScope ?? 'primary') !== 'maternal' ? 'checked' : '' }} onchange="window.syncStudioLineageScope && window.syncStudioLineageScope(this.value)">
-                            <span><strong>Marital / Household Tree</strong> <span class="text-muted">(#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})</span></span>
+                            <span class="studio-lineage-icon" aria-hidden="true"><i class="bi bi-house-heart-fill"></i></span>
+                            <span class="studio-lineage-text"><span class="studio-lineage-name">Marital / Household Tree</span><span class="studio-lineage-code">#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }}</span></span>
                         </label>
-                        <label class="studio-lineage-option d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 border bg-white" style="cursor:pointer;min-height:44px;font-size:.82rem;white-space:nowrap;flex-shrink:0;">
+                        <label class="studio-lineage-option">
                             <input type="radio" name="studio_lineage_scope_radio" value="maternal" data-code="{{ $maternalFamCode }}" data-surname="{{ $maidenSurname ?? '' }}" {{ ($activeLineageScope ?? 'primary') === 'maternal' ? 'checked' : '' }} onchange="window.syncStudioLineageScope && window.syncStudioLineageScope(this.value)">
-                            <span><strong>My Birth / Maiden Family</strong> <span class="text-muted">(#{{ $maternalFamCode }})</span></span>
+                            <span class="studio-lineage-icon" aria-hidden="true"><i class="bi bi-tree-fill"></i></span>
+                            <span class="studio-lineage-text"><span class="studio-lineage-name">My Birth / Maiden Family</span><span class="studio-lineage-code">#{{ $maternalFamCode }}</span></span>
                         </label>
                     </div>
-                    <div class="text-muted mt-2" id="studioLineageScopeHelp" style="font-size:.76rem;">
+                    <div class="mt-2" id="studioLineageScopeHelp">
                         @if(($activeLineageScope ?? 'primary') === 'maternal')
                             Adding to your <strong>Birth / Maiden Family (#{{ $maternalFamCode }})</strong> so your parents and birth siblings connect directly to your birth lineage.
                         @else

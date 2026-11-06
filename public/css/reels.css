@@ -11,12 +11,37 @@
    Horizontal Reels / Stories Tray (Facebook-Style Cards)
    ========================================================= */
 .reels-tray-wrapper {
-  background: #ffffff;
+  background: var(--bg-surface, #ffffff);
   border-radius: 20px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-subtle, #e2e8f0);
   padding: 16px 18px;
   margin-bottom: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+body.dark-mode .reels-tray-wrapper,
+body.dark-theme .reels-tray-wrapper,
+[data-bs-theme="dark"] .reels-tray-wrapper {
+  background: var(--bg-surface, #161616);
+  border-color: var(--border-subtle, #262626);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.reel-tray-title {
+  color: var(--text-primary, #0f172a);
+}
+body.dark-mode .reel-tray-title,
+body.dark-theme .reel-tray-title,
+[data-bs-theme="dark"] .reel-tray-title {
+  color: var(--text-primary, #f8fafc) !important;
+}
+
+.reel-tray-subtitle {
+  color: var(--text-secondary, #64748b);
+}
+body.dark-mode .reel-tray-subtitle,
+body.dark-theme .reel-tray-subtitle,
+[data-bs-theme="dark"] .reel-tray-subtitle {
+  color: var(--text-secondary, #94a3b8) !important;
 }
 
 .reels-tray-scroll {
@@ -58,26 +83,42 @@
   display: none;
 }
 .reel-tray-filter-pill {
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
-  color: #475569;
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  background: var(--bg-surface-elevated, #f8fafc);
+  color: var(--text-secondary, #475569);
   font-size: 0.72rem;
   font-weight: 700;
-  padding: 4px 11px;
+  padding: 5px 12px;
+  min-height: 36px;
   border-radius: 9999px;
   white-space: nowrap;
   cursor: pointer;
   transition: all 0.2s ease;
+  user-select: none;
+}
+body.dark-mode .reel-tray-filter-pill,
+body.dark-theme .reel-tray-filter-pill,
+[data-bs-theme="dark"] .reel-tray-filter-pill {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
 }
 .reel-tray-filter-pill:hover {
   background: #fbefef;
   color: #a31621;
   border-color: #ecc7c9;
 }
+body.dark-mode .reel-tray-filter-pill:hover,
+body.dark-theme .reel-tray-filter-pill:hover,
+[data-bs-theme="dark"] .reel-tray-filter-pill:hover {
+  background: rgba(163, 22, 33, 0.2);
+  color: #fca5a5;
+  border-color: rgba(163, 22, 33, 0.4);
+}
 .reel-tray-filter-pill.active {
-  background: #a31621;
+  background: var(--brand-primary, #a31621);
   color: #ffffff;
-  border-color: #a31621;
+  border-color: var(--brand-primary, #a31621);
   box-shadow: 0 2px 8px rgba(163,22,33, 0.28);
 }
 
@@ -102,6 +143,9 @@
   transform: translateY(-4px) scale(1.02);
   box-shadow: 0 10px 24px rgba(163,22,33, 0.25);
   color: #ffffff;
+}
+.reel-fb-card:active {
+  transform: scale(0.97);
 }
 
 /* Ambient Blurred Backdrop (prevents anamorphic stretching on landscape videos) */
@@ -249,15 +293,25 @@
   flex-shrink: 0;
   scroll-snap-align: start;
   cursor: pointer;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface-elevated, #f8fafc);
+  border: 1px solid var(--border-subtle, #e2e8f0);
   display: flex;
   flex-direction: column;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+body.dark-mode .reel-fb-create-card,
+body.dark-theme .reel-fb-create-card,
+[data-bs-theme="dark"] .reel-fb-create-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 .reel-fb-create-card:hover {
   transform: translateY(-4px);
+}
+.reel-fb-create-card:active {
+  transform: scale(0.97);
 }
 .reel-fb-create-top {
   height: 65%;
@@ -278,12 +332,17 @@
 .reel-fb-create-bottom {
   height: 35%;
   width: 100%;
-  background: #ffffff;
+  background: var(--bg-surface, #ffffff);
   position: relative;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   padding-bottom: 10px;
+}
+body.dark-mode .reel-fb-create-bottom,
+body.dark-theme .reel-fb-create-bottom,
+[data-bs-theme="dark"] .reel-fb-create-bottom {
+  background: #1e293b;
 }
 .reel-fb-create-plus {
   position: absolute;
@@ -293,7 +352,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #a31621;
+  background: var(--brand-primary, #a31621);
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -302,15 +361,26 @@
   border: 3px solid #ffffff;
   box-shadow: 0 2px 8px rgba(163,22,33, 0.4);
 }
+body.dark-mode .reel-fb-create-plus,
+body.dark-theme .reel-fb-create-plus,
+[data-bs-theme="dark"] .reel-fb-create-plus {
+  border-color: #1e293b;
+}
 .reel-fb-create-label {
   font-size: 0.75rem;
   font-weight: 800;
-  color: #1e293b;
+  color: var(--text-primary, #1e293b);
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
+  padding: 0 4px;
+}
+body.dark-mode .reel-fb-create-label,
+body.dark-theme .reel-fb-create-label,
+[data-bs-theme="dark"] .reel-fb-create-label {
+  color: #f8fafc !important;
 }
 
 /* =========================================================
@@ -873,16 +943,29 @@
   }
 
   .reels-tray-wrapper {
-    padding: 14px 16px;
+    padding: 12px 14px;
     border-radius: 18px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
+  }
+
+  .reels-tray-scroll {
+    gap: 10px;
+    padding: 4px 2px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
   }
 
   .reel-fb-card,
   .reel-fb-create-card {
-    width: 140px;
-    height: 232px;
-    border-radius: 18px;
+    width: 130px;
+    height: 220px;
+    border-radius: 16px;
+  }
+
+  .reel-tray-icon-badge {
+    width: 32px;
+    height: 32px;
+    font-size: 0.95rem;
   }
 }
 
