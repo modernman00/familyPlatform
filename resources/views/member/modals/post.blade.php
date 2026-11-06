@@ -86,7 +86,7 @@
                             @else
                                 <div class="d-inline-flex align-items-center gap-1.5 mt-1">
                                     <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-2.5 py-1" style="font-size: 0.78rem;">
-                                        <i class="bi bi-shield-check text-primary me-1"></i> Family: #{{ $activeFamCode }}
+                                        <i class="bi bi-shield-check text-primary me-1"></i> #{{ ltrim((string)$activeFamCode, '#') }}
                                     </span>
                                     @if(empty($hasMaternalCode))
                                     <a href="/member/settings?tab=lineage" class="text-decoration-none small text-muted" style="font-size: 0.75rem;" title="Link or create a birth family code to enable dual-lineage posting">

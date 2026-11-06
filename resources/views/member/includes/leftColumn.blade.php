@@ -34,6 +34,9 @@
                          alt="{{ ucwords(strtolower($data['firstName'] ?? '')) }} {{ ucwords(strtolower($data['lastName'] ?? '')) }}" 
                          class="avatar profileImg profile-avatar-interactive shadow-sm" 
                          id="leftColProfileAvatar"
+                         width="105"
+                         height="105"
+                         fetchpriority="high"
                          data-profile-expand="true"
                          data-profile-name="{{ ucwords(strtolower($data['firstName'] ?? '')) }} {{ ucwords(strtolower($data['lastName'] ?? '')) }}"
                          data-profile-subtitle="{{ $leftAvatarSubtitle }}"
@@ -83,13 +86,13 @@
                 <span class="family-code-headline text-uppercase fw-bold mb-1.5" style="font-size: 0.72rem; letter-spacing: 0.08em; color: var(--text-muted, #64748b);">
                     <i class="bi bi-qr-code me-1 opacity-75"></i>{{ $leftMarriedCode !== '' ? __('profile.family_codes_headline', 'Family Codes') : __('profile.family_code_headline', 'Family Code') }}
                 </span>
-                <div class="d-flex flex-column align-items-center gap-2 w-100">
+                <div class="d-flex flex-row flex-wrap justify-content-center align-items-center gap-1.5 w-100">
                     @if($leftMarriedCode !== '')
                         <a href="/organogram/{{ $data['id'] ?? '' }}?mode=canvas&amp;family_code={{ urlencode($leftMarriedCode) }}&amp;lineage=primary"
                            class="family-code-pill family-code-pill--married text-decoration-none"
                            id="marriedFamCodePill"
                            title="{{ __('profile.view_married_tree_tooltip', 'View Married / Household Family Tree') }} (#{{ $leftMarriedCode }})">
-                            <span class="family-code-label me-1.5">{{ __('profile.married_code_short', 'Married') }} -</span>
+                            <span class="family-code-label me-1">{{ __('profile.married_code_short', 'Married') }} -</span>
                             <span class="family-code-value">{{ $leftMarriedCode }}</span>
                         </a>
                     @endif
@@ -98,7 +101,7 @@
                            class="family-code-pill {{ $leftMarriedCode !== '' ? 'family-code-pill--birth' : '' }} text-decoration-none"
                            id="birthFamCodePill"
                            title="{{ __('profile.view_birth_tree_tooltip', 'View Birth / Maiden Family Tree') }} (#{{ $leftEffectiveBirthCode }})">
-                            <span class="family-code-label {{ $leftMarriedCode !== '' ? 'family-code-label--birth' : '' }} me-1.5">{{ __('profile.birth_code_short', 'Birth') }} -</span>
+                            <span class="family-code-label {{ $leftMarriedCode !== '' ? 'family-code-label--birth' : '' }} me-1">{{ __('profile.birth_code_short', 'Birth') }} -</span>
                             <span class="family-code-value {{ $leftMarriedCode !== '' ? 'family-code-value--birth' : '' }}">{{ $leftEffectiveBirthCode }}</span>
                         </a>
                     @endif

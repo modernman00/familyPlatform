@@ -1,0 +1,7 @@
+@font-face {
+  font-family: 'Font Awesome 5 Free';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/public/font-awesome/fonts/fontawesome-webfont.woff2?v=4.6.3') format('woff2');
+}

@@ -3,7 +3,8 @@
 @section('data-page-id', 'profilePage')
 @push('styles')
     <link rel="stylesheet" href="/public/css/profilepage.css?v={{ time() }}">
-    <link rel="stylesheet" href="/public/css/reels.css?v={{ time() }}">
+    <link rel="preload" href="/public/css/reels.css?v={{ time() }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="/public/css/reels.css?v={{ time() }}"></noscript>
 @endpush
 @section('content')
 

@@ -8,7 +8,8 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <!-- Self-Hosted Outfit Font (Headings & Display) -->
   <link rel="preload" href="/public/fonts/outfit/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/public/css/outfit.css?v={{ assetVersion('css/outfit.css') }}">
+  <link rel="preload" href="/public/css/outfit.css?v={{ assetVersion('css/outfit.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/public/css/outfit.css?v={{ assetVersion('css/outfit.css') }}"></noscript>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   
   <!-- PWA & Mobile Web App Capabilities -->

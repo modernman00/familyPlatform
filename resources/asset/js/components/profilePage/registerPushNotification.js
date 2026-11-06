@@ -70,14 +70,22 @@ async function syncToServer(subscription) {
 
 // ---- import-time bootstrap: keep an existing grant in sync -----------------
 if (pushSupported()) {
-  getReadyServiceWorker()
-    .then((swReg) => swReg.pushManager.getSubscription().then((sub) => {
-      if (sub) return syncToServer(sub).catch((e) => console.warn('[push] resync failed', e?.response?.data?.message || e.message));
-      if (Notification.permission === 'granted' && VAPID_PUBLIC_KEY) {
-        return doSubscribe(swReg).catch((e) => console.warn('[push] auto-subscribe skipped', e?.response?.data?.message || e.message));
-      }
-    }))
-    .catch((err) => console.warn('[push] SW ready check failed', err));
+  const runPushSync = () => {
+    getReadyServiceWorker()
+      .then((swReg) => swReg.pushManager.getSubscription().then((sub) => {
+        if (sub) return syncToServer(sub).catch((e) => console.warn('[push] resync failed', e?.response?.data?.message || e.message));
+        if (Notification.permission === 'granted' && VAPID_PUBLIC_KEY) {
+          return doSubscribe(swReg).catch((e) => console.warn('[push] auto-subscribe skipped', e?.response?.data?.message || e.message));
+        }
+      }))
+      .catch((err) => console.warn('[push] SW ready check failed', err));
+  };
+
+  if (typeof window.requestIdleCallback === 'function') {
+    window.requestIdleCallback(runPushSync, { timeout: 3500 });
+  } else {
+    setTimeout(runPushSync, 1500);
+  }
 }
 
 async function doSubscribe(swReg) {

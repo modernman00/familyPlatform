@@ -1557,8 +1557,8 @@ body.dark-mode .family-code-headline {
   background-color: var(--secondary-color);
   border: 1px solid #ecc7c9;
   border-radius: 9999px;
-  padding: 8px 18px;
-  min-height: 44px;
+  padding: 4px 12px;
+  min-height: 28px;
   width: fit-content;
   max-width: 100%;
   display: inline-flex;
@@ -1566,7 +1566,7 @@ body.dark-mode .family-code-headline {
   justify-content: center;
   white-space: nowrap;
   flex-shrink: 0;
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   font-weight: 600;
   font-family: inherit;
   transition: all 0.2s ease;
@@ -1591,7 +1591,7 @@ a.family-code-pill:active {
   text-transform: none;
   font-weight: 600;
   color: #a31621;
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   letter-spacing: normal;
   white-space: nowrap;
   flex-shrink: 0;
@@ -1604,7 +1604,7 @@ a.family-code-pill:active {
 .family-code-value {
   font-weight: 600;
   color: #2a0a0d;
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   letter-spacing: normal;
   white-space: nowrap;
 }
@@ -1634,6 +1634,21 @@ body.dark-mode .family-code-label--birth {
 body.dark-mode .family-code-value,
 body.dark-mode .family-code-value--birth {
   color: #ffffff !important;
+}
+
+@media (min-width: 992px) {
+  .profile-quick-actions {
+    background: linear-gradient(135deg, rgba(163, 22, 33, 0.04) 0%, rgba(225, 29, 72, 0.05) 50%, rgba(245, 158, 11, 0.06) 100%);
+    border: 1px solid rgba(163, 22, 33, 0.12);
+    border-radius: 16px;
+    padding: 12px 10px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  }
+  body.dark-mode .profile-quick-actions,
+  [data-bs-theme="dark"] .profile-quick-actions {
+    background: linear-gradient(135deg, rgba(163, 22, 33, 0.12) 0%, rgba(225, 29, 72, 0.1) 50%, rgba(245, 158, 11, 0.08) 100%);
+    border-color: rgba(163, 22, 33, 0.3);
+  }
 }
 
 /* ==========================================================================

@@ -102,7 +102,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Self-Hosted Typography: Outfit (Geometric Social Style) -->
   <link rel="preload" href="/public/fonts/outfit/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/public/css/outfit.css?v={{ assetVersion('css/outfit.css') }}">
+  <link rel="preload" href="/public/css/outfit.css?v={{ assetVersion('css/outfit.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/public/css/outfit.css?v={{ assetVersion('css/outfit.css') }}"></noscript>
   <link href="/public/css/landing.css" rel="stylesheet">
   <link href="/public/css/standards-v21.css?v={{ assetVersion('css/standards-v21.css') }}" rel="stylesheet">
   <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>

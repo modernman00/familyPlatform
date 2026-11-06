@@ -78,7 +78,15 @@ final class PostDto implements JsonSerializable
     {
         $postNo = (int)($row['post_no'] ?? 0);
         $id = (string)($row['id'] ?? '');
-        $fullName = (string)($row['fullName'] ?? ($row['fullname'] ?? 'Family Member'));
+        $fullName = (string)($row['fullName'] ?? ($row['fullname'] ?? ''));
+        if ($fullName === '' || $fullName === 'Family Member') {
+            if (!empty($row['personalFullName']) && is_string($row['personalFullName'])) {
+                $fullName = trim($row['personalFullName']);
+            }
+        }
+        if ($fullName === '') {
+            $fullName = 'Family Member';
+        }
         $message = (string)($row['postMessage'] ?? ($row['content'] ?? ''));
         if ($message !== '') {
             $message = (string)preg_replace('/&amp;(#\d+|#x[0-9a-f]+|[a-z]+);/iu', '&$1;', $message);

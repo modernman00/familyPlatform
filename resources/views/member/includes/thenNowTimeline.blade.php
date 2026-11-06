@@ -59,57 +59,65 @@
         f.appendChild(imgWrapper); f.appendChild(c);
         return f;
     };
-    fetch('/api/members/' + encodeURIComponent(@json((string)($memberId ?? ''))) + '/then-now', { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (body) {
-            var items = (body && body.data && Array.isArray(body.data.items)) ? body.data.items : [];
-            if (!items.length) {
-                if (emptyEl) emptyEl.classList.remove('d-none');
-                root.classList.remove('d-none');
-                return;
-            }
-            items.forEach(function (it, idx) {
-                var card = document.createElement('div');
-                card.className = 'then-now-timeline__pair position-relative';
-                card.setAttribute('role', 'button');
-                card.setAttribute('tabindex', '0');
-                card.setAttribute('aria-label', 'View and expand Then & Now comparison between ' + (it.before_label || 'Then') + ' and ' + (it.after_label || 'Now'));
-                card.title = 'Click to expand comparison';
+    var loadThenNowTimeline = function () {
+        fetch('/api/members/' + encodeURIComponent(@json((string)($memberId ?? ''))) + '/then-now', { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (body) {
+                var items = (body && body.data && Array.isArray(body.data.items)) ? body.data.items : [];
+                if (!items.length) {
+                    if (emptyEl) emptyEl.classList.remove('d-none');
+                    root.classList.remove('d-none');
+                    return;
+                }
+                items.forEach(function (it, idx) {
+                    var card = document.createElement('div');
+                    card.className = 'then-now-timeline__pair position-relative';
+                    card.setAttribute('role', 'button');
+                    card.setAttribute('tabindex', '0');
+                    card.setAttribute('aria-label', 'View and expand Then & Now comparison between ' + (it.before_label || 'Then') + ' and ' + (it.after_label || 'Now'));
+                    card.title = 'Click to expand comparison';
 
-                card.appendChild(fig(it.before_img, it.before_label || 'Then', 'Then photo'));
-                card.appendChild(fig(it.after_img, it.after_label || 'Now', 'Now photo'));
+                    card.appendChild(fig(it.before_img, it.before_label || 'Then', 'Then photo'));
+                    card.appendChild(fig(it.after_img, it.after_label || 'Now', 'Now photo'));
 
-                // Visual tap-to-expand badge overlay
-                var pill = document.createElement('div');
-                pill.className = 'then-now-timeline__expand-pill';
-                pill.innerHTML = '<span class="badge rounded-pill bg-dark bg-opacity-75 text-white shadow-sm d-inline-flex align-items-center gap-1" style="font-size: 0.72rem; padding: 4px 10px;"><i class="bi bi-arrows-angle-expand"></i> Expand</span>';
-                card.appendChild(pill);
+                    // Visual tap-to-expand badge overlay
+                    var pill = document.createElement('div');
+                    pill.className = 'then-now-timeline__expand-pill';
+                    pill.innerHTML = '<span class="badge rounded-pill bg-dark bg-opacity-75 text-white shadow-sm d-inline-flex align-items-center gap-1" style="font-size: 0.72rem; padding: 4px 10px;"><i class="bi bi-arrows-angle-expand"></i> Expand</span>';
+                    card.appendChild(pill);
 
-                card.addEventListener('click', function () {
-                    if (typeof window.triggerHaptic === 'function') window.triggerHaptic('selection');
-                    if (window.__expandThenNowTimeline) {
-                        window.__expandThenNowTimeline(items, idx);
-                    }
-                });
-
-                card.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
+                    card.addEventListener('click', function () {
                         if (typeof window.triggerHaptic === 'function') window.triggerHaptic('selection');
                         if (window.__expandThenNowTimeline) {
                             window.__expandThenNowTimeline(items, idx);
                         }
-                    }
-                });
+                    });
 
-                list.appendChild(card);
+                    card.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            if (typeof window.triggerHaptic === 'function') window.triggerHaptic('selection');
+                            if (window.__expandThenNowTimeline) {
+                                window.__expandThenNowTimeline(items, idx);
+                            }
+                        }
+                    });
+
+                    list.appendChild(card);
+                });
+                root.classList.remove('d-none');
+            })
+            .catch(function () {
+                if (emptyEl) emptyEl.classList.remove('d-none');
+                root.classList.remove('d-none');
             });
-            root.classList.remove('d-none');
-        })
-        .catch(function () {
-            if (emptyEl) emptyEl.classList.remove('d-none');
-            root.classList.remove('d-none');
-        });
+    };
+
+    if (typeof window.requestIdleCallback === 'function') {
+        window.requestIdleCallback(loadThenNowTimeline, { timeout: 3500 });
+    } else {
+        setTimeout(loadThenNowTimeline, 1200);
+    }
 })();
 </script>
 <style>

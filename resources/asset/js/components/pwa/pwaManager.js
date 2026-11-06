@@ -43,23 +43,32 @@ class PWAManager {
     if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return;
     if (Notification.permission !== 'granted') return;
 
-    navigator.serviceWorker.ready.then((reg) => {
-      reg.pushManager.getSubscription().then((sub) => {
-        if (sub) {
-          this.syncSubscriptionToServer(sub);
-        } else {
-          const vapidKey = document.querySelector('meta[name="vapid-public-key"]')?.getAttribute('content');
-          if (vapidKey) {
-            reg.pushManager.subscribe({
-              userVisibleOnly: true,
-              applicationServerKey: this.urlBase64ToUint8Array(vapidKey)
-            }).then((newSub) => {
-              this.syncSubscriptionToServer(newSub);
-            }).catch((err) => console.warn('[PWA PushAutoSync] subscribe failed:', err));
+    // Defer heavy Push Manager negotiation off the main thread evaluation path
+    const scheduleSync = () => {
+      navigator.serviceWorker.ready.then((reg) => {
+        reg.pushManager.getSubscription().then((sub) => {
+          if (sub) {
+            this.syncSubscriptionToServer(sub);
+          } else {
+            const vapidKey = document.querySelector('meta[name="vapid-public-key"]')?.getAttribute('content');
+            if (vapidKey) {
+              reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: this.urlBase64ToUint8Array(vapidKey)
+              }).then((newSub) => {
+                this.syncSubscriptionToServer(newSub);
+              }).catch((err) => console.warn('[PWA PushAutoSync] subscribe failed:', err));
+            }
           }
-        }
-      }).catch((err) => console.warn('[PWA PushAutoSync] getSubscription failed:', err));
-    }).catch((err) => console.warn('[PWA PushAutoSync] SW ready failed:', err));
+        }).catch((err) => console.warn('[PWA PushAutoSync] getSubscription failed:', err));
+      }).catch((err) => console.warn('[PWA PushAutoSync] SW ready failed:', err));
+    };
+
+    if (typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(scheduleSync, { timeout: 3500 });
+    } else {
+      setTimeout(scheduleSync, 1500);
+    }
   }
 
   urlBase64ToUint8Array(base64String) {

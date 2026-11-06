@@ -154,9 +154,10 @@ class FeedRepository
     public function getPostByNo(int $postNo, ?string $currentUserId = null): ?PostDto
     {
         try {
-            $query = "SELECT post.*, pp.img
+            $query = "SELECT post.*, pp.img, NULLIF(TRIM(CONCAT(COALESCE(p_author.firstName, ''), ' ', COALESCE(p_author.lastName, ''))), '') AS personalFullName
                 FROM post
                 LEFT JOIN profilePics pp ON post.id = pp.id
+                LEFT JOIN personal p_author ON post.id = p_author.id
                 WHERE post.post_no = ?
                 AND post.date_deleted IS NULL
                 LIMIT 1";
@@ -208,9 +209,10 @@ class FeedRepository
                 ? "post.postFamCode IN ($inQuery)"
                 : "1 = 0";
 
-            $query = "SELECT post.*, pp.img, rm.requester_id, rm.approver_id, rm.status, rm.requesterCode
+            $query = "SELECT post.*, pp.img, rm.requester_id, rm.approver_id, rm.status, rm.requesterCode, NULLIF(TRIM(CONCAT(COALESCE(p_author.firstName, ''), ' ', COALESCE(p_author.lastName, ''))), '') AS personalFullName
                 FROM post
                 LEFT JOIN profilePics pp ON post.id = pp.id
+                LEFT JOIN personal p_author ON post.id = p_author.id
                 LEFT JOIN (
                     SELECT requester_id, approver_id, status, requesterCode
                     FROM requestMgt
@@ -294,9 +296,10 @@ class FeedRepository
                 ? "post.postFamCode IN ($inQuery)"
                 : "1 = 0";
 
-            $query = "SELECT post.*, pp.img, rm.requester_id, rm.approver_id, rm.status, rm.requesterCode
+            $query = "SELECT post.*, pp.img, rm.requester_id, rm.approver_id, rm.status, rm.requesterCode, NULLIF(TRIM(CONCAT(COALESCE(p_author.firstName, ''), ' ', COALESCE(p_author.lastName, ''))), '') AS personalFullName
                 FROM post
                 LEFT JOIN profilePics pp ON post.id = pp.id
+                LEFT JOIN personal p_author ON post.id = p_author.id
                 LEFT JOIN (
                     SELECT requester_id, approver_id, status, requesterCode
                     FROM requestMgt

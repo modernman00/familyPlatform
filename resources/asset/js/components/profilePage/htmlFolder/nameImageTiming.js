@@ -13,7 +13,8 @@ const postedAt = (date) => {
 }
 
 const familyBadge = (famCode) => {
-  return famCode ? `<span class="w3-badge w3-small w3-blue w3-margin-left" style="font-weight: normal; padding: 2px 6px;">Family: ${esc(famCode)}</span>` : '';
+  const clean = famCode ? String(famCode).replace(/^#+/, '') : '';
+  return clean ? `<span class="w3-badge w3-small w3-blue w3-margin-left" style="font-weight: normal; padding: 2px 6px;">#${esc(clean)}</span>` : '';
 }
 
 export const nameImgTiming = (data) => {

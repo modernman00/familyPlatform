@@ -11,7 +11,10 @@
             <div class="ig-story-item" role="button" tabindex="0" data-bs-toggle="modal" data-bs-target="#createReelModal" aria-label="Add to your family story">
                 <div class="ig-story-avatar-wrap is-self">
                     <img src="{{ !empty($data['img']) ? (str_starts_with($data['img'], '/') ? $data['img'] : '/resources/images/profile/' . $data['img']) : '/resources/images/profile/avatarM.png' }}" 
-                         alt="Your Story" 
+                         alt="" 
+                         aria-hidden="true"
+                         width="56"
+                         height="56"
                          class="ig-story-avatar">
                     <div class="ig-story-plus-badge" title="Add Moment">
                         <i class="bi bi-plus-lg"></i>
@@ -33,10 +36,14 @@
                 @endphp
                 <a href="/reels?id={{ $firstReelId }}" 
                    class="ig-story-item"
-                   title="{{ $momentsLabel }}">
+                   title="{{ $momentsLabel }}"
+                   aria-label="{{ $momentsLabel }}">
                     <div class="ig-story-avatar-wrap {{ $isBirthday ? 'is-gold' : 'is-active' }}">
                         <img src="{{ $creatorAvatar }}" 
-                             alt="{{ $creatorFirstName }}" 
+                             alt="" 
+                             aria-hidden="true"
+                             width="56"
+                             height="56"
                              class="ig-story-avatar" 
                              loading="lazy" 
                              onerror="this.src='/resources/images/profile/avatarM.png'">

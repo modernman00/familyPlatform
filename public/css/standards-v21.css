@@ -1987,15 +1987,35 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, 
     display: none !important;
   }
 
+  .profile-quick-actions {
+    background: linear-gradient(135deg, rgba(163, 22, 33, 0.05) 0%, rgba(225, 29, 72, 0.06) 50%, rgba(245, 158, 11, 0.08) 100%);
+    border: 1px solid rgba(163, 22, 33, 0.15);
+    border-radius: 16px;
+    padding: 12px 10px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  }
+  body.dark-mode .profile-quick-actions,
+  [data-bs-theme="dark"] .profile-quick-actions {
+    background: linear-gradient(135deg, rgba(163, 22, 33, 0.14) 0%, rgba(225, 29, 72, 0.12) 50%, rgba(245, 158, 11, 0.1) 100%);
+    border-color: rgba(163, 22, 33, 0.35);
+  }
+
   .profile-quick-toggle {
     min-height: 44px;
     white-space: nowrap;
     flex-shrink: 0;
-    border: 1px solid var(--border-color, #dddfe2);
-    border-radius: 12px;
-    background: transparent;
-    color: var(--text-color, #1c1e21);
-    transition: transform var(--motion-fast, 150ms) var(--ease, ease);
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #a31621 0%, #e11d48 50%, #f59e0b 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(163, 22, 33, 0.35);
+    transition: transform var(--motion-fast, 150ms) var(--ease, ease), box-shadow var(--motion-fast, 150ms) var(--ease, ease);
+  }
+
+  .profile-quick-toggle:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 6px 18px rgba(163, 22, 33, 0.45);
+    color: #ffffff !important;
   }
 
   .profile-quick-toggle:active {
@@ -2004,6 +2024,7 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, 
 
   .profile-quick-chevron {
     transition: transform var(--motion-base, 250ms) var(--ease, ease);
+    color: #ffffff !important;
   }
 
   .profile-quick-toggle[aria-expanded="true"] .profile-quick-chevron {
@@ -2051,20 +2072,21 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, 
   }
 }
 
-/* 2. Instagram Mobile Story Circles (< 768px) */
+/* 2. Unified Reels / Stories Cards on Mobile (< 768px) */
 .ig-stories-tray {
-  margin-bottom: 12px;
-  padding: 6px 0;
+  margin-bottom: 14px;
+  padding: 6px 0 10px 0;
   border-bottom: 1px solid var(--border-subtle, #e2e8f0);
 }
 
 .ig-stories-scroll {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   padding: 4px 6px;
+  scroll-snap-type: x proximity;
 }
 .ig-stories-scroll::-webkit-scrollbar {
   display: none;
@@ -2077,31 +2099,34 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, 
   gap: 6px;
   text-decoration: none;
   flex-shrink: 0;
-  width: 84px;
-  min-height: 110px;
+  width: 104px;
+  min-height: 168px;
   cursor: pointer;
   background: transparent;
   border: none;
   padding: 0;
+  scroll-snap-align: start;
 }
 
 .ig-story-avatar-wrap {
   position: relative;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
+  width: 104px;
+  height: 156px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 3px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+  overflow: hidden;
+  background: #0f172a;
 }
 .ig-story-avatar-wrap:active {
-  transform: scale(0.94);
+  transform: scale(0.96);
 }
 
-/* Instagram Multi-Colour Living Conic Gradient Ring */
+/* Multi-Colour Living Conic Gradient Border Frame */
 .ig-story-avatar-wrap.is-active {
   background: conic-gradient(from 180deg at 50% 50%, var(--brand-primary, #a31621) 0deg, #e11d48 90deg, var(--accent-gold, #f59e0b) 180deg, #e11d48 270deg, var(--brand-primary, #a31621) 360deg);
 }
@@ -2113,16 +2138,22 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, 
 
 /* Self / Add Story Ring */
 .ig-story-avatar-wrap.is-self {
-  background: transparent;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 1px solid #cbd5e1;
   padding: 0;
+}
+body.dark-mode .ig-story-avatar-wrap.is-self,
+[data-bs-theme="dark"] .ig-story-avatar-wrap.is-self {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-color: #334155;
 }
 
 .ig-story-avatar {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 13px;
   object-fit: cover;
-  border: 2.5px solid #ffffff;
+  border: none;
   display: block;
   background-color: #f1f5f9;
 }
@@ -2134,20 +2165,20 @@ body.dark-theme .ig-story-avatar {
 
 .ig-story-plus-badge {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 26px;
-  height: 26px;
+  bottom: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background-color: #0095f6;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2.5px solid #ffffff;
+  border: 2px solid #ffffff;
   font-size: 15px;
   font-weight: 700;
-  box-shadow: 0 2px 6px rgba(0, 149, 246, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 149, 246, 0.5);
 }
 body.dark-mode .ig-story-plus-badge,
 body.dark-theme .ig-story-plus-badge {
@@ -2156,8 +2187,8 @@ body.dark-theme .ig-story-plus-badge {
 
 .ig-story-count-badge {
   position: absolute;
-  top: -2px;
-  right: -2px;
+  top: 6px;
+  right: 6px;
   min-width: 22px;
   height: 22px;
   padding: 0 6px;
@@ -2180,9 +2211,9 @@ body.dark-theme .ig-story-count-badge {
 
 .ig-story-label {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-color, #262626);
-  max-width: 84px;
+  max-width: 104px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -3647,6 +3678,26 @@ video.feed-post-video::-webkit-media-controls-play-button,
 .notifications-dropdown {
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
+}
+
+/* 5. WCAG AA Contrast Hardening for Subtle Badges */
+.badge.bg-secondary-subtle,
+.badge.bg-secondary-subtle.text-secondary-emphasis,
+.badge.bg-secondary-subtle.text-secondary {
+  background-color: #e2e8f0 !important;
+  color: #1e293b !important; /* > 7:1 WCAG AAA Contrast */
+  border: 1px solid #cbd5e1 !important;
+}
+
+[data-bs-theme="dark"] .badge.bg-secondary-subtle,
+[data-bs-theme="dark"] .badge.bg-secondary-subtle.text-secondary-emphasis,
+[data-bs-theme="dark"] .badge.bg-secondary-subtle.text-secondary,
+.dark .badge.bg-secondary-subtle,
+.dark .badge.bg-secondary-subtle.text-secondary-emphasis,
+.dark .badge.bg-secondary-subtle.text-secondary {
+  background-color: #334155 !important;
+  color: #f8fafc !important; /* > 7:1 WCAG AAA Contrast */
+  border: 1px solid #475569 !important;
 }
 
 

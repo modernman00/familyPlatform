@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Xx",
+    "title": "UI design standards v2.1 and telemetry telemetry enhancements",
     "notes": [
-        "Xx",
-        "Perf/a11y(profile): stop reel tiles pre-downloading video, fix touch targets, contrast and meta description",
-        "Perf(layout): preconnect to CDNs and defer the Font Awesome kit on the profile layout"
+        "UI design standards v2.1 and telemetry telemetry enhancements",
+        "Perf(cache): cache web fonts for a year",
+        "Perf(css): self-host Bootstrap 5.3.0-alpha1 CSS and Bootstrap Icons 1.10.3"
     ],
     "released_at": "2026-11-05",
-    "commit": "18cdcce0"
+    "commit": "33031f81"
 }

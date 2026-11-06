@@ -83,8 +83,8 @@
 
 /* Facebook-Style Vertical Reels Card */
 .reel-fb-card {
-  width: 122px;
-  height: 204px;
+  width: 136px;
+  height: 226px;
   aspect-ratio: 9 / 16;
   border-radius: 18px;
   position: relative;
@@ -240,8 +240,8 @@
 
 /* Create Reel Card (First Card in Tray) */
 .reel-fb-create-card {
-  width: 122px;
-  height: 204px;
+  width: 136px;
+  height: 226px;
   aspect-ratio: 9 / 16;
   border-radius: 18px;
   position: relative;
@@ -880,9 +880,9 @@
 
   .reel-fb-card,
   .reel-fb-create-card {
-    width: 130px;
-    height: 215px;
-    border-radius: 16px;
+    width: 140px;
+    height: 232px;
+    border-radius: 18px;
   }
 }
 

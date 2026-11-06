@@ -3,7 +3,8 @@
 @section('data-page-id', 'getProfilePage')
 {{-- custom css --}}
 @push('styles')
-    <link rel="stylesheet" href="/public/css/outfit.css">
+    <link rel="preload" href="/public/css/outfit.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="/public/css/outfit.css"></noscript>
     <link rel="stylesheet" href="/public/css/seeProfile.css?v={{ time() }}">
 @endpush
 

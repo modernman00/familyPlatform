@@ -23,7 +23,7 @@
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <div class="d-flex align-items-center flex-wrap">
-            <h6 class="mb-0 fw-semibold text-dark" style="font-size: 1.05rem;" x-text="post.fullName"></h6>
+            <h3 class="h6 mb-0 fw-semibold text-dark" style="font-size: 1.05rem;" x-text="post.fullName"></h3>
             <template x-if="post.is_official || post.id === '{{ \App\services\FamilyPlatformAccountService::getAccountId() }}'">
               <span class="badge rounded-pill text-white ms-1.5 px-2 py-0.5 d-inline-flex align-items-center gap-1 shadow-2xs" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); font-size: 0.72rem; font-weight: 600;" title="Verified FamilyPlatform Account">
                 <i class="bi bi-patch-check-fill" style="color: #ffffff; font-size: 0.75rem;"></i>
@@ -86,7 +86,7 @@
                     :style="post.target_scope === 'birth' ? 'color: #7f1d1d !important; background-color: #fee2e2 !important; border-color: #fca5a5 !important;' : (post.target_scope === 'married' ? 'color: #14532d !important; background-color: #dcfce7 !important; border-color: #86efac !important;' : '')"
                     style="font-size: 0.78rem; font-weight: normal; padding: 2px 8px;">
                 <i class="bi me-1" :class="post.target_scope === 'birth' ? 'bi-heart-pulse-fill' : (post.target_scope === 'married' ? 'bi-house-heart-fill' : 'bi-people')"></i>
-                <span x-text="(post.target_scope === 'birth' ? 'Birth Family: ' : (post.target_scope === 'married' ? 'Married Family: ' : (window.__ ? window.__('feed.family_label', 'Family') : 'Family') + ': ')) + post.postFamCode"></span>
+                <span x-text="'#' + String(post.postFamCode).replace(/^#+/, '')"></span>
               </span>
             </template>
           </div>
@@ -1064,19 +1064,22 @@
                  isCardLandscape: (vid.type !== 'direct'),
                  cardAspect: (vid.type !== 'direct' ? '16 / 9' : '4 / 5'),
                  detectCardDimensions(el) {
-                   if (!el || !el.videoWidth || !el.videoHeight) return;
-                   this.hasCardMetadata = true;
-                   const r = el.videoWidth / el.videoHeight;
-                   if (r > 1.15) {
-                     this.isCardLandscape = true;
-                     this.cardAspect = (el.videoWidth / el.videoHeight).toFixed(4) + ' / 1';
-                   } else if (r < 0.88) {
-                     this.isCardLandscape = false;
-                     this.cardAspect = (r <= 0.65) ? '9 / 16' : (el.videoWidth / el.videoHeight).toFixed(4) + ' / 1';
-                   } else {
-                     this.isCardLandscape = false;
-                     this.cardAspect = '1 / 1';
-                   }
+                   if (!el) return;
+                   requestAnimationFrame(() => {
+                     if (!el.videoWidth || !el.videoHeight) return;
+                     this.hasCardMetadata = true;
+                     const r = el.videoWidth / el.videoHeight;
+                     if (r > 1.15) {
+                       this.isCardLandscape = true;
+                       this.cardAspect = (el.videoWidth / el.videoHeight).toFixed(4) + ' / 1';
+                     } else if (r < 0.88) {
+                       this.isCardLandscape = false;
+                       this.cardAspect = (r <= 0.65) ? '9 / 16' : (el.videoWidth / el.videoHeight).toFixed(4) + ' / 1';
+                     } else {
+                       this.isCardLandscape = false;
+                       this.cardAspect = '1 / 1';
+                     }
+                   });
                  },
                  togglePlay(vEl) {
                    if (!vEl) return;
@@ -1153,6 +1156,8 @@
                 <video referrerpolicy="no-referrer" class="w-100 h-100 position-absolute top-0 start-0"
                        :src="vid.embedUrl"
                        :poster="(!hasCardMetadata && vid.thumbnailUrl) ? vid.thumbnailUrl : null"
+                       width="640"
+                       height="360"
                        playsinline
                        webkit-playsinline
                        muted
@@ -1165,7 +1170,9 @@
                        @pause="isPlaying = false"
                        @ended="onVideoEnded(vIdx, $el)"
                        @timeupdate="onTimeUpdate($el)"
-                       style="object-fit: cover !important; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 2; cursor: pointer; border-radius: 12px; background: transparent;"></video>
+                       style="object-fit: cover !important; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 2; cursor: pointer; border-radius: 12px; background: transparent;">
+                  <track kind="captions" srclang="en" label="English Captions">
+                </video>
 
                 <!-- Bottom Scrubber Bar -->
                 <div class="position-absolute bottom-0 start-0 w-100" style="height: 4px; background: rgba(255, 255, 255, 0.2); z-index: 5;">

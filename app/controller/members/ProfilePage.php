@@ -345,9 +345,22 @@ final class ProfilePage extends ProcessImg
                 $arEmoji = null;
             }
 
+            $resolvedFullName = trim(($_SESSION['fName'] ?? '') . ' ' . ($_SESSION['lName'] ?? ''));
+            if ($resolvedFullName === '') {
+                $pStmt = \Src\Db::connect2()->prepare("SELECT CONCAT(TRIM(COALESCE(firstName, '')), ' ', TRIM(COALESCE(lastName, ''))) as name FROM personal WHERE id = ? LIMIT 1");
+                $pStmt->execute([$id]);
+                $dbName = trim((string)$pStmt->fetchColumn());
+                if ($dbName !== '') {
+                    $resolvedFullName = $dbName;
+                    $parts = explode(' ', $dbName, 2);
+                    $_SESSION['fName'] = $parts[0] ?? '';
+                    $_SESSION['lName'] = $parts[1] ?? '';
+                }
+            }
+
             $newInput = [
                 'id' => $id,
-                'fullName' => $_SESSION['fName'] . " " . $_SESSION['lName'],
+                'fullName' => $resolvedFullName !== '' ? $resolvedFullName : 'Family Member',
                 'profileImg' => Post::getProfilePicsById($id) ?: 'avatarM.png',
                 'post_time' => milliSeconds(),
                 'postFamCode' => $userFamCode,
@@ -869,9 +882,22 @@ final class ProfilePage extends ProcessImg
                 );
             }
 
+            $resolvedCommenterName = trim(($_SESSION['fName'] ?? '') . ' ' . ($_SESSION['lName'] ?? ''));
+            if ($resolvedCommenterName === '') {
+                $pStmt = \Src\Db::connect2()->prepare("SELECT CONCAT(TRIM(COALESCE(firstName, '')), ' ', TRIM(COALESCE(lastName, ''))) as name FROM personal WHERE id = ? LIMIT 1");
+                $pStmt->execute([$id]);
+                $dbName = trim((string)$pStmt->fetchColumn());
+                if ($dbName !== '') {
+                    $resolvedCommenterName = $dbName;
+                    $parts = explode(' ', $dbName, 2);
+                    $_SESSION['fName'] = $parts[0] ?? '';
+                    $_SESSION['lName'] = $parts[1] ?? '';
+                }
+            }
+
             $newInput = [
                 'id' => $id,
-                'fullName' => $_SESSION['fName'] . " " . $_SESSION['lName'],
+                'fullName' => $resolvedCommenterName !== '' ? $resolvedCommenterName : 'Family Member',
                 'profileImg' => Post::getProfilePicsById($id) ?: 'avatarM.png',
                 'post_time' => milliSeconds()
             ];

@@ -152,14 +152,14 @@ it("clusterReelsByCreator prioritizes requested reel and its creator cluster", f
 // -------------------------------------------------------------
 // Test 3: CSS Scale & Mobile Ergonomics Verification
 // -------------------------------------------------------------
-it("standards-v21.css enforces mobile bubble expansion (>= 78px wrap, >= 70px avatar)", function() {
+it("standards-v21.css enforces mobile card expansion (>= 78px wrap, >= 70px or 100% card avatar)", function() {
     $css = file_get_contents(__DIR__ . '/../public/css/standards-v21.css');
 
-    if (!preg_match('/\.ig-story-avatar-wrap\s*\{[^}]*width:\s*(7[8-9]|8[0-9]|9[0-9])px/i', $css)) {
+    if (!preg_match('/\.ig-story-avatar-wrap\s*\{[^}]*width:\s*(7[8-9]|8[0-9]|9[0-9]|1[0-9]{2})px/i', $css)) {
         throw new \Exception("Expected .ig-story-avatar-wrap width >= 78px");
     }
-    if (!preg_match('/\.ig-story-avatar\s*\{[^}]*width:\s*(7[0-9]|8[0-9])px/i', $css)) {
-        throw new \Exception("Expected .ig-story-avatar width >= 70px");
+    if (!preg_match('/\.ig-story-avatar\s*\{[^}]*width:\s*(7[0-9]|8[0-9]|9[0-9]|100%)/i', $css)) {
+        throw new \Exception("Expected .ig-story-avatar width >= 70px or 100%");
     }
     if (!str_contains($css, '.ig-story-count-badge')) {
         throw new \Exception("Expected .ig-story-count-badge definition in standards-v21.css");
