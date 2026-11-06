@@ -238,7 +238,34 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
     const videoFiles = rawSelectedFiles.filter(f => (f.type && f.type.startsWith('video/')) || /\.(mp4|webm|mov|ogg)$/i.test(f.name || ''));
     const imageOnlyFiles = rawSelectedFiles.filter(f => !videoFiles.includes(f));
 
-    if (videoFiles.length > 0) {
+    // Link-first nudge: large raw videos are costly to store and stream, so invite the user to share a link instead.
+    const nudgeThresholdBytes = 10 * 1024 * 1024;
+    const largeVideo = videoFiles.some(f => f.size >= nudgeThresholdBytes);
+    let videoFilesToProcess = videoFiles;
+    if (largeVideo) {
+      const choice = await Swal.fire({
+        icon: 'info',
+        title: 'Big video? Share it as a link instead',
+        html: 'Paste a <strong>Google Photos</strong>, YouTube or Vimeo link into your post. It appears instantly and plays in full quality, with no waiting for an upload.<br><small>In Google Photos: open the video, tap Share, then Create link, and paste it here.</small>',
+        showCancelButton: true,
+        showDenyButton: true,
+        confirmButtonText: 'Paste a link',
+        denyButtonText: 'Upload anyway',
+        cancelButtonText: 'Cancel',
+        focusConfirm: true,
+      });
+      const decision = choice.isConfirmed ? 'link' : (choice.isDenied ? 'upload' : 'cancel');
+      document.dispatchEvent(new CustomEvent('video-link-nudge', { detail: { decision, count: videoFiles.length } }));
+      if (decision !== 'upload') {
+        videoFilesToProcess = [];
+        if (decision === 'link') {
+          const editor = document.getElementById('postMessageEditor');
+          if (editor) editor.focus();
+        }
+      }
+    }
+
+    if (videoFilesToProcess.length > 0) {
       const remainingAllowance = 3 - attachedVideos.length;
       if (remainingAllowance <= 0) {
         Swal.fire({
@@ -249,8 +276,8 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
           showConfirmButton: false
         });
       } else {
-        const allowedVideos = videoFiles.slice(0, remainingAllowance);
-        if (videoFiles.length > remainingAllowance) {
+        const allowedVideos = videoFilesToProcess.slice(0, remainingAllowance);
+        if (videoFilesToProcess.length > remainingAllowance) {
           Swal.fire({
             icon: 'info',
             title: 'Maximum 3 Videos',
