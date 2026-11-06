@@ -31,6 +31,11 @@ export function profileFeed(opts = {}) {
         videoModalProgress: 0,
         videoModalCurrentTime: '0:00',
         videoModalDuration: '0:00',
+        videoModalRemainingTime: '-0:00',
+        videoModalSpeed: 1,
+        videoModalHasFrame: false,
+        videoModalIsPortrait: true,
+        videoModalPost: null,
         videoModalFullscreen: false,
         touchStartX: 0,
         touchStartY: 0,
@@ -2586,7 +2591,7 @@ export function profileFeed(opts = {}) {
             document.body.style.overflow = ''; // Restore background scrolling
         },
 
-        openVideoModal(videos, index = 0, initialMuted = false) {
+        openVideoModal(videos, index = 0, initialMuted = false, postObj = null) {
             let list = [];
             if (Array.isArray(videos)) {
                 list = videos.filter(v => v && (v.embedUrl || typeof v === 'string'));
@@ -2597,6 +2602,13 @@ export function profileFeed(opts = {}) {
             }
 
             if (list.length === 0) return;
+
+            // Pause any background feed videos before launching full-screen mode
+            document.querySelectorAll('video').forEach(v => {
+                if (v.id !== 'fullVideoModalPlayer' && !v.paused) {
+                    try { v.pause(); } catch (e) {}
+                }
+            });
 
             // Normalize entries
             list = list.map(v => {
@@ -2619,11 +2631,19 @@ export function profileFeed(opts = {}) {
             this.videoModalProgress = 0;
             this.videoModalCurrentTime = '0:00';
             this.videoModalDuration = '0:00';
+            this.videoModalRemainingTime = '-0:00';
+            this.videoModalSpeed = 1;
+            this.videoModalHasFrame = false;
+            this.videoModalIsPortrait = true;
+            this.videoModalPost = postObj || null;
             this.videoModalOpen = true;
             document.body.style.overflow = 'hidden';
 
             this.$nextTick(() => {
                 this.syncVideoModalPlayback();
+                setTimeout(() => {
+                    if (this.videoModalOpen) this.syncVideoModalPlayback();
+                }, 60);
             });
         },
 
@@ -2633,6 +2653,8 @@ export function profileFeed(opts = {}) {
             this.videoModalVideos = [];
             this.videoModalIndex = 0;
             this.videoModalPlaying = false;
+            this.videoModalHasFrame = false;
+            this.videoModalPost = null;
             document.body.style.overflow = '';
             if (document.fullscreenElement || document.webkitFullscreenElement) {
                 try {
@@ -2642,33 +2664,66 @@ export function profileFeed(opts = {}) {
             }
         },
 
-        syncVideoModalPlayback() {
+        getVideoModalElement() {
+            const direct = document.getElementById('fullVideoModalPlayer');
+            if (direct) return direct;
             const container = document.getElementById('fullVideoModalStage');
-            if (!container) return;
-            const vEl = container.querySelector('video');
-            if (vEl) {
-                vEl.muted = this.videoModalMuted;
-                const activeVid = this.videoModalVideos[this.videoModalIndex];
-                if (activeVid && typeof activeVid.trimStart === 'number' && activeVid.trimStart > 0) {
-                    vEl.currentTime = activeVid.trimStart;
-                } else {
-                    vEl.currentTime = 0;
+            return container ? container.querySelector('video') : null;
+        },
+
+        onVideoModalMetadata(vEl) {
+            if (!vEl) return;
+            if (vEl.videoWidth && vEl.videoHeight) {
+                this.videoModalIsPortrait = (vEl.videoHeight >= vEl.videoWidth * 0.95);
+            }
+            if (vEl.duration && !isNaN(vEl.duration)) {
+                this.videoModalDuration = this.formatVideoTime(vEl.duration);
+                const rem = Math.max(0, vEl.duration - (vEl.currentTime || 0));
+                this.videoModalRemainingTime = '-' + this.formatVideoTime(rem);
+            }
+        },
+
+        syncVideoModalPlayback() {
+            const vEl = this.getVideoModalElement();
+            if (!vEl) return;
+
+            vEl.muted = this.videoModalMuted;
+            vEl.playbackRate = this.videoModalSpeed || 1;
+            const activeVid = this.videoModalVideos[this.videoModalIndex];
+            if (vEl.paused) {
+                if (activeVid && typeof activeVid.trimStart === 'number' && activeVid.trimStart > 0 && vEl.currentTime < activeVid.trimStart) {
+                    try { vEl.currentTime = activeVid.trimStart; } catch (e) {}
                 }
-                const playPromise = vEl.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        this.videoModalPlaying = true;
-                    }).catch(() => {
-                        this.videoModalPlaying = false;
-                    });
+                const attemptPlay = () => {
+                    const playPromise = vEl.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            this.videoModalPlaying = true;
+                            this.videoModalHasFrame = true;
+                        }).catch(() => {
+                            // Browser blocked unmuted playback -> fallback to muted autoplay immediately
+                            vEl.muted = true;
+                            this.videoModalMuted = true;
+                            vEl.play().then(() => {
+                                this.videoModalPlaying = true;
+                                this.videoModalHasFrame = true;
+                            }).catch(() => {
+                                this.videoModalPlaying = false;
+                            });
+                        });
+                    }
+                };
+                if (vEl.readyState >= 2) {
+                    attemptPlay();
+                } else {
+                    vEl.addEventListener('loadeddata', () => attemptPlay(), { once: true });
+                    attemptPlay();
                 }
             }
         },
 
         pauseVideoModalPlayback() {
-            const container = document.getElementById('fullVideoModalStage');
-            if (!container) return;
-            const vEl = container.querySelector('video');
+            const vEl = this.getVideoModalElement();
             if (vEl) {
                 try { vEl.pause(); } catch (e) {}
             }
@@ -2677,6 +2732,7 @@ export function profileFeed(opts = {}) {
         nextVideoModal() {
             if (this.videoModalVideos.length > 1) {
                 this.pauseVideoModalPlayback();
+                this.videoModalHasFrame = false;
                 this.videoModalIndex = (this.videoModalIndex + 1) % this.videoModalVideos.length;
                 this.videoModalProgress = 0;
                 this.$nextTick(() => {
@@ -2688,6 +2744,7 @@ export function profileFeed(opts = {}) {
         prevVideoModal() {
             if (this.videoModalVideos.length > 1) {
                 this.pauseVideoModalPlayback();
+                this.videoModalHasFrame = false;
                 this.videoModalIndex = (this.videoModalIndex - 1 + this.videoModalVideos.length) % this.videoModalVideos.length;
                 this.videoModalProgress = 0;
                 this.$nextTick(() => {
@@ -2697,13 +2754,13 @@ export function profileFeed(opts = {}) {
         },
 
         toggleVideoModalPlay() {
-            const container = document.getElementById('fullVideoModalStage');
-            if (!container) return;
-            const vEl = container.querySelector('video');
+            const vEl = this.getVideoModalElement();
             if (vEl) {
                 if (vEl.paused) {
-                    vEl.play().catch(() => {});
-                    this.videoModalPlaying = true;
+                    vEl.play().then(() => {
+                        this.videoModalPlaying = true;
+                        this.videoModalHasFrame = true;
+                    }).catch(() => {});
                 } else {
                     vEl.pause();
                     this.videoModalPlaying = false;
@@ -2712,9 +2769,7 @@ export function profileFeed(opts = {}) {
         },
 
         toggleVideoModalMute() {
-            const container = document.getElementById('fullVideoModalStage');
-            if (!container) return;
-            const vEl = container.querySelector('video');
+            const vEl = this.getVideoModalElement();
             if (vEl) {
                 vEl.muted = !vEl.muted;
                 this.videoModalMuted = vEl.muted;
@@ -2723,12 +2778,20 @@ export function profileFeed(opts = {}) {
             }
         },
 
+        toggleVideoModalSpeed() {
+            const speeds = [1, 1.25, 1.5, 2];
+            const idx = speeds.indexOf(this.videoModalSpeed);
+            this.videoModalSpeed = speeds[(idx + 1) % speeds.length];
+            const vEl = this.getVideoModalElement();
+            if (vEl) {
+                vEl.playbackRate = this.videoModalSpeed;
+            }
+        },
+
         seekVideoModal(event) {
             const track = event.currentTarget;
-            const container = document.getElementById('fullVideoModalStage');
-            if (!track || !container) return;
-            const vEl = container.querySelector('video');
-            if (!vEl || !vEl.duration) return;
+            const vEl = this.getVideoModalElement();
+            if (!track || !vEl || !vEl.duration) return;
             const rect = track.getBoundingClientRect();
             const clickX = Math.max(0, Math.min(event.clientX - rect.left, rect.width));
             const ratio = clickX / rect.width;
@@ -2740,6 +2803,8 @@ export function profileFeed(opts = {}) {
             this.videoModalProgress = Math.min(100, Math.max(0, (vEl.currentTime / vEl.duration) * 100));
             this.videoModalCurrentTime = this.formatVideoTime(vEl.currentTime);
             this.videoModalDuration = this.formatVideoTime(vEl.duration);
+            const remaining = Math.max(0, vEl.duration - vEl.currentTime);
+            this.videoModalRemainingTime = '-' + this.formatVideoTime(remaining);
 
             const activeVid = this.videoModalVideos[this.videoModalIndex];
             if (activeVid && typeof activeVid.trimEnd === 'number' && vEl.currentTime >= activeVid.trimEnd) {
@@ -2754,6 +2819,7 @@ export function profileFeed(opts = {}) {
                 } else {
                     // Loop back to the first video
                     this.pauseVideoModalPlayback();
+                    this.videoModalHasFrame = false;
                     this.videoModalIndex = 0;
                     this.videoModalProgress = 0;
                     this.$nextTick(() => {
@@ -2762,8 +2828,7 @@ export function profileFeed(opts = {}) {
                 }
             } else {
                 // Single video: loop playback
-                const container = document.getElementById('fullVideoModalStage');
-                const vEl = container ? container.querySelector('video') : null;
+                const vEl = this.getVideoModalElement();
                 if (vEl) {
                     const activeVid = this.videoModalVideos[this.videoModalIndex];
                     vEl.currentTime = (activeVid && typeof activeVid.trimStart === 'number') ? activeVid.trimStart : 0;
@@ -2781,16 +2846,21 @@ export function profileFeed(opts = {}) {
 
         toggleNativeFullscreen() {
             const el = document.getElementById('fullVideoModalRoot') || document.documentElement;
+            const vEl = this.getVideoModalElement();
             if (!document.fullscreenElement && !document.webkitFullscreenElement) {
                 if (el.requestFullscreen) {
-                    el.requestFullscreen();
+                    el.requestFullscreen().catch(() => {});
+                    this.videoModalFullscreen = true;
                 } else if (el.webkitRequestFullscreen) {
                     el.webkitRequestFullscreen();
+                    this.videoModalFullscreen = true;
+                } else if (vEl && vEl.webkitEnterFullscreen) {
+                    vEl.webkitEnterFullscreen();
+                    this.videoModalFullscreen = true;
                 }
-                this.videoModalFullscreen = true;
             } else {
                 if (document.exitFullscreen) {
-                    document.exitFullscreen();
+                    document.exitFullscreen().catch(() => {});
                 } else if (document.webkitExitFullscreen) {
                     document.webkitExitFullscreen();
                 }

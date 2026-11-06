@@ -1010,13 +1010,8 @@
            }
          }"
          x-init="$nextTick(() => initMultiVideoObserver())">
-      <!-- Header Badge / Counter -->
-      <div class="d-flex align-items-center justify-content-between mb-1.5 px-1">
-        <span class="badge rounded-pill px-2.5 py-1 d-inline-flex align-items-center gap-1.5"
-              style="background: rgba(15, 23, 42, 0.08); color: var(--text-main, #0f172a); font-size: 0.75rem; font-weight: 600;">
-          <i class="bi bi-camera-reels-fill text-danger"></i>
-          <span x-text="'Video ' + (activeVidIdx + 1) + ' of ' + post.videos.length"></span>
-        </span>
+      <!-- Subtle Pagination Dots (No Video Numbering) -->
+      <div class="d-flex align-items-center justify-content-end mb-1.5 px-1" x-show="post.videos.length > 1">
         <div class="d-flex align-items-center gap-1.5">
           <template x-for="(v, vIdx) in post.videos" :key="'dot-' + vIdx">
             <span class="rounded-pill transition-all"
@@ -1055,7 +1050,7 @@
            style="scroll-snap-type: x mandatory; scrollbar-width: thin; -webkit-overflow-scrolling: touch; scroll-padding: 0 4px; height: clamp(340px, 50vh, 460px);">
         <template x-for="(vid, vIdx) in post.videos" :key="vIdx">
           <div class="multi-video-card flex-shrink-0 position-relative rounded-3 overflow-hidden shadow-sm border border-light-subtle d-flex flex-column h-100"
-               :style="'scroll-snap-align: start; flex: 0 0 auto; width: ' + (isCardLandscape ? 'clamp(300px, 82%, 520px)' : (post.videos.length === 2 ? 'clamp(240px, 48.5%, 360px)' : 'clamp(210px, 44%, 300px)')) + '; height: 100%; background: transparent; transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);'"
+               :style="'scroll-snap-align: start; flex: 0 0 auto; width: ' + (isCardLandscape ? 'clamp(300px, 82%, 520px)' : (post.videos.length === 2 ? 'clamp(240px, 48.5%, 360px)' : 'clamp(210px, 44%, 300px)')) + '; height: 100%; background: #0b0f19; transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);'"
                x-data="{
                  isMuted: true,
                  isPlaying: false,
@@ -1067,7 +1062,6 @@
                    if (!el) return;
                    requestAnimationFrame(() => {
                      if (!el.videoWidth || !el.videoHeight) return;
-                     this.hasCardMetadata = true;
                      const r = el.videoWidth / el.videoHeight;
                      if (r > 1.15) {
                        this.isCardLandscape = true;
@@ -1112,21 +1106,12 @@
                  }
                }"
                x-init="$nextTick(() => { const v = $el.querySelector('video'); if (v && v.videoWidth) detectCardDimensions(v); })">
-            <!-- Badge: Video Number & Type -->
-            <div class="position-absolute top-0 start-0 m-2.5 d-flex align-items-center gap-1.5" style="z-index: 5; pointer-events: none;">
-              <span class="badge rounded-pill px-2 py-1 shadow-sm d-inline-flex align-items-center gap-1"
-                    style="background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); color: #ffffff; font-size: 0.7rem; font-weight: 600;">
-                <i class="bi bi-play-circle-fill text-warning"></i>
-                <span x-text="'Video ' + (vIdx + 1)"></span>
-              </span>
-            </div>
-
             <!-- Full Video Mode Button Top-Right -->
             <button type="button"
                     class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
-                    @click.stop="openVideoModal(post.videos, vIdx, isMuted)"
-                    :title="'Play Video ' + (vIdx + 1) + ' in full video mode'"
-                    :aria-label="'Play Video ' + (vIdx + 1) + ' in full video mode'"
+                    @click.stop="openVideoModal(post.videos, vIdx, isMuted, post)"
+                    title="Play in full video mode"
+                    aria-label="Play in full video mode"
                     style="top: 8px; right: 46px; z-index: 6; width: 32px; height: 32px; min-width: 32px; min-height: 32px; border-radius: 9999px; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
               <i class="bi bi-arrows-fullscreen" style="font-size: 0.75rem; color: #ffffff;"></i>
             </button>
@@ -1143,9 +1128,9 @@
 
             <!-- Video Player (Direct Stream or Embedded) -->
             <template x-if="vid.type === 'direct'">
-              <div class="position-relative w-100 h-100 flex-grow-1 overflow-hidden" style="min-height: 320px; background: transparent;">
-                <!-- High-Res Poster Thumbnail Overlay (Before video frames load) -->
-                <img x-show="!isPlaying && !hasCardMetadata && vid.thumbnailUrl"
+              <div class="position-relative w-100 h-100 flex-grow-1 overflow-hidden" style="min-height: 320px; background: #0b0f19;">
+                <!-- High-Res Poster Thumbnail Overlay (Stays visible until first video frame decodes) -->
+                <img x-show="!hasCardMetadata && vid.thumbnailUrl"
                      :src="vid.thumbnailUrl"
                      class="position-absolute top-0 start-0 w-100 h-100 pointer-events-none"
                      style="z-index: 3; object-fit: cover !important; width: 100%; height: 100%; position: absolute; inset: 0;"
@@ -1161,16 +1146,17 @@
                        playsinline
                        webkit-playsinline
                        muted
-                       preload="none"
+                       preload="metadata"
                        @loadedmetadata="detectCardDimensions($el)"
                        @loadeddata="hasCardMetadata = true; detectCardDimensions($el)"
+                       @playing="hasCardMetadata = true"
                        @click.stop="togglePlay($el)"
-                       @dblclick.stop="openVideoModal(post.videos, vIdx, isMuted)"
+                       @dblclick.stop="openVideoModal(post.videos, vIdx, isMuted, post)"
                        @play="isPlaying = true"
                        @pause="isPlaying = false"
                        @ended="onVideoEnded(vIdx, $el)"
                        @timeupdate="onTimeUpdate($el)"
-                       style="object-fit: cover !important; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 2; cursor: pointer; border-radius: 12px; background: transparent;">
+                       style="object-fit: cover !important; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 2; cursor: pointer; border-radius: 12px; background: #0b0f19;">
                   <track kind="captions" srclang="en" label="English Captions">
                 </video>
 
@@ -1183,7 +1169,7 @@
 
             <!-- Embedded Third-Party (YouTube / Vimeo / Cloudflare) -->
             <template x-if="vid.type !== 'direct'">
-              <div class="w-100 h-100 position-relative flex-grow-1" style="background: transparent;">
+              <div class="w-100 h-100 position-relative flex-grow-1" style="background: #0b0f19;">
                 <iframe :src="vid.embedUrl"
                         title="Video Player"
                         frameborder="0"
@@ -1194,9 +1180,9 @@
                 <!-- Embedded Full Video Mode Button -->
                 <button type="button"
                         class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
-                        @click.stop="openVideoModal(post.videos, vIdx, false)"
-                        :title="'Play Video ' + (vIdx + 1) + ' in full video mode'"
-                        :aria-label="'Play Video ' + (vIdx + 1) + ' in full video mode'"
+                        @click.stop="openVideoModal(post.videos, vIdx, false, post)"
+                        title="Play in full video mode"
+                        aria-label="Play in full video mode"
                         style="top: 8px; right: 8px; z-index: 6; width: 32px; height: 32px; min-width: 32px; min-height: 32px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
                   <i class="bi bi-arrows-fullscreen" style="font-size: 0.75rem; color: #ffffff;"></i>
                 </button>
@@ -1226,7 +1212,7 @@
                 style="width: 100%; height: 100%; border: none;"></iframe>
         <button type="button"
                 class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
-                @click.stop="openVideoModal([post.video], 0, false)"
+                @click.stop="openVideoModal([post.video], 0, false, post)"
                 title="View Fullscreen in full video mode"
                 aria-label="View Fullscreen in full video mode"
                 style="top: 10px; right: 10px; z-index: 6; width: 34px; height: 34px; min-width: 34px; min-height: 34px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
@@ -1277,7 +1263,6 @@
            },
            detectVideoDimensions(el) {
              if (!el || !el.videoWidth || !el.videoHeight) return;
-             this.hasMetadata = true;
              const w = el.videoWidth;
              const h = el.videoHeight;
              const ratio = w / h;
@@ -1369,14 +1354,14 @@
          }"
          x-init="$nextTick(() => initSingleVideoObserver())">
       
-      <!-- Outer Adaptive Container: Zero Black Space Guarantee -->
+      <!-- Outer Adaptive Container: Zero White/Black Space Guarantee -->
       <div class="video-rendition-frame position-relative overflow-hidden mx-auto shadow-sm"
            @mouseenter="showControlsOverlay = true"
            @mouseleave="showControlsOverlay = false"
-           :style="'aspect-ratio: ' + (viewMode === 'reel' ? (isPortrait ? videoRatio : '9 / 16') : videoRatio) + '; max-height: ' + (viewMode === 'reel' ? '580px' : videoMaxHeight) + '; width: 100%; max-width: ' + (isPortrait ? (videoRatio === '9 / 16' ? '380px' : '440px') : (viewMode === 'reel' ? '380px' : '100%')) + '; border-radius: 16px; background: transparent; transition: aspect-ratio 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);'">
+           :style="'aspect-ratio: ' + (viewMode === 'reel' ? (isPortrait ? videoRatio : '9 / 16') : videoRatio) + '; max-height: ' + (viewMode === 'reel' ? '580px' : videoMaxHeight) + '; width: 100%; max-width: ' + (isPortrait ? (videoRatio === '9 / 16' ? '380px' : '440px') : (viewMode === 'reel' ? '380px' : '100%')) + '; border-radius: 16px; background: #0b0f19; transition: aspect-ratio 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);'">
 
-        <!-- High-Res Video Poster Overlay before stream metadata loads (Guarantees zero dark/black screen) -->
-        <img x-show="!isPlaying && !hasMetadata && post.video && post.video.thumbnailUrl"
+        <!-- High-Res Video Poster Overlay before stream frames decode (Guarantees zero white flash) -->
+        <img x-show="!hasMetadata && post.video && post.video.thumbnailUrl"
              :src="post.video.thumbnailUrl"
              class="position-absolute top-0 start-0 w-100 h-100 pointer-events-none"
              style="z-index: 3; border-radius: 16px; object-fit: cover !important;"
@@ -1384,7 +1369,7 @@
              alt="Video preview thumbnail"
              x-on:error="$el.style.display = 'none'">
 
-        <!-- Main Video Element (Full-Bleed Cover: Zero Black Space) -->
+        <!-- Main Video Element (Full-Bleed Cover: Zero White/Black Space) -->
         <video referrerpolicy="no-referrer" class="feed-post-video w-100 h-100 position-relative"
                :src="post.video.embedUrl"
                :poster="(!hasMetadata && post.video && post.video.thumbnailUrl) ? post.video.thumbnailUrl : null"
@@ -1392,9 +1377,9 @@
                webkit-playsinline
                muted
                loop
-               preload="none"
+               preload="metadata"
                @click.stop="togglePlayback($el)"
-               @dblclick.stop="openVideoModal([post.video], 0, isVideoMuted)"
+               @dblclick.stop="openVideoModal([post.video], 0, isVideoMuted, post)"
                @loadedmetadata="
                  detectVideoDimensions($el);
                  if (post.video && post.video.trimStart !== null && $el.currentTime < post.video.trimStart) { 
@@ -1402,6 +1387,7 @@
                  }
                "
                @loadeddata="hasMetadata = true; detectVideoDimensions($el)"
+               @playing="hasMetadata = true"
                @play="
                  isPlaying = true;
                  if (post.video && post.video.trimStart !== null && ($el.currentTime < post.video.trimStart || (post.video.trimEnd !== null && $el.currentTime >= post.video.trimEnd))) { 
@@ -1411,7 +1397,7 @@
                @pause="isPlaying = false"
                @timeupdate="handleTimeUpdate($el)"
                @volumechange="isVideoMuted = $el.muted"
-               style="width: 100%; height: 100%; object-fit: cover !important; z-index: 2; border-radius: 16px; cursor: pointer; background: transparent;"></video>
+               style="width: 100%; height: 100%; object-fit: cover !important; z-index: 2; border-radius: 16px; cursor: pointer; background: #0b0f19;"></video>
 
         <!-- Format Badge & 1-Tap Reel/Cinema Switcher (Top-Left) -->
         <div class="position-absolute d-inline-flex align-items-center gap-1.5 shadow-sm"
@@ -1454,7 +1440,7 @@
         <!-- Full Video Mode Pill Top-Right -->
         <button type="button" 
                 class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
-                @click.stop="openVideoModal([post.video], 0, isVideoMuted)"
+                @click.stop="openVideoModal([post.video], 0, isVideoMuted, post)"
                 title="View Fullscreen in full video mode"
                 aria-label="View Fullscreen in full video mode"
                 style="top: 12px; right: 52px; z-index: 6; width: 34px; height: 34px; min-width: 34px; min-height: 34px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; transition: transform 0.15s ease, background 0.15s ease; white-space: nowrap; flex-shrink: 0;">
@@ -1495,7 +1481,7 @@
               <!-- Full Video Mode Button -->
               <button type="button" 
                       class="btn btn-link text-white p-0 d-inline-flex align-items-center justify-content-center text-decoration-none"
-                      @click.stop="openVideoModal([post.video], 0, isVideoMuted)"
+                      @click.stop="openVideoModal([post.video], 0, isVideoMuted, post)"
                       title="Play in full video mode"
                       aria-label="Play in full video mode"
                       style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; white-space: nowrap; flex-shrink: 0;">
