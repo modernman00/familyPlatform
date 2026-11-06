@@ -101,7 +101,7 @@ describe('Alpine Enterprise, Button Spinners & SweetAlert2 Real-Life Verificatio
             expect(win.FamilyPlatformSpinner, 'FamilyPlatformSpinner must be initialized').to.exist;
             expect(win.ScoreTenantSpinner, 'ScoreTenantSpinner alias must be intact').to.exist;
 
-            const submitBtn = win.document.querySelector('button[type="submit"], .stitch-submit');
+            const submitBtn = win.document.querySelector('#button, button[type="submit"]:not([disabled]), .stitch-submit');
             expect(submitBtn, 'Submit button must exist on login page').to.exist;
 
             // Simulate start
