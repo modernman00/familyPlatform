@@ -53,6 +53,10 @@ $router->map('GET', '/api/roundtable/dispute/[*:id]', 'App\controller\members\Fa
 $router->map('POST', '/api/roundtable/arbitrate-instant', 'App\controller\members\FamilyRoundTableController@arbitrateInstant', 'api_roundtable_arbitrate_instant');
 $router->map('POST', '/api/roundtable/record-chore-points', 'App\controller\members\FamilyRoundTableController@recordChorePoints', 'api_roundtable_record_chore_points');
 
+// Living Heirloom 2.5D Facial Depth & Parallax Photo Animator (ATG Flagship)
+$router->map('GET', '/family/living-heirloom', 'App\controller\members\LivingHeirloomController@index', 'family_living_heirloom');
+$router->map('POST', '/api/heirloom/save-portrait', 'App\controller\members\LivingHeirloomController@savePortrait', 'api_heirloom_save_portrait');
+
 // Backward-compatible aliases for tribunal endpoints
 $router->map('POST', '/api/fun-place/file-dispute', 'App\controller\members\FamilyRoundTableController@fileDispute', 'alias_fun_place_file_dispute');
 $router->map('POST', '/api/fun-place/submit-statement', 'App\controller\members\FamilyRoundTableController@submitStatement', 'alias_fun_place_submit_statement');

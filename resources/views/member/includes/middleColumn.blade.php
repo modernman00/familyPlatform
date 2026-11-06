@@ -948,7 +948,7 @@
       <span x-show="isLoadingMore" class="text-muted small">Loading more family moments…</span>
     </div>
     
-    <!-- Premium Alpine Lightbox Modal with Drag-to-Dismiss Gesture -->
+    <!-- Premium Alpine Lightbox Modal with Drag-to-Dismiss & Per-Image Emoji/Comment/Bookmark Bar -->
     <div x-cloak x-show="lightboxOpen" 
          class="lightbox-overlay"
          :style="getLightboxOverlayStyle()"
@@ -958,29 +958,42 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100 scale-100"
          x-transition:leave-end="opacity-0 scale-95"
-         @keydown.escape.window="closeLightbox()"
-         @keydown.right.window="nextLightboxImage()"
-         @keydown.left.window="prevLightboxImage()"
+         @keydown.escape.window="if (mediaCommentDrawerOpen) { mediaCommentDrawerOpen = false; } else { closeLightbox(); }"
+         @keydown.right.window="if (!mediaCommentDrawerOpen) nextLightboxImage()"
+         @keydown.left.window="if (!mediaCommentDrawerOpen) prevLightboxImage()"
          @touchstart.passive="onLightboxTouchStart($event)"
          @touchmove="onLightboxTouchMove($event)"
          @touchend="onLightboxTouchEnd($event)"
          @touchcancel="onLightboxTouchCancel()"
          @click="closeLightbox()">
         
-        <!-- Close Button (High contrast, 48px touch target) -->
+        <!-- Top-Left Back Button -->
+        <button type="button" 
+                @click.stop="closeLightbox()" 
+                aria-label="Back to feed"
+                style="position: absolute; top: max(18px, env(safe-area-inset-top, 18px)); left: 20px; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.22); color: #ffffff; width: 46px; height: 46px; min-width: 46px; min-height: 46px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; z-index: 100002; box-shadow: 0 4px 14px rgba(0,0,0,0.5);">
+            <i class="bi bi-arrow-left" style="font-size: 1.2rem;"></i>
+        </button>
+
+        <!-- Image Counter Pill Top-Centre -->
+        <div x-show="lightboxImages && lightboxImages.length > 1" 
+             style="position: absolute; top: max(22px, env(safe-area-inset-top, 22px)); left: 50%; transform: translateX(-50%); color: #ffffff; font-size: 0.82rem; font-weight: 600; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); padding: 6px 16px; border-radius: 9999px; letter-spacing: 0.04em; z-index: 100002; border: 1px solid rgba(255,255,255,0.2);" 
+             x-text="(lightboxIndex + 1) + ' / ' + lightboxImages.length"></div>
+
+        <!-- Close Button Top-Right (High contrast, 46px touch target) -->
         <button type="button" 
                 @click.stop="closeLightbox()" 
                 aria-label="Close photo view"
-                style="position: absolute; top: 18px; right: 20px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25); color: #ffffff; width: 46px; height: 46px; border-radius: 50%; font-size: 26px; line-height: 1; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; z-index: 100002; box-shadow: 0 4px 14px rgba(0,0,0,0.5);">
+                style="position: absolute; top: max(18px, env(safe-area-inset-top, 18px)); right: 20px; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.22); color: #ffffff; width: 46px; height: 46px; min-width: 46px; min-height: 46px; border-radius: 50%; font-size: 26px; line-height: 1; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; z-index: 100002; box-shadow: 0 4px 14px rgba(0,0,0,0.5);">
             <i class="bi bi-x-lg" style="font-size: 1.15rem;"></i>
         </button>
         
         <!-- Previous Button -->
         <button type="button" 
-                @click.stop.prevent="prevLightboxImage()" 
+                @click.stop.prevent="mediaReactionTrayOpen = false; prevLightboxImage()" 
                 x-show="lightboxImages && lightboxImages.length > 1" 
                 aria-label="Previous photo"
-                style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25); color: #ffffff; width: 50px; height: 50px; border-radius: 50%; font-size: 22px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s ease; z-index: 100002; user-select: none; box-shadow: 0 4px 14px rgba(0,0,0,0.5);">
+                style="position: absolute; left: 16px; top: 46%; transform: translateY(-50%); background: rgba(15, 23, 42, 0.68); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.25); color: #ffffff; width: 48px; height: 48px; min-width: 48px; min-height: 48px; border-radius: 50%; font-size: 22px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s ease; z-index: 100002; user-select: none; box-shadow: 0 4px 14px rgba(0,0,0,0.5);">
             <i class="bi bi-chevron-left"></i>
         </button>
 
@@ -1002,9 +1015,10 @@
                  x-on:load="lightboxLoading = false; lightboxError = false;"
                  x-on:error="lightboxLoading = false; lightboxError = true;"
                  x-show="!lightboxError"
-                 style="max-width: 100%; max-height: 84vh; border-radius: 8px; object-fit: contain; box-shadow: 0 25px 60px rgba(0,0,0,0.7); transition: transform 0.2s ease;" 
+                 @dblclick.stop="if (lightboxPost) reactToMediaItem(lightboxPost, 'image', lightboxIndex, 'love', $event)"
+                 style="max-width: 100%; max-height: 76vh; border-radius: 10px; object-fit: contain; box-shadow: 0 25px 60px rgba(0,0,0,0.7); transition: transform 0.2s ease;" 
                  alt="Enlarged family photo"
-                 @click.stop>
+                 @click.stop="mediaReactionTrayOpen = false">
 
             <!-- Fallback if Image Fails to Load -->
             <div x-show="lightboxError" 
@@ -1018,17 +1032,193 @@
         
         <!-- Next Button -->
         <button type="button" 
-                @click.stop.prevent="nextLightboxImage()" 
+                @click.stop.prevent="mediaReactionTrayOpen = false; nextLightboxImage()" 
                 x-show="lightboxImages && lightboxImages.length > 1" 
                 aria-label="Next photo"
-                style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25); color: #ffffff; width: 50px; height: 50px; border-radius: 50%; font-size: 22px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s ease; z-index: 100002; user-select: none; box-shadow: 0 4px 14px rgba(0,0,0,0.5);">
+                style="position: absolute; right: 16px; top: 46%; transform: translateY(-50%); background: rgba(15, 23, 42, 0.68); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.25); color: #ffffff; width: 48px; height: 48px; min-width: 48px; min-height: 48px; border-radius: 50%; font-size: 22px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s ease; z-index: 100002; user-select: none; box-shadow: 0 4px 14px rgba(0,0,0,0.5);">
             <i class="bi bi-chevron-right"></i>
         </button>
         
-        <!-- Image Counter Badge -->
-        <div x-show="lightboxImages && lightboxImages.length > 1" 
-             style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); color: #ffffff; font-size: 14px; font-weight: 600; background: rgba(0,0,0,0.75); padding: 6px 20px; border-radius: 30px; letter-spacing: 0.5px; box-shadow: 0 4px 14px rgba(0,0,0,0.5); z-index: 100002; border: 1px solid rgba(255,255,255,0.2);" 
-             x-text="(lightboxIndex + 1) + ' / ' + lightboxImages.length"></div>
+        <!-- Twitter/X Floating Bottom Author, Caption & Per-Image Emoji/Comment/Bookmark Bar -->
+        <template x-if="lightboxPost">
+            <div class="position-absolute bottom-0 start-0 w-100 px-3 pt-4"
+                 style="z-index: 100003; padding-bottom: max(18px, env(safe-area-inset-bottom, 18px)); background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.58) 68%, transparent 100%);"
+                 @click.stop>
+                <div class="mx-auto" style="max-width: 680px;">
+                    <!-- Author Row (Uses lightboxPost.profileImg with fallback) -->
+                    <div class="d-flex align-items-center gap-2.5 mb-2">
+                        <img :src="lightboxPost.profileImg || '/resources/images/profile/avatarM.png'"
+                             x-on:error="$el.src = '/resources/images/profile/avatarM.png'"
+                             class="rounded-circle border border-white border-opacity-25 flex-shrink-0"
+                             style="width: 40px; height: 40px; object-fit: cover; background: #1e293b;"
+                             alt="Author avatar">
+                        <div class="d-flex flex-column min-w-0">
+                            <div class="d-flex align-items-center gap-1.5">
+                                <span class="fw-bold text-white text-truncate" style="font-size: 0.95rem; text-shadow: 0 1px 3px rgba(0,0,0,0.8);" x-text="lightboxPost.fullName || 'Family Member'"></span>
+                                <i class="bi bi-patch-check-fill text-info" style="font-size: 0.85rem;"></i>
+                            </div>
+                            <span class="text-white-50 text-truncate" style="font-size: 0.78rem;" x-text="(lightboxPost.postFamCode || lightboxPost.famCode) ? ('#' + String(lightboxPost.postFamCode || lightboxPost.famCode).replace(/^#+/, '')) : ''"></span>
+                        </div>
+                    </div>
+
+                    <!-- Post Caption -->
+                    <template x-if="getMediaCaption(lightboxPost)">
+                        <p class="text-white mb-2.5"
+                           style="font-size: 0.9rem; line-height: 1.4; text-shadow: 0 1px 3px rgba(0,0,0,0.85); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"
+                           x-text="getMediaCaption(lightboxPost)"></p>
+                    </template>
+
+                    <!-- Interactive Pills Row (Comment, 6-Emoji Reaction Picker, Bookmark, Share) -->
+                    <div class="d-flex align-items-center gap-2 flex-wrap position-relative">
+                        <!-- Comment Pill (Opens Slide-Up Comment Drawer for This Photo) -->
+                        <button type="button"
+                                class="btn d-inline-flex align-items-center gap-1.5 px-3 rounded-pill text-white"
+                                @click.stop="mediaReactionTrayOpen = false; mediaCommentDrawerOpen = !mediaCommentDrawerOpen"
+                                title="View or add comments on this photo"
+                                aria-label="View or add comments on this photo"
+                                style="min-height: 44px; min-width: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.22); font-size: 0.85rem; font-weight: 600; white-space: nowrap; flex-shrink: 0;">
+                            <i class="bi bi-chat-fill" style="font-size: 0.95rem;"></i>
+                            <span x-text="(lightboxPost.comments ? lightboxPost.comments.length : 0)"></span>
+                        </button>
+
+                        <!-- Emoji Reaction Pill + Floating 6-Emoji Dock -->
+                        <div class="position-relative">
+                            <div x-show="mediaReactionTrayOpen"
+                                 x-cloak
+                                 x-transition.opacity.duration.150ms
+                                 class="d-flex align-items-center gap-1.5 p-1.5 px-2.5 rounded-pill shadow-lg"
+                                 style="position: absolute; bottom: calc(100% + 10px); left: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.25); z-index: 100006; white-space: nowrap;">
+                                <template x-for="type in Object.keys(emojiMap)" :key="'lb-emo-' + type">
+                                    <button type="button"
+                                            class="btn p-1 rounded-circle d-inline-flex align-items-center justify-content-center"
+                                            style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; transition: transform 0.15s ease;"
+                                            :style="getMediaReaction(lightboxPost, 'image', lightboxIndex) === type ? 'background: rgba(255,255,255,0.2); transform: scale(1.12);' : ''"
+                                            :title="emojiMap[type].label"
+                                            @click.stop="reactToMediaItem(lightboxPost, 'image', lightboxIndex, type, $event)">
+                                        <span class="d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(type, 28)"></span>
+                                    </button>
+                                </template>
+                            </div>
+
+                            <button type="button"
+                                    class="btn d-inline-flex align-items-center gap-1.5 px-3 rounded-pill text-white"
+                                    @click.stop="mediaReactionTrayOpen = !mediaReactionTrayOpen"
+                                    title="React with emoji to this photo"
+                                    aria-label="React with emoji to this photo"
+                                    style="min-height: 44px; min-width: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.22); font-size: 0.85rem; font-weight: 600; white-space: nowrap; flex-shrink: 0;">
+                                <template x-if="!getMediaReaction(lightboxPost, 'image', lightboxIndex)">
+                                    <i class="bi bi-heart" style="font-size: 0.95rem;"></i>
+                                </template>
+                                <template x-if="getMediaReaction(lightboxPost, 'image', lightboxIndex)">
+                                    <span class="d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(getMediaReaction(lightboxPost, 'image', lightboxIndex), 20)"></span>
+                                </template>
+                                <span x-text="lightboxPost.post_likes || 0"></span>
+                            </button>
+                        </div>
+
+                        <!-- Bookmark Pill -->
+                        <button type="button"
+                                class="btn d-inline-flex align-items-center justify-content-center rounded-circle text-white"
+                                @click.stop="toggleMediaBookmark(lightboxPost)"
+                                title="Save memory to collection"
+                                aria-label="Save memory to collection"
+                                style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.22); flex-shrink: 0;">
+                            <i class="bi" :class="lightboxPost._saved ? 'bi-bookmark-fill text-warning' : 'bi-bookmark'" style="font-size: 0.95rem;"></i>
+                        </button>
+
+                        <!-- Share Link Pill -->
+                        <button type="button"
+                                class="btn d-inline-flex align-items-center justify-content-center rounded-circle text-white"
+                                @click.stop="shareMediaItem(lightboxPost, 'image', lightboxIndex)"
+                                title="Share photo"
+                                aria-label="Share photo"
+                                style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.22); flex-shrink: 0;">
+                            <i class="bi bi-box-arrow-up" style="font-size: 0.95rem;"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- In-Modal Slide-Up Comment Drawer for Enlarged Photo -->
+        <template x-if="lightboxPost && mediaCommentDrawerOpen">
+            <div class="position-absolute bottom-0 start-0 w-100 px-2 pb-2"
+                 style="z-index: 100008; max-height: 68vh; display: flex; flex-direction: column;"
+                 @click.stop>
+                <div class="mx-auto w-100 rounded-top-4 shadow-lg d-flex flex-column overflow-hidden"
+                     style="max-width: 680px; max-height: 65vh; background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2);">
+                    <!-- Drawer Header -->
+                    <div class="d-flex align-items-center justify-content-between px-3 py-2.5 border-bottom border-secondary border-opacity-25">
+                        <div class="d-flex align-items-center gap-2 text-white fw-bold" style="font-size: 0.92rem;">
+                            <i class="bi bi-chat-dots-fill text-info"></i>
+                            <span x-text="lightboxImages.length > 1 ? ('Comments • Photo ' + (lightboxIndex + 1) + ' of ' + lightboxImages.length) : 'Photo Comments'"></span>
+                            <span class="badge rounded-pill bg-light text-dark" style="font-size: 0.72rem;" x-text="(lightboxPost.comments ? lightboxPost.comments.length : 0)"></span>
+                        </div>
+                        <button type="button"
+                                class="btn btn-sm text-white-50 p-1 rounded-circle d-inline-flex align-items-center justify-content-center"
+                                style="width: 36px; height: 36px;"
+                                @click.stop="mediaCommentDrawerOpen = false"
+                                aria-label="Close comments">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- Comments List -->
+                    <div class="flex-grow-1 overflow-y-auto px-3 py-2.5" style="max-height: 36vh;">
+                        <template x-if="!lightboxPost.comments || lightboxPost.comments.length === 0">
+                            <div class="text-center text-white-50 py-4" style="font-size: 0.85rem;">
+                                No comments yet — be the first to comment on this photo!
+                            </div>
+                        </template>
+                        <template x-for="c in (lightboxPost.comments || [])" :key="c.comment_no">
+                            <div class="d-flex align-items-start gap-2.5 mb-2.5">
+                                <img :src="c.profileImg || '/resources/images/profile/avatarM.png'"
+                                     x-on:error="$el.src = '/resources/images/profile/avatarM.png'"
+                                     class="rounded-circle flex-shrink-0 mt-0.5"
+                                     style="width: 32px; height: 32px; object-fit: cover; background: #1e293b;"
+                                     alt="">
+                                <div class="p-2 px-2.5 rounded-3 flex-grow-1" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <div class="d-flex align-items-center justify-content-between gap-2 mb-0.5">
+                                        <span class="fw-bold text-white" style="font-size: 0.8rem;" x-text="c.fullName || 'Family Member'"></span>
+                                        <span class="text-white-50" style="font-size: 0.7rem;" x-text="formatDate(c.comment_time || c.post_time || c.date_created)"></span>
+                                    </div>
+                                    <div class="text-white" style="font-size: 0.85rem; line-height: 1.35; word-break: break-word;" x-text="c.comment"></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Quick Emoji Bar + Comment Input -->
+                    <div class="px-3 pt-2 pb-3 border-top border-secondary border-opacity-25" style="background: rgba(10, 15, 28, 0.95);">
+                        <div class="d-flex align-items-center gap-1.5 mb-2 overflow-x-auto pb-1">
+                            <template x-for="emo in ['❤️', '🔥', '👏', '😂', '😍', '🎉', '🥰', '🙌']" :key="'lb-qemo-' + emo">
+                                <button type="button"
+                                        class="btn btn-sm rounded-pill px-2.5 py-1 text-white"
+                                        style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); font-size: 0.95rem; min-height: 36px; min-width: 40px; flex-shrink: 0;"
+                                        @click.stop="insertEmojiIntoMediaComment(emo)"
+                                        x-text="emo"></button>
+                            </template>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="text"
+                                   class="form-control rounded-pill text-white border-secondary"
+                                   style="background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 0.88rem; min-height: 44px;"
+                                   :placeholder="lightboxImages.length > 1 ? ('Add a comment on Photo ' + (lightboxIndex + 1) + '...') : 'Add a comment on this photo...'"
+                                   x-model="mediaCommentInput"
+                                   @keydown.enter.prevent="submitMediaComment(lightboxPost, 'image', lightboxIndex, lightboxImages.length)">
+                            <button type="button"
+                                    class="btn btn-danger rounded-pill px-3 fw-semibold d-inline-flex align-items-center justify-content-center gap-1.5"
+                                    style="min-height: 44px; min-width: 76px; white-space: nowrap; flex-shrink: 0;"
+                                    :disabled="mediaCommentSubmitting || !mediaCommentInput.trim()"
+                                    @click.stop="submitMediaComment(lightboxPost, 'image', lightboxIndex, lightboxImages.length)">
+                                <span x-show="mediaCommentSubmitting" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span x-text="mediaCommentSubmitting ? 'Sending' : 'Post'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
     </div>
 
     <!-- Twitter/X-Style Immersive Edge-to-Edge Full Video Mode -->
@@ -1042,10 +1232,10 @@
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         @keydown.escape.window="if (videoModalOpen) closeVideoModal()"
-         @keydown.right.window="if (videoModalOpen) nextVideoModal()"
-         @keydown.left.window="if (videoModalOpen) prevVideoModal()"
-         @keydown.space.window="if (videoModalOpen) { $event.preventDefault(); toggleVideoModalPlay(); }"
+         @keydown.escape.window="if (videoModalOpen) { if (mediaCommentDrawerOpen) { mediaCommentDrawerOpen = false; } else { closeVideoModal(); } }"
+         @keydown.right.window="if (videoModalOpen && !mediaCommentDrawerOpen) nextVideoModal()"
+         @keydown.left.window="if (videoModalOpen && !mediaCommentDrawerOpen) prevVideoModal()"
+         @keydown.space.window="if (videoModalOpen && !mediaCommentDrawerOpen) { $event.preventDefault(); toggleVideoModalPlay(); }"
          role="dialog"
          aria-modal="true"
          aria-label="Full video player">
@@ -1094,7 +1284,7 @@
 
             <!-- Previous Video Navigation Arrow (Only when post has > 1 video) -->
             <button type="button" 
-                    @click.stop="prevVideoModal()" 
+                    @click.stop="mediaReactionTrayOpen = false; prevVideoModal()" 
                     x-show="videoModalVideos && videoModalVideos.length > 1" 
                     title="Previous video"
                     aria-label="Previous video"
@@ -1123,7 +1313,7 @@
                            webkit-playsinline
                            autoplay
                            preload="auto"
-                           @click.stop="toggleVideoModalPlay()"
+                           @click.stop="mediaReactionTrayOpen = false; toggleVideoModalPlay()"
                            @dblclick.stop="toggleNativeFullscreen()"
                            @loadedmetadata="onVideoModalMetadata($el)"
                            @loadeddata="videoModalHasFrame = true; onVideoModalMetadata($el)"
@@ -1150,7 +1340,7 @@
 
             <!-- Next Video Navigation Arrow (Only when post has > 1 video) -->
             <button type="button" 
-                    @click.stop="nextVideoModal()" 
+                    @click.stop="mediaReactionTrayOpen = false; nextVideoModal()" 
                     x-show="videoModalVideos && videoModalVideos.length > 1" 
                     title="Next video"
                     aria-label="Next video"
@@ -1159,23 +1349,24 @@
                 <i class="bi bi-chevron-right" style="font-size: 1.25rem;"></i>
             </button>
 
-            <!-- Twitter/X Floating Bottom Post Author, Caption & Engagement Pills Overlay -->
+            <!-- Twitter/X Floating Bottom Post Author, Caption & Working Engagement Pills Overlay -->
             <template x-if="videoModalPost">
                 <div class="position-absolute bottom-0 start-0 w-100 px-3 pt-5 pb-3"
                      style="z-index: 10504; background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.45) 62%, transparent 100%); pointer-events: none;">
                     <div class="mx-auto" style="max-width: 680px; pointer-events: auto;">
-                        <!-- Author Row -->
+                        <!-- Author Row (Uses videoModalPost.profileImg with fallback) -->
                         <div class="d-flex align-items-center gap-2.5 mb-2">
-                            <img :src="getProfileImageUrl(videoModalPost.avatar, videoModalPost.gender)"
+                            <img :src="videoModalPost.profileImg || '/resources/images/profile/avatarM.png'"
+                                 x-on:error="$el.src = '/resources/images/profile/avatarM.png'"
                                  class="rounded-circle border border-white border-opacity-25 flex-shrink-0"
-                                 style="width: 40px; height: 40px; object-fit: cover;"
+                                 style="width: 40px; height: 40px; object-fit: cover; background: #1e293b;"
                                  alt="Author avatar">
                             <div class="d-flex flex-column min-w-0">
                                 <div class="d-flex align-items-center gap-1.5">
                                     <span class="fw-bold text-white text-truncate" style="font-size: 0.95rem; text-shadow: 0 1px 3px rgba(0,0,0,0.8);" x-text="videoModalPost.fullName || 'Family Member'"></span>
                                     <i class="bi bi-patch-check-fill text-info" style="font-size: 0.85rem;"></i>
                                 </div>
-                                <span class="text-white-50 text-truncate" style="font-size: 0.78rem;" x-text="videoModalPost.famCode ? ('@' + videoModalPost.famCode.toLowerCase()) : ''"></span>
+                                <span class="text-white-50 text-truncate" style="font-size: 0.78rem;" x-text="(videoModalPost.postFamCode || videoModalPost.famCode) ? ('#' + String(videoModalPost.postFamCode || videoModalPost.famCode).replace(/^#+/, '')) : ''"></span>
                             </div>
                         </div>
 
@@ -1186,49 +1377,153 @@
                                x-text="getMediaCaption(videoModalPost)"></p>
                         </template>
 
-                        <!-- Twitter/X Translucent Engagement Pills Row -->
-                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <!-- Comment Pill -->
+                        <!-- Twitter/X Translucent Engagement Pills Row (Working Comment Drawer, 6-Emoji Picker, Bookmark, Share) -->
+                        <div class="d-flex align-items-center gap-2 flex-wrap position-relative">
+                            <!-- Comment Pill (Opens Slide-Up Comment Drawer in Modal) -->
                             <button type="button"
                                     class="btn d-inline-flex align-items-center gap-1.5 px-3 rounded-pill text-white"
-                                    @click.stop="closeVideoModal(); toggleCommentForm(videoModalPost.postId)"
-                                    title="Comment on post"
-                                    aria-label="Comment on post"
+                                    @click.stop="mediaReactionTrayOpen = false; mediaCommentDrawerOpen = !mediaCommentDrawerOpen"
+                                    title="View or add comments on this video"
+                                    aria-label="View or add comments on this video"
                                     style="min-height: 44px; min-width: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.18); font-size: 0.85rem; font-weight: 600; white-space: nowrap; flex-shrink: 0;">
                                 <i class="bi bi-chat-fill" style="font-size: 0.95rem;"></i>
                                 <span x-text="(videoModalPost.comments ? videoModalPost.comments.length : 0)"></span>
                             </button>
 
-                            <!-- Like / Reaction Pill -->
-                            <button type="button"
-                                    class="btn d-inline-flex align-items-center gap-1.5 px-3 rounded-pill text-white"
-                                    @click.stop="toggleLike(videoModalPost.postId)"
-                                    title="React to post"
-                                    aria-label="React to post"
-                                    style="min-height: 44px; min-width: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.18); font-size: 0.85rem; font-weight: 600; white-space: nowrap; flex-shrink: 0;">
-                                <i class="bi" :class="videoModalPost.isLiked ? 'bi-heart-fill text-danger' : 'bi-heart'" style="font-size: 0.95rem;"></i>
-                                <span x-text="videoModalPost.likesCount || 0"></span>
-                            </button>
+                            <!-- Emoji Reaction Pill + Floating 6-Emoji Dock -->
+                            <div class="position-relative">
+                                <div x-show="mediaReactionTrayOpen"
+                                     x-cloak
+                                     x-transition.opacity.duration.150ms
+                                     class="d-flex align-items-center gap-1.5 p-1.5 px-2.5 rounded-pill shadow-lg"
+                                     style="position: absolute; bottom: calc(100% + 10px); left: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.25); z-index: 10509; white-space: nowrap;">
+                                    <template x-for="type in Object.keys(emojiMap)" :key="'vm-emo-' + type">
+                                        <button type="button"
+                                                class="btn p-1 rounded-circle d-inline-flex align-items-center justify-content-center"
+                                                style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; transition: transform 0.15s ease;"
+                                                :style="getMediaReaction(videoModalPost, 'video', videoModalIndex) === type ? 'background: rgba(255,255,255,0.2); transform: scale(1.12);' : ''"
+                                                :title="emojiMap[type].label"
+                                                @click.stop="reactToMediaItem(videoModalPost, 'video', videoModalIndex, type, $event)">
+                                            <span class="d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(type, 28)"></span>
+                                        </button>
+                                    </template>
+                                </div>
+
+                                <button type="button"
+                                        class="btn d-inline-flex align-items-center gap-1.5 px-3 rounded-pill text-white"
+                                        @click.stop="mediaReactionTrayOpen = !mediaReactionTrayOpen"
+                                        title="React with emoji to this video"
+                                        aria-label="React with emoji to this video"
+                                        style="min-height: 44px; min-width: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.18); font-size: 0.85rem; font-weight: 600; white-space: nowrap; flex-shrink: 0;">
+                                    <template x-if="!getMediaReaction(videoModalPost, 'video', videoModalIndex)">
+                                        <i class="bi bi-heart" style="font-size: 0.95rem;"></i>
+                                    </template>
+                                    <template x-if="getMediaReaction(videoModalPost, 'video', videoModalIndex)">
+                                        <span class="d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(getMediaReaction(videoModalPost, 'video', videoModalIndex), 20)"></span>
+                                    </template>
+                                    <span x-text="videoModalPost.post_likes || 0"></span>
+                                </button>
+                            </div>
 
                             <!-- Bookmark Pill -->
                             <button type="button"
                                     class="btn d-inline-flex align-items-center justify-content-center rounded-circle text-white"
-                                    @click.stop="toggleBookmark(videoModalPost.postId)"
-                                    title="Bookmark post"
-                                    aria-label="Bookmark post"
+                                    @click.stop="toggleMediaBookmark(videoModalPost)"
+                                    title="Save memory to collection"
+                                    aria-label="Save memory to collection"
                                     style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.18); flex-shrink: 0;">
-                                <i class="bi" :class="videoModalPost.isBookmarked ? 'bi-bookmark-fill text-warning' : 'bi-bookmark'" style="font-size: 0.95rem;"></i>
+                                <i class="bi" :class="videoModalPost._saved ? 'bi-bookmark-fill text-warning' : 'bi-bookmark'" style="font-size: 0.95rem;"></i>
                             </button>
 
                             <!-- Share Link Pill -->
                             <button type="button"
                                     class="btn d-inline-flex align-items-center justify-content-center rounded-circle text-white"
-                                    @click.stop="if (navigator.share) { navigator.share({ title: videoModalPost.fullName || 'Family Post', url: window.location.href }).catch(() => {}); } else if ($clipboard) { $clipboard(window.location.href, 'Post link copied!'); }"
+                                    @click.stop="shareMediaItem(videoModalPost, 'video', videoModalIndex)"
                                     title="Share video"
                                     aria-label="Share video"
                                     style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.18); flex-shrink: 0;">
                                 <i class="bi bi-box-arrow-up" style="font-size: 0.95rem;"></i>
                             </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- In-Modal Slide-Up Comment Drawer for Full-Screen Video -->
+            <template x-if="videoModalPost && mediaCommentDrawerOpen">
+                <div class="position-absolute bottom-0 start-0 w-100 px-2 pb-2"
+                     style="z-index: 10510; max-height: 68vh; display: flex; flex-direction: column;"
+                     @click.stop>
+                    <div class="mx-auto w-100 rounded-top-4 shadow-lg d-flex flex-column overflow-hidden"
+                         style="max-width: 680px; max-height: 65vh; background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2);">
+                        <!-- Drawer Header -->
+                        <div class="d-flex align-items-center justify-content-between px-3 py-2.5 border-bottom border-secondary border-opacity-25">
+                            <div class="d-flex align-items-center gap-2 text-white fw-bold" style="font-size: 0.92rem;">
+                                <i class="bi bi-chat-dots-fill text-info"></i>
+                                <span>Video Comments</span>
+                                <span class="badge rounded-pill bg-light text-dark" style="font-size: 0.72rem;" x-text="(videoModalPost.comments ? videoModalPost.comments.length : 0)"></span>
+                            </div>
+                            <button type="button"
+                                    class="btn btn-sm text-white-50 p-1 rounded-circle d-inline-flex align-items-center justify-content-center"
+                                    style="width: 36px; height: 36px;"
+                                    @click.stop="mediaCommentDrawerOpen = false"
+                                    aria-label="Close comments">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+
+                        <!-- Comments List -->
+                        <div class="flex-grow-1 overflow-y-auto px-3 py-2.5" style="max-height: 36vh;">
+                            <template x-if="!videoModalPost.comments || videoModalPost.comments.length === 0">
+                                <div class="text-center text-white-50 py-4" style="font-size: 0.85rem;">
+                                    No comments yet — be the first to comment on this video!
+                                </div>
+                            </template>
+                            <template x-for="c in (videoModalPost.comments || [])" :key="c.comment_no">
+                                <div class="d-flex align-items-start gap-2.5 mb-2.5">
+                                    <img :src="c.profileImg || '/resources/images/profile/avatarM.png'"
+                                         x-on:error="$el.src = '/resources/images/profile/avatarM.png'"
+                                         class="rounded-circle flex-shrink-0 mt-0.5"
+                                         style="width: 32px; height: 32px; object-fit: cover; background: #1e293b;"
+                                         alt="">
+                                    <div class="p-2 px-2.5 rounded-3 flex-grow-1" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <div class="d-flex align-items-center justify-content-between gap-2 mb-0.5">
+                                            <span class="fw-bold text-white" style="font-size: 0.8rem;" x-text="c.fullName || 'Family Member'"></span>
+                                            <span class="text-white-50" style="font-size: 0.7rem;" x-text="formatDate(c.comment_time || c.post_time || c.date_created)"></span>
+                                        </div>
+                                        <div class="text-white" style="font-size: 0.85rem; line-height: 1.35; word-break: break-word;" x-text="c.comment"></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Quick Emoji Bar + Comment Input -->
+                        <div class="px-3 pt-2 pb-3 border-top border-secondary border-opacity-25" style="background: rgba(10, 15, 28, 0.95);">
+                            <div class="d-flex align-items-center gap-1.5 mb-2 overflow-x-auto pb-1">
+                                <template x-for="emo in ['❤️', '🔥', '👏', '😂', '😍', '🎉', '🥰', '🙌']" :key="'vm-qemo-' + emo">
+                                    <button type="button"
+                                            class="btn btn-sm rounded-pill px-2.5 py-1 text-white"
+                                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); font-size: 0.95rem; min-height: 36px; min-width: 40px; flex-shrink: 0;"
+                                            @click.stop="insertEmojiIntoMediaComment(emo)"
+                                            x-text="emo"></button>
+                                </template>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="text"
+                                       class="form-control rounded-pill text-white border-secondary"
+                                       style="background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 0.88rem; min-height: 44px;"
+                                       placeholder="Add a comment on this video..."
+                                       x-model="mediaCommentInput"
+                                       @keydown.enter.prevent="submitMediaComment(videoModalPost, 'video', videoModalIndex, videoModalVideos.length)">
+                                <button type="button"
+                                        class="btn btn-danger rounded-pill px-3 fw-semibold d-inline-flex align-items-center justify-content-center gap-1.5"
+                                        style="min-height: 44px; min-width: 76px; white-space: nowrap; flex-shrink: 0;"
+                                        :disabled="mediaCommentSubmitting || !mediaCommentInput.trim()"
+                                        @click.stop="submitMediaComment(videoModalPost, 'video', videoModalIndex, videoModalVideos.length)">
+                                    <span x-show="mediaCommentSubmitting" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span x-text="mediaCommentSubmitting ? 'Sending' : 'Post'"></span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

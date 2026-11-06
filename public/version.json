@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(mobile): mobile viewport audit, smart nav scroll, push rate limits, and asset production build",
+    "title": "Feat(video): eliminate white flash, remove video numbering, and launch Twitter/X full-screen video mode",
     "notes": [
+        "Feat(video): eliminate white flash, remove video numbering, and launch Twitter/X full-screen video mode",
         "Feat(mobile): mobile viewport audit, smart nav scroll, push rate limits, and asset production build",
-        "UI design standards v2.1 and telemetry telemetry enhancements",
-        "Perf(cache): cache web fonts for a year"
+        "UI design standards v2.1 and telemetry telemetry enhancements"
     ],
     "released_at": "2026-11-06",
-    "commit": "be224ad3"
+    "commit": "7b5775b0"
 }

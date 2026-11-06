@@ -473,7 +473,7 @@
              ]"
              :style="'border-radius:12px; width:100%; max-height: 600px; aspect-ratio: ' + (singleAspect !== 'auto' ? singleAspect : 'unset') + '; background: rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: center; transition: aspect-ratio 0.35s cubic-bezier(0.16, 1, 0.3, 1);'">
           <a href="#" 
-             @click.prevent="typeof handleImageTap === 'function' ? handleImageTap(post, post.images, 0, $event) : openLightbox(post.images, 0)" 
+             @click.prevent="typeof handleImageTap === 'function' ? handleImageTap(post, post.images, 0, $event) : openLightbox(post.images, 0, post)" 
              @dblclick.prevent.stop="triggerHeartBurst(post, 0)"
              role="button" 
              aria-label="View enlarged photo or double tap to like" 
@@ -729,7 +729,7 @@
                    :class="currentIdx === idx ? 'is-slide-active' : ''"
                    style="scroll-snap-align: start; min-width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
                 <a href="#" 
-                   @click.prevent="typeof handleImageTap === 'function' ? handleImageTap(post, post.images, idx, $event) : openLightbox(post.images, idx)" 
+                   @click.prevent="typeof handleImageTap === 'function' ? handleImageTap(post, post.images, idx, $event) : openLightbox(post.images, idx, post)" 
                    @dblclick.prevent.stop="triggerHeartBurst(post, idx)"
                    role="button" 
                    aria-label="View enlarged photo or double tap to like" 

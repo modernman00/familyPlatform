@@ -143,6 +143,9 @@
             <button class="nav-link rounded-pill fw-semibold py-2 px-3 small" id="mode-pinball-btn" data-bs-toggle="pill" data-bs-target="#court-mode-pinball" type="button" role="tab" style="min-height: 44px;">
                 <i class="bi bi-controller me-1 text-info"></i> Kinship Quest Arcade
             </button>
+            <button class="nav-link rounded-pill fw-semibold py-2 px-3 small" id="mode-heirloom-btn" data-bs-toggle="pill" data-bs-target="#court-mode-heirloom" type="button" role="tab" style="min-height: 44px;">
+                <i class="bi bi-camera-fill me-1 text-warning"></i> Living Heirloom Animator ✨
+            </button>
         </div>
         <div class="d-inline-flex align-items-center gap-2 px-3 py-1 bg-light rounded-pill small text-muted">
             <i class="bi bi-peace text-success"></i> Reconciliatory &bull; Firm &bull; Non-Punitive
@@ -421,6 +424,11 @@
         {{-- MODE C: KINSHIP QUEST CHORE ARCADE --}}
         <div class="tab-pane fade" id="court-mode-pinball" role="tabpanel">
             @include('components.kinship_quest_pinball')
+        </div>
+
+        {{-- MODE D: LIVING HEIRLOOM 2.5D PHOTO ANIMATOR --}}
+        <div class="tab-pane fade" id="court-mode-heirloom" role="tabpanel">
+            @include('components.living_heirloom_card')
         </div>
     </div>
 </div>

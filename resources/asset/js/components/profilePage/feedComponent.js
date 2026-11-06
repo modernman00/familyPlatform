@@ -23,6 +23,18 @@ export function profileFeed(opts = {}) {
         lightboxIndex: 0,
         lightboxLoading: false,
         lightboxError: false,
+        lightboxPost: null,
+        mediaReactionTrayOpen: false,
+        mediaCommentDrawerOpen: false,
+        mediaCommentInput: '',
+        mediaCommentSubmitting: false,
+        mediaReactionsMap: (() => {
+            try {
+                return JSON.parse(localStorage.getItem('fp_media_reactions_v1') || '{}') || {};
+            } catch (e) {
+                return {};
+            }
+        })(),
         videoModalOpen: false,
         videoModalVideos: [],
         videoModalIndex: 0,
@@ -2510,7 +2522,7 @@ export function profileFeed(opts = {}) {
                 this.lastTapTime[postKey] = now;
                 if (this.tapTimeout) clearTimeout(this.tapTimeout);
                 this.tapTimeout = setTimeout(() => {
-                    this.openLightbox(images, idx);
+                    this.openLightbox(images, idx, post);
                     this.tapTimeout = null;
                 }, 260);
             }
@@ -2557,7 +2569,7 @@ export function profileFeed(opts = {}) {
             }
         },
 
-        openLightbox(images, index = 0) {
+        openLightbox(images, index = 0, postObj = null) {
             let imgList = [];
             if (Array.isArray(images)) {
                 imgList = Array.from(images).filter(img => img && typeof img === 'string');
@@ -2576,6 +2588,10 @@ export function profileFeed(opts = {}) {
             this.lightboxError = false;
             this.lightboxDragY = 0;
             this.lightboxDragging = false;
+            this.lightboxPost = postObj || null;
+            this.mediaReactionTrayOpen = false;
+            this.mediaCommentDrawerOpen = false;
+            this.mediaCommentInput = '';
             this.lightboxOpen = true;
             document.body.style.overflow = 'hidden'; // Prevent background scrolling
         },
@@ -2588,7 +2604,93 @@ export function profileFeed(opts = {}) {
             this.lightboxError = false;
             this.lightboxDragY = 0;
             this.lightboxDragging = false;
+            this.lightboxPost = null;
+            this.mediaReactionTrayOpen = false;
+            this.mediaCommentDrawerOpen = false;
+            this.mediaCommentInput = '';
             document.body.style.overflow = ''; // Restore background scrolling
+        },
+
+        getMediaItemKey(post, mediaType, idx) {
+            if (!post || !post.post_no) return '';
+            return `${post.post_no}_${mediaType}_${idx || 0}`;
+        },
+
+        getMediaReaction(post, mediaType, idx) {
+            if (!post || !post.post_no) return null;
+            const key = this.getMediaItemKey(post, mediaType, idx);
+            if (key && this.mediaReactionsMap && this.mediaReactionsMap[key]) {
+                return this.mediaReactionsMap[key];
+            }
+            return post.user_reaction || null;
+        },
+
+        reactToMediaItem(post, mediaType, idx, reactionType, ev = null) {
+            if (!post || !post.post_no) return;
+            const key = this.getMediaItemKey(post, mediaType, idx);
+            const current = this.mediaReactionsMap[key] || null;
+            const nextReaction = (current === reactionType) ? null : reactionType;
+            this.mediaReactionsMap = {
+                ...this.mediaReactionsMap,
+                [key]: nextReaction
+            };
+            try {
+                localStorage.setItem('fp_media_reactions_v1', JSON.stringify(this.mediaReactionsMap));
+            } catch (e) {}
+            this.mediaReactionTrayOpen = false;
+            this.reactToPost(post.post_no, reactionType, ev);
+        },
+
+        insertEmojiIntoMediaComment(emoji) {
+            this.mediaCommentInput = (this.mediaCommentInput || '') + emoji;
+        },
+
+        async submitMediaComment(post, mediaType, idx, total) {
+            if (!post || !post.post_no || this.mediaCommentSubmitting) return;
+            const text = (this.mediaCommentInput || '').trim();
+            if (!text) return;
+
+            this.mediaCommentSubmitting = true;
+            try {
+                const label = (total > 1)
+                    ? `[${mediaType === 'video' ? 'Video' : 'Photo'} ${(idx || 0) + 1}] `
+                    : '';
+                this.commentInputs[post.post_no] = label + text;
+                await this.submitComment(post.post_no);
+                this.mediaCommentInput = '';
+            } finally {
+                this.mediaCommentSubmitting = false;
+            }
+        },
+
+        toggleMediaBookmark(post) {
+            if (!post || !post.post_no) return;
+            if (typeof window.__saveMemory === 'function') {
+                window.__saveMemory(post.post_no);
+            } else {
+                post._saved = !post._saved;
+            }
+        },
+
+        shareMediaItem(post, mediaType, idx) {
+            const shareUrl = `${window.location.origin}/profilePage?post_no=${encodeURIComponent(post?.post_no || '')}#post${encodeURIComponent(post?.post_no || '')}`;
+            if (navigator.share) {
+                navigator.share({
+                    title: post?.fullName ? `${post.fullName}'s Family Memory` : 'Family Memory',
+                    url: shareUrl
+                }).catch(() => {});
+            } else if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Link copied to clipboard!',
+                        showConfirmButton: false,
+                        timer: 1800
+                    });
+                }).catch(() => {});
+            }
         },
 
         openVideoModal(videos, index = 0, initialMuted = false, postObj = null) {
@@ -2636,6 +2738,9 @@ export function profileFeed(opts = {}) {
             this.videoModalHasFrame = false;
             this.videoModalIsPortrait = true;
             this.videoModalPost = postObj || null;
+            this.mediaReactionTrayOpen = false;
+            this.mediaCommentDrawerOpen = false;
+            this.mediaCommentInput = '';
             this.videoModalOpen = true;
             document.body.style.overflow = 'hidden';
 
@@ -2655,6 +2760,9 @@ export function profileFeed(opts = {}) {
             this.videoModalPlaying = false;
             this.videoModalHasFrame = false;
             this.videoModalPost = null;
+            this.mediaReactionTrayOpen = false;
+            this.mediaCommentDrawerOpen = false;
+            this.mediaCommentInput = '';
             document.body.style.overflow = '';
             if (document.fullscreenElement || document.webkitFullscreenElement) {
                 try {
