@@ -114,6 +114,7 @@ final class ProfilePage extends ProcessImg
                 'radarSettings' => $radarSettings,
                 'adulthoodGraduation' => $adulthoodGraduation,
                 'pendingWeeklyReel' => $pendingWeeklyReel,
+                'cover' => (new \App\services\CoverPhotoService())->getCurrent((string) $this->id),
                 'isPendingApproval' => $data['isPendingApproval'] ?? false,
                 'pendingApprovalData' => $data['pendingApprovalData'] ?? null
             ]);
@@ -1125,6 +1126,51 @@ final class ProfilePage extends ProcessImg
 
 
 
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    /**
+     * Upload a new cover photo for the profile header (POST, multipart: coverImageFile).
+     * Responds JSON { message: { coverUrl } }.
+     */
+    public function coverImage(): void
+    {
+        try {
+            \App\controller\BaseController::validateCsrf();
+            $coverUrl = (new \App\services\CoverPhotoService())->upload();
+            msgSuccess(200, ['coverUrl' => $coverUrl]);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    /**
+     * Save the cover photo focal point (POST JSON or form: x, y as 0-100 percentages).
+     */
+    public function coverImagePosition(): void
+    {
+        try {
+            $input = json_decode((string) file_get_contents('php://input'), true);
+            $input = is_array($input) ? $input : $_POST;
+            \App\controller\BaseController::validateCsrf($input);
+            (new \App\services\CoverPhotoService())->setPosition((string) $this->id, $input['x'] ?? null, $input['y'] ?? null);
+            msgSuccess(200, ['saved' => true]);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    /**
+     * Remove the cover photo and fall back to the brand gradient (POST).
+     */
+    public function removeCoverImage(): void
+    {
+        try {
+            \App\controller\BaseController::validateCsrf();
+            (new \App\services\CoverPhotoService())->remove((string) $this->id);
+            msgSuccess(200, ['coverUrl' => null]);
         } catch (\Throwable $th) {
             showError($th);
         }

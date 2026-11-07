@@ -58,10 +58,35 @@ final class AtgEmojiController extends BaseController
 
         $catalog = $this->service->getCatalog();
 
+        // Re-open the customiser on the member's saved studio look (if any).
+        $savedTraits = $this->service->traitsFromProfileImage((string)$data['profileImg']);
+        // First visit: start from the member's profile gender (still freely changeable).
+        $genderDefault = match (strtolower((string)($userData['gender'] ?? ''))) {
+            'female' => ['presentation' => 'feminine'],
+            'male'   => ['presentation' => 'masculine', 'hairstyle' => 'high_fade'],
+            default  => [],
+        };
+        $initialTraits = $this->service->sanitiseTraits($savedTraits ?? $genderDefault);
+
+        $rawProfileImg = (string)$data['profileImg'];
+        $currentProfilePhotoUrl = str_starts_with($rawProfileImg, '/')
+            ? $rawProfileImg
+            : '/resources/images/profile/' . $rawProfileImg;
+        if (str_ends_with($currentProfilePhotoUrl, '.svg')) {
+            $pngCompanion = substr($currentProfilePhotoUrl, 0, -4) . '.png';
+            if (is_file(ltrim($pngCompanion, '/'))) {
+                $currentProfilePhotoUrl = $pngCompanion;
+            }
+        }
+
         view('member.emojiStudio', [
-            'data'     => $data,
-            'userData' => $userData,
-            'catalog'  => $catalog,
+            'data'                   => $data,
+            'userData'               => $userData,
+            'catalog'                => $catalog,
+            'initialTraits'          => $initialTraits,
+            'initialSvg'             => $this->service->renderProceduralAvatar($initialTraits, 256, true),
+            'hasSavedLook'           => $savedTraits !== null,
+            'currentProfilePhotoUrl' => $currentProfilePhotoUrl,
         ]);
     }
 
@@ -98,16 +123,11 @@ final class AtgEmojiController extends BaseController
             $rawInput = (string)file_get_contents('php://input');
             $input = json_decode($rawInput, true) ?: [];
 
-            $traits = [
-                'skin_tone'  => (string)($input['skin_tone'] ?? 'warm_chestnut'),
-                'hairstyle'  => (string)($input['hairstyle'] ?? 'afro_crown'),
-                'expression' => (string)($input['expression'] ?? 'warm_smile'),
-                'accessory'  => (string)($input['accessory'] ?? 'none'),
-                'backdrop'   => (string)($input['backdrop'] ?? 'warm_sunset'),
-            ];
+            $traits = $this->service->sanitiseTraits($input);
 
             $size = isset($input['size']) ? (int)$input['size'] : 256;
-            $svg = $this->service->renderProceduralAvatar($traits, $size);
+            $animated = !isset($input['animated']) || (bool)$input['animated'];
+            $svg = $this->service->renderProceduralAvatar($traits, $size, $animated);
 
             echo json_encode([
                 'success' => true,
@@ -175,26 +195,83 @@ final class AtgEmojiController extends BaseController
                 return;
             }
 
-            $traits = [
-                'skin_tone'  => (string)($input['skin_tone'] ?? 'warm_chestnut'),
-                'hairstyle'  => (string)($input['hairstyle'] ?? 'afro_crown'),
-                'expression' => (string)($input['expression'] ?? 'warm_smile'),
-                'accessory'  => (string)($input['accessory'] ?? 'none'),
-                'backdrop'   => (string)($input['backdrop'] ?? 'warm_sunset'),
-            ];
+            $traits = $this->service->sanitiseTraits($input);
 
             $pngBase64 = isset($input['png_base64']) && is_string($input['png_base64']) ? $input['png_base64'] : null;
 
-            $result = $this->service->saveAvatar($this->userId, $traits, $pngBase64);
+            $animated = !empty($input['animated']);
+            $mode = isset($input['mode']) && is_string($input['mode']) ? $input['mode'] : 'procedural';
+            $choreography = isset($input['choreography']) && is_string($input['choreography']) ? $input['choreography'] : 'smile';
+            $sampleRgb = [
+                isset($input['sample_r']) ? max(0, min(255, (int)$input['sample_r'])) : 138,
+                isset($input['sample_g']) ? max(0, min(255, (int)$input['sample_g'])) : 84,
+                isset($input['sample_b']) ? max(0, min(255, (int)$input['sample_b'])) : 52,
+            ];
+
+            $result = $this->service->saveAvatar($this->userId, $traits, $pngBase64, $animated, $mode, $choreography, $sampleRgb);
 
             echo json_encode([
                 'success'  => true,
-                'message'  => 'Your 3D Avatar has been successfully set as your profile picture!',
+                'message'  => $mode === 'living_photo'
+                    ? 'Your Living Photo is now your official profile picture — it smiles, blinks, and moves wherever your profile appears!'
+                    : ($animated
+                        ? 'Your living avatar is now your profile picture — it blinks and breathes wherever your photo appears.'
+                        : 'Your 3D Avatar has been successfully set as your profile picture!'),
                 'filename' => $result['filename'],
                 'url'      => $result['url'],
+                'png_url'  => $result['png_url'] ?? $result['url'],
             ]);
         } catch (\Throwable $e) {
             http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'error'   => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Analyse an uploaded portrait photo to preserve identity, extract complexion & hair
+     * traits, and calibrate neural realism parameters (denoising, CFG scale, face restoration).
+     * Route: POST /api/emoji/photo-to-avatar
+     */
+    public function photoToAvatar(): void
+    {
+        header('Content-Type: application/json; charset=UTF-8');
+
+        try {
+            if (empty($this->userId)) {
+                http_response_code(401);
+                echo json_encode([
+                    'success' => false,
+                    'error'   => 'Authentication required to synthesise photo avatar.',
+                ]);
+                return;
+            }
+
+            $rawInput = (string)file_get_contents('php://input');
+            $input = json_decode($rawInput, true) ?: [];
+
+            $clientToken = (string)($input['csrf_token'] ?? $input['token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $_SERVER['HTTP_X_XSRF_TOKEN'] ?? $_POST['token'] ?? '');
+            $sessionToken = (string)($_SESSION['token'] ?? '');
+
+            if ($sessionToken !== '' && !hash_equals($sessionToken, $clientToken)) {
+                http_response_code(403);
+                echo json_encode([
+                    'success' => false,
+                    'error'   => 'Invalid security token. Please refresh the page and try again.',
+                ]);
+                return;
+            }
+
+            $analysis = $this->service->analysePhotoToAvatar($input);
+
+            echo json_encode([
+                'success' => true,
+                'data'    => $analysis,
+            ], JSON_UNESCAPED_SLASHES);
+        } catch (\Throwable $e) {
+            http_response_code(400);
             echo json_encode([
                 'success' => false,
                 'error'   => $e->getMessage(),

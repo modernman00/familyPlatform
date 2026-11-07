@@ -362,6 +362,472 @@ body.dark-mode .heirloom-reaction-btn.active {
     }
 }
 
+/* ── Profile cover photo (left column profile card) ─────────────────────── */
+// Taller band so the photo actually reads as a cover; the avatar overlaps its bottom edge by 65px.
+.profile-card {
+    --cover-h: 170px;
+
+    @media (min-width: 992px) {
+        --cover-h: 150px; // narrower sidebar column on desktop
+    }
+
+    .avatar-container {
+        top: calc(var(--cover-h) - 65px);
+    }
+}
+
+.cover-photo {
+    position: relative;
+    height: var(--cover-h, 170px);
+    background: linear-gradient(135deg, #2a0a0d 0%, #2a0a0d 40%, #8a1019 80%, #b8202c 100%);
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+
+    &:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: -4px;
+    }
+
+    &.is-uploading {
+        opacity: 0.6;
+    }
+
+    // Reposition mode: the whole band is the drag surface
+    &.is-adjusting {
+        cursor: grab;
+        touch-action: none;
+        outline: 2px dashed rgba(255, 255, 255, 0.85);
+        outline-offset: -6px;
+
+        // Avatar overlaps the band; let drags pass through it while adjusting
+        ~ .avatar-container {
+            pointer-events: none;
+        }
+    }
+
+    &.is-dragging {
+        cursor: grabbing;
+    }
+}
+
+// Discoverability hint on the empty gradient only (hidden once a photo is set)
+.cover-photo__add {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.78rem;
+    font-weight: 600;
+    pointer-events: none;
+
+    &.d-none {
+        display: none !important;
+    }
+}
+
+.cover-photo__menu {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    min-width: 190px;
+    padding: 6px;
+    border-radius: 14px;
+    background: var(--card-bg, #fff);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    cursor: default;
+
+    &.d-none {
+        display: none !important;
+    }
+
+    button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 44px;
+        padding: 0 12px;
+        border: none;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--text-color);
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-align: left;
+
+        &:hover,
+        &:focus-visible {
+            background: var(--hover-color, rgba(0, 0, 0, 0.05));
+        }
+
+        &.is-danger {
+            color: #c0392b;
+        }
+    }
+}
+
+.cover-photo__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 14px;
+    border: none;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    backdrop-filter: blur(6px);
+    transition: background-color 0.15s ease;
+
+    &:hover,
+    &:focus-visible {
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+    }
+
+    &--primary {
+        background: var(--primary-color, #a31621);
+
+        &:hover,
+        &:focus-visible {
+            background: #8a1019;
+        }
+    }
+}
+
+.cover-photo__adjust-bar {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: default;
+
+    &.d-none {
+        display: none !important;
+    }
+}
+
+.cover-photo__adjust-hint {
+    flex-grow: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    height: 44px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.profile-verified-tick {
+    margin-left: 4px;
+    font-size: 1rem;
+    color: #1d9bf0;
+    vertical-align: 0.05em;
+}
+
+/* ── Video Builder (Create Post modal) ──────────────────────────────────── */
+.video-builder {
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    background-color: var(--bg-color);
+    animation: pollBuilderIn 0.22s ease-out;
+
+    &.d-none {
+        display: none !important;
+    }
+}
+
+.video-builder__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.video-builder__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background-color: var(--primary-color);
+    color: #fff;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.video-builder__title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    flex-grow: 1;
+}
+
+.video-builder__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin: -8px -8px -8px 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+        background-color: var(--hover-color);
+        color: var(--text-color);
+    }
+}
+
+.video-builder__dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    padding: 20px 16px;
+    min-height: 120px;
+    justify-content: center;
+    text-align: center;
+    border: 1.5px dashed var(--border-color);
+    border-radius: 14px;
+    background-color: var(--card-bg);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+
+    &:hover,
+    &:focus-within {
+        border-color: var(--primary-color);
+        background-color: var(--hover-color);
+    }
+}
+
+.video-builder__dropzone-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 4px;
+    border-radius: 50%;
+    background-color: rgba(163, 22, 33, 0.1);
+    color: var(--primary-color);
+    font-size: 1.3rem;
+}
+
+.video-builder__dropzone-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-color);
+}
+
+.video-builder__dropzone-hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.video-builder__footer {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.video-builder__expiry {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.video-builder__select {
+    width: auto;
+    min-height: 44px;
+    font-size: 0.8rem;
+    border-radius: 10px;
+}
+
+.video-builder__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: auto;
+    min-height: 44px;
+    padding: 0 4px;
+    border: none;
+    background: transparent;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary-color);
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+/* ── Link Builder (Create Post modal) — shares .video-builder chrome ────── */
+.link-builder__field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 4px 4px 12px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 14px;
+    background-color: var(--card-bg);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:focus-within {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(163, 22, 33, 0.12);
+    }
+}
+
+.link-builder__field-icon {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.link-builder__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 4px;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 0.9rem;
+    text-transform: none;
+    letter-spacing: normal;
+
+    &,
+    &:focus,
+    &:focus-visible {
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+
+    &::placeholder {
+        color: var(--text-muted);
+        text-transform: none;
+        letter-spacing: normal;
+        opacity: 1;
+    }
+}
+
+.link-builder__attach {
+    flex-shrink: 0;
+    min-height: 44px;
+    padding: 0 18px;
+    border: none;
+    border-radius: 10px;
+    background-color: var(--primary-color);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: filter 0.15s ease;
+
+    &:hover {
+        filter: brightness(1.08);
+    }
+}
+
+.link-builder__sources {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.link-builder__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background-color: var(--hover-color);
+    color: var(--text-muted);
+    font-size: 0.74rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.link-builder__note {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 10px 0 0;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.link-builder__help {
+    margin-top: 6px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+
+    summary {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        min-height: 44px;
+        list-style: none;
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--primary-color);
+
+        &::-webkit-details-marker {
+            display: none;
+        }
+    }
+
+    p {
+        margin: 0;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        line-height: 1.5;
+    }
+}
+
 /* ── Poll Builder (Create Post modal) ───────────────────────────────────── */
 .poll-builder {
     margin-bottom: 14px;

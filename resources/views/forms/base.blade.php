@@ -462,6 +462,7 @@
 
     @include('component.submitSpinner')
     @include('partials.pwa-register')
+    @include('partials.social-share')
 
     @if(($_ENV['APP_ENV'] ?? '') !== 'local')
     <script nonce="{{ $nonce }}">

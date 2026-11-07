@@ -15,6 +15,8 @@ class TranslateTest extends TestCase
         if (session_status() !== PHP_SESSION_ACTIVE) {
             @session_start();
         }
+        $_SESSION['token'] = 'valid-test-csrf-token';
+        $_POST['token'] = 'valid-test-csrf-token';
     }
 
     public function testUnauthenticatedRequestIsRejected(): void
@@ -29,7 +31,7 @@ class TranslateTest extends TestCase
     public function testEmptyTextReturnsEmptyTranslation(): void
     {
         $_SESSION['id'] = '999';
-        $_POST = ['text' => '', 'target' => 'fr'];
+        $_POST = ['text' => '', 'target' => 'fr', 'token' => 'valid-test-csrf-token'];
 
         $controller = new TranslateController();
 
@@ -45,7 +47,7 @@ class TranslateTest extends TestCase
     public function testOverlongTextIsRejected(): void
     {
         $_SESSION['id'] = '999';
-        $_POST = ['text' => str_repeat('a', 5001), 'target' => 'fr'];
+        $_POST = ['text' => str_repeat('a', 5001), 'target' => 'fr', 'token' => 'valid-test-csrf-token'];
 
         $controller = new TranslateController();
 
@@ -62,7 +64,7 @@ class TranslateTest extends TestCase
     {
         $_SESSION['id'] = '999';
         $_SESSION['trans_cache'] = [];
-        $_POST = ['text' => 'Good morning family', 'target' => 'fr'];
+        $_POST = ['text' => 'Good morning family', 'target' => 'fr', 'token' => 'valid-test-csrf-token'];
 
         $controller = new TranslateController();
 
@@ -98,7 +100,7 @@ class TranslateTest extends TestCase
         $controller = new TranslateController();
 
         foreach ($malicious as $payload) {
-            $_POST = ['text' => $payload, 'target' => 'es'];
+            $_POST = ['text' => $payload, 'target' => 'es', 'token' => 'valid-test-csrf-token'];
             ob_start();
             $controller->translate();
             $output = ob_get_clean();

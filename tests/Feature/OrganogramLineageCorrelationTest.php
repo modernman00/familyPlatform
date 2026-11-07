@@ -116,7 +116,7 @@ final class OrganogramLineageCorrelationTest extends TestCase
         $repairMethod->setAccessible(true);
         $repairMethod->invoke($organogram, $this->testFamCode, $this->rootUserId);
 
-        // Verify Laf is now registered as child in ancestralUnionId
+        // Verify Laf is NOT silently grafted to ancestral union (Zero-Silent-Graft Invariant)
         $stmt = $this->pdo->prepare("
             SELECT COUNT(*) FROM family_node_children 
             WHERE union_id = ? AND child_id = ?
@@ -124,7 +124,7 @@ final class OrganogramLineageCorrelationTest extends TestCase
         $stmt->execute([$ancestralUnionId, $lafNodeId]);
         $count = (int)$stmt->fetchColumn();
 
-        $this->assertEquals(1, $count, 'Orphaned Gen 0 Laf node must be healed and linked to ancestral parents union');
+        $this->assertEquals(0, $count, 'Orphaned Gen 0 Laf node must NOT be silently grafted under Zero-Silent-Graft Invariant');
     }
 
     public function testLineageQuestServiceFormatsCleanNames(): void

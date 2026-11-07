@@ -995,6 +995,13 @@ class FamilyCodeApprovalFlowTest extends TestCase
             'test-token'
         );
 
+        $notificationService->sendFamilyEscalationBroadcast(
+            99999,
+            $familyCode,
+            $newUserInfo,
+            'test-token'
+        );
+
         // Verify in-app notifications exist for both inviter AND second member
         $stmt = $this->pdo->prepare(
             'SELECT receiver_id, notification_name, notification_content, notification_status 

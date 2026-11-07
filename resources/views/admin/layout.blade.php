@@ -217,6 +217,11 @@
                 <i class="fa-solid fa-book-bookmark"></i>
                 <span>Living Playbook</span>
             </a>
+
+            <a href="{{ $adminPrefix }}/dashboard#atg-admin-explainer-studio" class="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/40 transition-colors">
+                <i class="fa-solid fa-video text-emerald-400"></i>
+                <span>Explainer Studio</span>
+            </a>
         </div>
     </nav>
 

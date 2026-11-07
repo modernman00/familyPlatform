@@ -666,4 +666,30 @@ final class FamilyAiHubController extends BaseController
             echo json_encode(['success' => false, 'error' => 'Unable to execute family sovereign search.']);
         }
     }
+
+    /**
+     * Endpoint: Sovereign 60fps Kinetic Video Explainer Capsule
+     * Route: GET|POST /api/ai/sovereign-explainer
+     */
+    public function sovereignExplainer(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        try {
+            $raw = file_get_contents('php://input');
+            $json = is_string($raw) ? (json_decode($raw, true) ?: []) : [];
+            $title = isset($json['title']) ? (string) $json['title'] : (isset($_GET['title']) ? (string) $_GET['title'] : '');
+
+            $overrides = $title !== '' ? ['title' => $title] : [];
+            $result = \Src\Explainer\PortfolioExplainerRegistry::renderAppExplainer('familyplatform', $overrides);
+
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+            echo json_encode($result, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+        } catch (\InvalidArgumentException $e) {
+            http_response_code(422);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Unable to render family sovereign explainer.']);
+        }
+    }
 }

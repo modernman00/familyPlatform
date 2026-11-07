@@ -59,4 +59,15 @@ if ($isNonProd) {
     // pattern never matched a real URL.)
     $router->map('GET|POST', '/clearcache', 'App\controller\ClearCache@clear', 'clear-cache');
 }
+// ATG Sovereign Poster & Flyer Studio (Family Reunions, Anniversaries, Naming & Milestones)
+$router->map('GET', '/poster-studio', function () {
+    (new \Src\Media\UniversalPosterStudioController())->showStudio('familyplatform');
+}, 'atg_poster_studio');
+$router->map('GET', '/flyer-studio', function () {
+    (new \Src\Media\UniversalPosterStudioController())->showStudio('familyplatform');
+}, 'atg_flyer_studio');
+$router->map('GET|POST', '/api/poster-studio/render', function () {
+    (new \Src\Media\UniversalPosterStudioController())->renderApiPoster();
+}, 'api_atg_poster_studio_render');
+
 include_once __DIR__ . "/cron.php";

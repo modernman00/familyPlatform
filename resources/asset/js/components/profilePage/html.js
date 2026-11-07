@@ -13,7 +13,7 @@ const renderVideoPlayer = (postMessage) => {
 
   const isShort = (video.originalUrl && video.originalUrl.includes('/shorts/'));
 
-  if (video.type === 'youtube' || video.type === 'vimeo' || video.type === 'cloudflare') {
+  if (video.type === 'youtube' || video.type === 'vimeo' || video.type === 'cloudflare' || video.type === 'tiktok') {
     return `
       <div class="video-embed-container mb-3" style="border-radius: 14px; overflow: hidden; max-height: ${isShort ? '560px' : '440px'}; max-width: ${isShort ? '380px' : '100%'}; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
         <div class="ratio ${isShort ? 'ratio-9x16' : 'ratio-16x9'}">

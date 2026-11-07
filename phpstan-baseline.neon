@@ -805,8 +805,8 @@ parameters:
 			path: app/controller/NotificationController.php
 
 		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
+			message: '#^Call to function method_exists\(\) with ''Src\\\\PushNotificationService'' and ''isValidPushKeys'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
 			count: 1
 			path: app/controller/NotificationController.php
 
@@ -833,6 +833,18 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: app/controller/NotificationController.php
+
+		-
+			message: '#^Parameter \#1 \$userId of static method Src\\PushNotificationService\:\:registerSubscription\(\) expects string, int\<min, \-1\>\|int\<1, max\>\|string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/controller/NotificationController.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/controller/RealtimeBroadcastingController.php
 
 		-
 			message: '#^Method App\\controller\\ServeImgController\:\:PostDir\(\) has parameter \$imgName with no type specified\.$#'
@@ -1153,10 +1165,40 @@ parameters:
 			path: app/controller/members/FamilyRequestController.php
 
 		-
+			message: '#^Left side of && is always false\.$#'
+			identifier: booleanAnd.leftAlwaysFalse
+			count: 2
+			path: app/controller/members/Organogram.php
+
+		-
 			message: '#^Method App\\controller\\members\\Organogram\:\:fetchRelationsData\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/members/Organogram.php
+
+		-
+			message: '#^Method App\\controller\\members\\Organogram\:\:healOrphanedGen0Members\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: app/controller/members/Organogram.php
+
+		-
+			message: '#^Method App\\controller\\members\\Organogram\:\:healOrphanedGen0Members\(\) returns void but does not have any side effects\.$#'
+			identifier: void.pure
+			count: 1
+			path: app/controller/members/Organogram.php
+
+		-
+			message: '#^Offset ''hide_parent_first…'' on array\{user_id\: string, access_mode\: string, notify_on_view\: bool\} in empty\(\) does not exist\.$#'
+			identifier: empty.offset
+			count: 3
+			path: app/controller/members/Organogram.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between ''spouse'' and ''spouse'' will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 1
+			path: app/controller/members/OrganogramEditorController.php
 
 		-
 			message: '#^Match arm comparison between ''celebrate'' and ''celebrate'' is always true\.$#'
@@ -1249,9 +1291,39 @@ parameters:
 			path: app/controller/members/ProfilePage.php
 
 		-
+			message: '#^Cannot cast array\|string\|null to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: app/controller/members/ProfilePage.php
+
+		-
 			message: '#^Method App\\controller\\members\\ProfilePage\:\:processUploadedCommentMedia\(\) has parameter \$file with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
+			path: app/controller/members/ProfilePage.php
+
+		-
+			message: '#^Offset ''default_scope'' on array\{all\: list\<string\>, birth\: list\<string\>, married\: list\<string\>, has_dual_lineage\: bool, can_choose\: bool, default_scope\: string, primary_fam_code\: string, birth_fam_code\: string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/controller/members/ProfilePage.php
+
+		-
+			message: '#^Offset ''images'' on array\{images\: array\<string\>, videos\: array\<string\>, cleaned_message\: string, preview\: array\<string, mixed\>\|null\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/controller/members/ProfilePage.php
+
+		-
+			message: '#^Offset ''videos'' on array\{images\: array\<string\>, videos\: array\<string\>, cleaned_message\: string, preview\: array\<string, mixed\>\|null\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/controller/members/ProfilePage.php
+
+		-
+			message: '#^Offset 0 on non\-empty\-list\<string\> on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
 			path: app/controller/members/ProfilePage.php
 
 		-
@@ -1261,10 +1333,34 @@ parameters:
 			path: app/controller/members/ProfilePage.php
 
 		-
-			message: '#^Ternary operator condition is always true\.$#'
-			identifier: ternary.alwaysTrue
+			message: '#^Strict comparison using \!\=\= between non\-falsy\-string and ''0'' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
 			count: 1
 			path: app/controller/members/ProfilePage.php
+
+		-
+			message: '#^Ternary operator condition is always true\.$#'
+			identifier: ternary.alwaysTrue
+			count: 3
+			path: app/controller/members/ProfilePage.php
+
+		-
+			message: '#^Parameter \#2 \$userId of static method App\\controller\\members\\SettingController\:\:syncWeddingAnniversary\(\) expects string, int\|string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/controller/members/SettingController.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\{id\: int, email\: string, role\: string\} will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/controller/members/StreamController.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\<string, mixed\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 3
+			path: app/controller/members/TwoTruthsGameController.php
 
 		-
 			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'
@@ -1319,6 +1415,36 @@ parameters:
 			identifier: notIdentical.alwaysTrue
 			count: 1
 			path: app/controller/register/Register.php
+
+		-
+			message: '#^Method App\\dto\\PostDto\:\:__construct\(\) has parameter \$twoTruths with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/dto/PostDto.php
+
+		-
+			message: '#^Method App\\dto\\PostDto\:\:__construct\(\) has parameter \$video with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/dto/PostDto.php
+
+		-
+			message: '#^Method App\\dto\\PostDto\:\:__construct\(\) has parameter \$videos with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/dto/PostDto.php
+
+		-
+			message: '#^Variable \$message on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 2
+			path: app/dto/PostDto.php
+
+		-
+			message: '#^Variable \$parts in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: app/dto/PostDto.php
 
 		-
 			message: '#^Function Validate\(\) has parameter \$array with no value type specified in iterable type array\.$#'
@@ -1507,6 +1633,12 @@ parameters:
 			path: app/model/AllMembersData.php
 
 		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 4
+			path: app/model/FamilyJournal.php
+
+		-
 			message: '#^Method App\\model\\PollData\:\:createPoll\(\) has parameter \$options with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -1654,6 +1786,18 @@ parameters:
 			path: app/model/Post.php
 
 		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/model/PostComparison.php
+
+		-
+			message: '#^Cannot call method fetchAll\(\) on PDOStatement\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/model/PostComparison.php
+
+		-
 			message: '#^Method App\\model\\ReactionData\:\:getReactionsForPosts\(\) has parameter \$postIds with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -1676,6 +1820,24 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/model/ReactionData.php
+
+		-
+			message: '#^Comparison operation "\>" between int\<1, max\> and 0 is always true\.$#'
+			identifier: greater.alwaysTrue
+			count: 1
+			path: app/model/Reel.php
+
+		-
+			message: '#^Result of && is always true\.$#'
+			identifier: booleanAnd.alwaysTrue
+			count: 1
+			path: app/model/Reel.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between int\<1, max\> and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/model/Reel.php
 
 		-
 			message: '#^Method App\\model\\ReviewAppsData\:\:getWithId\(\) return type has no value type specified in iterable type array\.$#'
@@ -1708,6 +1870,54 @@ parameters:
 			path: app/model/SingleCustomerData.php
 
 		-
+			message: '#^Variable \$msg on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 3
+			path: app/repository/FeedRepository.php
+
+		-
+			message: '#^Call to static method email\(\) on an unknown class App\\controller\\email\\SendEmailFunctionality\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/service/NotificationService.php
+
+		-
+			message: '#^Variable \$adminEmail in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: app/services/CloudflareStreamService.php
+
+		-
+			message: '#^Offset ''hide_parent_first…'' on array\{user_id\: string, access_mode\: string, notify_on_view\: bool\} in empty\(\) does not exist\.$#'
+			identifier: empty.offset
+			count: 1
+			path: app/services/CollateralKinshipService.php
+
+		-
+			message: '#^Argument of an invalid type list\<string\>\|false supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: app/services/FamilyPlatformAccountService.php
+
+		-
+			message: '#^Offset ''content'' on array\{success\: true, content\: string, provider\: string, model\: string, error\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/FamilyPlatformAccountService.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: app/services/FamilyPlatformAccountService.php
+
+		-
+			message: '#^Offset ''state'' on array\{state\: string, code\: string, origin\: string\|null, pending\: array\<string, mixed\>\|null\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/FamilyPostAudienceService.php
+
+		-
 			message: '#^Offset ''finding_of_fact'' on non\-empty\-array\<string, mixed\> on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
@@ -1724,6 +1934,54 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/services/FamilyRoundTableService.php
+
+		-
+			message: '#^Cannot call method fetch\(\) on PDOStatement\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/services/FamilyTreeAccessService.php
+
+		-
+			message: '#^Method App\\services\\FamilyTreeAccessService\:\:saveAccessControlPolicy\(\) should return array\{success\: bool, access_mode\: string, hide_parent_first_name\: bool, allowed_count\: int, denied_count\: int, message\: string\} but returns array\{success\: false, access_mode\: ''family_all''\|''only_me''\|''specific_persons'', allowed_count\: 0, denied_count\: 0, message\: ''Unable to save…''\}\.$#'
+			identifier: return.type
+			count: 1
+			path: app/services/FamilyTreeAccessService.php
+
+		-
+			message: '#^Offset ''code'' on array\{state\: ''active'', code\: string, origin\: string\|null, pending\: array\<string, mixed\>\|null\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/FamilyTreeAccessService.php
+
+		-
+			message: '#^Offset ''hide_parent_first…'' on array\{user_id\: string, access_mode\: string, notify_on_view\: bool\} on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: app/services/FamilyTreeAccessService.php
+
+		-
+			message: '#^Offset ''state'' on array\{state\: string, code\: string, origin\: string\|null, pending\: array\<string, mixed\>\|null\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/FamilyTreeAccessService.php
+
+		-
+			message: '#^Offset ''first_name'' on non\-empty\-array\<string, mixed\> on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/FamilyTriviaService.php
+
+		-
+			message: '#^Offset ''node_id'' on array\{first_name\: non\-empty\-string, last_name\: string, full_name\: non\-empty\-string, user_id\: non\-empty\-string\|null, node_id\: int, birth_year\: mixed, birth_place\: mixed\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: app/services/FamilyTriviaService.php
+
+		-
+			message: '#^Offset 0 on array\{int\|string, string\|null\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/InactivityScoringService.php
 
 		-
 			message: '#^Offset ''finding_of_fact'' on non\-empty\-array\<string, mixed\> on left side of \?\? always exists and is not nullable\.$#'
@@ -1756,21 +2014,39 @@ parameters:
 			path: app/services/LinkPreviewService.php
 
 		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/services/LinkPreviewService.php
+
+		-
 			message: '#^Cannot call method fetch\(\) on PDOStatement\|false\.$#'
 			identifier: method.nonObject
-			count: 1
+			count: 2
 			path: app/services/LinkPreviewService.php
 
 		-
 			message: '#^Cannot call method fetchAll\(\) on PDOStatement\|false\.$#'
 			identifier: method.nonObject
+			count: 2
+			path: app/services/LinkPreviewService.php
+
+		-
+			message: '#^Constant App\\services\\LinkPreviewService\:\:CONNECT_TIMEOUT_SECS is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: app/services/LinkPreviewService.php
+
+		-
+			message: '#^Constant App\\services\\LinkPreviewService\:\:HTTP_TIMEOUT_SECS is unused\.$#'
+			identifier: classConstant.unused
 			count: 1
 			path: app/services/LinkPreviewService.php
 
 		-
 			message: '#^Offset 0 on non\-empty\-list\<string\> on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
-			count: 1
+			count: 2
 			path: app/services/LinkPreviewService.php
 
 		-
@@ -1780,8 +2056,26 @@ parameters:
 			path: app/services/LinkPreviewService.php
 
 		-
-			message: '#^Parameter \#2 \$options of function curl_setopt_array expects array\{10002\: non\-empty\-string, 19913\: bool, 52\: bool, 68\: int, 13\: int, 78\: int, 181\: int, 182\: int, \.\.\.\}, array\{10002\: string, 19913\: false, 52\: true, 68\: 3, 13\: 4, 78\: 2, 181\: 3, 182\: 3, \.\.\.\} given\.$#'
+			message: '#^Parameter \#1 \$haystack of function str_contains expects string, string\|false given\.$#'
 			identifier: argument.type
+			count: 1
+			path: app/services/LinkPreviewService.php
+
+		-
+			message: '#^Parameter \#2 \$options of function curl_setopt_array expects array\{10002\: non\-empty\-string, 19913\: bool, 52\: bool, 68\: int, 13\: int, 78\: int, 181\: int, 182\: int, \.\.\.\}, array\{10002\: string, 19913\: false, 52\: true, 68\: 5, 13\: 6, 78\: 3, 181\: 3, 182\: 3, \.\.\.\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/services/LinkPreviewService.php
+
+		-
+			message: '#^Parameter \#2 \$options of function curl_setopt_array expects array\{10002\: non\-empty\-string, 19913\: bool, 52\: bool, 68\: int, 13\: int, 78\: int, 64\: bool, 81\: 0\|2, \.\.\.\}, array\{10002\: non\-empty\-string, 19913\: false, 52\: true, 68\: 5, 13\: 6, 78\: 3, 64\: false, 81\: false, \.\.\.\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/services/LinkPreviewService.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between non\-empty\-string\|null and '''' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
 			count: 1
 			path: app/services/LinkPreviewService.php
 
@@ -1816,6 +2110,54 @@ parameters:
 			path: app/services/ProfilepageService.php
 
 		-
+			message: '#^Method App\\services\\PromptGuideService\:\:all\(\) should return array\<string, array\{slug\: string, title\: string, category\: string, read_time\: string, meta_description\: string, summary\: string, audio_tip\: string, phases\: array\<int, array\{phase_title\: string, questions\: array\<int, string\>\}\>, \.\.\.\}\> but returns non\-empty\-array\<string, array\<string, mixed\>\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/services/PromptGuideService.php
+
+		-
+			message: '#^Offset ''category'' on array\{slug\: string, title\: string, category\: string, read_time\?\: string, meta_description\: string, summary\: string, audio_tip\?\: string, phases\: array\<int, array\{phase_title\: string, questions\: array\<int, string\>\}\>, \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/PromptGuideService.php
+
+		-
+			message: '#^Offset ''meta_description'' on array\{slug\: string, title\: string, category\: string, read_time\?\: string, meta_description\: string, summary\: string, audio_tip\?\: string, phases\: array\<int, array\{phase_title\: string, questions\: array\<int, string\>\}\>, \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/PromptGuideService.php
+
+		-
+			message: '#^Offset ''phases'' on array\{slug\: string, title\: string, category\: string, read_time\?\: string, meta_description\: string, summary\: string, audio_tip\?\: string, phases\: array\<int, array\{phase_title\: string, questions\: array\<int, string\>\}\>, \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/PromptGuideService.php
+
+		-
+			message: '#^Offset ''slug'' on array\{slug\: string, title\: string, category\: string, read_time\?\: string, meta_description\: string, summary\: string, audio_tip\?\: string, phases\: array\<int, array\{phase_title\: string, questions\: array\<int, string\>\}\>, \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/PromptGuideService.php
+
+		-
+			message: '#^Offset ''summary'' on array\{slug\: string, title\: string, category\: string, read_time\?\: string, meta_description\: string, summary\: string, audio_tip\?\: string, phases\: array\<int, array\{phase_title\: string, questions\: array\<int, string\>\}\>, \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/PromptGuideService.php
+
+		-
+			message: '#^Offset ''title'' on array\{slug\: string, title\: string, category\: string, read_time\?\: string, meta_description\: string, summary\: string, audio_tip\?\: string, phases\: array\<int, array\{phase_title\: string, questions\: array\<int, string\>\}\>, \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/PromptGuideService.php
+
+		-
+			message: '#^Parameter \#1 \$haystack of function str_starts_with expects string, int\<min, \-1\>\|int\<1, max\>\|string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/services/TwoTruthsGameService.php
+
+		-
 			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, int\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -1826,6 +2168,12 @@ parameters:
 			identifier: method.staticCall
 			count: 2
 			path: app/services/TwoTruthsGameService.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: app/services/VideoAutoTrimService.php
 
 		-
 			message: '#^Comparison operation "\<\=" between int\<1, max\> and 0 is always false\.$#'
@@ -1842,6 +2190,12 @@ parameters:
 		-
 			message: '#^Method App\\services\\VisualSupremacyService\:\:createGdResource\(\) should return GdImage\|resource\|null but returns GdImage\|false\|null\.$#'
 			identifier: return.type
+			count: 1
+			path: app/services/VisualSupremacyService.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
 			count: 1
 			path: app/services/VisualSupremacyService.php
 
@@ -1871,6 +2225,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$image of function imageavif expects GdImage, GdImage\|resource given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/services/VisualSupremacyService.php
+
+		-
+			message: '#^Parameter \#1 \$image of function imageconvolution expects GdImage, GdImage\|resource given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/services/VisualSupremacyService.php
@@ -1910,3 +2270,15 @@ parameters:
 			identifier: booleanOr.alwaysFalse
 			count: 1
 			path: app/services/VisualSupremacyService.php
+
+		-
+			message: '#^Offset ''duration'' on array\{type\: ''intro'', duration\: 4, title\: ''Weekly Highlights'', subtitle\: non\-falsy\-string, caption\: ''Celebrating the…''\}\|array\{type\: ''milestone'', duration\: 4, title\: non\-falsy\-string, subtitle\: ''Celebrating another…'', image_url\: non\-falsy\-string\|null\}\|array\{type\: ''outro'', duration\: 4, title\: ''One Family\. Endless…'', subtitle\: ''Approved and shared…''\}\|array\{type\: ''photo''\|''sanctuary'', duration\: 5, image_url\: non\-falsy\-string, author\: string, caption\: string, likes\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/WeeklyActivityVideoCuratorService.php
+
+		-
+			message: '#^Offset ''image'' on array\{type\: ''birthday'', title\: non\-falsy\-string, subtitle\: ''Celebrating another…'', image\: null\} on left side of \?\? always exists and is always null\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/WeeklyActivityVideoCuratorService.php

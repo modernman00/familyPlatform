@@ -13,3 +13,4 @@ $router->map('GET', '/api/emoji/catalog', 'App\controller\members\AtgEmojiContro
 $router->map('POST', '/api/emoji/render-avatar', 'App\controller\members\AtgEmojiController@renderAvatar', 'api_emoji_render_avatar');
 $router->map('GET', '/api/emoji/svg/[*:id]', 'App\controller\members\AtgEmojiController@renderEmojiSvg', 'api_emoji_render_svg');
 $router->map('POST', '/api/emoji/save-avatar', 'App\controller\members\AtgEmojiController@saveAvatar', 'api_emoji_save_avatar');
+$router->map('POST', '/api/emoji/photo-to-avatar', 'App\controller\members\AtgEmojiController@photoToAvatar', 'api_emoji_photo_to_avatar');

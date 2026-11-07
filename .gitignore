@@ -47,6 +47,7 @@ localhost.pem
 mysql.session.sql
 .agents/
 scratch.php
+LocalValetDriver.php
 test.drawio
 *.key
 *.crt

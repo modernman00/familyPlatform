@@ -190,29 +190,22 @@
                     <div id="composerActiveDrawers" class="mb-3">
 
                         <!-- 1. Video Embed & Auto-Trim Container (Direct Upload Focus) -->
-                        <div id="videoEmbedContainer" class="composer-drawer video-builder d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div class="d-flex align-items-center gap-2 flex-wrap">
-                                    <span class="fw-bold small" style="color: #a31621 !important;"><i class="bi bi-camera-video-fill me-1"></i> Upload Videos (Max 3)</span>
-                                    <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1" style="font-size: 0.7rem;">
-                                        <i class="bi bi-scissors me-1"></i> Smart 30s Auto-Trim
-                                    </span>
-                                </div>
-                                <button type="button" id="removeVideoBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Close video upload drawer"></button>
-                            </div>
-                            <div class="d-flex gap-2 align-items-center flex-wrap mb-2">
-                                <label for="videoDirectFileInput" class="btn btn-sm fw-semibold mb-0 d-inline-flex align-items-center gap-1.5 shadow-xs" style="cursor: pointer; border-radius: 8px; font-size: 0.82rem; padding: 9px 16px; min-height: 44px; white-space: nowrap; flex-shrink: 0; background-color: #a31621; color: #ffffff !important; border: none;">
-                                    <i class="bi bi-cloud-arrow-up-fill fs-6"></i> Upload Videos (Up to 3, Auto-Trim to 30s)
-                                </label>
-                                <input type="file" id="videoDirectFileInput" accept="video/mp4,video/quicktime,video/webm" multiple hidden>
-                                <input type="url" id="postVideoInput" class="d-none" placeholder="" aria-hidden="true">
+                        <div id="videoEmbedContainer" class="composer-drawer video-builder d-none mb-3">
+                            <div class="video-builder__header">
+                                <span class="video-builder__icon"><i class="bi bi-camera-video-fill"></i></span>
+                                <span class="video-builder__title">Add videos</span>
+                                <button type="button" id="removeVideoBtn" class="video-builder__close" aria-label="Close video upload drawer">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
                             </div>
 
-                            <!-- 30-Second Rule & Auto-Trim Notification Banner -->
-                            <div class="d-flex align-items-center gap-2 mt-2 px-2.5 py-1.5 rounded-2 bg-light-subtle border border-dashed border-secondary-subtle" style="font-size: 0.75rem;">
-                                <i class="bi bi-scissors text-danger"></i>
-                                <span class="text-secondary"><strong>Smart 30-Second Auto-Trim:</strong> Videos from your device longer than 30 seconds can be automatically trimmed in the highlight studio. To share web video links (YouTube, Vimeo, etc.), use the <strong>Link Photos &amp; Videos</strong> tool below.</span>
-                            </div>
+                            <label for="videoDirectFileInput" class="video-builder__dropzone">
+                                <span class="video-builder__dropzone-icon"><i class="bi bi-cloud-arrow-up-fill"></i></span>
+                                <span class="video-builder__dropzone-title">Choose up to 3 videos</span>
+                                <span class="video-builder__dropzone-hint">MP4, MOV or WebM &middot; clips over 30s get trimmed to a highlight</span>
+                            </label>
+                            <input type="file" id="videoDirectFileInput" accept="video/mp4,video/quicktime,video/webm" multiple hidden>
+                            <input type="url" id="postVideoInput" class="d-none" placeholder="" aria-hidden="true">
 
                             <!-- Interactive On-Demand Video Auto-Trim Studio -->
                             <div id="videoAutoTrimStudio" class="d-none mt-3 p-3 rounded-3 border" style="background: #0f172a; color: #f8fafc; border-color: rgba(248, 250, 252, 0.16) !important;">
@@ -258,23 +251,6 @@
                                 </div>
                             </div>
 
-                            <!-- Dynamic Video Retention Expiration Control -->
-                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-2 px-2 py-1 rounded-2 bg-light-subtle border border-light-subtle">
-                                <div class="d-flex align-items-center gap-1">
-                                    <i class="bi bi-hourglass-split text-danger"></i>
-                                    <span class="small fw-semibold text-secondary" style="font-size: 0.78rem;">Keep Video For:</span>
-                                </div>
-                                <div class="d-flex align-items-center gap-1">
-                                    <select id="videoExpirySelect" class="form-select form-select-sm" style="font-size: 0.75rem; padding: 3px 8px; border-radius: 8px; width: auto; font-weight: 500;">
-                                        <option value="86400">⏳ 24 Hours (Free)</option>
-                                        <option value="604800">📅 7 Days (Free)</option>
-                                        <option value="2592000" selected>🗓️ 30 Days (Free Default)</option>
-                                        <option value="31536000" data-premium="true">👑 1 Year (Premium Only)</option>
-                                        <option value="0" data-premium="true">👑 Permanent / Never (Premium Only)</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
                             <div id="videoUploadProgressWrapper" class="d-none mt-2">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <small id="videoUploadStatus" class="text-danger fw-semibold" style="font-size: 0.75rem;">Optimising and uploading video clip...</small>
@@ -286,6 +262,22 @@
                             </div>
 
                             <div id="videoLivePreview" class="mt-2 d-none ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm" style="max-height: 180px;"></div>
+
+                            <div class="video-builder__footer">
+                                <label for="videoExpirySelect" class="video-builder__expiry">
+                                    <i class="bi bi-hourglass-split"></i> Keep for
+                                </label>
+                                <select id="videoExpirySelect" class="form-select form-select-sm video-builder__select">
+                                    <option value="86400">24 hours</option>
+                                    <option value="604800">7 days</option>
+                                    <option value="2592000" selected>30 days (free)</option>
+                                    <option value="31536000" data-premium="true">1 year &middot; Premium</option>
+                                    <option value="0" data-premium="true">Forever &middot; Premium</option>
+                                </select>
+                                <button type="button" id="videoUseLinkBtn" class="video-builder__link">
+                                    <i class="bi bi-link-45deg"></i> Have a YouTube link?
+                                </button>
+                            </div>
                         </div>
 
                         <!-- 2. Integrated Emoji Picker Drawer (Standard & 3D Family AR Emojis) -->
@@ -565,27 +557,37 @@
                         </div>
 
                         <!-- 7. Linked Media Drawer (Zero-Storage Architecture: Photos & Videos) -->
-                        <div id="googlePhotoDrawer" class="composer-drawer d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
-                            <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
-                                <span class="fw-bold small d-flex align-items-center gap-1.5" style="color: #a31621 !important;">
-                                    <i class="bi bi-link-45deg fs-5"></i> Link Photos &amp; Videos (Zero Storage)
-                                </span>
-                                <button type="button" id="closeGooglePhotoDrawerBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Close media drawer"></button>
+                        <div id="googlePhotoDrawer" class="composer-drawer video-builder link-builder d-none mb-3">
+                            <div class="video-builder__header">
+                                <span class="video-builder__icon"><i class="bi bi-link-45deg"></i></span>
+                                <span class="video-builder__title">Link photos &amp; videos</span>
+                                <button type="button" id="closeGooglePhotoDrawerBtn" class="video-builder__close" aria-label="Close media drawer">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
                             </div>
-                            <p class="small text-muted mb-2" style="font-size: 0.8rem; line-height: 1.45;">
-                                Post high-resolution photos or videos directly from <strong>Google Photos, iCloud, YouTube, Vimeo, or direct web links</strong>. Multiple links will form a swipeable carousel with <strong>zero server storage</strong> used:
+
+                            <div class="link-builder__field">
+                                <i class="bi bi-link-45deg link-builder__field-icon" aria-hidden="true"></i>
+                                <input type="text" id="googlePhotoLinkInput" class="link-builder__input" placeholder="Paste one or more links…" inputmode="url" autocomplete="off" aria-label="Paste photo or video link">
+                                <button type="button" id="btnAttachGooglePhoto" class="link-builder__attach">Attach</button>
+                            </div>
+
+                            <div class="link-builder__sources" aria-label="Supported sources">
+                                <span class="link-builder__chip"><i class="bi bi-google"></i> Google Photos</span>
+                                <span class="link-builder__chip"><i class="bi bi-apple"></i> iCloud</span>
+                                <span class="link-builder__chip"><i class="bi bi-youtube"></i> YouTube</span>
+                                <span class="link-builder__chip"><i class="bi bi-vimeo"></i> Vimeo</span>
+                                <span class="link-builder__chip"><i class="bi bi-globe2"></i> Any web link</span>
+                            </div>
+
+                            <p class="link-builder__note">
+                                <i class="bi bi-cloud-check"></i> Full quality, no upload &mdash; several links become a swipeable carousel.
                             </p>
-                            <div class="input-group input-group-sm mb-2">
-                                <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-radius: 8px 0 0 8px;">
-                                    <i class="bi bi-link-45deg"></i>
-                                </span>
-                                <input type="text" id="googlePhotoLinkInput" class="form-control form-control-sm border-start-0 shadow-none" placeholder="Paste link(s), e.g. Google Photos, iCloud, YouTube, Vimeo, web links..." style="border-radius: 0 8px 8px 0;">
-                                <button type="button" id="btnAttachGooglePhoto" class="btn btn-sm btn-primary fw-semibold px-3" style="border-radius: 8px; margin-left: 6px; min-height: 38px;">Attach</button>
-                            </div>
-                            <div class="p-2.5 rounded-2 bg-light-subtle border border-dashed border-secondary-subtle" style="font-size: 0.74rem; line-height: 1.45;">
-                                <i class="bi bi-lightbulb-fill text-warning me-1"></i>
-                                <strong>How to get link:</strong> In <strong>Google Photos</strong> or <strong>iCloud</strong>, select photo(s) &rarr; tap <strong>Share</strong> &rarr; tap <strong>Create link</strong> (or copy image address) &rarr; paste here!
-                            </div>
+
+                            <details class="link-builder__help">
+                                <summary><i class="bi bi-question-circle"></i> How do I get a link?</summary>
+                                <p>In Google Photos or iCloud, select your photo(s) &rarr; <strong>Share</strong> &rarr; <strong>Create link</strong> (or copy image address), then paste it above.</p>
+                            </details>
                         </div>
 
                         <input type="hidden" name="ar_emoji" id="attachedArEmojiInput" value="">

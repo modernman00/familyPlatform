@@ -220,6 +220,7 @@ final class FamilyTreeAccessControlTest extends TestCase
             FamilyTreeAccessService::MODE_SPECIFIC_PERSONS,
             [], // no allowed members
             [],
+            false,
             $this->pdo
         );
         $this->assertTrue($saveRes['success']);
@@ -240,6 +241,7 @@ final class FamilyTreeAccessControlTest extends TestCase
             FamilyTreeAccessService::MODE_ONLY_ME,
             [$this->relativeId],
             [],
+            false,
             $this->pdo
         );
 

@@ -837,7 +837,7 @@ const renderAllAttachedVideoPreviews = () => {
         card.appendChild(removeBtn);
 
         const parsed = parseVideoUrl(entry.streamUrl);
-        if (parsed && (parsed.type === 'youtube' || parsed.type === 'vimeo' || parsed.type === 'cloudflare')) {
+        if (parsed && (parsed.type === 'youtube' || parsed.type === 'vimeo' || parsed.type === 'cloudflare' || parsed.type === 'tiktok')) {
             const iframeWrap = document.createElement('div');
             iframeWrap.className = 'ratio ratio-16x9 w-100';
             iframeWrap.style.maxHeight = '200px';
@@ -1352,6 +1352,17 @@ if (addVideoBtn && videoContainer) {
         removeVideoBtn.addEventListener('click', (e) => {
             e.preventDefault();
             closeVideoBuilder();
+        });
+    }
+
+    // "Have a YouTube link?" — hand off to the Link Photos & Videos drawer
+    const videoUseLinkBtn = document.getElementById('videoUseLinkBtn');
+    if (videoUseLinkBtn) {
+        videoUseLinkBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Only collapse the drawer if nothing is attached — closeVideoBuilder() discards uploads
+            if (attachedVideoList.length === 0 && !activeVideoUploadPromises.size) closeVideoBuilder();
+            document.getElementById('addGooglePhotoBtn')?.click();
         });
     }
 

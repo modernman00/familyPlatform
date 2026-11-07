@@ -4,6 +4,8 @@
  * - YouTube (Standard, Shortened youtu.be, Shorts, Live, Unlisted, with or without '=' in query)
  * - Vimeo
  * - Cloudflare Stream
+ * - TikTok (full video URLs)
+ * - Dropbox shared video files
  * - Direct MP4 / WebM video streams
  */
 
@@ -51,6 +53,33 @@ export function parseVideoUrl(url) {
       videoId: cfMatch[1],
       embedUrl: `https://iframe.videodelivery.net/${cfMatch[1]}`,
       originalUrl: trimmed
+    };
+  }
+
+  // 3b. TikTok (tiktok.com/@user/video/ID) — embeddable player
+  const tiktokMatch = trimmed.match(/^https?:\/\/(?:www\.)?tiktok\.com\/@[\w.-]+\/video\/(\d{8,25})/i);
+  if (tiktokMatch) {
+    return {
+      type: 'tiktok',
+      videoId: tiktokMatch[1],
+      embedUrl: `https://www.tiktok.com/embed/v2/${tiktokMatch[1]}`,
+      originalUrl: trimmed
+    };
+  }
+
+  // 3c. Dropbox shared video files — force raw streaming (dl=0 returns an HTML page, raw=1 returns the file)
+  const dropboxRegex = /^https?:\/\/(?:www\.)?dropbox\.com\/(?:s|scl\/fi)\/[^\s"'<>?#]+\.(?:mp4|webm|mov|ogg)(?:\?[^\s"'<>#]*)?$/i;
+  if (dropboxRegex.test(trimmed)) {
+    const dbUrl = new URL(trimmed);
+    dbUrl.searchParams.delete('dl');
+    dbUrl.searchParams.set('raw', '1');
+    return {
+      type: 'direct',
+      videoId: null,
+      embedUrl: dbUrl.toString(),
+      originalUrl: trimmed,
+      trimStart: null,
+      trimEnd: null,
     };
   }
 

@@ -149,7 +149,7 @@
                 <!-- 0. Lead Card: Facebook-Style "Upload Your Contacts" Card (RFC-0038) -->
                 <div class="kin-card kinship-item-card kinship-item-card--contacts-lead position-relative" 
                      id="kinContactsUploadCard"
-                     style="flex: 0 0 240px; min-width: 240px; max-width: 240px; scroll-snap-align: start; border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(175deg, #1d4ed8 0%, #2563eb 50%, #1e40af 100%); color: #ffffff; border: 1.5px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);">
+                     style="flex: 0 0 240px; min-width: 240px; max-width: 240px; scroll-snap-align: start; border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(175deg, var(--brand-primary, #a31621) 0%, #b8202c 50%, var(--brand-secondary, #7a0e16) 100%); color: #ffffff; border: 1.5px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 16px rgba(163, 22, 33, 0.25);">
                     
                     <!-- Top Section: Visual Family/Mobile Illustration (Mirroring Facebook Benchmark Reference) -->
                     <div class="position-relative p-3 text-center d-flex align-items-center justify-content-center" 
@@ -164,9 +164,9 @@
 
                         <!-- Bespoke SVG Illustration: Family Taking Selfies & Connecting on Mobile Phones -->
                         <svg width="170" height="150" viewBox="0 0 180 160" fill="none" xmlns="http://www.w3.org/2000/svg" class="mx-auto" aria-hidden="true">
-                            <circle cx="90" cy="80" r="65" fill="#3B82F6" fill-opacity="0.35"/>
+                            <circle cx="90" cy="80" r="65" fill="#FFFFFF" fill-opacity="0.14"/>
                             <circle cx="50" cy="55" r="35" fill="#EC4899" fill-opacity="0.25"/>
-                            <circle cx="130" cy="55" r="35" fill="#60A5FA" fill-opacity="0.3"/>
+                            <circle cx="130" cy="55" r="35" fill="#F87171" fill-opacity="0.3"/>
                             
                             <!-- Left: Young Kin Selfie taker -->
                             <circle cx="48" cy="45" r="16" fill="#FDE68A"/>
@@ -185,7 +185,7 @@
 
                             <!-- Center: Hand holding selfie stick phone with smiling face -->
                             <line x1="90" y1="140" x2="90" y2="85" stroke="#E2E8F0" stroke-width="4" stroke-linecap="round"/>
-                            <rect x="65" y="70" width="50" height="32" rx="6" fill="#FFFFFF" stroke="#3B82F6" stroke-width="2"/>
+                            <rect x="65" y="70" width="50" height="32" rx="6" fill="#FFFFFF" stroke="#a31621" stroke-width="2"/>
                             <circle cx="90" cy="84" r="7" fill="#FCD34D"/>
                             <path d="M86 87C87 89 93 89 94 87" stroke="#92400E" stroke-width="1.2" stroke-linecap="round"/>
                             
@@ -210,10 +210,10 @@
                         <!-- Action Button: Upload / Find Kin (Facebook Benchmark Match) -->
                         <div>
                             <button type="button" 
-                                    class="btn btn-light fw-bold text-primary w-100 py-2 d-flex align-items-center justify-content-center gap-1.5 shadow-sm btn-upload-contacts-lead btn-spin-on-click"
+                                    class="btn btn-light fw-bold w-100 py-2 d-flex align-items-center justify-content-center gap-1.5 shadow-sm btn-upload-contacts-lead btn-spin-on-click"
                                     data-spin="true"
                                     aria-label="{{ __('kinship.upload_contacts_btn', 'Upload') }}"
-                                    style="border-radius: 10px; min-height: 44px; font-size: 0.88rem; font-weight: 700; color: #1d4ed8 !important; background-color: #ffffff; border: none; white-space: nowrap; flex-shrink: 0; transition: transform 0.15s ease;">
+                                    style="border-radius: 10px; min-height: 44px; font-size: 0.88rem; font-weight: 700; color: var(--brand-primary, #a31621) !important; background-color: #ffffff; border: none; white-space: nowrap; flex-shrink: 0; transition: transform 0.15s ease;">
                                 <i class="bi bi-person-lines-fill"></i>
                                 <span>{{ __('kinship.upload_contacts_btn', 'Upload') }}</span>
                             </button>

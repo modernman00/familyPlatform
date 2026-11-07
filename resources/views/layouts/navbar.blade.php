@@ -38,6 +38,11 @@
                         <i class="bi bi-stars me-1"></i> {{ __('nav.studio', 'Studio') }}
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link stitch-nav-link" href="/poster-studio" title="Family Flyer Studio - Design Jubilee, Milestone & Reunion Posters">
+                        <i class="bi bi-palette2 me-1 text-warning"></i> Family Flyer Studio
+                    </a>
+                </li>
                 <li class="nav-item reelsNav">
                     <a class="nav-link stitch-nav-link" href="/reels" title="{{ __('nav.reels', 'Reels') }} - Watch captivating family video moments">
                         <i class="bi bi-camera-reels-fill me-1"></i> {{ __('nav.reels', 'Reels') }}
@@ -137,6 +142,11 @@
                         <li class="profileNav">
                             <a class="dropdown-item py-2 px-3 fw-medium" href="/profile" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Edit your personal profile information">
                                 <i class="bi bi-pencil-square me-2 text-primary"></i> {{ __('nav.edit_profile', 'Edit Profile') }}
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2 px-3 fw-medium" href="/poster-studio" title="Family Flyer Studio - Design Jubilee, Milestone & Reunion Posters">
+                                <i class="bi bi-palette2 me-2 text-warning"></i> Family Flyer Studio
                             </a>
                         </li>
                         <li>

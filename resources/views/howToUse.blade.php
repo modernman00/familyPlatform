@@ -426,6 +426,38 @@
           </div>
         </div>
 
+        <!-- Pillar 8b: Profile Cover Photo -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(163,22,33, 0.12); color: #a31621;">
+                <i class="bi bi-image fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">8b. Your Profile Cover Photo</h3>
+                <span class="badge" style="background: #a31621; color: #fff;">Personalise</span>
+              </div>
+            </div>
+
+            <p class="lead text-secondary">
+              Put a family portrait, your hometown or a favourite reunion photo behind your profile card. On your home page, tap the banner above your profile picture to add a cover.
+            </p>
+
+            <ul class="text-secondary small mb-3">
+              <li>JPG, PNG, WebP or HEIC, up to 10 MB. Large photos are resized automatically.</li>
+              <li>Once a cover is set, tap it to open a short menu: <strong>Change photo</strong>, <strong>Reposition</strong> or <strong>Remove</strong>.</li>
+              <li><strong>Reposition</strong> lets you drag the photo (or use the arrow keys) to choose which part shows. Tap <strong>Save</strong> to keep it or <strong>Cancel</strong> to undo. It also opens straight after you upload a new cover.</li>
+              <li>Cover photos also appear in your photo gallery, alongside your profile pictures.</li>
+            </ul>
+
+            <div class="p-3 rounded-3 bg-light border">
+              <p class="small text-muted mb-0">
+                Every cover is checked against its file type and scanned before it is saved, using the same upload safeguards as your profile picture.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- Pillar 9: Privacy, Two-Factor Authentication (2FA) & Passkeys -->
         <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
           <div class="card-body p-4 p-md-5">
@@ -498,6 +530,14 @@
                   <h6 class="fw-bold text-dark"><i class="bi bi-chat-heart text-danger me-2"></i>Reels Comments Parity &amp; Interactive Features</h6>
                   <p class="small text-muted mb-0">
                     Comments on <strong>Family Reels</strong> enjoy full functional parity with standard post comments: organise discussions into <strong>1-level threaded replies</strong>, attach vibrant animated stickers from our curated <strong>Family GIF</strong> catalogue, react with emotional emoji pickers (Like, Love, Haha, Wow, Sad, Angry), and edit your own comments inline with instant preview.
+                  </p>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="p-3 rounded-3 bg-light border">
+                  <h6 class="fw-bold text-dark"><i class="bi bi-emoji-smile text-warning me-2"></i>Living Avatar &amp; Emoji Studio</h6>
+                  <p class="small text-muted mb-0">
+                    Open <a href="/member/emoji-studio">Emoji Studio</a> to build an avatar that looks like you: a Gender Expression choice (Neutral, Feminine or Masculine) that never limits your other options, 13 skin tones, vitiligo and freckles, 5 face and eye shapes, 21 hairstyles and headwear (including hijab, dastar, gele and kufi), hair colours, facial hair, outfits and eyewear. In the <strong>Photo-to-Living Avatar</strong> tab, upload a portrait to extract your exact complexion undertone and hair colour, preview a 2.5D breathing and blinking portrait, and fine-tune identity-preservation parameters (Denoising Strength, CFG Scale, Face Restoration, Skin Texture, Micro-Sharpening and Eye Catchlight). Your avatar follows your cursor, or your phone's tilt. Tap it or use the reaction bar (👋 😂 😮 ❤️ 🙆 💃) to make it react. Turn on <strong>Talk mode</strong> and its mouth moves when you speak; the audio stays on your device. Keep <strong>Living profile photo</strong> ticked and your saved photo blinks and breathes. In <strong>Living Emojis</strong>, every emoji moves, and you can pick a skin tone for the people emojis (Hello Kin, Held With Love, Ancestral Blessing, Kinship Embrace) before tapping one to copy it.
                   </p>
                 </div>
               </div>

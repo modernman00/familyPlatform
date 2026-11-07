@@ -849,7 +849,7 @@ final class FamilyTreeAccessService
      * @param string $accessMode 'family_all' | 'specific_persons' | 'only_me'
      * @param array<int, string> $allowedUserIds
      * @param array<int, string> $deniedUserIds
-     * @param bool $hideParentFirstName Option to show initial only for parents' first names
+     * @param bool|PDO $hideParentFirstName Option to show initial only for parents' first names (or PDO instance for backwards-compatibility)
      * @param PDO|null $pdo
      * @return array{success: bool, access_mode: string, hide_parent_first_name: bool, allowed_count: int, denied_count: int, message: string}
      */
@@ -858,9 +858,13 @@ final class FamilyTreeAccessService
         string $accessMode,
         array $allowedUserIds = [],
         array $deniedUserIds = [],
-        bool $hideParentFirstName = false,
+        bool|PDO $hideParentFirstName = false,
         ?PDO $pdo = null
     ): array {
+        if ($hideParentFirstName instanceof PDO) {
+            $pdo = $hideParentFirstName;
+            $hideParentFirstName = false;
+        }
         self::ensureSchema($pdo);
         $treeOwnerId = trim($treeOwnerId);
 

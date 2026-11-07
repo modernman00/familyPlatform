@@ -136,12 +136,20 @@ class TranslateController extends BaseController
             error_log('Translate error: ' . $e->getMessage());
         }
 
-        // Graceful fallback: return unescaped source text
+        // Graceful fallback: cache & return unescaped source text to avoid repeated connection timeouts
+        $_SESSION['trans_cache'][$cacheKey] = [
+            'text' => $cleanSourceText,
+            'source' => '',
+            'already_in_target' => false,
+            'fallback' => true,
+        ];
+
         echo json_encode([
             'success' => true,
             'translation' => $cleanSourceText,
             'detected_source' => '',
             'already_in_target' => false,
+            'cached' => false,
             'fallback' => true
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }

@@ -109,6 +109,9 @@
     </div>
 </div>
 
+<!-- In-House Sovereign Video Explainer Studio (ATG ExplainerCore) -->
+{!! \Src\Explainer\PortfolioExplainerRegistry::renderAdminStudioSection($selectedApp ?? 'familyplatform') !!}
+
 <!-- Autonomous Executive Decision & Action Engine -->
 <div class="mb-10">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">

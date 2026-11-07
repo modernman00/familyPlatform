@@ -4,17 +4,37 @@
     <div class="card profile-card text-center border-0 shadow-sm" style="border-radius: 20px; overflow: hidden; background-color: var(--card-bg); color: var(--text-color);">
         <div class="card-header position-relative p-0 border-0">
             <!-- Modern Brand Radial Mesh Cover -->
-            <div class="cover-photo"
-                style="height: 120px; background: linear-gradient(135deg, #2a0a0d 0%, #2a0a0d 40%, #8a1019 80%, #b8202c 100%); position: relative;">
-                @if(!empty($isPendingApproval))
-                <span class="position-absolute top-0 end-0 m-3 badge bg-warning text-dark fw-bold px-2.5 py-1 rounded-pill shadow-xs" style="font-size: 0.72rem; letter-spacing: 0.04em;">
-                    <i class="bi bi-hourglass-split me-1"></i> PENDING APPROVAL
+            <!-- Member cover photo (falls back to the brand gradient). Nothing sits on top of the photo:
+                 tapping the cover opens a small edit menu; the focal point is adjustable. -->
+            @php $hasCover = !empty($cover['url']); @endphp
+            <!-- Kept outside the band so its programmatic click can't bubble back into openCoverMenu -->
+            <input type="file" id="coverPhotoInput" accept="image/jpeg,image/png,image/webp,image/heic" hidden onchange="handleProfileCoverUpload(this)">
+            <div class="cover-photo {{ $hasCover ? 'has-cover' : '' }}"
+                id="profileCoverPhoto"
+                role="button" tabindex="0"
+                aria-label="{{ $hasCover ? 'Edit cover photo' : 'Add cover photo' }}"
+                aria-haspopup="menu"
+                onclick="openCoverMenu(event)"
+                onkeydown="if (event.key === 'Enter' || event.key === ' ') { openCoverMenu(event); }"
+                @if($hasCover) style="background-image: url('{{ $cover['url'] }}'); background-position: {{ (int) $cover['x'] }}% {{ (int) $cover['y'] }}%;" @endif>
+                <!-- Only shown on the empty gradient (never over a photo) so members can discover the feature -->
+                <span class="cover-photo__add {{ $hasCover ? 'd-none' : '' }}" id="coverPhotoAddHint" aria-hidden="true">
+                    <i class="bi bi-image"></i> Add cover photo
                 </span>
-                @else
-                <span class="position-absolute top-0 end-0 m-3 badge bg-white bg-opacity-25 text-white fw-bold px-2 py-1 rounded-pill" style="font-size: 0.7rem; letter-spacing: 0.04em;">
-                    <i class="bi bi-shield-check text-warning"></i> {{ __('profile.verified', 'VERIFIED') }}
-                </span>
-                @endif
+
+                <!-- Tap menu (appears on demand, closes on outside tap / Escape) -->
+                <div class="cover-photo__menu d-none" id="coverPhotoMenu" role="menu" aria-label="Cover photo options">
+                    <button type="button" role="menuitem" onclick="coverMenuAction('change', event)"><i class="bi bi-image"></i> Change photo</button>
+                    <button type="button" role="menuitem" onclick="coverMenuAction('adjust', event)"><i class="bi bi-arrows-move"></i> Reposition</button>
+                    <button type="button" role="menuitem" class="is-danger" onclick="coverMenuAction('remove', event)"><i class="bi bi-trash3"></i> Remove</button>
+                </div>
+
+                <!-- Reposition mode (drag or arrow keys) — only visible while adjusting -->
+                <div class="cover-photo__adjust-bar d-none" id="coverAdjustBar">
+                    <span class="cover-photo__adjust-hint"><i class="bi bi-arrows-move"></i> Drag to reposition</span>
+                    <button type="button" class="cover-photo__btn" id="coverAdjustCancelBtn" onclick="endCoverAdjust(false)">Cancel</button>
+                    <button type="button" class="cover-photo__btn cover-photo__btn--primary" id="coverAdjustSaveBtn" onclick="endCoverAdjust(true)">Save</button>
+                </div>
             </div>
             @php
                 $leftPrimaryCode = ltrim((string)($primaryFamCode ?? ($data['primaryFamCode'] ?? ($data['famCode'] ?? ''))), '#');
@@ -28,7 +48,7 @@
                     ? __('profile.family_member', 'Family Member') . ' • ' . __('profile.married_family_code', 'Married Code') . ': ' . $leftMarriedCode . ' • ' . __('profile.birth_family_code', 'Birth Code') . ': ' . $leftEffectiveBirthCode
                     : __('profile.family_member', 'Family Member') . ' • ' . __('profile.birth_family_code', 'Birth Code') . ': ' . $leftEffectiveBirthCode;
             @endphp
-            <div class="avatar-container position-absolute w-100" style="top: 55px;" title="Click to enlarge profile photo" role="button" tabindex="0" aria-label="View {{ ucwords(strtolower($data['firstName'] ?? '')) }}'s profile photo in full size">
+            <div class="avatar-container position-absolute w-100" title="Click to enlarge profile photo" role="button" tabindex="0" aria-label="View {{ ucwords(strtolower($data['firstName'] ?? '')) }}'s profile photo in full size">
                 <div class="position-relative d-inline-block">
                     <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" 
                          alt="{{ ucwords(strtolower($data['firstName'] ?? '')) }} {{ ucwords(strtolower($data['lastName'] ?? '')) }}" 
@@ -57,6 +77,15 @@
                             onclick="triggerDirectAvatarFileSelect(event)">
                         <i class="bi bi-camera-fill"></i>
                     </button>
+                    <!-- Living Avatar Studio shortcut (mirrors the camera button) -->
+                    <a href="/member/emoji-studio"
+                       class="avatar-emoji-btn shadow-sm"
+                       id="avatarStudioShortcut"
+                       title="Create your living avatar"
+                       aria-label="Create your living avatar"
+                       onclick="event.stopPropagation()">
+                        <i class="bi bi-person-bounding-box" aria-hidden="true"></i>
+                    </a>
                     <input type="file" 
                            id="directAvatarUploadInput" 
                            name="direct_img" 
@@ -71,7 +100,15 @@
 
             <h4 class="card-title fw-bold mb-1" style="color: var(--text-color); font-size: 1.25rem; letter-spacing: -0.01em;">
                 {{ ucwords(strtolower($data['firstName'])) }} {{ ucwords(strtolower($data['lastName'])) }}
+                @if(empty($isPendingApproval))
+                <i class="bi bi-patch-check-fill profile-verified-tick" title="{{ __('profile.verified', 'Verified') }}" aria-label="{{ __('profile.verified', 'Verified') }}"></i>
+                @endif
             </h4>
+            @if(!empty($isPendingApproval))
+            <span class="badge bg-warning text-dark fw-bold px-2.5 py-1 rounded-pill mb-2" style="font-size: 0.72rem; letter-spacing: 0.04em;">
+                <i class="bi bi-hourglass-split me-1"></i> PENDING APPROVAL
+            </span>
+            @endif
 
             @php
                 $leftUserCountry = trim((string)($data['country'] ?? ''));
@@ -238,6 +275,238 @@
                 }
                 return false;
             };
+
+            // ── Cover photo (shared-lib FileUploader pipeline via /member/profilePage/coverImg) ──
+            (function() {
+                function coverCsrf() {
+                    return document.querySelector('meta[name="csrf-token"]')?.content
+                        || document.querySelector('input[name="token"]')?.value
+                        || @json($_SESSION['token'] ?? '');
+                }
+                function coverNotify(icon, title, text) {
+                    if (typeof Swal === 'undefined') { if (icon === 'error') alert(text || title); return; }
+                    if (icon === 'success') {
+                        Swal.fire({ toast: true, position: 'top-end', icon: icon, title: title, showConfirmButton: false, timer: 1500 });
+                    } else {
+                        Swal.fire({ icon: icon, title: title, text: text, confirmButtonColor: '#a31621' });
+                    }
+                }
+                function applyCover(url, pos) {
+                    var band = document.getElementById('profileCoverPhoto');
+                    if (!band) return;
+                    band.classList.toggle('has-cover', !!url);
+                    band.style.backgroundImage = url ? 'url("' + url + '")' : '';
+                    band.style.backgroundPosition = url ? (pos ? pos.x + '% ' + pos.y + '%' : '50% 50%') : '';
+                    document.getElementById('coverPhotoAddHint')?.classList.toggle('d-none', !!url);
+                    band.setAttribute('aria-label', url ? 'Edit cover photo' : 'Add cover photo');
+                }
+                // ── Reposition: drag (pointer) or arrow keys moves background-position; Save persists it ──
+                var adjust = null;
+                function readPos(band) {
+                    var parts = (band.style.backgroundPosition || '50% 50%').split(' ');
+                    return { x: parseFloat(parts[0]) || 50, y: parseFloat(parts[1] ?? parts[0]) || 50 };
+                }
+                function setPos(band, x, y) {
+                    x = Math.max(0, Math.min(100, x));
+                    y = Math.max(0, Math.min(100, y));
+                    band.style.backgroundPosition = x.toFixed(1) + '% ' + y.toFixed(1) + '%';
+                }
+                function measureOverflow(band, img) {
+                    // background-size: cover → scaled image overflows the band on one axis
+                    var w = band.clientWidth, h = band.clientHeight;
+                    var scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+                    return { x: img.naturalWidth * scale - w, y: img.naturalHeight * scale - h };
+                }
+                function onPointerDown(e) {
+                    if (!adjust || e.target.closest('button')) return;
+                    e.preventDefault();
+                    adjust.drag = { startX: e.clientX, startY: e.clientY, from: readPos(adjust.band) };
+                    adjust.band.setPointerCapture(e.pointerId);
+                    adjust.band.classList.add('is-dragging');
+                }
+                function onPointerMove(e) {
+                    if (!adjust || !adjust.drag) return;
+                    var o = adjust.overflow, d = adjust.drag;
+                    // Dragging the photo down reveals more of its top → percentage goes down
+                    var x = o.x > 0 ? d.from.x - ((e.clientX - d.startX) / o.x) * 100 : 50;
+                    var y = o.y > 0 ? d.from.y - ((e.clientY - d.startY) / o.y) * 100 : 50;
+                    setPos(adjust.band, x, y);
+                }
+                function onPointerUp(e) {
+                    if (!adjust || !adjust.drag) return;
+                    adjust.drag = null;
+                    adjust.band.classList.remove('is-dragging');
+                    try { adjust.band.releasePointerCapture(e.pointerId); } catch (_) {}
+                }
+                function onKey(e) {
+                    if (!adjust) return;
+                    var step = e.shiftKey ? 10 : 2, p = readPos(adjust.band);
+                    var map = { ArrowUp: [0, step], ArrowDown: [0, -step], ArrowLeft: [step, 0], ArrowRight: [-step, 0] };
+                    if (e.key === 'Escape') { e.preventDefault(); window.endCoverAdjust(false); return; }
+                    if (e.key === 'Enter') { e.preventDefault(); window.endCoverAdjust(true); return; }
+                    if (!map[e.key]) return;
+                    e.preventDefault();
+                    setPos(adjust.band, p.x + map[e.key][0], p.y + map[e.key][1]);
+                }
+
+                // ── Tap-to-edit menu (keeps the photo itself free of overlays) ──
+                function closeCoverMenu() {
+                    document.getElementById('coverPhotoMenu')?.classList.add('d-none');
+                    document.removeEventListener('pointerdown', onOutsideMenu, true);
+                    document.removeEventListener('keydown', onMenuKey, true);
+                }
+                function onOutsideMenu(e) {
+                    if (!e.target.closest('#coverPhotoMenu')) closeCoverMenu();
+                }
+                function onMenuKey(e) {
+                    if (e.key === 'Escape') { closeCoverMenu(); document.getElementById('profileCoverPhoto')?.focus(); }
+                }
+                window.openCoverMenu = function(e) {
+                    var band = document.getElementById('profileCoverPhoto');
+                    if (!band || adjust) return;
+                    if (e && e.target && e.target.closest && e.target.closest('#coverPhotoMenu, #coverAdjustBar')) return;
+                    if (e) e.preventDefault();
+                    if (!band.classList.contains('has-cover')) {
+                        document.getElementById('coverPhotoInput')?.click();
+                        return;
+                    }
+                    var menu = document.getElementById('coverPhotoMenu');
+                    if (!menu) return;
+                    if (!menu.classList.contains('d-none')) { closeCoverMenu(); return; }
+                    menu.classList.remove('d-none');
+                    menu.querySelector('button')?.focus({ preventScroll: true });
+                    // Defer so the opening tap doesn't immediately close it
+                    setTimeout(function() {
+                        document.addEventListener('pointerdown', onOutsideMenu, true);
+                        document.addEventListener('keydown', onMenuKey, true);
+                    }, 0);
+                };
+                window.coverMenuAction = function(action, e) {
+                    if (e) { e.preventDefault(); e.stopPropagation(); }
+                    closeCoverMenu();
+                    if (action === 'change') document.getElementById('coverPhotoInput')?.click();
+                    if (action === 'adjust') window.startCoverAdjust();
+                    if (action === 'remove') window.removeProfileCover();
+                };
+
+                window.startCoverAdjust = function() {
+                    var band = document.getElementById('profileCoverPhoto');
+                    if (!band || !band.classList.contains('has-cover') || adjust) return;
+                    var src = (band.style.backgroundImage.match(/url\(["']?(.*?)["']?\)/) || [])[1];
+                    if (!src) return;
+                    var img = new Image();
+                    img.onload = function() {
+                        adjust = { band: band, original: band.style.backgroundPosition, overflow: measureOverflow(band, img), drag: null };
+                        band.classList.add('is-adjusting');
+                        band.setAttribute('tabindex', '0');
+                        band.setAttribute('aria-label', 'Cover photo position. Use arrow keys to move, Enter to save, Escape to cancel.');
+                        document.getElementById('coverAdjustBar')?.classList.remove('d-none');
+                        band.addEventListener('pointerdown', onPointerDown);
+                        band.addEventListener('pointermove', onPointerMove);
+                        band.addEventListener('pointerup', onPointerUp);
+                        band.addEventListener('pointercancel', onPointerUp);
+                        band.addEventListener('keydown', onKey);
+                        band.focus({ preventScroll: true });
+                    };
+                    img.src = src;
+                };
+
+                window.endCoverAdjust = async function(save) {
+                    if (!adjust) return;
+                    var band = adjust.band, original = adjust.original;
+                    band.removeEventListener('pointerdown', onPointerDown);
+                    band.removeEventListener('pointermove', onPointerMove);
+                    band.removeEventListener('pointerup', onPointerUp);
+                    band.removeEventListener('pointercancel', onPointerUp);
+                    band.removeEventListener('keydown', onKey);
+                    band.classList.remove('is-adjusting', 'is-dragging');
+                    band.removeAttribute('tabindex');
+                    band.removeAttribute('aria-label');
+                    document.getElementById('coverAdjustBar')?.classList.add('d-none');
+                    adjust = null;
+
+                    if (!save) { band.style.backgroundPosition = original; return; }
+                    var p = readPos(band);
+                    try {
+                        var body = new FormData();
+                        body.append('x', String(Math.round(p.x)));
+                        body.append('y', String(Math.round(p.y)));
+                        await postCover('/member/profilePage/coverImg/position', body);
+                        coverNotify('success', 'Cover position saved');
+                    } catch (err) {
+                        band.style.backgroundPosition = original;
+                        coverNotify('error', 'Could not save position', err.message);
+                    }
+                };
+
+                async function postCover(endpoint, body) {
+                    var token = coverCsrf();
+                    if (token) body.append('token', token);
+                    var res = await fetch(endpoint, {
+                        method: 'POST',
+                        body: body,
+                        headers: Object.assign({ 'X-Requested-With': 'XMLHttpRequest' }, token ? { 'X-CSRF-TOKEN': token } : {})
+                    });
+                    var json = await res.json().catch(function() { return {}; });
+                    if (!res.ok) throw new Error(json.message || json.error || 'Something went wrong. Please try again.');
+                    return json.message || {};
+                }
+
+                window.handleProfileCoverUpload = async function(input) {
+                    var file = input && input.files && input.files[0];
+                    if (!file) return;
+                    var band = document.getElementById('profileCoverPhoto');
+                    var previousBg = band ? band.style.backgroundImage : '';
+                    var hadCover = band ? band.classList.contains('has-cover') : false;
+
+                    if (!/^image\/(jpeg|png|webp|heic|heif)$/.test(file.type) && !/\.(jpe?g|png|webp|heic)$/i.test(file.name)) {
+                        coverNotify('warning', 'Unsupported file', 'Please choose a JPG, PNG, WebP or HEIC photo.');
+                        input.value = '';
+                        return;
+                    }
+                    if (file.size > 10 * 1024 * 1024) {
+                        coverNotify('warning', 'File too large', 'Cover photos must be 10 MB or smaller.');
+                        input.value = '';
+                        return;
+                    }
+
+                    // Optimistic local preview while the upload runs
+                    var previewUrl = URL.createObjectURL(file);
+                    applyCover(previewUrl);
+                    if (band) band.classList.add('is-uploading');
+
+                    try {
+                        var body = new FormData();
+                        body.append('coverImageFile', file);
+                        var data = await postCover('/member/profilePage/coverImg', body);
+                        applyCover(data.coverUrl || previewUrl);
+                        coverNotify('success', 'Cover photo updated', '');
+                        // Let the member frame the new photo straight away
+                        if (data.coverUrl) window.startCoverAdjust();
+                    } catch (err) {
+                        if (band) {
+                            band.style.backgroundImage = previousBg;
+                            band.classList.toggle('has-cover', hadCover);
+                        }
+                        document.getElementById('coverPhotoAddHint')?.classList.toggle('d-none', hadCover);
+                        coverNotify('error', 'Upload failed', err.message);
+                    } finally {
+                        if (band) band.classList.remove('is-uploading');
+                        URL.revokeObjectURL(previewUrl);
+                        input.value = '';
+                    }
+                };
+
+                window.removeProfileCover = async function() {
+                    try {
+                        await postCover('/member/profilePage/coverImg/remove', new FormData());
+                        applyCover(null);
+                        coverNotify('success', 'Cover photo removed');
+                    } catch (err) {
+                        coverNotify('error', 'Could not remove cover', err.message);
+                    }
+                };
+            })();
 
             window.triggerDirectAvatarFileSelect = function(e) {
                 if (e) {

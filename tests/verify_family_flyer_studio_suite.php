@@ -2,141 +2,83 @@
 declare(strict_types=1);
 
 /**
- * 🎨 FAMILY FLYER STUDIO & AR SUITE VERIFICATION TEST (TAT 2.0 & BRATS GATE)
+ * 🎨 FAMILY FLYER STUDIO REGRESSION GATE
+ *
+ * Since Nov 2026 the Family Hub "Flyer Studio" tab embeds the shared-lib
+ * Universal Poster Engine (/poster-studio) instead of the legacy in-page studio.
  *
  * Verifies:
- * 1. Renaming of presets: Birthday, Live Show & Concert, Golden Jubilee, Fiesta.
- * 2. Neutralization of 'World-Class Masterpiece' buzzword across UI and download scripts.
- * 3. Prevention of black background + red font on template click (WCAG AA contrast).
- * 4. Multi-format support (Portrait 3:4, Story 9:16, Square 1:1, Landscape 16:9).
- * 5. Visual layer customization (moving things around, resizing font & container, deleting/hiding layers).
- * 6. Augmented Reality (AR) suite (Camera Room View, 3D Gyroscope/Mouse Hologram Tilt, AR QR Badge).
- * 7. Universal British English (UK) compliance.
+ * 1. The Flyer Studio tab pane exists and embeds /poster-studio?app=familyplatform.
+ * 2. The engine is lazy-mounted (data-src, set on first shown.bs.tab) so the Hub stays fast.
+ * 3. A full-screen escape hatch to the standalone engine is present.
+ * 4. The legacy in-page studio (presets, AR room, canvas renderer) is fully removed — one editor only.
+ * 5. The /poster-studio and render API routes are registered.
+ * 6. Universal British English (UK) compliance and zero 'Masterpiece' buzzwords.
  */
 
 echo "======================================================================\n";
-echo "  🎨 FAMILY FLYER STUDIO & AR SUITE REGRESSION GATE                  \n";
+echo "  🎨 FAMILY FLYER STUDIO (UNIVERSAL POSTER ENGINE) REGRESSION GATE   \n";
 echo "======================================================================\n";
 
-$bladePath = __DIR__ . '/../resources/views/member/familyAiHub.blade.php';
-if (!file_exists($bladePath)) {
-    echo "❌ FAIL: familyAiHub.blade.php not found at {$bladePath}\n";
-    exit(1);
+$root = dirname(__DIR__);
+$bladePath = $root . '/resources/views/member/familyAiHub.blade.php';
+$routerPath = $root . '/app/router/router.php';
+foreach ([$bladePath, $routerPath] as $path) {
+    if (!file_exists($path)) {
+        echo "❌ FAIL: required file not found at {$path}\n";
+        exit(1);
+    }
 }
 
-$content = file_get_contents($bladePath);
+$content = (string) file_get_contents($bladePath);
+$router = (string) file_get_contents($routerPath);
 $failures = [];
 
-// 1. Preset Renaming Verification
-if (stripos($content, 'btnPresetBirthday') === false || stripos($content, 'Birthday') === false) {
-    $failures[] = "Preset 'Birthday' (formerly major@50) is missing.";
+// 1. Embedded engine
+if (!str_contains($content, 'id="tab-flyer" role="tabpanel"')) {
+    $failures[] = "Flyer Studio tab pane (#tab-flyer) is missing.";
 }
-if (stripos($content, 'btnPresetLiveShow') === false || stripos($content, 'Live Show &amp; Concert') === false) {
-    $failures[] = "Preset 'Live Show & Concert' (formerly all white party) is missing.";
+if (!preg_match('/<iframe[^>]*id="flyerEngineFrame"[^>]*data-src="\/poster-studio\?app=familyplatform"/s', $content)) {
+    $failures[] = "Flyer Studio must embed the Universal Poster Engine via data-src=\"/poster-studio?app=familyplatform\".";
 }
-if (stripos($content, 'Golden Jubilee') === false || stripos($content, 'btnPresetJubilee') === false) {
-    $failures[] = "Preset 'Golden Jubilee' is missing or contains typo.";
-}
-if (stripos($content, 'btnPresetFiesta') === false || stripos($content, 'Fiesta') === false) {
-    $failures[] = "Preset 'Fiesta' (formerly african heritage fiesta) is missing.";
+if (!preg_match('/<iframe[^>]*id="flyerEngineFrame"[^>]*title="[^"]+"/s', $content)) {
+    $failures[] = "Embedded engine iframe must carry an accessible title.";
 }
 
-// 2. Removal of 'World-Class Masterpiece'
-if (preg_match('/World-Class\s+Masterpiece/i', $content)) {
-    $failures[] = "'World-Class Masterpiece' still found in view template.";
-}
-if (preg_match('/Masterpiece\s+Poster/i', $content)) {
-    $failures[] = "'Masterpiece Poster' still found in view template.";
+// 2. Lazy mount
+if (!preg_match("/tabBtn\.addEventListener\('shown\.bs\.tab',\s*mount\)/", $content)) {
+    $failures[] = "Engine must be lazy-mounted when the Flyer Studio tab is first shown.";
 }
 
-// 3. Black background & red font neutralization
-if (preg_match('/\.flyer-preset-btn\.active\s*\{[^}]*color:\s*(#a31621|#b8202c|red)/i', $content)) {
-    $failures[] = "Active preset button has red text on dark background.";
-}
-if (!preg_match('/\.flyer-preset-btn\.active\s*\{[^}]*color:\s*#ffffff\s*!important/i', $content)) {
-    $failures[] = "Active preset button must enforce white text (#ffffff !important) on dark slate.";
+// 3. Full-screen escape hatch
+if (!preg_match('/<a[^>]*href="\/poster-studio\?app=familyplatform"[^>]*target="_blank"/s', $content)) {
+    $failures[] = "A 'Full screen' link to the standalone engine is missing.";
 }
 
-// 4. Multi-format support
-$formats = ['portrait_3_4', 'story_9_16', 'square_1_1', 'landscape_16_9'];
-foreach ($formats as $fmt) {
-    if (strpos($content, $fmt) === false) {
-        $failures[] = "Format '{$fmt}' is missing from studio implementation.";
+// 4. Legacy studio removed (single editor, no duplicate entry points)
+foreach (['applyBirthdayPreset', 'renderFullPosterCanvas', 'arRoomModal', 'launchArRoomView', 'updateFamFlyerPreview', 'flyerControlsColumn'] as $legacy) {
+    if (str_contains($content, $legacy)) {
+        $failures[] = "Legacy in-page studio artefact '{$legacy}' still present; the Hub must host only the Universal Poster Engine.";
     }
 }
 
-// 5. Layer freedom (move, resize, font, delete)
-$requiredMethods = [
-    'moveSelectedLayerY',
-    'updateSelectedLayerFontSize',
-    'updateSelectedLayerFontFamily',
-    'setSelectedLayerAlign',
-    'toggleSelectedLayerVisibility',
-    'deleteSelectedLayer',
-    'updateContainerWidth',
-    'promptAddCustomTextLayer'
-];
-foreach ($requiredMethods as $method) {
-    if (strpos($content, $method) === false) {
-        $failures[] = "Customization method '{$method}' is missing.";
-    }
+// 5. Routes
+if (!str_contains($router, "'/poster-studio'") || !str_contains($router, 'UniversalPosterStudioController')) {
+    $failures[] = "Route GET /poster-studio → UniversalPosterStudioController is not registered.";
+}
+if (!str_contains($router, "'/api/poster-studio/render'")) {
+    $failures[] = "Route /api/poster-studio/render is not registered.";
 }
 
-// 6. Augmented Reality (AR) Suite
-$arFeatures = [
-    'launchArRoomView',
-    'arRoomModal',
-    'arVideoFeed',
-    'toggle3DTilt',
-    'toggleArQrBadge',
-    'snapArPhoto',
-    'applyArPreset'
-];
-foreach ($arFeatures as $feat) {
-    if (strpos($content, $feat) === false) {
-        $failures[] = "AR feature '{$feat}' is missing from implementation.";
-    }
-}
-
-// 7. British English (UK) Invariant
+// 6. British English & buzzwords
 if (preg_match('/\b(customize|customized|customizing|customizer)\b/i', $content)) {
     $failures[] = "US English spelling 'customize' found; must use British English 'customise'.";
 }
 if (preg_match('/>\s*Center\s*</i', $content)) {
     $failures[] = "US English 'Center' found in user-facing copy; must use 'Centre'.";
 }
-
-// 8. Legacy celebrant sample poster removal (Zero double poster collision)
-if (stripos($content, 'celebrant-sample.jpg') !== false) {
-    $failures[] = "Found legacy 'celebrant-sample.jpg' poster reference in view template.";
-}
-if (!preg_match('/function\s+applyBirthdayPreset\(\)\s*\{[^}]*clearCelebrantPhoto\(\)/s', $content)) {
-    $failures[] = "Birthday preset must call clearCelebrantPhoto() to ensure clean background.";
-}
-if (!preg_match('/<div\s+id="prevCelebrantWrap"[^>]*display:\s*none;[^>]*>/', $content)) {
-    $failures[] = "Celebrant wrapper must be hidden by default (display: none;) until user uploads photo.";
-}
-
-// 9. Solid High-Definition Poster Download
-if (stripos($content, 'document.fonts.ready') === false) {
-    $failures[] = "renderFullPosterCanvas must await document.fonts.ready for pristine typography.";
-}
-if (stripos($content, 'URL.createObjectURL(blob)') === false && stripos($content, 'canvas.toBlob') === false) {
-    $failures[] = "downloadFamFlyer must support canvas.toBlob for robust mobile/safari download.";
-}
-if (stripos($content, 'flyerActionFeedback') === false) {
-    $failures[] = "Action feedback element 'flyerActionFeedback' is missing.";
-}
-
-// 10. Native Web Share API & WhatsApp Rich Poster Sharing
-if (stripos($content, 'navigator.canShare') === false) {
-    $failures[] = "shareFamFlyerWhatsApp must integrate navigator.canShare for direct image sharing.";
-}
-if (!preg_match('/new\s+File\(\[blob\],\s*filename,\s*\{\s*type:\s*[\'"]image\/png[\'"]\s*\}\)/', $content)) {
-    $failures[] = "shareFamFlyerWhatsApp must construct a PNG File instance for native image attachment.";
-}
-if (stripos($content, 'api.whatsapp.com/send?text=') === false) {
-    $failures[] = "shareFamFlyerWhatsApp fallback must link to WhatsApp with encoded invitation text.";
+if (preg_match('/World-Class\s+Masterpiece|Masterpiece\s+Poster/i', $content)) {
+    $failures[] = "'Masterpiece' buzzword copy found in view template.";
 }
 
 if (!empty($failures)) {
@@ -147,15 +89,11 @@ if (!empty($failures)) {
     exit(1);
 }
 
-echo "✅ [PASS 1/10] Presets renamed accurately (Birthday, Live Show & Concert, Golden Jubilee, Fiesta)\n";
-echo "✅ [PASS 2/10] Zero 'World-Class Masterpiece' references found across codebase\n";
-echo "✅ [PASS 3/10] Zero red font on dark background; WCAG AA high-contrast verified\n";
-echo "✅ [PASS 4/10] 4 Responsive formats supported (Portrait 3:4, Story 9:16, Square 1:1, Landscape 16:9)\n";
-echo "✅ [PASS 5/10] Full layer freedom verified (Move X/Y, Font Size slider, Family, Container Width, Delete)\n";
-echo "✅ [PASS 6/10] Interactive Augmented Reality (AR) suite verified (Camera Room View, 3D Tilt, QR Badge)\n";
-echo "✅ [PASS 7/10] Universal British English (UK) invariant verified (customise, centre)\n";
-echo "✅ [PASS 8/10] Legacy background poster completely removed; zero collision on Birthday preset\n";
-echo "✅ [PASS 9/10] High-definition poster download verified (fonts loaded, blob URL, auto-fit text)\n";
-echo "✅ [PASS 10/10] WhatsApp flyer sharing verified (native image file attachment + rich text fallback)\n";
-echo "\n🎉 ALL FLYER STUDIO & AR SUITE CHECKS PASSED WITH EXIT CODE 0!\n";
+echo "✅ [PASS 1/6] Flyer Studio tab embeds the Universal Poster Engine (/poster-studio?app=familyplatform)\n";
+echo "✅ [PASS 2/6] Engine is lazy-mounted on first tab open\n";
+echo "✅ [PASS 3/6] Full-screen link to the standalone engine present\n";
+echo "✅ [PASS 4/6] Legacy in-page studio fully removed (single editor)\n";
+echo "✅ [PASS 5/6] /poster-studio and render API routes registered\n";
+echo "✅ [PASS 6/6] British English invariant & zero buzzword copy verified\n";
+echo "\n🎉 ALL FLYER STUDIO CHECKS PASSED WITH EXIT CODE 0!\n";
 exit(0);

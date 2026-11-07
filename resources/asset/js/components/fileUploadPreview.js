@@ -256,6 +256,23 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
       });
       const decision = choice.isConfirmed ? 'link' : (choice.isDenied ? 'upload' : 'cancel');
       document.dispatchEvent(new CustomEvent('video-link-nudge', { detail: { decision, count: videoFiles.length } }));
+      // Anonymised telemetry (no PII): lets us measure how many people choose a link over a raw upload.
+      try {
+        const largestMb = Math.round(Math.max(...videoFiles.map(f => f.size)) / (1024 * 1024));
+        fetch('/api/telemetry/event', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          keepalive: true,
+          body: JSON.stringify({
+            event: 'video_link_nudge',
+            url: window.location.pathname,
+            viewport_width: window.innerWidth,
+            viewport_height: window.innerHeight,
+            metadata: { decision, count: videoFiles.length, largest_mb: largestMb },
+          }),
+        }).catch(() => {});
+      } catch (e) { /* telemetry must never break posting */ }
       if (decision !== 'upload') {
         videoFilesToProcess = [];
         if (decision === 'link') {

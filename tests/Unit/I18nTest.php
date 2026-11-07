@@ -122,7 +122,7 @@ class I18nTest extends TestCase
         I18n::setLocale('en');
         $this->assertSame('Share a moment with your family...', __('feed.share_prompt'));
         $this->assertSame('Then & Now', __('feed.then_now'));
-        $this->assertSame('Family Dynasty Hub', __('heritage.dynasty_hub'));
+        $this->assertSame('Family Rituals & Quests Hub', __('heritage.dynasty_hub'));
         $this->assertSame('All Family Memories', __('feed.all_memories'));
         $this->assertSame('Tagged With You', __('feed.tagged_with_you'));
         $this->assertSame('Like', __('feed.like'));
@@ -136,7 +136,7 @@ class I18nTest extends TestCase
         I18n::setLocale('fr');
         $this->assertSame('Partagez un moment avec votre famille...', __('feed.share_prompt'));
         $this->assertSame('Avant & Maintenant', __('feed.then_now'));
-        $this->assertSame('Centre de Dynastie Familiale', __('heritage.dynasty_hub'));
+        $this->assertSame('Centre de Rituels et Quêtes', __('heritage.dynasty_hub'));
         $this->assertSame('Tous les souvenirs de famille', __('feed.all_memories'));
         $this->assertSame('Identifié(e) avec vous', __('feed.tagged_with_you'));
         $this->assertSame("J'aime", __('feed.like'));
@@ -150,7 +150,7 @@ class I18nTest extends TestCase
         I18n::setLocale('es');
         $this->assertSame('Comparte un momento con tu familia...', __('feed.share_prompt'));
         $this->assertSame('Antes & Ahora', __('feed.then_now'));
-        $this->assertSame('Centro de Dinastía Familiar', __('heritage.dynasty_hub'));
+        $this->assertSame('Centro de Rituales y Misiones', __('heritage.dynasty_hub'));
         $this->assertSame('Todos los recuerdos familiares', __('feed.all_memories'));
         $this->assertSame('Etiquetado contigo', __('feed.tagged_with_you'));
         $this->assertSame('Me gusta', __('feed.like'));

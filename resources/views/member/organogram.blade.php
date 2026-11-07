@@ -7,226 +7,186 @@
 @section('content')
 
 <div class="organogram-container-fluid">
-    <!-- Header Section -->
-    <div class="organogram-header">
-        <div class="header-container">
-            <div class="header-top-row">
-                <div>
-                    <h2 class="organogram-title fw-bold" id="treeHeaderTitle">
-                        <i class="bi bi-diagram-3"></i>
-                        @if(($activeLineageScope ?? 'primary') === 'maternal' && !empty($maidenSurname))
-                            {{ $data['firstName'] ?? '' }}'s {{ $maidenSurname }} Birth Family Tree
-                        @elseif(($activeLineageScope ?? 'primary') === 'inlaw')
-                            {{ $data['firstName'] ?? '' }}'s In-Law Lineage Tree
-                        @else
-                            {{ $data['firstName'] ?? '' }} {{ $data['lastName'] ?? '' }}'s Family Tree
-                        @endif
-                    </h2>
-                    <p class="organogram-subtitle mb-0">
-                        @if(($activeLineageScope ?? 'primary') === 'maternal' && !empty($maternalFamCode))
-                            Exploring your Birth / Maiden Family lineage (<strong>#{{ $maternalFamCode }}</strong>). Click any person to see their details and full profile.
-                        @elseif(($activeLineageScope ?? 'primary') === 'inlaw')
-                            Exploring your In-Law lineage (<strong>#{{ $familyCode }}</strong>). Click any person to see their details and full profile.
-                        @else
-                            Explore your family heritage, partners, and lineage. Click any person to see their details and full profile.
-                        @endif
-                    </p>
-                    <div class="d-flex align-items-center gap-2 flex-wrap mt-2">
-                        <span class="badge rounded-pill px-3 py-1.5 d-inline-flex align-items-center gap-1.5" style="background: rgba(16, 185, 129, 0.16); border: 1px solid rgba(16, 185, 129, 0.45); color: #34d399; font-weight: 700; font-size: 0.78rem;">
-                            <i class="bi bi-shield-lock-fill"></i> Same Family Code Only (#{{ $familyCode }})
-                        </span>
-                        <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-bold d-inline-flex align-items-center gap-1.5" onclick="openWhoViewedTreeModal()" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; font-size: 0.78rem; min-height: 34px;">
-                            <i class="bi bi-eye-fill"></i> Viewed by <span id="headerViewersBadge">{{ $treeViewersData['unique_viewers'] ?? 0 }}</span> family members
-                        </button>
-                    </div>
-                    @php
-                        $currentViewMode = $_GET['mode'] ?? 'canvas';
-                        $otherHeldCodes = array_diff($heldCodes ?? [], array_filter([$primaryFamCode ?? '', $maternalFamCode ?? '', $wifeFamCode ?? '']));
-                    @endphp
-                    @if(!empty($hasMaternalCode) || !empty($wifeFamCode) || !empty($otherHeldCodes))
-                    <div class="d-inline-flex flex-wrap align-items-center gap-2 mt-2 p-1 rounded-pill" style="background: rgba(15, 23, 42, 0.78); border: 1px solid rgba(245, 158, 11, 0.35);">
-                        <a href="?mode={{ $currentViewMode }}&family_code={{ $primaryFamCode }}&lineage=primary" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') === 'primary' ? 'btn-warning text-dark shadow-sm' : 'text-white-50' }}" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
-                            <i class="bi bi-house-heart-fill"></i> Marital / Household Tree (#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})
-                        </a>
-                        @if(!empty($hasMaternalCode) && !empty($maternalFamCode))
-                        <a href="?mode={{ $currentViewMode }}&family_code={{ $maternalFamCode }}&lineage=birth" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') === 'maternal' ? 'btn-warning text-dark shadow-sm' : 'text-white-50' }}" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
-                            <i class="bi bi-diagram-3-fill"></i> Birth / Maiden Family (#{{ $maternalFamCode }})
-                        </a>
-                        @endif
-                        @if(!empty($wifeFamCode))
-                        <a href="?mode={{ $currentViewMode }}&family_code={{ $wifeFamCode }}&lineage=inlaw" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') === 'inlaw' ? 'btn-warning text-dark shadow-sm' : 'text-white-50' }}" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
-                            <i class="bi bi-people-fill"></i> In-Law Lineage (#{{ $wifeFamCode }})
-                        </a>
-                        @endif
-                        @foreach($otherHeldCodes as $ohc)
-                        <a href="?mode={{ $currentViewMode }}&family_code={{ $ohc }}" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($familyCode ?? '') === $ohc ? 'btn-warning text-dark shadow-sm' : 'text-white-50' }}" style="min-height: 36px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
-                            <i class="bi bi-diagram-2"></i> #{{ $ohc }}
-                        </a>
-                        @endforeach
-                    </div>
-                    @endif
-                </div>
+    @php
+        $currentViewMode = $_GET['mode'] ?? 'canvas';
+        $otherHeldCodes = array_diff($heldCodes ?? [], array_filter([$primaryFamCode ?? '', $maternalFamCode ?? '', $wifeFamCode ?? '']));
+        $treeViewerCount = (int) ($treeViewersData['unique_viewers'] ?? 0);
+        $treeAccessMode = $treeAccessData['access_mode'] ?? 'family_all';
+        $treeIsRestricted = !in_array(strtolower((string) $treeAccessMode), ['family_all', 'family all', ''], true);
+        $activeScope = $activeLineageScope ?? 'primary';
+    @endphp
 
-                <!-- Actions (Search & Config) -->
-                <div class="header-actions d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-2 gap-md-2">
-                    @if(empty($isSelf) && empty($graphData['has_built_tree']))
-                    <button type="button" class="btn btn-warning text-dark px-3 py-2 fw-bold d-inline-flex align-items-center shadow-sm btn-prompt-tree-action" id="btnHeaderPromptBuildTree" onclick="window.promptMemberToBuildTree()" style="border-radius: 50px; min-height: 44px; white-space: nowrap;" title="Invite relative to connect their branch of the family tree">
-                        <i class="bi bi-envelope-heart-fill me-2 text-dark"></i> Invite {{ explode(' ', trim($data['firstName'] ?? 'Them'))[0] }} to Connect Branch
-                    </button>
+    <!-- Compact Tree Header: title + privacy/viewers meta + primary actions (one entry point per action) -->
+    <header class="organogram-header tree-hero">
+        <div class="tree-hero__row">
+            <div class="tree-hero__titles">
+                <h1 class="organogram-title" id="treeHeaderTitle">
+                    @if($activeScope === 'maternal' && !empty($maidenSurname))
+                        {{ $data['firstName'] ?? '' }}'s {{ $maidenSurname }} Birth Family
+                    @elseif($activeScope === 'inlaw')
+                        {{ $data['firstName'] ?? '' }}'s In-Law Lineage
+                    @else
+                        {{ $data['firstName'] ?? '' }} {{ $data['lastName'] ?? '' }}'s Family Tree
                     @endif
-                    <button type="button" class="btn-action" id="btnWhoViewedTree" onclick="openWhoViewedTreeModal()" title="See relatives who viewed your family tree" style="border-color: rgba(56, 189, 248, 0.45); color: #38bdf8;">
-                        <i class="bi bi-eye-fill text-info"></i> Viewers (<span id="btnHeaderViewersCount">{{ $treeViewersData['unique_viewers'] ?? 0 }}</span>)
+                </h1>
+                <div class="tree-hero__meta">
+                    <button type="button" class="tree-meta-chip tree-meta-chip--private"
+                            onclick="{{ empty($isReadOnly) ? 'openTreeAccessControlModal()' : 'openWhoViewedTreeModal()' }}"
+                            title="Strictly private to family code #{{ $familyCode }}. External contacts cannot view.">
+                        <i class="bi bi-shield-lock-fill" aria-hidden="true"></i>
+                        <span>Private · Same Family Code Only (#{{ $familyCode }}){{ $treeIsRestricted ? ' · Restricted' : '' }}</span>
                     </button>
-                    @if(empty($isReadOnly))
-                    <button type="button" class="btn-action" id="btnTreeAccessControl" onclick="openTreeAccessControlModal()" title="Limit or manage family tree access to specific persons" style="border-color: rgba(245, 158, 11, 0.45); color: #fbbf24;">
-                        <i class="bi bi-shield-lock-fill text-warning"></i> Limit Access
+                    <button type="button" class="tree-meta-chip" id="btnWhoViewedTree" onclick="openWhoViewedTreeModal()" title="See relatives who viewed this family tree">
+                        <i class="bi bi-eye-fill" aria-hidden="true"></i>
+                        <span><span id="headerViewersBadge">{{ $treeViewerCount }}</span> {{ $treeViewerCount === 1 ? 'viewer' : 'viewers' }}</span>
                     </button>
-                    @endif
-                    <button type="button" class="btn-action" onclick="centerOnMe()" title="Focus on Me">
-                        <i class="bi bi-person-bounding-box text-info"></i> Focus on Me
-                    </button>
-                    <button type="button" class="btn-action" onclick="if(window.traceCardLineage) window.traceCardLineage();" title="Trace Lineage">
-                        <i class="bi bi-compass-fill text-warning"></i> Trace Lineage
-                    </button>
-                    <button type="button" class="btn-action btn-gold" onclick="fitTreeScreen()" title="Fit Family to Viewport">
-                        <i class="bi bi-aspect-ratio"></i> Fit Family
-                    </button>
-                    @if(empty($isReadOnly))
-                    <button type="button" class="btn-action" onclick="openLineageQuestModal()" title="Lineage Quests on WhatsApp" style="border-color: rgba(16, 185, 129, 0.4); color: #10b981;">
-                        <i class="bi bi-compass-fill text-success"></i> Quests
-                    </button>
-                    <button type="button" class="btn-action" onclick="openFamilyFlyerModal()" title="Generate WhatsApp Family Status Flyer" style="border-color: rgba(245, 158, 11, 0.4); color: #f59e0b;">
-                        <i class="bi bi-card-image text-warning"></i> WhatsApp Flyer
-                    </button>
-                    <button type="button" class="btn-action" onclick="openTimeCapsuleModal()" title="Digital Time Capsule Vault" style="border-color: rgba(184,32,44, 0.4); color: #ef6b73;">
-                        <i class="bi bi-hourglass-split text-primary"></i> Time Capsule
-                    </button>
-                    <button type="button" id="configureFamilyBtn" class="btn-action" onclick="openFamilyStudio()" title="Open Family Studio to update relatives & lineage directly on this page">
-                        <i class="bi bi-stars text-warning"></i> Lineage Studio
-                    </button>
-                    <button type="button" class="btn-action" id="manageRelativesBtn" onclick="openManageRelativesModal()" title="Remove unrecognised names from family tree" style="border-color: rgba(239, 68, 68, 0.4); color: #ef4444;">
-                        <i class="bi bi-person-x-fill text-danger"></i> Remove Relatives
-                    </button>
-                    @endif
-                    <div class="search-box-wrapper" id="memberSearchWrapper" style="min-width: 240px;">
-                        <i class="bi bi-search search-icon"></i>
-                        <input type="text" id="memberSearchInput" class="member-search-input w-100" placeholder="Find relative in tree..." autocomplete="off">
-                        <div id="searchDropdown" class="search-dropdown"></div>
-                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Multi-Modal View Switcher (Luxury Dark Segmented Control) -->
-    <div class="tree-mode-switcher-container text-center mb-1 d-flex flex-wrap align-items-center justify-content-center gap-2">
-        @if(empty($isReadOnly))
-        <div class="d-flex align-items-center gap-2 flex-shrink-0 tree-quick-actions">
-            <button type="button" onclick="openInviteFamilyModal()" class="btn btn-primary fw-bold text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center rounded-pill" style="background: linear-gradient(135deg, #a31621 0%, #b8202c 100%); border: none; min-height: 44px; font-size: 0.88rem; padding: 8px 16px;">
-                <i class="bi bi-send-fill me-1.5"></i> Invite Family
-            </button>
-            <button type="button" onclick="openLineageQuestModal()" class="btn btn-success fw-bold text-white text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center rounded-pill" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; min-height: 44px; font-size: 0.88rem; padding: 8px 16px;">
-                <i class="bi bi-whatsapp me-1.5"></i> WhatsApp Quests
-            </button>
-            <button type="button" onclick="toggleHowToBuildGuide()" class="btn btn-outline-warning text-warning fw-bold text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center rounded-pill" id="btnToggleHowToBuildGuide" title="How to build and create your family tree" style="border-color: rgba(245, 158, 11, 0.45); min-height: 44px; font-size: 0.88rem; padding: 8px 16px;">
-                <i class="bi bi-compass-fill me-1.5"></i> How to Build Tree
-            </button>
+            <div class="tree-hero__actions">
+                <div class="search-box-wrapper tree-search" id="memberSearchWrapper">
+                    <i class="bi bi-search search-icon" aria-hidden="true"></i>
+                    <input type="text" id="memberSearchInput" class="member-search-input w-100" placeholder="Find a relative…" autocomplete="off" aria-label="Find a relative in this tree">
+                    <div id="searchDropdown" class="search-dropdown"></div>
+                </div>
+                @if(empty($isReadOnly))
+                <button type="button" id="configureFamilyBtn" class="tree-btn tree-btn--primary" onclick="switchTreeViewMode('studio'); if (typeof openFamilyStudio === 'function') openFamilyStudio({ openAddModal: true });" title="Add a parent, partner, child, sibling or relative">
+                    <i class="bi bi-person-plus-fill" aria-hidden="true"></i><span>Add relative</span>
+                </button>
+                <div class="dropdown">
+                    <button type="button" class="tree-btn tree-btn--icon" data-bs-toggle="dropdown" data-bs-display="dynamic" aria-expanded="false" aria-label="More tree actions" title="More">
+                        <i class="bi bi-three-dots" aria-hidden="true"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end tree-menu">
+                        <li><h6 class="dropdown-header">Grow your tree</h6></li>
+                        <li><button type="button" class="dropdown-item" onclick="openInviteFamilyModal()"><i class="bi bi-send-fill"></i> Invite family</button></li>
+                        <li><button type="button" class="dropdown-item" onclick="openLineageQuestModal()"><i class="bi bi-whatsapp"></i> WhatsApp quests</button></li>
+                        <li><button type="button" class="dropdown-item" onclick="openFamilyFlyerModal()"><i class="bi bi-card-image"></i> Family status flyer</button></li>
+                        <li><button type="button" class="dropdown-item" onclick="openTimeCapsuleModal()"><i class="bi bi-hourglass-split"></i> Time capsule</button></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header">Privacy</h6></li>
+                        <li><button type="button" class="dropdown-item" id="btnTreeAccessControl" onclick="openTreeAccessControlModal()"><i class="bi bi-shield-lock-fill"></i> Limit access</button></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header">Manage</h6></li>
+                        <li><button type="button" class="dropdown-item" id="manageRelativesBtn" onclick="openManageRelativesModal()"><i class="bi bi-person-x-fill"></i> Remove relatives</button></li>
+                        <li><button type="button" class="dropdown-item" id="btnToggleHowToBuildGuide" onclick="toggleHowToBuildGuide()"><i class="bi bi-compass-fill"></i> How to build your tree</button></li>
+                    </ul>
+                </div>
+                @endif
+            </div>
         </div>
+    </header>
+
+    <!-- Toolbar: which tree (lineage scope) + how to view it -->
+    <div class="tree-mode-switcher-container tree-toolbar">
+        @if(!empty($hasMaternalCode) || !empty($wifeFamCode) || !empty($otherHeldCodes))
+        <nav class="tree-scope" aria-label="Choose family tree">
+            <a href="?mode={{ $currentViewMode }}&family_code={{ $primaryFamCode }}&lineage=primary" class="tree-scope__item {{ $activeScope === 'primary' ? 'is-active' : '' }}" @if($activeScope === 'primary') aria-current="page" @endif>
+                <i class="bi bi-house-heart-fill" aria-hidden="true"></i><span>Household</span><small>#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }}</small>
+            </a>
+            @if(!empty($hasMaternalCode) && !empty($maternalFamCode))
+            <a href="?mode={{ $currentViewMode }}&family_code={{ $maternalFamCode }}&lineage=birth" class="tree-scope__item {{ $activeScope === 'maternal' ? 'is-active' : '' }}" @if($activeScope === 'maternal') aria-current="page" @endif>
+                <i class="bi bi-diagram-3-fill" aria-hidden="true"></i><span>Birth family</span><small>#{{ $maternalFamCode }}</small>
+            </a>
+            @endif
+            @if(!empty($wifeFamCode))
+            <a href="?mode={{ $currentViewMode }}&family_code={{ $wifeFamCode }}&lineage=inlaw" class="tree-scope__item {{ $activeScope === 'inlaw' ? 'is-active' : '' }}" @if($activeScope === 'inlaw') aria-current="page" @endif>
+                <i class="bi bi-people-fill" aria-hidden="true"></i><span>In-laws</span><small>#{{ $wifeFamCode }}</small>
+            </a>
+            @endif
+            @foreach($otherHeldCodes as $ohc)
+            <a href="?mode={{ $currentViewMode }}&family_code={{ $ohc }}" class="tree-scope__item {{ ($familyCode ?? '') === $ohc ? 'is-active' : '' }}">
+                <i class="bi bi-diagram-2" aria-hidden="true"></i><span>#{{ $ohc }}</span>
+            </a>
+            @endforeach
+        </nav>
         @endif
-        <div class="layout-segmented-control" role="group" aria-label="Layout View Modes">
-            <button type="button" id="btnModeCanvas" class="layout-segment-btn active" onclick="switchTreeViewMode('canvas')" title="Panoramic Dynasty: Full balanced wide tree of all siblings & branches">
-                <i class="bi bi-diagram-3-fill text-info"></i>
-                <span>Panoramic Dynasty</span>
+
+        <div class="layout-segmented-control" role="group" aria-label="Tree view">
+            <button type="button" id="btnModeCanvas" class="layout-segment-btn active" onclick="switchTreeViewMode('canvas')" title="Panoramic: full balanced tree of all branches">
+                <i class="bi bi-diagram-3-fill" aria-hidden="true"></i><span>Panoramic</span>
             </button>
-            <button type="button" id="btnModeLineage" class="layout-segment-btn" onclick="switchTreeViewMode('lineage')" title="Direct Lineage Focus: Highlights direct ancestral path in gold">
-                <i class="bi bi-compass-fill text-warning"></i>
-                <span>Direct Lineage</span>
+            <button type="button" id="btnModeLineage" class="layout-segment-btn" onclick="switchTreeViewMode('lineage')" title="Direct lineage: highlights your ancestral path">
+                <i class="bi bi-compass-fill" aria-hidden="true"></i><span>Lineage</span>
             </button>
-            <button type="button" id="btnModePedigree" class="layout-segment-btn" onclick="switchTreeViewMode('pedigree')" title="Pedigree Outline: Mobile hierarchical list">
-                <i class="bi bi-list-nested text-success"></i>
-                <span>Pedigree Outline</span>
+            <button type="button" id="btnModePedigree" class="layout-segment-btn" onclick="switchTreeViewMode('pedigree')" title="Outline: hierarchical list">
+                <i class="bi bi-list-nested" aria-hidden="true"></i><span>Outline</span>
             </button>
-            <button type="button" id="btnModeFanChart" class="layout-segment-btn" onclick="switchTreeViewMode('fanchart')" title="Radial 360° Fan: Concentric pedigree wheel with colour-coded ancestral quadrants">
-                <i class="bi bi-pie-chart-fill text-warning"></i>
-                <span>Radial 360° Fan</span>
+            <button type="button" id="btnModeFanChart" class="layout-segment-btn" onclick="switchTreeViewMode('fanchart')" title="Fan chart: 360° pedigree wheel">
+                <i class="bi bi-pie-chart-fill" aria-hidden="true"></i><span>Fan</span>
             </button>
-            <button type="button" id="btnModeGlobe" class="layout-segment-btn" onclick="switchTreeViewMode('globe')" title="3D Dynasty Globe: Spatial migration & global diaspora across continents">
-                <i class="bi bi-globe-americas text-info"></i>
-                <span>Dynasty Globe</span>
+            <button type="button" id="btnModeGlobe" class="layout-segment-btn" onclick="switchTreeViewMode('globe')" title="Globe: where your family lives around the world">
+                <i class="bi bi-globe-americas" aria-hidden="true"></i><span>Globe</span>
             </button>
-            <button type="button" id="btnModeStudio" class="layout-segment-btn" onclick="openFamilyStudio()" title="Family Studio: Curate and update relatives, unions, and lineage directly">
-                <i class="bi bi-stars text-warning"></i>
-                <span>Family Studio</span>
+            @if(empty($isReadOnly))
+            <button type="button" id="btnModeStudio" class="layout-segment-btn layout-segment-btn--studio" onclick="switchTreeViewMode('studio')" title="Family Studio: Curate and update relatives, unions, and lineage directly">
+                <i class="bi bi-pencil-square" aria-hidden="true"></i><span>Family Studio</span>
                 <span class="badge bg-warning text-dark ms-1 px-1.5 py-0.5 rounded-pill" style="font-size: 0.68rem; font-weight: 700;">Update Tree</span>
             </button>
+            @endif
         </div>
     </div>
 
     <!-- Tree Workspace Container -->
     <div class="organogram-container">
 
-        <!-- High-Visibility Family Tree Security & Viewers Ribbon -->
-        <div id="treeSecurityBanner" class="alert shadow-sm border-0 rounded-3 mb-2 mx-2 mx-lg-3 d-flex flex-column flex-md-row align-items-center justify-content-between tree-security-ribbon" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.94) 0%, rgba(30, 41, 59, 0.92) 100%); border: 1px solid rgba(56, 189, 248, 0.28) !important; border-left: 4px solid #38bdf8 !important; backdrop-filter: blur(16px);">
-            <div class="d-flex align-items-center gap-2.5 tree-ribbon-content">
-                <div class="tree-banner-icon-badge rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35);">
+        <!-- High-Visibility Family Tree Security & Viewers Banner -->
+        <div id="treeSecurityBanner" class="alert shadow-lg border-0 rounded-4 mb-3 mx-3 d-flex flex-column flex-md-row align-items-center justify-content-between p-3 gap-3 d-none" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 41, 59, 0.94) 100%); border: 1px solid rgba(56, 189, 248, 0.35); border-left: 5px solid #38bdf8 !important; backdrop-filter: blur(16px); box-shadow: 0 16px 36px rgba(0,0,0,0.4);">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); font-size: 1.25rem;">
                     <i class="bi bi-shield-check"></i>
                 </div>
-                <div class="flex-grow-1 min-w-0">
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <span class="fw-bold text-white fs-6 tree-banner-title">Tree Visibility &amp; Privacy Guard</span>
-                        <span class="badge rounded-pill px-2 py-0.5" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.45); font-size: 0.7rem; font-weight: 700;">#{{ $familyCode }} ONLY</span>
-                        <span class="badge rounded-pill px-2 py-0.5" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); font-size: 0.7rem; font-weight: 700;">
+                <div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                        <h6 class="mb-0 fw-bold text-white fs-6">Family Tree Visibility & Privacy Guard</h6>
+                        <span class="badge rounded-pill px-2.5 py-0.5" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.45); font-size: 0.7rem; font-weight: 700;">Same Family Code Only (#{{ $familyCode }})</span>
+                        <span class="badge rounded-pill px-2.5 py-0.5" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); font-size: 0.7rem; font-weight: 700;">
                             POLICY: {{ strtoupper(str_replace('_', ' ', $treeAccessData['access_mode'] ?? 'FAMILY ALL')) }}
                         </span>
-                        <span class="tree-banner-desc text-white-50 ms-1 d-none d-lg-inline" style="font-size: 0.8rem;">
-                            Strictly private to family code #{{ $familyCode }}. External contacts cannot view.
-                        </span>
                     </div>
-                    <p class="mb-0 text-white-50 d-lg-none mt-1" style="font-size: 0.82rem; line-height: 1.4;">
-                        Your tree is <strong>strictly private to family code #{{ $familyCode }}</strong>. External contacts cannot view it.
+                    <p class="mb-0 text-white-50" style="font-size: 0.85rem; line-height: 1.45;">
+                        Your tree is <strong>strictly private to family code #{{ $familyCode }}</strong>. External contacts cannot view it. You can see everyone who viewed your tree and limit access to specific relatives anytime.
                     </p>
                 </div>
             </div>
-            <div class="d-flex align-items-center gap-2 flex-shrink-0 tree-ribbon-actions justify-content-center justify-content-md-end flex-wrap mt-2 mt-md-0">
-                <button type="button" class="btn btn-outline-info rounded-pill px-3 py-1.5 fw-bold d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0 text-nowrap" onclick="openWhoViewedTreeModal()" style="min-height: 38px; font-size: 0.82rem;">
+            <div class="d-flex align-items-center gap-2 flex-shrink-0 flex-wrap">
+                <button type="button" class="btn btn-outline-info rounded-pill px-3 py-2 fw-bold d-inline-flex align-items-center gap-1.5 text-nowrap" onclick="openWhoViewedTreeModal()" style="min-height: 44px; font-size: 0.85rem;">
                     <i class="bi bi-eye-fill"></i> Who Viewed Tree (<span id="bannerViewersCount">{{ $treeViewersData['unique_viewers'] ?? 0 }}</span>)
                 </button>
                 @if(empty($isReadOnly))
-                <button type="button" class="btn btn-warning text-dark rounded-pill px-3 py-1.5 fw-bold d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0 text-nowrap" onclick="openTreeAccessControlModal()" style="min-height: 38px; font-size: 0.82rem;">
+                <button type="button" class="btn btn-warning text-dark rounded-pill px-3 py-2 fw-bold d-inline-flex align-items-center gap-1.5 text-nowrap" onclick="openTreeAccessControlModal()" style="min-height: 44px; font-size: 0.85rem;">
                     <i class="bi bi-person-slash"></i> Limit Access
                 </button>
                 @endif
             </div>
         </div>
 
-        <!-- Integrated Family Studio Discovery Announcement Ribbon -->
-        <div id="treeStudioDiscoveryBanner" class="alert shadow-sm border-0 rounded-3 mb-2 mx-2 mx-lg-3 d-flex flex-column flex-md-row align-items-center justify-content-between tree-studio-ribbon" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.92) 100%); border: 1px solid rgba(251, 191, 36, 0.35) !important; border-left: 4px solid #fbbf24 !important; backdrop-filter: blur(16px);">
-            <div class="d-flex align-items-center gap-2.5 tree-ribbon-content">
-                <div class="tree-banner-icon-badge rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.35);">
+        <!-- Integrated Family Studio Discovery Announcement Banner -->
+        <div id="treeStudioDiscoveryBanner" class="alert shadow-lg border-0 rounded-4 mb-3 mx-3 d-flex flex-column flex-md-row align-items-center justify-content-between p-3 gap-3 d-none" style="background: linear-gradient(135deg, rgba(30, 10, 15, 0.95) 0%, rgba(138, 16, 25, 0.95) 100%); border: 1px solid rgba(251, 191, 36, 0.4); border-left: 5px solid #fbbf24 !important; backdrop-filter: blur(16px); box-shadow: 0 16px 36px rgba(0,0,0,0.4);">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 46px; height: 46px; background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.45); font-size: 1.25rem;">
                     <i class="bi bi-stars"></i>
                 </div>
-                <div class="flex-grow-1 min-w-0">
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <span class="fw-bold text-white fs-6 tree-banner-title">Family Studio is now inside your Family Tree!</span>
-                        <span class="badge bg-warning text-dark rounded-pill px-2 py-0.5" style="font-size: 0.65rem; font-weight: 800; letter-spacing: 0.04em;">NEW</span>
-                        <span class="tree-banner-desc text-white-50 ms-1 d-none d-lg-inline" style="font-size: 0.8rem;">
-                            No need to leave the page. Switch between viewing your interactive tree and curating relatives in Family Studio.
-                        </span>
+                <div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                        <h6 class="mb-0 fw-bold text-white fs-6">Family Studio is now inside your Family Tree!</h6>
+                        <span class="badge bg-warning text-dark rounded-pill px-2 py-0.5" style="font-size: 0.68rem; font-weight: 800; letter-spacing: 0.04em;">NEW</span>
                     </div>
-                    <p class="mb-0 text-white-50 d-lg-none mt-1" style="font-size: 0.82rem; line-height: 1.4;">
-                        Curate relatives, unions, and lineage directly in <strong>Family Studio</strong> without leaving this page!
+                    <p class="mb-0 text-white-50" style="font-size: 0.88rem; line-height: 1.45;">
+                        You no longer have to navigate away to update your tree. Easily switch between seeing your interactive tree and adding or curating relatives directly in <strong>Family Studio</strong>!
                     </p>
                 </div>
             </div>
-            <div class="d-flex align-items-center gap-2 flex-shrink-0 tree-ribbon-actions justify-content-between justify-content-md-end mt-2 mt-md-0">
-                <button type="button" class="btn btn-warning text-dark px-3 py-1.5 fw-bold d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm flex-grow-1 flex-md-grow-0 rounded-pill" onclick="openFamilyStudio()" style="min-height: 38px; font-size: 0.82rem; white-space: nowrap;">
-                    <i class="bi bi-pencil-square"></i> Open Family Studio
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                <button type="button" class="btn btn-warning text-dark px-3 py-2 fw-bold d-inline-flex align-items-center gap-1 shadow-sm" onclick="switchTreeViewMode('studio')" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
+                    <i class="bi bi-stars"></i> Open Studio
                 </button>
-                <button type="button" class="btn btn-outline-light text-white-50 px-2 py-1.5 border-0 flex-shrink-0 rounded-circle" onclick="dismissTreeStudioDiscoveryBanner()" title="Dismiss announcement" aria-label="Dismiss announcement" style="width: 36px; height: 36px; min-height: 36px; min-width: 36px; display: inline-flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-x-lg" style="font-size: 0.85rem;"></i>
+                <button type="button" class="btn btn-outline-light text-white-50 px-3 py-2 border-0" onclick="dismissTreeStudioDiscoveryBanner()" title="Dismiss announcement" style="border-radius: 50px; min-height: 44px; min-width: 44px;">
+                    <i class="bi bi-x-lg"></i>
                 </button>
             </div>
         </div>
+
 
         @php
             $hasBuiltTree = !empty($graphData['has_built_tree']);
@@ -234,7 +194,7 @@
         @endphp
 
         <!-- How to Build Your Family Tree Quick Guide Banner (Visible for New Users & Toggleable) -->
-        <div id="howToBuildTreeGuideBanner" class="tree-how-to-guide-card alert border-0 mb-3 mx-2 mx-sm-3 p-3 p-sm-4 position-relative {{ $shouldShowGuide ? '' : 'd-none' }}" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 100%); border: 1.5px solid rgba(245, 158, 11, 0.45) !important; border-left: 5px solid #f59e0b !important; border-radius: 18px; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);">
+        <div id="howToBuildTreeGuideBanner" data-open="{{ $shouldShowGuide ? '1' : '0' }}" class="tree-how-to-guide-card alert border-0 mb-3 mx-2 mx-sm-3 p-3 p-sm-4 position-relative {{ $shouldShowGuide ? '' : 'd-none' }}" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 100%); border: 1.5px solid rgba(245, 158, 11, 0.45) !important; border-left: 5px solid #f59e0b !important; border-radius: 18px; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);">
             <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-3 pb-2 border-bottom" style="border-color: rgba(245, 158, 11, 0.25) !important;">
                 <div class="d-flex align-items-center gap-3 tree-ribbon-content">
                     <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1.5px solid rgba(245, 158, 11, 0.45); font-size: 1.35rem;">
@@ -335,23 +295,6 @@
             ];
         @endphp
 
-        @if(empty($isSelf) && empty($graphData['has_built_tree']))
-        <!-- Prominent Lineage Tree Prompt Banner -->
-        <div id="promptBuildTreeBanner" class="alert shadow-lg border-0 rounded-4 mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 p-3 gap-3" style="background: linear-gradient(135deg, rgba(42,10,13, 0.9) 0%, rgba(42,10,13, 0.85) 100%); border: 1px solid rgba(245, 158, 11, 0.3); border-left: 5px solid #f59e0b !important; backdrop-filter: blur(16px); box-shadow: 0 16px 36px rgba(0,0,0,0.4);">
-            <div class="d-flex align-items-center gap-3">
-                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; flex-shrink: 0;">
-                    <i class="bi bi-bell-fill fs-4"></i>
-                </div>
-                <div>
-                    <h6 class="mb-1 fw-bold text-white fs-6">{{ trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? '')) }} Has Not Connected Their Branch Yet</h6>
-                    <p class="mb-0 text-white-50" style="font-size: 0.88rem;">This relative has not added their immediate family members yet. Send them a warm invitation to connect their branch!</p>
-                </div>
-            </div>
-            <button type="button" class="btn btn-warning text-dark px-4 py-2 fw-bold d-inline-flex align-items-center justify-content-center shadow-sm flex-shrink-0 btn-prompt-tree-action" onclick="window.promptMemberToBuildTree()" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
-                <i class="bi bi-envelope-heart-fill me-2 text-dark"></i> Invite {{ explode(' ', trim($data['firstName'] ?? 'Them'))[0] }} to Connect Branch
-            </button>
-        </div>
-        @endif
 
         @if(empty($isReadOnly))
         <!-- Kinship Auto-Match Discovery Banner ("Is this you on the family tree?") -->
@@ -1897,11 +1840,13 @@
         if (!banner) return;
         if (banner.classList.contains('d-none')) {
             banner.classList.remove('d-none');
+            banner.dataset.open = '1';
             window.__fpDismissedGuideBanner = false;
             try { localStorage.removeItem('fp_dismiss_guide_banner'); } catch(_) {}
             banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } else {
             banner.classList.add('d-none');
+            banner.dataset.open = '0';
             window.__fpDismissedGuideBanner = true;
             try { localStorage.setItem('fp_dismiss_guide_banner', 'true'); } catch(_) {}
         }
@@ -1909,7 +1854,7 @@
 
     window.dismissHowToBuildGuide = function() {
         const banner = document.getElementById('howToBuildTreeGuideBanner');
-        if (banner) banner.classList.add('d-none');
+        if (banner) { banner.classList.add('d-none'); banner.dataset.open = '0'; }
         window.__fpDismissedGuideBanner = true;
         try { localStorage.setItem('fp_dismiss_guide_banner', 'true'); } catch(_) {}
     };
@@ -1989,7 +1934,7 @@
         } else {
             // Restoring non-studio view: restore canvas-specific alerts if active
             if (securityBanner && !window.__fpDismissedSecurityBanner) securityBanner.classList.remove('d-none');
-            if (guideBanner && !window.__fpDismissedGuideBanner) guideBanner.classList.remove('d-none');
+            if (guideBanner && guideBanner.dataset.open === '1' && !window.__fpDismissedGuideBanner) guideBanner.classList.remove('d-none');
             if (unplacedDock && window.__fpHasUnplacedMembers) {
                 unplacedDock.classList.remove('d-none');
                 unplacedDock.classList.add('d-flex');

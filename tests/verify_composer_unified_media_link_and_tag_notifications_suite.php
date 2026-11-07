@@ -34,8 +34,8 @@ $modalViewPath = __DIR__ . '/../resources/views/member/modals/post.blade.php';
 $modalContent = file_get_contents($modalViewPath);
 
 assertTest(
-    str_contains($modalContent, 'Link Photos &amp; Videos (Zero Storage)') || str_contains($modalContent, 'Link Photos & Videos (Zero Storage)'),
-    'Post modal contains Link Photos & Videos (Zero Storage) drawer header'
+    str_contains($modalContent, 'id="googlePhotoDrawer"') && str_contains($modalContent, 'Link photos &amp; videos'),
+    'Post modal contains Link photos & videos drawer header'
 );
 
 assertTest(
@@ -70,7 +70,7 @@ assertTest(
 // Test 3: Verify Video drawer streamlining
 // -------------------------------------------------------------
 assertTest(
-    str_contains($modalContent, 'Upload Videos (Up to 3, Auto-Trim to 30s)'),
+    str_contains($modalContent, 'Choose up to 3 videos') && str_contains($modalContent, 'id="videoAutoTrimStudio"'),
     'Video drawer focuses on Direct Video Upload and 30s auto-trim highlight studio'
 );
 

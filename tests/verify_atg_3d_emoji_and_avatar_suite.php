@@ -209,6 +209,141 @@ if (!str_contains($viewContent, 'btn-spin-on-click')) {
 
 echo "  ✅ All AR components, frontend assets and layout templates verified against Golden Standards.\n";
 
+// [7/7] Inclusive traits, motion rig, emoji tones & living-emoji motion
+echo "\n[7/7] Verifying inclusive traits, motion rig and emoji skin tones...\n";
+$opts = \App\services\AtgAvatarRenderer::options();
+foreach (['skin_tone' => 12, 'hairstyle' => 20, 'eye_shape' => 5, 'hair_color' => 10, 'facial_hair' => 4, 'outfit' => 6] as $trait => $min) {
+    if (count($opts[$trait]) < $min) {
+        $errors[] = "Trait '{$trait}' has only " . count($opts[$trait]) . " options (expected >= {$min}).";
+    }
+}
+foreach (['hijab', 'dastar_turban', 'kufi_cap', 'traditional_gele', 'long_straight', 'blunt_bangs'] as $style) {
+    if (!isset($opts['hairstyle'][$style])) {
+        $errors[] = "Missing inclusive hairstyle/headwear '{$style}'.";
+    }
+}
+$rig = $service->renderProceduralAvatar(['hairstyle' => 'hijab', 'eye_shape' => 'monolid'], 256, true);
+foreach (['atg-av-headpose', 'atg-av-gaze', 'atg-av-eye-l', 'atg-av-talk', 'atg-av-mouth', '@keyframes atgAvBlink', 'prefers-reduced-motion', 'data-atg-traits'] as $hook) {
+    if (!str_contains($rig, $hook)) {
+        $errors[] = "Animated avatar rig missing '{$hook}'.";
+    }
+}
+$fem = $service->renderProceduralAvatar(['presentation' => 'feminine'], 256);
+$masc = $service->renderProceduralAvatar(['presentation' => 'masculine'], 256);
+$neut = $service->renderProceduralAvatar(['presentation' => 'neutral'], 256);
+if ($fem === $masc || $fem === $neut || $masc === $neut) {
+    $errors[] = "Gender expression options must render distinct bodies.";
+}
+$beardedFem = $service->renderProceduralAvatar(['presentation' => 'feminine', 'facial_hair' => 'full_beard', 'hairstyle' => 'high_fade'], 256);
+if (!str_contains($beardedFem, 'facial_hair:full_beard')) {
+    $errors[] = "Gender expression must not restrict facial hair / hairstyle choices.";
+}
+$static = $service->renderProceduralAvatar([], 256, false);
+if (str_contains($static, '<style>')) {
+    $errors[] = "Static avatar must not embed idle animation styles.";
+}
+$sanitised = $service->sanitiseTraits(['skin_tone' => '"><script>', 'outfit' => 'suit_tie', 'unknown' => 'x']);
+if ($sanitised['skin_tone'] !== 'warm_chestnut' || $sanitised['outfit'] !== 'suit_tie' || isset($sanitised['unknown'])) {
+    $errors[] = "sanitiseTraits() failed to whitelist input.";
+}
+if ($service->traitsFromProfileImage('../../.env') !== null) {
+    $errors[] = "traitsFromProfileImage() accepted a non-studio path.";
+}
+[$base, $tone] = $service->parseToneId('family_wave_medium_dark_3d');
+if ($base !== 'family_wave_3d' || $tone !== 'medium_dark') {
+    $errors[] = "parseToneId() failed on a tone variant.";
+}
+$light = $service->renderSvgEmoji('family_heart_hands_light_3d', 96);
+$dark = $service->renderSvgEmoji('family_heart_hands_dark_3d', 96);
+if ($light === $dark || !str_contains($dark, '#4a2c1c')) {
+    $errors[] = "Tone variants of family_heart_hands_3d do not differ.";
+}
+foreach ($service->allEmojiAssetIds() as $assetId) {
+    $svg = $service->renderSvgEmoji($assetId, 64);
+    if (!str_contains($svg, 'class="atgm atgm-')) {
+        $errors[] = "Emoji '{$assetId}' has no motion wrapper.";
+    }
+    if (preg_match('/:([a-z0-9_]+_3d):/', ':' . $assetId . ':') !== 1) {
+        $errors[] = "Emoji id '{$assetId}' breaks the :<id>_3d: shortcode convention.";
+    }
+}
+if (empty($errors)) {
+    echo "  ✅ 13 skin tones, 21 hair/headwear styles, motion rig hooks, and " . count($service->allEmojiAssetIds()) . " living emoji assets verified.\n";
+}
+
+// [8/8] Verify Photo-to-Living Avatar Analysis & Permissions-Policy Header
+echo "\n[8/8] Verifying Photo-to-Living Avatar Analysis & Permissions-Policy Header...\n";
+$photoAnalysis = $service->analysePhotoToAvatar([
+    'sample_r'           => 106,
+    'sample_g'           => 60,
+    'sample_b'           => 32,
+    'hair_r'             => 14,
+    'hair_g'             => 11,
+    'hair_b'             => 10,
+    'denoising_strength' => 0.38,
+    'cfg_scale'          => 6.5,
+    'face_restoration'   => 0.65,
+    'skin_texture'       => 0.72,
+    'sharpening'         => 0.45,
+    'eye_retouch'        => 0.80,
+]);
+if (($photoAnalysis['sampled_palette']['skin_tone'] ?? '') !== 'warm_chestnut') {
+    $errors[] = "Photo-to-Avatar failed to match RGB(106,60,32) to warm_chestnut skin tone.";
+}
+if (($photoAnalysis['parameters']['denoising_strength'] ?? 0.0) !== 0.38 || ($photoAnalysis['identity_score'] ?? 0.0) < 95.0) {
+    $errors[] = "Photo-to-Avatar realism parameters or identity lock score failed validation.";
+}
+$htaccessContent = (string)file_get_contents(dirname(__DIR__) . '/.htaccess');
+if (!str_contains($htaccessContent, 'microphone=(self)')) {
+    $errors[] = ".htaccess Permissions-Policy must include microphone=(self) so Talk Mode functions in production.";
+}
+
+// Verify Living Photo Save Mode (embeds portrait PNG + choreography animations into SVG)
+if (!empty($testUserId)) {
+    $tinyPngBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+    // Pad valid PNG to > 100 bytes so length gate passes
+    $im = imagecreatetruecolor(64, 64);
+    $bg = imagecolorallocate($im, 138, 84, 52);
+    imagefill($im, 0, 0, $bg);
+    ob_start();
+    imagepng($im);
+    $pngBytes = (string)ob_get_clean();
+    imagedestroy($im);
+    $validPngUri = 'data:image/png;base64,' . base64_encode($pngBytes);
+
+    $livingSave = $service->saveAvatar(
+        $testUserId,
+        ['skin_tone' => 'warm_chestnut', 'hairstyle' => 'afro_crown'],
+        $validPngUri,
+        true,
+        'living_photo',
+        'dance',
+        [138, 84, 52]
+    );
+    if (empty($livingSave['success']) || !str_ends_with($livingSave['filename'], '.svg')) {
+        $errors[] = "saveAvatar(living_photo) failed to return an active .svg filename.";
+    } else {
+        $savedSvgPath = dirname(__DIR__) . '/resources/images/profile/' . $livingSave['filename'];
+        $savedSvgText = is_file($savedSvgPath) ? (string)file_get_contents($savedSvgPath) : '';
+        if (!str_contains($savedSvgText, 'atg-living-photo-svg') || !str_contains($savedSvgText, 'atgLpDance')) {
+            $errors[] = "Saved Living Photo SVG is missing atg-living-photo-svg class or dance choreography keyframes.";
+        }
+        @unlink($savedSvgPath);
+        @unlink(substr($savedSvgPath, 0, -4) . '.png');
+        @unlink(dirname(__DIR__) . '/public/img/profile/' . $livingSave['filename']);
+        @unlink(dirname(__DIR__) . '/public/img/profile/' . substr($livingSave['filename'], 0, -4) . '.png');
+    }
+
+    if ($originalImg !== null) {
+        $restStmt = $db->prepare("UPDATE profilePics SET img = ? WHERE id = ?");
+        $restStmt->execute([$originalImg, $testUserId]);
+    }
+}
+
+if (empty($errors)) {
+    echo "  ✅ Photo-to-Living Avatar RGB complexion matching, neural realism parameters, Living Photo SVG save, and microphone=(self) security policy verified.\n";
+}
+
 echo "\n=================================================================\n";
 if (empty($errors)) {
     echo "🎉 ALL ATG 3D EMOJI & AVATAR TESTS PASSED! ZERO VIOLATIONS.\n";

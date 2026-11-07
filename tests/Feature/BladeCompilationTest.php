@@ -46,7 +46,9 @@ final class BladeCompilationTest extends TestCase
             $viewName = str_replace('/', '.', $relativePath);
 
             try {
-                $compiledCode = $this->blade->compile($viewName);
+                $this->blade->compile($viewName);
+                $compiledFile = $this->blade->getCompiledFile($viewName);
+                $compiledCode = file_exists($compiledFile) ? (string) file_get_contents($compiledFile) : '';
                 $this->assertNotEmpty($compiledCode, "Compiled code should not be empty for view: {$viewName}");
 
                 // Validate compiled PHP syntax using TOKEN_PARSE to catch any PHP ParseError (e.g. BladeOne pipeEnable || collisions)

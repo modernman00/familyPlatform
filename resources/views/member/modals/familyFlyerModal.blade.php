@@ -9,11 +9,14 @@
                         <i class="bi bi-card-image"></i>
                     </div>
                     <div>
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
                             <h5 class="modal-title fw-bold mb-0 text-dark" id="familyFlyerModalLabel">Family Status Flyer</h5>
                             <span class="badge bg-warning text-dark fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">WHATSAPP SOCIAL CARD</span>
+                            <a href="/poster-studio?app=familyplatform" target="_blank" rel="noopener" class="btn btn-sm btn-dark fw-bold rounded-pill px-3 d-inline-flex align-items-center" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
+                                🎨 Open Full ATG Poster Studio
+                            </a>
                         </div>
-                        <p class="text-muted small mb-0">Generate a high-status heraldic flyer of your family clan to share on WhatsApp & social chats.</p>
+                        <p class="text-muted small mb-0">Generate a high-status heraldic flyer of your family clan to share on WhatsApp &amp; social chats.</p>
                     </div>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

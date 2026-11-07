@@ -20,6 +20,9 @@ $router->map('POST', '/member/profilePage/updateAnniversary', 'App\controller\me
 
 
 $router->map('POST', '/member/profilePage/profileImg', 'App\controller\members\ProfilePage@profileImage', 'profile_page_profileImg');
+$router->map('POST', '/member/profilePage/coverImg', 'App\controller\members\ProfilePage@coverImage', 'profile_page_coverImg');
+$router->map('POST', '/member/profilePage/coverImg/position', 'App\controller\members\ProfilePage@coverImagePosition', 'profile_page_coverImg_position');
+$router->map('POST', '/member/profilePage/coverImg/remove', 'App\controller\members\ProfilePage@removeCoverImage', 'profile_page_coverImg_remove');
 
 $router->map('POST', '/photos/postImages', 'App\controller\members\ProfilePage@postPics', 'MEMBERS_IMG_POST');
 
@@ -75,6 +78,7 @@ $router->map('POST', '/api/ai/generate-trivia', 'App\controller\members\FamilyAi
 $router->map('POST', '/api/ai/weekend-outings', 'App\controller\members\FamilyAiHubController@discoverWeekendOutings', 'api_ai_weekend_outings');
 $router->map('POST', '/api/ai/post-outings-poll', 'App\controller\members\FamilyAiHubController@postOutingsPoll', 'api_ai_post_outings_poll');
 $router->map('GET|POST', '/api/ai/sovereign-search', 'App\controller\members\FamilyAiHubController@sovereignSearch', 'api_ai_sovereign_search');
+$router->map('GET|POST', '/api/ai/sovereign-explainer', 'App\controller\members\FamilyAiHubController@sovereignExplainer', 'api_ai_sovereign_explainer');
 
 
 

@@ -61,11 +61,34 @@ final class VideoParser
             ];
         }
 
+        // 3b. TikTok (tiktok.com/@user/video/ID)
+        if (preg_match('/^https?:\/\/(?:www\.)?tiktok\.com\/@[\w.-]+\/video\/(\d{8,25})/i', $trimmed, $ttMatches) === 1) {
+            return [
+                'type' => 'tiktok',
+                'videoId' => $ttMatches[1],
+                'thumbnailUrl' => null,
+                'originalUrl' => $trimmed,
+            ];
+        }
+
+        // 3c. Dropbox shared video files — streamed as direct video via raw=1
+        $dropboxRegex = '/^https?:\/\/(?:www\.)?dropbox\.com\/(?:s|scl\/fi)\/[^\s"\'<>?#]+\.(?:mp4|webm|mov|ogg)(?:\?[^\s"\'<>#]*)?$/i';
+        if (preg_match($dropboxRegex, $trimmed) === 1) {
+            return [
+                'type' => 'direct',
+                'videoId' => null,
+                'thumbnailUrl' => null,
+                'originalUrl' => $trimmed,
+                'trimStart' => null,
+                'trimEnd' => null,
+            ];
+        }
+
         // 4. Direct HTML5 Video (.mp4, .webm, .ogg, .mov) — supports absolute http(s) and sovereign /resources/videos/ paths with optional #t=start,end
         $directVideoRegex = '/^(?:https?:\/\/[^\s"\'<>]+|\/resources\/(?:videos|images)\/[^\s"\'<>]+)\.(mp4|webm|ogg|mov)(?:\?[^\s"\'<>#]*)?(?:#t=([0-9]+(?:\.[0-9]+)?)(?:,([0-9]+(?:\.[0-9]+)?))?)?$/i';
         if (preg_match($directVideoRegex, $trimmed, $directMatches) === 1) {
-            $trimStart = isset($directMatches[2]) && $directMatches[2] !== '' ? (float)$directMatches[2] : null;
-            $trimEnd = isset($directMatches[3]) && $directMatches[3] !== '' ? (float)$directMatches[3] : null;
+            $trimStart = isset($directMatches[2]) && is_numeric($directMatches[2]) ? (float)$directMatches[2] : null;
+            $trimEnd = isset($directMatches[3]) && is_numeric($directMatches[3]) ? (float)$directMatches[3] : null;
             return [
                 'type' => 'direct',
                 'videoId' => null,

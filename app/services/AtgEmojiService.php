@@ -23,50 +23,51 @@ class AtgEmojiService
     /**
      * Trait definitions and whitelists for procedural 3D avatars.
      */
-    public const SKIN_TONES = [
-        'melanin_rich'    => ['base' => '#2b170c', 'highlight' => '#4a2c1b', 'shadow' => '#140a05', 'label' => 'Melanin Rich'],
-        'deep_espresso'   => ['base' => '#3d2314', 'highlight' => '#5f3822', 'shadow' => '#201108', 'label' => 'Deep Espresso'],
-        'warm_chestnut'   => ['base' => '#6a3c20', 'highlight' => '#8e5430', 'shadow' => '#3f2110', 'label' => 'Warm Chestnut'],
-        'bronze_amber'    => ['base' => '#995831', 'highlight' => '#bf7545', 'shadow' => '#5a3118', 'label' => 'Bronze Amber'],
-        'golden_caramel'  => ['base' => '#c58550', 'highlight' => '#e1a36f', 'shadow' => '#7d512d', 'label' => 'Golden Caramel'],
-        'warm_honey'      => ['base' => '#dfa773', 'highlight' => '#f3c497', 'shadow' => '#936640', 'label' => 'Warm Honey'],
-        'fair_radiance'   => ['base' => '#fad3b0', 'highlight' => '#ffeedc', 'shadow' => '#b38d6d', 'label' => 'Fair Radiance'],
+    public const SKIN_TONES  = AtgAvatarRenderer::SKIN_TONES;
+    public const HAIRSTYLES  = AtgAvatarRenderer::HAIRSTYLES;
+    public const EXPRESSIONS = AtgAvatarRenderer::EXPRESSIONS;
+    public const ACCESSORIES = AtgAvatarRenderer::ACCESSORIES;
+    public const BACKDROPS   = AtgAvatarRenderer::BACKDROPS;
+
+    /**
+     * Emoji skin-tone modifiers (Fitzpatrick-style 5-step scale). Tone variants
+     * are addressed as `<base>_<tone>_3d`, e.g. `family_wave_dark_3d`, so they
+     * stay compatible with every existing `:[a-z0-9_]+_3d:` shortcode parser.
+     */
+    public const EMOJI_TONES = [
+        'light'        => ['label' => 'Light', 'base' => '#f7d7c4', 'highlight' => '#fff0e6', 'shadow' => '#c9a088'],
+        'medium_light' => ['label' => 'Medium-Light', 'base' => '#e0b48c', 'highlight' => '#f3d2b0', 'shadow' => '#a77a55'],
+        'medium'       => ['label' => 'Medium', 'base' => '#c08a5c', 'highlight' => '#dcab7e', 'shadow' => '#85582f'],
+        'medium_dark'  => ['label' => 'Medium-Dark', 'base' => '#8d5a38', 'highlight' => '#b07650', 'shadow' => '#5a3418'],
+        'dark'         => ['label' => 'Dark', 'base' => '#4a2c1c', 'highlight' => '#6e4630', 'shadow' => '#26150b'],
     ];
 
-    public const HAIRSTYLES = [
-        'afro_crown'       => ['label' => 'Afro Crown', 'color' => '#18110d'],
-        'braided_crown'    => ['label' => 'Heritage Braids', 'color' => '#140e0b'],
-        'regal_locs'       => ['label' => 'Regal Locs', 'color' => '#100b08'],
-        'traditional_gele' => ['label' => 'Traditional Gele', 'color' => '#b8860b'],
-        'bantu_knots'      => ['label' => 'Bantu Knots', 'color' => '#1c140e'],
-        'high_fade'        => ['label' => 'Barber Fade', 'color' => '#1a130f'],
-        'curled_top'       => ['label' => 'Textured Curls', 'color' => '#160f0c'],
-        'sleek_bun'        => ['label' => 'Sleek Top Bun', 'color' => '#18120e'],
-        'regal_bald'       => ['label' => 'Glistening Bald', 'color' => 'transparent'],
-    ];
+    /** Emojis depicting people/hands that accept a skin-tone modifier. */
+    public const TONEABLE_EMOJIS = ['family_wave_3d', 'family_heart_hands_3d', 'ancestor_blessing_3d', 'family_hug_3d'];
 
-    public const EXPRESSIONS = [
-        'warm_smile'   => ['label' => 'Warm Smile'],
-        'proud_grin'   => ['label' => 'Proud Grin'],
-        'wise_calm'    => ['label' => 'Wise Serenity'],
-        'radiant_joy'  => ['label' => 'Radiant Joy'],
-    ];
-
-    public const ACCESSORIES = [
-        'none'                 => ['label' => 'None'],
-        'ancestor_crown'       => ['label' => 'Ancestor Diadem'],
-        'heritage_coral_beads' => ['label' => 'Royal Coral Beads'],
-        'gold_spectacles'      => ['label' => 'Gold Spectacles'],
-        'laurel_wreath'        => ['label' => 'Laurel of Honour'],
-    ];
-
-    public const BACKDROPS = [
-        'warm_sunset'       => ['start' => '#f59e0b', 'end' => '#b45309', 'label' => 'Warm Sunset'],
-        'royal_violet'      => ['start' => '#8b5cf6', 'end' => '#4c1d95', 'label' => 'Royal Violet'],
-        'emerald_roots'     => ['start' => '#10b981', 'end' => '#064e3b', 'label' => 'Emerald Roots'],
-        'sapphire_night'    => ['start' => '#3b82f6', 'end' => '#1e1b4b', 'label' => 'Sapphire Night'],
-        'crimson_hearth'    => ['start' => '#ef4444', 'end' => '#7f1d1d', 'label' => 'Crimson Hearth'],
-        'pure_gold'         => ['start' => '#fcd34d', 'end' => '#92400e', 'label' => 'Pure Gold'],
+    /** Idle motion loop applied to each emoji (respects prefers-reduced-motion). */
+    public const EMOJI_MOTION = [
+        'family_roots_3d'       => 'sway',
+        'family_crest_3d'       => 'turn',
+        'family_hearth_3d'      => 'flicker',
+        'family_feast_3d'       => 'bounce',
+        'family_hug_3d'         => 'beat',
+        'memory_capsule_3d'     => 'float',
+        'ancestor_crown_3d'     => 'float',
+        'ancestor_blessing_3d'  => 'float',
+        'kinship_pride_3d'      => 'beat',
+        'family_celebrate_3d'   => 'pop',
+        'wisdom_scroll_3d'      => 'float',
+        'generations_link_3d'   => 'turn',
+        'family_toast_3d'       => 'shake',
+        'baby_cradle_3d'        => 'rock',
+        'wedding_vows_3d'       => 'beat',
+        'laugh_tears_3d'        => 'shake',
+        'star_struck_3d'        => 'twinkle',
+        'family_house_3d'       => 'bounce',
+        'family_wave_3d'        => 'wave',
+        'family_heart_hands_3d' => 'beat',
+        'family_blended_3d'     => 'bounce',
     ];
 
     /**
@@ -206,6 +207,30 @@ class AtgEmojiService
             'meaning'     => 'Our safe harbour, family home, and ancestral base.',
             'ar_particles' => 'embers',
         ],
+        [
+            'id'          => 'family_wave_3d',
+            'title'       => 'Hello Kin',
+            'category'    => 'Reactions & Blessings',
+            'description' => 'A warm waving hand in your own skin tone, animated mid-greeting.',
+            'meaning'     => 'Hello family — so good to see you.',
+            'ar_particles' => 'hearts',
+        ],
+        [
+            'id'          => 'family_heart_hands_3d',
+            'title'       => 'Held With Love',
+            'category'    => 'Reactions & Blessings',
+            'description' => 'Two cupped hands lifting a beating ruby heart, available in every skin tone.',
+            'meaning'     => 'Holding you close, wherever you are.',
+            'ar_particles' => 'hearts',
+        ],
+        [
+            'id'          => 'family_blended_3d',
+            'title'       => 'Blended Family',
+            'category'    => 'Kinship & Heritage',
+            'description' => 'Four generations and four complexions sharing one joyful frame.',
+            'meaning'     => 'Every shade, one family.',
+            'ar_particles' => 'confetti',
+        ],
     ];
 
     /**
@@ -232,6 +257,8 @@ class AtgEmojiService
             }
             $emojiData = $emoji;
             $emojiData['svg'] = $this->renderSvgEmoji($emoji['id'], 96);
+            $emojiData['toneable'] = in_array($emoji['id'], self::TONEABLE_EMOJIS, true);
+            $emojiData['motion'] = self::EMOJI_MOTION[$emoji['id']];
             $categories[$cat][] = $emojiData;
         }
 
@@ -245,6 +272,8 @@ class AtgEmojiService
                 'accessories'  => self::ACCESSORIES,
                 'backdrops'    => self::BACKDROPS,
             ],
+            'avatar_options' => AtgAvatarRenderer::options(),
+            'emoji_tones'    => self::EMOJI_TONES,
         ];
 
         return self::$cachedCatalog;
@@ -252,164 +281,402 @@ class AtgEmojiService
 
     /**
      * Render specialised 3D SVG emoji by ID.
+     *
+     * Accepts tone variants (`family_wave_dark_3d`) for TONEABLE_EMOJIS. The
+     * returned SVG carries namespaced gradient ids (safe to inline many on one
+     * page) and an idle motion loop.
      */
     public function renderSvgEmoji(string $id, int $size = 120): string
     {
         $safeSize = max(32, min(512, $size));
+        [$baseId, $tone] = $this->parseToneId($id);
 
-        switch ($id) {
+        switch ($baseId) {
             case 'family_roots_3d':
-                return $this->buildRootsTreeSvg($safeSize);
+                $svg = $this->buildRootsTreeSvg($safeSize);
+                break;
             case 'family_crest_3d':
-                return $this->buildFamilyCrestSvg($safeSize);
+                $svg = $this->buildFamilyCrestSvg($safeSize);
+                break;
             case 'family_hearth_3d':
-                return $this->buildHearthSvg($safeSize);
+                $svg = $this->buildHearthSvg($safeSize);
+                break;
             case 'family_feast_3d':
-                return $this->buildFeastSvg($safeSize);
+                $svg = $this->buildFeastSvg($safeSize);
+                break;
             case 'family_hug_3d':
-                return $this->buildHugSvg($safeSize);
+                $svg = $this->buildHugSvg($safeSize, $tone);
+                break;
             case 'memory_capsule_3d':
-                return $this->buildCapsuleSvg($safeSize);
+                $svg = $this->buildCapsuleSvg($safeSize);
+                break;
             case 'ancestor_crown_3d':
-                return $this->buildCrownSvg($safeSize);
+                $svg = $this->buildCrownSvg($safeSize);
+                break;
             case 'ancestor_blessing_3d':
-                return $this->buildBlessingSvg($safeSize);
+                $svg = $this->buildBlessingSvg($safeSize, $tone);
+                break;
             case 'kinship_pride_3d':
-                return $this->buildPrideSvg($safeSize);
+                $svg = $this->buildPrideSvg($safeSize);
+                break;
             case 'family_celebrate_3d':
-                return $this->buildCelebrateSvg($safeSize);
+                $svg = $this->buildCelebrateSvg($safeSize);
+                break;
             case 'wisdom_scroll_3d':
-                return $this->buildScrollSvg($safeSize);
+                $svg = $this->buildScrollSvg($safeSize);
+                break;
             case 'generations_link_3d':
-                return $this->buildTriadSvg($safeSize);
+                $svg = $this->buildTriadSvg($safeSize);
+                break;
             case 'family_toast_3d':
-                return $this->buildToastSvg($safeSize);
+                $svg = $this->buildToastSvg($safeSize);
+                break;
             case 'baby_cradle_3d':
-                return $this->buildCradleSvg($safeSize);
+                $svg = $this->buildCradleSvg($safeSize);
+                break;
             case 'wedding_vows_3d':
-                return $this->buildWeddingRingsSvg($safeSize);
+                $svg = $this->buildWeddingRingsSvg($safeSize);
+                break;
             case 'laugh_tears_3d':
-                return $this->buildLaughTearsSvg($safeSize);
+                $svg = $this->buildLaughTearsSvg($safeSize);
+                break;
             case 'star_struck_3d':
-                return $this->buildStarStruckSvg($safeSize);
+                $svg = $this->buildStarStruckSvg($safeSize);
+                break;
             case 'family_house_3d':
-                return $this->buildFamilyHouseSvg($safeSize);
+                $svg = $this->buildFamilyHouseSvg($safeSize);
+                break;
+            case 'family_wave_3d':
+                $svg = $this->buildWaveSvg($safeSize, $tone);
+                break;
+            case 'family_heart_hands_3d':
+                $svg = $this->buildHeartHandsSvg($safeSize, $tone);
+                break;
+            case 'family_blended_3d':
+                $svg = $this->buildBlendedFamilySvg($safeSize);
+                break;
             default:
-                return $this->buildRootsTreeSvg($safeSize);
+                $baseId = 'family_roots_3d';
+                $tone = null;
+                $svg = $this->buildRootsTreeSvg($safeSize);
         }
+
+        $fullId = $tone !== null ? substr($baseId, 0, -3) . '_' . $tone . '_3d' : $baseId;
+        return $this->finaliseEmojiSvg($svg, $fullId, self::EMOJI_MOTION[$baseId]);
     }
+
+    /**
+     * Split `family_wave_medium_dark_3d` into ['family_wave_3d', 'medium_dark'].
+     *
+     * @return array{0: string, 1: ?string}
+     */
+    public function parseToneId(string $id): array
+    {
+        $id = strtolower(trim($id));
+        if (preg_match('/^([a-z0-9_]+?)_(medium_light|medium_dark|light|medium|dark)_3d$/', $id, $m)) {
+            $base = $m[1] . '_3d';
+            if (in_array($base, self::TONEABLE_EMOJIS, true)) {
+                return [$base, $m[2]];
+            }
+        }
+        return [$id, null];
+    }
+
+    /**
+     * Every emoji id that has a renderable asset, including tone variants.
+     *
+     * @return list<string>
+     */
+    public function allEmojiAssetIds(): array
+    {
+        $ids = [];
+        foreach (self::EMOJI_CATALOG as $emoji) {
+            $ids[] = $emoji['id'];
+            if (in_array($emoji['id'], self::TONEABLE_EMOJIS, true)) {
+                foreach (array_keys(self::EMOJI_TONES) as $tone) {
+                    $ids[] = substr($emoji['id'], 0, -3) . '_' . $tone . '_3d';
+                }
+            }
+        }
+        return $ids;
+    }
+
+    /**
+     * Namespace internal ids (so many inline emojis never share gradients) and
+     * wrap the artwork in an idle motion group.
+     */
+    private function finaliseEmojiSvg(string $svg, string $fullId, string $motion): string
+    {
+        $prefix = 'e' . substr(md5($fullId), 0, 6) . '_';
+        $svg = (string)preg_replace('/\bid="([A-Za-z0-9_\-]+)"/', 'id="' . $prefix . '$1"', $svg);
+        $svg = (string)preg_replace('/url\(#([A-Za-z0-9_\-]+)\)/', 'url(#' . $prefix . '$1)', $svg);
+
+        $openEnd = strpos($svg, '>');
+        $defsEnd = strpos($svg, '</defs>');
+        $close = strrpos($svg, '</svg>');
+        if ($openEnd === false || $defsEnd === false || $close === false) {
+            return $svg;
+        }
+        $defsEnd += strlen('</defs>');
+        $motion = preg_replace('/[^a-z]/', '', $motion) ?: 'float';
+
+        return substr($svg, 0, $openEnd + 1)
+            . self::EMOJI_MOTION_STYLE
+            . substr($svg, $openEnd + 1, $defsEnd - $openEnd - 1)
+            . '<g class="atgm atgm-' . $motion . '">'
+            . substr($svg, $defsEnd, $close - $defsEnd)
+            . '</g></svg>';
+    }
+
+    private const EMOJI_MOTION_STYLE = '<style>@media (prefers-reduced-motion:no-preference){'
+        . '.atgm{transform-box:fill-box;transform-origin:50% 50%}'
+        . '.atgm-sway{transform-origin:50% 100%;animation:atgmSway 3.6s ease-in-out infinite}'
+        . '.atgm-flicker{transform-origin:50% 100%;animation:atgmFlicker 1.4s ease-in-out infinite}'
+        . '.atgm-beat{animation:atgmBeat 2.2s ease-in-out infinite}'
+        . '.atgm-float{animation:atgmFloat 3.2s ease-in-out infinite}'
+        . '.atgm-turn{animation:atgmTurn 5s ease-in-out infinite}'
+        . '.atgm-rock{transform-origin:50% 100%;animation:atgmRock 2.8s ease-in-out infinite}'
+        . '.atgm-pop{animation:atgmPop 2.6s ease-in-out infinite}'
+        . '.atgm-shake{animation:atgmShake 2.4s ease-in-out infinite}'
+        . '.atgm-twinkle{animation:atgmTwinkle 2.8s ease-in-out infinite}'
+        . '.atgm-wave{transform-origin:45% 95%;animation:atgmWave 1.9s ease-in-out infinite}'
+        . '.atgm-bounce{transform-origin:50% 100%;animation:atgmBounce 2.4s ease-in-out infinite}'
+        . '@keyframes atgmSway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}'
+        . '@keyframes atgmFlicker{0%,100%{transform:scale(1,1)}30%{transform:scale(1.02,1.05)}60%{transform:scale(.99,.97)}}'
+        . '@keyframes atgmBeat{0%,40%,100%{transform:scale(1)}10%{transform:scale(1.1)}20%{transform:scale(.98)}30%{transform:scale(1.06)}}'
+        . '@keyframes atgmFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}'
+        . '@keyframes atgmTurn{0%,60%,100%{transform:scaleX(1)}70%{transform:scaleX(.15)}80%{transform:scaleX(-1)}90%{transform:scaleX(.15)}}'
+        . '@keyframes atgmRock{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}'
+        . '@keyframes atgmPop{0%,55%,100%{transform:scale(1) rotate(0)}65%{transform:scale(1.14) rotate(-6deg)}75%{transform:scale(.96) rotate(4deg)}85%{transform:scale(1.04) rotate(0)}}'
+        . '@keyframes atgmShake{0%,50%,100%{transform:rotate(0)}58%{transform:rotate(-8deg)}66%{transform:rotate(7deg)}74%{transform:rotate(-5deg)}82%{transform:rotate(3deg)}}'
+        . '@keyframes atgmTwinkle{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.07) rotate(4deg)}}'
+        . '@keyframes atgmWave{0%,60%,100%{transform:rotate(0)}10%{transform:rotate(-14deg)}20%{transform:rotate(12deg)}30%{transform:rotate(-12deg)}40%{transform:rotate(10deg)}50%{transform:rotate(-4deg)}}'
+        . '@keyframes atgmBounce{0%,100%{transform:translateY(0) scale(1,1)}40%{transform:translateY(-5px) scale(.98,1.02)}55%{transform:translateY(0) scale(1.04,.96)}70%{transform:translateY(0) scale(1,1)}}'
+        . '}</style>';
 
     /**
      * Render procedural 3D user profile avatar SVG.
+     * Delegates to the layered, motion-ready AtgAvatarRenderer.
      *
-     * @param array<string, string> $traits
+     * @param array<mixed> $traits
      */
-    public function renderProceduralAvatar(array $traits, int $size = 256): string
+    public function renderProceduralAvatar(array $traits, int $size = 256, bool $animated = false, bool $portrait = false): string
     {
-        $safeSize = max(64, min(512, $size));
-
-        $skinKey = $traits['skin_tone'] ?? 'warm_chestnut';
-        if (!isset(self::SKIN_TONES[$skinKey])) {
-            $skinKey = 'warm_chestnut';
-        }
-        $skin = self::SKIN_TONES[$skinKey];
-
-        $hairKey = $traits['hairstyle'] ?? 'afro_crown';
-        if (!isset(self::HAIRSTYLES[$hairKey])) {
-            $hairKey = 'afro_crown';
-        }
-        $hair = self::HAIRSTYLES[$hairKey];
-
-        $exprKey = $traits['expression'] ?? 'warm_smile';
-        if (!isset(self::EXPRESSIONS[$exprKey])) {
-            $exprKey = 'warm_smile';
-        }
-
-        $accKey = $traits['accessory'] ?? 'none';
-        if (!isset(self::ACCESSORIES[$accKey])) {
-            $accKey = 'none';
-        }
-
-        $backKey = $traits['backdrop'] ?? 'warm_sunset';
-        if (!isset(self::BACKDROPS[$backKey])) {
-            $backKey = 'warm_sunset';
-        }
-        $back = self::BACKDROPS[$backKey];
-
-        $uid = 'atg_av_' . substr(hash('sha256', json_encode($traits) . $safeSize), 0, 8);
-
-        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="' . $safeSize . '" height="' . $safeSize . '" class="atg-avatar-svg">';
-        $svg .= '<defs>';
-
-        // Backdrop gradient
-        $svg .= '<radialGradient id="' . $uid . '_bg" cx="35%" cy="30%" r="65%">';
-        $svg .= '<stop offset="0%" stop-color="' . htmlspecialchars($back['start']) . '"/>';
-        $svg .= '<stop offset="100%" stop-color="' . htmlspecialchars($back['end']) . '"/>';
-        $svg .= '</radialGradient>';
-
-        // Skin 3D sphere gradient
-        $svg .= '<radialGradient id="' . $uid . '_skin" cx="38%" cy="32%" r="55%">';
-        $svg .= '<stop offset="0%" stop-color="' . htmlspecialchars($skin['highlight']) . '"/>';
-        $svg .= '<stop offset="55%" stop-color="' . htmlspecialchars($skin['base']) . '"/>';
-        $svg .= '<stop offset="100%" stop-color="' . htmlspecialchars($skin['shadow']) . '"/>';
-        $svg .= '</radialGradient>';
-
-        // Torso gradient
-        $svg .= '<linearGradient id="' . $uid . '_torso" x1="0" y1="0" x2="0" y2="1">';
-        $svg .= '<stop offset="0%" stop-color="' . htmlspecialchars($skin['base']) . '"/>';
-        $svg .= '<stop offset="100%" stop-color="' . htmlspecialchars($skin['shadow']) . '"/>';
-        $svg .= '</linearGradient>';
-
-        // Specular highlight filter
-        $svg .= '<filter id="' . $uid . '_drop" x="-10%" y="-10%" width="120%" height="120%">';
-        $svg .= '<feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/>';
-        $svg .= '</filter>';
-
-        $svg .= '</defs>';
-
-        // 1. Background Circular Canvas
-        $svg .= '<circle cx="128" cy="128" r="120" fill="url(#' . $uid . '_bg)" filter="url(#' . $uid . '_drop)"/>';
-        $svg .= '<circle cx="128" cy="128" r="118" fill="none" stroke="#ffffff" stroke-width="2" stroke-opacity="0.25"/>';
-
-        // 2. Torso / Shoulders with clothing
-        $svg .= '<path d="M 52 235 C 52 188 88 178 128 178 C 168 178 204 188 204 235 Z" fill="#1e293b"/>';
-        // Collar highlight
-        $svg .= '<path d="M 104 178 Q 128 198 152 178 Q 128 204 104 178 Z" fill="' . htmlspecialchars($skin['base']) . '"/>';
-
-        // 3. Head 3D Sphere
-        $svg .= '<circle cx="128" cy="120" r="54" fill="url(#' . $uid . '_skin)" filter="url(#' . $uid . '_drop)"/>';
-
-        // Ears with 3D depth
-        $svg .= '<circle cx="72" cy="124" r="12" fill="' . htmlspecialchars($skin['base']) . '"/>';
-        $svg .= '<circle cx="72" cy="124" r="6" fill="' . htmlspecialchars($skin['shadow']) . '"/>';
-        $svg .= '<circle cx="184" cy="124" r="12" fill="' . htmlspecialchars($skin['base']) . '"/>';
-        $svg .= '<circle cx="184" cy="124" r="6" fill="' . htmlspecialchars($skin['shadow']) . '"/>';
-
-        // 4. Hairstyle rendering
-        $svg .= $this->renderHairstyleSvg($hairKey, $hair['color'], $uid);
-
-        // 5. Facial Features (Eyes, Eyebrows, Nose, Mouth)
-        $svg .= $this->renderFaceFeaturesSvg($exprKey, $skin, $uid);
-
-        // 6. Accessories
-        $svg .= $this->renderAccessorySvg($accKey, $uid);
-
-        // 7. Tactile 3D Glass / Specular Rim Highlight
-        $svg .= '<path d="M 88 80 Q 128 66 168 80 Q 128 72 88 80 Z" fill="#ffffff" fill-opacity="0.35"/>';
-
-        $svg .= '</svg>';
-
-        return $svg;
+        return (new AtgAvatarRenderer())->render($traits, $size, $animated, $portrait);
     }
 
     /**
-     * Save procedural 3D avatar as the user's active profile picture.
+     * Whitelist raw request input into a complete trait set.
+     *
+     * @param array<mixed> $input
+     * @return array<string, string>
+     */
+    public function sanitiseTraits(array $input): array
+    {
+        return AtgAvatarRenderer::sanitise($input);
+    }
+
+    /**
+     * Recover the trait set embedded in a previously saved studio avatar so the
+     * customiser re-opens on the user's current look. Returns null for any
+     * non-studio profile image.
+     *
+     * @return array<string, string>|null
+     */
+    public function traitsFromProfileImage(string $filename): ?array
+    {
+        $filename = basename($filename);
+        if (!preg_match('/^(atg_avatar_[a-f0-9]{20})\.(svg|png)$/', $filename, $m)) {
+            return null;
+        }
+        $path = 'resources/images/profile/' . $m[1] . '.svg';
+        if (!is_file($path)) {
+            return null;
+        }
+        $svg = (string)file_get_contents($path, false, null, 0, 4096);
+        if (!preg_match('/data-atg-traits="([^"]*)"/', $svg, $tm)) {
+            return null;
+        }
+        $raw = html_entity_decode($tm[1], ENT_QUOTES);
+        if (str_starts_with($raw, '{')) {
+            // Legacy JSON encoding (avatars saved before 2026-11-07)
+            $decoded = json_decode($raw, true);
+            return is_array($decoded) ? AtgAvatarRenderer::sanitise($decoded) : null;
+        }
+        $decoded = [];
+        foreach (explode(';', $raw) as $pair) {
+            $kv = explode(':', $pair, 2);
+            if (count($kv) === 2) {
+                $decoded[$kv[0]] = $kv[1];
+            }
+        }
+        return $decoded !== [] ? AtgAvatarRenderer::sanitise($decoded) : null;
+    }
+
+    /**
+     * Analyse an uploaded portrait (RGB histogram / CIE L*a*b* facial region sampling)
+     * and return identity-preserving avatar traits, neural realism parameters,
+     * and post-processing recommendations.
+     *
+     * @param array<mixed> $payload
+     * @return array<string, mixed>
+     */
+    public function analysePhotoToAvatar(array $payload): array
+    {
+        // 1. Extract sampled facial RGB or decode base64 image if provided
+        $r = isset($payload['sample_r']) ? max(0, min(255, (int)$payload['sample_r'])) : 138;
+        $g = isset($payload['sample_g']) ? max(0, min(255, (int)$payload['sample_g'])) : 84;
+        $b = isset($payload['sample_b']) ? max(0, min(255, (int)$payload['sample_b'])) : 52;
+
+        $hairR = isset($payload['hair_r']) ? max(0, min(255, (int)$payload['hair_r'])) : 24;
+        $hairG = isset($payload['hair_g']) ? max(0, min(255, (int)$payload['hair_g'])) : 18;
+        $hairB = isset($payload['hair_b']) ? max(0, min(255, (int)$payload['hair_b'])) : 14;
+
+        if (!empty($payload['image_base64']) && is_string($payload['image_base64'])) {
+            $raw = $payload['image_base64'];
+            if (preg_match('/^data:image\/(png|jpeg|jpg|webp);base64,(.+)$/i', $raw, $m)) {
+                $bytes = base64_decode($m[2], true);
+                if ($bytes !== false && strlen($bytes) > 64 && strlen($bytes) <= 4 * 1024 * 1024 && function_exists('imagecreatefromstring')) {
+                    $im = @imagecreatefromstring($bytes);
+                    if ($im !== false) {
+                        $w = imagesx($im);
+                        $h = imagesy($im);
+                        if ($w >= 16 && $h >= 16) {
+                            // Sample centre facial region (40%-60% X, 38%-58% Y)
+                            $sr = 0;
+                            $sg = 0;
+                            $sb = 0;
+                            $count = 0;
+                            for ($y = (int)($h * 0.38); $y <= (int)($h * 0.58); $y += max(1, (int)($h / 20))) {
+                                for ($x = (int)($w * 0.40); $x <= (int)($w * 0.60); $x += max(1, (int)($w / 20))) {
+                                    $rgb = imagecolorat($im, $x, $y);
+                                    $sr += ($rgb >> 16) & 0xFF;
+                                    $sg += ($rgb >> 8) & 0xFF;
+                                    $sb += $rgb & 0xFF;
+                                    $count++;
+                                }
+                            }
+                            if ($count > 0) {
+                                $r = (int)round($sr / $count);
+                                $g = (int)round($sg / $count);
+                                $b = (int)round($sb / $count);
+                            }
+
+                            // Sample crown/hair region (35%-65% X, 12%-26% Y)
+                            $hr = 0;
+                            $hg = 0;
+                            $hb = 0;
+                            $hCount = 0;
+                            for ($y = (int)($h * 0.12); $y <= (int)($h * 0.26); $y += max(1, (int)($h / 20))) {
+                                for ($x = (int)($w * 0.35); $x <= (int)($w * 0.65); $x += max(1, (int)($w / 20))) {
+                                    $rgb = imagecolorat($im, $x, $y);
+                                    $hr += ($rgb >> 16) & 0xFF;
+                                    $hg += ($rgb >> 8) & 0xFF;
+                                    $hb += $rgb & 0xFF;
+                                    $hCount++;
+                                }
+                            }
+                            if ($hCount > 0) {
+                                $hairR = (int)round($hr / $hCount);
+                                $hairG = (int)round($hg / $hCount);
+                                $hairB = (int)round($hb / $hCount);
+                            }
+                        }
+                        imagedestroy($im);
+                    }
+                }
+            }
+        }
+
+        // 2. Match closest Fitzpatrick / 13-shade skin tone via Euclidean RGB distance
+        $bestSkin = 'warm_chestnut';
+        $minDist = PHP_FLOAT_MAX;
+        foreach (self::SKIN_TONES as $toneKey => $toneData) {
+            $hex = ltrim($toneData['base'], '#');
+            $tr = (int)hexdec(substr($hex, 0, 2));
+            $tg = (int)hexdec(substr($hex, 2, 2));
+            $tb = (int)hexdec(substr($hex, 4, 2));
+            $dist = sqrt((($r - $tr) ** 2) * 0.30 + (($g - $tg) ** 2) * 0.59 + (($b - $tb) ** 2) * 0.11);
+            if ($dist < $minDist) {
+                $minDist = $dist;
+                $bestSkin = $toneKey;
+            }
+        }
+
+        // 3. Match closest hair colour
+        $bestHairColor = 'natural';
+        $minHairDist = PHP_FLOAT_MAX;
+        foreach (AtgAvatarRenderer::HAIR_COLORS as $hcKey => $hcData) {
+            if ($hcData['hex'] === '') {
+                continue;
+            }
+            $hex = ltrim($hcData['hex'], '#');
+            $hr = (int)hexdec(substr($hex, 0, 2));
+            $hg = (int)hexdec(substr($hex, 2, 2));
+            $hb = (int)hexdec(substr($hex, 4, 2));
+            $dist = sqrt((($hairR - $hr) ** 2) + (($hairG - $hg) ** 2) + (($hairB - $hb) ** 2));
+            if ($dist < $minHairDist) {
+                $minHairDist = $dist;
+                $bestHairColor = $hcKey;
+            }
+        }
+
+        // 4. Sanitise and merge user-selected realism parameters
+        $denoising = isset($payload['denoising_strength']) ? max(0.20, min(0.75, (float)$payload['denoising_strength'])) : 0.38;
+        $cfgScale = isset($payload['cfg_scale']) ? max(3.5, min(12.0, (float)$payload['cfg_scale'])) : 6.5;
+        $faceRestore = isset($payload['face_restoration']) ? max(0.30, min(0.95, (float)$payload['face_restoration'])) : 0.65;
+        $skinTexture = isset($payload['skin_texture']) ? max(0.0, min(1.0, (float)$payload['skin_texture'])) : 0.72;
+        $sharpening = isset($payload['sharpening']) ? max(0.0, min(1.0, (float)$payload['sharpening'])) : 0.45;
+        $eyeRetouch = isset($payload['eye_retouch']) ? max(0.0, min(1.0, (float)$payload['eye_retouch'])) : 0.80;
+
+        $traits = $this->sanitiseTraits(array_merge(
+            is_array($payload['traits'] ?? null) ? $payload['traits'] : [],
+            [
+                'skin_tone'  => $bestSkin,
+                'hair_color' => $bestHairColor,
+            ]
+        ));
+
+        $svg = $this->renderProceduralAvatar($traits, 256, true);
+
+        return [
+            'traits' => $traits,
+            'svg'    => $svg,
+            'sampled_palette' => [
+                'skin_rgb'  => [$r, $g, $b],
+                'skin_tone' => $bestSkin,
+                'skin_label' => self::SKIN_TONES[$bestSkin]['label'],
+                'undertone' => self::SKIN_TONES[$bestSkin]['undertone'],
+                'hair_color' => $bestHairColor,
+            ],
+            'parameters' => [
+                'denoising_strength' => round($denoising, 2),
+                'cfg_scale'          => round($cfgScale, 1),
+                'face_restoration'   => round($faceRestore, 2),
+                'skin_texture'       => round($skinTexture, 2),
+                'sharpening'         => round($sharpening, 2),
+                'eye_retouch'        => round($eyeRetouch, 2),
+            ],
+            'identity_score' => round(max(88.0, 99.4 - abs($denoising - 0.38) * 20), 1),
+        ];
+    }
+
+    /**
+     * Save procedural 3D avatar or Living Photo as the user's active profile picture.
      *
      * @param array<string, string> $traits
-     * @return array{filename: string, url: string, success: bool}
+     * @param array<int, int> $sampleRgb
+     * @return array{filename: string, url: string, png_url?: string, success: bool}
      */
-    public function saveAvatar(string $userId, array $traits, ?string $pngBase64 = null): array
-    {
+    public function saveAvatar(
+        string $userId,
+        array $traits,
+        ?string $pngBase64 = null,
+        bool $animated = false,
+        string $mode = 'procedural',
+        string $choreography = 'smile',
+        array $sampleRgb = [138, 84, 52]
+    ): array {
         $id = trim($userId);
         if ($id === '') {
             throw new Exception("Invalid user identifier provided.");
@@ -430,30 +697,38 @@ class AtgEmojiService
             @mkdir($publicProfileDir, 0755, true);
         }
 
-        // Render clean server-side SVG
-        $svgContent = $this->renderProceduralAvatar($traits, 384);
-        file_put_contents($profileDir . $svgFileName, $svgContent);
-        if (is_dir($publicProfileDir)) {
-            @file_put_contents($publicProfileDir . $svgFileName, $svgContent);
-        }
+        $validPngDataUri = null;
+        $hasSavedPng = false;
 
-        $activeFileName = $svgFileName;
-
-        // If client submitted high-res PNG canvas snapshot, save PNG for universal compatibility
+        // If client submitted high-res PNG canvas snapshot, validate and save PNG for universal compatibility.
         if ($pngBase64 !== null && str_starts_with($pngBase64, 'data:image/png;base64,')) {
             $rawBase64 = substr($pngBase64, strlen('data:image/png;base64,'));
             $decoded = base64_decode($rawBase64, true);
             if ($decoded !== false && strlen($decoded) > 100 && strlen($decoded) < 5 * 1024 * 1024) {
-                // Verify PNG header
                 if (substr($decoded, 0, 8) === "\x89PNG\r\n\x1a\n") {
                     file_put_contents($profileDir . $pngFileName, $decoded);
                     if (is_dir($publicProfileDir)) {
                         @file_put_contents($publicProfileDir . $pngFileName, $decoded);
                     }
-                    $activeFileName = $pngFileName;
+                    $validPngDataUri = 'data:image/png;base64,' . base64_encode($decoded);
+                    $hasSavedPng = true;
                 }
             }
         }
+
+        // Render clean server-side SVG (either Living Photo SVG wrapping the real portrait or procedural 3D SVG)
+        if ($mode === 'living_photo' && $validPngDataUri !== null) {
+            $svgContent = $this->buildLivingPhotoSvg($validPngDataUri, $traits, $sampleRgb, $choreography, 384, $animated);
+        } else {
+            $svgContent = $this->renderProceduralAvatar($traits, 384, $animated, true);
+        }
+
+        file_put_contents($profileDir . $svgFileName, $svgContent);
+        if (is_dir($publicProfileDir)) {
+            @file_put_contents($publicProfileDir . $svgFileName, $svgContent);
+        }
+
+        $activeFileName = ($animated || !$hasSavedPng) ? $svgFileName : $pngFileName;
 
         // Persist to database using strictly parameterized queries
         $db = Db::connect2();
@@ -485,7 +760,89 @@ class AtgEmojiService
             'success'  => true,
             'filename' => $activeFileName,
             'url'      => '/resources/images/profile/' . $activeFileName,
+            'png_url'  => '/resources/images/profile/' . ($hasSavedPng ? $pngFileName : $activeFileName),
         ];
+    }
+
+    /**
+     * Build a self-contained Living Photo SVG that embeds the user's real portrait
+     * (`data:image/png;base64,...`) and animates breathing, eyelid blinking,
+     * smiling cheek-lift, and optional dance/wink choreography anywhere `<img>` is rendered.
+     *
+     * @param array<string, string> $traits
+     * @param array<int, int> $sampleRgb
+     */
+    private function buildLivingPhotoSvg(
+        string $pngDataUri,
+        array $traits,
+        array $sampleRgb,
+        string $choreography = 'smile',
+        int $size = 384,
+        bool $animated = true
+    ): string {
+        $r = max(0, min(255, (int)($sampleRgb[0] ?? 138)));
+        $g = max(0, min(255, (int)($sampleRgb[1] ?? 84)));
+        $b = max(0, min(255, (int)($sampleRgb[2] ?? 52)));
+        $skinFill = sprintf('rgb(%d,%d,%d)', $r, $g, $b);
+
+        $pairs = [];
+        foreach ($traits as $tk => $tv) {
+            $pairs[] = $tk . ':' . $tv;
+        }
+        $traitAttr = htmlspecialchars(implode(';', $pairs), ENT_QUOTES, 'UTF-8');
+        $safeChoreo = in_array($choreography, ['smile', 'dance', 'wink', 'laugh', 'love', 'idle'], true)
+            ? $choreography
+            : 'smile';
+
+        $stageAnim = match ($safeChoreo) {
+            'dance' => 'atgLpDance 1.8s ease-in-out infinite',
+            'laugh' => 'atgLpLaugh 1.6s ease-in-out infinite',
+            'wink'  => 'atgLpSway 3.4s ease-in-out infinite',
+            default => 'atgLpBreathe 4.0s ease-in-out infinite',
+        };
+
+        $style = '';
+        if ($animated) {
+            $style = '<style>@media (prefers-reduced-motion:no-preference){'
+                . '.atg-lp-stage{transform-origin:192px 210px;animation:' . $stageAnim . '}'
+                . '.atg-lp-smile{transform-origin:192px 235px;animation:atgLpSmileLift 3.6s ease-in-out infinite}'
+                . '.atg-lp-lid-l{transform-origin:160px 164px;animation:atgLpBlink 4.4s ease-in-out infinite}'
+                . '.atg-lp-lid-r{transform-origin:224px 164px;animation:' . ($safeChoreo === 'wink' ? 'atgLpWink 3.4s ease-in-out infinite' : 'atgLpBlink 4.4s ease-in-out infinite') . '}'
+                . '.atg-lp-glint{animation:atgLpGlint 2.8s ease-in-out infinite}'
+                . '@keyframes atgLpBreathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-4px) scale(1.018)}}'
+                . '@keyframes atgLpDance{0%,100%{transform:translate(0,0) rotate(-2.5deg) scale(1.02)}25%{transform:translate(4px,-6px) rotate(2.5deg) scale(1.035)}50%{transform:translate(0,-2px) rotate(-2deg) scale(1.02)}75%{transform:translate(-4px,-6px) rotate(2.5deg) scale(1.035)}}'
+                . '@keyframes atgLpLaugh{0%,100%{transform:translateY(0) scale(1.02)}20%{transform:translateY(-5px) scale(1.03)}40%{transform:translateY(0) scale(1.02)}60%{transform:translateY(-4px) scale(1.03)}}'
+                . '@keyframes atgLpSway{0%,100%{transform:rotate(-1.8deg) translateY(0)}50%{transform:rotate(2.2deg) translateY(-3px)}}'
+                . '@keyframes atgLpSmileLift{0%,100%{transform:translateY(0) scaleX(1)}50%{transform:translateY(-4.5px) scaleX(1.028)}}'
+                . '@keyframes atgLpBlink{0%,92%,100%{transform:scaleY(0.01);opacity:0}95%,97%{transform:scaleY(1);opacity:0.92}}'
+                . '@keyframes atgLpWink{0%,70%,100%{transform:scaleY(0.01);opacity:0}78%,88%{transform:scaleY(1);opacity:0.95}}'
+                . '@keyframes atgLpGlint{0%,100%{opacity:0.45}50%{opacity:0.95}}'
+                . '}</style>';
+        }
+
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" width="' . $size . '" height="' . $size . '" '
+            . 'class="atg-avatar-svg atg-living-photo-svg" data-atg-living-photo="1" data-atg-choreography="' . $safeChoreo . '" data-atg-traits="' . $traitAttr . '">'
+            . $style
+            . '<defs>'
+            . '<clipPath id="atgLpFrame"><rect x="0" y="0" width="384" height="384" rx="48"/></clipPath>'
+            . '<clipPath id="atgLpSmileZone"><ellipse cx="192" cy="236" rx="86" ry="42"/></clipPath>'
+            . '</defs>'
+            . '<g clip-path="url(#atgLpFrame)">'
+            . '<rect width="384" height="384" fill="#1e1b18"/>'
+            . '<g class="atg-lp-stage">'
+            . '<image href="' . $pngDataUri . '" x="-8" y="-8" width="400" height="400" preserveAspectRatio="xMidYMid slice"/>'
+            . '<g class="atg-lp-smile" clip-path="url(#atgLpSmileZone)">'
+            . '<image href="' . $pngDataUri . '" x="-8" y="-8" width="400" height="400" preserveAspectRatio="xMidYMid slice"/>'
+            . '<ellipse cx="136" cy="216" rx="22" ry="11" fill="#fb7185" opacity="0.16"/>'
+            . '<ellipse cx="248" cy="216" rx="22" ry="11" fill="#fb7185" opacity="0.16"/>'
+            . '</g>'
+            . '<ellipse class="atg-lp-lid-l" cx="160" cy="164" rx="18" ry="9" fill="' . $skinFill . '" opacity="0"/>'
+            . '<ellipse class="atg-lp-lid-r" cx="224" cy="164" rx="18" ry="9" fill="' . $skinFill . '" opacity="0"/>'
+            . '<circle class="atg-lp-glint" cx="163" cy="161" r="2.4" fill="#ffffff" opacity="0.75"/>'
+            . '<circle class="atg-lp-glint" cx="227" cy="161" r="2.4" fill="#ffffff" opacity="0.75"/>'
+            . '</g>'
+            . '</g>'
+            . '</svg>';
     }
 
     /* -------------------------------------------------------------------------
@@ -596,26 +953,32 @@ class AtgEmojiService
             . '</svg>';
     }
 
-    private function buildHugSvg(int $size): string
+    private function buildHugSvg(int $size, ?string $tone = null): string
     {
+        $t1 = self::EMOJI_TONES[$tone ?? 'medium_dark'];
+        $t2 = self::EMOJI_TONES[$tone ?? 'light'];
         return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="' . $size . '" height="' . $size . '" class="atg-3d-emoji">'
             . '<defs>'
-            . '<radialGradient id="fh_p1" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#fffbeb"/><stop offset="35%" stop-color="#fde047"/><stop offset="75%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#b45309"/></radialGradient>'
-            . '<radialGradient id="fh_p2" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#ffedd5"/><stop offset="40%" stop-color="#fb923c"/><stop offset="80%" stop-color="#ea580c"/><stop offset="100%" stop-color="#9a3412"/></radialGradient>'
+            . '<radialGradient id="fh_s1" cx="35%" cy="30%" r="70%"><stop offset="0%" stop-color="' . $t1['highlight'] . '"/><stop offset="60%" stop-color="' . $t1['base'] . '"/><stop offset="100%" stop-color="' . $t1['shadow'] . '"/></radialGradient>'
+            . '<radialGradient id="fh_s2" cx="35%" cy="30%" r="70%"><stop offset="0%" stop-color="' . $t2['highlight'] . '"/><stop offset="60%" stop-color="' . $t2['base'] . '"/><stop offset="100%" stop-color="' . $t2['shadow'] . '"/></radialGradient>'
+            . '<linearGradient id="fh_p1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fcd34d"/><stop offset="100%" stop-color="#d97706"/></linearGradient>'
+            . '<linearGradient id="fh_p2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fb923c"/><stop offset="100%" stop-color="#c2410c"/></linearGradient>'
             . '<radialGradient id="fh_hrt" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#ffe4e6"/><stop offset="40%" stop-color="#f43f5e"/><stop offset="100%" stop-color="#be123c"/></radialGradient>'
             . '<filter id="fh_hug_sh"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#f43f5e" flood-opacity="0.3"/></filter>'
             . '</defs>'
             . '<g filter="url(#fh_hug_sh)">'
-            . '<path d="M 60 14 C 60 14 50 4 41 9 C 32 15 36 27 60 40 C 84 27 88 15 79 9 C 70 4 60 14 60 14 Z" fill="url(#fh_hrt)"/>'
-            . '<ellipse cx="48" cy="14" rx="4" ry="2" fill="#ffffff" fill-opacity="0.7"/>'
-            . '<circle cx="44" cy="52" r="16" fill="url(#fh_p1)"/>'
-            . '<circle cx="40" cy="46" r="4" fill="#ffffff" fill-opacity="0.6"/>'
-            . '<path d="M 22 98 C 22 72 44 68 56 74 C 66 79 68 98 68 98 Z" fill="url(#fh_p1)"/>'
-            . '<circle cx="76" cy="52" r="16" fill="url(#fh_p2)"/>'
-            . '<circle cx="72" cy="46" r="4" fill="#ffffff" fill-opacity="0.6"/>'
-            . '<path d="M 52 98 C 52 74 74 68 86 74 C 98 79 98 98 98 98 Z" fill="url(#fh_p2)"/>'
-            . '<path d="M 34 76 Q 60 92 86 76" stroke="url(#fh_p1)" stroke-width="8" stroke-linecap="round" fill="none"/>'
-            . '<path d="M 34 76 Q 60 92 86 76" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.4"/>'
+            . '<path d="M 60 24 C 60 24 52 15 44 19 C 36 24 40 34 60 44 C 80 34 84 24 76 19 C 68 15 60 24 60 24 Z" fill="url(#fh_hrt)"/>'
+            . '<ellipse cx="49" cy="23" rx="3.5" ry="1.8" fill="#ffffff" fill-opacity="0.7"/>'
+            . '<path d="M 18 108 C 18 82 34 74 48 76 C 60 78 66 92 66 108 Z" fill="url(#fh_p1)"/>'
+            . '<path d="M 54 108 C 54 92 60 78 72 76 C 86 74 102 82 102 108 Z" fill="url(#fh_p2)"/>'
+            . '<circle cx="44" cy="58" r="15" fill="url(#fh_s1)"/>'
+            . '<path d="M 29 56 C 28 40 60 38 59 54 C 52 46 38 46 29 56 Z" fill="#1c1410"/>'
+            . '<circle cx="76" cy="58" r="15" fill="url(#fh_s2)"/>'
+            . '<path d="M 61 60 C 58 38 94 38 91 60 C 88 50 80 46 76 46 C 70 46 64 50 61 60 Z" fill="#7c3a1d"/>'
+            . '<path d="M 38 60 Q 41 63 44 60 M 70 60 Q 73 63 76 60" stroke="#1c1917" stroke-width="1.6" stroke-linecap="round" fill="none"/>'
+            . '<path d="M 40 66 Q 44 69 48 66 M 72 66 Q 76 69 80 66" stroke="#9f1239" stroke-width="1.6" stroke-linecap="round" fill="none"/>'
+            . '<path d="M 30 84 Q 60 100 90 84" stroke="url(#fh_s1)" stroke-width="8" stroke-linecap="round" fill="none"/>'
+            . '<path d="M 30 84 Q 60 100 90 84" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.3"/>'
             . '</g>'
             . '</svg>';
     }
@@ -674,12 +1037,16 @@ class AtgEmojiService
             . '</svg>';
     }
 
-    private function buildBlessingSvg(int $size): string
+    private function buildBlessingSvg(int $size, ?string $tone = null): string
     {
+        $tn = $tone !== null ? self::EMOJI_TONES[$tone] : null;
+        $skinGrad = $tn !== null
+            ? '<stop offset="0%" stop-color="' . $tn['highlight'] . '"/><stop offset="55%" stop-color="' . $tn['base'] . '"/><stop offset="100%" stop-color="' . $tn['shadow'] . '"/>'
+            : '<stop offset="0%" stop-color="#ffedd5"/><stop offset="40%" stop-color="#fed7aa"/><stop offset="80%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#b45309"/>';
         return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="' . $size . '" height="' . $size . '" class="atg-3d-emoji">'
             . '<defs>'
             . '<radialGradient id="bl_sun" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#ffffff"/><stop offset="30%" stop-color="#fef08a"/><stop offset="70%" stop-color="#facc15"/><stop offset="100%" stop-color="#f59e0b"/></radialGradient>'
-            . '<linearGradient id="bl_skin" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffedd5"/><stop offset="40%" stop-color="#fed7aa"/><stop offset="80%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#b45309"/></linearGradient>'
+            . '<linearGradient id="bl_skin" x1="0" y1="0" x2="1" y2="1">' . $skinGrad . '</linearGradient>'
             . '<filter id="bl_sh"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#f59e0b" flood-opacity="0.35"/></filter>'
             . '</defs>'
             . '<g filter="url(#bl_sh)">'
@@ -937,134 +1304,95 @@ class AtgEmojiService
             . '</svg>';
     }
 
-    private function renderHairstyleSvg(string $hairKey, string $color, string $uid): string
+    /**
+     * @return array{label:string, base:string, highlight:string, shadow:string}
+     */
+    private function emojiTone(?string $tone): array
     {
-        switch ($hairKey) {
-            case 'afro_crown':
-                return '<circle cx="128" cy="94" r="62" fill="' . htmlspecialchars($color) . '"/>'
-                    . '<circle cx="92" cy="84" r="28" fill="' . htmlspecialchars($color) . '"/>'
-                    . '<circle cx="164" cy="84" r="28" fill="' . htmlspecialchars($color) . '"/>'
-                    . '<circle cx="128" cy="66" r="30" fill="' . htmlspecialchars($color) . '"/>'
-                    . '<circle cx="118" cy="60" r="14" fill="#ffffff" fill-opacity="0.12"/>';
-            case 'braided_crown':
-                return '<path d="M 68 116 Q 128 54 188 116 Q 128 74 68 116 Z" fill="' . htmlspecialchars($color) . '"/>'
-                    . '<circle cx="96" cy="84" r="4" fill="#eab308"/>'
-                    . '<circle cx="128" cy="78" r="4" fill="#eab308"/>'
-                    . '<circle cx="160" cy="84" r="4" fill="#eab308"/>';
-            case 'regal_locs':
-                return '<path d="M 70 106 Q 128 58 186 106 Q 128 72 70 106 Z" fill="' . htmlspecialchars($color) . '"/>'
-                    . '<path d="M 68 110 L 62 170" stroke="' . htmlspecialchars($color) . '" stroke-width="12" stroke-linecap="round"/>'
-                    . '<path d="M 80 110 L 76 182" stroke="' . htmlspecialchars($color) . '" stroke-width="10" stroke-linecap="round"/>'
-                    . '<path d="M 176 110 L 180 182" stroke="' . htmlspecialchars($color) . '" stroke-width="10" stroke-linecap="round"/>'
-                    . '<path d="M 188 110 L 194 170" stroke="' . htmlspecialchars($color) . '" stroke-width="12" stroke-linecap="round"/>'
-                    . '<circle cx="76" cy="150" r="4" fill="#b45309"/>'
-                    . '<circle cx="180" cy="150" r="4" fill="#b45309"/>';
-            case 'traditional_gele':
-                return '<path d="M 52 108 Q 128 32 204 108 L 194 92 Q 128 20 62 92 Z" fill="#b8860b"/>'
-                    . '<path d="M 46 96 Q 128 28 210 96 L 202 82 Q 128 14 54 82 Z" fill="#d97706"/>'
-                    . '<path d="M 40 84 Q 128 18 216 84 L 208 72 Q 128 8 48 72 Z" fill="#f59e0b"/>'
-                    . '<circle cx="128" cy="46" r="6" fill="#ef4444"/>';
-            case 'bantu_knots':
-                return '<circle cx="128" cy="72" r="14" fill="' . htmlspecialchars($color) . '"/>'
-                    . '<circle cx="94" cy="82" r="12" fill="' . htmlspecialchars($color) . '"/>'
-                    . '<circle cx="162" cy="82" r="12" fill="' . htmlspecialchars($color) . '"/>'
-                    . '<circle cx="74" cy="106" r="10" fill="' . htmlspecialchars($color) . '"/>'
-                    . '<circle cx="182" cy="106" r="10" fill="' . htmlspecialchars($color) . '"/>';
-            case 'high_fade':
-                return '<path d="M 76 114 Q 128 66 180 114 Q 128 84 76 114 Z" fill="' . htmlspecialchars($color) . '"/>'
-                    . '<rect x="94" y="68" width="68" height="24" rx="10" fill="' . htmlspecialchars($color) . '"/>';
-            case 'curled_top':
-                return '<circle cx="128" cy="80" r="42" fill="' . htmlspecialchars($color) . '"/>'
-                    . '<circle cx="112" cy="76" r="16" fill="#292524"/>'
-                    . '<circle cx="144" cy="76" r="16" fill="#292524"/>';
-            case 'sleek_bun':
-                return '<path d="M 76 116 Q 128 72 180 116 Z" fill="' . htmlspecialchars($color) . '"/>'
-                    . '<circle cx="128" cy="56" r="22" fill="' . htmlspecialchars($color) . '"/>'
-                    . '<path d="M 112 50 L 144 62" stroke="#eab308" stroke-width="3" stroke-linecap="round"/>';
-            case 'regal_bald':
-            default:
-                // Luminous smooth highlight on bald crown
-                return '<ellipse cx="120" cy="94" rx="28" ry="14" fill="#ffffff" fill-opacity="0.22"/>';
-        }
+        return $tone !== null && isset(self::EMOJI_TONES[$tone])
+            ? self::EMOJI_TONES[$tone]
+            : ['label' => 'Classic', 'base' => '#fbbf24', 'highlight' => '#fde68a', 'shadow' => '#d97706'];
     }
 
-    private function renderFaceFeaturesSvg(string $exprKey, array $skin, string $uid): string
+    private function buildWaveSvg(int $size, ?string $tone = null): string
     {
-        $svg = '';
-
-        // Eyebrows
-        $svg .= '<path d="M 94 104 Q 106 100 116 104" stroke="' . htmlspecialchars($skin['shadow']) . '" stroke-width="3.5" stroke-linecap="round" fill="none"/>';
-        $svg .= '<path d="M 140 104 Q 150 100 162 104" stroke="' . htmlspecialchars($skin['shadow']) . '" stroke-width="3.5" stroke-linecap="round" fill="none"/>';
-
-        // Eyes
-        if ($exprKey === 'radiant_joy') {
-            // Closed joyful curve eyes
-            $svg .= '<path d="M 96 116 Q 106 124 116 116" stroke="#1c1917" stroke-width="3.5" stroke-linecap="round" fill="none"/>';
-            $svg .= '<path d="M 140 116 Q 150 124 160 116" stroke="#1c1917" stroke-width="3.5" stroke-linecap="round" fill="none"/>';
-        } else {
-            // Open 3D eyes
-            $svg .= '<ellipse cx="106" cy="116" rx="9" ry="7" fill="#ffffff"/>';
-            $svg .= '<circle cx="106" cy="116" r="5" fill="#3f2314"/>';
-            $svg .= '<circle cx="108" cy="114" r="2" fill="#ffffff"/>';
-
-            $svg .= '<ellipse cx="150" cy="116" rx="9" ry="7" fill="#ffffff"/>';
-            $svg .= '<circle cx="150" cy="116" r="5" fill="#3f2314"/>';
-            $svg .= '<circle cx="152" cy="114" r="2" fill="#ffffff"/>';
-        }
-
-        // Nose with 3D bridge shadow
-        $svg .= '<path d="M 128 114 Q 128 132 122 134 Q 128 136 134 134" stroke="' . htmlspecialchars($skin['shadow']) . '" stroke-width="3" stroke-linecap="round" fill="none"/>';
-
-        // Cheeks flush
-        $svg .= '<circle cx="92" cy="130" r="10" fill="#f43f5e" fill-opacity="0.18"/>';
-        $svg .= '<circle cx="164" cy="130" r="10" fill="#f43f5e" fill-opacity="0.18"/>';
-
-        // Mouth based on expression
-        switch ($exprKey) {
-            case 'proud_grin':
-                $svg .= '<path d="M 106 144 Q 128 166 150 144 Z" fill="#ffffff"/>';
-                $svg .= '<path d="M 104 144 Q 128 168 152 144" stroke="' . htmlspecialchars($skin['shadow']) . '" stroke-width="3" fill="none"/>';
-                break;
-            case 'wise_calm':
-                $svg .= '<path d="M 112 148 Q 128 154 144 148" stroke="' . htmlspecialchars($skin['shadow']) . '" stroke-width="3.5" stroke-linecap="round" fill="none"/>';
-                break;
-            case 'radiant_joy':
-                $svg .= '<path d="M 104 142 Q 128 172 152 142 Z" fill="#991b1b"/>';
-                $svg .= '<path d="M 108 144 Q 128 156 148 144 Z" fill="#ffffff"/>';
-                break;
-            case 'warm_smile':
-            default:
-                $svg .= '<path d="M 108 146 Q 128 162 148 146" stroke="' . htmlspecialchars($skin['shadow']) . '" stroke-width="3.5" stroke-linecap="round" fill="none"/>';
-                break;
-        }
-
-        return $svg;
+        $t = $this->emojiTone($tone);
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="' . $size . '" height="' . $size . '" class="atg-3d-emoji">'
+            . '<defs>'
+            . '<linearGradient id="wv_skin" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="' . $t['highlight'] . '"/><stop offset="55%" stop-color="' . $t['base'] . '"/><stop offset="100%" stop-color="' . $t['shadow'] . '"/></linearGradient>'
+            . '<linearGradient id="wv_cuff" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#60a5fa"/><stop offset="100%" stop-color="#1d4ed8"/></linearGradient>'
+            . '<filter id="wv_sh"><feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#000" flood-opacity="0.25"/></filter>'
+            . '</defs>'
+            . '<g filter="url(#wv_sh)" transform="rotate(-12 60 70)">'
+            . '<rect x="48" y="96" width="30" height="20" rx="4" fill="url(#wv_cuff)"/>'
+            . '<rect x="40" y="26" width="12" height="44" rx="6" fill="url(#wv_skin)" stroke="' . $t['shadow'] . '" stroke-width="0.8"/>'
+            . '<rect x="53" y="18" width="12" height="52" rx="6" fill="url(#wv_skin)" stroke="' . $t['shadow'] . '" stroke-width="0.8"/>'
+            . '<rect x="66" y="22" width="12" height="48" rx="6" fill="url(#wv_skin)" stroke="' . $t['shadow'] . '" stroke-width="0.8"/>'
+            . '<rect x="79" y="32" width="11" height="40" rx="5.5" fill="url(#wv_skin)" stroke="' . $t['shadow'] . '" stroke-width="0.8"/>'
+            . '<rect x="40" y="52" width="50" height="50" rx="20" fill="url(#wv_skin)"/>'
+            . '<ellipse cx="34" cy="78" rx="8" ry="19" transform="rotate(-38 34 78)" fill="url(#wv_skin)" stroke="' . $t['shadow'] . '" stroke-width="0.8"/>'
+            . '<path d="M 50 80 Q 64 88 80 78" stroke="' . $t['shadow'] . '" stroke-width="1.6" fill="none" opacity="0.6"/>'
+            . '<ellipse cx="58" cy="24" rx="3" ry="5" fill="#ffffff" opacity="0.45"/>'
+            . '<ellipse cx="46" cy="32" rx="2.4" ry="4" fill="#ffffff" opacity="0.4"/>'
+            . '</g>'
+            . '<path d="M 96 22 Q 104 30 100 42 M 104 14 Q 116 28 110 46" stroke="#f59e0b" stroke-width="3.2" stroke-linecap="round" fill="none"/>'
+            . '<path d="M 18 34 Q 12 44 16 54" stroke="#f59e0b" stroke-width="3.2" stroke-linecap="round" fill="none"/>'
+            . '</svg>';
     }
 
-    private function renderAccessorySvg(string $accKey, string $uid): string
+    private function buildHeartHandsSvg(int $size, ?string $tone = null): string
     {
-        switch ($accKey) {
-            case 'ancestor_crown':
-                return '<path d="M 98 72 L 96 46 L 112 60 L 128 36 L 144 60 L 160 46 L 158 72 Z" fill="#eab308"/>'
-                    . '<circle cx="128" cy="38" r="4" fill="#a855f7"/>'
-                    . '<circle cx="96" cy="48" r="3" fill="#ef4444"/>'
-                    . '<circle cx="160" cy="48" r="3" fill="#3b82f6"/>';
-            case 'heritage_coral_beads':
-                return '<path d="M 94 184 Q 128 206 162 184" stroke="#dc2626" stroke-width="8" stroke-linecap="round" stroke-dasharray="1 11" fill="none"/>'
-                    . '<circle cx="128" cy="198" r="6" fill="#eab308"/>';
-            case 'gold_spectacles':
-                return '<circle cx="106" cy="116" r="14" fill="none" stroke="#eab308" stroke-width="2.5"/>'
-                    . '<circle cx="150" cy="116" r="14" fill="none" stroke="#eab308" stroke-width="2.5"/>'
-                    . '<line x1="120" y1="116" x2="136" y2="116" stroke="#eab308" stroke-width="2.5"/>'
-                    . '<path d="M 92 116 L 76 114 M 164 116 L 180 114" stroke="#eab308" stroke-width="2"/>';
-            case 'laurel_wreath':
-                return '<path d="M 72 108 Q 98 64 128 66" stroke="#eab308" stroke-width="3" fill="none"/>'
-                    . '<ellipse cx="88" cy="84" rx="6" ry="3" fill="#eab308" transform="rotate(-30 88 84)"/>'
-                    . '<ellipse cx="104" cy="74" rx="6" ry="3" fill="#eab308" transform="rotate(-15 104 74)"/>'
-                    . '<ellipse cx="120" cy="68" rx="6" ry="3" fill="#eab308"/>';
-            case 'none':
-            default:
-                return '';
-        }
+        $t = $this->emojiTone($tone);
+        $palm = function (int $dir) use ($t): string {
+            $tr = $dir === 1 ? '' : ' transform="translate(120 0) scale(-1 1)"';
+            return '<g' . $tr . '>'
+                . '<path d="M 14 70 C 10 88 22 106 44 106 L 58 106 L 58 92 C 46 92 36 86 32 74 Z" fill="url(#hh_skin)"/>'
+                . '<path d="M 32 74 C 34 66 30 58 24 58 C 18 58 14 64 14 70" fill="url(#hh_skin)"/>'
+                . '<path d="M 22 84 Q 36 92 52 92 M 20 94 Q 34 101 52 100" stroke="' . $t['shadow'] . '" stroke-width="1.4" fill="none" opacity="0.7"/>'
+                . '<ellipse cx="22" cy="64" rx="3" ry="4" fill="#ffffff" opacity="0.35"/>'
+                . '</g>';
+        };
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="' . $size . '" height="' . $size . '" class="atg-3d-emoji">'
+            . '<defs>'
+            . '<linearGradient id="hh_skin" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="' . $t['highlight'] . '"/><stop offset="55%" stop-color="' . $t['base'] . '"/><stop offset="100%" stop-color="' . $t['shadow'] . '"/></linearGradient>'
+            . '<radialGradient id="hh_heart" cx="35%" cy="30%" r="70%"><stop offset="0%" stop-color="#ffe4e6"/><stop offset="40%" stop-color="#f43f5e"/><stop offset="100%" stop-color="#9f1239"/></radialGradient>'
+            . '<filter id="hh_sh"><feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#be123c" flood-opacity="0.3"/></filter>'
+            . '</defs>'
+            . '<g filter="url(#hh_sh)">'
+            . '<path d="M 60 34 C 60 34 48 18 34 24 C 20 30 22 50 60 82 C 98 50 100 30 86 24 C 72 18 60 34 60 34 Z" fill="url(#hh_heart)"/>'
+            . '<ellipse cx="40" cy="32" rx="7" ry="4" fill="#ffffff" opacity="0.6" transform="rotate(-25 40 32)"/>'
+            . $palm(1) . $palm(-1)
+            . '<polygon points="96,14 98,19 103,20 98,21 96,26 94,21 89,20 94,19" fill="#fde047"/>'
+            . '<polygon points="22,12 23.5,15.5 27,16 23.5,17 22,20 20.5,17 17,16 20.5,15.5" fill="#fde047"/>'
+            . '</g>'
+            . '</svg>';
+    }
+
+    private function buildBlendedFamilySvg(int $size): string
+    {
+        $face = function (string $id, float $cx, float $cy, float $r, string $tone, string $hair, string $hairPath): string {
+            $t = self::EMOJI_TONES[$tone];
+            $eY = $cy - $r * 0.05;
+            $eX = $r * 0.36;
+            return '<radialGradient id="' . $id . '" cx="35%" cy="30%" r="70%"><stop offset="0%" stop-color="' . $t['highlight'] . '"/><stop offset="60%" stop-color="' . $t['base'] . '"/><stop offset="100%" stop-color="' . $t['shadow'] . '"/></radialGradient>'
+                . '<circle cx="' . $cx . '" cy="' . $cy . '" r="' . $r . '" fill="url(#' . $id . ')"/>'
+                . '<path d="' . $hairPath . '" fill="' . $hair . '"/>'
+                . '<circle cx="' . ($cx - $eX) . '" cy="' . $eY . '" r="' . ($r * 0.09) . '" fill="#1c1917"/>'
+                . '<circle cx="' . ($cx + $eX) . '" cy="' . $eY . '" r="' . ($r * 0.09) . '" fill="#1c1917"/>'
+                . '<path d="M ' . ($cx - $r * 0.38) . ' ' . ($cy + $r * 0.28) . ' Q ' . $cx . ' ' . ($cy + $r * 0.62) . ' ' . ($cx + $r * 0.38) . ' ' . ($cy + $r * 0.28) . ' Z" fill="#7f1d1d"/>'
+                . '<ellipse cx="' . ($cx - $r * 0.55) . '" cy="' . ($cy + $r * 0.25) . '" rx="' . ($r * 0.16) . '" ry="' . ($r * 0.1) . '" fill="#f43f5e" opacity="0.3"/>'
+                . '<ellipse cx="' . ($cx + $r * 0.55) . '" cy="' . ($cy + $r * 0.25) . '" rx="' . ($r * 0.16) . '" ry="' . ($r * 0.1) . '" fill="#f43f5e" opacity="0.3"/>';
+        };
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="' . $size . '" height="' . $size . '" class="atg-3d-emoji">'
+            . '<defs><filter id="bf_sh"><feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#7c3aed" flood-opacity="0.25"/></filter>'
+            . '<radialGradient id="bf_hrt" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#ffe4e6"/><stop offset="45%" stop-color="#f43f5e"/><stop offset="100%" stop-color="#be123c"/></radialGradient></defs>'
+            . '<g filter="url(#bf_sh)">'
+            . '<path d="M 60 16 C 60 16 54 8 48 11 C 42 14 44 21 60 30 C 76 21 78 14 72 11 C 66 8 60 16 60 16 Z" fill="url(#bf_hrt)"/>'
+            . $face('bf_a', 30, 62, 17, 'light', '#e6c27a', 'M 13 62 C 12 40 48 38 47 60 C 44 50 36 46 30 47 C 22 48 15 54 13 62 Z')
+            . $face('bf_c', 90, 62, 17, 'medium_light', '#111827', 'M 73 64 C 70 42 110 40 107 64 L 106 56 L 74 56 Z')
+            . $face('bf_b', 60, 54, 20, 'dark', '#d4d4d8', 'M 40 52 C 36 26 84 26 80 52 C 86 40 74 28 60 30 C 46 28 34 40 40 52 Z')
+            . $face('bf_d', 60, 92, 15, 'medium', '#3f2a1d', 'M 45 90 C 44 72 76 72 75 90 C 74 82 68 78 60 78 C 52 78 46 82 45 90 Z')
+            . '</g>'
+            . '</svg>';
     }
 }
