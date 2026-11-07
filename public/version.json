@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(media): link-first nudge for large video uploads and production bundle build",
+    "title": "Test(cypress): update composer tools count assertion for unified emoji button",
     "notes": [
-        "Feat(media): link-first nudge for large video uploads and production bundle build",
-        "Test(cypress): target enabled submit button in alpine real life verification",
-        "Feat(social): Facebook-benchmark suggested kin carousel, always-on reels tray, living heirloom studio, and flashback bridge"
+        "Test(cypress): update composer tools count assertion for unified emoji button",
+        "Feat(core): adjustable profile covers, 3D AR emoji avatar engine, and tree studio parity",
+        "Feat(media): link-first nudge for large video uploads and production bundle build"
     ],
-    "released_at": "2026-11-06",
-    "commit": "48312004"
+    "released_at": "2026-11-07",
+    "commit": "512f0a8e"
 }
