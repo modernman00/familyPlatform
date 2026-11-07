@@ -1180,10 +1180,13 @@ export function profileFeed(opts = {}) {
             }
             if (!message) return '';
             let safeText = this.escapeHtml(message);
+            // A caption made only of living emojis renders them sticker-sized so they stand out.
+            const emojiOnly = /:[a-z0-9_]+_3d:/i.test(message) && message.replace(/:[a-z0-9_]+_3d:/gi, '').trim() === '';
+            const liveEmojiClass = emojiOnly ? 'atg-emoji-container atg-live-emoji atg-live-emoji--jumbo' : 'atg-emoji-container atg-live-emoji';
 
             // Render 3D family emojis (:family_roots_3d:, :family_crest_3d:, etc.)
             safeText = safeText.replace(/:(family_[a-z0-9_]+_3d|ancestor_[a-z0-9_]+_3d|memory_capsule_3d|kinship_pride_3d|wisdom_scroll_3d|generations_link_3d|family_toast_3d|baby_cradle_3d|wedding_vows_3d|laugh_tears_3d|star_struck_3d|family_house_3d):/gi, (match, emojiId) => {
-                return `<span class="atg-emoji-container atg-live-emoji" role="button" tabindex="0" onclick="event.stopPropagation(); window.AtgEmojiEngine && window.AtgEmojiEngine.openArViewer('${emojiId}')"><img src="/public/img/emoji/${emojiId}.svg?v=20261104a" onerror="this.src='/img/emoji/${emojiId}.svg?v=20261104a'" class="atg-3d-emoji" loading="lazy" width="26" height="26" alt="${emojiId}" title="Tap to view in 3D / AR"></span>`;
+                return `<span class="${liveEmojiClass}" role="button" tabindex="0" onclick="event.stopPropagation(); window.AtgEmojiEngine && window.AtgEmojiEngine.openArViewer('${emojiId}')"><img src="/public/img/emoji/${emojiId}.svg?v=20261107a" onerror="this.src='/img/emoji/${emojiId}.svg?v=20261107a'" class="atg-3d-emoji" loading="lazy" width="26" height="26" alt="${emojiId}" title="Tap to view in 3D / AR"></span>`;
             });
 
             // Linkify URLs into secure clickable links

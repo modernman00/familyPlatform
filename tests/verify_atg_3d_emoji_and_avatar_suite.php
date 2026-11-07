@@ -39,7 +39,7 @@ $expectedEmojiIds = [
     'family_hug_3d', 'memory_capsule_3d', 'ancestor_crown_3d', 'ancestor_blessing_3d',
     'kinship_pride_3d', 'family_celebrate_3d', 'wisdom_scroll_3d', 'generations_link_3d',
     'family_toast_3d', 'baby_cradle_3d', 'wedding_vows_3d', 'laugh_tears_3d',
-    'star_struck_3d', 'family_house_3d'
+    'star_struck_3d', 'family_house_3d', 'family_point_3d', 'family_clap_3d'
 ];
 
 foreach ($expectedEmojiIds as $emojiId) {

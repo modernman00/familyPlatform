@@ -48,6 +48,8 @@
                     <button type="button" class="atg-react-btn" data-reaction="love" aria-label="Love">❤️</button>
                     <button type="button" class="atg-react-btn" data-reaction="nod" aria-label="Nod yes">🙆</button>
                     <button type="button" class="atg-react-btn" data-reaction="dance" aria-label="Dance">💃</button>
+                    <button type="button" class="atg-react-btn" data-reaction="point" aria-label="Point at you">🫵</button>
+                    <button type="button" class="atg-react-btn" data-reaction="clap" aria-label="Clap">👏</button>
                 </div>
             </div>
 
@@ -85,10 +87,10 @@
             <!-- Navigation Tabs -->
             <div class="atg-tabs" role="tablist">
                 <button type="button" class="atg-tab-btn active" role="tab" data-atg-tab="avatar-tab" onclick="switchAtgTab('avatar-tab', this)">
-                    👤 Avatar Customiser
+                    👤 Avatar
                 </button>
                 <button type="button" class="atg-tab-btn" role="tab" data-atg-tab="photo-avatar-tab" onclick="switchAtgTab('photo-avatar-tab', this)">
-                    📸 Photo-to-Living Avatar
+                    📸 Living Photo
                 </button>
                 <button type="button" class="atg-tab-btn" role="tab" data-atg-tab="catalog-tab" onclick="switchAtgTab('catalog-tab', this)">
                     🛡️ Living Emojis
@@ -229,7 +231,7 @@
                                         <span id="atgParamDenoisingVal">0.38</span>
                                     </div>
                                     <input type="range" id="atgParamDenoising" class="form-range" min="0.20" max="0.75" step="0.01" value="0.38">
-                                    <small class="text-muted d-block" style="font-size: 0.72rem;">Optimal: 0.32–0.42. Higher values (&gt;0.55) risk losing facial identity.</small>
+                                    <small class="text-muted d-block" style="font-size: 0.82rem;">Optimal: 0.32–0.42. Higher values (&gt;0.55) risk losing facial identity.</small>
                                 </div>
 
                                 <div class="mb-2">
@@ -238,7 +240,7 @@
                                         <span id="atgParamCfgVal">6.5</span>
                                     </div>
                                     <input type="range" id="atgParamCfg" class="form-range" min="3.5" max="12.0" step="0.5" value="6.5">
-                                    <small class="text-muted d-block" style="font-size: 0.72rem;">Optimal: 5.5–7.5. Avoid &gt;9.0 to prevent harsh contrast &amp; burnt skin tones.</small>
+                                    <small class="text-muted d-block" style="font-size: 0.82rem;">Optimal: 5.5–7.5. Avoid &gt;9.0 to prevent harsh contrast &amp; burnt skin tones.</small>
                                 </div>
 
                                 <div class="mb-2">
@@ -247,7 +249,7 @@
                                         <span id="atgParamFaceRestoreVal">0.65</span>
                                     </div>
                                     <input type="range" id="atgParamFaceRestore" class="form-range" min="0.30" max="0.95" step="0.05" value="0.65">
-                                    <small class="text-muted d-block" style="font-size: 0.72rem;">Optimal: 0.60–0.75. Preserves natural pores without plastic over-smoothing.</small>
+                                    <small class="text-muted d-block" style="font-size: 0.82rem;">Optimal: 0.60–0.75. Preserves natural pores without plastic over-smoothing.</small>
                                 </div>
 
                                 <div class="row g-2 mt-1">
@@ -342,13 +344,18 @@
                         </button>
                     @endforeach
                 </div>
-                <p class="text-sm text-slate-500 mb-4">
-                    Every emoji is alive. Tap one to copy its shortcode — people emojis copy in your chosen skin tone. Shake your phone for a surprise.
-                </p>
+                <div class="atg-emoji-howto">
+                    <strong>What do living emojis do?</strong>
+                    <ol>
+                        <li>They're animated family emojis — they wave, clap, point, beat and sparkle right inside posts and comments.</li>
+                        <li>Tap one below to copy it, then paste it into a post or comment. Or pick it from <em>✨ 3D Family Emojis</em> in the post composer.</li>
+                        <li>In the feed, anyone can tap it to open it in 3D / AR. Hands and people come in your chosen skin tone.</li>
+                    </ol>
+                </div>
 
                 @foreach ($catalog['categories'] as $categoryName => $emojis)
-                    <div class="mb-6">
-                        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-700 mb-3 border-b pb-1">
+                    <div class="atg-catalog-section">
+                        <h3 class="atg-catalog-heading">
                             {{ $categoryName }}
                         </h3>
                         <div class="atg-catalog-grid">
@@ -359,7 +366,8 @@
                                      data-emoji-title="{{ $emoji['title'] }}"
                                      data-toneable="{{ !empty($emoji['toneable']) ? '1' : '0' }}"
                                      role="button" tabindex="0"
-                                     title="Click to copy :{{ $emoji['id'] }}:">
+                                     aria-label="{{ $emoji['title'] }} — tap to copy"
+                                     title="Tap to copy :{{ $emoji['id'] }}:">
                                     <div class="atg-emoji-container">
                                         {!! $emoji['svg'] !!}
                                     </div>

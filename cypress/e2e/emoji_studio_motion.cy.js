@@ -71,13 +71,41 @@ describe('Living Avatar & Emoji Studio', () => {
 
     it('keeps 44px touch targets and no console errors on mobile', () => {
         cy.viewport(390, 844);
-        cy.get('.atg-react-btn, .atg-section-chip, .atg-trait-pill:visible').each($el => {
+        cy.reload();
+        cy.get('#atgAvatarViewport .atg-avatar-svg').should('exist');
+        cy.get('.atg-react-btn, .atg-tab-btn, .atg-section-chip, .atg-trait-pill:visible').each($el => {
             expect($el[0].getBoundingClientRect().height).to.be.at.least(44);
         });
-        cy.document().then(doc => {
+        const noHorizontalScroll = () => cy.document().then(doc => {
             expect(doc.documentElement.scrollWidth).to.be.at.most(390);
         });
-        cy.screenshot('emoji-studio-mobile', { capture: 'viewport' });
+        noHorizontalScroll();
+        // Cards must sit fully inside the viewport (a clipped parent can hide overflow from scrollWidth).
+        cy.get('.atg-preview-stage, .atg-controls-card').each($el => {
+            expect($el[0].getBoundingClientRect().right).to.be.at.most(390);
+        });
+        cy.get('.atg-react-btn[data-reaction="clap"]').click();
+        cy.get('.atg-avatar-svg').should('have.class', 'atg-react-clap');
+        cy.get('.atg-react-btn[data-reaction="point"]').click();
+        cy.get('.atg-avatar-svg').should('have.class', 'atg-react-point');
+        // Body copy must stay legible on a phone (>= 13px).
+        cy.get('.atg-studio-subtitle, .atg-trait-pill:visible, .atg-motion-toggle small').each($el => {
+            expect(parseFloat(getComputedStyle($el[0]).fontSize)).to.be.at.least(13);
+        });
+        cy.screenshot('emoji-studio-mobile', { capture: 'fullPage' });
+
+        cy.get('.atg-tab-btn[data-atg-tab="photo-avatar-tab"]').click();
+        noHorizontalScroll();
+        cy.get('#photo-avatar-tab').screenshot('emoji-studio-mobile-photo');
+
+        cy.get('.atg-tab-btn[data-atg-tab="catalog-tab"]').click();
+        noHorizontalScroll();
+        cy.get('.atg-emoji-card-meaning').each($el => {
+            expect(parseFloat(getComputedStyle($el[0]).fontSize)).to.be.at.least(13);
+        });
+        cy.get('.atg-emoji-card[data-emoji-base="family_point_3d"] svg .atgm-point').should('exist');
+        cy.get('.atg-emoji-card[data-emoji-base="family_clap_3d"] svg .atgm-clap').should('exist');
+        cy.get('#catalog-tab').screenshot('emoji-studio-mobile-catalog');
         cy.get('@consoleError').should('not.have.been.called');
     });
 
@@ -116,7 +144,7 @@ describe('Living Avatar & Emoji Studio', () => {
         cy.get('.swal2-confirm').click({ force: true });
 
         // 2. Switch to "Photo-to-Living Avatar" tab
-        cy.contains('.atg-tab-btn', 'Photo-to-Living Avatar').click();
+        cy.get('.atg-tab-btn[data-atg-tab="photo-avatar-tab"]').click();
         cy.get('#photo-avatar-tab').should('be.visible');
 
         // 3. Click "Use Profile Photo" (#atgUseCurrentProfilePhotoBtn)

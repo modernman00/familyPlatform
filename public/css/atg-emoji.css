@@ -69,7 +69,7 @@
     font-size: 1.875rem;
     font-weight: 800;
     letter-spacing: -0.025em;
-    color: #0f172a;
+    color: var(--text-color, #0f172a);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -77,8 +77,8 @@
 }
 
 .atg-studio-subtitle {
-    font-size: 0.95rem;
-    color: #475569;
+    font-size: 1rem;
+    color: var(--text-muted-aa, #475569);
     max-width: 600px;
     margin: 8px auto 0;
     line-height: 1.5;
@@ -100,15 +100,20 @@
 
 .atg-studio-grid {
     display: grid;
-    grid-template-columns: 360px 1fr;
+    grid-template-columns: 360px minmax(0, 1fr);
     gap: 28px;
     align-items: start;
 }
 
 @media (max-width: 900px) {
     .atg-studio-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
+}
+
+.atg-preview-stage,
+.atg-controls-card {
+    min-width: 0;
 }
 
 /* -------------------------------------------------------------------------
@@ -233,7 +238,7 @@
     background: transparent;
     border: none;
     padding: 8px 16px;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: #64748b;
     border-radius: 8px;
@@ -254,7 +259,7 @@
 }
 
 .atg-trait-label {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -276,7 +281,7 @@
     border: 2px solid #e2e8f0;
     border-radius: 12px;
     padding: 10px 12px;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: #334155;
     cursor: pointer;
@@ -340,18 +345,18 @@
 }
 
 .atg-emoji-card-title {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: #0f172a;
     margin-top: 10px;
-    white-space: nowrap;
+    line-height: 1.25;
 }
 
 .atg-emoji-card-meaning {
-    font-size: 0.72rem;
-    color: #64748b;
+    font-size: 0.85rem;
+    color: #475569;
     margin-top: 4px;
-    line-height: 1.3;
+    line-height: 1.35;
 }
 
 
@@ -531,7 +536,7 @@
 /* Inline, living 3D emoji inside post captions (sits flush on the text line) */
 .atg-live-emoji {
     display: inline-block;
-    vertical-align: 0.23em;
+    vertical-align: -0.55em;
     margin: 0 0.15em;
     line-height: 1;
     min-width: 26px;
@@ -541,10 +546,29 @@
     transform-origin: 50% 85%;
 }
 .atg-live-emoji .atg-3d-emoji {
-    width: 1.55em;
-    height: 1.55em;
-    vertical-align: top;
-    filter: drop-shadow(0 2px 3px rgba(217, 119, 6, 0.3));
+    width: 2.1em;
+    height: 2.1em;
+    display: block;
+    /* The artwork is bright gold/pastel by design; on a white card it washed
+       out. A hairline dark rim + grounded shadow + a touch more saturation
+       gives it a defined silhouette without changing the art itself. */
+    filter:
+        saturate(1.18) contrast(1.08)
+        drop-shadow(0 0 0.6px rgba(15, 23, 42, 0.75))
+        drop-shadow(0 2px 3px rgba(15, 23, 42, 0.28));
+}
+/* Caption that is only living emoji(s): show them big, like a sticker. */
+.atg-live-emoji--jumbo .atg-3d-emoji {
+    width: 3.4em;
+    height: 3.4em;
+}
+.atg-live-emoji--jumbo {
+    margin: 0.15em 0.2em;
+}
+body.dark-mode .atg-live-emoji .atg-3d-emoji,
+body.dark-theme .atg-live-emoji .atg-3d-emoji,
+[data-bs-theme="dark"] .atg-live-emoji .atg-3d-emoji {
+    filter: saturate(1.1) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55));
 }
 .atg-live-emoji:hover,
 .atg-live-emoji:active,
@@ -600,7 +624,7 @@
 
 #postMessageEditor .atg-live-emoji {
     display: inline-block;
-    vertical-align: 0.23em;
+    vertical-align: -0.55em;
     margin: 0 0.15em;
     line-height: 1;
     cursor: default;
@@ -640,13 +664,13 @@ button.atg-trait-pill {
 }
 
 .atg-stage-hint {
-    font-size: 0.78rem;
+    font-size: 0.875rem;
     color: #64748b;
     margin: -8px 0 12px;
 }
 
 .atg-stage-note {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     color: #64748b;
     margin: 10px 0 0;
 }
@@ -721,15 +745,15 @@ button.atg-trait-pill {
 .atg-motion-toggle strong,
 .atg-living-toggle strong {
     display: block;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
 }
 
 .atg-motion-toggle small,
 .atg-living-toggle small {
     display: block;
-    font-size: 0.72rem;
-    color: #64748b;
-    line-height: 1.3;
+    font-size: 0.82rem;
+    color: #475569;
+    line-height: 1.35;
 }
 
 .atg-motion-toggle:hover {
@@ -808,6 +832,10 @@ button.atg-trait-pill {
 .atg-avatar-svg.atg-react-love .atg-av-react { animation: atgRLove 1.3s ease-in-out; }
 .atg-avatar-svg.atg-react-nod .atg-av-react { animation: atgRNod 1.1s ease-in-out; }
 .atg-avatar-svg.atg-react-dance .atg-av-react { animation: atgRDance 2.1s ease-in-out; }
+.atg-avatar-svg.atg-react-point .atg-av-react { animation: atgRPoint 1.2s cubic-bezier(0.3, 1.5, 0.5, 1); }
+.atg-avatar-svg.atg-react-point .atg-av-brows { transform: translateY(2px); }
+.atg-avatar-svg.atg-react-clap .atg-av-react { animation: atgRClap 1.2s ease-in-out; }
+.atg-avatar-svg.atg-react-clap .atg-av-eye { animation: atgRSquint 1.2s ease-in-out; }
 
 @keyframes atgRHello {
     0%, 100% { transform: rotate(0); }
@@ -848,6 +876,21 @@ button.atg-trait-pill {
     60% { transform: translateY(6px) scaleY(0.98); }
     80% { transform: translateY(0); }
 }
+@keyframes atgRPoint {
+    0%, 100% { transform: scale(1) translateY(0); }
+    25% { transform: scale(1.1) translateY(-4px); }
+    45% { transform: scale(1.06) translateY(-2px) rotate(-2deg); }
+    65% { transform: scale(1.1) translateY(-4px); }
+}
+@keyframes atgRClap {
+    0%, 100% { transform: translateY(0) scale(1); }
+    12% { transform: translateY(-5px) scale(1.03); }
+    24% { transform: translateY(0) scale(1); }
+    36% { transform: translateY(-5px) scale(1.03); }
+    48% { transform: translateY(0) scale(1); }
+    60% { transform: translateY(-5px) scale(1.03); }
+    72% { transform: translateY(0) scale(1); }
+}
 @keyframes atgRDance {
     0%, 100% { transform: rotate(0) translateY(0); }
     12% { transform: rotate(-8deg) translateY(-6px); }
@@ -878,7 +921,7 @@ button.atg-trait-pill {
     background: #ffffff;
     color: #334155;
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 0.92rem;
     font-family: inherit;
     cursor: pointer;
 }
@@ -899,7 +942,7 @@ button.atg-trait-pill {
 }
 
 .atg-tone-label {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -956,6 +999,120 @@ button.atg-trait-pill {
 @media (max-width: 900px) {
     .atg-preview-stage {
         position: static;
+    }
+}
+
+/* "What do living emojis do?" explainer */
+.atg-emoji-howto {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    color: #422006;
+    font-size: 0.95rem;
+    line-height: 1.45;
+}
+
+.atg-emoji-howto strong {
+    display: block;
+    font-size: 1rem;
+    margin-bottom: 6px;
+}
+
+.atg-emoji-howto ol {
+    margin: 0;
+    padding-left: 1.2rem;
+}
+
+.atg-emoji-howto li + li {
+    margin-top: 4px;
+}
+
+.atg-catalog-heading {
+    font-size: 0.95rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #334155;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 6px;
+    margin: 0 0 4px;
+}
+
+.atg-catalog-section {
+    margin-bottom: 28px;
+}
+
+/* Phone layout */
+@media (max-width: 640px) {
+    .atg-studio-wrapper {
+        padding: 16px 12px 96px;
+    }
+    .atg-studio-header {
+        margin-bottom: 16px;
+    }
+    .atg-studio-title {
+        font-size: 1.6rem;
+        line-height: 1.2;
+        flex-wrap: wrap;
+    }
+    .atg-studio-subtitle {
+        font-size: 1rem;
+    }
+    .atg-studio-grid {
+        gap: 16px;
+    }
+    .atg-preview-stage,
+    .atg-controls-card {
+        padding: 16px;
+        border-radius: 16px;
+    }
+    .atg-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        overflow: visible;
+        margin-bottom: 16px;
+    }
+    .atg-tab-btn {
+        white-space: normal;
+        line-height: 1.2;
+        padding: 8px 6px;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+    .atg-btn-primary,
+    .atg-btn-secondary {
+        white-space: normal;
+        text-align: center;
+        width: 100%;
+        font-size: 1rem;
+        min-height: 48px;
+    }
+    .atg-react-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 1.45rem;
+    }
+    .atg-reaction-bar {
+        gap: 8px;
+    }
+    .atg-photo-studio-card .text-sm,
+    .atg-photo-studio-card .small,
+    .atg-photo-studio-card small {
+        font-size: 0.9rem !important;
+    }
+    .atg-photo-studio-card .form-select {
+        font-size: 1rem;
+    }
+    #atgPhotoLivingCanvas {
+        max-width: 100%;
+        height: auto !important;
+        aspect-ratio: 240 / 270;
+    }
+    .atg-emoji-card {
+        padding: 12px 8px;
     }
 }
 

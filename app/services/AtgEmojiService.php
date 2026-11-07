@@ -43,7 +43,7 @@ class AtgEmojiService
     ];
 
     /** Emojis depicting people/hands that accept a skin-tone modifier. */
-    public const TONEABLE_EMOJIS = ['family_wave_3d', 'family_heart_hands_3d', 'ancestor_blessing_3d', 'family_hug_3d'];
+    public const TONEABLE_EMOJIS = ['family_wave_3d', 'family_heart_hands_3d', 'ancestor_blessing_3d', 'family_hug_3d', 'family_point_3d', 'family_clap_3d'];
 
     /** Idle motion loop applied to each emoji (respects prefers-reduced-motion). */
     public const EMOJI_MOTION = [
@@ -68,6 +68,8 @@ class AtgEmojiService
         'family_wave_3d'        => 'wave',
         'family_heart_hands_3d' => 'beat',
         'family_blended_3d'     => 'bounce',
+        'family_point_3d'       => 'point',
+        'family_clap_3d'        => 'clap',
     ];
 
     /**
@@ -231,6 +233,22 @@ class AtgEmojiService
             'meaning'     => 'Every shade, one family.',
             'ar_particles' => 'confetti',
         ],
+        [
+            'id'          => 'family_point_3d',
+            'title'       => 'Yes, You!',
+            'category'    => 'Reactions & Blessings',
+            'description' => 'A hand pointing straight out of the screen at whoever is reading, in your own skin tone.',
+            'meaning'     => 'This one is for you — you did it!',
+            'ar_particles' => 'stars',
+        ],
+        [
+            'id'          => 'family_clap_3d',
+            'title'       => 'Applause',
+            'category'    => 'Reactions & Blessings',
+            'description' => 'Two hands clapping with bright impact sparks, available in every skin tone.',
+            'meaning'     => 'Well done — the whole family is cheering.',
+            'ar_particles' => 'confetti',
+        ],
     ];
 
     /**
@@ -355,6 +373,12 @@ class AtgEmojiService
             case 'family_blended_3d':
                 $svg = $this->buildBlendedFamilySvg($safeSize);
                 break;
+            case 'family_point_3d':
+                $svg = $this->buildPointSvg($safeSize, $tone);
+                break;
+            case 'family_clap_3d':
+                $svg = $this->buildClapSvg($safeSize, $tone);
+                break;
             default:
                 $baseId = 'family_roots_3d';
                 $tone = null;
@@ -451,6 +475,16 @@ class AtgEmojiService
         . '@keyframes atgmShake{0%,50%,100%{transform:rotate(0)}58%{transform:rotate(-8deg)}66%{transform:rotate(7deg)}74%{transform:rotate(-5deg)}82%{transform:rotate(3deg)}}'
         . '@keyframes atgmTwinkle{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.07) rotate(4deg)}}'
         . '@keyframes atgmWave{0%,60%,100%{transform:rotate(0)}10%{transform:rotate(-14deg)}20%{transform:rotate(12deg)}30%{transform:rotate(-12deg)}40%{transform:rotate(10deg)}50%{transform:rotate(-4deg)}}'
+        . '.atgm-point{transform-origin:10% 50%;animation:atgmPoint 2.2s cubic-bezier(.3,1.5,.5,1) infinite}'
+        . '.atgm-point .atgp-burst{transform-box:fill-box;transform-origin:50% 50%;animation:atgmBurst 2.2s ease-out infinite}'
+        . '.atgm-clap .atgc-hand{transform-box:fill-box;transform-origin:50% 100%}'
+        . '.atgm-clap .atgc-l{animation:atgmClapL 1.8s ease-in-out infinite}'
+        . '.atgm-clap .atgc-r{animation:atgmClapL 1.8s ease-in-out infinite}'
+        . '.atgm-clap .atgc-spark{animation:atgmSpark 1.8s ease-out infinite}'
+        . '@keyframes atgmPoint{0%,50%,100%{transform:translateX(0) scale(1)}60%{transform:translateX(5px) scale(1.12)}70%{transform:translateX(-1px) scale(.98)}80%{transform:translateX(3px) scale(1.06)}90%{transform:translateX(0) scale(1)}}'
+        . '@keyframes atgmBurst{0%,55%{opacity:.35;transform:scale(.85)}62%{opacity:1;transform:scale(1.15)}85%,100%{opacity:.35;transform:scale(.9)}}'
+        . '@keyframes atgmClapL{0%,48%,100%{transform:rotate(-18deg)}12%,36%{transform:rotate(0)}24%{transform:rotate(-18deg)}}'
+        . '@keyframes atgmSpark{0%,8%,20%,32%,44%,100%{opacity:0}12%,36%{opacity:1}}'
         . '@keyframes atgmBounce{0%,100%{transform:translateY(0) scale(1,1)}40%{transform:translateY(-5px) scale(.98,1.02)}55%{transform:translateY(0) scale(1.04,.96)}70%{transform:translateY(0) scale(1,1)}}'
         . '}</style>';
 
@@ -1364,6 +1398,65 @@ class AtgEmojiService
             . $palm(1) . $palm(-1)
             . '<polygon points="96,14 98,19 103,20 98,21 96,26 94,21 89,20 94,19" fill="#fde047"/>'
             . '<polygon points="22,12 23.5,15.5 27,16 23.5,17 22,20 20.5,17 17,16 20.5,15.5" fill="#fde047"/>'
+            . '</g>'
+            . '</svg>';
+    }
+
+    /**
+     * 👉 "Yes, you!" — an index finger that jabs straight at the reader,
+     * with a pulsing focus burst at the fingertip.
+     */
+    private function buildPointSvg(int $size, ?string $tone = null): string
+    {
+        $t = $this->emojiTone($tone);
+        $sk = ' fill="url(#pt_skin)" stroke="' . $t['shadow'] . '" stroke-width="1"';
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="' . $size . '" height="' . $size . '" class="atg-3d-emoji">'
+            . '<defs>'
+            . '<linearGradient id="pt_skin" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="' . $t['highlight'] . '"/><stop offset="55%" stop-color="' . $t['base'] . '"/><stop offset="100%" stop-color="' . $t['shadow'] . '"/></linearGradient>'
+            . '<linearGradient id="pt_cuff" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#a31621"/><stop offset="100%" stop-color="#f87171"/></linearGradient>'
+            . '<filter id="pt_sh"><feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#000" flood-opacity="0.3"/></filter>'
+            . '</defs>'
+            . '<g filter="url(#pt_sh)">'
+            . '<rect x="6" y="48" width="20" height="38" rx="4" fill="url(#pt_cuff)"/>'
+            . '<rect x="22" y="44" width="40" height="48" rx="18"' . $sk . '/>'
+            . '<rect x="40" y="82" width="24" height="11" rx="5.5"' . $sk . '/>'
+            . '<rect x="42" y="72" width="27" height="11" rx="5.5"' . $sk . '/>'
+            . '<rect x="44" y="62" width="28" height="11" rx="5.5"' . $sk . '/>'
+            . '<rect x="44" y="46" width="64" height="16" rx="8"' . $sk . '/>'
+            . '<rect x="95" y="48" width="10" height="11" rx="3.5" fill="#fff1f2" opacity="0.6" stroke="' . $t['shadow'] . '" stroke-width="0.7"/>'
+            . '<ellipse cx="46" cy="42" rx="17" ry="7.5" transform="rotate(-6 46 42)"' . $sk . '/>'
+            . '<path d="M 66 50 Q 68 54 66 58" stroke="' . $t['shadow'] . '" stroke-width="1.2" fill="none" opacity="0.6"/>'
+            . '<ellipse cx="70" cy="50" rx="12" ry="2.2" fill="#ffffff" opacity="0.45"/>'
+            . '</g>'
+            . '<g class="atgp-burst" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round">'
+            . '<line x1="108" y1="36" x2="115" y2="29"/><line x1="111" y1="54" x2="118" y2="54"/><line x1="108" y1="72" x2="115" y2="79"/>'
+            . '</g>'
+            . '</svg>';
+    }
+
+    /**
+     * 👏 Applause — two palms that swing together, with sparks on impact.
+     */
+    private function buildClapSvg(int $size, ?string $tone = null): string
+    {
+        $t = $this->emojiTone($tone);
+        $hand = '<rect x="-14" y="-40" width="28" height="64" rx="14" fill="url(#cl_skin)" stroke="' . $t['shadow'] . '" stroke-width="1"/>'
+            . '<path d="M -7 -38 L -7 -8 M 0 -40 L 0 -8 M 7 -38 L 7 -8" stroke="' . $t['shadow'] . '" stroke-width="1.3" opacity="0.55"/>'
+            . '<ellipse cx="-15" cy="4" rx="5.5" ry="13" transform="rotate(-28 -15 4)" fill="url(#cl_skin)" stroke="' . $t['shadow'] . '" stroke-width="1"/>'
+            . '<rect x="-12" y="22" width="24" height="12" rx="3" fill="url(#cl_cuff)"/>'
+            . '<ellipse cx="-5" cy="-30" rx="2.5" ry="5" fill="#ffffff" opacity="0.45"/>';
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="' . $size . '" height="' . $size . '" class="atg-3d-emoji">'
+            . '<defs>'
+            . '<linearGradient id="cl_skin" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="' . $t['highlight'] . '"/><stop offset="55%" stop-color="' . $t['base'] . '"/><stop offset="100%" stop-color="' . $t['shadow'] . '"/></linearGradient>'
+            . '<linearGradient id="cl_cuff" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#60a5fa"/><stop offset="100%" stop-color="#1d4ed8"/></linearGradient>'
+            . '<filter id="cl_sh"><feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#000" flood-opacity="0.28"/></filter>'
+            . '</defs>'
+            . '<g class="atgc-spark" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round">'
+            . '<line x1="60" y1="10" x2="60" y2="22"/><line x1="44" y1="16" x2="50" y2="25"/><line x1="76" y1="16" x2="70" y2="25"/>'
+            . '</g>'
+            . '<g filter="url(#cl_sh)">'
+            . '<g transform="translate(39 78) rotate(14)"><g class="atgc-hand atgc-l">' . $hand . '</g></g>'
+            . '<g transform="translate(81 78) rotate(-14) scale(-1 1)"><g class="atgc-hand atgc-r">' . $hand . '</g></g>'
             . '</g>'
             . '</svg>';
     }

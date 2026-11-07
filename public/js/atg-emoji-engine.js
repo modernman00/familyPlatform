@@ -487,12 +487,13 @@
                                     toast: true,
                                     position: 'top-end',
                                     showConfirmButton: false,
-                                    timer: 2000,
+                                    timer: 3500,
                                     timerProgressBar: true
                                 });
                                 Toast.fire({
                                     icon: 'success',
-                                    title: `Copied ${emojiTitle} (${shortcode})`
+                                    title: `Copied ${emojiTitle}`,
+                                    text: 'Paste it into any post or comment — it comes alive in the feed.'
                                 });
                             }
                         });
@@ -716,13 +717,13 @@
         },
 
         randomTapReaction: function () {
-            const pool = ['hello', 'laugh', 'wow', 'love', 'nod', 'dance'];
+            const pool = ['hello', 'laugh', 'wow', 'love', 'nod', 'dance', 'point', 'clap'];
             return pool[Math.floor(Math.random() * pool.length)];
         },
 
         playReaction: function (name) {
             const m = this.motion;
-            const allowed = { hello: ['👋', '✨'], laugh: ['😂', '🤣'], wow: ['😮', '⭐'], love: ['❤️', '💖', '💕'], nod: ['👍', '✅'], dance: ['🎶', '💃', '🕺'] };
+            const allowed = { hello: ['👋', '✨'], laugh: ['😂', '🤣'], wow: ['😮', '⭐'], love: ['❤️', '💖', '💕'], nod: ['👍', '✅'], dance: ['🎶', '💃', '🕺'], point: ['🫵', '👉', '✨'], clap: ['👏', '👏', '🎉'] };
             if (!allowed[name] || !m.viewport) return;
             const svg = m.viewport.querySelector('.atg-avatar-svg');
             if (svg) {
@@ -732,7 +733,7 @@
                 clearTimeout(m.reactTimer);
                 m.reactTimer = setTimeout(() => svg.classList.remove('atg-react-' + name), name === 'dance' ? 2200 : 1300);
             }
-            if (navigator.vibrate) navigator.vibrate(name === 'laugh' ? [14, 40, 14] : 12);
+            if (navigator.vibrate) navigator.vibrate(name === 'laugh' ? [14, 40, 14] : (name === 'clap' ? [10, 60, 10, 60, 10] : 12));
             if (m.reduce) return;
 
             const layer = m.viewport.querySelector('.atg-react-layer');
