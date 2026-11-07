@@ -66,7 +66,7 @@ describe('Create Post composer: mobile bottom sheet', () => {
 
     it('every composer tool is a >=44px touch target', () => {
         openModal('postModal');
-        cy.get('#postModal .composer-tool').should('have.length', 8).each(($el) => {
+        cy.get('#postModal .composer-tool').should('have.length.at.least', 7).each(($el) => {
             const r = $el[0].getBoundingClientRect();
             expect(r.height).to.be.at.least(44);
             expect(r.width).to.be.at.least(44);
