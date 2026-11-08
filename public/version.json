@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Test(cypress): update composer tools count assertion for unified emoji button",
+    "title": "Feat(emoji-studio): mobile layout, legible type, point & clap emojis, bolder feed emojis",
     "notes": [
+        "Feat(emoji-studio): mobile layout, legible type, point & clap emojis, bolder feed emojis",
         "Test(cypress): update composer tools count assertion for unified emoji button",
-        "Feat(core): adjustable profile covers, 3D AR emoji avatar engine, and tree studio parity",
-        "Feat(media): link-first nudge for large video uploads and production bundle build"
+        "Feat(core): adjustable profile covers, 3D AR emoji avatar engine, and tree studio parity"
     ],
-    "released_at": "2026-11-07",
-    "commit": "512f0a8e"
+    "released_at": "2026-11-08",
+    "commit": "5c85afab"
 }
