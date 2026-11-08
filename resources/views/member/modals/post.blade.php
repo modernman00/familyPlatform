@@ -290,6 +290,9 @@
                                     <button type="button" id="emojiTab3dBtn" class="btn btn-sm rounded-pill fw-semibold text-secondary px-3 py-1" style="font-size: 0.76rem;">
                                         ✨ 3D Family Emojis
                                     </button>
+                                    <button type="button" id="emojiTabMeBtn" class="btn btn-sm rounded-pill fw-semibold text-secondary px-3 py-1" style="font-size: 0.76rem;" data-testid="composer-me-tab">
+                                        🙋 Me
+                                    </button>
                                 </div>
                                 <button type="button" id="closeEmojiDrawerBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Close emoji picker"></button>
                             </div>
@@ -334,6 +337,12 @@
                                         </button>
                                     @endforeach
                                 </div>
+                            </div>
+
+                            <!-- Tab 3: Me-stickers (RFC-0011): your own avatar reacting -->
+                            <div id="meStickerTabPane" class="d-none" data-testid="composer-me-pane">
+                                <p class="text-muted small mb-2" style="font-size: 0.78rem;">Your own avatar, reacting. Tap one to add it to your post.</p>
+                                <div class="me-sticker-grid" id="meStickerComposerList" aria-live="polite"></div>
                             </div>
                         </div>
 
@@ -912,7 +921,7 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
 
     let currentMode = 'attach'; // 'attach' | 'insert'
 
-    const ATG_EMOJI_REGEX = /:(family_[a-z0-9_]+_3d|ancestor_[a-z0-9_]+_3d|memory_capsule_3d|kinship_pride_3d|wisdom_scroll_3d|generations_link_3d|family_toast_3d|baby_cradle_3d|wedding_vows_3d|laugh_tears_3d|star_struck_3d|family_house_3d):/gi;
+    const ATG_EMOJI_REGEX = /:([a-z0-9_]+_3d):/gi;
 
     // Helper: Build live emoji element
     function createLiveEmojiSpan(emojiId, title) {
@@ -937,6 +946,13 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
                     text += node.textContent;
                 } else if (node.nodeType === Node.ELEMENT_NODE) {
                     const el = node;
+                    if (el.hasAttribute('data-sticker-token')) {
+                        if (text.length > 0 && !/\s$/.test(text)) {
+                            text += ' ';
+                        }
+                        text += el.getAttribute('data-sticker-token') + ' ';
+                        return;
+                    }
                     if (el.hasAttribute('data-emoji-id')) {
                         if (text.length > 0 && !/\s$/.test(text)) {
                             text += ' ';
@@ -983,9 +999,13 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
             .replace(/"/g, '&quot;')
             .replace(/\n/g, '<br>');
 
-        const atgRegex = /:(family_[a-z0-9_]+_3d|ancestor_[a-z0-9_]+_3d|memory_capsule_3d|kinship_pride_3d|wisdom_scroll_3d|generations_link_3d|family_toast_3d|baby_cradle_3d|wedding_vows_3d|laugh_tears_3d|star_struck_3d|family_house_3d):/gi;
+        const atgRegex = /:([a-z0-9_]+_3d):/gi;
         safe = safe.replace(atgRegex, (match, emojiId) => {
             return `<span class="atg-emoji-container atg-live-emoji" contenteditable="false" data-emoji-id="${emojiId}"><img src="/img/emoji/${emojiId}.svg?v=20261103c" onerror="this.src='/img/emoji/${emojiId}.png?v=20261103c'" class="atg-3d-emoji" width="26" height="26" alt="${emojiId}" style="pointer-events:none; vertical-align:middle;"></span>`;
+        });
+
+        safe = safe.replace(/:me_(hello|laugh|wow|love|nod|dance|point|clap)@([A-Za-z0-9_-]{1,64}):/g, (match, reaction, uid) => {
+            return `<span class="atg-me-sticker" contenteditable="false" data-sticker-token="${match}"><img src="/api/emoji/avatar-sticker/${uid}/${reaction}" width="56" height="56" alt="My avatar: ${reaction}" style="pointer-events:none;"></span>`;
         });
 
         isInternalSync = true;
@@ -1047,7 +1067,7 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
     if (editor) {
         editor.addEventListener('input', function() {
             // Auto-convert any typed shortcodes like :family_crest_3d:
-            const shortcodeRegex = /:(family_[a-z0-9_]+_3d|ancestor_[a-z0-9_]+_3d|memory_capsule_3d|kinship_pride_3d|wisdom_scroll_3d|generations_link_3d|family_toast_3d|baby_cradle_3d|wedding_vows_3d|laugh_tears_3d|star_struck_3d|family_house_3d):/i;
+            const shortcodeRegex = /:([a-z0-9_]+_3d):/i;
             const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, null);
             let textNode;
             while ((textNode = walker.nextNode())) {
@@ -1121,6 +1141,143 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
             standardPane.classList.add('d-none');
         });
     }
+
+    // ── Me-stickers tab (RFC-0011) ──────────────────────────────────────
+    const tabMeBtn = document.getElementById('emojiTabMeBtn');
+    const mePane = document.getElementById('meStickerTabPane');
+    const meList = document.getElementById('meStickerComposerList');
+    const setTabState = (btn, on) => {
+        if (!btn) return;
+        btn.classList.toggle('active', on);
+        btn.classList.toggle('fw-bold', on);
+        btn.classList.toggle('text-secondary', !on);
+    };
+    [tabStandardBtn, tab3dBtn].forEach(b => b && b.addEventListener('click', () => {
+        if (mePane) mePane.classList.add('d-none');
+        setTabState(tabMeBtn, false);
+    }));
+
+    window.insertMeStickerIntoComposer = function(token, url, label) {
+        if (!editor || !/^:me_[a-z]+@[A-Za-z0-9_-]{1,64}:$/.test(token)) return;
+        editor.focus();
+        const span = document.createElement('span');
+        span.className = 'atg-me-sticker';
+        span.contentEditable = 'false';
+        span.dataset.stickerToken = token;
+        const img = document.createElement('img');
+        img.src = url;
+        img.width = 56;
+        img.height = 56;
+        img.alt = label || 'My avatar';
+        img.style.pointerEvents = 'none';
+        span.appendChild(img);
+        const spaceNode = document.createTextNode('\u00A0');
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+            const range = sel.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(spaceNode);
+            range.insertNode(span);
+            range.setStartAfter(spaceNode);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        } else {
+            editor.appendChild(span);
+            editor.appendChild(spaceNode);
+        }
+        window.syncEditorToTextarea();
+    };
+
+    const renderMeStickers = (data) => {
+        if (!meList) return;
+        meList.textContent = '';
+        if (!data || !data.available) {
+            const a = document.createElement('a');
+            a.href = (data && data.studio_url) || '/member/emoji-studio';
+            a.className = 'btn btn-sm btn-warning rounded-pill fw-semibold';
+            a.style.minHeight = '44px';
+            a.textContent = '🎨 Save your avatar in Emoji Studio to unlock Me-stickers';
+            meList.appendChild(a);
+            return;
+        }
+        data.stickers.forEach(st => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'me-sticker-btn';
+            b.dataset.token = st.token;
+            b.title = st.label;
+            b.setAttribute('aria-label', 'Add my avatar: ' + st.label);
+            const img = document.createElement('img');
+            img.src = st.url;
+            img.width = 64;
+            img.height = 64;
+            img.alt = '';
+            img.loading = 'lazy';
+            const cap = document.createElement('span');
+            cap.textContent = st.label;
+            b.append(img, cap);
+            b.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.insertMeStickerIntoComposer(st.token, st.url, st.label);
+            });
+            meList.appendChild(b);
+        });
+    };
+
+    if (tabMeBtn && mePane) {
+        tabMeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            setTabState(tabMeBtn, true);
+            setTabState(tabStandardBtn, false);
+            setTabState(tab3dBtn, false);
+            if (standardPane) standardPane.classList.add('d-none');
+            if (atg3dPane) atg3dPane.classList.add('d-none');
+            mePane.classList.remove('d-none');
+            if (meList && !meList.dataset.loaded) {
+                meList.dataset.loaded = '1';
+                meList.textContent = 'Loading your avatar…';
+                const loader = window.AtgEmojiEngine && window.AtgEmojiEngine.getMeStickers
+                    ? window.AtgEmojiEngine.getMeStickers()
+                    : fetch('/api/emoji/me-stickers', { credentials: 'same-origin' }).then(r => r.json());
+                loader.then(renderMeStickers).catch(() => { meList.dataset.loaded = ''; meList.textContent = 'Could not load your avatar. Try again.'; });
+            }
+        });
+    }
+
+    // Deep link from Emoji Studio: /member/profilePage?compose_sticker=<reaction>
+    (function openComposerWithSticker() {
+        let want = '';
+        try { want = new URLSearchParams(window.location.search).get('compose_sticker') || ''; } catch (_) {}
+        if (!/^(hello|laugh|wow|love|nod|dance|point|clap)$/.test(want)) return;
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('compose_sticker');
+            window.history.replaceState(null, '', url.toString());
+        } catch (_) {}
+        const go = () => {
+            const modalEl = document.getElementById('postModal');
+            if (!modalEl || !window.bootstrap || !window.bootstrap.Modal || !window.AtgEmojiEngine) return;
+            window.AtgEmojiEngine.getMeStickers().then(d => {
+                window.bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                const insert = () => {
+                    const st = d && d.available ? d.stickers.find(s => s.reaction === want) : null;
+                    if (st) {
+                        window.insertMeStickerIntoComposer(st.token, st.url, st.label);
+                    } else {
+                        // No saved avatar yet: open the Me tab so the unlock prompt shows.
+                        const drawer = document.getElementById('emojiPickerDrawer');
+                        const toggle = document.getElementById('emojiPost');
+                        if (drawer && drawer.classList.contains('d-none') && toggle) toggle.click();
+                        if (tabMeBtn) tabMeBtn.click();
+                    }
+                };
+                if (modalEl.classList.contains('show')) insert();
+                else modalEl.addEventListener('shown.bs.modal', insert, { once: true });
+            }).catch(() => {});
+        };
+        if (document.readyState === 'complete') go(); else window.addEventListener('load', go, { once: true });
+    })();
 
     if (modeAttachBtn && modeInsertBtn) {
         modeAttachBtn.addEventListener('click', function(e) {

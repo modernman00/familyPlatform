@@ -96,6 +96,10 @@ final class LinkPreviewService
         // Note: \x09 (tab) and \x0A (line feed) are explicitly preserved.
         $text = (string)preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $text);
 
+        // 6. Me-stickers (RFC-0011): a member may only post their own avatar sticker.
+        $authorId = isset($_SESSION['id']) && is_scalar($_SESSION['id']) ? trim((string)$_SESSION['id']) : '';
+        $text = AvatarStickerService::stripForeignTokens($text, $authorId);
+
         return trim($text);
     }
 

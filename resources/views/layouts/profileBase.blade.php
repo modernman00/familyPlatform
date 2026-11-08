@@ -209,6 +209,15 @@
   @include('partials.back-to-top')
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  {{-- Living emoji catalog for feed rendering, comment picker and tap-to-play (single source: AtgEmojiService) --}}
+  @php
+    $atgLivingEmojis = [
+      'catalog'  => array_map(fn ($e) => ['id' => $e['id'], 'title' => $e['title'], 'meaning' => $e['meaning'] ?? ''], \App\services\AtgEmojiService::EMOJI_CATALOG),
+      'toneable' => \App\services\AtgEmojiService::TONEABLE_EMOJIS,
+      'tones'    => array_keys(\App\services\AtgEmojiService::EMOJI_TONES),
+    ];
+  @endphp
+  <script nonce="{{ $nonce }}">window.ATG_LIVING_EMOJIS = @json($atgLivingEmojis);</script>
   <script nonce="{{ $nonce }}" src="/public/js/manifest.js?v={{ assetVersion('js/manifest.js') }}"></script>
   <script nonce="{{ $nonce }}" src="/public/js/vendor.js?v={{ assetVersion('js/vendor.js') }}"></script>
   <script nonce="{{ $nonce }}" src="/public/js/index.js?v={{ assetVersion('js/index.js') }}"></script>

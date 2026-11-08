@@ -64,6 +64,7 @@ export function profileFeed(opts = {}) {
         activeReactionBars: {},
         activeCommentReactionBars: {},
         commentEmojiOpen: {},
+        commentEmojiTab: 'standard',
         commentGifOpen: {},
         commentGifs: {},
         commentFiles: {},
@@ -1181,12 +1182,25 @@ export function profileFeed(opts = {}) {
             if (!message) return '';
             let safeText = this.escapeHtml(message);
             // A caption made only of living emojis renders them sticker-sized so they stand out.
-            const emojiOnly = /:[a-z0-9_]+_3d:/i.test(message) && message.replace(/:[a-z0-9_]+_3d:/gi, '').trim() === '';
+            const stickerRe = /:(?:[a-z0-9_]+_3d|me_[a-z]+@[A-Za-z0-9_-]{1,64}):/gi;
+            const emojiOnly = /:(?:[a-z0-9_]+_3d|me_[a-z]+@[A-Za-z0-9_-]{1,64}):/i.test(message) && message.replace(stickerRe, '').trim() === '';
             const liveEmojiClass = emojiOnly ? 'atg-emoji-container atg-live-emoji atg-live-emoji--jumbo' : 'atg-emoji-container atg-live-emoji';
 
-            // Render 3D family emojis (:family_roots_3d:, :family_crest_3d:, etc.)
-            safeText = safeText.replace(/:(family_[a-z0-9_]+_3d|ancestor_[a-z0-9_]+_3d|memory_capsule_3d|kinship_pride_3d|wisdom_scroll_3d|generations_link_3d|family_toast_3d|baby_cradle_3d|wedding_vows_3d|laugh_tears_3d|star_struck_3d|family_house_3d):/gi, (match, emojiId) => {
-                return `<span class="${liveEmojiClass}" role="button" tabindex="0" onclick="event.stopPropagation(); window.AtgEmojiEngine && window.AtgEmojiEngine.openArViewer('${emojiId}')"><img src="/public/img/emoji/${emojiId}.svg?v=20261107a" onerror="this.src='/img/emoji/${emojiId}.svg?v=20261107a'" class="atg-3d-emoji" loading="lazy" width="26" height="26" alt="${emojiId}" title="Tap to view in 3D / AR"></span>`;
+            // Render 3D family emojis (:family_roots_3d:, :family_clap_dark_3d:, etc.).
+            // Any :<id>_3d: token is accepted only if it is a known catalog id (incl. tone variants),
+            // so new catalog emojis render automatically without touching this regex.
+            // Me-stickers (RFC-0011): :me_<reaction>@<userId>: → the author's avatar doing that reaction.
+            // The server strips tokens naming anyone but the author, and serves the image only to family.
+            const stickerClass = emojiOnly ? 'atg-me-sticker atg-me-sticker--jumbo' : 'atg-me-sticker';
+            safeText = safeText.replace(/:me_(hello|laugh|wow|love|nod|dance|point|clap)@([A-Za-z0-9_-]{1,64}):/g, (match, reaction, uid) => {
+                return `<span class="${stickerClass}" role="button" tabindex="0" data-testid="me-sticker" onclick="event.stopPropagation(); window.AtgEmojiEngine && window.AtgEmojiEngine.tapSticker(this, '${reaction}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"><img src="/api/emoji/avatar-sticker/${uid}/${reaction}" loading="lazy" width="64" height="64" alt="Avatar sticker: ${reaction}" title="Tap to replay" onerror="this.closest('.atg-me-sticker').remove()"></span>`;
+            });
+
+            const knownIds = this.livingEmojiIdSet();
+            safeText = safeText.replace(/:([a-z0-9_]+_3d):/gi, (match, rawId) => {
+                const emojiId = rawId.toLowerCase();
+                if (knownIds && !knownIds.has(emojiId)) return match;
+                return `<span class="${liveEmojiClass}" role="button" tabindex="0" onclick="event.stopPropagation(); window.AtgEmojiEngine && window.AtgEmojiEngine.tapLive(this, '${emojiId}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"><img src="/public/img/emoji/${emojiId}.svg?v=20261107a" onerror="this.src='/img/emoji/${emojiId}.svg?v=20261107a'" class="atg-3d-emoji" loading="lazy" width="26" height="26" alt="${emojiId}" title="Tap to play · tap again for 3D / AR"></span>`;
             });
 
             // Linkify URLs into secure clickable links
@@ -2134,6 +2148,64 @@ export function profileFeed(opts = {}) {
         insertEmojiIntoComment(postNo, emoji) {
             const current = this.commentInputs[postNo] || '';
             this.commentInputs[postNo] = current + emoji;
+        },
+
+        // ── Living (3D) emojis: catalog from window.ATG_LIVING_EMOJIS (profileBase) ──
+        livingEmojiIdSet() {
+            if (this._livingIdSet) return this._livingIdSet;
+            const cfg = window.ATG_LIVING_EMOJIS;
+            if (!cfg || !Array.isArray(cfg.catalog)) return null; // unknown: accept any well-formed token
+            const set = new Set();
+            const toneable = new Set(cfg.toneable || []);
+            cfg.catalog.forEach(e => {
+                set.add(e.id);
+                if (toneable.has(e.id)) {
+                    (cfg.tones || []).forEach(t => set.add(e.id.replace(/_3d$/, `_${t}_3d`)));
+                }
+            });
+            this._livingIdSet = set;
+            return set;
+        },
+
+        get commentLivingPalette() {
+            const cfg = window.ATG_LIVING_EMOJIS;
+            if (!cfg || !Array.isArray(cfg.catalog)) return [];
+            // SKIN_TONES index 1..5 maps onto the living emoji tone keys in order.
+            const toneKey = (cfg.tones || [])[(this.commentSkinTone || 0) - 1] || null;
+            const toneable = new Set(cfg.toneable || []);
+            return cfg.catalog.map(e => ({
+                id: (toneKey && toneable.has(e.id)) ? e.id.replace(/_3d$/, `_${toneKey}_3d`) : e.id,
+                title: e.title,
+            }));
+        },
+
+        // ── Me-stickers in comments (RFC-0011) ──
+        meStickers: null,        // null = not loaded; { available, stickers[] } once fetched
+        meStickersError: false,
+
+        openMeStickerTab() {
+            this.commentEmojiTab = 'me';
+            if (this.meStickers || !window.AtgEmojiEngine || !window.AtgEmojiEngine.getMeStickers) return;
+            this.meStickersError = false;
+            window.AtgEmojiEngine.getMeStickers()
+                .then(d => { this.meStickers = d || { available: false }; })
+                .catch(() => { this.meStickersError = true; });
+        },
+
+        insertMeStickerIntoComment(postNo, token) {
+            if (!/^:me_[a-z]+@[A-Za-z0-9_-]{1,64}:$/.test(token)) return;
+            const current = this.commentInputs[postNo] || '';
+            const sep = current && !/\s$/.test(current) ? ' ' : '';
+            this.commentInputs[postNo] = `${current}${sep}${token} `;
+            this.commentEmojiOpen[postNo] = false;
+        },
+
+        insertLivingEmojiIntoComment(postNo, emojiId) {
+            if (!/^[a-z0-9_]+_3d$/.test(emojiId)) return;
+            const current = this.commentInputs[postNo] || '';
+            const sep = current && !/\s$/.test(current) ? ' ' : '';
+            this.commentInputs[postNo] = `${current}${sep}:${emojiId}: `;
+            this.commentEmojiOpen[postNo] = false;
         },
 
         // ── React to a comment with an emoji ───────────────────────────────

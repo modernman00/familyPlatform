@@ -19,10 +19,10 @@ describe('Social Feed Interactions', () => {
         // this particular textarea intermittently drops characters in this app under Cypress,
         // which isn't what this test is trying to verify.
         openModal('postModal');
-        cy.get('textarea#postMessage').should('be.visible')
+        cy.get('#postMessageEditor').should('be.visible').then(() => cy.get('textarea#postMessage'))
             .invoke('val', postContent)
-            .trigger('input')
-            .trigger('change');
+            .trigger('input', { force: true })
+            .trigger('change', { force: true });
 
         // Submit post
         cy.get('#submitPost').click();
@@ -43,8 +43,8 @@ describe('Social Feed Interactions', () => {
         const payload = `<img src=x onerror="window.__xss=1"> <b>${marker}</b>`;
 
         openModal('postModal');
-        cy.get('textarea#postMessage').should('be.visible')
-            .invoke('val', payload).trigger('input').trigger('change');
+        cy.get('#postMessageEditor').should('be.visible').then(() => cy.get('textarea#postMessage'))
+            .invoke('val', payload).trigger('input', { force: true }).trigger('change', { force: true });
         cy.get('#submitPost').click();
         cy.get('.swal2-popup', { timeout: 10000 }).should('contain.text', 'Post published successfully');
 
@@ -62,7 +62,7 @@ describe('Social Feed Interactions', () => {
     it('denies submitting an empty post', () => {
         // Leave textarea empty
         openModal('postModal');
-        cy.get('textarea#postMessage').clear();
+        cy.get('#postMessageEditor').clear();
         cy.get('#submitPost').click();
 
         // The server rejects a post with no text/image/poll and the error is shown via SweetAlert2
@@ -75,8 +75,8 @@ describe('Social Feed Interactions', () => {
     // feed made these toggle-based assertions depend on earlier runs' state.
     const createFreshPost = (text) => {
         openModal('postModal');
-        cy.get('textarea#postMessage').should('be.visible')
-            .invoke('val', text).trigger('input').trigger('change');
+        cy.get('#postMessageEditor').should('be.visible').then(() => cy.get('textarea#postMessage'))
+            .invoke('val', text).trigger('input', { force: true }).trigger('change', { force: true });
         cy.get('#submitPost').click();
         cy.get('.swal2-popup', { timeout: 10000 }).should('contain.text', 'Post published successfully');
         cy.get('#postModal', { timeout: 10000 }).should('not.be.visible');

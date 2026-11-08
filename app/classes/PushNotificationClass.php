@@ -69,6 +69,10 @@ class PushNotificationClass extends VapidClass
             return false;
         }
 
+        // Emoji / Me-sticker tokens become glyphs (OS notifications are plain text).
+        $message = \App\services\EmojiPlainText::humanize($message);
+        $title = \App\services\EmojiPlainText::humanize($title);
+
         // Never push to real devices during automated test suites.
         // For development/local environments, allow push if forceOutbound is true OR ALLOW_OUTBOUND_NOTIFICATIONS/ALLOW_OUTBOUND_PUSH is set.
         $allowPush = strtolower(trim((string) ($_ENV['ALLOW_OUTBOUND_PUSH'] ?? $_ENV['ALLOW_OUTBOUND_NOTIFICATIONS'] ?? (getenv('ALLOW_OUTBOUND_PUSH') ?: (getenv('ALLOW_OUTBOUND_NOTIFICATIONS') ?: ''))), "'\""));

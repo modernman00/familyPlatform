@@ -585,9 +585,107 @@ body.dark-theme .atg-live-emoji .atg-3d-emoji,
     25% { transform: rotate(-12deg) scale(1.2); }
     75% { transform: rotate(12deg) scale(1.2); }
 }
+/* Tap-to-play: a springy pop, then the burst particles fly out (atg-emoji-engine tapLive) */
+.atg-live-emoji.atg-live-emoji--play { animation: atgLivePop 0.85s cubic-bezier(.2,.9,.3,1.4) 1; }
+@keyframes atgLivePop {
+    0% { transform: scale(1); }
+    20% { transform: scale(0.82) rotate(-6deg); }
+    45% { transform: scale(1.45) rotate(8deg); }
+    70% { transform: scale(0.95) rotate(-3deg); }
+    100% { transform: scale(1) rotate(0); }
+}
+.atg-burst-layer { position: fixed; inset: 0; pointer-events: none; z-index: 2000; overflow: hidden; }
+.atg-burst-particle {
+    position: absolute;
+    font-size: 18px;
+    line-height: 1;
+    transform: translate(-50%, -50%);
+    will-change: transform, opacity;
+}
 @media (prefers-reduced-motion: reduce) {
     .atg-live-emoji, .atg-live-emoji:hover { animation: none; }
+    .atg-live-emoji.atg-live-emoji--play { animation: none; }
 }
+
+/* Me-stickers (RFC-0011): the member's own avatar reacting, inline in posts/comments */
+.atg-me-sticker {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0.15em 0.2em;
+    line-height: 0;
+    cursor: pointer;
+    border-radius: 50%;
+}
+.atg-me-sticker img {
+    width: 64px;
+    height: 64px;
+    /* No border-radius: the reaction badge sits on the bottom-right edge of the art. */
+    filter: drop-shadow(0 2px 4px rgba(15, 23, 42, 0.25));
+}
+.atg-me-sticker--jumbo img { width: 112px; height: 112px; }
+.atg-me-sticker.atg-live-emoji--play { animation: atgLivePop 0.85s cubic-bezier(.2,.9,.3,1.4) 1; }
+.atg-me-sticker:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }
+#postMessageEditor .atg-me-sticker img { width: 56px; height: 56px; }
+.me-sticker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 6px;
+    max-height: 260px;
+    overflow-y: auto;
+}
+.me-sticker-grid--comment { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); max-height: 220px; padding: 2px; }
+.me-sticker-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-height: 44px;
+    padding: 4px 2px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    background: transparent;
+    border-radius: 12px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: inherit;
+}
+.me-sticker-btn:hover, .me-sticker-btn:focus-visible { background: rgba(245, 158, 11, 0.14); border-color: #f59e0b; }
+@media (prefers-reduced-motion: reduce) {
+    .atg-me-sticker.atg-live-emoji--play { animation: none; }
+}
+
+/* Comment picker: Living emoji tab */
+.comment-emoji-tabs { display: flex; gap: 4px; padding: 2px 4px 6px; }
+.comment-emoji-tab {
+    flex: 1 1 0;
+    min-height: 32px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    background: transparent;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: inherit;
+}
+.comment-emoji-tab.active { background: #f59e0b; border-color: #f59e0b; color: #1f2937; }
+.comment-living-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    gap: 4px;
+    max-height: 210px;
+    overflow-y: auto;
+}
+.comment-living-btn {
+    min-width: 44px;
+    min-height: 44px;
+    border: 0;
+    background: transparent;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+}
+.comment-living-btn:hover, .comment-living-btn:focus-visible { background: rgba(245, 158, 11, 0.14); }
+.comment-living-btn img { width: 38px; height: 38px; }
 
 /* -------------------------------------------------------------------------
  * ATG Living 3D Emoji Rich Composer Editor

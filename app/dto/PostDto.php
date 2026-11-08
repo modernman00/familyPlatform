@@ -349,6 +349,7 @@ final class PostDto implements JsonSerializable
         if (empty($raw)) {
             return null;
         }
+        $raw = \App\services\EmojiPlainText::humanize($raw);
         $clean = preg_replace('#(?:https?://|/resources/(?:videos|images)/)[^\s"\'<>]+#i', '', $raw);
         $clean = preg_replace('/#[a-zA-Z0-9_]+/', '', (string)$clean);
         $clean = trim((string)$clean);

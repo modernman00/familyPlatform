@@ -11,8 +11,8 @@ describe('GIFs in comments', () => {
 
     const createFreshPost = (text) => {
         openModal('postModal');
-        cy.get('textarea#postMessage').should('be.visible')
-            .invoke('val', text).trigger('input').trigger('change');
+        cy.get('#postMessageEditor').should('be.visible').then(() => cy.get('textarea#postMessage'))
+            .invoke('val', text).trigger('input', { force: true }).trigger('change', { force: true });
         cy.get('#submitPost').click();
         // Publishing fans out Pusher + push notifications, which can take well over 10s locally.
         cy.get('.swal2-popup', { timeout: 60000 }).should('contain.text', 'Post published successfully');

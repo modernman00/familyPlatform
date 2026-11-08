@@ -75,7 +75,12 @@
                 <button type="button" id="atgRandomAvatarBtn" class="atg-btn-secondary">
                     <span>🎲 Surprise Me</span>
                 </button>
+                <a id="atgUseInPostBtn" class="atg-btn-secondary text-decoration-none" href="/member/profilePage?compose_sticker=hello"
+                   title="Post your saved avatar doing the last reaction you tried">
+                    <span>📣 Use in a post</span>
+                </a>
             </div>
+            <p class="atg-stage-note">Me-stickers use your <strong>saved</strong> avatar. Tap a reaction above, then <em>Use in a post</em>.</p>
             @if (!empty($hasSavedLook))
                 <p class="atg-stage-note">Loaded your current studio look.</p>
             @endif
@@ -395,5 +400,13 @@
         const target = document.getElementById(tabId);
         if (target) target.style.display = 'block';
     }
+
+    // RFC-0011: "Use in a post" follows the last reaction the member tried.
+    document.querySelectorAll('.atg-react-btn[data-reaction]').forEach(b => b.addEventListener('click', () => {
+        const link = document.getElementById('atgUseInPostBtn');
+        if (link && /^[a-z]+$/.test(b.dataset.reaction)) {
+            link.href = '/member/profilePage?compose_sticker=' + b.dataset.reaction;
+        }
+    }));
 </script>
 @endsection

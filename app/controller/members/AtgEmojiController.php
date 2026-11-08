@@ -7,6 +7,7 @@ namespace App\controller\members;
 use App\controller\BaseController;
 use App\model\Post;
 use App\services\AtgEmojiService;
+use App\services\AvatarStickerService;
 use Exception;
 use Src\Db;
 use Src\Exceptions\ForbiddenException;
@@ -159,6 +160,86 @@ final class AtgEmojiController extends BaseController
         header('Content-Type: image/svg+xml');
         header('Cache-Control: public, max-age=86400');
         echo $svg;
+    }
+
+    /**
+     * Me-sticker image (RFC-0011): the owner's avatar performing a reaction.
+     * Route: GET /api/emoji/avatar-sticker/[:userId]/[a:reaction]
+     * Logged-in + same family only; every other case is a 404 so existence is not leaked.
+     */
+    public function avatarSticker(string $ownerId = '', string $reaction = ''): void
+    {
+        $ownerId = trim($ownerId);
+        $reaction = strtolower(trim($reaction));
+        $stickers = new AvatarStickerService();
+
+        $traits = null;
+        if (
+            $this->userId !== ''
+            && AvatarStickerService::isValidUserId($ownerId)
+            && AvatarStickerService::isValidReaction($reaction)
+            && $stickers->canView($this->userId, $ownerId)
+        ) {
+            $traits = $stickers->getTraits($ownerId);
+        }
+
+        header('X-Content-Type-Options: nosniff');
+        if ($traits === null) {
+            http_response_code(404);
+            header('Content-Type: text/plain; charset=UTF-8');
+            header('Cache-Control: no-store');
+            echo 'Not found';
+            return;
+        }
+
+        $etag = '"' . hash('sha256', $ownerId . ':' . $traits['version'] . ':' . $reaction . ':v1') . '"';
+        header('ETag: ' . $etag);
+        header('Cache-Control: private, max-age=86400');
+        header('Vary: Cookie');
+        if (trim((string)($_SERVER['HTTP_IF_NONE_MATCH'] ?? '')) === $etag) {
+            http_response_code(304);
+            return;
+        }
+
+        header('Content-Type: image/svg+xml; charset=UTF-8');
+        header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'");
+        echo $stickers->renderSticker($traits['traits'], $reaction, 160);
+    }
+
+    /**
+     * The signed-in member's own Me-sticker set for the composer / comment picker.
+     * Route: GET /api/emoji/me-stickers
+     */
+    public function meStickers(): void
+    {
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: private, no-store');
+        if ($this->userId === '' || !AvatarStickerService::isValidUserId($this->userId)) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'available' => false]);
+            return;
+        }
+        $saved = (new AvatarStickerService())->getTraits($this->userId);
+        if ($saved === null) {
+            echo json_encode(['success' => true, 'available' => false, 'studio_url' => '/member/emoji-studio']);
+            return;
+        }
+        $items = [];
+        foreach (AvatarStickerService::REACTION_LABELS as $reaction => $label) {
+            $items[] = [
+                'reaction' => $reaction,
+                'label'    => $label,
+                'token'    => ':me_' . $reaction . '@' . $this->userId . ':',
+                'url'      => '/api/emoji/avatar-sticker/' . rawurlencode($this->userId) . '/' . $reaction . '?v=' . rawurlencode($saved['version']),
+            ];
+        }
+        echo json_encode([
+            'success'   => true,
+            'available' => true,
+            'user_id'   => $this->userId,
+            'version'   => $saved['version'],
+            'stickers'  => $items,
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     /**

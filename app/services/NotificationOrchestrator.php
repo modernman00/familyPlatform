@@ -41,7 +41,11 @@ final class NotificationOrchestrator
         ?array $metadata = null,
         ?string $scheduledAt = null
     ): string {
-        $effectiveScheduledAt = $scheduledAt ?? (is_array($metadata) && isset($metadata['scheduled_at']) && is_string($metadata['scheduled_at']) ? $metadata['scheduled_at'] : null);
+        // Emoji / Me-sticker tokens become glyphs: bell, push and email are plain text.
+        $title = EmojiPlainText::humanize($title);
+        $body = EmojiPlainText::humanize($body);
+
+        $effectiveScheduledAt = $scheduledAt ??(is_array($metadata) && isset($metadata['scheduled_at']) && is_string($metadata['scheduled_at']) ? $metadata['scheduled_at'] : null);
         $isScheduled = false;
         if ($effectiveScheduledAt !== null && trim($effectiveScheduledAt) !== '') {
             $parsed = strtotime($effectiveScheduledAt);

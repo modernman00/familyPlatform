@@ -134,10 +134,10 @@ describe('Chaos & Resiliency Testing', () => {
         cy.get('.feed-posts-container').then(($container) => {
             if ($container.find('button:contains("Comment")').length === 0) {
                 openModal('postModal');
-                cy.get('textarea#postMessage').should('be.visible')
+                cy.get('#postMessageEditor').should('be.visible').then(() => cy.get('textarea#postMessage'))
                     .invoke('val', 'Chaos Test Seed Post')
-                    .trigger('input')
-                    .trigger('change');
+                    .trigger('input', { force: true })
+                    .trigger('change', { force: true });
                 cy.get('#submitPost').click();
                 cy.get('.swal2-popup', { timeout: 10000 }).should('be.visible');
             }

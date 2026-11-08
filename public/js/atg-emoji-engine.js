@@ -2023,6 +2023,105 @@
                     showConfirmButton: false
                 });
             }
+        },
+
+        /**
+         * Feed / comment living emoji tap: the first tap plays the emoji with a themed
+         * particle burst; a second tap within a short window opens the 3D / AR viewer.
+         */
+        tapLive: function (el, emojiId) {
+            if (!el || !emojiId || !/^[a-z0-9_]+_3d$/i.test(emojiId)) return;
+            const now = Date.now();
+            const last = Number(el.dataset.atgPlayedAt || 0);
+            if (now - last < 2500) {
+                el.dataset.atgPlayedAt = '0';
+                const meta = this.livingEmojiMeta(emojiId);
+                this.openArViewer(emojiId, meta ? meta.title : undefined, meta ? meta.meaning : undefined);
+                return;
+            }
+            el.dataset.atgPlayedAt = String(now);
+            el.classList.remove('atg-live-emoji--play');
+            void el.offsetWidth; // restart the animation on rapid taps
+            el.classList.add('atg-live-emoji--play');
+            setTimeout(() => el.classList.remove('atg-live-emoji--play'), 900);
+            if (navigator.vibrate) { try { navigator.vibrate(12); } catch (_) { /* unsupported */ } }
+
+            const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (!reduce) this.burstParticles(el, emojiId);
+        },
+
+        /** Signed-in member's Me-stickers (RFC-0011), fetched once per page. */
+        getMeStickers: function (force) {
+            if (!this._meStickers || force) {
+                this._meStickers = fetch('/api/emoji/me-stickers', { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+                    .then(r => r.json())
+                    .catch(err => { this._meStickers = null; throw err; });
+            }
+            return this._meStickers;
+        },
+
+        /** Feed tap on a Me-sticker: replay its pop + burst (no AR viewer for avatars). */
+        tapSticker: function (el, reaction) {
+            if (!el) return;
+            el.classList.remove('atg-live-emoji--play');
+            void el.offsetWidth;
+            el.classList.add('atg-live-emoji--play');
+            setTimeout(() => el.classList.remove('atg-live-emoji--play'), 900);
+            const map = { hello: 'family_wave_3d', laugh: 'laugh_tears_3d', wow: 'star_struck_3d', love: 'family_hug_3d', nod: 'kinship_pride_3d', dance: 'family_celebrate_3d', point: 'family_point_3d', clap: 'family_clap_3d' };
+            const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (!reduce) this.burstParticles(el, map[reaction] || '');
+            if (navigator.vibrate) { try { navigator.vibrate(12); } catch (_) { /* unsupported */ } }
+        },
+
+        livingEmojiMeta: function (emojiId) {
+            const cfg = window.ATG_LIVING_EMOJIS;
+            if (!cfg || !Array.isArray(cfg.catalog)) return null;
+            const base = String(emojiId).replace(/_(medium_light|medium_dark|light|medium|dark)_3d$/, '_3d');
+            return cfg.catalog.find(e => e.id === base) || null;
+        },
+
+        burstParticles: function (el, emojiId) {
+            const base = String(emojiId).replace(/_(medium_light|medium_dark|light|medium|dark)_3d$/, '_3d');
+            const themes = {
+                family_celebrate_3d: ['🎉', '✨', '🎊'], family_feast_3d: ['🎉', '🍲', '✨'],
+                family_toast_3d: ['🥂', '✨', '🎉'], family_hug_3d: ['❤️', '💖', '🤗'],
+                family_heart_hands_3d: ['💖', '❤️', '💕'], family_hearth_3d: ['🔥', '💛', '✨'],
+                ancestor_blessing_3d: ['🙏', '✨', '💛'], ancestor_crown_3d: ['👑', '✨', '⭐'],
+                family_clap_3d: ['👏', '✨', '🎉'], laugh_tears_3d: ['😂', '💧', '🤣'],
+                star_struck_3d: ['⭐', '🌟', '✨'], kinship_pride_3d: ['🌟', '💪', '✨'],
+                baby_cradle_3d: ['🍼', '💕', '⭐'], wedding_vows_3d: ['💍', '💐', '💕'],
+                family_wave_3d: ['👋', '✨', '💛'], family_point_3d: ['👉', '✨', '⭐'],
+                family_roots_3d: ['🌿', '🍃', '✨'], memory_capsule_3d: ['📸', '✨', '💫'],
+            };
+            const glyphs = themes[base] || ['✨', '💛', '⭐'];
+            const rect = el.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const layer = document.createElement('div');
+            layer.className = 'atg-burst-layer';
+            layer.setAttribute('aria-hidden', 'true');
+            document.body.appendChild(layer);
+            const count = 10;
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('span');
+                p.className = 'atg-burst-particle';
+                p.textContent = glyphs[i % glyphs.length];
+                p.style.left = cx + 'px';
+                p.style.top = cy + 'px';
+                layer.appendChild(p);
+                const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.6;
+                const dist = 38 + Math.random() * 46;
+                const dx = Math.cos(angle) * dist;
+                const dy = Math.sin(angle) * dist - 24;
+                if (p.animate) {
+                    p.animate([
+                        { transform: 'translate(-50%, -50%) scale(0.4)', opacity: 1 },
+                        { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(1.1) rotate(${(Math.random() - 0.5) * 60}deg)`, opacity: 1, offset: 0.6 },
+                        { transform: `translate(calc(-50% + ${dx * 1.15}px), calc(-50% + ${dy + 30}px)) scale(0.8)`, opacity: 0 }
+                    ], { duration: 850 + Math.random() * 250, easing: 'cubic-bezier(.2,.8,.3,1)', fill: 'forwards' });
+                }
+            }
+            setTimeout(() => layer.remove(), 1300);
         }
     };
 

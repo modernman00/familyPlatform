@@ -11,8 +11,8 @@ describe('Threaded comment replies', () => {
 
     const createFreshPost = (text) => {
         openModal('postModal');
-        cy.get('textarea#postMessage').should('be.visible')
-            .invoke('val', text).trigger('input').trigger('change');
+        cy.get('#postMessageEditor').should('be.visible').then(() => cy.get('textarea#postMessage'))
+            .invoke('val', text).trigger('input', { force: true }).trigger('change', { force: true });
         cy.get('#submitPost').click();
         cy.get('.swal2-popup', { timeout: 60000 }).should('contain.text', 'Post published successfully');
         cy.get('#postModal', { timeout: 10000 }).should('not.be.visible');

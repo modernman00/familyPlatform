@@ -16,7 +16,7 @@ describe('Mixed Media & Multiple Video Posts: Photos and Videos in One Post', ()
         openModal('postModal');
 
         // 2. Type caption
-        cy.get('textarea#postMessage').type(testCaption);
+        cy.get('#postMessageEditor').click().type(testCaption);
 
         // 3. Attach a photo via #imageUpload
         cy.get('#imageUpload').selectFile('cypress/fixtures/test_photo.png', { force: true });
@@ -55,7 +55,7 @@ describe('Mixed Media & Multiple Video Posts: Photos and Videos in One Post', ()
         openModal('postModal');
 
         // 2. Type caption
-        cy.get('textarea#postMessage').type(testCaption);
+        cy.get('#postMessageEditor').click().type(testCaption);
 
         // 3. Attach a photo
         cy.get('#imageUpload').selectFile('cypress/fixtures/test_photo.png', { force: true });

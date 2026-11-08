@@ -784,7 +784,16 @@ class AtgEmojiService
         $fnStmt = $db->prepare("UPDATE family_nodes SET avatar_url = ? WHERE user_id = ?");
         $fnStmt->execute(['/resources/images/profile/' . $activeFileName, $id]);
 
-        // 3. Update active session
+        // 3. Persist procedural traits for Me-stickers (RFC-0011). Never blocks the save.
+        if ($mode !== 'living_photo') {
+            try {
+                (new AvatarStickerService($db))->saveTraits($id, $traits, 'procedural');
+            } catch (\Throwable $e) {
+                error_log('[AtgEmojiService::saveAvatar] sticker traits not saved: ' . $e->getMessage());
+            }
+        }
+
+        // 4. Update active session
         if (session_status() === PHP_SESSION_ACTIVE) {
             $_SESSION['img'] = $activeFileName;
             $_SESSION['profilePics'] = $activeFileName;

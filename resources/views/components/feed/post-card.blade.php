@@ -1834,12 +1834,57 @@
             </div>
           </div>
 
-          <div class="comment-emoji-grid">
+          <div class="comment-emoji-tabs" role="tablist" aria-label="Emoji type">
+            <button type="button" class="comment-emoji-tab" role="tab" data-testid="comment-emoji-tab-standard"
+                    :class="commentEmojiTab === 'standard' ? 'active' : ''"
+                    :aria-selected="commentEmojiTab === 'standard' ? 'true' : 'false'"
+                    @click.stop="commentEmojiTab = 'standard'">😀 Standard</button>
+            <button type="button" class="comment-emoji-tab" role="tab" data-testid="comment-emoji-tab-living"
+                    :class="commentEmojiTab === 'living' ? 'active' : ''"
+                    :aria-selected="commentEmojiTab === 'living' ? 'true' : 'false'"
+                    @click.stop="commentEmojiTab = 'living'">✨ Living</button>
+            <button type="button" class="comment-emoji-tab" role="tab" data-testid="comment-emoji-tab-me"
+                    :class="commentEmojiTab === 'me' ? 'active' : ''"
+                    :aria-selected="commentEmojiTab === 'me' ? 'true' : 'false'"
+                    @click.stop="openMeStickerTab()">🙋 Me</button>
+          </div>
+
+          <template x-if="commentEmojiOpen[post.post_no] && commentEmojiTab === 'me'">
+            <div class="me-sticker-grid me-sticker-grid--comment" data-testid="comment-me-grid">
+              <span class="text-muted small" x-show="!meStickers && !meStickersError">Loading your avatar…</span>
+              <span class="text-muted small" x-show="meStickersError">Could not load your avatar.</span>
+              <template x-if="meStickers && !meStickers.available">
+                <a href="/member/emoji-studio" class="btn btn-sm btn-warning rounded-pill fw-semibold" style="min-height:44px;">🎨 Save your avatar in Emoji Studio to unlock Me-stickers</a>
+              </template>
+              <template x-for="st in (meStickers && meStickers.available ? meStickers.stickers : [])" :key="st.reaction">
+                <button type="button" class="me-sticker-btn" :title="st.label" :aria-label="'Add my avatar: ' + st.label"
+                        @click="insertMeStickerIntoComment(post.post_no, st.token)">
+                  <img :src="st.url" width="52" height="52" alt="" loading="lazy">
+                  <span x-text="st.label"></span>
+                </button>
+              </template>
+            </div>
+          </template>
+
+          <div class="comment-emoji-grid" x-show="commentEmojiTab === 'standard'">
             <template x-for="emoji in commentEmojiPalette" :key="emoji">
               <button type="button" class="comment-emoji-btn" @click="insertEmojiIntoComment(post.post_no, emoji)"
                       :aria-label="'Insert ' + emoji" x-text="emoji"></button>
             </template>
           </div>
+
+          {{-- Perf: only build the living grid while this post's picker is open on that tab --}}
+          <template x-if="commentEmojiOpen[post.post_no] && commentEmojiTab === 'living'">
+            <div class="comment-living-grid" data-testid="comment-living-grid">
+              <template x-for="le in commentLivingPalette" :key="le.id">
+                <button type="button" class="comment-living-btn" :data-emoji-id="le.id"
+                        @click="insertLivingEmojiIntoComment(post.post_no, le.id)"
+                        :title="le.title" :aria-label="'Insert living emoji ' + le.title">
+                  <img :src="'/public/img/emoji/' + le.id + '.svg?v=20261107a'" :alt="le.title" width="38" height="38" loading="lazy" class="atg-3d-emoji">
+                </button>
+              </template>
+            </div>
+          </template>
         </div>
 
         <!-- GIF picker popup for comment input -->
