@@ -28,12 +28,26 @@
         <!-- Left Column: Live Motion Stage -->
         <div class="atg-preview-stage">
             <div class="atg-stage-sticky">
+                @if (!empty($hasProfilePhoto))
+                    <div class="atg-look-switch" role="radiogroup" aria-label="Build my avatar from">
+                        <button type="button" class="atg-look-btn" role="radio" data-look="photo" aria-checked="true">📸 My photo</button>
+                        <button type="button" class="atg-look-btn" role="radio" data-look="avatar" aria-checked="false">🎨 Cartoon</button>
+                    </div>
+                @endif
                 <div class="atg-canvas-viewport" id="atgAvatarViewport"
                      data-traits='@json($initialTraits)'
                      tabindex="0" role="button"
                      aria-label="Your live avatar. Tap to make it react; drag to rotate."
                      title="Tap to react · drag to rotate">
                     {!! $initialSvg !!}
+                    @if (!empty($hasProfilePhoto))
+                        {{-- Your real portrait acting out the chosen reaction (same art as the Me-sticker). --}}
+                        <img id="atgPhotoStickerStage" class="atg-photo-sticker-stage" alt="Your photo avatar" hidden
+                             data-base="/api/emoji/avatar-sticker/{{ rawurlencode((string)$stickerUserId) }}/"
+                             data-photo-url="{{ $stickerPhotoUrl ?? '' }}"
+                             data-face-known="{{ !empty($stickerFaceKnown) ? '1' : '0' }}"
+                             src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+                    @endif
                     <div class="atg-react-layer" aria-hidden="true"></div>
                 </div>
 
@@ -54,25 +68,25 @@
             </div>
 
             <div class="atg-motion-controls">
-                <button type="button" id="atgTalkBtn" class="atg-motion-toggle" aria-pressed="false">
+                <button type="button" id="atgTalkBtn" class="atg-motion-toggle atg-cartoon-only" aria-pressed="false">
                     <span class="atg-motion-icon">🎙️</span>
                     <span><strong>Talk mode</strong><small>Lip-syncs to your voice · audio never leaves your device</small></span>
                 </button>
-                <button type="button" id="atgSensorBtn" class="atg-motion-toggle" aria-pressed="false" hidden>
+                <button type="button" id="atgSensorBtn" class="atg-motion-toggle atg-cartoon-only" aria-pressed="false" hidden>
                     <span class="atg-motion-icon">📱</span>
                     <span><strong>Tilt &amp; shake</strong><small>Tilt to steer its gaze · shake for a laugh</small></span>
                 </button>
-                <label class="atg-living-toggle">
+                <label class="atg-living-toggle atg-cartoon-only">
                     <input type="checkbox" id="atgAnimatedSave" checked>
                     <span><strong>Living profile photo</strong><small>Blinks &amp; breathes wherever your photo shows</small></span>
                 </label>
             </div>
 
             <div class="atg-preview-actions">
-                <button type="button" id="atgSaveAvatarBtn" class="atg-btn-primary btn-spin-on-click" data-spin="true">
+                <button type="button" id="atgSaveAvatarBtn" class="atg-btn-primary btn-spin-on-click atg-cartoon-only" data-spin="true">
                     <span>✨ Set as Profile Picture</span>
                 </button>
-                <button type="button" id="atgRandomAvatarBtn" class="atg-btn-secondary">
+                <button type="button" id="atgRandomAvatarBtn" class="atg-btn-secondary atg-cartoon-only">
                     <span>🎲 Surprise Me</span>
                 </button>
                 <a id="atgUseInPostBtn" class="atg-btn-secondary text-decoration-none" href="/member/profilePage?compose_sticker=hello"
@@ -80,7 +94,8 @@
                     <span>📣 Use in a post</span>
                 </a>
             </div>
-            <p class="atg-stage-note">Me-stickers use your <strong>saved</strong> avatar. Tap a reaction above, then <em>Use in a post</em>.</p>
+            <p class="atg-stage-note atg-cartoon-only">Tap a reaction above, then <em>Use in a post</em> — your avatar joins the post as a Me-sticker. Your profile photo stays as it is.</p>
+            <p class="atg-stage-note atg-photo-only">This is your real profile photo. Tap a reaction above, then <em>Use in a post</em>: exactly this goes into your post.</p>
             @if (!empty($hasSavedLook))
                 <p class="atg-stage-note">Loaded your current studio look.</p>
             @endif
@@ -151,9 +166,6 @@
                             <span class="badge" style="background: rgba(163, 22, 33, 0.1); color: #a31621; font-weight: 700;">ATG Pod 1 &amp; Pod 3 Neural Pipeline</span>
                             <h3 class="h5 fw-bold text-dark mt-1 mb-0">Transform Your Photo into a Lifelike Living Avatar</h3>
                         </div>
-                        <span id="atgIdentityScoreBadge" class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
-                            Identity Lock: 99.4%
-                        </span>
                     </div>
                     <p class="text-sm text-slate-600 mb-3">
                         Upload a portrait or take a snapshot to extract your exact complexion undertone, hair tone, and facial geometry while animating natural eye blinks, breathing depth, and 3D head-tracking parallax.
@@ -222,114 +234,19 @@
                             </div>
                         </div>
 
-                        <!-- Critical Realism & Post-Processing Parameters -->
+                        <!-- What to do with the photo (no fake "AI" tuning: the photo is used as it is) -->
                         <div class="col-md-7">
                             <div class="p-3 rounded-4 border bg-white">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="fw-bold text-dark small text-uppercase">Critical Realism &amp; Identity Parameters</span>
-                                    <button type="button" id="atgResetRealismParamsBtn" class="btn btn-sm btn-link text-decoration-none p-0" style="min-height: 44px; min-width: 44px;">Reset Optimal</button>
-                                </div>
-
-                                <div class="mb-2">
-                                    <div class="d-flex justify-content-between small fw-semibold">
-                                        <label for="atgParamDenoising">Denoising Strength (Identity vs Synthesis)</label>
-                                        <span id="atgParamDenoisingVal">0.38</span>
-                                    </div>
-                                    <input type="range" id="atgParamDenoising" class="form-range" min="0.20" max="0.75" step="0.01" value="0.38">
-                                    <small class="text-muted d-block" style="font-size: 0.82rem;">Optimal: 0.32–0.42. Higher values (&gt;0.55) risk losing facial identity.</small>
-                                </div>
-
-                                <div class="mb-2">
-                                    <div class="d-flex justify-content-between small fw-semibold">
-                                        <label for="atgParamCfg">CFG Scale (Prompt &amp; Structure Adherence)</label>
-                                        <span id="atgParamCfgVal">6.5</span>
-                                    </div>
-                                    <input type="range" id="atgParamCfg" class="form-range" min="3.5" max="12.0" step="0.5" value="6.5">
-                                    <small class="text-muted d-block" style="font-size: 0.82rem;">Optimal: 5.5–7.5. Avoid &gt;9.0 to prevent harsh contrast &amp; burnt skin tones.</small>
-                                </div>
-
-                                <div class="mb-2">
-                                    <div class="d-flex justify-content-between small fw-semibold">
-                                        <label for="atgParamFaceRestore">Face Restoration Weight (CodeFormer / GFPGAN)</label>
-                                        <span id="atgParamFaceRestoreVal">0.65</span>
-                                    </div>
-                                    <input type="range" id="atgParamFaceRestore" class="form-range" min="0.30" max="0.95" step="0.05" value="0.65">
-                                    <small class="text-muted d-block" style="font-size: 0.82rem;">Optimal: 0.60–0.75. Preserves natural pores without plastic over-smoothing.</small>
-                                </div>
-
-                                <div class="row g-2 mt-1">
-                                    <div class="col-sm-4">
-                                        <label for="atgParamSkinTexture" class="small fw-semibold d-flex justify-content-between">
-                                            <span>Skin Texture</span><span id="atgParamSkinTextureVal">0.72</span>
-                                        </label>
-                                        <input type="range" id="atgParamSkinTexture" class="form-range" min="0.0" max="1.0" step="0.04" value="0.72">
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <label for="atgParamSharpening" class="small fw-semibold d-flex justify-content-between">
-                                            <span>Micro-Sharpen</span><span id="atgParamSharpeningVal">0.45</span>
-                                        </label>
-                                        <input type="range" id="atgParamSharpening" class="form-range" min="0.0" max="1.0" step="0.05" value="0.45">
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <label for="atgParamEyeRetouch" class="small fw-semibold d-flex justify-content-between">
-                                            <span>Eye Catchlight</span><span id="atgParamEyeRetouchVal">0.80</span>
-                                        </label>
-                                        <input type="range" id="atgParamEyeRetouch" class="form-range" min="0.0" max="1.0" step="0.05" value="0.80">
-                                    </div>
-                                </div>
-
-                                <div class="d-flex flex-wrap gap-2 mt-3">
-                                    <button type="button" id="atgSyncPhotoToAvatarBtn" class="atg-btn-primary btn-spin-on-click" data-spin="true">
-                                        <span>🧬 Match Complexion &amp; Sync to 3D Rig</span>
+                                <p class="small text-muted mb-2">Your photo is used exactly as it is: nothing is redrawn. Choose what to do with it:</p>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" id="atgSaveLivingPortraitBtn" class="atg-btn-primary btn-spin-on-click" data-spin="true">
+                                        <span>✨ Make it my blinking profile picture</span>
                                     </button>
-                                    <button type="button" id="atgSaveLivingPortraitBtn" class="atg-btn-secondary btn-spin-on-click" data-spin="true">
-                                        <span>✨ Save Living Photo as Profile Picture</span>
+                                    <button type="button" id="atgSyncPhotoToAvatarBtn" class="atg-btn-secondary btn-spin-on-click" data-spin="true">
+                                        <span>🎨 Colour my cartoon from this photo</span>
                                     </button>
                                 </div>
                                 <div id="atgPhotoMatchSummary" class="small text-success fw-semibold mt-2" style="display: none;"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Actionable 4-Stage Engineering Guide -->
-                    <div class="p-3 rounded-4 border bg-light">
-                        <h4 class="h6 fw-bold text-dark mb-2">📖 ATG Lifelike Avatar Production Guide: Preserving Identity &amp; Realism</h4>
-                        <div class="row g-3 small text-slate-700">
-                            <div class="col-md-6">
-                                <div class="p-2 bg-white rounded-3 border h-100">
-                                    <strong class="text-dark d-block mb-1">1. Image Selection &amp; Lighting</strong>
-                                    <ul class="mb-0 ps-3">
-                                        <li>Use a sharp, front-facing or slight 3/4 portrait (minimum 512×512px) with even, natural daylight.</li>
-                                        <li>Avoid heavy beauty filters, extreme wide-angle selfie distortion (&lt;24mm focal length), or sunglasses covering key periocular landmarks.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="p-2 bg-white rounded-3 border h-100">
-                                    <strong class="text-dark d-block mb-1">2. Prompt Crafting &amp; Conditioning</strong>
-                                    <ul class="mb-0 ps-3">
-                                        <li>Anchor prompts on natural photography descriptors: <em>"85mm portrait lens, natural skin micro-texture, subtle subsurface scattering, authentic catchlights"</em>.</li>
-                                        <li>Include negative prompts against uncanny artefacts: <em>"plastic skin, airbrushed, asymmetrical pupils, over-saturated, wax figure"</em>.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="p-2 bg-white rounded-3 border h-100">
-                                    <strong class="text-dark d-block mb-1">3. Model &amp; Identity Settings</strong>
-                                    <ul class="mb-0 ps-3">
-                                        <li><strong>Denoising Strength (0.32–0.42):</strong> Keeps bone structure, philtrum, and eye spacing locked to the source photo.</li>
-                                        <li><strong>CFG Scale (5.5–7.5) &amp; Face Restoration (0.60–0.75):</strong> Balances crisp facial fidelity without erasing freckles, wisdom lines, or melanin undertone warmth.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="p-2 bg-white rounded-3 border h-100">
-                                    <strong class="text-dark d-block mb-1">4. Post-Processing &amp; Pitfalls to Avoid</strong>
-                                    <ul class="mb-0 ps-3">
-                                        <li><strong>High-Pass Skin Texture &amp; Eye Retouching:</strong> Apply selective micro-sharpening (0.40–0.50) to iris rims and eyelashes while keeping specular catchlights crisp.</li>
-                                        <li><strong>Pitfalls to Avoid:</strong> Over-smoothing (plastic doll effect), high denoising (&gt;0.55) causing distorted jaw/eye proportions, and white-balance clipping that turns rich skin tones grey or orange.</li>
-                                    </ul>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -408,5 +325,148 @@
             link.href = '/member/profilePage?compose_sticker=' + b.dataset.reaction;
         }
     }));
+
+    // Photo avatar: the member's real portrait claps, laughs, waves… exactly as in the Me-sticker.
+    (function () {
+        const img = document.getElementById('atgPhotoStickerStage');
+        const viewport = document.getElementById('atgAvatarViewport');
+        const btns = document.querySelectorAll('.atg-look-btn');
+        if (!img || !viewport || !btns.length) return;
+        const order = ['hello', 'laugh', 'wow', 'love', 'nod', 'dance', 'point', 'clap'];
+        let current = 'hello';
+        let bust = '';
+        const show = (reaction) => {
+            if (order.indexOf(reaction) === -1) return;
+            current = reaction;
+            syncLink();
+            img.src = img.dataset.base + reaction + '?look=photo' + bust;
+            img.alt = 'Your photo avatar: ' + reaction;
+        };
+
+        // Find the face once per photo (MediaPipe BlazeFace, runs on this device only) and
+        // store its position so every sticker zooms in on it. Never blocks the studio.
+        let faceTried = false;
+        const MP = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
+        const MODEL = 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
+        const largest = (res) => (res && res.detections || [])
+            .map(d => d.boundingBox).filter(Boolean)
+            .sort((a, b) => b.width * b.height - a.width * a.height)[0] || null;
+        const findFace = async () => {
+            if (faceTried || img.dataset.faceKnown === '1' || !img.dataset.photoUrl) return;
+            faceTried = true;
+            try {
+                const photo = new Image();
+                photo.decoding = 'async';
+                photo.src = img.dataset.photoUrl;
+                await photo.decode();
+                const W = photo.naturalWidth, H = photo.naturalHeight;
+                const vision = await import(MP + '/vision_bundle.mjs');
+                const fileset = await vision.FilesetResolver.forVisionTasks(MP + '/wasm');
+                const detector = await vision.FaceDetector.createFromOptions(fileset, {
+                    baseOptions: { modelAssetPath: MODEL, delegate: 'CPU' }, runningMode: 'IMAGE', minDetectionConfidence: 0.5
+                });
+                // Pass 1: whole photo (selfies, head-and-shoulders).
+                let box = largest(detector.detect(photo));
+                let fx = 0, fy = 0, fw = W, fh = H;
+                if (!box) {
+                    // Pass 2: small faces in full-length photos: zoom into the top-centre area.
+                    fw = Math.round(W * 0.6); fh = Math.round(Math.min(H, fw * 1.2));
+                    fx = Math.round((W - fw) / 2); fy = 0;
+                    const c = document.createElement('canvas');
+                    const k = Math.min(1, 1024 / Math.max(fw, fh));
+                    c.width = Math.round(fw * k); c.height = Math.round(fh * k);
+                    c.getContext('2d').drawImage(photo, fx, fy, fw, fh, 0, 0, c.width, c.height);
+                    const b2 = largest(detector.detect(c));
+                    if (b2) box = { originX: b2.originX / k, originY: b2.originY / k, width: b2.width / k, height: b2.height / k };
+                }
+                detector.close();
+                if (!box) return;
+                const payload = {
+                    x: Math.max(0, (fx + box.originX) / W),
+                    y: Math.max(0, (fy + box.originY) / H),
+                    w: Math.min(1, box.width / W),
+                    h: Math.min(1, box.height / H)
+                };
+                payload.w = Math.min(payload.w, 1 - payload.x);
+                payload.h = Math.min(payload.h, 1 - payload.y);
+                const token = document.querySelector('input[name="token"]')?.value ||
+                    document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const r = await fetch('/api/emoji/me-stickers/face', {
+                    method: 'POST', credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ box: payload, token: token, csrf_token: token })
+                }).then(res => res.json());
+                if (r && r.success) {
+                    img.dataset.faceKnown = '1';
+                    bust = '&f=' + encodeURIComponent(r.version || Date.now());
+                    if (window.atgStickerLook === 'photo') show(current);
+                }
+            } catch (err) {
+                console.info('[Me-sticker] face zoom skipped:', err && err.message ? err.message : err);
+            }
+        };
+        const stage = viewport.closest('.atg-preview-stage');
+        const link = document.getElementById('atgUseInPostBtn');
+        const syncLink = () => { if (link) link.href = '/member/profilePage?compose_sticker=' + current; };
+        const setLook = (look) => {
+            window.atgStickerLook = look;
+            const photo = look === 'photo';
+            viewport.classList.toggle('atg-photo-look', photo);
+            if (stage) stage.classList.toggle('atg-photo-mode', photo);
+            img.hidden = !photo;
+            btns.forEach(b => b.setAttribute('aria-checked', String(b.dataset.look === look)));
+            if (photo) { show(current); findFace(); }
+            try { localStorage.setItem('atgStickerLook', look); } catch (e) { /* private mode */ }
+        };
+        btns.forEach(b => b.addEventListener('click', () => setLook(b.dataset.look)));
+        // Anything that edits the cartoon shows the cartoon, so changes are never invisible.
+        document.querySelectorAll('#avatar-tab, #atgSyncPhotoToAvatarBtn').forEach(el =>
+            el.addEventListener('click', (e) => {
+                if (window.atgStickerLook === 'photo' && (el.id === 'atgSyncPhotoToAvatarBtn' || e.target.closest('.atg-trait-pill'))) {
+                    setLook('avatar');
+                }
+            }));
+        document.querySelectorAll('.atg-react-btn[data-reaction]').forEach(b =>
+            b.addEventListener('click', () => { if (window.atgStickerLook === 'photo') show(b.dataset.reaction); }));
+        viewport.addEventListener('click', () => {
+            if (window.atgStickerLook === 'photo') show(order[(order.indexOf(current) + 1) % order.length]);
+        });
+        let saved = null;
+        try { saved = localStorage.getItem('atgStickerLook'); } catch (e) { /* private mode */ }
+        setLook(saved === 'avatar' ? 'avatar' : 'photo');
+    })();
+
+    // "Use in a post" stickers the look on screen right now — saved as the Me-sticker
+    // avatar only, so a member's real profile photo is never replaced.
+    (function () {
+        const link = document.getElementById('atgUseInPostBtn');
+        if (!link) return;
+        link.addEventListener('click', function (e) {
+            const engine = window.AtgEmojiEngine;
+            if (!engine || !engine.state || link.dataset.busy === '1') return;
+            e.preventDefault();
+            link.dataset.busy = '1';
+            link.setAttribute('aria-busy', 'true');
+            const token = document.querySelector('input[name="token"]')?.value ||
+                document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            const go = () => { window.location.href = link.href; };
+            const source = window.atgStickerLook === 'photo' ? 'photo' : 'avatar';
+            fetch('/api/emoji/me-stickers/look', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify(Object.assign({}, engine.state, { token: token, csrf_token: token, source: source }))
+            }).then(r => r.json()).then(d => {
+                if (d && d.success) { go(); return; }
+                throw new Error((d && d.error) || 'save failed');
+            }).catch(err => {
+                link.dataset.busy = '';
+                link.removeAttribute('aria-busy');
+                if (window.Swal) {
+                    window.Swal.fire({ icon: 'error', title: 'Could not prepare your sticker', text: String(err && err.message || err) });
+                }
+            });
+        });
+    })();
 </script>
 @endsection

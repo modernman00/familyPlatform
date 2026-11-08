@@ -633,6 +633,18 @@ body.dark-theme .atg-live-emoji .atg-3d-emoji,
     max-height: 260px;
     overflow-y: auto;
 }
+/* Unlock prompt spans the whole grid instead of being squeezed into one 84px cell. */
+.me-sticker-unlock {
+    grid-column: 1 / -1;
+    justify-self: start;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    white-space: normal;
+    text-align: left;
+    line-height: 1.3;
+    padding: 8px 16px;
+}
 .me-sticker-grid--comment { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); max-height: 220px; padding: 2px; }
 .me-sticker-btn {
     display: flex;
@@ -1240,3 +1252,22 @@ button.atg-trait-pill {
         animation: none;
     }
 }
+
+/* Comment picker: Me-tab hint (skin/hair come from the studio, not the tone row). */
+.me-sticker-hint { grid-column: 1 / -1; font-size: 0.72rem; color: #6b7280; line-height: 1.3; }
+.me-sticker-hint a { color: inherit; text-decoration: underline; }
+/* Me-sticker chip in the comment field: transparent SVG, no GIF frame. */
+.comment-composer__sticker { background: transparent; }
+
+/* Photo avatar look (real portrait acting out reactions) */
+.atg-look-switch { display: flex; justify-content: center; gap: 8px; margin-bottom: 12px; }
+.atg-look-btn {
+    min-height: 44px; padding: 8px 16px; border-radius: 999px; font-weight: 600;
+    border: 2px solid #e5e7eb; background: #fff; color: #1f2937; cursor: pointer;
+}
+.atg-look-btn[aria-checked="true"] { border-color: #7c3aed; background: #f5f3ff; color: #5b21b6; }
+.atg-canvas-viewport.atg-photo-look > .atg-avatar-svg { display: none; }
+.atg-photo-sticker-stage { display: block; width: 100%; height: 100%; object-fit: contain; }
+.atg-photo-sticker-stage[hidden] { display: none; }
+.atg-preview-stage.atg-photo-mode .atg-cartoon-only { display: none !important; }
+.atg-preview-stage:not(.atg-photo-mode) .atg-photo-only { display: none !important; }

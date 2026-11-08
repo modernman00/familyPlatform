@@ -129,6 +129,68 @@ final class AvatarStickerServiceTest extends TestCase
         }
     }
 
+    public function testPhotoStickerEmbedsTheUntouchedPortraitAndActsOutEachReaction(): void
+    {
+        $dir = sys_get_temp_dir() . '/phpunit_stk_' . bin2hex(random_bytes(4));
+        mkdir($dir);
+        $photo = $dir . '/me.jpg';
+        $im = imagecreatetruecolor(300, 400);
+        imagefill($im, 0, 0, (int)imagecolorallocate($im, 150, 100, 70));
+        imagejpeg($im, $photo);
+
+        $props = ['clap' => 'mp-cl', 'hello' => 'mp-wave', 'laugh' => 'mp-tl', 'wow' => 'mp-wl',
+                  'love' => 'mp-h1', 'nod' => 'mp-tu', 'dance' => 'mp-dl', 'point' => 'mp-pt'];
+        foreach ($props as $reaction => $cls) {
+            $svg = (string)$this->svc->renderPhotoSticker($photo, $reaction);
+            $doc = new \DOMDocument();
+            $this->assertTrue(@$doc->loadXML($svg), "well-formed XML for $reaction");
+            $this->assertStringContainsString('href="data:image/jpeg;base64,', $svg, 'portrait embedded, no external fetch');
+            $this->assertStringContainsString('class="' . $cls, $svg, "$reaction prop present");
+            $this->assertStringNotContainsString('<script', $svg);
+        }
+        $this->assertNull($this->svc->renderPhotoSticker($dir . '/missing.jpg', 'clap'));
+        @unlink($photo);
+        @rmdir($dir);
+    }
+
+    public function testFaceBoxZoomsTheCropAndRejectsBadBoxes(): void
+    {
+        $dir = sys_get_temp_dir() . '/phpunit_face_' . bin2hex(random_bytes(4));
+        mkdir($dir);
+        $photo = $dir . '/me.jpg';
+        // 400x400 white photo with a black 40x40 "face" at (300,40).
+        $im = imagecreatetruecolor(400, 400);
+        imagefill($im, 0, 0, (int)imagecolorallocate($im, 255, 255, 255));
+        imagefilledrectangle($im, 300, 40, 339, 79, (int)imagecolorallocate($im, 0, 0, 0));
+        imagejpeg($im, $photo, 95);
+
+        $valid = new \ReflectionMethod(AvatarStickerService::class, 'validFaceBox');
+        $this->assertNull($valid->invoke(null, ['x' => 0.9, 'y' => 0, 'w' => 0.5, 'h' => 0.5]), 'box off the photo');
+        $this->assertNull($valid->invoke(null, ['x' => 'a', 'y' => 0, 'w' => 0.5, 'h' => 0.5]), 'non-numeric');
+        $this->assertNull($valid->invoke(null, ['x' => 0, 'y' => 0, 'w' => 0.001, 'h' => 0.5]), 'too small');
+
+        $full = (string)$this->svc->photoDataUri($photo, 64);
+        $file = (new \ReflectionMethod(AvatarStickerService::class, 'faceBoxFile'))->invoke(null, $photo);
+        @mkdir(dirname($file), 0755, true);
+        file_put_contents($file, json_encode(['x' => 0.75, 'y' => 0.1, 'w' => 0.1, 'h' => 0.1]));
+        $zoomed = (string)$this->svc->photoDataUri($photo, 64);
+        @unlink($file);
+
+        $dark = static function (string $uri): int {
+            $g = imagecreatefromstring((string)base64_decode(substr($uri, strlen('data:image/jpeg;base64,'))));
+            $n = 0;
+            for ($x = 0; $x < 64; $x++) {
+                for ($y = 0; $y < 64; $y++) {
+                    $n += ((imagecolorat($g, $x, $y) >> 16) & 0xFF) < 80 ? 1 : 0;
+                }
+            }
+            return $n;
+        };
+        $this->assertGreaterThan($dark($full) * 3, $dark($zoomed), 'face fills far more of the zoomed crop');
+        @unlink($photo);
+        @rmdir($dir);
+    }
+
     public function testPlainTextSurfacesShowGlyphsNotRawTokens(): void
     {
         $this->assertSame('Well done 👏 ✨ team', EmojiPlainText::humanize('Well done :me_clap@ME1: :family_toast_3d: team'));

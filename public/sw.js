@@ -13,7 +13,7 @@
 
 'use strict';
 
-const SW_VERSION = 'v2.5.1';
+const SW_VERSION = 'v2.5.2'; // bumped to purge Me-sticker images cached cache-first
 const STATIC_CACHE = `fp-static-${SW_VERSION}`;
 const DYNAMIC_CACHE = `fp-dynamic-${SW_VERSION}`;
 const IMAGE_CACHE = `fp-images-${SW_VERSION}`;
@@ -205,7 +205,10 @@ self.addEventListener('fetch', (event) => {
     url.pathname.startsWith('/auth') ||
     url.pathname.startsWith('/webauthn') ||
     url.pathname.startsWith('/signout') ||
-    url.pathname.includes('/tests/clear-rate-limit');
+    url.pathname.includes('/tests/clear-rate-limit') ||
+    // Me-stickers are live images (same URL, new look after a studio save); the server
+    // revalidates them by ETag, so a cache-first copy would show a stale avatar forever.
+    url.pathname.startsWith('/api/emoji/avatar-sticker');
 
   if (
     isSensitiveEndpoint ||

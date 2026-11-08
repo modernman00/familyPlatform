@@ -112,6 +112,8 @@ const handleHashNavigation = () => {
     '#v-pills-familycode': 'v-pills-familycode-tab',
     '#family-code': 'v-pills-familycode-tab',
     '#family-network': 'v-pills-familycode-tab',
+    '#lineage': 'v-pills-familycode-tab',
+    '#dual-lineage': 'v-pills-familycode-tab',
   };
 
   const targetTabId = hashMap[hash.toLowerCase()];

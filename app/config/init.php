@@ -155,6 +155,15 @@ if (php_sapi_name() !== 'cli') {
                     );
                     header('Content-Security-Policy: ' . $value, true);
                 }
+                // Emoji Studio only: the MediaPipe face detector (photo Me-stickers) compiles
+                // WebAssembly and fetches its model from Google's model bucket. Scoped to this
+                // one page so the rest of the site keeps the stricter policy.
+                $path = (string)parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
+                if (rtrim($path, '/') === '/member/emoji-studio' && strpos($value, 'wasm-unsafe-eval') === false) {
+                    $value = preg_replace('/script-src(?!-)([^;]*)/', "script-src$1 'wasm-unsafe-eval'", $value, 1);
+                    $value = preg_replace('/connect-src([^;]*)/', 'connect-src$1 https://storage.googleapis.com', $value, 1);
+                    header('Content-Security-Policy: ' . $value, true);
+                }
                 break;
             }
         }

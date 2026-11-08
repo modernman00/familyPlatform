@@ -78,3 +78,27 @@ Alternatives I rejected:
 - **Ownership check:** enforced in `LinkPreviewService::sanitizePostMessage()`. Every post, comment, edit and reflection write passes through it, so one check covers them all.
 - **Tests:** `tests/Feature/AvatarStickerServiceTest.php` (8 tests) and `cypress/e2e/avatar_sticker.cy.js` (3 tests).
 - **Plain-text surfaces:** `EmojiPlainText::humanize()` turns sticker tokens into their glyph (e.g. `:me_clap@ID:` → 👏) and living-emoji tokens into ✨. It is applied in `NotificationOrchestrator::dispatch()`, `PushNotificationClass::sendPushNotification()` and `PostDto::deriveHookFromMessage()`.
+
+## Amendment (2026-11-08): sticker look without changing the profile photo
+
+Members who keep a real profile photo had no traits row, so "Use in a post" landed on the unlock card.
+`POST /api/emoji/me-stickers/look` (CSRF, own user only) now stores the on-screen studio traits in
+`member_avatar_traits` without touching `profilePics`; the studio's *Use in a post* button calls it before
+opening the composer. The unlock card spans the full picker grid.
+
+## Amendment (2026-11-08): photo Me-stickers (the member's real portrait)
+
+The cartoon avatar did not look like the member, so stickers can now be built from the profile photo itself.
+- `AvatarStickerService::getStickerSource()` picks the look. If `member_avatar_traits.mode` is `procedural`, the cartoon is used. In every other case a real profile photo (jpg/png/webp, or the PNG inside a Living Photo) is used, and the cartoon is the fallback.
+- `renderPhotoSticker()` embeds a square JPEG crop of the photo as a data URI. It honours EXIF orientation and is cached in `storage/cache/me-stickers/`. **The pixels are never stylised.** The reaction is acted out around the photo: hands tinted with the member's own skin tone (taken from the photo with a YCbCr skin median) clap, wave, point or go up to the cheeks for *wow*, and there are tears of joy, hearts, a thumbs-up and music notes.
+- Studio: a *📸 My photo / 🎨 Cartoon* switch above the stage. In photo mode the reaction buttons show the real sticker art (`?look=photo`, owner only). *Use in a post* saves `mode=photo`.
+- Feed and composer sticker URLs moved from `?v=live` to `?v=live2`. Browsers had cached `?v=live` for 24 hours under the old `max-age`, which is why the feed showed an old look.
+- Living Photo privacy (§5 Q2): a photo sticker is served only under the same family gate as the profile photo, which the same family can already see.
+
+## Amendment (2026-11-08): face zoom for photo Me-stickers
+- **Detection runs in the member's browser** in Emoji Studio, using MediaPipe Tasks Vision `@mediapipe/tasks-vision@0.10.14` with the BlazeFace short-range model on the CPU delegate. The photo never leaves the device for this step. Only the face box (four fractions) is POSTed to `/api/emoji/me-stickers/face` (CSRF-checked, own photo only).
+- If the first pass finds nothing, a second pass looks at the top-centre crop, which catches small faces in full-length shots. If there is still no face, nothing is stored and the sticker keeps the full-photo crop. Books, backs and screenshots return no face.
+- The box is stored at `storage/cache/me-stickers/faces/<md5(path:mtime)>.json`, so a new photo automatically needs fresh detection. It is folded into the sticker `version` so caches refresh.
+- **CSP:** on `/member/emoji-studio` only, `script-src` gains `'wasm-unsafe-eval'` (it allows WebAssembly compilation, not JS `eval`) and `connect-src` gains `https://storage.googleapis.com` (the model). The rest of the site is unchanged. This is done in `app/config/init.php`, not in shared-lib.
+- **Cost:** the first detection downloads about 9.4 MB of WASM plus a 230 KB model from jsDelivr and Google. The browser caches them, and detection runs only once per photo.
+- A pure-PHP skin-colour heuristic was tried first and rejected: it cropped to beige trousers and hands.

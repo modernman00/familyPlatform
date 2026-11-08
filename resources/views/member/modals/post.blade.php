@@ -88,9 +88,9 @@
                                     <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-2.5 py-1" style="font-size: 0.78rem;">
                                         <i class="bi bi-shield-check text-primary me-1"></i> #{{ ltrim((string)$activeFamCode, '#') }}
                                     </span>
-                                    @if(empty($hasMaternalCode))
-                                    <a href="/member/settings?tab=lineage" class="text-decoration-none small text-muted" style="font-size: 0.75rem;" title="Link or create a birth family code to enable dual-lineage posting">
-                                        <i class="bi bi-plus-circle me-0.5"></i> Add Birth Family
+                                    @if(empty($hasDualLineage))
+                                    <a href="/accountSetting#v-pills-familycode" class="text-decoration-none small text-muted d-inline-flex align-items-center" style="font-size: 0.75rem;" title="{{ __('modal.setup_dual_lineage', 'Set up dual lineage (birth & married family codes) in Account Settings') }}">
+                                        <i class="bi bi-diagram-3 me-1"></i> Dual Lineage
                                     </a>
                                     @endif
                                 </div>
@@ -1005,7 +1005,7 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
         });
 
         safe = safe.replace(/:me_(hello|laugh|wow|love|nod|dance|point|clap)@([A-Za-z0-9_-]{1,64}):/g, (match, reaction, uid) => {
-            return `<span class="atg-me-sticker" contenteditable="false" data-sticker-token="${match}"><img src="/api/emoji/avatar-sticker/${uid}/${reaction}" width="56" height="56" alt="My avatar: ${reaction}" style="pointer-events:none;"></span>`;
+            return `<span class="atg-me-sticker" contenteditable="false" data-sticker-token="${match}"><img src="/api/emoji/avatar-sticker/${uid}/${reaction}?v=live2" width="56" height="56" alt="My avatar: ${reaction}" style="pointer-events:none;"></span>`;
         });
 
         isInternalSync = true;
@@ -1195,9 +1195,8 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
         if (!data || !data.available) {
             const a = document.createElement('a');
             a.href = (data && data.studio_url) || '/member/emoji-studio';
-            a.className = 'btn btn-sm btn-warning rounded-pill fw-semibold';
-            a.style.minHeight = '44px';
-            a.textContent = '🎨 Save your avatar in Emoji Studio to unlock Me-stickers';
+            a.className = 'btn btn-sm btn-warning rounded-pill fw-semibold me-sticker-unlock';
+            a.textContent = '🎨 Design your avatar in Emoji Studio to unlock Me-stickers';
             meList.appendChild(a);
             return;
         }
@@ -1255,9 +1254,15 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
             url.searchParams.delete('compose_sticker');
             window.history.replaceState(null, '', url.toString());
         } catch (_) {}
+        let tries = 0;
         const go = () => {
             const modalEl = document.getElementById('postModal');
-            if (!modalEl || !window.bootstrap || !window.bootstrap.Modal || !window.AtgEmojiEngine) return;
+            if (!modalEl) return;
+            if (!window.bootstrap || !window.bootstrap.Modal || !window.AtgEmojiEngine) {
+                // Deferred scripts not ready yet: retry briefly instead of waiting for every feed image.
+                if (++tries < 50) setTimeout(go, 100);
+                return;
+            }
             window.AtgEmojiEngine.getMeStickers().then(d => {
                 window.bootstrap.Modal.getOrCreateInstance(modalEl).show();
                 const insert = () => {
@@ -1276,7 +1281,9 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
                 else modalEl.addEventListener('shown.bs.modal', insert, { once: true });
             }).catch(() => {});
         };
-        if (document.readyState === 'complete') go(); else window.addEventListener('load', go, { once: true });
+        // Open as soon as the DOM + deferred scripts are ready — NOT on window "load", which
+        // waits for every image in the feed and made "Use in a post" feel broken.
+        if (document.readyState !== 'loading') go(); else document.addEventListener('DOMContentLoaded', go, { once: true });
     })();
 
     if (modeAttachBtn && modeInsertBtn) {

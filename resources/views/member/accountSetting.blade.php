@@ -1362,7 +1362,7 @@
       if (cleanHash === 'family-connections' || cleanHash === 'familyConnections') {
         targetTrigger = document.getElementById('v-pills-parents-tab');
         elementToFocus = document.getElementById('familyConnectionsHeading') || document.getElementById('v-pills-parents');
-      } else if (cleanHash === 'family-code-mgt' || cleanHash === 'familyCodeMgt') {
+      } else if (cleanHash === 'family-code-mgt' || cleanHash === 'familyCodeMgt' || cleanHash === 'lineage' || cleanHash === 'dual-lineage' || cleanHash === 'dualLineage') {
         targetTrigger = document.getElementById('v-pills-familycode-tab');
         elementToFocus = document.getElementById('birthFamilyCard') || document.getElementById('v-pills-familycode');
       } else if (!targetTrigger) {
@@ -1402,7 +1402,12 @@
       }
     };
 
-    handleDeepLinkTarget(window.location.hash);
+    const initialTabParam = new URLSearchParams(window.location.search).get('tab');
+    if (initialTabParam && !window.location.hash) {
+      handleDeepLinkTarget('#' + initialTabParam);
+    } else {
+      handleDeepLinkTarget(window.location.hash);
+    }
     window.addEventListener('hashchange', function() {
       handleDeepLinkTarget(window.location.hash);
     });

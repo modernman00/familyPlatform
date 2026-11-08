@@ -543,7 +543,7 @@
                     <strong>Living emojis in posts &amp; comments:</strong> add them from the post composer's <em>✨ 3D Family Emojis</em> tab, or from the <em>✨ Living</em> tab in any comment's emoji picker (it follows your skin-tone choice). In the feed, <strong>tap a living emoji to play it</strong> with a burst of hearts, confetti or stars; tap it again within a moment to open it in 3D / AR.
                   </p>
                   <p class="small text-muted mb-0 mt-2">
-                    <strong>🙋 Me-stickers:</strong> once you save a studio avatar, post <em>yourself</em> waving, laughing, dancing, clapping and more. Pick one from the <em>🙋 Me</em> tab in the post composer or any comment's emoji picker, or tap a reaction in Emoji Studio and press <em>📣 Use in a post</em>. Only your family can see your stickers, and nobody else can post them as you. Living Photo avatars aren't used for stickers.
+                    <strong>🙋 Me-stickers:</strong> post <em>yourself</em> waving, laughing, dancing, clapping and more. With a profile photo, the sticker is your real photo (untouched) with hands in your own skin tone that clap, wave, point and gasp. Emoji Studio finds your face on your device and zooms the sticker in on it. Prefer a cartoon? Switch to <em>🎨 Cartoon</em> in Emoji Studio. Pick one from the <em>🙋 Me</em> tab in the post composer or any comment's emoji picker, or tap a reaction in Emoji Studio and press <em>📣 Use in a post</em> — that saves the look as your sticker avatar without changing your profile photo. Only your family can see your stickers, and nobody else can post them as you.
                   </p>
                 </div>
               </div>

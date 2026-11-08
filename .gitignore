@@ -99,6 +99,7 @@ storage/framework/
 # ------------------------------------------
 storage/reports/
 storage/uploads/
+storage/cache/
 **/uploads/
 **/upload/
 **/user_images/

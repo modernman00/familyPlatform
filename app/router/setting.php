@@ -2,6 +2,14 @@
 
 $router->map('GET', '/accountSetting', 'App\controller\members\SettingController@index', 'accountSetting');
 
+// Defensive redirect: map legacy /member/settings requests to /accountSetting#v-pills-familycode
+$router->map('GET', '/member/settings', function() {
+    $tab = trim((string)($_GET['tab'] ?? ''));
+    $hash = ($tab === 'lineage' || $tab === 'familycode') ? '#v-pills-familycode' : '';
+    header('Location: /accountSetting' . $hash, true, 302);
+    exit;
+}, 'memberSettingsRedirect');
+
 
 $router->map('POST', '/accountSetting', 'App\controller\members\SettingController@post', 'accountSettingPost');
 

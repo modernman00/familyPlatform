@@ -80,6 +80,7 @@ final class AtgEmojiController extends BaseController
             }
         }
 
+        $stickerSvc = new AvatarStickerService();
         view('member.emojiStudio', [
             'data'                   => $data,
             'userData'               => $userData,
@@ -88,6 +89,12 @@ final class AtgEmojiController extends BaseController
             'initialSvg'             => $this->service->renderProceduralAvatar($initialTraits, 256, true),
             'hasSavedLook'           => $savedTraits !== null,
             'currentProfilePhotoUrl' => $currentProfilePhotoUrl,
+            // Photo Me-stickers: the member's real portrait acts out each reaction.
+            'stickerUserId'          => $this->userId,
+            'hasProfilePhoto'        => $stickerSvc->hasProfilePhoto($this->userId),
+            'stickerKind'            => $stickerSvc->getStickerSource($this->userId)['kind'] ?? null,
+            'stickerPhotoUrl'        => $stickerSvc->stickerPhotoUrl($this->userId),
+            'stickerFaceKnown'       => $stickerSvc->hasFaceBox($this->userId),
         ]);
     }
 
@@ -180,7 +187,14 @@ final class AtgEmojiController extends BaseController
             && AvatarStickerService::isValidReaction($reaction)
             && $stickers->canView($this->userId, $ownerId)
         ) {
-            $traits = $stickers->getTraits($ownerId);
+            $traits = $stickers->getStickerSource($ownerId);
+            // Studio preview: the owner may preview their photo sticker before choosing it.
+            if (
+                $traits !== null && $traits['kind'] !== 'photo'
+                && ($_GET['look'] ?? '') === 'photo' && hash_equals($this->userId, $ownerId)
+            ) {
+                $traits = $stickers->getStickerSource($ownerId, true) ?? $traits;
+            }
         }
 
         header('X-Content-Type-Options: nosniff');
@@ -194,7 +208,11 @@ final class AtgEmojiController extends BaseController
 
         $etag = '"' . hash('sha256', $ownerId . ':' . $traits['version'] . ':' . $reaction . ':v1') . '"';
         header('ETag: ' . $etag);
-        header('Cache-Control: private, max-age=86400');
+        // Feed posts reference the UNVERSIONED url (the token carries no version), so it must
+        // revalidate every time — otherwise a re-designed avatar shows the old look for a day.
+        // Composer/picker urls carry ?v=<version> and may be cached for a day.
+        $versioned = isset($_GET['v']) && (string)$_GET['v'] === (string)$traits['version'];
+        header($versioned ? 'Cache-Control: private, max-age=86400' : 'Cache-Control: private, no-cache');
         header('Vary: Cookie');
         if (trim((string)($_SERVER['HTTP_IF_NONE_MATCH'] ?? '')) === $etag) {
             http_response_code(304);
@@ -203,6 +221,19 @@ final class AtgEmojiController extends BaseController
 
         header('Content-Type: image/svg+xml; charset=UTF-8');
         header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'");
+        if ($traits['kind'] === 'photo') {
+            $photoSvg = $stickers->renderPhotoSticker($traits['photo'], $reaction, 160);
+            if ($photoSvg !== null) {
+                echo $photoSvg;
+                return;
+            }
+            // Unreadable photo: fall back to the studio avatar if one exists.
+            $fallback = $stickers->getTraits($ownerId);
+            echo $fallback !== null
+                ? $stickers->renderSticker($fallback['traits'], $reaction, 160)
+                : $stickers->renderSticker([], $reaction, 160);
+            return;
+        }
         echo $stickers->renderSticker($traits['traits'], $reaction, 160);
     }
 
@@ -219,7 +250,7 @@ final class AtgEmojiController extends BaseController
             echo json_encode(['success' => false, 'available' => false]);
             return;
         }
-        $saved = (new AvatarStickerService())->getTraits($this->userId);
+        $saved = (new AvatarStickerService())->getStickerSource($this->userId);
         if ($saved === null) {
             echo json_encode(['success' => true, 'available' => false, 'studio_url' => '/member/emoji-studio']);
             return;
@@ -238,8 +269,86 @@ final class AtgEmojiController extends BaseController
             'available' => true,
             'user_id'   => $this->userId,
             'version'   => $saved['version'],
+            'kind'      => $saved['kind'],
             'stickers'  => $items,
         ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * Save the studio look as the member's Me-sticker avatar WITHOUT touching their
+     * profile picture (members who keep a real photo can still post Me-stickers).
+     * Route: POST /api/emoji/me-stickers/look
+     */
+    public function saveStickerLook(): void
+    {
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: private, no-store');
+        if ($this->userId === '' || !AvatarStickerService::isValidUserId($this->userId)) {
+            http_response_code(401);
+            echo json_encode(['success' => false]);
+            return;
+        }
+        $input = json_decode((string)file_get_contents('php://input'), true);
+        $input = is_array($input) ? $input : [];
+
+        $clientToken = (string)($input['csrf_token'] ?? $input['token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
+        $sessionToken = (string)($_SESSION['token'] ?? '');
+        if ($sessionToken !== '' && !hash_equals($sessionToken, $clientToken)) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Invalid security token. Please refresh the page and try again.']);
+            return;
+        }
+
+        try {
+            $svc = new AvatarStickerService();
+            // source=photo: stickers use the member's real portrait, exactly as uploaded.
+            $usePhoto = ($input['source'] ?? '') === 'photo';
+            if ($usePhoto && !$svc->hasProfilePhoto($this->userId)) {
+                http_response_code(422);
+                echo json_encode(['success' => false, 'error' => 'Add a profile photo first, then try again.']);
+                return;
+            }
+            $svc->saveTraits($this->userId, $this->service->sanitiseTraits($input), $usePhoto ? 'photo' : 'procedural');
+            $saved = $svc->getStickerSource($this->userId);
+            echo json_encode(['success' => true, 'version' => $saved['version'] ?? null]);
+        } catch (\Throwable $e) {
+            error_log('[AtgEmojiController::saveStickerLook] ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Could not save your sticker look.']);
+        }
+    }
+
+    /**
+     * Store the face box the studio's in-browser detector found on the member's own
+     * sticker photo, so photo Me-stickers zoom in on the face.
+     * Route: POST /api/emoji/me-stickers/face  (JSON {x,y,w,h} as fractions 0..1)
+     */
+    public function saveStickerFace(): void
+    {
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: private, no-store');
+        if ($this->userId === '' || !AvatarStickerService::isValidUserId($this->userId)) {
+            http_response_code(401);
+            echo json_encode(['success' => false]);
+            return;
+        }
+        $input = json_decode((string)file_get_contents('php://input'), true);
+        $input = is_array($input) ? $input : [];
+        $clientToken = (string)($input['csrf_token'] ?? $input['token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
+        $sessionToken = (string)($_SESSION['token'] ?? '');
+        if ($sessionToken !== '' && !hash_equals($sessionToken, $clientToken)) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Invalid security token. Please refresh the page and try again.']);
+            return;
+        }
+        $svc = new AvatarStickerService();
+        $box = is_array($input['box'] ?? null) ? $input['box'] : [];
+        if (!$svc->saveFaceBox($this->userId, $box)) {
+            http_response_code(422);
+            echo json_encode(['success' => false, 'error' => 'Face position not saved.']);
+            return;
+        }
+        echo json_encode(['success' => true, 'version' => $svc->getStickerSource($this->userId)['version'] ?? null]);
     }
 
     /**

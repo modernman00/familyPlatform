@@ -66,6 +66,39 @@ module.exports = defineConfig({
             await connection.end();
           }
         },
+        // RFC-0011 photo Me-stickers: give the account a REAL portrait (a fresh copy, so face
+        // detection runs again each time) and forget its sticker look. Returns the old picture.
+        async setStickerPhoto({ email, source }) {
+          const fs = require('fs');
+          const connection = await connectDb();
+          try {
+            const [rows] = await connection.execute('SELECT id FROM account WHERE email = ? LIMIT 1', [email]);
+            const id = rows[0]?.id;
+            if (!id) return null;
+            const [pics] = await connection.execute('SELECT img FROM profilePics WHERE id = ? LIMIT 1', [id]);
+            const name = 'cypress_sticker_face.jpg';
+            fs.copyFileSync(path.join(__dirname, source), path.join(__dirname, 'resources/images/profile', name));
+            if (pics.length) {
+              await connection.execute('UPDATE profilePics SET img = ? WHERE id = ?', [name, id]);
+            } else {
+              await connection.execute("INSERT INTO profilePics (id, img, buttonHTML) VALUES (?, ?, 'Add family')", [id, name]);
+            }
+            await connection.execute('DELETE FROM member_avatar_traits WHERE user_id = ?', [id]).catch(() => null);
+            return { id, previous: pics[0]?.img ?? null };
+          } finally {
+            await connection.end();
+          }
+        },
+        async restoreProfilePic({ id, img }) {
+          if (!id) return null;
+          const connection = await connectDb();
+          try {
+            if (img) await connection.execute('UPDATE profilePics SET img = ? WHERE id = ?', [img, id]);
+            return true;
+          } finally {
+            await connection.end();
+          }
+        },
         // --- RFC-0004 birth-family E2E fixtures: fresh users in, everything they touched out. ---
         async seedE2EUsers(specs) {
           const connection = await connectDb();

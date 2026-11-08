@@ -1821,7 +1821,7 @@
              role="dialog" aria-label="Choose an emoji" data-testid="comment-emoji-picker"
              class="comment-picker comment-picker--emoji">
           <!-- Race-Conscious Fitzpatrick Skin Tone Palette -->
-          <div class="d-flex align-items-center justify-content-between px-2 py-1 border-bottom mb-1 bg-light rounded" role="toolbar" aria-label="Comment skin tone diversity selector">
+          <div :class="commentEmojiTab === 'me' ? 'd-none' : 'd-flex'" class="align-items-center justify-content-between px-2 py-1 border-bottom mb-1 bg-light rounded" role="toolbar" aria-label="Comment skin tone diversity selector">
             <span class="text-muted fw-semibold" style="font-size:0.68rem;">Skin:</span>
             <div class="d-flex align-items-center gap-1">
               <template x-for="st in skinTones" :key="st.tone">
@@ -1851,14 +1851,15 @@
 
           <template x-if="commentEmojiOpen[post.post_no] && commentEmojiTab === 'me'">
             <div class="me-sticker-grid me-sticker-grid--comment" data-testid="comment-me-grid">
+              <span class="me-sticker-hint" x-show="meStickers && meStickers.available">Your avatar's skin, hair and style come from <a href="/member/emoji-studio">Emoji Studio</a>.</span>
               <span class="text-muted small" x-show="!meStickers && !meStickersError">Loading your avatar…</span>
               <span class="text-muted small" x-show="meStickersError">Could not load your avatar.</span>
               <template x-if="meStickers && !meStickers.available">
-                <a href="/member/emoji-studio" class="btn btn-sm btn-warning rounded-pill fw-semibold" style="min-height:44px;">🎨 Save your avatar in Emoji Studio to unlock Me-stickers</a>
+                <a href="/member/emoji-studio" class="btn btn-sm btn-warning rounded-pill fw-semibold me-sticker-unlock">🎨 Design your avatar in Emoji Studio to unlock Me-stickers</a>
               </template>
               <template x-for="st in (meStickers && meStickers.available ? meStickers.stickers : [])" :key="st.reaction">
                 <button type="button" class="me-sticker-btn" :title="st.label" :aria-label="'Add my avatar: ' + st.label"
-                        @click="insertMeStickerIntoComment(post.post_no, st.token)">
+                        @click="insertMeStickerIntoComment(post.post_no, st.token, st.url, st.label)">
                   <img :src="st.url" width="52" height="52" alt="" loading="lazy">
                   <span x-text="st.label"></span>
                 </button>
@@ -1962,11 +1963,19 @@
                 <i class="bi bi-x-lg"></i>
               </button>
             </div>
+            <!-- Selected Me-sticker preview (RFC-0011): shown as the avatar, not the raw token -->
+            <div x-show="commentStickers[post.post_no]" x-cloak class="comment-composer__gif comment-composer__sticker" data-testid="comment-sticker-preview">
+              <img :src="commentStickers[post.post_no]?.url || null" :alt="'My avatar: ' + (commentStickers[post.post_no]?.label || '')"
+                   width="72" height="72" style="display:block; width:72px; height:72px;">
+              <button type="button" @click="clearCommentSticker(post.post_no)" aria-label="Remove sticker">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
             <div class="comment-composer__row">
               <input type="text" class="comment-composer__input"
                      placeholder="{{ __('feed.write_comment', 'Write a comment...') }}" aria-label="{{ __('feed.write_comment', 'Write a comment...') }}"
                      :data-comment-input="post.post_no"
-                     x-model="commentInputs[post.post_no]" :required="!commentGifs[post.post_no]"
+                     x-model="commentInputs[post.post_no]" :required="!commentGifs[post.post_no] && !commentStickers[post.post_no]"
                      @input="handleCommentInput(post.post_no, $event)"
                      @paste="handleCommentPaste(post.post_no, $event)"
                      @keydown="handleCommentKeydown(post.post_no, $event)">
@@ -1986,7 +1995,7 @@
             </div>
           </div>
           <button type="submit" class="comment-composer__send" aria-label="Post comment" title="Submit Comment - Publish your comment to this family post"
-                  :class="((commentInputs[post.post_no] && commentInputs[post.post_no].trim()) || commentGifs[post.post_no]) ? 'is-active' : ''">
+                  :class="((commentInputs[post.post_no] && commentInputs[post.post_no].trim()) || commentGifs[post.post_no] || commentStickers[post.post_no]) ? 'is-active' : ''">
             <i class="bi bi-send-fill"></i>
           </button>
         </form>

@@ -1193,7 +1193,7 @@ export function profileFeed(opts = {}) {
             // The server strips tokens naming anyone but the author, and serves the image only to family.
             const stickerClass = emojiOnly ? 'atg-me-sticker atg-me-sticker--jumbo' : 'atg-me-sticker';
             safeText = safeText.replace(/:me_(hello|laugh|wow|love|nod|dance|point|clap)@([A-Za-z0-9_-]{1,64}):/g, (match, reaction, uid) => {
-                return `<span class="${stickerClass}" role="button" tabindex="0" data-testid="me-sticker" onclick="event.stopPropagation(); window.AtgEmojiEngine && window.AtgEmojiEngine.tapSticker(this, '${reaction}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"><img src="/api/emoji/avatar-sticker/${uid}/${reaction}" loading="lazy" width="64" height="64" alt="Avatar sticker: ${reaction}" title="Tap to replay" onerror="this.closest('.atg-me-sticker').remove()"></span>`;
+                return `<span class="${stickerClass}" role="button" tabindex="0" data-testid="me-sticker" onclick="event.stopPropagation(); window.AtgEmojiEngine && window.AtgEmojiEngine.tapSticker(this, '${reaction}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"><img src="/api/emoji/avatar-sticker/${uid}/${reaction}?v=live2" loading="lazy" width="64" height="64" alt="Avatar sticker: ${reaction}" title="Tap to replay" onerror="this.closest('.atg-me-sticker').remove()"></span>`;
             });
 
             const knownIds = this.livingEmojiIdSet();
@@ -1526,7 +1526,9 @@ export function profileFeed(opts = {}) {
         },
 
         async submitComment(postNo, ev = null) {
-            const commentText = (this.commentInputs[postNo] || '').trim();
+            const typedText = (this.commentInputs[postNo] || '').trim();
+            const stickerToken = this.commentStickers[postNo]?.token || '';
+            const commentText = [typedText, stickerToken].filter(Boolean).join(' ');
             const rawGif = this.commentGifs[postNo] || '';
             const attachedFile = this.commentFiles ? this.commentFiles[postNo] : null;
             const isBlob = typeof rawGif === 'string' && rawGif.startsWith('blob:');
@@ -1590,6 +1592,7 @@ export function profileFeed(opts = {}) {
                     }
 
                     this.commentInputs[postNo] = '';
+                    this.clearCommentSticker(postNo);
                     this.clearCommentGif(postNo);
                     this.commentGifOpen[postNo] = false;
                     this.mentionOpen[postNo] = false;
@@ -2192,12 +2195,18 @@ export function profileFeed(opts = {}) {
                 .catch(() => { this.meStickersError = true; });
         },
 
-        insertMeStickerIntoComment(postNo, token) {
+        // A chosen sticker shows as a preview chip in the comment field (like a GIF), never
+        // as its raw `:me_…@id:` token; the token is appended to the text on submit.
+        commentStickers: {},
+
+        insertMeStickerIntoComment(postNo, token, url = '', label = '') {
             if (!/^:me_[a-z]+@[A-Za-z0-9_-]{1,64}:$/.test(token)) return;
-            const current = this.commentInputs[postNo] || '';
-            const sep = current && !/\s$/.test(current) ? ' ' : '';
-            this.commentInputs[postNo] = `${current}${sep}${token} `;
+            this.commentStickers[postNo] = { token, url: String(url || ''), label: String(label || '') };
             this.commentEmojiOpen[postNo] = false;
+        },
+
+        clearCommentSticker(postNo) {
+            delete this.commentStickers[postNo];
         },
 
         insertLivingEmojiIntoComment(postNo, emojiId) {
