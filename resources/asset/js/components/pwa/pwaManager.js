@@ -222,6 +222,52 @@ class PWAManager {
   }
 
   /**
+   * Universal PWA Dismissal & Frequency Check
+   */
+  isInstallDismissed() {
+    try {
+      if (sessionStorage.getItem('pwa_prompt_shown_session')) return true;
+      const keys = [
+        'pwa-banner-dismissed',
+        'pwa_dismissed',
+        'pwa_prompt_dismissed',
+        'pwa_install_dismissed',
+        'fp_pwa_install_dismissed',
+        'pwa_ios_dismissed'
+      ];
+      for (const k of keys) {
+        const val = localStorage.getItem(k);
+        if (val) {
+          const num = parseInt(val, 10);
+          if (!isNaN(num)) {
+            if (Date.now() - num < 14 * 86400000) return true;
+          } else if (val === 'true') {
+            return true;
+          }
+        }
+      }
+    } catch (_) {}
+    return false;
+  }
+
+  syncDismissal() {
+    const nowStr = Date.now().toString();
+    const keys = [
+      'pwa-banner-dismissed',
+      'pwa_dismissed',
+      'pwa_prompt_dismissed',
+      'pwa_install_dismissed',
+      'fp_pwa_install_dismissed',
+      'pwa_ios_dismissed'
+    ];
+    keys.forEach(k => {
+      try { localStorage.setItem(k, nowStr); } catch (_) {}
+    });
+    try { sessionStorage.setItem('pwa_prompt_shown_session', 'true'); } catch (_) {}
+    window.__PWA_INSTALL_ACTIVE__ = false;
+  }
+
+  /**
    * 2. Android / Chromium Custom Install Banner
    */
   setupInstallPrompt() {
@@ -234,9 +280,15 @@ class PWAManager {
       this.deferredPrompt = e;
       this.updateAmbientInstallButtons(true);
 
-      // Don't show if user dismissed within last 14 days or already installed
-      const dismissed = localStorage.getItem('pwa_install_dismissed') || localStorage.getItem('fp_pwa_install_dismissed');
-      if (dismissed && Date.now() - parseInt(dismissed, 10) < 14 * 86400000) {
+      // Singleton guard: if another install prompt is already active, suppress
+      if (window.__PWA_INSTALL_ACTIVE__) {
+        const legacy = document.getElementById('pwa-install-banner');
+        if (legacy) legacy.remove();
+        return;
+      }
+
+      // Don't show if user dismissed or already prompted in this session
+      if (this.isInstallDismissed()) {
         return;
       }
 
@@ -245,6 +297,7 @@ class PWAManager {
 
     window.addEventListener('appinstalled', () => {
       this.deferredPrompt = null;
+      window.__PWA_INSTALL_ACTIVE__ = false;
       document.getElementById('pwa-install-banner')?.remove();
       this.updateAmbientInstallButtons(false);
       if (window.familyTelemetry) window.familyTelemetry.track('pwa_installed');
@@ -327,7 +380,9 @@ class PWAManager {
   }
 
   showInstallBanner() {
-    if (document.getElementById('pwa-install-banner') || this.isStandalone) return;
+    if (document.getElementById('pwa-install-banner') || this.isStandalone || window.__PWA_INSTALL_ACTIVE__) return;
+    window.__PWA_INSTALL_ACTIVE__ = true;
+    try { sessionStorage.setItem('pwa_prompt_shown_session', 'true'); } catch (_) {}
 
     const banner = document.createElement('div');
     banner.id = 'pwa-install-banner';
@@ -368,9 +423,7 @@ class PWAManager {
     });
 
     document.getElementById('pwa-banner-close')?.addEventListener('click', () => {
-      const nowStr = Date.now().toString();
-      localStorage.setItem('pwa_install_dismissed', nowStr);
-      localStorage.setItem('fp_pwa_install_dismissed', nowStr);
+      this.syncDismissal();
       if (window.familyTelemetry) window.familyTelemetry.track('pwa_install_dismissed');
       banner.classList.remove('show');
       setTimeout(() => banner.remove(), 400);
@@ -381,21 +434,24 @@ class PWAManager {
    * 3. iOS Safari "Add to Home Screen" Visual Overlay Tutorial
    */
   setupIOSPrompt() {
-    if (!this.isIOS || this.isStandalone) return;
+    if (!this.isIOS || this.isStandalone || window.__PWA_INSTALL_ACTIVE__) return;
 
-    const dismissed = localStorage.getItem('pwa_ios_dismissed') || localStorage.getItem('fp_pwa_install_dismissed');
-    if (dismissed && Date.now() - parseInt(dismissed, 10) < 14 * 86400000) {
+    if (this.isInstallDismissed()) {
       return;
     }
 
     // Delay prompt to not overwhelm user on initial landing
     setTimeout(() => {
-      this.showIOSOverlay();
+      if (!window.__PWA_INSTALL_ACTIVE__ && !this.isInstallDismissed()) {
+        this.showIOSOverlay();
+      }
     }, 4000);
   }
 
   showIOSOverlay() {
-    if (document.getElementById('pwa-ios-overlay') || this.isStandalone) return;
+    if (document.getElementById('pwa-ios-overlay') || this.isStandalone || window.__PWA_INSTALL_ACTIVE__) return;
+    window.__PWA_INSTALL_ACTIVE__ = true;
+    try { sessionStorage.setItem('pwa_prompt_shown_session', 'true'); } catch (_) {}
 
     const overlay = document.createElement('div');
     overlay.id = 'pwa-ios-overlay';
@@ -429,9 +485,7 @@ class PWAManager {
     setTimeout(() => overlay.classList.add('show'), 100);
 
     document.getElementById('pwa-ios-close')?.addEventListener('click', () => {
-      const nowStr = Date.now().toString();
-      localStorage.setItem('pwa_ios_dismissed', nowStr);
-      localStorage.setItem('fp_pwa_install_dismissed', nowStr);
+      this.syncDismissal();
       if (window.familyTelemetry) window.familyTelemetry.track('pwa_install_dismissed');
       overlay.classList.remove('show');
       setTimeout(() => overlay.remove(), 400);
