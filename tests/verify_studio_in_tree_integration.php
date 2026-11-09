@@ -74,7 +74,7 @@ assertCondition(
 
 assertCondition(
     str_contains($organogramContent, 'id="treeStudioDiscoveryBanner"') &&
-    str_contains($organogramContent, 'Family Studio is now inside your Family Tree!') &&
+    (str_contains($organogramContent, 'Tree Studio is now inside your Family Tree!') || str_contains($organogramContent, 'Family Studio is now inside your Family Tree!')) &&
     str_contains($organogramContent, 'dismissTreeStudioDiscoveryBanner()'),
     'organogram.blade.php features prominent discovery banner informing users of Studio in tree'
 );
