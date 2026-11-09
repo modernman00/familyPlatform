@@ -515,7 +515,7 @@ final class AtgFestiveCardService
         }
 
         // Resolve author profile info
-        $userStmt = $this->db->prepare('SELECT name, lastName, (SELECT img FROM profilePics WHERE id = account.id LIMIT 1) as profile_img FROM account WHERE id = ? LIMIT 1');
+        $userStmt = $this->db->prepare('SELECT firstName AS name, lastName, (SELECT img FROM profilePics WHERE id = account.id LIMIT 1) as profile_img FROM account WHERE id = ? LIMIT 1');
         $userStmt->execute([$userId]);
         $author = $userStmt->fetch(PDO::FETCH_ASSOC) ?: [];
         $fullName = trim(($author['name'] ?? '') . ' ' . ($author['lastName'] ?? ''));

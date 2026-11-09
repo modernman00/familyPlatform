@@ -54,7 +54,7 @@ final class FestiveCardController
         $famCode = is_string($_SESSION['famCode'] ?? null) ? $_SESSION['famCode'] : '';
 
         $pdo = Db::connect2();
-        $userStmt = $pdo->prepare('SELECT id, name, lastName, (SELECT img FROM profilePics WHERE id = account.id LIMIT 1) as profile_img FROM account WHERE id = ? LIMIT 1');
+        $userStmt = $pdo->prepare('SELECT id, firstName AS name, lastName, (SELECT img FROM profilePics WHERE id = account.id LIMIT 1) as profile_img FROM account WHERE id = ? LIMIT 1');
         $userStmt->execute([$userId]);
         $user = $userStmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
