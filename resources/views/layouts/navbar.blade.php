@@ -22,35 +22,35 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1 ms-lg-3">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1 ms-lg-2">
                 <li class="nav-item profilePageNav">
                     <a class="nav-link stitch-nav-link" href="/profilePage" title="{{ __('nav.my_page', 'My Page') }} - View and manage your family profile">
-                        <i class="bi bi-person-fill me-1"></i> {{ __('nav.my_page', 'My Page') }}
+                        <i class="bi bi-person-fill"></i>{{ __('nav.my_page', 'My Page') }}
                     </a>
                 </li>
                 <li class="nav-item familyTreeNav">
                     <a class="nav-link stitch-nav-link" href="/organogram/{{ $_SESSION['id'] ?? '' }}?mode=canvas" title="{{ __('nav.tree', 'Tree') }} - Explore living family tree and lineage">
-                        <i class="bi bi-diagram-3-fill me-1"></i> {{ __('nav.tree', 'Tree') }}
+                        <i class="bi bi-diagram-3-fill"></i>{{ __('nav.tree', 'Tree') }}
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link stitch-nav-link" href="/familyStudio" title="{{ __('nav.studio', 'Tree Studio') }} - Family reels and creative celebrations">
-                        <i class="bi bi-stars me-1"></i> {{ __('nav.studio', 'Tree Studio') }}
+                        <i class="bi bi-stars"></i>{{ __('nav.studio', 'Tree Studio') }}
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link stitch-nav-link" href="/poster-studio" title="Flyer Studio - Design Jubilee, Milestone & Reunion Posters">
-                        <i class="bi bi-palette2 me-1 text-warning"></i> Flyer Studio
+                        <i class="bi bi-palette2 text-warning"></i>Flyer Studio
                     </a>
                 </li>
                 <li class="nav-item reelsNav">
                     <a class="nav-link stitch-nav-link" href="/reels" title="{{ __('nav.reels', 'Reels') }} - Watch captivating family video moments">
-                        <i class="bi bi-camera-reels-fill me-1"></i> {{ __('nav.reels', 'Reels') }}
+                        <i class="bi bi-camera-reels-fill"></i>{{ __('nav.reels', 'Reels') }}
                     </a>
                 </li>
                 <li class="nav-item allMembersNav">
                     <a class="nav-link stitch-nav-link" href="/allMembers" title="{{ __('nav.family', 'Family') }} - Browse connected family network">
-                        <i class="bi bi-people-fill me-1"></i> {{ __('nav.family', 'Family') }}
+                        <i class="bi bi-people-fill"></i>{{ __('nav.family', 'Family') }}
                     </a>
                 </li>
             </ul>

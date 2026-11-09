@@ -72,16 +72,15 @@
 /* Navigation Links */
 .stitch-nav-link {
   color: #334155 !important;
-  font-weight: 600;
-  font-size: 0.88rem;
-  min-height: 44px;
-  min-width: 44px;
-  padding: 0.55rem 0.95rem !important;
+  font-weight: 550;
+  font-size: 0.84rem;
+  min-height: 38px;
+  padding: 0.4rem 0.65rem !important;
   border-radius: var(--stitch-radius-pill);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.32rem;
   white-space: nowrap !important;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -91,7 +90,8 @@
 }
 .stitch-nav-link i {
   color: #475569;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
+  margin-right: 0 !important;
   transition: color 0.2s ease, transform 0.2s ease;
 }
 .stitch-nav-link:hover {
