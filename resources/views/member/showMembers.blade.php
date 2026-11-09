@@ -20,7 +20,7 @@
                 </p>
                 <div class="d-flex flex-wrap gap-2">
                     <a href="/familyStudio" class="btn btn-light fw-bold text-primary px-3 px-sm-4 py-2" style="border-radius: 12px; min-height: 44px; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                        <i class="bi bi-stars text-warning me-1"></i> Family Studio
+                        <i class="bi bi-stars text-warning me-1"></i> Tree Studio
                     </a>
                     <a href="/organogram?mode=canvas" class="btn btn-outline-light fw-bold px-3 px-sm-4 py-2" style="border-radius: 12px; min-height: 44px; font-size: 0.9rem;">
                         <i class="bi bi-diagram-3-fill me-1"></i> Interactive Tree

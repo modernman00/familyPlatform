@@ -119,8 +119,8 @@
                 <i class="bi bi-globe-americas" aria-hidden="true"></i><span>Globe</span>
             </button>
             @if(empty($isReadOnly))
-            <button type="button" id="btnModeStudio" class="layout-segment-btn layout-segment-btn--studio" onclick="switchTreeViewMode('studio')" title="Family Studio: Curate and update relatives, unions, and lineage directly">
-                <i class="bi bi-pencil-square" aria-hidden="true"></i><span>Family Studio</span>
+            <button type="button" id="btnModeStudio" class="layout-segment-btn layout-segment-btn--studio" onclick="switchTreeViewMode('studio')" title="Tree Studio: Curate and update relatives, unions, and lineage directly">
+                <i class="bi bi-pencil-square" aria-hidden="true"></i><span>Tree Studio</span>
                 <span class="badge bg-warning text-dark ms-1 px-1.5 py-0.5 rounded-pill" style="font-size: 0.68rem; font-weight: 700;">Update Tree</span>
             </button>
             @endif
@@ -161,7 +161,7 @@
             </div>
         </div>
 
-        <!-- Integrated Family Studio Discovery Announcement Banner -->
+        <!-- Integrated Tree Studio Discovery Announcement Banner -->
         <div id="treeStudioDiscoveryBanner" class="alert shadow-lg border-0 rounded-4 mb-3 mx-3 d-flex flex-column flex-md-row align-items-center justify-content-between p-3 gap-3 d-none" style="background: linear-gradient(135deg, rgba(30, 10, 15, 0.95) 0%, rgba(138, 16, 25, 0.95) 100%); border: 1px solid rgba(251, 191, 36, 0.4); border-left: 5px solid #fbbf24 !important; backdrop-filter: blur(16px); box-shadow: 0 16px 36px rgba(0,0,0,0.4);">
             <div class="d-flex align-items-center gap-3">
                 <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 46px; height: 46px; background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.45); font-size: 1.25rem;">
@@ -169,17 +169,17 @@
                 </div>
                 <div>
                     <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-                        <h6 class="mb-0 fw-bold text-white fs-6">Family Studio is now inside your Family Tree!</h6>
+                        <h6 class="mb-0 fw-bold text-white fs-6">Tree Studio is now inside your Family Tree!</h6>
                         <span class="badge bg-warning text-dark rounded-pill px-2 py-0.5" style="font-size: 0.68rem; font-weight: 800; letter-spacing: 0.04em;">NEW</span>
                     </div>
                     <p class="mb-0 text-white-50" style="font-size: 0.88rem; line-height: 1.45;">
-                        You no longer have to navigate away to update your tree. Easily switch between seeing your interactive tree and adding or curating relatives directly in <strong>Family Studio</strong>!
+                        You no longer have to navigate away to update your tree. Easily switch between seeing your interactive tree and adding or curating relatives directly in <strong>Tree Studio</strong>!
                     </p>
                 </div>
             </div>
             <div class="d-flex align-items-center gap-2 flex-shrink-0">
                 <button type="button" class="btn btn-warning text-dark px-3 py-2 fw-bold d-inline-flex align-items-center gap-1 shadow-sm" onclick="switchTreeViewMode('studio')" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
-                    <i class="bi bi-stars"></i> Open Studio
+                    <i class="bi bi-stars"></i> Open Tree Studio
                 </button>
                 <button type="button" class="btn btn-outline-light text-white-50 px-3 py-2 border-0" onclick="dismissTreeStudioDiscoveryBanner()" title="Dismiss announcement" style="border-radius: 50px; min-height: 44px; min-width: 44px;">
                     <i class="bi bi-x-lg"></i>
@@ -214,7 +214,7 @@
                 </div>
                 <div class="d-flex align-items-center gap-2 flex-shrink-0 tree-ribbon-actions justify-content-between justify-content-md-end">
                     <button type="button" class="btn btn-warning text-dark px-3.5 py-2 fw-bold d-inline-flex align-items-center justify-content-center gap-2 shadow-sm flex-grow-1 flex-md-grow-0" onclick="openFamilyStudio({ openAddModal: true })" style="border-radius: 50px; min-height: 44px; font-size: 0.9rem; white-space: nowrap;">
-                        <i class="bi bi-magic"></i> Start in Family Studio
+                        <i class="bi bi-magic"></i> Start in Tree Studio
                     </button>
                     <button type="button" class="btn btn-outline-light text-white-50 px-2.5 py-2 border-0 flex-shrink-0" onclick="dismissHowToBuildGuide()" title="Hide guide" aria-label="Hide guide" style="border-radius: 50px; min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center;">
                         <i class="bi bi-x-lg"></i>
@@ -237,7 +237,7 @@
                         </div>
                         <div>
                             <button type="button" class="btn btn-sm btn-outline-warning w-100 fw-bold d-inline-flex align-items-center justify-content-center gap-1.5" onclick="openFamilyStudio({ openAddModal: true })" style="min-height: 42px; border-radius: 8px; font-size: 0.82rem;">
-                                <i class="bi bi-person-plus-fill"></i> Add Parents in Studio
+                                <i class="bi bi-person-plus-fill"></i> Add Parents in Tree Studio
                             </button>
                         </div>
                     </div>
@@ -573,7 +573,7 @@
                                     Your family tree is currently empty. Start building your lineage by adding your parents, partner, siblings, or children!
                                 </p>
                                 <button type="button" onclick="openFamilyStudio({ openAddModal: true })" class="btn btn-success px-4 py-2 fw-bold" style="border-radius: 50px; min-height: 44px; display: inline-flex; align-items: center;">
-                                    <i class="bi bi-plus-circle me-1"></i> Add Relatives in Studio
+                                    <i class="bi bi-plus-circle me-1"></i> Add Relatives in Tree Studio
                                 </button>
                             </div>
                         @else
@@ -664,7 +664,7 @@
                             Your family tree is currently empty. Start building your lineage by adding your parents, partner, siblings, or children!
                         </p>
                         <button type="button" onclick="openFamilyStudio({ openAddModal: true })" class="btn btn-success px-4 py-2 fw-bold" style="border-radius: 50px; min-height: 44px; display: inline-flex; align-items: center;">
-                            <i class="bi bi-plus-circle me-1"></i> Add Relatives in Studio
+                            <i class="bi bi-plus-circle me-1"></i> Add Relatives in Tree Studio
                         </button>
                     </div>
                 @else
@@ -890,8 +890,8 @@
                     <button class="btn btn-sm btn-primary flex-grow-1 fw-bold d-inline-flex align-items-center justify-content-center" id="openAddRelativeModalBtn" onclick="openInviteRelativeFromNode()" style="min-height: 38px;">
                         <i class="bi bi-send-fill me-1"></i> Invite Family Member
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center justify-content-center" onclick="closeNodeModalAndOpenStudio()" style="min-height: 38px;" title="To add or edit tree structure directly, open Family Studio">
-                        <i class="bi bi-diagram-3-fill me-1"></i> Studio
+                    <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center justify-content-center" onclick="closeNodeModalAndOpenStudio()" style="min-height: 38px;" title="To add or edit tree structure directly, open Tree Studio">
+                        <i class="bi bi-diagram-3-fill me-1"></i> Tree Studio
                     </button>
                     <button class="btn btn-sm btn-outline-danger fw-bold" id="modalRemoveNodeBtn" style="display: none;" onclick="removeCurrentModalNode()">
                         <i class="bi bi-trash3-fill"></i> Remove
@@ -1597,7 +1597,7 @@
 
                     <div class="d-flex flex-wrap justify-content-center gap-3">
                         <button type="button" onclick="openFamilyStudio({ openAddModal: true })" class="btn btn-warning px-4 py-2.5 fw-bold text-dark shadow-sm d-inline-flex align-items-center gap-2" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
-                            <i class="bi bi-plus-circle-fill"></i> Add Your Parents &amp; Siblings in Studio
+                            <i class="bi bi-plus-circle-fill"></i> Add Your Parents &amp; Siblings in Tree Studio
                         </button>
                         <button type="button" class="btn btn-outline-light px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2" style="border-radius: 50px; min-height: 44px; white-space: nowrap; border-color: rgba(255,255,255,0.35);" data-bs-toggle="modal" data-bs-target="#inviteFamilyModal">
                             <i class="bi bi-person-lines-fill"></i> Invite Relatives by Phone/WhatsApp

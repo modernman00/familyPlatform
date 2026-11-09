@@ -12,7 +12,7 @@ return [
     'nav.profile' => 'Profile',
     'nav.my_page' => 'My Page',
     'nav.tree' => 'Family Tree',
-    'nav.studio' => 'Studio',
+    'nav.studio' => 'Tree Studio',
     'nav.journal' => 'Journal',
     'nav.reels' => 'Reels',
     'nav.family' => 'Family',

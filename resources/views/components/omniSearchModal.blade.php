@@ -570,6 +570,19 @@ body.dark-mode .omni-kbd {
             actionType: 'navigate',
             priority: 96
         },
+        {
+            id: 'act_kinship_calculator',
+            title: '7-Generation Kinship Calculator',
+            description: 'Calculate exact degrees of kinship, consanguinity percentage, and civil/canon law relationships',
+            keywords: ['kinship calculator', 'kinship', 'cousin', 'relationship calculator', 'consanguinity', 'degrees of kinship', 'second cousin', 'once removed', 'dna share', 'family degrees'],
+            category: 'Functions & Tools',
+            icon: 'bi-calculator-fill',
+            iconColor: '#a31621',
+            badge: 'Intelligence Tool',
+            url: '/kinship-calculator',
+            actionType: 'navigate',
+            priority: 95
+        },
 
         // --- Media & Memories ---
         {

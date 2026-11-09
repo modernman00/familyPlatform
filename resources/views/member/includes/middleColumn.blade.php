@@ -1740,14 +1740,14 @@
             </div>
         </div>
     </div>
+
+    <!-- Author-Only Rich Post Share Portal Modal (Inside profileFeed reactive scope) -->
+    @include('member.modals.postSharePortalModal')
   </div>
 
   <!-- The Modal Structure (Hidden by default) for the post image modal -->
   @includeIf('member.modals.postImg')
   @endif
-
-  <!-- Author-Only Rich Post Share Portal Modal -->
-  @include('member.modals.postSharePortalModal')
 
   <style>
     @keyframes pulse {

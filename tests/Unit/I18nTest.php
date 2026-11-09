@@ -25,6 +25,7 @@ class I18nTest extends TestCase
         $this->assertSame('en', I18n::getLocale());
         $this->assertSame('Home', I18n::trans('nav.home'));
         $this->assertSame('Family Tree', I18n::trans('nav.tree'));
+        $this->assertSame('Tree Studio', I18n::trans('nav.studio'));
     }
 
     public function testLocaleSwitchingWithStrictAllowlist(): void

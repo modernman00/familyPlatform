@@ -1131,7 +1131,7 @@ body.dark-theme .fhub #familyAiContent .form-select option { background: #0f172a
             </div>
         </div>
 
-        {{-- 🎨 TAB 4: FAMILY FLYER STUDIO — Universal Poster Engine (shared-lib, /poster-studio) --}}
+        {{-- 🎨 TAB 4: FLYER STUDIO — Universal Poster Engine (shared-lib, /poster-studio) --}}
         <div class="tab-pane fade" id="tab-flyer" role="tabpanel">
             <div class="fhub-engine card" id="flyerEngineCard">
                 <div class="fhub-engine-bar">

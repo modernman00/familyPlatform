@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(mobile): remove static d-block from discovery modal and enlarge touch targets to 44px",
+    "title": "Feat(festive): implement RFC-0019 ATG Omni-Occasion Festive Card and Living Envelope Engine",
     "notes": [
+        "Feat(festive): implement RFC-0019 ATG Omni-Occasion Festive Card and Living Envelope Engine",
         "Fix(mobile): remove static d-block from discovery modal and enlarge touch targets to 44px",
-        "Fix(ux): eliminate layout flash on discovery journey widget by defaulting visibility to false",
-        "Feat(lifecycle): implement 60-day omnichannel feature discovery engine and in-app journey hub"
+        "Fix(ux): eliminate layout flash on discovery journey widget by defaulting visibility to false"
     ],
     "released_at": "2026-11-09",
-    "commit": "fc791c86"
+    "commit": "e0f81f15"
 }

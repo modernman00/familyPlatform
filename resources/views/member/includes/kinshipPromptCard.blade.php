@@ -43,6 +43,13 @@
                         <span>Invite from Phone Contacts</span>
                     </button>
 
+                    <a href="/kinship-calculator" 
+                       class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold shadow-xs d-inline-flex align-items-center gap-2 transition-all"
+                       style="min-height: 44px; white-space: nowrap; flex-shrink: 0; font-size: 0.88rem; border-color: rgba(255, 255, 255, 0.45); color: #ffffff !important;">
+                        <i class="bi bi-calculator" style="color: #fbbf24;"></i>
+                        <span>Kinship Calculator</span>
+                    </a>
+
                     <a href="https://api.whatsapp.com/send?text={{ rawurlencode("Hi! I'm building our family tree and oral history archive on FamilyPlatform. Claim your branch and connect with our family here: " . \App\classes\GeoSite::baseUrl() . "/register") }}" 
                        target="_blank"
                        rel="noopener noreferrer"

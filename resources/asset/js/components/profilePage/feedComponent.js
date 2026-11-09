@@ -525,6 +525,7 @@ export function profileFeed(opts = {}) {
             if (typeof window !== 'undefined') {
                 window.__getHeirloomGlassSvg = getHeirloomGlassSvg;
                 window.__HEIRLOOM_REACTIONS = HEIRLOOM_REACTIONS;
+                window.__openSharePortal = (post) => this.openSharePortal(post);
             }
 
             // Register listeners before awaiting the initial fetch - a post created (or a
@@ -2827,6 +2828,12 @@ export function profileFeed(opts = {}) {
         },
 
         initEventListeners() {
+            window.addEventListener('open-share-portal', (event) => {
+                if (event?.detail) {
+                    this.openSharePortal(event.detail);
+                }
+            });
+
             window.addEventListener('post-created', (event) => {
                 const newPostData = event?.detail;
                 if (newPostData && typeof newPostData === 'object') {

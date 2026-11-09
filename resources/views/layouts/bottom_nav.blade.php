@@ -125,13 +125,13 @@ body.dark-theme .pwa-tab-center-action .pwa-center-btn-bubble,
         <span class="pwa-tab-label">{{ __('nav.add_photo', 'Add Photo') }}</span>
     </button>
 
-    <!-- Family Studio / Reels -->
-    <a href="/familyStudio" class="pwa-tab-item" data-tab="reels" title="{{ __('nav.studio', 'Family Studio') }} - Watch captivating family reels and celebrations">
+    <!-- Tree Studio / Reels -->
+    <a href="/familyStudio" class="pwa-tab-item" data-tab="reels" title="{{ __('nav.studio', 'Tree Studio') }} - Watch captivating family reels and celebrations">
         <div class="pwa-tab-icon-wrap">
             <i class="bi bi-camera-reels pwa-tab-icon-outline"></i>
             <i class="bi bi-camera-reels-fill pwa-tab-icon-filled"></i>
         </div>
-        <span class="pwa-tab-label">{{ __('nav.studio', 'Studio') }}</span>
+        <span class="pwa-tab-label">{{ __('nav.studio', 'Tree Studio') }}</span>
     </a>
 
     <!-- Notifications & Alerts -->

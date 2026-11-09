@@ -449,7 +449,7 @@
                   </div>
                 </div>
                 <a href="/familyStudio" class="btn btn-primary btn-sm px-3 py-2 fw-bold text-nowrap" style="border-radius: 8px;">
-                  Open Studio <i class="bi bi-arrow-right ms-1"></i>
+                  Open Tree Studio <i class="bi bi-arrow-right ms-1"></i>
                 </a>
               </div>
 

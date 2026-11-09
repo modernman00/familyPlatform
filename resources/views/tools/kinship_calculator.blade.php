@@ -158,9 +158,15 @@
               </p>
             </div>
             <div class="col-lg-4 text-lg-end">
-              <a href="/register" class="btn btn-light btn-lg px-4 py-3 fw-bold shadow-sm" style="color: #a31621; border-radius: 12px; min-height: 44px; white-space: nowrap;">
-                Explore Dynasty Tree <i class="bi bi-arrow-right ms-1"></i>
-              </a>
+              @if(\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('users'))
+                <a href="/organogram/{{ $_SESSION['id'] ?? '' }}?mode=canvas" class="btn btn-light btn-lg px-4 py-3 fw-bold shadow-sm" style="color: #a31621; border-radius: 12px; min-height: 44px; white-space: nowrap;">
+                  Open Your Dynasty Tree <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+              @else
+                <a href="/register" class="btn btn-light btn-lg px-4 py-3 fw-bold shadow-sm" style="color: #a31621; border-radius: 12px; min-height: 44px; white-space: nowrap;">
+                  Explore Dynasty Tree <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+              @endif
             </div>
           </div>
         </section>

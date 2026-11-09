@@ -144,7 +144,7 @@
                 <div class="p-3 mt-4 rounded-3 text-center" style="background: #f8fafc; border: 1px dashed #cbd5e1; font-size: 0.82rem; color: #64748b;">
                     <i class="bi bi-shield-lock-fill text-muted me-1"></i> <strong>Adding relatives directly to the tree?</strong><br>
                     Direct tree modifications and offline ancestors are managed in
-                    <a href="/familyStudio" class="fw-bold text-primary text-decoration-underline">Family Studio</a> or
+                    <a href="/familyStudio" class="fw-bold text-primary text-decoration-underline">Tree Studio</a> or
                     <a href="/accountSetting" class="fw-bold text-primary text-decoration-underline">Account Settings</a>.
                 </div>
             </div>

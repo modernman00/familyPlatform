@@ -161,6 +161,10 @@
                     <i class="bi bi-diagram-3-fill me-1.5" style="color: #059669;"></i> {{ __('profile.create_family_tree', 'Create Family Tree') }}
                 </a>
 
+                <a href="/kinship-calculator" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" title="{{ __('profile.kinship_calculator', 'Kinship Calculator') }} - Calculate exact relationship degrees and shared ancestry">
+                    <i class="bi bi-calculator-fill me-1.5" style="color: #a31621;"></i> {{ __('profile.kinship_calculator', 'Kinship Calculator') }}
+                </a>
+
                 <button type="button" class="btn btn-primary text-white fw-bold shadow-sm flex-fill" style="background-color: var(--primary-color, #a31621); border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Edit Profile - Update your personal bio, photo, and details">
                     <i class="bi bi-pencil-square me-1.5"></i> {{ __('profile.edit_profile', 'Edit Profile') }}
                 </button>

@@ -115,7 +115,7 @@
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" style="min-height: 44px;" @click.prevent="sharePost(post)">
+                  <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" style="min-height: 44px;" @click.prevent.stop="sharePost(post)">
                     <i class="bi bi-send-fill text-success" style="transform: rotate(-15deg); display: inline-block;"></i> {{ __('feed.share_post', 'Share Post') }}
                   </a>
                 </li>
@@ -1891,7 +1891,7 @@
                 type="button"
                 title="Send memory to family relatives"
                 aria-label="Share this memory"
-                @click="sharePost(post)">
+                @click.stop="sharePost(post)">
           <i class="bi bi-send-fill" style="font-size: 1.15rem; line-height: 1; transform: rotate(-15deg); display: inline-block;"></i>
         </button>
       </template>

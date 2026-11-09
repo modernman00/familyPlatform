@@ -100,6 +100,19 @@
                 </div>
                 <i class="bi bi-chevron-right" style="color: var(--text-muted, #64748b);"></i>
             </button>
+
+            <a href="/kinship-calculator" class="btn heritage-action-tile w-100 p-2.5 d-flex align-items-center justify-content-between text-start text-decoration-none shadow-xs transition-all" style="min-height: 54px;" title="Kinship Calculator - Calculate exact relationship degrees and shared ancestry">
+                <div class="d-flex align-items-center gap-2.5">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background: rgba(163, 22, 33, 0.12); color: #a31621;">
+                        <i class="bi bi-calculator-fill" style="font-size: 0.95rem;"></i>
+                    </div>
+                    <div>
+                        <div class="tile-title fw-bold" style="font-size: 0.92rem; color: var(--text-color, #0f172a);">{{ __('heritage.kinship_calculator', 'Kinship Calculator') }}</div>
+                        <div class="tile-subtitle" style="font-size: 0.82rem; color: var(--text-muted, #475569); line-height: 1.35;">{{ __('heritage.kinship_subtitle', 'Degrees & Shared Ancestry') }}</div>
+                    </div>
+                </div>
+                <i class="bi bi-chevron-right" style="color: var(--text-muted, #64748b);"></i>
+            </a>
         </div>
     </div>
 </div>

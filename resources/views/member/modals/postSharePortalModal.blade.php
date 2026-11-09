@@ -5,9 +5,10 @@
      ══════════════════════════════════════════════════════════════════════ --}}
 <div x-show="sharePortalOpen" 
      x-cloak
-     class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"
-     style="z-index: 10550; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);"
+     class="share-portal-modal-overlay"
+     style="position: fixed; inset: 0; z-index: 10550; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 16px;"
      @keydown.escape.window="closeSharePortal()"
+     @click.self="closeSharePortal()"
      role="dialog"
      aria-modal="true"
      aria-labelledby="sharePortalModalTitle"
@@ -20,7 +21,7 @@
 
     <div class="card border-0 shadow-2xl rounded-4 w-100 overflow-hidden"
          style="max-width: 520px; background: var(--card-bg, #ffffff); color: var(--text-main, #0f172a); border: 1px solid rgba(226, 232, 240, 0.8) !important;"
-         @click.outside="closeSharePortal()"
+         @click.stop
          x-transition:enter="transition ease-out duration-250"
          x-transition:enter-start="opacity-0 scale-95 translate-y-3"
          x-transition:enter-end="opacity-100 scale-100 translate-y-0"
@@ -80,82 +81,82 @@
                 {{ __('feed.or_share_directly_to', 'or share directly to:') }}
             </div>
 
-            <!-- 4. Direct Social Share Channels (6 Grid Buttons) -->
+            <!-- 4. Direct Social Share Channels (6 Icon-Only Channels) -->
             <div class="row g-2 text-center mb-3">
                 <!-- WhatsApp -->
-                <div class="col-4 col-sm-2">
+                <div class="col-2">
                     <a :href="getSharePortalWhatsappUrl()" 
                        target="_blank" 
                        rel="noopener noreferrer" 
-                       class="btn w-100 py-2 rounded-3 d-flex flex-column align-items-center justify-content-center text-white text-decoration-none shadow-xs" 
-                       style="background: #25d366; min-height: 62px; min-width: 44px; transition: transform 0.15s ease;"
+                       class="btn w-100 p-0 rounded-3 d-flex align-items-center justify-content-center text-white text-decoration-none shadow-xs" 
+                       style="background: #25d366; height: 48px; min-width: 44px; min-height: 44px; transition: transform 0.15s ease;"
+                       title="WhatsApp"
                        aria-label="Share on WhatsApp">
-                        <i class="bi bi-whatsapp mb-1" style="font-size: 1.25rem;"></i>
-                        <span style="font-size: 0.7rem; font-weight: 700; white-space: nowrap;">WhatsApp</span>
+                        <i class="bi bi-whatsapp" style="font-size: 1.35rem;"></i>
                     </a>
                 </div>
 
                 <!-- X / Twitter -->
-                <div class="col-4 col-sm-2">
+                <div class="col-2">
                     <a :href="getSharePortalXUrl()" 
                        target="_blank" 
                        rel="noopener noreferrer" 
-                       class="btn w-100 py-2 rounded-3 d-flex flex-column align-items-center justify-content-center text-white text-decoration-none shadow-xs" 
-                       style="background: #000000; min-height: 62px; min-width: 44px; transition: transform 0.15s ease;"
+                       class="btn w-100 p-0 rounded-3 d-flex align-items-center justify-content-center text-white text-decoration-none shadow-xs" 
+                       style="background: #000000; height: 48px; min-width: 44px; min-height: 44px; transition: transform 0.15s ease;"
+                       title="X / Twitter"
                        aria-label="Share on X / Twitter">
-                        <i class="bi bi-twitter-x mb-1" style="font-size: 1.15rem;"></i>
-                        <span style="font-size: 0.7rem; font-weight: 700; white-space: nowrap;">X / Twitter</span>
+                        <svg viewBox="0 0 24 24" style="width: 1.15rem; height: 1.15rem; fill: #ffffff; display: inline-block;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                     </a>
                 </div>
 
                 <!-- LinkedIn -->
-                <div class="col-4 col-sm-2">
+                <div class="col-2">
                     <a :href="getSharePortalLinkedinUrl()" 
                        target="_blank" 
                        rel="noopener noreferrer" 
-                       class="btn w-100 py-2 rounded-3 d-flex flex-column align-items-center justify-content-center text-white text-decoration-none shadow-xs" 
-                       style="background: #0a66c2; min-height: 62px; min-width: 44px; transition: transform 0.15s ease;"
+                       class="btn w-100 p-0 rounded-3 d-flex align-items-center justify-content-center text-white text-decoration-none shadow-xs" 
+                       style="background: #0a66c2; height: 48px; min-width: 44px; min-height: 44px; transition: transform 0.15s ease;"
+                       title="LinkedIn"
                        aria-label="Share on LinkedIn">
-                        <i class="bi bi-linkedin mb-1" style="font-size: 1.25rem;"></i>
-                        <span style="font-size: 0.7rem; font-weight: 700; white-space: nowrap;">LinkedIn</span>
+                        <i class="bi bi-linkedin" style="font-size: 1.25rem;"></i>
                     </a>
                 </div>
 
                 <!-- Facebook -->
-                <div class="col-4 col-sm-2">
+                <div class="col-2">
                     <a :href="getSharePortalFacebookUrl()" 
                        target="_blank" 
                        rel="noopener noreferrer" 
-                       class="btn w-100 py-2 rounded-3 d-flex flex-column align-items-center justify-content-center text-white text-decoration-none shadow-xs" 
-                       style="background: #1877f2; min-height: 62px; min-width: 44px; transition: transform 0.15s ease;"
+                       class="btn w-100 p-0 rounded-3 d-flex align-items-center justify-content-center text-white text-decoration-none shadow-xs" 
+                       style="background: #1877f2; height: 48px; min-width: 44px; min-height: 44px; transition: transform 0.15s ease;"
+                       title="Facebook"
                        aria-label="Share on Facebook">
-                        <i class="bi bi-facebook mb-1" style="font-size: 1.25rem;"></i>
-                        <span style="font-size: 0.7rem; font-weight: 700; white-space: nowrap;">Facebook</span>
+                        <i class="bi bi-facebook" style="font-size: 1.35rem;"></i>
                     </a>
                 </div>
 
                 <!-- Telegram -->
-                <div class="col-4 col-sm-2">
+                <div class="col-2">
                     <a :href="getSharePortalTelegramUrl()" 
                        target="_blank" 
                        rel="noopener noreferrer" 
-                       class="btn w-100 py-2 rounded-3 d-flex flex-column align-items-center justify-content-center text-white text-decoration-none shadow-xs" 
-                       style="background: #229ed9; min-height: 62px; min-width: 44px; transition: transform 0.15s ease;"
+                       class="btn w-100 p-0 rounded-3 d-flex align-items-center justify-content-center text-white text-decoration-none shadow-xs" 
+                       style="background: #229ed9; height: 48px; min-width: 44px; min-height: 44px; transition: transform 0.15s ease;"
+                       title="Telegram"
                        aria-label="Share on Telegram">
-                        <i class="bi bi-telegram mb-1" style="font-size: 1.25rem;"></i>
-                        <span style="font-size: 0.7rem; font-weight: 700; white-space: nowrap;">Telegram</span>
+                        <i class="bi bi-telegram" style="font-size: 1.35rem;"></i>
                     </a>
                 </div>
 
                 <!-- Copy Link Button -->
-                <div class="col-4 col-sm-2">
+                <div class="col-2">
                     <button type="button" 
-                            class="btn w-100 py-2 rounded-3 d-flex flex-column align-items-center justify-content-center text-white shadow-xs" 
-                            style="background: #475569; min-height: 62px; min-width: 44px; border: none; transition: transform 0.15s ease;"
+                            class="btn w-100 p-0 rounded-3 d-flex align-items-center justify-content-center text-white shadow-xs" 
+                            style="background: #475569; height: 48px; min-width: 44px; min-height: 44px; border: none; transition: transform 0.15s ease;"
                             @click="copySharePortalLink()"
+                            title="Copy link to clipboard"
                             aria-label="Copy memory link">
-                        <i class="bi mb-1" :class="sharePortalCopied ? 'bi-check-lg text-success' : 'bi-clipboard'" style="font-size: 1.25rem;"></i>
-                        <span style="font-size: 0.7rem; font-weight: 700; white-space: nowrap;" x-text="sharePortalCopied ? 'Copied!' : 'Copy Link'"></span>
+                        <i class="bi" :class="sharePortalCopied ? 'bi-check-lg text-success' : 'bi-link-45deg'" style="font-size: 1.35rem;"></i>
                     </button>
                 </div>
             </div>
