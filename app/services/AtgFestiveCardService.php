@@ -342,11 +342,12 @@ final class AtgFestiveCardService
             $templateStyle = 'classic';
         }
 
-        $senderName = trim((string)($data['sender_name'] ?? 'The Family'));
-        $recipientName = trim((string)($data['recipient_name'] ?? ''));
-        $headline = trim((string)($data['headline'] ?? self::OCCASIONS[$occasionKey]['default_headline']));
-        $verse = trim((string)($data['verse'] ?? self::OCCASIONS[$occasionKey]['default_verse']));
-        $signOff = trim((string)($data['sign_off'] ?? self::OCCASIONS[$occasionKey]['default_sign_off']));
+        // Defense-in-depth: strip HTML/script tags from card text fields
+        $senderName = strip_tags(trim((string)($data['sender_name'] ?? 'The Family')));
+        $recipientName = strip_tags(trim((string)($data['recipient_name'] ?? '')));
+        $headline = strip_tags(trim((string)($data['headline'] ?? self::OCCASIONS[$occasionKey]['default_headline'])));
+        $verse = strip_tags(trim((string)($data['verse'] ?? self::OCCASIONS[$occasionKey]['default_verse'])));
+        $signOff = strip_tags(trim((string)($data['sign_off'] ?? self::OCCASIONS[$occasionKey]['default_sign_off'])));
 
         $heroType = strtolower(trim((string)($data['hero_type'] ?? 'photo')));
         if (!in_array($heroType, ['photo', 'avatar', 'crest'], true)) {

@@ -504,8 +504,8 @@
 
                 async shareCard() {
                     const shareData = {
-                        title: '{{ addslashes($card['headline']) }}',
-                        text: 'A warm holiday card from {{ addslashes($card['sender_name']) }} on FamilyPlatform ✨',
+                        title: {!! json_encode((string)($card['headline'] ?? 'Festive Greetings'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!},
+                        text: {!! json_encode('A warm holiday card from ' . ((string)($card['sender_name'] ?? 'Family')) . ' on FamilyPlatform ✨', JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!},
                         url: window.location.href
                     };
 
@@ -532,7 +532,7 @@
             height = canvas.height = window.innerHeight;
         });
 
-        const particleType = "{{ $occasion['particle'] ?? 'snow' }}";
+        const particleType = {!! json_encode((string)($occasion['particle'] ?? 'snow'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!};
         const particles = [];
         const count = window.innerWidth < 600 ? 35 : 70;
 
