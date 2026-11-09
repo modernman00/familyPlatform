@@ -29,6 +29,20 @@ final class FestiveCardController
      *
      * Renders the in-app Festivity & Celebration Cards Studio Creator.
      */
+    /**
+     * Creative Studio hub: single entry point for flyers, posters and festive cards.
+     */
+    public function hub(): void
+    {
+        $userId = $_SESSION['id'] ?? null;
+        if (!$userId || !is_string($userId)) {
+            header('Location: /login');
+            exit;
+        }
+
+        view('member/creativeStudio');
+    }
+
     public function index(): void
     {
         $userId = $_SESSION['id'] ?? null;

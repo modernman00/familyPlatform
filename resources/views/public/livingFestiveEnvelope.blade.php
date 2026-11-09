@@ -1,3 +1,4 @@
+@php $jsonSafeFlags = JSON_HEX_TAG + JSON_HEX_APOS + JSON_HEX_QUOT + JSON_HEX_AMP; @endphp
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
@@ -504,8 +505,8 @@
 
                 async shareCard() {
                     const shareData = {
-                        title: {!! json_encode((string)($card['headline'] ?? 'Festive Greetings'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!},
-                        text: {!! json_encode('A warm holiday card from ' . ((string)($card['sender_name'] ?? 'Family')) . ' on FamilyPlatform ✨', JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!},
+                        title: {!! json_encode((string)($card['headline'] ?? 'Festive Greetings'), $jsonSafeFlags) !!},
+                        text: {!! json_encode('A warm holiday card from ' . ((string)($card['sender_name'] ?? 'Family')) . ' on FamilyPlatform ✨', $jsonSafeFlags) !!},
                         url: window.location.href
                     };
 
@@ -532,7 +533,7 @@
             height = canvas.height = window.innerHeight;
         });
 
-        const particleType = {!! json_encode((string)($occasion['particle'] ?? 'snow'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!};
+        const particleType = {!! json_encode((string)($occasion['particle'] ?? 'snow'), $jsonSafeFlags) !!};
         const particles = [];
         const count = window.innerWidth < 600 ? 35 : 70;
 

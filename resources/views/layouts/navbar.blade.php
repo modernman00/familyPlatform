@@ -39,8 +39,8 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link stitch-nav-link" href="/poster-studio" title="Flyer Studio - Design Jubilee, Milestone & Reunion Posters">
-                        <i class="bi bi-palette2 text-warning"></i>Flyer Studio
+                    <a class="nav-link stitch-nav-link" href="/creative-studio" title="Creative Studio - Flyers, Posters &amp; Festive Cards">
+                        <i class="bi bi-palette2 text-warning"></i>Creative Studio
                     </a>
                 </li>
                 <li class="nav-item reelsNav">
@@ -145,13 +145,8 @@
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item py-2 px-3 fw-medium" href="/poster-studio" title="Flyer Studio - Design Jubilee, Milestone & Reunion Posters">
-                                <i class="bi bi-palette2 me-2 text-warning"></i> Flyer Studio
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item py-2 px-3 fw-medium" href="/member/festive-cards" title="Festive Cards & Living Envelopes Studio">
-                                <i class="bi bi-envelope-heart-fill me-2 text-danger"></i> Festive Card Studio
+                            <a class="dropdown-item py-2 px-3 fw-medium" href="/creative-studio" title="Creative Studio - Flyers, Posters &amp; Festive Cards">
+                                <i class="bi bi-palette2 me-2 text-warning"></i> Creative Studio
                             </a>
                         </li>
                         <li>

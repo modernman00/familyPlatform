@@ -132,6 +132,7 @@
 @endpush
 
 @section('content')
+@include('member.creativeStudioTabs', ['creativeTab' => 'cards'])
 <div class="festive-studio-container" x-data="festiveStudioWizard()">
     @include('csrf')
     @include('component.submitSpinner')
