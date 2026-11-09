@@ -11,6 +11,8 @@ use Src\functionality\LoginFunctionality;
 use Src\functionality\LogoutFunctionality;
 use Src\Utility;
 use Src\Auth\TotpService;
+use Src\Exceptions\ValidationException;
+use Src\Exceptions\RecaptchaException;
 
 final class Login
 {
@@ -136,6 +138,8 @@ final class Login
             if ($requireMemberEmail2fa) {
                 try {
                     $result = LoginFunctionality::login(returnType: 'php', isCaptchaV3: $isCaptchaV3);
+                } catch (RecaptchaException $recaptchaEx) {
+                    throw new ValidationException('Security verification failed. Please refresh the page and try again.');
                 } catch (\Throwable $loginEx) {
                     // In non-production or for automated E2E tests, catch SMTP delivery failures
                     // where the 2FA code was already generated and saved into the DB code_mgt table,
@@ -261,7 +265,7 @@ final class Login
         }
 
         if (empty($input['email']) && empty($input['username'])) {
-            throw new \InvalidArgumentException('Email or username is required');
+            throw new ValidationException('Email or username is required.');
         }
 
         $rawEmail = (string) ($input['email'] ?? $input['username'] ?? '');
@@ -269,7 +273,11 @@ final class Login
 
         \Src\CorsHandler::setHeaders();
         if ($isCaptchaV3) {
-            \Src\Recaptcha::verifyCaptchaEnterprise($input, 'LOGIN');
+            try {
+                \Src\Recaptcha::verifyCaptchaEnterprise($input, 'LOGIN');
+            } catch (RecaptchaException $recaptchaEx) {
+                throw new ValidationException('Security verification failed. Please refresh the page and try again.');
+            }
             unset($input['action'], $input['token']);
         }
 

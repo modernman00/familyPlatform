@@ -21,11 +21,6 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link {{ str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/playbook') ? 'active' : '' }}" href="/playbook">
-            <i class="fas fa-book-open me-1" style="color: var(--brand-primary, #a31621);"></i>{{ __('nav.playbook', 'Playbook') }}
-          </a>
-        </li>
-        <li class="nav-item">
           <a class="nav-link {{ str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/blog') ? 'active' : '' }}" href="/blogs">
             <i class="fas fa-newspaper me-1" style="color: var(--brand-primary, #a31621);"></i>{{ __('nav.blog', 'Blog') }}
           </a>

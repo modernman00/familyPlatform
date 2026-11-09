@@ -56,7 +56,7 @@
       if (!btn || btn.getAttribute('aria-busy') === 'true') return;
 
       // Never overwrite or snapshot if an inline handler already disabled the button or injected a spinner
-      if (btn.disabled || FamilyPlatformSpinner.hasSpinnerMarkup(btn)) {
+      if (btn.disabled || btn.hasAttribute('data-mmlib-loading') || FamilyPlatformSpinner.hasSpinnerMarkup(btn)) {
         return;
       }
 
@@ -151,6 +151,17 @@
         btn.removeAttribute('data-mmlib-loading');
         btn.removeAttribute('data-original-html');
         btn.removeAttribute('data-original-disabled');
+      }
+
+      // Safety net: if the innerHTML still contains lingering spinner markup, strip it
+      if (FamilyPlatformSpinner.hasSpinnerMarkup(btn)) {
+        btn.innerHTML = btn.innerHTML
+          .replace(/<span[^>]*class="[^"]*st-spinner-border[^"]*"[^>]*><\/span>/gi, '')
+          .replace(/<svg[^>]*class="[^"]*mmlib-btn-spinner[^"]*"[^>]*>[\s\S]*?<\/svg>/gi, '')
+          .trim();
+        if (!btn.innerHTML) {
+          btn.innerHTML = '<span>Submit</span>';
+        }
       }
     },
 

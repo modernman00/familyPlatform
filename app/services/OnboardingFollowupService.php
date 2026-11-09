@@ -31,16 +31,28 @@ use Throwable;
  */
 final class OnboardingFollowupService
 {
-    public const EVENT_DAY1_TREE     = 'welcome_day1_tree';
-    public const EVENT_DAY3_VOICE    = 'voice_capsule_day3';
-    public const EVENT_DAY7_REFERRAL = 'referral_flywheel_day7';
-    public const EVENT_DAY14_ROOTS   = 'heritage_roots_day14';
-    public const EVENT_DAY21_RECIPE  = 'family_recipe_day21';
-    public const EVENT_DAY28_TRIVIA  = 'sunday_trivia_day28';
-    public const EVENT_DAY35_CAPSULE = 'time_capsule_day35';
-    public const EVENT_DAY42_ELDER   = 'elder_voices_day42';
-    public const EVENT_DAY49_REUNION = 'reunion_planner_day49';
-    public const EVENT_DAY60_DYNASTY = 'dynasty_snapshot_day60';
+    public const EVENT_DAY1_TREE            = 'welcome_day1_tree';
+    public const EVENT_DAY2_FIRST_POST      = 'first_post_day2';
+    public const EVENT_DAY3_VOICE           = 'voice_capsule_day3';
+    public const EVENT_DAY4_AVATAR          = 'avatar_studio_day4';
+    public const EVENT_DAY7_REFERRAL        = 'referral_flywheel_day7';
+    public const EVENT_DAY10_3D_EMOJIS      = 'living_emojis_day10';
+    public const EVENT_DAY14_ROOTS          = 'heritage_roots_day14';
+    public const EVENT_DAY14_THEN_NOW       = 'then_now_studio_day14';
+    public const EVENT_DAY18_CINEMA_VIDEO   = 'cinema_video_day18';
+    public const EVENT_DAY21_RECIPE         = 'family_recipe_day21';
+    public const EVENT_DAY21_REELS          = 'family_reels_day21';
+    public const EVENT_DAY25_JOURNAL        = 'family_journal_day25';
+    public const EVENT_DAY28_TRIVIA         = 'sunday_trivia_day28';
+    public const EVENT_DAY30_PHOTO_VAULT    = 'photo_vault_day30';
+    public const EVENT_DAY35_CAPSULE        = 'time_capsule_day35';
+    public const EVENT_DAY35_FLYER_STUDIO   = 'flyer_studio_day35';
+    public const EVENT_DAY40_ROUNDTABLE     = 'family_roundtable_day40';
+    public const EVENT_DAY42_ELDER          = 'elder_voices_day42';
+    public const EVENT_DAY45_EVENTS         = 'events_studio_day45';
+    public const EVENT_DAY49_REUNION        = 'reunion_planner_day49';
+    public const EVENT_DAY52_HERITAGE_GAMES = 'heritage_games_day52';
+    public const EVENT_DAY60_DYNASTY        = 'dynasty_snapshot_day60';
 
     // Inactivity & Dormancy Re-Engagement Lifecycle Events
     public const EVENT_INACTIVITY_TIER1_GHOST    = 'inactivity_tier1_one_name';
@@ -53,52 +65,64 @@ final class OnboardingFollowupService
      *
      * @param bool $dryRun If true, computes matches without sending emails or push alerts
      * @param string|null $forceUserId If set, executes for this specific user regardless of registration age
-     * @return array{
-     *     day1_processed: int,
-     *     day3_processed: int,
-     *     day7_processed: int,
-     *     day14_processed: int,
-     *     day21_processed: int,
-     *     day28_processed: int,
-     *     day35_processed: int,
-     *     day42_processed: int,
-     *     day49_processed: int,
-     *     day60_processed: int,
-     *     dry_run: bool
-     * }
+     * @return array<string, mixed>
      */
     public static function runAllTouchpoints(bool $dryRun = false, ?string $forceUserId = null): array
     {
-        $d1  = self::processDay1TreeKickstart($dryRun, $forceUserId);
-        $d3  = self::processDay3VoiceCapsule($dryRun, $forceUserId);
-        $d7  = self::processDay7ReferralFlywheel($dryRun, $forceUserId);
-        $d14 = self::processDay14HeritageRoots($dryRun, $forceUserId);
-        $d21 = self::processDay21FamilyRecipe($dryRun, $forceUserId);
-        $d28 = self::processDay28FamilyTrivia($dryRun, $forceUserId);
-        $d35 = self::processDay35TimeCapsule($dryRun, $forceUserId);
-        $d42 = self::processDay42ElderVoices($dryRun, $forceUserId);
-        $d49 = self::processDay49ReunionPlanner($dryRun, $forceUserId);
-        $d60 = self::processDay60DynastySnapshot($dryRun, $forceUserId);
+        $d1          = self::processDay1TreeKickstart($dryRun, $forceUserId);
+        $d2          = self::processDay2FirstPost($dryRun, $forceUserId);
+        $d3          = self::processDay3VoiceCapsule($dryRun, $forceUserId);
+        $d4          = self::processDay4AvatarStudio($dryRun, $forceUserId);
+        $d7          = self::processDay7ReferralFlywheel($dryRun, $forceUserId);
+        $d10         = self::processDay10LivingEmojis($dryRun, $forceUserId);
+        $d14         = self::processDay14HeritageRoots($dryRun, $forceUserId);
+        $d14_thennow = self::processDay14ThenNow($dryRun, $forceUserId);
+        $d18         = self::processDay18CinemaVideo($dryRun, $forceUserId);
+        $d21         = self::processDay21FamilyRecipe($dryRun, $forceUserId);
+        $d21_reels   = self::processDay21FamilyReels($dryRun, $forceUserId);
+        $d25         = self::processDay25FamilyJournal($dryRun, $forceUserId);
+        $d28         = self::processDay28FamilyTrivia($dryRun, $forceUserId);
+        $d30         = self::processDay30PhotoVault($dryRun, $forceUserId);
+        $d35         = self::processDay35TimeCapsule($dryRun, $forceUserId);
+        $d35_flyer   = self::processDay35FlyerStudio($dryRun, $forceUserId);
+        $d40         = self::processDay40FamilyRoundtable($dryRun, $forceUserId);
+        $d42         = self::processDay42ElderVoices($dryRun, $forceUserId);
+        $d45         = self::processDay45EventsAnnouncements($dryRun, $forceUserId);
+        $d49         = self::processDay49ReunionPlanner($dryRun, $forceUserId);
+        $d52         = self::processDay52HeritageGames($dryRun, $forceUserId);
+        $d60         = self::processDay60DynastySnapshot($dryRun, $forceUserId);
 
         // Process all 4 Inactivity Dormancy Tiers (Ghost, Delegate, Banter, Deep Hibernation)
         $inactivity = self::runAllInactivityTouchpoints($dryRun, $forceUserId);
 
         return [
-            'day1_processed'  => $d1,
-            'day3_processed'  => $d3,
-            'day7_processed'  => $d7,
-            'day14_processed' => $d14,
-            'day21_processed' => $d21,
-            'day28_processed' => $d28,
-            'day35_processed' => $d35,
-            'day42_processed' => $d42,
-            'day49_processed' => $d49,
-            'day60_processed' => $d60,
+            'day1_processed'           => $d1,
+            'day2_processed'           => $d2,
+            'day3_processed'           => $d3,
+            'day4_processed'           => $d4,
+            'day7_processed'           => $d7,
+            'day10_processed'          => $d10,
+            'day14_processed'          => $d14,
+            'day14_then_now_processed' => $d14_thennow,
+            'day18_processed'          => $d18,
+            'day21_processed'          => $d21,
+            'day21_reels_processed'    => $d21_reels,
+            'day25_processed'          => $d25,
+            'day28_processed'          => $d28,
+            'day30_processed'          => $d30,
+            'day35_processed'          => $d35,
+            'day35_flyer_processed'    => $d35_flyer,
+            'day40_processed'          => $d40,
+            'day42_processed'          => $d42,
+            'day45_processed'          => $d45,
+            'day49_processed'          => $d49,
+            'day52_processed'          => $d52,
+            'day60_processed'          => $d60,
             'tier1_ghost_processed'    => $inactivity['tier1_ghost_processed'],
             'tier2_delegate_processed' => $inactivity['tier2_delegate_processed'],
             'tier3_banter_processed'   => $inactivity['tier3_banter_processed'],
             'tier4_deep_processed'     => $inactivity['tier4_deep_processed'],
-            'dry_run'         => $dryRun,
+            'dry_run'                  => $dryRun,
         ];
     }
 
@@ -175,6 +199,169 @@ final class OnboardingFollowupService
                 self::recordLifecycleEvent($userId, self::EVENT_DAY1_TREE, 'omni', [
                     'email'      => $email,
                     'node_count' => $nodeCount,
+                ]);
+            }
+
+            $processed++;
+        }
+
+        return $processed;
+    }
+
+    /**
+     * Touchpoint 1b: Day 2 (48h post-registration) First Family Message & 3D Stage Studio
+     */
+    public static function processDay2FirstPost(bool $dryRun = false, ?string $forceUserId = null): int
+    {
+        $db = Db::connect2();
+        $minDate = date('Y-m-d H:i:s', strtotime('-48 hours'));
+        $maxDate = date('Y-m-d H:i:s', strtotime('-5 days'));
+
+        $users = self::fetchCandidates(self::EVENT_DAY2_FIRST_POST, $minDate, $maxDate, $forceUserId);
+        $processed = 0;
+
+        foreach ($users as $user) {
+            $userId    = (string)$user['id'];
+            $famCode   = (string)($user['famCode'] ?? '');
+            $email     = (string)($user['email'] ?? '');
+            $firstName = (string)($user['firstName'] ?? 'Family Member');
+            $lastName  = (string)($user['lastName'] ?? '');
+
+            if (empty($email) || empty($famCode)) {
+                continue;
+            }
+
+            // Check if user has already shared a post
+            $pStmt = $db->prepare('SELECT post_no FROM post WHERE id = ? AND date_deleted IS NULL LIMIT 1');
+            $pStmt->execute([$userId]);
+            $hasPost = (bool)$pStmt->fetchColumn();
+
+            if ($hasPost) {
+                self::recordLifecycleEvent($userId, self::EVENT_DAY2_FIRST_POST, 'skipped_already_posted', [
+                    'has_post' => true,
+                ]);
+                continue;
+            }
+
+            if (!$dryRun) {
+                try {
+                    $emailData = [
+                        'id'        => $userId,
+                        'firstName' => $firstName,
+                        'lastName'  => $lastName,
+                        'email'     => $email,
+                        'famCode'   => $famCode,
+                    ];
+                    SendEmailFunctionality::email(
+                        'msg/lifecycle/day2_first_post',
+                        "{$firstName}, break the ice with your first family update in 3D",
+                        $emailData,
+                        'member'
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 2 Email error for user {$userId}: " . $e->getMessage());
+                }
+
+                try {
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'social',
+                        priority: 'high',
+                        title: '💬 Share Your First Family Update in 3D',
+                        body: "Hello {$firstName}! Break the ice with 3D translucent text stages like Dynasty Tree or Holo Glass.",
+                        actionUrl: '/profilePage#openPostModalTrigger',
+                        tag: 'onboarding-day2',
+                        familyCode: $famCode,
+                        metadata: ['event' => self::EVENT_DAY2_FIRST_POST]
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 2 Push error for user {$userId}: " . $e->getMessage());
+                }
+
+                self::recordLifecycleEvent($userId, self::EVENT_DAY2_FIRST_POST, 'omni', [
+                    'email' => $email,
+                ]);
+            }
+
+            $processed++;
+        }
+
+        return $processed;
+    }
+
+    /**
+     * Touchpoint 2b: Day 4 (96h post-registration) Living Avatar Studio
+     */
+    public static function processDay4AvatarStudio(bool $dryRun = false, ?string $forceUserId = null): int
+    {
+        $db = Db::connect2();
+        $minDate = date('Y-m-d H:i:s', strtotime('-96 hours'));
+        $maxDate = date('Y-m-d H:i:s', strtotime('-8 days'));
+
+        $users = self::fetchCandidates(self::EVENT_DAY4_AVATAR, $minDate, $maxDate, $forceUserId);
+        $processed = 0;
+
+        foreach ($users as $user) {
+            $userId    = (string)$user['id'];
+            $famCode   = (string)($user['famCode'] ?? '');
+            $email     = (string)($user['email'] ?? '');
+            $firstName = (string)($user['firstName'] ?? 'Family Member');
+            $lastName  = (string)($user['lastName'] ?? '');
+
+            if (empty($email) || empty($famCode)) {
+                continue;
+            }
+
+            // Check if user already has a custom living avatar
+            $aStmt = $db->prepare('SELECT img FROM profilePics WHERE id = ? LIMIT 1');
+            $aStmt->execute([$userId]);
+            $profImg = (string)$aStmt->fetchColumn();
+            $hasAvatar = ($profImg !== '' && !str_contains($profImg, 'avatarM.png') && !str_contains($profImg, 'avatarF.png'));
+
+            if ($hasAvatar) {
+                self::recordLifecycleEvent($userId, self::EVENT_DAY4_AVATAR, 'skipped_already_has_avatar', [
+                    'avatar' => $profImg,
+                ]);
+                continue;
+            }
+
+            if (!$dryRun) {
+                try {
+                    $emailData = [
+                        'id'        => $userId,
+                        'firstName' => $firstName,
+                        'lastName'  => $lastName,
+                        'email'     => $email,
+                        'famCode'   => $famCode,
+                    ];
+                    SendEmailFunctionality::email(
+                        'msg/lifecycle/day4_avatar_studio',
+                        "{$firstName}, transform your photo into a living family avatar",
+                        $emailData,
+                        'member'
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 4 Email error for user {$userId}: " . $e->getMessage());
+                }
+
+                try {
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'social',
+                        priority: 'high',
+                        title: '🎨 Your Living Avatar Awaits',
+                        body: "Hello {$firstName}! Convert your photo into a living family avatar with custom hair, clothing, and 3D expressions.",
+                        actionUrl: '/member/emojiStudio',
+                        tag: 'onboarding-day4',
+                        familyCode: $famCode,
+                        metadata: ['event' => self::EVENT_DAY4_AVATAR]
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 4 Push error for user {$userId}: " . $e->getMessage());
+                }
+
+                self::recordLifecycleEvent($userId, self::EVENT_DAY4_AVATAR, 'omni', [
+                    'email' => $email,
                 ]);
             }
 
@@ -920,6 +1107,723 @@ final class OnboardingFollowupService
                 }
 
                 self::recordLifecycleEvent($userId, self::EVENT_DAY60_DYNASTY, 'omni', [
+                    'email' => $email,
+                ]);
+            }
+
+            $processed++;
+        }
+
+        return $processed;
+    }
+
+    /**
+     * Touchpoint 3b: Day 10 (10d post-registration) Living 3D Comments & Me-Stickers
+     */
+    public static function processDay10LivingEmojis(bool $dryRun = false, ?string $forceUserId = null): int
+    {
+        $minDate = date('Y-m-d H:i:s', strtotime('-10 days'));
+        $maxDate = date('Y-m-d H:i:s', strtotime('-18 days'));
+
+        $users = self::fetchCandidates(self::EVENT_DAY10_3D_EMOJIS, $minDate, $maxDate, $forceUserId);
+        $processed = 0;
+
+        foreach ($users as $user) {
+            $userId    = (string)$user['id'];
+            $famCode   = (string)($user['famCode'] ?? '');
+            $email     = (string)($user['email'] ?? '');
+            $firstName = (string)($user['firstName'] ?? 'Family Member');
+            $lastName  = (string)($user['lastName'] ?? '');
+
+            if (empty($email) || empty($famCode)) {
+                continue;
+            }
+
+            if (!$dryRun) {
+                try {
+                    $emailData = [
+                        'id'        => $userId,
+                        'firstName' => $firstName,
+                        'lastName'  => $lastName,
+                        'email'     => $email,
+                        'famCode'   => $famCode,
+                    ];
+                    SendEmailFunctionality::email(
+                        'msg/lifecycle/day10_living_emojis',
+                        "{$firstName}, express yourself with living 3D comments & Me-Stickers",
+                        $emailData,
+                        'member'
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 10 Email error for user {$userId}: " . $e->getMessage());
+                }
+
+                try {
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'social',
+                        priority: 'high',
+                        title: '🎭 Living 3D Comments & Me-Stickers',
+                        body: "Hello {$firstName}! Bring family stories to life with animated 3D emoji reactions, voice notes, and custom stickers.",
+                        actionUrl: '/member/emojiStudio',
+                        tag: 'onboarding-day10',
+                        familyCode: $famCode,
+                        metadata: ['event' => self::EVENT_DAY10_3D_EMOJIS]
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 10 Push error for user {$userId}: " . $e->getMessage());
+                }
+
+                self::recordLifecycleEvent($userId, self::EVENT_DAY10_3D_EMOJIS, 'omni', [
+                    'email' => $email,
+                ]);
+            }
+
+            $processed++;
+        }
+
+        return $processed;
+    }
+
+    /**
+     * Touchpoint 4b: Day 14 (14d post-registration) Then & Now Photo Studio
+     */
+    public static function processDay14ThenNow(bool $dryRun = false, ?string $forceUserId = null): int
+    {
+        $db = Db::connect2();
+        $minDate = date('Y-m-d H:i:s', strtotime('-14 days'));
+        $maxDate = date('Y-m-d H:i:s', strtotime('-24 days'));
+
+        $users = self::fetchCandidates(self::EVENT_DAY14_THEN_NOW, $minDate, $maxDate, $forceUserId);
+        $processed = 0;
+
+        foreach ($users as $user) {
+            $userId    = (string)$user['id'];
+            $famCode   = (string)($user['famCode'] ?? '');
+            $email     = (string)($user['email'] ?? '');
+            $firstName = (string)($user['firstName'] ?? 'Family Member');
+            $lastName  = (string)($user['lastName'] ?? '');
+
+            if (empty($email) || empty($famCode)) {
+                continue;
+            }
+
+            // Check if user already created a comparison
+            $cStmt = $db->prepare('SELECT 1 FROM post_comparisons pc JOIN post p ON pc.post_no = p.post_no WHERE p.id = ? LIMIT 1');
+            $cStmt->execute([$userId]);
+            $hasComparison = (bool)$cStmt->fetchColumn();
+
+            if ($hasComparison) {
+                self::recordLifecycleEvent($userId, self::EVENT_DAY14_THEN_NOW, 'skipped_already_has_comparison', [
+                    'has_comparison' => true,
+                ]);
+                continue;
+            }
+
+            if (!$dryRun) {
+                try {
+                    $emailData = [
+                        'id'        => $userId,
+                        'firstName' => $firstName,
+                        'lastName'  => $lastName,
+                        'email'     => $email,
+                        'famCode'   => $famCode,
+                    ];
+                    SendEmailFunctionality::email(
+                        'msg/lifecycle/day14_then_now',
+                        "{$firstName}, recreate yesterday with Then & Now photo comparisons",
+                        $emailData,
+                        'member'
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 14 Then & Now Email error for user {$userId}: " . $e->getMessage());
+                }
+
+                try {
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'social',
+                        priority: 'high',
+                        title: '⏳ Recreate Yesterday: Then & Now Photo Studio',
+                        body: "Hello {$firstName}! Compare vintage childhood memories side-by-side with today using our drag slider.",
+                        actionUrl: '/profilePage?tab=then_now',
+                        tag: 'onboarding-day14-then-now',
+                        familyCode: $famCode,
+                        metadata: ['event' => self::EVENT_DAY14_THEN_NOW]
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 14 Then & Now Push error for user {$userId}: " . $e->getMessage());
+                }
+
+                self::recordLifecycleEvent($userId, self::EVENT_DAY14_THEN_NOW, 'omni', [
+                    'email' => $email,
+                ]);
+            }
+
+            $processed++;
+        }
+
+        return $processed;
+    }
+
+    /**
+     * Touchpoint 4c: Day 18 (18d post-registration) Cinema Video Sharing
+     */
+    public static function processDay18CinemaVideo(bool $dryRun = false, ?string $forceUserId = null): int
+    {
+        $minDate = date('Y-m-d H:i:s', strtotime('-18 days'));
+        $maxDate = date('Y-m-d H:i:s', strtotime('-28 days'));
+
+        $users = self::fetchCandidates(self::EVENT_DAY18_CINEMA_VIDEO, $minDate, $maxDate, $forceUserId);
+        $processed = 0;
+
+        foreach ($users as $user) {
+            $userId    = (string)$user['id'];
+            $famCode   = (string)($user['famCode'] ?? '');
+            $email     = (string)($user['email'] ?? '');
+            $firstName = (string)($user['firstName'] ?? 'Family Member');
+            $lastName  = (string)($user['lastName'] ?? '');
+
+            if (empty($email) || empty($famCode)) {
+                continue;
+            }
+
+            if (!$dryRun) {
+                try {
+                    $emailData = [
+                        'id'        => $userId,
+                        'firstName' => $firstName,
+                        'lastName'  => $lastName,
+                        'email'     => $email,
+                        'famCode'   => $famCode,
+                    ];
+                    SendEmailFunctionality::email(
+                        'msg/lifecycle/day18_cinema_video',
+                        "{$firstName}, share family videos that unfurl into cinema players",
+                        $emailData,
+                        'member'
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 18 Email error for user {$userId}: " . $e->getMessage());
+                }
+
+                try {
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'social',
+                        priority: 'high',
+                        title: '🎬 Beautiful Video Sharing is Here',
+                        body: "Hello {$firstName}! Paste YouTube or Vimeo links and watch them transform into 16:9 cinema players.",
+                        actionUrl: '/profilePage',
+                        tag: 'onboarding-day18',
+                        familyCode: $famCode,
+                        metadata: ['event' => self::EVENT_DAY18_CINEMA_VIDEO]
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 18 Push error for user {$userId}: " . $e->getMessage());
+                }
+
+                self::recordLifecycleEvent($userId, self::EVENT_DAY18_CINEMA_VIDEO, 'omni', [
+                    'email' => $email,
+                ]);
+            }
+
+            $processed++;
+        }
+
+        return $processed;
+    }
+
+    /**
+     * Touchpoint 5b: Day 21 (21d post-registration) Family Reels Sanctuary
+     */
+    public static function processDay21FamilyReels(bool $dryRun = false, ?string $forceUserId = null): int
+    {
+        $db = Db::connect2();
+        $minDate = date('Y-m-d H:i:s', strtotime('-21 days'));
+        $maxDate = date('Y-m-d H:i:s', strtotime('-32 days'));
+
+        $users = self::fetchCandidates(self::EVENT_DAY21_REELS, $minDate, $maxDate, $forceUserId);
+        $processed = 0;
+
+        foreach ($users as $user) {
+            $userId    = (string)$user['id'];
+            $famCode   = (string)($user['famCode'] ?? '');
+            $email     = (string)($user['email'] ?? '');
+            $firstName = (string)($user['firstName'] ?? 'Family Member');
+            $lastName  = (string)($user['lastName'] ?? '');
+
+            if (empty($email) || empty($famCode)) {
+                continue;
+            }
+
+            $rStmt = $db->prepare('SELECT 1 FROM family_reels WHERE user_id = ? LIMIT 1');
+            $rStmt->execute([$userId]);
+            $hasReel = (bool)$rStmt->fetchColumn();
+
+            if ($hasReel) {
+                self::recordLifecycleEvent($userId, self::EVENT_DAY21_REELS, 'skipped_already_has_reel', [
+                    'has_reel' => true,
+                ]);
+                continue;
+            }
+
+            if (!$dryRun) {
+                try {
+                    $emailData = [
+                        'id'        => $userId,
+                        'firstName' => $firstName,
+                        'lastName'  => $lastName,
+                        'email'     => $email,
+                        'famCode'   => $famCode,
+                    ];
+                    SendEmailFunctionality::email(
+                        'msg/lifecycle/day21_family_reels',
+                        "{$firstName}, capture life in motion with Family Reels",
+                        $emailData,
+                        'member'
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 21 Reels Email error for user {$userId}: " . $e->getMessage());
+                }
+
+                try {
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'social',
+                        priority: 'high',
+                        title: '📽️ Capture Life in Motion with Reels',
+                        body: "Hello {$firstName}! Share 30-second kinetic video memories paired with ambient soundtracks and 1-level reply threads.",
+                        actionUrl: '/reels',
+                        tag: 'onboarding-day21-reels',
+                        familyCode: $famCode,
+                        metadata: ['event' => self::EVENT_DAY21_REELS]
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 21 Reels Push error for user {$userId}: " . $e->getMessage());
+                }
+
+                self::recordLifecycleEvent($userId, self::EVENT_DAY21_REELS, 'omni', [
+                    'email' => $email,
+                ]);
+            }
+
+            $processed++;
+        }
+
+        return $processed;
+    }
+
+    /**
+     * Touchpoint 5c: Day 25 (25d post-registration) Family Journal & AI Story Assistant
+     */
+    public static function processDay25FamilyJournal(bool $dryRun = false, ?string $forceUserId = null): int
+    {
+        $db = Db::connect2();
+        $minDate = date('Y-m-d H:i:s', strtotime('-25 days'));
+        $maxDate = date('Y-m-d H:i:s', strtotime('-36 days'));
+
+        $users = self::fetchCandidates(self::EVENT_DAY25_JOURNAL, $minDate, $maxDate, $forceUserId);
+        $processed = 0;
+
+        foreach ($users as $user) {
+            $userId    = (string)$user['id'];
+            $famCode   = (string)($user['famCode'] ?? '');
+            $email     = (string)($user['email'] ?? '');
+            $firstName = (string)($user['firstName'] ?? 'Family Member');
+            $lastName  = (string)($user['lastName'] ?? '');
+
+            if (empty($email) || empty($famCode)) {
+                continue;
+            }
+
+            $jStmt = $db->prepare('SELECT 1 FROM family_journals WHERE author_id = ? LIMIT 1');
+            $jStmt->execute([$userId]);
+            $hasJournal = (bool)$jStmt->fetchColumn();
+
+            if ($hasJournal) {
+                self::recordLifecycleEvent($userId, self::EVENT_DAY25_JOURNAL, 'skipped_already_has_journal', [
+                    'has_journal' => true,
+                ]);
+                continue;
+            }
+
+            if (!$dryRun) {
+                try {
+                    $emailData = [
+                        'id'        => $userId,
+                        'firstName' => $firstName,
+                        'lastName'  => $lastName,
+                        'email'     => $email,
+                        'famCode'   => $famCode,
+                    ];
+                    SendEmailFunctionality::email(
+                        'msg/lifecycle/day25_family_journal',
+                        "{$firstName}, preserve oral heritage with the AI Story Assistant",
+                        $emailData,
+                        'member'
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 25 Journal Email error for user {$userId}: " . $e->getMessage());
+                }
+
+                try {
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'social',
+                        priority: 'high',
+                        title: '📖 Preserve Cherished Oral Stories',
+                        body: "Hello {$firstName}! Chronicle your family's oral history and ancestral journey with our collaborative AI Story Assistant.",
+                        actionUrl: '/journal',
+                        tag: 'onboarding-day25-journal',
+                        familyCode: $famCode,
+                        metadata: ['event' => self::EVENT_DAY25_JOURNAL]
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 25 Journal Push error for user {$userId}: " . $e->getMessage());
+                }
+
+                self::recordLifecycleEvent($userId, self::EVENT_DAY25_JOURNAL, 'omni', [
+                    'email' => $email,
+                ]);
+            }
+
+            $processed++;
+        }
+
+        return $processed;
+    }
+
+    /**
+     * Touchpoint 6b: Day 30 (30d post-registration) Encrypted Family Vault & Gallery
+     */
+    public static function processDay30PhotoVault(bool $dryRun = false, ?string $forceUserId = null): int
+    {
+        $minDate = date('Y-m-d H:i:s', strtotime('-30 days'));
+        $maxDate = date('Y-m-d H:i:s', strtotime('-42 days'));
+
+        $users = self::fetchCandidates(self::EVENT_DAY30_PHOTO_VAULT, $minDate, $maxDate, $forceUserId);
+        $processed = 0;
+
+        foreach ($users as $user) {
+            $userId    = (string)$user['id'];
+            $famCode   = (string)($user['famCode'] ?? '');
+            $email     = (string)($user['email'] ?? '');
+            $firstName = (string)($user['firstName'] ?? 'Family Member');
+            $lastName  = (string)($user['lastName'] ?? '');
+
+            if (empty($email) || empty($famCode)) {
+                continue;
+            }
+
+            if (!$dryRun) {
+                try {
+                    $emailData = [
+                        'id'        => $userId,
+                        'firstName' => $firstName,
+                        'lastName'  => $lastName,
+                        'email'     => $email,
+                        'famCode'   => $famCode,
+                    ];
+                    SendEmailFunctionality::email(
+                        'msg/lifecycle/day30_photo_vault',
+                        "{$firstName}, secure family treasures in your Encrypted Vault",
+                        $emailData,
+                        'member'
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 30 Vault Email error for user {$userId}: " . $e->getMessage());
+                }
+
+                try {
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'social',
+                        priority: 'high',
+                        title: '🏛️ Your AES-256 Encrypted Family Vault',
+                        body: "Hello {$firstName}! Organise high-resolution albums with face tagging and lock precious family documents securely.",
+                        actionUrl: '/profilePage?tab=gallery',
+                        tag: 'onboarding-day30-vault',
+                        familyCode: $famCode,
+                        metadata: ['event' => self::EVENT_DAY30_PHOTO_VAULT]
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 30 Vault Push error for user {$userId}: " . $e->getMessage());
+                }
+
+                self::recordLifecycleEvent($userId, self::EVENT_DAY30_PHOTO_VAULT, 'omni', [
+                    'email' => $email,
+                ]);
+            }
+
+            $processed++;
+        }
+
+        return $processed;
+    }
+
+    /**
+     * Touchpoint 7b: Day 35 (35d post-registration) WhatsApp Status Flyer Studio
+     */
+    public static function processDay35FlyerStudio(bool $dryRun = false, ?string $forceUserId = null): int
+    {
+        $minDate = date('Y-m-d H:i:s', strtotime('-35 days'));
+        $maxDate = date('Y-m-d H:i:s', strtotime('-48 days'));
+
+        $users = self::fetchCandidates(self::EVENT_DAY35_FLYER_STUDIO, $minDate, $maxDate, $forceUserId);
+        $processed = 0;
+
+        foreach ($users as $user) {
+            $userId    = (string)$user['id'];
+            $famCode   = (string)($user['famCode'] ?? '');
+            $email     = (string)($user['email'] ?? '');
+            $firstName = (string)($user['firstName'] ?? 'Family Member');
+            $lastName  = (string)($user['lastName'] ?? '');
+
+            if (empty($email) || empty($famCode)) {
+                continue;
+            }
+
+            if (!$dryRun) {
+                try {
+                    $emailData = [
+                        'id'        => $userId,
+                        'firstName' => $firstName,
+                        'lastName'  => $lastName,
+                        'email'     => $email,
+                        'famCode'   => $famCode,
+                    ];
+                    SendEmailFunctionality::email(
+                        'msg/lifecycle/day35_flyer_studio',
+                        "{$firstName}, design high-res flyers for your WhatsApp Status",
+                        $emailData,
+                        'member'
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 35 Flyer Email error for user {$userId}: " . $e->getMessage());
+                }
+
+                try {
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'social',
+                        priority: 'high',
+                        title: '📜 Create Your WhatsApp Clan Flyer',
+                        body: "Hello {$firstName}! Generate an elegant visual flyer and clan crest of your family tree to share on WhatsApp Status.",
+                        actionUrl: '/organogram?flyer=1',
+                        tag: 'onboarding-day35-flyer',
+                        familyCode: $famCode,
+                        metadata: ['event' => self::EVENT_DAY35_FLYER_STUDIO]
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 35 Flyer Push error for user {$userId}: " . $e->getMessage());
+                }
+
+                self::recordLifecycleEvent($userId, self::EVENT_DAY35_FLYER_STUDIO, 'omni', [
+                    'email' => $email,
+                ]);
+            }
+
+            $processed++;
+        }
+
+        return $processed;
+    }
+
+    /**
+     * Touchpoint 8b: Day 40 (40d post-registration) Family Roundtable & Hub
+     */
+    public static function processDay40FamilyRoundtable(bool $dryRun = false, ?string $forceUserId = null): int
+    {
+        $minDate = date('Y-m-d H:i:s', strtotime('-40 days'));
+        $maxDate = date('Y-m-d H:i:s', strtotime('-54 days'));
+
+        $users = self::fetchCandidates(self::EVENT_DAY40_ROUNDTABLE, $minDate, $maxDate, $forceUserId);
+        $processed = 0;
+
+        foreach ($users as $user) {
+            $userId    = (string)$user['id'];
+            $famCode   = (string)($user['famCode'] ?? '');
+            $email     = (string)($user['email'] ?? '');
+            $firstName = (string)($user['firstName'] ?? 'Family Member');
+            $lastName  = (string)($user['lastName'] ?? '');
+
+            if (empty($email) || empty($famCode)) {
+                continue;
+            }
+
+            if (!$dryRun) {
+                try {
+                    $emailData = [
+                        'id'        => $userId,
+                        'firstName' => $firstName,
+                        'lastName'  => $lastName,
+                        'email'     => $email,
+                        'famCode'   => $famCode,
+                    ];
+                    SendEmailFunctionality::email(
+                        'msg/lifecycle/day40_family_roundtable',
+                        "{$firstName}, spark intergenerational talks at the Family Roundtable",
+                        $emailData,
+                        'member'
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 40 Roundtable Email error for user {$userId}: " . $e->getMessage());
+                }
+
+                try {
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'social',
+                        priority: 'high',
+                        title: '🎙️ Join This Week\'s Family Roundtable',
+                        body: "Hello {$firstName}! Gather grandparents, parents, and youth for warm family questions, debates, and consensus polls.",
+                        actionUrl: '/profilePage?tab=roundtable',
+                        tag: 'onboarding-day40-roundtable',
+                        familyCode: $famCode,
+                        metadata: ['event' => self::EVENT_DAY40_ROUNDTABLE]
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 40 Roundtable Push error for user {$userId}: " . $e->getMessage());
+                }
+
+                self::recordLifecycleEvent($userId, self::EVENT_DAY40_ROUNDTABLE, 'omni', [
+                    'email' => $email,
+                ]);
+            }
+
+            $processed++;
+        }
+
+        return $processed;
+    }
+
+    /**
+     * Touchpoint 9b: Day 45 (45d post-registration) 3-Gear Event Studio & Announcements
+     */
+    public static function processDay45EventsAnnouncements(bool $dryRun = false, ?string $forceUserId = null): int
+    {
+        $minDate = date('Y-m-d H:i:s', strtotime('-45 days'));
+        $maxDate = date('Y-m-d H:i:s', strtotime('-58 days'));
+
+        $users = self::fetchCandidates(self::EVENT_DAY45_EVENTS, $minDate, $maxDate, $forceUserId);
+        $processed = 0;
+
+        foreach ($users as $user) {
+            $userId    = (string)$user['id'];
+            $famCode   = (string)($user['famCode'] ?? '');
+            $email     = (string)($user['email'] ?? '');
+            $firstName = (string)($user['firstName'] ?? 'Family Member');
+            $lastName  = (string)($user['lastName'] ?? '');
+
+            if (empty($email) || empty($famCode)) {
+                continue;
+            }
+
+            if (!$dryRun) {
+                try {
+                    $emailData = [
+                        'id'        => $userId,
+                        'firstName' => $firstName,
+                        'lastName'  => $lastName,
+                        'email'     => $email,
+                        'famCode'   => $famCode,
+                    ];
+                    SendEmailFunctionality::email(
+                        'msg/lifecycle/day45_events_announcements',
+                        "{$firstName}, plan reunions with 3-Gear PartyPlatform Event Studio",
+                        $emailData,
+                        'member'
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 45 Event Email error for user {$userId}: " . $e->getMessage());
+                }
+
+                try {
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'social',
+                        priority: 'high',
+                        title: '📅 Plan Gatherings with Event Studio',
+                        body: "Hello {$firstName}! Sync your family tree directly into PartyPlatform Guest Builder for seamless RSVP tracking.",
+                        actionUrl: '/event',
+                        tag: 'onboarding-day45-event',
+                        familyCode: $famCode,
+                        metadata: ['event' => self::EVENT_DAY45_EVENTS]
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 45 Event Push error for user {$userId}: " . $e->getMessage());
+                }
+
+                self::recordLifecycleEvent($userId, self::EVENT_DAY45_EVENTS, 'omni', [
+                    'email' => $email,
+                ]);
+            }
+
+            $processed++;
+        }
+
+        return $processed;
+    }
+
+    /**
+     * Touchpoint 9c: Day 52 (52d post-registration) Sunday Trivia & Heritage Games
+     */
+    public static function processDay52HeritageGames(bool $dryRun = false, ?string $forceUserId = null): int
+    {
+        $minDate = date('Y-m-d H:i:s', strtotime('-52 days'));
+        $maxDate = date('Y-m-d H:i:s', strtotime('-65 days'));
+
+        $users = self::fetchCandidates(self::EVENT_DAY52_HERITAGE_GAMES, $minDate, $maxDate, $forceUserId);
+        $processed = 0;
+
+        foreach ($users as $user) {
+            $userId    = (string)$user['id'];
+            $famCode   = (string)($user['famCode'] ?? '');
+            $email     = (string)($user['email'] ?? '');
+            $firstName = (string)($user['firstName'] ?? 'Family Member');
+            $lastName  = (string)($user['lastName'] ?? '');
+
+            if (empty($email) || empty($famCode)) {
+                continue;
+            }
+
+            if (!$dryRun) {
+                try {
+                    $emailData = [
+                        'id'        => $userId,
+                        'firstName' => $firstName,
+                        'lastName'  => $lastName,
+                        'email'     => $email,
+                        'famCode'   => $famCode,
+                    ];
+                    SendEmailFunctionality::email(
+                        'msg/lifecycle/day52_heritage_games',
+                        "{$firstName}, Sunday Trivia, Guess Who & Two Truths and a Lie",
+                        $emailData,
+                        'member'
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 52 Games Email error for user {$userId}: " . $e->getMessage());
+                }
+
+                try {
+                    NotificationOrchestrator::dispatch(
+                        userId: $userId,
+                        category: 'social',
+                        priority: 'high',
+                        title: '🎲 Play Heritage Games & Sunday Trivia',
+                        body: "Hello {$firstName}! Test your family knowledge with Sunday Trivia, Guess Who, and Two Truths and a Lie!",
+                        actionUrl: '/member/trivia',
+                        tag: 'onboarding-day52-games',
+                        familyCode: $famCode,
+                        metadata: ['event' => self::EVENT_DAY52_HERITAGE_GAMES]
+                    );
+                } catch (Throwable $e) {
+                    error_log("[OnboardingFollowupService] Day 52 Games Push error for user {$userId}: " . $e->getMessage());
+                }
+
+                self::recordLifecycleEvent($userId, self::EVENT_DAY52_HERITAGE_GAMES, 'omni', [
                     'email' => $email,
                 ]);
             }

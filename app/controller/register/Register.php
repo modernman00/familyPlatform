@@ -8,6 +8,8 @@ use Exception;
 use Src\{ SubmitForm, Select, Db, CheckToken, Recaptcha, LoginUtility, CorsHandler, Limiter };
 use Src\functionality\middleware\GetRequestData;
 use Src\functionality\SendEmailFunctionality;
+use Src\Exceptions\ValidationException;
+use Src\Exceptions\RecaptchaException;
 
 // testing
 
@@ -206,7 +208,11 @@ final class Register extends Db
         CorsHandler::setHeaders();
         try {
             $input = GetRequestData::getRequestData();
-            Recaptcha::verifyCaptchaEnterprise($input, 'SUBMIT');
+            try {
+                Recaptcha::verifyCaptchaEnterprise($input, 'SUBMIT');
+            } catch (RecaptchaException $re) {
+                throw new ValidationException('Security verification failed. Please refresh the page and try again.');
+            }
 
             // "Join my family" with a code that doesn't exist: still create the
             // account, but as its own new family (server-generated code) rather
@@ -301,16 +307,16 @@ final class Register extends Db
             $joiningViaInvitation = $isExistingFamily;
             $cleanData['familyStatus'] = $joiningViaInvitation ? 'pending' : 'approved';
 
+            // check if the email already exists
+            if (checkEmailExist($cleanData['email'])) {
+                throw new ValidationException("Your email ({$cleanData['email']}) is already registered. Please sign in or reset your password.");
+            }
+
             // create sessions and some variables
-           sessSet('id',$cleanData['id']);
-           sessSet('firstName',$cleanData['firstName']);
+            sessSet('id', $cleanData['id']);
+            sessSet('firstName', $cleanData['firstName']);
 
             $firstName = $cleanData['firstName'];
-
-            // check if the email already exist
-            if (checkEmailExist($cleanData['email'])) {
-                throw new Exception("Your email-{$cleanData['email']} is already registered");
-            }
 
             Limiter::limit($cleanData['email']);  
             
@@ -621,13 +627,13 @@ final class Register extends Db
      * @param array $postData - array data from the input form
      * @param string|int $name - the input name 
      * @param string $table = the db table to save the id 
-     * @throws Exception
+     * @throws ValidationException
      * @return array
      */
     private function setId(array $postData, string|int $name, string $table): array
     {
 
-        $sanitiseName = ($postData["$name"]) ? checkInput($postData["$name"]) : throw new Exception("Provide Info");
+        $sanitiseName = ($postData["$name"]) ? checkInput($postData["$name"]) : throw new ValidationException("Please provide your {$name}.");
         $sanitiseName = is_string($sanitiseName) ? $sanitiseName : '';
 
         $idName = preg_replace('/[^A-Za-z ]/', '', $sanitiseName) ?? '';

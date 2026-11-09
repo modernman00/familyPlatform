@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(feed): add 3D futuristic translucent text stage studio & 1-tap in-feed stage converter",
+    "title": "Feat(feed): 3D interactive poll/trivia arenas and platform-generated post 3D auto-elevation (RFC-0018B)",
     "notes": [
+        "Feat(feed): 3D interactive poll/trivia arenas and platform-generated post 3D auto-elevation (RFC-0018B)",
         "Feat(feed): add 3D futuristic translucent text stage studio & 1-tap in-feed stage converter",
-        "Feat(stickers): photo me-stickers with face zoom, browser detection and traits decoupling",
-        "Fix(pwa): deduplicate install prompts and honour PWA singleton guard"
+        "Feat(stickers): photo me-stickers with face zoom, browser detection and traits decoupling"
     ],
     "released_at": "2026-11-09",
-    "commit": "117b2edf"
+    "commit": "7192c9ff"
 }

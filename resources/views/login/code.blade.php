@@ -104,8 +104,7 @@
         <!-- Submit Button -->
         <button type="button" 
                 id="button" 
-                class="btn btn-primary w-100 py-3 fw-bold mb-3 rounded-3 d-flex justify-content-center align-items-center"
-                data-spin="true">
+                class="btn btn-primary w-100 py-3 fw-bold mb-3 rounded-3 d-flex justify-content-center align-items-center">
             <span>Verify &amp; Continue</span> 
             <i class="fas fa-arrow-right ms-2"></i>
         </button>

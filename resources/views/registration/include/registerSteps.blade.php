@@ -242,7 +242,11 @@
             try { data = await res.json(); } catch (_) { data = null; }
 
             if (!res.ok || !data || data.status === 'error') {
-                showFormError(errorText(data));
+                const msg = errorText(data);
+                if (/already registered/i.test(msg) || /email/i.test(msg)) {
+                    setError('email', msg);
+                }
+                showFormError(msg);
                 return;
             }
             try { localStorage.setItem('redirect', '/login'); } catch (_) {}

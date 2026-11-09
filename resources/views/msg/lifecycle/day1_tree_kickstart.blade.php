@@ -42,7 +42,7 @@
 
 <ol style="margin: 0 0 24px 0; padding-left: 20px; color: #334155; font-size: 15px; line-height: 1.8;">
     <li>Open your live organogram canvas.</li>
-    <li>Click <strong>"Add Parents"</strong> to honor your father and mother.</li>
+    <li>Click <strong>"Add Parents"</strong> to honour your father and mother.</li>
     <li>Add your brothers and sisters to complete your immediate circle.</li>
 </ol>
 

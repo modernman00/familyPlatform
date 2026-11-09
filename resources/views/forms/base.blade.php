@@ -465,6 +465,9 @@
     @include('partials.social-share')
 
     @if(($_ENV['APP_ENV'] ?? '') !== 'local')
+    @if(!empty($_ENV['RECAPTCHA_SITE_KEY']))
+    <script nonce="{{ $nonce }}" src="https://www.google.com/recaptcha/enterprise.js?render={{ $_ENV['RECAPTCHA_SITE_KEY'] }}" async defer></script>
+    @endif
     <script nonce="{{ $nonce }}">
         window.RECAPTCHA_SITE_KEY = "{{ $_ENV['RECAPTCHA_SITE_KEY'] ?? '' }}";
     </script>

@@ -45,7 +45,8 @@ final class PlaybookRouteAndStandard19Test extends TestCase
     {
         $navContent = file_get_contents($this->viewsPath . '/includes/public_nav.blade.php');
         $this->assertNotFalse($navContent);
-        $this->assertStringContainsString('/playbook', $navContent);
+        // Playbook link removed from top public navbar per CEO mandate to keep public landing UX focused
+        $this->assertStringNotContainsString('/playbook', $navContent);
 
         $footerContent = file_get_contents($this->viewsPath . '/includes/public_footer.blade.php');
         $this->assertNotFalse($footerContent);

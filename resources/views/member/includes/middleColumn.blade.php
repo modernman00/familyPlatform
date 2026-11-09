@@ -689,6 +689,9 @@
   <!-- 60-Second Onboarding Checklist (Alpine.js - auto hides when complete) -->
   @includeIf('member.includes.onboardingChecklistWidget')
 
+  <!-- 60-Day Omnichannel Feature Discovery & Activation Hub Widget -->
+  @includeIf('member.includes.discoveryJourneyWidget')
+
   <!-- Contextual Kinship & Phone Contacts Inner Circle Prompt -->
   @includeIf('member.includes.kinshipPromptCard')
 

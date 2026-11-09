@@ -23,7 +23,7 @@
 </p>
 
 <p style="margin-bottom: 20px; font-size: 16px; color: #334155; line-height: 1.6;">
-    Family life moves quickly, and organizing get-togethers across different households, cities, and time zones can easily turn into messy group chat messages.
+    Family life moves quickly, and organising get-togethers across different households, cities, and time zones can easily turn into messy group chat messages.
 </p>
 
 <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-left: 4px solid #ef4444; padding: 20px 24px; border-radius: 8px; margin-bottom: 24px;">
