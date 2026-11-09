@@ -421,6 +421,7 @@
 
 @section('content')
 <div class="container py-4">
+    @include('member.creativeStudioTabs', ['creativeTab' => 'tree'])
 
     <!-- Hero Header with Mesh Elevation -->
     <div class="studio-header">

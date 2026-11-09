@@ -1,21 +1,43 @@
 @extends('layouts.profileBase')
 
 @section('title', 'Creative Studio — FamilyPlatform')
-@section('meta_description', 'Design family flyers, posters and festive greeting cards in one place.')
+@section('meta_description', 'Curate your family lineage in Tree Studio, and design family flyers, posters and festive greeting cards in one place.')
 
 @section('content')
-<div class="container py-4" style="max-width:1000px;">
+<div class="container py-4" style="max-width:1080px;">
     @include('member.creativeStudioTabs', ['creativeTab' => 'hub'])
 
-    <header class="mb-4">
-        <h1 class="fs-2 fw-bold mb-2">Creative Studio</h1>
-        <p class="text-body-secondary mb-0">Design something beautiful for your family, then share it on the platform or with friends.</p>
+    <header class="mb-4 d-flex align-items-center gap-3">
+        <span class="creative-3d-icon-wrap creative-3d-icon-wrap--lg" aria-hidden="true">
+            <span class="creative-3d-gem">
+                <span class="creative-3d-sheen"></span>
+                <svg class="creative-3d-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2.5L14.4 7.8L20.1 8.5L15.8 12.4L17 18.1L12 15.2L7 18.1L8.2 12.4L3.9 8.5L9.6 7.8L12 2.5Z" fill="#fef08a" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round"/>
+                </svg>
+            </span>
+            <span class="creative-3d-spark creative-3d-spark--1"></span>
+            <span class="creative-3d-spark creative-3d-spark--2"></span>
+        </span>
+        <div>
+            <h1 class="fs-2 fw-bold mb-1">Creative Studio</h1>
+            <p class="text-body-secondary mb-0">Curate your living family tree, or design bespoke flyers, posters and festive greeting cards to share with your family.</p>
+        </div>
     </header>
 
     <div class="row g-3">
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-4">
+            <a href="/familyStudio" class="text-decoration-none d-block h-100">
+                <div class="card h-100 border rounded-4 p-4 shadow-sm d-flex flex-column">
+                    <i class="bi bi-diagram-3-fill text-primary fs-2 mb-3"></i>
+                    <h2 class="fs-5 fw-semibold text-body">Tree Studio</h2>
+                    <p class="text-body-secondary small mb-3">Curate your family lineage, add parents, partners and children, and document generational stories.</p>
+                    <span class="btn btn-primary text-white fw-bold mt-auto align-self-start" style="min-height:44px;white-space:nowrap;">Open Tree Studio</span>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-4">
             <a href="/poster-studio" class="text-decoration-none d-block h-100">
-                <div class="card h-100 border rounded-4 p-4 shadow-sm">
+                <div class="card h-100 border rounded-4 p-4 shadow-sm d-flex flex-column">
                     <i class="bi bi-easel2-fill text-warning fs-2 mb-3"></i>
                     <h2 class="fs-5 fw-semibold text-body">Flyers &amp; Posters</h2>
                     <p class="text-body-secondary small mb-3">Reunions, anniversaries, naming ceremonies and milestone celebrations.</p>
@@ -23,9 +45,9 @@
                 </div>
             </a>
         </div>
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-4">
             <a href="/member/festive-cards" class="text-decoration-none d-block h-100">
-                <div class="card h-100 border rounded-4 p-4 shadow-sm">
+                <div class="card h-100 border rounded-4 p-4 shadow-sm d-flex flex-column">
                     <i class="bi bi-envelope-heart-fill text-danger fs-2 mb-3"></i>
                     <h2 class="fs-5 fw-semibold text-body">Festive Cards</h2>
                     <p class="text-body-secondary small mb-3">Christmas, Easter, Eid, Diwali and more, sent as living envelopes in seven design styles.</p>

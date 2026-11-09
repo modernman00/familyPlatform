@@ -33,15 +33,39 @@
                         <i class="bi bi-diagram-3-fill"></i>{{ __('nav.tree', 'Tree') }}
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link stitch-nav-link" href="/familyStudio" title="{{ __('nav.studio', 'Tree Studio') }} - Family reels and creative celebrations">
-                        <i class="bi bi-stars"></i>{{ __('nav.studio', 'Tree Studio') }}
+                <li class="nav-item creativeStudioNav">
+                    <a class="nav-link stitch-nav-link" href="/creative-studio" title="Creative Studio — Tree Studio, Flyers &amp; Posters, and Festive Greeting Cards" data-tooltip="Creative Studio — Tree Studio, Flyers &amp; Posters, and Festive Greeting Cards" aria-describedby="creativeStudioTooltipCard">
+                        <span class="creative-3d-icon-wrap" aria-hidden="true">
+                            <span class="creative-3d-gem">
+                                <span class="creative-3d-sheen"></span>
+                                <svg class="creative-3d-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2.5L14.4 7.8L20.1 8.5L15.8 12.4L17 18.1L12 15.2L7 18.1L8.2 12.4L3.9 8.5L9.6 7.8L12 2.5Z" fill="#fef08a" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            <span class="creative-3d-spark creative-3d-spark--1"></span>
+                            <span class="creative-3d-spark creative-3d-spark--2"></span>
+                        </span>
+                        <span>Creative Studio</span>
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link stitch-nav-link" href="/creative-studio" title="Creative Studio - Flyers, Posters &amp; Festive Cards">
-                        <i class="bi bi-palette2 text-warning"></i>Creative Studio
-                    </a>
+                    <div class="creative-studio-rich-tooltip" id="creativeStudioTooltipCard" role="tooltip">
+                        <div class="cs-tooltip-header">
+                            <i class="bi bi-stars"></i> Inside Creative Studio
+                        </div>
+                        <ul class="cs-tooltip-list">
+                            <li class="cs-tooltip-item">
+                                <i class="bi bi-diagram-3-fill text-info"></i>
+                                <span><strong>Tree Studio</strong> — Build &amp; curate your family lineage</span>
+                            </li>
+                            <li class="cs-tooltip-item">
+                                <i class="bi bi-easel2-fill text-warning"></i>
+                                <span><strong>Flyer Studio</strong> — Reunion, jubilee &amp; milestone posters</span>
+                            </li>
+                            <li class="cs-tooltip-item">
+                                <i class="bi bi-envelope-heart-fill text-danger"></i>
+                                <span><strong>Festive Cards</strong> — Living 3D greeting envelopes</span>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
                 <li class="nav-item reelsNav">
                     <a class="nav-link stitch-nav-link" href="/reels" title="{{ __('nav.reels', 'Reels') }} - Watch captivating family video moments">
@@ -145,8 +169,23 @@
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item py-2 px-3 fw-medium" href="/creative-studio" title="Creative Studio - Flyers, Posters &amp; Festive Cards">
-                                <i class="bi bi-palette2 me-2 text-warning"></i> Creative Studio
+                            <a class="dropdown-item py-2 px-3 fw-medium d-flex align-items-center gap-2" href="/creative-studio" title="Creative Studio — Tree Studio, Flyers &amp; Posters, and Festive Greeting Cards">
+                                <span class="creative-3d-icon-wrap" aria-hidden="true">
+                                    <span class="creative-3d-gem">
+                                        <span class="creative-3d-sheen"></span>
+                                        <svg class="creative-3d-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 2.5L14.4 7.8L20.1 8.5L15.8 12.4L17 18.1L12 15.2L7 18.1L8.2 12.4L3.9 8.5L9.6 7.8L12 2.5Z" fill="#fef08a" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round"/>
+                                        </svg>
+                                    </span>
+                                    <span class="creative-3d-spark creative-3d-spark--1"></span>
+                                    <span class="creative-3d-spark creative-3d-spark--2"></span>
+                                </span>
+                                <span>Creative Studio</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2 px-3 fw-medium" href="/familyStudio" title="{{ __('nav.studio', 'Tree Studio') }} — Curate your family lineage and generations">
+                                <i class="bi bi-diagram-3-fill me-2 text-primary"></i> {{ __('nav.studio', 'Tree Studio') }}
                             </a>
                         </li>
                         <li>
