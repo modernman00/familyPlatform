@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(lifecycle): implement 60-day omnichannel feature discovery engine and in-app journey hub",
+    "title": "Fix(ux): eliminate layout flash on discovery journey widget by defaulting visibility to false",
     "notes": [
+        "Fix(ux): eliminate layout flash on discovery journey widget by defaulting visibility to false",
         "Feat(lifecycle): implement 60-day omnichannel feature discovery engine and in-app journey hub",
-        "Feat(feed): 3D interactive poll/trivia arenas and platform-generated post 3D auto-elevation (RFC-0018B)",
-        "Feat(feed): add 3D futuristic translucent text stage studio & 1-tap in-feed stage converter"
+        "Feat(feed): 3D interactive poll/trivia arenas and platform-generated post 3D auto-elevation (RFC-0018B)"
     ],
     "released_at": "2026-11-09",
-    "commit": "5e5c6b7a"
+    "commit": "168555be"
 }

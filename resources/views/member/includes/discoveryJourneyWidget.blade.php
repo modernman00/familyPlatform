@@ -41,10 +41,10 @@
         <div class="d-flex align-items-center gap-2">
             <button type="button" 
                     class="btn-close btn-close-white" 
-                    @click="dismissWidget()" 
+                    @click.stop="dismissWidget()" 
                     aria-label="Dismiss discovery card"
                     title="Dismiss"
-                    style="min-width: 32px; min-height: 32px;"></button>
+                    style="min-width: 44px; min-height: 44px; padding: 12px;"></button>
         </div>
     </div>
 
@@ -93,14 +93,19 @@
     </div>
 
     <!-- All 15 Studios Full Modal / Drawer -->
-    <div class="modal fade show d-block" 
+    <div class="modal fade" 
+         :class="{ 'show d-block': showAllStudiosModal }"
          tabindex="-1" 
          role="dialog"
          aria-labelledby="allStudiosModalLabel"
          aria-modal="true"
          x-show="showAllStudiosModal" 
+         x-cloak
          x-trap.noscroll="showAllStudiosModal"
-         style="background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(8px); z-index: 1060;">
+         @click.self="closeStudiosModal()"
+         @keydown.escape.window="closeStudiosModal()"
+         style="background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(8px); z-index: 1060;"
+         :style="showAllStudiosModal ? 'display: block !important;' : 'display: none !important;'">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; background: #ffffff; color: #1e293b;">
                 <div class="modal-header border-bottom px-4 py-3" style="background: linear-gradient(135deg, #2a0a0d 0%, #6a0d15 100%); color: #ffffff;">
@@ -120,9 +125,9 @@
                     </div>
                     <button type="button" 
                             class="btn-close btn-close-white" 
-                            @click="showAllStudiosModal = false" 
+                            @click.stop="closeStudiosModal()" 
                             aria-label="Close"
-                            style="min-width: 36px; min-height: 36px;"></button>
+                            style="min-width: 44px; min-height: 44px; padding: 12px;"></button>
                 </div>
 
                 <div class="modal-body p-4">
@@ -179,7 +184,7 @@
                     </span>
                     <button type="button" 
                             class="btn btn-secondary rounded-pill px-4 fw-semibold" 
-                            @click="showAllStudiosModal = false"
+                            @click.stop="closeStudiosModal()"
                             style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
                         Close
                     </button>
@@ -258,6 +263,10 @@ if (typeof window.discoveryJourneyWidget !== 'function') {
                         headers: { 'Accept': 'application/json' }
                     }).catch(() => {});
                 } catch (err) {}
+            },
+
+            closeStudiosModal() {
+                this.showAllStudiosModal = false;
             },
 
             dismissWidget() {
