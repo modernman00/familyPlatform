@@ -193,8 +193,8 @@
 if (typeof window.discoveryJourneyWidget !== 'function') {
     window.discoveryJourneyWidget = function() {
         return {
-            visible: true,
-            inWindow: true,
+            visible: false,
+            inWindow: false,
             showAllStudiosModal: false,
             completedCount: 0,
             totalMilestones: 15,
@@ -205,8 +205,9 @@ if (typeof window.discoveryJourneyWidget !== 'function') {
 
             async initDiscoveryState() {
                 try {
-                    if (sessionStorage.getItem('fp_discovery_dismissed') === 'true') {
+                    if (localStorage.getItem('fp_discovery_dismissed') === 'true' || sessionStorage.getItem('fp_discovery_dismissed') === 'true') {
                         this.visible = false;
+                        this.inWindow = false;
                         return;
                     }
 
@@ -219,12 +220,19 @@ if (typeof window.discoveryJourneyWidget !== 'function') {
                         if (res.status === 'success' && res.data) {
                             const d = res.data;
                             this.accountAgeDays = d.account_age_days || 0;
-                            this.inWindow = d.is_in_discovery_window ?? true;
+                            this.inWindow = Boolean(d.is_in_discovery_window);
                             this.completedCount = d.completed_count || 0;
                             this.totalMilestones = d.total_milestones || 15;
                             this.progressPercentage = d.progress_percentage || 0;
                             this.currentMilestone = d.current_milestone || {};
                             this.milestones = d.milestones || [];
+
+                            // Strictly visible ONLY if within 60-day window and not all milestones completed
+                            if (this.inWindow && this.completedCount < this.totalMilestones) {
+                                this.visible = true;
+                            } else {
+                                this.visible = false;
+                            }
                         }
                     }
                 } catch (e) {
@@ -254,7 +262,9 @@ if (typeof window.discoveryJourneyWidget !== 'function') {
 
             dismissWidget() {
                 this.visible = false;
+                this.inWindow = false;
                 try {
+                    localStorage.setItem('fp_discovery_dismissed', 'true');
                     sessionStorage.setItem('fp_discovery_dismissed', 'true');
                 } catch (e) {}
             }
