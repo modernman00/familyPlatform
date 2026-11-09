@@ -131,6 +131,36 @@ assertStageTrue(
     'PostMessage::updatePost enforces PostDto::cleanPostStyle and BOLA author ownership check ($userId !== $postAuthorId)'
 );
 
+// 6. Phase 2: Verify 3D Interactive Poll Arena & Platform-Generated Post Auto-Elevation
+assertStageTrue(
+    str_contains($postCardView, 'data-testid="feed-poll-arena-card"') && str_contains($postCardView, 'fp-poll-arena'),
+    'post-card.blade.php renders 3D Futuristic Poll / Trivia / Game Show Arena (.fp-poll-arena)'
+);
+assertStageTrue(
+    str_contains($postCardView, '!post.two_truths && !hasPollArena(post)'),
+    'post-card.blade.php suppresses duplicate plain-text question block above poll arena'
+);
+
+$feedCompJs = (string) file_get_contents(__DIR__ . '/../resources/asset/js/components/profilePage/feedComponent.js');
+assertStageTrue(
+    str_contains($feedCompJs, 'getPollArenaMeta(post)') && str_contains($feedCompJs, 'getPollCleanIntro(post)'),
+    'feedComponent.js implements getPollArenaMeta() and getPollCleanIntro() for zero-duplication 3D Trivia/Poll arenas'
+);
+assertStageTrue(
+    str_contains($feedCompJs, 'joined our family circle') && str_contains($feedCompJs, 'officially turned 18') && str_contains($feedCompJs, 'family chronicle'),
+    'feedComponent.js retroactively infers 3D stages for platform-generated Welcome, 18th Birthday, and Chronicle posts'
+);
+
+$triviaSvc = (string) file_get_contents(__DIR__ . '/../app/services/FamilyTriviaService.php');
+$joinSvc = (string) file_get_contents(__DIR__ . '/../app/services/FamilyJoinAnnouncementService.php');
+$adultSvc = (string) file_get_contents(__DIR__ . '/../app/services/AdulthoodTransitionService.php');
+assertStageTrue(
+    str_contains($triviaSvc, '[style:grand_announcement]')
+    && str_contains($joinSvc, '[style:grand_announcement]')
+    && str_contains($adultSvc, '[style:aurora_prism]'),
+    'Backend platform post services embed 3D stage tokens on new Trivia, Welcome, and 18th Birthday posts'
+);
+
 if ($failures > 0) {
     echo "\nFAILED with {$failures} error(s).\n";
     exit(1);

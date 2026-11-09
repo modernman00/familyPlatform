@@ -112,7 +112,7 @@ final class AdulthoodTransitionService
             $unsealedCount = $stmtUnseal->rowCount();
 
             // 4. Publish celebratory announcement post to the family feed
-            $celebrationMessage = "🎂✨ Milestone Celebration: {$fullName} has officially turned 18 today! Happy 18th Birthday and welcome to full adulthood in our family! Let us celebrate this wonderful milestone together! 🎉🎈";
+            $celebrationMessage = "🎂✨ Milestone Celebration: {$fullName} has officially turned 18 today! Happy 18th Birthday and welcome to full adulthood in our family! Let us celebrate this wonderful milestone together! 🎉🎈 [style:aurora_prism]";
             $currentTimeMs = (string)(int)(microtime(true) * 1000);
             $currentDate = date('Y-m-d H:i:s');
 

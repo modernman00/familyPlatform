@@ -81,7 +81,7 @@ final class FamilyTriviaService
         // 3. Insert the post into the family feed
         $authorId = !empty($actorUserId) ? $actorUserId : 'HERITAGE_BOT';
         $authorName = 'FamilyPlatform Heritage';
-        $postMessage = "🏆 Sunday Family Ritual: Weekly Family Trivia & Banter!\n\n" . $triviaData['question'] . "\n\nCast your vote below and debate in the comments with the family!";
+        $postMessage = "🏆 Sunday Family Ritual: Weekly Family Trivia & Banter!\n\n" . $triviaData['question'] . "\n\nCast your vote below and debate in the comments with the family! [style:grand_announcement]";
 
         $postStmt = $db->prepare(
             'INSERT INTO post (id, fullName, postMessage, postFamCode, post_time, post_status, date_created)

@@ -157,17 +157,44 @@ export function profileFeed(opts = {}) {
             xsrfHeaderName: 'X-XSRF-TOKEN',
         },
 
-        extractPostStyle(rawText, explicitStyle = null) {
+        extractPostStyle(rawText, explicitStyle = null, postObj = null) {
             const allowed = new Set(this.textStageCatalog.map(s => s.slug));
             if (explicitStyle && typeof explicitStyle === 'string') {
                 const clean = explicitStyle.trim().toLowerCase();
+                if (clean === 'none') return null;
                 if (allowed.has(clean)) return clean;
             }
             if (!rawText || typeof rawText !== 'string') return null;
             const m = rawText.match(/\[style:([a-z0-9_]+)\]/i);
             if (m && m[1]) {
                 const candidate = m[1].toLowerCase();
+                if (candidate === 'none') return null;
                 if (allowed.has(candidate)) return candidate;
+            }
+
+            // Automatic 3D Stage inference for platform-generated milestone & heritage posts
+            // (so both existing historical posts and newly created platform broadcasts render in 3D stages)
+            const lower = rawText.toLowerCase();
+            if (lower.includes('joined our family circle') || lower.includes('warm welcome to the family')) {
+                return 'grand_announcement';
+            }
+            if (lower.includes('officially turned 18') || lower.includes('happy 18th birthday') || lower.includes('milestone celebration:')) {
+                return 'aurora_prism';
+            }
+            if (lower.includes('family chronicle') || lower.includes('/familyjournal/')) {
+                return 'heirloom_velvet';
+            }
+            if (lower.includes('[memory flashback') || lower.includes('on this day flashback')) {
+                return 'heirloom_velvet';
+            }
+            if (lower.includes('vote to change our family code') || lower.includes('wants to change our family code')) {
+                return 'alert_pulse';
+            }
+            if (lower.includes('welcome to your page') || postObj?.is_official || postObj?.id === 'FAMILY_PLATFORM_OFFICIAL') {
+                return 'dynasty_holo';
+            }
+            if (lower.includes('family roundtable') || lower.includes('roundtable accord')) {
+                return 'cyber_glass';
             }
             return null;
         },
@@ -178,9 +205,131 @@ export function profileFeed(opts = {}) {
         },
 
         getPostStageMeta(post) {
-            const slug = post?.post_style || this.extractPostStyle(post?.postMessage, post?.post_style);
+            const slug = post?.post_style || this.extractPostStyle(post?.postMessage, post?.post_style, post);
             if (!slug) return null;
-            return this.textStageCatalog.find(s => s.slug === slug) || null;
+            const base = this.textStageCatalog.find(s => s.slug === slug);
+            if (!base) return null;
+
+            const raw = String(post?.postMessage || '').toLowerCase();
+            let customBadge = base.badge;
+            if (raw.includes('joined our family circle') || raw.includes('warm welcome to the family')) {
+                customBadge = '🎉 FAMILY WELCOME MILESTONE';
+            } else if (raw.includes('officially turned 18') || raw.includes('happy 18th birthday')) {
+                customBadge = '🎂 18TH BIRTHDAY GRADUATION';
+            } else if (raw.includes('family chronicle') || raw.includes('/familyjournal/')) {
+                customBadge = '📖 FAMILY CHRONICLE DECREE';
+            } else if (raw.includes('[memory flashback')) {
+                customBadge = '⏳ ON THIS DAY FLASHBACK';
+            } else if (raw.includes('change our family code')) {
+                customBadge = '🗳️ FAMILY CODE GOVERNANCE';
+            } else if (raw.includes('welcome to your page')) {
+                customBadge = '🏡 SANCTUARY WELCOME';
+            } else if (post?.is_official || post?.id === 'FAMILY_PLATFORM_OFFICIAL') {
+                customBadge = '✨ OFFICIAL PLATFORM BROADCAST';
+            }
+            return { ...base, badge: customBadge };
+        },
+
+        getChronicleLink(post) {
+            const raw = String(post?.postMessage || '');
+            const m = raw.match(/(?:https?:\/\/[^\s<>"']+)?(\/familyJournal\/\d+)/i);
+            return m && m[1] ? m[1] : null;
+        },
+
+        hasPollArena(post) {
+            return Boolean(post?.poll && Array.isArray(post.poll.options) && post.poll.options.length > 0);
+        },
+
+        getPollArenaMeta(post) {
+            const raw = String(post?.postMessage || '');
+            const lower = raw.toLowerCase();
+            if (lower.includes('weekly family trivia')) {
+                return {
+                    theme: 'trivia_gold',
+                    badge: '🏆 WEEKLY FAMILY TRIVIA ARENA',
+                    subtitle: 'Sunday Family Ritual • Cast your vote below & debate in the comments!',
+                    icon: 'bi-trophy-fill',
+                };
+            }
+            if (lower.includes('family game show')) {
+                return {
+                    theme: 'gameshow_neon',
+                    badge: '🎮 FAMILY GAME SHOW ARENA',
+                    subtitle: 'Test how well you know our family stories & see who gets top marks!',
+                    icon: 'bi-controller',
+                };
+            }
+            if (lower.includes('weekend outings')) {
+                return {
+                    theme: 'outings_emerald',
+                    badge: '🗺️ FAMILY WEEKEND OUTINGS VOTE',
+                    subtitle: 'Scouted live activities for our family • Tap your pick for this weekend!',
+                    icon: 'bi-compass-fill',
+                };
+            }
+            if (lower.includes('change our family code')) {
+                return {
+                    theme: 'alert_vote',
+                    badge: '🗳️ FAMILY CODE GOVERNANCE VOTE',
+                    subtitle: 'Cast your vote — the code updates automatically if Yes wins.',
+                    icon: 'bi-shield-check',
+                };
+            }
+            return {
+                theme: 'cyber_poll',
+                badge: '📊 LIVE 3D FAMILY POLL',
+                subtitle: 'Tap an option below to cast your family vote',
+                icon: 'bi-bar-chart-fill',
+            };
+        },
+
+        getPollCleanIntro(post) {
+            if (!post) return '';
+            const rawCaption = this.getMediaCaption(post);
+            if (!rawCaption) return '';
+            const question = String(post?.poll?.question || '').trim();
+
+            const lines = rawCaption
+                .split(/\r?\n/)
+                .map(l => l.trim())
+                .filter(Boolean)
+                .filter(line => {
+                    if (question && (line === question || line.includes(question) || question.includes(line))) {
+                        return false;
+                    }
+                    const l = line.toLowerCase();
+                    if (l.includes('sunday family ritual: weekly family trivia')) return false;
+                    if (l.includes('cast your vote below and debate in the comments')) return false;
+                    if (l.includes('round 1 question is live in the poll below')) return false;
+                    if (l.includes('we just launched our family game show')) return false;
+                    if (l.includes('we just scouted live activities and museum events')) return false;
+                    if (l.includes('voting closes friday evening')) return false;
+                    return true;
+                });
+
+            return lines.join('\n').trim();
+        },
+
+        getPollOptionLetter(idx) {
+            const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+            return letters[idx] || String(idx + 1);
+        },
+
+        getLeadingPollOptionId(post) {
+            const opts = post?.poll?.options;
+            if (!Array.isArray(opts) || opts.length === 0) return null;
+            const total = Number(post?.poll?.total_votes || 0);
+            if (total <= 0) return null;
+            let maxVotes = 0;
+            let leaderId = null;
+            opts.forEach(o => {
+                const v = Number(o?.vote_count ?? o?.percentage ?? 0);
+                if (v > maxVotes) {
+                    maxVotes = v;
+                    leaderId = o.option_id;
+                }
+            });
+            return maxVotes > 0 ? leaderId : null;
         },
 
         hasFamilyTreeCall(post) {
@@ -674,7 +823,8 @@ export function profileFeed(opts = {}) {
                 post_tags: Array.isArray(p?.post_tags) ? p.post_tags : [],
                 views_count: parseInt(p?.views_count || 0, 10),
                 voice_capsule_url: p?.voice_capsule_url || null,
-                post_style: this.extractPostStyle(cleanMsg, p?.post_style),
+                is_official: Boolean(p?.is_official || p?.id === 'FAMILY_PLATFORM_OFFICIAL'),
+                post_style: this.extractPostStyle(cleanMsg, p?.post_style, p),
                 ar_emoji: p?.ar_emoji || (() => {
                     const m = cleanMsg.match(/:([a-z0-9_]+_3d):/i);
                     return m ? m[1] : null;
@@ -963,6 +1113,9 @@ export function profileFeed(opts = {}) {
 
             // Strip embedded 3D text stage style tokens
             text = text.replace(/\[style:[a-z0-9_]+\]\s*/gi, '');
+
+            // Clean trailing 'Read the full story: <url>' when the 3D Family Chronicle CTA button is rendered
+            text = text.replace(/👉\s*Read the full story:\s*(?:https?:\/\/[^\s<>"']+)?\/familyJournal\/\d+/gi, '');
 
             // Strip photo service links
             text = text.replace(/https?:\/\/(?:photos\.app\.goo\.gl|photos\.google\.com)\/[^\s<>"']+/gi, '');

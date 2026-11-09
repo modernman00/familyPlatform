@@ -143,8 +143,8 @@
     </div>
   </div>
 
-  <!-- Weekly Family Trivia Badge -->
-  <template x-if="post.postMessage && post.postMessage.includes('Weekly Family Trivia')">
+  <!-- Weekly Family Trivia Badge (Only when no 3D Poll Arena is rendered) -->
+  <template x-if="!hasPollArena(post) && post.postMessage && post.postMessage.includes('Weekly Family Trivia')">
     <div class="px-1 mb-2">
       <span class="badge rounded-pill px-3 py-1.5 text-white shadow-sm d-inline-flex align-items-center gap-1" style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.5px;">
         <i class="bi bi-trophy-fill"></i> {{ __('feed.trivia_badge', 'WEEKLY FAMILY TRIVIA') }}
@@ -152,8 +152,8 @@
     </div>
   </template>
 
-  <!-- Two Truths & a Lie Badge -->
-  <template x-if="post.two_truths || (post.postMessage && post.postMessage.includes('Two Truths & a Lie'))">
+  <!-- Two Truths & a Lie Badge (Only when the 3D Two Truths Card is not already rendering its own header) -->
+  <template x-if="!post.two_truths && (post.postMessage && post.postMessage.includes('Two Truths & a Lie'))">
     <div class="px-1 mb-2">
       <span class="badge rounded-pill px-3 py-1.5 text-white shadow-sm d-inline-flex align-items-center gap-1.5" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.5px;">
         <i class="bi bi-mask"></i> TWO TRUTHS &amp; A LIE
@@ -161,8 +161,8 @@
     </div>
   </template>
 
-  <!-- Family Chronicle / Journal Badge -->
-  <template x-if="post.postMessage && (post.postMessage.includes('Family Chronicle') || post.postMessage.includes('/familyJournal/'))">
+  <!-- Family Chronicle / Journal Badge (Only when not already rendered inside a 3D Text Stage) -->
+  <template x-if="!getPostStageMeta(post) && post.postMessage && (post.postMessage.includes('Family Chronicle') || post.postMessage.includes('/familyJournal/'))">
     <div class="px-1 mb-2">
       <span class="badge rounded-pill px-3 py-1.5 text-white shadow-sm d-inline-flex align-items-center gap-1.5" style="background: linear-gradient(135deg, #b8202c 0%, #8a1019 100%); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.5px;">
         <i class="bi bi-journal-bookmark-fill"></i> {{ __('feed.chronicle_badge', 'FAMILY CHRONICLE') }}
@@ -173,18 +173,18 @@
 
 
   <!-- Post Text (Prominent for Text-Only Posts & 3D Futuristic Translucent Stage Cards) -->
-  <template x-if="!post.two_truths && (getMediaCaption(post) || post.ar_emoji) && (!post.images || post.images.length === 0) && !post.video && (!post.videos || post.videos.length === 0) && !post.comparison">
+  <template x-if="!post.two_truths && !hasPollArena(post) && (getMediaCaption(post) || post.ar_emoji) && (!post.images || post.images.length === 0) && !post.video && (!post.videos || post.videos.length === 0) && !post.comparison">
     <div class="post-content px-1 mb-3">
       <!-- 1. 3D Futuristic & Translucent Stage Card (when post_style is active) -->
       <template x-if="getPostStageMeta(post)">
-        <div class="fp-text-stage" :class="'fp-text-stage--' + post.post_style" data-testid="feed-text-stage-card">
+        <div class="fp-text-stage" :class="'fp-text-stage--' + (post.post_style || getPostStageMeta(post).slug)" data-testid="feed-text-stage-card">
           <div class="fp-text-stage__orb fp-text-stage__orb--a" aria-hidden="true"></div>
           <div class="fp-text-stage__orb fp-text-stage__orb--b" aria-hidden="true"></div>
           <div class="fp-text-stage__grid" aria-hidden="true"></div>
 
           <div class="fp-text-stage__header">
             <span class="fp-stage-badge">
-              <template x-if="post.post_style === 'alert_pulse'">
+              <template x-if="(post.post_style || getPostStageMeta(post).slug) === 'alert_pulse'">
                 <span class="fp-stage-badge__pulse" aria-hidden="true"></span>
               </template>
               <span x-text="getPostStageMeta(post).badge"></span>
@@ -195,14 +195,23 @@
                :class="(getMediaCaption(post) || '').length <= 95 ? 'fp-text-stage__body--hero' : 'fp-text-stage__body--prose'"
                x-html="renderHashtags(getMediaCaption(post), post.ar_emoji)"></div>
 
-          <!-- Smart Contextual Family Tree Action Trigger inside 3D Stage -->
-          <template x-if="hasFamilyTreeCall(post)">
-            <div class="fp-text-stage__footer">
-              <a href="/organogram" class="fp-text-stage__cta">
-                <i class="bi bi-diagram-3-fill"></i>
-                <span>Add Your Branch to Family Tree</span>
-                <i class="bi bi-arrow-right-short" style="font-size: 1.25rem;"></i>
-              </a>
+          <!-- Smart Contextual Family Tree or Family Chronicle Action Trigger inside 3D Stage -->
+          <template x-if="hasFamilyTreeCall(post) || getChronicleLink(post)">
+            <div class="fp-text-stage__footer d-flex flex-wrap gap-2 justify-content-center">
+              <template x-if="getChronicleLink(post)">
+                <a :href="getChronicleLink(post)" class="fp-text-stage__cta">
+                  <i class="bi bi-book-half"></i>
+                  <span>{{ __('feed.read_chronicle', 'Read Full Chronicle') }}</span>
+                  <i class="bi bi-arrow-right-short" style="font-size: 1.25rem;"></i>
+                </a>
+              </template>
+              <template x-if="hasFamilyTreeCall(post)">
+                <a href="/organogram" class="fp-text-stage__cta">
+                  <i class="bi bi-diagram-3-fill"></i>
+                  <span>Add Your Branch to Family Tree</span>
+                  <i class="bi bi-arrow-right-short" style="font-size: 1.25rem;"></i>
+                </a>
+              </template>
             </div>
           </template>
         </div>
@@ -290,8 +299,8 @@
     </div>
   </template>
 
-  <!-- Direct Chronicle Read CTA -->
-  <template x-if="post.postMessage && post.postMessage.includes('/familyJournal/')">
+  <!-- Direct Chronicle Read CTA (When not already embedded in the 3D Stage Card) -->
+  <template x-if="post.postMessage && post.postMessage.includes('/familyJournal/') && (!getPostStageMeta(post) || hasPollArena(post) || (post.images && post.images.length > 0))">
     <div class="px-1 mb-3">
       <a :href="((post.postMessage.match(/(?:https?:\/\/[^\s<>&\"']+)?\/familyJournal\/\d+/) || ['/familyJournal'])[0])" 
          class="btn btn-sm text-white d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold shadow-xs" 
@@ -1721,35 +1730,80 @@
     </div>
   </template>
 
-  <!-- Poll Section -->
+  <!-- 3D Futuristic & Translucent Poll / Trivia / Game Show Arena -->
   <template x-if="post.poll && post.poll.options && post.poll.options.length > 0">
-    <div class="poll-container mt-2 p-3 bg-light rounded border border-light-subtle mb-3 mx-1">
-      <h6 class="fw-bold mb-3" style="font-size: 0.9rem;"><i class="fa fa-bar-chart me-2 text-primary"></i><span x-text="post.poll.question"></span></h6>
-      <div class="poll-options">
-        <template x-for="opt in post.poll.options" :key="opt.option_id">
-          <div class="poll-option mb-2 position-relative">
-            <button type="button" 
-                    @click="votePoll(post.post_no, opt.option_id)" 
-                    :disabled="isVotingPoll(post.post_no)"
-                    class="poll-option-btn w-100 text-start btn position-relative overflow-hidden" 
-                    :class="[
-                      isOptionVoted(post, opt.option_id) ? 'btn-outline-primary' : 'btn-outline-secondary',
-                      isVotingPoll(post.post_no) ? 'opacity-75 cursor-not-allowed' : ''
-                    ]"
-                    style="z-index: 1; font-size: 0.85rem; padding: 8px 12px; min-height: 44px;">
-              <span class="position-relative d-inline-flex align-items-center gap-1" style="z-index: 2;">
-                <span x-text="opt.option_text"></span>
-                <span x-show="isVotingPoll(post.post_no)" class="spinner-border spinner-border-sm ms-1 text-primary" role="status" aria-hidden="true" style="width: 0.85rem; height: 0.85rem;"></span>
-              </span>
-              <span class="float-end position-relative fw-bold" style="z-index: 2;" x-text="(opt.percentage || 0) + '%'"></span>
-              <div class="position-absolute top-0 start-0 h-100" 
-                   :class="isOptionVoted(post, opt.option_id) ? 'bg-primary' : 'bg-secondary'" 
-                   :style="'width: ' + (opt.percentage || 0) + '%; opacity: 0.15; transition: width 0.5s ease; z-index: 0;'"></div>
-            </button>
-          </div>
+    <div class="fp-poll-arena mx-1 mb-3"
+         :class="'fp-poll-arena--' + getPollArenaMeta(post).theme"
+         data-testid="feed-poll-arena-card">
+      <div class="fp-poll-arena__orb fp-poll-arena__orb--a" aria-hidden="true"></div>
+      <div class="fp-poll-arena__orb fp-poll-arena__orb--b" aria-hidden="true"></div>
+      <div class="fp-poll-arena__grid" aria-hidden="true"></div>
+
+      <!-- Top Header Bar: 3D Arena Badge + Live Vote Counter Pill -->
+      <div class="fp-poll-arena__top">
+        <span class="fp-poll-arena__badge">
+          <span x-text="getPollArenaMeta(post).badge"></span>
+        </span>
+        <span class="fp-poll-arena__votes-pill">
+          <i class="bi bi-people-fill"></i>
+          <span x-text="(post.poll.total_votes || 0) + ((post.poll.total_votes || 0) === 1 ? ' vote' : ' votes')"></span>
+        </span>
+      </div>
+
+      <!-- Optional Clean Intro Context (Stripped of duplicate question & boilerplate) -->
+      <template x-if="getPollCleanIntro(post)">
+        <div class="fp-poll-arena__intro" x-html="renderHashtags(getPollCleanIntro(post), post.ar_emoji)"></div>
+      </template>
+
+      <!-- Hero Question Typography (Displayed ONCE in crisp 3D contrast) -->
+      <h6 class="fp-poll-arena__question" x-text="post.poll.question"></h6>
+
+      <p class="fp-poll-arena__subtitle mb-3" x-text="getPollArenaMeta(post).subtitle"></p>
+
+      <!-- Tactile 3D Translucent Option Bars -->
+      <div class="fp-poll-arena__options">
+        <template x-for="(opt, optIdx) in post.poll.options" :key="opt.option_id">
+          <button type="button"
+                  @click="votePoll(post.post_no, opt.option_id)"
+                  :disabled="isVotingPoll(post.post_no)"
+                  class="fp-poll-opt poll-option-btn"
+                  :class="{
+                    'is-voted': isOptionVoted(post, opt.option_id),
+                    'is-leading': getLeadingPollOptionId(post) !== null && String(getLeadingPollOptionId(post)) === String(opt.option_id),
+                    'opacity-75 cursor-not-allowed': isVotingPoll(post.post_no)
+                  }">
+            <div class="fp-poll-opt__fill"
+                 :style="'width: ' + (opt.percentage || 0) + '%;'"></div>
+
+            <span class="fp-poll-opt__letter" x-text="getPollOptionLetter(optIdx)"></span>
+
+            <span class="fp-poll-opt__label">
+              <span x-text="opt.option_text"></span>
+              <template x-if="isOptionVoted(post, opt.option_id)">
+                <i class="bi bi-check-circle-fill fp-poll-opt__check" title="Your vote"></i>
+              </template>
+              <template x-if="getLeadingPollOptionId(post) !== null && String(getLeadingPollOptionId(post)) === String(opt.option_id)">
+                <span class="fp-poll-opt__crown" title="Leading choice">👑</span>
+              </template>
+              <span x-show="isVotingPoll(post.post_no)" class="spinner-border spinner-border-sm ms-1" role="status" aria-hidden="true" style="width: 0.85rem; height: 0.85rem;"></span>
+            </span>
+
+            <span class="fp-poll-opt__pct" x-text="(opt.percentage || 0) + '%'"></span>
+          </button>
         </template>
       </div>
-      <small class="text-muted mt-2 d-block" style="font-size: 0.75rem;" x-text="(post.poll.total_votes || 0) + ' votes'"></small>
+
+      <!-- Arena Footer -->
+      <div class="fp-poll-arena__footer">
+        <span class="fp-poll-arena__hint">
+          <i class="bi bi-hand-index-thumb-fill"></i>
+          <span>Tap any option to vote or switch your pick</span>
+        </span>
+        <span class="fp-poll-arena__discuss">
+          <i class="bi bi-chat-dots-fill"></i>
+          <span>Debate below</span>
+        </span>
+      </div>
     </div>
   </template>
 

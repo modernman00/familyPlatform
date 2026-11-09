@@ -325,6 +325,9 @@ class MemoryMilestoneService
             } else {
                 $composedMessage .= "\"{$origPost->postMessage}\"";
             }
+            if ($primaryImg === null || $primaryImg === '') {
+                $composedMessage .= ' [style:heirloom_velvet]';
+            }
 
             // 4. Insert into post table
             $insQuery = "INSERT INTO post (id, fullName, postMessage, postFamCode, post_img0, post_time, post_status, date_created)

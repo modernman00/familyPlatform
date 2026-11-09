@@ -143,7 +143,7 @@ final class FamilyJoinAnnouncementService
                 $postNo = (int)$existingPostNo;
             } else {
                 $timeMs = function_exists('milliSeconds') ? (string)milliSeconds() : (string)(int)(microtime(true) * 1000);
-                $feedMessage = "🎉 Warm Welcome to the Family!\n\n{$fullName} has just joined our family circle (#{$cleanCode})! Welcome aboard to our private sanctuary. Let us give them a warm family welcome! 🌳✨";
+                $feedMessage = "🎉 Warm Welcome to the Family!\n\n{$fullName} has just joined our family circle (#{$cleanCode})! Welcome aboard to our private sanctuary. Let us give them a warm family welcome! 🌳✨ [style:grand_announcement]";
 
                 $stmtPost = $db->prepare('
                     INSERT INTO post (

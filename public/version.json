@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(emoji): Me-stickers, living emojis in comments, tap-to-play feed emojis",
+    "title": "Feat(feed): add 3D futuristic translucent text stage studio & 1-tap in-feed stage converter",
     "notes": [
-        "Feat(emoji): Me-stickers, living emojis in comments, tap-to-play feed emojis",
-        "Feat(emoji-studio): mobile layout, legible type, point & clap emojis, bolder feed emojis",
-        "Test(cypress): update composer tools count assertion for unified emoji button"
+        "Feat(feed): add 3D futuristic translucent text stage studio & 1-tap in-feed stage converter",
+        "Feat(stickers): photo me-stickers with face zoom, browser detection and traits decoupling",
+        "Fix(pwa): deduplicate install prompts and honour PWA singleton guard"
     ],
-    "released_at": "2026-11-08",
-    "commit": "b5e53d9e"
+    "released_at": "2026-11-09",
+    "commit": "117b2edf"
 }

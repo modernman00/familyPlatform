@@ -2626,43 +2626,143 @@ body.dark-mode .comment-composer__send.is-active {
 }
 
 
-/* 🎭 TWO TRUTHS & A LIE: playable feed card */
-.tt-feed-card { border: 1px solid #fecaca; border-radius: 16px; background: linear-gradient(180deg, #fff7ed 0%, #ffffff 60%); overflow: hidden; }
-.tt-feed-head { padding: 16px; background: linear-gradient(135deg, #b8202c 0%, #7f1019 100%); color: #ffffff; }
-.tt-feed-eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #ffd700; }
-.tt-feed-title { margin: 4px 0; font-size: 1.125rem; font-weight: 700; color: #ffffff; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.tt-feed-sub { font-size: 0.875rem; color: #fff7ed; }
-.tt-feed-options { display: flex; flex-direction: column; gap: 8px; padding: 16px; }
-.tt-opt { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 8px 12px; text-align: left; border: 2px solid #e2e8f0; border-radius: 12px; background: #ffffff; color: #0f172a; font-size: 0.875rem; line-height: 1.4; overflow: hidden; cursor: pointer; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease; }
-.tt-opt:focus-visible { outline: 2px solid #b8202c; outline-offset: 2px; }
+/* 🎭 TWO TRUTHS & A LIE: 3D Translucent Mystery Arena Card */
+.tt-feed-card {
+  position: relative;
+  border: 1.5px solid rgba(252, 231, 154, 0.45);
+  border-radius: var(--radius-lg, 22px);
+  background:
+    radial-gradient(circle at 16% 18%, rgba(244, 63, 94, 0.35) 0%, transparent 50%),
+    radial-gradient(circle at 86% 82%, rgba(251, 191, 36, 0.25) 0%, transparent 55%),
+    linear-gradient(135deg, #2a0a12 0%, #4c0519 52%, #0f172a 100%);
+  color: #ffffff;
+  overflow: hidden;
+  box-shadow:
+    0 20px 44px -12px rgba(15, 23, 42, 0.45),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.35);
+}
+.tt-feed-head {
+  padding: 18px 20px 14px;
+  background: linear-gradient(135deg, rgba(184, 32, 44, 0.65) 0%, rgba(127, 16, 25, 0.5) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+.tt-feed-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(252, 231, 154, 0.45);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fce79a;
+  margin-bottom: 8px;
+}
+.tt-feed-title {
+  margin: 4px 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tt-feed-sub { font-size: 0.875rem; color: #fff7ed; opacity: 0.92; }
+.tt-feed-options { display: flex; flex-direction: column; gap: 10px; padding: 16px 20px; }
+.tt-opt {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 54px;
+  padding: 10px 14px;
+  text-align: left;
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .15s ease, border-color .15s ease, background .15s ease, box-shadow .15s ease;
+}
+.tt-opt:focus-visible { outline: 2px solid #fce79a; outline-offset: 2px; }
 .tt-opt:active:not(:disabled) { transform: scale(.98); }
-@media (hover: hover) { .tt-opt:hover:not(:disabled) { border-color: #b8202c; box-shadow: 0 4px 12px rgba(184,32,44,.15); } }
+@media (hover: hover) {
+  .tt-opt:hover:not(:disabled) {
+    border-color: rgba(252, 231, 154, 0.75);
+    background: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+  }
+}
 .tt-opt:disabled { cursor: default; }
-.tt-opt-num { flex: 0 0 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: #b8202c; color: #ffffff; font-weight: 700; z-index: 1; }
-.tt-opt-text { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; z-index: 1; }
-.tt-opt-pct { flex: 0 0 auto; font-weight: 700; z-index: 1; }
-.tt-opt-bar { position: absolute; inset: 0 auto 0 0; background: rgba(184,32,44,.12); transition: width .6s ease; z-index: 0; }
-.tt-opt-spin { z-index: 1; }
-.tt-opt.is-picked { border-color: #b8202c; background: #fff1f2; }
-.tt-opt.is-lie { border-color: #b8202c; background: #fee2e2; }
-.tt-opt.is-truth { border-color: #15803d; background: #f0fdf4; }
-.tt-opt.is-truth .tt-opt-num { background: #15803d; }
-.tt-feed-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0 16px 16px; }
-.tt-chip { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 4px 12px; border-radius: 999px; background: #f1f5f9; color: #334155; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
-.tt-chip-cta { background: #b8202c; color: #ffffff; }
-.tt-chip-ok { background: #dcfce7; color: #14532d; }
+.tt-opt-num {
+  flex: 0 0 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  font-weight: 800;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+}
+.tt-opt-text { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; color: #ffffff; z-index: 1; }
+.tt-opt-pct { flex: 0 0 auto; font-weight: 800; color: #fce79a; z-index: 1; }
+.tt-opt-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.32) 0%, rgba(225, 29, 72, 0.28) 100%);
+  transition: width .6s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 0;
+}
+.tt-opt-spin { z-index: 1; color: #fce79a; }
+.tt-opt.is-picked { border-color: #fce79a; background: rgba(251, 191, 36, 0.18); }
+.tt-opt.is-lie { border-color: #fb7185; background: rgba(225, 29, 72, 0.28); }
+.tt-opt.is-truth { border-color: #34d399; background: rgba(16, 185, 129, 0.24); }
+.tt-opt.is-truth .tt-opt-num { background: #10b981; }
+.tt-feed-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0 20px 18px; }
+.tt-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.tt-chip-cta { background: rgba(245, 158, 11, 0.28); border-color: rgba(252, 231, 154, 0.55); color: #fce79a; }
+.tt-chip-ok { background: rgba(16, 185, 129, 0.28); border-color: rgba(52, 211, 153, 0.55); color: #d1fae5; }
 .tt-chip-muted { margin-left: auto; }
 .tt-pop { animation: ttPop .5s ease; }
-.tt-feed-error { margin: 0; padding: 0 16px 16px; font-size: 0.875rem; color: #b91c1c; }
+.tt-feed-error { margin: 0; padding: 0 20px 16px; font-size: 0.875rem; color: #fecdd3; }
 @keyframes ttPop { 0% { transform: scale(.8); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .tt-opt, .tt-opt-bar, .tt-pop { transition: none; animation: none; } }
-body.dark-mode .tt-feed-card { background: #0f172a; border-color: #7f1019; }
-body.dark-mode .tt-opt { background: #1e293b; border-color: #334155; color: #f8fafc; }
-body.dark-mode .tt-opt.is-picked, body.dark-mode .tt-opt.is-lie { background: #3b0d12; }
-body.dark-mode .tt-opt.is-truth { background: #052e16; }
-body.dark-mode .tt-chip { background: #1e293b; color: #e2e8f0; }
-body.dark-mode .tt-chip-cta { background: #b8202c; color: #ffffff; }
-body.dark-mode .tt-chip-ok { background: #14532d; color: #dcfce7; }
+body.dark-mode .tt-feed-card { border-color: rgba(252, 231, 154, 0.45); }
+body.dark-mode .tt-opt { background: rgba(255, 255, 255, 0.10); border-color: rgba(255, 255, 255, 0.22); color: #ffffff; }
+body.dark-mode .tt-opt.is-picked, body.dark-mode .tt-opt.is-lie { background: rgba(225, 29, 72, 0.28); }
+body.dark-mode .tt-opt.is-truth { background: rgba(16, 185, 129, 0.24); }
+body.dark-mode .tt-chip { background: rgba(255, 255, 255, 0.12); color: #ffffff; }
+body.dark-mode .tt-chip-cta { background: rgba(245, 158, 11, 0.28); color: #fce79a; }
+body.dark-mode .tt-chip-ok { background: rgba(16, 185, 129, 0.28); color: #d1fae5; }
 
 /* ==========================================================================
    🎬 Native Video Browser Overlay Elimination (WebKit / Blink / Gecko)
@@ -3020,10 +3120,357 @@ video.feed-post-video::-webkit-media-controls-play-button,
   .fp-stage-badge__pulse,
   .fp-text-stage__cta,
   .fp-stage-converter__trigger,
-  .fp-stage-converter__chip {
+  .fp-stage-converter__chip,
+  .fp-poll-arena,
+  .fp-poll-opt,
+  .fp-poll-opt__fill {
     transition: none !important;
     animation: none !important;
   }
 }
+
+/* ==========================================================================
+   🏆 3D Futuristic & Translucent Poll / Trivia / Game Show Arena (RFC-0018B)
+   ========================================================================== */
+.fp-poll-arena {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg, 22px);
+  padding: var(--space-5, 22px) var(--space-4, 20px) var(--space-4, 18px);
+  color: #ffffff;
+  translate: 0px;
+  rotate: 0deg;
+  scale: 1;
+  transform-style: preserve-3d;
+  perspective: 1100px;
+  backdrop-filter: blur(22px) saturate(165%);
+  -webkit-backdrop-filter: blur(22px) saturate(165%);
+  border: 1.5px solid rgba(252, 231, 154, 0.48);
+  box-shadow:
+    0 22px 46px -12px rgba(15, 23, 42, 0.45),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.42),
+    inset 0 -10px 24px rgba(0, 0, 0, 0.28);
+  transition: translate 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
+}
+
+/* 1. Weekly Family Trivia Arena (Royal Amber Gold & Deep Indigo 3D Stage) */
+.fp-poll-arena--trivia_gold {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(251, 191, 36, 0.42) 0%, transparent 50%),
+    radial-gradient(circle at 86% 84%, rgba(245, 158, 11, 0.32) 0%, transparent 54%),
+    linear-gradient(135deg, #1e1b4b 0%, #451a03 52%, #0f172a 100%);
+  border-color: rgba(252, 211, 77, 0.62);
+}
+
+/* 2. Family Game Show Arena (Electric Violet & Cyan Studio Stage) */
+.fp-poll-arena--gameshow_neon {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(192, 132, 252, 0.42) 0%, transparent 50%),
+    radial-gradient(circle at 84% 82%, rgba(56, 189, 248, 0.38) 0%, transparent 54%),
+    linear-gradient(135deg, #2e1065 0%, #1e1b4b 52%, #0c4a6e 100%);
+  border-color: rgba(167, 139, 250, 0.58);
+}
+
+/* 3. Family Weekend Outings Vote (Bioluminescent Emerald & Teal Adventure Stage) */
+.fp-poll-arena--outings_emerald {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(52, 211, 153, 0.40) 0%, transparent 52%),
+    radial-gradient(circle at 86% 84%, rgba(45, 212, 191, 0.32) 0%, transparent 55%),
+    linear-gradient(135deg, #064e3b 0%, #0f766e 52%, #0f172a 100%);
+  border-color: rgba(110, 231, 183, 0.55);
+}
+
+/* 4. Family Code Governance Vote (High-Priority Crimson & Gold Beacon) */
+.fp-poll-arena--alert_vote {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(251, 191, 36, 0.34) 0%, transparent 50%),
+    radial-gradient(circle at 84% 82%, rgba(244, 63, 94, 0.40) 0%, transparent 54%),
+    linear-gradient(135deg, #7f1d1d 0%, #881337 52%, #1e1b4b 100%);
+  border-color: rgba(252, 231, 154, 0.58);
+}
+
+/* 5. Standard Live 3D Family Poll (Sapphire & Cyan Holographic Stage) */
+.fp-poll-arena--cyber_poll {
+  background:
+    radial-gradient(circle at 16% 20%, rgba(56, 189, 248, 0.38) 0%, transparent 50%),
+    radial-gradient(circle at 84% 82%, rgba(99, 102, 241, 0.36) 0%, transparent 54%),
+    linear-gradient(135deg, #0f172a 0%, #1e1b4b 52%, #082f49 100%);
+  border-color: rgba(125, 211, 252, 0.50);
+}
+
+.fp-poll-arena__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+  background-size: 26px 26px;
+  mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.85) 20%, transparent 82%);
+  -webkit-mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.85) 20%, transparent 82%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.fp-poll-arena__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(28px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+.fp-poll-arena__orb--a {
+  width: 140px;
+  height: 140px;
+  top: -40px;
+  right: -30px;
+  background: radial-gradient(circle, rgba(252, 231, 154, 0.55) 0%, transparent 72%);
+}
+
+.fp-poll-arena__orb--b {
+  width: 130px;
+  height: 130px;
+  bottom: -40px;
+  left: -30px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.42) 0%, transparent 72%);
+}
+
+.fp-poll-arena__top {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: var(--space-3, 12px);
+}
+
+.fp-poll-arena__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 13px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(252, 231, 154, 0.55);
+  color: #fce79a;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.24);
+}
+
+.fp-poll-arena__votes-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.48);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  color: #ffffff;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.fp-poll-arena__intro {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #fef3c7;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+.fp-poll-arena__question {
+  position: relative;
+  z-index: 2;
+  margin: 0 0 6px 0;
+  color: #ffffff !important;
+  font-size: clamp(1.12rem, 2.2vw, 1.32rem);
+  font-weight: 800;
+  line-height: 1.38;
+  letter-spacing: -0.01em;
+  text-shadow: 0 3px 14px rgba(0, 0, 0, 0.38);
+}
+
+.fp-poll-arena__subtitle {
+  position: relative;
+  z-index: 2;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255, 247, 237, 0.88);
+  line-height: 1.4;
+}
+
+.fp-poll-arena__options {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fp-poll-opt {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #ffffff !important;
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+
+@media (hover: hover) {
+  .fp-poll-opt:hover:not(:disabled) {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(252, 231, 154, 0.72);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.28);
+  }
+}
+
+.fp-poll-opt:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+.fp-poll-opt.is-voted {
+  border-color: #fce79a;
+  background: rgba(251, 191, 36, 0.18);
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(252, 231, 154, 0.35);
+}
+
+.fp-poll-opt.is-leading {
+  border-color: rgba(52, 211, 153, 0.75);
+}
+
+.fp-poll-opt__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.38) 0%, rgba(16, 185, 129, 0.34) 100%);
+  border-radius: inherit;
+  transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.fp-poll-opt.is-voted .fp-poll-opt__fill {
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.46) 0%, rgba(245, 158, 11, 0.36) 100%);
+}
+
+.fp-poll-opt__letter {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(252, 231, 154, 0.55);
+  color: #fce79a;
+  font-size: 0.8rem;
+  font-weight: 800;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+}
+
+.fp-poll-opt.is-voted .fp-poll-opt__letter {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+.fp-poll-opt__label {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: #ffffff !important;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.38;
+  overflow-wrap: anywhere;
+}
+
+.fp-poll-opt__check {
+  color: #fde047;
+  font-size: 0.95rem;
+}
+
+.fp-poll-opt__crown {
+  font-size: 0.92rem;
+  line-height: 1;
+}
+
+.fp-poll-opt__pct {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fce79a;
+  font-size: 0.8rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.fp-poll-arena__footer {
+  position: relative;
+  z-index: 2;
+  margin-top: var(--space-3, 14px);
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 247, 237, 0.85);
+}
+
+.fp-poll-arena__hint,
+.fp-poll-arena__discuss {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.fp-poll-arena__discuss {
+  color: #fce79a;
+  font-weight: 700;
+}
+
 
 

@@ -464,7 +464,7 @@ final class FamilyJournalController extends BaseController
                         'Memorial' => '🕊️',
                     };
 
-                    $broadcastMessage = "{$categoryEmoji} Preserved a new Family Chronicle: \"{$title}\"\n\n{$summary}\n\n👉 Read the full story: {$chronicleUrl}";
+                    $broadcastMessage = "{$categoryEmoji} Preserved a new Family Chronicle: \"{$title}\"\n\n{$summary}\n\n👉 Read the full story: {$chronicleUrl} [style:heirloom_velvet]";
 
                     $db = Db::connect2();
                     $currentTime = (string)(function_exists('milliSeconds') ? milliSeconds() : time());
