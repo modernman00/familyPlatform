@@ -2685,3 +2685,345 @@ video.feed-post-video::-webkit-media-controls-play-button,
   height: 0 !important;
 }
 
+/* ==========================================================================
+   🔮 3D Futuristic & Translucent Text Stage Architecture (RFC-0018)
+   ========================================================================== */
+.fp-text-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg, 22px);
+  padding: var(--space-6, 24px) var(--space-4, 20px);
+  color: #ffffff;
+  /* Identity individual transform properties to prevent abrupt stacking context creation */
+  translate: 0px;
+  rotate: 0deg;
+  scale: 1;
+  transform-style: preserve-3d;
+  perspective: 1100px;
+  backdrop-filter: blur(22px) saturate(165%);
+  -webkit-backdrop-filter: blur(22px) saturate(165%);
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 20px 42px -12px rgba(15, 23, 42, 0.42),
+    inset 0 1px 1px rgba(255, 255, 255, 0.42),
+    inset 0 -10px 24px rgba(0, 0, 0, 0.26);
+  transition: translate 0.28s cubic-bezier(0.22, 1, 0.36, 1), scale 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
+}
+
+@media (hover: hover) {
+  .fp-text-stage:hover {
+    translate: 0px -3px;
+    scale: 1.008;
+    box-shadow:
+      0 26px 52px -12px rgba(15, 23, 42, 0.55),
+      inset 0 1.5px 2px rgba(255, 255, 255, 0.58),
+      inset 0 -12px 28px rgba(0, 0, 0, 0.32);
+  }
+}
+
+/* 1. Dynasty Tree Stage (Translucent Emerald & Jade 3D Lineage) */
+.fp-text-stage--dynasty_holo {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(52, 211, 153, 0.38) 0%, transparent 52%),
+    radial-gradient(circle at 86% 84%, rgba(251, 191, 36, 0.28) 0%, transparent 55%),
+    linear-gradient(135deg, rgba(6, 78, 59, 0.96) 0%, rgba(4, 120, 87, 0.92) 52%, rgba(15, 23, 42, 0.96) 100%);
+  border-color: rgba(110, 231, 183, 0.45);
+}
+
+/* 2. 3D Holo Glass Stage (Futuristic Cyan & Indigo Translucent Glass) */
+.fp-text-stage--cyber_glass {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(56, 189, 248, 0.42) 0%, transparent 50%),
+    radial-gradient(circle at 84% 82%, rgba(129, 140, 248, 0.40) 0%, transparent 54%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 27, 75, 0.92) 50%, rgba(8, 47, 73, 0.95) 100%);
+  border-color: rgba(125, 211, 252, 0.48);
+}
+
+/* 3. Alert Trigger Stage (Pulsing Crimson Beacon — Strictly White & Gold Text) */
+.fp-text-stage--alert_pulse {
+  background:
+    radial-gradient(circle at 20% 18%, rgba(251, 191, 36, 0.28) 0%, transparent 48%),
+    radial-gradient(circle at 82% 85%, rgba(244, 63, 94, 0.42) 0%, transparent 55%),
+    linear-gradient(135deg, #881337 0%, #9f1239 48%, #7f1d1d 100%);
+  color: #ffffff !important;
+  border-color: rgba(252, 231, 154, 0.55);
+  box-shadow:
+    0 20px 44px -10px rgba(159, 18, 57, 0.52),
+    inset 0 1px 2px rgba(252, 231, 154, 0.55);
+}
+
+/* 4. Official Announcement Stage (Royal Champagne Gold & Obsidian) */
+.fp-text-stage--grand_announcement {
+  background:
+    radial-gradient(circle at 15% 18%, rgba(251, 191, 36, 0.40) 0%, transparent 52%),
+    radial-gradient(circle at 85% 82%, rgba(217, 119, 6, 0.35) 0%, transparent 55%),
+    linear-gradient(135deg, #1c1917 0%, #451a03 52%, #0f172a 100%);
+  border-color: rgba(252, 211, 77, 0.55);
+}
+
+/* 5. Aurora Prism Stage (Iridescent Violet, Magenta & Cyan 3D Prism) */
+.fp-text-stage--aurora_prism {
+  background:
+    radial-gradient(circle at 16% 22%, rgba(232, 121, 249, 0.42) 0%, transparent 52%),
+    radial-gradient(circle at 84% 80%, rgba(45, 212, 191, 0.36) 0%, transparent 54%),
+    linear-gradient(135deg, #2e1065 0%, #701a75 50%, #0f172a 100%);
+  border-color: rgba(240, 171, 252, 0.48);
+}
+
+/* 6. Royal Velvet Stage (Deep Burgundy Velvet & Gold Leaf Decree) */
+.fp-text-stage--heirloom_velvet {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(253, 230, 138, 0.28) 0%, transparent 50%),
+    radial-gradient(circle at 80% 82%, rgba(163, 22, 33, 0.45) 0%, transparent 56%),
+    linear-gradient(135deg, #4c0519 0%, #881337 52%, #1e1b4b 100%);
+  color: #ffffff !important;
+  border-color: rgba(253, 230, 138, 0.48);
+}
+
+/* Translucent 3D Grid & Floating Orbs */
+.fp-text-stage__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.85) 20%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.85) 20%, transparent 80%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.fp-text-stage__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(26px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.65;
+}
+
+.fp-text-stage__orb--a {
+  width: 150px;
+  height: 150px;
+  top: -45px;
+  right: -35px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.55) 0%, rgba(56, 189, 248, 0.15) 70%);
+}
+
+.fp-text-stage__orb--b {
+  width: 140px;
+  height: 140px;
+  bottom: -45px;
+  left: -35px;
+  background: radial-gradient(circle, rgba(252, 231, 154, 0.45) 0%, transparent 72%);
+}
+
+.fp-text-stage__header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-3, 12px);
+}
+
+.fp-stage-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  color: #fce79a;
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.24);
+}
+
+.fp-stage-badge__pulse {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #fde047;
+  box-shadow: 0 0 0 0 rgba(253, 224, 71, 0.85);
+  animation: fpStageBeacon 1.6s infinite;
+}
+
+@keyframes fpStageBeacon {
+  0% { box-shadow: 0 0 0 0 rgba(253, 224, 71, 0.85); }
+  70% { box-shadow: 0 0 0 9px rgba(253, 224, 71, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(253, 224, 71, 0); }
+}
+
+.fp-text-stage__body {
+  position: relative;
+  z-index: 2;
+  color: #ffffff !important;
+  text-align: center;
+  white-space: pre-line;
+  word-break: break-word;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.42);
+}
+
+.fp-text-stage__body--hero {
+  font-size: var(--text-2xl, 1.55rem);
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+}
+
+.fp-text-stage__body--prose {
+  font-size: var(--text-lg, 1.2rem);
+  font-weight: 700;
+  line-height: 1.48;
+}
+
+.fp-text-stage__body a,
+.fp-text-stage__body .family-tag-pill,
+.fp-text-stage__body .mention-chip {
+  color: #fce79a !important;
+  background: rgba(255, 255, 255, 0.16) !important;
+  border-color: rgba(252, 231, 154, 0.45) !important;
+}
+
+.fp-text-stage__footer {
+  position: relative;
+  z-index: 2;
+  margin-top: var(--space-4, 16px);
+  display: flex;
+  justify-content: center;
+}
+
+.fp-text-stage__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--tap-min, 44px);
+  min-width: var(--tap-min, 44px);
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid rgba(252, 231, 154, 0.65);
+  color: #ffffff !important;
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 800;
+  text-decoration: none !important;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+  transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.fp-text-stage__cta:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.34);
+}
+
+.fp-text-stage__cta:active {
+  transform: scale(0.98);
+}
+
+/* Retroactive 1-Tap In-Feed 3D Stage Converter Bar */
+.fp-stage-converter__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px;
+  scrollbar-width: none;
+}
+
+.fp-stage-converter__row::-webkit-scrollbar {
+  display: none;
+}
+
+.fp-stage-converter__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--tap-min, 44px);
+  min-width: var(--tap-min, 44px);
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  color: #fce79a;
+  border: 1.5px solid rgba(56, 189, 248, 0.45);
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 800;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.fp-stage-converter__trigger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.28);
+}
+
+.fp-stage-converter__trigger:active {
+  transform: scale(0.98);
+}
+
+.fp-stage-converter__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: var(--tap-min, 44px);
+  min-width: var(--tap-min, 44px);
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--card-bg, #ffffff);
+  color: var(--text-main, #0f172a);
+  border: 1.5px solid rgba(148, 163, 184, 0.35);
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.fp-stage-converter__chip:hover {
+  border-color: #6366f1;
+  transform: translateY(-1px);
+}
+
+.fp-stage-converter__chip:active {
+  transform: scale(0.98);
+}
+
+.fp-stage-converter__chip.is-active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #38bdf8;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+}
+
+.fp-stage-converter__chip--reset {
+  color: #475569;
+  border-style: dashed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fp-text-stage,
+  .fp-stage-badge__pulse,
+  .fp-text-stage__cta,
+  .fp-stage-converter__trigger,
+  .fp-stage-converter__chip {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+

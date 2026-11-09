@@ -562,7 +562,22 @@ final class PostMessage
             // have to be read manually, so the frontend sends JSON for edits.
             $rawInput = file_get_contents('php://input');
             $input = json_decode($rawInput !== false ? $rawInput : '', true) ?? [];
-            $cleanMessageStr = \App\services\LinkPreviewService::sanitizePostMessage((string)($input['postMessage'] ?? ''));
+            $existingRawMessage = (string)($post['postMessage'] ?? '');
+            $incomingMessage = array_key_exists('postMessage', $input)
+                ? (string)$input['postMessage']
+                : \App\dto\PostDto::stripStyleToken($existingRawMessage);
+            $cleanMessageStr = \App\services\LinkPreviewService::sanitizePostMessage($incomingMessage);
+
+            // Preserve or update 3D Futuristic Text Stage style slug (RFC-0014)
+            $resolvedStyle = array_key_exists('post_style', $input)
+                ? \App\dto\PostDto::cleanPostStyle($input['post_style'])
+                : (\App\dto\PostDto::extractStyleFromMessage($cleanMessageStr) ?? \App\dto\PostDto::extractStyleFromMessage($existingRawMessage));
+
+            if ($resolvedStyle !== null) {
+                $cleanMessageStr = \App\dto\PostDto::embedStyleToken($cleanMessageStr, $resolvedStyle);
+            } else {
+                $cleanMessageStr = \App\dto\PostDto::stripStyleToken($cleanMessageStr);
+            }
 
             (new Update('post'))->updateTable(
                 column: 'postMessage',
@@ -579,22 +594,28 @@ final class PostMessage
                     'post',
                     (string)$postNo,
                     (string)$userId,
-                    $cleanMessageStr
+                    \App\dto\PostDto::stripStyleToken($cleanMessageStr)
                 );
             } catch (\Throwable $th) {
                 error_log('[PostMessage::updatePost hashtags] ' . $th->getMessage());
             }
 
             // Warm up and resolve link preview
-            $linkPreview = \App\services\LinkPreviewService::getPreviewForPostText($cleanMessageStr);
+            $linkPreview = \App\services\LinkPreviewService::getPreviewForPostText(\App\dto\PostDto::stripStyleToken($cleanMessageStr));
 
             Pusher::broadcastToFamily((string) ($post['postFamCode'] ?? ''), 'update-post', [
                 'postNo' => $postNo,
                 'postMessage' => $cleanMessageStr,
+                'post_style' => $resolvedStyle,
                 'link_preview' => $linkPreview,
             ]);
 
-            msgSuccess(200, "post updated successfully");
+            msgSuccess(200, [
+                'status' => 'post updated successfully',
+                'post_no' => $postNo,
+                'postMessage' => $cleanMessageStr,
+                'post_style' => $resolvedStyle,
+            ]);
         } catch (\Throwable $th) {
             \showError($th);
         }

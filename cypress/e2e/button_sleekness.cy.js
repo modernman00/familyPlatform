@@ -77,7 +77,7 @@ describe('Button Sleekness, Modernity and Mobile Touch Ergonomics', () => {
         cy.viewport(390, 844);
         cy.visit('/register');
 
-        cy.get('.stitch-social-btn.google').should('be.visible').then(($btn) => {
+        cy.get('.fpr-social a[href^="/auth/google"]').should('be.visible').then(($btn) => {
             const height = $btn.outerHeight();
             expect(height).to.be.at.least(44);
             expect(height).to.be.lessThan(52);

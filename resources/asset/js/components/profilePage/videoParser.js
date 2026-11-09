@@ -160,9 +160,9 @@ export function extractVideosFromText(text, max = 3) {
  */
 export function cleanPostMessage(text, videoOrVideos) {
   if (!text || typeof text !== 'string') return '';
-  if (!videoOrVideos) return text;
+  let cleaned = text.replace(/\[style:[a-z0-9_]+\]\s*/gi, '');
+  if (!videoOrVideos) return cleaned.trim();
 
-  let cleaned = text;
   if (Array.isArray(videoOrVideos)) {
     videoOrVideos.forEach(v => {
       if (v?.originalUrl) {

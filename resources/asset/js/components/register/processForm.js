@@ -57,4 +57,15 @@ registerHandler({
 const submitBtn = document.getElementById('btnSubmit') || document.getElementById('button');
 if (submitBtn) {
     submitBtn.setAttribute('data-ready', 'true');
+    submitBtn.addEventListener('click', () => {
+        try {
+            sessionStorage.removeItem('pwa_prompt_shown_session');
+            localStorage.removeItem('pwa_install_dismissed');
+            localStorage.removeItem('fp_pwa_install_dismissed');
+            localStorage.removeItem('pwa-banner-dismissed');
+            localStorage.removeItem('pwa_dismissed');
+            localStorage.removeItem('pwa_prompt_dismissed');
+            localStorage.removeItem('pwa_ios_dismissed');
+        } catch (_) {}
+    });
 }

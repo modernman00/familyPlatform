@@ -14,6 +14,64 @@ use JsonSerializable;
  */
 final class PostDto implements JsonSerializable
 {
+    public const array ALLOWED_TEXT_STYLES = [
+        'cyber_glass',
+        'alert_pulse',
+        'grand_announcement',
+        'dynasty_holo',
+        'aurora_prism',
+        'heirloom_velvet',
+    ];
+
+    /**
+     * Normalize and validate a 3D text stage style slug against the strict allowlist.
+     */
+    public static function cleanPostStyle(mixed $raw): ?string
+    {
+        if (!is_string($raw)) {
+            return null;
+        }
+        $slug = strtolower(trim($raw));
+        if ($slug === '' || $slug === 'none' || $slug === 'plain') {
+            return null;
+        }
+        return in_array($slug, self::ALLOWED_TEXT_STYLES, true) ? $slug : null;
+    }
+
+    /**
+     * Extract a `[style:<slug>]` token from raw postMessage if present.
+     */
+    public static function extractStyleFromMessage(string $message): ?string
+    {
+        if (preg_match('/\[style:([a-z0-9_]+)\]/i', $message, $m)) {
+            return self::cleanPostStyle($m[1]);
+        }
+        return null;
+    }
+
+    /**
+     * Strip any `[style:<slug>]` token from visible message text.
+     */
+    public static function stripStyleToken(string $message): string
+    {
+        if (!str_contains($message, '[style:')) {
+            return $message;
+        }
+        return trim((string)preg_replace('/\s*\[style:[a-z0-9_]+\]\s*/i', ' ', $message));
+    }
+
+    /**
+     * Stamp or replace the `[style:<slug>]` token inside a message string for persistence.
+     */
+    public static function embedStyleToken(string $message, ?string $styleSlug): string
+    {
+        $cleanMsg = self::stripStyleToken($message);
+        $validStyle = self::cleanPostStyle($styleSlug);
+        if ($validStyle === null) {
+            return $cleanMsg;
+        }
+        return $cleanMsg !== '' ? $cleanMsg . ' [style:' . $validStyle . ']' : '[style:' . $validStyle . ']';
+    }
     /**
      * @param int $postNo
      * @param string $id
@@ -64,7 +122,8 @@ final class PostDto implements JsonSerializable
         public readonly ?string $arEmoji = null,
         public readonly array $videos = [],
         public readonly ?array $video = null,
-        public readonly string $targetScope = 'all'
+        public readonly string $targetScope = 'all',
+        public readonly ?string $postStyle = null
     ) {}
 
     /**
@@ -249,6 +308,10 @@ final class PostDto implements JsonSerializable
         if ($arEmoji === null && preg_match('/:([a-z0-9_]+_3d):/i', $message, $m)) {
             $arEmoji = $m[1];
         }
+        $postStyle = self::cleanPostStyle($row['post_style'] ?? null) ?? self::extractStyleFromMessage($message);
+        if ($postStyle !== null && str_contains($message, '[style:')) {
+            $row['displayMessage'] = self::stripStyleToken(isset($row['displayMessage']) && is_string($row['displayMessage']) ? $row['displayMessage'] : $message);
+        }
         $isOfficialPost = ($id === \App\services\FamilyPlatformAccountService::getAccountId()) || !empty($row['is_official']);
         if ($isOfficialPost && (empty($profileImg) || str_contains($profileImg, 'avatarM') || str_contains($profileImg, 'avatarF'))) {
             $profileImg = '/images/logo/logo.png';
@@ -282,7 +345,8 @@ final class PostDto implements JsonSerializable
             arEmoji: $arEmoji,
             videos: $rowVideos,
             video: $rowVideos[0] ?? null,
-            targetScope: (string)($row['target_scope'] ?? 'all')
+            targetScope: (string)($row['target_scope'] ?? 'all'),
+            postStyle: $postStyle
         );
     }
 
@@ -321,6 +385,7 @@ final class PostDto implements JsonSerializable
         $arr['voice_capsule_url'] = $this->voiceCapsuleUrl;
         $arr['is_official'] = $this->isOfficialPost;
         $arr['ar_emoji'] = $this->arEmoji;
+        $arr['post_style'] = $this->postStyle;
         $arr['videos'] = $this->videos;
         $arr['video'] = $this->video;
 

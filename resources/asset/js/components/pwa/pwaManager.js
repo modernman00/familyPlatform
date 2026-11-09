@@ -222,10 +222,20 @@ class PWAManager {
   }
 
   /**
+   * Check if current route is an authentication / onboarding form
+   * where popping up an install banner creates typing friction.
+   */
+  isAuthOrRegistrationRoute() {
+    const p = window.location.pathname.toLowerCase();
+    return p.startsWith('/register') || p.startsWith('/login') || p.includes('/verify-email');
+  }
+
+  /**
    * Universal PWA Dismissal & Frequency Check
    */
   isInstallDismissed() {
     try {
+      if (this.isAuthOrRegistrationRoute()) return true;
       if (sessionStorage.getItem('pwa_prompt_shown_session')) return true;
       const keys = [
         'pwa-banner-dismissed',
@@ -294,6 +304,17 @@ class PWAManager {
 
       this.showInstallBanner();
     });
+
+    // Android / Chrome proactive prompt: If beforeinstallprompt hasn't fired yet
+    // because of browser heuristic scoring delays, but the user is browsing on mobile,
+    // show the welcoming install banner after a 3.5s settling delay on content pages.
+    if (!this.isIOS && !this.isStandalone) {
+      setTimeout(() => {
+        if (!this.isStandalone && !window.__PWA_INSTALL_ACTIVE__ && !this.isInstallDismissed()) {
+          this.showInstallBanner();
+        }
+      }, 3500);
+    }
 
     window.addEventListener('appinstalled', () => {
       this.deferredPrompt = null;
@@ -411,15 +432,19 @@ class PWAManager {
     setTimeout(() => banner.classList.add('show'), 100);
 
     document.getElementById('pwa-install-btn')?.addEventListener('click', async () => {
-      if (!this.deferredPrompt) return;
       banner.remove();
-      this.deferredPrompt.prompt();
-      const { outcome } = await this.deferredPrompt.userChoice;
-      console.log(`[PWA] Install prompt outcome: ${outcome}`);
-      if (outcome === 'accepted') {
-        if (window.familyTelemetry) window.familyTelemetry.track('pwa_installed');
+      if (this.deferredPrompt) {
+        this.deferredPrompt.prompt();
+        const { outcome } = await this.deferredPrompt.userChoice;
+        console.log(`[PWA] Install prompt outcome: ${outcome}`);
+        if (outcome === 'accepted') {
+          if (window.familyTelemetry) window.familyTelemetry.track('pwa_installed');
+        }
+        this.deferredPrompt = null;
+      } else {
+        // Fallback: If browser withheld beforeinstallprompt event, guide the user directly
+        this.triggerAppInstall();
       }
-      this.deferredPrompt = null;
     });
 
     document.getElementById('pwa-banner-close')?.addEventListener('click', () => {

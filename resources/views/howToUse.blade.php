@@ -767,6 +767,49 @@
           </div>
         </div>
 
+        <!-- Pillar: 3D Futuristic & Translucent Text Stage Studio -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(163,22,33, 0.12); color: #a31621;">
+                <i class="bi bi-stars fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">3D Futuristic &amp; Translucent Text Stage Studio</h3>
+                <span class="badge text-white" style="background: #0f172a;">Live Composer + 1-Tap Retroactive Feed Converter</span>
+              </div>
+            </div>
+
+            <p class="lead text-secondary">
+              Transform plain text updates into high-impact, 3D translucent glass stages, pulsing family alert triggers, or royal broadcast announcements — either while typing in the composer or retroactively on already-published posts with a single tap.
+            </p>
+
+            <div class="row g-3 mt-1">
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-success text-white mb-2">6 Curated 3D Stages</span>
+                  <h6 class="fw-bold text-dark">Translucent &amp; Futuristic Archetypes</h6>
+                  <p class="small text-muted mb-0">Choose between <strong>🌳 Dynasty Tree</strong>, <strong>🔮 3D Holo Glass</strong>, <strong>🚨 Alert Trigger</strong>, <strong>📣 Announcement</strong>, <strong>🌌 Aurora Prism</strong>, and <strong>🏛️ Royal Velvet</strong>.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-primary text-white mb-2">Retroactive 1-Tap Upgrade</span>
+                  <h6 class="fw-bold text-dark">Convert Existing Posts in Place</h6>
+                  <p class="small text-muted mb-0">Already posted a plain text note? Use the in-feed <strong>✨ Convert to 3D Stage</strong> bar right below your post to upgrade its visual stage instantaneously without deleting or reposting.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge text-white mb-2" style="background: #a31621;">Smart Action Triggers</span>
+                  <h6 class="fw-bold text-dark">Interactive Dynasty Tree CTA</h6>
+                  <p class="small text-muted mb-0">Posts inviting relatives to grow the family tree or add their branch automatically embed a glowing <strong>Add Your Branch to Family Tree</strong> button linking directly to the organogram.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Back to Organogram CTA -->
         <div class="text-center mt-5">
           <a href="/organogram" class="btn btn-lg fw-bold px-5 py-3 text-white shadow-sm" style="background: linear-gradient(135deg, #a31621 0%, #7a0e16 100%); border-radius: 50px;">

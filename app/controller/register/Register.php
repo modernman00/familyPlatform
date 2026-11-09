@@ -41,7 +41,31 @@ final class Register extends Db
                     'password' => $randomPass,
                     'confirm_password' => $randomPass
                 ];
-                view('registration/register', ['registerPostData' => $registerPostData]);
+
+                // Invited relatives who chose "Continue with Google/Apple/Facebook"
+                // come back here with ?invite=… — keep their family code and tree
+                // node, otherwise they land on a blank "join" step.
+                $inviteTokenError = null;
+                if (!empty($_GET['invite']) && is_string($_GET['invite'])) {
+                    try {
+                        Limiter::limit('invite_token_' . (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+                        $tokenData = \App\services\InviteTokenService::peek((string)$_GET['invite']);
+                        if ($tokenData) {
+                            $registerPostData['famCode'] = $tokenData['family_code'];
+                            $registerPostData['claim_node'] = $tokenData['node_id'] ?? null;
+                            $oauthSurname = self::getFamilySurnameByCode((string)$tokenData['family_code']);
+                            if ($oauthSurname) {
+                                $registerPostData['familySurname'] = $oauthSurname;
+                            }
+                        } else {
+                            $inviteTokenError = 'This invite link has expired or is invalid. Please ask your family member to send a new one.';
+                        }
+                    } catch (\Throwable $e) {
+                        error_log('[Register] OAuth invite token error: ' . $e->getMessage());
+                        $inviteTokenError = 'This invite link has expired or is invalid. Please ask your family member to send a new one.';
+                    }
+                }
+                view('registration/register', ['registerPostData' => $registerPostData, 'inviteTokenError' => $inviteTokenError]);
             } else {
                 $registerPostData = [];
                 $inviteTokenError = null;
@@ -183,6 +207,22 @@ final class Register extends Db
         try {
             $input = GetRequestData::getRequestData();
             Recaptcha::verifyCaptchaEnterprise($input, 'SUBMIT');
+
+            // "Join my family" with a code that doesn't exist: still create the
+            // account, but as its own new family (server-generated code) rather
+            // than founding a family under the mistyped code. The response tells
+            // the person to link to the right family code afterwards.
+            $wantsJoin = (string)($input['account_type'] ?? '') === 'join';
+            $unmatchedFamCode = '';
+            if ($wantsJoin && !empty($input['famCode']) && is_string($input['famCode'])) {
+                $typedCode = trim($input['famCode']);
+                $joinCheck = new \App\service\FamilyCodeApprovalService(self::connect2());
+                if ($typedCode !== '' && !$joinCheck->familyCodeExists($typedCode)) {
+                    $unmatchedFamCode = mb_substr((string)preg_replace('/[^A-Za-z0-9]/', '', $typedCode), 0, 30);
+                    $input['famCode'] = '';
+                }
+            }
+
             unset($input['action'], $input['siteKey'], $input['account_type'], $input['checkbox']);
 
             // Auto-generate family code if creating a new family (familySurname or lastName provided, no famCode)
@@ -431,7 +471,19 @@ final class Register extends Db
 
                 $welcomeFirstName = !empty($cleanData['firstName']) ? trim((string)$cleanData['firstName']) : 'Family Member';
                 $welcomeSubject = "Welcome to your family dynasty, {$welcomeFirstName}! 🌳 Your private sanctuary is ready";
-                SendEmailFunctionality::email("msg/appSub", $welcomeSubject, $cleanData, 'member');
+                // The account is already committed at this point. A failed
+                // welcome email (bad mailbox, SMTP outage) must not turn a
+                // successful sign-up into an error screen, or leak SMTP details.
+                try {
+                    SendEmailFunctionality::email("msg/appSub", $welcomeSubject, $cleanData, 'member');
+                } catch (\Throwable $mailEx) {
+                    // Class name only: SMTP messages echo the recipient address (PII).
+                    error_log('[Register.php] Welcome email failed for account ' . (string)$cleanData['id'] . ' (' . get_class($mailEx) . ')');
+                }
+
+                $unmatchedNote = $unmatchedFamCode !== ''
+                    ? " We couldn't find the family code {$unmatchedFamCode}, so you aren't linked to your relatives yet. Ask them for the right family code, then find them under All Members and request to join their family."
+                    : '';
 
                 if (isset($_SESSION['oauth_pending'])) {
                     unset($_SESSION['oauth_pending']);
@@ -454,7 +506,7 @@ final class Register extends Db
                         sessSet('famCode', $cleanData['famCode']);
                         sessSet('famCodes', [(string)$cleanData['famCode']]);
                         \Src\JwtHandler::issueLoginCookie(['id' => $cleanData['id'], 'role' => 'users']);
-                        msgSuccess(200, "Registration complete. Redirecting to your profile...", "/profilePage");
+                        msgSuccess(200, "Registration complete." . $unmatchedNote . " Redirecting to your profile...", "/profilePage");
                     }
                 } else {
                     if ($joiningViaInvitation) {
@@ -482,8 +534,11 @@ final class Register extends Db
                         http_response_code(200);
                         echo json_encode([
                             'status' => 'success',
-                            'message' => "Hello $firstName - Your family has been created!",
+                            'message' => $unmatchedFamCode !== ''
+                                ? "Hello $firstName - Your account has been created." . $unmatchedNote
+                                : "Hello $firstName - Your family has been created!",
                             'family_code' => (string)$cleanData['famCode'],
+                            'code_not_found' => $unmatchedFamCode,
                             'show_code_modal' => true,
                             'redirect' => '/profilePage'
                         ]);

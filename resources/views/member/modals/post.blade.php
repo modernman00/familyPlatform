@@ -107,8 +107,14 @@
                     <input type="hidden" name="attached_gif_url" id="attachedGifUrlInput" value="">
                     <input type="hidden" name="attached_video_url" id="attachedVideoUrl" value="">
                     <input type="hidden" name="attached_video_urls" id="attachedVideoUrls" value="">
+                    <input type="hidden" name="post_style" id="composerPostStyleInput" value="">
 
-                    <div class="composer-editor-wrapper position-relative w-100">
+                    <div id="composerEditorStageWrapper" class="composer-editor-wrapper position-relative w-100">
+                        <div id="composerStageHeaderBadge" class="d-none mb-2">
+                            <span id="composerStageHeaderPill" class="fp-stage-badge">
+                                <span id="composerStageHeaderText">🔮 3D HOLOGRAM STAGE</span>
+                            </span>
+                        </div>
                         <div class="composer-text form-control border-0 bg-transparent shadow-none px-0"
                             id="postMessageEditor"
                             contenteditable="true"
@@ -119,6 +125,49 @@
                         <textarea class="d-none" data-emoji-target
                             placeholder="{{ __('feed.share_prompt', 'Share a moment with your family...') }}" name="postMessage" id="postMessage"
                             rows="2"></textarea>
+                    </div>
+
+                    <!-- 3D Futuristic & Translucent Text Stage Studio Strip -->
+                    <div id="composerTextStageBar" class="composer-stage-studio mt-2 mb-2" role="region" aria-label="3D Text Post Stage Designer">
+                        <div class="d-flex align-items-center justify-content-between mb-1.5 px-1">
+                            <span class="small fw-bold d-inline-flex align-items-center gap-1" style="font-size: 0.76rem; color: var(--text-muted-aa, #475569); letter-spacing: 0.02em;">
+                                <i class="bi bi-stars text-warning"></i>
+                                <span>3D Text Stage Design</span>
+                            </span>
+                            <button type="button" id="composerSmartStageSuggestBtn" class="btn btn-sm rounded-pill d-none py-0.5 px-2.5 fw-bold" style="font-size: 0.72rem; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff; border: none; min-height: 28px; white-space: nowrap; flex-shrink: 0;">
+                                ✨ Smart Match
+                            </button>
+                        </div>
+                        <div class="composer-stage-studio__row" role="radiogroup" aria-label="Choose 3D text stage style">
+                            <button type="button" class="composer-stage-pill is-active" data-stage-slug="" onclick="window.__setComposerTextStage('')" aria-pressed="true" title="Standard clean text post">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--plain">Aa</span>
+                                <span>Plain</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="dynasty_holo" onclick="window.__setComposerTextStage('dynasty_holo')" aria-pressed="false" title="Translucent 3D Emerald Dynasty Tree Stage">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--dynasty">🌳</span>
+                                <span>Dynasty Tree</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="cyber_glass" onclick="window.__setComposerTextStage('cyber_glass')" aria-pressed="false" title="Futuristic 3D Translucent Holo Glass Stage">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--cyber">🔮</span>
+                                <span>3D Holo Glass</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="alert_pulse" onclick="window.__setComposerTextStage('alert_pulse')" aria-pressed="false" title="3D Pulsing Family Alert Trigger Beacon">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--alert">🚨</span>
+                                <span>Alert Trigger</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="grand_announcement" onclick="window.__setComposerTextStage('grand_announcement')" aria-pressed="false" title="3D Royal Gold & Obsidian Broadcast Announcement">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--announce">📣</span>
+                                <span>Announcement</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="aurora_prism" onclick="window.__setComposerTextStage('aurora_prism')" aria-pressed="false" title="Iridescent 3D Futuristic Aurora Prism Stage">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--prism">🌌</span>
+                                <span>Aurora Prism</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="heirloom_velvet" onclick="window.__setComposerTextStage('heirloom_velvet')" aria-pressed="false" title="Deep Velvet & Gold Leaf Family Decree Stage">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--velvet">🏛️</span>
+                                <span>Royal Velvet</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Smart Family Hashtags Quick Pill Suggestions (single swipeable row) -->
@@ -987,7 +1036,14 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
     window.syncTextareaToEditor = function() {
         // While user is actively typing in the editor or during internal sync, never overwrite editor DOM!
         if (!editor || !textarea || isInternalSync || document.activeElement === editor) return;
-        const raw = textarea.value || '';
+        let raw = textarea.value || '';
+        const styleMatch = raw.match(/\[style:([a-z0-9_]+)\]/i);
+        if (styleMatch && styleMatch[1]) {
+            raw = raw.replace(/\[style:[a-z0-9_]+\]\s*/gi, '');
+            if (typeof window.__setComposerTextStage === 'function') {
+                window.__setComposerTextStage(styleMatch[1].toLowerCase());
+            }
+        }
         if (!raw.trim()) {
             editor.innerHTML = '';
             return;
@@ -1507,4 +1563,208 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
         }
     });
 };
+
+// ── 3D Futuristic & Translucent Text Stage Studio Controller ─────────────────
+(function() {
+    const STAGE_META = {
+        dynasty_holo: {
+            badge: '🌳 DYNASTY LINEAGE CALL',
+            label: '🌳 Dynasty Tree',
+        },
+        cyber_glass: {
+            badge: '🔮 3D HOLOGRAM STAGE',
+            label: '🔮 3D Holo Glass',
+        },
+        alert_pulse: {
+            badge: '🚨 FAMILY ALERT TRIGGER',
+            label: '🚨 Alert Trigger',
+        },
+        grand_announcement: {
+            badge: '📣 OFFICIAL BROADCAST',
+            label: '📣 Announcement',
+        },
+        aurora_prism: {
+            badge: '🌌 FUTURISTIC PRISM',
+            label: '🌌 Aurora Prism',
+        },
+        heirloom_velvet: {
+            badge: '🏛️ HEIRLOOM DECREE',
+            label: '🏛️ Royal Velvet',
+        },
+    };
+
+    const ALL_CLASSES = Object.keys(STAGE_META).map(s => 'fp-text-stage--' + s);
+
+    window.__setComposerTextStage = function(slug) {
+        const cleanSlug = (slug && STAGE_META[slug]) ? slug : '';
+        const input = document.getElementById('composerPostStyleInput');
+        const wrapper = document.getElementById('composerEditorStageWrapper');
+        const editor = document.getElementById('postMessageEditor');
+        const badgeWrap = document.getElementById('composerStageHeaderBadge');
+        const badgeText = document.getElementById('composerStageHeaderText');
+
+        if (input) input.value = cleanSlug;
+
+        document.querySelectorAll('#composerTextStageBar .composer-stage-pill').forEach(btn => {
+            const btnSlug = btn.getAttribute('data-stage-slug') || '';
+            const active = btnSlug === cleanSlug;
+            btn.classList.toggle('is-active', active);
+            btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+
+        if (!wrapper || !editor) return;
+
+        wrapper.classList.remove('fp-text-stage', 'fp-text-stage--composer', ...ALL_CLASSES);
+        if (cleanSlug) {
+            wrapper.classList.add('fp-text-stage', 'fp-text-stage--composer', 'fp-text-stage--' + cleanSlug);
+            editor.style.color = '#ffffff';
+            editor.style.fontWeight = '700';
+            editor.style.fontSize = '1.22rem';
+            editor.style.textAlign = 'center';
+            if (badgeWrap && badgeText) {
+                badgeText.textContent = STAGE_META[cleanSlug].badge;
+                badgeWrap.classList.remove('d-none');
+            }
+        } else {
+            editor.style.color = 'var(--text-main, #0f172a)';
+            editor.style.fontWeight = '';
+            editor.style.fontSize = '1.05rem';
+            editor.style.textAlign = '';
+            if (badgeWrap) badgeWrap.classList.add('d-none');
+        }
+    };
+
+    window.__resetTextStageBuilder = function() {
+        window.__setComposerTextStage('');
+        const suggestBtn = document.getElementById('composerSmartStageSuggestBtn');
+        if (suggestBtn) suggestBtn.classList.add('d-none');
+    };
+
+    const textarea = document.getElementById('postMessage');
+    const suggestBtn = document.getElementById('composerSmartStageSuggestBtn');
+    let suggestedSlug = '';
+
+    if (textarea && suggestBtn) {
+        textarea.addEventListener('input', function() {
+            const val = (textarea.value || '').toLowerCase();
+            const currentStyle = document.getElementById('composerPostStyleInput')?.value || '';
+            if (currentStyle || val.length < 5) {
+                suggestBtn.classList.add('d-none');
+                return;
+            }
+            if (val.includes('family tree') || val.includes('branch') || val.includes('lineage')) {
+                suggestedSlug = 'dynasty_holo';
+                suggestBtn.textContent = '✨ Try 3D Dynasty Tree Stage';
+                suggestBtn.classList.remove('d-none');
+            } else if (val.includes('urgent') || val.includes('alert') || val.includes('emergency') || val.includes('important')) {
+                suggestedSlug = 'alert_pulse';
+                suggestBtn.textContent = '🚨 Try 3D Alert Trigger';
+                suggestBtn.classList.remove('d-none');
+            } else if (val.includes('announce') || val.includes('welcome') || val.includes('congrat') || val.includes('reunion')) {
+                suggestedSlug = 'grand_announcement';
+                suggestBtn.textContent = '📣 Try 3D Announcement Stage';
+                suggestBtn.classList.remove('d-none');
+            } else if (val.length >= 12 && val.length <= 180) {
+                suggestedSlug = 'cyber_glass';
+                suggestBtn.textContent = '🔮 Convert to 3D Holo Stage';
+                suggestBtn.classList.remove('d-none');
+            } else {
+                suggestBtn.classList.add('d-none');
+            }
+        });
+
+        suggestBtn.addEventListener('click', function() {
+            if (suggestedSlug) {
+                window.__setComposerTextStage(suggestedSlug);
+                suggestBtn.classList.add('d-none');
+            }
+        });
+    }
+})();
 </script>
+
+<style>
+.composer-stage-studio__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2, 8px);
+    overflow-x: auto;
+    padding: var(--space-1, 4px) 2px 6px;
+    scrollbar-width: none;
+}
+.composer-stage-studio__row::-webkit-scrollbar {
+    display: none;
+}
+.composer-stage-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: var(--tap-min, 44px);
+    min-width: var(--tap-min, 44px);
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1.5px solid rgba(148, 163, 184, 0.32);
+    background: var(--card-bg, #ffffff);
+    color: var(--text-main, #0f172a);
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+.composer-stage-pill:hover {
+    transform: translateY(-1px);
+    border-color: #6366f1;
+}
+.composer-stage-pill:active {
+    transform: scale(0.98);
+}
+.composer-stage-pill.is-active {
+    background: #0f172a;
+    color: #ffffff;
+    border-color: #38bdf8;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.22);
+}
+.composer-stage-pill__dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: var(--text-xs, 0.75rem);
+    flex-shrink: 0;
+}
+.composer-stage-pill__dot--plain {
+    background: #e2e8f0;
+    color: #0f172a;
+    font-weight: 800;
+}
+.composer-stage-pill__dot--dynasty {
+    background: linear-gradient(135deg, #065f46, #10b981);
+}
+.composer-stage-pill__dot--cyber {
+    background: linear-gradient(135deg, #0ea5e9, #6366f1);
+}
+.composer-stage-pill__dot--alert {
+    background: linear-gradient(135deg, #991b1b, #e11d48);
+}
+.composer-stage-pill__dot--announce {
+    background: linear-gradient(135deg, #b45309, #f59e0b);
+}
+.composer-stage-pill__dot--prism {
+    background: linear-gradient(135deg, #7c3aed, #ec4899);
+}
+.composer-stage-pill__dot--velvet {
+    background: linear-gradient(135deg, #4c0519, #9f1239);
+}
+.fp-text-stage--composer {
+    padding: var(--space-4, 18px) !important;
+    border-radius: var(--radius-lg, 20px) !important;
+    margin-bottom: var(--space-2, 8px);
+}
+.fp-text-stage--composer #postMessageEditor:empty::before {
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+</style>

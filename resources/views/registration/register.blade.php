@@ -5,9 +5,25 @@
 
 @php
     $inviteFamCode = $registerPostData['famCode'] ?? '';
-    $familySurname = trim((string)($registerPostData['familySurname'] ?? ($registerPostData['lastName'] ?? '')));
+    $familySurname = ucwords(trim((string)($registerPostData['familySurname'] ?? ($registerPostData['lastName'] ?? ''))));
     $invitedFirstName = trim((string)($registerPostData['firstName'] ?? ''));
-    $hasInvitation = !empty($inviteFamCode) || !empty($invitedFirstName) || !empty($registerPostData['claim_node']);
+    // An invitation means a family code or tree node came with the link. A first
+    // name alone (e.g. from Google sign-in) is not an invitation.
+    $hasInvitation = !empty($inviteFamCode) || !empty($registerPostData['claim_node']);
+    $fprDoneMsg = [
+        'family_title' => __('reg.done_family_title', 'Your family has been created!'),
+        'created_title' => __('reg.done_created_title', 'Your account has been created'),
+        'share' => __('reg.done_share', 'Share this code with relatives so they can join your family.'),
+        'your_code' => __('reg.done_your_code', 'Your family code'),
+        'not_found_1' => __('reg.done_not_found_1', 'We couldn\'t find the family code :code, so you aren\'t linked to your relatives yet.'),
+        'not_found_2' => __('reg.done_not_found_2', 'Ask them for the right family code, then find them under All Members and request to join their family.'),
+        'temp_code' => __('reg.done_temp_code', 'Your own family code for now'),
+        'copy' => __('reg.done_copy', 'Copy code'),
+        'copied' => __('reg.done_copied', 'Copied'),
+        'go' => __('reg.done_go', 'Go to my profile'),
+        'go_login' => __('reg.done_go_login', 'Go to sign in'),
+        'signed_up_title' => __('reg.done_signed_up', 'You\'re signed up'),
+    ];
 
     if (!empty($familySurname)) {
         $pageOgTitle = "Join the {$familySurname} Family on FamilyPlatform";
@@ -28,648 +44,520 @@
 @section('extra_js')
 @include('components.auth.family-code-script')
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('form.register');
-    if (!form) return;
+// Register v2: the post-sign-up dialog. Submission itself is handled in
+// registration/include/registerSteps.blade.php, which calls window.fprShowDone().
+(function () {
+    'use strict';
+    const T = @json($fprDoneMsg);
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-    const hasInvitation = @json($hasInvitation);
-    const familySurnameInput = form.querySelector('input[name="familySurname"]');
-    const famCodeInput = form.querySelector('input[name="famCode"]');
-    const radioJoin = form.querySelector('input[name="account_type"][value="join"]');
-    const radioCreate = form.querySelector('input[name="account_type"][value="create"]');
+    window.fprShowDone = function (opts) {
+        const code = opts && opts.code ? String(opts.code) : '';
+        const missing = opts && opts.notFound ? String(opts.notFound) : '';
+        const redirectUrl = (opts && opts.redirect) || '/login';
+        const message = (opts && opts.message) || '';
+        const old = document.getElementById('family-code-modal');
+        if (old) old.remove();
 
-    if (!familySurnameInput || !famCodeInput) return;
-
-    // Get the field containers by ID (more reliable than label text parsing)
-    let familySurnameField = form.querySelector('#familySurname_div');
-    let famCodeField = form.querySelector('#famCode_div');
-
-    const toggleFields = () => {
-        const isCreating = radioCreate.checked;
-
-        if (familySurnameField) {
-            familySurnameField.style.display = isCreating ? 'block' : 'none';
-            familySurnameInput.required = isCreating;
+        let body;
+        if (code && missing) {
+            body = `<div class="fpr-done-icon is-warn" aria-hidden="true">!</div>
+                <h2 class="fpr-done-title" id="fprDoneTitle">${esc(T.created_title)}</h2>
+                <p class="fpr-done-text">${esc(T.not_found_1).replace(':code', '<strong>' + esc(missing) + '</strong>')}</p>
+                <p class="fpr-done-text">${esc(T.not_found_2)}</p>
+                <p class="fpr-done-label">${esc(T.temp_code)}</p>`;
+        } else if (code) {
+            body = `<div class="fpr-done-icon" aria-hidden="true">✓</div>
+                <h2 class="fpr-done-title" id="fprDoneTitle">${esc(T.family_title)}</h2>
+                <p class="fpr-done-text">${esc(T.share)}</p>
+                <p class="fpr-done-label">${esc(T.your_code)}</p>`;
+        } else {
+            body = `<div class="fpr-done-icon" aria-hidden="true">✓</div>
+                <h2 class="fpr-done-title" id="fprDoneTitle">${esc(T.signed_up_title)}</h2>
+                <p class="fpr-done-text">${esc(message)}</p>`;
         }
 
-        if (famCodeField) {
-            famCodeField.style.display = isCreating ? 'none' : 'block';
-            famCodeInput.required = !isCreating;
-        }
-    };
+        const wrap = document.createElement('div');
+        wrap.className = 'fpr-done';
+        wrap.id = 'family-code-modal';
+        wrap.setAttribute('role', 'dialog');
+        wrap.setAttribute('aria-modal', 'true');
+        wrap.setAttribute('aria-labelledby', 'fprDoneTitle');
+        wrap.innerHTML = `<div class="fpr-done-card">${body}
+            ${code ? `<p class="fpr-done-code" id="code-display">${esc(code)}</p>
+                      <button type="button" id="copy-code-btn" class="fpr-btn fpr-btn--ghost">${esc(T.copy)}</button>` : ''}
+            <a id="dashboard-btn" href="${esc(redirectUrl)}" class="fpr-btn fpr-btn--primary">${esc(redirectUrl.indexOf('/login') === 0 ? T.go_login : T.go)}</a>
+        </div>`;
+        (document.getElementById('fpr') || document.body).appendChild(wrap);
+        const go = document.getElementById('dashboard-btn');
+        if (go) go.focus();
 
-    // Set initial state
-    if (hasInvitation) {
-        radioJoin.checked = true;
-    } else {
-        radioCreate.checked = true;
-    }
-
-    // Attach listeners to radio buttons
-    if (radioJoin) radioJoin.addEventListener('change', toggleFields);
-    if (radioCreate) radioCreate.addEventListener('change', toggleFields);
-
-    // Initial toggle
-    toggleFields();
-
-    // Handle form submission — intercept JSON responses for code modal
-    form.addEventListener('submit', async (e) => {
-        const btn = form.querySelector('#btnSubmit');
-        if (btn) {
-            btn.classList.add('is-loading');
-            btn.disabled = true;
-        }
-    });
-
-    // Monitor fetch/XHR to catch JSON responses from registration
-    const originalFetch = window.fetch;
-    window.fetch = async function(...args) {
-        const response = await originalFetch.apply(window, args);
-        if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
-            const cloned = response.clone();
-            try {
-                const json = await cloned.json();
-                if (json.show_code_modal && json.family_code) {
-                    showFamilyCodeModal(json.family_code, json.redirect || '/login');
-                    // Consume the response so normal flow doesn't execute
-                    return new Response(JSON.stringify({status: 'handled'}), {status: 200, headers: {'Content-Type': 'application/json'}});
-                }
-            } catch (e) {
-                // Not JSON, continue normally
-            }
-        }
-        return response;
-    };
-
-    function showFamilyCodeModal(code, redirectUrl) {
-        const modal = document.createElement('div');
-        modal.innerHTML = `
-            <div class="modal is-active" id="family-code-modal" style="z-index: 9999;">
-                <div class="modal-background"></div>
-                <div class="modal-card" style="max-width: 500px;">
-                    <div class="modal-card-body" style="text-align: center; padding: 3rem 2rem;">
-                        <h2 class="title is-3 mb-4">🎉 Family Created!</h2>
-                        <p class="subtitle is-6 mb-5">Your family code is:</p>
-                        <div class="box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem;">
-                            <p style="font-size: 3.5rem; font-weight: bold; color: white; font-family: monospace; letter-spacing: 2px; margin: 0;" id="code-display">
-                                ${code}
-                            </p>
-                        </div>
-                        <button id="copy-code-btn" class="button is-primary mt-4" style="width: 100%;">
-                            <span class="icon"><i class="fas fa-copy"></i></span>
-                            <span>Copy Code</span>
-                        </button>
-                        <a id="dashboard-btn" href="${redirectUrl}" class="button is-success mt-2" style="width: 100%; font-weight: 600;">
-                            <span class="icon"><i class="fas fa-arrow-right"></i></span>
-                            <span>Go to Family Dashboard</span>
-                        </a>
-                        <p class="text-muted small mt-4">Share this code with family members so they can join your network.</p>
-                        <p style="font-size: 0.9rem; color: #999; margin-top: 1rem;">Redirecting to your dashboard in <span id="countdown">6</span> seconds...</p>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-
-        // Copy button handler
         const copyBtn = document.getElementById('copy-code-btn');
         if (copyBtn) {
             copyBtn.addEventListener('click', async () => {
                 try {
                     await navigator.clipboard.writeText(code);
-                    const originalText = copyBtn.innerHTML;
-                    copyBtn.innerHTML = '<span class="icon"><i class="fas fa-check"></i></span><span>Copied!</span>';
-                    copyBtn.classList.remove('is-primary');
-                    copyBtn.classList.add('is-success');
-                    setTimeout(() => {
-                        copyBtn.innerHTML = originalText;
-                        copyBtn.classList.add('is-primary');
-                        copyBtn.classList.remove('is-success');
-                    }, 2000);
+                    copyBtn.textContent = T.copied;
+                    setTimeout(() => { copyBtn.textContent = T.copy; }, 2000);
                 } catch (err) {
-                    console.error('Failed to copy:', err);
+                    console.warn('Copy failed:', err);
                 }
             });
         }
-
-        let countdown = 6;
-        const countdownEl = document.getElementById('countdown');
-        const interval = setInterval(() => {
-            countdown--;
-            if (countdownEl) countdownEl.textContent = countdown;
-            if (countdown <= 0) {
-                clearInterval(interval);
-                window.location.href = redirectUrl;
-            }
-        }, 1000);
-    }
-});
+    };
+})();
 </script>
 @endsection
 
 @section('extra_css')
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/autocompleter/autocomplete.min.css">
 @include('components.auth.family-code-styles')
-<style>
-    .register-card {
-        background: white;
-        border-radius: 12px;
-        padding: 3rem;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-        border: 1px solid var(--border-color);
-        margin-bottom: 4rem;
-    }
-
-    .register-title {
-        color: var(--brand-secondary);
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-    }
-
-    .register-subtitle {
-        color: var(--text-muted);
-        margin-bottom: 2.5rem;
-    }
-
-
-    .stitch-social-btn {
-        width: 100%;
-        border-radius: 12px;
-        padding: 0.55rem 1rem;
-        min-height: 44px;
-        font-size: 0.9rem;
-        font-weight: 550;
-        letter-spacing: -0.01em;
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 0.65rem;
-        margin-bottom: 0.75rem;
-        transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-        text-decoration: none;
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
-    }
-
-    .stitch-social-btn:active {
-        transform: scale(0.98);
-    }
-
-    .stitch-social-btn svg {
-        flex-shrink: 0;
-    }
-
-    .stitch-social-btn.google {
-        background-color: #ffffff;
-        color: #374151;
-        border: 1px solid #E5E7EB;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    }
-    .stitch-social-btn.google:hover {
-        background-color: #F9FAFB;
-        border-color: #D1D5DB;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-        color: #111827;
-        transform: translateY(-1px);
-    }
-
-    .stitch-social-btn.facebook {
-        background-color: #1877F2;
-        color: #ffffff;
-        border: 1px solid #1877F2;
-        box-shadow: 0 2px 6px rgba(24, 119, 242, 0.22);
-    }
-    .stitch-social-btn.facebook:hover {
-        background-color: #a31621;
-        border-color: #a31621;
-        box-shadow: 0 4px 10px rgba(24, 119, 242, 0.32);
-        color: #ffffff;
-        transform: translateY(-1px);
-    }
-
-    .stitch-social-btn.apple {
-        background-color: #000000;
-        color: #ffffff;
-        border: 1px solid #000000;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
-    }
-    .stitch-social-btn.apple:hover {
-        background-color: #1f2937;
-        border-color: #1f2937;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.32);
-        color: #ffffff;
-        transform: translateY(-1px);
-    }
-
-    .stitch-divider {
-        display: flex;
-        align-items: center;
-        margin: 2rem 0;
-        color: #6B7280;
-        font-size: 0.85rem;
-    }
-
-    .stitch-divider::before,
-    .stitch-divider::after {
-        content: "";
-        flex: 1;
-        border-bottom: 1px solid #E5E7EB;
-    }
-
-    .stitch-divider span {
-        padding: 0 12px;
-    }
-
-    /* Hide the auto-generated form section titles ("Personal Information" etc). */
-    .register .form-divider,
-    .register .title,
-    .register h2,
-    .register h3 {
-        display: none !important;
-    }
-
-    /* ...but #inviter-verification-modal lives inside <form class="register">
-       (so it can share the Alpine component), and its own <h3> heading must
-       stay visible. Re-assert it with higher specificity. */
-    #inviter-verification-modal h3,
-    #inviter-verification-modal h2 {
-        display: block !important;
-    }
-</style>
+<link rel="stylesheet" href="/public/css/register-v2.css?v={{ assetVersion('css/register-v2.css') }}">
 @endsection
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="register-card">
-                <div class="text-center mb-5">
-                    <img src="{{ getenv('APP_LOGO') }}" alt="logo" style="height: 64px;" class="mb-4">
-                    <h1 class="register-title h2">Join Your Family Network</h1>
-                    <p class="register-subtitle">Complete the steps below to create your secure family account</p>
-                </div>
+@php
+    $rp = $registerPostData ?? [];
+    $fv = static function (string $k) use ($rp): string {
+        $v = $rp[$k] ?? '';
+        return is_scalar($v) ? (string) $v : '';
+    };
+    $isOauth = isset($_SESSION['oauth_pending']);
+    $activeLocale = \App\classes\I18n::getLocale();
+    $supportedLocales = \App\classes\I18n::getSupportedLocales();
+    $currLocale = $supportedLocales[$activeLocale] ?? reset($supportedLocales);
+    $currFlag = is_array($currLocale) ? (string) ($currLocale['flag'] ?? '') : '';
+    $currCode = strtoupper(substr((string) $activeLocale, 0, 2));
+    $csrfValue = (string) ($_SESSION['token'] ?? '');
+    $treeFamily = $familySurname !== '' ? $familySurname : __('reg.tree_family', 'Your family');
+    $treeYou = $invitedFirstName !== '' ? $invitedFirstName : __('reg.tree_you', 'You');
+    $selCountry = $fv('country') !== '' ? $fv('country') : 'United Kingdom';
+    $selDay = $fv('day');
+    $selMonth = $fv('month');
+    $selYear = $fv('year');
+    $monthNames = explode(',', __('reg.months', 'January,February,March,April,May,June,July,August,September,October,November,December'));
+    $monthKeys = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    $months = [];
+    foreach ($monthKeys as $mi => $mk) {
+        $months[$mk] = trim((string) ($monthNames[$mi] ?? $mk));
+    }
+    $maxYear = (int) date('Y') - 13;
+    $countries = ['United Kingdom','Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan', 'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo (Brazzaville)', 'Congo (Kinshasa)', 'Costa Rica', 'Côte d\'Ivoire', 'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'East Timor', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Fiji', 'Finland', 'France', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Greece', 'Grenada', 'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'North Korea', 'South Korea', 'Kosovo', 'Kuwait', 'Kyrgyzstan', 'Laos', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macedonia', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania', 'Mauritius', 'Mexico', 'Micronesia', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Qatar', 'Romania', 'Russia', 'Rwanda', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Sudan', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Swaziland', 'Sweden', 'Switzerland', 'Syria', 'Taiwan', 'Tajikistan', 'Tanzania', 'Thailand', 'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United States', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Vatican City', 'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'];
+    $oauthParams = [];
+    foreach (['invite', 'ref', 'claim_node'] as $qk) {
+        if (!empty($_GET[$qk]) && is_string($_GET[$qk])) {
+            $oauthParams[$qk] = (string) $_GET[$qk];
+        }
+    }
+    $s3Title = $isOauth ? __('reg.s3_title_oauth', 'Last step') : __('reg.s3_title', 'Secure your account');
+    $s3Sub = $isOauth ? __('reg.s3_sub_oauth', 'Confirm and you\'re in.') : __('reg.s3_sub', 'Choose a password you don\'t use anywhere else.');
+    // Mirrors hasDirectInvite in components/auth/family-code-script: these links
+    // arrive with the code already confirmed, so the person starts on step 2.
+    $isDirectInvite = !empty($_GET['invite']) || !empty($_GET['invite_token']) || !empty($_GET['claim_node'])
+        || (!empty($_GET['famCode']) && (!empty($_GET['name']) || !empty($_GET['firstName'])));
+    $startStep = ($isDirectInvite && $inviteFamCode !== '' && empty($inviteTokenError)) ? 2 : 1;
+    if ($invitedFirstName !== '' && $familySurname !== '') {
+        $welcomeTitle = \App\classes\I18n::trans('reg.welcome_title_both', ['name' => $invitedFirstName, 'family' => $familySurname], 'Welcome, :name! The :family family saved you a place.');
+    } elseif ($familySurname !== '') {
+        $welcomeTitle = \App\classes\I18n::trans('reg.welcome_title_family', ['family' => $familySurname], 'The :family family saved you a place.');
+    } elseif ($invitedFirstName !== '') {
+        $welcomeTitle = \App\classes\I18n::trans('reg.welcome_title_name', ['name' => $invitedFirstName], 'Welcome, :name! Your family saved you a place.');
+    } else {
+        $welcomeTitle = __('reg.welcome_title', 'Your family saved you a place.');
+    }
+    $welcomeText = $startStep === 2
+        ? __('reg.welcome_text_ready', 'Your family code is filled in. Check your details, then choose a password.')
+        : __('reg.welcome_text', 'Your family code is filled in below. Tell us who invited you to continue.');
+    $oauthQueryStr = !empty($oauthParams) ? '?' . http_build_query($oauthParams) : '';
+@endphp
 
-                @if ($hasInvitation)
-                <div class="card p-4 mb-4 border-0 shadow-sm" style="background: linear-gradient(135deg, rgba(163, 22, 33, 0.06) 0%, rgba(122, 14, 22, 0.03) 100%); border-left: 5px solid var(--brand-primary) !important; border-radius: 14px;">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="d-flex align-items-center justify-content-center text-white" style="width: 48px; height: 48px; border-radius: 50%; background: var(--brand-primary); flex-shrink: 0;">
-                            <i class="fas fa-tree fs-5"></i>
-                        </div>
-                        <div>
-                            <span class="badge rounded-pill mb-1" style="background: rgba(163, 22, 33, 0.12); color: var(--brand-primary); font-weight: 700; font-size: 0.72rem; padding: 4px 10px;">
-                                <i class="fas fa-star me-1"></i>Kinship Invitation
+<div class="fpr" id="fpr" data-start-step="{{ $startStep }}" data-has-invitation="{{ $hasInvitation ? '1' : '0' }}" data-oauth="{{ $isOauth ? '1' : '0' }}">
+<div class="fpr-shell">
+
+    {{-- ===== Story panel ===== --}}
+    <aside class="fpr-aside" aria-hidden="false">
+        <a href="/" class="fpr-brand"><img src="{{ getenv('APP_LOGO') }}" alt="" width="36" height="36"> FamilyPlatform</a>
+        <div>
+            <h2 class="fpr-aside-title">{{ __('reg.aside_title', 'Every family has a story.') }} <em>{{ __('reg.aside_accent', 'Add your branch.') }}</em></h2>
+            <p class="fpr-aside-lede" style="margin-top:12px;">{{ __('reg.aside_lede', 'One private space for your family tree, memories and conversations, shared only with relatives.') }}</p>
+        </div>
+
+        <svg class="fpr-tree" viewBox="0 0 360 250" role="img" aria-label="{{ __('reg.tree_label', 'Your place on the family tree') }}">
+            <path class="branch" d="M180 62 C180 100 80 96 80 132" />
+            <path class="branch" d="M180 62 C180 100 280 96 280 132" />
+            <path class="branch" d="M80 160 C80 190 40 186 40 206" />
+            <path class="branch-you" d="M280 160 C280 192 220 186 220 204" />
+            <path class="branch" d="M280 160 C280 190 320 186 320 206" />
+            <rect class="node node-root" x="110" y="22" width="140" height="40" rx="20" />
+            <text x="180" y="47" data-fpr-tree="family">{{ $treeFamily }}</text>
+            <circle class="node" cx="80" cy="146" r="14" />
+            <circle class="node" cx="280" cy="146" r="14" />
+            <circle class="node" cx="40" cy="218" r="11" />
+            <circle class="node" cx="320" cy="218" r="11" />
+            <rect class="halo" x="160" y="200" width="120" height="38" rx="19" />
+            <rect class="node-you" x="166" y="204" width="108" height="30" rx="15" />
+            <text class="t-you" x="220" y="223" data-fpr-tree="you">{{ $treeYou }}</text>
+        </svg>
+
+        <ul class="fpr-points">
+            <li><span class="fpr-ic"><i class="fas fa-user-shield"></i></span><span>{{ __('reg.point1', 'Relatives join with your family code, and you approve who gets in.') }}</span></li>
+            <li><span class="fpr-ic"><i class="fas fa-sitemap"></i></span><span>{{ __('reg.point2', 'Build the tree together and keep everyone\'s stories in one place.') }}</span></li>
+            <li><span class="fpr-ic"><i class="fas fa-mobile-alt"></i></span><span>{{ __('reg.point3', 'Works on phone, tablet and computer.') }}</span></li>
+        </ul>
+    </aside>
+
+    {{-- ===== Form panel ===== --}}
+    <main class="fpr-main">
+        <div class="fpr-head">
+            <div>
+                <h1 class="fpr-title">{{ __('reg.title', 'Create your account') }}</h1>
+                <p class="fpr-sub">{{ __('reg.subtitle', 'Three short steps.') }}</p>
+            </div>
+            @if(!empty($supportedLocales) && count($supportedLocales) > 1)
+            <div class="fpr-lang dropdown">
+                <button type="button" class="fpr-lang-btn" id="fprLangBtn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ __('reg.change_language', 'Change language') }}">
+                    <span class="fpr-ic" aria-hidden="true"><i class="fas fa-globe"></i></span><span>{{ $currCode }}</span><span class="fpr-ic" style="font-size:0.7rem;" aria-hidden="true"><i class="fas fa-chevron-down"></i></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="fprLangBtn">
+                    @foreach ($supportedLocales as $locKey => $locMeta)
+                    <li>
+                        <a class="dropdown-item {{ $locKey === $activeLocale ? 'active' : '' }}" href="/locale/{{ $locKey }}" lang="{{ str_replace('_', '-', (string) $locKey) }}" @if($locKey === $activeLocale) aria-current="true" @endif>
+                            <span aria-hidden="true">{{ $locMeta['flag'] }}</span>
+                            <span>{{ $locMeta['native'] }}</span>
+                            @if($locKey === $activeLocale)<span class="fpr-ic" aria-hidden="true"><i class="fas fa-check fpr-check"></i></span>@endif
+                        </a>
+                    </li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+        </div>
+
+        <ol class="fpr-steps" id="fprStepper" aria-label="{{ __('reg.progress', 'Sign-up progress') }}">
+            <li data-step="1" data-state="current"><span><span class="n">1</span>{{ __('reg.step1', 'Your family') }}</span></li>
+            <li data-step="2" data-state="todo"><span><span class="n">2</span>{{ __('reg.step2', 'About you') }}</span></li>
+            <li data-step="3" data-state="todo"><span><span class="n">3</span>{{ __('reg.step3', 'Secure account') }}</span></li>
+        </ol>
+
+        @if ($hasInvitation)
+        <div class="fpr-welcome" role="status">
+            <span class="fpr-welcome-icon" aria-hidden="true"><span class="fpr-ic"><i class="fas fa-tree"></i></span></span>
+            <div class="fpr-welcome-body">
+                <p class="fpr-welcome-eyebrow">{{ __('reg.welcome_eyebrow', 'Family invitation') }}</p>
+                <h2 class="fpr-welcome-title">{{ $welcomeTitle }}</h2>
+                <p class="fpr-welcome-text">{{ $welcomeText }}</p>
+                @if($inviteFamCode !== '')
+                <p class="fpr-welcome-chip"><span class="fpr-ic"><i class="fas fa-check-circle"></i></span> {{ __('reg.family_code', 'Family code') }} <strong>{{ $inviteFamCode }}</strong></p>
+                @endif
+            </div>
+        </div>
+        @endif
+
+        @if (!empty($inviteTokenError))
+        <div class="fpr-note fpr-note--error" role="alert">
+            <span class="fpr-ic"><i class="fas fa-exclamation-triangle"></i></span>
+            <div>
+                <strong class="d-block">{{ __('reg.invite_issue', 'There\'s a problem with your invite link') }}</strong>
+                <span class="d-block">{{ $inviteTokenError }}</span>
+                <span class="d-block" style="margin-top:4px;">{{ __('reg.invite_issue_help', 'Ask your relative for a new link, or enter your family code yourself below.') }}</span>
+            </div>
+        </div>
+        @endif
+
+        @include('partials.loader', ['notificationId'=> 'register'])
+
+        @if (!$isOauth)
+        <!-- Webview Alert for WhatsApp / Facebook / Instagram in-app browsers -->
+        <div id="webview-alert" class="fpr-note fpr-note--warn" style="display: none;">
+            <i class="fas fa-external-link-alt"></i>
+            <div>
+                <strong>Browsing inside WhatsApp or Facebook?</strong>
+                <span class="d-block" style="font-size: 0.85rem;">For fastest 1-tap sign-in with Google, tap the menu (<strong>⋮</strong> or <strong>⋯</strong>) and choose <strong>"Open in Browser"</strong>.</span>
+            </div>
+        </div>
+        <script>
+            (function() {
+                const ua = navigator.userAgent || navigator.vendor || window.opera;
+                if (ua && (ua.includes('FBAN') || ua.includes('FBAV') || ua.includes('Instagram') || ua.includes('WhatsApp'))) {
+                    const el = document.getElementById('webview-alert');
+                    if (el) el.style.display = 'flex';
+                }
+            })();
+        </script>
+
+        <div class="fpr-social" data-fpr-social>
+            <a href="/auth/google{{ $oauthQueryStr }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24Z"/>
+                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15Z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/>
+                </svg>
+                <span>Google</span>
+            </a>
+            <a href="/auth/apple{{ $oauthQueryStr }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.85c.65-.8 1.1-1.92.97-3.05-1 .04-2.16.67-2.84 1.47-.6.69-1.12 1.82-.98 2.92 1.12.09 2.21-.55 2.85-1.34z"/>
+                </svg>
+                <span>Apple</span>
+            </a>
+            <a href="/auth/facebook{{ $oauthQueryStr }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2" aria-hidden="true">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+                <span>Facebook</span>
+            </a>
+        </div>
+        <div class="fpr-or" data-fpr-social><span>{{ __('reg.or_email', 'or sign up with email') }}</span></div>
+        @else
+        <div class="fpr-note fpr-note--info">
+            <span class="fpr-ic"><i class="fas fa-info-circle"></i></span>
+            <span><strong>{{ __('reg.oauth_almost', 'Almost done!') }}</strong> {{ __('reg.oauth_note', 'Add your family details and mobile number to finish signing up.') }}</span>
+        </div>
+        @endif
+
+        <form class="register" id="register" method="POST" enctype="multipart/form-data" autocomplete="off" novalidate x-data="familyCodeApprovalForm()">
+            @if(!empty($registerPostData['claim_node']))
+            <input type="hidden" name="claim_node" value="{{ (int)$registerPostData['claim_node'] }}">
+            @endif
+
+            {{-- ============ STEP 1 — Your family ============ --}}
+            <section class="fpr-step" data-fpr-step="1" aria-labelledby="fprStep1Title">
+                <h2 class="fpr-step-title" id="fprStep1Title">{{ __('auth.what_would_you_like_to_do', 'What would you like to do?') }}</h2>
+                <p class="fpr-step-sub">{{ __('reg.s1_sub', 'Join relatives who are already here, or start your family\'s space.') }}</p>
+
+                <fieldset>
+                    <legend class="visually-hidden">{{ __('reg.choose', 'Choose how to sign up') }}</legend>
+                    <div class="fpr-choices">
+                        <label class="fpr-choice">
+                            <input type="radio" name="account_type" value="join" {{ $hasInvitation ? 'checked' : '' }}>
+                            <span class="fpr-choice-body">
+                                <span class="fpr-choice-icon"><span class="fpr-ic"><i class="fas fa-users"></i></span></span>
+                                <span class="fpr-choice-title">{{ __('reg.join_title', 'Join my family') }}</span>
+                                <span class="fpr-choice-text">{{ __('reg.join_text', 'A relative gave me a family code.') }}</span>
                             </span>
-                            <h3 class="h5 fw-bold mb-1 text-dark">
-                                @if(!empty($invitedFirstName))
-                                Welcome, {{ $invitedFirstName }}!
-                                @elseif(!empty($familySurname))
-                                Welcome to the {{ $familySurname }} Family Sanctuary!
-                                @else
-                                Welcome to Your Family Tree!
-                                @endif
-                            </h3>
-                            <p class="small text-muted mb-0">
-                                Your spot has been reserved on the family organogram. Set your password below to claim your branch and unlock private memories, oral histories, and family events.
-                            </p>
+                            <span class="fpr-choice-tick" aria-hidden="true"><span class="fpr-ic"><i class="fas fa-check"></i></span></span>
+                        </label>
+                        <label class="fpr-choice">
+                            <input type="radio" name="account_type" value="create" {{ $hasInvitation ? '' : 'checked' }}>
+                            <span class="fpr-choice-body">
+                                <span class="fpr-choice-icon"><span class="fpr-ic"><i class="fas fa-tree"></i></span></span>
+                                <span class="fpr-choice-title">{{ __('reg.create_title', 'Start a new family') }}</span>
+                                <span class="fpr-choice-text">{{ __('reg.create_text', 'We\'ll create a code you can share.') }}</span>
+                            </span>
+                            <span class="fpr-choice-tick" aria-hidden="true"><span class="fpr-ic"><i class="fas fa-check"></i></span></span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                {{-- Join: family code + inline inviter check --}}
+                <div class="fpr-grid" data-fpr-mode="join">
+                    <div class="fpr-field" id="famCode_div">
+                        <label class="fpr-label" for="famCode">{{ __('reg.family_code', 'Family code') }}</label>
+                        <input class="fpr-input fpr-code" type="text" name="famCode" id="famCode" value="{{ $fv('famCode') }}" placeholder="e.g. OLA1234" maxlength="30" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="famCode_hint famCode_error">
+                        <p class="fpr-hint" id="famCode_hint">{{ __('reg.family_code_hint', 'Ask the relative who invited you. It\'s in their invite message too.') }}</p>
+                        <div class="fpr-status fpr-status--busy" x-show="checkingCode" x-cloak><span class="spinner-border spinner-border-sm" aria-hidden="true"></span> {{ __('reg.checking', 'Checking code…') }}</div>
+                        <div class="fpr-status fpr-status--ok" x-show="!checkingCode && codeExists && codeVerified" x-cloak><span class="fpr-ic"><i class="fas fa-check-circle"></i></span> {{ __('reg.code_found', 'Family found') }}</div>
+                        <div class="fpr-status fpr-status--warn" x-show="!checkingCode && lastCheckedCode && !codeExists" x-cloak><span class="fpr-ic"><i class="fas fa-exclamation-circle"></i></span> {{ __('reg.code_not_found', 'We couldn\'t find that code. You can still sign up, then link to your family\'s right code afterwards.') }}</div>
+                        <p class="fpr-err" id="famCode_error" role="alert"></p>
+                    </div>
+
+                    @include('registration.include.inviterCheck')
+                </div>
+
+                {{-- Create: family surname --}}
+                <div class="fpr-grid" data-fpr-mode="create">
+                    <div class="fpr-field" id="familySurname_div">
+                        <label class="fpr-label" for="familySurname">{{ __('reg.family_surname', 'Family surname') }}</label>
+                        <input class="fpr-input" type="text" name="familySurname" id="familySurname" value="{{ $fv('familySurname') }}" placeholder="e.g. Olaogun" maxlength="30" autocomplete="family-name" aria-describedby="familySurname_hint familySurname_error">
+                        <p class="fpr-hint" id="familySurname_hint">{{ __('reg.family_surname_hint', 'This names your family space. We\'ll create a family code from it after you sign up.') }}</p>
+                        <p class="fpr-err" id="familySurname_error" role="alert"></p>
+                    </div>
+                </div>
+            </section>
+
+            {{-- ============ STEP 2 — About you ============ --}}
+            <section class="fpr-step" data-fpr-step="2" aria-labelledby="fprStep2Title" hidden>
+                <h2 class="fpr-step-title" id="fprStep2Title">{{ __('reg.step2', 'About you') }}</h2>
+                <p class="fpr-step-sub">{{ __('reg.s2_sub', 'This is how relatives will recognise you on the tree.') }}</p>
+
+                <div class="fpr-grid">
+                    <div class="fpr-row-2">
+                        <div class="fpr-field">
+                            <label class="fpr-label" for="firstName">{{ __('reg.first_name', 'First name') }}</label>
+                            <input class="fpr-input" type="text" name="firstName" id="firstName" value="{{ $fv('firstName') }}" placeholder="Toyin" maxlength="35" autocomplete="given-name" aria-describedby="firstName_error">
+                            <p class="fpr-err" id="firstName_error" role="alert"></p><span id="firstName_help" hidden></span>
+                        </div>
+                        <div class="fpr-field">
+                            <label class="fpr-label" for="lastName">{{ __('reg.last_name', 'Last name') }}</label>
+                            <input class="fpr-input" type="text" name="lastName" id="lastName" value="{{ $fv('lastName') }}" placeholder="Edwards" maxlength="35" autocomplete="family-name" aria-describedby="lastName_error">
+                            <p class="fpr-err" id="lastName_error" role="alert"></p><span id="lastName_help" hidden></span>
                         </div>
                     </div>
-                </div>
-                @endif
 
-                @if (!empty($inviteTokenError))
-                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" style="background-color: #fee2e2; border: 1.5px solid #fca5a5; color: #7f1d1d; border-radius: 10px; padding: 16px;">
-                    <div class="d-flex align-items-start gap-3">
-                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 1.3rem; flex-shrink: 0;"></i>
-                        <div>
-                            <h5 class="alert-heading" style="margin-bottom: 6px; color: #7f1d1d; font-weight: 700;">Invite Link Issue</h5>
-                            <p style="margin-bottom: 0; font-size: 0.95rem;">{{ htmlspecialchars($inviteTokenError) }}</p>
-                            <hr style="border-color: rgba(0,0,0,0.1); margin: 10px 0;">
-                            <p style="margin-bottom: 0; font-size: 0.9rem; color: #991b1b;">
-                                <strong>What to do:</strong> Ask your family member to send you a new invite link, or proceed to register with your family code directly.
-                            </p>
+                    <fieldset class="fpr-field" aria-describedby="Date_of_Birth_hint Date_of_Birth_error">
+                        <legend class="fpr-label" style="margin-bottom:6px;">{{ __('reg.dob', 'Date of birth') }}</legend>
+                        <div class="fpr-dob">
+                            <select class="fpr-select" name="day" id="day" aria-label="{{ __('reg.day', 'Day') }}" autocomplete="bday-day">
+                                <option value="select">{{ __('reg.day', 'Day') }}</option>
+                                @for ($d = 1; $d <= 31; $d++)
+                                <option value="{{ $d }}" {{ $selDay === (string) $d ? 'selected' : '' }}>{{ $d }}</option>
+                                @endfor
+                            </select>
+                            <select class="fpr-select" name="month" id="month" aria-label="{{ __('reg.month', 'Month') }}" autocomplete="bday-month">
+                                <option value="select">{{ __('reg.month', 'Month') }}</option>
+                                @foreach ($months as $mKey => $mName)
+                                <option value="{{ $mKey }}" {{ $selMonth === $mKey ? 'selected' : '' }}>{{ $mName }}</option>
+                                @endforeach
+                            </select>
+                            <select class="fpr-select" name="year" id="year" aria-label="{{ __('reg.year', 'Year') }}" autocomplete="bday-year">
+                                <option value="select">{{ __('reg.year', 'Year') }}</option>
+                                @for ($y = $maxYear; $y >= 1920; $y--)
+                                <option value="{{ $y }}" {{ $selYear === (string) $y ? 'selected' : '' }}>{{ $y }}</option>
+                                @endfor
+                            </select>
                         </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <p class="fpr-hint" id="Date_of_Birth_hint">{{ __('reg.dob_hint', 'You need to be 13 or over to sign up yourself.') }}</p>
+                        <p class="fpr-err" id="Date_of_Birth_error" role="alert"></p>
+                        <p class="fpr-err" id="day_error"></p>
+                        <p class="fpr-err" id="month_error"></p>
+                        <p class="fpr-err" id="year_error"></p>
+                    </fieldset>
+
+                    <div class="fpr-field">
+                        <label class="fpr-label" for="email">{{ __('reg.email', 'Email') }}</label>
+                        <input class="fpr-input" type="email" name="email" id="email" value="{{ $fv('email') }}" placeholder="{{ __('auth.email_placeholder', 'e.g. alex@example.com') }}" maxlength="50" autocomplete="email" inputmode="email" aria-describedby="email_error">
+                        <p class="fpr-err" id="email_error" role="alert"></p><span id="email_help" hidden></span>
                     </div>
-                </div>
-                @endif
 
-                @include('partials.loader', ['notificationId'=> 'register'])
-
-                @if (!isset($_SESSION['oauth_pending']))
-                @php
-                    $oauthParams = [];
-                    if (!empty($_GET['invite'])) {
-                        $oauthParams['invite'] = (string)$_GET['invite'];
-                    }
-                    if (!empty($_GET['ref'])) {
-                        $oauthParams['ref'] = (string)$_GET['ref'];
-                    }
-                    if (!empty($_GET['claim_node'])) {
-                        $oauthParams['claim_node'] = (string)$_GET['claim_node'];
-                    }
-                    $oauthQueryStr = !empty($oauthParams) ? '?' . http_build_query($oauthParams) : '';
-                @endphp
-
-                <!-- Webview Alert for WhatsApp / Facebook / Instagram in-app browsers -->
-                <div id="webview-alert" class="alert alert-warning mb-3" style="display: none; background-color: #fffbeb; border: 1.5px solid #fde68a; color: #92400e; border-radius: 10px; padding: 12px 16px; font-size: 0.88rem;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="fas fa-external-link-alt" style="font-size: 1.1rem; flex-shrink: 0; color: #d97706;"></i>
-                        <div>
-                            <strong>Browsing inside WhatsApp or Facebook?</strong>
-                            <span class="d-block" style="font-size: 0.82rem; color: #78350f;">For fastest 1-tap sign-in with Google, tap the menu (<strong>⋮</strong> or <strong>⋯</strong>) and choose <strong>"Open in Browser"</strong>.</span>
+                    <div class="fpr-field">
+                        <span class="fpr-label" id="fprPhoneLabel">{{ __('reg.mobile', 'Mobile number') }}</span>
+                        <div class="fpr-phone">
+                            <select class="fpr-select" name="country" id="country" aria-labelledby="fprPhoneLabel" aria-label="{{ __('reg.country', 'Country') }}" autocomplete="country-name">
+                                @foreach ($countries as $c)
+                                <option value="{{ $c }}" {{ $selCountry === $c ? 'selected' : '' }}>{{ $c }}</option>
+                                @endforeach
+                            </select>
+                            <input class="fpr-input" type="tel" name="mobile" id="mobile" value="{{ $fv('mobile') }}" placeholder="7123 456789" maxlength="25" autocomplete="tel" inputmode="tel" aria-label="{{ __('reg.mobile', 'Mobile number') }}" aria-describedby="mobile_hint mobile_error">
                         </div>
+                        <p class="fpr-hint" id="mobile_hint">{{ __('reg.mobile_hint', 'Pick your country and we\'ll add the dialling code.') }}</p>
+                        <p class="fpr-err" id="country_error" role="alert"></p><span id="country_help" hidden></span>
+                        <p class="fpr-err" id="mobile_error" role="alert"></p><span id="mobile_help" hidden></span>
                     </div>
                 </div>
-                <script>
-                    (function() {
-                        const ua = navigator.userAgent || navigator.vendor || window.opera;
-                        if (ua && (ua.includes('FBAN') || ua.includes('FBAV') || ua.includes('Instagram') || ua.includes('WhatsApp'))) {
-                            const el = document.getElementById('webview-alert');
-                            if (el) el.style.display = 'block';
-                        }
-                    })();
-                </script>
+            </section>
 
-                <a href="/auth/google{{ $oauthQueryStr }}" class="stitch-social-btn google">
-                    <svg width="20" height="20" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
-                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24Z"/>
-                        <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15Z"/>
-                        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/>
-                    </svg>
-                    <span>Continue with Google</span>
-                </a>
+            {{-- ============ STEP 3 — Secure account ============ --}}
+            <section class="fpr-step" data-fpr-step="3" aria-labelledby="fprStep3Title" hidden>
+                <h2 class="fpr-step-title" id="fprStep3Title">{{ $s3Title }}</h2>
+                <p class="fpr-step-sub">{{ $s3Sub }}</p>
 
-                <a href="/auth/apple{{ $oauthQueryStr }}" class="stitch-social-btn apple">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffffff">
-                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.85c.65-.8 1.1-1.92.97-3.05-1 .04-2.16.67-2.84 1.47-.6.69-1.12 1.82-.98 2.92 1.12.09 2.21-.55 2.85-1.34z"/>
-                    </svg>
-                    <span>Continue with Apple</span>
-                </a>
-
-                <a href="/auth/facebook{{ $oauthQueryStr }}" class="stitch-social-btn facebook">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffffff">
-                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                    </svg>
-                    <span>Continue with Facebook</span>
-                </a>
-
-                <div class="stitch-divider">
-                    <span>OR REGISTER WITH EMAIL</span>
-                </div>
-                @else
-                <div class="alert alert-info text-center fw-bold" style="background-color: #EBF5FF; color: #1E3A8A; border: 1px solid #BFDBFE; border-radius: 8px; padding: 12px; margin-bottom: 24px;">
-                    <i class="bi bi-info-circle-fill me-2"></i> Almost done! Please provide your Family Code and Mobile Number to complete registration.
-                </div>
-                @endif
-
-                @if($hasInvitation)
-                <div class="invited-relative-hero mb-4" style="background: linear-gradient(135deg, #2a0a0d 0%, #2a0a0d 50%, #8a1019 100%); border-radius: 18px; padding: 26px; color: #ffffff; box-shadow: 0 16px 36px rgba(42,10,13, 0.28); border: 1.5px solid rgba(239,107,115, 0.4); position: relative; overflow: hidden;">
-                    <div style="position: absolute; top: -30px; right: -30px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(245, 158, 11, 0.22) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
-                    
-                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-                        <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); font-size: 0.78rem; padding: 5px 12px; border-radius: 999px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
-                            <i class="bi bi-tree-fill me-1"></i> Official Family Dynasty Invitation
-                        </span>
-                        <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.45); font-size: 0.78rem; padding: 5px 12px; border-radius: 999px; font-weight: 700;">
-                            <i class="bi bi-check-circle-fill me-1"></i> Verified Lineage Spot
-                        </span>
-                    </div>
-
-                    <h2 class="h3 fw-bold mb-2" style="color: #ffffff; letter-spacing: -0.02em;">
-                        @if(!empty($invitedFirstName))
-                            Welcome, {{ htmlspecialchars($invitedFirstName) }}! Claim Your Spot
-                        @else
-                            Claim Your Spot in the {{ htmlspecialchars($familySurname ?: 'Family') }} Dynasty
-                        @endif
-                    </h2>
-
-                    <p style="color: rgba(245,222,222, 0.88); font-size: 0.94rem; line-height: 1.55; margin-bottom: 18px; max-width: 620px;">
-                        You have been personally invited to claim your branch on the <strong style="color:#fff;">{{ htmlspecialchars($familySurname ?: 'Family') }} Family Tree</strong>. Connect directly with your kin, discover ancestral stories, and preserve cherished memories together.
-                    </p>
-
-                    <div class="d-flex flex-wrap align-items-center gap-3" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 12px 18px;">
-                        <div class="d-flex align-items-center gap-2">
-                            <span style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Family Code:</span>
-                            <strong style="color: #fbbf24; font-size: 1rem; letter-spacing: 0.06em; font-family: monospace;">{{ htmlspecialchars($inviteFamCode ?: 'PRE-SET') }}</strong>
+                <div class="fpr-grid">
+                    @if (!$isOauth)
+                    <div class="fpr-field">
+                        <label class="fpr-label" for="password">{{ __('reg.password', 'Password') }}</label>
+                        <div class="fpr-pw">
+                            <input class="fpr-input" type="password" name="password" id="password" value="{{ $fv('password') }}" placeholder="{{ __('reg.pw_placeholder', 'At least 8 characters') }}" maxlength="50" autocomplete="new-password" aria-describedby="fprPwRules password_error">
+                            <button type="button" class="fpr-pw-toggle" id="fprPwToggle" aria-controls="password" aria-pressed="false">{{ __('reg.show', 'Show') }}</button>
                         </div>
-                        <div style="height: 16px; width: 1px; background: rgba(255,255,255,0.2);"></div>
-                        <div class="d-flex align-items-center gap-2" style="color: #ecc7c9; font-size: 0.84rem;">
-                            <i class="bi bi-lightning-charge-fill text-warning"></i>
-                            <span>Fast-Track: Name &amp; Code Pre-Filled Below</span>
-                        </div>
+                        <div class="fpr-meter" id="fprMeter" data-score="0" aria-hidden="true"><span></span></div>
+                        <ul class="fpr-rules" id="fprPwRules" aria-live="polite">
+                            <li data-rule="len">{{ __('reg.rule_len', '8+ characters') }}</li>
+                            <li data-rule="case">{{ __('reg.rule_case', 'Upper & lower case') }}</li>
+                            <li data-rule="num">{{ __('reg.rule_num', 'A number') }}</li>
+                        </ul>
+                        <p class="fpr-err" id="password_error" role="alert"></p>
+                        {{-- Kept for the server contract; mirrors the password (no second box to type). --}}
+                        <input type="hidden" name="confirm_password" id="confirm_password" value="{{ $fv('confirm_password') }}">
+                        <p class="fpr-err" id="confirm_password_error" role="alert"></p>
                     </div>
-                </div>
-                @endif
-
-                <!-- International Language Switcher -->
-                <div class="d-flex justify-content-end mb-3">
-                    @php
-                        $activeLocale = \App\classes\I18n::getLocale();
-                        $supportedLocales = \App\classes\I18n::getSupportedLocales();
-                    @endphp
-                    <div class="d-flex align-items-center gap-1 p-1 rounded-pill" style="background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(255, 255, 255, 0.15);">
-                        @foreach ($supportedLocales as $locKey => $locMeta)
-                            <a href="/locale/{{ $locKey }}" class="btn btn-sm py-1 px-2 rounded-pill {{ $locKey === $activeLocale ? 'btn-primary fw-bold text-white' : 'text-light' }}" style="font-size: 0.78rem; text-decoration: none;">
-                                {{ $locMeta['flag'] }} {{ $locMeta['native'] }}
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
-
-                <form class="register" id="register" method="POST" enctype="multipart/form-data" autocomplete="off" x-data="familyCodeApprovalForm()" x-init="isCreating = $el.dataset.isCreating === 'true'" :data-is-creating="isCreating">
-                    @if(!empty($registerPostData['claim_node']))
-                    <input type="hidden" name="claim_node" value="{{ (int)$registerPostData['claim_node'] }}">
+                    @else
+                    <input type="hidden" name="password" value="{{ $fv('password') }}">
+                    <input type="hidden" name="confirm_password" value="{{ $fv('confirm_password') }}">
                     @endif
 
-                    <!-- Create vs Join Toggle -->
-                    <div class="field mb-4" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 20px;">
-                        <label style="color: #cbd5e1; font-weight: 600; font-size: 0.95rem; display: block; margin-bottom: 12px;">{{ __('auth.what_would_you_like_to_do', 'What would you like to do?') }}</label>
-                        <div class="d-flex gap-4">
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #e2e8f0;">
-                                <input type="radio" name="account_type" value="join" x-model="isCreating" :value="false" style="cursor: pointer;">
-                                <span>{{ __('auth.join_existing_family', 'Join existing family (have a code?)') }}</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #e2e8f0;">
-                                <input type="radio" name="account_type" value="create" x-model="isCreating" :value="true" style="cursor: pointer;">
-                                <span>{{ __('auth.create_new_family', 'Create new family') }}</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    @php
-                    $formArray = [
-                    __('auth.personal_info', 'Personal Information') => 'title',
-                    'name' => [
-                    'mixed',
-                    'label' => [
-                        __('auth.first_name', 'First Name'),
-                        __('auth.last_name', 'Last Name'),
-                        __('auth.family_surname', 'Family Surname'),
-                        __('auth.family_code', 'Family Code') . ' <button type="button" id="generateFamilyCode" class="button is-small is-primary ms-2 js-modal-trigger" data-target="modal-familyCode" style="font-size: 0.7rem; padding: 0.2rem 0.5rem; vertical-align: middle;">' . __('global.generate', 'Generate') . '</button>'
-                    ],
-                    'attribute' => ['firstName', 'lastName', 'familySurname', 'famCode'],
-                    'placeholder' => ['Toyin', 'Edwars', 'e.g. Olaogun', __('auth.family_code_placeholder', 'Check your email for the code')],
-                    'inputType' => ['text', 'text', 'text', 'text'],
-                    'value' => [
-                    isset($registerPostData['firstName']) ? $registerPostData['firstName'] : '',
-                    isset($registerPostData['lastName']) ? $registerPostData['lastName'] : '',
-                    isset($registerPostData['familySurname']) ? $registerPostData['familySurname'] : '',
-                    isset($registerPostData['famCode']) ? $registerPostData['famCode'] : ''
-                    ],
-                    'icon' => [
-                    '<i class="fas fa-user"></i>',
-                    '<i class="fas fa-user"></i>',
-                    '<i class="fas fa-home"></i>',
-                    '<i class="fas fa-barcode"></i>'
-                    ]
-                    ],
-                    'Date_of_Birth' => 'birthday',
-                    __('auth.contact_info', 'Contact Information') => 'title',
-                    'email_mobile' => [
-                    'mixed',
-                    'label' => [__('auth.email', 'Email'), __('global.country', 'Country'), __('auth.mobile', 'Mobile')],
-                    'attribute' => ['email', 'country', 'mobile'],
-                    'placeholder' => [__('auth.email_placeholder', 'e.g. alex@example.com'), __('global.select_country', 'Select Country'), __('auth.mobile_placeholder', 'e.g. +44 7123 456789 or local number')],
-                    'inputType' => ['email', 'select', 'text'],
-                    'value' => [
-                    isset($registerPostData['email']) ? $registerPostData['email'] : '',
-                    isset($registerPostData['country']) ? $registerPostData['country'] : '',
-                    isset($registerPostData['mobile']) ? $registerPostData['mobile'] : ''
-                    ],
-                    'options' => [
-                    [],
-                    ['United Kingdom','Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan', 'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo (Brazzaville)', 'Congo (Kinshasa)', 'Costa Rica', 'Côte d\'Ivoire', 'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'East Timor', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Fiji', 'Finland', 'France', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Greece', 'Grenada', 'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'North Korea', 'South Korea', 'Kosovo', 'Kuwait', 'Kyrgyzstan', 'Laos', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macedonia', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania', 'Mauritius', 'Mexico', 'Micronesia', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Qatar', 'Romania', 'Russia', 'Rwanda', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Sudan', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Swaziland', 'Sweden', 'Switzerland', 'Syria', 'Taiwan', 'Tajikistan', 'Tanzania', 'Thailand', 'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United States', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Vatican City', 'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'],
-                    []
-                    ],
-                    'icon' => [
-                    '<i class="fas fa-envelope-square"></i>',
-                    '<i class="fas fa-globe"></i>',
-                    '<i class="fas fa-mobile-alt"></i>',
-                    ]
-                    ]
-                    ];
-
-                    if (!isset($_SESSION['oauth_pending'])) {
-                    $formArray[__('auth.create_account', 'Create Your Account')] = 'title';
-                    $formArray['account'] = [
-                    'mixed',
-                    'label' => [__('auth.password', 'Password'), __('auth.confirm_password', 'Confirm Password')],
-                    'attribute' => ['password', 'confirm_password'],
-                    'placeholder' => ['xxxx', 'xxxx'],
-                    'inputType' => ['password', 'password'],
-                    'value' => [
-                    isset($registerPostData['password']) ? $registerPostData['password'] : '',
-                    isset($registerPostData['confirm_password']) ? $registerPostData['confirm_password'] : ''
-                    ],
-                    'icon' => [
-                    '<i class="fas fa-user-secret"></i>',
-                    '<i class="fas fa-user-secret"></i>',
-                    ]
-                    ];
-                    } else {
-                    echo '<input type="hidden" name="password" value="' . htmlspecialchars($registerPostData['password'] ?? '') . '">';
-                    echo '<input type="hidden" name="confirm_password" value="' . htmlspecialchars($registerPostData['confirm_password'] ?? '') . '">';
-                    }
-
-                    $form = new \Src\BuildFormBulma($formArray);
-                    $form->genForm();
-                    @endphp
-
-                    <!-- Inviter Verification Modal (shown when valid code entered) -->
-                    @include('components.auth.family-code-verification', ['errors' => $errors ?? []])
-
-                    <!-- Hidden inputs to track approval state. joining_via_invitation
-                         must reflect a *verified* invitation, not merely that the
-                         code exists, so the server creates the approval request. -->
-                    <input type="hidden" id="joining_via_invitation" :value="codeVerified ? 'true' : 'false'" name="joining_via_invitation">
-                    <input type="hidden" id="temporary_code" name="temporary_code" x-model="temporaryCode">
-
-                    {{-- Zero-Friction Honeypot Trap --}}
-                    <div style="display: none !important; position: absolute !important; left: -9999px !important;" aria-hidden="true">
-                        <input type="text" name="website_hp" tabindex="-1" autocomplete="off" value="">
-                    </div>
-
-                    <div class="field mt-4">
-                        <label class="checkbox">
-                            <input type="checkbox" name="checkbox" id="checkbox" required>
-                            By submitting this form, you agree to the handling of your information as outlined in our <a href="/privacy" class="text-decoration-none fw-bold" style="color: var(--brand-primary);">PRIVACY POLICY</a>
-                        </label>
-                        <div id="checkbox_error" class="help is-danger mt-1"></div>
-                    </div>
-
-                    <div class="field mt-5">
-                        <button type="submit" name="submit" id="btnSubmit" data-ready="true" class="button is-primary is-fullwidth">{{ __('auth.submit', 'Submit Form') }}</button>
-                    </div>
-                    <input type="hidden" name="token" id="token" value="{{ $_SESSION['token'] ?? '' }}">
-
-                </form>
-
-                <div id="modal-familyCode" class="modal glass-modal">
-                    <div class="modal-background glass-overlay"></div>
-                    <div class="modal-content glass-card">
-                        <div class="text-center mb-4">
-                            <img src="{{ getenv('APP_LOGO') }}" alt="logo" style="height: 48px;" class="mb-3 logo-glow">
-                            <h3 class="fw-bold premium-text">Create Your Family Code</h3>
-                            <p class="text-muted small">Create a unique code to invite your family members</p>
-                        </div>
-
-                        <div class="field mt-4">
-                            <div class="control glass-input-wrapper">
-                                <input type="text" id="surname" name="surname" class="input is-large glass-input" placeholder=" ">
-                                <label for="surname" class="glass-floating-label">Family Surname</label>
-                            </div>
-                            <div id="surname_error" class="help is-danger"></div>
-                        </div>
-
-                        <div class="field mt-4">
-                            <button name="btnFamCode" id="btnFamCode" type="button" class="button is-large is-fullwidth btn-gradient glow-effect">
-                                GENERATE CODE
-                            </button>
-                        </div>
-
-                        <div class="field mt-4 code-output-wrapper">
-                            <p class="text-muted small mb-2 text-center px-1 fw-bold" style="color: #4a5568;">Family Code</p>
-                            <div class="field mb-3" id="createFamCode">
-                                <input class="input is-large glass-code-input text-center fw-bold" type="text" id="createCode" placeholder="**CODE HERE**" readonly style="width: 100%;">
-                            </div>
-                            <div class="field">
-                                <button id="copyIcon" class="button is-large is-fullwidth btn-coral-glow fw-bold" type="button">
-                                    Copy Code <i class="far fa-copy ms-2"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="mt-4 text-center">
-                            <p class="text-muted small">Share this code with your family members so they can join your secure network.</p>
-                        </div>
-                    </div>
-                    <button type="button" id="modal-close-code" class="modal-close is-large" aria-label="close"></button>
+                    <label class="fpr-consent" for="checkbox">
+                        <input type="checkbox" name="checkbox" id="checkbox" required>
+                        <span>{{ __('reg.consent', 'I agree to FamilyPlatform handling my information as set out in the') }} <a href="/privacy" target="_blank" rel="noopener">{{ __('reg.privacy_policy', 'privacy policy') }}</a>.</span>
+                    </label>
+                    <p class="fpr-err" id="checkbox_error" role="alert"></p>
                 </div>
+            </section>
 
+            <!-- Hidden inputs to track approval state. joining_via_invitation
+                 must reflect a *verified* invitation, not merely that the
+                 code exists, so the server creates the approval request. -->
+            <input type="hidden" id="joining_via_invitation" :value="codeVerified ? 'true' : 'false'" name="joining_via_invitation">
+            <input type="hidden" id="temporary_code" name="temporary_code" x-model="temporaryCode">
 
-                @if (getenv('APP_ENV') === 'development' || getenv('APP_ENV') === 'local')
-                <script>
-                    document.addEventListener("DOMContentLoaded", function() {
-                        const dummyData = @json($registerPostData ?? []);
-                        for (const [name, val] of Object.entries(dummyData)) {
-                            const el = document.querySelector(`[name="${name}"]`);
-                            if (el && val !== null && val !== '') {
-                                el.value = val;
-                            }
-                        }
-                        const termsCheckbox = document.getElementById('checkbox');
-                        if (termsCheckbox) termsCheckbox.checked = true;
-                    });
-                </script>
-                @endif
+            {{-- Zero-Friction Honeypot Trap --}}
+            <div style="display: none !important; position: absolute !important; left: -9999px !important;" aria-hidden="true">
+                <input type="text" name="website_hp" tabindex="-1" autocomplete="off" value="">
+            </div>
 
-                <div class="mt-4 text-center">
-                    <p class="text-muted small">Already have an account? <a href="/login" class="fw-bold text-decoration-none" style="color: var(--brand-primary);">Log in</a></p>
-                </div>
+            <p class="fpr-note fpr-note--error" id="fprFormError" role="alert" hidden></p>
+            <div class="fpr-nav">
+                <button type="button" class="fpr-btn fpr-btn--ghost" id="fprBack" hidden><span class="fpr-ic" aria-hidden="true"><i class="fas fa-arrow-left"></i></span> {{ __('reg.back', 'Back') }}</button>
+                <button type="button" class="fpr-btn fpr-btn--primary" id="fprNext">{{ __('reg.continue', 'Continue') }} <span class="fpr-ic" aria-hidden="true"><i class="fas fa-arrow-right"></i></span></button>
+                <button type="submit" name="submit" id="btnSubmit" data-ready="true" class="fpr-btn fpr-btn--primary" hidden>{{ __('reg.submit', 'Create my account') }} <span class="fpr-ic" aria-hidden="true"><i class="fas fa-check"></i></span></button>
+            </div>
+            <input type="hidden" name="token" id="token" value="{{ $csrfValue }}">
+        </form>
+
+        <p class="fpr-foot">{{ __('reg.have_account', 'Already have an account?') }} <a href="/login">{{ __('reg.log_in', 'Log in') }}</a></p>
+    </main>
+</div>
+</div>
+
+{{-- Legacy "Generate family code" modal. No longer linked from the page (new
+     families get their code from the server on sign-up), but familyCode.js
+     binds to #btnFamCode / #copyIcon unguarded, so the markup must stay. --}}
+<div id="modal-familyCode" class="modal glass-modal">
+    <div class="modal-background glass-overlay"></div>
+    <div class="modal-content glass-card">
+        <div class="text-center mb-4">
+            <img src="{{ getenv('APP_LOGO') }}" alt="logo" style="height: 48px;" class="mb-3 logo-glow">
+            <h3 class="fw-bold premium-text">Create Your Family Code</h3>
+            <p class="text-muted small">Create a unique code to invite your family members</p>
+        </div>
+
+        <div class="field mt-4">
+            <div class="control glass-input-wrapper">
+                <input type="text" id="surname" name="surname" class="input is-large glass-input" placeholder=" ">
+                <label for="surname" class="glass-floating-label">Family Surname</label>
+            </div>
+            <div id="surname_error" class="help is-danger"></div>
+        </div>
+
+        <div class="field mt-4">
+            <button name="btnFamCode" id="btnFamCode" type="button" class="button is-large is-fullwidth btn-gradient glow-effect">
+                GENERATE CODE
+            </button>
+        </div>
+
+        <div class="field mt-4 code-output-wrapper">
+            <p class="text-muted small mb-2 text-center px-1 fw-bold" style="color: #4a5568;">Family Code</p>
+            <div class="field mb-3" id="createFamCode">
+                <input class="input is-large glass-code-input text-center fw-bold" type="text" id="createCode" placeholder="**CODE HERE**" readonly style="width: 100%;">
+            </div>
+            <div class="field">
+                <button id="copyIcon" class="button is-large is-fullwidth btn-coral-glow fw-bold" type="button">
+                    Copy Code <i class="far fa-copy ms-2"></i>
+                </button>
             </div>
         </div>
     </div>
+    <button type="button" id="modal-close-code" class="modal-close is-large" aria-label="close"></button>
 </div>
+
+@if (getenv('APP_ENV') === 'development' || getenv('APP_ENV') === 'local')
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const termsCheckbox = document.getElementById('checkbox');
+        if (termsCheckbox && @json(!empty($registerPostData['password']))) termsCheckbox.checked = true;
+    });
+</script>
+@endif
+
+@include('registration.include.registerSteps')
 @endsection

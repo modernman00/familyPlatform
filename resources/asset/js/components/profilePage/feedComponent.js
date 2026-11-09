@@ -100,9 +100,173 @@ export function profileFeed(opts = {}) {
         activeSpotlightPostNo: null,
         playingVoicePostNo: null,
         activeAudioInstance: null,
+        convertingStagePosts: {},
+        stagePickerOpen: {},
+        textStageCatalog: [
+            {
+                slug: 'dynasty_holo',
+                shortLabel: 'Dynasty Tree',
+                label: '🌳 Dynasty Tree',
+                badge: '🌳 DYNASTY LINEAGE CALL',
+                icon: 'bi-diagram-3-fill',
+                accent: '#34d399',
+            },
+            {
+                slug: 'cyber_glass',
+                shortLabel: '3D Holo',
+                label: '🔮 3D Holo Glass',
+                badge: '🔮 3D HOLOGRAM STAGE',
+                icon: 'bi-layers-half',
+                accent: '#38bdf8',
+            },
+            {
+                slug: 'alert_pulse',
+                shortLabel: 'Alert Trigger',
+                label: '🚨 Alert Trigger',
+                badge: '🚨 FAMILY ALERT TRIGGER',
+                icon: 'bi-broadcast-pin',
+                accent: '#fce79a',
+            },
+            {
+                slug: 'grand_announcement',
+                shortLabel: 'Announcement',
+                label: '📣 Announcement',
+                badge: '📣 OFFICIAL BROADCAST',
+                icon: 'bi-megaphone-fill',
+                accent: '#fbbf24',
+            },
+            {
+                slug: 'aurora_prism',
+                shortLabel: 'Aurora Prism',
+                label: '🌌 Aurora Prism',
+                badge: '🌌 FUTURISTIC PRISM',
+                icon: 'bi-stars',
+                accent: '#e879f9',
+            },
+            {
+                slug: 'heirloom_velvet',
+                shortLabel: 'Royal Velvet',
+                label: '🏛️ Royal Velvet',
+                badge: '🏛️ HEIRLOOM DECREE',
+                icon: 'bi-award-fill',
+                accent: '#fde68a',
+            },
+        ],
         csrfOptions: {
             xsrfCookieName: 'XSRF-TOKEN',
             xsrfHeaderName: 'X-XSRF-TOKEN',
+        },
+
+        extractPostStyle(rawText, explicitStyle = null) {
+            const allowed = new Set(this.textStageCatalog.map(s => s.slug));
+            if (explicitStyle && typeof explicitStyle === 'string') {
+                const clean = explicitStyle.trim().toLowerCase();
+                if (allowed.has(clean)) return clean;
+            }
+            if (!rawText || typeof rawText !== 'string') return null;
+            const m = rawText.match(/\[style:([a-z0-9_]+)\]/i);
+            if (m && m[1]) {
+                const candidate = m[1].toLowerCase();
+                if (allowed.has(candidate)) return candidate;
+            }
+            return null;
+        },
+
+        stripStyleToken(text) {
+            if (!text || typeof text !== 'string') return '';
+            return text.replace(/\[style:[a-z0-9_]+\]\s*/gi, '').trim();
+        },
+
+        getPostStageMeta(post) {
+            const slug = post?.post_style || this.extractPostStyle(post?.postMessage, post?.post_style);
+            if (!slug) return null;
+            return this.textStageCatalog.find(s => s.slug === slug) || null;
+        },
+
+        hasFamilyTreeCall(post) {
+            const text = String(post?.displayMessage || post?.postMessage || '').toLowerCase();
+            return (
+                text.includes('family tree')
+                || text.includes('adding your branch')
+                || text.includes('add your branch')
+                || text.includes('organogram')
+                || post?.post_style === 'dynasty_holo'
+            );
+        },
+
+        toggleStagePicker(postNo) {
+            if (!postNo) return;
+            this.stagePickerOpen[postNo] = !this.stagePickerOpen[postNo];
+        },
+
+        async setPostStage(post, styleSlug, ev = null) {
+            if (!post || !post.post_no || this.convertingStagePosts[post.post_no]) return;
+            const prevStyle = post.post_style || null;
+            const prevMsg = post.postMessage || '';
+            const cleanSlug = (!styleSlug || styleSlug === 'none') ? null : String(styleSlug).toLowerCase();
+
+            // Optimistic UI update
+            post.post_style = cleanSlug;
+            const stripped = this.stripStyleToken(prevMsg);
+            post.postMessage = cleanSlug ? `[style:${cleanSlug}] ${stripped}` : stripped;
+            post.displayMessage = this.getMediaCaption(post);
+            this.convertingStagePosts[post.post_no] = true;
+
+            if (typeof window.triggerHaptic === 'function') {
+                window.triggerHaptic('impact');
+            }
+
+            try {
+                const res = await axios.put(
+                    `/post/${post.post_no}`,
+                    { post_style: cleanSlug || 'none' },
+                    this.csrfOptions
+                );
+                const payload = (res?.data?.message && typeof res.data.message === 'object')
+                    ? res.data.message
+                    : res?.data;
+                if (payload?.post_style !== undefined) {
+                    post.post_style = payload.post_style || null;
+                }
+                if (payload?.postMessage) {
+                    post.postMessage = this.decodeHtml(payload.postMessage);
+                    post.displayMessage = this.getMediaCaption(post);
+                }
+                const meta = this.getPostStageMeta(post);
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: meta ? `Converted to ${meta.label}` : 'Reverted to standard text post',
+                    showConfirmButton: false,
+                    timer: 2200
+                });
+            } catch (err) {
+                console.error('Failed to convert post stage:', err);
+                post.post_style = prevStyle;
+                post.postMessage = prevMsg;
+                post.displayMessage = this.getMediaCaption(post);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Stage Conversion Failed',
+                    text: err?.response?.data?.message || 'Unable to update post design right now.',
+                    confirmButtonColor: '#a31621'
+                });
+            } finally {
+                this.convertingStagePosts[post.post_no] = false;
+            }
+        },
+
+        async cyclePostStage(post, ev = null) {
+            if (!post || !post.post_no) return;
+            const order = this.hasFamilyTreeCall(post)
+                ? ['dynasty_holo', 'cyber_glass', 'alert_pulse', 'grand_announcement', 'aurora_prism', 'heirloom_velvet']
+                : ['cyber_glass', 'alert_pulse', 'grand_announcement', 'dynasty_holo', 'aurora_prism', 'heirloom_velvet'];
+            const current = post.post_style || null;
+            const idx = current ? order.indexOf(current) : -1;
+            const nextSlug = order[(idx + 1) % order.length];
+            this.stagePickerOpen[post.post_no] = true;
+            await this.setPostStage(post, nextSlug, ev);
         },
 
         // Living Heirloom Glass 3D Emoji Map
@@ -510,6 +674,7 @@ export function profileFeed(opts = {}) {
                 post_tags: Array.isArray(p?.post_tags) ? p.post_tags : [],
                 views_count: parseInt(p?.views_count || 0, 10),
                 voice_capsule_url: p?.voice_capsule_url || null,
+                post_style: this.extractPostStyle(cleanMsg, p?.post_style),
                 ar_emoji: p?.ar_emoji || (() => {
                     const m = cleanMsg.match(/:([a-z0-9_]+_3d):/i);
                     return m ? m[1] : null;
@@ -795,6 +960,9 @@ export function profileFeed(opts = {}) {
                 : String(post.postMessage || '');
 
             if (!text.trim()) return '';
+
+            // Strip embedded 3D text stage style tokens
+            text = text.replace(/\[style:[a-z0-9_]+\]\s*/gi, '');
 
             // Strip photo service links
             text = text.replace(/https?:\/\/(?:photos\.app\.goo\.gl|photos\.google\.com)\/[^\s<>"']+/gi, '');
@@ -1693,8 +1861,17 @@ export function profileFeed(opts = {}) {
             const notice = document.getElementById('editPostNotice');
             if (!postNoInput || !textarea) return;
 
+            const currentStyle = post?.post_style || this.extractPostStyle(post?.postMessage, post?.post_style) || '';
+            const styleInput = document.getElementById('composerPostStyleInput');
+            if (styleInput) {
+                styleInput.value = currentStyle;
+            }
+            if (typeof window.__setComposerTextStage === 'function') {
+                window.__setComposerTextStage(currentStyle);
+            }
+
             postNoInput.value = post.post_no;
-            textarea.value = this.decodeHtml(post.postMessage || '');
+            textarea.value = this.stripStyleToken(this.decodeHtml(post.postMessage || ''));
             if (notice) notice.classList.remove('d-none');
 
             const modalTitle = document.getElementById('postModalLabel');
@@ -2541,13 +2718,18 @@ export function profileFeed(opts = {}) {
             // Dispatched by allEvents.js after a successful post edit (the acting
             // user's own tab — other tabs get it via the update-post Pusher bind).
             window.addEventListener('post-updated', (event) => {
-                const { postNo, postMessage, link_preview } = event?.detail || {};
+                const { postNo, postMessage, post_style, link_preview } = event?.detail || {};
                 const post = this.posts.find(p => String(p.post_no) === String(postNo));
                 if (post) {
-                    post.postMessage = postMessage;
-                    post.videos = extractVideosFromText(postMessage || '', 3);
+                    const effectiveStyle = post_style !== undefined
+                        ? this.extractPostStyle(postMessage, post_style === 'none' ? null : post_style)
+                        : this.extractPostStyle(postMessage, post.post_style);
+                    post.post_style = effectiveStyle;
+                    const stripped = this.stripStyleToken(postMessage ?? post.postMessage ?? '');
+                    post.postMessage = effectiveStyle ? `[style:${effectiveStyle}] ${stripped}` : stripped;
+                    post.videos = extractVideosFromText(post.postMessage || '', 3);
                     post.video = post.videos.length > 0 ? post.videos[0] : null;
-                    post.displayMessage = this.normalizeEmojiText(cleanPostMessage(postMessage || '', post.videos));
+                    post.displayMessage = this.normalizeEmojiText(cleanPostMessage(post.postMessage || '', post.videos));
                     this.observeFeedVideos();
                     if (link_preview !== undefined) {
                         post.link_preview = link_preview;
@@ -3252,7 +3434,8 @@ export function profileFeed(opts = {}) {
                 channel.bind('update-post', (data) => {
                     const post = this.posts.find(p => String(p.post_no) === String(data?.postNo));
                     if (post) {
-                        post.postMessage = data?.postMessage ?? post.postMessage;
+                        post.postMessage = this.decodeHtml(data?.postMessage ?? post.postMessage);
+                        post.post_style = this.extractPostStyle(post.postMessage, data?.post_style);
                         post.displayMessage = this.normalizeEmojiText(cleanPostMessage(post.postMessage || '', extractVideoFromText(post.postMessage)));
                         post.video = extractVideoFromText(post.postMessage);
                         if (data?.link_preview !== undefined) {
@@ -3336,6 +3519,7 @@ if (typeof window !== 'undefined') {
 
         if (!text.trim()) return '';
 
+        text = text.replace(/\[style:[a-z0-9_]+\]\s*/gi, '');
         text = text.replace(/https?:\/\/(?:photos\.app\.goo\.gl|photos\.google\.com)\/[^\s<>"']+/gi, '');
         text = text.replace(/https?:\/\/(?:www\.)?(?:icloud\.com\/photos|i\.imgur\.com|imgur\.com|ibb\.co|postimg\.cc)\/[^\s<>"']+/gi, '');
         text = text.replace(/https?:\/\/[^\s<>"']+\.(?:jpe?g|png|webp|avif|gif)(?:\?[^\s<>"']*)?/gi, '');

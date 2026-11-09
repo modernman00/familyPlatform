@@ -99,6 +99,12 @@
             <template x-if="isOwnPost(post)">
               <div>
                 <li>
+                  <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" style="min-height: 44px;" @click.prevent="cyclePostStage(post, $event)">
+                    <i class="bi bi-stars text-warning"></i>
+                    <span x-text="post.post_style ? 'Switch 3D Stage Design' : 'Convert to 3D Stage'"></span>
+                  </a>
+                </li>
+                <li>
                   <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" style="min-height: 44px;" @click.prevent="editPost(post)">
                     <i class="bi bi-pencil-square text-primary"></i> {{ __('feed.edit_post', 'Edit Post') }}
                   </a>
@@ -166,11 +172,100 @@
 
 
 
-  <!-- Post Text (Prominent for Text-Only Posts) -->
+  <!-- Post Text (Prominent for Text-Only Posts & 3D Futuristic Translucent Stage Cards) -->
   <template x-if="!post.two_truths && (getMediaCaption(post) || post.ar_emoji) && (!post.images || post.images.length === 0) && !post.video && (!post.videos || post.videos.length === 0) && !post.comparison">
     <div class="post-content px-1 mb-3">
-      <p class="mb-0" style="white-space: pre-line; font-size: 1.05rem; color: var(--text-main); line-height: 1.55; font-family: var(--font-sans, -apple-system, system-ui, sans-serif);" x-html="renderHashtags(getMediaCaption(post), post.ar_emoji)"></p>
-      
+      <!-- 1. 3D Futuristic & Translucent Stage Card (when post_style is active) -->
+      <template x-if="getPostStageMeta(post)">
+        <div class="fp-text-stage" :class="'fp-text-stage--' + post.post_style" data-testid="feed-text-stage-card">
+          <div class="fp-text-stage__orb fp-text-stage__orb--a" aria-hidden="true"></div>
+          <div class="fp-text-stage__orb fp-text-stage__orb--b" aria-hidden="true"></div>
+          <div class="fp-text-stage__grid" aria-hidden="true"></div>
+
+          <div class="fp-text-stage__header">
+            <span class="fp-stage-badge">
+              <template x-if="post.post_style === 'alert_pulse'">
+                <span class="fp-stage-badge__pulse" aria-hidden="true"></span>
+              </template>
+              <span x-text="getPostStageMeta(post).badge"></span>
+            </span>
+          </div>
+
+          <div class="fp-text-stage__body"
+               :class="(getMediaCaption(post) || '').length <= 95 ? 'fp-text-stage__body--hero' : 'fp-text-stage__body--prose'"
+               x-html="renderHashtags(getMediaCaption(post), post.ar_emoji)"></div>
+
+          <!-- Smart Contextual Family Tree Action Trigger inside 3D Stage -->
+          <template x-if="hasFamilyTreeCall(post)">
+            <div class="fp-text-stage__footer">
+              <a href="/organogram" class="fp-text-stage__cta">
+                <i class="bi bi-diagram-3-fill"></i>
+                <span>Add Your Branch to Family Tree</span>
+                <i class="bi bi-arrow-right-short" style="font-size: 1.25rem;"></i>
+              </a>
+            </div>
+          </template>
+        </div>
+      </template>
+
+      <!-- 2. Standard Plain Text Post (when post_style is not set) -->
+      <template x-if="!getPostStageMeta(post)">
+        <div>
+          <p class="mb-0" style="white-space: pre-line; font-size: 1.05rem; color: var(--text-main); line-height: 1.55; font-family: var(--font-sans, -apple-system, system-ui, sans-serif);" x-html="renderHashtags(getMediaCaption(post), post.ar_emoji)"></p>
+          <template x-if="hasFamilyTreeCall(post)">
+            <div class="mt-2.5">
+              <a href="/organogram" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1.5 px-3 py-1.5 shadow-2xs" style="background: linear-gradient(135deg, #065f46 0%, #059669 100%); color: #ffffff !important; min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                <i class="bi bi-diagram-3-fill"></i>
+                <span>Add Your Branch to Family Tree</span>
+                <i class="bi bi-arrow-right-short"></i>
+              </a>
+            </div>
+          </template>
+        </div>
+      </template>
+
+      <!-- 3. Retroactive 1-Tap In-Feed 3D Stage Converter Bar (Author Only) -->
+      <template x-if="isOwnPost(post)">
+        <div class="fp-stage-converter mt-2.5" data-testid="infeed-stage-converter">
+          <div class="fp-stage-converter__row">
+            <button type="button"
+                    class="fp-stage-converter__trigger"
+                    :disabled="!!convertingStagePosts[post.post_no]"
+                    @click.stop="cyclePostStage(post, $event)"
+                    title="One-tap convert this post into a 3D futuristic stage">
+              <template x-if="convertingStagePosts[post.post_no]">
+                <span class="spinner-border spinner-border-sm" role="status" style="width: 13px; height: 13px; border-width: 2px;"></span>
+              </template>
+              <template x-if="!convertingStagePosts[post.post_no]">
+                <i class="bi bi-magic"></i>
+              </template>
+              <span x-text="post.post_style ? '✨ Next 3D Stage' : '✨ Convert to 3D Stage'"></span>
+            </button>
+
+            <template x-for="st in textStageCatalog" :key="st.slug">
+              <button type="button"
+                      class="fp-stage-converter__chip"
+                      :class="post.post_style === st.slug ? 'is-active' : ''"
+                      :disabled="!!convertingStagePosts[post.post_no]"
+                      @click.stop="setPostStage(post, st.slug, $event)"
+                      :title="'Convert post to ' + st.label">
+                <span x-text="st.label"></span>
+              </button>
+            </template>
+
+            <template x-if="post.post_style">
+              <button type="button"
+                      class="fp-stage-converter__chip fp-stage-converter__chip--reset"
+                      :disabled="!!convertingStagePosts[post.post_no]"
+                      @click.stop="setPostStage(post, 'none', $event)"
+                      title="Revert to plain text">
+                <span>Plain</span>
+              </button>
+            </template>
+          </div>
+        </div>
+      </template>
+
       <!-- Active Translation Status Pill (Only Visible Once User Requested Translation) -->
       <div class="mt-1.5 d-flex align-items-center gap-2" x-show="post._isTranslated || post._isTranslating" x-cloak>
         <span class="badge bg-light text-muted border d-inline-flex align-items-center gap-1.5 py-1 px-2" style="font-size: 0.78rem; font-weight: 500;">

@@ -346,6 +346,16 @@ final class ProfilePage extends ProcessImg
                 $arEmoji = null;
             }
 
+            // Read 3D Futuristic Text Stage style slug (RFC-0014)
+            $postStyle = \App\dto\PostDto::cleanPostStyle($_POST['post_style'] ?? null)
+                ?? \App\dto\PostDto::extractStyleFromMessage($cleanMultiLineMessage);
+            unset($_POST['post_style'], $_REQUEST['post_style']);
+            if ($postStyle !== null) {
+                $cleanMultiLineMessage = \App\dto\PostDto::embedStyleToken($cleanMultiLineMessage, $postStyle);
+            } else {
+                $cleanMultiLineMessage = \App\dto\PostDto::stripStyleToken($cleanMultiLineMessage);
+            }
+
             $resolvedFullName = trim(($_SESSION['fName'] ?? '') . ' ' . ($_SESSION['lName'] ?? ''));
             if ($resolvedFullName === '') {
                 $pStmt = \Src\Db::connect2()->prepare("SELECT CONCAT(TRIM(COALESCE(firstName, '')), ' ', TRIM(COALESCE(lastName, ''))) as name FROM personal WHERE id = ? LIMIT 1");
@@ -375,7 +385,7 @@ final class ProfilePage extends ProcessImg
                 'attached_gif_url', 'attached_video_url', 'attached_video_urls', 'tagged_user_ids', 'shared_temp_images',
                 'then_now', 'then_label', 'now_label', 'reply_to_post',
                 'comparison_mode', 'mystery_year', 'then_now_voice_base64',
-                'attached_ar_emoji', 'target_scope', 'target_fam_code',
+                'attached_ar_emoji', 'target_scope', 'target_fam_code', 'post_style',
                 'submit', 'button'
             ];
             if ($arEmoji === null) {
@@ -396,7 +406,7 @@ final class ProfilePage extends ProcessImg
                     'postFamCode', 'profileImg',
                     'then_now', 'then_label', 'now_label', 'reply_to_post',
                     'comparison_mode', 'mystery_year', 'then_now_voice_base64',
-                    'ar_emoji', 'attached_ar_emoji',
+                    'ar_emoji', 'attached_ar_emoji', 'post_style',
                     'target_scope', 'target_fam_code'
                 ]
             );
@@ -467,6 +477,9 @@ final class ProfilePage extends ProcessImg
                 }
 
                 // Preserve multi-line captions with photo/video links stripped (even if empty, ensure raw media link is not retained)
+                if ($postStyle !== null) {
+                    $cleanMultiLineMessage = \App\dto\PostDto::embedStyleToken($cleanMultiLineMessage, $postStyle);
+                }
                 (new \Src\Update('post'))->updateTable(
                     column: 'postMessage',
                     columnAnswer: $cleanMultiLineMessage,
@@ -664,6 +677,7 @@ final class ProfilePage extends ProcessImg
                         'date_deleted'
                     ]));
                     $newPost['ar_emoji'] = $arEmoji ?: ($newPost['ar_emoji'] ?? null);
+                    $newPost['post_style'] = $postStyle ?: ($newPost['post_style'] ?? null);
                     if (empty($newPost['link_preview'])) {
                         if (
                             !empty($extractedMedia['preview'])

@@ -29,6 +29,7 @@ sessionStorage.removeItem('fromForgot');
 if (redirectTo === '/profilePage') {
   try {
     localStorage.removeItem('redirect');
+    sessionStorage.removeItem('pwa_prompt_shown_session');
   } catch (e) {}
 }
 

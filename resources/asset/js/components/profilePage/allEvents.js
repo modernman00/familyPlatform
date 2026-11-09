@@ -67,6 +67,9 @@ try {
             if (typeof window.__resetVideoBuilder === 'function') {
                 window.__resetVideoBuilder();
             }
+            if (typeof window.__resetTextStageBuilder === 'function') {
+                window.__resetTextStageBuilder();
+            }
         });
     }
 
@@ -207,19 +210,33 @@ try {
                 // Editing is text-only, so it goes as JSON to a PUT endpoint rather
                 // than the multipart POST the create flow uses (images/poll aren't
                 // part of the edit payload — see PostMessage::updatePost).
+                const selectedStageStyle = document.getElementById('composerPostStyleInput')?.value || '';
                 const response = isEditing
-                    ? await axios.put(`/post/${editPostNo}`, { postMessage: id('postMessage').value }, options)
+                    ? await axios.put(`/post/${editPostNo}`, {
+                        postMessage: id('postMessage').value,
+                        post_style: selectedStageStyle || 'none',
+                    }, options)
                     : await axios.post("/member/profilePage/post", formData, options);
 
                 // Defensive check on response data
                 if (response?.data?.status === 'success' || response?.status === 200) {
                     if (isEditing) {
+                        const editPayload = (response?.data?.message && typeof response.data.message === 'object')
+                            ? response.data.message
+                            : response?.data;
                         window.dispatchEvent(new CustomEvent('post-updated', {
-                            detail: { postNo: editPostNo, postMessage: id('postMessage').value }
+                            detail: {
+                                postNo: editPostNo,
+                                postMessage: editPayload?.postMessage || id('postMessage').value,
+                                post_style: editPayload?.post_style !== undefined ? editPayload.post_style : (selectedStageStyle || null),
+                            }
                         }));
 
                         closePostModal();
                         formExtra.reset();
+                        if (typeof window.__resetTextStageBuilder === 'function') {
+                            window.__resetTextStageBuilder();
+                        }
 
                         Swal.fire({
                             toast: true,
@@ -266,6 +283,9 @@ try {
                     }
                     if (typeof window.__resetVideoBuilder === 'function') {
                         window.__resetVideoBuilder();
+                    }
+                    if (typeof window.__resetTextStageBuilder === 'function') {
+                        window.__resetTextStageBuilder();
                     }
                     const addOptBtn = document.getElementById('addPollOptionBtn');
                     if (addOptBtn) addOptBtn.style.display = '';

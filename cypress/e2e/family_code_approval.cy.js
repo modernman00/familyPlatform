@@ -43,16 +43,16 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
   };
 
   // Fill the inviter fields and submit. Sets the x-model values directly so the
-  // "Verify & Continue" button (disabled until all three are non-empty) enables.
+  // "Check and continue" button (disabled until all three are non-empty) enables.
   const verifyInviter = ({ firstName, lastName, contact }) => {
-    cy.get('#inviter-verification-modal', { timeout: 15000 }).should('be.visible');
+    cy.get('#inviter-check', { timeout: 15000 }).should('be.visible');
     alpineData().then((data) => {
       data.inviterFirstName = firstName;
       data.inviterLastName = lastName;
       data.inviterContact = contact;
     });
     cy.get('#inviter_first_name').should('have.value', firstName);
-    cy.get('#inviter-verification-modal').contains('button', 'Verify & Continue').click();
+    cy.get('#inviter-check').contains('button', 'Check and continue').click();
   };
 
   describe('Registration with Existing Family Code', () => {
@@ -68,7 +68,7 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
       enterFamilyCode('FAKE9999');
 
       // Should not show inviter form for invalid code
-      cy.get('#inviter-verification-modal', { timeout: 3000 }).should('not.be.visible');
+      cy.get('#inviter-check', { timeout: 3000 }).should('not.be.visible');
     });
 
     it('should show inviter verification form when valid code entered', () => {
@@ -84,8 +84,8 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
         enterFamilyCode(validCode);
 
         // Wait for AJAX validation
-        cy.get('#inviter-verification-modal', { timeout: 8000 }).should('be.visible');
-        cy.get('#inviter-verification-modal').contains('Verify Your Invitation').should('be.visible');
+        cy.get('#inviter-check', { timeout: 8000 }).should('be.visible');
+        cy.get('#inviter-check').contains('Who invited you?').should('be.visible');
         cy.get('#inviter_first_name').should('be.visible');
         cy.get('#inviter_last_name').should('be.visible');
         cy.get('#inviter_contact').should('be.visible');
@@ -117,7 +117,7 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
         verifyInviter({ firstName: inviter.firstName, lastName: inviter.lastName, contact: inviter.email });
 
         // Should show verified badge
-        cy.get('#inviter-verification-modal').contains('Invitation Verified', { timeout: 8000 }).should('be.visible');
+        cy.get('#inviter-verified', { timeout: 8000 }).should('be.visible').and('contain', 'Invitation confirmed');
       });
     });
   });
@@ -139,8 +139,8 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
         enterFamilyCode(validCode);
         verifyInviter({ firstName: inviter.firstName, lastName: inviter.lastName, contact: inviter.email });
 
-        // Modal auto-closes after verification (~1.6s)
-        cy.get('#inviter-verification-modal', { timeout: 10000 }).should('not.be.visible');
+        // The inline inviter panel hides once the inviter is verified.
+        cy.get('#inviter-check', { timeout: 10000 }).should('not.be.visible');
 
         cy.get('#joining_via_invitation').should('have.value', 'true');
         cy.get('#temporary_code').invoke('val').should('match', /.+/);
@@ -416,7 +416,7 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
         cy.intercept('POST', '/api/family-code/check', { body: { exists: true, temporary_code: validCode } }).as('codeCheck');
 
         cy.wrap(null).then(() => enterFamilyCode(validCode)).then(() => {
-          cy.get('#inviter-verification-modal', { timeout: 8000 }).should('be.visible');
+          cy.get('#inviter-check', { timeout: 8000 }).should('be.visible');
           // All fields should be visible and not hidden
           cy.get('#inviter_first_name').should('be.visible');
           cy.get('#inviter_last_name').should('be.visible');
@@ -450,12 +450,12 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
         cy.intercept('POST', '/api/family-code/verify-inviter', { delay: 1000, body: { verified: true } }).as('inviterCheck');
 
         cy.wrap(null).then(() => enterFamilyCode(validCode)).then(() => {
-          cy.get('#inviter-verification-modal', { timeout: 8000 }).should('be.visible');
+          cy.get('#inviter-check', { timeout: 8000 }).should('be.visible');
           verifyInviter({ firstName: inviter.firstName, lastName: inviter.lastName, contact: inviter.email });
           // Button should show loading state
-          cy.get('#inviter-verification-modal').contains('Verifying').should('be.visible');
+          cy.get('#inviter-check').contains('Checking').should('be.visible');
           cy.wait('@inviterCheck');
-          cy.get('#inviter-verification-modal').contains('Invitation Verified', { timeout: 8000 }).should('be.visible');
+          cy.get('#inviter-verified', { timeout: 8000 }).should('be.visible').and('contain', 'Invitation confirmed');
         });
       });
     });

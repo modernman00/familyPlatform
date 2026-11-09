@@ -144,6 +144,20 @@ module.exports = defineConfig({
             await connection.end();
           }
         },
+        // Register v2 spec: look up the account a UI sign-up just created so
+        // cleanupE2EUsers can remove it again.
+        async findRegisteredUser(email) {
+          const connection = await connectDb();
+          try {
+            const [rows] = await connection.execute(
+              'SELECT a.id, a.email, p.famCode FROM account a LEFT JOIN personal p ON p.id = a.id WHERE a.email = ? LIMIT 1',
+              [email]
+            );
+            return rows[0] ? { id: String(rows[0].id), email: rows[0].email, famCode: rows[0].famCode || '' } : null;
+          } finally {
+            await connection.end();
+          }
+        },
         async cleanupE2EUsers(users) {
           if (!Array.isArray(users) || users.length === 0) return null;
           const ids = users.map((u) => u.id);
