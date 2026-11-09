@@ -12,15 +12,15 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="{{ $card['headline'] }} ✨">
     <meta property="og:description" content="A warm festive greeting from {{ $card['sender_name'] }}. Tap to open your family envelope.">
-    <meta property="og:image" content="{{ $card['image_url'] }}">
+    <meta property="og:image" content="{{ $card['absolute_image_url'] ?? $card['image_url'] }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:url" content="{{ $card['public_url'] }}">
+    <meta property="og:url" content="{{ $card['absolute_public_url'] ?? $card['public_url'] }}">
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ $card['headline'] }} ✨">
     <meta name="twitter:description" content="A warm festive greeting from {{ $card['sender_name'] }}.">
-    <meta name="twitter:image" content="{{ $card['image_url'] }}">
+    <meta name="twitter:image" content="{{ $card['absolute_image_url'] ?? $card['image_url'] }}">
 
     <link rel="icon" href="/favicon.ico">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -407,7 +407,7 @@
                     @endif
 
                     <!-- Share / Download Action Pill Strip -->
-                    <div class="d-flex justify-content-center align-items-center gap-2 mt-4 pt-2">
+                    <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 mt-4 pt-2">
                         <button type="button" 
                                 class="btn btn-outline-light rounded-pill px-3 py-2 btn-sm fw-semibold d-inline-flex align-items-center gap-2"
                                 @click="shareCard()"
@@ -421,6 +421,12 @@
                            style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
                             <i class="bi bi-download"></i>
                             <span>Save Image</span>
+                        </a>
+                        <a href="/register?ref=festive_{{ $card['share_token'] }}@if(!empty($card['fam_code']))&famCode={{ preg_replace('/^#+/', '', $card['fam_code']) }}@endif" 
+                           class="btn rounded-pill px-3 py-2 btn-sm fw-bold d-inline-flex align-items-center gap-2 text-white shadow-sm"
+                           style="background: var(--theme-accent, #f59e0b); min-height: 44px; white-space: nowrap; flex-shrink: 0;">
+                            <i class="bi bi-reply-fill"></i>
+                            <span>Reply with a Card</span>
                         </a>
                     </div>
                 </div>
@@ -439,7 +445,7 @@
             <h5 class="text-white fw-bold mb-3" style="font-size: 1.15rem;">
                 Send your own family’s festive greetings or build your 7-generation ancestral tree.
             </h5>
-            <a href="/register?ref=festive_{{ $card['share_token'] }}" class="btn-viral-cta">
+            <a href="/register?ref=festive_{{ $card['share_token'] }}@if(!empty($card['fam_code']))&famCode={{ preg_replace('/^#+/', '', $card['fam_code']) }}@endif" class="btn-viral-cta">
                 <i class="bi bi-stars fs-5"></i>
                 <span>Create Your Family’s Free Festive Card</span>
                 <i class="bi bi-arrow-right"></i>

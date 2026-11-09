@@ -176,7 +176,7 @@ final class FestiveCardController
 
         if (!$card) {
             http_response_code(404);
-            view('error/404');
+            view('errors.404');
             return;
         }
 

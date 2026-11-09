@@ -142,11 +142,8 @@ class AutonomousBlogService
             ];
         }
 
-        // 5. HTML purification
-        $content = strip_tags(
-            $draft['content'],
-            '<h3><h4><h5><h6><p><ul><ol><li><strong><b><em><i><blockquote><br><hr><div><span><a>'
-        );
+        // 5. Dual-Boundary HTML purification
+        $content = self::purifyHtml($draft['content']);
 
         $safeTitle = htmlspecialchars_decode(strip_tags($draft['title']), ENT_QUOTES);
         $safeSummary = htmlspecialchars_decode(strip_tags($draft['summary']), ENT_QUOTES);
@@ -239,5 +236,83 @@ class AutonomousBlogService
         }
 
         return $slug . '-' . time();
+    }
+
+    /**
+     * Enterprise HTML purifier: strips disallowed tags and sanitizes attributes
+     * to eliminate Stored XSS, protocol injection, and dangerous event handlers.
+     */
+    public static function purifyHtml(string $rawHtml): string
+    {
+        $allowedTags = '<h3><h4><h5><h6><p><ul><ol><li><strong><b><em><i><blockquote><br><hr><a>';
+        $stripped = strip_tags($rawHtml, $allowedTags);
+
+        if (trim($stripped) === '') {
+            return '';
+        }
+
+        $dom = new \DOMDocument();
+        $libxmlState = libxml_use_internal_errors(true);
+        $htmlWithEncoding = '<?xml encoding="utf-8" ?><div>' . $stripped . '</div>';
+        $dom->loadHTML($htmlWithEncoding, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+        libxml_use_internal_errors($libxmlState);
+
+        $xpath = new \DOMXPath($dom);
+        $elements = $xpath->query('//*');
+
+        if ($elements !== false) {
+            /** @var \DOMElement $el */
+            foreach ($elements as $el) {
+                if ($el->tagName === 'div' && $el->parentNode === null) {
+                    continue;
+                }
+
+                $attrsToRemove = [];
+                if ($el->hasAttributes()) {
+                    foreach ($el->attributes as $attr) {
+                        $attrName = strtolower($attr->name);
+                        if (str_starts_with($attrName, 'on') || in_array($attrName, ['style', 'id', 'class', 'src', 'formaction', 'srcset', 'data'], true)) {
+                            $attrsToRemove[] = $attr->name;
+                            continue;
+                        }
+
+                        if ($el->tagName === 'a') {
+                            if ($attrName === 'href') {
+                                $href = trim($attr->value);
+                                if (preg_match('/^(javascript|data|vbscript|file):/i', $href) || !preg_match('#^(https?://|/[a-zA-Z0-9_\-\./%#?&=]+)#i', $href)) {
+                                    $attrsToRemove[] = $attr->name;
+                                }
+                            } else {
+                                $attrsToRemove[] = $attr->name;
+                            }
+                        } else {
+                            $attrsToRemove[] = $attr->name;
+                        }
+                    }
+
+                    foreach ($attrsToRemove as $badAttr) {
+                        $el->removeAttribute($badAttr);
+                    }
+                }
+
+                if ($el->tagName === 'a' && $el->hasAttribute('href')) {
+                    $el->setAttribute('target', '_blank');
+                    $el->setAttribute('rel', 'noopener noreferrer');
+                }
+            }
+        }
+
+        $rootDiv = $dom->getElementsByTagName('div')->item(0);
+        if (!$rootDiv) {
+            return $stripped;
+        }
+
+        $cleanHtml = '';
+        foreach ($rootDiv->childNodes as $child) {
+            $cleanHtml .= $dom->saveHTML($child);
+        }
+
+        return $cleanHtml;
     }
 }

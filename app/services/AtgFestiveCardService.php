@@ -354,7 +354,14 @@ final class AtgFestiveCardService
         }
 
         $heroPhotoUrl = trim((string)($data['hero_photo_url'] ?? ''));
+        if ($heroPhotoUrl !== '' && !preg_match('#^/resources/[a-zA-Z0-9_\-\./]+$#', $heroPhotoUrl)) {
+            $heroPhotoUrl = '';
+        }
+
         $audioVoiceUrl = trim((string)($data['audio_voice_url'] ?? ''));
+        if ($audioVoiceUrl !== '' && !preg_match('#^/resources/[a-zA-Z0-9_\-\./]+$#', $audioVoiceUrl)) {
+            $audioVoiceUrl = '';
+        }
 
         // Generate 128-bit cryptographically secure UUID and public share token
         $uuid = bin2hex(random_bytes(16));
@@ -386,19 +393,37 @@ final class AtgFestiveCardService
         ]);
 
         $cardId = (int)$this->db->lastInsertId();
+        $appUrl = rtrim((string)($_ENV['APP_URL'] ?? (getenv('APP_URL') ?: 'https://familyplatform.com')), '/');
 
-        return [
+        $cardPayload = [
             'id' => $cardId,
             'uuid' => $uuid,
             'share_token' => $shareToken,
             'public_url' => '/greetings/f/' . $shareToken,
             'image_url' => '/greetings/i/' . $shareToken . '.png',
+            'absolute_public_url' => $appUrl . '/greetings/f/' . $shareToken,
+            'absolute_image_url' => $appUrl . '/greetings/i/' . $shareToken . '.png',
             'occasion' => $occasionKey,
             'theme' => $themeKey,
             'template_style' => $templateStyle,
             'headline' => $headline,
+            'verse' => $verse,
+            'sign_off' => $signOff,
             'sender_name' => $senderName,
+            'recipient_name' => $recipientName,
+            'occasion_meta' => self::OCCASIONS[$occasionKey] ?? self::OCCASIONS['christmas'],
+            'theme_meta' => self::THEMES[$themeKey] ?? self::THEMES['royal_crimson'],
+            'template_style_meta' => self::TEMPLATE_STYLES[$templateStyle] ?? self::TEMPLATE_STYLES['classic'],
         ];
+
+        // Asynchronously/eagerly pre-render PNG so crawlers and recipients never experience cold GD delays
+        try {
+            AtgFestiveCardRenderer::renderPng($cardPayload);
+        } catch (\Throwable $e) {
+            error_log('[AtgFestiveCardService] Pre-rendering PNG failed: ' . $e->getMessage());
+        }
+
+        return $cardPayload;
     }
 
     /**
@@ -430,12 +455,16 @@ final class AtgFestiveCardService
         $themeMeta = self::THEMES[$themeKey] ?? self::THEMES['royal_crimson'];
         $styleMeta = self::TEMPLATE_STYLES[$styleKey] ?? self::TEMPLATE_STYLES['classic'];
 
+        $appUrl = rtrim((string)($_ENV['APP_URL'] ?? (getenv('APP_URL') ?: 'https://familyplatform.com')), '/');
+
         return array_merge($row, [
             'occasion_meta' => $occasionMeta,
             'theme_meta' => $themeMeta,
             'template_style_meta' => $styleMeta,
             'public_url' => '/greetings/f/' . $token,
             'image_url' => '/greetings/i/' . $token . '.png',
+            'absolute_public_url' => $appUrl . '/greetings/f/' . $token,
+            'absolute_image_url' => $appUrl . '/greetings/i/' . $token . '.png',
         ]);
     }
 
@@ -591,6 +620,12 @@ final class AtgFestiveCardService
             return false;
         }
 
+        $width = (int)($imageInfo[0] ?? 0);
+        $height = (int)($imageInfo[1] ?? 0);
+        if ($width <= 0 || $height <= 0 || $width > 4096 || $height > 4096) {
+            return false;
+        }
+
         $mime = $imageInfo['mime'] ?? '';
         $image = null;
 
@@ -607,6 +642,15 @@ final class AtgFestiveCardService
                 imagealphablending($image, false);
                 imagesavealpha($image, true);
                 imagepng($image, $sourcePath, 8);
+                imagedestroy($image);
+                return true;
+            }
+        } elseif ($mime === 'image/webp' && function_exists('imagecreatefromwebp') && function_exists('imagewebp')) {
+            $image = @imagecreatefromwebp($sourcePath);
+            if ($image) {
+                imagealphablending($image, false);
+                imagesavealpha($image, true);
+                imagewebp($image, $sourcePath, 88);
                 imagedestroy($image);
                 return true;
             }
