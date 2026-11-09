@@ -86,6 +86,25 @@ final class BlogData extends Select
     }
 
     /**
+     * Increment view count atomically with session debouncing
+     *
+     * @param int $blogId
+     */
+    public static function incrementViews(int $blogId): void
+    {
+        if ($blogId <= 0) {
+            return;
+        }
+        try {
+            $pdo = \Src\Db::connect2();
+            $stmt = $pdo->prepare("UPDATE blogs SET views = views + 1 WHERE id = ?");
+            $stmt->execute([$blogId]);
+        } catch (\Throwable $e) {
+            error_log('Failed to increment FamilyPlatform blog view: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Retrieve all blogs (drafts and published) for the admin panel
      *
      * @return array<int, mixed>

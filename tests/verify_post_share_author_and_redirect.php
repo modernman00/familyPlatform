@@ -105,6 +105,78 @@ try {
         "Unauthenticated caller is blocked with 401 Unauthorised"
     );
 
+    // 7. Test Social Media Crawler detection & Dynamic Open Graph metadata
+    $_SESSION = [];
+    $_COOKIE = [];
+    $_SERVER['HTTP_USER_AGENT'] = 'WhatsApp/2.23.20.76 i';
+    $GLOBALS['__testRedirect'] = null;
+    $GLOBALS['__testView'] = null;
+
+    $controller->handlePostLink($testPostNo);
+    $viewData = $GLOBALS['__testView'] ?? [];
+
+    assertShare(
+        PostShareController::isSocialCrawler('WhatsApp/2.23.20.76 i'),
+        "WhatsApp crawler is correctly identified by isSocialCrawler()"
+    );
+    assertShare(
+        PostShareController::isSocialCrawler('facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)'),
+        "Facebook external hit crawler is correctly identified by isSocialCrawler()"
+    );
+    assertShare(
+        PostShareController::isSocialCrawler('Twitterbot/1.0'),
+        "Twitterbot is correctly identified by isSocialCrawler()"
+    );
+    assertShare(
+        !PostShareController::isSocialCrawler('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15'),
+        "Regular mobile Safari browser is NOT treated as a crawler"
+    );
+    assertShare(
+        ($viewData['path'] ?? '') === 'public.postShareLanding',
+        "WhatsApp crawler receives rich Open Graph landing view (public.postShareLanding)"
+    );
+    assertShare(
+        str_contains($viewData['data']['ogTitle'] ?? '', 'Author Relative'),
+        "Open Graph title includes author name ('{$viewData['data']['ogTitle']}')"
+    );
+    assertShare(
+        str_contains($viewData['data']['ogDescription'] ?? '', $testFamCode),
+        "Open Graph description includes family circle ('{$viewData['data']['ogDescription']}')"
+    );
+    assertShare(
+        !empty($viewData['data']['ogImage']),
+        "Open Graph image is provided ('{$viewData['data']['ogImage']}')"
+    );
+    assertShare(
+        $GLOBALS['__testRedirect'] === null,
+        "Social crawlers are NEVER redirected away from the canonical post URL"
+    );
+
+    // 8. Test Video Post Sanitisation (Zero /resources/ leaked into user-facing copy)
+    $videoPostNo = 0;
+    $stmtVid = $db->prepare('INSERT INTO post (id, fullName, postMessage, postFamCode, post_status, date_created) VALUES (?, ?, ?, ?, ?, NOW())');
+    $stmtVid->execute([$authorId, 'Laf OLAOGUN', '/resources/videos/posts/post_vid_test_12345.webm#t=0,30', $testFamCode, 'published']);
+    $videoPostNo = (int)$db->lastInsertId();
+
+    $GLOBALS['__testView'] = null;
+    $controller->handlePostLink($videoPostNo);
+    $vidViewData = $GLOBALS['__testView'] ?? [];
+
+    assertShare(
+        str_contains($vidViewData['data']['ogTitle'] ?? '', 'Laf OLAOGUN shared a family video memory'),
+        "Video post OG title is cleanly humanised ('{$vidViewData['data']['ogTitle']}')"
+    );
+    assertShare(
+        !str_contains($vidViewData['data']['ogTitle'] ?? '', '/resources/'),
+        "Zero '/resources/' leaks in video post title"
+    );
+    assertShare(
+        !str_contains($vidViewData['data']['ogDescription'] ?? '', '/resources/'),
+        "Zero '/resources/' leaks in video post description"
+    );
+
+    $db->prepare('DELETE FROM post WHERE post_no = ?')->execute([$videoPostNo]);
+
 } finally {
     // Cleanup fixture
     $db->prepare('DELETE FROM post WHERE post_no = ?')->execute([$testPostNo]);

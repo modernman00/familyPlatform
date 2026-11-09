@@ -38,6 +38,20 @@ final class BlogController
                 return;
             }
 
+            // Atomically increment views with session debouncing
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            if (!isset($_SESSION['viewed_blogs']) || !is_array($_SESSION['viewed_blogs'])) {
+                $_SESSION['viewed_blogs'] = [];
+            }
+            $blogIdInt = (int) ($blog['id'] ?? 0);
+            if ($blogIdInt > 0 && !in_array($blogIdInt, $_SESSION['viewed_blogs'], true)) {
+                $_SESSION['viewed_blogs'][] = $blogIdInt;
+                BlogData::incrementViews($blogIdInt);
+                $blog['views'] = ((int) ($blog['views'] ?? 0)) + 1;
+            }
+
             $recentBlogs = BlogData::getRecentPublishedBlogs($slug);
 
             Utility::view('blog/show', [

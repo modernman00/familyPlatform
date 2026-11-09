@@ -296,11 +296,16 @@
                         <div class="blog-card-body">
                             <div class="d-flex align-items-center justify-content-between mb-2">
                                 <span class="topic-pill">
-                                    <i class="fas fa-bookmark me-1"></i> Family Stories
+                                    <i class="fas fa-bookmark me-1"></i> {{ $blog['category'] ?? 'Family Stories' }}
                                 </span>
-                                <span class="read-time-meta">
-                                    <i class="far fa-clock me-1"></i> {{ $readTime }} min read
-                                </span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="read-time-meta">
+                                        <i class="far fa-eye me-1"></i> {{ number_format((int) ($blog['views'] ?? 0)) }} views
+                                    </span>
+                                    <span class="read-time-meta">
+                                        <i class="far fa-clock me-1"></i> {{ $readTime }} min read
+                                    </span>
+                                </div>
                             </div>
 
                             <h2 class="blog-card-title">

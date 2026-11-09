@@ -79,6 +79,7 @@ final class RouteDispatch
             'App\controller\members\OmniSearchController',
             'App\controller\RealtimeBroadcastingController', // Sovereign Realtime Broadcasting SSE & Auth for FamilyPlatform
             'App\controller\PostShareController', // Public Shareable Post Link & Guest-to-Register Engine
+            'App\controller\members\FestiveCardController', // RFC-0019 Omni-Occasion Festive Card & Living Envelope Engine
         ];
 
         if (\class_exists('\App\controller\BaseController')) {

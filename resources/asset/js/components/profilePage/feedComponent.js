@@ -3105,6 +3105,43 @@ export function profileFeed(opts = {}) {
             }
         },
 
+        getCleanShareText(post) {
+            if (!post) return 'Check out this memory on FamilyPlatform';
+            const author = (post.fullName || '').trim() || 'A family relative';
+            let raw = (post.displayMessage || post.postMessage || '').trim();
+
+            // Strip style tokens
+            raw = raw.replace(/\[style:[a-z0-9_]+\]\s*/gi, '');
+
+            // Strip file paths, video paths, resource URLs, and internal filenames
+            raw = raw.replace(/(?:https?:\/\/[^\s]+|\/resources\/(?:videos|images|profile)\/[^\s]+|post_vid_[^\s]+|[a-f0-9_]+_Sho_[^\s]+|\.(?:webm|mp4|mov|jpg|jpeg|png|gif|webp|avif)(?:#[^\s]*)?)/gi, '').trim();
+
+            // If genuine user text exists
+            if (raw.length > 0) {
+                const stripped = raw.replace(/^["'“]|["'”]$/g, '').trim();
+                return `“${stripped}” — ${author} on FamilyPlatform`;
+            }
+
+            // Media-specific clean human descriptions
+            const hasVideo = !!(post.video 
+                || (Array.isArray(post.videos) && post.videos.length > 0) 
+                || (typeof post.postMessage === 'string' && (post.postMessage.includes('/resources/videos/') || post.postMessage.includes('.webm') || post.postMessage.includes('.mp4'))));
+
+            if (hasVideo) {
+                return `Watch ${author}’s family video memory on FamilyPlatform`;
+            }
+
+            if (Array.isArray(post.images) && post.images.length > 0) {
+                return `View ${author}’s family photo on FamilyPlatform`;
+            }
+
+            if (post.voice_capsule_url) {
+                return `Listen to ${author}’s voice capsule on FamilyPlatform`;
+            }
+
+            return `${author} shared a family memory on FamilyPlatform`;
+        },
+
         openSharePortal(post) {
             if (!post || !post.post_no) return;
 
@@ -3125,8 +3162,20 @@ export function profileFeed(opts = {}) {
 
             this.sharePortalPost = post;
             this.sharePortalUrl = `${window.location.origin}/post/${encodeURIComponent(post.post_no)}`;
-            this.sharePortalTitle = post.fullName ? `${post.fullName}'s Family Memory` : 'Family Memory';
-            this.sharePortalText = post.displayMessage || post.postMessage || 'Check out this memory on FamilyPlatform';
+
+            const hasVideo = !!(post.video 
+                || (Array.isArray(post.videos) && post.videos.length > 0) 
+                || (typeof post.postMessage === 'string' && (post.postMessage.includes('/resources/videos/') || post.postMessage.includes('.webm') || post.postMessage.includes('.mp4'))));
+
+            if (hasVideo) {
+                this.sharePortalTitle = post.fullName ? `${post.fullName}'s Family Video` : 'Family Video';
+            } else if (Array.isArray(post.images) && post.images.length > 0) {
+                this.sharePortalTitle = post.fullName ? `${post.fullName}'s Family Photo` : 'Family Photo';
+            } else {
+                this.sharePortalTitle = post.fullName ? `${post.fullName}'s Family Memory` : 'Family Memory';
+            }
+
+            this.sharePortalText = this.getCleanShareText(post);
 
             // Resolve preview image
             if (Array.isArray(post.images) && post.images.length > 0 && post.images[0]) {
@@ -3135,7 +3184,10 @@ export function profileFeed(opts = {}) {
                     ? img 
                     : `/resources/images/post/${img}`;
             } else if (post.profileImg) {
-                this.sharePortalImg = post.profileImg;
+                const pImg = post.profileImg;
+                this.sharePortalImg = (pImg.startsWith('http') || pImg.startsWith('/'))
+                    ? pImg
+                    : `/resources/images/profile/${pImg}`;
             } else {
                 this.sharePortalImg = '/resources/images/profile/avatarM.png';
             }
@@ -3193,12 +3245,12 @@ export function profileFeed(opts = {}) {
         },
 
         getSharePortalWhatsappUrl() {
-            const text = encodeURIComponent(`${this.sharePortalText} ${this.sharePortalUrl}`);
+            const text = encodeURIComponent(`${this.sharePortalText}\n\n${this.sharePortalUrl}`);
             return `https://api.whatsapp.com/send?text=${text}`;
         },
 
         getSharePortalXUrl() {
-            const text = encodeURIComponent(this.sharePortalTitle);
+            const text = encodeURIComponent(this.sharePortalText);
             const url = encodeURIComponent(this.sharePortalUrl);
             return `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
         },
@@ -3215,7 +3267,7 @@ export function profileFeed(opts = {}) {
 
         getSharePortalTelegramUrl() {
             const url = encodeURIComponent(this.sharePortalUrl);
-            const text = encodeURIComponent(this.sharePortalTitle);
+            const text = encodeURIComponent(this.sharePortalText);
             return `https://t.me/share/url?url=${url}&text=${text}`;
         },
 

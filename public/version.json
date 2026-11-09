@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(festive): implement RFC-0019 ATG Omni-Occasion Festive Card and Living Envelope Engine",
+    "title": "Update studio tree integration",
     "notes": [
-        "Feat(festive): implement RFC-0019 ATG Omni-Occasion Festive Card and Living Envelope Engine",
-        "Fix(mobile): remove static d-block from discovery modal and enlarge touch targets to 44px",
-        "Fix(ux): eliminate layout flash on discovery journey widget by defaulting visibility to false"
+        "Update studio tree integration",
+        "Feat(festive-cards): correct migration ordering for festive cards and wire up studio entrypoints",
+        "Feat(festive): implement RFC-0019 ATG Omni-Occasion Festive Card and Living Envelope Engine"
     ],
     "released_at": "2026-11-09",
-    "commit": "e0f81f15"
+    "commit": "da0728a7"
 }

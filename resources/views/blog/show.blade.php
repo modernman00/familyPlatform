@@ -274,6 +274,8 @@
                     <div class="text-muted small">
                         <i class="far fa-calendar-alt me-1"></i> {{ $datePublishedStr }}
                         <span class="mx-1">•</span>
+                        <i class="far fa-eye me-1"></i> {{ number_format((int) ($blog['views'] ?? 0)) }} views
+                        <span class="mx-1">•</span>
                         <i class="far fa-clock me-1"></i> {{ $readMinutes }} min read
                     </div>
                 </div>
