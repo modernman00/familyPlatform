@@ -49,6 +49,13 @@ export function profileFeed(opts = {}) {
         videoModalIsPortrait: true,
         videoModalPost: null,
         videoModalFullscreen: false,
+        sharePortalOpen: false,
+        sharePortalPost: null,
+        sharePortalUrl: '',
+        sharePortalTitle: '',
+        sharePortalText: '',
+        sharePortalImg: '',
+        sharePortalCopied: false,
         touchStartX: 0,
         touchStartY: 0,
         heartBursts: {},
@@ -3091,25 +3098,126 @@ export function profileFeed(opts = {}) {
             }
         },
 
-        shareMediaItem(post, mediaType, idx) {
-            const shareUrl = `${window.location.origin}/profilePage?post_no=${encodeURIComponent(post?.post_no || '')}#post${encodeURIComponent(post?.post_no || '')}`;
-            if (navigator.share) {
-                navigator.share({
-                    title: post?.fullName ? `${post.fullName}'s Family Memory` : 'Family Memory',
-                    url: shareUrl
-                }).catch(() => {});
-            } else if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(shareUrl).then(() => {
+        openSharePortal(post) {
+            if (!post || !post.post_no) return;
+
+            // Strict Author Ownership Gate: Only the author can share this post
+            if (!this.isOwnPost(post)) {
+                if (typeof Swal !== 'undefined') {
                     Swal.fire({
                         toast: true,
                         position: 'top-end',
-                        icon: 'success',
-                        title: 'Link copied to clipboard!',
+                        icon: 'warning',
+                        title: 'Only the author can share this post.',
                         showConfirmButton: false,
-                        timer: 1800
+                        timer: 2500
                     });
-                }).catch(() => {});
+                }
+                return;
             }
+
+            this.sharePortalPost = post;
+            this.sharePortalUrl = `${window.location.origin}/post/${encodeURIComponent(post.post_no)}`;
+            this.sharePortalTitle = post.fullName ? `${post.fullName}'s Family Memory` : 'Family Memory';
+            this.sharePortalText = post.displayMessage || post.postMessage || 'Check out this memory on FamilyPlatform';
+
+            // Resolve preview image
+            if (Array.isArray(post.images) && post.images.length > 0 && post.images[0]) {
+                const img = post.images[0];
+                this.sharePortalImg = (img.startsWith('http') || img.startsWith('/')) 
+                    ? img 
+                    : `/resources/images/post/${img}`;
+            } else if (post.profileImg) {
+                this.sharePortalImg = post.profileImg;
+            } else {
+                this.sharePortalImg = '/resources/images/profile/avatarM.png';
+            }
+
+            this.sharePortalCopied = false;
+            this.sharePortalOpen = true;
+        },
+
+        closeSharePortal() {
+            this.sharePortalOpen = false;
+            this.sharePortalPost = null;
+        },
+
+        sharePortalViaSystem() {
+            if (!this.sharePortalPost) return;
+            if (navigator.share) {
+                navigator.share({
+                    title: this.sharePortalTitle,
+                    text: this.sharePortalText,
+                    url: this.sharePortalUrl
+                }).catch((err) => {
+                    if (err && err.name !== 'AbortError') {
+                        this.copySharePortalLink();
+                    }
+                });
+            } else {
+                this.copySharePortalLink();
+            }
+        },
+
+        copySharePortalLink() {
+            if (!this.sharePortalUrl) return;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(this.sharePortalUrl).then(() => {
+                    this.sharePortalCopied = true;
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Post link copied to clipboard!',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }
+                    setTimeout(() => {
+                        this.sharePortalCopied = false;
+                    }, 2500);
+                }).catch(() => {
+                    window.prompt('Copy this share link:', this.sharePortalUrl);
+                });
+            } else {
+                window.prompt('Copy this share link:', this.sharePortalUrl);
+            }
+        },
+
+        getSharePortalWhatsappUrl() {
+            const text = encodeURIComponent(`${this.sharePortalText} ${this.sharePortalUrl}`);
+            return `https://api.whatsapp.com/send?text=${text}`;
+        },
+
+        getSharePortalXUrl() {
+            const text = encodeURIComponent(this.sharePortalTitle);
+            const url = encodeURIComponent(this.sharePortalUrl);
+            return `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+        },
+
+        getSharePortalLinkedinUrl() {
+            const url = encodeURIComponent(this.sharePortalUrl);
+            return `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
+        },
+
+        getSharePortalFacebookUrl() {
+            const url = encodeURIComponent(this.sharePortalUrl);
+            return `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+        },
+
+        getSharePortalTelegramUrl() {
+            const url = encodeURIComponent(this.sharePortalUrl);
+            const text = encodeURIComponent(this.sharePortalTitle);
+            return `https://t.me/share/url?url=${url}&text=${text}`;
+        },
+
+        sharePost(post) {
+            this.openSharePortal(post);
+        },
+
+        shareMediaItem(post, mediaType, idx) {
+            this.openSharePortal(post);
         },
 
         openVideoModal(videos, index = 0, initialMuted = false, postObj = null) {

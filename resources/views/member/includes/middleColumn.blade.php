@@ -1129,15 +1129,17 @@
                             <i class="bi" :class="lightboxPost._saved ? 'bi-bookmark-fill text-warning' : 'bi-bookmark'" style="font-size: 0.95rem;"></i>
                         </button>
 
-                        <!-- Share Link Pill -->
-                        <button type="button"
-                                class="btn d-inline-flex align-items-center justify-content-center rounded-circle text-white"
-                                @click.stop="shareMediaItem(lightboxPost, 'image', lightboxIndex)"
-                                title="Share photo"
-                                aria-label="Share photo"
-                                style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.22); flex-shrink: 0;">
-                            <i class="bi bi-box-arrow-up" style="font-size: 0.95rem;"></i>
-                        </button>
+                        <!-- Share Link Pill (Author Only - Swift Glider) -->
+                        <template x-if="isOwnPost(lightboxPost)">
+                            <button type="button"
+                                    class="btn d-inline-flex align-items-center justify-content-center rounded-circle text-white"
+                                    @click.stop="shareMediaItem(lightboxPost, 'image', lightboxIndex)"
+                                    title="Share photo"
+                                    aria-label="Share photo"
+                                    style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.22); flex-shrink: 0;">
+                                <i class="bi bi-send-fill" style="font-size: 0.95rem; transform: rotate(-15deg); display: inline-block;"></i>
+                            </button>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -1438,15 +1440,17 @@
                                 <i class="bi" :class="videoModalPost._saved ? 'bi-bookmark-fill text-warning' : 'bi-bookmark'" style="font-size: 0.95rem;"></i>
                             </button>
 
-                            <!-- Share Link Pill -->
-                            <button type="button"
-                                    class="btn d-inline-flex align-items-center justify-content-center rounded-circle text-white"
-                                    @click.stop="shareMediaItem(videoModalPost, 'video', videoModalIndex)"
-                                    title="Share video"
-                                    aria-label="Share video"
-                                    style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.18); flex-shrink: 0;">
-                                <i class="bi bi-box-arrow-up" style="font-size: 0.95rem;"></i>
-                            </button>
+                            <!-- Share Link Pill (Author Only - Swift Glider) -->
+                            <template x-if="isOwnPost(videoModalPost)">
+                                <button type="button"
+                                        class="btn d-inline-flex align-items-center justify-content-center rounded-circle text-white"
+                                        @click.stop="shareMediaItem(videoModalPost, 'video', videoModalIndex)"
+                                        title="Share video"
+                                        aria-label="Share video"
+                                        style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.18); flex-shrink: 0;">
+                                    <i class="bi bi-send-fill" style="font-size: 0.95rem; transform: rotate(-15deg); display: inline-block;"></i>
+                                </button>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -1741,6 +1745,9 @@
   <!-- The Modal Structure (Hidden by default) for the post image modal -->
   @includeIf('member.modals.postImg')
   @endif
+
+  <!-- Author-Only Rich Post Share Portal Modal -->
+  @include('member.modals.postSharePortalModal')
 
   <style>
     @keyframes pulse {

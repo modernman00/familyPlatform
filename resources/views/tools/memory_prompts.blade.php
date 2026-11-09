@@ -2,6 +2,8 @@
 
 @section('title', 'Oral History & Family Journal Prompt Studio — Chronicle Your Elders | FamilyPlatform')
 @section('meta_description', 'Generate sensory oral storytelling prompts to record grandparents, parents, and relatives before memories fade. Free interactive family journal tool with 1-click WhatsApp sharing.')
+@section('og_title', 'Oral History & Family Journal Prompt Studio — Chronicle Your Elders | FamilyPlatform')
+@section('og_description', 'Generate sensory oral storytelling prompts to record grandparents, parents, and relatives before memories fade. Free interactive family journal tool with 1-click WhatsApp sharing.')
 @section('data-page-id', 'memory-prompts-tool')
 
 @section('content')
@@ -11,7 +13,7 @@
       <div class="badge rounded-pill px-3 py-2 mb-3 fw-bold text-uppercase" style="background: rgba(255,255,255,0.18); color: #fff; font-size: 0.8rem; letter-spacing: 0.05em;">
         🎙️ Free Heritage Preservation Tool
       </div>
-      <h1 class="display-5 fw-bold mb-2">Chronicle Your Elders: Oral History Prompt Studio</h1>
+      <h1 class="display-5 fw-bold mb-2 text-white" style="color: #ffffff !important;">Chronicle Your Elders: Oral History Prompt Studio</h1>
       <p class="fs-5 mb-0 max-w-700 mx-auto" style="color: rgba(255, 255, 255, 0.92) !important; line-height: 1.6;">
         Every grandparent carries a living library of wisdom, resilience, and laughter. Use these sensory prompts to record their voices before memories fade.
       </p>
@@ -98,15 +100,18 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="d-flex flex-wrap gap-3 mb-4">
-              <button id="generateBtn" class="btn btn-brand btn-lg px-4 py-2 fw-bold shadow-sm d-flex align-items-center gap-2" style="min-height: 44px;">
+            <div class="d-flex flex-wrap gap-2 mb-4">
+              <button id="generateBtn" class="btn btn-brand btn-lg px-4 py-2 fw-bold shadow-sm d-flex align-items-center gap-2" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;" aria-label="Generate tailored interview prompts">
                 <i class="bi bi-sparkles"></i> Generate Prompts
               </button>
-              <button id="copyBtn" class="btn btn-outline-secondary btn-lg px-4 py-2 fw-semibold d-flex align-items-center gap-2" style="min-height: 44px;">
-                <i class="bi bi-clipboard"></i> Copy Prompts
+              <button id="copyBtn" class="btn btn-outline-secondary btn-lg px-4 py-2 fw-semibold d-flex align-items-center gap-2" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;" aria-label="Copy prompts with attribution link">
+                <i class="bi bi-clipboard"></i> <span id="copyBtnText">Copy Prompts</span>
               </button>
-              <button id="whatsappBtn" class="btn btn-success btn-lg px-4 py-2 fw-semibold d-flex align-items-center gap-2" style="min-height: 44px; background-color: #25D366; border-color: #25D366;">
+              <button id="whatsappBtn" class="btn btn-success btn-lg px-4 py-2 fw-semibold d-flex align-items-center gap-2" style="min-height: 44px; white-space: nowrap; flex-shrink: 0; background-color: #25D366; border-color: #25D366; color: #ffffff;" aria-label="Send prompts to relative via WhatsApp">
                 <i class="bi bi-whatsapp"></i> Send via WhatsApp
+              </button>
+              <button id="sharePromptsNativeBtn" class="btn btn-outline-danger btn-lg px-4 py-2 fw-semibold d-flex align-items-center gap-2" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;" aria-label="Share prompts using device options">
+                <i class="bi bi-share-fill"></i> Share Prompts
               </button>
             </div>
 
@@ -125,7 +130,7 @@
               <div class="badge bg-danger text-white px-3 py-1 mb-2 text-uppercase fw-bold" style="font-size: 0.75rem;">
                 🔒 Sovereign Family Archive
               </div>
-              <h3 class="fw-bold mb-2">Preserve These Recordings in Your Private Living Heritage Tree</h3>
+              <h3 class="fw-bold mb-2 text-white" style="color: #ffffff !important;">Preserve These Recordings in Your Private Living Heritage Tree</h3>
               <p class="mb-0" style="color: rgba(255, 255, 255, 0.9) !important; line-height: 1.6;">
                 Don't leave recorded voice notes buried in chat apps where they expire. FamilyPlatform attaches your audio capsules directly to your ancestor nodes on an encrypted 7-generation dynasty organogram.
               </p>
@@ -302,6 +307,18 @@
       PROMPT_DATABASE.partner = PROMPT_DATABASE.parent;
       PROMPT_DATABASE.sibling = PROMPT_DATABASE.grandparent;
 
+      function getPromptsSharePayload() {
+        const items = Array.from(document.querySelectorAll('#promptsContainer li div')).map((d, i) => `${i + 1}. ${d.innerText}`);
+        const shareUrl = window.location.href;
+        const text = `Hi! I was using FamilyPlatform's Oral History Studio and thought of you. I would love to record your answers to these memories when we next have tea:\n\n${items.join('\n\n')}\n\nInteractive Studio: ${shareUrl}`;
+        return {
+          title: 'Oral History & Family Journal Prompts | FamilyPlatform',
+          text,
+          url: shareUrl,
+          rawList: items.join('\n\n') + `\n\n— Generated with FamilyPlatform Oral History Studio (${shareUrl})`
+        };
+      }
+
       function renderPrompts() {
         const rel = document.getElementById('relativeSelect').value;
         const theme = document.getElementById('themeSelect').value;
@@ -323,6 +340,42 @@
         });
         html += '</ol>';
         container.innerHTML = html;
+
+        // Persist filter selections in URL without reloading
+        try {
+          const url = new URL(window.location.href);
+          url.searchParams.set('rel', rel);
+          url.searchParams.set('theme', theme);
+          url.searchParams.set('fmt', fmt);
+          window.history.replaceState({ rel, theme, fmt }, '', url.toString());
+        } catch (e) {
+          // Graceful fallback
+        }
+      }
+
+      // Initialise selectors from URL query parameters if present
+      try {
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('rel')) {
+          const rVal = params.get('rel');
+          if (['grandparent', 'parent', 'elder', 'partner', 'sibling'].includes(rVal)) {
+            document.getElementById('relativeSelect').value = rVal;
+          }
+        }
+        if (params.has('theme')) {
+          const tVal = params.get('theme');
+          if (['childhood', 'romance', 'hardship', 'culinary', 'humour'].includes(tVal)) {
+            document.getElementById('themeSelect').value = tVal;
+          }
+        }
+        if (params.has('fmt')) {
+          const fVal = params.get('fmt');
+          if (['quick', 'standard', 'roundtable'].includes(fVal)) {
+            document.getElementById('formatSelect').value = fVal;
+          }
+        }
+      } catch (e) {
+        // Fallback
       }
 
       document.getElementById('generateBtn').addEventListener('click', renderPrompts);
@@ -332,22 +385,53 @@
 
       // Copy Button
       document.getElementById('copyBtn').addEventListener('click', function() {
-        const items = Array.from(document.querySelectorAll('#promptsContainer li div')).map((d, i) => `${i + 1}. ${d.innerText}`);
-        const text = items.join('\n\n') + '\n\n— Generated with FamilyPlatform Oral History Studio (https://myfamilyplatform.com/prompts)';
-        navigator.clipboard.writeText(text).then(() => {
-          const original = this.innerHTML;
-          this.innerHTML = '<i class="bi bi-check2 text-success"></i> Copied!';
-          setTimeout(() => this.innerHTML = original, 2000);
-        });
+        const payload = getPromptsSharePayload();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(payload.rawList).then(() => {
+            const textSpan = this.querySelector('#copyBtnText') || this;
+            const original = textSpan.innerHTML;
+            textSpan.innerHTML = '<i class="bi bi-check2 text-success"></i> Copied!';
+            setTimeout(() => textSpan.innerHTML = original, 2000);
+          }).catch(() => {
+            window.prompt('Copy prompts to clipboard:', payload.rawList);
+          });
+        } else {
+          window.prompt('Copy prompts to clipboard:', payload.rawList);
+        }
       });
 
       // WhatsApp Button
       document.getElementById('whatsappBtn').addEventListener('click', function() {
-        const relText = document.getElementById('relativeSelect').options[document.getElementById('relativeSelect').selectedIndex].text;
-        const items = Array.from(document.querySelectorAll('#promptsContainer li div')).map((d, i) => `${i + 1}. ${d.innerText}`);
-        const text = `Hi! I was using FamilyPlatform's Oral History Studio and thought of you. I would love to record your answers to these memories when we next have tea:\n\n${items.join('\n\n')}\n\nLet me know when suits! ❤️`;
-        const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+        const payload = getPromptsSharePayload();
+        const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(payload.text)}`;
         window.open(url, '_blank');
+      });
+
+      // Native Device Share Button
+      document.getElementById('sharePromptsNativeBtn').addEventListener('click', async function() {
+        const payload = getPromptsSharePayload();
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: payload.title,
+              text: payload.text,
+              url: payload.url
+            });
+            return;
+          } catch (err) {
+            if (err && err.name === 'AbortError') return;
+          }
+        }
+        // Fallback to clipboard
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(payload.rawList).then(() => {
+            const original = this.innerHTML;
+            this.innerHTML = '<i class="bi bi-check2 text-success"></i> Copied!';
+            setTimeout(() => this.innerHTML = original, 2000);
+          });
+        } else {
+          window.prompt('Copy prompts to clipboard:', payload.rawList);
+        }
       });
 
       // Initial Render

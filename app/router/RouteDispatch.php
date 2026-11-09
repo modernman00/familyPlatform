@@ -78,6 +78,7 @@ final class RouteDispatch
             'App\controller\PublicToolsController',
             'App\controller\members\OmniSearchController',
             'App\controller\RealtimeBroadcastingController', // Sovereign Realtime Broadcasting SSE & Auth for FamilyPlatform
+            'App\controller\PostShareController', // Public Shareable Post Link & Guest-to-Register Engine
         ];
 
         if (\class_exists('\App\controller\BaseController')) {

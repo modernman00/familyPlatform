@@ -115,6 +115,11 @@
                   </a>
                 </li>
                 <li>
+                  <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" style="min-height: 44px;" @click.prevent="sharePost(post)">
+                    <i class="bi bi-send-fill text-success" style="transform: rotate(-15deg); display: inline-block;"></i> {{ __('feed.share_post', 'Share Post') }}
+                  </a>
+                </li>
+                <li>
                   <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger" href="#" style="min-height: 44px;" @click.prevent="deletePost(post.post_no)">
                     <i class="bi bi-trash3"></i> {{ __('feed.delete_post', 'Delete Post') }}
                   </a>
@@ -1869,15 +1874,27 @@
         </button>
       </div>
 
-      <!-- Comment Button -->
+      <!-- Comment Button (Heritage Acoustic Yarn Capsule) -->
       <button class="btn btn-action-glyph btn-action-comment rounded-circle"
               style="min-width: 44px; min-height: 44px;"
               type="button"
-              title="Write or view family comments on this post"
+              title="Share a family story or comment on this post"
               aria-label="Comment on this post"
               @click="toggleCommentForm(post.post_no)">
-        <i class="bi bi-chat" style="font-size: 1.35rem; line-height: 1;"></i>
+        <i class="bi bi-chat-quote-fill" style="font-size: 1.3rem; line-height: 1;"></i>
       </button>
+
+      <!-- Share Button (The Swift Aerodynamic Glider - Author Only) -->
+      <template x-if="isOwnPost(post)">
+        <button class="btn btn-action-glyph btn-action-share rounded-circle"
+                style="min-width: 44px; min-height: 44px;"
+                type="button"
+                title="Send memory to family relatives"
+                aria-label="Share this memory"
+                @click="sharePost(post)">
+          <i class="bi bi-send-fill" style="font-size: 1.15rem; line-height: 1; transform: rotate(-15deg); display: inline-block;"></i>
+        </button>
+      </template>
 
 
     </div>

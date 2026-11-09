@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(ux): eliminate layout flash on discovery journey widget by defaulting visibility to false",
+    "title": "Fix(mobile): remove static d-block from discovery modal and enlarge touch targets to 44px",
     "notes": [
+        "Fix(mobile): remove static d-block from discovery modal and enlarge touch targets to 44px",
         "Fix(ux): eliminate layout flash on discovery journey widget by defaulting visibility to false",
-        "Feat(lifecycle): implement 60-day omnichannel feature discovery engine and in-app journey hub",
-        "Feat(feed): 3D interactive poll/trivia arenas and platform-generated post 3D auto-elevation (RFC-0018B)"
+        "Feat(lifecycle): implement 60-day omnichannel feature discovery engine and in-app journey hub"
     ],
     "released_at": "2026-11-09",
-    "commit": "168555be"
+    "commit": "fc791c86"
 }

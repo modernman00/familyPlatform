@@ -30,4 +30,12 @@ $router->map('POST', '/api/games/two-truths/vote', 'App\controller\members\TwoTr
 $router->map('POST', '/api/games/two-truths/create', 'App\controller\members\TwoTruthsGameController@create', 'games_two_truths_create');
 $router->map('POST', '/api/games/two-truths/reveal', 'App\controller\members\TwoTruthsGameController@reveal', 'games_two_truths_reveal');
 
+// RFC-0019: Festivity & Celebration Greeting Cards Studio (ATG)
+$router->map('GET', '/member/festive-cards', 'App\controller\members\FestiveCardController@index', 'member_festive_cards');
+$router->map('POST', '/api/festive-cards/create', 'App\controller\members\FestiveCardController@create', 'api_festive_cards_create');
+$router->map('POST', '/api/festive-cards/post-to-feed', 'App\controller\members\FestiveCardController@postToFeed', 'api_festive_cards_post_to_feed');
+$router->map('GET', '/greetings/f/[:token]', 'App\controller\members\FestiveCardController@publicView', 'festive_card_public_view');
+$router->map('GET', '/greetings/i/[:token]', 'App\controller\members\FestiveCardController@renderCardImage', 'festive_card_render_image');
+
+
 

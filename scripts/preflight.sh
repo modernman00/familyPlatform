@@ -297,6 +297,10 @@ if [ -f "tests/verify_text_stage_posts.php" ]; then
     php tests/verify_text_stage_posts.php || GATE4_PASSED=0
 fi
 
+if [ -f "tests/verify_post_share_author_and_redirect.php" ]; then
+    php tests/verify_post_share_author_and_redirect.php || GATE4_PASSED=0
+fi
+
 if [ "$GATE4_PASSED" -eq 1 ]; then
     echo -e "${GREEN}  ✅ Gate 4 Passed: 0 Must-Have violations, PWA verified, Frontend stable.${NC}"
 else

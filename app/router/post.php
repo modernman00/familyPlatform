@@ -135,8 +135,16 @@ $router->map(
 $router->map(
   method: 'GET',
   route: '/post/[i:postNo]',
-  target: 'App\controller\members\PostMessage@getSinglePost',
-  name: 'post_get_single_alias'
+  target: 'App\controller\PostShareController@handlePostLink',
+  name: 'post_shareable_link'
+);
+
+// Author-Only Post Share Link Generator API (Strict SecOps Author Gate)
+$router->map(
+  method: 'POST',
+  route: '/api/posts/[i:postNo]/share',
+  target: 'App\controller\PostShareController@sharePostApi',
+  name: 'api_posts_share'
 );
 
 // Native iOS / Apple Photos Share Sheet Endpoints

@@ -2,6 +2,8 @@
 
 @section('title', ($guide['title'] ?? 'Family Memory Prompt Guide') . ' | FamilyPlatform')
 @section('meta_description', $guide['meta_description'] ?? 'Oral history interview questions and memory recording guide for families.')
+@section('og_title', ($guide['title'] ?? 'Family Memory Prompt Guide') . ' | FamilyPlatform')
+@section('og_description', $guide['meta_description'] ?? 'Oral history interview questions and memory recording guide for families.')
 @section('data-page-id', 'prompt-guide-detail')
 
 @section('content')
@@ -18,7 +20,7 @@
         </span>
         <span class="small" style="color: rgba(255,255,255,0.85);">• {{ $guide['read_time'] ?? '5 min read' }}</span>
       </div>
-      <h1 class="display-6 fw-bold mb-3 mx-auto text-white" style="max-width: 860px; line-height: 1.25;">
+      <h1 class="display-6 fw-bold mb-3 mx-auto text-white" style="max-width: 860px; line-height: 1.25; color: #ffffff !important;">
         {{ $guide['title'] }}
       </h1>
       <p class="fs-5 mb-0 mx-auto" style="max-width: 720px; line-height: 1.6; color: rgba(255, 255, 255, 0.92);">
@@ -33,7 +35,7 @@
       <div class="col-lg-9">
 
         <!-- Pro-Tip Audio Callout (High Contrast & Immune to Dark-Mode Inversion) -->
-        <div class="card border-0 shadow-sm rounded-4 mb-5 p-4 p-md-4" style="background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%); border-left: 6px solid #d97706 !important;">
+        <div class="card border-0 shadow-sm rounded-4 mb-4 p-4 p-md-4" style="background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%); border-left: 6px solid #d97706 !important;">
           <div class="d-flex align-items-start gap-3">
             <span class="fs-3 text-warning-emphasis" aria-hidden="true">💡</span>
             <div>
@@ -41,6 +43,29 @@
               <p class="mb-0" style="font-size: 0.95rem; line-height: 1.6; color: #92400e !important;">
                 {{ $guide['audio_tip'] }}
               </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Share Guide Action Banner -->
+        <div class="card border border-slate-200 shadow-sm rounded-4 mb-5 bg-white p-3 p-md-4">
+          <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
+            <div>
+              <div class="fw-bold text-dark d-flex align-items-center gap-2 fs-6">
+                <i class="bi bi-chat-heart text-danger"></i> Share This Guide with Family
+              </div>
+              <div class="text-secondary small">Invite siblings and cousins to interview elders together before stories fade.</div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap shrink-0">
+              <button type="button" id="shareGuideWhatsAppBtn" class="btn btn-success btn-sm px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm" style="min-height: 44px; white-space: nowrap; background-color: #25D366; border-color: #25D366; color: #ffffff;" aria-label="Share interview guide via WhatsApp">
+                <i class="bi bi-whatsapp"></i> WhatsApp
+              </button>
+              <button type="button" id="shareGuideNativeBtn" class="btn btn-outline-danger btn-sm px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1.5" style="min-height: 44px; white-space: nowrap;" aria-label="Share guide using device options">
+                <i class="bi bi-share-fill"></i> Share
+              </button>
+              <button type="button" id="copyGuideLinkBtn" class="btn btn-outline-secondary btn-sm px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1.5" style="min-height: 44px; white-space: nowrap;" aria-label="Copy guide link">
+                <i class="bi bi-clipboard"></i> <span id="copyGuideLinkText">Copy Link</span>
+              </button>
             </div>
           </div>
         </div>
@@ -83,7 +108,7 @@
             <span class="badge rounded-pill bg-danger px-3 py-1.5 fw-bold text-uppercase mb-3" style="font-size: 0.75rem;">
               Preserve Forever
             </span>
-            <h3 class="display-6 fw-bold mb-3 text-white">Record & Store These Audio Stories Securely</h3>
+            <h3 class="display-6 fw-bold mb-3 text-white" style="color: #ffffff !important;">Record & Store These Audio Stories Securely</h3>
             <p class="text-slate-300 fs-5 mb-4" style="line-height: 1.6;">
               Don't leave voice recordings scattered across lost phones and WhatsApp threads. Upload them to your family's private, encrypted vault with automated voice transcription.
             </p>
@@ -141,9 +166,66 @@
     </div>
   </main>
 
-  <!-- Interactive Script for Copy Buttons -->
+  <!-- Interactive Script for Copy & Share Buttons -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
+      const guideTitle = {!! json_encode($guide['title'] ?? 'Oral History Guide') !!};
+      const guideUrl = window.location.href;
+      const shareMessage = `Hi! I found this wonderful oral history guide for chronicling family memories: "${guideTitle}". Let's ask our elders these questions when we next get together: ${guideUrl}`;
+
+      // WhatsApp Share
+      const waBtn = document.getElementById('shareGuideWhatsAppBtn');
+      if (waBtn) {
+        waBtn.addEventListener('click', function () {
+          const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareMessage)}`;
+          window.open(url, '_blank');
+        });
+      }
+
+      // Native Device Share
+      const nativeBtn = document.getElementById('shareGuideNativeBtn');
+      if (nativeBtn) {
+        nativeBtn.addEventListener('click', async function () {
+          if (navigator.share) {
+            try {
+              await navigator.share({
+                title: guideTitle,
+                text: shareMessage,
+                url: guideUrl
+              });
+              return;
+            } catch (err) {
+              if (err && err.name === 'AbortError') return;
+            }
+          }
+          copyGuideLink(this);
+        });
+      }
+
+      // Copy Guide Link
+      const copyLinkBtn = document.getElementById('copyGuideLinkBtn');
+      function copyGuideLink(btn) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(guideUrl).then(() => {
+            const textSpan = btn.querySelector('#copyGuideLinkText') || btn;
+            const original = textSpan.innerHTML;
+            textSpan.innerHTML = '<i class="bi bi-check2 text-success"></i> Copied!';
+            setTimeout(() => { textSpan.innerHTML = original; }, 2000);
+          }).catch(() => {
+            window.prompt('Copy guide link:', guideUrl);
+          });
+        } else {
+          window.prompt('Copy guide link:', guideUrl);
+        }
+      }
+
+      if (copyLinkBtn) {
+        copyLinkBtn.addEventListener('click', function () {
+          copyGuideLink(this);
+        });
+      }
+
+      // Individual Prompt Copy Buttons
       const copyButtons = document.querySelectorAll('.copy-prompt-btn');
       copyButtons.forEach(button => {
         button.addEventListener('click', function () {

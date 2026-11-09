@@ -526,6 +526,16 @@ body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .sti
   color: #0f172a !important;
 }
 
+/* 🛡️ Inviolable Contrast Safeguard: Prevent dark-on-dark & dark-on-red in .public-layout dark/accent surfaces */
+:is(body, html) :is(.public-layout, [data-surface="light"], .surface-light) :is(.text-white, [data-surface="dark"], .surface-dark, .bg-dark, .bg-danger, header[style*="linear-gradient"], section[style*="linear-gradient"], div[style*="linear-gradient"], .card[style*="linear-gradient"]) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .feature-title, .stitch-title),
+:is(body, html) :is(.public-layout, [data-surface="light"], .surface-light) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .feature-title, .stitch-title):is(.text-white, [style*="color: #ffffff"], [style*="color: rgb(255, 255, 255)"], [style*="color: #fff"]) {
+  color: #ffffff !important;
+}
+
+:is(body, html) :is(.public-layout, [data-surface="light"], .surface-light) :is(.text-white, [data-surface="dark"], .surface-dark, .bg-dark, .bg-danger, section[style*="linear-gradient"], div[style*="linear-gradient"], .card[style*="linear-gradient"]) :is(.text-muted, .text-secondary, p:not(.text-dark)) {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
 /* Dark-Mode Tabs, Nav Pills & Secondary Buttons */
 body.dark-mode .nav-pills .nav-link:not(.active),
 body.dark-mode .nav-tabs .nav-link:not(.active),
@@ -2382,6 +2392,29 @@ body.dark-theme .ig-story-count-badge {
   }
 }
 
+/* 🚀 Share Action Button (The Swift Aerodynamic Glider) - Modern Emerald Tint & Supersonic Lift */
+.btn-action-glyph.btn-action-share {
+  border-color: rgba(5, 150, 105, 0.28);
+  background: rgba(5, 150, 105, 0.05);
+  color: #059669;
+}
+.btn-action-glyph.btn-action-share i,
+.btn-action-glyph.btn-action-share svg {
+  transition: transform 220ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@media (hover: hover) {
+  .btn-action-glyph.btn-action-share:hover {
+    border-color: #10b981;
+    background: rgba(5, 150, 105, 0.12);
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.22);
+    color: #047857;
+  }
+  .btn-action-glyph.btn-action-share:hover i,
+  .btn-action-glyph.btn-action-share:hover svg {
+    transform: rotate(0deg) translate(2px, -2px) scale(1.12);
+  }
+}
+
 /* 🔖 Bookmark Action Button - Modern Royal Purple / Amethyst Border & Tactile Surface */
 .btn-action-glyph.btn-action-bookmark {
   border-color: rgba(147, 51, 234, 0.28);
@@ -2439,6 +2472,13 @@ body.dark-theme .btn-action-glyph.btn-action-bookmark,
   border-color: rgba(192, 132, 252, 0.45);
   background: rgba(147, 51, 234, 0.15);
   color: #c084fc !important;
+}
+body.dark-mode .btn-action-glyph.btn-action-share,
+body.dark-theme .btn-action-glyph.btn-action-share,
+[data-bs-theme="dark"] .btn-action-glyph.btn-action-share {
+  border-color: rgba(52, 211, 153, 0.45);
+  background: rgba(5, 150, 105, 0.15);
+  color: #34d399 !important;
 }
 body.dark-mode .btn-action-glyph.is-liked i,
 body.dark-theme .btn-action-glyph.is-liked i,

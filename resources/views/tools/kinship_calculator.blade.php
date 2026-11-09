@@ -2,6 +2,8 @@
 
 @section('title', '7-Generation Kinship & Relationship Degree Calculator | FamilyPlatform')
 @section('meta_description', 'Calculate exact genealogical relationships, degrees of kinship, and consanguinity percentage across your family tree. Free visual kinship calculator by FamilyPlatform.')
+@section('og_title', '7-Generation Kinship & Relationship Degree Calculator | FamilyPlatform')
+@section('og_description', 'Calculate exact genealogical relationships, degrees of kinship, and consanguinity percentage across your family tree. Free visual kinship calculator by FamilyPlatform.')
 @section('data-page-id', 'kinship-calculator-tool')
 
 @section('content')
@@ -11,7 +13,7 @@
       <div class="badge rounded-pill px-3 py-2 mb-3 fw-bold text-uppercase" style="background: rgba(255,255,255,0.18); color: #fff; font-size: 0.8rem; letter-spacing: 0.05em;">
         🌳 Free Genealogical Intelligence Tool
       </div>
-      <h1 class="display-5 fw-bold mb-2">7-Generation Kinship &amp; Consanguinity Calculator</h1>
+      <h1 class="display-5 fw-bold mb-2 text-white" style="color: #ffffff !important;">7-Generation Kinship &amp; Consanguinity Calculator</h1>
       <p class="fs-5 mb-0 max-w-700 mx-auto" style="color: rgba(255, 255, 255, 0.92) !important; line-height: 1.6;">
         Wondering what a "second cousin once removed" actually means? Calculate exact relationship degrees and shared ancestry paths instantly.
       </p>
@@ -122,6 +124,22 @@
                   <div id="dnaShare" class="fs-4 fw-bold text-danger">~6.25%</div>
                 </div>
               </div>
+
+              <!-- Share Calculation Bar -->
+              <div class="mt-4 pt-4 border-top">
+                <div class="d-flex flex-column flex-sm-row justify-content-center align-items-center gap-2">
+                  <button type="button" id="shareWhatsAppBtn" class="btn btn-success btn-lg px-4 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-2 shadow-sm" style="min-height: 44px; white-space: nowrap; flex-shrink: 0; background-color: #25D366; border-color: #25D366; color: #ffffff;" aria-label="Share calculation via WhatsApp">
+                    <i class="bi bi-whatsapp"></i> Share on WhatsApp
+                  </button>
+                  <button type="button" id="shareNativeBtn" class="btn btn-danger btn-lg px-4 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-2 shadow-sm" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;" aria-label="Share calculation to device">
+                    <i class="bi bi-share-fill"></i> Share Calculation
+                  </button>
+                  <button type="button" id="copyResultBtn" class="btn btn-outline-secondary btn-lg px-4 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-2" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;" aria-label="Copy calculation result and link">
+                    <i class="bi bi-clipboard"></i> <span id="copyResultBtnText">Copy Link &amp; Result</span>
+                  </button>
+                </div>
+                <div class="text-muted small mt-2">Share this exact genealogical calculation with family members.</div>
+              </div>
             </div>
 
           </div>
@@ -134,7 +152,7 @@
               <div class="badge bg-danger text-white px-3 py-1 mb-2 text-uppercase fw-bold" style="font-size: 0.75rem;">
                 🌳 7-Generation Dynasty Engine
               </div>
-              <h3 class="fw-bold mb-2">Build Your Complete Dynasty Tree on FamilyPlatform</h3>
+              <h3 class="fw-bold mb-2 text-white" style="color: #ffffff !important;">Build Your Complete Dynasty Tree on FamilyPlatform</h3>
               <p class="mb-0" style="color: rgba(255, 255, 255, 0.9) !important; line-height: 1.6;">
                 Don't calculate relationships by hand. FamilyPlatform automatically calculates ego-centric kinship titles for every single relative in your living 7-generation organogram with zero node overlaps.
               </p>
@@ -187,9 +205,21 @@
         "5,5": { title: "Fourth Cousins", civil: 10, canon: 5, dna: "~0.20%", expl: "You both share the same 3rd great-grandparents (5th generation down)." }
       };
 
+      let currentCalculationData = null;
+
+      function getSharePayload() {
+        const title = currentCalculationData ? currentCalculationData.title : 'Genealogical Kinship';
+        const dna = currentCalculationData ? currentCalculationData.dna : '';
+        const expl = currentCalculationData ? currentCalculationData.expl : '';
+        const shareUrl = window.location.href;
+        const text = `Did you know we are ${title} (${dna} shared DNA)? ${expl}\n\nCalculate your exact family relationship path on FamilyPlatform: ${shareUrl}`;
+        return { title: `${title} | Kinship Calculator`, text, url: shareUrl };
+      }
+
       function updateCalculation() {
         const g1 = document.getElementById('person1Gen').value;
         const g2 = document.getElementById('person2Gen').value;
+        const ancestor = document.getElementById('ancestorSelect').value;
         const key = `${g1},${g2}`;
 
         const data = TABLE[key] || {
@@ -199,12 +229,50 @@
           dna: "< 0.1%",
           expl: `Generational distance of ${g1} and ${g2} steps from the common ancestor.`
         };
+        currentCalculationData = data;
 
         document.getElementById('relationshipTitle').innerText = data.title;
         document.getElementById('relationshipExplanation').innerText = data.expl;
         document.getElementById('civilDegree').innerText = `${data.civil}th Degree`;
         document.getElementById('canonDegree').innerText = `${data.canon}th Degree`;
         document.getElementById('dnaShare').innerText = data.dna;
+
+        // Persist state in URL without full page reload
+        try {
+          const url = new URL(window.location.href);
+          url.searchParams.set('ancestor', ancestor);
+          url.searchParams.set('p1', g1);
+          url.searchParams.set('p2', g2);
+          window.history.replaceState({ ancestor, p1: g1, p2: g2 }, '', url.toString());
+        } catch (e) {
+          // Graceful fallback for environments with restricted history
+        }
+      }
+
+      // Initialise from URL query parameters if present
+      try {
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('ancestor')) {
+          const validAncestors = ['parent', 'grandparent', 'great_grandparent', '2nd_great_grandparent', '3rd_great_grandparent', '4th_great_grandparent'];
+          const aVal = params.get('ancestor');
+          if (validAncestors.includes(aVal)) {
+            document.getElementById('ancestorSelect').value = aVal;
+          }
+        }
+        if (params.has('p1')) {
+          const p1Val = parseInt(params.get('p1'), 10);
+          if (p1Val >= 1 && p1Val <= 5) {
+            document.getElementById('person1Gen').value = String(p1Val);
+          }
+        }
+        if (params.has('p2')) {
+          const p2Val = parseInt(params.get('p2'), 10);
+          if (p2Val >= 1 && p2Val <= 5) {
+            document.getElementById('person2Gen').value = String(p2Val);
+          }
+        }
+      } catch (e) {
+        // Fallback to default
       }
 
       document.getElementById('person1Gen').addEventListener('change', updateCalculation);
@@ -224,6 +292,60 @@
         }
         updateCalculation();
       });
+
+      // 1-Click WhatsApp Share
+      document.getElementById('shareWhatsAppBtn').addEventListener('click', function() {
+        const payload = getSharePayload();
+        const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(payload.text)}`;
+        window.open(waUrl, '_blank');
+      });
+
+      // Native Device Share
+      document.getElementById('shareNativeBtn').addEventListener('click', async function() {
+        const payload = getSharePayload();
+        if (navigator.share) {
+          try {
+            await navigator.share(payload);
+            return;
+          } catch (err) {
+            if (err && err.name === 'AbortError') return;
+          }
+        }
+        // Fallback to clipboard
+        copyCalculationToClipboard(this);
+      });
+
+      // Copy Result & Link
+      function copyCalculationToClipboard(triggerBtn) {
+        const payload = getSharePayload();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(payload.text).then(() => {
+            showCopiedFeedback(triggerBtn || document.getElementById('copyResultBtn'));
+          }).catch(() => {
+            promptFallback(payload.text);
+          });
+        } else {
+          promptFallback(payload.text);
+        }
+      }
+
+      document.getElementById('copyResultBtn').addEventListener('click', function() {
+        copyCalculationToClipboard(this);
+      });
+
+      function showCopiedFeedback(btn) {
+        if (!btn) return;
+        const textSpan = btn.querySelector('#copyResultBtnText') || btn;
+        const originalText = textSpan.innerHTML;
+        textSpan.innerHTML = '<i class="bi bi-check2 text-success"></i> Copied!';
+        setTimeout(() => {
+          textSpan.innerHTML = originalText;
+        }, 2200);
+      }
+
+      function promptFallback(text) {
+        window.prompt('Copy kinship calculation and link:', text);
+      }
 
       updateCalculation();
     })();
