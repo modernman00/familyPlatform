@@ -237,6 +237,13 @@ final class FeatureDiscoveryService
         ],
     ];
 
+    /**
+     * In-memory request-level cache to eliminate duplicate queries within the same request lifecycle.
+     *
+     * @var array<string, array<string, mixed>>
+     */
+    private static array $requestCache = [];
+
     public function __construct(?PDO $db = null)
     {
         $this->db = $db ?? Db::connect2();
@@ -247,6 +254,7 @@ final class FeatureDiscoveryService
      *
      * @param string $userId
      * @param string $famCode
+     * @param bool $skipCache
      * @return array{
      *     account_age_days: int,
      *     is_in_discovery_window: bool,
@@ -257,10 +265,28 @@ final class FeatureDiscoveryService
      *     milestones: array<int, array<string, mixed>>
      * }
      */
-    public function getUserDiscoveryState(string $userId, string $famCode): array
+    public function getUserDiscoveryState(string $userId, string $famCode, bool $skipCache = false): array
     {
         $userId = trim($userId);
         $famCode = trim($famCode);
+
+        $cacheKey = $userId . '_' . $famCode;
+        if (!$skipCache && isset(self::$requestCache[$cacheKey])) {
+            /** @var array{account_age_days: int, is_in_discovery_window: bool, completed_count: int, total_milestones: int, progress_percentage: int, current_milestone: array<string, mixed>, milestones: array<int, array<string, mixed>>} */
+            return self::$requestCache[$cacheKey];
+        }
+
+        // Check short-lived session cache (300 seconds TTL) to eliminate query storms across feed tabs
+        $sessionKey = 'discovery_state_' . $userId;
+        if (!$skipCache && isset($_SESSION[$sessionKey]) && is_array($_SESSION[$sessionKey])) {
+            $cachedTime = (int)($_SESSION[$sessionKey]['t'] ?? 0);
+            if (time() - $cachedTime < 300 && !empty($_SESSION[$sessionKey]['data']) && is_array($_SESSION[$sessionKey]['data'])) {
+                /** @var array{account_age_days: int, is_in_discovery_window: bool, completed_count: int, total_milestones: int, progress_percentage: int, current_milestone: array<string, mixed>, milestones: array<int, array<string, mixed>>} $cachedData */
+                $cachedData = $_SESSION[$sessionKey]['data'];
+                self::$requestCache[$cacheKey] = $cachedData;
+                return $cachedData;
+            }
+        }
 
         $accountAgeDays = $this->getAccountAgeInDays($userId);
         $completedKeys = $this->getCompletedEventKeys($userId);
@@ -302,7 +328,7 @@ final class FeatureDiscoveryService
         $totalMilestones = count(self::MILESTONES);
         $progressPercentage = (int)round(($completedCount / max(1, $totalMilestones)) * 100);
 
-        return [
+        $result = [
             'account_age_days'        => $accountAgeDays,
             'is_in_discovery_window'  => ($accountAgeDays <= 60),
             'completed_count'         => $completedCount,
@@ -311,6 +337,14 @@ final class FeatureDiscoveryService
             'current_milestone'       => $currentMilestone,
             'milestones'              => $milestones,
         ];
+
+        self::$requestCache[$cacheKey] = $result;
+        $_SESSION[$sessionKey] = [
+            't' => time(),
+            'data' => $result,
+        ];
+
+        return $result;
     }
 
     /**
@@ -335,6 +369,10 @@ final class FeatureDiscoveryService
                 VALUES (?, ?, \'interactive_fast_forward\', JSON_OBJECT(\'action\', \'user_launched\'), NOW())
             ');
             $stmt->execute([$userId, $featureKey]);
+
+            // Invalidate caches immediately so updated progress reflects instantly
+            self::$requestCache = [];
+            unset($_SESSION['discovery_state_' . $userId]);
 
             return ['status' => 'success', 'message' => 'Milestone completed successfully', 'key' => $featureKey];
         } catch (PDOException $e) {

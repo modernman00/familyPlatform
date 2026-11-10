@@ -1,592 +1,471 @@
-@php $jsonSafeFlags = JSON_HEX_TAG + JSON_HEX_APOS + JSON_HEX_QUOT + JSON_HEX_AMP; @endphp
+@php
+    $jsonSafeFlags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE;
+    $recipient = trim((string)($card['recipient_name'] ?? ''));
+    $sender = (string)($card['sender_name'] ?? 'Your family');
+    $mood = (string)($card['mood'] ?? 'joyful');
+    $moodMeta = (array)($card['mood_meta'] ?? []);
+    $ogTitle = ($recipient !== '' ? '💌 A card for ' . $recipient : '💌 You’ve received a card') . ' from ' . $sender;
+    $ogDesc = $card['headline'] . ' — tap to break the seal and open your living envelope.';
+    $ogImage = $card['absolute_og_image_url'] ?? $card['absolute_image_url'] ?? $card['image_url'];
+    $prompt = (string)($moodMeta['envelope_prompt'] ?? 'Something wonderful is inside');
+    $replyHref = '/register?ref=festive_' . $card['share_token'] . (!empty($card['fam_code']) ? '&famCode=' . rawurlencode((string)preg_replace('/^#+/', '', (string)$card['fam_code'])) : '');
+@endphp
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="robots" content="noindex, nofollow">
-    
-    <!-- OpenGraph & Social Previews -->
-    <title>{{ $card['headline'] }} — From {{ $card['sender_name'] }}</title>
-    <meta name="description" content="{{ $card['headline'] }}: {{ $card['verse'] }}">
-    
+    <meta name="theme-color" content="{{ $theme['deep_color'] ?? '#120409' }}">
+
+    <title>{{ $ogTitle }}</title>
+    <meta name="description" content="{{ $ogDesc }}">
+
+    <!-- OpenGraph & Social Previews (WhatsApp, iMessage, Facebook, X) -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="{{ $card['headline'] }} ✨">
-    <meta property="og:description" content="A warm festive greeting from {{ $card['sender_name'] }}. Tap to open your family envelope.">
-    <meta property="og:image" content="{{ $card['absolute_image_url'] ?? $card['image_url'] }}">
+    <meta property="og:site_name" content="FamilyPlatform">
+    <meta property="og:title" content="{{ $ogTitle }}">
+    <meta property="og:description" content="{{ $ogDesc }}">
+    <meta property="og:image" content="{{ $ogImage }}">
+    <meta property="og:image:secure_url" content="{{ $ogImage }}">
+    <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="{{ $card['occasion_label'] }} card from {{ $sender }}">
     <meta property="og:url" content="{{ $card['absolute_public_url'] ?? $card['public_url'] }}">
-
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $card['headline'] }} ✨">
-    <meta name="twitter:description" content="A warm festive greeting from {{ $card['sender_name'] }}.">
-    <meta name="twitter:image" content="{{ $card['absolute_image_url'] ?? $card['image_url'] }}">
+    <meta name="twitter:title" content="{{ $ogTitle }}">
+    <meta name="twitter:description" content="{{ $ogDesc }}">
+    <meta name="twitter:image" content="{{ $ogImage }}">
 
     <link rel="icon" href="/favicon.ico">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Great+Vibes&family=Playfair+Display:wght@400;500;600&family=Inter:wght@500;600&display=swap">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="/public/css/festive-cards.css?v={{ assetVersion('css/festive-cards.css') }}">
+    <link rel="preload" as="image" href="{{ $card['portrait_image_url'] }}">
 
-    <style>
+    <style nonce="{{ $nonce ?? '' }}">
         :root {
-            --theme-bg: {{ $theme['primary_color'] ?? '#881337' }};
-            --theme-accent: {{ $theme['accent_color'] ?? '#f59e0b' }};
-            --theme-seal: {{ $theme['seal_color'] ?? '#b91c1c' }};
-            --theme-gradient: {{ $theme['gradient'] ?? 'linear-gradient(135deg, #1e0910 0%, #4c0519 50%, #881337 100%)' }};
+            --primary: {{ $theme['primary_color'] ?? '#7a0f2a' }};
+            --accent: {{ $theme['accent_color'] ?? '#d4af37' }};
+            --deep: {{ $theme['deep_color'] ?? '#1a0309' }};
+            --light: {{ $theme['light_color'] ?? '#f6e7a8' }};
+            --paper: {{ $theme['paper_color'] ?? '#fbf3e4' }};
+            --seal: {{ $theme['seal_color'] ?? '#9f1239' }};
+            --metal: linear-gradient(118deg, var(--light) 0%, var(--accent) 22%, color-mix(in srgb, var(--accent) 52%, #000) 42%, var(--light) 58%, var(--accent) 78%, color-mix(in srgb, var(--accent) 55%, #000) 100%);
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        html { background: #050406; }
         body {
-            background: #090205;
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             min-height: 100vh;
             min-height: 100dvh;
+            color: #f6f0e4;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(70% 55% at 50% 38%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 70%),
+                radial-gradient(120% 80% at 50% 120%, color-mix(in srgb, var(--primary) 55%, transparent), transparent 70%),
+                linear-gradient(180deg, color-mix(in srgb, var(--deep) 80%, #000) 0%, var(--deep) 60%, #050406 100%);
+            background-attachment: fixed;
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            -webkit-font-smoothing: antialiased;
         }
-
-        #particleCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
             pointer-events: none;
-            z-index: 1;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            z-index: 0;
         }
+        #particleCanvas { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 1; }
 
-        /* ── Living Envelope & 3D Stage ── */
-        .envelope-stage {
-            position: relative;
-            z-index: 10;
-            width: 100%;
-            max-width: 680px;
-            margin: 40px auto 20px auto;
-            perspective: 1200px;
-            padding: 0 16px;
-        }
+        main { position: relative; z-index: 2; flex: 1; display: flex; flex-direction: column; align-items: center; padding: max(28px, env(safe-area-inset-top)) 16px 24px; }
 
-        .envelope-box {
-            position: relative;
-            width: 100%;
-            background: var(--theme-gradient);
-            border-radius: 24px;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), 0 0 40px rgba(245, 158, 11, 0.2);
-            border: 2px solid rgba(254, 240, 138, 0.35);
-            overflow: visible;
-            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
+        .intro { text-align: center; max-width: 520px; margin-bottom: 18px; transition: opacity .6s ease, transform .6s ease; }
+        .intro.is-hidden { opacity: 0; transform: translateY(-10px); pointer-events: none; }
+        .eyebrow { font-family: 'Cinzel', Georgia, serif; font-size: .74rem; letter-spacing: .34em; text-transform: uppercase; background: var(--metal); -webkit-background-clip: text; background-clip: text; color: transparent; margin: 0 0 10px; }
+        .intro h1 { font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: clamp(1.6rem, 6vw, 2.3rem); line-height: 1.15; margin: 0 0 6px; color: #fff; }
+        .intro h1 .script { font-family: 'Great Vibes', cursive; font-weight: 400; font-size: 1.3em; background: var(--metal); -webkit-background-clip: text; background-clip: text; color: transparent; padding: 0 .06em; }
+        .intro p { margin: 0; color: rgba(246,240,228,.72); font-size: .95rem; }
 
-        /* Top Flap */
-        .envelope-flap {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 140px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(0, 0, 0, 0.35) 100%);
-            clip-path: polygon(0 0, 100% 0, 50% 100%);
-            transform-origin: top center;
-            transition: transform 0.8s ease-in-out;
-            z-index: 25;
-            pointer-events: none;
-        }
+        /* ── Scene ─────────────────────────────────────────────────────── */
+        .scene { position: relative; width: min(88vw, 460px, calc((100vh - 190px) * 0.78)); min-width: 260px; aspect-ratio: 4 / 5.6; perspective: 1600px; margin-top: 4px; }
+        .scene.is-revealed { aspect-ratio: 4 / 5; transition: aspect-ratio .9s cubic-bezier(.2,.8,.2,1); }
 
-        .envelope-flap.opened {
-            transform: rotateX(180deg);
+        .env-card {
+            position: absolute; left: 7%; right: 7%; bottom: 14%;
+            transform-origin: 50% 100%;
+            transform: translateY(0) scale(.86);
+            opacity: 0;
             z-index: 2;
+            transition: transform 1.1s cubic-bezier(.2,.85,.25,1), opacity .2s linear .35s, left .9s cubic-bezier(.2,.8,.2,1), right .9s cubic-bezier(.2,.8,.2,1), bottom .9s cubic-bezier(.2,.8,.2,1);
         }
+        .scene.is-open .env-card { opacity: 1; }
+        .scene.is-rising .env-card { transform: translateY(-46%) scale(.86); }
+        .scene.is-revealed .env-card { left: 0; right: 0; bottom: 0; transform: none; z-index: 6; }
 
-        /* Gold Wax Seal */
-        .wax-seal {
-            position: absolute;
-            top: 95px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 84px;
-            height: 84px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #ef4444 0%, var(--theme-seal) 70%, #450a0a 100%);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.4);
-            border: 2px solid rgba(254, 240, 138, 0.65);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 30;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .wax-seal:hover {
-            transform: translateX(-50%) scale(1.08);
-            filter: brightness(1.15);
-        }
-
-        .wax-seal.broken {
-            animation: crackWax 0.6s forwards ease-out;
-            pointer-events: none;
-        }
-
-        @keyframes crackWax {
-            0% { transform: translateX(-50%) scale(1); filter: brightness(1.5); }
-            50% { transform: translateX(-50%) scale(1.15) rotate(5deg); opacity: 0.8; }
-            100% { transform: translateX(-50%) scale(0.4) rotate(-15deg); opacity: 0; display: none; }
-        }
-
-        .wax-seal-monogram {
-            font-family: "Georgia", serif;
-            font-weight: bold;
-            font-size: 1.5rem;
-            color: #fef08a;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-            letter-spacing: 1px;
-        }
-
-        /* ── The Unfolded Card Container ── */
-        .card-inner-sheet {
-            display: none;
-            position: relative;
-            z-index: 20;
-            border-radius: 20px;
-            padding: 36px 28px;
-            margin: 12px;
-            animation: slideUpCard 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .card-inner-sheet.revealed {
-            display: block;
-        }
-
-        @keyframes slideUpCard {
-            0% { opacity: 0; transform: translateY(40px) scale(0.96); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        /* ── The 7 Archetype Themes ── */
-
-        /* 1. Classic Heritage */
-        .fp-festive-card-classic {
-            background: linear-gradient(135deg, #18050b 0%, #2e0815 50%, #4c0519 100%);
-            border: 2px solid rgba(245, 158, 11, 0.55);
-            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.6);
-        }
-
-        /* 2. Luxury 3D Spatial */
-        .fp-festive-card-spatial {
-            background: linear-gradient(145deg, #1f1b2e 0%, #110e1c 100%);
-            border: 2px solid #a855f7;
+        .env {
+            position: absolute; left: 0; right: 0; bottom: 6%;
+            aspect-ratio: 1.42;
             transform-style: preserve-3d;
-            box-shadow: 0 20px 50px rgba(168, 85, 247, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.3);
+            transition: transform 1s cubic-bezier(.5,0,.2,1), opacity .8s ease;
         }
+        .scene.is-revealed .env { transform: translateY(70%) rotateX(18deg); opacity: 0; pointer-events: none; }
+        .env__back, .env__front, .env__flap { position: absolute; inset: 0; border-radius: 10px; }
+        .env__back {
+            z-index: 1;
+            box-shadow: 0 30px 50px -10px rgba(0,0,0,.6), 0 8px 16px rgba(0,0,0,.35);
+            background:
+                repeating-linear-gradient(45deg, color-mix(in srgb, var(--accent) 35%, transparent) 0 2px, transparent 2px 14px),
+                linear-gradient(180deg, color-mix(in srgb, var(--primary) 75%, #000), var(--primary));
+        }
+        .env__front {
+            z-index: 3;
+            background:
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+                linear-gradient(165deg, color-mix(in srgb, var(--primary) 92%, #fff) 0%, var(--primary) 45%, color-mix(in srgb, var(--primary) 70%, #000) 100%);
+            clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%);
+        }
+        .env__front::before, .env__front::after { content: ''; position: absolute; inset: 0; }
+        .env__front::before { background: linear-gradient(to top right, rgba(0,0,0,.22), transparent 50%); clip-path: polygon(0 0, 50% 50%, 0 100%); }
+        .env__front::after { background: linear-gradient(to top left, rgba(255,255,255,.08), transparent 50%); clip-path: polygon(100% 0, 50% 50%, 100% 100%); }
+        .env__address { position: absolute; z-index: 4; left: 0; right: 0; bottom: 5%; text-align: center; pointer-events: none; }
+        .env__to { font-family: 'Great Vibes', cursive; font-size: clamp(1.6rem, 7.5vw, 2.3rem); line-height: 1.1; background: var(--metal); -webkit-background-clip: text; background-clip: text; color: transparent; padding: 0 .1em; filter: drop-shadow(0 1px 0 rgba(0,0,0,.35)); }
+        .env__from { font-family: 'Cinzel', Georgia, serif; font-size: .62rem; letter-spacing: .32em; text-transform: uppercase; color: color-mix(in srgb, var(--light) 80%, transparent); margin-top: 4px; }
+        .env__flap {
+            z-index: 5;
+            height: 56%;
+            transform-origin: 50% 0;
+            transform-style: preserve-3d;
+            transition: transform .9s cubic-bezier(.45,.05,.2,1), z-index 0s linear .45s;
+        }
+        .env__flap-face, .env__flap-inner { position: absolute; inset: 0; clip-path: polygon(0 0, 100% 0, 50% 100%); backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 10px 10px 0 0; }
+        .env__flap-face { background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 85%, #fff) 0%, color-mix(in srgb, var(--primary) 88%, #000) 100%); }
+        .env__flap-face::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,.25)); }
+        .env__flap-inner {
+            transform: rotateX(180deg);
+            background:
+                radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--light) 50%, transparent) 0 1px, transparent 1.6px) 0 0 / 12px 12px,
+                var(--metal);
+        }
+        .scene.is-open .env__flap { transform: rotateX(180deg); z-index: 0; }
 
-        /* 3. Translucent Frost */
-        .fp-festive-card-translucent {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1.5px solid rgba(255, 255, 255, 0.35);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.1);
+        .wax-seal {
+            position: absolute; z-index: 7;
+            left: 50%; top: 54%;
+            width: clamp(74px, 22vw, 96px); aspect-ratio: 1;
+            transform: translate(-50%, -50%);
+            border: 0; padding: 0; cursor: pointer;
+            border-radius: 47% 53% 50% 50% / 52% 48% 52% 48%;
+            background: radial-gradient(circle at 34% 28%, color-mix(in srgb, var(--seal) 55%, #fff) 0%, var(--seal) 38%, color-mix(in srgb, var(--seal) 45%, #000) 100%);
+            box-shadow: 0 10px 22px rgba(0,0,0,.5), inset 0 3px 4px rgba(255,255,255,.35), inset 0 -6px 9px rgba(0,0,0,.35);
+            display: grid; place-items: center;
+            -webkit-tap-highlight-color: transparent;
+            transition: transform .25s cubic-bezier(.2,1.4,.4,1);
         }
+        .wax-seal::before { content: ''; position: absolute; inset: 16%; border-radius: 50%; border: 2px solid rgba(0,0,0,.22); box-shadow: 0 1px 0 rgba(255,255,255,.18); }
+        .wax-seal::after { content: ''; position: absolute; inset: -14px; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--light) 60%, transparent); animation: sealPulse 2.2s ease-out infinite; }
+        .wax-seal:hover { transform: translate(-50%, -50%) scale(1.06); }
+        .wax-seal:focus-visible { outline: 3px solid var(--light); outline-offset: 6px; }
+        .wax-seal__mono { position: relative; font-family: 'Cinzel', Georgia, serif; font-weight: 700; font-size: clamp(1.4rem, 6vw, 1.9rem); background: var(--metal); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 -1px 0 rgba(0,0,0,.45)); }
+        .wax-seal__mono.is-pair { font-size: clamp(1.1rem, 4.6vw, 1.45rem); }
+        .wax-seal.broken { animation: crackWax .7s forwards cubic-bezier(.5,0,.75,0); pointer-events: none; }
+        .wax-seal.broken::after { display: none; }
+        @keyframes sealPulse { 0% { transform: scale(.85); opacity: .9; } 100% { transform: scale(1.35); opacity: 0; } }
+        @keyframes crackWax {
+            0% { transform: translate(-50%, -50%) scale(1); filter: brightness(1.3); }
+            35% { transform: translate(-50%, -50%) scale(1.12) rotate(6deg); }
+            100% { transform: translate(-50%, -20%) scale(.5) rotate(-24deg); opacity: 0; }
+        }
+        .seal-anchor { position: absolute; left: 0; right: 0; bottom: 6%; aspect-ratio: 1.42; pointer-events: none; z-index: 7; }
+        .seal-anchor .wax-seal { top: 49%; pointer-events: auto; }
+        .scene.is-revealed .seal-anchor { display: none; }
 
-        /* 4. Hollow Die-Cut */
-        .fp-festive-card-hollow {
-            background: #111827;
-            border: 3px dashed var(--theme-accent);
-            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9);
-            position: relative;
-        }
+        .tap-hint { margin-top: 16px; text-align: center; color: rgba(246,240,228,.7); font-size: .88rem; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity .4s; }
+        .tap-hint.is-hidden { opacity: 0; }
 
-        /* 5. Plaque & Royal Engraving */
-        .fp-festive-card-plaque {
-            background: linear-gradient(180deg, #09090b 0%, #18181b 100%);
-            border: 3px solid #d4af37;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), inset 0 2px 5px rgba(212, 175, 55, 0.5);
-        }
+        /* ── After reveal ──────────────────────────────────────────────── */
+        .after { width: min(92vw, 460px); margin-top: 26px; opacity: 0; transform: translateY(14px); transition: opacity .7s ease .5s, transform .7s ease .5s; pointer-events: none; }
+        .after.is-in { opacity: 1; transform: none; pointer-events: auto; }
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 12px 14px; border-radius: 16px; border: 1px solid color-mix(in srgb, var(--light) 25%, transparent); background: rgba(255,255,255,.06); color: #f6f0e4; font: 600 .9rem/1.2 'Inter', sans-serif; text-decoration: none; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .2s, transform .2s; }
+        .btn:hover { background: rgba(255,255,255,.12); color: #fff; }
+        .btn--wa { grid-column: 1 / -1; min-height: 56px; font-size: 1rem; border: 0; color: #fff; background: linear-gradient(135deg, #25d366, #128c4a); box-shadow: 0 14px 30px -14px rgba(37,211,102,.75); }
+        .btn--wa:hover { filter: brightness(1.05); background: linear-gradient(135deg, #25d366, #128c4a); }
+        .btn--gold { grid-column: 1 / -1; color: #1b1406; border: 0; background: linear-gradient(110deg, var(--light), var(--accent) 45%, var(--light) 70%, var(--accent)); background-size: 200% 100%; box-shadow: 0 14px 30px -16px color-mix(in srgb, var(--accent) 80%, transparent); }
+        .btn--gold:hover { color: #1b1406; background-position: 100% 0; }
+        .audio { display: flex; align-items: center; gap: 12px; justify-content: center; margin: 0 0 14px; }
 
-        /* 6. Hyper-Reality Hologram */
-        .fp-festive-card-holographic {
-            background: linear-gradient(135deg, rgba(236,72,153,0.2) 0%, rgba(59,130,246,0.2) 50%, rgba(16,185,129,0.2) 100%);
-            backdrop-filter: blur(16px);
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 0 40px rgba(56, 189, 248, 0.35);
-            animation: holoShift 8s infinite alternate ease-in-out;
-        }
+        footer { position: relative; z-index: 2; text-align: center; padding: 28px 20px calc(28px + env(safe-area-inset-bottom)); color: rgba(246,240,228,.55); font-size: .8rem; }
+        footer .brand { font-family: 'Cinzel', Georgia, serif; letter-spacing: .38em; text-transform: uppercase; font-size: .68rem; color: color-mix(in srgb, var(--light) 70%, transparent); display: block; margin-bottom: 6px; }
+        footer a { color: color-mix(in srgb, var(--light) 85%, #fff); }
 
-        @keyframes holoShift {
-            0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(90deg); }
-        }
+        .fp-toast { position: fixed; left: 50%; bottom: 28px; z-index: 30; transform: translate(-50%, 20px); opacity: 0; background: #17120c; color: #f4efe6; border: 1px solid rgba(243,220,154,.35); padding: 12px 18px; border-radius: 999px; font: 600 .9rem 'Inter', sans-serif; box-shadow: 0 16px 30px rgba(0,0,0,.35); transition: opacity .3s, transform .3s; }
+        .fp-toast.is-in { opacity: 1; transform: translate(-50%, 0); }
 
-        /* 7. 3D Origami Pop-Up */
-        .fp-festive-card-origami {
-            background: #ffffff;
-            color: #1e293b;
-            border: 3px solid #e11d48;
-            box-shadow: 0 25px 60px rgba(225, 29, 72, 0.35);
-        }
-        .fp-festive-card-origami .card-verse {
-            color: #334155 !important;
-        }
-        .fp-festive-card-origami .card-sender {
-            color: #9f1239 !important;
-        }
-        .fp-festive-card-origami .card-headline {
-            color: #0f172a !important;
-        }
-
-        /* Hero Photo Frame */
-        .festive-hero-wrap {
-            max-width: 380px;
-            margin: 0 auto 24px auto;
-            border-radius: 18px;
-            overflow: hidden;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
-            border: 2px solid rgba(254, 240, 138, 0.4);
-        }
-
-        .festive-hero-img {
-            width: 100%;
-            height: auto;
-            max-height: 320px;
-            object-fit: cover;
-            display: block;
-        }
-
-        /* Audio Note Player */
-        .festive-audio-dock {
-            background: rgba(0, 0, 0, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 999px;
-            padding: 10px 20px;
-            max-width: 340px;
-            margin: 16px auto;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        /* ── Viral Invitation Banner ── */
-        .viral-growth-dock {
-            position: relative;
-            z-index: 20;
-            background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.95) 30%, #0f172a 100%);
-            padding: 40px 20px 30px 20px;
-            text-align: center;
-            margin-top: auto;
-        }
-
-        .btn-viral-cta {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: #ffffff;
-            font-weight: 700;
-            border-radius: 999px;
-            padding: 14px 32px;
-            min-height: 48px;
-            border: none;
-            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
-            transition: transform 0.2s, filter 0.2s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-viral-cta:hover {
-            transform: scale(1.03);
-            filter: brightness(1.1);
-            color: #ffffff;
+        @media (prefers-reduced-motion: reduce) {
+            .env-card, .env, .env__flap, .after, .intro { transition-duration: .01s !important; transition-delay: 0s !important; }
+            .wax-seal::after { animation: none; }
         }
     </style>
 </head>
-<body x-data="livingEnvelopeApp()">
+<body x-data="livingEnvelopeApp()" @keydown.enter.window="if (!isOpened) openEnvelope()">
 
-    <!-- 60fps Particle Dynamics Canvas (Snow, Petals, Confetti) -->
-    <canvas id="particleCanvas"></canvas>
+    <canvas id="particleCanvas" aria-hidden="true"></canvas>
 
-    <main class="container d-flex flex-column align-items-center justify-content-center py-4 flex-grow-1">
+    <main>
+        <header class="intro" :class="{ 'is-hidden': stage !== 'closed' }">
+            <p class="eyebrow">{{ $card['occasion_label'] }}</p>
+            <h1>
+                @if($recipient !== '')
+                    A card for <span class="script">{{ $recipient }}</span>
+                @else
+                    {{ $prompt }}
+                @endif
+            </h1>
+            <p>Sealed with love by <strong>{{ $sender }}</strong></p>
+        </header>
 
-        <!-- Top Greeting Invitation Prompt (Pre-Open) -->
-        <div class="text-center mb-3" x-show="!isOpened" x-transition.opacity>
-            <span class="badge rounded-pill px-3 py-1.5 fw-bold mb-2 shadow-sm"
-                  style="background: rgba(254, 240, 138, 0.2); color: #fef08a; border: 1px solid rgba(254, 240, 138, 0.4); font-size: 0.85rem; letter-spacing: 0.05em; text-transform: uppercase;">
-                {{ $occasion['title'] }}
-            </span>
-            <h2 class="fw-bold text-white mb-1" style="font-size: 1.4rem;">
-                A Special Holiday Card for You
-            </h2>
-            <p class="text-white-50 small mb-0">
-                From <strong>{{ $card['sender_name'] }}</strong> &bull; Tap the gold wax seal to open
-            </p>
-        </div>
+        <div class="scene" :class="{ 'is-open': stage !== 'closed', 'is-rising': stage === 'rising' || stage === 'revealed', 'is-revealed': stage === 'revealed' }">
+            <div class="env-card" id="envCard">
+                @include('festive.card', ['card' => $card, 'live' => false, 'tilt' => true, 'thumb' => false, 'animateIn' => false, 'styleExpr' => 'c.style'])
+            </div>
 
-        <!-- 3D Living Envelope Stage -->
-        <div class="envelope-stage">
-            <div class="envelope-box">
-                
-                <!-- Envelope Flap -->
-                <div class="envelope-flap" :class="{ 'opened': isOpened }"></div>
-
-                <!-- Interactive Wax Seal -->
-                <div class="wax-seal" 
-                     :class="{ 'broken': isOpened }"
-                     @click="openEnvelope()"
-                     title="Tap to break seal and open card"
-                     aria-label="Break wax seal and open card"
-                     role="button">
-                    <span class="wax-seal-monogram">FP</span>
+            <div class="env" aria-hidden="true">
+                <div class="env__back"></div>
+                <div class="env__front"></div>
+                <div class="env__address">
+                    <div class="env__to">{{ $recipient !== '' ? 'For ' . $recipient : 'For you' }}</div>
+                    <div class="env__from">From {{ $sender }}</div>
                 </div>
-
-                <!-- Unfolded Card Interior -->
-                <div class="card-inner-sheet {{ $templateStyle['card_class'] ?? 'fp-festive-card-classic' }}" 
-                     :class="{ 'revealed': isOpened }">
-                    
-                    <!-- Decorative Corner Filigree -->
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge rounded-pill fw-bold px-3 py-1"
-                              style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); font-size: 0.75rem;">
-                            {{ $templateStyle['badge'] ?? 'Festive Keepsake' }}
-                        </span>
-                        <span class="small text-white-50" style="font-size: 0.8rem;">
-                            {{ $occasion['badge'] }}
-                        </span>
-                    </div>
-
-                    @if(!empty($card['hero_photo_url']))
-                    <div class="festive-hero-wrap">
-                        <img src="{{ $card['hero_photo_url'] }}" alt="Family Holiday Photo" class="festive-hero-img">
-                    </div>
-                    @endif
-
-                    <!-- Headline -->
-                    <h1 class="card-headline text-center fw-bold mb-3" style="font-size: 1.85rem; letter-spacing: -0.02em; font-family: 'Georgia', serif;">
-                        {{ $card['headline'] }}
-                    </h1>
-
-                    @if(!empty($card['recipient_name']))
-                    <h5 class="text-center text-warning fw-semibold mb-3" style="font-size: 1.1rem;">
-                        Dearest {{ $card['recipient_name'] }},
-                    </h5>
-                    @endif
-
-                    <!-- Verse Body -->
-                    <p class="card-verse text-center mb-4 text-white" style="font-size: 1.05rem; line-height: 1.7; font-family: -apple-system, sans-serif;">
-                        {!! nl2br(e($card['verse'])) !!}
-                    </p>
-
-                    <!-- Sign-Off & Sender -->
-                    <div class="text-center pt-2 border-top border-white-50">
-                        <p class="text-white-50 mb-1 fst-italic" style="font-size: 0.95rem;">
-                            {{ $card['sign_off'] }}
-                        </p>
-                        <h4 class="card-sender fw-bold" style="color: #fef08a; font-family: 'Georgia', serif; font-size: 1.5rem;">
-                            {{ $card['sender_name'] }}
-                        </h4>
-                    </div>
-
-                    <!-- Audio Note Player (If present) -->
-                    @if(!empty($card['audio_voice_url']))
-                    <div class="festive-audio-dock">
-                        <button type="button" class="btn btn-sm btn-warning rounded-circle" @click="toggleAudio()" style="width: 36px; height: 36px;">
-                            <i class="bi" :class="isPlayingAudio ? 'bi-pause-fill' : 'bi-play-fill'"></i>
-                        </button>
-                        <span class="small text-white fw-semibold">Listen to Family Voice Note</span>
-                        <audio id="festiveAudio" src="{{ $card['audio_voice_url'] }}" preload="none"></audio>
-                    </div>
-                    @endif
-
-                    <!-- Share / Download Action Pill Strip -->
-                    <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 mt-4 pt-2">
-                        <button type="button" 
-                                class="btn btn-outline-light rounded-pill px-3 py-2 btn-sm fw-semibold d-inline-flex align-items-center gap-2"
-                                @click="shareCard()"
-                                style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
-                            <i class="bi bi-share-fill"></i>
-                            <span>Share with Family &amp; Friends</span>
-                        </button>
-                        <a href="{{ $card['image_url'] }}" 
-                           download="festive_card_{{ $card['share_token'] }}.png"
-                           class="btn btn-outline-warning rounded-pill px-3 py-2 btn-sm fw-semibold d-inline-flex align-items-center gap-2"
-                           style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
-                            <i class="bi bi-download"></i>
-                            <span>Save Image</span>
-                        </a>
-                        <a href="/register?ref=festive_{{ $card['share_token'] }}@if(!empty($card['fam_code']))&famCode={{ preg_replace('/^#+/', '', $card['fam_code']) }}@endif" 
-                           class="btn rounded-pill px-3 py-2 btn-sm fw-bold d-inline-flex align-items-center gap-2 text-white shadow-sm"
-                           style="background: var(--theme-accent, #f59e0b); min-height: 44px; white-space: nowrap; flex-shrink: 0;">
-                            <i class="bi bi-reply-fill"></i>
-                            <span>Reply with a Card</span>
-                        </a>
-                    </div>
+                <div class="env__flap">
+                    <div class="env__flap-face"></div>
+                    <div class="env__flap-inner"></div>
                 </div>
+            </div>
 
+            <div class="seal-anchor">
+                <button type="button" class="wax-seal" :class="{ 'broken': isOpened }" @click="openEnvelope()" aria-label="Break the wax seal and open your card">
+                    <span class="wax-seal__mono {{ mb_strlen((string)$card['monogram']) > 1 ? 'is-pair' : '' }}">{{ $card['monogram'] }}</span>
+                </button>
             </div>
         </div>
 
+        <p class="tap-hint" :class="{ 'is-hidden': isOpened }"><i class="bi bi-hand-index-thumb" aria-hidden="true"></i> Tap the seal to open</p>
+
+        <section class="after" :class="{ 'is-in': stage === 'revealed' }" aria-label="Card actions">
+            @if(!empty($card['audio_voice_url']))
+            <div class="audio">
+                <button type="button" class="btn" style="min-width:50px" @click="toggleAudio()" :aria-label="isPlayingAudio ? 'Pause voice note' : 'Play voice note'">
+                    <i class="bi" :class="isPlayingAudio ? 'bi-pause-fill' : 'bi-play-fill'" aria-hidden="true"></i>
+                </button>
+                <span>Listen to the voice note</span>
+                <audio id="festiveAudio" src="{{ $card['audio_voice_url'] }}" preload="none"></audio>
+            </div>
+            @endif
+            <div class="actions">
+                <button type="button" class="btn btn--wa" @click="shareWhatsApp()"><i class="bi bi-whatsapp" aria-hidden="true"></i> Share on WhatsApp</button>
+                <a class="btn" href="{{ $card['portrait_image_url'] }}?download=1" download><i class="bi bi-download" aria-hidden="true"></i> Save card</a>
+                <button type="button" class="btn" @click="replay()"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> Replay</button>
+                <a class="btn btn--gold" href="{{ $replyHref }}"><i class="bi bi-envelope-paper-heart" aria-hidden="true"></i> Send a card back — it’s free</a>
+            </div>
+        </section>
     </main>
 
-    <!-- Viral Growth Invitation Dock -->
-    <footer class="viral-growth-dock">
-        <div class="container" style="max-width: 580px;">
-            <p class="text-white-50 small mb-2" style="font-size: 0.88rem;">
-                Crafted with love on <strong>FamilyPlatform</strong> &bull; The private sanctuary for family heritage &amp; celebration.
-            </p>
-            <h5 class="text-white fw-bold mb-3" style="font-size: 1.15rem;">
-                Send your own family’s festive greetings or build your 7-generation ancestral tree.
-            </h5>
-            <a href="/register?ref=festive_{{ $card['share_token'] }}@if(!empty($card['fam_code']))&famCode={{ preg_replace('/^#+/', '', $card['fam_code']) }}@endif" class="btn-viral-cta">
-                <i class="bi bi-stars fs-5"></i>
-                <span>Create Your Family’s Free Festive Card</span>
-                <i class="bi bi-arrow-right"></i>
-            </a>
-        </div>
+    <footer>
+        <span class="brand">FamilyPlatform</span>
+        The private home for your family’s stories, tree and celebrations. <a href="{{ $replyHref }}">Create yours</a>
     </footer>
 
-    <!-- Audio Chime Synthesizer & Particle Simulation Engine -->
-    <script>
+    <script nonce="{{ $nonce ?? '' }}" src="/public/js/festive-cards.js?v={{ assetVersion('js/festive-cards.js') }}"></script>
+    <script nonce="{{ $nonce ?? '' }}">
+        const FESTIVE = {
+            particle: {!! json_encode((string)($card['particle'] ?? 'snow'), $jsonSafeFlags) !!},
+            mood: {!! json_encode($mood, $jsonSafeFlags) !!},
+            accent: {!! json_encode((string)($theme['accent_color'] ?? '#d4af37'), $jsonSafeFlags) !!},
+            light: {!! json_encode((string)($theme['light_color'] ?? '#f6e7a8'), $jsonSafeFlags) !!},
+            primary: {!! json_encode((string)($theme['primary_color'] ?? '#7a0f2a'), $jsonSafeFlags) !!},
+            whatsapp: {!! json_encode((string)($card['whatsapp_text'] ?? ''), $jsonSafeFlags) !!},
+            image: {!! json_encode((string)$card['portrait_image_url'], $jsonSafeFlags) !!},
+        };
+
         function livingEnvelopeApp() {
             return {
                 isOpened: false,
+                stage: 'closed',
                 isPlayingAudio: false,
+                timers: [],
+
+                init() {
+                    if (window.FPCards) window.FPCards.prepareShareFile(FESTIVE.image, 'greeting-card.jpg');
+                },
 
                 openEnvelope() {
                     if (this.isOpened) return;
                     this.isOpened = true;
                     this.playChime();
-                    triggerParticleBurst();
+                    const card = document.querySelector('#envCard .fc-card');
+                    if (window.FPCards) window.FPCards.enableGyro(card);
+                    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    const t = (fn, ms) => this.timers.push(setTimeout(fn, reduce ? 0 : ms));
+                    t(() => { this.stage = 'open'; }, 280);
+                    t(() => { this.stage = 'rising'; }, 950);
+                    t(() => {
+                        this.stage = 'revealed';
+                        if (card) { card.classList.add('fc-animate-in'); }
+                        window.triggerParticleBurst && window.triggerParticleBurst();
+                    }, 2000);
+                },
+
+                replay() {
+                    this.timers.forEach(clearTimeout);
+                    this.timers = [];
+                    const card = document.querySelector('#envCard .fc-card');
+                    if (card) card.classList.remove('fc-animate-in');
+                    this.stage = 'closed';
+                    this.isOpened = false;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 },
 
                 playChime() {
                     try {
                         const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                        const osc = ctx.createOscillator();
-                        const gain = ctx.createGain();
-                        
-                        osc.type = 'triangle';
-                        osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-                        osc.frequency.exponentialRampToValueAtTime(880.00, ctx.currentTime + 0.3); // A5
-                        osc.frequency.exponentialRampToValueAtTime(1174.66, ctx.currentTime + 0.6); // D6
-                        
-                        gain.gain.setValueAtTime(0.01, ctx.currentTime);
-                        gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 0.1);
-                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
-                        
-                        osc.connect(gain);
-                        gain.connect(ctx.destination);
-                        osc.start();
-                        osc.stop(ctx.currentTime + 0.85);
+                        const solemn = FESTIVE.mood === 'reverent';
+                        const notes = solemn ? [220, 329.63] : [783.99, 987.77, 1174.66, 1567.98];
+                        notes.forEach((f, i) => {
+                            const start = ctx.currentTime + i * (solemn ? 0.5 : 0.11);
+                            const osc = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(f, start);
+                            gain.gain.setValueAtTime(0.0001, start);
+                            gain.gain.exponentialRampToValueAtTime(solemn ? 0.16 : 0.12, start + 0.02);
+                            gain.gain.exponentialRampToValueAtTime(0.0001, start + (solemn ? 3.2 : 1.4));
+                            osc.connect(gain); gain.connect(ctx.destination);
+                            osc.start(start); osc.stop(start + (solemn ? 3.3 : 1.5));
+                        });
                     } catch (e) {}
                 },
 
                 toggleAudio() {
                     const audio = document.getElementById('festiveAudio');
                     if (!audio) return;
-                    if (this.isPlayingAudio) {
-                        audio.pause();
-                        this.isPlayingAudio = false;
-                    } else {
-                        audio.play().catch(() => {});
-                        this.isPlayingAudio = true;
-                        audio.onended = () => { this.isPlayingAudio = false; };
-                    }
+                    if (this.isPlayingAudio) { audio.pause(); this.isPlayingAudio = false; return; }
+                    audio.play().catch(() => {});
+                    this.isPlayingAudio = true;
+                    audio.onended = () => { this.isPlayingAudio = false; };
                 },
 
-                async shareCard() {
-                    const shareData = {
-                        title: {!! json_encode((string)($card['headline'] ?? 'Festive Greetings'), $jsonSafeFlags) !!},
-                        text: {!! json_encode('A warm holiday card from ' . ((string)($card['sender_name'] ?? 'Family')) . ' on FamilyPlatform ✨', $jsonSafeFlags) !!},
-                        url: window.location.href
-                    };
+                shareWhatsApp() {
+                    window.FPCards.shareWhatsApp({ text: FESTIVE.whatsapp, imageUrl: FESTIVE.image });
+                },
 
-                    if (navigator.share) {
-                        try {
-                            await navigator.share(shareData);
-                        } catch (e) {}
-                    } else {
-                        navigator.clipboard.writeText(window.location.href);
-                        alert('Card link copied to clipboard! Paste it into WhatsApp or iMessage to send.');
-                    }
-                }
+                /* v1 API kept for callers/tests */
+                async shareCard() { this.shareWhatsApp(); },
             };
         }
 
-        // ── 60fps Particle Engine ──
-        const canvas = document.getElementById('particleCanvas');
-        const ctx = canvas.getContext('2d');
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
+        /* ── Ambient particles tuned to the occasion's mood ───────────────── */
+        (function () {
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+            const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            let W = 0, H = 0;
+            function size() { W = window.innerWidth; H = window.innerHeight; canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+            size();
+            window.addEventListener('resize', size);
 
-        window.addEventListener('resize', () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        });
+            const type = FESTIVE.particle;
+            const gold = [FESTIVE.light, FESTIVE.accent, '#fff4d1'];
+            const palettes = {
+                confetti: [FESTIVE.accent, FESTIVE.light, FESTIVE.primary, '#ffffff', '#f472b6', '#60a5fa'],
+                petals: ['#fbcfe8', '#f9a8d4', '#fde2e4', '#ffffff'],
+                leaves: ['#c2410c', '#ea580c', '#b45309', '#a16207', '#7c2d12'],
+                snow: ['#ffffff'], stardust: ['#ffffff', FESTIVE.light], golddust: gold,
+                sparks: ['#fde68a', '#fbbf24', '#f59e0b', '#fff7ed'], embers: ['#fde7c2', '#fcd9a8', '#ffffff'],
+            };
+            const colours = palettes[type] || palettes.snow;
+            const small = window.innerWidth < 600;
+            const counts = { confetti: 46, petals: 30, leaves: 26, snow: 70, stardust: 80, golddust: 70, sparks: 40, embers: 22 };
+            const parts = [];
+            const rand = (a, b) => a + Math.random() * (b - a);
 
-        const particleType = {!! json_encode((string)($occasion['particle'] ?? 'snow'), $jsonSafeFlags) !!};
-        const particles = [];
-        const count = window.innerWidth < 600 ? 35 : 70;
-
-        for (let i = 0; i < count; i++) {
-            particles.push({
-                x: Math.random() * width,
-                y: Math.random() * height,
-                r: Math.random() * 3 + 1.5,
-                dx: Math.random() * 1.5 - 0.75,
-                dy: Math.random() * 1.2 + 0.8,
-                color: particleType === 'confetti' 
-                    ? ['#f59e0b', '#ec4899', '#3b82f6', '#10b981', '#fef08a'][Math.floor(Math.random() * 5)]
-                    : (particleType === 'petals' ? '#f472b6' : '#ffffff'),
-                opacity: Math.random() * 0.7 + 0.3
-            });
-        }
-
-        function renderParticles() {
-            ctx.clearRect(0, 0, width, height);
-            for (let p of particles) {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                ctx.fillStyle = p.color;
-                ctx.globalAlpha = p.opacity;
-                ctx.fill();
-
-                p.x += p.dx;
-                p.y += p.dy;
-
-                if (p.y > height) {
-                    p.y = -5;
-                    p.x = Math.random() * width;
+            function make(burst) {
+                const p = { x: rand(0, W), y: rand(-H, H), rot: rand(0, Math.PI * 2), vr: rand(-0.03, 0.03), sway: rand(0, Math.PI * 2), c: colours[Math.floor(Math.random() * colours.length)], tw: rand(0, Math.PI * 2) };
+                switch (type) {
+                    case 'confetti': Object.assign(p, { w: rand(5, 9), h: rand(8, 14), vy: rand(0.6, 1.6), vx: rand(-0.4, 0.4) }); break;
+                    case 'petals': Object.assign(p, { w: rand(6, 10), h: rand(10, 15), vy: rand(0.4, 1.0), vx: rand(-0.3, 0.6) }); break;
+                    case 'leaves': Object.assign(p, { w: rand(7, 12), h: rand(12, 18), vy: rand(0.5, 1.2), vx: rand(-0.3, 0.5) }); break;
+                    case 'embers': Object.assign(p, { r: rand(2, 5), vy: rand(-0.35, -0.12), vx: rand(-0.15, 0.15), y: rand(0, H * 1.4) }); break;
+                    case 'sparks': Object.assign(p, { r: rand(1, 2.4), vy: rand(-1.0, -0.35), vx: rand(-0.3, 0.3), y: rand(0, H * 1.3) }); break;
+                    case 'stardust':
+                    case 'golddust': Object.assign(p, { r: rand(0.6, 2), vy: rand(0.08, 0.3), vx: rand(-0.12, 0.12) }); break;
+                    default: Object.assign(p, { r: rand(1.2, 3.6), vy: rand(0.4, 1.1), vx: rand(-0.3, 0.3) });
                 }
-                if (p.x > width) p.x = 0;
-                if (p.x < 0) p.x = width;
+                if (burst) {
+                    const a = rand(0, Math.PI * 2), sp = rand(3, 9);
+                    Object.assign(p, { x: W / 2, y: H * 0.42, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 3, burst: 1, life: 1, c: [...gold, ...colours][Math.floor(Math.random() * (gold.length + colours.length))] });
+                    if (!p.w && type !== 'embers') { p.w = rand(5, 9); p.h = rand(8, 13); }
+                }
+                return p;
             }
-            requestAnimationFrame(renderParticles);
-        }
-        renderParticles();
+            for (let i = 0; i < Math.round((counts[type] || 50) * (small ? 0.6 : 1)); i++) parts.push(make(false));
 
-        function triggerParticleBurst() {
-            for (let i = 0; i < 60; i++) {
-                particles.push({
-                    x: width / 2,
-                    y: height * 0.4,
-                    r: Math.random() * 4 + 2,
-                    dx: (Math.random() - 0.5) * 8,
-                    dy: (Math.random() - 0.7) * 8,
-                    color: ['#fbbf24', '#f43f5e', '#ffffff', '#38bdf8'][Math.floor(Math.random() * 4)],
-                    opacity: 1
-                });
+            function draw(p) {
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.globalAlpha = p.burst ? Math.max(0, p.life) : 1;
+                if (type === 'embers' && !p.burst) {
+                    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, p.r * 4);
+                    const a = 0.35 + 0.25 * Math.sin(p.tw);
+                    g.addColorStop(0, 'rgba(255,240,210,' + a + ')');
+                    g.addColorStop(1, 'rgba(255,200,140,0)');
+                    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, p.r * 4, 0, Math.PI * 2); ctx.fill();
+                } else if (p.w) {
+                    ctx.rotate(p.rot);
+                    ctx.fillStyle = p.c;
+                    if (type === 'petals' || type === 'leaves') { ctx.beginPath(); ctx.ellipse(0, 0, p.w / 2, p.h / 2, 0, 0, Math.PI * 2); ctx.fill(); }
+                    else { ctx.scale(1, Math.cos(p.tw)); ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); }
+                } else {
+                    const tw = (type === 'stardust' || type === 'golddust') ? 0.45 + 0.55 * Math.abs(Math.sin(p.tw)) : 0.85;
+                    ctx.globalAlpha *= tw;
+                    ctx.fillStyle = p.c;
+                    ctx.shadowColor = p.c; ctx.shadowBlur = type === 'snow' ? 0 : 6;
+                    ctx.beginPath(); ctx.arc(0, 0, p.r, 0, Math.PI * 2); ctx.fill();
+                }
+                ctx.restore();
             }
-        }
+
+            function step() {
+                ctx.clearRect(0, 0, W, H);
+                for (let i = parts.length - 1; i >= 0; i--) {
+                    const p = parts[i];
+                    p.tw += 0.05; p.sway += 0.02; p.rot += p.vr;
+                    if (p.burst) { p.vy += 0.12; p.vx *= 0.985; p.life -= 0.009; if (p.life <= 0) { parts.splice(i, 1); continue; } }
+                    p.x += p.vx + (p.burst ? 0 : Math.sin(p.sway) * 0.35);
+                    p.y += p.vy;
+                    if (!p.burst) {
+                        if (p.vy > 0 && p.y > H + 20) { p.y = -20; p.x = rand(0, W); }
+                        if (p.vy < 0 && p.y < -20) { p.y = H + 20; p.x = rand(0, W); }
+                        if (p.x > W + 20) p.x = -20; if (p.x < -20) p.x = W + 20;
+                    }
+                    draw(p);
+                }
+                if (!reduce) requestAnimationFrame(step);
+            }
+            step();
+
+            window.triggerParticleBurst = function () {
+                if (reduce || FESTIVE.mood === 'reverent') return; // remembrance: stillness, no confetti
+                for (let i = 0; i < (small ? 70 : 120); i++) parts.push(make(true));
+            };
+        })();
     </script>
+    <script nonce="{{ $nonce ?? '' }}" defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
 </body>
 </html>

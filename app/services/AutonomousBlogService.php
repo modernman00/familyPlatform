@@ -280,7 +280,10 @@ class AutonomousBlogService
                         if ($el->tagName === 'a') {
                             if ($attrName === 'href') {
                                 $href = trim($attr->value);
-                                if (preg_match('/^(javascript|data|vbscript|file):/i', $href) || !preg_match('#^(https?://|/[a-zA-Z0-9_\-\./%#?&=]+)#i', $href)) {
+                                $isSafeScheme = (str_starts_with($href, 'http://') || str_starts_with($href, 'https://') || str_starts_with($href, '/'))
+                                    && !preg_match('~^(javascript|data|vbscript|file):~i', $href);
+
+                                if (!$isSafeScheme) {
                                     $attrsToRemove[] = $attr->name;
                                 }
                             } else {

@@ -458,6 +458,9 @@ final class PostMessage
             $input = json_decode($rawInput !== false ? $rawInput : '', true) ?? [];
             $cleanComment = \App\services\LinkPreviewService::sanitizePostMessage((string)($input['comment'] ?? ''));
 
+            // Sovereign Content Safety & Abuse Guardrail Gate (ATG Pod 1 & Marcus SecOps)
+            \App\services\ContentSafetyService::assertClean($cleanComment, 'comment', 'feed_comment_edit');
+
             (new Update('comment'))->updateTable(
                 column: 'comment',
                 columnAnswer: $cleanComment,
@@ -567,6 +570,9 @@ final class PostMessage
                 ? (string)$input['postMessage']
                 : \App\dto\PostDto::stripStyleToken($existingRawMessage);
             $cleanMessageStr = \App\services\LinkPreviewService::sanitizePostMessage($incomingMessage);
+
+            // Sovereign Content Safety & Abuse Guardrail Gate (ATG Pod 1 & Marcus SecOps)
+            \App\services\ContentSafetyService::assertClean($cleanMessageStr, 'post', 'feed_post_edit');
 
             // Preserve or update 3D Futuristic Text Stage style slug (RFC-0014)
             $resolvedStyle = array_key_exists('post_style', $input)

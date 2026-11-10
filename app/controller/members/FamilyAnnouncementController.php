@@ -71,6 +71,12 @@ final class FamilyAnnouncementController extends BaseController
                 throw new ValidationException("Announcement message must be between 5 and 5,000 characters.");
             }
 
+            // Sovereign Content Safety & Abuse Guardrail Gate (ATG Pod 1 & Marcus SecOps)
+            \App\services\ContentSafetyService::assertCleanPayload([
+                'announcement title' => $title,
+                'announcement message' => $message,
+            ], 'family_announcement');
+
             if (!in_array($priority, ['normal', 'important', 'urgent'], true)) {
                 $priority = 'important';
             }

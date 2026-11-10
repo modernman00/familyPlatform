@@ -53,6 +53,12 @@ final class Event extends AllMembersData
             $hostIdRaw = checkInput($_SESSION['id'] ?? '');
             $hostIdStr = is_string($hostIdRaw) ? $hostIdRaw : '';
 
+            // Sovereign Content Safety & Abuse Guardrail Gate (ATG Pod 1 & Marcus SecOps)
+            \App\services\ContentSafetyService::assertCleanPayload([
+                'event name' => isset($_POST['eventName']) && is_scalar($_POST['eventName']) ? (string)$_POST['eventName'] : '',
+                'event description' => isset($_POST['eventDescription']) && is_scalar($_POST['eventDescription']) ? (string)$_POST['eventDescription'] : '',
+            ], 'family_event');
+
             $retunLastId = SubmitPostData::submitToOneTablenImage(
                 table: 'events',
                 minMaxData: [

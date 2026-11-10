@@ -167,7 +167,9 @@ final class PostShareController
                 return;
             }
 
-            // Unregistered / Guest human: redirect to /register with the author's family code pre-populated
+            // Unregistered / Guest human: issue signed intent cookie to survive registration & OAuth SSO
+            self::issueShareIntentCookie((int)$postNo, $cleanFamCode);
+
             if ($isJsonRequest) {
                 http_response_code(401);
                 header('Content-Type: application/json; charset=utf-8');
@@ -175,7 +177,24 @@ final class PostShareController
                 return;
             }
 
-            redirect('/register?' . http_build_query($queryParams));
+            if (isset($_GET['direct'])) {
+                redirect($targetRedirectUrl);
+                return;
+            }
+
+            // Render the high-converting social landing preview screen for unregistered guests
+            view('public/postShareLanding', [
+                'ogTitle' => $ogTitle,
+                'ogDescription' => $ogDescription,
+                'ogImage' => $ogImage,
+                'ogType' => $hasVideo ? 'video.other' : 'article',
+                'canonicalUrl' => $canonicalUrl,
+                'cleanFamCode' => $cleanFamCode,
+                'mediaLabel' => $mediaLabel,
+                'shouldRedirect' => false,
+                'targetRedirectUrl' => $targetRedirectUrl,
+                'redirectTarget' => $redirectTarget,
+            ]);
         } catch (\Throwable $e) {
             error_log('[PostShareController] handlePostLink error: ' . $e->getMessage());
             if ($isJsonRequest) {
@@ -310,5 +329,69 @@ final class PostShareController
         }
 
         return false;
+    }
+
+    /**
+     * Issues an HMAC-signed share intent cookie that persists the post_no and famCode
+     * across registration, including third-party OAuth flows.
+     */
+    public static function issueShareIntentCookie(int $postNo, string $famCode): void
+    {
+        $payload = json_encode([
+            'post_no' => $postNo,
+            'famCode' => $famCode,
+            't'       => time(),
+        ]);
+        if ($payload === false) {
+            return;
+        }
+
+        $secret = (string)($_ENV['APP_KEY'] ?? 'familyPlatformIntentKey');
+        $signature = hash_hmac('sha256', $payload, $secret);
+        $cookieVal = $signature . '.' . base64_encode($payload);
+
+        $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443);
+        setcookie('fp_share_intent', $cookieVal, [
+            'expires'  => time() + (7 * 86400),
+            'path'     => '/',
+            'secure'   => $isSecure,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    }
+
+    /**
+     * Validates and unpacks the signed fp_share_intent cookie.
+     *
+     * @return array{post_no: int, famCode: string}|null
+     */
+    public static function parseShareIntentCookie(?string $rawCookie = null): ?array
+    {
+        $raw = $rawCookie ?? ($_COOKIE['fp_share_intent'] ?? null);
+        if (!is_string($raw) || !str_contains($raw, '.')) {
+            return null;
+        }
+
+        [$sig, $encoded] = explode('.', $raw, 2);
+        $payload = base64_decode($encoded, true);
+        if ($payload === false) {
+            return null;
+        }
+
+        $secret = (string)($_ENV['APP_KEY'] ?? 'familyPlatformIntentKey');
+        $expectedSig = hash_hmac('sha256', $payload, $secret);
+        if (!hash_equals($expectedSig, $sig)) {
+            return null;
+        }
+
+        $data = json_decode($payload, true);
+        if (!is_array($data) || empty($data['post_no'])) {
+            return null;
+        }
+
+        return [
+            'post_no' => (int)$data['post_no'],
+            'famCode' => (string)($data['famCode'] ?? ''),
+        ];
     }
 }

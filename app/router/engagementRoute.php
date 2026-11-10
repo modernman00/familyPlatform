@@ -35,8 +35,12 @@ $router->map('GET', '/creative-studio', 'App\controller\members\FestiveCardContr
 $router->map('GET', '/member/festive-cards', 'App\controller\members\FestiveCardController@index', 'member_festive_cards');
 $router->map('POST', '/api/festive-cards/create', 'App\controller\members\FestiveCardController@create', 'api_festive_cards_create');
 $router->map('POST', '/api/festive-cards/post-to-feed', 'App\controller\members\FestiveCardController@postToFeed', 'api_festive_cards_post_to_feed');
-$router->map('GET', '/greetings/f/[:token]', 'App\controller\members\FestiveCardController@publicView', 'festive_card_public_view');
-$router->map('GET', '/greetings/i/[:token]', 'App\controller\members\FestiveCardController@renderCardImage', 'festive_card_render_image');
+$router->map('GET|HEAD', '/greetings/f/[h:token]', 'App\controller\members\FestiveCardController@publicView', 'festive_card_public_view');
+// OG/link-preview image: .jpg (WhatsApp-sized) and .png (v1 links). [:token] alone can never match a dotted path.
+$router->map('GET|HEAD', '/greetings/i/[h:token].[jpg|png:ext]', 'App\controller\members\FestiveCardController@renderCardImage', 'festive_card_render_image_ext');
+$router->map('GET|HEAD', '/greetings/i/[h:token]', 'App\controller\members\FestiveCardController@renderCardImage', 'festive_card_render_image');
+// Portrait 1080x1350 keepsake (save / share-sheet file / feed image)
+$router->map('GET|HEAD', '/greetings/p/[h:token].jpg', 'App\controller\members\FestiveCardController@renderPortraitImage', 'festive_card_render_portrait');
 
 
 

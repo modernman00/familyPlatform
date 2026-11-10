@@ -156,6 +156,9 @@ fi
 if [ -f "tests/verify_text_stage_posts.php" ]; then
     php tests/verify_text_stage_posts.php || ADVERSARIAL_PASSED=0
 fi
+if [ -f "tests/verify_content_safety_and_abuse_filter_suite.php" ]; then
+    php tests/verify_content_safety_and_abuse_filter_suite.php || ADVERSARIAL_PASSED=0
+fi
 if [ -f "scripts/dast-guest-builder-idor.sh" ]; then
     bash scripts/dast-guest-builder-idor.sh || ADVERSARIAL_PASSED=0
 elif [ -f "scripts/dast-idor-access-control.sh" ]; then

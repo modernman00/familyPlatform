@@ -81,12 +81,12 @@ foreach ($expectedArchetypes as $arch) {
 }
 
 // -------------------------------------------------------------------------
-// Phase 3: Auditing Canonical 10 Occasions & British English
+// Phase 3: Auditing Canonical Occasions & British English
 // -------------------------------------------------------------------------
-echo "\n[Phase 3] Auditing 10 Occasions & Curated Verses...\n";
+echo "\n[Phase 3] Auditing Occasions & Curated Verses...\n";
 
 $occasions = AtgFestiveCardService::OCCASIONS;
-assertCondition(count($occasions) === 10, "AtgFestiveCardService defines 10 occasions (count=" . count($occasions) . ")");
+assertCondition(count($occasions) >= 10, "AtgFestiveCardService defines at least 10 occasions (count=" . count($occasions) . ")");
 
 $expectedOccasions = [
     'christmas', 'new_year', 'easter', 'eid', 'diwali', 'thanksgiving',

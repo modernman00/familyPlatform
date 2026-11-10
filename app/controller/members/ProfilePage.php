@@ -321,6 +321,17 @@ final class ProfilePage extends ProcessImg
                 throw new \Src\Exceptions\ValidationException("Please add some text, an image, a video, or a poll to your post.");
             }
 
+            // Sovereign Content Safety & Abuse Guardrail Gate (ATG Pod 1 & Marcus SecOps)
+            \App\services\ContentSafetyService::assertCleanPayload([
+                'post' => $cleanMultiLineMessage,
+                'poll question' => isset($_POST['poll_question']) && is_scalar($_POST['poll_question']) ? (string)$_POST['poll_question'] : '',
+                'poll option' => isset($_POST['poll_options']) && is_array($_POST['poll_options']) ? $_POST['poll_options'] : [],
+                'photo caption' => [
+                    isset($_POST['then_label']) && is_scalar($_POST['then_label']) ? (string)$_POST['then_label'] : '',
+                    isset($_POST['now_label']) && is_scalar($_POST['now_label']) ? (string)$_POST['now_label'] : '',
+                ],
+            ], 'feed_post');
+
             $id = checkInput(data: $_SESSION['id']);
             $userFamCode = (string)($_SESSION['famCode'] ?? '');
             if (empty($userFamCode) && !empty($_POST['postFamCode'])) {
@@ -881,6 +892,11 @@ final class ProfilePage extends ProcessImg
 
             if ($gifUrl === null && $cleanComment === '') {
                 throw new \Src\Exceptions\ValidationException('Write a comment or pick a GIF/sticker.');
+            }
+
+            // Sovereign Content Safety & Abuse Guardrail Gate (ATG Pod 1 & Marcus SecOps)
+            if ($cleanComment !== '') {
+                \App\services\ContentSafetyService::assertClean($cleanComment, 'comment', 'feed_comment');
             }
 
             // Optional reply target. Validated against the post BEFORE the insert so a bad

@@ -44,17 +44,46 @@ assertShare($testPostNo > 0, "Test post created with post_no = {$testPostNo}");
 try {
     $controller = new PostShareController();
 
-    // 2. Test Guest Redirection on /post/{postNo}
+    // 2. Test Guest Landing Preview on /post/{postNo}
     $_SESSION = [];
     $_COOKIE = [];
     unset($_SERVER['HTTP_ACCEPT'], $_SERVER['HTTP_X_REQUESTED_WITH']);
     $GLOBALS['__testRedirect'] = null;
+    $GLOBALS['__testView'] = null;
 
     $controller->handlePostLink($testPostNo);
-    $redirectLoc = (string)($GLOBALS['__testRedirect'] ?? '');
+    $guestView = $GLOBALS['__testView'] ?? [];
 
-    $hasRegisterRedirect = str_starts_with($redirectLoc, '/register') && str_contains($redirectLoc, 'famCode=' . $testFamCode);
-    assertShare($hasRegisterRedirect, "Guest visitor to /post/{$testPostNo} is redirected to /register?famCode={$testFamCode}&redirect=... (Got: '{$redirectLoc}')");
+    assertShare(
+        ($guestView['path'] ?? '') === 'public.postShareLanding',
+        "Guest human visitor receives high-converting landing preview (public.postShareLanding)"
+    );
+    assertShare(
+        !empty($guestView['data']['targetRedirectUrl']) && str_contains($guestView['data']['targetRedirectUrl'], 'famCode=' . $testFamCode),
+        "Guest landing CTA contains pre-populated famCode={$testFamCode}"
+    );
+
+    // 2b. Test direct redirection flag (?direct=1)
+    $_GET['direct'] = '1';
+    $GLOBALS['__testRedirect'] = null;
+    $controller->handlePostLink($testPostNo);
+    $directRedirect = (string)($GLOBALS['__testRedirect'] ?? '');
+    unset($_GET['direct']);
+
+    assertShare(
+        str_starts_with($directRedirect, '/register') && str_contains($directRedirect, 'famCode=' . $testFamCode),
+        "Direct flag (?direct=1) performs 302 forward to register with famCode={$testFamCode}"
+    );
+
+    // 2c. Test signed share intent cookie verification
+    $dummyPayload = json_encode(['post_no' => $testPostNo, 'famCode' => $testFamCode, 't' => time()]);
+    $secret = (string)($_ENV['APP_KEY'] ?? 'familyPlatformIntentKey');
+    $dummyCookie = hash_hmac('sha256', (string)$dummyPayload, $secret) . '.' . base64_encode((string)$dummyPayload);
+    $parsedIntent = PostShareController::parseShareIntentCookie($dummyCookie);
+    assertShare(
+        is_array($parsedIntent) && $parsedIntent['post_no'] === $testPostNo && $parsedIntent['famCode'] === $testFamCode,
+        "Signed fp_share_intent cookie is cryptographically verified and extracted"
+    );
 
     // 3. Test Authenticated User Redirection on /post/{postNo}
     $_SESSION['id'] = $authorId;

@@ -116,6 +116,20 @@ class FamilyRoundTableService
             return ['success' => false, 'error' => 'A title and grievance statement are required.'];
         }
 
+        // Sovereign Content Safety & Abuse Guardrail Gate (ATG Pod 1 & Marcus SecOps)
+        foreach (['dispute title' => $cleanTitle, 'grievance statement' => $cleanGrievance] as $fieldLabel => $fieldVal) {
+            $safetyCheck = ContentSafetyService::inspectText($fieldVal, $fieldLabel);
+            if (!$safetyCheck['is_clean']) {
+                ContentSafetyService::recordViolation(
+                    'round_table_dispute',
+                    (string)$safetyCheck['category'],
+                    (int)$safetyCheck['tier'],
+                    (string)$safetyCheck['redacted_match']
+                );
+                return ['success' => false, 'error' => (string)$safetyCheck['message']];
+            }
+        }
+
         if ($partyAId === $partyBId) {
             return ['success' => false, 'error' => 'A council hearing requires two distinct family members.'];
         }
@@ -262,6 +276,18 @@ class FamilyRoundTableService
         $cleanStatement = self::sanitizePromptInput($statement, 2000);
         if ($cleanStatement === '') {
             return ['success' => false, 'error' => 'Your statement cannot be empty.'];
+        }
+
+        // Sovereign Content Safety & Abuse Guardrail Gate (ATG Pod 1 & Marcus SecOps)
+        $safetyCheck = ContentSafetyService::inspectText($cleanStatement, 'council statement');
+        if (!$safetyCheck['is_clean']) {
+            ContentSafetyService::recordViolation(
+                'round_table_statement',
+                (string)$safetyCheck['category'],
+                (int)$safetyCheck['tier'],
+                (string)$safetyCheck['redacted_match']
+            );
+            return ['success' => false, 'error' => (string)$safetyCheck['message']];
         }
 
         $pdo = Db::connect2();

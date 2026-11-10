@@ -161,6 +161,13 @@ final class FamilyJournalController extends BaseController
         // Sanitize rich HTML content using modern DOM-based HTML purifier
         $cleanContent = AIService::purifyHtml((string)$contentRaw);
 
+        // Sovereign Content Safety & Abuse Guardrail Gate (ATG Pod 1 & Marcus SecOps)
+        \App\services\ContentSafetyService::assertCleanPayload([
+            'journal title' => $title,
+            'journal summary' => $summary,
+            'journal story' => $cleanContent,
+        ], 'family_journal');
+
         if (empty($summary)) {
             $plain = strip_tags($cleanContent);
             $summary = mb_substr($plain, 0, 200) . (mb_strlen($plain) > 200 ? '...' : '');

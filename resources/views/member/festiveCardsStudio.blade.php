@@ -1,652 +1,640 @@
 @extends('layouts.profileBase')
 
 @section('title', 'Festive Cards Studio — FamilyPlatform')
-@section('meta_description', 'Create bespoke family greeting cards for Christmas, Easter, New Year, and all milestone celebrations with 3D living envelopes.')
+@section('meta_description', 'Design couture greeting cards for every celebration — Christmas, Eid, Diwali, birthdays, weddings, remembrance or your own occasion — and send them as living envelopes.')
 
 @push('styles')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Great+Vibes&family=Playfair+Display:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/public/css/festive-cards.css?v={{ assetVersion('css/festive-cards.css') }}">
 <style>
-.festive-studio-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 24px 16px 60px 16px;
-}
+.fs-wrap { --fs-gold: #c9a24b; --fs-gold-2: #f3dc9a; --fs-ink: #17120c; --fs-line: #e8e1d4; --fs-surface: #ffffff; --fs-muted: #6b6257; --fs-soft: #faf7f1;
+    max-width: 1240px; margin: 0 auto; padding: 8px 16px 72px; color: var(--fs-ink); }
+.dark-mode .fs-wrap { --fs-ink: #f4efe6; --fs-line: #2d2a26; --fs-surface: #18171a; --fs-muted: #a79f94; --fs-soft: #201e22; }
 
-.festive-studio-card {
-    background: #ffffff;
-    border-radius: 24px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-}
+/* Hero */
+.fs-hero { position: relative; overflow: hidden; border-radius: 28px; padding: 28px 24px; margin-bottom: 24px; color: #fbf6ea;
+    background: radial-gradient(80% 120% at 85% 10%, rgba(201,162,75,.35), transparent 60%), radial-gradient(60% 90% at 0% 100%, rgba(122,15,42,.6), transparent 70%), linear-gradient(135deg, #0c0a0e 0%, #1d1418 55%, #2a0f19 100%);
+    box-shadow: 0 30px 60px -30px rgba(0,0,0,.6); }
+.fs-hero::after { content: ''; position: absolute; inset: 10px; border: 1px solid rgba(243,220,154,.28); border-radius: 20px; pointer-events: none; }
+.fs-hero__eyebrow { font-family: 'Cinzel', Georgia, serif; font-size: .72rem; letter-spacing: .32em; text-transform: uppercase; color: var(--fs-gold-2); margin-bottom: 10px; }
+.fs-hero h1 { font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: clamp(1.7rem, 3.6vw, 2.6rem); line-height: 1.12; margin: 0 0 10px; color: #fff; letter-spacing: -.01em; }
+.fs-hero h1 em { font-family: 'Great Vibes', cursive; font-style: normal; font-weight: 400; font-size: 1.25em; background: linear-gradient(110deg,#f3dc9a,#c9a24b 40%,#fff1c4 60%,#c9a24b); -webkit-background-clip: text; background-clip: text; color: transparent; padding: 0 .08em; }
+.fs-hero p { color: rgba(251,246,234,.78); max-width: 620px; font-size: .98rem; margin: 0; }
+.fs-hero__row { position: relative; z-index: 1; display: flex; gap: 20px; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; }
+.fs-pill-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 10px 18px; border-radius: 999px; border: 1px solid rgba(243,220,154,.45); background: rgba(255,255,255,.06); color: #fbf6ea; font-weight: 600; font-size: .9rem; white-space: nowrap; cursor: pointer; transition: background .2s; }
+.fs-pill-btn:hover { background: rgba(255,255,255,.14); color: #fff; }
 
-.dark-mode .festive-studio-card {
-    background: #18181b;
-    border-color: #27272a;
-    color: #f4f4f5;
-}
+/* Layout */
+.fs-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+@media (min-width: 992px) { .fs-grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 32px; } }
+.fs-preview-col { order: -1; }
+@media (min-width: 992px) { .fs-preview-col { order: 2; } }
+.fs-stage { position: sticky; top: 84px; border-radius: 28px; padding: 28px 22px 20px; overflow: hidden;
+    background: radial-gradient(70% 55% at 50% 30%, rgba(201,162,75,.22), transparent 70%), radial-gradient(120% 80% at 50% 120%, #2a1a10, transparent 70%), #0e0c10;
+    box-shadow: inset 0 0 0 1px rgba(243,220,154,.14), 0 30px 60px -36px rgba(0,0,0,.7); }
+@media (max-width: 991.98px) { .fs-stage { position: relative; top: 0; padding: 20px 16px 16px; } }
+.fs-stage__card { max-width: 380px; margin: 0 auto; }
+@media (max-width: 575.98px) { .fs-stage__card { max-width: 300px; } }
+.fs-stage__meta { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.fs-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; font-size: .76rem; font-weight: 600; color: #efe6d4; background: rgba(255,255,255,.07); border: 1px solid rgba(243,220,154,.22); }
+.fs-stage__hint { text-align: center; color: rgba(239,230,212,.55); font-size: .76rem; margin-top: 10px; }
 
-.archetype-pill {
-    cursor: pointer;
-    border: 2px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 12px 14px;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    background: #f8fafc;
-    min-height: 44px;
-}
+.fs-panel { background: var(--fs-surface); border: 1px solid var(--fs-line); border-radius: 24px; padding: 22px 18px; box-shadow: 0 20px 40px -32px rgba(23,18,12,.35); }
+@media (min-width: 768px) { .fs-panel { padding: 28px 28px; } }
+.fs-step { padding-bottom: 26px; margin-bottom: 26px; border-bottom: 1px solid var(--fs-line); }
+.fs-step:last-of-type { border-bottom: 0; margin-bottom: 8px; }
+.fs-step__head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+.fs-step__num { font-family: 'Cinzel', Georgia, serif; font-size: .78rem; color: var(--fs-gold); letter-spacing: .12em; flex: none; }
+.fs-step__title { font-family: 'Playfair Display', Georgia, serif; font-size: 1.22rem; font-weight: 500; margin: 0; color: var(--fs-ink); }
+.fs-step__sub { color: var(--fs-muted); font-size: .84rem; margin: -6px 0 14px; }
 
-.dark-mode .archetype-pill {
-    background: #27272a;
-    border-color: #3f3f46;
-}
+/* Occasion tiles */
+.fs-occasions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (min-width: 576px) { .fs-occasions { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1200px) { .fs-occasions { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.fs-occ { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 10px 12px; border-radius: 16px; border: 1.5px solid var(--fs-line); background: var(--fs-soft); color: var(--fs-ink); text-align: left; cursor: pointer; transition: border-color .2s, transform .2s, box-shadow .2s; font: inherit; }
+.fs-occ:hover { transform: translateY(-1px); border-color: #d9c38f; }
+.fs-occ[aria-pressed="true"] { border-color: var(--fs-gold); background: linear-gradient(135deg, rgba(243,220,154,.28), rgba(201,162,75,.10)); box-shadow: 0 8px 20px -12px rgba(201,162,75,.8); }
+.fs-occ__emoji { font-size: 1.35rem; line-height: 1; flex: none; }
+.fs-occ__name { font-size: .84rem; font-weight: 600; line-height: 1.2; }
+.fs-occ--custom { border-style: dashed; border-color: #cdb47a; background: transparent; grid-column: 1 / -1; }
+.fs-occ--custom .fs-occ__name { font-family: 'Playfair Display', Georgia, serif; font-size: .98rem; font-weight: 500; }
+.fs-occ--custom small { display: block; color: var(--fs-muted); font-size: .76rem; font-weight: 400; margin-top: 2px; }
+.fs-custom { margin-top: 14px; padding: 18px; border-radius: 18px; border: 1px solid #e3d3ab; background: linear-gradient(160deg, rgba(243,220,154,.18), rgba(255,255,255,0)); }
+.dark-mode .fs-custom { border-color: #4a3f2a; }
+.fs-moods { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+@media (min-width: 768px) { .fs-moods { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.fs-mood { min-height: 64px; padding: 10px 12px; border-radius: 14px; border: 1.5px solid var(--fs-line); background: var(--fs-surface); text-align: left; cursor: pointer; font: inherit; color: var(--fs-ink); }
+.fs-mood[aria-pressed="true"] { border-color: var(--fs-gold); box-shadow: 0 6px 16px -10px rgba(201,162,75,.9); }
+.fs-mood b { display: block; font-size: .84rem; }
+.fs-mood span { display: block; font-size: .72rem; color: var(--fs-muted); line-height: 1.3; margin-top: 2px; }
 
-.archetype-pill:hover {
-    border-color: #f59e0b;
-    transform: translateY(-2px);
-}
+/* Style tiles (live mini cards) */
+.fs-styles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (min-width: 576px) { .fs-styles { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1200px) { .fs-styles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.fs-style { padding: 10px 10px 12px; border-radius: 18px; border: 1.5px solid var(--fs-line); background: var(--fs-soft); cursor: pointer; text-align: left; font: inherit; color: var(--fs-ink); transition: transform .2s, border-color .2s, box-shadow .2s; }
+.fs-style:hover { transform: translateY(-2px); }
+.fs-style[aria-pressed="true"] { border-color: var(--fs-gold); box-shadow: 0 12px 26px -16px rgba(201,162,75,.95); background: linear-gradient(160deg, rgba(243,220,154,.25), transparent); }
+.fs-style__card { border-radius: 10px; padding: 8px; background: #0f0d11; margin-bottom: 10px; }
+.fs-style__name { font-weight: 700; font-size: .82rem; line-height: 1.2; }
+.fs-style__tag { color: var(--fs-muted); font-size: .72rem; line-height: 1.3; margin-top: 2px; }
 
-.archetype-pill.active {
-    border-color: #f59e0b;
-    background: #fefce8;
-    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
-}
+/* Palettes */
+.fs-palettes { display: flex; flex-wrap: wrap; gap: 10px; }
+.fs-pal { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 6px 14px 6px 6px; border-radius: 999px; border: 1.5px solid var(--fs-line); background: var(--fs-surface); cursor: pointer; font: inherit; font-size: .8rem; font-weight: 600; color: var(--fs-ink); }
+.fs-pal[aria-pressed="true"] { border-color: var(--fs-gold); box-shadow: 0 6px 16px -10px rgba(201,162,75,.9); }
+.fs-pal__dot { width: 34px; height: 34px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 2px rgba(255,255,255,.7), 0 2px 6px rgba(0,0,0,.25); }
 
-.dark-mode .archetype-pill.active {
-    background: rgba(245, 158, 11, 0.15);
-    border-color: #f59e0b;
-}
+/* Photo drop */
+.fs-drop { position: relative; display: flex; align-items: center; gap: 16px; padding: 16px; min-height: 96px; border-radius: 18px; border: 1.5px dashed #cdb47a; background: var(--fs-soft); cursor: pointer; transition: background .2s, border-color .2s; }
+.fs-drop:hover, .fs-drop.is-over { background: rgba(243,220,154,.18); border-color: var(--fs-gold); }
+.fs-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.fs-drop__thumb { width: 72px; height: 72px; border-radius: 14px; object-fit: cover; flex: none; background: #e9e1d2; display: grid; place-items: center; color: #9b8a66; font-size: 1.6rem; overflow: hidden; }
+.fs-drop__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.fs-drop b { display: block; font-size: .92rem; }
+.fs-drop small { color: var(--fs-muted); font-size: .76rem; }
+.fs-link-btn { background: none; border: 0; color: #9b2c2c; font-weight: 600; font-size: .82rem; min-height: 44px; padding: 0 6px; cursor: pointer; position: relative; z-index: 2; }
 
-.live-card-preview-wrap {
-    position: sticky;
-    top: 90px;
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
-    border: 2px solid rgba(245, 158, 11, 0.35);
-    transition: all 0.3s ease;
-}
+/* Fields */
+.fs-label { display: block; font-size: .78rem; font-weight: 700; letter-spacing: .02em; color: var(--fs-muted); margin-bottom: 6px; }
+.fs-input, .fs-textarea { width: 100%; min-height: 48px; padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--fs-line); background: var(--fs-surface); color: var(--fs-ink); font-size: 1rem; font-family: inherit; transition: border-color .2s, box-shadow .2s; }
+.fs-input:focus, .fs-textarea:focus { outline: none; border-color: var(--fs-gold); box-shadow: 0 0 0 4px rgba(201,162,75,.18); }
+.fs-textarea { min-height: 120px; resize: vertical; line-height: 1.5; }
+.fs-field { margin-bottom: 14px; }
+.fs-row { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 576px) { .fs-row { grid-template-columns: 1fr 1fr; } }
+.fs-count { float: right; font-weight: 500; }
+.fs-verses { display: grid; gap: 8px; margin-bottom: 12px; }
+.fs-verse { text-align: left; padding: 12px 14px; min-height: 48px; border-radius: 14px; border: 1px solid var(--fs-line); background: var(--fs-soft); font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.02rem; line-height: 1.4; color: var(--fs-ink); cursor: pointer; font-style: italic; }
+.fs-verse:hover { border-color: #d9c38f; }
+.fs-verse[aria-pressed="true"] { border-color: var(--fs-gold); background: rgba(243,220,154,.18); }
 
-/* 7 Archetype Live Preview Classes */
-.preview-card-classic {
-    background: linear-gradient(135deg, #18050b 0%, #4c0519 100%);
-    border: 2px solid #f59e0b;
-    color: #ffffff;
-}
+.fs-submit { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 56px; border: 0; border-radius: 999px; padding: 14px 28px; font-weight: 700; font-size: 1.02rem; letter-spacing: .01em; color: #1b1406; cursor: pointer;
+    background: linear-gradient(110deg, #f3dc9a 0%, #c9a24b 35%, #fff1c4 55%, #c9a24b 75%, #b48a35 100%); background-size: 200% 100%; box-shadow: 0 16px 30px -16px rgba(180,138,53,.9), inset 0 1px 0 rgba(255,255,255,.6); transition: background-position .6s, transform .2s; }
+.fs-submit:hover { background-position: 100% 0; transform: translateY(-1px); }
+.fs-submit[disabled] { opacity: .7; cursor: progress; }
+.fs-error { color: #b42318; font-size: .86rem; margin-top: 10px; }
+.fs-spin { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(27,20,6,.25); border-top-color: #1b1406; animation: fs-spin .8s linear infinite; }
+@keyframes fs-spin { to { transform: rotate(360deg); } }
 
-.preview-card-spatial_3d {
-    background: linear-gradient(145deg, #1f1b2e 0%, #110e1c 100%);
-    border: 2px solid #a855f7;
-    color: #ffffff;
-    box-shadow: 0 15px 35px rgba(168, 85, 247, 0.35);
-}
+/* Archive */
+.fs-archive { margin-top: 48px; }
+.fs-archive__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+.fs-archive__head h2 { font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: 1.6rem; margin: 0; color: var(--fs-ink); }
+.fs-archive__head p { color: var(--fs-muted); margin: 4px 0 0; font-size: .9rem; }
+.fs-archive__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (min-width: 768px) { .fs-archive__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1200px) { .fs-archive__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; } }
+.fs-item { display: flex; flex-direction: column; border-radius: 20px; background: var(--fs-surface); border: 1px solid var(--fs-line); overflow: hidden; }
+.fs-item__stage { display: block; padding: 14px; background: radial-gradient(70% 60% at 50% 30%, rgba(201,162,75,.18), transparent 70%), #110f13; cursor: pointer; border: 0; width: 100%; }
+.fs-item__body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.fs-item__title { font-weight: 700; font-size: .88rem; line-height: 1.25; color: var(--fs-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fs-item__meta { color: var(--fs-muted); font-size: .74rem; display: flex; gap: 10px; flex-wrap: wrap; }
+.fs-item__actions { display: flex; gap: 6px; margin-top: 10px; }
+.fs-icon-btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; min-width: 44px; border-radius: 12px; border: 1px solid var(--fs-line); background: var(--fs-soft); color: var(--fs-ink); font-size: .8rem; font-weight: 600; cursor: pointer; text-decoration: none; }
+.fs-icon-btn:hover { border-color: #d9c38f; color: var(--fs-ink); text-decoration: none; }
+.fs-icon-btn--wa { background: #128c4a; border-color: #128c4a; color: #fff; }
+.fs-icon-btn--wa:hover { background: #0f7a40; color: #fff; }
+.fs-empty { padding: 40px 20px; text-align: center; border-radius: 24px; border: 1.5px dashed var(--fs-line); color: var(--fs-muted); }
+.fs-empty b { display: block; font-family: 'Playfair Display', Georgia, serif; font-size: 1.2rem; color: var(--fs-ink); font-weight: 500; margin-bottom: 4px; }
 
-.preview-card-translucent {
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(16px);
-    border: 1.5px solid rgba(255, 255, 255, 0.35);
-    color: #ffffff;
-}
+/* Share sheet */
+.fs-sheet { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: end center; padding: 0; background: rgba(8,6,10,.72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+@media (min-width: 768px) { .fs-sheet { place-items: center; padding: 24px; } }
+.fs-sheet__panel { width: 100%; max-width: 860px; max-height: 92vh; overflow: auto; border-radius: 28px 28px 0 0; background: #121014; color: #f4efe6; box-shadow: 0 -20px 60px rgba(0,0,0,.5); padding: 22px 18px calc(22px + env(safe-area-inset-bottom)); }
+@media (min-width: 768px) { .fs-sheet__panel { border-radius: 28px; padding: 28px; display: grid; grid-template-columns: 300px 1fr; gap: 28px; align-items: center; } }
+.fs-sheet__img { display: block; width: 100%; max-width: 300px; margin: 0 auto 16px; border-radius: 12px; box-shadow: 0 24px 50px -20px rgba(0,0,0,.8), 0 0 0 1px rgba(243,220,154,.2); aspect-ratio: 4/5; object-fit: cover; background: #1c1a1e; }
+@media (max-width: 767.98px) { .fs-sheet__img { max-width: 220px; } }
+.fs-sheet h3 { font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: 1.5rem; margin: 0 0 6px; color: #fff; }
+.fs-sheet__sub { color: rgba(244,239,230,.7); font-size: .9rem; margin-bottom: 18px; }
+.fs-sheet__eyebrow { font-family: 'Cinzel', Georgia, serif; font-size: .7rem; letter-spacing: .3em; text-transform: uppercase; color: #f3dc9a; margin-bottom: 8px; }
+.fs-sheet__actions { display: grid; gap: 10px; }
+.fs-sheet__row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fs-sbtn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 12px 16px; border-radius: 16px; border: 1px solid rgba(243,220,154,.22); background: rgba(255,255,255,.05); color: #f4efe6; font-weight: 600; font-size: .92rem; cursor: pointer; text-decoration: none; }
+.fs-sbtn:hover { background: rgba(255,255,255,.1); color: #fff; text-decoration: none; }
+.fs-sbtn--wa { background: linear-gradient(135deg, #25d366, #128c4a); border-color: transparent; color: #fff; font-size: 1rem; min-height: 56px; box-shadow: 0 14px 28px -14px rgba(37,211,102,.7); }
+.fs-sbtn--wa:hover { filter: brightness(1.05); }
+.fs-sbtn--gold { background: linear-gradient(110deg, #f3dc9a, #c9a24b 50%, #f3dc9a); color: #1b1406; border-color: transparent; }
+.fs-sbtn--gold:hover { color: #1b1406; }
+.fs-sheet__close { position: absolute; top: 14px; right: 14px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.15); background: rgba(0,0,0,.4); color: #fff; font-size: 1.2rem; cursor: pointer; }
+.fs-sheet__note { color: rgba(244,239,230,.55); font-size: .76rem; margin-top: 12px; }
 
-.preview-card-hollow {
-    background: #0f172a;
-    border: 2px dashed #f59e0b;
-    color: #ffffff;
-}
-
-.preview-card-plaque {
-    background: linear-gradient(180deg, #09090b 0%, #1c1917 100%);
-    border: 3px solid #d4af37;
-    color: #ffffff;
-}
-
-.preview-card-hyper_reality {
-    background: linear-gradient(135deg, #4c0519 0%, #1e1b4b 50%, #064e3b 100%);
-    border: 2px solid #38bdf8;
-    color: #ffffff;
-    box-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
-}
-
-.preview-card-origami {
-    background: #ffffff;
-    color: #0f172a;
-    border: 3px solid #e11d48;
-}
-
-.verse-option-pill {
-    cursor: pointer;
-    border-radius: 12px;
-    padding: 10px 14px;
-    font-size: 0.86rem;
-    border: 1px solid #e2e8f0;
-    transition: background 0.15s;
-    background: #f8fafc;
-}
-.verse-option-pill:hover {
-    background: #f1f5f9;
-}
-.dark-mode .verse-option-pill {
-    background: #27272a;
-    border-color: #3f3f46;
-    color: #e4e4e7;
-}
+.fp-toast { position: fixed; left: 50%; bottom: 28px; z-index: 3000; transform: translate(-50%, 20px); opacity: 0; background: #17120c; color: #f4efe6; border: 1px solid rgba(243,220,154,.35); padding: 12px 18px; border-radius: 999px; font-size: .9rem; font-weight: 600; box-shadow: 0 16px 30px rgba(0,0,0,.35); transition: opacity .3s, transform .3s; }
+.fp-toast.is-in { opacity: 1; transform: translate(-50%, 0); }
 </style>
 @endpush
 
 @section('content')
 @include('member.creativeStudioTabs', ['creativeTab' => 'cards'])
-<div class="festive-studio-container" x-data="festiveStudioWizard()">
+<script nonce="{{ $nonce ?? '' }}" src="/public/js/festive-cards.js?v={{ assetVersion('js/festive-cards.js') }}"></script>
+
+<div class="fs-wrap" x-data="festiveStudioWizard()">
     @include('csrf')
-    @include('component.submitSpinner')
 
-    <!-- Studio Header Banner -->
-    <div class="card border-0 mb-4 overflow-hidden shadow-sm" 
-         style="border-radius: 24px; background: linear-gradient(135deg, #1e0910 0%, #4c0519 45%, #881337 100%); color: #ffffff; border: 1.5px solid rgba(245, 158, 11, 0.35);">
-        <div class="card-body p-4 p-md-5 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
+    <section class="fs-hero">
+        <div class="fs-hero__row">
             <div>
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="badge rounded-pill fw-bold px-3 py-1 text-white" 
-                          style="background: rgba(245, 158, 11, 0.25); border: 1px solid rgba(245, 158, 11, 0.5); font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase;">
-                        ATG Sovereign Studio &bull; RFC-0019
-                    </span>
-                    <span class="badge rounded-pill fw-semibold px-2.5 py-1 text-white" 
-                          style="background: rgba(255, 255, 255, 0.15); font-size: 0.75rem;">
-                        7 Creative Archetypes
-                    </span>
-                </div>
-                <h1 class="fw-bold text-white mb-2" style="font-size: 1.85rem; letter-spacing: -0.02em;">
-                    Festivity &amp; Celebration Greeting Cards Studio
-                </h1>
-                <p class="text-white-50 mb-0" style="font-size: 0.95rem; max-width: 620px; line-height: 1.55;">
-                    Craft bespoke holiday cards with 3D wax seal envelopes for Christmas, Easter, New Year, and milestone family moments. Share internally on your feed or send viral links to friends on WhatsApp.
-                </p>
+                <div class="fs-hero__eyebrow">Festive Cards Studio</div>
+                <h1>Couture cards for <em>every</em> celebration</h1>
+                <p>Choose an occasion — or name your own — pick a design, add a photo and your words. We seal it in a living envelope you can send on WhatsApp in one tap.</p>
             </div>
-
-            <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                <a href="#previousCardsSection" class="btn btn-outline-light rounded-pill px-4 py-2.5 fw-semibold small" style="min-height: 44px; white-space: nowrap;">
-                    <i class="bi bi-clock-history me-1.5"></i>
-                    <span>Family Cards ({{ count($cards) }})</span>
-                </a>
-            </div>
+            @if(count($cards) > 0)
+            <button type="button" class="fs-pill-btn" @click="document.getElementById('fsArchive').scrollIntoView({ behavior: 'smooth' })">
+                <i class="bi bi-collection" aria-hidden="true"></i>
+                <span>Your cards ({{ count($cards) }})</span>
+            </button>
+            @endif
         </div>
-    </div>
+    </section>
 
-    <!-- Main Studio Workspace (2-Column Wizard & Live Preview) -->
-    <div class="row g-4">
-        
-        <!-- Left: Studio Wizard Form -->
-        <div class="col-12 col-lg-7">
-            <div class="festive-studio-card p-4 p-md-4">
-                
-                <form id="festiveCardForm" @submit.prevent="submitFestiveCard($event)">
-                    @csrf
-                    
-                    <!-- Step 1: Occasion Selector -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold d-flex align-items-center justify-content-between mb-2">
-                            <span>1. Choose the Celebration / Occasion</span>
-                            <span class="badge bg-warning text-dark fw-bold" x-text="selectedOccasion.title"></span>
-                        </label>
-                        <div class="row g-2">
-                            @foreach($occasions as $key => $occ)
-                            <div class="col-6 col-sm-4">
-                                <div class="archetype-pill d-flex align-items-center gap-2"
-                                     :class="{ 'active': occasionKey === '{{ $key }}' }"
-                                     @click="selectOccasion('{{ $key }}')">
-                                    <i class="bi {{ $occ['icon'] }} fs-5 text-warning"></i>
-                                    <div class="small fw-bold text-truncate" style="font-size: 0.8rem;">
-                                        {{ $occ['title'] }}
-                                    </div>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
+    <div class="fs-grid">
+        {{-- ─────────── Live preview ─────────── --}}
+        <aside class="fs-preview-col" aria-label="Live preview">
+            <div class="fs-stage">
+                <div class="fs-stage__card">
+                    @include('festive.card', ['live' => true, 'tilt' => true, 'thumb' => false, 'animateIn' => false, 'styleExpr' => 'c.style', 'card' => []])
+                </div>
+                <div class="fs-stage__meta">
+                    <span class="fs-chip"><i class="bi bi-gem" aria-hidden="true"></i><span x-text="selectedStyle.name"></span></span>
+                    <span class="fs-chip"><span style="width:10px;height:10px;border-radius:50%;display:inline-block" :style="'background:' + selectedTheme.accent_color"></span><span x-text="selectedTheme.label"></span></span>
+                </div>
+                <p class="fs-stage__hint" x-text="FPCards.isTouch ? 'This is exactly how your card will look.' : 'Move your cursor over the card to see the light play.'"></p>
+            </div>
+        </aside>
 
-                    <!-- Step 2: Design Archetype (The 7 Archetypes) -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold d-flex align-items-center justify-content-between mb-2">
-                            <span>2. Select Design Archetype (Royal Luxe &amp; ATG)</span>
-                            <span class="badge bg-primary text-white fw-semibold" x-text="selectedStyle.name"></span>
-                        </label>
-                        <div class="row g-2">
-                            @foreach($templateStyles as $sKey => $s)
-                            <div class="col-6 col-sm-4">
-                                <div class="archetype-pill d-flex flex-column justify-content-between"
-                                     :class="{ 'active': templateStyle === '{{ $sKey }}' }"
-                                     @click="templateStyle = '{{ $sKey }}'">
-                                    <div class="d-flex align-items-center gap-1.5 mb-1">
-                                        <i class="bi {{ $s['icon'] }} text-warning"></i>
-                                        <span class="fw-bold small text-truncate" style="font-size: 0.82rem;">{{ $s['name'] }}</span>
-                                    </div>
-                                    <span class="text-muted" style="font-size: 0.72rem; line-height: 1.3;">{{ $s['tagline'] }}</span>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
+        {{-- ─────────── Studio form ─────────── --}}
+        <div>
+            <form class="fs-panel" @submit.prevent="submit()" novalidate>
+                @csrf
 
-                    <!-- Step 3: Color Palette & Theme -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold mb-2">3. Palette &amp; Particle Dynamics</label>
-                        <div class="d-flex flex-wrap gap-2">
-                            @foreach($themes as $tKey => $thm)
-                            <button type="button" 
-                                    class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5"
-                                    :class="themeKey === '{{ $tKey }}' ? 'btn-dark' : 'btn-outline-secondary'"
-                                    @click="themeKey = '{{ $tKey }}'"
-                                    style="min-height: 40px; font-size: 0.8rem;">
-                                <span class="rounded-circle d-inline-block" style="width: 12px; height: 12px; background: {{ $thm['primary_color'] }}; border: 1px solid #ffffff;"></span>
-                                <span>{{ $thm['label'] }}</span>
+                {{-- 1. Occasion --}}
+                <section class="fs-step" aria-labelledby="fsStepOccasion">
+                    <div class="fs-step__head"><span class="fs-step__num">I</span><h2 class="fs-step__title" id="fsStepOccasion">What are we celebrating?</h2></div>
+                    <div class="fs-occasions" role="group" aria-label="Occasion">
+                        @foreach($occasions as $key => $occ)
+                            @continue($key === 'custom')
+                            <button type="button" class="fs-occ" :aria-pressed="occasionKey === '{{ $key }}'" @click="selectOccasion('{{ $key }}')">
+                                <span class="fs-occ__emoji" aria-hidden="true">{{ $occ['emoji'] }}</span>
+                                <span class="fs-occ__name">{{ $occ['short'] }}</span>
                             </button>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <!-- Step 4: Visual Hero (Photo / Living Avatar) -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold mb-2">4. Family Hero Imagery</label>
-                        <div class="d-flex gap-2 mb-3">
-                            <button type="button" 
-                                    class="btn btn-sm rounded-pill px-3.5 py-2 fw-semibold"
-                                    :class="heroType === 'photo' ? 'btn-danger' : 'btn-outline-secondary'"
-                                    @click="heroType = 'photo'"
-                                    style="min-height: 44px;">
-                                <i class="bi bi-camera me-1"></i>
-                                <span>Upload Family Photo</span>
-                            </button>
-                            <button type="button" 
-                                    class="btn btn-sm rounded-pill px-3.5 py-2 fw-semibold"
-                                    :class="heroType === 'crest' ? 'btn-danger' : 'btn-outline-secondary'"
-                                    @click="heroType = 'crest'"
-                                    style="min-height: 44px;">
-                                <i class="bi bi-shield me-1"></i>
-                                <span>Clan Heraldic Crest</span>
-                            </button>
-                        </div>
-
-                        <div x-show="heroType === 'photo'" class="p-3 rounded-3 border bg-light">
-                            <span class="small text-muted d-block mb-2">
-                                <i class="bi bi-shield-check text-success me-1"></i>
-                                <strong>SecOps Protected:</strong> All camera EXIF GPS metadata is automatically stripped on upload.
+                        @endforeach
+                        <button type="button" class="fs-occ fs-occ--custom" :aria-pressed="occasionKey === 'custom'" @click="selectOccasion('custom')">
+                            <span class="fs-occ__emoji" aria-hidden="true">✍️</span>
+                            <span class="fs-occ__name">Create your own celebration
+                                <small>Anything that matters to you — a remembrance, a retirement, a citizenship, a first home…</small>
                             </span>
-                            <input type="file" 
-                                   name="hero_photo" 
-                                   id="heroPhotoInput" 
-                                   accept="image/*" 
-                                   class="form-control"
-                                   @change="handlePhotoPreview($event)">
-                        </div>
-                    </div>
-
-                    <!-- Step 5: Headline, Verse & Sign-Off -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold mb-2">5. Personalize Festive Verse &amp; Sign-Off</label>
-                        
-                        <div class="mb-3">
-                            <label class="form-label small text-muted">Card Headline</label>
-                            <input type="text" 
-                                   name="headline" 
-                                   class="form-control" 
-                                   x-model="headline" 
-                                   required 
-                                   placeholder="Merry Christmas &amp; Joyous Festivities">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small text-muted">Recipient Name (Optional)</label>
-                            <input type="text" 
-                                   name="recipient_name" 
-                                   class="form-control" 
-                                   x-model="recipientName" 
-                                   placeholder="e.g. Grandma Rose, The Sterling Family, Friends &amp; Colleagues">
-                        </div>
-
-                        <!-- Sample Verse Quick Selector -->
-                        <div class="mb-2">
-                            <span class="small fw-semibold text-muted d-block mb-1">Pick a curated verse or write your own:</span>
-                            <div class="d-flex flex-column gap-1.5 mb-2">
-                                <template x-for="(v, idx) in selectedOccasion.sample_verses" :key="idx">
-                                    <div class="verse-option-pill" @click="verse = v">
-                                        <i class="bi bi-chat-heart text-warning me-1"></i>
-                                        <span x-text="v"></span>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small text-muted">Card Verse / Message</label>
-                            <textarea name="verse" 
-                                      class="form-control" 
-                                      rows="3" 
-                                      x-model="verse" 
-                                      required></textarea>
-                        </div>
-
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <label class="form-label small text-muted">Sign-off Phrase</label>
-                                <input type="text" name="sign_off" class="form-control" x-model="signOff" required placeholder="With all our love,">
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label small text-muted">Family / Sender Name</label>
-                                <input type="text" name="sender_name" class="form-control" x-model="senderName" required placeholder="The Olaogun Family">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Submission Action -->
-                    <div class="pt-3 border-top d-flex align-items-center justify-content-between flex-wrap gap-2">
-                        <button type="submit" 
-                                id="btnCreateFestiveCard"
-                                class="btn btn-danger btn-lg rounded-pill px-5 fw-bold shadow-sm d-inline-flex align-items-center gap-2"
-                                style="min-height: 48px; background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%); border: none;">
-                            <i class="bi bi-magic fs-5"></i>
-                            <span>Generate Festive Card &amp; Living Envelope</span>
                         </button>
                     </div>
 
-                </form>
-
-            </div>
-        </div>
-
-        <!-- Right: Live Real-Time Interactive Card Preview -->
-        <div class="col-12 col-lg-5">
-            <div class="live-card-preview-wrap" :class="`preview-card-${templateStyle}`">
-                
-                <div class="p-4 p-md-4">
-                    <!-- Preview Badge -->
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge rounded-pill fw-bold px-2.5 py-1 text-white"
-                              style="background: rgba(245, 158, 11, 0.3); border: 1px solid rgba(245, 158, 11, 0.6); font-size: 0.72rem;">
-                            <span x-text="selectedStyle.name"></span>
-                        </span>
-                        <span class="small text-white-50" style="font-size: 0.78rem;">
-                            Live Interactive Preview
-                        </span>
-                    </div>
-
-                    <!-- Hero Image Preview -->
-                    <div class="mb-3 text-center" x-show="previewPhotoUrl">
-                        <img :src="previewPhotoUrl" alt="Card Hero Preview" class="img-fluid rounded-3 shadow-sm" style="max-height: 220px; object-fit: cover; width: 100%;">
-                    </div>
-
-                    <!-- Headline -->
-                    <h3 class="fw-bold mb-2 text-center" 
-                        style="font-family: 'Georgia', serif; font-size: 1.45rem;"
-                        x-text="headline || 'Merry Christmas & Joyous Festivities'"></h3>
-
-                    <!-- Recipient -->
-                    <div class="text-center text-warning fw-semibold mb-2" 
-                         x-show="recipientName"
-                         x-text="`Dearest ${recipientName},`"
-                         style="font-size: 0.95rem;"></div>
-
-                    <!-- Verse Body -->
-                    <p class="text-center small mb-3" 
-                       style="line-height: 1.6; font-size: 0.92rem; opacity: 0.9;"
-                       x-text="verse || 'Wishing our dearest family and friends a season filled with warmth and joy.'"></p>
-
-                    <!-- Sign-Off -->
-                    <div class="text-center pt-2 border-top border-white-50">
-                        <div class="small fst-italic text-white-50" x-text="signOff || 'With all our love,'"></div>
-                        <h5 class="fw-bold mb-0 text-warning" 
-                            style="font-family: 'Georgia', serif;"
-                            x-text="senderName || 'The Family'"></h5>
-                    </div>
-
-                    <!-- Mock Wax Seal Stamp -->
-                    <div class="d-flex justify-content-center mt-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm"
-                             style="width: 52px; height: 52px; background: #b91c1c; border: 2px solid #fef08a; color: #fef08a; font-weight: bold; font-family: 'Georgia', serif; font-size: 1.1rem;">
-                            FP
+                    <div class="fs-custom" x-show="occasionKey === 'custom'" x-cloak x-transition.opacity>
+                        <div class="fs-field">
+                            <label class="fs-label" for="fsCustomOccasion">Name your celebration <span class="fs-count" x-text="customOccasion.length + '/80'"></span></label>
+                            <input id="fsCustomOccasion" class="fs-input" type="text" maxlength="80" x-model="customOccasion" x-ref="customInput"
+                                   placeholder="e.g. Dad’s 25th Remembrance" @input="onCustomName()" autocomplete="off">
+                        </div>
+                        <span class="fs-label">Set the mood</span>
+                        <div class="fs-moods" role="group" aria-label="Mood">
+                            @foreach($moods as $mKey => $m)
+                            <button type="button" class="fs-mood" :aria-pressed="mood === '{{ $mKey }}'" @click="selectMood('{{ $mKey }}')">
+                                <b>{{ $m['emoji'] }} {{ $m['label'] }}</b>
+                                <span>{{ $m['description'] }}</span>
+                            </button>
+                            @endforeach
                         </div>
                     </div>
-                </div>
+                </section>
 
-            </div>
+                {{-- 2. Design style --}}
+                <section class="fs-step" aria-labelledby="fsStepStyle">
+                    <div class="fs-step__head"><span class="fs-step__num">II</span><h2 class="fs-step__title" id="fsStepStyle">Choose a design</h2></div>
+                    <p class="fs-step__sub">Each preview uses your words and photo.</p>
+                    <div class="fs-styles" role="group" aria-label="Design style">
+                        @foreach($templateStyles as $sKey => $s)
+                        <button type="button" class="fs-style" :aria-pressed="templateStyle === '{{ $sKey }}'" @click="templateStyle = '{{ $sKey }}'">
+                            <div class="fs-style__card">
+                                @include('festive.card', ['live' => true, 'thumb' => true, 'tilt' => false, 'animateIn' => false, 'styleExpr' => "'" . $sKey . "'", 'card' => []])
+                            </div>
+                            <div class="fs-style__name">{{ $s['name'] }}</div>
+                            <div class="fs-style__tag">{{ $s['tagline'] }}</div>
+                        </button>
+                        @endforeach
+                    </div>
+                </section>
+
+                {{-- 3. Palette --}}
+                <section class="fs-step" aria-labelledby="fsStepPalette">
+                    <div class="fs-step__head"><span class="fs-step__num">III</span><h2 class="fs-step__title" id="fsStepPalette">Palette &amp; metal</h2></div>
+                    <div class="fs-palettes" role="group" aria-label="Palette">
+                        @foreach($themes as $tKey => $thm)
+                        <button type="button" class="fs-pal" :aria-pressed="themeKey === '{{ $tKey }}'" @click="themeKey = '{{ $tKey }}'">
+                            <span class="fs-pal__dot" style="background: linear-gradient(135deg, {{ $thm['primary_color'] }} 0 48%, {{ $thm['accent_color'] }} 52% 100%);"></span>
+                            <span>{{ $thm['label'] }}</span>
+                        </button>
+                        @endforeach
+                    </div>
+                </section>
+
+                {{-- 4. Photo --}}
+                <section class="fs-step" aria-labelledby="fsStepPhoto">
+                    <div class="fs-step__head"><span class="fs-step__num">IV</span><h2 class="fs-step__title" id="fsStepPhoto">Add a photo <span style="font-size:.8rem;color:var(--fs-muted);font-family:inherit">(optional)</span></h2></div>
+                    <label class="fs-drop" :class="{ 'is-over': dragOver }" @dragover.prevent="dragOver = true" @dragleave="dragOver = false" @drop.prevent="dragOver = false; onPhoto($event.dataTransfer.files[0])">
+                        <input type="file" accept="image/*" @change="onPhoto($event.target.files[0]); $event.target.value = ''" aria-label="Upload a photo">
+                        <span class="fs-drop__thumb">
+                            <template x-if="photoUrl"><img :src="photoUrl" alt=""></template>
+                            <template x-if="!photoUrl"><i class="bi" :class="photoBusy ? 'bi-hourglass-split' : 'bi-image'" aria-hidden="true"></i></template>
+                        </span>
+                        <span style="flex:1;min-width:0">
+                            <b x-text="photoUrl ? 'Photo added — looking lovely' : (photoBusy ? 'Preparing your photo…' : 'Tap to choose or drop a photo')"></b>
+                            <small>Without a photo, your family monogram becomes the centrepiece. Location data is always removed.</small>
+                        </span>
+                        <button type="button" class="fs-link-btn" x-show="photoUrl" x-cloak @click.prevent.stop="removePhoto()">Remove</button>
+                    </label>
+                    <p class="fs-error" x-show="photoError" x-text="photoError" x-cloak></p>
+                </section>
+
+                {{-- 5. Words --}}
+                <section class="fs-step" aria-labelledby="fsStepWords">
+                    <div class="fs-step__head"><span class="fs-step__num">V</span><h2 class="fs-step__title" id="fsStepWords">Your words</h2></div>
+
+                    <div class="fs-field">
+                        <label class="fs-label" for="fsHeadline">Headline <span class="fs-count" x-text="headline.length + '/160'"></span></label>
+                        <input id="fsHeadline" class="fs-input" type="text" maxlength="160" x-model="headline" @input="headlineTouched = true" required>
+                    </div>
+                    <div class="fs-field">
+                        <label class="fs-label" for="fsRecipient">Who is it for? <span style="font-weight:400">(optional)</span></label>
+                        <input id="fsRecipient" class="fs-input" type="text" maxlength="128" x-model="recipientName" placeholder="e.g. Grandma Rose, Aunty Funmi, The Sterling Family">
+                    </div>
+
+                    <span class="fs-label">Pick a verse, then make it yours</span>
+                    <div class="fs-verses">
+                        <template x-for="(v, i) in suggestions" :key="occasionKey + mood + i">
+                            <button type="button" class="fs-verse" :aria-pressed="verse === v" @click="verse = v" x-text="v"></button>
+                        </template>
+                    </div>
+                    <div class="fs-field">
+                        <label class="fs-label" for="fsVerse">Message <span class="fs-count" x-text="verse.length + '/600'"></span></label>
+                        <textarea id="fsVerse" class="fs-textarea" maxlength="600" x-model="verse" required></textarea>
+                    </div>
+                    <div class="fs-row">
+                        <div class="fs-field">
+                            <label class="fs-label" for="fsSignOff">Sign-off</label>
+                            <input id="fsSignOff" class="fs-input" type="text" maxlength="128" x-model="signOff" placeholder="With all our love,">
+                        </div>
+                        <div class="fs-field">
+                            <label class="fs-label" for="fsSender">From</label>
+                            <input id="fsSender" class="fs-input" type="text" maxlength="128" x-model="senderName" placeholder="The Olaogun Family" required>
+                        </div>
+                    </div>
+                </section>
+
+                <button type="submit" class="fs-submit" :disabled="busy">
+                    <span class="fs-spin" x-show="busy" x-cloak aria-hidden="true"></span>
+                    <i class="bi bi-envelope-paper-heart" x-show="!busy" aria-hidden="true"></i>
+                    <span x-text="busy ? 'Sealing your envelope…' : 'Create card & seal the envelope'"></span>
+                </button>
+                <p class="fs-error" role="alert" x-show="error" x-text="error" x-cloak></p>
+            </form>
         </div>
-
     </div>
 
-    <!-- Previously Generated Festive Cards Archive -->
-    <div class="mt-5 pt-4 border-top" id="previousCardsSection">
-        <div class="d-flex align-items-center justify-content-between mb-3">
+    {{-- ─────────── Archive ─────────── --}}
+    <section class="fs-archive" id="fsArchive" aria-labelledby="fsArchiveTitle">
+        <div class="fs-archive__head">
             <div>
-                <h4 class="fw-bold mb-1">Your Family’s Festive Cards Archive</h4>
-                <p class="text-muted small mb-0">Browse, share on WhatsApp, or cross-post holiday cards to your family dashboard.</p>
+                <h2 id="fsArchiveTitle">Your family’s cards</h2>
+                <p>Every card your family has sent. Tap one to share it again.</p>
             </div>
-            <span class="badge bg-secondary rounded-pill px-3 py-1.5">{{ count($cards) }} Created</span>
         </div>
 
         @if(empty($cards))
-        <div class="card border-0 p-5 text-center bg-light rounded-4">
-            <div class="display-6 mb-2">💌</div>
-            <h5 class="fw-bold">No Festive Cards Created Yet</h5>
-            <p class="text-muted small mb-0">Select an occasion and archetype above to author your very first holiday greeting card.</p>
-        </div>
+            <div class="fs-empty">
+                <b>No cards yet</b>
+                Your first card will appear here the moment you seal it.
+            </div>
         @else
-        <div class="row g-3">
-            @foreach($cards as $c)
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden" style="background: var(--card-bg, #ffffff); border: 1px solid #e2e8f0;">
-                    @if(!empty($c['hero_photo_url']))
-                    <img src="{{ $c['hero_photo_url'] }}" alt="{{ $c['headline'] }}" class="card-img-top" style="height: 160px; object-fit: cover;">
-                    @else
-                    <div class="p-4 text-center" style="background: {{ $c['theme_meta']['gradient'] ?? '#881337' }}; color: #ffffff;">
-                        <span class="badge bg-warning text-dark fw-bold mb-1">{{ $c['occasion_meta']['title'] }}</span>
-                        <h6 class="fw-bold mb-0 text-white">{{ $c['headline'] }}</h6>
-                    </div>
-                    @endif
-
-                    <div class="card-body p-3 d-flex flex-column justify-content-between">
-                        <div>
-                            <div class="d-flex align-items-center justify-content-between mb-1.5">
-                                <span class="badge bg-light text-dark border fw-bold" style="font-size: 0.72rem;">
-                                    {{ $c['template_style_meta']['name'] ?? 'Classic Heritage' }}
-                                </span>
-                                <span class="small text-muted" style="font-size: 0.75rem;">
-                                    <i class="bi bi-eye me-1"></i>{{ $c['view_count'] }} views
-                                </span>
+            <div class="fs-archive__grid">
+                @foreach($cards as $c)
+                    @php
+                        $sheetData = [
+                            'token' => $c['share_token'],
+                            'label' => $c['occasion_label'],
+                            'headline' => $c['headline'],
+                            'url' => $c['absolute_public_url'],
+                            'path' => $c['public_url'],
+                            'image' => $c['portrait_image_url'],
+                            'whatsapp' => $c['whatsapp_text'],
+                            'posted' => !empty($c['feed_post_id']),
+                        ];
+                    @endphp
+                    <article class="fs-item" data-card='@json($sheetData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                        <button type="button" class="fs-item__stage" @click="openSheet(JSON.parse($el.closest('[data-card]').dataset.card))" aria-label="Share {{ $c['occasion_label'] }} card">
+                            @include('festive.card', ['card' => $c, 'thumb' => true, 'live' => false, 'tilt' => false, 'animateIn' => false, 'styleExpr' => 'c.style'])
+                        </button>
+                        <div class="fs-item__body">
+                            <div class="fs-item__title">{{ $c['emoji'] }} {{ $c['occasion_label'] }}</div>
+                            <div class="fs-item__meta">
+                                @if(!empty($c['recipient_name']))<span>For {{ $c['recipient_name'] }}</span>@endif
+                                <span><i class="bi bi-eye" aria-hidden="true"></i> {{ (int)$c['view_count'] }}</span>
+                                @if(!empty($c['created_at']))<span>{{ date('j M Y', strtotime((string)$c['created_at'])) }}</span>@endif
                             </div>
-                            <h6 class="fw-bold text-dark mb-1 text-truncate">{{ $c['headline'] }}</h6>
-                            <p class="text-muted small mb-3" style="font-size: 0.8rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                                {{ $c['verse'] }}
-                            </p>
-                        </div>
-
-                        <div class="pt-2 border-top d-flex align-items-center justify-content-between flex-wrap gap-2">
-                            <a href="{{ $c['public_url'] }}" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-semibold" style="min-height: 38px;">
-                                <i class="bi bi-envelope-open me-1"></i> View Card
-                            </a>
-                            
-                            <div class="d-flex gap-1.5">
-                                <button type="button" 
-                                        class="btn btn-sm btn-success rounded-pill px-2.5" 
-                                        @click="shareWhatsApp('{{ addslashes($c['headline']) }}', '{{ $c['public_url'] }}')"
-                                        title="Share on WhatsApp"
-                                        style="min-height: 38px; min-width: 38px;">
-                                    <i class="bi bi-whatsapp"></i>
+                            <div class="fs-item__actions">
+                                <button type="button" class="fs-icon-btn fs-icon-btn--wa" @click="openSheet(JSON.parse($el.closest('[data-card]').dataset.card))" aria-label="Share on WhatsApp">
+                                    <i class="bi bi-whatsapp" aria-hidden="true"></i><span>Share</span>
                                 </button>
-                                <button type="button" 
-                                        class="btn btn-sm btn-danger rounded-pill px-2.5" 
-                                        @click="postToFeed('{{ $c['share_token'] }}', $event)"
-                                        title="Post to Family Feed"
-                                        style="min-height: 38px;">
-                                    <i class="bi bi-broadcast me-1"></i> Feed
-                                </button>
+                                <a class="fs-icon-btn" href="{{ $c['public_url'] }}" target="_blank" rel="noopener" aria-label="Open envelope" style="flex:0 0 44px">
+                                    <i class="bi bi-envelope-open-heart" aria-hidden="true"></i>
+                                </a>
                             </div>
                         </div>
+                    </article>
+                @endforeach
+            </div>
+        @endif
+    </section>
+
+    {{-- ─────────── Share sheet ─────────── --}}
+    <div class="fs-sheet" x-show="sheet" x-cloak x-transition.opacity @keydown.escape.window="closeSheet()" @click.self="closeSheet()" role="dialog" aria-modal="true" aria-labelledby="fsSheetTitle">
+        <template x-if="sheet">
+            <div class="fs-sheet__panel" style="position:relative" @click.stop>
+                <button type="button" class="fs-sheet__close" @click="closeSheet()" aria-label="Close"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+                <img class="fs-sheet__img" :src="sheet.image" alt="Your card as it will be shared">
+                <div>
+                    <div class="fs-sheet__eyebrow" x-text="sheet.label"></div>
+                    <h3 id="fsSheetTitle" x-text="sheet.justCreated ? 'Sealed and ready to send' : 'Share this card'"></h3>
+                    <p class="fs-sheet__sub">They’ll see the card as a rich preview, then tap to break the wax seal and open the living envelope.</p>
+                    <div class="fs-sheet__actions">
+                        <button type="button" class="fs-sbtn fs-sbtn--wa" @click="sendWhatsApp()">
+                            <i class="bi bi-whatsapp" aria-hidden="true"></i><span>Send on WhatsApp</span>
+                        </button>
+                        <div class="fs-sheet__row">
+                            <button type="button" class="fs-sbtn" @click="copyLink()"><i class="bi bi-link-45deg" aria-hidden="true"></i><span>Copy link</span></button>
+                            <a class="fs-sbtn" :href="sheet.path" target="_blank" rel="noopener"><i class="bi bi-envelope-open-heart" aria-hidden="true"></i><span>Open envelope</span></a>
+                        </div>
+                        <div class="fs-sheet__row">
+                            <a class="fs-sbtn" :href="sheet.image + '?download=1'" download><i class="bi bi-download" aria-hidden="true"></i><span>Save image</span></a>
+                            <button type="button" class="fs-sbtn" x-show="canNativeShare" @click="shareMore()"><i class="bi bi-share" aria-hidden="true"></i><span>More apps</span></button>
+                            <button type="button" class="fs-sbtn" x-show="!canNativeShare" @click="copyMessage()"><i class="bi bi-chat-quote" aria-hidden="true"></i><span>Copy message</span></button>
+                        </div>
+                        <button type="button" class="fs-sbtn fs-sbtn--gold" :disabled="sheet.posted || feedBusy" @click="postToFeed()">
+                            <i class="bi" :class="sheet.posted ? 'bi-check2-circle' : 'bi-broadcast'" aria-hidden="true"></i>
+                            <span x-text="sheet.posted ? 'On your family feed' : (feedBusy ? 'Posting…' : 'Post to family feed')"></span>
+                        </button>
                     </div>
+                    <p class="fs-sheet__note" x-show="sheet.justCreated">Your card is saved in “Your family’s cards” below.</p>
                 </div>
             </div>
-            @endforeach
-        </div>
-        @endif
+        </template>
     </div>
-
 </div>
 
-<script>
+<script nonce="{{ $nonce ?? '' }}">
 function festiveStudioWizard() {
-    const occasions = @json($occasions);
-    const themes = @json($themes);
-    const templateStyles = @json($templateStyles);
+    const occasions = @json($occasions, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+    const themes = @json($themes, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+    const templateStyles = @json($templateStyles, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+    const moods = @json($moods, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+    const defaultSender = @json(trim((string)($user['name'] ?? '') . ' ' . (string)($user['lastName'] ?? '')) ?: 'The Family', JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
 
     return {
-        occasions: occasions,
-        themes: themes,
-        templateStyles: templateStyles,
+        occasions, themes, templateStyles, moods,
         occasionKey: 'christmas',
+        customOccasion: '',
+        mood: 'joyful',
         templateStyle: 'classic',
         themeKey: 'royal_crimson',
-        heroType: 'photo',
-        headline: 'Merry Christmas & Joyous Festivities',
+        headline: occasions.christmas.default_headline,
+        headlineTouched: false,
         recipientName: '',
-        verse: 'Wishing our dearest family and friends a season filled with warmth, radiant laughter, and treasured moments together.',
-        signOff: 'With all our love,',
-        senderName: '{{ addslashes($user['name'] ?? 'The Family') }} {{ addslashes($user['lastName'] ?? '') }}',
-        previewPhotoUrl: '',
+        verse: occasions.christmas.default_verse,
+        signOff: occasions.christmas.default_sign_off,
+        senderName: defaultSender,
+        photoBlob: null,
+        photoUrl: '',
+        photoBusy: false,
+        photoError: '',
+        dragOver: false,
+        busy: false,
+        error: '',
+        sheet: null,
+        feedBusy: false,
+        canNativeShare: !!navigator.share,
 
-        get selectedOccasion() {
-            return this.occasions[this.occasionKey] || this.occasions['christmas'];
+        init() {
+            if (window.FPCards) window.FPCards.initTilt(this.$el);
         },
 
-        get selectedStyle() {
-            return this.templateStyles[this.templateStyle] || this.templateStyles['classic'];
+        get selectedOccasion() { return this.occasions[this.occasionKey] || this.occasions.christmas; },
+        get selectedStyle() { return this.templateStyles[this.templateStyle] || this.templateStyles.classic; },
+        get selectedTheme() { return this.themes[this.themeKey] || this.themes.royal_crimson; },
+        get selectedMood() { return this.moods[this.mood] || this.moods.joyful; },
+        get suggestions() {
+            return this.occasionKey === 'custom' ? this.selectedMood.sample_verses : (this.selectedOccasion.sample_verses || []);
+        },
+        get eyebrow() {
+            if (this.occasionKey === 'custom') return this.customOccasion.trim() || 'Your Celebration';
+            return this.selectedOccasion.badge;
+        },
+        /* Everything the shared card partial binds to */
+        get c() {
+            const fp = window.FPCards;
+            return {
+                style: this.templateStyle,
+                vars: fp ? fp.cardVars(this.selectedTheme, this.headline, this.verse) : '',
+                eyebrow: this.eyebrow,
+                headline: this.headline || this.selectedOccasion.default_headline,
+                recipient: this.recipientName.trim(),
+                verse: this.verse,
+                signOff: this.signOff,
+                sender: this.senderName || 'The Family',
+                photo: this.photoUrl,
+                monogram: fp ? fp.monogram(this.senderName) : 'F',
+            };
         },
 
         selectOccasion(key) {
             this.occasionKey = key;
+            if (key === 'custom') {
+                this.headlineTouched = false;
+                this.applyMood(this.mood);
+                this.$nextTick(() => this.$refs.customInput && this.$refs.customInput.focus());
+                return;
+            }
             const occ = this.selectedOccasion;
             this.themeKey = occ.default_theme || 'royal_crimson';
             this.headline = occ.default_headline || '';
+            this.headlineTouched = false;
             this.verse = occ.default_verse || '';
-            this.signOff = occ.default_sign_off || 'With warm regards,';
+            this.signOff = occ.default_sign_off || 'With love,';
         },
-
-        handlePhotoPreview(event) {
-            const file = event.target.files && event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    this.previewPhotoUrl = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
+        selectMood(key) { this.mood = key; this.applyMood(key); },
+        applyMood(key) {
+            const m = this.moods[key] || this.moods.joyful;
+            this.themeKey = m.default_theme;
+            if (!this.headlineTouched) this.headline = m.default_headline;
+            this.verse = m.sample_verses[0];
+            this.signOff = m.default_sign_off;
         },
+        onCustomName() { /* the name appears live as the card's eyebrow */ },
 
-        async submitFestiveCard(event) {
-            const btn = document.getElementById('btnCreateFestiveCard');
-            if (window.ScoreTenantSpinner) {
-                ScoreTenantSpinner.start(btn);
-            }
-
+        async onPhoto(file) {
+            if (!file) return;
+            this.photoError = '';
+            this.photoBusy = true;
             try {
-                const form = document.getElementById('festiveCardForm');
-                const formData = new FormData(form);
-                
-                const csrfToken = document.querySelector('input[name="token"]')?.value || '';
-                formData.append('token', csrfToken);
-                formData.append('occasion', this.occasionKey);
-                formData.append('template_style', this.templateStyle);
-                formData.append('theme', this.themeKey);
-                formData.append('hero_type', this.heroType);
-
-                const response = await fetch('/api/festive-cards/create', {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'Accept': 'application/json' }
-                });
-
-                const res = await response.json();
-                if (window.ScoreTenantSpinner) {
-                    ScoreTenantSpinner.stop(btn);
-                }
-
-                if (res.status === 'success' && res.data) {
-                    if (window.Swal) {
-                        Swal.fire({
-                            title: 'Festive Card Created! 🎄',
-                            html: `<p>Your card has been generated. Open the Living Envelope to preview or copy your link to share on WhatsApp.</p>`,
-                            icon: 'success',
-                            showCancelButton: true,
-                            confirmButtonText: 'Open Living Envelope',
-                            cancelButtonText: 'Done',
-                            confirmButtonColor: '#e11d48'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.open(res.data.public_url, '_blank');
-                            }
-                            window.location.reload();
-                        });
-                    } else {
-                        alert('Card created! Redirecting to preview...');
-                        window.location.href = res.data.public_url;
-                    }
-                } else {
-                    alert(res.message || 'Could not generate card. Please try again.');
-                }
-            } catch (err) {
-                if (window.ScoreTenantSpinner) {
-                    ScoreTenantSpinner.stop(btn);
-                }
-                alert('Network error while generating festive card.');
+                const out = await window.FPCards.preparePhoto(file, 2000);
+                if (this.photoUrl) URL.revokeObjectURL(this.photoUrl);
+                this.photoBlob = out.blob;
+                this.photoUrl = out.url;
+            } catch (e) {
+                this.photoError = e.message || 'We could not read that photo.';
+            } finally {
+                this.photoBusy = false;
             }
         },
-
-        shareWhatsApp(headline, url) {
-            const fullUrl = window.location.origin + url;
-            const text = encodeURIComponent(`✨ ${headline} ✨\nOpen our family's festive holiday card:\n${fullUrl}`);
-            window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+        removePhoto() {
+            if (this.photoUrl) URL.revokeObjectURL(this.photoUrl);
+            this.photoBlob = null;
+            this.photoUrl = '';
         },
 
-        async postToFeed(shareToken, event) {
-            const btn = event.currentTarget;
-            if (window.ScoreTenantSpinner) {
-                ScoreTenantSpinner.start(btn);
-            }
+        csrf() { return document.querySelector('input[name="token"]')?.value || ''; },
 
+        async submit() {
+            this.error = '';
+            if (this.occasionKey === 'custom' && !this.customOccasion.trim()) {
+                this.error = 'Please name your celebration, e.g. “Dad’s 25th Remembrance”.';
+                this.$refs.customInput && this.$refs.customInput.focus();
+                return;
+            }
+            if (!this.headline.trim() || !this.verse.trim() || !this.senderName.trim()) {
+                this.error = 'Please add a headline, a message and who it’s from.';
+                return;
+            }
+            this.busy = true;
             try {
-                const csrfToken = document.querySelector('input[name="token"]')?.value || '';
                 const fd = new FormData();
-                fd.append('token', csrfToken);
-                fd.append('share_token', shareToken);
+                fd.append('token', this.csrf());
+                fd.append('occasion', this.occasionKey);
+                fd.append('custom_occasion', this.customOccasion.trim());
+                fd.append('mood', this.mood);
+                fd.append('template_style', this.templateStyle);
+                fd.append('theme', this.themeKey);
+                fd.append('headline', this.headline.trim());
+                fd.append('recipient_name', this.recipientName.trim());
+                fd.append('verse', this.verse.trim());
+                fd.append('sign_off', this.signOff.trim());
+                fd.append('sender_name', this.senderName.trim());
+                fd.append('hero_type', this.photoBlob ? 'photo' : 'crest');
+                if (this.photoBlob) fd.append('hero_photo', this.photoBlob, 'photo.jpg');
 
-                const response = await fetch('/api/festive-cards/post-to-feed', {
-                    method: 'POST',
-                    body: fd,
-                    headers: { 'Accept': 'application/json' }
-                });
-
-                const res = await response.json();
-                if (window.ScoreTenantSpinner) {
-                    ScoreTenantSpinner.stop(btn);
+                const response = await fetch('/api/festive-cards/create', { method: 'POST', body: fd, headers: { 'Accept': 'application/json' } });
+                const res = await response.json().catch(() => ({}));
+                if (!response.ok || res.status !== 'success' || !res.data) {
+                    this.error = res.message || 'We could not create your card. Please try again.';
+                    return;
                 }
+                const d = res.data;
+                this.openSheet({
+                    token: d.share_token, label: d.occasion_label, headline: d.headline,
+                    url: d.absolute_public_url, path: d.public_url, image: d.portrait_image_url,
+                    whatsapp: d.whatsapp_text, posted: false, justCreated: true,
+                });
+            } catch (e) {
+                this.error = 'Network error — please check your connection and try again.';
+            } finally {
+                this.busy = false;
+            }
+        },
 
-                if (res.status === 'success') {
-                    if (window.Swal) {
-                        Swal.fire({
-                            toast: true,
-                            position: 'top-end',
-                            icon: 'success',
-                            title: 'Published to Family Feed!',
-                            showConfirmButton: false,
-                            timer: 3000
-                        });
-                    } else {
-                        alert('Published to family feed!');
-                    }
+        openSheet(data) {
+            this.sheet = data;
+            document.documentElement.style.overflow = 'hidden';
+            if (window.FPCards) window.FPCards.prepareShareFile(data.image, 'greeting-card.jpg');
+        },
+        closeSheet() {
+            const reload = this.sheet && this.sheet.justCreated;
+            this.sheet = null;
+            document.documentElement.style.overflow = '';
+            if (reload) window.location.reload();
+        },
+        sendWhatsApp() {
+            window.FPCards.shareWhatsApp({ text: this.sheet.whatsapp, imageUrl: this.sheet.image });
+        },
+        shareMore() {
+            window.FPCards.shareNative({ title: this.sheet.headline, text: this.sheet.whatsapp, url: this.sheet.url, imageUrl: this.sheet.image });
+        },
+        async copyLink() {
+            await window.FPCards.copy(this.sheet.url);
+            window.FPCards.toast('Link copied — paste it anywhere');
+        },
+        async copyMessage() {
+            await window.FPCards.copy(this.sheet.whatsapp);
+            window.FPCards.toast('Message copied');
+        },
+        async postToFeed() {
+            if (!this.sheet || this.sheet.posted) return;
+            this.feedBusy = true;
+            try {
+                const fd = new FormData();
+                fd.append('token', this.csrf());
+                fd.append('share_token', this.sheet.token);
+                const response = await fetch('/api/festive-cards/post-to-feed', { method: 'POST', body: fd, headers: { 'Accept': 'application/json' } });
+                const res = await response.json().catch(() => ({}));
+                if (response.ok && res.status === 'success') {
+                    this.sheet.posted = true;
+                    window.FPCards.toast(res.data && res.data.status === 'already_posted' ? 'Already on your family feed' : 'Posted to your family feed');
                 } else {
-                    alert(res.message || 'Could not post to feed.');
+                    window.FPCards.toast(res.message || 'Could not post to the feed');
                 }
             } catch (e) {
-                if (window.ScoreTenantSpinner) {
-                    ScoreTenantSpinner.stop(btn);
-                }
-                alert('Network error while posting card to feed.');
+                window.FPCards.toast('Network error — please try again');
+            } finally {
+                this.feedBusy = false;
             }
-        }
+        },
     };
 }
 </script>

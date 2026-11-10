@@ -66,6 +66,7 @@ final class FestiveCardController
             'occasions' => AtgFestiveCardService::OCCASIONS,
             'themes' => AtgFestiveCardService::THEMES,
             'templateStyles' => AtgFestiveCardService::TEMPLATE_STYLES,
+            'moods' => AtgFestiveCardService::MOODS,
             'cards' => $cards,
         ]);
     }
@@ -92,32 +93,43 @@ final class FestiveCardController
 
             $data = $_POST;
 
-            // Handle optional hero photo upload with automated EXIF GPS scrubbing
-            if (isset($_FILES['hero_photo']) && is_array($_FILES['hero_photo']) && ($_FILES['hero_photo']['error'] ?? 1) === UPLOAD_ERR_OK) {
-                $tmpPath = (string)$_FILES['hero_photo']['tmp_name'];
-                $imageInfo = @getimagesize($tmpPath);
+            // Never trust a client-supplied asset path; only a fresh upload may set the hero photo.
+            unset($data['hero_photo_url'], $data['audio_voice_url']);
 
-                if ($imageInfo && in_array($imageInfo['mime'], ['image/jpeg', 'image/png', 'image/webp'], true)) {
-                    // Sanitize EXIF GPS immediately
-                    AtgFestiveCardService::stripExifGps($tmpPath);
-
-                    $ext = ($imageInfo['mime'] === 'image/png') ? 'png' : (($imageInfo['mime'] === 'image/webp') ? 'webp' : 'jpg');
-                    $filename = 'festive_' . bin2hex(random_bytes(10)) . '.' . $ext;
-                    $uploadDir = __DIR__ . '/../../../public/resources/images/festive_cards';
-
-                    if (!is_dir($uploadDir)) {
-                        @mkdir($uploadDir, 0755, true);
-                    }
-
-                    $destPath = $uploadDir . '/' . $filename;
-                    if (@move_uploaded_file($tmpPath, $destPath)) {
-                        $data['hero_photo_url'] = '/resources/images/festive_cards/' . $filename;
-                        $data['hero_type'] = 'photo';
-                    }
+            // Optional hero photo: validated, auto-oriented, downscaled and re-encoded (purges all EXIF incl. GPS)
+            $upload = $_FILES['hero_photo'] ?? null;
+            if (is_array($upload) && ($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+                $err = (int)($upload['error'] ?? UPLOAD_ERR_NO_FILE);
+                if ($err !== UPLOAD_ERR_OK) {
+                    $this->jsonError(422, in_array($err, [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)
+                        ? 'That photo is too large. Please choose one under 12 MB.'
+                        : 'The photo did not upload completely. Please try again.');
+                    return;
+                }
+                if ((int)($upload['size'] ?? 0) > 12 * 1024 * 1024) {
+                    $this->jsonError(422, 'That photo is too large. Please choose one under 12 MB.');
+                    return;
+                }
+                $tmpPath = (string)($upload['tmp_name'] ?? '');
+                if (!is_uploaded_file($tmpPath)) {
+                    $this->jsonError(400, 'Invalid photo upload.');
+                    return;
+                }
+                try {
+                    $data['hero_photo_url'] = AtgFestiveCardService::storeHeroPhoto($tmpPath);
+                    $data['hero_type'] = 'photo';
+                } catch (\InvalidArgumentException $e) {
+                    $this->jsonError(422, $e->getMessage());
+                    return;
                 }
             }
 
-            $card = $this->service->createCard($userId, $famCode, $data);
+            try {
+                $card = $this->service->createCard($userId, $famCode, $data);
+            } catch (\InvalidArgumentException $e) {
+                $this->jsonError(422, $e->getMessage());
+                return;
+            }
 
             http_response_code(200);
             header('Content-Type: application/json');
@@ -126,10 +138,11 @@ final class FestiveCardController
                 'message' => 'Festive card created successfully!',
                 'data' => $card,
             ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        } catch (\Src\Exceptions\UnauthorisedException $th) {
+            $this->jsonError(403, 'Your session has expired. Please refresh the page and try again.');
         } catch (\Throwable $th) {
-            http_response_code(500);
-            header('Content-Type: application/json');
-            echo json_encode(['status' => 'error', 'message' => $th->getMessage()]);
+            error_log('[FestiveCardController::create] ' . $th->getMessage());
+            $this->jsonError(500, 'We could not create your card just now. Please try again.');
         }
     }
 
@@ -197,6 +210,7 @@ final class FestiveCardController
         // Increment anonymous view counter safely
         $this->service->recordCardView($token);
 
+        header('X-Robots-Tag: noindex, nofollow');
         view('public/livingFestiveEnvelope', [
             'card' => $card,
             'occasion' => $card['occasion_meta'],
@@ -206,15 +220,16 @@ final class FestiveCardController
     }
 
     /**
-     * GET /greetings/i/{token}.png
+     * GET /greetings/i/{token}.jpg|.png
      *
-     * Dynamic OpenGraph image preview rendered via AtgFestiveCardRenderer.
+     * 1200x630 link-preview image (WhatsApp, iMessage, Facebook, X) rendered by AtgFestiveCardRenderer.
      *
      * @param string $token
+     * @param string $ext
      */
-    public function renderCardImage(string $token): void
+    public function renderCardImage(string $token, string $ext = 'png'): void
     {
-        $token = preg_replace('/\.png$/i', '', trim($token));
+        $token = preg_replace('/\.(png|jpe?g)$/i', '', trim($token)) ?? '';
         $card = $this->service->getCardByToken($token);
 
         if (!$card) {
@@ -223,13 +238,12 @@ final class FestiveCardController
         }
 
         try {
-            $png = AtgFestiveCardRenderer::renderPng($card);
-            header('Content-Type: image/png');
-            header('Cache-Control: public, max-age=86400, stale-while-revalidate=604800');
-            header('Content-Length: ' . strlen($png));
-            echo $png;
-            exit;
+            if (strtolower($ext) === 'jpg') {
+                $this->sendImage(AtgFestiveCardRenderer::renderJpeg($card, 'og'), 'image/jpeg');
+            }
+            $this->sendImage(AtgFestiveCardRenderer::renderPng($card), 'image/png');
         } catch (\Throwable $th) {
+            error_log('[FestiveCardController::renderCardImage] ' . $th->getMessage());
             // Fallback to SVG if GD fails
             $svg = AtgFestiveCardRenderer::renderSvg($card);
             header('Content-Type: image/svg+xml');
@@ -237,5 +251,51 @@ final class FestiveCardController
             echo $svg;
             exit;
         }
+    }
+
+    /**
+     * GET /greetings/p/{token}.jpg
+     *
+     * 1080x1350 portrait keepsake for "Save card", native share-sheet files and the family feed.
+     */
+    public function renderPortraitImage(string $token): void
+    {
+        $card = $this->service->getCardByToken(trim($token));
+        if (!$card) {
+            http_response_code(404);
+            exit;
+        }
+
+        try {
+            $jpg = AtgFestiveCardRenderer::renderJpeg($card, 'portrait');
+            if (isset($_GET['download'])) {
+                $slug = trim((string)preg_replace('/[^a-z0-9]+/', '-', strtolower((string)$card['occasion_label'])), '-') ?: 'card';
+                header('Content-Disposition: attachment; filename="familyplatform-' . $slug . '-card.jpg"');
+            }
+            $this->sendImage($jpg, 'image/jpeg');
+        } catch (\Throwable $th) {
+            error_log('[FestiveCardController::renderPortraitImage] ' . $th->getMessage());
+            http_response_code(500);
+            exit;
+        }
+    }
+
+    private function sendImage(string $bytes, string $type): never
+    {
+        header('Content-Type: ' . $type);
+        header('Cache-Control: public, max-age=604800, stale-while-revalidate=2592000');
+        header('X-Content-Type-Options: nosniff');
+        header('Content-Length: ' . strlen($bytes));
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'HEAD') {
+            echo $bytes;
+        }
+        exit;
+    }
+
+    private function jsonError(int $code, string $message): void
+    {
+        http_response_code($code);
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'error', 'message' => $message], JSON_UNESCAPED_UNICODE);
     }
 }

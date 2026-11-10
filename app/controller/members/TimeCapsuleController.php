@@ -124,6 +124,22 @@ final class TimeCapsuleController extends BaseController
                 return;
             }
 
+            // Sovereign Content Safety & Abuse Guardrail Gate (ATG Pod 1 & Marcus SecOps)
+            foreach (['recipient name' => $recipientName, 'capsule title' => $title, 'capsule message' => $message] as $fieldLabel => $fieldVal) {
+                $safetyCheck = \App\services\ContentSafetyService::inspectText($fieldVal, $fieldLabel);
+                if (!$safetyCheck['is_clean']) {
+                    \App\services\ContentSafetyService::recordViolation(
+                        'time_capsule',
+                        (string)$safetyCheck['category'],
+                        (int)$safetyCheck['tier'],
+                        (string)$safetyCheck['redacted_match']
+                    );
+                    http_response_code(422);
+                    echo json_encode(['status' => 'error', 'message' => (string)$safetyCheck['message']]);
+                    return;
+                }
+            }
+
             $today = date('Y-m-d');
             if ($unlockDate <= $today) {
                 http_response_code(422);

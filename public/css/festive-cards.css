@@ -1,0 +1,845 @@
+/* ==========================================================================
+   FamilyPlatform — Couture Festive Card System (RFC-0019 v2)
+   One card component for the studio preview, archive and living envelope.
+   Sized entirely in container units (cqw) so a thumbnail and a full card are
+   the same design at different scales.
+   ========================================================================== */
+
+@property --fc-mx { syntax: '<number>'; inherits: true; initial-value: 0.5; }
+@property --fc-my { syntax: '<number>'; inherits: true; initial-value: 0.35; }
+
+.fc-card {
+    --fc-primary: #7a0f2a;
+    --fc-accent: #d4af37;
+    --fc-deep: #1a0309;
+    --fc-light: #f6e7a8;
+    --fc-paper: #fbf3e4;
+    --fc-ink: #5c0a1f;
+    --fc-seal: #9f1239;
+    --fc-vs: 1;
+    --fc-hs: 1;
+    --fc-rx: 0deg;
+    --fc-ry: 0deg;
+    --fc-text: #fbf6ea;
+    --fc-text-soft: rgba(251, 246, 234, 0.84);
+    --fc-metal: linear-gradient(118deg,
+        var(--fc-light) 0%,
+        var(--fc-accent) 18%,
+        color-mix(in srgb, var(--fc-accent) 52%, #000) 36%,
+        var(--fc-light) 52%,
+        var(--fc-accent) 68%,
+        color-mix(in srgb, var(--fc-accent) 55%, #000) 84%,
+        var(--fc-light) 100%);
+
+    container-type: inline-size;
+    position: relative;
+    width: 100%;
+    perspective: 1600px;
+    font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+    color: var(--fc-text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    user-select: none;
+}
+
+.fc-tilt {
+    transform: rotateX(var(--fc-ry)) rotateY(var(--fc-rx));
+    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: transform;
+}
+.fc-card.is-tracking .fc-tilt { transition: transform 0.08s linear; }
+
+.fc-face {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border-radius: 2.6cqw;
+    box-shadow:
+        0 0.6cqw 1.2cqw rgba(0, 0, 0, 0.18),
+        0 5cqw 9cqw -2cqw rgba(0, 0, 0, 0.45);
+    isolation: isolate;
+}
+
+.fc-bg,
+.fc-fx,
+.fc-paperwrap,
+.fc-frame,
+.fc-holo,
+.fc-glare {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+}
+.fc-bg { overflow: hidden; z-index: 0; }
+.fc-fx { overflow: hidden; z-index: 1; }
+.fc-paperwrap { z-index: 2; display: none; }
+.fc-frame { z-index: 3; }
+.fc-content { z-index: 5; }
+.fc-holo { z-index: 6; display: none; overflow: hidden; }
+.fc-glare { z-index: 7; overflow: hidden; opacity: 0; transition: opacity 0.4s ease;
+    background: radial-gradient(circle at calc(var(--fc-mx) * 100%) calc(var(--fc-my) * 100%), rgba(255, 255, 255, 0.55), transparent 42%);
+    mix-blend-mode: soft-light; }
+.fc-card[data-fc-tilt]:hover .fc-glare,
+.fc-card.is-tracking .fc-glare { opacity: 1; }
+.fc-fx > i { display: none; }
+
+.fc-corner { position: absolute; z-index: 4; width: 17cqw; aspect-ratio: 1; pointer-events: none; display: none; }
+.fc-corner--tl { top: 2.6cqw; left: 2.6cqw; }
+.fc-corner--tr { top: 2.6cqw; right: 2.6cqw; transform: scaleX(-1); }
+.fc-corner--bl { bottom: 2.6cqw; left: 2.6cqw; transform: scaleY(-1); }
+.fc-corner--br { bottom: 2.6cqw; right: 2.6cqw; transform: scale(-1, -1); }
+
+/* ── Content layout ─────────────────────────────────────────────────────── */
+.fc-content {
+    position: absolute;
+    inset: 8.5cqw 9cqw 9.5cqw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 0;
+}
+
+.fc-eyebrow {
+    margin: 0;
+    font-family: 'Cinzel', 'Trajan Pro', Georgia, serif;
+    font-size: 2.55cqw;
+    font-weight: 600;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    line-height: 1.3;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 0.34em; /* optical centring for tracking */
+}
+
+.fc-rule {
+    position: relative;
+    width: 34cqw;
+    height: 1.6cqw;
+    margin: 1.1cqw 0 2.4cqw;
+    flex: none;
+}
+.fc-rule::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; top: 50%;
+    height: 0.16cqw;
+    background: linear-gradient(90deg, transparent, var(--fc-accent) 25%, var(--fc-accent) 75%, transparent);
+    opacity: 0.85;
+}
+.fc-rule::after {
+    content: '';
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 1.3cqw; height: 1.3cqw;
+    background: var(--fc-metal);
+    transform: translate(-50%, -50%) rotate(45deg);
+    box-shadow: 0 0 0 0.6cqw var(--fc-rule-gap, transparent);
+}
+
+.fc-hero {
+    position: relative;
+    margin: 0 0 3cqw;
+    flex: none;
+}
+.fc-hero__frame {
+    position: relative;
+    width: 58cqw;
+    height: 46cqw;
+    padding: 1.1cqw;
+    background: var(--fc-metal);
+    border-radius: 29cqw 29cqw 1.6cqw 1.6cqw;
+    box-shadow: 0 2.2cqw 4.2cqw -1cqw rgba(0, 0, 0, 0.5);
+}
+.fc-hero__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 30%;
+    border-radius: 28cqw 28cqw 1cqw 1cqw;
+    background: color-mix(in srgb, var(--fc-deep) 70%, #000);
+}
+.fc-no-photo .fc-hero__frame { display: none; }
+.fc-has-photo .fc-crest { display: none; }
+
+.fc-crest {
+    position: relative;
+    width: 27cqw;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    padding: 1.1cqw;
+    background: var(--fc-metal);
+    box-shadow: 0 2cqw 4cqw -1cqw rgba(0, 0, 0, 0.55);
+}
+.fc-crest__inner {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--fc-primary) 80%, #fff), var(--fc-primary) 45%, color-mix(in srgb, var(--fc-primary) 55%, #000));
+}
+.fc-crest__inner::before {
+    content: '';
+    position: absolute;
+    inset: 1.6cqw;
+    border-radius: 50%;
+    border: 0.18cqw solid color-mix(in srgb, var(--fc-accent) 70%, transparent);
+    box-shadow: inset 0 0 0 0.9cqw transparent, inset 0 0 0 1.08cqw color-mix(in srgb, var(--fc-accent) 30%, transparent);
+}
+.fc-crest__mono {
+    font-family: 'Cinzel', Georgia, serif;
+    font-weight: 600;
+    font-size: 10cqw;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    padding-top: 0.6cqw;
+}
+.fc-crest__mono.is-pair { font-size: 7.6cqw; }
+
+.fc-headline {
+    margin: 0;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 500;
+    font-size: calc(6.7cqw * var(--fc-hs));
+    line-height: 1.1;
+    letter-spacing: -0.005em;
+    color: var(--fc-text);
+    text-wrap: balance;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    padding-bottom: 0.2em;
+    max-width: 100%;
+    flex: none;
+}
+.fc-no-photo .fc-headline { font-size: calc(8.2cqw * var(--fc-hs)); }
+
+.fc-recipient {
+    margin: 0.4cqw 0 0;
+    font-family: 'Great Vibes', 'Snell Roundhand', cursive;
+    font-size: 5.6cqw;
+    line-height: 1.25;
+    padding: 0 1.5cqw;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: none;
+}
+
+.fc-verse {
+    margin: 1.6cqw 0 0;
+    font-size: calc(3.85cqw * var(--fc-vs));
+    font-weight: 500;
+    line-height: 1.42;
+    color: var(--fc-text-soft);
+    white-space: pre-line;
+    text-wrap: pretty;
+    max-width: 100%;
+    display: -webkit-box;
+    -webkit-line-clamp: var(--fc-vl, 4);
+    line-clamp: var(--fc-vl, 4);
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: none;
+}
+.fc-style-plaque.fc-has-photo,
+.fc-style-hollow.fc-has-photo,
+.fc-style-translucent.fc-has-photo { --fc-vl: 3; }
+.fc-card.fc-no-photo { --fc-vl: 8; }
+.fc-no-photo .fc-verse { font-size: calc(4.4cqw * var(--fc-vs)); }
+
+.fc-sign {
+    margin-top: 2.6cqw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2cqw;
+    max-width: 100%;
+    flex: none;
+}
+.fc-signoff {
+    font-style: italic;
+    font-size: 3.3cqw;
+    color: var(--fc-text-soft);
+    line-height: 1.2;
+}
+.fc-sender {
+    font-family: 'Great Vibes', 'Snell Roundhand', cursive;
+    font-weight: 400;
+    font-size: 7cqw;
+    line-height: 1.25;
+    padding: 0 2cqw;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fc-metal {
+    background: var(--fc-metal);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+    -webkit-text-fill-color: transparent;
+    animation: fc-foil 7s ease-in-out infinite alternate;
+}
+@keyframes fc-foil { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+
+.fc-brand {
+    position: absolute;
+    z-index: 5;
+    left: 0; right: 0;
+    bottom: 3.6cqw;
+    text-align: center;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 1.55cqw;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--fc-text-soft);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* ── Wax seal ───────────────────────────────────────────────────────────── */
+.fc-seal {
+    position: absolute;
+    right: -3.2cqw;
+    bottom: -3.4cqw;
+    width: 14cqw;
+    aspect-ratio: 1;
+    display: none;
+    place-items: center;
+    border-radius: 47% 53% 50% 50% / 52% 48% 52% 48%;
+    background:
+        radial-gradient(circle at 34% 28%, color-mix(in srgb, var(--fc-seal) 55%, #fff) 0%, var(--fc-seal) 38%, color-mix(in srgb, var(--fc-seal) 50%, #000) 100%);
+    box-shadow:
+        0 1cqw 1.6cqw rgba(0, 0, 0, 0.45),
+        inset 0 0.35cqw 0.45cqw rgba(255, 255, 255, 0.35),
+        inset 0 -0.6cqw 0.9cqw rgba(0, 0, 0, 0.35);
+    transform: rotate(-8deg);
+}
+.fc-seal::before {
+    content: '';
+    position: absolute;
+    inset: 2.1cqw;
+    border-radius: 50%;
+    border: 0.3cqw solid rgba(0, 0, 0, 0.22);
+    box-shadow: 0 0.15cqw 0 rgba(255, 255, 255, 0.18);
+}
+.fc-seal__mono {
+    position: relative;
+    font-family: 'Cinzel', Georgia, serif;
+    font-weight: 700;
+    font-size: 4.6cqw;
+    line-height: 1;
+    padding-top: 0.3cqw;
+    filter: drop-shadow(0 -0.12cqw 0 rgba(0, 0, 0, 0.45));
+}
+.fc-seal__mono.is-pair { font-size: 3.5cqw; }
+
+/* ==========================================================================
+   1. CLASSIC HERITAGE — letterpress ivory, gold foil filigree, wax seal
+   ========================================================================== */
+/* Foil on light paper: deepen the metal towards the ink so silver/rose metals stay legible */
+.fc-style-classic,
+.fc-style-hollow,
+.fc-style-origami {
+    --fc-metal: linear-gradient(118deg,
+        color-mix(in srgb, var(--fc-accent) 55%, var(--fc-ink)) 0%,
+        color-mix(in srgb, var(--fc-accent) 60%, #000) 22%,
+        color-mix(in srgb, var(--fc-accent) 85%, var(--fc-ink)) 42%,
+        color-mix(in srgb, var(--fc-accent) 45%, #000) 62%,
+        color-mix(in srgb, var(--fc-accent) 70%, var(--fc-ink)) 82%,
+        color-mix(in srgb, var(--fc-accent) 55%, #000) 100%);
+}
+.fc-style-classic {
+    --fc-text: var(--fc-ink);
+    --fc-text-soft: color-mix(in srgb, var(--fc-ink) 78%, #4a3b2c);
+    --fc-rule-gap: var(--fc-paper);
+}
+.fc-style-classic .fc-bg {
+    background:
+        radial-gradient(120% 80% at 50% 0%, rgba(255, 255, 255, 0.75), transparent 60%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .34 0 0 0 0 .24 0 0 0 .11 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+        linear-gradient(160deg, color-mix(in srgb, var(--fc-paper) 70%, #fff), var(--fc-paper) 55%, color-mix(in srgb, var(--fc-paper) 88%, #b89b72));
+    box-shadow: inset 0 0 7cqw color-mix(in srgb, #7a5a2c 22%, transparent);
+}
+.fc-style-classic .fc-frame::before,
+.fc-style-classic .fc-frame::after {
+    content: '';
+    position: absolute;
+    border-radius: 0.6cqw;
+}
+.fc-style-classic .fc-frame::before {
+    inset: 3cqw;
+    padding: 0.55cqw;
+    background: var(--fc-metal);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+.fc-style-classic .fc-frame::after {
+    inset: 4.7cqw;
+    border: 0.16cqw solid color-mix(in srgb, var(--fc-accent) 70%, transparent);
+}
+.fc-style-classic .fc-corner,
+.fc-style-hollow .fc-corner,
+.fc-style-spatial_3d .fc-corner {
+    display: block;
+    background: var(--fc-metal);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23000' stroke-linecap='round'%3E%3Cpath d='M8 8H72M8 8V72' stroke-width='2.4'/%3E%3Cpath d='M15 15H46M15 15V46' stroke-width='1.1'/%3E%3Cpath d='M8 8c15 4 23 12 27 27M8 8c4 15 12 23 27 27' stroke-width='1.5'/%3E%3Cpath d='M72 8c7 0 10 3.5 10 8s-3.5 7-7 7-5.5-2.5-5.5-5' stroke-width='1.5'/%3E%3Cpath d='M8 72c0 7 3.5 10 8 10s7-3.5 7-7-2.5-5.5-5-5.5' stroke-width='1.5'/%3E%3C/g%3E%3Cpath d='M27 19l8 8-8 8-8-8z'/%3E%3Ccircle cx='50' cy='8' r='2.2'/%3E%3Ccircle cx='8' cy='50' r='2.2'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23000' stroke-linecap='round'%3E%3Cpath d='M8 8H72M8 8V72' stroke-width='2.4'/%3E%3Cpath d='M15 15H46M15 15V46' stroke-width='1.1'/%3E%3Cpath d='M8 8c15 4 23 12 27 27M8 8c4 15 12 23 27 27' stroke-width='1.5'/%3E%3Cpath d='M72 8c7 0 10 3.5 10 8s-3.5 7-7 7-5.5-2.5-5.5-5' stroke-width='1.5'/%3E%3Cpath d='M8 72c0 7 3.5 10 8 10s7-3.5 7-7-2.5-5.5-5-5.5' stroke-width='1.5'/%3E%3C/g%3E%3Cpath d='M27 19l8 8-8 8-8-8z'/%3E%3Ccircle cx='50' cy='8' r='2.2'/%3E%3Ccircle cx='8' cy='50' r='2.2'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.fc-style-classic .fc-eyebrow,
+.fc-style-classic .fc-recipient,
+.fc-style-classic .fc-sender { filter: drop-shadow(0 0.08cqw 0 rgba(255, 255, 255, 0.7)); }
+.fc-style-classic .fc-headline { text-shadow: 0 0.1cqw 0 rgba(255, 255, 255, 0.8); }
+.fc-style-classic .fc-seal,
+.fc-style-spatial_3d .fc-seal,
+.fc-style-hollow .fc-seal,
+.fc-style-origami .fc-seal { display: grid; }
+.fc-card.fc-no-photo .fc-seal { display: none; }
+
+/* ==========================================================================
+   2. LUXURY 3D SPATIAL — floating layers, gilded arch, parallax depth
+   ========================================================================== */
+.fc-style-spatial_3d .fc-tilt,
+.fc-style-spatial_3d .fc-face,
+.fc-style-spatial_3d .fc-content { transform-style: preserve-3d; }
+.fc-style-spatial_3d .fc-face {
+    box-shadow:
+        0 0 0 0.35cqw color-mix(in srgb, var(--fc-accent) 75%, #000),
+        0 1cqw 2cqw rgba(0, 0, 0, 0.35),
+        0 7cqw 12cqw -3cqw rgba(0, 0, 0, 0.7);
+}
+.fc-style-spatial_3d .fc-bg {
+    background:
+        radial-gradient(70% 50% at 50% 30%, color-mix(in srgb, var(--fc-accent) 34%, transparent), transparent 72%),
+        radial-gradient(120% 70% at 50% 120%, color-mix(in srgb, var(--fc-primary) 80%, #000), transparent 70%),
+        linear-gradient(165deg, var(--fc-deep) 0%, var(--fc-primary) 52%, var(--fc-deep) 100%);
+}
+.fc-style-spatial_3d .fc-fx {
+    transform: translateZ(1.5cqw);
+    background:
+        radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--fc-light) 70%, transparent) 0 0.5cqw, transparent 1.4cqw),
+        radial-gradient(circle at 86% 12%, color-mix(in srgb, var(--fc-light) 55%, transparent) 0 0.9cqw, transparent 2.4cqw),
+        radial-gradient(circle at 78% 56%, color-mix(in srgb, var(--fc-light) 40%, transparent) 0 0.4cqw, transparent 1.2cqw),
+        radial-gradient(circle at 18% 64%, color-mix(in srgb, var(--fc-light) 45%, transparent) 0 1.2cqw, transparent 3cqw),
+        radial-gradient(circle at 92% 86%, color-mix(in srgb, var(--fc-light) 60%, transparent) 0 0.6cqw, transparent 1.8cqw),
+        radial-gradient(circle at 8% 92%, color-mix(in srgb, var(--fc-light) 35%, transparent) 0 0.8cqw, transparent 2.2cqw);
+    filter: blur(0.15cqw);
+    opacity: 0.9;
+}
+.fc-style-spatial_3d .fc-frame::before {
+    content: '';
+    position: absolute;
+    inset: 3.2cqw;
+    border-radius: 1.2cqw;
+    border: 0.18cqw solid color-mix(in srgb, var(--fc-accent) 65%, transparent);
+    transform: translateZ(2cqw);
+}
+.fc-style-spatial_3d .fc-hero { transform: translateZ(5cqw); }
+.fc-style-spatial_3d .fc-hero__frame { padding: 1.4cqw; box-shadow: 0 3.4cqw 5cqw -1cqw rgba(0, 0, 0, 0.7), 0 0 6cqw color-mix(in srgb, var(--fc-accent) 30%, transparent); }
+.fc-style-spatial_3d .fc-crest { box-shadow: 0 3cqw 5cqw -1cqw rgba(0, 0, 0, 0.7), 0 0 8cqw color-mix(in srgb, var(--fc-accent) 35%, transparent); }
+.fc-style-spatial_3d .fc-headline { transform: translateZ(8cqw); text-shadow: 0 0.8cqw 1.6cqw rgba(0, 0, 0, 0.55); }
+.fc-style-spatial_3d .fc-recipient,
+.fc-style-spatial_3d .fc-verse { transform: translateZ(6cqw); }
+.fc-style-spatial_3d .fc-sign { transform: translateZ(7cqw); }
+.fc-style-spatial_3d .fc-eyebrow, .fc-style-spatial_3d .fc-rule { transform: translateZ(4cqw); }
+.fc-style-spatial_3d .fc-corner { opacity: 0.85; transform-origin: center; }
+.fc-style-spatial_3d .fc-corner--tl { transform: translateZ(2cqw); }
+.fc-style-spatial_3d .fc-corner--tr { transform: translateZ(2cqw) scaleX(-1); }
+.fc-style-spatial_3d .fc-corner--bl { transform: translateZ(2cqw) scaleY(-1); }
+.fc-style-spatial_3d .fc-corner--br { transform: translateZ(2cqw) scale(-1, -1); }
+
+/* ==========================================================================
+   3. TRANSLUCENT FROST — frosted crystal pane over living aurora light
+   ========================================================================== */
+.fc-style-translucent .fc-bg {
+    background: linear-gradient(160deg, var(--fc-deep), color-mix(in srgb, var(--fc-deep) 60%, var(--fc-primary)));
+}
+.fc-style-translucent .fc-fx > i {
+    display: block;
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(6cqw);
+    opacity: 0.95;
+    animation: fc-orb 16s ease-in-out infinite alternate;
+}
+.fc-style-translucent .fc-fx > i:nth-child(1) { width: 70cqw; height: 70cqw; left: -18cqw; top: -10cqw; background: var(--fc-primary); }
+.fc-style-translucent .fc-fx > i:nth-child(2) { width: 56cqw; height: 56cqw; right: -16cqw; top: 26cqw; background: var(--fc-accent); animation-delay: -5s; animation-duration: 19s; }
+.fc-style-translucent .fc-fx > i:nth-child(3) { width: 64cqw; height: 64cqw; left: 10cqw; bottom: -22cqw; background: color-mix(in srgb, var(--fc-primary) 50%, #7aa8ff); animation-delay: -9s; }
+@keyframes fc-orb {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(6cqw, -5cqw) scale(1.08); }
+    100% { transform: translate(-5cqw, 6cqw) scale(0.94); }
+}
+.fc-style-translucent .fc-frame {
+    inset: 4.5cqw;
+    border-radius: 4cqw;
+    background: linear-gradient(140deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0.14) 100%);
+    -webkit-backdrop-filter: blur(3.4cqw) saturate(170%);
+    backdrop-filter: blur(3.4cqw) saturate(170%);
+    border: 0.22cqw solid rgba(255, 255, 255, 0.42);
+    box-shadow:
+        inset 0 0.25cqw 0 rgba(255, 255, 255, 0.55),
+        inset 0 -0.3cqw 0.6cqw rgba(255, 255, 255, 0.12),
+        0 3cqw 6cqw rgba(0, 0, 0, 0.3);
+}
+.fc-style-translucent .fc-frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.22) 45%, transparent 60%);
+    background-size: 250% 100%;
+    background-position: calc(var(--fc-mx) * 100%) 0;
+}
+.fc-style-translucent .fc-content { inset: 10cqw 11cqw 11cqw; }
+.fc-style-translucent .fc-hero__frame {
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 3.6cqw;
+    padding: 0.8cqw;
+    box-shadow: 0 2cqw 4cqw rgba(0, 0, 0, 0.3), inset 0 0.2cqw 0 rgba(255, 255, 255, 0.7);
+    width: 54cqw; height: 42cqw;
+}
+.fc-style-translucent .fc-hero__img { border-radius: 3cqw; }
+.fc-style-translucent .fc-crest { background: rgba(255, 255, 255, 0.4); }
+.fc-style-translucent .fc-crest__inner { background: rgba(255, 255, 255, 0.12); -webkit-backdrop-filter: blur(2cqw); backdrop-filter: blur(2cqw); }
+.fc-style-translucent .fc-headline { text-shadow: 0 0.4cqw 1.6cqw rgba(0, 0, 0, 0.35); }
+.fc-style-translucent .fc-sender,
+.fc-style-translucent .fc-recipient,
+.fc-style-translucent .fc-eyebrow { filter: drop-shadow(0 0.2cqw 0.5cqw rgba(0, 0, 0, 0.55)); }
+.fc-style-translucent .fc-verse, .fc-style-translucent .fc-signoff { text-shadow: 0 0.2cqw 0.8cqw rgba(0, 0, 0, 0.35); }
+.fc-style-translucent .fc-brand { bottom: 6cqw; }
+
+/* ==========================================================================
+   4. HOLLOW DIE-CUT — laser-cut lace paper over a foil underlay
+   ========================================================================== */
+.fc-style-hollow {
+    --fc-text: var(--fc-ink);
+    --fc-text-soft: color-mix(in srgb, var(--fc-ink) 78%, #4a3b2c);
+    --fc-rule-gap: var(--fc-paper);
+}
+.fc-style-hollow .fc-bg {
+    background:
+        radial-gradient(circle at calc(var(--fc-mx) * 100%) calc(var(--fc-my) * 100%), color-mix(in srgb, var(--fc-light) 60%, transparent), transparent 40%),
+        var(--fc-metal);
+}
+.fc-style-hollow .fc-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, color-mix(in srgb, var(--fc-primary) 75%, transparent), color-mix(in srgb, var(--fc-primary) 35%, transparent));
+    mix-blend-mode: multiply;
+}
+.fc-style-hollow .fc-paperwrap {
+    display: block;
+    filter: drop-shadow(0 0.45cqw 0.5cqw rgba(0, 0, 0, 0.45));
+}
+.fc-style-hollow .fc-paper {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .34 0 0 0 0 .24 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+        linear-gradient(170deg, color-mix(in srgb, var(--fc-paper) 60%, #fff), var(--fc-paper));
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 400 500%27 preserveAspectRatio=%27none%27%3E%3Cpath fill-rule=%27evenodd%27 fill=%27%23000%27 d=%27M0 0H400V500H0ZM11.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM25.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM25.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM39.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM39.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM53.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM53.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM67.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM67.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM81.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM81.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM95.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM95.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM109.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM109.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM123.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM123.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM137.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM137.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM151.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM151.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM165.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM165.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM179.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM179.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM193.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM193.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM207.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM207.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM221.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM221.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM235.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM235.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM249.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM249.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM263.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM263.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM277.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM277.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM291.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM291.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM305.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM305.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM319.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM319.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM333.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM333.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM347.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM347.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM361.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM361.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM375.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM375.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 29a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 29a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 43a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 43a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 57a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 57a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 71a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 71a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 85a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 85a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 99a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 99a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 113a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 113a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 127a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 127a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 141a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 141a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 155a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 155a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 169a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 169a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 183a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 183a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 197a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 197a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 211a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 211a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 225a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 225a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 239a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 239a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 253a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 253a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 267a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 267a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 281a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 281a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 295a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 295a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 309a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 309a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 323a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 323a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 337a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 337a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 351a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 351a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 365a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 365a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 379a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 379a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 393a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 393a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 407a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 407a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 421a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 421a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 435a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 435a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 449a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 449a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 463a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 463a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 477a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 477a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM34 24.6L36.4 27L34 29.4L31.6 27ZM34 470.6L36.4 473L34 475.4L31.6 473ZM48 24.6L50.4 27L48 29.4L45.6 27ZM48 470.6L50.4 473L48 475.4L45.6 473ZM62 24.6L64.4 27L62 29.4L59.6 27ZM62 470.6L64.4 473L62 475.4L59.6 473ZM76 24.6L78.4 27L76 29.4L73.6 27ZM76 470.6L78.4 473L76 475.4L73.6 473ZM90 24.6L92.4 27L90 29.4L87.6 27ZM90 470.6L92.4 473L90 475.4L87.6 473ZM104 24.6L106.4 27L104 29.4L101.6 27ZM104 470.6L106.4 473L104 475.4L101.6 473ZM118 24.6L120.4 27L118 29.4L115.6 27ZM118 470.6L120.4 473L118 475.4L115.6 473ZM132 24.6L134.4 27L132 29.4L129.6 27ZM132 470.6L134.4 473L132 475.4L129.6 473ZM146 24.6L148.4 27L146 29.4L143.6 27ZM146 470.6L148.4 473L146 475.4L143.6 473ZM160 24.6L162.4 27L160 29.4L157.6 27ZM160 470.6L162.4 473L160 475.4L157.6 473ZM174 24.6L176.4 27L174 29.4L171.6 27ZM174 470.6L176.4 473L174 475.4L171.6 473ZM188 24.6L190.4 27L188 29.4L185.6 27ZM188 470.6L190.4 473L188 475.4L185.6 473ZM202 24.6L204.4 27L202 29.4L199.6 27ZM202 470.6L204.4 473L202 475.4L199.6 473ZM216 24.6L218.4 27L216 29.4L213.6 27ZM216 470.6L218.4 473L216 475.4L213.6 473ZM230 24.6L232.4 27L230 29.4L227.6 27ZM230 470.6L232.4 473L230 475.4L227.6 473ZM244 24.6L246.4 27L244 29.4L241.6 27ZM244 470.6L246.4 473L244 475.4L241.6 473ZM258 24.6L260.4 27L258 29.4L255.6 27ZM258 470.6L260.4 473L258 475.4L255.6 473ZM272 24.6L274.4 27L272 29.4L269.6 27ZM272 470.6L274.4 473L272 475.4L269.6 473ZM286 24.6L288.4 27L286 29.4L283.6 27ZM286 470.6L288.4 473L286 475.4L283.6 473ZM300 24.6L302.4 27L300 29.4L297.6 27ZM300 470.6L302.4 473L300 475.4L297.6 473ZM314 24.6L316.4 27L314 29.4L311.6 27ZM314 470.6L316.4 473L314 475.4L311.6 473ZM328 24.6L330.4 27L328 29.4L325.6 27ZM328 470.6L330.4 473L328 475.4L325.6 473ZM342 24.6L344.4 27L342 29.4L339.6 27ZM342 470.6L344.4 473L342 475.4L339.6 473ZM356 24.6L358.4 27L356 29.4L353.6 27ZM356 470.6L358.4 473L356 475.4L353.6 473ZM370 24.6L372.4 27L370 29.4L367.6 27ZM370 470.6L372.4 473L370 475.4L367.6 473ZM27 31.6L29.4 34L27 36.4L24.6 34ZM373 31.6L375.4 34L373 36.4L370.6 34ZM27 45.6L29.4 48L27 50.4L24.6 48ZM373 45.6L375.4 48L373 50.4L370.6 48ZM27 59.6L29.4 62L27 64.4L24.6 62ZM373 59.6L375.4 62L373 64.4L370.6 62ZM27 73.6L29.4 76L27 78.4L24.6 76ZM373 73.6L375.4 76L373 78.4L370.6 76ZM27 87.6L29.4 90L27 92.4L24.6 90ZM373 87.6L375.4 90L373 92.4L370.6 90ZM27 101.6L29.4 104L27 106.4L24.6 104ZM373 101.6L375.4 104L373 106.4L370.6 104ZM27 115.6L29.4 118L27 120.4L24.6 118ZM373 115.6L375.4 118L373 120.4L370.6 118ZM27 129.6L29.4 132L27 134.4L24.6 132ZM373 129.6L375.4 132L373 134.4L370.6 132ZM27 143.6L29.4 146L27 148.4L24.6 146ZM373 143.6L375.4 146L373 148.4L370.6 146ZM27 157.6L29.4 160L27 162.4L24.6 160ZM373 157.6L375.4 160L373 162.4L370.6 160ZM27 171.6L29.4 174L27 176.4L24.6 174ZM373 171.6L375.4 174L373 176.4L370.6 174ZM27 185.6L29.4 188L27 190.4L24.6 188ZM373 185.6L375.4 188L373 190.4L370.6 188ZM27 199.6L29.4 202L27 204.4L24.6 202ZM373 199.6L375.4 202L373 204.4L370.6 202ZM27 213.6L29.4 216L27 218.4L24.6 216ZM373 213.6L375.4 216L373 218.4L370.6 216ZM27 227.6L29.4 230L27 232.4L24.6 230ZM373 227.6L375.4 230L373 232.4L370.6 230ZM27 241.6L29.4 244L27 246.4L24.6 244ZM373 241.6L375.4 244L373 246.4L370.6 244ZM27 255.6L29.4 258L27 260.4L24.6 258ZM373 255.6L375.4 258L373 260.4L370.6 258ZM27 269.6L29.4 272L27 274.4L24.6 272ZM373 269.6L375.4 272L373 274.4L370.6 272ZM27 283.6L29.4 286L27 288.4L24.6 286ZM373 283.6L375.4 286L373 288.4L370.6 286ZM27 297.6L29.4 300L27 302.4L24.6 300ZM373 297.6L375.4 300L373 302.4L370.6 300ZM27 311.6L29.4 314L27 316.4L24.6 314ZM373 311.6L375.4 314L373 316.4L370.6 314ZM27 325.6L29.4 328L27 330.4L24.6 328ZM373 325.6L375.4 328L373 330.4L370.6 328ZM27 339.6L29.4 342L27 344.4L24.6 342ZM373 339.6L375.4 342L373 344.4L370.6 342ZM27 353.6L29.4 356L27 358.4L24.6 356ZM373 353.6L375.4 356L373 358.4L370.6 356ZM27 367.6L29.4 370L27 372.4L24.6 370ZM373 367.6L375.4 370L373 372.4L370.6 370ZM27 381.6L29.4 384L27 386.4L24.6 384ZM373 381.6L375.4 384L373 386.4L370.6 384ZM27 395.6L29.4 398L27 400.4L24.6 398ZM373 395.6L375.4 398L373 400.4L370.6 398ZM27 409.6L29.4 412L27 414.4L24.6 412ZM373 409.6L375.4 412L373 414.4L370.6 412ZM27 423.6L29.4 426L27 428.4L24.6 426ZM373 423.6L375.4 426L373 428.4L370.6 426ZM27 437.6L29.4 440L27 442.4L24.6 440ZM373 437.6L375.4 440L373 442.4L370.6 440ZM27 451.6L29.4 454L27 456.4L24.6 454ZM373 451.6L375.4 454L373 456.4L370.6 454ZM27 465.6L29.4 468L27 470.4L24.6 468ZM373 465.6L375.4 468L373 470.4L370.6 468ZM39 44a5 5 0 1 0 10 0a5 5 0 1 0 -10 0ZM52.4 44.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM49.199999999999996 51.8a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM41.4 55.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM33.6 51.8a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM30.4 44.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM33.6 36.2a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM41.4 33.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM49.199999999999996 36.2a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM351 44a5 5 0 1 0 10 0a5 5 0 1 0 -10 0ZM364.4 44.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM361.2 51.8a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM353.4 55.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM345.59999999999997 51.8a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM342.4 44.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM345.59999999999997 36.2a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM353.4 33.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM361.2 36.2a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM39 456a5 5 0 1 0 10 0a5 5 0 1 0 -10 0ZM52.4 456.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM49.199999999999996 463.8a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM41.4 467.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM33.6 463.8a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM30.4 456.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM33.6 448.2a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM41.4 445.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM49.199999999999996 448.2a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM351 456a5 5 0 1 0 10 0a5 5 0 1 0 -10 0ZM364.4 456.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM361.2 463.8a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM353.4 467.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM345.59999999999997 463.8a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM342.4 456.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM345.59999999999997 448.2a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM353.4 445.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM361.2 448.2a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0Z%27/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 400 500%27 preserveAspectRatio=%27none%27%3E%3Cpath fill-rule=%27evenodd%27 fill=%27%23000%27 d=%27M0 0H400V500H0ZM11.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM25.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM25.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM39.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM39.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM53.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM53.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM67.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM67.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM81.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM81.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM95.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM95.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM109.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM109.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM123.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM123.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM137.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM137.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM151.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM151.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM165.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM165.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM179.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM179.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM193.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM193.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM207.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM207.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM221.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM221.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM235.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM235.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM249.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM249.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM263.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM263.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM277.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM277.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM291.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM291.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM305.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM305.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM319.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM319.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM333.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM333.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM347.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM347.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM361.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM361.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM375.4 15a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM375.4 485a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 29a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 29a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 43a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 43a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 57a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 57a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 71a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 71a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 85a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 85a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 99a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 99a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 113a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 113a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 127a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 127a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 141a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 141a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 155a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 155a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 169a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 169a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 183a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 183a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 197a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 197a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 211a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 211a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 225a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 225a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 239a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 239a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 253a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 253a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 267a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 267a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 281a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 281a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 295a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 295a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 309a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 309a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 323a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 323a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 337a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 337a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 351a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 351a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 365a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 365a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 379a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 379a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 393a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 393a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 407a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 407a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 421a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 421a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 435a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 435a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 449a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 449a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 463a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 463a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM11.4 477a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM381.4 477a3.6 3.6 0 1 0 7.2 0a3.6 3.6 0 1 0 -7.2 0ZM34 24.6L36.4 27L34 29.4L31.6 27ZM34 470.6L36.4 473L34 475.4L31.6 473ZM48 24.6L50.4 27L48 29.4L45.6 27ZM48 470.6L50.4 473L48 475.4L45.6 473ZM62 24.6L64.4 27L62 29.4L59.6 27ZM62 470.6L64.4 473L62 475.4L59.6 473ZM76 24.6L78.4 27L76 29.4L73.6 27ZM76 470.6L78.4 473L76 475.4L73.6 473ZM90 24.6L92.4 27L90 29.4L87.6 27ZM90 470.6L92.4 473L90 475.4L87.6 473ZM104 24.6L106.4 27L104 29.4L101.6 27ZM104 470.6L106.4 473L104 475.4L101.6 473ZM118 24.6L120.4 27L118 29.4L115.6 27ZM118 470.6L120.4 473L118 475.4L115.6 473ZM132 24.6L134.4 27L132 29.4L129.6 27ZM132 470.6L134.4 473L132 475.4L129.6 473ZM146 24.6L148.4 27L146 29.4L143.6 27ZM146 470.6L148.4 473L146 475.4L143.6 473ZM160 24.6L162.4 27L160 29.4L157.6 27ZM160 470.6L162.4 473L160 475.4L157.6 473ZM174 24.6L176.4 27L174 29.4L171.6 27ZM174 470.6L176.4 473L174 475.4L171.6 473ZM188 24.6L190.4 27L188 29.4L185.6 27ZM188 470.6L190.4 473L188 475.4L185.6 473ZM202 24.6L204.4 27L202 29.4L199.6 27ZM202 470.6L204.4 473L202 475.4L199.6 473ZM216 24.6L218.4 27L216 29.4L213.6 27ZM216 470.6L218.4 473L216 475.4L213.6 473ZM230 24.6L232.4 27L230 29.4L227.6 27ZM230 470.6L232.4 473L230 475.4L227.6 473ZM244 24.6L246.4 27L244 29.4L241.6 27ZM244 470.6L246.4 473L244 475.4L241.6 473ZM258 24.6L260.4 27L258 29.4L255.6 27ZM258 470.6L260.4 473L258 475.4L255.6 473ZM272 24.6L274.4 27L272 29.4L269.6 27ZM272 470.6L274.4 473L272 475.4L269.6 473ZM286 24.6L288.4 27L286 29.4L283.6 27ZM286 470.6L288.4 473L286 475.4L283.6 473ZM300 24.6L302.4 27L300 29.4L297.6 27ZM300 470.6L302.4 473L300 475.4L297.6 473ZM314 24.6L316.4 27L314 29.4L311.6 27ZM314 470.6L316.4 473L314 475.4L311.6 473ZM328 24.6L330.4 27L328 29.4L325.6 27ZM328 470.6L330.4 473L328 475.4L325.6 473ZM342 24.6L344.4 27L342 29.4L339.6 27ZM342 470.6L344.4 473L342 475.4L339.6 473ZM356 24.6L358.4 27L356 29.4L353.6 27ZM356 470.6L358.4 473L356 475.4L353.6 473ZM370 24.6L372.4 27L370 29.4L367.6 27ZM370 470.6L372.4 473L370 475.4L367.6 473ZM27 31.6L29.4 34L27 36.4L24.6 34ZM373 31.6L375.4 34L373 36.4L370.6 34ZM27 45.6L29.4 48L27 50.4L24.6 48ZM373 45.6L375.4 48L373 50.4L370.6 48ZM27 59.6L29.4 62L27 64.4L24.6 62ZM373 59.6L375.4 62L373 64.4L370.6 62ZM27 73.6L29.4 76L27 78.4L24.6 76ZM373 73.6L375.4 76L373 78.4L370.6 76ZM27 87.6L29.4 90L27 92.4L24.6 90ZM373 87.6L375.4 90L373 92.4L370.6 90ZM27 101.6L29.4 104L27 106.4L24.6 104ZM373 101.6L375.4 104L373 106.4L370.6 104ZM27 115.6L29.4 118L27 120.4L24.6 118ZM373 115.6L375.4 118L373 120.4L370.6 118ZM27 129.6L29.4 132L27 134.4L24.6 132ZM373 129.6L375.4 132L373 134.4L370.6 132ZM27 143.6L29.4 146L27 148.4L24.6 146ZM373 143.6L375.4 146L373 148.4L370.6 146ZM27 157.6L29.4 160L27 162.4L24.6 160ZM373 157.6L375.4 160L373 162.4L370.6 160ZM27 171.6L29.4 174L27 176.4L24.6 174ZM373 171.6L375.4 174L373 176.4L370.6 174ZM27 185.6L29.4 188L27 190.4L24.6 188ZM373 185.6L375.4 188L373 190.4L370.6 188ZM27 199.6L29.4 202L27 204.4L24.6 202ZM373 199.6L375.4 202L373 204.4L370.6 202ZM27 213.6L29.4 216L27 218.4L24.6 216ZM373 213.6L375.4 216L373 218.4L370.6 216ZM27 227.6L29.4 230L27 232.4L24.6 230ZM373 227.6L375.4 230L373 232.4L370.6 230ZM27 241.6L29.4 244L27 246.4L24.6 244ZM373 241.6L375.4 244L373 246.4L370.6 244ZM27 255.6L29.4 258L27 260.4L24.6 258ZM373 255.6L375.4 258L373 260.4L370.6 258ZM27 269.6L29.4 272L27 274.4L24.6 272ZM373 269.6L375.4 272L373 274.4L370.6 272ZM27 283.6L29.4 286L27 288.4L24.6 286ZM373 283.6L375.4 286L373 288.4L370.6 286ZM27 297.6L29.4 300L27 302.4L24.6 300ZM373 297.6L375.4 300L373 302.4L370.6 300ZM27 311.6L29.4 314L27 316.4L24.6 314ZM373 311.6L375.4 314L373 316.4L370.6 314ZM27 325.6L29.4 328L27 330.4L24.6 328ZM373 325.6L375.4 328L373 330.4L370.6 328ZM27 339.6L29.4 342L27 344.4L24.6 342ZM373 339.6L375.4 342L373 344.4L370.6 342ZM27 353.6L29.4 356L27 358.4L24.6 356ZM373 353.6L375.4 356L373 358.4L370.6 356ZM27 367.6L29.4 370L27 372.4L24.6 370ZM373 367.6L375.4 370L373 372.4L370.6 370ZM27 381.6L29.4 384L27 386.4L24.6 384ZM373 381.6L375.4 384L373 386.4L370.6 384ZM27 395.6L29.4 398L27 400.4L24.6 398ZM373 395.6L375.4 398L373 400.4L370.6 398ZM27 409.6L29.4 412L27 414.4L24.6 412ZM373 409.6L375.4 412L373 414.4L370.6 412ZM27 423.6L29.4 426L27 428.4L24.6 426ZM373 423.6L375.4 426L373 428.4L370.6 426ZM27 437.6L29.4 440L27 442.4L24.6 440ZM373 437.6L375.4 440L373 442.4L370.6 440ZM27 451.6L29.4 454L27 456.4L24.6 454ZM373 451.6L375.4 454L373 456.4L370.6 454ZM27 465.6L29.4 468L27 470.4L24.6 468ZM373 465.6L375.4 468L373 470.4L370.6 468ZM39 44a5 5 0 1 0 10 0a5 5 0 1 0 -10 0ZM52.4 44.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM49.199999999999996 51.8a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM41.4 55.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM33.6 51.8a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM30.4 44.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM33.6 36.2a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM41.4 33.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM49.199999999999996 36.2a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM351 44a5 5 0 1 0 10 0a5 5 0 1 0 -10 0ZM364.4 44.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM361.2 51.8a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM353.4 55.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM345.59999999999997 51.8a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM342.4 44.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM345.59999999999997 36.2a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM353.4 33.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM361.2 36.2a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM39 456a5 5 0 1 0 10 0a5 5 0 1 0 -10 0ZM52.4 456.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM49.199999999999996 463.8a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM41.4 467.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM33.6 463.8a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM30.4 456.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM33.6 448.2a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM41.4 445.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM49.199999999999996 448.2a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM351 456a5 5 0 1 0 10 0a5 5 0 1 0 -10 0ZM364.4 456.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM361.2 463.8a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM353.4 467.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM345.59999999999997 463.8a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM342.4 456.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM345.59999999999997 448.2a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM353.4 445.0a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0ZM361.2 448.2a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0Z%27/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+.fc-style-hollow .fc-hero__frame {
+    padding: 1.3cqw;
+    background:
+        radial-gradient(circle, var(--fc-paper) 0 0.55cqw, transparent 0.62cqw) 0 0 / 2.2cqw 2.2cqw,
+        color-mix(in srgb, var(--fc-primary) 85%, #000);
+    box-shadow: inset 0 0.5cqw 0.8cqw rgba(0, 0, 0, 0.45), 0 0.4cqw 0 rgba(255, 255, 255, 0.6);
+}
+.fc-style-hollow .fc-hero__img { box-shadow: 0 0 0 0.3cqw var(--fc-paper); }
+.fc-style-hollow .fc-content { inset: 10.5cqw 11cqw 11cqw; }
+.fc-style-hollow .fc-corner { width: 12cqw; top: auto; left: auto; display: none; }
+.fc-style-hollow .fc-brand { bottom: 6.8cqw; }
+
+/* ==========================================================================
+   5. PLAQUE & ROYAL ENGRAVING — black marble slab, bevelled brass, engraving
+   ========================================================================== */
+.fc-style-plaque { --fc-text-soft: #d8d2c4; }
+.fc-style-plaque .fc-face { border-radius: 1.4cqw; }
+.fc-style-plaque .fc-bg {
+    background: var(--fc-metal);
+    background-size: 160% 160%;
+    background-position: calc(var(--fc-mx) * 60%) calc(var(--fc-my) * 60%);
+    box-shadow:
+        inset 0 0.6cqw 0.6cqw rgba(255, 255, 255, 0.5),
+        inset 0 -0.7cqw 0.9cqw rgba(0, 0, 0, 0.45),
+        inset 0.6cqw 0 0.6cqw rgba(255, 255, 255, 0.25),
+        inset -0.6cqw 0 0.8cqw rgba(0, 0, 0, 0.3);
+}
+.fc-style-plaque .fc-frame {
+    inset: 4.6cqw;
+    border-radius: 0.8cqw;
+    background:
+        radial-gradient(90% 60% at 25% 10%, rgba(255, 255, 255, 0.09), transparent 60%),
+        linear-gradient(118deg, transparent 38%, rgba(255, 255, 255, 0.07) 46%, transparent 54%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='500'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='turbulence' baseFrequency='.0035 .011' numOctaves='6' seed='8'/%3E%3CfeColorMatrix values='0 0 0 0 .93 0 0 0 0 .92 0 0 0 0 .9 -9 0 0 0 1.12'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)' opacity='.42'/%3E%3C/svg%3E") center / cover,
+        linear-gradient(165deg, #1b1b1f 0%, #0b0b0c 55%, #17171a 100%);
+    box-shadow:
+        0 0 0 0.3cqw color-mix(in srgb, var(--fc-accent) 55%, #000),
+        0 0 0 0.55cqw color-mix(in srgb, var(--fc-light) 60%, transparent),
+        inset 0 0.8cqw 1.6cqw rgba(0, 0, 0, 0.85),
+        inset 0 -0.2cqw 0.4cqw rgba(255, 255, 255, 0.08);
+}
+.fc-style-plaque .fc-frame::after {
+    content: '';
+    position: absolute;
+    inset: 2.4cqw;
+    border: 0.16cqw solid color-mix(in srgb, var(--fc-accent) 60%, transparent);
+    border-radius: 0.4cqw;
+}
+.fc-style-plaque .fc-corner {
+    display: block;
+    width: 3.4cqw;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--fc-light), var(--fc-accent) 45%, color-mix(in srgb, var(--fc-accent) 40%, #000));
+    box-shadow: 0 0.3cqw 0.4cqw rgba(0, 0, 0, 0.6), inset 0 -0.2cqw 0.3cqw rgba(0, 0, 0, 0.4);
+    transform: none;
+}
+.fc-style-plaque .fc-corner::after {
+    content: '';
+    position: absolute;
+    left: 20%; right: 20%; top: 46%;
+    height: 0.4cqw;
+    background: color-mix(in srgb, var(--fc-accent) 30%, #000);
+    transform: rotate(-30deg);
+    border-radius: 1px;
+}
+.fc-style-plaque .fc-corner--tl { top: 0.6cqw; left: 0.6cqw; }
+.fc-style-plaque .fc-corner--tr { top: 0.6cqw; right: 0.6cqw; }
+.fc-style-plaque .fc-corner--bl { bottom: 0.6cqw; left: 0.6cqw; }
+.fc-style-plaque .fc-corner--br { bottom: 0.6cqw; right: 0.6cqw; }
+.fc-style-plaque .fc-content { inset: 10cqw 10.5cqw 10.5cqw; }
+.fc-style-plaque .fc-headline {
+    font-family: 'Cinzel', Georgia, serif;
+    font-weight: 600;
+    font-size: calc(5.4cqw * var(--fc-hs));
+    letter-spacing: 0.04em;
+    line-height: 1.16;
+    background: var(--fc-metal);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 -0.14cqw 0 rgba(0, 0, 0, 0.95)) drop-shadow(0 0.14cqw 0 rgba(255, 255, 255, 0.16));
+}
+.fc-style-plaque.fc-no-photo .fc-headline { font-size: calc(7cqw * var(--fc-hs)); }
+.fc-style-plaque .fc-eyebrow,
+.fc-style-plaque .fc-sender,
+.fc-style-plaque .fc-recipient { filter: drop-shadow(0 -0.12cqw 0 rgba(0, 0, 0, 0.9)); }
+.fc-style-plaque .fc-hero__frame {
+    width: 44cqw; height: 46cqw;
+    border-radius: 50%;
+    padding: 1.5cqw;
+    box-shadow: 0 1.6cqw 2.4cqw rgba(0, 0, 0, 0.7), inset 0 0.3cqw 0.4cqw rgba(255, 255, 255, 0.5);
+}
+.fc-style-plaque .fc-hero__img { border-radius: 50%; box-shadow: inset 0 0 2cqw rgba(0, 0, 0, 0.6); }
+.fc-style-plaque .fc-crest__inner { background: radial-gradient(circle at 35% 30%, #2a2a2e, #0b0b0c 70%); }
+.fc-style-plaque .fc-brand { bottom: 5.8cqw; color: color-mix(in srgb, var(--fc-accent) 70%, #fff); }
+
+/* ==========================================================================
+   6. HYPER-REALITY HOLOGRAM — iridescent foil that shifts with the light
+   ========================================================================== */
+.fc-style-hyper_reality .fc-bg {
+    background:
+        radial-gradient(80% 55% at 50% 20%, color-mix(in srgb, var(--fc-primary) 70%, #3b2a7a), transparent 75%),
+        linear-gradient(160deg, var(--fc-deep), color-mix(in srgb, var(--fc-deep) 70%, #1c1446) 50%, var(--fc-deep));
+}
+.fc-style-hyper_reality .fc-holo {
+    display: block;
+    mix-blend-mode: color-dodge;
+    opacity: 0.24;
+    background:
+        repeating-linear-gradient(118deg,
+            hsl(330 95% 72%) 0%, hsl(40 95% 70%) 4%, hsl(140 90% 68%) 8%,
+            hsl(195 95% 70%) 12%, hsl(265 95% 74%) 16%, hsl(330 95% 72%) 20%);
+    background-size: 420% 420%;
+    background-position: calc(var(--fc-mx) * 100%) calc(var(--fc-my) * 100%);
+}
+.fc-style-hyper_reality .fc-holo::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 0.1cqw, transparent 0.16cqw) 0 0 / 1.7cqw 1.9cqw,
+                radial-gradient(circle, rgba(255, 255, 255, 0.7) 0 0.08cqw, transparent 0.14cqw) 0.8cqw 1cqw / 2.3cqw 2.1cqw;
+    opacity: 0.4;
+}
+.fc-style-hyper_reality .fc-holo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at calc(var(--fc-mx) * 100%) calc(var(--fc-my) * 100%), rgba(255, 255, 255, 0.85), transparent 38%);
+    mix-blend-mode: overlay;
+}
+.fc-style-hyper_reality .fc-frame {
+    inset: 2.8cqw;
+    border-radius: 1.6cqw;
+    padding: 0.45cqw;
+    background: conic-gradient(from calc(var(--fc-mx) * 360deg), #ff7ac6, #ffd36e, #7dffb0, #6ee7ff, #a78bfa, #ff7ac6);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.95;
+}
+.fc-style-hyper_reality .fc-frame::after {
+    content: '';
+    position: absolute;
+    inset: 1.4cqw;
+    border-radius: 1cqw;
+    border: 0.14cqw solid rgba(255, 255, 255, 0.4);
+}
+.fc-style-hyper_reality .fc-headline {
+    background: linear-gradient(180deg, #ffffff 0%, #e7ecff 42%, #8d97bd 52%, #f4f6ff 70%, #ffffff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0.22cqw 0 0 rgba(255, 64, 160, 0.45)) drop-shadow(-0.22cqw 0 0 rgba(0, 210, 255, 0.45)) drop-shadow(0 0.6cqw 1cqw rgba(0, 0, 0, 0.5));
+}
+.fc-style-hyper_reality .fc-hero__frame,
+.fc-style-hyper_reality .fc-crest {
+    background: conic-gradient(from calc(var(--fc-my) * 360deg), #ff7ac6, #ffd36e, #7dffb0, #6ee7ff, #a78bfa, #ff7ac6);
+}
+.fc-style-hyper_reality .fc-hero__frame { border-radius: 3cqw; width: 56cqw; height: 44cqw; padding: 0.9cqw; }
+.fc-style-hyper_reality .fc-hero__img { border-radius: 2.4cqw; }
+.fc-style-hyper_reality .fc-crest__inner { background: radial-gradient(circle at 35% 30%, #2a2152, var(--fc-deep) 70%); }
+.fc-style-hyper_reality .fc-eyebrow,
+.fc-style-hyper_reality .fc-sender,
+.fc-style-hyper_reality .fc-recipient,
+.fc-style-hyper_reality .fc-crest__mono { --fc-metal: linear-gradient(110deg, #ffd6f0, #c7f3ff 30%, #fff6c9 55%, #d9c8ff 80%, #ffd6f0); }
+.fc-card.fc-idle.fc-style-hyper_reality,
+.fc-card.fc-idle.fc-style-translucent,
+.fc-card.fc-idle.fc-style-hollow,
+.fc-card.fc-idle.fc-style-plaque { animation: fc-light-drift 9s ease-in-out infinite alternate; }
+@keyframes fc-light-drift {
+    0% { --fc-mx: 0.15; --fc-my: 0.2; }
+    50% { --fc-mx: 0.85; --fc-my: 0.45; }
+    100% { --fc-mx: 0.35; --fc-my: 0.85; }
+}
+
+/* ==========================================================================
+   7. 3D ORIGAMI POP-UP — folded paper planes and a pop-up photo stage
+   ========================================================================== */
+.fc-style-origami {
+    --fc-text: var(--fc-ink);
+    --fc-text-soft: color-mix(in srgb, var(--fc-ink) 80%, #3f3a35);
+    --fc-rule-gap: var(--fc-paper);
+}
+.fc-style-origami .fc-tilt,
+.fc-style-origami .fc-face,
+.fc-style-origami .fc-content { transform-style: preserve-3d; }
+.fc-style-origami .fc-bg {
+    background:
+        linear-gradient(90deg, rgba(0, 0, 0, 0.055) 0 33.33%, rgba(0, 0, 0, 0) 33.33% 66.66%, rgba(255, 255, 255, 0.55) 66.66% 100%),
+        linear-gradient(90deg, transparent calc(33.33% - 0.15cqw), rgba(0, 0, 0, 0.12) 33.33%, transparent calc(33.33% + 0.15cqw), transparent calc(66.66% - 0.15cqw), rgba(255, 255, 255, 0.9) 66.66%, transparent calc(66.66% + 0.15cqw)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .34 0 0 0 0 .24 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+        var(--fc-paper);
+}
+.fc-style-origami .fc-fx > i { display: block; position: absolute; }
+.fc-style-origami .fc-fx > i:nth-child(1) {
+    left: 0; top: 0; width: 30cqw; height: 30cqw;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--fc-primary) 80%, #fff) 0%, var(--fc-primary) 50%, color-mix(in srgb, var(--fc-primary) 60%, #000) 50.5%, color-mix(in srgb, var(--fc-primary) 85%, #000) 100%);
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+.fc-style-origami .fc-fx > i:nth-child(2) {
+    right: 0; bottom: 0; width: 36cqw; height: 36cqw;
+    background: linear-gradient(315deg, color-mix(in srgb, var(--fc-accent) 80%, #fff) 0%, var(--fc-accent) 50%, color-mix(in srgb, var(--fc-accent) 60%, #000) 50.5%, color-mix(in srgb, var(--fc-accent) 80%, #000) 100%);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+.fc-style-origami .fc-fx > i:nth-child(3) {
+    right: 0; top: 0; width: 18cqw; height: 18cqw;
+    background: linear-gradient(225deg, color-mix(in srgb, var(--fc-primary) 50%, var(--fc-paper)) 50%, color-mix(in srgb, var(--fc-primary) 40%, #000) 50.5%);
+    clip-path: polygon(0 0, 100% 0, 100% 100%);
+    opacity: 0.85;
+}
+.fc-style-origami .fc-frame::before {
+    content: '';
+    position: absolute;
+    inset: 3cqw;
+    border: 0.18cqw dashed color-mix(in srgb, var(--fc-ink) 35%, transparent);
+    border-radius: 1cqw;
+}
+.fc-style-origami .fc-hero { transform: translateZ(7cqw) rotateX(4deg); transform-origin: 50% 100%; }
+.fc-style-origami .fc-hero::after {
+    content: '';
+    position: absolute;
+    left: 6%; right: 6%; bottom: -2.2cqw;
+    height: 3cqw;
+    background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, 0.35), transparent 70%);
+    transform: translateZ(-7cqw);
+    filter: blur(0.6cqw);
+}
+.fc-style-origami .fc-hero__frame {
+    background: #fffdf8;
+    border-radius: 0.6cqw;
+    padding: 1.6cqw 1.6cqw 5.2cqw;
+    width: 56cqw; height: 48cqw;
+    transform: rotate(-2.5deg);
+    box-shadow: 0 0.3cqw 0.6cqw rgba(0, 0, 0, 0.15), 0 2.8cqw 3.6cqw -1cqw rgba(0, 0, 0, 0.35);
+}
+.fc-style-origami .fc-hero__frame::before {
+    content: '';
+    position: absolute;
+    top: -1.6cqw; left: 50%;
+    width: 13cqw; height: 3.4cqw;
+    transform: translateX(-50%) rotate(3deg);
+    background: color-mix(in srgb, var(--fc-accent) 45%, rgba(255, 255, 255, 0.6));
+    opacity: 0.85;
+    box-shadow: 0 0.2cqw 0.4cqw rgba(0, 0, 0, 0.12);
+}
+.fc-style-origami .fc-hero__img { border-radius: 0.2cqw; }
+.fc-style-origami .fc-seal { right: -4.5cqw; bottom: -1cqw; }
+.fc-style-origami .fc-headline { transform: translateZ(3cqw); }
+.fc-style-origami .fc-crest { transform: rotate(-3deg); }
+.fc-style-origami .fc-crest__inner::before { border-style: dashed; }
+
+/* Pop-up spring when the envelope opens */
+
+@keyframes fc-popup {
+    from { transform: translateZ(0) rotateX(80deg); opacity: 0.3; }
+    to { transform: translateZ(7cqw) rotateX(4deg); opacity: 1; }
+}
+.fc-card.fc-animate-in .fc-content > * { animation: fc-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.fc-card.fc-animate-in .fc-content > *:nth-child(2) { animation-delay: 0.05s; }
+.fc-card.fc-animate-in .fc-content > *:nth-child(3) { animation-delay: 0.12s; }
+.fc-card.fc-animate-in .fc-content > *:nth-child(4) { animation-delay: 0.22s; }
+.fc-card.fc-animate-in .fc-content > *:nth-child(5) { animation-delay: 0.32s; }
+.fc-card.fc-animate-in .fc-content > *:nth-child(6) { animation-delay: 0.42s; }
+.fc-card.fc-animate-in .fc-content > *:nth-child(7) { animation-delay: 0.52s; }
+@keyframes fc-rise { from { opacity: 0; transform: translateY(2.5cqw); } to { opacity: 1; transform: none; } }
+.fc-card.fc-animate-in.fc-style-spatial_3d .fc-content > *,
+.fc-card.fc-animate-in.fc-style-origami .fc-content > * { animation-name: fc-fade; }
+.fc-card.fc-animate-in.fc-style-origami .fc-content > .fc-hero { animation: fc-popup 1.2s cubic-bezier(0.18, 1.4, 0.4, 1) both 0.15s; }
+@keyframes fc-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* Thumbnails: lighter rendering cost */
+.fc-card.fc-thumb { perspective: none; }
+.fc-card.fc-thumb .fc-metal { animation: none; }
+.fc-card.fc-thumb .fc-face { box-shadow: 0 0.8cqw 2.4cqw rgba(0, 0, 0, 0.25); }
+
+@media (prefers-reduced-motion: reduce) {
+    .fc-metal,
+    .fc-style-translucent .fc-fx > i,
+    .fc-card.fc-idle,
+    .fc-card.fc-animate-in .fc-content > *,
+    .fc-card.fc-animate-in .fc-hero { animation: none !important; }
+    .fc-tilt { transition: none; }
+}

@@ -128,6 +128,18 @@ final class Register extends Db
                         $registerPostData['famCode'] = $resolvedCode === strtoupper($sanitizedCode) ? $sanitizedCode : $resolvedCode;
                     }
                 }
+
+                // Automatic share intent rehydration: check signed fp_share_intent cookie
+                if (empty($registerPostData['famCode']) && !empty($_COOKIE['fp_share_intent'])) {
+                    $intent = \App\controller\PostShareController::parseShareIntentCookie();
+                    if (!empty($intent['famCode'])) {
+                        $sanitizedCode = (string)preg_replace('/[^A-Za-z0-9]/', '', $intent['famCode']);
+                        if ($sanitizedCode !== '') {
+                            $resolvedCode = \App\services\FamilyCodeRenameService::resolveAlias(\Src\Db::connect2(), $sanitizedCode);
+                            $registerPostData['famCode'] = $resolvedCode === strtoupper($sanitizedCode) ? $sanitizedCode : $resolvedCode;
+                        }
+                    }
+                }
                 if (empty($registerPostData['firstName']) && !empty($_GET['name']) && is_string($_GET['name'])) {
                     $cleaned = checkInput($_GET['name']);
                     $rawName = is_string($cleaned) ? trim($cleaned) : '';
