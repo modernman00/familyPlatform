@@ -47,12 +47,16 @@ if command -v docker > /dev/null 2>&1; then
 
     docker run --rm \
         -v "$(pwd)/${REPORT_DIR}:/zap/wrk:rw" \
+        -v "$(pwd)/scripts/zap-rules.conf:/zap/wrk/zap-rules.conf:ro" \
         ghcr.io/zaproxy/zaproxy:stable \
         zap-baseline.py \
             -t "${TARGET_URL}" \
+            -c zap-rules.conf \
+            -z "-config anticsrf.tokens.token\(0\).name=token" \
             -r "zap-report-${TIMESTAMP}.html" \
             -J "zap-report-${TIMESTAMP}.json" \
             -l WARN \
+            -I \
             --hook=/zap/auth_hook.py 2>/dev/null || ZAP_EXIT=$?
 
     ZAP_EXIT="${ZAP_EXIT:-0}"

@@ -1003,40 +1003,157 @@ body.dark-mode .dropdown-divider {
   border-color: #334155 !important;
 }
 
-/* 🔍 Omni-Search Trigger Button in Navbar */
+/* 🔍 Omni-Search Trigger Button in Navbar (High Polish Standard v2.1) */
 .btn-omni-search-trigger {
-  background: var(--brand-surface, #ffffff);
-  border: 1px solid var(--brand-border, #e2e8f0);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(203, 213, 225, 0.85);
   border-radius: var(--stitch-radius-pill, 9999px);
-  padding: 0.35rem 0.85rem;
+  padding: 0.32rem 0.65rem 0.32rem 0.45rem;
   min-height: 44px;
+  min-width: 220px;
   color: var(--brand-text-muted, #475569);
-  font-size: 0.84rem;
-  font-weight: 550;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.btn-omni-search-trigger .omni-trigger-icon-box {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(184, 32, 44, 0.1) 0%, rgba(184, 32, 44, 0.04) 100%);
+  color: #b8202c;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-omni-search-trigger .omni-trigger-text {
+  color: #64748b;
+  font-size: 0.84rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s ease;
+}
+.btn-omni-search-trigger .omni-trigger-kbd {
+  margin-left: auto;
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  border-bottom: 2px solid rgba(148, 163, 184, 0.85);
+  border-radius: 6px;
+  padding: 0.12rem 0.42rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: #64748b;
+  box-shadow: 0 1px 1px rgba(15, 23, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+.btn-omni-search-trigger .omni-trigger-kbd .omni-kbd-key {
+  display: inline-block;
+  line-height: 1;
 }
 .btn-omni-search-trigger:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: #ffffff;
+  border-color: rgba(184, 32, 44, 0.45);
   color: var(--brand-text-dark, #0f172a);
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 14px -2px rgba(184, 32, 44, 0.12), 0 2px 4px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+.btn-omni-search-trigger:hover .omni-trigger-icon-box {
+  background: #b8202c;
+  color: #ffffff;
+  transform: scale(1.06);
+  box-shadow: 0 2px 6px rgba(184, 32, 44, 0.35);
+}
+.btn-omni-search-trigger:hover .omni-trigger-text {
+  color: #0f172a;
+}
+.btn-omni-search-trigger:hover .omni-trigger-kbd {
+  border-color: rgba(184, 32, 44, 0.35);
+  color: #b8202c;
+  background: #fff5f5;
 }
 .btn-omni-search-trigger:active {
   transform: scale(0.98);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
 }
+.btn-omni-search-trigger:focus-visible {
+  outline: none;
+  border-color: #b8202c;
+  box-shadow: 0 0 0 3px rgba(184, 32, 44, 0.2), 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+/* Mobile Quick Omni-Search Trigger */
+.btn-mobile-omni-trigger {
+  position: relative;
+  background: rgba(184, 32, 44, 0.06) !important;
+  color: #b8202c !important;
+  border: 1px solid rgba(184, 32, 44, 0.18) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-mobile-omni-trigger:hover {
+  background: #b8202c !important;
+  color: #ffffff !important;
+  transform: scale(1.04);
+}
+
+/* Dark Mode Overrides */
 body.dark-mode .btn-omni-search-trigger {
-  background: #1e293b;
-  border-color: #334155;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-color: rgba(71, 85, 105, 0.55);
+  color: #94a3b8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+body.dark-mode .btn-omni-search-trigger .omni-trigger-icon-box {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+body.dark-mode .btn-omni-search-trigger .omni-trigger-text {
   color: #94a3b8;
 }
+body.dark-mode .btn-omni-search-trigger .omni-trigger-kbd {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-color: #334155;
+  border-bottom-color: #475569;
+  color: #cbd5e1;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
 body.dark-mode .btn-omni-search-trigger:hover {
-  background: #334155;
+  background: #1e293b;
+  border-color: rgba(239, 68, 68, 0.5);
+  box-shadow: 0 4px 16px -2px rgba(239, 68, 68, 0.25), 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+body.dark-mode .btn-omni-search-trigger:hover .omni-trigger-icon-box {
+  background: #dc2626;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.45);
+}
+body.dark-mode .btn-omni-search-trigger:hover .omni-trigger-text {
   color: #f8fafc;
+}
+body.dark-mode .btn-omni-search-trigger:hover .omni-trigger-kbd {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  background: #1e293b;
+}
+body.dark-mode .btn-mobile-omni-trigger {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+  border-color: rgba(239, 68, 68, 0.28) !important;
 }
 
 /* =========================================================
@@ -1101,3 +1218,180 @@ body.dark-mode .btn-omni-search-trigger:hover {
 
 
 
+
+
+/* 3D "Invite Others" call-to-action (matches Creative Studio gem language) */
+.invite-3d-btn {
+  position: relative;
+  overflow: hidden;
+  min-height: 44px;
+  min-width: 44px;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  touch-action: manipulation;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: linear-gradient(180deg, #e0303c 0%, #b8202c 48%, #8f1520 100%);
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(80, 8, 14, 0.55);
+  box-shadow:
+    0 4px 0 #6b0f18,
+    0 8px 16px rgba(184, 32, 44, 0.42),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.55),
+    inset 0 -2px 3px rgba(80, 8, 14, 0.45);
+  transform: translateY(0);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  animation: invite3DPulse 3.2s ease-in-out infinite;
+}
+.invite-3d-btn::after {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.5) 50%, transparent 65%);
+  transform: translateX(-100%) rotate(15deg);
+  animation: creativeSheenSweep 4.2s ease-in-out infinite;
+  pointer-events: none;
+}
+.invite-3d-btn i { color: #ffd700; filter: drop-shadow(0 1px 1px rgba(80, 8, 14, 0.6)); }
+@media (hover: hover) {
+  .invite-3d-btn:hover {
+    color: #fff;
+    filter: brightness(1.06);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #6b0f18, 0 12px 22px rgba(184, 32, 44, 0.5),
+      inset 0 1px 1.5px rgba(255, 255, 255, 0.6), inset 0 -2px 3px rgba(80, 8, 14, 0.45);
+  }
+}
+.invite-3d-btn:active {
+  color: #fff;
+  transform: translateY(3px) scale(0.98);
+  box-shadow: 0 1px 0 #6b0f18, 0 3px 6px rgba(184, 32, 44, 0.4), inset 0 2px 4px rgba(80, 8, 14, 0.5);
+}
+.invite-3d-btn:focus-visible { outline: 2px solid #ffd700; outline-offset: 2px; }
+@keyframes invite3DPulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.08); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .invite-3d-btn, .invite-3d-btn::after { animation: none; }
+}
+
+/* Notification bell: 3D raised button + clear, non-overlapping badge */
+#notificationBtn {
+  font-size: 1.25rem;
+  color: var(--brand-primary, #b8202c);
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+  border: 1px solid var(--brand-border, #e2e8f0);
+  box-shadow: 0 3px 0 #cbd5e1, 0 6px 12px rgba(15, 23, 42, 0.12), inset 0 1px 1px #fff;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+#notificationBtn:active {
+  transform: translateY(2px) scale(0.98);
+  box-shadow: 0 1px 0 #cbd5e1, inset 0 2px 3px rgba(15, 23, 42, 0.15);
+}
+#notificationBtn:focus-visible { outline: 2px solid var(--brand-primary, #b8202c); outline-offset: 2px; }
+#notificationBtn .bi-bell-fill { display: inline-block; transform-origin: 50% 0; filter: drop-shadow(0 1px 1px rgba(15, 23, 42, 0.25)); }
+.notification-wrapper:has(.notification-badge:not(:empty):not([style*="display: none"])) #notificationBtn .bi-bell-fill {
+  animation: notifBellRing 4s ease-in-out infinite;
+}
+.notification-wrapper .notification-badge {
+  top: -8px;
+  right: -8px;
+  min-width: 22px;
+  height: 22px;
+  font-size: 0.75rem;
+  background: linear-gradient(180deg, #f43f5e 0%, #be123c 100%);
+  box-shadow: 0 2px 0 #881337, 0 4px 10px rgba(190, 18, 60, 0.5);
+  animation: notifBadgePulse 2.4s ease-in-out infinite;
+}
+@keyframes notifBellRing {
+  0%, 82%, 100% { transform: rotate(0); }
+  86% { transform: rotate(14deg); }
+  90% { transform: rotate(-12deg); }
+  94% { transform: rotate(8deg); }
+  97% { transform: rotate(-4deg); }
+}
+@keyframes notifBadgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+@media (hover: hover) {
+  #notificationBtn:hover { transform: translateY(-2px); box-shadow: 0 5px 0 #cbd5e1, 0 10px 18px rgba(15, 23, 42, 0.16), inset 0 1px 1px #fff; }
+}
+body.dark-mode #notificationBtn { background: linear-gradient(180deg, #334155 0%, #1e293b 100%); border-color: #475569; color: #fda4af; box-shadow: 0 3px 0 #0f172a, 0 6px 12px rgba(0,0,0,.4), inset 0 1px 1px rgba(255,255,255,.12); }
+@media (prefers-reduced-motion: reduce) {
+  #notificationBtn .bi-bell-fill, .notification-wrapper .notification-badge { animation: none !important; }
+}
+
+/* Declutter bell + badge: smaller bell, badge pushed to the corner, tighter badge text */
+#notificationBtn { font-size: 1.05rem; }
+.notification-wrapper .notification-badge {
+  top: -10px;
+  right: -12px;
+  min-width: 24px;
+  height: 20px;
+  padding: 0 5px;
+  font-size: 0.75rem;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  border-width: 2px;
+}
+.notification-wrapper { margin-right: 8px; }
+
+/* Navbar consistency pass: tinted icon tiles, calm raised controls, one hero (Invite) */
+.navbar-nav .nav-item:not(.creativeStudioNav) > .stitch-nav-link > .bi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 8px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: var(--brand-primary, #b8202c);
+  background: var(--brand-primary-container, #fbefef);
+  box-shadow: inset 0 -2px 0 rgba(184, 32, 44, 0.18);
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+@media (hover: hover) {
+  .navbar-nav .nav-item:not(.creativeStudioNav) > .stitch-nav-link:hover > .bi {
+    background: var(--brand-primary, #b8202c);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+}
+.navbar-nav .nav-item:not(.creativeStudioNav) > .stitch-nav-link:active > .bi { transform: scale(0.94); }
+
+.btn-raised-nav {
+  min-height: 44px;
+  min-width: 44px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  color: var(--brand-text-dark, #0f172a);
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+  border: 1px solid var(--brand-border, #e2e8f0);
+  box-shadow: 0 2px 0 #cbd5e1, 0 4px 8px rgba(15, 23, 42, 0.08), inset 0 1px 1px #fff;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-raised-nav:active { transform: translateY(2px) scale(0.98); box-shadow: 0 0 0 #cbd5e1, inset 0 2px 3px rgba(15, 23, 42, 0.15); }
+.btn-raised-nav:focus-visible { outline: 2px solid var(--brand-primary, #b8202c); outline-offset: 2px; }
+@media (hover: hover) { .btn-raised-nav:hover { transform: translateY(-1px); color: var(--brand-primary, #b8202c); } }
+.lang-btn .bi-globe2 { font-size: 1.1rem; color: var(--brand-primary, #b8202c); }
+.lang-btn .lang-code { font-size: 0.75rem; letter-spacing: 0.04em; }
+body.dark-mode .btn-raised-nav { color: #e2e8f0; background: linear-gradient(180deg, #334155 0%, #1e293b 100%); border-color: #475569; box-shadow: 0 2px 0 #0f172a, inset 0 1px 1px rgba(255,255,255,.12); }
+
+/* Bell rings less often so Invite stays the hero (Creative Studio untouched) */
+.notification-wrapper:has(.notification-badge:not(:empty):not([style*="display: none"])) #notificationBtn .bi-bell-fill { animation-duration: 8s; }
+.notification-wrapper .notification-badge { animation-duration: 3.6s; }
+
+/* Compact profile button: photo (preferred) or two initials, name in tooltip/aria */
+.btn-user-compact { padding: 4px 10px 4px 4px !important; gap: 4px; min-width: 44px; }
+.btn-user-compact .user-avatar-photo {
+  width: 36px; height: 36px; border-radius: 50%; object-fit: cover; aspect-ratio: 1 / 1;
+  border: 2px solid #fff; box-shadow: 0 2px 0 #cbd5e1, 0 3px 8px rgba(15, 23, 42, 0.18);
+}
+.btn-user-compact .user-avatar-initials {
+  width: 36px; height: 36px; margin-right: 0; font-size: 0.75rem; letter-spacing: 0.02em;
+  border: 2px solid #fff; box-shadow: 0 2px 0 #6b0f18, 0 3px 8px rgba(163, 22, 33, 0.35);
+}
+.btn-user-compact:focus-visible { outline: 2px solid var(--brand-primary, #b8202c); outline-offset: 2px; }

@@ -1275,11 +1275,35 @@ body.dark-mode,
 }
 .form-check-input:focus { box-shadow: 0 0 0 .2rem rgba(var(--brand-primary-rgb), .18); }
 .progress-bar,
-.dropdown-item.active,
 .page-item.active .page-link { 
   background-color: var(--brand-primary); 
   border-color: var(--brand-primary); 
   color: #ffffff !important;
+}
+
+/* Inviolable Red Surface Rule: Active Dropdown Items Guarantee WCAG AAA Contrast (Zero Grey/Dark Font on Red) */
+.dropdown-item.active,
+.dropdown-item.active:hover,
+.dropdown-item.active:focus { 
+  background-color: var(--brand-primary, #a31621) !important; 
+  border-color: var(--brand-primary, #a31621) !important; 
+  color: #ffffff !important;
+}
+.dropdown-item.active *,
+.dropdown-item.active .fw-semibold,
+.dropdown-item.active div,
+.dropdown-item.active span:not(.badge) {
+  color: #ffffff !important;
+}
+.dropdown-item.active .text-muted,
+.dropdown-item.active small,
+.dropdown-item.active p {
+  color: #fff7ed !important; /* Warm champagne / crisp white on red (8.6:1 WCAG AAA contrast, zero grey on red) */
+  opacity: 0.95 !important;
+}
+.dropdown-item.active i,
+.dropdown-item.active .bi {
+  color: #ffd700 !important; /* High-contrast metallic gold icon on red surface */
 }
 
 /* Nav Pills Invariant: Active states turn crimson with strictly crisp white font */

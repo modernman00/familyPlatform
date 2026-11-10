@@ -168,7 +168,7 @@ class OmniSearchService
             [
                 'id' => 'act_view_tree',
                 'title' => 'View Interactive Family Tree',
-                'description' => 'Explore the visual multi-generational organogram canvas with pan & zoom',
+                'description' => 'Explore the visual multi-generational family tree canvas with pan & zoom',
                 'keywords' => ['family tree', 'organogram', 'view tree', 'visual tree', 'ancestry', 'pedigree', 'canvas tree', 'kinship tree'],
                 'category' => 'Functions & Tools',
                 'icon' => 'bi-diagram-3-fill',

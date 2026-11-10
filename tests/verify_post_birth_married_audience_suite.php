@@ -222,9 +222,9 @@ try {
     assertCondition($canUserAAccessPost3 === true, "Author User A retains access to own Married-only post");
 
     // =========================================================================
-    // STEP 7: CONNECTION BYPASS IMMUNITY (requestMgt Anti-Leak Gate)
+    // STEP 7: CONNECTION BYPASS IMMUNITY & OPTION A KINSHIP VERIFICATION
     // =========================================================================
-    echo "\n[Step 7] Testing requestMgt Connection Bypass Immunity...\n";
+    echo "\n[Step 7] Testing requestMgt Connection Bypass Immunity & Option A Verification...\n";
     // Connect User A and User B in requestMgt as friends/in-laws
     $db->prepare("INSERT INTO requestMgt (requester_id, approver_id, requesterCode, approverCode, status) VALUES (?, ?, ?, ?, 'Approved')")
         ->execute([$userAId, $userBId, $marriedFamCode, $marriedFamCode]);
@@ -237,6 +237,41 @@ try {
     $canAccessPost2_connected = $audienceService->canUserAccessPost($post2No, $userBId);
     assertCondition($canAccessPost2_connected === false, "canUserAccessPost rejects User B on Birth-only post even when connected in requestMgt");
 
+    // Create User D: External Connected Kin who holds NEITHER married nor birth family code of User A
+    $userDId = 'usr_d_kin_' . bin2hex(random_bytes(4));
+    $userDFamCode = 'FAM_EXTERNAL_' . strtoupper(bin2hex(random_bytes(4)));
+    $db->prepare("INSERT INTO account (id, email, password, status) VALUES (?, ?, 'hash', 'active')")
+        ->execute([$userDId, "userd_{$userDId}@example.com"]);
+    $db->prepare("INSERT INTO personal (id, firstName, lastName, famCode) VALUES (?, 'David', 'Kin', ?)")
+        ->execute([$userDId, $userDFamCode]);
+    $db->prepare("INSERT INTO user_families (user_id, family_code, status, role) VALUES (?, ?, 'approved', 'member')")
+        ->execute([$userDId, $userDFamCode]);
+    $db->prepare("INSERT INTO family_codes (code, kind, created_by) VALUES (?, 'primary', ?)")
+        ->execute([$userDFamCode, $userDId]);
+
+    // Connect User A and User D in requestMgt as Approved Connected Kin
+    $db->prepare("INSERT INTO requestMgt (requester_id, approver_id, requesterCode, approverCode, status) VALUES (?, ?, ?, ?, 'Approved')")
+        ->execute([$userAId, $userDId, $marriedFamCode, $userDFamCode]);
+
+    // 1. User D CAN see Post 1 ('all' scope)
+    $feedUserD = $feedRepo->getFeedPostsAsArray($userDId, [$userDFamCode], 50, 0);
+    $post1InD = in_array($post1No, array_column($feedUserD, 'post_no'), true);
+    assertCondition($post1InD === true, "Connected Kin User D can view Post 1 with scope 'all' in feed");
+
+    $canAccessPost1_D = $audienceService->canUserAccessPost($post1No, $userDId);
+    assertCondition($canAccessPost1_D === true, "canUserAccessPost grants access to Connected Kin User D on Post 1 ('all' scope)");
+
+    // 2. User D CANNOT see Post 2 ('birth' scope) or Post 3 ('married' scope)
+    $post2InD = in_array($post2No, array_column($feedUserD, 'post_no'), true);
+    $post3InD = in_array($post3No, array_column($feedUserD, 'post_no'), true);
+    assertCondition($post2InD === false, "Birth-only post strictly hidden from Connected Kin User D in feed");
+    assertCondition($post3InD === false, "Married-only post strictly hidden from Connected Kin User D in feed");
+
+    $canAccessPost2_D = $audienceService->canUserAccessPost($post2No, $userDId);
+    $canAccessPost3_D = $audienceService->canUserAccessPost($post3No, $userDId);
+    assertCondition($canAccessPost2_D === false, "canUserAccessPost strictly blocks Connected Kin User D from Birth-only post");
+    assertCondition($canAccessPost3_D === false, "canUserAccessPost strictly blocks Connected Kin User D from Married-only post");
+
 } catch (\Throwable $e) {
     echo "\n  ❌ CRITICAL EXCEPTION: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
     $failCount++;
@@ -244,6 +279,13 @@ try {
     // Teardown test records
     echo "\n[Teardown] Cleaning up test fixtures...\n";
     if (isset($post1No)) $db->prepare("DELETE FROM post WHERE post_no IN (?, ?, ?, ?)")->execute([$post1No, $post2No, $post3No, $post4No]);
+    if (isset($userDId)) {
+        $db->prepare("DELETE FROM requestMgt WHERE requester_id = ? OR approver_id = ?")->execute([$userDId, $userDId]);
+        $db->prepare("DELETE FROM user_families WHERE user_id = ?")->execute([$userDId]);
+        $db->prepare("DELETE FROM personal WHERE id = ?")->execute([$userDId]);
+        $db->prepare("DELETE FROM account WHERE id = ?")->execute([$userDId]);
+        $db->prepare("DELETE FROM family_codes WHERE code = ?")->execute([$userDFamCode]);
+    }
     if (isset($post1No)) $db->prepare("DELETE FROM post_family_targets WHERE post_no IN (?, ?, ?, ?)")->execute([$post1No, $post2No, $post3No, $post4No]);
     $db->prepare("DELETE FROM requestMgt WHERE requester_id IN (?, ?, ?) OR approver_id IN (?, ?, ?)")->execute([$userAId, $userBId, $userCId, $userAId, $userBId, $userCId]);
     $db->prepare("DELETE FROM user_families WHERE user_id IN (?, ?, ?)")->execute([$userAId, $userBId, $userCId]);

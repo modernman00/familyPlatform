@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+$rootDir = dirname(__DIR__);
+if (file_exists($rootDir . '/.env')) {
+    \Dotenv\Dotenv::createImmutable($rootDir)->safeLoad();
+}
+
 use App\dto\PostDto;
 
 echo "=== [BRATS & Adversarial Security Gate] 3D Text Stage Studio Verification ===\n";
@@ -159,6 +164,31 @@ assertStageTrue(
     && str_contains($joinSvc, '[style:grand_announcement]')
     && str_contains($adultSvc, '[style:aurora_prism]'),
     'Backend platform post services embed 3D stage tokens on new Trivia, Welcome, and 18th Birthday posts'
+);
+
+// 7. Phase 3: 3D Stage + Rich Link Preview Coexistence & Resilient Extraction
+assertStageTrue(
+    str_contains($postCardView, 'fp-text-stage__preview-wrapper')
+    && str_contains($postCardView, 'fp-text-stage__preview-card')
+    && str_contains($postCardView, '!getPostStageMeta(post)'),
+    'post-card.blade.php embeds 16:9 glassmorphic link preview inside 3D stage and suppresses duplicate outside card'
+);
+
+$modalPostView = (string) file_get_contents(__DIR__ . '/../resources/views/member/modals/post.blade.php');
+assertStageTrue(
+    str_contains($modalPostView, 'fp-text-stage__composer-preview')
+    && str_contains($modalPostView, 'checkAndUnfurlLink'),
+    'modals/post.blade.php binds live unfurler to editor and applies 3D translucent preview styling'
+);
+
+$idecidePreview = \App\services\LinkPreviewService::getPreviewForPostText('https://idecideapp.com/blogs/108');
+assertStageTrue(
+    is_array($idecidePreview)
+    && !empty($idecidePreview['title'])
+    && !empty($idecidePreview['description'])
+    && !empty($idecidePreview['image'])
+    && ($idecidePreview['domain'] ?? '') === 'idecideapp.com',
+    'LinkPreviewService resiliently extracts metadata for idecideapp blog post even when deep route fails'
 );
 
 if ($failures > 0) {

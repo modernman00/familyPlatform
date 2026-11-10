@@ -625,15 +625,19 @@ final class LinkPreviewService
         if ($html === null || trim($html) === '') {
             if (($_ENV['APP_ENV'] ?? '') === 'testing' && str_contains($url, 'afrobeats-and-amapiano-halloween-night')) {
                 $html = '<head><meta property="og:title" content="Afrobeats and Amapiano Halloween Night"><meta property="og:description" content="Official PartyPlatform Event"><meta property="og:image" content="https://mypartyplatform.com/api/og/event/CYRGVPP"><meta property="og:site_name" content="PartyPlatform"></head>';
-            } else {
-                return null;
             }
         }
 
         // 4. Extract OpenGraph and Twitter card metadata
-        $ogData = self::parseMetadata($html, $url);
+        $ogData = ($html !== null && trim($html) !== '') ? self::parseMetadata($html, $url) : [];
         if (empty($ogData['title']) && empty($ogData['image_url'])) {
-            return null;
+            // Resilient Fallback: Inspect parent directory or root origin, or synthesize from safe URL
+            $fallbackOg = self::fetchFallbackMetadata($url);
+            if ($fallbackOg !== null) {
+                $ogData = $fallbackOg;
+            } else {
+                $ogData = self::synthesizeFallbackMetadata($url);
+            }
         }
 
         // 5. Store into cache
@@ -874,6 +878,123 @@ final class LinkPreviewService
         $basePath = isset($parts['path']) ? dirname($parts['path']) : '/';
         $basePath = rtrim($basePath, '/') . '/';
         return $scheme . '://' . $host . $port . $basePath . ltrim($relative, '/');
+    }
+
+    /**
+     * Resilient fallback: When a specific subpage or deep route returns an error (e.g. 500, 404)
+     * or lacks OpenGraph tags, inspect parent paths or the root origin (https://<host>/) to recover
+     * canonical site metadata, site name, social card banner, and description.
+     *
+     * @return array<string, mixed>|null
+     */
+    private static function fetchFallbackMetadata(string $url): ?array
+    {
+        $parts = parse_url($url);
+        if (!$parts || empty($parts['host'])) {
+            return null;
+        }
+
+        $scheme = $parts['scheme'] ?? 'https';
+        $host = (string)$parts['host'];
+        $path = (string)($parts['path'] ?? '');
+
+        // Generate candidate fallback URLs in priority order: parent path -> root origin
+        $candidates = [];
+
+        // 1. Parent directory path if deep subpath exists (e.g. /blogs/108 -> /blogs)
+        $trimmedPath = trim($path, '/');
+        if ($trimmedPath !== '' && str_contains($trimmedPath, '/')) {
+            $parentPath = dirname('/' . $trimmedPath);
+            if ($parentPath !== '/' && $parentPath !== '.') {
+                $candidates[] = $scheme . '://' . $host . $parentPath;
+            }
+        }
+
+        // 2. Root origin (https://domain/)
+        $origin = $scheme . '://' . $host . '/';
+        if ($origin !== $url && !in_array($origin, $candidates, true)) {
+            $candidates[] = $origin;
+        }
+
+        foreach ($candidates as $fallbackUrl) {
+            if (!self::isSafeUrl($fallbackUrl)) {
+                continue;
+            }
+
+            $html = self::fetchHtmlHead($fallbackUrl);
+            if ($html !== null && trim($html) !== '') {
+                $meta = self::parseMetadata($html, $fallbackUrl);
+                if (!empty($meta['title']) || !empty($meta['image_url']) || !empty($meta['description'])) {
+                    // Retain the author's original requested URL as the destination
+                    $meta['url'] = $url;
+                    $meta['canonical_url'] = $url;
+
+                    // Humanize specific path slug if available to contextualize the title
+                    if ($trimmedPath !== '') {
+                        $segments = explode('/', $trimmedPath);
+                        $lastSegment = end($segments);
+                        if (!empty($lastSegment)) {
+                            $cleanSlug = ucwords(str_replace(['-', '_'], ' ', $lastSegment));
+                            if (is_numeric($lastSegment)) {
+                                $sectionName = count($segments) > 1 ? ucfirst($segments[count($segments) - 2]) : 'Article';
+                                $cleanSlug = rtrim($sectionName, 's') . ' #' . $lastSegment;
+                            }
+                            $sitePrefix = (string)($meta['site_name'] ?? '');
+                            if (!empty($meta['title']) && !str_contains(strtolower((string)$meta['title']), strtolower($cleanSlug))) {
+                                $meta['title'] = $sitePrefix !== '' ? "{$sitePrefix} — {$cleanSlug}" : "{$cleanSlug} — " . ($meta['title']);
+                            }
+                        }
+                    }
+
+                    return $meta;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Synthesizes a clean, structured fallback social card from the URL structure itself
+     * when all remote HTTP probes fail, guaranteeing the user never sees a broken null void.
+     *
+     * @return array<string, mixed>
+     */
+    private static function synthesizeFallbackMetadata(string $url): array
+    {
+        $domain = (string)parse_url($url, PHP_URL_HOST);
+        $cleanDomain = preg_replace('/^www\./i', '', $domain) ?: $domain;
+        $hostParts = explode('.', $cleanDomain);
+        $siteName = ucfirst($hostParts[0]);
+
+        $path = trim((string)parse_url($url, PHP_URL_PATH), '/');
+        $title = $siteName;
+        if ($path !== '') {
+            $segments = explode('/', $path);
+            $last = end($segments);
+            if (!empty($last)) {
+                if (is_numeric($last)) {
+                    $sec = count($segments) > 1 ? ucfirst($segments[count($segments) - 2]) : 'Item';
+                    $title = $siteName . ' — ' . rtrim($sec, 's') . ' #' . $last;
+                } else {
+                    $cleanSlug = ucwords(str_replace(['-', '_'], ' ', $last));
+                    $title = $siteName . ' — ' . $cleanSlug;
+                }
+            }
+        } else {
+            $title = $siteName . ' — ' . $cleanDomain;
+        }
+
+        return [
+            'url' => $url,
+            'canonical_url' => $url,
+            'domain' => $cleanDomain,
+            'site_name' => $siteName,
+            'title' => $title,
+            'description' => "Explore {$cleanDomain}",
+            'image_url' => null,
+            'card_type' => 'summary_large_image',
+        ];
     }
 
     /**

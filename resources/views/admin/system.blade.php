@@ -117,7 +117,7 @@
                 <span>Relational Search &amp; Graph Invariant</span>
             </div>
             <p class="text-gray-400 text-[11px] leading-relaxed">
-                Structural metadata in <code class="text-indigo-300">personal</code> (<code class="text-gray-300">firstName</code>, <code class="text-gray-300">lastName</code>, <code class="text-gray-300">day/month/year</code>) remains indexed in plaintext at MySQL layer, secured by InnoDB TDE at rest and strict multi-tenant authorization guards. This guarantees O(log n) performance for the Multigenerational Organogram and Kinship Fuzzy-Matcher.
+                Structural metadata in <code class="text-indigo-300">personal</code> (<code class="text-gray-300">firstName</code>, <code class="text-gray-300">lastName</code>, <code class="text-gray-300">day/month/year</code>) remains indexed in plaintext at MySQL layer, secured by InnoDB TDE at rest and strict multi-tenant authorization guards. This guarantees O(log n) performance for the Multigenerational Family Tree and Kinship Fuzzy-Matcher.
             </p>
         </div>
     </div>

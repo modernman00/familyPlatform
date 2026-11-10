@@ -13,7 +13,7 @@ FamilyPlatform currently operates four separate registration entry points:
 1. **Direct Registration (`/register`):** Creating a new family or joining an existing family with a code.
 2. **Family Referral / Tree Claim (`?invite=<hex>`):** Claiming an existing node on the family tree via `InviteTokenService`.
 3. **Platform Recommendation (`/join?ref=<hmac>`):** Viral invitation to spawn a separate, private family sanctuary via `FamilyRecommendationService`.
-4. **Settings Email Invite (`/register/contactNewMember`):** Inviting un-onboarded relatives from profile settings and organogram branches.
+4. **Settings Email Invite (`/register/contactNewMember`):** Inviting un-onboarded relatives from profile settings and family tree branches.
 
 A comprehensive audit revealed critical architectural and conversion failures:
 - **P0 Security Vulnerability:** `/register/contactNewMember` in `General.php` is unauthenticated, lacks CSRF protection, and lacks rate limiting—functioning as an open mail relay for arbitrary spam.

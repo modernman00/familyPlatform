@@ -3032,6 +3032,64 @@ video.feed-post-video::-webkit-media-controls-play-button,
   transform: scale(0.98);
 }
 
+/* Embedded Link Preview Card inside 3D Stage */
+.fp-text-stage__preview-wrapper {
+  position: relative;
+  z-index: 2;
+  margin-top: var(--space-3, 12px);
+  width: 100%;
+}
+
+.fp-text-stage__preview-card {
+  display: block;
+  text-decoration: none !important;
+  border-radius: var(--radius-lg, 14px);
+  background: rgba(15, 23, 42, 0.76);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  overflow: hidden;
+}
+
+.fp-text-stage__preview-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.38);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+}
+
+.fp-text-stage__preview-card:active {
+  transform: scale(0.99);
+}
+
+/* Composer Link Preview inside 3D Text Stage */
+#composerLinkPreviewContainer.fp-text-stage__composer-preview {
+  background: rgba(15, 23, 42, 0.85) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32) !important;
+}
+
+#composerLinkPreviewContainer.fp-text-stage__composer-preview h6,
+#composerLinkPreviewContainer.fp-text-stage__composer-preview #composerLinkPreviewTitle {
+  color: #ffffff !important;
+}
+
+#composerLinkPreviewContainer.fp-text-stage__composer-preview p,
+#composerLinkPreviewContainer.fp-text-stage__composer-preview #composerLinkPreviewDesc {
+  color: rgba(226, 232, 240, 0.9) !important;
+}
+
+#composerLinkPreviewContainer.fp-text-stage__composer-preview #composerLinkPreviewUrl {
+  color: rgba(203, 213, 225, 0.75) !important;
+}
+
+#composerLinkPreviewContainer.fp-text-stage__composer-preview #composerLinkPreviewSiteName {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
 /* Retroactive 1-Tap In-Feed 3D Stage Converter Bar */
 .fp-stage-converter__row {
   display: flex;

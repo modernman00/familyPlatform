@@ -32,7 +32,7 @@
         🌳 Did You Know?
     </h4>
     <p style="margin: 0; color: #44403c; font-size: 14px; line-height: 1.6;">
-        Adding just your <strong>father</strong>, <strong>mother</strong>, and <strong>siblings</strong> unlocks an expansive 6-generation organogram. Our smart kinship engine automatically links your collateral relatives and ancestral downlines.
+        Adding just your <strong>father</strong>, <strong>mother</strong>, and <strong>siblings</strong> unlocks an expansive 6-generation family tree. Our smart kinship engine automatically links your collateral relatives and ancestral downlines.
     </p>
 </div>
 
@@ -41,7 +41,7 @@
 </h3>
 
 <ol style="margin: 0 0 24px 0; padding-left: 20px; color: #44403c; font-size: 15px; line-height: 1.8;">
-    <li>Open your live organogram canvas.</li>
+    <li>Open your live family tree canvas.</li>
     <li>Click <strong>"Add Parents"</strong> to honour your father and mother.</li>
     <li>Add your brothers and sisters to complete your immediate circle.</li>
 </ol>

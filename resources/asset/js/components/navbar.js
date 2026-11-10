@@ -18,7 +18,7 @@ function updateNotificationBadge(count) {
     const headerBadge = id('header_notif_count');
     const mobileBadge = id('pwa_bottom_badge');
     
-    const displayStr = countNum > 99 ? '99+' : (countNum > 0 ? countNum.toString() : '');
+    const displayStr = countNum > 9 ? '9+' : (countNum > 0 ? countNum.toString() : '');
 
     if (badge) {
         if (countNum <= 0) {

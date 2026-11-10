@@ -188,3 +188,14 @@ function releaseSessionLock(): void
         session_write_close();
     }
 }
+
+/**
+ * Global HTML escaping helper compatible with Blade templates.
+ * Guarantees that calls to e() in views or compiled cache files never fail.
+ */
+if (!function_exists('e')) {
+    function e(mixed $value, bool $doubleEncode = true): string
+    {
+        return htmlspecialchars((string)($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', $doubleEncode);
+    }
+}

@@ -1147,8 +1147,16 @@ export function profileFeed(opts = {}) {
 
             // Strip original/canonical preview URLs if link preview exists
             if (post.link_preview) {
-                if (post.link_preview.original_url) text = text.split(post.link_preview.original_url).join('');
-                if (post.link_preview.url) text = text.split(post.link_preview.url).join('');
+                const stripUrl = (u) => {
+                    if (!u || typeof u !== 'string') return;
+                    text = text.split(u).join('');
+                    const trimmed = u.replace(/\/+$/, '');
+                    if (trimmed && trimmed !== u) text = text.split(trimmed).join('');
+                    const withSlash = (trimmed || u) + '/';
+                    if (withSlash !== u) text = text.split(withSlash).join('');
+                };
+                stripUrl(post.link_preview.original_url);
+                stripUrl(post.link_preview.url);
             }
             if (post.video && post.video.originalUrl) {
                 text = text.split(post.video.originalUrl).join('');
@@ -1573,6 +1581,7 @@ export function profileFeed(opts = {}) {
                     // bypasses Alpine's proxy, so write to the reactive copy in this.posts.
                     const target = this.posts?.find(p => p?.post_no === post.post_no) || post;
                     target.link_preview = d;
+                    target.displayMessage = this.getMediaCaption(target);
 
                     // If linked album contains multiple photos or videos, promote to native multi-media carousel
                     if (Array.isArray(d.album_images) && d.album_images.length > 0) {
@@ -1796,15 +1805,19 @@ export function profileFeed(opts = {}) {
             const cursorPos = input.selectionEnd ?? text.length;
             const textBeforeCursor = text.slice(0, cursorPos);
 
-            const match = textBeforeCursor.match(/(?:^|\s)@([^\s@]*)$/);
+            const match = textBeforeCursor.match(/(?:^|\s)@([A-Za-z0-9_'\- ]{0,40})$/);
             if (!match) {
                 this.mentionOpen[postNo] = false;
                 this.mentionMatches[postNo] = [];
                 return;
             }
 
-            const query = (match[1] || '').toLowerCase();
+            const query = (match[1] || '').trim().toLowerCase();
             const currentUserId = String(this.currentUserId || '');
+
+            if (!this.familyRoster || this.familyRoster.length === 0) {
+                this.loadFamilyRoster();
+            }
 
             const matches = (this.familyRoster || []).filter(m => {
                 const first = (m.firstName || '').trim();
@@ -1846,7 +1859,7 @@ export function profileFeed(opts = {}) {
         selectMention(postNo, member) {
             if (!member) return;
             const text = this.commentInputs[postNo] || '';
-            const replaced = text.replace(/(?:^|\s)@([^\s@]*)$/, (match) => {
+            const replaced = text.replace(/(?:^|\s)@([A-Za-z0-9_'\- ]*)$/, (match) => {
                 const prefix = match.startsWith(' ') ? ' ' : '';
                 return `${prefix}@${member.firstName} ${member.lastName} `;
             });
@@ -3965,8 +3978,16 @@ if (typeof window !== 'undefined') {
         text = text.replace(/(?:https?:\/\/[^\s"'<>]+|\/resources\/(?:videos|images)\/[^\s"'<>]+)\.(?:mp4|webm|ogg|mov)(?:\?[^\s"'<>#]*)?(?:#t=[0-9.]+(?:,[0-9.]+)?)?/gi, '');
 
         if (post.link_preview) {
-            if (post.link_preview.original_url) text = text.split(post.link_preview.original_url).join('');
-            if (post.link_preview.url) text = text.split(post.link_preview.url).join('');
+            const stripUrl = (u) => {
+                if (!u || typeof u !== 'string') return;
+                text = text.split(u).join('');
+                const trimmed = u.replace(/\/+$/, '');
+                if (trimmed && trimmed !== u) text = text.split(trimmed).join('');
+                const withSlash = (trimmed || u) + '/';
+                if (withSlash !== u) text = text.split(withSlash).join('');
+            };
+            stripUrl(post.link_preview.original_url);
+            stripUrl(post.link_preview.url);
         }
         if (post.video && post.video.originalUrl) {
             text = text.split(post.video.originalUrl).join('');

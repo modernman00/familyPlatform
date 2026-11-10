@@ -365,7 +365,7 @@
                         </div>
                     </div>
 
-                    <input type="hidden" name="token" value="{{ $token }}">
+                    @include('csrf')
                     
                     <div class="modal-footer">
                         <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Cancel</button>

@@ -687,7 +687,23 @@ final class ProfilePage extends ProcessImg
                     if (is_string($rawTagged)) {
                         $rawTagged = json_decode($rawTagged, true) ?: [$rawTagged];
                     }
-                    if (is_array($rawTagged) && !empty($rawTagged)) {
+                    if (!is_array($rawTagged)) {
+                        $rawTagged = [];
+                    }
+
+                    // Autonomous @Mention Auto-Detection (ATG & Silas Contrarian Gate)
+                    // If author typed "@First Last" in the post body, resolve and merge tagged user IDs
+                    if ($famCode !== '' && !empty($cleanMultiLineMessage) && str_contains($cleanMultiLineMessage, '@')) {
+                        $members = \App\model\AllMembersData::AllMembersEmailByFamCode($famCode, $authorIdStr);
+                        if (!empty($members)) {
+                            $extractedIds = \App\services\CommentThreadService::extractMentionedIds($cleanMultiLineMessage, $members, $authorIdStr);
+                            if (!empty($extractedIds)) {
+                                $rawTagged = array_merge($rawTagged, $extractedIds);
+                            }
+                        }
+                    }
+
+                    if (!empty($rawTagged)) {
                         $cleanTaggedIds = array_values(array_unique(array_filter(array_map('strval', $rawTagged))));
                         if (!empty($cleanTaggedIds)) {
                             $postTags = \App\controller\members\TagController::syncPostTags(

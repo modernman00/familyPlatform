@@ -31,7 +31,7 @@
               <i class="bi bi-heart-pulse-fill text-danger"></i> Milestone Memories
             </div>
             <div class="d-flex align-items-center gap-1">
-              <i class="bi bi-diagram-3-fill text-primary"></i> Living Organogram
+              <i class="bi bi-diagram-3-fill text-primary"></i> Living Family Tree
             </div>
           </div>
         </div>
@@ -59,7 +59,7 @@
               <!-- SVG icon for Network -->
               <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
             </div>
-            <h3 class="feature-title">Private Organograms</h3>
+            <h3 class="feature-title">Private Family Trees</h3>
             <p class="text-muted">Visualize your family history with dynamic family trees. See exactly how everyone is connected across generations.</p>
           </div>
         </div>

@@ -90,7 +90,7 @@
         {{ $quest['subtitle'] ?? 'We are building our complete family tree. Can you or an elder help fill in this missing branch?' }}
     </p>
     <a href="{{ $baseUrl }}/organogram" style="color: #a31621; font-weight: 700; text-decoration: underline; font-size: 14px;">
-        Open Organogram Canvas &amp; Quests &rarr;
+        Open Family Tree Canvas &amp; Quests &rarr;
     </a>
 </div>
 @endif

@@ -1,5 +1,5 @@
 @extends ('layouts.profileBase')
-@section('title', 'Family Tree & Organogram')
+@section('title', 'Family Tree')
 @section('data-page-id', 'organogram')
 @push('styles')
     <link rel="stylesheet" href="/public/css/organogram.css?v={{ time() }}">
@@ -2684,11 +2684,11 @@
                         if (whatsappBtn) whatsappBtn.href = `https://api.whatsapp.com/send?text=${inviteMessage}`;
                         if (smsBtn) smsBtn.href = `sms:?body=${inviteMessage}`;
                     } else {
-                        console.error('[organogram] invite token generation failed', data);
+                        console.error('[family tree] invite token generation failed', data);
                     }
                 })
                 .catch(err => {
-                    console.error('[organogram] invite token generation error:', err);
+                    console.error('[family tree] invite token generation error:', err);
                 });
             }
         }

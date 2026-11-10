@@ -37,6 +37,7 @@ return [
     'nav.add_photo' => 'Añadir Foto',
     'nav.alerts' => 'Alertas',
     'nav.change_language' => 'Cambiar Idioma',
+    'nav.search_placeholder' => 'Buscar personas, actividades y recuerdos...',
 
     // Global / Diaspora
     'global.worldwide_families' => 'Conectando Familias en Todo el Mundo',

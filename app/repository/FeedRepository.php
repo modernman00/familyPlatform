@@ -95,21 +95,29 @@ class FeedRepository
                 LEFT JOIN (
                     SELECT requester_id, approver_id, status, requesterCode
                     FROM requestMgt
-                    WHERE requester_id IS NOT NULL AND requester_id = ?
-                ) AS rm ON post.id = rm.approver_id
+                    WHERE (requester_id = ? OR approver_id = ?)
+                      AND LOWER(status) IN ('approved', 'accepted')
+                ) AS rm ON (post.id = rm.approver_id OR post.id = rm.requester_id)
                 WHERE (
                     post.id = ?
                     OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_no = post.post_no AND pt.user_id = ?)
                     OR post.id = ?
                     OR (
                         EXISTS (SELECT 1 FROM post_family_targets pft_all WHERE pft_all.post_no = post.post_no)
-                        AND {$targetCheck}
+                        AND (
+                            {$targetCheck}
+                            OR (
+                                COALESCE(post.target_scope, 'all') = 'all'
+                                AND (rm.approver_id IS NOT NULL OR rm.requester_id IS NOT NULL)
+                            )
+                        )
                     )
                     OR (
                         NOT EXISTS (SELECT 1 FROM post_family_targets pft_none WHERE pft_none.post_no = post.post_no)
                         AND (
                             {$legacyCodeCheck}
-                            OR post.id = rm.approver_id
+                            OR rm.approver_id IS NOT NULL
+                            OR rm.requester_id IS NOT NULL
                         )
                     )
                 )
@@ -117,6 +125,7 @@ class FeedRepository
                 AND post.date_deleted IS NULL";
 
             $params = [
+                $userId,
                 $userId,
                 $userId,
                 $userId,
@@ -216,20 +225,28 @@ class FeedRepository
                 LEFT JOIN (
                     SELECT requester_id, approver_id, status, requesterCode
                     FROM requestMgt
-                    WHERE requester_id IS NOT NULL AND requester_id = ?
-                ) AS rm ON post.id = rm.approver_id
+                    WHERE (requester_id = ? OR approver_id = ?)
+                      AND LOWER(status) IN ('approved', 'accepted')
+                ) AS rm ON (post.id = rm.approver_id OR post.id = rm.requester_id)
                 WHERE (
                     post.id = ?
                     OR post.id = ?
                     OR (
                         EXISTS (SELECT 1 FROM post_family_targets pft_all WHERE pft_all.post_no = post.post_no)
-                        AND {$targetCheck}
+                        AND (
+                            {$targetCheck}
+                            OR (
+                                COALESCE(post.target_scope, 'all') = 'all'
+                                AND (rm.approver_id IS NOT NULL OR rm.requester_id IS NOT NULL)
+                            )
+                        )
                     )
                     OR (
                         NOT EXISTS (SELECT 1 FROM post_family_targets pft_none WHERE pft_none.post_no = post.post_no)
                         AND (
                             {$legacyCodeCheck}
-                            OR post.id = rm.approver_id
+                            OR rm.approver_id IS NOT NULL
+                            OR rm.requester_id IS NOT NULL
                         )
                     )
                 ) 
@@ -239,6 +256,7 @@ class FeedRepository
                 ORDER BY post.date_created DESC";
 
             $params = [
+                $userId,
                 $userId,
                 $userId,
                 \App\services\FamilyPlatformAccountService::getAccountId()
@@ -303,21 +321,29 @@ class FeedRepository
                 LEFT JOIN (
                     SELECT requester_id, approver_id, status, requesterCode
                     FROM requestMgt
-                    WHERE requester_id IS NOT NULL AND requester_id = ?
-                ) AS rm ON post.id = rm.approver_id
+                    WHERE (requester_id = ? OR approver_id = ?)
+                      AND LOWER(status) IN ('approved', 'accepted')
+                ) AS rm ON (post.id = rm.approver_id OR post.id = rm.requester_id)
                 WHERE (
                     post.id = ?
                     OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_no = post.post_no AND pt.user_id = ?)
                     OR post.id = ?
                     OR (
                         EXISTS (SELECT 1 FROM post_family_targets pft_all WHERE pft_all.post_no = post.post_no)
-                        AND {$targetCheck}
+                        AND (
+                            {$targetCheck}
+                            OR (
+                                COALESCE(post.target_scope, 'all') = 'all'
+                                AND (rm.approver_id IS NOT NULL OR rm.requester_id IS NOT NULL)
+                            )
+                        )
                     )
                     OR (
                         NOT EXISTS (SELECT 1 FROM post_family_targets pft_none WHERE pft_none.post_no = post.post_no)
                         AND (
                             {$legacyCodeCheck}
-                            OR post.id = rm.approver_id
+                            OR rm.approver_id IS NOT NULL
+                            OR rm.requester_id IS NOT NULL
                         )
                     )
                 )
@@ -325,6 +351,7 @@ class FeedRepository
                 AND post.date_deleted IS NULL";
 
             $params = [
+                $userId,
                 $userId,
                 $userId,
                 $userId,

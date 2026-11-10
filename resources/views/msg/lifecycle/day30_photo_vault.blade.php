@@ -42,7 +42,7 @@
 
 <ul style="margin: 0 0 24px 0; padding-left: 20px; color: #44403c; font-size: 15px; line-height: 1.8;">
     <li>Create high-resolution albums categorised by decade, holiday, or family branch.</li>
-    <li>Tag faces with automatic organogram node linking.</li>
+    <li>Tag faces with automatic family tree node linking.</li>
     <li>Store scans of birth records, property deeds, and family heirlooms safely.</li>
 </ul>
 

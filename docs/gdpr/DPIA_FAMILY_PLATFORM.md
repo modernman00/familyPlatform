@@ -1,5 +1,5 @@
 # 🏛️ DATA PROTECTION IMPACT ASSESSMENT (DPIA) — FAMILYPLATFORM
-**System:** `FamilyPlatform` (Private Social Network, Living Organograms & Heritage Archives)  
+**System:** `FamilyPlatform` (Private Social Network, Living Family Trees & Heritage Archives)  
 **Lead Auditor:** Ajibike (AI Governance & Agentic Compliance Lead) & Marcus (SecOps)  
 **Reviewed by:** David (Deloitte Principal Gatewatcher) & Olutobi (Head of TAT)  
 **Classification:** High-Risk Processing Assessment (UK GDPR Article 35 / ICO Standard)  
@@ -49,7 +49,7 @@ graph TD
 - **Inherent Risk:** High. Parents or grandparents may create family tree nodes for minor children with birthdates and photos.
 - **Mitigation:**
   1. Minor nodes cannot register standalone accounts without explicit parental confirmation.
-  2. Living organogram trees are walled behind authenticated family code boundaries (`postFamCode` / `famCode`), never indexed by search engines (`robots.txt: Disallow /`).
+  2. Living family trees are walled behind authenticated family code boundaries (`postFamCode` / `famCode`), never indexed by search engines (`robots.txt: Disallow /`).
   3. Parents hold full unilateral rights to edit or remove child nodes at any time.
 - **Residual Risk:** 🟢 **LOW / ACCEPTABLE**
 

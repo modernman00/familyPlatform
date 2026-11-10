@@ -58,7 +58,7 @@
 
             <!-- Code Verification Form -->
             <form id="totpVerifyForm" method="POST" action="/admin/setup-2fa" style="max-width:440px; margin:0 auto; text-align:center;">
-                <input type="hidden" name="token" id="csrf_token" value="{{ $_SESSION['token'] ?? '' }}">
+                @include('csrf')
                 
                 <h4 style="font-weight:700; color:#1e293b; margin-bottom:8px;">
                     <i class="fa fa-lock w3-text-green"></i> Enter 6-Digit Code

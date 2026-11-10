@@ -62,7 +62,7 @@
                 </div>
             </td>
             <td valign="top">
-                <strong style="color: #0f172a; font-size: 15px;">Interactive 7-Generation Family Organogram</strong>
+                <strong style="color: #0f172a; font-size: 15px;">Interactive 7-Generation Family Tree</strong>
                 <p style="margin: 4px 0 0 0; font-size: 13px; color: #475569; line-height: 1.5;">
                     Add your immediate kin in under 60 seconds. Our smart kinship engine maps up to 7 generations upwards and downwards dynamically.
                 </p>
@@ -128,7 +128,7 @@
         ⚡ Your 60-Second Legacy Starter:
     </h4>
     <ol style="margin: 0; padding-left: 20px; font-size: 14px; color: #334155; line-height: 1.7;">
-        <li>Log in and open your <strong>Interactive Organogram</strong>.</li>
+        <li>Log in and open your <strong>Interactive Family Tree</strong>.</li>
         <li>Click <strong>"Add Parents"</strong> to honour your mother and father.</li>
         <li>Share your Family Code on <strong>WhatsApp</strong> so your kin can link to your branch!</li>
     </ol>

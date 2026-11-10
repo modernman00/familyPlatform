@@ -4,23 +4,23 @@
         <div class="modal-content omni-search-content shadow-2xl border-0 overflow-hidden">
             <!-- Search Input Header -->
             <div class="omni-search-header p-3 border-bottom d-flex align-items-center gap-3">
-                <div class="omni-search-icon-wrap text-muted d-flex align-items-center justify-content-center">
-                    <i class="bi bi-search fs-5 text-primary"></i>
+                <div class="omni-search-icon-wrap d-flex align-items-center justify-content-center" aria-hidden="true">
+                    <i class="bi bi-search fs-5"></i>
                 </div>
                 <div class="flex-grow-1 position-relative">
                     <input type="search"
                            id="omniSearchInput"
                            class="form-control form-control-lg border-0 shadow-none omni-search-input ps-0"
-                           placeholder="Search data, activities, or functions (e.g. 'family journal', 'create family code')..."
-                           aria-label="Search data, activities, or functions"
+                           placeholder="Search people, activities and memories..."
+                           aria-label="Search people, activities and memories"
                            autocomplete="off"
                            spellcheck="false">
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <div class="spinner-border spinner-border-sm text-primary omni-search-spinner" id="omniSearchSpinner" role="status" style="display: none;">
+                    <div class="spinner-border spinner-border-sm omni-search-spinner" id="omniSearchSpinner" role="status" style="display: none; color: #b8202c;">
                         <span class="visually-hidden">Searching...</span>
                     </div>
-                    <button type="button" class="btn btn-sm btn-light rounded-pill px-2.5 py-1 text-muted border omni-esc-badge" data-bs-dismiss="modal" aria-label="Close search" title="Close search modal (Esc)">
+                    <button type="button" class="btn btn-sm omni-esc-badge" data-bs-dismiss="modal" aria-label="Close search" title="Close search modal (Esc)">
                         <span class="small fw-semibold">ESC</span>
                     </button>
                 </div>
@@ -139,36 +139,86 @@
 <style>
 /* 🔍 Omni-Search Styling conforming to Global Design Standards v2.1 */
 .omni-search-modal .modal-dialog {
-    max-width: 680px;
-    margin: 1.75rem auto;
+    max-width: 700px;
+    margin: 2rem auto;
 }
 .omni-search-content {
-    border-radius: 18px;
+    border-radius: 20px;
     background: #ffffff;
-    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 25px 65px -15px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(226, 232, 240, 0.9);
+    border: none;
+    overflow: hidden;
 }
 .omni-search-header {
     background: #ffffff;
+    padding: 1.1rem 1.35rem !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.85) !important;
+}
+.omni-search-header:focus-within {
+    background: #fafafa;
+    border-bottom-color: rgba(184, 32, 44, 0.3) !important;
+    box-shadow: 0 4px 12px rgba(184, 32, 44, 0.05);
 }
 .omni-search-input {
-    font-size: 1.05rem;
-    font-weight: 500;
+    font-size: 1.15rem;
+    font-weight: 550;
+    letter-spacing: -0.015em;
     color: #0f172a;
     background: transparent !important;
+    padding-left: 0.35rem;
 }
 .omni-search-input::placeholder {
     color: #94a3b8;
-    font-size: 0.95rem;
+    font-size: 1.02rem;
+    font-weight: 450;
 }
 .omni-search-icon-wrap {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: #fbefef;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(184, 32, 44, 0.12) 0%, rgba(184, 32, 44, 0.04) 100%);
+    color: #b8202c;
+    flex-shrink: 0;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.omni-search-header:focus-within .omni-search-icon-wrap {
+    background: #b8202c;
+    color: #ffffff;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(184, 32, 44, 0.3);
+}
+.omni-esc-badge {
+    background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+    border: 1px solid rgba(203, 213, 225, 0.85);
+    border-bottom: 2px solid rgba(148, 163, 184, 0.8);
+    border-radius: 8px;
+    padding: 0.22rem 0.55rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #64748b;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    transition: all 0.15s ease;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.omni-esc-badge:hover {
+    background: #ffffff;
+    border-color: rgba(184, 32, 44, 0.4);
+    color: #b8202c;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(184, 32, 44, 0.15);
+}
+.omni-esc-badge:active {
+    transform: scale(0.96);
 }
 .omni-filter-bar {
     background: #f8fafc;
+    padding: 0.6rem 1.25rem !important;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.85) !important;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -177,23 +227,27 @@
 }
 .omni-filter-chip {
     border-radius: 9999px;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    padding: 0.25rem 0.75rem;
+    padding: 0.32rem 0.85rem;
     background: #ffffff;
     border: 1px solid #e2e8f0;
     color: #64748b;
     white-space: nowrap;
-    transition: all 0.15s ease;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
 }
 .omni-filter-chip:hover {
     background: #f1f5f9;
     color: #0f172a;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
 }
 .omni-filter-chip.active {
-    background: #b8202c;
+    background: linear-gradient(135deg, #b8202c 0%, #991b1b 100%);
     color: #ffffff;
-    border-color: #b8202c;
+    border-color: #991b1b;
+    box-shadow: 0 2px 6px rgba(184, 32, 44, 0.3);
 }
 .omni-filter-chip.active i {
     color: #ffffff !important;
@@ -316,17 +370,43 @@
 /* Dark Mode Overrides */
 body.dark-mode .omni-search-content {
     background: #0f172a;
-    border-color: #334155;
+    border: 1px solid rgba(51, 65, 85, 0.7);
+    box-shadow: 0 25px 65px -15px rgba(0, 0, 0, 0.75);
 }
 body.dark-mode .omni-search-header {
     background: #0f172a;
-    border-bottom-color: #1e293b !important;
+    border-bottom-color: rgba(51, 65, 85, 0.6) !important;
+}
+body.dark-mode .omni-search-header:focus-within {
+    background: #1e293b;
+    border-bottom-color: rgba(239, 68, 68, 0.4) !important;
+}
+body.dark-mode .omni-search-icon-wrap {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+}
+body.dark-mode .omni-search-header:focus-within .omni-search-icon-wrap {
+    background: #dc2626;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
 }
 body.dark-mode .omni-search-input {
     color: #f8fafc;
 }
 body.dark-mode .omni-search-input::placeholder {
     color: #64748b;
+}
+body.dark-mode .omni-esc-badge {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    border-color: #334155;
+    border-bottom-color: #475569;
+    color: #cbd5e1;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+}
+body.dark-mode .omni-esc-badge:hover {
+    background: #1e293b;
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #fca5a5;
 }
 body.dark-mode .omni-filter-bar {
     background: #1e293b;
@@ -340,6 +420,13 @@ body.dark-mode .omni-filter-chip {
 body.dark-mode .omni-filter-chip:hover {
     background: #1e293b;
     color: #f8fafc;
+    border-color: #475569;
+}
+body.dark-mode .omni-filter-chip.active {
+    background: linear-gradient(135deg, #dc2626 0%, #b8202c 100%);
+    border-color: #dc2626;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
 }
 body.dark-mode .omni-result-item:hover,
 body.dark-mode .omni-result-item.is-selected {
@@ -560,7 +647,7 @@ body.dark-mode .omni-kbd {
         {
             id: 'act_view_tree',
             title: 'View Interactive Family Tree',
-            description: 'Explore the visual multi-generational organogram canvas with pan & zoom',
+            description: 'Explore the visual multi-generational family tree canvas with pan & zoom',
             keywords: ['family tree', 'organogram', 'view tree', 'visual tree', 'ancestry', 'pedigree', 'canvas tree', 'kinship tree'],
             category: 'Functions & Tools',
             icon: 'bi-diagram-3-fill',

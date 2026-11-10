@@ -89,6 +89,20 @@
     <!-- Loading Indicator / Skeleton -->
     <div id="setLoader" class="loader my-5 mx-auto"></div>
 
+    <!-- Connected Kin Privacy Transparency Callout -->
+    <div id="connectedKinPrivacyBanner" class="alert d-none align-items-start gap-3 p-3 mb-4 rounded-4 shadow-sm border" style="background: rgba(238, 242, 255, 0.85); border-color: rgba(165, 180, 252, 0.6) !important; color: #1e1b4b;" role="status">
+        <div class="d-flex align-items-center justify-content-center flex-shrink-0 rounded-circle text-primary" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; background: rgba(99, 102, 241, 0.15);">
+            <i class="bi bi-shield-lock-fill fs-5"></i>
+        </div>
+        <div class="flex-grow-1" style="font-size: 0.85rem; line-height: 1.45;">
+            <div class="fw-bold mb-0.5" style="font-size: 0.9rem;">What Connected Kin Can &amp; Cannot Access</div>
+            <div>
+                <strong>Connected Kin</strong> are approved relatives or in-laws holding a different family code. They can view your profile, send direct messages, and see general posts shared with <em>All Family Circles &amp; Connected Kin</em>. 
+                Your <strong>Family Tree</strong>, confidential contact numbers, and lineage-specific posts (Birth or Married family only) remain strictly private and locked to members sharing your family code.
+            </div>
+        </div>
+    </div>
+
     <p id="searchHidden" class="d-none"></p>
 
     <!-- Members Grid Container -->

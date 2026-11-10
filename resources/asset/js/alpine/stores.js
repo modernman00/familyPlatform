@@ -10,7 +10,7 @@ export function initAlpineStores(Alpine) {
   Alpine.store('notifications', {
     unreadCount: 0,
     get display() {
-      if (this.unreadCount > 99) return '99+';
+      if (this.unreadCount > 9) return '9+';
       return this.unreadCount > 0 ? String(this.unreadCount) : '';
     },
     get hasUnread() {
@@ -41,7 +41,7 @@ export function initAlpineStores(Alpine) {
       }
     },
     _syncLegacyDom(num) {
-      const displayStr = num > 99 ? '99+' : (num > 0 ? String(num) : '');
+      const displayStr = num > 9 ? '9+' : (num > 0 ? String(num) : '');
       const badgeIds = ['notification_count', 'header_notif_count', 'pwa_bottom_badge'];
       badgeIds.forEach((id) => {
         const el = document.getElementById(id);

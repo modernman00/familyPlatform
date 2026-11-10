@@ -43,7 +43,7 @@
 <ul style="margin: 0 0 24px 0; padding-left: 20px; color: #44403c; font-size: 15px; line-height: 1.8;">
     <li>Convert any clear portrait into a living family avatar in 1 click.</li>
     <li>Unlock personalised Me-Sticker reaction packs for comments and celebrations.</li>
-    <li>Display your custom avatar proudly on the 7-generation dynasty organogram.</li>
+    <li>Display your custom avatar proudly on the 7-generation dynasty family tree.</li>
 </ul>
 
 <!-- CTA Button -->

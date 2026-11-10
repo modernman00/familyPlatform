@@ -13,7 +13,7 @@
         </a>
 
         <!-- Quick mobile search icon for phone viewports -->
-        <button class="btn btn-icon-stitch d-lg-none ms-auto me-2" type="button" data-bs-toggle="modal" data-bs-target="#omniSearchModal" aria-label="Search activities, memories, and family members" title="Search activities, memories, and family members">
+        <button class="btn btn-icon-stitch btn-mobile-omni-trigger d-lg-none ms-auto me-2" type="button" data-bs-toggle="modal" data-bs-target="#omniSearchModal" aria-label="Search activities, memories, and family members" title="Search activities, memories, and family members">
             <i class="bi bi-search"></i>
         </button>
 
@@ -80,17 +80,21 @@
             </ul>
 
             <div class="d-flex align-items-center flex-wrap flex-lg-nowrap gap-2 navbar-actions-group flex-shrink-0">
-                <!-- Omni-Search Trigger Button (Search Data, Activities & Functions) -->
-                <button class="btn btn-omni-search-trigger d-none d-lg-flex align-items-center gap-2" id="omniSearchTriggerBtn" type="button" aria-label="Search data, activities, functions" title="Search activities, memories, and family members (⌘K)" data-bs-toggle="modal" data-bs-target="#omniSearchModal">
-                    <i class="bi bi-search text-primary"></i>
-                    <span class="d-none d-xxl-inline text-muted small pe-2">{{ __('nav.search_placeholder', 'Search data, activities, functions...') }}</span>
-                    <span class="d-none d-xl-inline d-xxl-none text-muted small pe-1">{{ __('nav.search', 'Search...') }}</span>
-                    <span class="d-inline d-xl-none text-muted small pe-1">{{ __('nav.search', 'Search...') }}</span>
-                    <kbd class="d-none d-md-inline-block text-muted px-1.5 py-0.5 rounded border border-secondary-subtle" style="font-size: 0.68rem; background: rgba(0,0,0,0.04);">⌘K</kbd>
+                <!-- Omni-Search Trigger Button (Search People, Activities & Memories) -->
+                <button class="btn btn-omni-search-trigger d-none d-lg-flex align-items-center gap-2.5" id="omniSearchTriggerBtn" type="button" aria-label="Search people, activities and memories" title="Search activities, memories, and family members (⌘K)" data-bs-toggle="modal" data-bs-target="#omniSearchModal">
+                    <span class="omni-trigger-icon-box" aria-hidden="true">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <span class="omni-trigger-text d-none d-xxl-inline pe-1">{{ __('nav.search_placeholder', 'Search people, activities and memories...') }}</span>
+                    <span class="omni-trigger-text d-none d-xl-inline d-xxl-none pe-1">{{ __('nav.search', 'Search...') }}</span>
+                    <span class="omni-trigger-text d-inline d-xl-none pe-1">{{ __('nav.search', 'Search...') }}</span>
+                    <kbd class="omni-trigger-kbd d-none d-md-inline-flex align-items-center gap-0.5" aria-hidden="true">
+                        <span class="omni-kbd-key">⌘</span><span class="omni-kbd-key">K</span>
+                    </kbd>
                 </button>
 
                 <!-- Recommend / Invite Others Button -->
-                <button class="btn btn-sm d-flex align-items-center gap-1 px-3 py-1 fw-bold text-white rounded-pill shadow-sm" id="btnOpenRecommendModal" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" style="background: linear-gradient(135deg, #b8202c 0%, #a31621 100%); font-size: 0.85rem; min-height: 44px; touch-action: manipulation;" type="button" title="Invite family relatives and friends to join your network">
+                <button class="btn btn-sm invite-3d-btn d-flex align-items-center gap-2 px-3 py-1 fw-bold text-white rounded-pill" id="btnOpenRecommendModal" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" type="button" title="Invite family relatives and friends to join your network">
                     <i class="bi bi-person-plus-fill text-warning"></i>
                     <span class="d-none d-xl-inline">{{ __('nav.invite_others', 'Invite Others') }}</span>
                     <span class="d-inline d-xl-none">{{ __('nav.invite', 'Invite') }}</span>
@@ -135,7 +139,7 @@
                         $supportedLocales = \App\classes\I18n::getSupportedLocales();
                         $currLocale = $supportedLocales[$activeLocale] ?? $supportedLocales['en'];
                     @endphp
-                    <button class="btn btn-sm d-flex align-items-center gap-1 px-2.5 py-1 rounded-pill border" type="button" id="langMenu" data-bs-toggle="dropdown" data-bs-display="dynamic" aria-expanded="false" style="background: var(--card-bg, #fff); font-size: 0.85rem; min-height: 44px; touch-action: manipulation;" title="{{ __('nav.change_language', 'Change Language / Select locale') }}">
+                    <button class="btn btn-sm btn-raised-nav lang-btn d-flex align-items-center gap-2 px-3 py-1 rounded-pill" type="button" id="langMenu" data-bs-toggle="dropdown" data-bs-display="dynamic" aria-expanded="false" aria-label="{{ __('nav.change_language', 'Change Language / Select locale') }}" title="{{ __('nav.change_language', 'Change Language / Select locale') }}">
                         <span style="font-size: 1.1rem;">{{ $currLocale['flag'] }}</span>
                         <span class="d-none d-md-inline fw-semibold text-uppercase" style="font-size: 0.78rem;">{{ $activeLocale }}</span>
                     </button>
@@ -153,13 +157,24 @@
 
                 <!-- User Profile Dropdown (Refined Capsule with Avatar Monogram) -->
                 <div class="dropdown">
-                    <button class="btn btn-user-stitch dropdown-toggle d-flex align-items-center gap-2" type="button" id="userMenu" data-bs-toggle="dropdown" data-bs-display="dynamic" aria-expanded="false" title="Account profile and preferences menu">
-                        <span class="user-avatar-initials flex-shrink-0">{{ strtoupper(substr($_SESSION['fullName'] ?? 'A', 0, 1)) }}</span>
-                        <span class="fw-semibold text-truncate user-name-label">{{ ucwords(strtolower($_SESSION['fullName'] ?? 'Account')) }}</span>
+                    @php
+                        $navFullName = trim((string)($_SESSION['fullName'] ?? 'Account'));
+                        $navNameParts = preg_split('/\s+/', $navFullName, -1, PREG_SPLIT_NO_EMPTY) ?: ['A'];
+                        $navInitials = mb_strtoupper(mb_substr($navNameParts[0], 0, 1) . (count($navNameParts) > 1 ? mb_substr(end($navNameParts), 0, 1) : ''));
+                        $navRawImg = trim((string)($_SESSION['img'] ?? ($_SESSION['profilePics'] ?? '')));
+                        $navHasPhoto = $navRawImg !== '' && !str_contains($navRawImg, 'avatarM.png') && !str_contains($navRawImg, 'avatarF.png');
+                        $navImgSrc = $navHasPhoto ? (str_starts_with($navRawImg, '/') ? $navRawImg : '/resources/images/profile/' . rawurlencode($navRawImg)) : '';
+                    @endphp
+                    <button class="btn btn-user-stitch btn-user-compact dropdown-toggle d-flex align-items-center" type="button" id="userMenu" data-bs-toggle="dropdown" data-bs-display="dynamic" aria-expanded="false" aria-label="{{ $navFullName }} — account menu" title="{{ $navFullName }} — account profile and preferences">
+                        @if ($navHasPhoto)
+                            <img src="{{ $navImgSrc }}" alt="" class="user-avatar-photo flex-shrink-0" width="36" height="36" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'user-avatar-initials flex-shrink-0',textContent:'{{ $navInitials }}'}))">
+                        @else
+                            <span class="user-avatar-initials flex-shrink-0" aria-hidden="true">{{ $navInitials }}</span>
+                        @endif
                     </button>
                     <ul class="dropdown-menu dropdown-menu-lg-end shadow-lg border-0 py-2 stitch-user-dropdown" aria-labelledby="userMenu" style="border-radius: 16px; min-width: 200px;">
                         <li>
-                            <button type="button" class="dropdown-item py-2 px-3 fw-medium text-primary text-start w-100 border-0 bg-transparent" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" title="Invite family relatives and friends to join your family network">
+                            <button type="button" class="dropdown-item d-lg-none py-2 px-3 fw-medium text-primary text-start w-100 border-0 bg-transparent" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" title="Invite family relatives and friends to join your family network">
                                 <i class="bi bi-person-plus-fill me-2 text-warning"></i> {{ __('nav.invite_others', 'Invite Others') }}
                             </button>
                         </li>

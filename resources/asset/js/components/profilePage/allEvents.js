@@ -152,6 +152,14 @@ try {
                     return;
                 }
 
+                // Sync composer text and auto-tag any typed @mentions before validation
+                if (typeof window.syncEditorToTextarea === 'function') {
+                    window.syncEditorToTextarea();
+                }
+                if (typeof window.autoTagMentionedUsersInText === 'function') {
+                    window.autoTagMentionedUsersInText();
+                }
+
                 // Prevent empty post submission with friendly tactile prompt
                 if (!isEditing) {
                     const postMsgVal = (id('postMessage')?.value || '').trim();

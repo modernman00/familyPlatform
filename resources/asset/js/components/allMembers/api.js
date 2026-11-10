@@ -86,6 +86,18 @@ export function applyFilter(filterVal = "all") {
     emptyPlaceholder.remove();
   }
 
+  // Toggle Connected Kin Privacy Guidance Banner
+  const privacyBanner = id("connectedKinPrivacyBanner");
+  if (privacyBanner) {
+    if (filterVal === "connected") {
+      privacyBanner.classList.remove("d-none");
+      privacyBanner.classList.add("d-flex");
+    } else {
+      privacyBanner.classList.add("d-none");
+      privacyBanner.classList.remove("d-flex");
+    }
+  }
+
   return visibleCount;
 }
 

@@ -40,7 +40,7 @@
 </h3>
 
 <ul style="margin: 0 0 24px 0; padding-left: 20px; color: #44403c; font-size: 15px; line-height: 1.8;">
-    <li>Open your organogram and review your high-resolution tree.</li>
+    <li>Open your family tree and review your high-resolution tree.</li>
     <li>Export or print your family tree diagram for your living room or family reunion.</li>
     <li>Continue sharing moments on the private family stream.</li>
 </ul>

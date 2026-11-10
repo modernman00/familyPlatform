@@ -97,6 +97,7 @@
         </div>
 
         <form id="createCampaignForm" onsubmit="submitNewCampaign(event)" class="space-y-4">
+            @include('csrf')
             <?= csrf_field() ?>
             <div>
                 <label class="block text-xs font-semibold uppercase text-gray-300 mb-1">Campaign Title</label>

@@ -135,38 +135,96 @@ if (($_ENV['APP_ENV'] ?? '') === 'local') {
 // option isn't actually wired up by view2()/viewBuilderWithCSP(). We can't
 // patch vendor/modernman00/shared-lib directly (changes there are lost on
 // composer update and must go through the upstream package instead), so
-// widen connect-src on the header right before it's actually sent — this
-// runs after CSP::apply() has already set its nonce, and we preserve it.
+// harden, sanitize, and ensure a complete CSP header is ALWAYS sent on all HTTP responses.
 if (php_sapi_name() !== 'cli') {
     header_register_callback(function () {
         if (($_ENV['APP_ENV'] ?? '') === 'local') {
             header_remove('X-Frame-Options');
             header('X-Frame-Options: SAMEORIGIN', true);
         }
+
+        $cspFound = false;
         foreach (headers_list() as $header) {
             if (stripos($header, 'Content-Security-Policy:') === 0) {
+                $cspFound = true;
                 $value = trim(substr($header, strlen('Content-Security-Policy:')));
+
+                // 1. Replace dangerous wildcard https: in script-src with approved origins
+                $approvedScripts = 'https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://use.fontawesome.com https://www.google.com https://www.gstatic.com https://recaptcha.google.com';
+                $value = preg_replace(
+                    "/script-src(?!-attr)([^;]*)\bhttps:\b([^;]*)/",
+                    "script-src$1 $approvedScripts $2",
+                    $value
+                ) ?? $value;
+
+                // 2. Ensure connect-src covers Google Analytics, Google APIs & jsDelivr
                 if (strpos($value, 'google-analytics.com') === false) {
                     $value = preg_replace(
                         '/connect-src([^;]*)/',
                         'connect-src$1 https://*.google-analytics.com https://*.analytics.google.com https://cdn.jsdelivr.net',
                         $value,
                         1
-                    );
-                    header('Content-Security-Policy: ' . $value, true);
+                    ) ?? $value;
                 }
-                // Emoji Studio only: the MediaPipe face detector (photo Me-stickers) compiles
-                // WebAssembly and fetches its model from Google's model bucket. Scoped to this
-                // one page so the rest of the site keeps the stricter policy.
+
+                // 3. Ensure directives with no fallback are defined (OWASP ZAP 10055)
+                if (strpos($value, 'object-src') === false) {
+                    $value .= "; object-src 'none'";
+                }
+                if (strpos($value, 'base-uri') === false) {
+                    $value .= "; base-uri 'self'";
+                }
+                if (strpos($value, 'form-action') === false) {
+                    $value .= "; form-action 'self'";
+                }
+                if (strpos($value, 'frame-ancestors') === false) {
+                    $value .= "; frame-ancestors 'self'";
+                }
+
+                // 4. Emoji/Poster/Flyer Studio on-device MediaPipe wasm permissions
                 $path = (string)parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
-                // Poster Studio uses the same on-device MediaPipe person segmenter for background removal.
-                if (in_array(rtrim($path, '/'), ['/member/emoji-studio', '/poster-studio', '/flyer-studio'], true) && strpos($value, 'wasm-unsafe-eval') === false) {
-                    $value = preg_replace('/script-src(?!-)([^;]*)/', "script-src$1 'wasm-unsafe-eval'", $value, 1);
-                    $value = preg_replace('/connect-src([^;]*)/', 'connect-src$1 https://storage.googleapis.com', $value, 1);
-                    header('Content-Security-Policy: ' . $value, true);
+                if (in_array(rtrim($path, '/'), ['/member/emoji-studio', '/poster-studio', '/flyer-studio'], true)) {
+                    if (strpos($value, 'wasm-unsafe-eval') === false) {
+                        $value = preg_replace('/script-src(?!-)([^;]*)/', "script-src$1 'wasm-unsafe-eval'", $value, 1) ?? $value;
+                    }
+                    if (strpos($value, 'storage.googleapis.com') === false) {
+                        $value = preg_replace('/connect-src([^;]*)/', 'connect-src$1 https://storage.googleapis.com', $value, 1) ?? $value;
+                    }
                 }
+
+                header('Content-Security-Policy: ' . $value, true);
                 break;
             }
+        }
+
+        // If no CSP was emitted by the view or route (e.g. landing page /, /api, /cron, /member redirects),
+        // emit a complete, robust, nonce-protected Content-Security-Policy header.
+        if (!$cspFound) {
+            $nonce = defined('CSP_NONCE') ? (string) CSP_NONCE : bin2hex(random_bytes(16));
+            if (!defined('CSP_NONCE')) {
+                define('CSP_NONCE', $nonce);
+            }
+
+            $scriptSrc = "script-src 'self' 'nonce-$nonce' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://use.fontawesome.com https://www.google.com https://www.gstatic.com https://recaptcha.google.com 'unsafe-eval'";
+            $connectSrc = "connect-src 'self' https://www.google.com https://www.gstatic.com https://*.google-analytics.com https://*.analytics.google.com https://cdn.jsdelivr.net";
+
+            $path = (string)parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
+            if (in_array(rtrim($path, '/'), ['/member/emoji-studio', '/poster-studio', '/flyer-studio'], true)) {
+                $scriptSrc .= " 'wasm-unsafe-eval'";
+                $connectSrc .= " https://storage.googleapis.com";
+            }
+
+            $defaultCsp = "default-src 'self'; "
+                . $scriptSrc . "; "
+                . "script-src-attr 'unsafe-inline'; "
+                . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
+                . "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; "
+                . "img-src 'self' data: https:; "
+                . $connectSrc . "; "
+                . "frame-src 'self' https://www.google.com https://recaptcha.google.com; "
+                . "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'";
+
+            header('Content-Security-Policy: ' . $defaultCsp, true);
         }
     });
 }

@@ -292,7 +292,7 @@ class FamilyPostAudienceService
 
         try {
             // 1. Fetch post metadata
-            $stmt = $this->pdo->prepare('SELECT id, postFamCode, post_status, date_deleted FROM post WHERE post_no = ? LIMIT 1');
+            $stmt = $this->pdo->prepare('SELECT id, postFamCode, target_scope, post_status, date_deleted FROM post WHERE post_no = ? LIMIT 1');
             $stmt->execute([$postNo]);
             $post = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$post || !empty($post['date_deleted'])) {
@@ -334,7 +334,7 @@ class FamilyPostAudienceService
             }
 
             if ($hasExplicitTargets) {
-                // STRICT LINEAGE GATE: Post was explicitly targeted. Viewer MUST hold at least one target family code.
+                // If viewer holds at least one target family code, access is granted
                 if (!empty($viewerCodes)) {
                     $inPlaceholders = implode(',', array_fill(0, count($viewerCodes), '?'));
                     $targetStmt = $this->pdo->prepare(
@@ -345,7 +345,23 @@ class FamilyPostAudienceService
                         return true;
                     }
                 }
-                // Explicitly targeted post, and viewer holds no matching target code: ACCESS DENIED!
+
+                // OPTION A KINSHIP GATE: If target_scope is 'all', approved connected kin in requestMgt also have access
+                $targetScope = (string)($post['target_scope'] ?? 'all');
+                if ($targetScope === 'all') {
+                    $rmTargetStmt = $this->pdo->prepare(
+                        "SELECT 1 FROM requestMgt
+                         WHERE ((requester_id = ? AND approver_id = ?) OR (approver_id = ? AND requester_id = ?))
+                           AND LOWER(status) IN ('approved', 'accepted')
+                         LIMIT 1"
+                    );
+                    $rmTargetStmt->execute([$userId, $authorId, $userId, $authorId]);
+                    if ($rmTargetStmt->fetchColumn() !== false) {
+                        return true;
+                    }
+                }
+
+                // Explicitly targeted post (e.g. birth or married only, or unapproved contact): ACCESS DENIED!
                 return false;
             }
 

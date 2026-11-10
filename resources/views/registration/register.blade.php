@@ -318,6 +318,7 @@
         @endif
 
         <form class="register" id="register" method="POST" enctype="multipart/form-data" autocomplete="off" novalidate x-data="familyCodeApprovalForm()">
+            @include('csrf')
             @if(!empty($registerPostData['claim_node']))
             <input type="hidden" name="claim_node" value="{{ (int)$registerPostData['claim_node'] }}">
             @endif
@@ -514,6 +515,8 @@
                 <button type="submit" name="submit" id="btnSubmit" data-ready="true" class="fpr-btn fpr-btn--primary" hidden>{{ __('reg.submit', 'Create my account') }} <span class="fpr-ic" aria-hidden="true"><i class="fas fa-check"></i></span></button>
             </div>
             <input type="hidden" name="token" id="token" value="{{ $csrfValue }}">
+            <input type="hidden" name="_token" id="_token" value="{{ $csrfValue }}">
+            <input type="hidden" name="csrf_token" id="csrf_token" value="{{ $csrfValue }}">
         </form>
 
         <p class="fpr-foot">{{ __('reg.have_account', 'Already have an account?') }} <a href="/login">{{ __('reg.log_in', 'Log in') }}</a></p>

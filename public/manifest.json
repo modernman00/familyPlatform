@@ -98,7 +98,7 @@
     {
       "name": "Family Tree",
       "short_name": "Tree",
-      "description": "Explore and edit the family organogram",
+      "description": "Explore and edit the family tree",
       "url": "/organogram",
       "icons": [
         {

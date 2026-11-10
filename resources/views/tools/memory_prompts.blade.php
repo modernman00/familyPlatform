@@ -132,7 +132,7 @@
               </div>
               <h3 class="fw-bold mb-2 text-white" style="color: #ffffff !important;">Preserve These Recordings in Your Private Living Heritage Tree</h3>
               <p class="mb-0" style="color: rgba(255, 255, 255, 0.9) !important; line-height: 1.6;">
-                Don't leave recorded voice notes buried in chat apps where they expire. FamilyPlatform attaches your audio capsules directly to your ancestor nodes on an encrypted 7-generation dynasty organogram.
+                Don't leave recorded voice notes buried in chat apps where they expire. FamilyPlatform attaches your audio capsules directly to your ancestor nodes on an encrypted 7-generation dynasty family tree.
               </p>
             </div>
             <div class="col-lg-4 text-lg-end">
@@ -476,7 +476,7 @@
         {
           "@type": "HowToStep",
           "name": "Archive to Your Living Heritage Tree",
-          "text": "Save the audio recordings permanently to the elder's node on your private FamilyPlatform organogram."
+          "text": "Save the audio recordings permanently to the elder's node on your private FamilyPlatform family tree."
         }
       ]
     }

@@ -48,14 +48,14 @@
                                         <i class="bi bi-people-fill text-primary" id="composerAudienceIcon"></i>
                                         <span id="composerAudienceLabel">All (Birth &amp; Married)</span>
                                     </button>
-                                    <ul class="dropdown-menu shadow-sm rounded-3 py-2 border-0" aria-labelledby="composerAudienceBtn" style="min-width: 290px; font-size: 0.85rem;">
+                                    <ul class="dropdown-menu shadow-sm rounded-3 py-2 border-0" aria-labelledby="composerAudienceBtn" style="min-width: 320px; font-size: 0.85rem;">
                                         <li><h6 class="dropdown-header text-uppercase text-muted fw-bold" style="font-size: 0.68rem; letter-spacing: 0.5px;">Who should see this post?</h6></li>
                                         <li>
-                                            <button type="button" class="dropdown-item d-flex align-items-start gap-2 py-2 active" data-scope="all" onclick="selectPostAudience('all', 'All (Birth &amp; Married)', 'bi-people-fill text-primary', '')">
+                                            <button type="button" class="dropdown-item d-flex align-items-start gap-2 py-2 active" data-scope="all" onclick="selectPostAudience('all', 'All (Family &amp; Connected Kin)', 'bi-people-fill text-primary', '')">
                                                 <i class="bi bi-people-fill text-primary fs-5 mt-0.5"></i>
                                                 <div>
-                                                    <div class="fw-semibold">All Family Circles</div>
-                                                    <small class="text-muted d-block text-wrap">Broadcast to all birth &amp; married members ({{ implode(', ', array_map(fn($c) => '#' . $c, $allCodes)) }})</small>
+                                                    <div class="fw-semibold">All Family Circles &amp; Connected Kin</div>
+                                                    <small class="text-muted d-block text-wrap">Broadcast to all birth &amp; married members ({{ implode(', ', array_map(fn($c) => '#' . $c, $allCodes)) }}) and approved Connected Kin</small>
                                                 </div>
                                             </button>
                                         </li>
@@ -64,8 +64,8 @@
                                             <button type="button" class="dropdown-item d-flex align-items-start gap-2 py-2" data-scope="birth" onclick="selectPostAudience('birth', 'Birth Family Only', 'bi-heart-pulse-fill text-danger', '{{ $birthCodes[0] ?? '' }}')">
                                                 <i class="bi bi-heart-pulse-fill text-danger fs-5 mt-0.5"></i>
                                                 <div>
-                                                    <div class="fw-semibold">Birth / Maiden Family</div>
-                                                    <small class="text-muted d-block text-wrap">Visible only to your birth family ({{ implode(', ', array_map(fn($c) => '#' . $c, $birthCodes)) }})</small>
+                                                    <div class="fw-semibold">Birth / Maiden Family Only</div>
+                                                    <small class="text-muted d-block text-wrap">Visible only to your birth family ({{ implode(', ', array_map(fn($c) => '#' . $c, $birthCodes)) }}). Connected kin excluded.</small>
                                                 </div>
                                             </button>
                                         </li>
@@ -75,8 +75,8 @@
                                             <button type="button" class="dropdown-item d-flex align-items-start gap-2 py-2" data-scope="married" onclick="selectPostAudience('married', 'Married Family Only', 'bi-house-heart-fill text-success', '{{ $marriedCodes[0] ?? '' }}')">
                                                 <i class="bi bi-house-heart-fill text-success fs-5 mt-0.5"></i>
                                                 <div>
-                                                    <div class="fw-semibold">Married / Household Family</div>
-                                                    <small class="text-muted d-block text-wrap">Visible only to your married household ({{ implode(', ', array_map(fn($c) => '#' . $c, $marriedCodes)) }})</small>
+                                                    <div class="fw-semibold">Married / Household Family Only</div>
+                                                    <small class="text-muted d-block text-wrap">Visible only to your married household ({{ implode(', ', array_map(fn($c) => '#' . $c, $marriedCodes)) }}). Connected kin excluded.</small>
                                                 </div>
                                             </button>
                                         </li>
@@ -100,7 +100,7 @@
 
                     <p id="formPostMessageModal_notification"></p>
 
-                    <input type="hidden" name="token" value="{{ $token }}">
+                    @include('csrf')
                     <input type="hidden" name="post_no" id="editPostNo" value="">
                     <input type="hidden" name="target_scope" id="composerTargetScope" value="{{ $defaultScope }}">
                     <input type="hidden" name="target_fam_code" id="composerTargetFamCode" value="" disabled>
@@ -125,6 +125,15 @@
                         <textarea class="d-none" data-emoji-target
                             placeholder="{{ __('feed.share_prompt', 'Share a moment with your family...') }}" name="postMessage" id="postMessage"
                             rows="2"></textarea>
+
+                        <!-- Inline @mention Autocomplete Dropdown for Post Composer -->
+                        <div id="composerMentionDropdown" class="mention-autocomplete shadow-lg d-none" role="listbox" aria-label="Mention a family member" style="position: absolute; top: 100%; left: 0; right: 0; max-width: 360px; z-index: 1060; margin-top: 4px;">
+                            <div class="mention-autocomplete__header d-flex align-items-center justify-content-between px-2 py-1 text-muted">
+                                <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Mention a family member</span>
+                                <span style="font-size: 0.7rem;">&uarr;&darr; to navigate &bull; Enter to select</span>
+                            </div>
+                            <div class="mention-autocomplete__list" id="composerMentionList"></div>
+                        </div>
                     </div>
 
                     <!-- 3D Futuristic & Translucent Text Stage Studio Strip -->
@@ -872,6 +881,7 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
     let lastFetchedUrl = null;
 
     const textarea = document.getElementById('postMessage');
+    const editor = document.getElementById('postMessageEditor');
     const container = document.getElementById('composerLinkPreviewContainer');
     const closeBtn = document.getElementById('closeComposerLinkPreview');
     const imgEl = document.getElementById('composerLinkPreviewImg');
@@ -890,62 +900,79 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
         });
     }
 
-    if (textarea) {
-        textarea.addEventListener('input', function() {
-            const val = textarea.value;
-            const urlMatch = val.match(/(https?:\/\/[^\s<>"']+)/i);
-            if (!urlMatch || !urlMatch[1]) {
-                if (container) container.classList.add('d-none');
-                lastFetchedUrl = null;
-                return;
-            }
+    function checkAndUnfurlLink() {
+        const val = (editor ? editor.innerText : '') || (textarea ? textarea.value : '');
+        const urlMatch = val.match(/(https?:\/\/[^\s<>"']+)/i);
+        if (!urlMatch || !urlMatch[1]) {
+            if (container) container.classList.add('d-none');
+            lastFetchedUrl = null;
+            return;
+        }
 
-            const url = urlMatch[1].replace(/:[a-z0-9_]+_3d:.*$/i, '').replace(/[.,;:!?)]+$/, '');
-            if (!url || url === dismissedUrl || url === lastFetchedUrl) {
-                return;
-            }
+        const url = urlMatch[1].replace(/:[a-z0-9_]+_3d:.*$/i, '').replace(/[.,;:!?)]+$/, '');
+        if (!url || url === dismissedUrl || url === lastFetchedUrl) {
+            return;
+        }
 
-            if (previewDebounceTimer) clearTimeout(previewDebounceTimer);
-            previewDebounceTimer = setTimeout(async function() {
-                try {
-                    const response = await fetch('/api/link-preview?url=' + encodeURIComponent(url), {
-                        headers: { 'Accept': 'application/json' }
-                    });
-                    if (!response.ok) return;
-                    const res = await response.json();
-                    if (res?.status === 'success' && res?.data && (res.data.title || res.data.image)) {
-                        const d = res.data;
-                        lastFetchedUrl = url;
-                        if (d.is_photo_link || d.is_google_photo) {
-                            if (titleEl) titleEl.textContent = 'Linked Photo (Zero Storage)';
-                            if (descEl) descEl.textContent = 'This photo will appear natively on the family feed with zero storage used. The link will be automatically hidden from the caption.';
-                            if (urlEl) urlEl.textContent = d.original_url || d.url || url;
-                            if (domainBadge) domainBadge.textContent = d.is_google_photo ? 'Google Photos' : 'Linked Photo';
-                            if (siteNameEl) siteNameEl.textContent = d.site_name || 'Google Photos';
-                            if (ctaEl) ctaEl.textContent = 'Native Photo Card';
-                        } else {
-                            if (titleEl) titleEl.textContent = d.title || '';
-                            if (descEl) descEl.textContent = d.description || '';
-                            if (urlEl) urlEl.textContent = d.url || url;
-                            if (domainBadge) domainBadge.textContent = d.is_party_event ? 'PartyPlatform' : (d.domain || 'Link');
-                            if (siteNameEl) siteNameEl.textContent = d.site_name || d.domain || '';
-                            if (ctaEl) ctaEl.textContent = d.cta_label || 'View Event / RSVP →';
-                        }
-                        if (imgEl && imgWrapper) {
-                            if (d.image) {
-                                imgEl.src = d.image;
-                                imgWrapper.classList.remove('d-none');
-                            } else {
-                                imgWrapper.classList.add('d-none');
-                            }
-                        }
-                        if (container) container.classList.remove('d-none');
+        if (previewDebounceTimer) clearTimeout(previewDebounceTimer);
+        previewDebounceTimer = setTimeout(async function() {
+            try {
+                const response = await fetch('/api/link-preview?url=' + encodeURIComponent(url), {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!response.ok) return;
+                const res = await response.json();
+                if (res?.status === 'success' && res?.data && (res.data.title || res.data.image || res.data.domain)) {
+                    const d = res.data;
+                    lastFetchedUrl = url;
+                    if (d.is_photo_link || d.is_google_photo) {
+                        if (titleEl) titleEl.textContent = 'Linked Photo (Zero Storage)';
+                        if (descEl) descEl.textContent = 'This photo will appear natively on the family feed with zero storage used. The link will be automatically hidden from the caption.';
+                        if (urlEl) urlEl.textContent = d.original_url || d.url || url;
+                        if (domainBadge) domainBadge.textContent = d.is_google_photo ? 'Google Photos' : 'Linked Photo';
+                        if (siteNameEl) siteNameEl.textContent = d.site_name || 'Google Photos';
+                        if (ctaEl) ctaEl.textContent = 'Native Photo Card';
+                    } else {
+                        if (titleEl) titleEl.textContent = d.title || d.domain || '';
+                        if (descEl) descEl.textContent = d.description || '';
+                        if (urlEl) urlEl.textContent = d.url || url;
+                        if (domainBadge) domainBadge.textContent = d.is_party_event ? 'PartyPlatform' : (d.domain || 'Link');
+                        if (siteNameEl) siteNameEl.textContent = d.site_name || d.domain || '';
+                        if (ctaEl) ctaEl.textContent = d.cta_label || 'View Event / RSVP →';
                     }
-                } catch (_) {
-                    // Fail silently
+                    if (imgEl && imgWrapper) {
+                        if (d.image) {
+                            imgEl.src = d.image;
+                            imgWrapper.classList.remove('d-none');
+                        } else {
+                            imgWrapper.classList.add('d-none');
+                        }
+                    }
+                    if (container) {
+                        const currentStyle = document.getElementById('composerPostStyleInput')?.value || '';
+                        if (currentStyle) {
+                            container.classList.add('fp-text-stage__composer-preview');
+                        } else {
+                            container.classList.remove('fp-text-stage__composer-preview');
+                        }
+                        container.classList.remove('d-none');
+                    }
                 }
-            }, 400);
-        });
+            } catch (_) {
+                // Fail silently
+            }
+        }, 350);
+    }
+
+    window.__unfurlComposerLinkPreview = checkAndUnfurlLink;
+
+    if (textarea) {
+        textarea.addEventListener('input', checkAndUnfurlLink);
+    }
+    if (editor) {
+        editor.addEventListener('input', checkAndUnfurlLink);
+        editor.addEventListener('keyup', checkAndUnfurlLink);
+        editor.addEventListener('paste', () => setTimeout(checkAndUnfurlLink, 50));
     }
 })();
 
@@ -1706,6 +1733,7 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
 
         if (!wrapper || !editor) return;
 
+        const previewContainer = document.getElementById('composerLinkPreviewContainer');
         wrapper.classList.remove('fp-text-stage', 'fp-text-stage--composer', ...ALL_CLASSES);
         if (cleanSlug) {
             wrapper.classList.add('fp-text-stage', 'fp-text-stage--composer', 'fp-text-stage--' + cleanSlug);
@@ -1717,12 +1745,18 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
                 badgeText.textContent = STAGE_META[cleanSlug].badge;
                 badgeWrap.classList.remove('d-none');
             }
+            if (previewContainer) {
+                previewContainer.classList.add('fp-text-stage__composer-preview');
+            }
         } else {
             editor.style.color = 'var(--text-main, #0f172a)';
             editor.style.fontWeight = '';
             editor.style.fontSize = '1.05rem';
             editor.style.textAlign = '';
             if (badgeWrap) badgeWrap.classList.add('d-none');
+            if (previewContainer) {
+                previewContainer.classList.remove('fp-text-stage__composer-preview');
+            }
         }
     };
 
@@ -1730,6 +1764,10 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
         window.__setComposerTextStage('');
         const suggestBtn = document.getElementById('composerSmartStageSuggestBtn');
         if (suggestBtn) suggestBtn.classList.add('d-none');
+        const previewContainer = document.getElementById('composerLinkPreviewContainer');
+        if (previewContainer) {
+            previewContainer.classList.remove('fp-text-stage__composer-preview');
+        }
     };
 
     const textarea = document.getElementById('postMessage');
@@ -1858,5 +1896,58 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
 }
 .fp-text-stage--composer #postMessageEditor:empty::before {
     color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Glassmorphic 3D Composer Link Preview Elevation */
+.fp-text-stage__composer-preview {
+    background: rgba(15, 23, 42, 0.9) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.22) !important;
+    backdrop-filter: blur(16px) !important;
+    box-shadow: 0 12px 30px -6px rgba(0, 0, 0, 0.45) !important;
+}
+.fp-text-stage__composer-preview #composerLinkPreviewTitle {
+    color: #ffffff !important;
+}
+.fp-text-stage__composer-preview #composerLinkPreviewDesc {
+    color: #cbd5e1 !important;
+}
+.fp-text-stage__composer-preview #composerLinkPreviewSiteName {
+    color: #94a3b8 !important;
+}
+.fp-text-stage__composer-preview #composerLinkPreviewUrl {
+    color: #94a3b8 !important;
+}
+
+/* Audience Selector Dropdown: Inviolable Red Surface Rule Compliance */
+#composerAudienceDropdown .dropdown-menu {
+    border: 1px solid var(--border-color, #e2e8f0) !important;
+    padding: 6px !important;
+    border-radius: 14px !important;
+}
+#composerAudienceDropdown .dropdown-item {
+    border-radius: 10px !important;
+    padding: 8px 12px !important;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+#composerAudienceDropdown .dropdown-item.active,
+#composerAudienceDropdown .dropdown-item.active:hover,
+#composerAudienceDropdown .dropdown-item.active:focus {
+    background-color: var(--brand-primary, #a31621) !important;
+    border-color: var(--brand-primary, #a31621) !important;
+    color: #ffffff !important;
+}
+#composerAudienceDropdown .dropdown-item.active *,
+#composerAudienceDropdown .dropdown-item.active .fw-semibold,
+#composerAudienceDropdown .dropdown-item.active div {
+    color: #ffffff !important;
+}
+#composerAudienceDropdown .dropdown-item.active small,
+#composerAudienceDropdown .dropdown-item.active .text-muted {
+    color: #fff7ed !important; /* Crisp warm champagne with 8.6:1 WCAG AAA contrast, zero grey on red */
+    opacity: 0.95 !important;
+}
+#composerAudienceDropdown .dropdown-item.active i,
+#composerAudienceDropdown .dropdown-item.active .bi {
+    color: #ffd700 !important; /* Luminous gold on red */
 }
 </style>

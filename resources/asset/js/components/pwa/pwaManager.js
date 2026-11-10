@@ -633,7 +633,7 @@ class PWAManager {
 
       if (!isNaN(count) && count > 0) {
         if (mobileBadge) {
-          mobileBadge.textContent = count > 99 ? '99+' : count;
+          mobileBadge.textContent = count > 9 ? '9+' : count;
           mobileBadge.style.display = 'inline-flex';
         }
         PWAManager.setBadge(count);

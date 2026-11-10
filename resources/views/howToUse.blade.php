@@ -25,7 +25,7 @@
             </div>
             <h2 id="geo-quick-answers-heading" class="fw-bold fs-3 text-dark mb-3">How do you preserve family memories and build a living family tree privately?</h2>
             <p class="lead text-secondary mb-4" style="line-height: 1.7;">
-              <strong>To preserve family memories privately without third-party tracking, create an isolated family sanctuary on FamilyPlatform, invite relatives using a private Family Code, and build a living 7-generation organogram with encrypted voice capsules, oral history prompts, and collaborative milestone archives.</strong>
+              <strong>To preserve family memories privately without third-party tracking, create an isolated family sanctuary on FamilyPlatform, invite relatives using a private Family Code, and build a living 7-generation family tree with encrypted voice capsules, oral history prompts, and collaborative milestone archives.</strong>
             </p>
             <div class="row g-3">
               <div class="col-md-4">
@@ -37,7 +37,7 @@
               <div class="col-md-4">
                 <div class="p-3 rounded-3 bg-light border h-100">
                   <div class="fw-bold text-dark mb-1">2. 7-Generation Dynasty Tree</div>
-                  <p class="small text-muted mb-0">Ego-centric organogram connecting ancestors (-7) and descendants (+7) with zero node overlapping.</p>
+                  <p class="small text-muted mb-0">Ego-centric family tree connecting ancestors (-7) and descendants (+7) with zero node overlapping.</p>
                 </div>
               </div>
               <div class="col-md-4">
@@ -64,7 +64,7 @@
             </div>
 
             <p class="lead text-secondary">
-              FamilyPlatform provides a panoramic, ego-centric organogram canvas rendering up to 7 generations upwards (-1 to -7) and downwards (+1 to +7) with complete collateral and spouse integration.
+              FamilyPlatform provides a panoramic, ego-centric family tree canvas rendering up to 7 generations upwards (-1 to -7) and downwards (+1 to +7) with complete collateral and spouse integration.
             </p>
 
             <div class="row g-4 mt-2">
@@ -291,7 +291,7 @@
               </div>
             </div>
             <p class="lead text-secondary">
-              When joining an existing family network or merging branches, your historical family tree is never lost. The system preserves access to your origin lineage and seamlessly grafts your ancestors, partners, and children into your new family organogram.
+              When joining an existing family network or merging branches, your historical family tree is never lost. The system preserves access to your origin lineage and seamlessly grafts your ancestors, partners, and children into your new family tree.
             </p>
             <div class="row g-3">
               <div class="col-md-4">
@@ -310,9 +310,9 @@
               </div>
               <div class="col-md-4">
                 <div class="p-3 border rounded-3 bg-light h-100">
-                  <span class="badge bg-success mb-2">Step 3 &middot; Multi-Lineage Organogram</span>
+                  <span class="badge bg-success mb-2">Step 3 &middot; Multi-Lineage Family Tree</span>
                   <h6 class="fw-bold text-dark">Switch Lineages Freely</h6>
-                  <p class="small text-muted mb-0">Your origin family code remains approved in your account. You can switch between your primary family tree and origin branches anytime using the Organogram header dropdown.</p>
+                  <p class="small text-muted mb-0">Your origin family code remains approved in your account. You can switch between your primary family tree and origin branches anytime using the Family tree header dropdown.</p>
                 </div>
               </div>
             </div>
@@ -342,7 +342,7 @@
                 <span class="fw-bold text-dark">1-Tap WhatsApp Collaboration</span>
               </div>
               <p class="small text-muted mb-0">
-                Click <strong>"Quests"</strong> on your organogram canvas to view active missions. Tap <strong>"Ask on WhatsApp"</strong> to instantly message Uncle Tunde or Auntie Funke with an opaque, 256-bit signed claim link that pre-fills their details in 10 seconds.
+                Click <strong>"Quests"</strong> on your family tree canvas to view active missions. Tap <strong>"Ask on WhatsApp"</strong> to instantly message Uncle Tunde or Auntie Funke with an opaque, 256-bit signed claim link that pre-fills their details in 10 seconds.
               </p>
             </div>
           </div>
@@ -396,7 +396,7 @@
 
             <div class="p-3 rounded-3 bg-light border">
               <p class="small text-muted mb-0">
-                Click <strong>"WhatsApp Flyer"</strong> on the organogram to preview your clan crest. Use <strong>"Share to WhatsApp"</strong> on mobile to pass the image directly into family group chats via the native Web Share API.
+                Click <strong>"WhatsApp Flyer"</strong> on the family tree to preview your clan crest. Use <strong>"Share to WhatsApp"</strong> on mobile to pass the image directly into family group chats via the native Web Share API.
               </p>
             </div>
           </div>
@@ -804,7 +804,7 @@
                 <div class="p-3 border rounded-3 bg-light h-100">
                   <span class="badge text-white mb-2" style="background: #a31621;">Smart Action Triggers</span>
                   <h6 class="fw-bold text-dark">Interactive Dynasty Tree CTA</h6>
-                  <p class="small text-muted mb-0">Posts inviting relatives to grow the family tree or add their branch automatically embed a glowing <strong>Add Your Branch to Family Tree</strong> button linking directly to the organogram.</p>
+                  <p class="small text-muted mb-0">Posts inviting relatives to grow the family tree or add their branch automatically embed a glowing <strong>Add Your Branch to Family Tree</strong> button linking directly to the family tree.</p>
                 </div>
               </div>
             </div>
@@ -861,7 +861,7 @@
           </div>
         </div>
 
-        <!-- Back to Organogram CTA -->
+        <!-- Back to Family Tree CTA -->
         <div class="text-center mt-5">
           <a href="/organogram" class="btn btn-lg fw-bold px-5 py-3 text-white shadow-sm" style="background: linear-gradient(135deg, #a31621 0%, #7a0e16 100%); border-radius: 50px;">
             <i class="bi bi-diagram-3-fill me-2"></i>Explore Your Family Tree
@@ -881,7 +881,7 @@
     {
       "@type": "HowTo",
       "name": "How to Build a Private Family Tree and Chronicle Oral Memories",
-      "description": "Step-by-step instructions for creating a secure, 7-generation living family organogram and preserving sensory audio memories across generations.",
+      "description": "Step-by-step instructions for creating a secure, 7-generation living family tree and preserving sensory audio memories across generations.",
       "totalTime": "PT10M",
       "step": [
         {
@@ -892,7 +892,7 @@
         },
         {
           "@type": "HowToStep",
-          "name": "Build the 7-Generation Organogram",
+          "name": "Build the 7-Generation Family Tree",
           "text": "Navigate up to 7 generations of ancestors (-1 to -7) and descendants (+1 to +7) on an ego-centric canvas with automatic collateral matching.",
           "url": "https://myfamilyplatform.com/how-to-use#tree"
         },
@@ -918,7 +918,7 @@
           "name": "What is the 7-Generation Dynasty Tree in FamilyPlatform?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "The 7-Generation Dynasty Tree is an interactive, ego-centric organogram that displays 7 generations upwards (parents to 5th great-grandparents) and 7 generations downwards (children to 5th great-grandchildren) with automatic kinship calculation and collateral branch mapping."
+            "text": "The 7-Generation Dynasty Tree is an interactive, ego-centric family tree that displays 7 generations upwards (parents to 5th great-grandparents) and 7 generations downwards (children to 5th great-grandchildren) with automatic kinship calculation and collateral branch mapping."
           }
         },
         {

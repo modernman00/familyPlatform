@@ -427,7 +427,7 @@
                   </div>
                 </div>
 
-                <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
+                @include('csrf')
                 <span id="fName" class="d-none">{{ $_SESSION['fullName'] ?? '' }}</span>
                 
                 <button type="button" id="profileBtn" class="btn-save">Save Profile Details</button>
@@ -492,7 +492,7 @@
 
               <form id="parentsForm">
                 <input type="hidden" name="action" value="updateParents">
-                <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
+                @include('csrf')
                 {{-- lineage_scope & lineage_code are updated by the radio buttons above (JS) --}}
                 <input type="hidden" name="lineage_scope" id="parentsLineageScope" value="{{ $hasMaternalCode ? 'maternal' : 'primary' }}">
                 <input type="hidden" name="lineage_code" id="parentsLineageCode" value="{{ $accountData['otherFamCode'] ?? '' }}">
@@ -586,7 +586,7 @@
 
               <form id="childrenForm">
                 <input type="hidden" name="action" value="updateChildren">
-                <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
+                @include('csrf')
 
                 <div class="mb-4">
                   <label for="children" class="form-label fw-bold">Select Number of Children</label>
@@ -647,7 +647,7 @@
 
               <form id="siblingsForm">
                 <input type="hidden" name="action" value="updateSiblings">
-                <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
+                @include('csrf')
                 <input type="hidden" name="lineage_scope" id="siblingsLineageScope" value="{{ $hasMaternalCode ? 'maternal' : 'primary' }}">
                 <input type="hidden" name="lineage_code" id="siblingsLineageCode" value="{{ $accountData['otherFamCode'] ?? '' }}">
 
@@ -682,7 +682,7 @@
 
               <form id="maritalForm">
                 <input type="hidden" name="action" value="updateMarital">
-                <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
+                @include('csrf')
 
                 <div class="mb-4">
                   <label for="maritalStatus" class="form-label fw-bold">Marital Status</label>
@@ -746,7 +746,7 @@
 
               <form id="passwordForm">
                 <input type="hidden" name="action" value="updatePassword">
-                <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
+                @include('csrf')
 
                 <div class="mb-4">
                   <label class="form-label">Current Password</label>
@@ -784,7 +784,7 @@
 
               <form id="preferencesForm">
                 <input type="hidden" name="action" value="updatePreferences">
-                <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
+                @include('csrf')
 
                 <div class="custom-switch">
                   <div class="switch-info">
@@ -906,7 +906,7 @@
 
               <form id="privacyForm">
                 <input type="hidden" name="action" value="updatePrivacy">
-                <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
+                @include('csrf')
 
                 <div class="custom-switch">
                   <div class="switch-info">

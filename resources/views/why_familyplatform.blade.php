@@ -483,7 +483,7 @@
           <ul class="compare-list">
             <li class="compare-item good">
               <i class="fas fa-check-circle"></i>
-              <div><strong>Interactive Living Organogram:</strong> Complete genealogical mapping—every photo, video, and story connects to ancestral roots.</div>
+              <div><strong>Interactive Living Family Tree:</strong> Complete genealogical mapping—every photo, video, and story connects to ancestral roots.</div>
             </li>
             <li class="compare-item good">
               <i class="fas fa-check-circle"></i>
@@ -531,7 +531,7 @@
             <tr>
               <td><strong>Family Tree / Kinship</strong></td>
               <td class="text-muted"><i class="fas fa-times text-danger me-2"></i>None (Flat, chaotic phone number roster)</td>
-              <td class="fw-semibold text-dark"><i class="fas fa-check text-success me-2"></i>Interactive Organogram &amp; Kinship Calculator</td>
+              <td class="fw-semibold text-dark"><i class="fas fa-check text-success me-2"></i>Interactive Family Tree &amp; Kinship Calculator</td>
             </tr>
             <tr>
               <td><strong>Event Planning</strong></td>

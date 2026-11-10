@@ -74,7 +74,7 @@ $router->map('GET', '/llms.txt', function() {
         readfile($llmsFile);
     } else {
         http_response_code(404);
-        echo "# FamilyPlatform\n> The private family social network and living heritage organogram.\n";
+        echo "# FamilyPlatform\n> The private family social network and living heritage family tree.\n";
     }
 });
 

@@ -28,8 +28,8 @@
       <h3><span style="color: var(--brand-primary);">01.</span> Family Profiles</h3>
       <p>Each family member creates their own detailed profile, providing information such as date of birth, contact details, and their exact relationship to the family tree. Profiles serve as a living directory for your entire extended family.</p>
 
-      <h3><span style="color: var(--brand-primary);">02.</span> Dynamic Family Tree (Organogram)</h3>
-      <p>Visualize and explore your family connections with our interactive organogram. See exactly how generations link together, making it easy for younger members to understand their heritage.</p>
+      <h3><span style="color: var(--brand-primary);">02.</span> Dynamic Family Tree</h3>
+      <p>Visualize and explore your family connections with our interactive family tree. See exactly how generations link together, making it easy for younger members to understand their heritage.</p>
 
       <h3><span style="color: var(--brand-primary);">03.</span> Private News Feed</h3>
       <p>A central hub free from algorithms and strangers. Share life updates, photos, and milestones securely. It ensures everyone stays informed about the moments that matter without broadcasting them to the public internet.</p>

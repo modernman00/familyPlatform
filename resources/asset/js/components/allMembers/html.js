@@ -126,7 +126,7 @@ export const renderHtml = (el) => {
                     <i class="bi bi-person-badge-fill" style="pointer-events: none;"></i> View Profile
                 </button>
                 <div class="d-flex gap-2">
-                    <button class="btn-stitch-tonal flex-grow-1 text-white-50" disabled style="opacity: 0.75; cursor: not-allowed;" title="Family tree is private: Only viewable by relatives sharing family code #${famCode}">
+                    <button class="btn-stitch-tonal flex-grow-1" disabled style="opacity: 0.85; cursor: not-allowed; color: var(--stitch-text-secondary, #64748b);" title="Family tree is private: Only viewable by relatives sharing family code #${famCode}. Connected Kin can chat and view general posts.">
                         <i class="bi bi-shield-lock-fill text-warning" style="pointer-events: none;"></i> Tree (#${famCode} Only)
                     </button>
                     <button class="btn-stitch-danger flex-grow-1" id="removeProfile${idSafe}" title="Remove Connection">

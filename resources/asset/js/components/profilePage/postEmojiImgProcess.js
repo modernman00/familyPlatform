@@ -1921,22 +1921,32 @@ const renderSuggestions = (members) => {
     });
 };
 
+let cachedFamilyMembers = [];
+
 const fetchSuggestions = async (query = '') => {
-    if (!tagSuggestionsList) return;
     try {
         const res = await axios.get('/api/members/tag-suggestions', {
             params: { q: query.trim() }
         });
         const members = res?.data?.message?.members || res?.data?.data?.members || res?.data?.members || [];
+        if (Array.isArray(members) && members.length > 0) {
+            const memberMap = new Map(cachedFamilyMembers.map(m => [String(m.id), m]));
+            members.forEach(m => memberMap.set(String(m.id), m));
+            cachedFamilyMembers = Array.from(memberMap.values());
+        }
         renderSuggestions(members);
+        return members;
     } catch (err) {
         console.error('[TagPeople] Failed to fetch tag suggestions:', err);
-        tagSuggestionsList.innerHTML = `
-            <div class="text-center py-2 text-danger small">
-                Failed to load family members. Tap to retry.
-            </div>
-        `;
-        tagSuggestionsList.firstElementChild?.addEventListener('click', () => fetchSuggestions(query));
+        if (tagSuggestionsList) {
+            tagSuggestionsList.innerHTML = `
+                <div class="text-center py-2 text-danger small">
+                    Failed to load family members. Tap to retry.
+                </div>
+            `;
+            tagSuggestionsList.firstElementChild?.addEventListener('click', () => fetchSuggestions(query));
+        }
+        return [];
     }
 };
 
@@ -1950,8 +1960,319 @@ const resetTagBuilder = () => {
     selectedTags.clear();
     renderSelectedTags();
     closeTagBuilder();
+    closeComposerMentionDropdown();
     if (tagSearchInput) tagSearchInput.value = '';
 };
+
+// ── Inline @Mention Autocomplete for Composer ─────────────────────────────
+const composerEditor = document.getElementById('postMessageEditor');
+const composerMentionDropdown = document.getElementById('composerMentionDropdown');
+const composerMentionList = document.getElementById('composerMentionList');
+let composerMentionMatches = [];
+let composerMentionActiveIndex = 0;
+let composerMentionDebounceTimer = null;
+
+function getComposerTextBeforeCursor(editorEl) {
+    if (!editorEl) return '';
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount || !editorEl.contains(sel.anchorNode)) {
+        return editorEl.innerText || editorEl.textContent || '';
+    }
+    try {
+        const range = sel.getRangeAt(0);
+        const preCaretRange = range.cloneRange();
+        preCaretRange.selectNodeContents(editorEl);
+        preCaretRange.setEnd(range.endContainer, range.endOffset);
+        return preCaretRange.toString();
+    } catch (_) {
+        return editorEl.innerText || editorEl.textContent || '';
+    }
+}
+
+function closeComposerMentionDropdown() {
+    if (composerMentionDropdown) {
+        composerMentionDropdown.classList.add('d-none');
+    }
+    composerMentionMatches = [];
+    composerMentionActiveIndex = 0;
+}
+
+function updateComposerMentionActiveItem() {
+    if (!composerMentionList) return;
+    const items = composerMentionList.querySelectorAll('.mention-autocomplete__item');
+    items.forEach((item, idx) => {
+        const isActive = idx === composerMentionActiveIndex;
+        item.classList.toggle('mention-autocomplete__item--active', isActive);
+        item.style.background = isActive ? 'var(--hover-color, #f1f5f9)' : 'transparent';
+        item.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        if (isActive) {
+            item.scrollIntoView({ block: 'nearest' });
+        }
+    });
+}
+
+function renderComposerMentionDropdown() {
+    if (!composerMentionDropdown || !composerMentionList) return;
+    if (!composerMentionMatches.length) {
+        closeComposerMentionDropdown();
+        return;
+    }
+
+    composerMentionList.innerHTML = '';
+    composerMentionMatches.forEach((m, idx) => {
+        const isActive = idx === composerMentionActiveIndex;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `mention-autocomplete__item d-flex align-items-center gap-2 w-100 text-start px-2 py-1.5 border-0 ${isActive ? 'mention-autocomplete__item--active' : ''}`;
+        btn.style.cssText = 'background: transparent; border-radius: 8px; cursor: pointer; min-height: 40px;';
+        if (isActive) {
+            btn.style.background = 'var(--hover-color, #f1f5f9)';
+        }
+        btn.setAttribute('role', 'option');
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+
+        const safeFullName = (m.fullName || `${m.firstName} ${m.lastName}`).replace(/[&<>"']/g, (c) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+        }[c]));
+
+        const profImg = m.profileImg || '/resources/images/profile/avatarM.png';
+        btn.innerHTML = `
+            <img src="${profImg}" alt="" class="rounded-circle flex-shrink-0" width="28" height="28" style="object-fit: cover;">
+            <div class="flex-grow-1 min-w-0">
+                <span class="fw-semibold text-dark text-truncate d-block" style="font-size: 0.8125rem;">${safeFullName}</span>
+            </div>
+            <span class="badge rounded-pill bg-light text-muted border flex-shrink-0" style="font-size: 0.68rem;">
+                ${m.famCode ? '#' + m.famCode : 'Family'}
+            </span>
+        `;
+
+        btn.addEventListener('mouseenter', () => {
+            composerMentionActiveIndex = idx;
+            updateComposerMentionActiveItem();
+        });
+
+        btn.addEventListener('mousedown', (ev) => {
+            ev.preventDefault();
+        });
+
+        btn.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            selectComposerMention(m);
+        });
+
+        composerMentionList.appendChild(btn);
+    });
+
+    composerMentionDropdown.classList.remove('d-none');
+}
+
+function selectComposerMention(member) {
+    if (!member) return;
+
+    if (!selectedTags.has(member.id)) {
+        selectedTags.set(member.id, {
+            id: member.id,
+            fullName: member.fullName || `${member.firstName} ${member.lastName}`.trim(),
+            firstName: member.firstName,
+            lastName: member.lastName,
+            profileImg: member.profileImg || '/resources/images/profile/avatarM.png',
+            famCode: member.famCode || ''
+        });
+        renderSelectedTags();
+        updateSuggestionListSelectionState();
+    }
+
+    replaceComposerMentionText(member);
+    closeComposerMentionDropdown();
+}
+
+function replaceComposerMentionText(member) {
+    const fullName = member.fullName || `${member.firstName} ${member.lastName}`.trim();
+    if (!composerEditor) return;
+    composerEditor.focus();
+
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && composerEditor.contains(sel.anchorNode)) {
+        const range = sel.getRangeAt(0);
+        let node = sel.anchorNode;
+        if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.nodeValue || '';
+            const offset = sel.anchorOffset;
+            const before = text.slice(0, offset);
+            const after = text.slice(offset);
+            const atIndex = before.lastIndexOf('@');
+            if (atIndex !== -1) {
+                const prefix = before.slice(0, atIndex);
+                const insertText = `@${fullName} `;
+                node.nodeValue = prefix + insertText + after;
+
+                const newOffset = atIndex + insertText.length;
+                const newRange = document.createRange();
+                newRange.setStart(node, Math.min(newOffset, node.nodeValue.length));
+                newRange.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+                if (typeof window.syncEditorToTextarea === 'function') {
+                    window.syncEditorToTextarea();
+                }
+                return;
+            }
+        }
+    }
+
+    // Fallback: replace on full text string
+    const currentText = composerEditor.innerText || composerEditor.textContent || '';
+    const replaced = currentText.replace(/(?:^|\s)@([A-Za-z0-9_'\- ]*)$/, (m) => {
+        const p = m.startsWith(' ') ? ' ' : '';
+        return `${p}@${fullName} `;
+    });
+    composerEditor.innerText = replaced;
+    if (typeof window.syncEditorToTextarea === 'function') {
+        window.syncEditorToTextarea();
+    }
+}
+
+function filterAndShowComposerMentions(rawQuery) {
+    const query = (rawQuery || '').trim().toLowerCase();
+    const currentUserId = String(window.currentUserId || '');
+
+    const matches = (cachedFamilyMembers || []).filter(m => {
+        if (String(m.id) === currentUserId) return false;
+        const first = (m.firstName || '').trim().toLowerCase();
+        const last = (m.lastName || '').trim().toLowerCase();
+        const full = (m.fullName || `${first} ${last}`).trim().toLowerCase();
+        if (!first && !last) return false;
+        if (!query) return true;
+        return full.includes(query) || first.startsWith(query) || last.startsWith(query);
+    }).slice(0, 8);
+
+    composerMentionMatches = matches;
+    composerMentionActiveIndex = 0;
+
+    if (matches.length > 0) {
+        renderComposerMentionDropdown();
+    } else if (query.length > 0) {
+        if (composerMentionDebounceTimer) clearTimeout(composerMentionDebounceTimer);
+        composerMentionDebounceTimer = setTimeout(async () => {
+            const serverMembers = await fetchSuggestions(query);
+            const filtered = (serverMembers || []).filter(m => String(m.id) !== currentUserId).slice(0, 8);
+            composerMentionMatches = filtered;
+            composerMentionActiveIndex = 0;
+            if (filtered.length > 0) {
+                renderComposerMentionDropdown();
+            } else {
+                closeComposerMentionDropdown();
+            }
+        }, 150);
+    } else {
+        closeComposerMentionDropdown();
+    }
+}
+
+function handleComposerInput(ev) {
+    const target = ev.target;
+    const isEditor = target === composerEditor;
+    const isTextarea = target === postMessageArea;
+    if (!isEditor && !isTextarea) return;
+
+    const textBefore = isEditor
+        ? getComposerTextBeforeCursor(composerEditor)
+        : (target.value ? target.value.slice(0, target.selectionEnd ?? target.value.length) : '');
+
+    const match = textBefore.match(/(?:^|\s)@([A-Za-z0-9_'\- ]{0,40})$/);
+
+    if (match) {
+        if (addTagBtn) addTagBtn.classList.add('tag-active');
+
+        if (!cachedFamilyMembers.length) {
+            fetchSuggestions('').then(() => {
+                filterAndShowComposerMentions(match[1]);
+            });
+        } else {
+            filterAndShowComposerMentions(match[1]);
+        }
+    } else {
+        closeComposerMentionDropdown();
+    }
+}
+
+function handleComposerKeydown(ev) {
+    if (!composerMentionDropdown || composerMentionDropdown.classList.contains('d-none') || !composerMentionMatches.length) {
+        return;
+    }
+
+    if (ev.key === 'ArrowDown') {
+        ev.preventDefault();
+        composerMentionActiveIndex = (composerMentionActiveIndex + 1) % composerMentionMatches.length;
+        updateComposerMentionActiveItem();
+    } else if (ev.key === 'ArrowUp') {
+        ev.preventDefault();
+        composerMentionActiveIndex = (composerMentionActiveIndex - 1 + composerMentionMatches.length) % composerMentionMatches.length;
+        updateComposerMentionActiveItem();
+    } else if (ev.key === 'Enter' || ev.key === 'Tab') {
+        if (composerMentionMatches[composerMentionActiveIndex]) {
+            ev.preventDefault();
+            selectComposerMention(composerMentionMatches[composerMentionActiveIndex]);
+        }
+    } else if (ev.key === 'Escape') {
+        ev.preventDefault();
+        closeComposerMentionDropdown();
+    }
+}
+
+// Global auto-tag scan before submit
+window.autoTagMentionedUsersInText = function() {
+    const text = (document.getElementById('postMessage')?.value || composerEditor?.innerText || '').trim();
+    if (!text || !cachedFamilyMembers.length) return;
+    const mentionRegex = /(?:^|\s)@([A-Za-z0-9_'\- ]{2,50})/g;
+    let m;
+    while ((m = mentionRegex.exec(text)) !== null) {
+        const nameQuery = m[1].trim().toLowerCase();
+        const found = cachedFamilyMembers.find(member => {
+            const full = (member.fullName || `${member.firstName} ${member.lastName}`).trim().toLowerCase();
+            return full === nameQuery || (member.firstName && member.lastName && full.startsWith(nameQuery));
+        });
+        if (found && !selectedTags.has(found.id)) {
+            selectedTags.set(found.id, {
+                id: found.id,
+                fullName: found.fullName || `${found.firstName} ${found.lastName}`.trim(),
+                firstName: found.firstName,
+                lastName: found.lastName,
+                profileImg: found.profileImg || '/resources/images/profile/avatarM.png',
+                famCode: found.famCode || ''
+            });
+        }
+    }
+    renderSelectedTags();
+};
+
+if (composerEditor) {
+    composerEditor.addEventListener('input', handleComposerInput);
+    composerEditor.addEventListener('keyup', (ev) => {
+        if (ev.key === '@' || ev.key === 'Backspace' || ev.key.length === 1) {
+            handleComposerInput(ev);
+        }
+    });
+    composerEditor.addEventListener('keydown', handleComposerKeydown);
+}
+
+if (postMessageArea) {
+    postMessageArea.addEventListener('input', handleComposerInput);
+    postMessageArea.addEventListener('keyup', (ev) => {
+        if (ev.key === '@' || ev.key === 'Backspace' || ev.key.length === 1) {
+            handleComposerInput(ev);
+        }
+    });
+    postMessageArea.addEventListener('keydown', handleComposerKeydown);
+}
+
+document.addEventListener('click', (ev) => {
+    if (composerMentionDropdown && !composerMentionDropdown.classList.contains('d-none')) {
+        if (!composerMentionDropdown.contains(ev.target) && ev.target !== composerEditor) {
+            closeComposerMentionDropdown();
+        }
+    }
+});
 
 if (addTagBtn && tagContainer) {
     addTagBtn.addEventListener('click', (e) => {
@@ -1987,22 +2308,6 @@ if (addTagBtn && tagContainer) {
             searchDebounceTimer = setTimeout(() => {
                 fetchSuggestions(val);
             }, 150);
-        });
-    }
-
-    if (postMessageArea) {
-        postMessageArea.addEventListener('keyup', (e) => {
-            if (e.key === '@') {
-                if (tagContainer.classList.contains('d-none')) {
-                    tagContainer.classList.remove('d-none');
-                    addTagBtn.classList.add('tag-active');
-                    scrollDrawerIntoView(tagContainer);
-                    fetchSuggestions('');
-                }
-                if (tagSearchInput) {
-                    setTimeout(() => tagSearchInput.focus(), 60);
-                }
-            }
         });
     }
 }

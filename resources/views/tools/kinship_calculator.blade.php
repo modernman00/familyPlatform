@@ -154,7 +154,7 @@
               </div>
               <h3 class="fw-bold mb-2 text-white" style="color: #ffffff !important;">Build Your Complete Dynasty Tree on FamilyPlatform</h3>
               <p class="mb-0" style="color: rgba(255, 255, 255, 0.9) !important; line-height: 1.6;">
-                Don't calculate relationships by hand. FamilyPlatform automatically calculates ego-centric kinship titles for every single relative in your living 7-generation organogram with zero node overlaps.
+                Don't calculate relationships by hand. FamilyPlatform automatically calculates ego-centric kinship titles for every single relative in your living 7-generation family tree with zero node overlaps.
               </p>
             </div>
             <div class="col-lg-4 text-lg-end">

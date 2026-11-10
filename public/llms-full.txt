@@ -1,20 +1,20 @@
 # FamilyPlatform — Complete Knowledge Base & System Specification
 
-> The private, zero-tracking family social network, digital sanctuary, and living heritage organogram.
+> The private, zero-tracking family social network, digital sanctuary, and living heritage family tree.
 
 ## 1. System Overview & Mission
 FamilyPlatform was engineered from the ground up to solve the privacy, fragmentation, and preservation crises facing modern families. Public social media networks (Facebook, Instagram, TikTok) treat family milestones as engagement commodities, scraping children's photographs to train commercial algorithms and targeting families with predatory advertising. Meanwhile, unstructured chat apps (WhatsApp, Telegram) suffer from digital noise, lost memories, media expiration, and zero multi-generational structure.
 
 FamilyPlatform provides:
 - A closed, invitation-only digital haven for relatives.
-- An interactive living organogram (heritage family tree).
+- An interactive living family tree (heritage family tree).
 - Sensory oral storytelling vaults capturing grandparent memories before they are lost.
 - Collaborative event coordinators for multi-generational gatherings and reunions.
 - Absolute data sovereignty: zero tracking scripts, zero data monetization, and 100% GDPR compliance.
 
 ## 2. Core Modules & Functionality
 
-### 2.1 The Living Heritage Organogram (Family Tree)
+### 2.1 The Living Heritage Family Tree (Family Tree)
 - **Multi-Generational Visualisation:** Displays ancestors, siblings, spouses, children, and extended branches with clear lineage connectors.
 - **Node Biographies:** Every family member node contains a private life capsule, including birth milestones, ancestral origins, voice memories, and tagged family heirlooms.
 - **Elder-Accessible Navigation:** Built with responsive canvas rendering, generous touch targets (minimum 44x44px), and intuitive pan-and-zoom controls tailored for non-technical elders.

@@ -60,7 +60,7 @@ final class FeatureDiscoveryService
             'key' => 'welcome_day1_tree',
             'title' => '7-Generation Dynasty Family Tree',
             'tagline' => 'Preserve your ancestral roots in under 60 seconds',
-            'description' => 'Add your parents and siblings to unlock your interactive 7-generation organogram with automated kinship calculation and deceased ancestor honours.',
+            'description' => 'Add your parents and siblings to unlock your interactive 7-generation family tree with automated kinship calculation and deceased ancestor honours.',
             'chapter' => 'Chapter 1: Roots & Identity',
             'icon' => 'bi-diagram-3-fill',
             'action_url' => '/organogram',
