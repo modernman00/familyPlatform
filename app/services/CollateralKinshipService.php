@@ -501,6 +501,7 @@ final class CollateralKinshipService
                 'avatar_url' => $avatar,
                 'generation_level' => $relativeGen[$nId] ?? 0,
                 'voice_capsule_url' => $n['voice_capsule_url'] ?? null,
+                'dna_ethnicity_json' => $n['dna_ethnicity_json'] ?? null,
                 'is_placeholder' => (bool)($n['is_placeholder'] ?? false),
                 'pending_confirmation' => isset($pendingNodeIds[$nId]),
                 'is_root' => ($nId === $egoNodeId),

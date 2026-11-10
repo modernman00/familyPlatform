@@ -526,6 +526,18 @@ body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .sti
   color: #0f172a !important;
 }
 
+/* 🛡️ Inviolable Contrast Safeguard: Prevent strong & b elements from rendering white/ghost on light surfaces */
+body.dark-mode :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container, .feature-card, .card) :is(strong, b):not(.text-white):not(.badge),
+body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container, .feature-card, .card) :is(strong, b):not(.text-white):not(.badge),
+[data-bs-theme="dark"] :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container, .feature-card, .card) :is(strong, b):not(.text-white):not(.badge),
+:is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container, .feature-card, .card:not(.bg-dark):not(.bg-danger)) :is(strong, b):not(.text-white):not(.badge) {
+  color: inherit !important;
+}
+
+:is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container, .feature-card, .card) :is(strong, b).text-dark {
+  color: #0f172a !important;
+}
+
 /* 🛡️ Inviolable Contrast Safeguard: Prevent dark-on-dark & dark-on-red in .public-layout dark/accent surfaces */
 :is(body, html) :is(.public-layout, [data-surface="light"], .surface-light) :is(.text-white, [data-surface="dark"], .surface-dark, .bg-dark, .bg-danger, header[style*="linear-gradient"], section[style*="linear-gradient"], div[style*="linear-gradient"], .card[style*="linear-gradient"]) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .feature-title, .stitch-title),
 :is(body, html) :is(.public-layout, [data-surface="light"], .surface-light) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .feature-title, .stitch-title):is(.text-white, [style*="color: #ffffff"], [style*="color: rgb(255, 255, 255)"], [style*="color: #fff"]) {

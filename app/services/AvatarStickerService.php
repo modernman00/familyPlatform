@@ -460,7 +460,7 @@ final class AvatarStickerService
             $sy = (int)max(0, min($h - $side, $cy - $side * 0.47));
         }
 
-        $dst = imagecreatetruecolor($px, $px);
+        $dst = imagecreatetruecolor(max(1, (int)$px), max(1, (int)$px));
         imagefill($dst, 0, 0, (int)imagecolorallocate($dst, 255, 255, 255));
         imagecopyresampled($dst, $src, 0, 0, $sx, $sy, $px, $px, $side, $side);
         ob_start();

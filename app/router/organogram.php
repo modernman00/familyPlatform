@@ -28,6 +28,7 @@ $router->map('POST', '/member/organogram/editor/set-gender', 'App\controller\mem
 $router->map('POST', '/member/organogram/editor/delete', 'App\controller\members\OrganogramEditorController@deleteNode', 'MEMBER_ORGANOGRAM_DELETE_NODE');
 $router->map('POST', '/member/organogram/node/voice-capsule', 'App\controller\members\OrganogramEditorController@uploadVoiceCapsule', 'MEMBER_ORGANOGRAM_UPLOAD_VOICE_CAPSULE');
 $router->map('POST', '/member/organogram/node/delete-voice-capsule', 'App\controller\members\OrganogramEditorController@deleteVoiceCapsule', 'MEMBER_ORGANOGRAM_DELETE_VOICE_CAPSULE');
+$router->map('POST', '/member/organogram/node/dna-makeup', 'App\controller\members\OrganogramEditorController@saveNodeDnaMakeup', 'MEMBER_ORGANOGRAM_SAVE_DNA_MAKEUP');
 $router->map('POST', '/api/claim-family-node', 'App\controller\members\Organogram@claimNode', 'API_CLAIM_FAMILY_NODE');
 $router->map('POST', '/api/dismiss-claim-node', 'App\controller\members\Organogram@dismissClaimNode', 'API_DISMISS_CLAIM_NODE');
 $router->map('POST', '/api/family-tree/prompt-build', 'App\controller\members\Organogram@promptBuildTree', 'API_FAMILY_TREE_PROMPT_BUILD');

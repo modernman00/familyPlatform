@@ -60,12 +60,14 @@ if ($isNonProd) {
     $router->map('GET|POST', '/clearcache', 'App\controller\ClearCache@clear', 'clear-cache');
 }
 // ATG Sovereign Poster & Flyer Studio (Family Reunions, Anniversaries, Naming & Milestones)
-$router->map('GET', '/poster-studio', function () {
-    (new \Src\Media\UniversalPosterStudioController())->showStudio('familyplatform');
-}, 'atg_poster_studio');
-$router->map('GET', '/flyer-studio', function () {
-    (new \Src\Media\UniversalPosterStudioController())->showStudio('familyplatform');
-}, 'atg_flyer_studio');
+// App-owned studio UI (navbar, family presets, events, feed posting) over the shared poster engine
+$router->map('GET', '/poster-studio', 'App\controller\members\PosterStudioController@index', 'atg_poster_studio');
+$router->map('GET', '/flyer-studio', 'App\controller\members\PosterStudioController@index', 'atg_flyer_studio');
+// Built-in studio art (backdrops, florals): static, non-sensitive, served without session work
+$router->map('GET', '/poster-studio-asset/[*:file]', function (string $file) {
+    (new \Src\Media\UniversalPosterStudioController())->serveStudioAsset($file);
+}, 'poster_studio_asset');
+$router->map('POST', '/api/poster-studio/post-to-feed', 'App\controller\members\PosterStudioController@postToFeed', 'api_poster_studio_post_feed');
 $router->map('GET|POST', '/api/poster-studio/render', function () {
     (new \Src\Media\UniversalPosterStudioController())->renderApiPoster();
 }, 'api_atg_poster_studio_render');

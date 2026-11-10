@@ -31,23 +31,23 @@
               <i class="bi bi-patch-check-fill"></i> Verified Genealogy Standard
             </div>
             <h2 id="kinship-faq" class="fw-bold fs-4 text-dark mb-3">What does "second cousin once removed" mean in a family tree?</h2>
-            <p class="lead text-secondary mb-3" style="line-height: 1.7; font-size: 1.05rem;">
-              <strong>"Second cousins" share the same great-grandparents. The term "once removed" means there is a one-generation difference between you: they are either the child of your second cousin, or the second cousin of your parent. They share approximately 3.125% of your DNA.</strong>
+            <p class="lead text-dark mb-3" style="line-height: 1.7; font-size: 1.05rem;">
+              <strong class="text-dark">"Second cousins" share the same great-grandparents. The term "once removed" means there is a one-generation difference between you: they are either the child of your second cousin, or the second cousin of your parent. They share approximately 3.125% of your DNA.</strong>
             </p>
             <div class="row g-2 pt-2">
               <div class="col-sm-4">
-                <div class="p-2 px-3 rounded-3 bg-light border small text-secondary">
-                  <strong>First Cousins:</strong> Share Grandparents (12.5% DNA)
+                <div class="p-2 px-3 rounded-3 bg-light border small text-dark">
+                  <strong class="text-dark">First Cousins:</strong> Share Grandparents (12.5% DNA)
                 </div>
               </div>
               <div class="col-sm-4">
-                <div class="p-2 px-3 rounded-3 bg-light border small text-secondary">
-                  <strong>Second Cousins:</strong> Share Great-Grandparents (3.125% DNA)
+                <div class="p-2 px-3 rounded-3 bg-light border small text-dark">
+                  <strong class="text-dark">Second Cousins:</strong> Share Great-Grandparents (3.125% DNA)
                 </div>
               </div>
               <div class="col-sm-4">
-                <div class="p-2 px-3 rounded-3 bg-light border small text-secondary">
-                  <strong>Removed:</strong> Difference in generations (+1 or -1)
+                <div class="p-2 px-3 rounded-3 bg-light border small text-dark">
+                  <strong class="text-dark">Removed:</strong> Difference in generations (+1 or -1)
                 </div>
               </div>
             </div>

@@ -118,6 +118,9 @@
             <button type="button" id="btnModeGlobe" class="layout-segment-btn" onclick="switchTreeViewMode('globe')" title="Globe: where your family lives around the world">
                 <i class="bi bi-globe-americas" aria-hidden="true"></i><span>Globe</span>
             </button>
+            <button type="button" id="btnToggleTreeDna" class="layout-segment-btn active" onclick="toggleTreeDnaOverlay()" title="Toggle Shared DNA % and Ancestral Chromosome Bars on tree nodes" aria-pressed="true">
+                <span aria-hidden="true" style="font-size: 0.9rem; line-height: 1;">🧬</span><span>DNA %</span>
+            </button>
             @if(empty($isReadOnly))
             <button type="button" id="btnModeStudio" class="layout-segment-btn layout-segment-btn--studio" onclick="switchTreeViewMode('studio')" title="Tree Studio: Curate and update relatives, unions, and lineage directly">
                 <i class="bi bi-pencil-square" aria-hidden="true"></i><span>Tree Studio</span>
@@ -502,6 +505,37 @@
                                 <i class="bi bi-link-45deg"></i> Copy Link
                             </button>
                         </div>
+                    </div>
+
+                    <!-- Layer 1 & Layer 2: DNA Make-Up & Consanguinity Section -->
+                    <div id="cardDnaMakeupSection" style="margin-top: 14px; padding: 12px; border-radius: 14px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.28);">
+                        <div class="d-flex align-items-center justify-content-between mb-1.5 gap-2">
+                            <div class="d-flex align-items-center gap-1.5">
+                                <span aria-hidden="true" style="font-size: 0.95rem;">🧬</span>
+                                <span class="fw-bold text-white" style="font-size: 0.8rem; letter-spacing: 0.03em;">DNA MAKE-UP &amp; KINSHIP</span>
+                            </div>
+                            <span id="cardSharedDnaBadge" class="badge rounded-pill" style="font-size: 0.72rem; font-weight: 800; background: rgba(6, 78, 59, 0.9); color: #6ee7b7; border: 1px solid #10b981;">100% DNA</span>
+                        </div>
+                        <div id="cardDnaConsanguinityText" class="text-white-50 mb-2" style="font-size: 0.73rem; line-height: 1.35;">
+                            6,800 cM · Reference Member
+                        </div>
+
+                        <!-- Multi-Segment Chromosome Bar -->
+                        <div id="cardDnaChromosomeBar" style="display: flex; width: 100%; height: 8px; border-radius: 999px; overflow: hidden; background: rgba(255,255,255,0.08); margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.15);"></div>
+
+                        <!-- Ancestral / Ethnicity Breakdown List -->
+                        <div id="cardDnaRegionsList" class="d-flex flex-column gap-1 mb-2" style="font-size: 0.75rem;"></div>
+
+                        <!-- Uniparental Haplogroups (Y-DNA & mtDNA) -->
+                        <div id="cardDnaHaplogroupsRow" class="d-flex flex-wrap gap-1.5 mb-2" style="display: none;"></div>
+
+                        <div id="cardDnaSourceLabel" class="text-white-50 fst-italic mb-2" style="font-size: 0.69rem;">
+                            Synthesised from Family Tree Lineage
+                        </div>
+
+                        <button type="button" id="btnOpenDnaMakeupModal" class="btn-action w-100" onclick="openDnaMakeupModal(window.selectedNodeId)" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.28), rgba(5, 150, 105, 0.4)); border-color: rgba(16, 185, 129, 0.6); color: #ecfdf5; font-weight: 700; font-size: 0.78rem; padding: 6px 12px; min-height: 44px; justify-content: center; white-space: nowrap;">
+                            <span aria-hidden="true" class="me-1">🧬</span> Curate DNA &amp; Ethnicity Make-up
+                        </button>
                     </div>
 
                     <!-- Living Voice Capsule Section -->
@@ -1226,12 +1260,98 @@
                 </div>
             </div>
         </div>
+
+        <!-- Layer 2: Interactive DNA & Ancestral Make-up Curation Modal -->
+        <div class="modal fade" id="dnaMakeupModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 520px;">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #0f172a; color: #ffffff; border: 1px solid rgba(16, 185, 129, 0.35); max-height: calc(100vh - 3.5rem);">
+                    <div class="modal-header border-bottom border-secondary py-3 px-4 flex-shrink-0" style="background: rgba(15, 23, 42, 0.95);">
+                        <div class="d-flex align-items-center gap-2.5">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);">
+                                <span aria-hidden="true" style="font-size: 1.2rem;">🧬</span>
+                            </div>
+                            <div>
+                                <h5 class="modal-title fw-bold text-white mb-0 fs-6">Curate DNA &amp; Ancestral Make-up</h5>
+                                <small class="text-white-50" id="dnaModalTargetName">Biogeographical Heritage &amp; Mendelian Propagation</small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4" style="overflow-y: auto;">
+                        <form id="dnaMakeupForm" onsubmit="saveDnaMakeupForm(event)">
+                            @csrf
+                            <input type="hidden" id="dnaModalNodeId" name="node_id" value="">
+
+                            <div class="p-3 rounded-3 mb-3" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); font-size: 0.8rem; color: #d1fae5; line-height: 1.45;">
+                                <strong>Automatic Tree Propagation:</strong> Recording ancestral or DNA test percentages (e.g., 23andMe, AncestryDNA) for a parent or grandparent automatically synthesises <strong>50/50 Mendelian inheritance</strong> for their children and descendants down the family tree.
+                            </div>
+
+                            <!-- Quick Region Presets -->
+                            <div class="mb-3">
+                                <label class="form-label text-white-50 small fw-bold mb-1.5" style="font-size: 0.74rem; letter-spacing: 0.04em; text-transform: uppercase;">
+                                    Quick-Add Ancestral Region
+                                </label>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-2.5 py-1" style="font-size: 0.75rem; min-height: 36px; white-space: nowrap;" onclick="addDnaPresetRegion('Nigerian (Yoruba)', '#10b981')">+ Nigerian (Yoruba)</button>
+                                    <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-2.5 py-1" style="font-size: 0.75rem; min-height: 36px; white-space: nowrap;" onclick="addDnaPresetRegion('Nigerian (Igbo)', '#14b8a6')">+ Nigerian (Igbo)</button>
+                                    <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-2.5 py-1" style="font-size: 0.75rem; min-height: 36px; white-space: nowrap;" onclick="addDnaPresetRegion('Ghanaian &amp; West African', '#f59e0b')">+ Ghanaian &amp; West African</button>
+                                    <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-2.5 py-1" style="font-size: 0.75rem; min-height: 36px; white-space: nowrap;" onclick="addDnaPresetRegion('British &amp; Irish', '#3b82f6')">+ British &amp; Irish</button>
+                                    <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-2.5 py-1" style="font-size: 0.75rem; min-height: 36px; white-space: nowrap;" onclick="addDnaPresetRegion('Scottish &amp; Welsh', '#06b6d4')">+ Scottish &amp; Welsh</button>
+                                    <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-2.5 py-1" style="font-size: 0.75rem; min-height: 36px; white-space: nowrap;" onclick="addDnaPresetRegion('Caribbean Heritage', '#ec4899')">+ Caribbean</button>
+                                    <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-2.5 py-1" style="font-size: 0.75rem; min-height: 36px; white-space: nowrap;" onclick="addDnaPresetRegion('East African', '#8b5cf6')">+ East African</button>
+                                    <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-2.5 py-1" style="font-size: 0.75rem; min-height: 36px; white-space: nowrap;" onclick="addDnaPresetRegion('European &amp; Iberian', '#f97316')">+ European</button>
+                                </div>
+                            </div>
+
+                            <!-- Dynamic Region Rows -->
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-white fw-bold small">Ancestral / Biogeographical Regions</span>
+                                <span id="dnaModalTotalPctBadge" class="badge bg-success rounded-pill" style="font-size: 0.74rem;">Total: 100%</span>
+                            </div>
+
+                            <div id="dnaRegionsInputContainer" class="d-flex flex-column gap-2 mb-3"></div>
+
+                            <button type="button" class="btn btn-sm btn-outline-info w-100 mb-3 fw-semibold" onclick="addDnaRegionRow('', 25, '#3b82f6')" style="border-radius: 10px; min-height: 44px; white-space: nowrap;">
+                                <i class="bi bi-plus-circle me-1"></i> Add Custom Ancestral Region
+                            </button>
+
+                            <!-- Optional Uniparental Haplogroups -->
+                            <div class="row g-2 mb-3 pt-2 border-top border-secondary">
+                                <div class="col-6">
+                                    <label for="dnaInputHaploY" class="form-label text-white-50 small mb-1" style="font-size: 0.75rem;">
+                                        Y-DNA Haplogroup (Paternal)
+                                    </label>
+                                    <input type="text" id="dnaInputHaploY" name="haplogroup_y" class="form-control form-control-sm" placeholder="e.g. E-M2, R1b" maxlength="24" style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: #ffffff; min-height: 40px;">
+                                </div>
+                                <div class="col-6">
+                                    <label for="dnaInputHaploMt" class="form-label text-white-50 small mb-1" style="font-size: 0.75rem;">
+                                        mtDNA Haplogroup (Maternal)
+                                    </label>
+                                    <input type="text" id="dnaInputHaploMt" name="haplogroup_mt" class="form-control form-control-sm" placeholder="e.g. L3, H1, U5" maxlength="24" style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: #ffffff; min-height: 40px;">
+                                </div>
+                            </div>
+
+                            <div id="dnaMakeupModalAlert" class="alert d-none mb-3 small" role="alert"></div>
+
+                            <div class="d-flex flex-wrap gap-2 pt-2">
+                                <button type="button" id="btnResetDnaMakeup" onclick="resetNodeDnaMakeup()" class="btn btn-outline-light fw-semibold px-3 py-2 flex-grow-1" style="border-radius: 12px; min-height: 44px; font-size: 0.84rem; white-space: nowrap;">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset to Tree Auto-Synthesis
+                                </button>
+                                <button type="submit" id="btnSaveDnaMakeup" class="btn btn-success fw-bold px-4 py-2 flex-grow-1 btn-spin-on-click" style="border-radius: 12px; min-height: 44px; font-size: 0.86rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; white-space: nowrap;">
+                                    <i class="bi bi-check2-circle me-1"></i> Save &amp; Propagate DNA
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 @include('member.includes.treeAccessModals')
 @include('component.swalAlert')
-<script src="/public/js/vendor/kinshiptree.js?v=9.6"></script>
+<script src="/public/js/vendor/kinshiptree.js?v=9.8"></script>
 <script>
     window.__ROOT_USER_ID__ = '{{ $data['id'] ?? '' }}';
     window.__LOGGED_IN_USER_ID__ = '{{ $_SESSION['id'] ?? '' }}';
@@ -1525,9 +1645,29 @@
                     email: node.email || (node.raw ? node.raw.email : '') || '',
                     mobile: node.mobile || (node.raw ? node.raw.mobile : '') || '',
                     occupation: node.occupation || (node.raw ? node.raw.occupation : '') || '',
+                    shared_dna_pct: (typeof node.shared_dna_pct === 'number') ? node.shared_dna_pct : null,
+                    shared_dna_formatted: node.shared_dna_formatted || '',
+                    shared_dna_badge: node.shared_dna_badge || '',
+                    shared_cm_avg: node.shared_cm_avg || 0,
+                    shared_cm_range: node.shared_cm_range || '',
+                    is_biological_kin: Boolean(node.is_biological_kin),
+                    consanguinity_degree: (node.consanguinity_degree !== undefined) ? node.consanguinity_degree : null,
+                    dna_makeup: node.dna_makeup || null,
                     raw: node
                 });
             });
+        }
+
+        // Initialise DNA overlay preference (default ON)
+        try {
+            window.__SHOW_TREE_DNA__ = localStorage.getItem('fp_show_tree_dna') !== '0';
+            const dnaBtn = document.getElementById('btnToggleTreeDna');
+            if (dnaBtn) {
+                dnaBtn.classList.toggle('active', window.__SHOW_TREE_DNA__);
+                dnaBtn.setAttribute('aria-pressed', window.__SHOW_TREE_DNA__ ? 'true' : 'false');
+            }
+        } catch (_) {
+            window.__SHOW_TREE_DNA__ = true;
         }
 
         const hasBuiltTree = Boolean(graphData && graphData.has_built_tree);
@@ -2324,6 +2464,112 @@
             }
         }
 
+        // Layer 1 & Layer 2 DNA Make-Up & Consanguinity Card Synchronisation
+        const dnaSection = document.getElementById('cardDnaMakeupSection');
+        if (dnaSection) {
+            const sharedDnaBadge = document.getElementById('cardSharedDnaBadge');
+            const consangText = document.getElementById('cardDnaConsanguinityText');
+            const chromBar = document.getElementById('cardDnaChromosomeBar');
+            const regionsList = document.getElementById('cardDnaRegionsList');
+            const haploRow = document.getElementById('cardDnaHaplogroupsRow');
+            const sourceLabelEl = document.getElementById('cardDnaSourceLabel');
+            const openDnaBtn = document.getElementById('btnOpenDnaMakeupModal');
+
+            const rawPct = (typeof node.shared_dna_pct === 'number')
+                ? node.shared_dna_pct
+                : (node.raw && typeof node.raw.shared_dna_pct === 'number' ? node.raw.shared_dna_pct : 0);
+            const dnaFormatted = node.shared_dna_formatted || (node.raw && node.raw.shared_dna_formatted) || (rawPct + '%');
+            const cmRange = node.shared_cm_range || (node.raw && node.raw.shared_cm_range) || '';
+            const isBioKin = Boolean(node.is_biological_kin || (node.raw && node.raw.is_biological_kin));
+            const deg = (node.consanguinity_degree !== undefined && node.consanguinity_degree !== null)
+                ? node.consanguinity_degree
+                : (node.raw ? node.raw.consanguinity_degree : null);
+            const dnaMakeup = node.dna_makeup || (node.raw && node.raw.dna_makeup) || null;
+
+            if (sharedDnaBadge) {
+                if (rawPct === 100) {
+                    sharedDnaBadge.style.background = 'rgba(120, 53, 15, 0.92)';
+                    sharedDnaBadge.style.color = '#fde68a';
+                    sharedDnaBadge.style.borderColor = '#fbbf24';
+                    sharedDnaBadge.textContent = '100% Reference DNA';
+                } else if (isBioKin && rawPct > 0) {
+                    sharedDnaBadge.style.background = 'rgba(6, 78, 59, 0.92)';
+                    sharedDnaBadge.style.color = '#6ee7b7';
+                    sharedDnaBadge.style.borderColor = '#10b981';
+                    sharedDnaBadge.textContent = dnaFormatted + ' Shared DNA';
+                } else {
+                    sharedDnaBadge.style.background = 'rgba(30, 41, 59, 0.92)';
+                    sharedDnaBadge.style.color = '#cbd5e1';
+                    sharedDnaBadge.style.borderColor = 'rgba(148, 163, 184, 0.45)';
+                    sharedDnaBadge.textContent = 'Non-Biological Kin';
+                }
+            }
+
+            if (consangText) {
+                if (rawPct === 100) {
+                    consangText.textContent = '6,800 cM · Primary Reference Genome (You)';
+                } else if (isBioKin && rawPct > 0) {
+                    const degOrdinal = deg === 1 ? '1st Degree' : (deg === 2 ? '2nd Degree' : (deg === 3 ? '3rd Degree' : (deg ? deg + 'th Degree' : 'Biological Kin')));
+                    consangText.textContent = (cmRange ? cmRange + ' · ' : '') + degOrdinal + ' Consanguinity';
+                } else {
+                    consangText.textContent = 'Connected via Marriage / Affinity (0% Shared Autosomal DNA)';
+                }
+            }
+
+            const activeRegs = (dnaMakeup && Array.isArray(dnaMakeup.active_regions)) ? dnaMakeup.active_regions : [];
+            if (chromBar) {
+                chromBar.innerHTML = activeRegs.map(r => {
+                    const pct = Math.max(1, Math.min(100, Number(r.percentage) || 0));
+                    const col = /^#[0-9a-fA-F]{6}$/.test(String(r.color || '')) ? r.color : '#10b981';
+                    const safeReg = typeof escapeHtmlText === 'function' ? escapeHtmlText(String(r.region || '')) : String(r.region || '');
+                    return `<div style="width: ${pct}%; background: ${col}; height: 100%;" title="${pct}% ${safeReg}"></div>`;
+                }).join('');
+            }
+
+            if (regionsList) {
+                regionsList.innerHTML = activeRegs.map(r => {
+                    const pct = Number(r.percentage) || 0;
+                    const col = /^#[0-9a-fA-F]{6}$/.test(String(r.color || '')) ? r.color : '#10b981';
+                    const safeReg = typeof escapeHtmlText === 'function' ? escapeHtmlText(String(r.region || '')) : String(r.region || '');
+                    return `
+                        <div class="d-flex align-items-center justify-content-between gap-2">
+                            <div class="d-flex align-items-center gap-1.5 text-truncate">
+                                <span style="width: 8px; height: 8px; border-radius: 50%; background: ${col}; flex-shrink: 0; display: inline-block;"></span>
+                                <span class="text-white text-truncate" title="${safeReg}">${safeReg}</span>
+                            </div>
+                            <strong style="color: #6ee7b7; flex-shrink: 0;">${pct}%</strong>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            if (haploRow) {
+                const hy = dnaMakeup && dnaMakeup.haplogroup_y ? String(dnaMakeup.haplogroup_y) : '';
+                const hmt = dnaMakeup && dnaMakeup.haplogroup_mt ? String(dnaMakeup.haplogroup_mt) : '';
+                if (hy || hmt) {
+                    const safeHy = typeof escapeHtmlText === 'function' ? escapeHtmlText(hy) : hy;
+                    const safeHmt = typeof escapeHtmlText === 'function' ? escapeHtmlText(hmt) : hmt;
+                    haploRow.innerHTML = ''
+                        + (hy ? `<span class="badge rounded-pill" style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.45); font-size: 0.68rem;">Y-DNA: ${safeHy}</span>` : '')
+                        + (hmt ? `<span class="badge rounded-pill" style="background: rgba(236, 72, 153, 0.2); color: #f9a8d4; border: 1px solid rgba(236, 72, 153, 0.45); font-size: 0.68rem;">mtDNA: ${safeHmt}</span>` : '');
+                    haploRow.style.display = 'flex';
+                } else {
+                    haploRow.innerHTML = '';
+                    haploRow.style.display = 'none';
+                }
+            }
+
+            if (sourceLabelEl) {
+                sourceLabelEl.textContent = (dnaMakeup && dnaMakeup.source_label)
+                    ? dnaMakeup.source_label
+                    : 'Synthesised from Family Tree Lineage';
+            }
+
+            if (openDnaBtn) {
+                openDnaBtn.style.display = (isReadOnlyTree || node.is_placeholder) ? 'none' : 'inline-flex';
+            }
+        }
+
         // Living Voice Capsule synchronization
         const voiceSection = document.getElementById('cardVoiceCapsuleSection');
         const voiceBadge = document.getElementById('voiceCapsuleStatusBadge');
@@ -2718,6 +2964,247 @@
         }
     };
 
+    window.toggleTreeDnaOverlay = function() {
+        window.__SHOW_TREE_DNA__ = (window.__SHOW_TREE_DNA__ === false);
+        try {
+            localStorage.setItem('fp_show_tree_dna', window.__SHOW_TREE_DNA__ ? '1' : '0');
+        } catch (_) {}
+        const dnaBtn = document.getElementById('btnToggleTreeDna');
+        if (dnaBtn) {
+            dnaBtn.classList.toggle('active', window.__SHOW_TREE_DNA__);
+            dnaBtn.setAttribute('aria-pressed', window.__SHOW_TREE_DNA__ ? 'true' : 'false');
+        }
+        if (window.family && typeof window.family.render === 'function') {
+            window.family.render();
+        }
+        renderPedigreeOutline();
+    };
+
+    window.openDnaMakeupModal = function(nodeId) {
+        const targetId = String(nodeId || window.selectedNodeId || '');
+        if (!targetId) return;
+
+        const node = (window.familyTreeNodes || []).find(n => String(n.id) === targetId);
+        if (!node) return;
+
+        const idInput = document.getElementById('dnaModalNodeId');
+        const targetNameEl = document.getElementById('dnaModalTargetName');
+        const container = document.getElementById('dnaRegionsInputContainer');
+        const haploYInput = document.getElementById('dnaInputHaploY');
+        const haploMtInput = document.getElementById('dnaInputHaploMt');
+        const alertEl = document.getElementById('dnaMakeupModalAlert');
+
+        if (idInput) idInput.value = targetId;
+        if (targetNameEl) {
+            targetNameEl.textContent = (node.name || 'Relative') + ' · ' + (node.title || 'Family Member');
+        }
+        if (alertEl) {
+            alertEl.className = 'alert d-none mb-3 small';
+            alertEl.textContent = '';
+        }
+
+        const dnaMakeup = node.dna_makeup || (node.raw && node.raw.dna_makeup) || null;
+        if (haploYInput) haploYInput.value = (dnaMakeup && dnaMakeup.haplogroup_y) ? String(dnaMakeup.haplogroup_y) : '';
+        if (haploMtInput) haploMtInput.value = (dnaMakeup && dnaMakeup.haplogroup_mt) ? String(dnaMakeup.haplogroup_mt) : '';
+
+        if (container) {
+            container.innerHTML = '';
+            const initialRegions = (dnaMakeup && Array.isArray(dnaMakeup.recorded_regions) && dnaMakeup.recorded_regions.length > 0)
+                ? dnaMakeup.recorded_regions
+                : ((dnaMakeup && Array.isArray(dnaMakeup.active_regions) && dnaMakeup.active_regions.length > 0)
+                    ? dnaMakeup.active_regions
+                    : [{ region: 'Nigerian (Yoruba)', percentage: 100, color: '#10b981' }]);
+
+            initialRegions.forEach(r => {
+                window.addDnaRegionRow(r.region || '', Number(r.percentage) || 50, r.color || '#10b981');
+            });
+            window.updateDnaModalTotalPct();
+        }
+
+        const modalEl = document.getElementById('dnaMakeupModal');
+        if (modalEl && typeof bootstrap !== 'undefined') {
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        }
+    };
+
+    window.addDnaPresetRegion = function(regionName, defaultColor) {
+        const container = document.getElementById('dnaRegionsInputContainer');
+        if (!container) return;
+        const existingInputs = container.querySelectorAll('.dna-region-name-input');
+        for (let i = 0; i < existingInputs.length; i++) {
+            if (existingInputs[i].value.trim().toLowerCase() === regionName.toLowerCase()) {
+                existingInputs[i].focus();
+                return;
+            }
+        }
+        if (existingInputs.length === 1 && existingInputs[0].value.trim() === '') {
+            existingInputs[0].value = regionName;
+            const colorInput = existingInputs[0].closest('.dna-region-row')?.querySelector('.dna-region-color-input');
+            if (colorInput && defaultColor) colorInput.value = defaultColor;
+            window.updateDnaModalTotalPct();
+            return;
+        }
+        const defaultPct = existingInputs.length === 0 ? 100 : 25;
+        window.addDnaRegionRow(regionName, defaultPct, defaultColor || '#10b981');
+    };
+
+    window.addDnaRegionRow = function(regionName = '', pct = 50, color = '#10b981') {
+        const container = document.getElementById('dnaRegionsInputContainer');
+        if (!container) return;
+        const rows = container.querySelectorAll('.dna-region-row');
+        if (rows.length >= 6) return;
+
+        const safeColor = /^#[0-9a-fA-F]{6}$/.test(String(color || '')) ? color : '#10b981';
+        const row = document.createElement('div');
+        row.className = 'dna-region-row d-flex align-items-center gap-2 p-2 rounded-3';
+        row.style.background = 'rgba(255,255,255,0.05)';
+        row.style.border = '1px solid rgba(255,255,255,0.14)';
+
+        row.innerHTML = `
+            <input type="color" class="form-control form-control-color dna-region-color-input p-1 border-0 bg-transparent" value="${safeColor}" title="Choose segment colour" style="width: 34px; height: 34px; cursor: pointer; flex-shrink: 0;">
+            <input type="text" class="form-control form-control-sm dna-region-name-input" placeholder="Ancestral region or clan..." maxlength="60" required style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: #ffffff; min-height: 38px;">
+            <div class="input-group input-group-sm" style="width: 105px; flex-shrink: 0;">
+                <input type="number" class="form-control dna-region-pct-input text-end fw-bold" min="1" max="100" step="0.5" value="${Number(pct) || 25}" oninput="window.updateDnaModalTotalPct()" required style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: #6ee7b7; min-height: 38px;">
+                <span class="input-group-text" style="background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.2); color: #cbd5e1;">%</span>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center justify-content-center p-0 flex-shrink-0" onclick="this.closest('.dna-region-row').remove(); window.updateDnaModalTotalPct();" title="Remove region" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; border-radius: 8px;">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        `;
+        const nameInput = row.querySelector('.dna-region-name-input');
+        if (nameInput) nameInput.value = regionName;
+        container.appendChild(row);
+        window.updateDnaModalTotalPct();
+    };
+
+    window.updateDnaModalTotalPct = function() {
+        const badge = document.getElementById('dnaModalTotalPctBadge');
+        const container = document.getElementById('dnaRegionsInputContainer');
+        if (!badge || !container) return;
+        let sum = 0;
+        container.querySelectorAll('.dna-region-pct-input').forEach(inp => {
+            sum += Math.max(0, parseFloat(inp.value) || 0);
+        });
+        const rounded = Math.round(sum * 10) / 10;
+        badge.textContent = `Total: ${rounded}%` + (Math.abs(rounded - 100) > 0.5 ? ' (Auto-normalises to 100%)' : '');
+        badge.className = Math.abs(rounded - 100) <= 0.5 ? 'badge bg-success rounded-pill' : 'badge bg-warning text-dark rounded-pill';
+    };
+
+    window.saveDnaMakeupForm = function(e) {
+        if (e) e.preventDefault();
+        const nodeId = document.getElementById('dnaModalNodeId')?.value || window.selectedNodeId;
+        const container = document.getElementById('dnaRegionsInputContainer');
+        const haploY = document.getElementById('dnaInputHaploY')?.value.trim() || '';
+        const haploMt = document.getElementById('dnaInputHaploMt')?.value.trim() || '';
+        const alertEl = document.getElementById('dnaMakeupModalAlert');
+        const saveBtn = document.getElementById('btnSaveDnaMakeup');
+
+        const regions = [];
+        if (container) {
+            container.querySelectorAll('.dna-region-row').forEach(row => {
+                const rName = row.querySelector('.dna-region-name-input')?.value.trim() || '';
+                const rPct = parseFloat(row.querySelector('.dna-region-pct-input')?.value || '0') || 0;
+                const rColor = row.querySelector('.dna-region-color-input')?.value || '#10b981';
+                if (rName && rPct > 0) {
+                    regions.push({ region: rName, percentage: rPct, color: rColor });
+                }
+            });
+        }
+
+        if (regions.length === 0 && !haploY && !haploMt) {
+            if (alertEl) {
+                alertEl.className = 'alert alert-warning mb-3 small';
+                alertEl.textContent = 'Please enter at least one ancestral region or haplogroup.';
+            }
+            return;
+        }
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                          document.querySelector('#dnaMakeupForm input[name="token"]')?.value || '';
+
+        if (saveBtn && window.ScoreTenantSpinner) {
+            window.ScoreTenantSpinner.start(saveBtn);
+        }
+
+        fetch('/member/organogram/node/dna-makeup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken,
+                'X-XSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify({
+                node_id: Number(nodeId),
+                regions: regions,
+                haplogroup_y: haploY,
+                haplogroup_mt: haploMt,
+                token: csrfToken
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (saveBtn && window.ScoreTenantSpinner) {
+                window.ScoreTenantSpinner.stop(saveBtn);
+            }
+            if (data && data.status === 'success') {
+                window.location.reload();
+            } else if (alertEl) {
+                alertEl.className = 'alert alert-danger mb-3 small';
+                alertEl.textContent = (data && data.message) ? data.message : 'Could not save DNA make-up.';
+            }
+        })
+        .catch(() => {
+            if (saveBtn && window.ScoreTenantSpinner) {
+                window.ScoreTenantSpinner.stop(saveBtn);
+            }
+            if (alertEl) {
+                alertEl.className = 'alert alert-danger mb-3 small';
+                alertEl.textContent = 'Network error while saving DNA make-up.';
+            }
+        });
+    };
+
+    window.resetNodeDnaMakeup = function() {
+        const nodeId = document.getElementById('dnaModalNodeId')?.value || window.selectedNodeId;
+        const resetBtn = document.getElementById('btnResetDnaMakeup');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                          document.querySelector('#dnaMakeupForm input[name="token"]')?.value || '';
+
+        if (resetBtn && window.ScoreTenantSpinner) {
+            window.ScoreTenantSpinner.start(resetBtn);
+        }
+
+        fetch('/member/organogram/node/dna-makeup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken,
+                'X-XSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify({
+                node_id: Number(nodeId),
+                clear: true,
+                token: csrfToken
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (resetBtn && window.ScoreTenantSpinner) {
+                window.ScoreTenantSpinner.stop(resetBtn);
+            }
+            if (data && data.status === 'success') {
+                window.location.reload();
+            }
+        })
+        .catch(() => {
+            if (resetBtn && window.ScoreTenantSpinner) {
+                window.ScoreTenantSpinner.stop(resetBtn);
+            }
+        });
+    };
+
     function renderPedigreeOutline() {
         const container = document.getElementById('pedigreeOutlineContainer');
         if (!container || !graphData || !graphData.nodes) return;
@@ -2758,17 +3245,26 @@
                     ${gen.nodes.map(node => {
                         const fullName = (node.full_name || `${node.first_name || ''} ${node.last_name || ''}`).trim() || 'Family Member';
                         const avatar = node.avatar_url || (node.gender === 'Female' ? '/resources/images/profile/avatarF.png' : '/resources/images/profile/avatarM.png');
-                        const role = node.bio || (lvl === '0' ? (String(node.user_id) === String(window.__ROOT_USER_ID__) ? 'You (Self)' : 'Household / Sibling') : (lvl === '-1' ? 'Parent / Elder' : (lvl === '-2' ? 'Grandparent' : (lvl === '1' ? 'Child' : 'Descendant'))));
+                        const role = node.ego_relation || node.bio || (lvl === '0' ? (String(node.user_id) === String(window.__ROOT_USER_ID__) ? 'You (Self)' : 'Household / Sibling') : (lvl === '-1' ? 'Parent / Elder' : (lvl === '-2' ? 'Grandparent' : (lvl === '1' ? 'Child' : 'Descendant'))));
                         const isDeceased = Boolean(node.is_deceased);
                         const isSelf = String(node.user_id) === String(window.__ROOT_USER_ID__);
+                        const showDna = window.__SHOW_TREE_DNA__ !== false && !node.is_placeholder;
+                        const dnaBadgeText = (showDna && node.is_biological_kin && node.shared_dna_formatted)
+                            ? `🧬 ${node.shared_dna_formatted} DNA`
+                            : (showDna && !node.is_biological_kin ? '💍 Non-Bio' : '');
+                        const dnaSummary = (showDna && node.dna_makeup && node.dna_makeup.summary_text)
+                            ? String(node.dna_makeup.summary_text)
+                            : '';
 
                         return `
                         <div class="pedigree-member-card ${isDeceased ? 'pedigree-deceased-card' : ''} ${isSelf ? 'border-primary' : ''}" onclick="openNodeFromPedigree('${node.id}')">
                             <img src="${avatar}" alt="${fullName}" class="pedigree-member-avatar ${isDeceased ? 'pedigree-avatar-deceased' : ''}" onerror="this.src='/resources/images/profile/avatarM.png'">
                             <div class="pedigree-member-info">
                                 <div class="pedigree-member-name">${fullName} ${isSelf ? '<span class="badge bg-primary ms-1" style="font-size: 0.65rem;">You</span>' : ''}</div>
-                                <div class="pedigree-member-meta">
+                                <div class="pedigree-member-meta flex-wrap gap-1">
                                     <span class="pedigree-role-pill">${role}</span>
+                                    ${dnaBadgeText ? `<span class="badge rounded-pill" style="background: rgba(6, 78, 59, 0.88); color: #6ee7b7; border: 1px solid #10b981; font-size: 0.68rem;">${dnaBadgeText}</span>` : ''}
+                                    ${dnaSummary ? `<span class="badge rounded-pill" style="background: rgba(30, 41, 59, 0.85); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.35); font-size: 0.66rem;">${dnaSummary}</span>` : ''}
                                     ${isDeceased ? '<span class="pedigree-deceased-pill fw-bold"><i class="bi bi-flower1 text-warning"></i> In Memory</span>' : ''}
                                 </div>
                             </div>

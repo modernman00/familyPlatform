@@ -126,7 +126,8 @@ final class FestiveCardController
 
             try {
                 $card = $this->service->createCard($userId, $famCode, $data);
-            } catch (\InvalidArgumentException $e) {
+            } catch (\InvalidArgumentException | \Src\Exceptions\ValidationException $e) {
+                // Validation and content-safety rejections carry user-facing messages
                 $this->jsonError(422, $e->getMessage());
                 return;
             }

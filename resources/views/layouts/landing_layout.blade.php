@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ \App\classes\I18n::getLocale() }}">
+<html lang="{{ \App\classes\I18n::getLocale() }}" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover">
@@ -120,6 +120,7 @@
     .button { height: auto; }
     .input { height: auto; padding: 0.75rem 1rem; border-radius: 8px; }
     .section { padding: 3rem 1.5rem; }
+    strong, b { color: inherit; }
     
     /* Auth Page specific overrides */
     .auth-card {

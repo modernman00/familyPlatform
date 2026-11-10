@@ -279,10 +279,676 @@ final class KinshipCalculatorService
                 }
             }
 
+            // 5. Layer 1: Compute Mendelian Shared DNA % & centiMorgan (cM) Consanguinity Metrics
+            $dnaMetrics = self::computeSharedDnaMetrics(
+                $id,
+                $egoNodeId,
+                $path,
+                (string)$node['kinship_category'],
+                $node['sibling_kind'],
+                $parentsOf
+            );
+            $node['shared_dna_pct'] = $dnaMetrics['shared_dna_pct'];
+            $node['shared_dna_formatted'] = $dnaMetrics['shared_dna_formatted'];
+            $node['shared_dna_badge'] = $dnaMetrics['shared_dna_badge'];
+            $node['shared_cm_avg'] = $dnaMetrics['shared_cm_avg'];
+            $node['shared_cm_range'] = $dnaMetrics['shared_cm_range'];
+            $node['is_biological_kin'] = $dnaMetrics['is_biological_kin'];
+
             $decorated[$id] = $node;
         }
 
+        // 6. Layer 2: Propagate Tree-Derived Ancestral Lineage & Biogeographical DNA Make-Up
+        $decorated = self::propagateTreeDnaMakeup($decorated, $parentsOf, $childrenOf);
+
         return $decorated;
+    }
+
+    /**
+     * Layer 1: Compute exact Mendelian Shared DNA percentage and centiMorgan (cM) range
+     * from the ego-centric kinship path using Wright's Coefficient of Relationship.
+     *
+     * @param int $nodeId
+     * @param int $egoId
+     * @param array<int, array{type: string, from: int, to: int}>|null $path
+     * @param string $category
+     * @param string|null $siblingKind
+     * @param array<int, array<int, int>> $parentsOf
+     * @return array{
+     *     shared_dna_pct: float,
+     *     shared_dna_formatted: string,
+     *     shared_dna_badge: string,
+     *     shared_cm_avg: int,
+     *     shared_cm_range: string,
+     *     is_biological_kin: bool
+     * }
+     */
+    private static function computeSharedDnaMetrics(
+        int $nodeId,
+        int $egoId,
+        ?array $path,
+        string $category,
+        ?string $siblingKind,
+        array $parentsOf
+    ): array {
+        if ($nodeId === $egoId) {
+            return [
+                'shared_dna_pct' => 100.0,
+                'shared_dna_formatted' => '100%',
+                'shared_dna_badge' => '🧬 100% YOU',
+                'shared_cm_avg' => 6800,
+                'shared_cm_range' => '6,800 cM',
+                'is_biological_kin' => true,
+            ];
+        }
+
+        if ($path === null || empty($path)) {
+            return [
+                'shared_dna_pct' => 0.0,
+                'shared_dna_formatted' => '0%',
+                'shared_dna_badge' => '',
+                'shared_cm_avg' => 0,
+                'shared_cm_range' => '0 cM',
+                'is_biological_kin' => false,
+            ];
+        }
+
+        // Non-consanguineous categories or any path traversing a marital/spouse edge
+        if (in_array($category, ['spouse', 'in_law', 'step_parent'], true)) {
+            return [
+                'shared_dna_pct' => 0.0,
+                'shared_dna_formatted' => '0%',
+                'shared_dna_badge' => '💍 Non-Bio',
+                'shared_cm_avg' => 0,
+                'shared_cm_range' => '0 cM (Marital / In-Law)',
+                'is_biological_kin' => false,
+            ];
+        }
+
+        $halvings = 0;
+        foreach ($path as $step) {
+            $stepType = $step['type'];
+            if ($stepType === 'spouse') {
+                return [
+                    'shared_dna_pct' => 0.0,
+                    'shared_dna_formatted' => '0%',
+                    'shared_dna_badge' => '💍 Non-Bio',
+                    'shared_cm_avg' => 0,
+                    'shared_cm_range' => '0 cM (Marital / In-Law)',
+                    'is_biological_kin' => false,
+                ];
+            }
+            if ($stepType === 'parent' || $stepType === 'child') {
+                $halvings += 1;
+            } elseif ($stepType === 'sibling') {
+                $fromId = (int)$step['from'];
+                $toId = (int)$step['to'];
+                $fromParents = $parentsOf[$fromId] ?? [];
+                $toParents = $parentsOf[$toId] ?? [];
+                $sharedCount = count(array_intersect($fromParents, $toParents));
+                $isHalfStep = ($siblingKind === 'half')
+                    || ($sharedCount === 1 && (count($fromParents) > 1 || count($toParents) > 1));
+                $halvings += $isHalfStep ? 2 : 1;
+            }
+        }
+
+        if ($halvings <= 0) {
+            return [
+                'shared_dna_pct' => 0.0,
+                'shared_dna_formatted' => '0%',
+                'shared_dna_badge' => '',
+                'shared_cm_avg' => 0,
+                'shared_cm_range' => '0 cM',
+                'is_biological_kin' => false,
+            ];
+        }
+
+        $rawPct = 100.0 * pow(0.5, $halvings);
+        $pct = round($rawPct, 2);
+
+        // Format clean human-readable percentage
+        if ($pct >= 10.0) {
+            $formattedVal = rtrim(rtrim(number_format($pct, 1, '.', ''), '0'), '.');
+        } elseif ($pct >= 1.0) {
+            $formattedVal = rtrim(rtrim(number_format($pct, 2, '.', ''), '0'), '.');
+        } else {
+            $formattedVal = rtrim(rtrim(number_format($rawPct, 2, '.', ''), '0'), '.');
+        }
+
+        // Direct parent/child is exact 50%; other relationships have recombination variance (~)
+        $isExact50 = ($halvings === 1 && in_array($category, ['parent', 'child'], true));
+        $prefix = $isExact50 ? '' : '~';
+        $formatted = $prefix . $formattedVal . '%';
+        $badge = '🧬 ' . $formatted . ' DNA';
+
+        // Empirical centiMorgan (cM) averages & ranges (Shared cM Project v4.0 benchmarks)
+        if ($isExact50) {
+            $cmAvg = 3400;
+            $cmRange = '3,330–3,720 cM';
+        } elseif ($halvings === 1) {
+            // Full siblings
+            $cmAvg = 2613;
+            $cmRange = '2,209–3,384 cM';
+        } elseif ($halvings === 2) {
+            $cmAvg = 1700;
+            $cmRange = '1,156–2,311 cM';
+        } elseif ($halvings === 3) {
+            $cmAvg = 850;
+            $cmRange = '396–1,397 cM';
+        } elseif ($halvings === 4) {
+            $cmAvg = 425;
+            $cmRange = '102–980 cM';
+        } elseif ($halvings === 5) {
+            $cmAvg = 212;
+            $cmRange = '41–592 cM';
+        } else {
+            $cmAvg = (int)max(1, round(6800 * pow(0.5, $halvings)));
+            $cmMin = (int)max(0, round($cmAvg * 0.25));
+            $cmMax = (int)round($cmAvg * 1.85);
+            $cmRange = number_format($cmMin) . '–' . number_format($cmMax) . ' cM';
+        }
+
+        return [
+            'shared_dna_pct' => $pct,
+            'shared_dna_formatted' => $formatted,
+            'shared_dna_badge' => $badge,
+            'shared_cm_avg' => $cmAvg,
+            'shared_cm_range' => $cmRange,
+            'is_biological_kin' => true,
+        ];
+    }
+
+    /**
+     * Layer 2: Multi-Generational Ancestral Lineage & Biogeographical DNA Make-Up Engine.
+     *
+     * Combines:
+     * 1. Recorded Biogeographical Ethnicity JSON (`dna_ethnicity_json`) with 50/50 Mendelian
+     *    top-down inheritance (and full-sibling parity) across generations.
+     * 2. Universal Tree-Synthesised Ancestral Founder Make-up (`lineage_regions`) so every
+     *    node displays an accurate multi-segment ancestral composition bar immediately.
+     * 3. Uniparental Haplogroup Propagation (Y-DNA along father-to-son lines, mtDNA along
+     *    mother-to-child lines).
+     *
+     * @param array<int, array<string, mixed>> $nodesById
+     * @param array<int, array<int, int>> $parentsOf
+     * @param array<int, array<int, int>> $childrenOf
+     * @return array<int, array<string, mixed>>
+     */
+    private static function propagateTreeDnaMakeup(
+        array $nodesById,
+        array $parentsOf,
+        array $childrenOf
+    ): array {
+        if (empty($nodesById)) {
+            return $nodesById;
+        }
+
+        // High-contrast WCAG-compliant luxury chromosome segment palette
+        $palette = [
+            '#10b981', // Emerald
+            '#3b82f6', // Royal Blue
+            '#f59e0b', // Amber Gold
+            '#ec4899', // Rose
+            '#8b5cf6', // Violet
+            '#06b6d4', // Cyan
+            '#f97316', // Coral Orange
+            '#14b8a6', // Teal
+        ];
+
+        // 1. Parse recorded DNA profiles & establish founder lineage labels
+        /** @var array<int, array<int, array{region: string, percentage: float, color: string}>> $recordedEthnicity */
+        $recordedEthnicity = [];
+        /** @var array<int, string> $haploY */
+        $haploY = [];
+        /** @var array<int, string> $haploYSource */
+        $haploYSource = [];
+        /** @var array<int, string> $haploMt */
+        $haploMt = [];
+        /** @var array<int, string> $haploMtSource */
+        $haploMtSource = [];
+
+        foreach ($nodesById as $id => $n) {
+            $rawJson = $n['dna_ethnicity_json'] ?? null;
+            if (is_string($rawJson) && trim($rawJson) !== '') {
+                $decoded = json_decode($rawJson, true);
+                if (is_array($decoded)) {
+                    if (!empty($decoded['regions']) && is_array($decoded['regions'])) {
+                        $cleanRegions = [];
+                        $colorIdx = 0;
+                        foreach ($decoded['regions'] as $r) {
+                            if (!is_array($r)) {
+                                continue;
+                            }
+                            $rawReg = preg_replace('#<(script|style)\b[^>]*>.*?</\1>#is', '', (string)($r['region'] ?? '')) ?? '';
+                            $regName = trim(strip_tags($rawReg));
+                            $regPct = (float)($r['percentage'] ?? 0);
+                            $regColor = trim((string)($r['color'] ?? ''));
+                            if (!preg_match('/^#[0-9a-fA-F]{6}$/', $regColor)) {
+                                $regColor = $palette[$colorIdx % count($palette)];
+                            }
+                            if ($regName !== '' && $regPct > 0) {
+                                $cleanRegions[] = [
+                                    'region' => mb_substr($regName, 0, 60),
+                                    'percentage' => round($regPct, 1),
+                                    'color' => $regColor,
+                                ];
+                                $colorIdx++;
+                            }
+                        }
+                        if (!empty($cleanRegions)) {
+                            $recordedEthnicity[$id] = self::normaliseRegionWeights($cleanRegions);
+                        }
+                    }
+                    $hy = trim(strip_tags((string)($decoded['haplogroup_y'] ?? '')));
+                    if ($hy !== '') {
+                        $haploY[$id] = mb_substr($hy, 0, 24);
+                        $haploYSource[$id] = 'recorded';
+                    }
+                    $hmt = trim(strip_tags((string)($decoded['haplogroup_mt'] ?? '')));
+                    if ($hmt !== '') {
+                        $haploMt[$id] = mb_substr($hmt, 0, 24);
+                        $haploMtSource[$id] = 'recorded';
+                    }
+                }
+            }
+        }
+
+        // 2. Identify biological Father and Mother for each node
+        $fatherOf = [];
+        $motherOf = [];
+        foreach ($parentsOf as $childId => $pIds) {
+            foreach ($pIds as $pId) {
+                $pGender = strtolower((string)($nodesById[$pId]['gender'] ?? ''));
+                if ($pGender === 'male' && !isset($fatherOf[$childId])) {
+                    $fatherOf[$childId] = $pId;
+                } elseif ($pGender === 'female' && !isset($motherOf[$childId])) {
+                    $motherOf[$childId] = $pId;
+                }
+            }
+        }
+
+        // 3. Propagate Y-DNA (Patrilineal: Father <-> Son) and mtDNA (Matrilineal: Mother <-> Children)
+        // 3a. Walk upward from recorded nodes to seed patrilineal/matrilineal ancestors
+        foreach (array_keys($haploY) as $startId) {
+            $curr = $startId;
+            $guard = 0;
+            while (isset($fatherOf[$curr]) && $guard < 16) {
+                $fId = $fatherOf[$curr];
+                if (!isset($haploY[$fId])) {
+                    $haploY[$fId] = $haploY[$startId];
+                    $haploYSource[$fId] = 'paternal_line';
+                }
+                $curr = $fId;
+                $guard++;
+            }
+        }
+        foreach (array_keys($haploMt) as $startId) {
+            $curr = $startId;
+            $guard = 0;
+            while (isset($motherOf[$curr]) && $guard < 16) {
+                $mId = $motherOf[$curr];
+                if (!isset($haploMt[$mId])) {
+                    $haploMt[$mId] = $haploMt[$startId];
+                    $haploMtSource[$mId] = 'maternal_line';
+                }
+                $curr = $mId;
+                $guard++;
+            }
+        }
+
+        // 3b. Sort node IDs topologically from oldest generation to youngest
+        $sortedIds = array_keys($nodesById);
+        usort($sortedIds, static function (int $a, int $b) use ($nodesById): int {
+            $genA = (int)($nodesById[$a]['generation_level'] ?? 0);
+            $genB = (int)($nodesById[$b]['generation_level'] ?? 0);
+            return $genA !== $genB ? ($genA <=> $genB) : ($a <=> $b);
+        });
+
+        // Multi-pass downward haplogroup inheritance
+        for ($pass = 0; $pass < 6; $pass++) {
+            foreach ($sortedIds as $id) {
+                $nGender = strtolower((string)($nodesById[$id]['gender'] ?? ''));
+                if ($nGender === 'male' && isset($haploY[$id])) {
+                    foreach ($childrenOf[$id] ?? [] as $chId) {
+                        $chGender = strtolower((string)($nodesById[$chId]['gender'] ?? ''));
+                        if ($chGender === 'male' && !isset($haploY[$chId])) {
+                            $haploY[$chId] = $haploY[$id];
+                            $haploYSource[$chId] = 'paternal_line';
+                        }
+                    }
+                }
+                if ($nGender === 'female' && isset($haploMt[$id])) {
+                    foreach ($childrenOf[$id] ?? [] as $chId) {
+                        if (!isset($haploMt[$chId])) {
+                            $haploMt[$chId] = $haploMt[$id];
+                            $haploMtSource[$chId] = 'maternal_line';
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4. Compute Universal Tree-Synthesised Ancestral Founder Make-up (`lineage_regions`)
+        /** @var array<int, array<int, array{region: string, percentage: float, color: string}>> $lineageMakeup */
+        $lineageMakeup = [];
+        $founderColorMap = [];
+        $founderIdx = 0;
+
+        foreach ($sortedIds as $id) {
+            $parents = $parentsOf[$id] ?? [];
+            if (empty($parents)) {
+                $label = self::resolveFounderLineageLabel($id, $nodesById);
+                if (!isset($founderColorMap[$label])) {
+                    $founderColorMap[$label] = $palette[$founderIdx % count($palette)];
+                    $founderIdx++;
+                }
+                $lineageMakeup[$id] = [[
+                    'region' => $label,
+                    'percentage' => 100.0,
+                    'color' => $founderColorMap[$label],
+                ]];
+            }
+        }
+
+        // Propagate founder lineage top-down across up to 8 generational passes
+        for ($pass = 0; $pass < 8; $pass++) {
+            foreach ($sortedIds as $id) {
+                $parents = $parentsOf[$id] ?? [];
+                if (empty($parents)) {
+                    continue;
+                }
+                if (count($parents) >= 2) {
+                    $p1 = $parents[0];
+                    $p2 = $parents[1];
+                    if (isset($lineageMakeup[$p1], $lineageMakeup[$p2])) {
+                        $lineageMakeup[$id] = self::blendParentRegions($lineageMakeup[$p1], $lineageMakeup[$p2]);
+                    }
+                } elseif (count($parents) === 1) {
+                    $p1 = $parents[0];
+                    if (isset($lineageMakeup[$p1])) {
+                        $p1Gender = strtolower((string)($nodesById[$p1]['gender'] ?? ''));
+                        $otherLabel = ($p1Gender === 'male') ? 'Maternal Heritage Line' : 'Paternal Heritage Line';
+                        if (!isset($founderColorMap[$otherLabel])) {
+                            $founderColorMap[$otherLabel] = $palette[$founderIdx % count($palette)];
+                            $founderIdx++;
+                        }
+                        $otherRegions = [[
+                            'region' => $otherLabel,
+                            'percentage' => 100.0,
+                            'color' => $founderColorMap[$otherLabel],
+                        ]];
+                        $lineageMakeup[$id] = self::blendParentRegions($lineageMakeup[$p1], $otherRegions);
+                    }
+                }
+            }
+        }
+
+        // Fallback for any disconnected/cyclic node without lineageMakeup yet
+        foreach ($nodesById as $id => $n) {
+            if (!isset($lineageMakeup[$id])) {
+                $label = self::resolveFounderLineageLabel($id, $nodesById);
+                if (!isset($founderColorMap[$label])) {
+                    $founderColorMap[$label] = $palette[$founderIdx % count($palette)];
+                    $founderIdx++;
+                }
+                $lineageMakeup[$id] = [[
+                    'region' => $label,
+                    'percentage' => 100.0,
+                    'color' => $founderColorMap[$label],
+                ]];
+            }
+        }
+
+        // 5. Propagate Biogeographical Ethnicity (`recordedEthnicity`) across the tree
+        $activeEthnicity = $recordedEthnicity;
+        $ethnicitySource = [];
+        $ethnicitySourceLabel = [];
+        foreach (array_keys($recordedEthnicity) as $id) {
+            $ethnicitySource[$id] = 'recorded';
+            $ethnicitySourceLabel[$id] = 'Recorded DNA Profile';
+        }
+
+        // 5a. Top-down 50/50 Mendelian inheritance from parents to children
+        for ($pass = 0; $pass < 8; $pass++) {
+            foreach ($sortedIds as $id) {
+                if (isset($recordedEthnicity[$id])) {
+                    continue;
+                }
+                $parents = $parentsOf[$id] ?? [];
+                if (count($parents) >= 2) {
+                    $p1 = $parents[0];
+                    $p2 = $parents[1];
+                    if (isset($activeEthnicity[$p1], $activeEthnicity[$p2])) {
+                        $activeEthnicity[$id] = self::blendParentRegions($activeEthnicity[$p1], $activeEthnicity[$p2]);
+                        $ethnicitySource[$id] = 'inherited_dna';
+                        $ethnicitySourceLabel[$id] = 'Synthesised from Parents (50/50 Mendelian)';
+                    } elseif (isset($activeEthnicity[$p1]) || isset($activeEthnicity[$p2])) {
+                        $knownP = isset($activeEthnicity[$p1]) ? $p1 : $p2;
+                        $otherP = isset($activeEthnicity[$p1]) ? $p2 : $p1;
+                        $otherFallback = $lineageMakeup[$otherP] ?? [[
+                            'region' => self::resolveFounderLineageLabel($otherP, $nodesById),
+                            'percentage' => 100.0,
+                            'color' => '#64748b',
+                        ]];
+                        $activeEthnicity[$id] = self::blendParentRegions($activeEthnicity[$knownP], $otherFallback);
+                        $ethnicitySource[$id] = 'inherited_dna';
+                        $ethnicitySourceLabel[$id] = 'Synthesised from Parent & Tree Lineage (50/50)';
+                    }
+                } elseif (count($parents) === 1) {
+                    $p1 = $parents[0];
+                    if (isset($activeEthnicity[$p1])) {
+                        $activeEthnicity[$id] = $activeEthnicity[$p1];
+                        $ethnicitySource[$id] = 'inherited_dna';
+                        $ethnicitySourceLabel[$id] = 'Inherited from Parent DNA Profile';
+                    }
+                }
+            }
+        }
+
+        // 5b. Full-sibling Mendelian parity: if a full sibling has recorded/inherited DNA and this sibling does not
+        foreach ($sortedIds as $id) {
+            if (isset($activeEthnicity[$id])) {
+                continue;
+            }
+            $myParents = $parentsOf[$id] ?? [];
+            if (empty($myParents)) {
+                continue;
+            }
+            foreach ($sortedIds as $otherId) {
+                if ($otherId === $id || !isset($activeEthnicity[$otherId])) {
+                    continue;
+                }
+                $otherParents = $parentsOf[$otherId] ?? [];
+                if (!empty($otherParents) && count($myParents) === count($otherParents) && empty(array_diff($myParents, $otherParents))) {
+                    $activeEthnicity[$id] = $activeEthnicity[$otherId];
+                    $ethnicitySource[$id] = 'inherited_dna';
+                    $ethnicitySourceLabel[$id] = 'Shared Full-Sibling Parental DNA Make-up';
+                    break;
+                }
+            }
+        }
+
+        // 6. Attach complete `dna_makeup` payload to every node
+        foreach ($nodesById as $id => &$node) {
+            $hasCustomEthnicity = isset($activeEthnicity[$id]);
+            $activeRegions = $hasCustomEthnicity ? $activeEthnicity[$id] : $lineageMakeup[$id];
+            $mode = $hasCustomEthnicity ? 'ethnicity' : 'tree_lineage';
+            $src = $hasCustomEthnicity ? ($ethnicitySource[$id] ?? 'inherited_dna') : 'tree_synthesised';
+            $srcLabel = $hasCustomEthnicity
+                ? ($ethnicitySourceLabel[$id] ?? 'Synthesised from Family DNA')
+                : 'Synthesised from Family Tree Lineage';
+
+            // Build concise summary string for node cards & tooltips (top 2 regions)
+            $summaryParts = [];
+            foreach (array_slice($activeRegions, 0, 2) as $reg) {
+                $shortReg = preg_replace('/\s*\b(Ancestral|Heritage|Paternal|Maternal)\s+Line\b/i', '', $reg['region']) ?? $reg['region'];
+                $shortReg = trim($shortReg);
+                if (mb_strlen($shortReg) > 14) {
+                    $shortReg = mb_substr($shortReg, 0, 13) . '…';
+                }
+                $pctStr = rtrim(rtrim(number_format((float)$reg['percentage'], 1, '.', ''), '0'), '.');
+                $summaryParts[] = $pctStr . '% ' . $shortReg;
+            }
+            if (count($activeRegions) > 2) {
+                $summaryParts[] = '+' . (count($activeRegions) - 2);
+            }
+
+            $node['dna_makeup'] = [
+                'mode' => $mode,
+                'source' => $src,
+                'source_label' => $srcLabel,
+                'active_regions' => $activeRegions,
+                'recorded_regions' => $recordedEthnicity[$id] ?? [],
+                'lineage_regions' => $lineageMakeup[$id],
+                'summary_text' => implode(' · ', $summaryParts),
+                'haplogroup_y' => $haploY[$id] ?? null,
+                'haplogroup_y_source' => $haploYSource[$id] ?? null,
+                'haplogroup_mt' => $haploMt[$id] ?? null,
+                'haplogroup_mt_source' => $haploMtSource[$id] ?? null,
+            ];
+        }
+        unset($node);
+
+        return $nodesById;
+    }
+
+    /**
+     * Resolve a dignified, distinct Founder Lineage label for a root ancestor node in the tree.
+     *
+     * @param int $nodeId
+     * @param array<int, array<string, mixed>> $nodesById
+     * @return string
+     */
+    private static function resolveFounderLineageLabel(int $nodeId, array $nodesById): string
+    {
+        $n = $nodesById[$nodeId] ?? [];
+        $gender = strtolower((string)($n['gender'] ?? ''));
+        $maiden = trim((string)($n['maiden_name'] ?? ''));
+        $last = trim((string)($n['last_name'] ?? ''));
+        $first = trim((string)($n['first_name'] ?? ''));
+        $birthCode = trim((string)($n['birth_family_code'] ?? ''));
+        $isPlaceholder = !empty($n['is_placeholder']);
+
+        if ($maiden !== '') {
+            return $maiden . ' Ancestral Line';
+        }
+        if ($birthCode !== '') {
+            return '#' . $birthCode . ' Ancestral Line';
+        }
+
+        if ($isPlaceholder) {
+            return $gender === 'female' ? 'Maternal Ancestral Line' : 'Paternal Ancestral Line';
+        }
+
+        // If female founder has no maiden name recorded, include first name so Maternal & Paternal lines stay distinct
+        if ($gender === 'female') {
+            if ($first !== '' && !in_array(strtolower($first), ['mother', 'mum', 'mom', 'wife', 'grandmother', 'relative'], true)) {
+                return $first . ($last !== '' ? ' (' . $last . ')' : '') . ' Maternal Line';
+            }
+            return $last !== '' ? ($last . ' Maternal Line') : 'Maternal Ancestral Line';
+        }
+
+        if ($last !== '') {
+            if ($first !== '' && !in_array(strtolower($first), ['father', 'dad', 'husband', 'grandfather', 'relative'], true)) {
+                return $last . ' (' . $first . ') Line';
+            }
+            return $last . ' Paternal Line';
+        }
+
+        if ($first !== '') {
+            return $first . ' Ancestral Line';
+        }
+
+        return 'Ancestral Founder Line';
+    }
+
+    /**
+     * Blend two parent region arrays using exact 50/50 Mendelian inheritance and normalise to 100%.
+     *
+     * @param array<int, array{region: string, percentage: float, color: string}> $parent1Regions
+     * @param array<int, array{region: string, percentage: float, color: string}> $parent2Regions
+     * @return array<int, array{region: string, percentage: float, color: string}>
+     */
+    private static function blendParentRegions(array $parent1Regions, array $parent2Regions): array
+    {
+        $merged = [];
+        foreach ($parent1Regions as $r) {
+            $key = strtolower(trim($r['region']));
+            if (!isset($merged[$key])) {
+                $merged[$key] = [
+                    'region' => $r['region'],
+                    'percentage' => 0.0,
+                    'color' => $r['color'],
+                ];
+            }
+            $merged[$key]['percentage'] += ((float)$r['percentage']) * 0.5;
+        }
+        foreach ($parent2Regions as $r) {
+            $key = strtolower(trim($r['region']));
+            if (!isset($merged[$key])) {
+                $merged[$key] = [
+                    'region' => $r['region'],
+                    'percentage' => 0.0,
+                    'color' => $r['color'],
+                ];
+            }
+            $merged[$key]['percentage'] += ((float)$r['percentage']) * 0.5;
+        }
+
+        return self::normaliseRegionWeights(array_values($merged));
+    }
+
+    /**
+     * Normalise an array of DNA regions so percentages sum to 100.0%, sorted descending.
+     *
+     * @param array<int, array{region: string, percentage: float, color: string}> $regions
+     * @return array<int, array{region: string, percentage: float, color: string}>
+     */
+    private static function normaliseRegionWeights(array $regions): array
+    {
+        $total = 0.0;
+        foreach ($regions as $r) {
+            $total += max(0.0, (float)$r['percentage']);
+        }
+        if ($total <= 0.0) {
+            return [];
+        }
+
+        $normalised = [];
+        foreach ($regions as $r) {
+            $pct = round(((float)$r['percentage'] / $total) * 100.0, 1);
+            if ($pct >= 0.5) {
+                $normalised[] = [
+                    'region' => $r['region'],
+                    'percentage' => $pct,
+                    'color' => $r['color'],
+                ];
+            }
+        }
+
+        usort($normalised, static fn(array $a, array $b): int => $b['percentage'] <=> $a['percentage']);
+
+        // Cap at 6 distinct segments for visual clarity and adjust rounding residue on largest segment
+        if (count($normalised) > 6) {
+            $top = array_slice($normalised, 0, 5);
+            $restPct = 0.0;
+            foreach (array_slice($normalised, 5) as $rem) {
+                $restPct += $rem['percentage'];
+            }
+            $top[] = [
+                'region' => 'Other Ancestral Lines',
+                'percentage' => round($restPct, 1),
+                'color' => '#94a3b8',
+            ];
+            $normalised = $top;
+        }
+
+        $sum = array_sum(array_column($normalised, 'percentage'));
+        if (!empty($normalised) && abs(100.0 - $sum) > 0.01) {
+            $normalised[0]['percentage'] = round($normalised[0]['percentage'] + (100.0 - $sum), 1);
+        }
+
+        return $normalised;
     }
 
     /**

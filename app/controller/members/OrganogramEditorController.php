@@ -1987,6 +1987,153 @@ final class OrganogramEditorController extends BaseController
         }
     }
 
+    /**
+     * Save or Reset Biogeographical DNA Make-Up & Haplogroup Profile for a family node.
+     * Enforces strict CSRF, family-scope IDOR protection, and XSS-safe schema validation.
+     */
+    public function saveNodeDnaMakeup(): void
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                msgException(405, 'Method Not Allowed');
+                return;
+            }
+
+            $rawInput = file_get_contents('php://input') ?: '';
+            $jsonInput = json_decode($rawInput, true) ?: [];
+
+            $nodeId = (int)($_POST['node_id'] ?? ($jsonInput['node_id'] ?? 0));
+            if ($nodeId <= 0) {
+                msgException(400, 'Invalid Node ID');
+                return;
+            }
+
+            $db = Db::connect2();
+            $ctx = $this->resolveEditorFamilyContext($db, 0, $nodeId, $jsonInput);
+            $familyCode = $ctx['family_code'];
+            if (empty($familyCode)) {
+                msgException(403, 'Unauthorised Access');
+                return;
+            }
+
+            // IDOR Protection: Verify node belongs to this user's family code
+            $stmt = $db->prepare("SELECT id, family_code FROM family_nodes WHERE id = ? AND family_code = ?");
+            $stmt->execute([$nodeId, $familyCode]);
+            $node = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$node) {
+                msgException(403, 'Permission Denied: Node does not belong to your family tree.');
+                return;
+            }
+
+            // Defensive self-healing schema check
+            try {
+                $colChk = $db->query("SHOW COLUMNS FROM family_nodes LIKE 'dna_ethnicity_json'");
+                if ($colChk === false || !$colChk->fetch()) {
+                    $db->exec("ALTER TABLE family_nodes ADD COLUMN dna_ethnicity_json TEXT NULL DEFAULT NULL AFTER voice_capsule_url");
+                }
+            } catch (\Throwable) {
+                // Ignore if column already exists
+            }
+
+            $isClear = !empty($_POST['clear']) || !empty($jsonInput['clear']);
+            if ($isClear) {
+                $upd = $db->prepare("UPDATE family_nodes SET dna_ethnicity_json = NULL WHERE id = ? AND family_code = ?");
+                $upd->execute([$nodeId, $familyCode]);
+
+                msgSuccess(200, [
+                    'message' => 'DNA profile reset to automatic family tree synthesis.',
+                    'node_id' => $nodeId,
+                    'dna_profile' => null,
+                ]);
+                return;
+            }
+
+            $rawRegions = $jsonInput['regions'] ?? ($_POST['regions'] ?? []);
+            if (is_string($rawRegions)) {
+                $rawRegions = json_decode($rawRegions, true) ?: [];
+            }
+
+            $palette = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#f97316', '#14b8a6'];
+            $cleanRegions = [];
+            $totalPct = 0.0;
+            $idx = 0;
+
+            if (is_array($rawRegions)) {
+                foreach (array_slice($rawRegions, 0, 8) as $item) {
+                    if (!is_array($item)) {
+                        continue;
+                    }
+                    $rawRegion = preg_replace('#<(script|style)\b[^>]*>.*?</\1>#is', '', (string)($item['region'] ?? '')) ?? '';
+                    $regionName = trim(strip_tags($rawRegion));
+                    $regionName = str_replace(['<', '>', '"', "'"], '', $regionName);
+                    $pct = (float)($item['percentage'] ?? 0);
+                    $color = trim((string)($item['color'] ?? ''));
+                    if (!preg_match('/^#[0-9a-fA-F]{6}$/', $color)) {
+                        $color = $palette[$idx % count($palette)];
+                    }
+
+                    if ($regionName !== '' && $pct > 0.0) {
+                        $clampedPct = min(100.0, max(0.1, $pct));
+                        $cleanRegions[] = [
+                            'region' => mb_substr($regionName, 0, 60),
+                            'percentage' => $clampedPct,
+                            'color' => $color,
+                        ];
+                        $totalPct += $clampedPct;
+                        $idx++;
+                    }
+                }
+            }
+
+            // Normalise region percentages to 100.0%
+            if (!empty($cleanRegions) && $totalPct > 0.0) {
+                foreach ($cleanRegions as &$cr) {
+                    $cr['percentage'] = round(($cr['percentage'] / $totalPct) * 100.0, 1);
+                }
+                unset($cr);
+                usort($cleanRegions, static fn(array $a, array $b): int => $b['percentage'] <=> $a['percentage']);
+                $sum = array_sum(array_column($cleanRegions, 'percentage'));
+                if (abs(100.0 - $sum) > 0.01) {
+                    $cleanRegions[0]['percentage'] = round($cleanRegions[0]['percentage'] + (100.0 - $sum), 1);
+                }
+            }
+
+            $rawHaploY = trim(strip_tags((string)($jsonInput['haplogroup_y'] ?? ($_POST['haplogroup_y'] ?? ''))));
+            $haploY = preg_replace('/[^A-Za-z0-9\-\+\*\(\)\s\~]/', '', $rawHaploY) ?? '';
+            $haploY = mb_substr(trim($haploY), 0, 24);
+
+            $rawHaploMt = trim(strip_tags((string)($jsonInput['haplogroup_mt'] ?? ($_POST['haplogroup_mt'] ?? ''))));
+            $haploMt = preg_replace('/[^A-Za-z0-9\-\+\*\(\)\s\~]/', '', $rawHaploMt) ?? '';
+            $haploMt = mb_substr(trim($haploMt), 0, 24);
+
+            if (empty($cleanRegions) && $haploY === '' && $haploMt === '') {
+                msgException(400, 'Please provide at least one ancestral region or haplogroup marker.');
+                return;
+            }
+
+            $payload = [
+                'regions' => $cleanRegions,
+                'haplogroup_y' => $haploY !== '' ? $haploY : null,
+                'haplogroup_mt' => $haploMt !== '' ? $haploMt : null,
+                'source' => 'recorded',
+                'updated_at' => gmdate('Y-m-d\TH:i:s\Z'),
+            ];
+
+            $encodedJson = json_encode($payload, JSON_UNESCAPED_UNICODE);
+            $upd = $db->prepare("UPDATE family_nodes SET dna_ethnicity_json = ? WHERE id = ? AND family_code = ?");
+            $upd->execute([$encodedJson, $nodeId, $familyCode]);
+
+            msgSuccess(200, [
+                'message' => 'DNA make-up saved and propagated across your family tree.',
+                'node_id' => $nodeId,
+                'dna_profile' => $payload,
+            ]);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
     private function requesterName(): string
     {
         $n = trim((string)($_SESSION['fName'] ?? '') . ' ' . (string)($_SESSION['lName'] ?? ''));

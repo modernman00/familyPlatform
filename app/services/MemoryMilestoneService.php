@@ -319,6 +319,8 @@ class MemoryMilestoneService
             $timeHeader = $yearsAgo === 1 ? '1 year ago' : "{$yearsAgo} years ago";
             $customNote = trim($reflectionMessage);
 
+            $primaryImg = is_string($origPost->rawAttributes['post_img0'] ?? null) ? $origPost->rawAttributes['post_img0'] : null;
+
             $composedMessage = "✨ [Memory Flashback — {$timeHeader}]: ";
             if ($customNote !== '') {
                 $composedMessage .= "{$customNote} \n\n— Original note: \"{$origPost->postMessage}\"";
@@ -333,7 +335,6 @@ class MemoryMilestoneService
             $insQuery = "INSERT INTO post (id, fullName, postMessage, postFamCode, post_img0, post_time, post_status, date_created)
                          VALUES (?, ?, ?, ?, ?, ?, 'published', CURRENT_TIMESTAMP)";
             $insStmt = $this->db->prepare($insQuery);
-            $primaryImg = is_string($origPost->rawAttributes['post_img0'] ?? null) ? $origPost->rawAttributes['post_img0'] : null;
             $insStmt->execute([
                 $userId,
                 $fullName,

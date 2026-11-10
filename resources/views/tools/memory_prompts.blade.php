@@ -32,23 +32,23 @@
               <i class="bi bi-patch-check-fill"></i> Verified Heritage Guide
             </div>
             <h2 id="prompt-tool-faq" class="fw-bold fs-4 text-dark mb-3">How do you interview grandparents about family history without awkward silence?</h2>
-            <p class="lead text-secondary mb-3" style="line-height: 1.7; font-size: 1.05rem;">
-              <strong>To conduct meaningful oral history interviews, replace vague questions like "Tell me about your life" with specific sensory memory prompts: ask about the aromas of their childhood kitchen, the first song on their car radio, or the hardest lesson of their twenties. Record in relaxed 10-minute sessions over tea.</strong>
+            <p class="lead text-dark mb-3" style="line-height: 1.7; font-size: 1.05rem;">
+              <strong class="text-dark">To conduct meaningful oral history interviews, replace vague questions like "Tell me about your life" with specific sensory memory prompts: ask about the aromas of their childhood kitchen, the first song on their car radio, or the hardest lesson of their twenties. Record in relaxed 10-minute sessions over tea.</strong>
             </p>
             <div class="row g-2 pt-2">
               <div class="col-sm-4">
-                <div class="p-2 px-3 rounded-3 bg-light border small text-secondary">
-                  <strong>1. Sensory Triggers:</strong> Scent, sound, taste.
+                <div class="p-2 px-3 rounded-3 bg-light border small text-dark">
+                  <strong class="text-dark">1. Sensory Triggers:</strong> Scent, sound, taste.
                 </div>
               </div>
               <div class="col-sm-4">
-                <div class="p-2 px-3 rounded-3 bg-light border small text-secondary">
-                  <strong>2. Short Audio Clips:</strong> 5–10 mins to avoid fatigue.
+                <div class="p-2 px-3 rounded-3 bg-light border small text-dark">
+                  <strong class="text-dark">2. Short Audio Clips:</strong> 5–10 mins to avoid fatigue.
                 </div>
               </div>
               <div class="col-sm-4">
-                <div class="p-2 px-3 rounded-3 bg-light border small text-secondary">
-                  <strong>3. Private Archive:</strong> Encrypted family vault.
+                <div class="p-2 px-3 rounded-3 bg-light border small text-dark">
+                  <strong class="text-dark">3. Private Archive:</strong> Encrypted family vault.
                 </div>
               </div>
             </div>

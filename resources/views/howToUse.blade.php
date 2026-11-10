@@ -140,7 +140,8 @@
               <li class="mb-2">Click <strong>"Record / Upload Voice Capsule"</strong> in the slide-out dossier.</li>
               <li class="mb-2">Record oral histories, lullabies, ancestral blessings, or life advice.</li>
               <li class="mb-2">Recordings are encrypted and streamable exclusively by authenticated family members.</li>
-              <li><strong>Honouring Deceased Ancestors:</strong> Relatives marked as deceased are respectfully distinguished with a 🕊️ In Memory banner, silver/slate ribbons, grayscale portraits, and lifespan dates across the Canvas Tree, Pedigree Outline, and Radial Fan Chart.</li>
+              <li class="mb-2"><strong>Honouring Deceased Ancestors:</strong> Relatives marked as deceased are respectfully distinguished with a 🕊️ In Memory banner, silver/slate ribbons, grayscale portraits, and lifespan dates across the Canvas Tree, Pedigree Outline, and Radial Fan Chart.</li>
+              <li><strong>DNA Make-Up &amp; Mendelian Consanguinity (Layers 1 &amp; 2):</strong> Every tree node automatically displays your <strong>Shared DNA % &amp; centiMorgans (cM)</strong> calculated via Wright's Coefficient of Relationship ($r = \sum (1/2)^L$) alongside a multi-segment <strong>Ancestral Chromosome Bar</strong>. Click any node and select <strong>"Curate DNA &amp; Ethnicity Make-up"</strong> to record regional DNA test breakdowns (e.g., 23andMe, AncestryDNA) or Y-DNA/mtDNA haplogroups—which automatically propagate 50/50 Mendelian inheritance down your family tree!</li>
             </ol>
           </div>
         </div>

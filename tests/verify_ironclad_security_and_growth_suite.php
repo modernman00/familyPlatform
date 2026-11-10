@@ -89,7 +89,7 @@ assertIronclad(!empty($createdCard['absolute_image_url']) && str_starts_with($cr
 assertIronclad(!empty($createdCard['absolute_public_url']) && str_starts_with($createdCard['absolute_public_url'], 'http'), 'Card includes absolute public URL: ' . $createdCard['absolute_public_url']);
 
 // Verify pre-rendered PNG is cached on disk
-$cacheFile = __DIR__ . '/../public/resources/cache/festive_cards/' . $createdCard['share_token'] . '.png';
+$cacheFile = __DIR__ . '/../storage/cache/festive_cards/' . $createdCard['share_token'] . '_og_v2.jpg';
 assertIronclad(file_exists($cacheFile) && filesize($cacheFile) > 1000, 'Festive card PNG was pre-rendered at creation time: ' . basename($cacheFile));
 
 // Test WebP EXIF stripping and bounds check

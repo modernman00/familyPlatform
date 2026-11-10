@@ -166,6 +166,40 @@ assertCondition(str_contains($studioContent, 'festiveStudioWizard()'), "festiveC
 assertCondition(str_contains($envelopeContent, 'livingEnvelopeApp()'), "livingFestiveEnvelope implements Living Envelope state machine");
 assertCondition(str_contains($envelopeContent, 'wax-seal'), "livingFestiveEnvelope contains interactive wax seal");
 
+// -------------------------------------------------------------------------
+// Phase 7: "Your Own Celebration" (custom occasion + mood) & WhatsApp/OG assets
+// -------------------------------------------------------------------------
+echo "\n[Phase 7] Auditing Your Own Celebration, Moods & Link-Preview Assets...\n";
+
+$threw = false;
+try {
+    $service->createCard('test_user_777', 'STERLING2026', ['occasion' => 'custom', 'custom_occasion' => '   ']);
+} catch (\InvalidArgumentException $e) {
+    $threw = true;
+}
+assertCondition($threw, "Custom occasion without a name is rejected");
+
+$custom = $service->createCard('test_user_777', 'STERLING2026', [
+    'occasion' => 'custom',
+    'custom_occasion' => "Dad's <b>25th</b> Remembrance",
+    'mood' => 'reverent',
+    'template_style' => 'plaque',
+    'sender_name' => 'The Sterling Clan',
+    'hero_photo_url' => '/resources/../../.env',
+]);
+assertCondition(($custom['custom_occasion'] ?? '') === "Dad's 25th Remembrance", "Custom occasion name stored with tags stripped");
+assertCondition(($custom['mood'] ?? '') === 'reverent' && ($custom['particle'] ?? '') === 'embers', "Reverent mood drives gentle ember particles");
+assertCondition(($custom['theme'] ?? '') === 'pearl_dove', "Reverent mood defaults to the Pearl Dove palette");
+assertCondition(($custom['eyebrow'] ?? '') === "Dad's 25th Remembrance", "Custom name becomes the card eyebrow");
+assertCondition(empty($custom['hero_photo_url']), "Path-traversal hero photo URL rejected");
+assertCondition(str_contains((string)$custom['whatsapp_text'], (string)$custom['absolute_public_url']), "WhatsApp message carries the absolute envelope link");
+
+$jpg = AtgFestiveCardRenderer::renderJpeg($custom, 'og');
+assertCondition(str_starts_with($jpg, "\xFF\xD8") && strlen($jpg) < 600000, "OG JPEG rendered under WhatsApp's preview size limit (" . strlen($jpg) . " bytes)");
+$portrait = AtgFestiveCardRenderer::renderJpeg($custom, 'portrait');
+$dims = getimagesizefromstring($portrait);
+assertCondition(is_array($dims) && $dims[0] === 1080 && $dims[1] === 1350, "Portrait keepsake rendered at 1080x1350");
+
 // Cleanup test record
 $db->prepare('DELETE FROM festive_cards WHERE user_id = ?')->execute(['test_user_777']);
 

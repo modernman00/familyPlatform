@@ -631,6 +631,18 @@ parameters:
 			path: app/classes/VerifyToken.php
 
 		-
+			message: '#^Parameter \#1 \$haystack of function strpos expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/config/init.php
+
+		-
+			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/config/init.php
+
+		-
 			message: '#^Call to method addNewCol\(\) on an unknown class Src\\AlterTable\.$#'
 			identifier: class.notFound
 			count: 1
@@ -841,6 +853,30 @@ parameters:
 			path: app/controller/NotificationController.php
 
 		-
+			message: '#^Offset ''id'' on non\-empty\-array\<mixed\> on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/controller/PostShareController.php
+
+		-
+			message: '#^Parameter \#1 \$string of function trim expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/controller/PostShareController.php
+
+		-
+			message: '#^Parameter \#2 \$famCode of static method App\\controller\\PostShareController\:\:issueShareIntentCookie\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/controller/PostShareController.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between non\-falsy\-string and '''' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/controller/PostShareController.php
+
+		-
 			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -1007,6 +1043,12 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/controller/admin/ReviewApps.php
+
+		-
+			message: '#^Dead catch \- Src\\Exceptions\\RecaptchaException is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
+			count: 1
+			path: app/controller/login/Login.php
 
 		-
 			message: '#^PHPDoc tag @param references unknown parameter\: \$sanitisedData$#'
@@ -1882,6 +1924,198 @@ parameters:
 			path: app/service/NotificationService.php
 
 		-
+			message: '#^Cannot access offset 0 on array\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 9
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Cannot access offset 1 on array\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Cannot access offset 2 on array\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 6
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Cannot access offset 3 on array\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Cannot access offset 5 on array\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Cannot access offset 7 on array\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Offset ''mime'' on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Parameter \#1 \$width of function imagecreatetruecolor expects int\<1, max\>, int given\.$#'
+			identifier: argument.type
+			count: 5
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Parameter \#2 \$color of function imagecolortransparent expects int\|null, int\<0, max\>\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Parameter \#2 \$height of function imagecreatetruecolor expects int\<1, max\>, int given\.$#'
+			identifier: argument.type
+			count: 6
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Parameter \#2 \$red of function imagecolorallocatealpha expects int\<0, 255\>, int given\.$#'
+			identifier: argument.type
+			count: 4
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Parameter \#3 \$green of function imagecolorallocatealpha expects int\<0, 255\>, int given\.$#'
+			identifier: argument.type
+			count: 4
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Parameter \#4 \$blue of function imagecolorallocatealpha expects int\<0, 255\>, int given\.$#'
+			identifier: argument.type
+			count: 4
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Parameter \#4 \$color of function imagefill expects int, int\<0, max\>\|false given\.$#'
+			identifier: argument.type
+			count: 7
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Parameter \#4 \$color of function imagesetpixel expects int, int\<0, max\>\|false given\.$#'
+			identifier: argument.type
+			count: 5
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Parameter \#5 \$alpha of function imagecolorallocatealpha expects int\<0, 127\>, int given\.$#'
+			identifier: argument.type
+			count: 5
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Parameter \#5 \$alpha of function imagecolorallocatealpha expects int\<0, 127\>, int\<0, max\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Parameter \#6 \$color of function imagefilledellipse expects int, int\<0, max\>\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Parameter \#6 \$color of function imagefilledrectangle expects int, int\<0, max\>\|false given\.$#'
+			identifier: argument.type
+			count: 4
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Parameter \#6 \$color of function imageline expects int, int\<0, max\>\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Parameter \#6 \$color of function imagettftext expects int, int\<0, max\>\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Parameter \#7 \$colour of static method App\\services\\AtgFestiveCardRenderer\:\:drawShape\(\) expects int, int\<0, max\>\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Static method App\\services\\AtgFestiveCardRenderer\:\:fitLines\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: app/services/AtgFestiveCardRenderer.php
+
+		-
+			message: '#^Call to function is_array\(\) with non\-empty\-array\<string, mixed\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/services/AtgFestiveCardService.php
+
+		-
+			message: '#^Match arm comparison between ''image/webp'' and ''image/webp'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/services/AtgFestiveCardService.php
+
+		-
+			message: '#^Offset ''emoji'' on array\{key\: ''birthday'', title\: ''Birthday Celebration'', short\: ''Birthday'', icon\: ''bi\-cake2\-fill'', emoji\: ''🎂'', mood\: ''joyful'', default_theme\: ''gold_champagne'', particle\: ''confetti'', \.\.\.\}\|array\{key\: ''christmas'', title\: ''Christmas & Boxing…'', short\: ''Christmas'', icon\: ''bi\-tree\-fill'', emoji\: ''🎄'', mood\: ''joyful'', default_theme\: ''royal_crimson'', particle\: ''snow'', \.\.\.\}\|array\{key\: ''custom'', title\: ''Your Own Celebration'', short\: ''Your Own Celebration'', icon\: ''bi\-pencil\-square'', emoji\: ''✨'', mood\: ''joyful'', default_theme\: ''gold_champagne'', particle\: ''confetti'', \.\.\.\}\|array\{key\: ''diwali'', title\: ''Diwali \(Festival of…'', short\: ''Diwali'', icon\: ''bi\-brightness\-high…'', emoji\: ''🪔'', mood\: ''joyful'', default_theme\: ''autumn_harvest'', particle\: ''sparks'', \.\.\.\}\|array\{key\: ''easter'', title\: ''Easter & Spring…'', short\: ''Easter'', icon\: ''bi\-flower1'', emoji\: ''🌷'', mood\: ''joyful'', default_theme\: ''rose_blush'', particle\: ''petals'', \.\.\.\}\|array\{key\: ''eid'', title\: ''Eid Mubarak \(al…'', short\: ''Eid'', icon\: ''bi\-moon\-stars\-fill'', emoji\: ''🌙'', mood\: ''joyful'', default_theme\: ''celestial_navy'', particle\: ''stardust'', \.\.\.\}\|array\{key\: ''fathers_day'', title\: ''Father’s Day Honour'', short\: ''Father’s Day'', icon\: ''bi\-shield\-fill\-check'', emoji\: ''👔'', mood\: ''grateful'', default_theme\: ''celestial_navy'', particle\: ''golddust'', \.\.\.\}\|array\{key\: ''graduation'', title\: ''Graduation &…'', short\: ''Graduation'', icon\: ''bi\-mortarboard\-fill'', emoji\: ''🎓'', mood\: ''joyful'', default_theme\: ''celestial_navy'', particle\: ''confetti'', \.\.\.\}\|array\{key\: ''milestone'', title\: ''Family Milestone &…'', short\: ''Milestone'', icon\: ''bi\-trophy\-fill'', emoji\: ''🏆'', mood\: ''joyful'', default_theme\: ''royal_crimson'', particle\: ''golddust'', \.\.\.\}\|array\{key\: ''mothers_day'', title\: ''Mother’s Day Honour'', short\: ''Mother’s Day'', icon\: ''bi\-heart\-fill'', emoji\: ''💐'', mood\: ''grateful'', default_theme\: ''rose_blush'', particle\: ''petals'', \.\.\.\}\|array\{key\: ''new_baby'', title\: ''New Baby & Naming…'', short\: ''New Baby'', icon\: ''bi\-balloon\-fill'', emoji\: ''👶'', mood\: ''joyful'', default_theme\: ''pearl_dove'', particle\: ''stardust'', \.\.\.\}\|array\{key\: ''new_year'', title\: ''New Year’s…'', short\: ''New Year'', icon\: ''bi\-stars'', emoji\: ''🥂'', mood\: ''joyful'', default_theme\: ''onyx_gold'', particle\: ''golddust'', \.\.\.\}\|array\{key\: ''remembrance'', title\: ''In Loving Memory &…'', short\: ''Remembrance'', icon\: ''bi\-feather'', emoji\: ''🕊️'', mood\: ''reverent'', default_theme\: ''pearl_dove'', particle\: ''embers'', \.\.\.\}\|array\{key\: ''reunion'', title\: ''Annual Family…'', short\: ''Family Reunion'', icon\: ''bi\-people\-fill'', emoji\: ''🏡'', mood\: ''joyful'', default_theme\: ''gold_champagne'', particle\: ''confetti'', \.\.\.\}\|array\{key\: ''thanksgiving'', title\: ''Thanksgiving &…'', short\: ''Thanksgiving'', icon\: ''bi\-cup\-hot\-fill'', emoji\: ''🍂'', mood\: ''grateful'', default_theme\: ''autumn_harvest'', particle\: ''leaves'', \.\.\.\}\|array\{key\: ''wedding'', title\: ''Wedding & Wedding…'', short\: ''Wedding'', icon\: ''bi\-gem'', emoji\: ''💍'', mood\: ''romantic'', default_theme\: ''onyx_gold'', particle\: ''petals'', \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/AtgFestiveCardService.php
+
+		-
+			message: '#^Offset ''mime'' on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: app/services/AtgFestiveCardService.php
+
+		-
+			message: '#^Offset ''mood'' on array\{key\: ''birthday'', title\: ''Birthday Celebration'', short\: ''Birthday'', icon\: ''bi\-cake2\-fill'', emoji\: ''🎂'', mood\: ''joyful'', default_theme\: ''gold_champagne'', particle\: ''confetti'', \.\.\.\}\|array\{key\: ''christmas'', title\: ''Christmas & Boxing…'', short\: ''Christmas'', icon\: ''bi\-tree\-fill'', emoji\: ''🎄'', mood\: ''joyful'', default_theme\: ''royal_crimson'', particle\: ''snow'', \.\.\.\}\|array\{key\: ''custom'', title\: ''Your Own Celebration'', short\: ''Your Own Celebration'', icon\: ''bi\-pencil\-square'', emoji\: ''✨'', mood\: ''joyful'', default_theme\: ''gold_champagne'', particle\: ''confetti'', \.\.\.\}\|array\{key\: ''diwali'', title\: ''Diwali \(Festival of…'', short\: ''Diwali'', icon\: ''bi\-brightness\-high…'', emoji\: ''🪔'', mood\: ''joyful'', default_theme\: ''autumn_harvest'', particle\: ''sparks'', \.\.\.\}\|array\{key\: ''easter'', title\: ''Easter & Spring…'', short\: ''Easter'', icon\: ''bi\-flower1'', emoji\: ''🌷'', mood\: ''joyful'', default_theme\: ''rose_blush'', particle\: ''petals'', \.\.\.\}\|array\{key\: ''eid'', title\: ''Eid Mubarak \(al…'', short\: ''Eid'', icon\: ''bi\-moon\-stars\-fill'', emoji\: ''🌙'', mood\: ''joyful'', default_theme\: ''celestial_navy'', particle\: ''stardust'', \.\.\.\}\|array\{key\: ''fathers_day'', title\: ''Father’s Day Honour'', short\: ''Father’s Day'', icon\: ''bi\-shield\-fill\-check'', emoji\: ''👔'', mood\: ''grateful'', default_theme\: ''celestial_navy'', particle\: ''golddust'', \.\.\.\}\|array\{key\: ''graduation'', title\: ''Graduation &…'', short\: ''Graduation'', icon\: ''bi\-mortarboard\-fill'', emoji\: ''🎓'', mood\: ''joyful'', default_theme\: ''celestial_navy'', particle\: ''confetti'', \.\.\.\}\|array\{key\: ''milestone'', title\: ''Family Milestone &…'', short\: ''Milestone'', icon\: ''bi\-trophy\-fill'', emoji\: ''🏆'', mood\: ''joyful'', default_theme\: ''royal_crimson'', particle\: ''golddust'', \.\.\.\}\|array\{key\: ''mothers_day'', title\: ''Mother’s Day Honour'', short\: ''Mother’s Day'', icon\: ''bi\-heart\-fill'', emoji\: ''💐'', mood\: ''grateful'', default_theme\: ''rose_blush'', particle\: ''petals'', \.\.\.\}\|array\{key\: ''new_baby'', title\: ''New Baby & Naming…'', short\: ''New Baby'', icon\: ''bi\-balloon\-fill'', emoji\: ''👶'', mood\: ''joyful'', default_theme\: ''pearl_dove'', particle\: ''stardust'', \.\.\.\}\|array\{key\: ''new_year'', title\: ''New Year’s…'', short\: ''New Year'', icon\: ''bi\-stars'', emoji\: ''🥂'', mood\: ''joyful'', default_theme\: ''onyx_gold'', particle\: ''golddust'', \.\.\.\}\|array\{key\: ''remembrance'', title\: ''In Loving Memory &…'', short\: ''Remembrance'', icon\: ''bi\-feather'', emoji\: ''🕊️'', mood\: ''reverent'', default_theme\: ''pearl_dove'', particle\: ''embers'', \.\.\.\}\|array\{key\: ''reunion'', title\: ''Annual Family…'', short\: ''Family Reunion'', icon\: ''bi\-people\-fill'', emoji\: ''🏡'', mood\: ''joyful'', default_theme\: ''gold_champagne'', particle\: ''confetti'', \.\.\.\}\|array\{key\: ''thanksgiving'', title\: ''Thanksgiving &…'', short\: ''Thanksgiving'', icon\: ''bi\-cup\-hot\-fill'', emoji\: ''🍂'', mood\: ''grateful'', default_theme\: ''autumn_harvest'', particle\: ''leaves'', \.\.\.\}\|array\{key\: ''wedding'', title\: ''Wedding & Wedding…'', short\: ''Wedding'', icon\: ''bi\-gem'', emoji\: ''💍'', mood\: ''romantic'', default_theme\: ''onyx_gold'', particle\: ''petals'', \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/AtgFestiveCardService.php
+
+		-
+			message: '#^Offset 0 on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: app/services/AtgFestiveCardService.php
+
+		-
+			message: '#^Offset 1 on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: app/services/AtgFestiveCardService.php
+
+		-
+			message: '#^Offset 0 on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/AvatarStickerService.php
+
+		-
+			message: '#^Offset 1 on array\{0\: int\<16, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/services/AvatarStickerService.php
+
+		-
 			message: '#^Variable \$adminEmail in empty\(\) always exists and is not falsy\.$#'
 			identifier: empty.variable
 			count: 1
@@ -1892,6 +2126,18 @@ parameters:
 			identifier: empty.offset
 			count: 1
 			path: app/services/CollateralKinshipService.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/services/ContentSafetyService.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between non\-empty\-string and '''' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/services/ContentSafetyService.php
 
 		-
 			message: '#^Argument of an invalid type list\<string\>\|false supplied for foreach, only iterables are supported\.$#'

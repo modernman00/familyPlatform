@@ -162,6 +162,12 @@
 .fs-sheet__close { position: absolute; top: 14px; right: 14px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.15); background: rgba(0,0,0,.4); color: #fff; font-size: 1.2rem; cursor: pointer; }
 .fs-sheet__note { color: rgba(244,239,230,.55); font-size: .76rem; margin-top: 12px; }
 
+.fs-fab { position: fixed; left: 16px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 1040; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 10px 18px 10px 10px; border-radius: 999px; border: 1px solid rgba(243,220,154,.4); background: #121014; color: #f4efe6; font-weight: 600; font-size: .88rem; box-shadow: 0 14px 30px -10px rgba(0,0,0,.6); cursor: pointer; }
+.fs-fab__thumb { width: 30px; height: 36px; border-radius: 5px; overflow: hidden; flex: none; }
+@media (min-width: 992px) { .fs-fab { display: none !important; } }
+.fs-sheet__img { animation: fs-shimmer 1.4s ease-in-out infinite alternate; }
+.fs-sheet__img.is-loaded { animation: none; }
+@keyframes fs-shimmer { from { background: #1c1a1e; } to { background: #2a2630; } }
 .fp-toast { position: fixed; left: 50%; bottom: 28px; z-index: 3000; transform: translate(-50%, 20px); opacity: 0; background: #17120c; color: #f4efe6; border: 1px solid rgba(243,220,154,.35); padding: 12px 18px; border-radius: 999px; font-size: .9rem; font-weight: 600; box-shadow: 0 16px 30px rgba(0,0,0,.35); transition: opacity .3s, transform .3s; }
 .fp-toast.is-in { opacity: 1; transform: translate(-50%, 0); }
 </style>
@@ -395,12 +401,19 @@
         @endif
     </section>
 
+    {{-- Mobile: jump back to the live preview --}}
+    <button type="button" class="fs-fab" x-show="!stageVisible && !sheet" x-cloak x-transition.opacity
+            @click="document.querySelector('.fs-stage').scrollIntoView({ behavior: 'smooth', block: 'start' })" aria-label="See your card preview">
+        <span class="fs-fab__thumb" aria-hidden="true">@include('festive.card', ['live' => true, 'thumb' => true, 'tilt' => false, 'animateIn' => false, 'styleExpr' => 'c.style', 'card' => []])</span>
+        <span>Preview card</span>
+    </button>
+
     {{-- ─────────── Share sheet ─────────── --}}
     <div class="fs-sheet" x-show="sheet" x-cloak x-transition.opacity @keydown.escape.window="closeSheet()" @click.self="closeSheet()" role="dialog" aria-modal="true" aria-labelledby="fsSheetTitle">
         <template x-if="sheet">
             <div class="fs-sheet__panel" style="position:relative" @click.stop>
                 <button type="button" class="fs-sheet__close" @click="closeSheet()" aria-label="Close"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
-                <img class="fs-sheet__img" :src="sheet.image" alt="Your card as it will be shared">
+                <img class="fs-sheet__img" :src="sheet.image" alt="Your card as it will be shared" @load="$el.classList.add('is-loaded')">
                 <div>
                     <div class="fs-sheet__eyebrow" x-text="sheet.label"></div>
                     <h3 id="fsSheetTitle" x-text="sheet.justCreated ? 'Sealed and ready to send' : 'Share this card'"></h3>
@@ -436,7 +449,7 @@ function festiveStudioWizard() {
     const themes = @json($themes, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
     const templateStyles = @json($templateStyles, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
     const moods = @json($moods, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
-    const defaultSender = @json(trim((string)($user['name'] ?? '') . ' ' . (string)($user['lastName'] ?? '')) ?: 'The Family', JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+    const defaultSender = @json(trim((string)($user['lastName'] ?? '')) !== '' ? 'The ' . trim((string)$user['lastName']) . ' Family' : (trim((string)($user['name'] ?? '')) ?: 'The Family'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
 
     return {
         occasions, themes, templateStyles, moods,
@@ -461,9 +474,14 @@ function festiveStudioWizard() {
         sheet: null,
         feedBusy: false,
         canNativeShare: !!navigator.share,
+        stageVisible: true,
 
         init() {
             if (window.FPCards) window.FPCards.initTilt(this.$el);
+            const stage = this.$el.querySelector('.fs-stage');
+            if (stage && 'IntersectionObserver' in window) {
+                new IntersectionObserver((entries) => { this.stageVisible = entries[0].isIntersecting; }, { threshold: 0.15 }).observe(stage);
+            }
         },
 
         get selectedOccasion() { return this.occasions[this.occasionKey] || this.occasions.christmas; },

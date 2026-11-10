@@ -257,9 +257,9 @@ if ! git diff-index --quiet HEAD -- 2>/dev/null; then
     fi
 fi
 
-# Guard against accidental secret leaks
-UNTRACKED_SECRETS=$(git status --porcelain | grep -E "^\?\?.*(\\.env|\\.pem|\\.sql|\\.key|\\.crt|\\.backup)" || true)
-STAGED_SECRETS=$(git diff --cached --name-only | grep -E "(\\.env|\\.pem|\\.sql|\\.key|\\.crt|\\.backup)" || true)
+# Guard against accidental secret leaks (exclude legitimate version-controlled schema migrations)
+UNTRACKED_SECRETS=$(git status --porcelain | grep -E "^\?\?.*(\\.env|\\.pem|\\.sql|\\.key|\\.crt|\\.backup)" | grep -vE '^\?\?\s+migrations/' || true)
+STAGED_SECRETS=$(git diff --cached --name-only | grep -E "(\\.env|\\.pem|\\.sql|\\.key|\\.crt|\\.backup)" | grep -vE '^migrations/' || true)
 
 if [ -n "$UNTRACKED_SECRETS" ]; then
     echo "🛑 SEC-OPS ALERT: Potential untracked secret files detected in workspace:"

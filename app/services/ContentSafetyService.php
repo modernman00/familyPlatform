@@ -164,7 +164,6 @@ final class ContentSafetyService
         'scrape' => true,
         'scraped' => true,
         'scraper' => true,
-        'scraping' => true,
         'trapezoid' => true,
         'trapeze' => true,
         'parapet' => true,

@@ -22,8 +22,8 @@ use RuntimeException;
  */
 final class AtgFestiveCardRenderer
 {
-    private const WIDTH = 1200;
-    private const HEIGHT = 630;
+    public const WIDTH = 1200;
+    public const HEIGHT = 630;
     private const SS = 2; // supersampling factor
     private const CACHE_VERSION = 'v2';
 
@@ -83,10 +83,12 @@ final class AtgFestiveCardRenderer
     }
 
     /**
-     * Write the portrait render to the deploy-protected uploads dir so the family feed can show it.
+     * Write the portrait render into the feed's post-image directory so the family feed shows the
+     * designed card. The feed client resolves bare filenames to /resources/images/post/<name>
+     * (any other relative path is rewritten there too), so we store and return the bare filename.
      *
      * @param array<string, mixed> $card
-     * @return string|null Public web path
+     * @return string|null Bare filename for post.post_img0
      */
     public static function exportFeedImage(array $card): ?string
     {
@@ -95,15 +97,15 @@ final class AtgFestiveCardRenderer
             if ($token === '') {
                 return null;
             }
-            $dir = AtgFestiveCardService::projectRoot() . AtgFestiveCardService::HERO_WEB_DIR;
+            $dir = AtgFestiveCardService::projectRoot() . '/resources/images/post';
             if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
                 return null;
             }
-            $name = 'card_' . $token . '.jpg';
+            $name = 'festive_card_' . $token . '.jpg';
             if (@file_put_contents($dir . '/' . $name, self::renderJpeg($card, 'portrait')) === false) {
                 return null;
             }
-            return AtgFestiveCardService::HERO_WEB_DIR . '/' . $name;
+            return $name;
         } catch (\Throwable $e) {
             error_log('[AtgFestiveCardRenderer] Feed export failed: ' . $e->getMessage());
             return null;
@@ -523,7 +525,7 @@ SVG;
             $mono = self::str($card, 'monogram', 'F');
             $size = (int)($d * (mb_strlen($mono) > 1 ? 0.3 : 0.4));
             $bb = imagettfbbox($size, 0, self::font('cinzel'), $mono);
-            $th = abs($bb[5] - $bb[1]);
+            $th = $bb !== false ? abs($bb[5] - $bb[1]) : (int)($size * 1.2);
             self::metalText($img, self::font('cinzel'), $size, $cx, (int)($cy + $th / 2), $mono, $t, true);
             return;
         }
@@ -595,7 +597,7 @@ SVG;
         self::ellipseStroke($img, $cx, $cy, (int)($d * 0.64), self::mix($seal, [0, 0, 0], 0.4), 30, max(2, (int)($d * 0.025)));
         $size = (int)($d * (mb_strlen($mono) > 1 ? 0.2 : 0.27));
         $bb = imagettfbbox($size, 0, self::font('cinzel'), $mono);
-        $th = abs($bb[5] - $bb[1]);
+        $th = $bb !== false ? abs($bb[5] - $bb[1]) : (int)($size * 1.2);
         self::textCentred($img, self::font('cinzel'), $size, $cx + 1, (int)($cy + $th / 2) + 2, $mono, self::mix($seal, [0, 0, 0], 0.5), 40);
         self::metalText($img, self::font('cinzel'), $size, $cx, (int)($cy + $th / 2), $mono, $t, true);
     }

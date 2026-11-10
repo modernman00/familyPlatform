@@ -861,7 +861,7 @@ final class AtgFestiveCardService
                      . "💌 Open the living envelope: {$card['absolute_public_url']}";
 
         // Persist the designed card as a real image file so the feed shows the full design
-        $feedImage = AtgFestiveCardRenderer::exportFeedImage($card) ?? ($card['hero_url'] ?: null);
+        $feedImage = AtgFestiveCardRenderer::exportFeedImage($card);
 
         $insertSql = 'INSERT INTO post (
                         id, fullName, profileImg, postMessage, postFamCode, post_time, post_status, post_img0, date_created
