@@ -453,7 +453,6 @@ if [ -f "scripts/generate_sitemap.php" ]; then
 fi
 copy_item public
 copy_item resources
-copy_item vendor
 copy_item composer.json
 copy_item composer.lock
 copy_item index.php
@@ -488,10 +487,8 @@ for TARGET_SW in "$SANDBOX/public/sw.js" "$SANDBOX/sw.js" "$SANDBOX/public/servi
     fi
 done
 
-# Local offline composer dump-autoload inside sandbox
-echo "⚡ Generating optimized production autoloader (--no-dev)..."
-(cd "$SANDBOX" && composer dump-autoload --optimize --no-dev --no-interaction --quiet 2>/dev/null || true)
-echo "✅ Sandbox assembled and optimized."
+# Prepare vendor in sandbox using hermetic content-addressable cache & zero-symlink audit
+bash scripts/prepare_vendor_cache.sh familyPlatform "$SANDBOX"
 
 ################################################################################
 # 8. DIRECT ATOMIC RSYNC SYNCHRONIZATION
