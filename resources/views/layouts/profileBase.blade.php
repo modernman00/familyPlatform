@@ -183,6 +183,35 @@
 </head>
 
 <body data-page-id="@yield('data-page-id')" data-spy="scroll">
+  {{-- ATG Sovereign 4K Perceptual Cinema GPU Filter (Contrast-Adaptive Sharpening + Luma Micro-Contrast) --}}
+  <svg width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;" aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="atg-4k-cinema-cas" x="0%" y="0%" width="100%" height="100%" color-interpolation-filters="sRGB">
+        <feConvolveMatrix order="3 3" preserveAlpha="true" kernelMatrix="0 -0.15 0 -0.15 1.60 -0.15 0 -0.15 0" result="sharpened" />
+        <feComponentTransfer in="sharpened">
+          <feFuncR type="linear" slope="1.02" intercept="-0.01" />
+          <feFuncG type="linear" slope="1.02" intercept="-0.01" />
+          <feFuncB type="linear" slope="1.02" intercept="-0.01" />
+        </feComponentTransfer>
+      </filter>
+    </defs>
+  </svg>
+  <style nonce="{{ $nonce }}">
+    video.atg-4k-video-render,
+    .feed-post-video,
+    .reel-video-element {
+      filter: url(#atg-4k-cinema-cas) contrast(1.035) saturate(1.045);
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+    @supports (-webkit-touch-callout: none) {
+      video.atg-4k-video-render,
+      .feed-post-video,
+      .reel-video-element {
+        filter: contrast(1.045) saturate(1.055) brightness(1.01);
+      }
+    }
+  </style>
   @include('partials.pwa-splash')
 
   @include('layouts.navbar')

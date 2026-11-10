@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Update studio tree integration",
+    "title": "Feat(tree-dna): implement family node DNA make-up, festive cards studio v2, and kinship enhancements",
     "notes": [
-        "Update studio tree integration",
-        "Feat(festive-cards): correct migration ordering for festive cards and wire up studio entrypoints",
-        "Feat(festive): implement RFC-0019 ATG Omni-Occasion Festive Card and Living Envelope Engine"
+        "Feat(tree-dna): implement family node DNA make-up, festive cards studio v2, and kinship enhancements",
+        "Feat(deploy): implement hermetic CAS vendor cache engine with zero-symlink audit",
+        "Feat(festive): deliver RFC-0019 v2 festive cards with custom occasions, typography, rich share sheet and content safety"
     ],
-    "released_at": "2026-11-09",
-    "commit": "da0728a7"
+    "released_at": "2026-11-10",
+    "commit": "14123aff"
 }

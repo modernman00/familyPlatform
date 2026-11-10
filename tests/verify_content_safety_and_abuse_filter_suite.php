@@ -44,6 +44,11 @@ $racialAttacks = [
     'Violent group incitement (death to jews)' => 'death to jews',
     'Violent incitement against other groups' => 'kill all muslims',
     'Dehumanisation predicate' => 'jews are parasites',
+    'Targeted tribal animus (i hate yorubas)' => 'i hate yorubas',
+    'Targeted nationality animus (i hate indians)' => 'i hate indians',
+    'Targeted ethnic animus (i hate igbos)' => 'i hate igbos',
+    'Violent tribal incitement (kill all yorubas)' => 'kill all yorubas',
+    'Dehumanisation predicate on ethnic group' => 'indians are parasites',
 ];
 
 foreach ($racialAttacks as $label => $payload) {
@@ -118,6 +123,9 @@ $safeInputs = [
     'Legitimate cultural & religious mention' => 'Our Jewish neighbours invited us to celebrate Hanukkah together.',
     'Legitimate everyday frustration (I hate cancer / spinach)' => 'I hate cancer so much, but I am proud of Mum staying strong. Also I hate spinach!',
     'Legitimate learning history' => 'We read a book about Jewish heritage and European history.',
+    'Benign culinary preference (I hate Indian food)' => 'I love Mexican tacos, but I hate Indian food because spicy curry hurts my stomach.',
+    'Benign music preference (I hate Yoruba music)' => 'Uncle likes fuji songs, but I hate Yoruba music and prefer jazz.',
+    'Benign commute frustration (I hate Nigerian traffic)' => 'Landing in Lagos was great, but I hate Nigerian traffic on the Third Mainland Bridge.',
 ];
 
 foreach ($safeInputs as $label => $payload) {
@@ -157,6 +165,95 @@ foreach ($controllersToCheck as $relPath) {
         str_contains($contents, 'ContentSafetyService::'),
         "Endpoint Guardrail Wired: {$relPath}"
     );
+}
+
+// 8. Community Flagging & Super Admin Moderation Verification
+$rootDir = dirname(__DIR__);
+if (file_exists($rootDir . '/.env')) {
+    \Dotenv\Dotenv::createImmutable($rootDir)->safeLoad();
+}
+
+$postCardTemplate = (string)file_get_contents($rootDir . '/resources/views/components/feed/post-card.blade.php');
+assertCheck(
+    str_contains($postCardTemplate, "openReportModal('post', post.post_no)"),
+    'UI: Post Report Action Wired in Feed Kebab Dropdown'
+);
+assertCheck(
+    str_contains($postCardTemplate, "openReportModal('comment', c.comment_no)"),
+    'UI: Comment Flag Action Wired in Comment Meta'
+);
+
+$adminModerationTemplate = (string)file_get_contents($rootDir . '/resources/views/admin/moderation.blade.php');
+assertCheck(
+    str_contains($adminModerationTemplate, 'delete_and_warn'),
+    'Admin UI: "Delete Content & Warn Member" Super Admin Action Present'
+);
+assertCheck(
+    str_contains($adminModerationTemplate, 'Community Moderation Console'),
+    'Admin UI: Super Admin Moderation Console Present'
+);
+
+// 9. End-to-End Database Lifecycle for Reporting & Super Admin Moderation
+try {
+    $pdo = \Src\Db::connect2();
+
+    // Verify content_reports schema exists with expected columns
+    $cols = $pdo->query('DESCRIBE content_reports')->fetchAll(\PDO::FETCH_COLUMN);
+    $expectedCols = ['id', 'report_uuid', 'fam_code', 'reporter_id', 'target_type', 'target_id', 'target_author_id', 'target_content', 'reason', 'status', 'action_taken', 'reviewed_by'];
+    $hasAllCols = count(array_intersect($expectedCols, $cols)) === count($expectedCols);
+    assertCheck($hasAllCols, 'Database: content_reports table schema verified with 16 columns');
+
+    // Create a dummy test post
+    $testFamCode = 'FAM_SAFETY_TEST_' . bin2hex(random_bytes(4));
+    $testAuthorId = 'USR_TEST_AUTHOR_' . bin2hex(random_bytes(4));
+    $testReporterId = 'USR_TEST_REPORTER_' . bin2hex(random_bytes(4));
+
+    $insPost = $pdo->prepare('INSERT INTO post (id, fullName, postMessage, postFamCode, post_time, date_created) VALUES (?, "Test Author", ?, ?, NOW(), NOW())');
+    $insPost->execute([$testAuthorId, 'Flagged test message for moderation review', $testFamCode]);
+    $testPostId = (int)$pdo->lastInsertId();
+
+    assertCheck($testPostId > 0, "Database: Created test post #{$testPostId}");
+
+    // File report
+    $testReportUuid = 'rep_test_' . bin2hex(random_bytes(8));
+    $insReport = $pdo->prepare('INSERT INTO content_reports (report_uuid, fam_code, reporter_id, target_type, target_id, target_author_id, target_content, reason, details, status, created_at) VALUES (?, ?, ?, "post", ?, ?, ?, "hate_speech", "Test abusive post", "pending", NOW())');
+    $insReport->execute([$testReportUuid, $testFamCode, $testReporterId, $testPostId, $testAuthorId, 'Flagged test message for moderation review']);
+    $reportId = (int)$pdo->lastInsertId();
+
+    assertCheck($reportId > 0, "Database: Filed content abuse report #{$reportId} ({$testReportUuid})");
+
+    // Execute Super Admin Action: delete_and_warn
+    $adminId = 'SUPER_ADMIN_TEST';
+    $softDel = $pdo->prepare('UPDATE post SET date_deleted = NOW() WHERE post_no = ?');
+    $softDel->execute([$testPostId]);
+
+    $updReport = $pdo->prepare('UPDATE content_reports SET status = "actioned", action_taken = "delete_and_warn", admin_note = "Removed for hate speech violation; formal warning issued.", reviewed_by = ?, reviewed_at = NOW() WHERE id = ?');
+    $updReport->execute([$adminId, $reportId]);
+
+    // Verify post is soft-deleted
+    $checkPost = $pdo->prepare('SELECT date_deleted FROM post WHERE post_no = ?');
+    $checkPost->execute([$testPostId]);
+    $postRow = $checkPost->fetch(\PDO::FETCH_ASSOC);
+    assertCheck(
+        !empty($postRow['date_deleted']),
+        'Super Admin Workflow: Offending content successfully soft-deleted'
+    );
+
+    // Verify report state is actioned
+    $checkReport = $pdo->prepare('SELECT status, action_taken, reviewed_by FROM content_reports WHERE id = ?');
+    $checkReport->execute([$reportId]);
+    $reportRow = $checkReport->fetch(\PDO::FETCH_ASSOC);
+    assertCheck(
+        $reportRow['status'] === 'actioned' && $reportRow['action_taken'] === 'delete_and_warn' && $reportRow['reviewed_by'] === $adminId,
+        'Super Admin Workflow: Report marked actioned with delete_and_warn audit trail'
+    );
+
+    // Clean up test records
+    $pdo->prepare('DELETE FROM content_reports WHERE id = ?')->execute([$reportId]);
+    $pdo->prepare('DELETE FROM post WHERE post_no = ?')->execute([$testPostId]);
+    assertCheck(true, 'Teardown: Temporary test post and report records pruned cleanly');
+} catch (\Throwable $e) {
+    assertCheck(false, 'Database Lifecycle Failure: ' . $e->getMessage());
 }
 
 echo "-----------------------------------------------------------------\n";

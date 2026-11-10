@@ -100,6 +100,7 @@ class FamilyClaimService
             }
 
             if ($isMatch) {
+                $nodeGender = !empty($memberData['gender']) ? FamilyGraphService::normaliseGender((string)$memberData['gender'], 'Other') : null;
                 $sex = (($memberData['gender'] ?? 'Male') === 'Male') ? 'avatarM.png' : 'avatarF.png';
                 $rootAvatar = (string)($memberData['img'] ?? "/resources/images/profile/{$sex}");
                 $upd = $db->prepare("
@@ -107,12 +108,13 @@ class FamilyClaimService
                     SET user_id = ?, 
                         first_name = COALESCE(NULLIF(?, ''), first_name),
                         last_name = COALESCE(NULLIF(?, ''), last_name),
+                        gender = COALESCE(NULLIF(?, ''), gender),
                         avatar_url = COALESCE(NULLIF(?, ''), avatar_url),
                         email = COALESCE(NULLIF(?, ''), email),
                         mobile = COALESCE(NULLIF(?, ''), mobile)
                     WHERE id = ?
                 ");
-                $upd->execute([$userId, $firstName, $lastName, $rootAvatar, $email, $mobile, $candId]);
+                $upd->execute([$userId, $firstName, $lastName, $nodeGender, $rootAvatar, $email, $mobile, $candId]);
                 return $candId;
             }
         }

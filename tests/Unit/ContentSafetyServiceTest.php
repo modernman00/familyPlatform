@@ -24,6 +24,12 @@ final class ContentSafetyServiceTest extends TestCase
             'Racist kike and chink slurs',
             'Racist wetback and raghead slurs',
             'White power and sieg heil extremist phrases',
+            'i hate jews',
+            'i hate yorubas',
+            'i hate indians',
+            'i hate igbos',
+            'kill all yorubas',
+            'indians are subhuman',
         ];
 
         foreach ($payloads as $payload) {
@@ -88,6 +94,10 @@ final class ContentSafetyServiceTest extends TestCase
             'The kitchen was spick and span before the family reunion in the 1990s.',
             'Watch this family video: https://www.youtube.com/watch?v=fuk123cunt99',
             'Pass the glass of water to the passenger in class.',
+            'I hate Indian food because spicy curry hurts my stomach, but I love tacos.',
+            'Uncle loves fuji music, but I hate Yoruba music and prefer classical.',
+            'Landing in Lagos was great, but I hate Nigerian traffic.',
+            'We love Yoruba culture and heritage.',
         ];
 
         foreach ($benignFamilyMessages as $message) {

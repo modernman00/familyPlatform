@@ -172,17 +172,59 @@
             <hr class="flex-grow-1 my-0" style="border-color: #e2e8f0;">
           </div>
 
-          <!-- Copyable Link Field -->
+          <!-- Tactile Link Icon & Hidden URL Standard -->
           <div class="mb-3">
-            <label for="inputShareLink" class="form-label text-muted fw-semibold small mb-1">Your Personal Referral Link</label>
-            <div class="input-group">
-              <input type="text" id="inputShareLink" class="form-control" readonly style="font-size: 0.9rem; font-family: monospace; border-radius: 10px 0 0 10px;" value="Generating link...">
-              <button class="btn btn-primary px-3 fw-semibold" id="btnCopyShareLink" type="button" style="border-radius: 0 10px 10px 0; min-height: 38px;">
-                <i class="bi bi-clipboard me-1"></i> Copy
-              </button>
+            <label class="form-label text-muted fw-semibold small mb-1.5 d-flex align-items-center justify-content-between">
+              <span>Private Sanctuary Link</span>
+              <span class="badge bg-light text-muted border font-monospace" style="font-size: 0.72rem;">URL Hidden • 1-Click Entry</span>
+            </label>
+            
+            <div class="sanctuary-url-pill d-flex align-items-center justify-content-between p-2 rounded-3"
+                 id="sanctuarySharePillContainer"
+                 style="background: #fdf2f2; border: 1.5px solid rgba(163, 22, 33, 0.22); box-shadow: 0 2px 8px rgba(163, 22, 33, 0.06); transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+                
+                <!-- Clickable Action: Hides raw URL behind Link Icon + Title -->
+                <a href="#" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   id="linkSanctuaryDirect"
+                   class="d-flex align-items-center gap-2.5 text-decoration-none text-dark flex-grow-1 min-w-0 px-2 py-1"
+                   style="min-height: 44px; touch-action: manipulation; outline: none;"
+                   title="Enter Private Family Sanctuary">
+                    
+                    <div class="sanctuary-link-icon-badge flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle"
+                         style="width: 38px; height: 38px; background: rgba(163, 22, 33, 0.12); color: #8a1019; font-size: 1.25rem;">
+                        <span aria-hidden="true">🔗</span>
+                    </div>
+
+                    <div class="d-flex flex-column min-w-0 me-2">
+                        <span class="fw-bold text-dark text-truncate" style="font-size: 0.92rem; letter-spacing: -0.01em; line-height: 1.25;" id="linkSanctuaryTitle">
+                            Enter Private Family Sanctuary
+                        </span>
+                        <span class="text-muted small text-truncate" style="font-size: 0.76rem; font-weight: 500;">
+                            myfamilyplatform.com • 100% Private
+                        </span>
+                    </div>
+
+                    <i class="bi bi-arrow-up-right-circle text-primary ms-auto me-1 opacity-75" style="font-size: 1.05rem;" aria-hidden="true"></i>
+                </a>
+
+                <!-- 1-Tap Copy Button -->
+                <button type="button" 
+                        id="btnCopyShareLink"
+                        class="btn btn-sm btn-outline-primary d-inline-flex align-items-center justify-content-center gap-1.5 px-3 rounded-pill fw-semibold shadow-xs flex-shrink-0 ms-1"
+                        style="min-height: 44px; min-width: 44px; font-size: 0.82rem; white-space: nowrap; border-color: rgba(163, 22, 33, 0.35); color: #8a1019;"
+                        aria-label="Copy private sanctuary link">
+                    <i class="bi bi-clipboard" id="iconCopyShareLink"></i>
+                    <span id="textCopyShareLink">Copy</span>
+                </button>
             </div>
-            <div id="copySuccessFeedback" class="text-success small fw-semibold mt-1 d-none">
-              <i class="bi bi-check-circle-fill me-1"></i> Link copied to clipboard!
+
+            <!-- Hidden input preserved for script fallback & clipboard -->
+            <input type="hidden" id="inputShareLink" value="">
+            
+            <div id="copySuccessFeedback" class="text-success small fw-semibold mt-1.5 d-none">
+              <i class="bi bi-check-circle-fill me-1"></i> Private link copied to clipboard!
             </div>
           </div>
 
@@ -219,10 +261,10 @@
 
     function buildRichInviteMessage(surname, code, url) {
         return `🌳 *Family Heritage Invitation* 🌳\n\n` +
-            `You are invited to join our *${surname || 'Family'} Network & Heritage Tree* on FamilyPlatform.\n\n` +
+            `You are invited to join our *${surname || 'Family'} Network & Heritage Tree*.\n\n` +
             `🔑 *Family Code:* #${code}\n\n` +
-            `✨ Claim your branch on our live family tree, preserve our heritage, share memories, and connect across generations.\n\n` +
-            `👉 Tap here to join our family sanctuary:\n${url}\n\n` +
+            `✨ Claim your branch on our live family tree, preserve our oral histories, share cherished recipes, and connect across generations.\n\n` +
+            `🔗 Tap to Enter Our Family Sanctuary:\n${url}\n\n` +
             `Welcome to our living family legacy! 🏰`;
     }
 

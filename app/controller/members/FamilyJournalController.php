@@ -361,10 +361,13 @@ final class FamilyJournalController extends BaseController
                         VALUES (?, ?, ?, 'Added as Chronicle Contributor', 'Journal', ?, ?, 'new', NOW())
                     ");
 
+                    $contribRecipientIds = [];
                     foreach ($contributorIds as $cId) {
+                        $cId = (string)$cId;
                         if ($cId === '' || $cId === $this->userId) {
                             continue;
                         }
+                        $contribRecipientIds[] = $cId;
                         $msg = "{$authorName} credited you as a contributor to \"{$title}\"";
                         try {
                             $stmt->execute([
@@ -375,11 +378,13 @@ final class FamilyJournalController extends BaseController
                                 $journalUrl
                             ]);
                         } catch (\Throwable) {}
+                    }
 
+                    if (!empty($contribRecipientIds)) {
                         try {
                             PushNotificationClass::sendPushNotification(
-                                userId: $cId,
-                                message: $msg,
+                                userId: $contribRecipientIds,
+                                message: "{$authorName} credited you as a contributor to \"{$title}\"",
                                 url: $journalUrl,
                                 title: '📖 Chronicle Contributor',
                                 tag: 'journal-contributor-' . $insertedId
@@ -409,11 +414,13 @@ final class FamilyJournalController extends BaseController
                         VALUES (?, ?, ?, '📖 New Family Chronicle', 'Journal', ?, ?, 'new', NOW())
                     ");
 
+                    $recipientIds = [];
                     foreach ($members as $member) {
                         $targetId = (string)($member['id'] ?? '');
                         if ($targetId === '' || $targetId === $this->userId) {
                             continue;
                         }
+                        $recipientIds[] = $targetId;
                         try {
                             $stmt->execute([
                                 $this->userId,
@@ -423,10 +430,12 @@ final class FamilyJournalController extends BaseController
                                 $journalUrl
                             ]);
                         } catch (\Throwable) {}
+                    }
 
+                    if (!empty($recipientIds)) {
                         try {
                             PushNotificationClass::sendPushNotification(
-                                userId: $targetId,
+                                userId: $recipientIds,
                                 message: $msg,
                                 url: $journalUrl,
                                 title: '📖 New Family Chronicle',

@@ -34,6 +34,11 @@ class StreamController
                 $userId = (string)$verifyJWT['id'];
             }
 
+            // Fast-Response Session Unlock: Release PHP session file lock before DB queries and cURL
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+
             // Check if member has Premium status
             $isPremium = false;
             try {
@@ -106,6 +111,11 @@ class StreamController
 
             // Enforce CSRF token validation
             \Src\CheckToken::tokenCheck();
+
+            // Fast-Response Session Unlock: Release PHP session file lock before DB queries and cURL
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
 
             // Check if member has Premium status for retention rules
             $isPremium = false;

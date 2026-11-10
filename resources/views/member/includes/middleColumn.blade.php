@@ -1071,6 +1071,33 @@
                            x-text="getMediaCaption(lightboxPost)"></p>
                     </template>
 
+                    <!-- Living Heirloom Glass Reaction Shelf (In-flow: never covers author, caption, or action buttons on desktop or mobile) -->
+                    <div x-show="mediaReactionTrayOpen"
+                         x-cloak
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 -translate-y-2"
+                         class="mb-2.5"
+                         @click.outside="mediaReactionTrayOpen = false">
+                        <div class="d-inline-flex align-items-center gap-1.5 p-1.5 px-2.5 rounded-pill shadow-lg"
+                             style="background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.25); max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                            <template x-for="type in ['love', 'like', 'haha', 'shock', 'sad', 'celebrate']" :key="'lb-emo-' + type">
+                                <button type="button"
+                                        class="btn p-1 rounded-circle d-inline-flex align-items-center justify-content-center"
+                                        style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; transition: transform 0.15s ease;"
+                                        :style="getMediaReaction(lightboxPost, 'image', lightboxIndex) === type ? 'background: rgba(255,255,255,0.2); transform: scale(1.12);' : ''"
+                                        :title="emojiMap[type]?.label || type"
+                                        :aria-label="emojiMap[type]?.label || type"
+                                        @click.stop="reactToMediaItem(lightboxPost, 'image', lightboxIndex, type, $event)">
+                                    <span class="d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(type, 28)"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
                     <!-- Interactive Pills Row (Comment, 6-Emoji Reaction Picker, Bookmark, Share) -->
                     <div class="d-flex align-items-center gap-2 flex-wrap position-relative">
                         <!-- Comment Pill (Opens Slide-Up Comment Drawer for This Photo) -->
@@ -1084,40 +1111,21 @@
                             <span x-text="(lightboxPost.comments ? lightboxPost.comments.length : 0)"></span>
                         </button>
 
-                        <!-- Emoji Reaction Pill + Floating 6-Emoji Dock -->
-                        <div class="position-relative">
-                            <div x-show="mediaReactionTrayOpen"
-                                 x-cloak
-                                 x-transition.opacity.duration.150ms
-                                 class="d-flex align-items-center gap-1.5 p-1.5 px-2.5 rounded-pill shadow-lg"
-                                 style="position: absolute; bottom: calc(100% + 10px); left: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.25); z-index: 100006; white-space: nowrap;">
-                                <template x-for="type in Object.keys(emojiMap)" :key="'lb-emo-' + type">
-                                    <button type="button"
-                                            class="btn p-1 rounded-circle d-inline-flex align-items-center justify-content-center"
-                                            style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; transition: transform 0.15s ease;"
-                                            :style="getMediaReaction(lightboxPost, 'image', lightboxIndex) === type ? 'background: rgba(255,255,255,0.2); transform: scale(1.12);' : ''"
-                                            :title="emojiMap[type].label"
-                                            @click.stop="reactToMediaItem(lightboxPost, 'image', lightboxIndex, type, $event)">
-                                        <span class="d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(type, 28)"></span>
-                                    </button>
-                                </template>
-                            </div>
-
-                            <button type="button"
-                                    class="btn d-inline-flex align-items-center gap-1.5 px-3 rounded-pill text-white"
-                                    @click.stop="mediaReactionTrayOpen = !mediaReactionTrayOpen"
-                                    title="React with emoji to this photo"
-                                    aria-label="React with emoji to this photo"
-                                    style="min-height: 44px; min-width: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.22); font-size: 0.85rem; font-weight: 600; white-space: nowrap; flex-shrink: 0;">
-                                <template x-if="!getMediaReaction(lightboxPost, 'image', lightboxIndex)">
-                                    <i class="bi bi-heart" style="font-size: 0.95rem;"></i>
-                                </template>
-                                <template x-if="getMediaReaction(lightboxPost, 'image', lightboxIndex)">
-                                    <span class="d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(getMediaReaction(lightboxPost, 'image', lightboxIndex), 20)"></span>
-                                </template>
-                                <span x-text="lightboxPost.post_likes || 0"></span>
-                            </button>
-                        </div>
+                        <!-- Emoji Reaction Pill Toggle -->
+                        <button type="button"
+                                class="btn d-inline-flex align-items-center gap-1.5 px-3 rounded-pill text-white"
+                                @click.stop="mediaReactionTrayOpen = !mediaReactionTrayOpen"
+                                title="React with emoji to this photo"
+                                aria-label="React with emoji to this photo"
+                                style="min-height: 44px; min-width: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.22); font-size: 0.85rem; font-weight: 600; white-space: nowrap; flex-shrink: 0;">
+                            <template x-if="!getMediaReaction(lightboxPost, 'image', lightboxIndex)">
+                                <i class="bi bi-heart" style="font-size: 0.95rem;"></i>
+                            </template>
+                            <template x-if="getMediaReaction(lightboxPost, 'image', lightboxIndex)">
+                                <span class="d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(getMediaReaction(lightboxPost, 'image', lightboxIndex), 20)"></span>
+                            </template>
+                            <span x-text="lightboxPost.post_likes || 0"></span>
+                        </button>
 
                         <!-- Bookmark Pill -->
                         <button type="button"
@@ -1302,11 +1310,16 @@
             <template x-if="videoModalVideos[videoModalIndex] && videoModalVideos[videoModalIndex].type === 'direct'">
                 <div class="position-relative w-100 h-100 d-flex align-items-center justify-content-center overflow-hidden"
                      style="background: #000000; width: 100%; height: 100%;">
+                    <!-- Ambient Blurred Glow Backdrop (Eliminates stark black bars while preserving 100% uncropped video) -->
+                    <div class="position-absolute inset-0 w-100 h-100 pointer-events-none"
+                         :style="'background-image: url(\'' + (videoModalVideos[videoModalIndex]?.thumbnailUrl || '') + '\'); background-size: cover; background-position: center; filter: blur(36px) brightness(0.35); transform: scale(1.15); z-index: 1;'"
+                         x-show="videoModalVideos[videoModalIndex]?.thumbnailUrl"></div>
+
                     <!-- High-Res Poster Thumbnail Overlay (Only before first frame decodes) -->
                     <img x-show="!videoModalHasFrame && videoModalVideos[videoModalIndex]?.thumbnailUrl"
                          :src="videoModalVideos[videoModalIndex]?.thumbnailUrl"
                          class="position-absolute top-0 start-0 w-100 h-100 pointer-events-none"
-                         :style="'z-index: 2; object-fit: ' + (videoModalIsPortrait ? 'cover' : 'contain') + '; width: 100%; height: 100%;'"
+                         style="z-index: 2; object-fit: contain !important; width: 100%; height: 100%;"
                          alt="Full video preview"
                          x-on:error="$el.style.display = 'none'">
 
@@ -1327,7 +1340,7 @@
                            @pause="videoModalPlaying = false"
                            @ended="onVideoModalEnded()"
                            @timeupdate="onVideoModalTimeUpdate($el)"
-                           :style="'width: 100%; height: 100%; object-fit: ' + (videoModalIsPortrait ? 'cover' : 'contain') + '; background: #000000; cursor: pointer; z-index: 3;'"></video>
+                           style="width: 100%; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain !important; background: transparent; cursor: pointer; z-index: 3; position: relative;"></video>
                 </div>
             </template>
 
@@ -1382,6 +1395,33 @@
                                x-text="getMediaCaption(videoModalPost)"></p>
                         </template>
 
+                        <!-- Living Heirloom Glass Reaction Shelf (In-flow: never covers author, caption, or action buttons on desktop or mobile) -->
+                        <div x-show="mediaReactionTrayOpen"
+                             x-cloak
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 -translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 -translate-y-2"
+                             class="mb-2.5"
+                             @click.outside="mediaReactionTrayOpen = false">
+                            <div class="d-inline-flex align-items-center gap-1.5 p-1.5 px-2.5 rounded-pill shadow-lg"
+                                 style="background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.25); max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                                <template x-for="type in ['love', 'like', 'haha', 'shock', 'sad', 'celebrate']" :key="'vm-emo-' + type">
+                                    <button type="button"
+                                            class="btn p-1 rounded-circle d-inline-flex align-items-center justify-content-center"
+                                            style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; transition: transform 0.15s ease;"
+                                            :style="getMediaReaction(videoModalPost, 'video', videoModalIndex) === type ? 'background: rgba(255,255,255,0.2); transform: scale(1.12);' : ''"
+                                            :title="emojiMap[type]?.label || type"
+                                            :aria-label="emojiMap[type]?.label || type"
+                                            @click.stop="reactToMediaItem(videoModalPost, 'video', videoModalIndex, type, $event)">
+                                        <span class="d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(type, 28)"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+
                         <!-- Twitter/X Translucent Engagement Pills Row (Working Comment Drawer, 6-Emoji Picker, Bookmark, Share) -->
                         <div class="d-flex align-items-center gap-2 flex-wrap position-relative">
                             <!-- Comment Pill (Opens Slide-Up Comment Drawer in Modal) -->
@@ -1395,40 +1435,21 @@
                                 <span x-text="(videoModalPost.comments ? videoModalPost.comments.length : 0)"></span>
                             </button>
 
-                            <!-- Emoji Reaction Pill + Floating 6-Emoji Dock -->
-                            <div class="position-relative">
-                                <div x-show="mediaReactionTrayOpen"
-                                     x-cloak
-                                     x-transition.opacity.duration.150ms
-                                     class="d-flex align-items-center gap-1.5 p-1.5 px-2.5 rounded-pill shadow-lg"
-                                     style="position: absolute; bottom: calc(100% + 10px); left: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.25); z-index: 10509; white-space: nowrap;">
-                                    <template x-for="type in Object.keys(emojiMap)" :key="'vm-emo-' + type">
-                                        <button type="button"
-                                                class="btn p-1 rounded-circle d-inline-flex align-items-center justify-content-center"
-                                                style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; transition: transform 0.15s ease;"
-                                                :style="getMediaReaction(videoModalPost, 'video', videoModalIndex) === type ? 'background: rgba(255,255,255,0.2); transform: scale(1.12);' : ''"
-                                                :title="emojiMap[type].label"
-                                                @click.stop="reactToMediaItem(videoModalPost, 'video', videoModalIndex, type, $event)">
-                                            <span class="d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(type, 28)"></span>
-                                        </button>
-                                    </template>
-                                </div>
-
-                                <button type="button"
-                                        class="btn d-inline-flex align-items-center gap-1.5 px-3 rounded-pill text-white"
-                                        @click.stop="mediaReactionTrayOpen = !mediaReactionTrayOpen"
-                                        title="React with emoji to this video"
-                                        aria-label="React with emoji to this video"
-                                        style="min-height: 44px; min-width: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.18); font-size: 0.85rem; font-weight: 600; white-space: nowrap; flex-shrink: 0;">
-                                    <template x-if="!getMediaReaction(videoModalPost, 'video', videoModalIndex)">
-                                        <i class="bi bi-heart" style="font-size: 0.95rem;"></i>
-                                    </template>
-                                    <template x-if="getMediaReaction(videoModalPost, 'video', videoModalIndex)">
-                                        <span class="d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(getMediaReaction(videoModalPost, 'video', videoModalIndex), 20)"></span>
-                                    </template>
-                                    <span x-text="videoModalPost.post_likes || 0"></span>
-                                </button>
-                            </div>
+                            <!-- Emoji Reaction Pill Toggle -->
+                            <button type="button"
+                                    class="btn d-inline-flex align-items-center gap-1.5 px-3 rounded-pill text-white"
+                                    @click.stop="mediaReactionTrayOpen = !mediaReactionTrayOpen"
+                                    title="React with emoji to this video"
+                                    aria-label="React with emoji to this video"
+                                    style="min-height: 44px; min-width: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.18); font-size: 0.85rem; font-weight: 600; white-space: nowrap; flex-shrink: 0;">
+                                <template x-if="!getMediaReaction(videoModalPost, 'video', videoModalIndex)">
+                                    <i class="bi bi-heart" style="font-size: 0.95rem;"></i>
+                                </template>
+                                <template x-if="getMediaReaction(videoModalPost, 'video', videoModalIndex)">
+                                    <span class="d-inline-flex align-items-center justify-content-center" x-html="getHeirloomGlassSvg(getMediaReaction(videoModalPost, 'video', videoModalIndex), 20)"></span>
+                                </template>
+                                <span x-text="videoModalPost.post_likes || 0"></span>
+                            </button>
 
                             <!-- Bookmark Pill -->
                             <button type="button"

@@ -111,6 +111,7 @@ final class AtgFestiveCardService
             'key' => 'christmas',
             'title' => 'Christmas & Boxing Day',
             'short' => 'Christmas',
+            'scene_title' => 'Christmas Tree, Snowfall & Holly',
             'icon' => 'bi-tree-fill',
             'emoji' => '🎄',
             'mood' => 'joyful',
@@ -130,11 +131,12 @@ final class AtgFestiveCardService
             'key' => 'new_year',
             'title' => 'New Year’s Celebration',
             'short' => 'New Year',
+            'scene_title' => 'Midnight Firecrackers, Fireworks & Toast',
             'icon' => 'bi-stars',
-            'emoji' => '🥂',
+            'emoji' => '🎆',
             'mood' => 'joyful',
             'default_theme' => 'onyx_gold',
-            'particle' => 'golddust',
+            'particle' => 'fireworks',
             'badge' => 'New Beginnings',
             'default_headline' => 'Happy New Year & Bright New Horizons',
             'default_verse' => 'Here is to twelve fresh chapters of health, boundless joy, and extraordinary family triumphs in the New Year.',
@@ -149,6 +151,7 @@ final class AtgFestiveCardService
             'key' => 'easter',
             'title' => 'Easter & Spring Renewal',
             'short' => 'Easter',
+            'scene_title' => 'Spring Tulips, Sunbeams & Painted Eggs',
             'icon' => 'bi-flower1',
             'emoji' => '🌷',
             'mood' => 'joyful',
@@ -168,6 +171,7 @@ final class AtgFestiveCardService
             'key' => 'eid',
             'title' => 'Eid Mubarak (al-Fitr & al-Adha)',
             'short' => 'Eid',
+            'scene_title' => 'Crescent Moon & Hanging Fanoos Lanterns',
             'icon' => 'bi-moon-stars-fill',
             'emoji' => '🌙',
             'mood' => 'joyful',
@@ -187,6 +191,7 @@ final class AtgFestiveCardService
             'key' => 'diwali',
             'title' => 'Diwali (Festival of Lights)',
             'short' => 'Diwali',
+            'scene_title' => 'Glowing Diyas, Lotus Rangoli & Sparklers',
             'icon' => 'bi-brightness-high-fill',
             'emoji' => '🪔',
             'mood' => 'joyful',
@@ -206,6 +211,7 @@ final class AtgFestiveCardService
             'key' => 'thanksgiving',
             'title' => 'Thanksgiving & Harvest Gratitude',
             'short' => 'Thanksgiving',
+            'scene_title' => 'Harvest Pumpkins, Golden Wheat & Maple Leaves',
             'icon' => 'bi-cup-hot-fill',
             'emoji' => '🍂',
             'mood' => 'grateful',
@@ -225,6 +231,7 @@ final class AtgFestiveCardService
             'key' => 'mothers_day',
             'title' => 'Mother’s Day Honour',
             'short' => 'Mother’s Day',
+            'scene_title' => 'Couture Rose & Peony Bouquet',
             'icon' => 'bi-heart-fill',
             'emoji' => '💐',
             'mood' => 'grateful',
@@ -244,6 +251,7 @@ final class AtgFestiveCardService
             'key' => 'fathers_day',
             'title' => 'Father’s Day Honour',
             'short' => 'Father’s Day',
+            'scene_title' => 'Sovereign Shield, Royal Crown & Oak Laurels',
             'icon' => 'bi-shield-fill-check',
             'emoji' => '👔',
             'mood' => 'grateful',
@@ -263,6 +271,7 @@ final class AtgFestiveCardService
             'key' => 'reunion',
             'title' => 'Annual Family Gathering & Reunion',
             'short' => 'Family Reunion',
+            'scene_title' => 'Ancestral Family Tree & Hearth Lanterns',
             'icon' => 'bi-people-fill',
             'emoji' => '🏡',
             'mood' => 'joyful',
@@ -282,6 +291,7 @@ final class AtgFestiveCardService
             'key' => 'milestone',
             'title' => 'Family Milestone & Anniversary',
             'short' => 'Milestone',
+            'scene_title' => 'Golden Jubilee Trophy & Laurel Wreath',
             'icon' => 'bi-trophy-fill',
             'emoji' => '🏆',
             'mood' => 'joyful',
@@ -301,6 +311,7 @@ final class AtgFestiveCardService
             'key' => 'birthday',
             'title' => 'Birthday Celebration',
             'short' => 'Birthday',
+            'scene_title' => 'Three-Tier Birthday Cake, Candles & Balloons',
             'icon' => 'bi-cake2-fill',
             'emoji' => '🎂',
             'mood' => 'joyful',
@@ -320,6 +331,7 @@ final class AtgFestiveCardService
             'key' => 'wedding',
             'title' => 'Wedding & Wedding Anniversary',
             'short' => 'Wedding',
+            'scene_title' => 'Golden Wedding Bands, Floral Arch & Doves',
             'icon' => 'bi-gem',
             'emoji' => '💍',
             'mood' => 'romantic',
@@ -339,6 +351,7 @@ final class AtgFestiveCardService
             'key' => 'new_baby',
             'title' => 'New Baby & Naming Ceremony',
             'short' => 'New Baby',
+            'scene_title' => 'Crescent Moon Cradle, Clouds & Pastel Balloons',
             'icon' => 'bi-balloon-fill',
             'emoji' => '👶',
             'mood' => 'joyful',
@@ -358,6 +371,7 @@ final class AtgFestiveCardService
             'key' => 'graduation',
             'title' => 'Graduation & Achievement',
             'short' => 'Graduation',
+            'scene_title' => 'Mortarboard Cap, Diploma Scroll & Laurels',
             'icon' => 'bi-mortarboard-fill',
             'emoji' => '🎓',
             'mood' => 'joyful',
@@ -377,6 +391,7 @@ final class AtgFestiveCardService
             'key' => 'remembrance',
             'title' => 'In Loving Memory & Remembrance',
             'short' => 'Remembrance',
+            'scene_title' => 'Peaceful Dove, Olive Branch & Eternal Flame',
             'icon' => 'bi-feather',
             'emoji' => '🕊️',
             'mood' => 'reverent',
@@ -396,6 +411,7 @@ final class AtgFestiveCardService
             'key' => 'custom',
             'title' => 'Your Own Celebration',
             'short' => 'Your Own Celebration',
+            'scene_title' => 'Bespoke Celebration Illustration',
             'icon' => 'bi-pencil-square',
             'emoji' => '✨',
             'mood' => 'joyful',
@@ -685,9 +701,9 @@ final class AtgFestiveCardService
             'card sign-off' => $signOff,
         ], 'festive_card');
 
-        $heroType = strtolower(trim((string)($data['hero_type'] ?? 'photo')));
+        $heroType = strtolower(trim((string)($data['hero_type'] ?? 'avatar')));
         if (!in_array($heroType, ['photo', 'avatar', 'crest'], true)) {
-            $heroType = 'photo';
+            $heroType = 'avatar';
         }
 
         $heroPhotoUrl = trim((string)($data['hero_photo_url'] ?? ''));
@@ -698,7 +714,7 @@ final class AtgFestiveCardService
             $heroPhotoUrl = '';
         }
         if ($heroPhotoUrl === '' && $heroType === 'photo') {
-            $heroType = 'crest';
+            $heroType = 'avatar';
         }
 
         $audioVoiceUrl = trim((string)($data['audio_voice_url'] ?? ''));
@@ -844,7 +860,7 @@ final class AtgFestiveCardService
             ];
         }
 
-        $userStmt = $this->db->prepare('SELECT firstName AS name, lastName, (SELECT img FROM profilePics WHERE id = account.id LIMIT 1) as profile_img FROM account WHERE id = ? LIMIT 1');
+        $userStmt = $this->db->prepare('SELECT firstName AS name, lastName, (SELECT img FROM profilePics WHERE id = personal.id LIMIT 1) as profile_img FROM personal WHERE id = ? LIMIT 1');
         $userStmt->execute([$userId]);
         $author = $userStmt->fetch(PDO::FETCH_ASSOC) ?: [];
         $fullName = trim(($author['name'] ?? '') . ' ' . ($author['lastName'] ?? ''));
@@ -932,16 +948,20 @@ final class AtgFestiveCardService
 
         $custom = trim((string)($row['custom_occasion'] ?? ''));
         $isCustom = $occasionKey === 'custom' && $custom !== '';
-        $moodKey = $isCustom ? (string)($row['mood'] ?? 'joyful') : (string)($occasionMeta['mood'] ?? 'joyful');
+        $moodKey = $isCustom ? (string)($row['mood'] ?? 'joyful') : (string)$occasionMeta['mood'];
         $moodMeta = self::MOODS[$moodKey] ?? self::MOODS['joyful'];
 
         $occasionLabel = $isCustom ? $custom : (string)$occasionMeta['title'];
         $eyebrow = $isCustom ? $custom : (string)$occasionMeta['badge'];
         $particle = $isCustom ? (string)$moodMeta['particle'] : (string)$occasionMeta['particle'];
-        $emoji = $isCustom ? (string)$moodMeta['emoji'] : (string)($occasionMeta['emoji'] ?? '✨');
+        $emoji = $isCustom ? (string)$moodMeta['emoji'] : (string)$occasionMeta['emoji'];
 
         $sender = (string)($row['sender_name'] ?? 'The Family');
         $appUrl = self::appUrl();
+        $heroUrl = self::resolveAssetUrl((string)($row['hero_photo_url'] ?? ''));
+        $rawHeroType = strtolower(trim((string)($row['hero_type'] ?? 'avatar')));
+        $heroMode = $heroUrl !== '' ? 'photo' : ($rawHeroType === 'crest' ? 'crest' : 'art');
+        $artKey = self::resolveArtKey($occasionKey, $moodKey, $custom);
 
         return array_merge($row, [
             'occasion_meta' => $occasionMeta,
@@ -954,7 +974,9 @@ final class AtgFestiveCardService
             'particle' => $particle,
             'emoji' => $emoji,
             'monogram' => self::monogram($sender),
-            'hero_url' => self::resolveAssetUrl((string)($row['hero_photo_url'] ?? '')),
+            'hero_url' => $heroUrl,
+            'hero_mode' => $heroMode,
+            'art_key' => $artKey,
             'public_url' => '/greetings/f/' . $token,
             'image_url' => '/greetings/i/' . $token . '.png',
             'og_image_url' => '/greetings/i/' . $token . '.jpg',
@@ -965,6 +987,74 @@ final class AtgFestiveCardService
             'absolute_portrait_image_url' => $appUrl . '/greetings/p/' . $token . '.jpg',
             'whatsapp_text' => self::whatsAppMessage($row, $moodKey, $emoji, $appUrl . '/greetings/f/' . $token),
         ]);
+    }
+
+    /**
+     * Resolve the visual occasion illustration key for both curated and custom celebrations.
+     * Mirrors resolveArtKey() in public/js/festive-cards.js.
+     */
+    public static function resolveArtKey(string $occasionKey, string $moodKey = 'joyful', string $customText = ''): string
+    {
+        $occasionKey = strtolower(trim($occasionKey));
+        if ($occasionKey !== 'custom' && isset(self::OCCASIONS[$occasionKey])) {
+            return $occasionKey;
+        }
+
+        $q = mb_strtolower(trim($customText));
+        if ($q !== '') {
+            if (preg_match('/\b(christmas|xmas|noel|yuletide|boxing day|advent)\b/u', $q)) {
+                return 'christmas';
+            }
+            if (preg_match('/\b(new year|hogmanay|nye|firework|firecracker)\b/u', $q)) {
+                return 'new_year';
+            }
+            if (preg_match('/\b(easter|pascha|resurrection|spring)\b/u', $q)) {
+                return 'easter';
+            }
+            if (preg_match('/\b(eid|ramadan|mubarak|iftaar|iftar)\b/u', $q)) {
+                return 'eid';
+            }
+            if (preg_match('/\b(diwali|deepavali|navratri|holi|pongal|onam)\b/u', $q)) {
+                return 'diwali';
+            }
+            if (preg_match('/\b(thanksgiving|harvest)\b/u', $q)) {
+                return 'thanksgiving';
+            }
+            if (preg_match('/\b(mother|mum|mom|mama|matriarch)\b/u', $q)) {
+                return 'mothers_day';
+            }
+            if (preg_match('/\b(father|dad|papa|patriarch)\b/u', $q)) {
+                return 'fathers_day';
+            }
+            if (preg_match('/\b(reunion|homecoming|clan|gathering|housewarming|first home)\b/u', $q)) {
+                return 'reunion';
+            }
+            if (preg_match('/\b(birthday|bday|born day|turning \d+)\b/u', $q)) {
+                return 'birthday';
+            }
+            if (preg_match('/\b(wedding|bride|groom|marriage|engagement|nikah|valentine)\b/u', $q)) {
+                return 'wedding';
+            }
+            if (preg_match('/\b(baby|newborn|christening|baptism|naming|dedication|maternity)\b/u', $q)) {
+                return 'new_baby';
+            }
+            if (preg_match('/\b(graduat|convocation|degree|exam|phd|masters|scholar)\b/u', $q)) {
+                return 'graduation';
+            }
+            if (preg_match('/\b(remembrance|memorial|memory|tribute|condolence|passing|funeral)\b/u', $q)) {
+                return 'remembrance';
+            }
+            if (preg_match('/\b(milestone|anniversary|jubilee|promotion|retirement|citizenship|award)\b/u', $q)) {
+                return 'milestone';
+            }
+        }
+
+        return match (strtolower(trim($moodKey))) {
+            'reverent' => 'remembrance',
+            'romantic' => 'wedding',
+            'grateful' => 'mothers_day',
+            default => 'new_year',
+        };
     }
 
     /**
@@ -1108,7 +1198,7 @@ final class AtgFestiveCardService
     public static function resolveAssetUrl(string $url): string
     {
         $url = trim($url);
-        if ($url === '' || !str_starts_with($url, '/resources/') || str_contains($url, '..')) {
+        if ($url === '' || !(str_starts_with($url, '/resources/') || str_starts_with($url, '/public/')) || str_contains($url, '..')) {
             return '';
         }
         $root = self::projectRoot();

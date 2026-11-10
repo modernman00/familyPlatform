@@ -2,7 +2,6 @@
 
 @section('title', 'Connect Your Family Branch on FamilyPlatform')
 
-@section('content')
 @php
     $baseUrl = rtrim((string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com'), '/');
     $treeUrl = $data['treeUrl'] ?? ($data['studioUrl'] ?? ($baseUrl . '/organogram?mode=canvas'));
@@ -10,37 +9,46 @@
     $firstName = $data['firstName'] ?? 'Family Member';
 @endphp
 
-<p style="margin-bottom: 20px; font-size: 16px; color: #1e293b;">
-    Hello <strong>{{ $firstName }}</strong>,
+@section('preheader', $requesterName . ' would love you to add your branch to the family tree.')
+@section('eyebrow', 'Grow the family tree')
+@section('headline', htmlspecialchars((string)$requesterName, ENT_QUOTES, 'UTF-8') . ' asked you to add your branch')
+
+@section('content')
+
+<p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.65; color: #292524;">
+    Hi {{ $firstName }},
 </p>
 
-<p style="margin-bottom: 20px; font-size: 15px; color: #334155; line-height: 1.6;">
-    <strong>{{ $requesterName }}</strong> invited you to connect your branch of our family tree on FamilyPlatform! You can easily link your relatives to preserve your shared heritage and grow our family circle together.
+<p style="margin: 0 0 22px 0; font-size: 16px; line-height: 1.65; color: #44403c;">
+    <strong style="color: #1c1917;">{{ $requesterName }}</strong> is filling in the family tree and would love your side of the story. Linking your parents, spouse, siblings and children takes just a few minutes.
 </p>
 
 @if(!empty($data['note']))
-<div style="margin-bottom: 25px; background-color: #f8fafc; border-left: 4px solid #a31621; padding: 16px 20px; border-radius: 8px;">
-    <p style="margin: 0; font-size: 14px; font-style: italic; color: #8a1019; line-height: 1.5;">
-        "{{ htmlspecialchars((string)$data['note']) }}"
-    </p>
-    <p style="margin: 8px 0 0 0; font-size: 12px; color: #64748b; font-weight: 600;">
-        — {{ $requesterName }}
-    </p>
-</div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 0 24px 0;">
+    <tr>
+        <td style="background-color: #fbf7f2; border-left: 3px solid #a31621; padding: 16px 20px; border-radius: 0 12px 12px 0;">
+            <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 16px; font-style: italic; color: #44403c; line-height: 1.55;">
+                &ldquo;{{ (string)$data['note'] }}&rdquo;
+            </p>
+            <p style="margin: 8px 0 0 0; font-size: 13px; color: #78716c; font-weight: 600;">
+                &mdash; {{ $requesterName }}
+            </p>
+        </td>
+    </tr>
+</table>
 @endif
 
-<p style="margin-bottom: 25px; font-size: 15px; color: #334155; line-height: 1.6;">
-    Connecting your family branch takes just a few moments on the <strong>Family Tree</strong>. You can link your parents, spouse, siblings, and children to celebrate your shared roots and expand our family timeline.
-</p>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 0 24px 0;">
+    <tr>
+        <td align="center" class="btn-block">
+            <a href="{{ $treeUrl }}" target="_blank" style="background-color: #a31621; color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 999px; font-weight: 700; font-size: 16px; display: inline-block;">
+                Add my branch &rarr;
+            </a>
+        </td>
+    </tr>
+</table>
 
-<div style="text-align: center; margin-bottom: 30px;">
-    <a href="{{ $treeUrl }}"
-       style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 50px; font-weight: 700; display: inline-block; font-size: 15px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
-        🌱 View Family Tree & Connect Branch
-    </a>
-</div>
-
-<p style="text-align: center; font-size: 13px; color: #94a3b8; margin: 0; line-height: 1.5;">
-    Ready to get started? Visit your <a href="{{ $treeUrl }}" style="color: #10b981; text-decoration: underline;">Family Tree</a> anytime from your dashboard.
+<p style="margin: 0 0 8px 0; font-size: 13px; line-height: 1.5; color: #a8a29e; text-align: center;">
+    You can also open the Family Tree any time from your dashboard.
 </p>
 @endsection

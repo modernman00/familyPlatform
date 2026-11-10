@@ -4,6 +4,7 @@ import { format } from 'timeago.js';
 import { esc } from '../global';
 import { FAMILY_GIFS, GIF_CATEGORIES } from '../profilePage/gifCatalog';
 import { HEIRLOOM_REACTIONS, getHeirloomGlassSvg, triggerHeirloomBurst } from '../profilePage/heirloomGlassReactions';
+import { compressVideoFile, shouldOptimiseVideoOnDevice } from '../helper/videoCompressor';
 
 const REEL_COMMENT_EMOJI_MAP = {
     love: '❤️',
@@ -513,7 +514,7 @@ class FamilyReelsPlayer {
 
         // Direct HTML5 Video File (MP4, WebM, MOV, server uploads) - no 'loop' attribute so 'ended' fires for continuous autoplay
         return `
-        <video class="reel-video-element ${initialFitClass}" id="reelActiveVideo" playsinline webkit-playsinline preload="auto" ${this.isMuted ? 'muted' : ''} autoplay>
+        <video class="reel-video-element atg-4k-video-render ${initialFitClass}" id="reelActiveVideo" playsinline webkit-playsinline preload="auto" ${this.isMuted ? 'muted' : ''} autoplay>
             <source src="${esc(trimmed)}" type="video/mp4">
             <source src="${esc(trimmed)}" type="video/webm">
             Your browser does not support HTML5 video.
@@ -2339,7 +2340,6 @@ class FamilyReelsPlayer {
                     // Select track handler
                     const selectBtn = card.querySelector('.btn-select-track');
                     selectBtn?.addEventListener('click', () => {
-                        if (modalAudioPreview) modalAudioPreview.pause();
                         if (activePlayingTrackBtn) activePlayingTrackBtn.innerHTML = '<i class="bi bi-play-fill fs-5"></i>';
 
                         if (audioUrlInput) audioUrlInput.value = track.url;
@@ -2353,6 +2353,21 @@ class FamilyReelsPlayer {
                         }
                         if (audioDrawer) audioDrawer.classList.add('d-none');
                         if (btnToggleAudioDrawerText) btnToggleAudioDrawerText.textContent = 'Change Music';
+
+                        // Initialize and play selected soundtrack in modal
+                        if (!modalAudioPreview) {
+                            modalAudioPreview = new Audio();
+                            modalAudioPreview.addEventListener('ended', () => updatePreviewMixButton(false));
+                            modalAudioPreview.addEventListener('pause', () => updatePreviewMixButton(false));
+                            modalAudioPreview.addEventListener('play', () => updatePreviewMixButton(true));
+                        }
+                        modalAudioPreview.src = track.url;
+                        modalAudioPreview.volume = (sliderMusicVol ? Number(sliderMusicVol.value) : 40) / 100;
+                        const startOffset = sliderAudioStart ? (parseFloat(sliderAudioStart.value) || 0) : 0;
+                        try { modalAudioPreview.currentTime = startOffset; } catch (_) {}
+                        modalAudioPreview.play().then(() => {
+                            updatePreviewMixButton(true);
+                        }).catch(() => {});
                     });
 
                     curatedList.appendChild(card);
@@ -2390,6 +2405,69 @@ class FamilyReelsPlayer {
             customPanel?.classList.remove('d-none');
         });
 
+        const btnPreviewMix = document.getElementById('btnPreviewSoundtrackMix');
+        const iconPreviewMix = document.getElementById('iconPreviewSoundtrackMix');
+        const textPreviewMix = document.getElementById('textPreviewSoundtrackMix');
+
+        const updatePreviewMixButton = (isPlaying) => {
+            if (iconPreviewMix) {
+                iconPreviewMix.className = isPlaying ? 'bi bi-pause-circle-fill text-danger' : 'bi bi-play-circle-fill';
+            }
+            if (textPreviewMix) {
+                textPreviewMix.textContent = isPlaying ? 'Pause Music' : 'Preview Music';
+            }
+        };
+
+        btnPreviewMix?.addEventListener('click', () => {
+            if (!modalAudioPreview || !modalAudioPreview.src) {
+                if (audioDrawer && audioDrawer.classList.contains('d-none')) {
+                    audioDrawer.classList.remove('d-none');
+                    loadCuratedTracks();
+                }
+                return;
+            }
+            if (modalAudioPreview.paused) {
+                const startOffset = sliderAudioStart ? (parseFloat(sliderAudioStart.value) || 0) : 0;
+                try { modalAudioPreview.currentTime = startOffset; } catch (_) {}
+                modalAudioPreview.volume = (sliderMusicVol ? Number(sliderMusicVol.value) : 40) / 100;
+                modalAudioPreview.play().then(() => {
+                    updatePreviewMixButton(true);
+                }).catch(() => {});
+            } else {
+                modalAudioPreview.pause();
+                updatePreviewMixButton(false);
+            }
+        });
+
+        if (previewVideo) {
+            previewVideo.addEventListener('play', () => {
+                if (modalAudioPreview && modalAudioPreview.src && (audioUrlInput?.value || (customAudioInput?.files && customAudioInput.files.length > 0))) {
+                    const startOffset = sliderAudioStart ? (parseFloat(sliderAudioStart.value) || 0) : 0;
+                    try {
+                        modalAudioPreview.currentTime = startOffset + (previewVideo.currentTime % (modalAudioPreview.duration || 30));
+                    } catch (_) {}
+                    modalAudioPreview.volume = (sliderMusicVol ? Number(sliderMusicVol.value) : 40) / 100;
+                    modalAudioPreview.play().then(() => updatePreviewMixButton(true)).catch(() => {});
+                }
+            });
+
+            previewVideo.addEventListener('pause', () => {
+                if (modalAudioPreview && !modalAudioPreview.paused) {
+                    modalAudioPreview.pause();
+                    updatePreviewMixButton(false);
+                }
+            });
+
+            previewVideo.addEventListener('seeking', () => {
+                if (modalAudioPreview && modalAudioPreview.src) {
+                    const startOffset = sliderAudioStart ? (parseFloat(sliderAudioStart.value) || 0) : 0;
+                    try {
+                        modalAudioPreview.currentTime = startOffset + (previewVideo.currentTime % (modalAudioPreview.duration || 30));
+                    } catch (_) {}
+                }
+            });
+        }
+
         customAudioInput?.addEventListener('change', function () {
             const file = this.files?.[0];
             if (!file) return;
@@ -2413,10 +2491,26 @@ class FamilyReelsPlayer {
             if (dualControls) dualControls.classList.remove('d-none');
             if (audioDrawer) audioDrawer.classList.add('d-none');
             if (btnToggleAudioDrawerText) btnToggleAudioDrawerText.textContent = 'Change Music';
+
+            try {
+                if (!modalAudioPreview) {
+                    modalAudioPreview = new Audio();
+                    modalAudioPreview.addEventListener('ended', () => updatePreviewMixButton(false));
+                    modalAudioPreview.addEventListener('pause', () => updatePreviewMixButton(false));
+                    modalAudioPreview.addEventListener('play', () => updatePreviewMixButton(true));
+                }
+                modalAudioPreview.src = URL.createObjectURL(file);
+                modalAudioPreview.volume = (sliderMusicVol ? Number(sliderMusicVol.value) : 40) / 100;
+                modalAudioPreview.play().then(() => updatePreviewMixButton(true)).catch(() => {});
+            } catch (_) {}
         });
 
         btnResetAudio?.addEventListener('click', () => {
-            if (modalAudioPreview) modalAudioPreview.pause();
+            if (modalAudioPreview) {
+                modalAudioPreview.pause();
+                modalAudioPreview.removeAttribute('src');
+            }
+            updatePreviewMixButton(false);
             if (audioUrlInput) audioUrlInput.value = '';
             if (customAudioInput) customAudioInput.value = '';
             if (customAudioPrompt && customAudioSelected) {
@@ -2496,17 +2590,83 @@ class FamilyReelsPlayer {
 
             const formData = new FormData(uploadForm);
 
+            const progressWrapper = document.getElementById('reelUploadProgressWrapper');
+            const progressBar = document.getElementById('reelUploadProgressBar');
+            const statusText = document.getElementById('reelUploadStatusText');
+            const percentText = document.getElementById('reelUploadPercentText');
+            const sizeIndicator = document.getElementById('reelUploadSizeIndicator');
+            const speedSubtext = document.getElementById('reelUploadSpeedSubtext');
+
+            if (progressWrapper) {
+                progressWrapper.classList.remove('d-none');
+                if (progressBar) progressBar.style.width = '0%';
+                if (percentText) percentText.textContent = '0%';
+                if (statusText) statusText.innerHTML = '<i class="bi bi-cloud-arrow-up-fill text-primary"></i> Uploading video…';
+                if (sizeIndicator) sizeIndicator.textContent = 'Preparing upload…';
+                if (speedSubtext) speedSubtext.textContent = 'Please keep this window open';
+            }
+
             if (submitBtn) {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Publishing Reel...';
             }
 
+            let uploadSucceeded = false;
             try {
+                if (hasFile) {
+                    const selectedFile = fileInput.files[0];
+                    const detectedDur = (previewVideo && previewVideo.duration && isFinite(previewVideo.duration))
+                        ? previewVideo.duration
+                        : null;
+                    if (selectedFile && shouldOptimiseVideoOnDevice(selectedFile, { trimStart: 0, trimEnd: 30, originalDuration: detectedDur })) {
+                        if (statusText) {
+                            statusText.innerHTML = '<i class="bi bi-stars text-warning"></i> Optimising video for 4K clarity & fast upload…';
+                        }
+                        if (sizeIndicator) {
+                            sizeIndicator.textContent = `Source ${(selectedFile.size / (1024 * 1024)).toFixed(1)} MB → Optimising…`;
+                        }
+                        const optResult = await compressVideoFile(selectedFile, {
+                            trimStart: 0,
+                            trimEnd: 30,
+                            originalDuration: detectedDur,
+                            onProgress: (pct) => {
+                                const mappedPct = Math.min(40, Math.max(5, Math.round(pct * 0.4)));
+                                if (progressBar) progressBar.style.width = `${mappedPct}%`;
+                                if (percentText) percentText.textContent = `${mappedPct}%`;
+                            }
+                        });
+                        if (optResult && optResult.compressed && optResult.file) {
+                            formData.set('video_file', optResult.file, optResult.file.name || selectedFile.name || 'reel.mp4');
+                        }
+                    }
+                }
+
                 const res = await axios.post('/api/reels/upload', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                    onUploadProgress: (progressEvent) => {
+                        if (progressEvent.total) {
+                            const percent = Math.min(100, Math.round((progressEvent.loaded * 100) / progressEvent.total));
+                            if (progressBar) progressBar.style.width = `${percent}%`;
+                            if (percentText) percentText.textContent = `${percent}%`;
+                            const loadedMb = (progressEvent.loaded / (1024 * 1024)).toFixed(1);
+                            const totalMb = (progressEvent.total / (1024 * 1024)).toFixed(1);
+                            if (sizeIndicator) sizeIndicator.textContent = `${loadedMb} MB / ${totalMb} MB`;
+
+                            if (percent < 100) {
+                                if (statusText) statusText.innerHTML = '<i class="bi bi-cloud-arrow-up-fill text-primary"></i> Uploading video…';
+                            } else {
+                                if (statusText) statusText.innerHTML = '<span class="spinner-border spinner-border-sm text-primary me-1"></span> Processing & publishing reel…';
+                                if (speedSubtext) speedSubtext.textContent = 'Finalising memory & notifying family…';
+                            }
+                        }
+                    }
                 });
 
                 if (res.data?.status === 'success') {
+                    uploadSucceeded = true;
+                    if (progressBar) progressBar.style.width = '100%';
+                    if (percentText) percentText.textContent = '100%';
+                    if (statusText) statusText.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Reel published!';
                     if (typeof Swal !== 'undefined') {
                         await Swal.fire({
                             icon: 'success',
@@ -2528,6 +2688,9 @@ class FamilyReelsPlayer {
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<i class="bi bi-camera-video-fill me-1"></i> Publish Reel';
+                }
+                if (progressWrapper && !uploadSucceeded) {
+                    progressWrapper.classList.add('d-none');
                 }
             }
         });

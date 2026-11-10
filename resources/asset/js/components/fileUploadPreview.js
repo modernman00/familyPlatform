@@ -1,6 +1,7 @@
 import { id } from '@shared';
 import Swal from 'sweetalert2';
 import { compressImageFile } from './helper/imageCompressor';
+import { scanImageSafety } from './helper/mediaSafetyScanner';
 
 let selectedFilesStore = [];
 
@@ -108,6 +109,7 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
       // If we have a local video file, blob URL, or stream URL, render inline video thumbnail
       if (vid.streamUrl || vid.blobUrl || vid.file) {
         const vidPreview = document.createElement('video');
+        vidPreview.className = 'atg-4k-video-render';
         vidPreview.muted = true;
         vidPreview.preload = 'metadata';
         vidPreview.playsInline = true;
@@ -135,13 +137,18 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
 
       // Video badge indicator
       const badge = document.createElement('span');
+      badge.id = `composerVidBadge_${vid.id || vIdx}`;
       badge.className = 'badge position-absolute bottom-0 start-0 m-1 px-1.5 py-0.5 rounded-pill';
       badge.style.fontSize = '0.65rem';
-      badge.style.backgroundColor = 'rgba(163, 22, 33, 0.9)';
+      badge.style.backgroundColor = (!vid.uploading && !vid.customising && vid.streamUrl)
+        ? 'rgba(5, 150, 105, 0.94)'
+        : 'rgba(163, 22, 33, 0.9)';
       badge.style.color = '#ffffff';
       badge.innerHTML = vid.uploading
         ? '<span class="spinner-border spinner-border-sm me-0.5" style="width: 8px; height: 8px;"></span> Uploading...'
-        : `<i class="bi bi-camera-video-fill me-0.5"></i> Video ${attachedVideos.length > 1 ? (vIdx + 1) : ''}`;
+        : (vid.customising
+            ? '<i class="bi bi-scissors me-0.5"></i> Ready to trim'
+            : `<i class="bi bi-stars me-0.5" style="color:#fde047;"></i> 4K Ready${attachedVideos.length > 1 ? ` · #${vIdx + 1}` : ''}`);
       videoWrapper.appendChild(badge);
 
       // Remove video button
@@ -184,12 +191,18 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
       const vCount = attachedVideos.length;
       const iCount = accumulatedFiles.length;
 
+      const allVideosReady = vCount > 0 && attachedVideos.every(v => !v.uploading && v.streamUrl);
+      const savedBytesTotal = attachedVideos.reduce((acc, v) => acc + (v.savedBytes > 0 ? v.savedBytes : 0), 0);
+      const atgBadgeHtml = allVideosReady
+        ? ` <span class="badge rounded-pill ms-1 px-2 py-0.5" style="background:rgba(5,150,105,0.12);color:#047857;border:1px solid rgba(5,150,105,0.3);font-size:0.68rem;font-weight:700;">⚡ ATG 4K FastStart${savedBytesTotal > 102400 ? ` · Saved ${formatFileSize(savedBytesTotal)}` : ''}</span>`
+        : '';
+
       if (iCount > 0 && vCount > 0) {
-        countLabel = `<strong>${iCount} photo${iCount > 1 ? 's' : ''}, ${vCount} video${vCount > 1 ? 's' : ''}</strong> <small>· ${formatFileSize(totalBytes)}</small>`;
+        countLabel = `<strong>${iCount} photo${iCount > 1 ? 's' : ''}, ${vCount} video${vCount > 1 ? 's' : ''}</strong> <small>· ${formatFileSize(totalBytes)}</small>${atgBadgeHtml}`;
       } else if (iCount > 0) {
         countLabel = `<strong>${iCount} photo${iCount > 1 ? 's' : ''}</strong> <small>· ${formatFileSize(totalBytes)}</small>`;
       } else if (vCount > 0) {
-        countLabel = `<strong>${vCount} video${vCount > 1 ? 's' : ''}</strong>${totalBytes > 0 ? ` <small>· ${formatFileSize(totalBytes)}</small>` : ''}`;
+        countLabel = `<strong>${vCount} video${vCount > 1 ? 's' : ''}</strong>${totalBytes > 0 ? ` <small>· ${formatFileSize(totalBytes)}</small>` : ''}${atgBadgeHtml}`;
       }
       fileNamesDisplay.innerHTML = countLabel;
     }
@@ -238,8 +251,8 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
     const videoFiles = rawSelectedFiles.filter(f => (f.type && f.type.startsWith('video/')) || /\.(mp4|webm|mov|ogg)$/i.test(f.name || ''));
     const imageOnlyFiles = rawSelectedFiles.filter(f => !videoFiles.includes(f));
 
-    // Link-first nudge: large raw videos are costly to store and stream, so invite the user to share a link instead.
-    const nudgeThresholdBytes = 10 * 1024 * 1024;
+    // Link-first nudge: only prompt for massive (>150MB) raw files since ATG now optimises & fast-uploads standard videos natively.
+    const nudgeThresholdBytes = 150 * 1024 * 1024;
     const largeVideo = videoFiles.some(f => f.size >= nudgeThresholdBytes);
     let videoFilesToProcess = videoFiles;
     if (largeVideo) {
@@ -303,11 +316,13 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
             showConfirmButton: false
           });
         }
-        for (const vFile of allowedVideos) {
-          if (typeof window.__handleComposerVideoFile === 'function') {
-            await window.__handleComposerVideoFile(vFile);
-          }
-        }
+        await Promise.all(
+          allowedVideos.map(vFile =>
+            typeof window.__handleComposerVideoFile === 'function'
+              ? window.__handleComposerVideoFile(vFile)
+              : Promise.resolve()
+          )
+        );
       }
     }
 
@@ -343,6 +358,34 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
 
     if (!validRawFiles.length) return;
 
+    // Client-Side Media Safety Pre-Screening (Option A: Explicit Adult Detection)
+    // Run in parallel across selected images to keep multi-photo staging instantaneous!
+    const safetyResults = await Promise.all(
+      validRawFiles.map(async (file) => ({
+        file,
+        scanResult: await scanImageSafety(file)
+      }))
+    );
+
+    const safeFiles = [];
+    for (const { file, scanResult } of safetyResults) {
+      if (!scanResult.isSafe) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Family Safety Advisory',
+          text: `Photo "${file.name}" appears to contain sexually explicit content or excessive nudity. FamilyPlatform is dedicated to safe, family-friendly memories for all generations.`,
+          confirmButtonColor: '#a31621'
+        });
+      } else {
+        safeFiles.push(file);
+      }
+    }
+    if (!safeFiles.length) {
+      if (fileNamesDisplay) fileNamesDisplay.textContent = '';
+      if (!accumulatedFiles.length) previewContainer.classList.add('d-none');
+      return;
+    }
+
     // Show quick optimising status if files are chosen (en-GB)
     if (fileNamesDisplay) {
       fileNamesDisplay.textContent = 'Optimising photos for instant upload...';
@@ -351,7 +394,7 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
 
     // High-speed parallel client-side compression (balanced 2K Retina clarity at 0.85 quality for instant uploads)
     const compressedFiles = await Promise.all(
-      validRawFiles.map(file => compressImageFile(file, { maxWidth: 2048, maxHeight: 2048, quality: 0.85 }))
+      safeFiles.map(file => compressImageFile(file, { maxWidth: 2048, maxHeight: 2048, quality: 0.85 }))
     );
 
     // Merge newly selected files with existing accumulated files (deduplicating by name and size)

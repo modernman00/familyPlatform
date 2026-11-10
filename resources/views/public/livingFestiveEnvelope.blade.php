@@ -384,16 +384,35 @@
             const gold = [FESTIVE.light, FESTIVE.accent, '#fff4d1'];
             const palettes = {
                 confetti: [FESTIVE.accent, FESTIVE.light, FESTIVE.primary, '#ffffff', '#f472b6', '#60a5fa'],
+                fireworks: ['#ffd700', '#ff6b6b', '#38bdf8', '#c084fc', '#34d399', '#ffffff', FESTIVE.light],
                 petals: ['#fbcfe8', '#f9a8d4', '#fde2e4', '#ffffff'],
                 leaves: ['#c2410c', '#ea580c', '#b45309', '#a16207', '#7c2d12'],
-                snow: ['#ffffff'], stardust: ['#ffffff', FESTIVE.light], golddust: gold,
+                snow: ['#ffffff', '#e0f2fe', '#f8fafc'], stardust: ['#ffffff', FESTIVE.light], golddust: gold,
                 sparks: ['#fde68a', '#fbbf24', '#f59e0b', '#fff7ed'], embers: ['#fde7c2', '#fcd9a8', '#ffffff'],
             };
             const colours = palettes[type] || palettes.snow;
             const small = window.innerWidth < 600;
-            const counts = { confetti: 46, petals: 30, leaves: 26, snow: 70, stardust: 80, golddust: 70, sparks: 40, embers: 22 };
+            const counts = { confetti: 46, fireworks: 42, petals: 30, leaves: 26, snow: 74, stardust: 80, golddust: 70, sparks: 40, embers: 22 };
             const parts = [];
             const rand = (a, b) => a + Math.random() * (b - a);
+
+            function spawnFirework(cx, cy, ringCount) {
+                const baseCol = colours[Math.floor(Math.random() * colours.length)];
+                const rays = ringCount || (small ? 22 : 34);
+                for (let k = 0; k < rays; k++) {
+                    const a = (Math.PI * 2 * k) / rays + rand(-0.06, 0.06);
+                    const sp = rand(1.8, 5.4);
+                    parts.push({
+                        x: cx, y: cy,
+                        vx: Math.cos(a) * sp,
+                        vy: Math.sin(a) * sp,
+                        r: rand(1.5, 2.8),
+                        rot: a, vr: 0, sway: 0, tw: rand(0, Math.PI * 2),
+                        c: k % 3 === 0 ? '#ffffff' : baseCol,
+                        burst: 1, firework: 1, life: rand(0.75, 1.1)
+                    });
+                }
+            }
 
             function make(burst) {
                 const p = { x: rand(0, W), y: rand(-H, H), rot: rand(0, Math.PI * 2), vr: rand(-0.03, 0.03), sway: rand(0, Math.PI * 2), c: colours[Math.floor(Math.random() * colours.length)], tw: rand(0, Math.PI * 2) };
@@ -402,15 +421,18 @@
                     case 'petals': Object.assign(p, { w: rand(6, 10), h: rand(10, 15), vy: rand(0.4, 1.0), vx: rand(-0.3, 0.6) }); break;
                     case 'leaves': Object.assign(p, { w: rand(7, 12), h: rand(12, 18), vy: rand(0.5, 1.2), vx: rand(-0.3, 0.5) }); break;
                     case 'embers': Object.assign(p, { r: rand(2, 5), vy: rand(-0.35, -0.12), vx: rand(-0.15, 0.15), y: rand(0, H * 1.4) }); break;
-                    case 'sparks': Object.assign(p, { r: rand(1, 2.4), vy: rand(-1.0, -0.35), vx: rand(-0.3, 0.3), y: rand(0, H * 1.3) }); break;
+                    case 'sparks':
+                    case 'fireworks': Object.assign(p, { r: rand(1.1, 2.5), vy: rand(-1.2, -0.4), vx: rand(-0.3, 0.3), y: rand(0, H * 1.3) }); break;
                     case 'stardust':
                     case 'golddust': Object.assign(p, { r: rand(0.6, 2), vy: rand(0.08, 0.3), vx: rand(-0.12, 0.12) }); break;
-                    default: Object.assign(p, { r: rand(1.2, 3.6), vy: rand(0.4, 1.1), vx: rand(-0.3, 0.3) });
+                    default:
+                        const isFlake = type === 'snow' && Math.random() < 0.28;
+                        Object.assign(p, { r: isFlake ? rand(3.5, 6.2) : rand(1.2, 3.4), flake: isFlake, vy: rand(0.4, 1.15), vx: rand(-0.3, 0.3) });
                 }
                 if (burst) {
                     const a = rand(0, Math.PI * 2), sp = rand(3, 9);
                     Object.assign(p, { x: W / 2, y: H * 0.42, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 3, burst: 1, life: 1, c: [...gold, ...colours][Math.floor(Math.random() * (gold.length + colours.length))] });
-                    if (!p.w && type !== 'embers') { p.w = rand(5, 9); p.h = rand(8, 13); }
+                    if (!p.w && type !== 'embers' && type !== 'fireworks') { p.w = rand(5, 9); p.h = rand(8, 13); }
                 }
                 return p;
             }
@@ -420,7 +442,30 @@
                 ctx.save();
                 ctx.translate(p.x, p.y);
                 ctx.globalAlpha = p.burst ? Math.max(0, p.life) : 1;
-                if (type === 'embers' && !p.burst) {
+                if (p.firework) {
+                    ctx.strokeStyle = p.c;
+                    ctx.lineWidth = p.r;
+                    ctx.lineCap = 'round';
+                    ctx.shadowColor = p.c;
+                    ctx.shadowBlur = 8;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(-p.vx * 2.6, -p.vy * 2.6);
+                    ctx.stroke();
+                } else if (p.flake) {
+                    ctx.rotate(p.rot);
+                    ctx.strokeStyle = p.c;
+                    ctx.lineWidth = 1.15;
+                    ctx.lineCap = 'round';
+                    ctx.globalAlpha = 0.82;
+                    for (let k = 0; k < 3; k++) {
+                        ctx.beginPath();
+                        ctx.moveTo(-p.r, 0);
+                        ctx.lineTo(p.r, 0);
+                        ctx.stroke();
+                        ctx.rotate(Math.PI / 3);
+                    }
+                } else if (type === 'embers' && !p.burst) {
                     const g = ctx.createRadialGradient(0, 0, 0, 0, 0, p.r * 4);
                     const a = 0.35 + 0.25 * Math.sin(p.tw);
                     g.addColorStop(0, 'rgba(255,240,210,' + a + ')');
@@ -432,7 +477,7 @@
                     if (type === 'petals' || type === 'leaves') { ctx.beginPath(); ctx.ellipse(0, 0, p.w / 2, p.h / 2, 0, 0, Math.PI * 2); ctx.fill(); }
                     else { ctx.scale(1, Math.cos(p.tw)); ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); }
                 } else {
-                    const tw = (type === 'stardust' || type === 'golddust') ? 0.45 + 0.55 * Math.abs(Math.sin(p.tw)) : 0.85;
+                    const tw = (type === 'stardust' || type === 'golddust' || type === 'fireworks') ? 0.45 + 0.55 * Math.abs(Math.sin(p.tw)) : 0.85;
                     ctx.globalAlpha *= tw;
                     ctx.fillStyle = p.c;
                     ctx.shadowColor = p.c; ctx.shadowBlur = type === 'snow' ? 0 : 6;
@@ -441,12 +486,19 @@
                 ctx.restore();
             }
 
+            let fwTick = 0;
             function step() {
                 ctx.clearRect(0, 0, W, H);
+                if (type === 'fireworks' && !reduce) {
+                    fwTick++;
+                    if (fwTick % 75 === 15) {
+                        spawnFirework(rand(W * 0.14, W * 0.86), rand(H * 0.12, H * 0.48));
+                    }
+                }
                 for (let i = parts.length - 1; i >= 0; i--) {
                     const p = parts[i];
                     p.tw += 0.05; p.sway += 0.02; p.rot += p.vr;
-                    if (p.burst) { p.vy += 0.12; p.vx *= 0.985; p.life -= 0.009; if (p.life <= 0) { parts.splice(i, 1); continue; } }
+                    if (p.burst) { p.vy += p.firework ? 0.055 : 0.12; p.vx *= p.firework ? 0.968 : 0.985; p.life -= p.firework ? 0.015 : 0.009; if (p.life <= 0) { parts.splice(i, 1); continue; } }
                     p.x += p.vx + (p.burst ? 0 : Math.sin(p.sway) * 0.35);
                     p.y += p.vy;
                     if (!p.burst) {
@@ -462,6 +514,11 @@
 
             window.triggerParticleBurst = function () {
                 if (reduce || FESTIVE.mood === 'reverent') return; // remembrance: stillness, no confetti
+                if (type === 'fireworks') {
+                    spawnFirework(W * 0.25, H * 0.28, 36);
+                    spawnFirework(W * 0.75, H * 0.26, 36);
+                    spawnFirework(W * 0.5, H * 0.18, 44);
+                }
                 for (let i = 0; i < (small ? 70 : 120); i++) parts.push(make(true));
             };
         })();

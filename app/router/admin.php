@@ -125,3 +125,9 @@ $router->map('POST', '/admin/setup-2fa', 'App\controller\admin\TotpSetupControll
 $router->map('POST', $adminSecretPath . '/setup-2fa', 'App\controller\admin\TotpSetupController@save', 'admin_totp_save_secret');
 $router->map('POST', '/admin/disable-2fa', 'App\controller\admin\TotpSetupController@disable', 'admin_totp_disable');
 $router->map('POST', $adminSecretPath . '/disable-2fa', 'App\controller\admin\TotpSetupController@disable', 'admin_totp_disable_secret');
+
+// CONTENT SAFETY & ABUSE MODERATION COMMAND CONSOLE
+$router->map('GET', '/admin/moderation', 'App\controller\admin\AdminModerationController@index', 'admin_moderation_index');
+$router->map('GET', $adminSecretPath . '/moderation', 'App\controller\admin\AdminModerationController@index', 'admin_moderation_index_secret');
+$router->map('POST', '/admin/moderation/action', 'App\controller\admin\AdminModerationController@takeAction', 'admin_moderation_action');
+$router->map('POST', $adminSecretPath . '/moderation/action', 'App\controller\admin\AdminModerationController@takeAction', 'admin_moderation_action_secret');

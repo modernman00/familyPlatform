@@ -4,6 +4,16 @@
 // and never trigger Giphy's "This content is not available" placeholder image.
 
 export const FAMILY_GIFS = [
+    // 💎 Official FamilyPlatform Brand GIFs (ATG Pods 3 & 4)
+    { id: 'atg_heritage_tree_bloom', cat: 'family_brand', title: 'Heritage Tree — Roots & Wings', url: '/images/brand/gifs/atg_heritage_tree_bloom.gif' },
+    { id: 'atg_kinship_pulse', cat: 'family_brand', title: 'Generations Connected — Kinship Pulse', url: '/images/brand/gifs/atg_kinship_pulse.gif' },
+    { id: 'atg_family_reunion_toast', cat: 'family_brand', title: 'Family Reunion Toast — Reunited & Celebrating', url: '/images/brand/gifs/atg_family_reunion_toast.gif' },
+    { id: 'atg_welcome_home_circle', cat: 'family_brand', title: 'Welcome Home — Family Circle', url: '/images/brand/gifs/atg_welcome_home_circle.gif' },
+    { id: 'atg_family_love_hugs', cat: 'family_brand', title: 'Sending Family Love & Warm Hugs', url: '/images/brand/gifs/atg_family_love_hugs.gif' },
+    { id: 'atg_proud_family_applause', cat: 'family_brand', title: 'Proud Family Moments — Standing Ovation', url: '/images/brand/gifs/atg_proud_family_applause.gif' },
+    { id: 'atg_legacy_vault_spark', cat: 'family_brand', title: 'Family Legacy — Cherished Forever', url: '/images/brand/gifs/atg_legacy_vault_spark.gif' },
+    { id: 'atg_sunday_family_banter', cat: 'family_brand', title: 'Sunday Banter — Laughter & Joy', url: '/images/brand/gifs/atg_sunday_family_banter.gif' },
+
     // Celebrate & Congrats
     { id: 'g_cel_1', cat: 'celebrate', title: 'Party Confetti Celebration', url: 'https://media.giphy.com/media/artj92V8o75VPL7AeQ/200.gif' },
     { id: 'g_cel_2', cat: 'celebrate', title: 'Cheers Toast Champagne', url: 'https://media.giphy.com/media/g9582DNuQppxC/200.gif' },
@@ -74,6 +84,7 @@ export const FAMILY_GIFS = [
 
 export const GIF_CATEGORIES = [
     { key: 'all', label: '🌟 All' },
+    { key: 'family_brand', label: '💎 Family Brand' },
     { key: 'stickers', label: '🏷️ Stickers' },
     { key: 'celebrate', label: '🎉 Celebrate' },
     { key: 'love', label: '❤️ Love & Hugs' },
@@ -87,6 +98,9 @@ export const GIF_CATEGORIES = [
 export const isAllowedGifUrl = (url) => {
     if (!url || typeof url !== 'string') return false;
     const trimmed = url.trim();
+    if (trimmed.startsWith('/images/brand/gifs/') || trimmed.startsWith('/api/atg/gif/')) {
+        return true;
+    }
     if (trimmed.startsWith('/resources/images/post/comment_') || trimmed.startsWith('/resources/images/post/')) {
         return true;
     }

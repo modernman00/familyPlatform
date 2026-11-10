@@ -252,6 +252,106 @@ foreach ($decorated[5]['dna_makeup']['active_regions'] as $reg) {
     assertTrue((bool)preg_match('/^#[0-9a-fA-F]{6}$/', $reg['color']), 'Malicious colour string replaced with safe hex colour token');
 }
 
+// 7. Verify Explicit Recursive DNA Hierarchy (50% Parent -> 25% Grandparent -> 12.5% Great-Grandparent -> 6.25% 2nd Great-Grandparent)
+// Add Paternal Great-Grandparents (Nodes 14 & 15 -> Union 105 -> Paternal Grandfather Node 1)
+// and a synthetic placeholder parent (Node 16, is_placeholder=true) above Node 14 to verify placeholder filtering.
+$nodesWithGreatGrandparents = array_merge($nodes, [
+    [
+        'id' => 14,
+        'first_name' => 'Ogunleye',
+        'last_name' => 'Olaogun',
+        'gender' => 'Male',
+        'generation_level' => -3,
+    ],
+    [
+        'id' => 15,
+        'first_name' => 'Morenike',
+        'last_name' => 'Olaogun',
+        'maiden_name' => 'Ajayi',
+        'gender' => 'Female',
+        'generation_level' => -3,
+    ],
+    [
+        'id' => 16,
+        'first_name' => 'Add Father',
+        'last_name' => '',
+        'gender' => 'Male',
+        'generation_level' => -4,
+        'is_placeholder' => true,
+    ],
+]);
+
+$unionsWithGGP = array_merge($unions, [
+    ['id' => 105, 'partner_1_id' => 14, 'partner_2_id' => 15, 'is_current' => 1, 'union_type' => 'married'],
+    ['id' => 106, 'partner_1_id' => 16, 'partner_2_id' => 16, 'is_current' => 1, 'union_type' => 'single'],
+]);
+
+$childrenWithGGP = array_merge($children, [
+    ['union_id' => 105, 'child_id' => 1],
+    ['union_id' => 106, 'child_id' => 14],
+]);
+
+$decoratedGGP = KinshipCalculatorService::calculateEgoKinship([
+    'nodes' => $nodesWithGreatGrandparents,
+    'unions' => $unionsWithGGP,
+    'children' => $childrenWithGGP,
+], 6);
+
+$egoExplicit = $decoratedGGP[6]['dna_makeup']['explicit_tree'];
+assertTrue($egoExplicit['has_ancestors'] === true && $egoExplicit['max_depth'] === 3, 'Ego (Node 6) has explicit_tree with has_ancestors=true and max_depth=3 (Parents -> Grandparents -> Great-Grandparents)');
+assertTrue($egoExplicit['parent_line_summary'] === '50% Father (Babatunde) · 50% Mother (Folake)', 'Ego parent_line_summary explicitly states "50% Father (Babatunde) · 50% Mother (Folake)"');
+assertTrue(str_contains($egoExplicit['sub_line_summary'], 'GP 25%') && str_contains($egoExplicit['sub_line_summary'], 'GGP 12.5%'), 'Ego sub_line_summary explicitly highlights both GP 25% and GGP 12.5%');
+
+$fatherBranch = $egoExplicit['branches'][0];
+$motherBranch = $egoExplicit['branches'][1];
+assertTrue($fatherBranch['role'] === 'Father' && $fatherBranch['percentage'] === 50.0 && $fatherBranch['name'] === 'Babatunde Olaogun', 'Ego Branch 0 is 50% Father: Babatunde Olaogun');
+assertTrue($motherBranch['role'] === 'Mother' && $motherBranch['percentage'] === 50.0 && $motherBranch['name'] === 'Folake Balogun', 'Ego Branch 1 is 50% Mother: Folake Balogun');
+assertTrue($fatherBranch['consists_of_label'] === 'Consists of Paternal Grandparents (25% + 25%)' && count($fatherBranch['consists_of']) === 2, 'Father 50% explicitly consists of Paternal Grandparents (25% + 25%)');
+
+$patGFBranch = $fatherBranch['consists_of'][0];
+$patGMBranch = $fatherBranch['consists_of'][1];
+assertTrue($patGFBranch['role'] === 'Paternal Grandfather' && $patGFBranch['percentage'] === 25.0 && $patGFBranch['name'] === 'Adesanya Olaogun', 'Father consists_of[0] is 25% Paternal Grandfather: Adesanya Olaogun');
+assertTrue($patGMBranch['role'] === 'Paternal Grandmother' && $patGMBranch['percentage'] === 25.0 && $patGMBranch['name'] === 'Iyabo Adebayo', 'Father consists_of[1] is 25% Paternal Grandmother: Iyabo Adebayo');
+assertTrue($patGFBranch['consists_of_label'] === 'Consists of Great-Grandparents (12.5% + 12.5%)' && count($patGFBranch['consists_of']) === 2, 'Paternal Grandfather 25% explicitly consists of Great-Grandparents (12.5% + 12.5%)');
+
+$patGGFBranch = $patGFBranch['consists_of'][0];
+$patGGMBranch = $patGFBranch['consists_of'][1];
+assertTrue($patGGFBranch['role'] === 'Paternal Great-Grandfather' && $patGGFBranch['percentage'] === 12.5 && $patGGFBranch['name'] === 'Ogunleye Olaogun', 'Paternal Grandfather consists_of[0] is 12.5% Paternal Great-Grandfather: Ogunleye Olaogun');
+assertTrue($patGGMBranch['role'] === 'Paternal Great-Grandmother' && $patGGMBranch['percentage'] === 12.5 && $patGGMBranch['name'] === 'Morenike Ajayi', 'Paternal Grandfather consists_of[1] is 12.5% Paternal Great-Grandmother: Morenike Ajayi');
+assertTrue(empty($patGGFBranch['consists_of']), 'Placeholder parent (is_placeholder=true) above Node 14 is NOT expanded into consists_of');
+
+// Verify 4-generation cascade on Ego's Son (Node 13): 50% Father -> 25% Grandparent -> 12.5% Great-Grandparent -> 6.25% 2nd Great-Grandparent
+$sonExplicit = $decoratedGGP[13]['dna_makeup']['explicit_tree'];
+assertTrue($sonExplicit['max_depth'] === 4, 'Son (Node 13) explicit_tree reaches max_depth=4 (6.25% 2nd Great-Grandparents)');
+$son2ndGGF = $sonExplicit['branches'][0]['consists_of'][0]['consists_of'][0]['consists_of'][0];
+assertTrue($son2ndGGF['percentage'] === 6.25 && $son2ndGGF['formatted_pct'] === '6.25%' && $son2ndGGF['name'] === 'Ogunleye Olaogun', 'Son (Node 13) explicitly traces 6.25% to Paternal 2nd Great-Grandfather Ogunleye Olaogun');
+
+// Verify sub_segments sum to exact 100.0%
+$subSegTotal = 0.0;
+foreach ($egoExplicit['sub_segments'] as $seg) {
+    $subSegTotal += (float)$seg['percentage'];
+}
+assertTrue(abs($subSegTotal - 100.0) < 0.01, 'Ego explicit_tree sub_segments sum to exact 100.0% (12.5% + 12.5% + 25% + 50%)');
+assertTrue(is_array($fatherBranch['regions']) && count($fatherBranch['regions']) === 2 && $fatherBranch['regions'][0]['percentage'] === 80.0, 'Father branch includes regions array for Option B Ancestor Fan wedges');
+assertTrue($uncleLineage[0]['region'] === 'Adesanya line' && $uncleLineage[1]['region'] === 'Adebayo line', 'Founder lineage labels use concise "<Name> line" format for readable node chips');
+
+// 8. Verify Option A (Heritage Halo + Shared DNA Tab + 3 Chips + <70% Zoom LOD) & Option D + B Fan in UI
+$kinshipJs = (string)file_get_contents(__DIR__ . '/../resources/asset/js/vendor/kinshiptree.js');
+$organogramBlade = (string)file_get_contents(__DIR__ . '/../resources/views/member/organogram.blade.php');
+assertTrue(
+    str_contains($kinshipJs, 'kinship-dna-halo') &&
+    str_contains($kinshipJs, 'kinship-dna-chips') &&
+    str_contains($kinshipJs, 'kinship-zoom-far'),
+    'kinshiptree.js implements Option A Heritage Halo, 3 readable DNA chips, and <70% zoom level-of-detail'
+);
+assertTrue(
+    str_contains($organogramBlade, 'buildAncestorFanSvg') &&
+    str_contains($organogramBlade, 'buildOptionDExplicitTreeHtml') &&
+    str_contains($organogramBlade, 'treeDnaQuickPopover') &&
+    str_contains($organogramBlade, 'cardDnaAncestorFanBox'),
+    'organogram.blade.php implements Option D + Option B Ancestor Fan Chart in both popover and person card'
+);
+
 echo "-----------------------------------------------------------------\n";
 echo "Results: {$passed} passed, {$failed} failed.\n";
 if ($failed > 0) {

@@ -21,30 +21,30 @@
     $whatsappMsg = urlencode("Hello! I started our private family tree on FamilyPlatform. Jump in and help me add everyone using our Family Code: {$famCode} at {$baseUrl}/register?famCode={$famCode}");
 @endphp
 
-<p style="margin-bottom: 20px; font-size: 16px; color: #1e293b; line-height: 1.6;">
+<p style="margin: 0 0 16px 0; font-size: 16px; color: #292524; line-height: 1.65;">
     Hello <strong>{{ $data['firstName'] }}</strong>,
 </p>
 
-<p style="margin-bottom: 20px; font-size: 16px; color: #334155; line-height: 1.6;">
+<p style="margin: 0 0 22px 0; font-size: 16px; color: #44403c; line-height: 1.65;">
     Life gets busy, and preserving generations of family heritage should never feel like a solo burden on your shoulders alone.
 </p>
 
 <!-- Co-Pilot Invitation Card -->
-<div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-left: 4px solid #2563eb; padding: 20px 24px; border-radius: 8px; margin-bottom: 24px;">
-    <h4 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 16px; font-weight: 700;">
+<div style="background-color: #fbf7f2; border: 1px solid #efe4d8; border-left: 3px solid #a31621; border-radius: 12px; padding: 20px 22px; margin: 0 0 26px 0;">
+    <h4 style="margin: 0 0 6px 0; color: #a31621; font-size: 15px; font-weight: 700;">
         🤝 Invite a Family Co-Pilot via WhatsApp
     </h4>
     <p style="margin: 0 0 16px 0; color: #1e40af; font-size: 14px; line-height: 1.6;">
         Every family has a natural storyteller — a sister who collects old photographs, an uncle who remembers every birthday, or a cousin who loves family history. Pass them the key so they can help you co-build.
     </p>
     <div style="text-align: center;">
-        <a href="https://api.whatsapp.com/send?text={{ $whatsappMsg }}" target="_blank" style="background-color: #25D366; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; font-size: 14px; display: inline-block; box-shadow: 0 2px 8px rgba(37,211,102, 0.3);">
+        <a href="https://api.whatsapp.com/send?text={{ $whatsappMsg }}" target="_blank" style="background-color: #25D366; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 999px; font-weight: 700; font-size: 14px; display: inline-block; box-shadow: 0 2px 8px rgba(37,211,102, 0.3);">
             Share Family Key on WhatsApp &rarr;
         </a>
     </div>
 </div>
 
-<h3 style="margin: 0 0 16px 0; font-size: 17px; font-weight: 700; color: #0f172a;">
+<h3 style="margin: 0 0 12px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 19px; font-weight: 700; color: #1c1917;">
     Your Reserved Family Code:
 </h3>
 
@@ -58,15 +58,15 @@
 <!-- 1-Click Magic CTA Button -->
 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0 24px 0;">
     <tr>
-        <td align="center">
-            <a href="{{ $magicUrl }}" target="_blank" style="background: linear-gradient(135deg, #a31621 0%, #8a1019 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(163,22,33, 0.35);">
+        <td align="center" class="btn-block">
+            <a href="{{ $magicUrl }}" target="_blank" style="background-color: #a31621; color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 999px; font-weight: 700; font-size: 16px; display: inline-block;">
                 Access Your Sanctuary (1-Click Login) &rarr;
             </a>
         </td>
     </tr>
 </table>
 
-<p style="margin: 20px 0 0 0; font-size: 13px; color: #64748b; text-align: center;">
+<p style="margin: 8px 0 0 0; font-size: 13px; color: #a8a29e; text-align: center;">
     Your relatives can join instantly • No technical setup required • Shared family history
 </p>
 

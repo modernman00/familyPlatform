@@ -507,30 +507,35 @@
                         </div>
                     </div>
 
-                    <!-- Layer 1 & Layer 2: DNA Make-Up & Consanguinity Section -->
-                    <div id="cardDnaMakeupSection" style="margin-top: 14px; padding: 12px; border-radius: 14px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.28);">
-                        <div class="d-flex align-items-center justify-content-between mb-1.5 gap-2">
-                            <div class="d-flex align-items-center gap-1.5">
-                                <span aria-hidden="true" style="font-size: 0.95rem;">🧬</span>
-                                <span class="fw-bold text-white" style="font-size: 0.8rem; letter-spacing: 0.03em;">DNA MAKE-UP &amp; KINSHIP</span>
+                    <!-- Option D + Option B Fan: DNA Make-Up & Explicit Ancestor Breakdown -->
+                    <div id="cardDnaMakeupSection" style="margin-top: 14px; padding: 14px; border-radius: 16px; background: rgba(15, 23, 42, 0.94); border: 1px solid rgba(148, 163, 184, 0.25); box-shadow: 0 12px 28px rgba(0,0,0,0.35);">
+                        <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+                            <div>
+                                <div style="font-size: 0.66rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #94a3b8;">Shared with you</div>
+                                <div class="d-flex align-items-baseline gap-2 mt-0.5">
+                                    <span id="cardSharedDnaBigPct" style="font-size: 1.35rem; font-weight: 800; color: #6ee7b7; font-variant-numeric: tabular-nums; line-height: 1.1;">100%</span>
+                                    <span id="cardSharedDnaBadge" class="badge rounded-pill" style="font-size: 0.66rem; font-weight: 800; background: rgba(6, 78, 59, 0.9); color: #6ee7b7; border: 1px solid #10b981;">100% DNA</span>
+                                </div>
                             </div>
-                            <span id="cardSharedDnaBadge" class="badge rounded-pill" style="font-size: 0.72rem; font-weight: 800; background: rgba(6, 78, 59, 0.9); color: #6ee7b7; border: 1px solid #10b981;">100% DNA</span>
+                            <div id="cardDnaAncestorFanBox" style="flex-shrink: 0; line-height: 0;"></div>
                         </div>
-                        <div id="cardDnaConsanguinityText" class="text-white-50 mb-2" style="font-size: 0.73rem; line-height: 1.35;">
+                        <div id="cardDnaConsanguinityText" class="mb-2.5" style="font-size: 0.72rem; color: #64748b; line-height: 1.35;">
                             6,800 cM · Reference Member
                         </div>
 
-                        <!-- Multi-Segment Chromosome Bar -->
-                        <div id="cardDnaChromosomeBar" style="display: flex; width: 100%; height: 8px; border-radius: 999px; overflow: hidden; background: rgba(255,255,255,0.08); margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.15);"></div>
+                        <!-- Make-up Multi-Segment Bar -->
+                        <div style="font-size: 0.66rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px;">Make-up</div>
+                        <div id="cardDnaChromosomeBar" style="display: flex; height: 10px; border-radius: 5px; overflow: hidden; gap: 2px; background: rgba(255,255,255,0.06); margin-bottom: 9px;"></div>
 
-                        <!-- Ancestral / Ethnicity Breakdown List -->
-                        <div id="cardDnaRegionsList" class="d-flex flex-column gap-1 mb-2" style="font-size: 0.75rem;"></div>
+                        <!-- Tabular Region Rows + Explicit 2-Column Father (50%) | Mother (50%) Tree -->
+                        <div id="cardDnaRegionsList" class="d-flex flex-column gap-1.5 mb-2" style="font-size: 0.76rem;"></div>
 
-                        <!-- Uniparental Haplogroups (Y-DNA & mtDNA) -->
-                        <div id="cardDnaHaplogroupsRow" class="d-flex flex-wrap gap-1.5 mb-2" style="display: none;"></div>
-
-                        <div id="cardDnaSourceLabel" class="text-white-50 fst-italic mb-2" style="font-size: 0.69rem;">
-                            Synthesised from Family Tree Lineage
+                        <!-- Footer: Source & Uniparental Haplogroups (Y-DNA & mtDNA) -->
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-1.5 mb-2.5 pt-1" style="border-top: 1px solid rgba(148, 163, 184, 0.14);">
+                            <div id="cardDnaSourceLabel" style="font-size: 0.69rem; color: #64748b;">
+                                Source: From family tree
+                            </div>
+                            <div id="cardDnaHaplogroupsRow" class="d-flex flex-wrap gap-1.5" style="font-size: 0.69rem; color: #94a3b8; display: none;"></div>
                         </div>
 
                         <button type="button" id="btnOpenDnaMakeupModal" class="btn-action w-100" onclick="openDnaMakeupModal(window.selectedNodeId)" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.28), rgba(5, 150, 105, 0.4)); border-color: rgba(16, 185, 129, 0.6); color: #ecfdf5; font-weight: 700; font-size: 0.78rem; padding: 6px 12px; min-height: 44px; justify-content: center; white-space: nowrap;">
@@ -1347,11 +1352,18 @@
             </div>
         </div>
     </div>
+
+    <!-- Option D + Option B Fan Floating Quick Popover on Tree Canvas -->
+    <div id="treeDnaQuickPopover" role="dialog" aria-label="DNA make-up preview"
+         onmouseenter="window.cancelHideTreeNodeDnaPopover && window.cancelHideTreeNodeDnaPopover()"
+         onmouseleave="window.scheduleHideTreeNodeDnaPopover && window.scheduleHideTreeNodeDnaPopover()"
+         style="display: none; position: fixed; z-index: 1085; width: 324px; max-width: calc(100vw - 24px); background: rgba(15, 23, 42, 0.97); border: 1px solid rgba(148, 163, 184, 0.28); border-radius: 16px; padding: 14px 16px; box-shadow: 0 22px 48px rgba(0, 0, 0, 0.55); backdrop-filter: blur(12px); color: #f8fafc; pointer-events: auto;">
+    </div>
 </div>
 
 @include('member.includes.treeAccessModals')
 @include('component.swalAlert')
-<script src="/public/js/vendor/kinshiptree.js?v=9.8"></script>
+<script src="/public/js/vendor/kinshiptree.js?v=10.2"></script>
 <script>
     window.__ROOT_USER_ID__ = '{{ $data['id'] ?? '' }}';
     window.__LOGGED_IN_USER_ID__ = '{{ $_SESSION['id'] ?? '' }}';
@@ -2218,8 +2230,225 @@
     window.selectedNodeId = null;
     let currentInviteLink = '';
 
+    // Option D + Option B Ancestor Fan Chart & Explicit Parent -> Grandparent -> Great-Grandparent Popover/Dossier Engine
+    window.buildAncestorFanSvg = function(targetNode, scale = 1.02) {
+        const esc = (s) => typeof escapeHtmlText === 'function' ? escapeHtmlText(String(s || '')) : String(s || '').replace(/[&<>"']/g, '');
+        const pt = (cx, cy, r, a) => [cx + r * Math.sin(a * Math.PI / 180), cy - r * Math.cos(a * Math.PI / 180)];
+        const sector = (cx, cy, r0, r1, a0, a1) => {
+            const span = Math.max(1.2, Math.min(356, a1 - a0));
+            const endA = a0 + span;
+            const L = span > 180 ? 1 : 0;
+            const [x1, y1] = pt(cx, cy, r1, a0), [x2, y2] = pt(cx, cy, r1, endA), [x3, y3] = pt(cx, cy, r0, endA), [x4, y4] = pt(cx, cy, r0, a0);
+            return `M${x1.toFixed(2)} ${y1.toFixed(2)}A${r1} ${r1} 0 ${L} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}L${x3.toFixed(2)} ${y3.toFixed(2)}A${r0} ${r0} 0 ${L} 0 ${x4.toFixed(2)} ${y4.toFixed(2)}Z`;
+        };
+
+        const rawPct = (typeof targetNode.shared_dna_pct === 'number')
+            ? targetNode.shared_dna_pct
+            : (targetNode.raw && typeof targetNode.raw.shared_dna_pct === 'number' ? targetNode.raw.shared_dna_pct : 0);
+        const isBioKin = Boolean(targetNode.is_biological_kin || (targetNode.raw && targetNode.raw.is_biological_kin));
+        const isInLaw = !isBioKin || rawPct === 0;
+        const dnaMakeup = targetNode.dna_makeup || (targetNode.raw && targetNode.raw.dna_makeup) || null;
+        const explicitTree = (dnaMakeup && dnaMakeup.explicit_tree) ? dnaMakeup.explicit_tree : null;
+        const activeRegs = (dnaMakeup && Array.isArray(dnaMakeup.active_regions) && dnaMakeup.active_regions.length > 0)
+            ? dnaMakeup.active_regions
+            : [{ region: 'Lineage', percentage: 100, color: '#3b82f6' }];
+
+        const branches = (explicitTree && Array.isArray(explicitTree.branches)) ? explicitTree.branches : [];
+        const fatherB = branches[0] || { short_name: 'Father', name: 'Father', regions: [{ percentage: 100, color: activeRegs[0] ? activeRegs[0].color : '#3b82f6' }], consists_of: [] };
+        const motherB = branches[1] || { short_name: 'Mother', name: 'Mother', regions: [{ percentage: 100, color: (activeRegs[1] || activeRegs[0] || { color: '#10b981' }).color }], consists_of: [] };
+        const hasGGP = Boolean(explicitTree && Number(explicitTree.max_depth) >= 3);
+
+        const cx = 70, cy = 62;
+        const R = (hasGGP ? [21, 23, 34, 36, 47, 49, 58] : [24, 26, 40, 42, 56]).map(v => v * scale);
+        let out = '';
+
+        const wedgeRegs = (regs, a0, a1, r0, r1, label) => {
+            const list = (Array.isArray(regs) && regs.length > 0) ? regs : [{ percentage: 100, color: '#3b82f6' }];
+            let a = a0;
+            list.forEach(rg => {
+                const pct = Math.max(0, Math.min(100, Number(rg.percentage ?? rg.p) || 0));
+                const span = (a1 - a0) * (pct / 100);
+                if (span <= 0.8) return;
+                const col = /^#[0-9a-fA-F]{6}$/.test(String(rg.color || rg.c || '')) ? (rg.color || rg.c) : '#3b82f6';
+                out += `<path d="${sector(cx, cy, r0, r1, a + 0.8, a + span - 0.8)}" fill="${col}"><title>${esc(label)}</title></path>`;
+                a += span;
+            });
+        };
+
+        wedgeRegs(fatherB.regions, -90, 0, R[1], R[2], `50% Father · ${fatherB.short_name || fatherB.name || 'Father'}`);
+        wedgeRegs(motherB.regions, 0, 90, R[1], R[2], `50% Mother · ${motherB.short_name || motherB.name || 'Mother'}`);
+
+        [[fatherB, -90], [motherB, 0]].forEach(([par, a0]) => {
+            const gps = Array.isArray(par.consists_of) ? par.consists_of : [];
+            if (gps.length > 0) {
+                gps.slice(0, 2).forEach((g, i) => {
+                    const gCol = /^#[0-9a-fA-F]{6}$/.test(String(g.color || '')) ? g.color : '#10b981';
+                    const gA0 = a0 + i * 45;
+                    out += `<path d="${sector(cx, cy, R[3], R[4], gA0 + 0.8, gA0 + 45 - 0.8)}" fill="${gCol}" fill-opacity="0.84"><title>25% Grandparent · ${esc(g.short_name || g.name || 'Grandparent')}</title></path>`;
+                    if (hasGGP) {
+                        const ggps = Array.isArray(g.consists_of) ? g.consists_of : [];
+                        if (ggps.length > 0) {
+                            ggps.slice(0, 2).forEach((gg, gi) => {
+                                const ggCol = /^#[0-9a-fA-F]{6}$/.test(String(gg.color || '')) ? gg.color : gCol;
+                                out += `<path d="${sector(cx, cy, R[5], R[6], gA0 + gi * 22.5 + 0.7, gA0 + (gi + 1) * 22.5 - 0.7)}" fill="${ggCol}" fill-opacity="0.72"><title>12.5% Great-Grandparent · ${esc(gg.short_name || gg.name || 'Great-Grandparent')}</title></path>`;
+                            });
+                        } else {
+                            [0, 1].forEach(gi => {
+                                out += `<path d="${sector(cx, cy, R[5], R[6], gA0 + gi * 22.5 + 1.2, gA0 + (gi + 1) * 22.5 - 1.2)}" fill="none" stroke="rgba(148,163,184,0.35)" stroke-dasharray="2 2"><title>Add great-grandparent</title></path>`;
+                            });
+                        }
+                    }
+                });
+            } else {
+                [0, 1].forEach(i => {
+                    out += `<path d="${sector(cx, cy, R[3], R[4], a0 + i * 45 + 1.5, a0 + (i + 1) * 45 - 1.5)}" fill="none" stroke="rgba(148,163,184,0.45)" stroke-dasharray="3 3"><title>Add grandparent</title></path>`;
+                });
+            }
+        });
+
+        const pctLabel = isInLaw ? 'In-law' : (Math.round(rawPct * 10) / 10) + '%';
+        out += `<path d="${sector(cx, cy, 0.01, R[0], -90, 90)}" fill="#0b1120" stroke="rgba(148,163,184,0.25)"/>`;
+        out += `<text x="${cx}" y="${cy - (isInLaw ? 6 : 9) * scale}" font-size="${(isInLaw ? 8.8 : 12.2) * scale}" font-weight="800" fill="${isInLaw ? '#cbd5e1' : '#6ee7b7'}" text-anchor="middle">${esc(pctLabel)}</text>`;
+        if (!isInLaw) {
+            out += `<text x="${cx}" y="${cy - 1.5 * scale}" font-size="${6.2 * scale}" font-weight="700" fill="#64748b" text-anchor="middle" letter-spacing="0.5">SHARED</text>`;
+        }
+        return `<svg width="140" height="64" viewBox="0 0 140 64" aria-hidden="true">${out}</svg>`;
+    };
+
+    window.buildOptionDExplicitTreeHtml = function(explicitTree, escHtml) {
+        if (!explicitTree || !explicitTree.has_ancestors || !Array.isArray(explicitTree.branches) || explicitTree.branches.length === 0) {
+            return `<div style="border-top: 1px solid rgba(148,163,184,0.18); padding-top: 8px; margin-top: 4px; font-size: 0.72rem; color: #93c5fd; font-weight: 700;">🏛️ 100% Ancestral Founder in Family Tree</div>`;
+        }
+        const fB = explicitTree.branches[0] || { short_name: 'Father', name: 'Father', consists_of: [] };
+        const mB = explicitTree.branches[1] || { short_name: 'Mother', name: 'Mother', consists_of: [] };
+        const renderCol = (b, roleTitle) => {
+            const pName = escHtml(b.short_name || b.name || roleTitle);
+            const gps = Array.isArray(b.consists_of) ? b.consists_of : [];
+            const gpLine = gps.length > 0
+                ? gps.map(g => `${escHtml(g.short_name || g.name)} ${escHtml(g.formatted_pct || '25%')}`).join(' · ')
+                : (b.ethnicity_summary ? escHtml(b.ethnicity_summary) : 'Grandparents not yet added');
+            const ggpList = [];
+            gps.forEach(g => {
+                if (Array.isArray(g.consists_of)) {
+                    g.consists_of.forEach(gg => ggpList.push(`${escHtml(gg.short_name || gg.name)} ${escHtml(gg.formatted_pct || '12.5%')}`));
+                }
+            });
+            const ggpLine = ggpList.length > 0
+                ? `<small style="color: #c4b5fd; display: block; font-size: 0.66rem; margin-top: 2px;">↳ GGP: ${ggpList.join(' · ')}</small>`
+                : '';
+            return `
+                <div style="min-width: 0;">
+                    <small style="color: #94a3b8; display: block; font-size: 0.69rem;">${roleTitle} · 50%</small>
+                    <b style="color: #f8fafc; display: block; font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escHtml(b.name || roleTitle)}">${pName}</b>
+                    <small style="color: #cbd5e1; display: block; font-size: 0.69rem; line-height: 1.35;">${gpLine}</small>
+                    ${ggpLine}
+                </div>
+            `;
+        };
+        return `
+            <div class="dna-option-d-tree" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid rgba(148,163,184,0.18); padding-top: 9px; margin-top: 4px;">
+                ${renderCol(fB, 'Father')}
+                ${renderCol(mB, 'Mother')}
+            </div>
+        `;
+    };
+
+    window.__dnaPopHideTimer = null;
+    window.cancelHideTreeNodeDnaPopover = function() {
+        if (window.__dnaPopHideTimer) {
+            clearTimeout(window.__dnaPopHideTimer);
+            window.__dnaPopHideTimer = null;
+        }
+    };
+    window.scheduleHideTreeNodeDnaPopover = function() {
+        window.cancelHideTreeNodeDnaPopover();
+        window.__dnaPopHideTimer = setTimeout(() => {
+            window.hideTreeNodeDnaPopover(false);
+        }, 220);
+    };
+    window.hideTreeNodeDnaPopover = function() {
+        window.cancelHideTreeNodeDnaPopover();
+        const pop = document.getElementById('treeDnaQuickPopover');
+        if (pop) pop.style.display = 'none';
+    };
+    window.showTreeNodeDnaPopover = function(targetNode, ev) {
+        window.cancelHideTreeNodeDnaPopover();
+        const pop = document.getElementById('treeDnaQuickPopover');
+        if (!pop || !targetNode) return;
+        const esc = (s) => typeof escapeHtmlText === 'function' ? escapeHtmlText(String(s || '')) : String(s || '').replace(/[&<>"']/g, '');
+        const rawPct = (typeof targetNode.shared_dna_pct === 'number')
+            ? targetNode.shared_dna_pct
+            : (targetNode.raw && typeof targetNode.raw.shared_dna_pct === 'number' ? targetNode.raw.shared_dna_pct : 0);
+        const isBioKin = Boolean(targetNode.is_biological_kin || (targetNode.raw && targetNode.raw.is_biological_kin));
+        const cmRange = targetNode.shared_cm_range || (targetNode.raw && targetNode.raw.shared_cm_range) || '';
+        const dnaMakeup = targetNode.dna_makeup || (targetNode.raw && targetNode.raw.dna_makeup) || null;
+        const activeRegs = (dnaMakeup && Array.isArray(dnaMakeup.active_regions)) ? dnaMakeup.active_regions : [];
+        const explicitTree = (dnaMakeup && dnaMakeup.explicit_tree) ? dnaMakeup.explicit_tree : null;
+        const hy = dnaMakeup && dnaMakeup.haplogroup_y ? String(dnaMakeup.haplogroup_y) : '';
+        const hmt = dnaMakeup && dnaMakeup.haplogroup_mt ? String(dnaMakeup.haplogroup_mt) : '';
+        const srcLabel = (dnaMakeup && dnaMakeup.source_label) ? dnaMakeup.source_label : 'From family tree';
+        const bigLabel = (!isBioKin || rawPct === 0) ? 'In-law' : ((Math.round(rawPct * 10) / 10) + '%');
+        const roleLabel = esc(targetNode.title || 'Relative');
+        const personName = esc(targetNode.name || targetNode.nameL1 || 'Relative');
+        const subCaption = rawPct === 100
+            ? '6,800 cM · Reference member (You)'
+            : ((isBioKin && rawPct > 0) ? `${esc(cmRange)} · typical for ${roleLabel.toLowerCase()}` : '0% shared autosomal DNA · connected by marriage');
+
+        pop.setAttribute('aria-label', `DNA make-up for ${personName}`);
+        pop.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                <div>
+                    <div style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;">Shared with you</div>
+                    <div style="font-size:22px;font-weight:800;color:${(!isBioKin || rawPct === 0) ? '#cbd5e1' : '#6ee7b7'};font-variant-numeric:tabular-nums;line-height:1.1;">${esc(bigLabel)}</div>
+                </div>
+                ${window.buildAncestorFanSvg(targetNode, 1.04)}
+            </div>
+            <div style="font-size:11px;color:#64748b;margin:2px 0 8px;">${subCaption}</div>
+            <div>
+                <div style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:5px;">Make-up</div>
+                <div style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px;margin-bottom:8px;">
+                    ${activeRegs.map(r => {
+                        const p = Math.max(1, Number(r.percentage) || 0);
+                        const c = /^#[0-9a-fA-F]{6}$/.test(String(r.color || '')) ? r.color : '#10b981';
+                        return `<span style="flex:${p};background:${c};"></span>`;
+                    }).join('')}
+                </div>
+            </div>
+            <div style="display:grid;gap:5px;margin-bottom:6px;">
+                ${activeRegs.map(r => {
+                    const p = Math.round((Number(r.percentage) || 0) * 10) / 10;
+                    const c = /^#[0-9a-fA-F]{6}$/.test(String(r.color || '')) ? r.color : '#10b981';
+                    return `<div style="display:grid;grid-template-columns:10px 1fr auto;gap:8px;align-items:center;font-size:12px;">
+                        <span style="width:10px;height:10px;border-radius:3px;background:${c};display:inline-block;"></span>
+                        <span style="color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(r.region)}</span>
+                        <b style="color:#f8fafc;font-variant-numeric:tabular-nums;">${p}%</b>
+                    </div>`;
+                }).join('')}
+            </div>
+            ${window.buildOptionDExplicitTreeHtml(explicitTree, esc)}
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#64748b;margin-top:8px;padding-top:6px;border-top:1px solid rgba(148,163,184,0.14);">
+                <span>Source: ${esc(srcLabel)}</span>
+                <span>${hy ? 'Y ' + esc(hy) : ''}${hy && hmt ? ' · ' : ''}${hmt ? 'mt ' + esc(hmt) : ''}</span>
+            </div>
+        `;
+
+        pop.style.display = 'block';
+        const anchorEl = (ev && ev.target && ev.target.closest) ? (ev.target.closest('.kinship-node') || ev.target) : null;
+        const rect = anchorEl ? anchorEl.getBoundingClientRect() : { right: (ev ? ev.clientX + 16 : 240), left: (ev ? ev.clientX - 16 : 200), top: (ev ? ev.clientY - 40 : 140) };
+        const popW = 324;
+        const popH = pop.offsetHeight || 290;
+        let left = rect.right + 14;
+        if (left + popW > window.innerWidth - 12) {
+            left = Math.max(12, rect.left - popW - 14);
+        }
+        let top = Math.max(76, Math.min(window.innerHeight - popH - 16, rect.top));
+        pop.style.left = `${Math.round(left)}px`;
+        pop.style.top = `${Math.round(top)}px`;
+    };
+
     window.openPersonCard = function(node) {
         if (!node) return;
+        window.hideTreeNodeDnaPopover();
         window.selectedNodeId = String(node.id);
         
         const card = document.getElementById('personDetailsCard');
@@ -2464,10 +2693,11 @@
             }
         }
 
-        // Layer 1 & Layer 2 DNA Make-Up & Consanguinity Card Synchronisation
         const dnaSection = document.getElementById('cardDnaMakeupSection');
         if (dnaSection) {
+            const sharedBigPct = document.getElementById('cardSharedDnaBigPct');
             const sharedDnaBadge = document.getElementById('cardSharedDnaBadge');
+            const fanBoxEl = document.getElementById('cardDnaAncestorFanBox');
             const consangText = document.getElementById('cardDnaConsanguinityText');
             const chromBar = document.getElementById('cardDnaChromosomeBar');
             const regionsList = document.getElementById('cardDnaRegionsList');
@@ -2485,6 +2715,15 @@
                 ? node.consanguinity_degree
                 : (node.raw ? node.raw.consanguinity_degree : null);
             const dnaMakeup = node.dna_makeup || (node.raw && node.raw.dna_makeup) || null;
+
+            if (sharedBigPct) {
+                sharedBigPct.textContent = (!isBioKin || rawPct === 0) ? 'In-law' : dnaFormatted;
+                sharedBigPct.style.color = (!isBioKin || rawPct === 0) ? '#cbd5e1' : (rawPct === 100 ? '#fde68a' : '#6ee7b7');
+            }
+
+            if (fanBoxEl && typeof window.buildAncestorFanSvg === 'function') {
+                fanBoxEl.innerHTML = window.buildAncestorFanSvg(node, 1.02);
+            }
 
             if (sharedDnaBadge) {
                 if (rawPct === 100) {
@@ -2517,30 +2756,35 @@
             }
 
             const activeRegs = (dnaMakeup && Array.isArray(dnaMakeup.active_regions)) ? dnaMakeup.active_regions : [];
+            const explicitTree = (dnaMakeup && dnaMakeup.explicit_tree) ? dnaMakeup.explicit_tree : null;
+            const escHtml = (str) => typeof escapeHtmlText === 'function' ? escapeHtmlText(String(str || '')) : String(str || '').replace(/[&<>"']/g, '');
+
             if (chromBar) {
                 chromBar.innerHTML = activeRegs.map(r => {
                     const pct = Math.max(1, Math.min(100, Number(r.percentage) || 0));
                     const col = /^#[0-9a-fA-F]{6}$/.test(String(r.color || '')) ? r.color : '#10b981';
-                    const safeReg = typeof escapeHtmlText === 'function' ? escapeHtmlText(String(r.region || '')) : String(r.region || '');
-                    return `<div style="width: ${pct}%; background: ${col}; height: 100%;" title="${pct}% ${safeReg}"></div>`;
+                    const safeReg = escHtml(r.region || '');
+                    return `<span style="flex: ${pct}; background: ${col}; height: 100%; display: block;" title="${pct}% ${safeReg}"></span>`;
                 }).join('');
             }
 
             if (regionsList) {
-                regionsList.innerHTML = activeRegs.map(r => {
-                    const pct = Number(r.percentage) || 0;
+                const regionRowsHtml = activeRegs.map(r => {
+                    const pct = Math.round((Number(r.percentage) || 0) * 10) / 10;
                     const col = /^#[0-9a-fA-F]{6}$/.test(String(r.color || '')) ? r.color : '#10b981';
-                    const safeReg = typeof escapeHtmlText === 'function' ? escapeHtmlText(String(r.region || '')) : String(r.region || '');
+                    const safeReg = escHtml(r.region || '');
                     return `
-                        <div class="d-flex align-items-center justify-content-between gap-2">
-                            <div class="d-flex align-items-center gap-1.5 text-truncate">
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: ${col}; flex-shrink: 0; display: inline-block;"></span>
-                                <span class="text-white text-truncate" title="${safeReg}">${safeReg}</span>
-                            </div>
-                            <strong style="color: #6ee7b7; flex-shrink: 0;">${pct}%</strong>
+                        <div style="display: grid; grid-template-columns: 10px 1fr auto; gap: 8px; align-items: center; font-size: 0.76rem;">
+                            <span style="width: 10px; height: 10px; border-radius: 3px; background: ${col}; display: inline-block;"></span>
+                            <span class="text-truncate" style="color: #e2e8f0;" title="${safeReg}">${safeReg}</span>
+                            <b style="color: #f8fafc; font-variant-numeric: tabular-nums;">${pct}%</b>
                         </div>
                     `;
                 }).join('');
+                const explicitTreeHtml = typeof window.buildOptionDExplicitTreeHtml === 'function'
+                    ? window.buildOptionDExplicitTreeHtml(explicitTree, escHtml)
+                    : '';
+                regionsList.innerHTML = `<div style="display: grid; gap: 5px; margin-bottom: 4px;">${regionRowsHtml}</div>${explicitTreeHtml}`;
             }
 
             if (haploRow) {
@@ -2550,8 +2794,8 @@
                     const safeHy = typeof escapeHtmlText === 'function' ? escapeHtmlText(hy) : hy;
                     const safeHmt = typeof escapeHtmlText === 'function' ? escapeHtmlText(hmt) : hmt;
                     haploRow.innerHTML = ''
-                        + (hy ? `<span class="badge rounded-pill" style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.45); font-size: 0.68rem;">Y-DNA: ${safeHy}</span>` : '')
-                        + (hmt ? `<span class="badge rounded-pill" style="background: rgba(236, 72, 153, 0.2); color: #f9a8d4; border: 1px solid rgba(236, 72, 153, 0.45); font-size: 0.68rem;">mtDNA: ${safeHmt}</span>` : '');
+                        + (hy ? `<span class="badge rounded-pill" style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.45); font-size: 0.66rem;">Y ${safeHy}</span>` : '')
+                        + (hmt ? `<span class="badge rounded-pill" style="background: rgba(236, 72, 153, 0.2); color: #f9a8d4; border: 1px solid rgba(236, 72, 153, 0.45); font-size: 0.66rem;">mt ${safeHmt}</span>` : '');
                     haploRow.style.display = 'flex';
                 } else {
                     haploRow.innerHTML = '';
@@ -2560,9 +2804,10 @@
             }
 
             if (sourceLabelEl) {
-                sourceLabelEl.textContent = (dnaMakeup && dnaMakeup.source_label)
+                const rawSrc = (dnaMakeup && dnaMakeup.source_label)
                     ? dnaMakeup.source_label
-                    : 'Synthesised from Family Tree Lineage';
+                    : 'From family tree';
+                sourceLabelEl.textContent = 'Source: ' + rawSrc;
             }
 
             if (openDnaBtn) {
@@ -3252,9 +3497,11 @@
                         const dnaBadgeText = (showDna && node.is_biological_kin && node.shared_dna_formatted)
                             ? `🧬 ${node.shared_dna_formatted} DNA`
                             : (showDna && !node.is_biological_kin ? '💍 Non-Bio' : '');
-                        const dnaSummary = (showDna && node.dna_makeup && node.dna_makeup.summary_text)
-                            ? String(node.dna_makeup.summary_text)
-                            : '';
+                        const expTree = (showDna && node.dna_makeup && node.dna_makeup.explicit_tree) ? node.dna_makeup.explicit_tree : null;
+                        const dnaSummary = (expTree && expTree.parent_line_summary)
+                            ? String(expTree.parent_line_summary)
+                            : ((showDna && node.dna_makeup && node.dna_makeup.summary_text) ? String(node.dna_makeup.summary_text) : '');
+                        const dnaSubSummary = (expTree && expTree.sub_line_summary) ? String(expTree.sub_line_summary) : '';
 
                         return `
                         <div class="pedigree-member-card ${isDeceased ? 'pedigree-deceased-card' : ''} ${isSelf ? 'border-primary' : ''}" onclick="openNodeFromPedigree('${node.id}')">
@@ -3264,7 +3511,8 @@
                                 <div class="pedigree-member-meta flex-wrap gap-1">
                                     <span class="pedigree-role-pill">${role}</span>
                                     ${dnaBadgeText ? `<span class="badge rounded-pill" style="background: rgba(6, 78, 59, 0.88); color: #6ee7b7; border: 1px solid #10b981; font-size: 0.68rem;">${dnaBadgeText}</span>` : ''}
-                                    ${dnaSummary ? `<span class="badge rounded-pill" style="background: rgba(30, 41, 59, 0.85); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.35); font-size: 0.66rem;">${dnaSummary}</span>` : ''}
+                                    ${dnaSummary ? `<span class="badge rounded-pill" style="background: rgba(30, 41, 59, 0.85); color: #e2e8f0; border: 1px solid rgba(148, 163, 184, 0.35); font-size: 0.66rem;">${dnaSummary}</span>` : ''}
+                                    ${dnaSubSummary ? `<span class="badge rounded-pill" style="background: rgba(120, 53, 15, 0.45); color: #fde68a; border: 1px solid rgba(251, 191, 36, 0.4); font-size: 0.64rem;">${dnaSubSummary}</span>` : ''}
                                     ${isDeceased ? '<span class="pedigree-deceased-pill fw-bold"><i class="bi bi-flower1 text-warning"></i> In Memory</span>' : ''}
                                 </div>
                             </div>

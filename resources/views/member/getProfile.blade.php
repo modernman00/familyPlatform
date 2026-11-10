@@ -13,9 +13,57 @@
 @section('content')
 
     <div class="profile-container">
+        @php
+            $hasCover = !empty($cover['url']);
+            $canEdit = !empty($canEditCover);
+            $coverUrl = $cover['url'] ?? '';
+            $coverX = isset($cover['x']) ? (int)$cover['x'] : 50;
+            $coverY = isset($cover['y']) ? (int)$cover['y'] : 50;
+        @endphp
         <!-- Profile Hero Section -->
-        <div class="profile-hero">
-            <div class="hero-background"></div>
+        <div class="profile-hero {{ $hasCover ? 'has-cover' : '' }} {{ $canEdit ? 'can-edit-cover' : '' }}" id="seeProfileHero"
+             @if($hasCover) style="background-image: url('{{ $coverUrl }}'); background-position: {{ $coverX }}% {{ $coverY }}%;" @endif>
+            <div class="hero-background" id="seeProfileHeroBg"
+                 @if($hasCover) style="background-image: url('{{ $coverUrl }}'); background-position: {{ $coverX }}% {{ $coverY }}%;" @endif></div>
+            <div class="hero-scrim"></div>
+
+            @if($canEdit)
+                <!-- Hidden file upload input for cover photo -->
+                <input type="file" id="seeCoverInput" accept="image/jpeg,image/png,image/webp,image/heic" hidden onchange="handleSeeProfileCoverUpload(this)">
+
+                <!-- Controls on top right -->
+                <div class="see-profile-cover-controls" id="seeProfileCoverControls">
+                    @if($hasCover)
+                        <button type="button" class="btn-see-cover-control" id="seeProfileCoverRepositionBtn" onclick="startSeeProfileCoverAdjust(event)" title="Reposition cover photo">
+                            <i class="bi bi-arrows-move me-1"></i> Reposition
+                        </button>
+                        <button type="button" class="btn-see-cover-control btn-icon-only" id="seeProfileCoverMenuBtn" onclick="toggleSeeProfileCoverMenu(event)" title="Cover options" aria-label="Cover photo options">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <div class="see-cover-dropdown d-none" id="seeProfileCoverDropdown" role="menu">
+                            <button type="button" role="menuitem" onclick="seeProfileCoverAction('change', event)"><i class="bi bi-image"></i> Change photo</button>
+                            <button type="button" role="menuitem" onclick="seeProfileCoverAction('adjust', event)"><i class="bi bi-arrows-move"></i> Reposition</button>
+                            <button type="button" role="menuitem" class="is-danger" onclick="seeProfileCoverAction('remove', event)"><i class="bi bi-trash3"></i> Remove</button>
+                        </div>
+                    @else
+                        <button type="button" class="btn-see-cover-control" id="seeProfileCoverAddBtn" onclick="seeProfileCoverAction('change', event)" title="Add cover photo">
+                            <i class="bi bi-image me-1"></i> Add Cover Photo
+                        </button>
+                    @endif
+                </div>
+
+                <!-- Adjust Mode Bar (Drag or Arrow Keys) -->
+                <div class="see-cover-adjust-bar d-none" id="seeProfileCoverAdjustBar">
+                    <span class="see-cover-adjust-hint">
+                        <i class="bi bi-arrows-move me-2"></i> Drag to reposition &bull; Arrow keys also move
+                    </span>
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="btn-cover-pill btn-cover-cancel" id="seeCoverCancelBtn" onclick="endSeeProfileCoverAdjust(false)">Cancel</button>
+                        <button type="button" class="btn-cover-pill btn-cover-save" id="seeCoverSaveBtn" onclick="endSeeProfileCoverAdjust(true)">Save</button>
+                    </div>
+                </div>
+            @endif
+
             <div class="hero-content">
                 <div class="profile-avatar-wrapper" style="cursor: pointer;" title="Click to enlarge profile photo" role="button" tabindex="0" aria-label="View {{ $data['fullName'] }}'s profile photo in full size">
                     <img src="/resources/images/profile/{{ $data['profilePics'] ?? 'avatarM.png' }}" 
@@ -205,17 +253,32 @@
             <div class="right-column">
                 <!-- Immediate Family Card -->
                 <div class="info-card">
-                    <h3><i class="bi bi-diagram-3-fill me-2"></i>Immediate Family</h3>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="mb-0"><i class="bi bi-diagram-3-fill me-2" style="color: var(--accent-color);"></i>Immediate Family</h3>
+                        @if(!empty($relativesWithImgs))
+                            <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1">
+                                {{ count($relativesWithImgs) }} {{ count($relativesWithImgs) === 1 ? 'Relative' : 'Relatives' }}
+                            </span>
+                        @endif
+                    </div>
                     @if(!empty($relativesWithImgs))
                         <div class="family-members">
                             @foreach ($relativesWithImgs as $relative)
-                            <a href="/allMembers/setProfile/{{ $relative['id'] }}" title="View {{ $relative['fullName'] }}'s profile">    
-                                <div class="family-member">
-                                    <img src="{{ $relative['img'] }}" alt="{{ $relative['fullName'] }}" class="member-avatar" onerror="this.src='/resources/images/profile/avatarM.png'">
-                                    <div class="member-name text-truncate">{{ $relative['fullName'] }}</div>
-                                    <div class="member-relation">{{ $relative['relationship'] }}</div>
-                                </div>
-                            </a>
+                                @if(!empty($relative['isLinked']) && !empty($relative['id']))
+                                    <a href="/allMembers/seeProfile/{{ $relative['id'] }}" class="family-member-link text-decoration-none" title="View {{ $relative['fullName'] }}'s profile">    
+                                        <div class="family-member">
+                                            <img src="{{ $relative['img'] }}" alt="{{ $relative['fullName'] }}" class="member-avatar" onerror="this.src='/resources/images/profile/avatarM.png'">
+                                            <div class="member-name text-truncate" title="{{ $relative['fullName'] }}">{{ $relative['fullName'] }}</div>
+                                            <div class="member-relation">{{ $relative['relationship'] }}</div>
+                                        </div>
+                                    </a>
+                                @else
+                                    <div class="family-member unlinked-member" title="{{ $relative['fullName'] }} (Not yet on FamilyPlatform)">
+                                        <img src="{{ $relative['img'] }}" alt="{{ $relative['fullName'] }}" class="member-avatar" onerror="this.src='/resources/images/profile/avatarM.png'">
+                                        <div class="member-name text-truncate" title="{{ $relative['fullName'] }}">{{ $relative['fullName'] }}</div>
+                                        <div class="member-relation">{{ $relative['relationship'] }}</div>
+                                    </div>
+                                @endif
                             @endforeach
                         </div>
                     @else
@@ -301,6 +364,379 @@
                 if (modal) modal.classList.remove('active');
             }
         });
+
+        /* ── seeProfile Cover Photo Management & Adjustment ── */
+        (function() {
+            const memberId = '{{ (string)($viewedMemberId ?? ($data['id'] ?? '')) }}';
+            const canEdit = @json(!empty($canEditCover));
+            if (!canEdit) return;
+
+            let adjust = null;
+
+            function seeCoverCsrf() {
+                return document.querySelector('meta[name="csrf-token"]')?.content
+                    || document.querySelector('input[name="token"]')?.value
+                    || @json($_SESSION['token'] ?? '');
+            }
+
+            function seeCoverNotify(type, title, text) {
+                if (typeof Swal !== 'undefined' && Swal.fire) {
+                    Swal.fire({
+                        icon: type,
+                        title: title,
+                        text: text || '',
+                        timer: 2500,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                } else if (typeof toastr !== 'undefined' && toastr[type]) {
+                    toastr[type](text || title);
+                } else {
+                    console.log('[' + type.toUpperCase() + '] ' + title + (text ? ': ' + text : ''));
+                }
+            }
+
+            function applySeeCover(url, pos) {
+                const hero = document.getElementById('seeProfileHero');
+                const heroBg = document.getElementById('seeProfileHeroBg');
+                const hasUrl = Boolean(url);
+                if (hero) {
+                    hero.classList.toggle('has-cover', hasUrl);
+                    hero.style.backgroundImage = hasUrl ? `url("${url}")` : '';
+                    hero.style.backgroundPosition = hasUrl ? (pos ? `${pos.x}% ${pos.y}%` : '50% 50%') : '';
+                }
+                if (heroBg) {
+                    heroBg.style.backgroundImage = hasUrl ? `url("${url}")` : '';
+                    heroBg.style.backgroundPosition = hasUrl ? (pos ? `${pos.x}% ${pos.y}%` : '50% 50%') : '';
+                }
+
+                // Update controls dynamically
+                const controls = document.getElementById('seeProfileCoverControls');
+                if (controls) {
+                    if (hasUrl) {
+                        controls.innerHTML = `
+                            <button type="button" class="btn-see-cover-control" id="seeProfileCoverRepositionBtn" onclick="startSeeProfileCoverAdjust(event)" title="Reposition cover photo">
+                                <i class="bi bi-arrows-move me-1"></i> Reposition
+                            </button>
+                            <button type="button" class="btn-see-cover-control btn-icon-only" id="seeProfileCoverMenuBtn" onclick="toggleSeeProfileCoverMenu(event)" title="Cover options" aria-label="Cover photo options">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <div class="see-cover-dropdown d-none" id="seeProfileCoverDropdown" role="menu">
+                                <button type="button" role="menuitem" onclick="seeProfileCoverAction('change', event)"><i class="bi bi-image"></i> Change photo</button>
+                                <button type="button" role="menuitem" onclick="seeProfileCoverAction('adjust', event)"><i class="bi bi-arrows-move"></i> Reposition</button>
+                                <button type="button" role="menuitem" class="is-danger" onclick="seeProfileCoverAction('remove', event)"><i class="bi bi-trash3"></i> Remove</button>
+                            </div>
+                        `;
+                    } else {
+                        controls.innerHTML = `
+                            <button type="button" class="btn-see-cover-control" id="seeProfileCoverAddBtn" onclick="seeProfileCoverAction('change', event)" title="Add cover photo">
+                                <i class="bi bi-image me-1"></i> Add Cover Photo
+                            </button>
+                        `;
+                    }
+                }
+            }
+
+            function readPos(el) {
+                const parts = (el.style.backgroundPosition || '50% 50%').split(' ');
+                return {
+                    x: parseFloat(parts[0]) || 50,
+                    y: parseFloat(parts[1] !== undefined ? parts[1] : parts[0]) || 50
+                };
+            }
+
+            function setPos(el, x, y) {
+                x = Math.max(0, Math.min(100, x));
+                y = Math.max(0, Math.min(100, y));
+                const posStr = `${x.toFixed(1)}% ${y.toFixed(1)}%`;
+                el.style.backgroundPosition = posStr;
+                const hero = document.getElementById('seeProfileHero');
+                if (hero) hero.style.backgroundPosition = posStr;
+            }
+
+            function measureOverflow(el, img) {
+                const w = el.clientWidth || 800;
+                const h = el.clientHeight || 300;
+                const scale = Math.max(w / (img.naturalWidth || w), h / (img.naturalHeight || h));
+                return {
+                    x: (img.naturalWidth || w) * scale - w,
+                    y: (img.naturalHeight || h) * scale - h
+                };
+            }
+
+            function onPointerDown(e) {
+                if (!adjust || e.target.closest('button')) return;
+                e.preventDefault();
+                adjust.drag = {
+                    startX: e.clientX,
+                    startY: e.clientY,
+                    from: readPos(adjust.target)
+                };
+                adjust.hero.setPointerCapture(e.pointerId);
+                adjust.hero.classList.add('is-dragging');
+            }
+
+            function onPointerMove(e) {
+                if (!adjust || !adjust.drag) return;
+                const o = adjust.overflow;
+                const d = adjust.drag;
+                const x = o.x > 0 ? d.from.x - ((e.clientX - d.startX) / o.x) * 100 : 50;
+                const y = o.y > 0 ? d.from.y - ((e.clientY - d.startY) / o.y) * 100 : 50;
+                setPos(adjust.target, x, y);
+            }
+
+            function onPointerUp(e) {
+                if (!adjust || !adjust.drag) return;
+                adjust.drag = null;
+                adjust.hero.classList.remove('is-dragging');
+                try { adjust.hero.releasePointerCapture(e.pointerId); } catch (_) {}
+            }
+
+            function onKey(e) {
+                if (!adjust) return;
+                const step = e.shiftKey ? 10 : 2;
+                const p = readPos(adjust.target);
+                const map = {
+                    ArrowUp: [0, step],
+                    ArrowDown: [0, -step],
+                    ArrowLeft: [step, 0],
+                    ArrowRight: [-step, 0]
+                };
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    window.endSeeProfileCoverAdjust(false);
+                    return;
+                }
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    window.endSeeProfileCoverAdjust(true);
+                    return;
+                }
+                if (!map[e.key]) return;
+                e.preventDefault();
+                setPos(adjust.target, p.x + map[e.key][0], p.y + map[e.key][1]);
+            }
+
+            function closeCoverMenu() {
+                const menu = document.getElementById('seeProfileCoverDropdown');
+                if (menu) menu.classList.add('d-none');
+                document.removeEventListener('pointerdown', onOutsideMenu, true);
+                document.removeEventListener('keydown', onMenuKey, true);
+            }
+
+            function onOutsideMenu(e) {
+                if (!e.target.closest('#seeProfileCoverDropdown') && !e.target.closest('#seeProfileCoverMenuBtn')) {
+                    closeCoverMenu();
+                }
+            }
+
+            function onMenuKey(e) {
+                if (e.key === 'Escape') closeCoverMenu();
+            }
+
+            window.toggleSeeProfileCoverMenu = function(e) {
+                if (e) { e.preventDefault(); e.stopPropagation(); }
+                const menu = document.getElementById('seeProfileCoverDropdown');
+                if (!menu) return;
+                if (!menu.classList.contains('d-none')) {
+                    closeCoverMenu();
+                    return;
+                }
+                menu.classList.remove('d-none');
+                setTimeout(() => {
+                    document.addEventListener('pointerdown', onOutsideMenu, true);
+                    document.addEventListener('keydown', onMenuKey, true);
+                }, 0);
+            };
+
+            window.seeProfileCoverAction = function(action, e) {
+                if (e) { e.preventDefault(); e.stopPropagation(); }
+                closeCoverMenu();
+                if (action === 'adjust') {
+                    window.startSeeProfileCoverAdjust();
+                } else if (action === 'change') {
+                    document.getElementById('seeCoverInput')?.click();
+                } else if (action === 'remove') {
+                    window.removeSeeProfileCover();
+                }
+            };
+
+            window.startSeeProfileCoverAdjust = function(e) {
+                if (e) { e.preventDefault(); e.stopPropagation(); }
+                closeCoverMenu();
+                const hero = document.getElementById('seeProfileHero');
+                const heroBg = document.getElementById('seeProfileHeroBg');
+                if (!hero || !heroBg || adjust) return;
+
+                const bgStyle = heroBg.style.backgroundImage || hero.style.backgroundImage || '';
+                const match = bgStyle.match(/url\(["']?(.*?)["']?\)/);
+                const src = match ? match[1] : '';
+                if (!src) return;
+
+                const img = new Image();
+                img.onload = function() {
+                    adjust = {
+                        hero: hero,
+                        target: heroBg,
+                        original: heroBg.style.backgroundPosition || hero.style.backgroundPosition || '50% 50%',
+                        overflow: measureOverflow(hero, img),
+                        drag: null
+                    };
+
+                    hero.classList.add('is-adjusting');
+                    document.getElementById('seeProfileCoverControls')?.classList.add('d-none');
+                    document.getElementById('seeProfileCoverAdjustBar')?.classList.remove('d-none');
+
+                    hero.addEventListener('pointerdown', onPointerDown);
+                    hero.addEventListener('pointermove', onPointerMove);
+                    hero.addEventListener('pointerup', onPointerUp);
+                    hero.addEventListener('pointercancel', onPointerUp);
+                    window.addEventListener('keydown', onKey);
+                };
+                img.src = src;
+            };
+
+            window.endSeeProfileCoverAdjust = async function(save) {
+                if (!adjust) return;
+                const hero = adjust.hero;
+                const heroBg = adjust.target;
+                const original = adjust.original;
+
+                hero.removeEventListener('pointerdown', onPointerDown);
+                hero.removeEventListener('pointermove', onPointerMove);
+                hero.removeEventListener('pointerup', onPointerUp);
+                hero.removeEventListener('pointercancel', onPointerUp);
+                window.removeEventListener('keydown', onKey);
+
+                hero.classList.remove('is-adjusting', 'is-dragging');
+                document.getElementById('seeProfileCoverAdjustBar')?.classList.add('d-none');
+                document.getElementById('seeProfileCoverControls')?.classList.remove('d-none');
+
+                const saveBtn = document.getElementById('seeCoverSaveBtn');
+
+                if (!save) {
+                    heroBg.style.backgroundPosition = original;
+                    hero.style.backgroundPosition = original;
+                    adjust = null;
+                    return;
+                }
+
+                const pos = readPos(heroBg);
+                adjust = null;
+
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Saving...';
+                }
+
+                try {
+                    const token = seeCoverCsrf();
+                    const body = new FormData();
+                    body.append('x', String(Math.round(pos.x)));
+                    body.append('y', String(Math.round(pos.y)));
+                    body.append('memberId', memberId);
+                    if (token) body.append('token', token);
+
+                    const res = await fetch('/member/profilePage/coverImg/position', {
+                        method: 'POST',
+                        body: body,
+                        headers: Object.assign({ 'X-Requested-With': 'XMLHttpRequest' }, token ? { 'X-CSRF-TOKEN': token } : {})
+                    });
+                    const json = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(json.message || json.error || 'Could not save cover position.');
+
+                    seeCoverNotify('success', 'Cover position saved');
+                } catch (err) {
+                    heroBg.style.backgroundPosition = original;
+                    hero.style.backgroundPosition = original;
+                    seeCoverNotify('error', 'Could not save position', err.message);
+                } finally {
+                    if (saveBtn) {
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = 'Save';
+                    }
+                }
+            };
+
+            window.handleSeeProfileCoverUpload = async function(input) {
+                const file = input && input.files && input.files[0];
+                if (!file) return;
+
+                if (!/^image\/(jpeg|png|webp|heic|heif)$/.test(file.type) && !/\.(jpe?g|png|webp|heic)$/i.test(file.name)) {
+                    seeCoverNotify('warning', 'Unsupported file', 'Please choose a JPG, PNG, WebP or HEIC photo.');
+                    input.value = '';
+                    return;
+                }
+                if (file.size > 10 * 1024 * 1024) {
+                    seeCoverNotify('warning', 'File too large', 'Cover photos must be 10 MB or smaller.');
+                    input.value = '';
+                    return;
+                }
+
+                const hero = document.getElementById('seeProfileHero');
+                const previousBg = hero ? hero.style.backgroundImage : '';
+                const previewUrl = URL.createObjectURL(file);
+                applySeeCover(previewUrl);
+
+                if (hero) hero.classList.add('is-uploading');
+
+                try {
+                    const token = seeCoverCsrf();
+                    const body = new FormData();
+                    body.append('coverImageFile', file);
+                    body.append('memberId', memberId);
+                    if (token) body.append('token', token);
+
+                    const res = await fetch('/member/profilePage/coverImg', {
+                        method: 'POST',
+                        body: body,
+                        headers: Object.assign({ 'X-Requested-With': 'XMLHttpRequest' }, token ? { 'X-CSRF-TOKEN': token } : {})
+                    });
+                    const json = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(json.message || json.error || 'Cover photo upload failed.');
+
+                    const data = json.message || {};
+                    const finalUrl = data.coverUrl || previewUrl;
+                    applySeeCover(finalUrl);
+                    seeCoverNotify('success', 'Cover photo updated');
+
+                    setTimeout(() => {
+                        window.startSeeProfileCoverAdjust();
+                    }, 200);
+                } catch (err) {
+                    applySeeCover(previousBg.replace(/^url\(["']?/, '').replace(/["']?\)$/, ''));
+                    seeCoverNotify('error', 'Upload failed', err.message);
+                } finally {
+                    if (hero) hero.classList.remove('is-uploading');
+                    URL.revokeObjectURL(previewUrl);
+                    input.value = '';
+                }
+            };
+
+            window.removeSeeProfileCover = async function() {
+                if (!confirm('Are you sure you want to remove your cover photo?')) return;
+                try {
+                    const token = seeCoverCsrf();
+                    const body = new FormData();
+                    body.append('memberId', memberId);
+                    if (token) body.append('token', token);
+
+                    const res = await fetch('/member/profilePage/coverImg/remove', {
+                        method: 'POST',
+                        body: body,
+                        headers: Object.assign({ 'X-Requested-With': 'XMLHttpRequest' }, token ? { 'X-CSRF-TOKEN': token } : {})
+                    });
+                    const json = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(json.message || json.error || 'Could not remove cover photo.');
+
+                    applySeeCover('');
+                    seeCoverNotify('success', 'Cover photo removed');
+                } catch (err) {
+                    seeCoverNotify('error', 'Could not remove cover', err.message);
+                }
+            };
+        })();
     </script>
 
     @includeIf('member.modals.thenNowComparisonModal')

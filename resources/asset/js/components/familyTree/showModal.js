@@ -109,9 +109,10 @@ export const showPersonDetails = async (personData) => {
   const codeInMsg = displayCodeBadge ? ` ${displayCodeBadge}` : '';
   const inviteMessage = encodeURIComponent(
     `🌳 *Family Tree Invitation* 🌳\n\n` +
-    `You are invited to connect with the *${familyTreeLabel}* on FamilyPlatform${codeInMsg}.\n\n` +
-    `Click below to claim your spot, explore our lineage, and connect with the family:\n` +
-    `👉 ${inviteLink}`
+    `You are invited to connect with the *${familyTreeLabel}*${codeInMsg}.\n\n` +
+    `Explore our living lineage, share cherished memories, and claim your spot:\n\n` +
+    `🔗 Tap to Claim Your Branch on Our Family Tree:\n` +
+    `${inviteLink}`
   );
 
   const isReadOnly = Boolean(personData?.isReadOnly) || Boolean(window.__IS_READ_ONLY__) || (typeof window.graphData !== 'undefined' && Boolean(window.graphData?.isReadOnly));
@@ -309,9 +310,10 @@ export const showPersonDetails = async (personData) => {
         const freshUrl = data.invite_url;
         const freshMsg = encodeURIComponent(
           `🌳 *Family Tree Invitation* 🌳\n\n` +
-          `You are invited to connect with the *${familyTreeLabel}* on FamilyPlatform${codeInMsg}.\n\n` +
-          `Click below to claim your spot, explore our lineage, and connect with the family:\n` +
-          `👉 ${freshUrl}`
+          `You are invited to connect with the *${familyTreeLabel}*${codeInMsg}.\n\n` +
+          `Explore our living lineage, share cherished memories, and claim your spot:\n\n` +
+          `🔗 Tap to Claim Your Branch on Our Family Tree:\n` +
+          `${freshUrl}`
         );
         const wBtn = id('treeClaimWhatsappBtn');
         const sBtn = id('treeClaimSmsBtn');

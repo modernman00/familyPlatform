@@ -101,19 +101,21 @@ final class KinshipCalculatorService
 
         foreach ($childParents as $cId => $pUnions) {
             foreach ($pUnions as $pu) {
-                if ($pu['p1'] > 0) {
+                if ($pu['p1'] > 0 && $pu['p1'] !== $cId) {
                     $parentsOf[$cId][] = $pu['p1'];
                     $childrenOf[$pu['p1']][] = $cId;
                 }
-                if ($pu['p2'] > 0) {
+                if ($pu['p2'] > 0 && $pu['p2'] !== $cId) {
                     $parentsOf[$cId][] = $pu['p2'];
                     $childrenOf[$pu['p2']][] = $cId;
                 }
             }
-            $parentsOf[$cId] = array_unique($parentsOf[$cId]);
+            if (!empty($parentsOf[$cId])) {
+                $parentsOf[$cId] = array_values(array_unique($parentsOf[$cId]));
+            }
         }
         foreach ($childrenOf as $pId => $cList) {
-            $childrenOf[$pId] = array_unique($cList);
+            $childrenOf[$pId] = array_values(array_unique($cList));
         }
 
         // Direct sibling lookup: personId -> [siblingIds]
@@ -553,7 +555,21 @@ final class KinshipCalculatorService
             }
         }
 
-        // 2. Identify biological Father and Mother for each node
+        // 2. Filter out synthetic placeholder parents and identify biological Father and Mother for each node
+        $realParentsOf = [];
+        foreach ($parentsOf as $childId => $pIds) {
+            $validPIds = [];
+            foreach ($pIds as $pId) {
+                if (isset($nodesById[$pId]) && empty($nodesById[$pId]['is_placeholder'])) {
+                    $validPIds[] = (int)$pId;
+                }
+            }
+            if (!empty($validPIds)) {
+                $realParentsOf[$childId] = array_values(array_unique($validPIds));
+            }
+        }
+        $parentsOf = $realParentsOf;
+
         $fatherOf = [];
         $motherOf = [];
         foreach ($parentsOf as $childId => $pIds) {
@@ -793,6 +809,18 @@ final class KinshipCalculatorService
                 $summaryParts[] = '+' . (count($activeRegions) - 2);
             }
 
+            // Build explicit recursive ancestral DNA hierarchy (50% Parent -> 25% Grandparent -> 12.5% Great-Grandparent)
+            $explicitTree = self::buildExplicitDnaHierarchy(
+                (int)$id,
+                $nodesById,
+                $fatherOf,
+                $motherOf,
+                $parentsOf,
+                $activeEthnicity,
+                $lineageMakeup,
+                $palette
+            );
+
             $node['dna_makeup'] = [
                 'mode' => $mode,
                 'source' => $src,
@@ -801,6 +829,7 @@ final class KinshipCalculatorService
                 'recorded_regions' => $recordedEthnicity[$id] ?? [],
                 'lineage_regions' => $lineageMakeup[$id],
                 'summary_text' => implode(' · ', $summaryParts),
+                'explicit_tree' => $explicitTree,
                 'haplogroup_y' => $haploY[$id] ?? null,
                 'haplogroup_y_source' => $haploYSource[$id] ?? null,
                 'haplogroup_mt' => $haploMt[$id] ?? null,
@@ -810,6 +839,361 @@ final class KinshipCalculatorService
         unset($node);
 
         return $nodesById;
+    }
+
+    /**
+     * Check whether a node has at least one non-placeholder biological parent in the tree.
+     *
+     * @param int $nodeId
+     * @param array<int, array<string, mixed>> $nodesById
+     * @param array<int, array<int, int>> $parentsOf
+     * @return bool
+     */
+    private static function hasRealParentInTree(int $nodeId, array $nodesById, array $parentsOf): bool
+    {
+        foreach ($parentsOf[$nodeId] ?? [] as $pId) {
+            if (isset($nodesById[$pId]) && empty($nodesById[$pId]['is_placeholder'])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Resolve the ordered [FatherId|null, MotherId|null] pair of non-placeholder parents for a node.
+     *
+     * @param int $nodeId
+     * @param array<int, array<string, mixed>> $nodesById
+     * @param array<int, int> $fatherOf
+     * @param array<int, int> $motherOf
+     * @param array<int, array<int, int>> $parentsOf
+     * @return array{0: int|null, 1: int|null}
+     */
+    private static function resolveRealParentPair(
+        int $nodeId,
+        array $nodesById,
+        array $fatherOf,
+        array $motherOf,
+        array $parentsOf
+    ): array {
+        $fId = isset($fatherOf[$nodeId]) && empty($nodesById[$fatherOf[$nodeId]]['is_placeholder'])
+            ? (int)$fatherOf[$nodeId]
+            : null;
+        $mId = isset($motherOf[$nodeId]) && empty($nodesById[$motherOf[$nodeId]]['is_placeholder'])
+            ? (int)$motherOf[$nodeId]
+            : null;
+
+        // Fallback if gender was omitted on one or both real parents
+        foreach ($parentsOf[$nodeId] ?? [] as $pId) {
+            $pId = (int)$pId;
+            if (!isset($nodesById[$pId]) || !empty($nodesById[$pId]['is_placeholder'])) {
+                continue;
+            }
+            if ($pId === $fId || $pId === $mId) {
+                continue;
+            }
+            if ($fId === null) {
+                $fId = $pId;
+            } elseif ($mId === null) {
+                $mId = $pId;
+            }
+        }
+
+        return [$fId, $mId];
+    }
+
+    /**
+     * Build the explicit recursive hierarchical DNA breakdown for a node:
+     * - 50% Father (explicitly consists of 25% Paternal Grandfather + 25% Paternal Grandmother -> 12.5% Great-Grandparents)
+     * - 50% Mother (explicitly consists of 25% Maternal Grandfather + 25% Maternal Grandmother -> 12.5% Great-Grandparents)
+     *
+     * @param int $nodeId
+     * @param array<int, array<string, mixed>> $nodesById
+     * @param array<int, int> $fatherOf
+     * @param array<int, int> $motherOf
+     * @param array<int, array<int, int>> $parentsOf
+     * @param array<int, array<int, array{region: string, percentage: float, color: string}>> $activeEthnicity
+     * @param array<int, array<int, array{region: string, percentage: float, color: string}>> $lineageMakeup
+     * @param array<int, string> $palette
+     * @return array<string, mixed>
+     */
+    private static function buildExplicitDnaHierarchy(
+        int $nodeId,
+        array $nodesById,
+        array $fatherOf,
+        array $motherOf,
+        array $parentsOf,
+        array $activeEthnicity,
+        array $lineageMakeup,
+        array $palette
+    ): array {
+        if (!self::hasRealParentInTree($nodeId, $nodesById, $parentsOf)) {
+            $founderLabel = self::resolveFounderLineageLabel($nodeId, $nodesById);
+            $shortFounder = preg_replace('/\s*\b(Ancestral|Heritage|Paternal|Maternal)\s+Line\b/i', '', $founderLabel) ?? $founderLabel;
+            $shortFounder = trim($shortFounder);
+            return [
+                'has_ancestors' => false,
+                'is_founder' => true,
+                'max_depth' => 0,
+                'founder_label' => $founderLabel,
+                'parent_line_summary' => '100% Founder (' . $shortFounder . ')',
+                'sub_line_summary' => '',
+                'sub_line_full' => '',
+                'branches' => [],
+                'sub_segments' => [[
+                    'id' => $nodeId,
+                    'percentage' => 100.0,
+                    'formatted_pct' => '100%',
+                    'name' => $founderLabel,
+                    'short_name' => $shortFounder,
+                    'role' => 'Founder Ancestor',
+                    'generation_depth' => 0,
+                    'root_side' => 'founder',
+                    'color' => $lineageMakeup[$nodeId][0]['color'] ?? '#3b82f6',
+                ]],
+                'tooltip_tree_text' => '100% Ancestral Founder: ' . $founderLabel,
+            ];
+        }
+
+        // Distinct colour palettes for Paternal vs Maternal sub-branches so the 2-tier chromosome bar is visually intuitive
+        $paternalPalette = ['#2563eb', '#3b82f6', '#06b6d4', '#6366f1', '#0ea5e9', '#8b5cf6'];
+        $maternalPalette = ['#059669', '#10b981', '#f59e0b', '#ec4899', '#14b8a6', '#f43f5e'];
+        $patColorIdx = 0;
+        $matColorIdx = 0;
+        $maxDepth = 1;
+        $subSegments = [];
+        $gpShortList = [];
+        $ggpShortList = [];
+
+        [$fId, $mId] = self::resolveRealParentPair($nodeId, $nodesById, $fatherOf, $motherOf, $parentsOf);
+
+        $buildBranch = function (
+            ?int $ancId,
+            string $slot,
+            string $rootSide,
+            int $depth,
+            array $visited
+        ) use (
+            &$buildBranch,
+            &$maxDepth,
+            &$subSegments,
+            &$gpShortList,
+            &$ggpShortList,
+            &$patColorIdx,
+            &$matColorIdx,
+            $nodesById,
+            $fatherOf,
+            $motherOf,
+            $parentsOf,
+            $activeEthnicity,
+            $lineageMakeup,
+            $paternalPalette,
+            $maternalPalette
+        ): array {
+            if ($depth > $maxDepth) {
+                $maxDepth = $depth;
+            }
+
+            $pct = 100.0 * pow(0.5, $depth);
+            $formattedPct = rtrim(rtrim(number_format($pct, 2, '.', ''), '0'), '.') . '%';
+
+            $sidePrefix = $rootSide === 'paternal' ? 'Paternal' : 'Maternal';
+            $shortSidePrefix = $rootSide === 'paternal' ? 'Pat.' : 'Mat.';
+            $isMaleSlot = ($slot === 'father');
+
+            if ($depth === 1) {
+                $role = $isMaleSlot ? 'Father' : 'Mother';
+                $shortRole = $role;
+            } elseif ($depth === 2) {
+                $role = $sidePrefix . ' ' . ($isMaleSlot ? 'Grandfather' : 'Grandmother');
+                $shortRole = $shortSidePrefix . ' ' . ($isMaleSlot ? 'Grandfather' : 'Grandmother');
+            } elseif ($depth === 3) {
+                $role = $sidePrefix . ' ' . ($isMaleSlot ? 'Great-Grandfather' : 'Great-Grandmother');
+                $shortRole = $shortSidePrefix . ' ' . ($isMaleSlot ? 'Great-GF' : 'Great-GM');
+            } elseif ($depth === 4) {
+                $role = $sidePrefix . ' 2nd ' . ($isMaleSlot ? 'Great-Grandfather' : 'Great-Grandmother');
+                $shortRole = '2nd ' . ($isMaleSlot ? 'Great-GF' : 'Great-GM');
+            } else {
+                $ord = ($depth - 2) . 'th';
+                $role = $sidePrefix . ' ' . $ord . ' ' . ($isMaleSlot ? 'Great-Grandfather' : 'Great-Grandmother');
+                $shortRole = $ord . ' ' . ($isMaleSlot ? 'Great-GF' : 'Great-GM');
+            }
+
+            $isUnrecorded = ($ancId === null || !isset($nodesById[$ancId]));
+            if (!$isUnrecorded) {
+                $ancNode = $nodesById[$ancId];
+                $first = trim((string)($ancNode['first_name'] ?? ''));
+                $last = trim((string)($ancNode['last_name'] ?? ''));
+                $maiden = trim((string)($ancNode['maiden_name'] ?? ''));
+                $fullName = trim($first . ' ' . ($maiden !== '' && $maiden !== $last ? $maiden : $last));
+                if ($fullName === '') {
+                    $fullName = $role;
+                }
+                $shortName = $first !== '' ? $first : ($maiden !== '' ? $maiden : ($last !== '' ? $last : $role));
+            } else {
+                $fullName = 'Unrecorded ' . $role;
+                $shortName = 'Unrecorded';
+            }
+
+            if ($rootSide === 'paternal') {
+                $color = $depth === 1 ? '#3b82f6' : $paternalPalette[($patColorIdx++) % count($paternalPalette)];
+            } else {
+                $color = $depth === 1 ? '#10b981' : $maternalPalette[($matColorIdx++) % count($maternalPalette)];
+            }
+
+            // Record concise ethnicity summary for this specific ancestor if available
+            $ethSummary = '';
+            if (!$isUnrecorded && isset($activeEthnicity[$ancId])) {
+                $ethParts = [];
+                foreach (array_slice($activeEthnicity[$ancId], 0, 2) as $er) {
+                    $ePct = rtrim(rtrim(number_format((float)$er['percentage'], 1, '.', ''), '0'), '.');
+                    $ethParts[] = $ePct . '% ' . $er['region'];
+                }
+                $ethSummary = implode(' · ', $ethParts);
+            }
+
+            $ancRegions = (!$isUnrecorded && isset($activeEthnicity[$ancId]))
+                ? $activeEthnicity[$ancId]
+                : ((!$isUnrecorded && isset($lineageMakeup[$ancId]))
+                    ? $lineageMakeup[$ancId]
+                    : [['region' => $fullName, 'percentage' => 100.0, 'color' => $color]]);
+            if (!empty($ancRegions[0]['color']) && preg_match('/^#[0-9a-fA-F]{6}$/', (string)$ancRegions[0]['color'])) {
+                $color = (string)$ancRegions[0]['color'];
+            }
+
+            if ($depth === 2 && !$isUnrecorded) {
+                $gpShortList[] = $formattedPct . ' ' . $shortName;
+            } elseif ($depth === 3 && !$isUnrecorded) {
+                $ggpShortList[] = $formattedPct . ' ' . $shortName;
+            }
+
+            $consistsOf = [];
+            $consistsOfLabel = '';
+            $consistsOfSummary = '';
+
+            if (
+                !$isUnrecorded
+                && $depth < 5
+                && !in_array($ancId, $visited, true)
+                && self::hasRealParentInTree($ancId, $nodesById, $parentsOf)
+            ) {
+                $nextVisited = array_merge($visited, [$ancId]);
+                [$subFId, $subMId] = self::resolveRealParentPair($ancId, $nodesById, $fatherOf, $motherOf, $parentsOf);
+
+                $childFatherBranch = $buildBranch($subFId, 'father', $rootSide, $depth + 1, $nextVisited);
+                $childMotherBranch = $buildBranch($subMId, 'mother', $rootSide, $depth + 1, $nextVisited);
+                $consistsOf = [$childFatherBranch, $childMotherBranch];
+
+                $subPctStr = $childFatherBranch['formatted_pct'];
+                if ($depth === 1) {
+                    $consistsOfLabel = 'Consists of ' . $sidePrefix . ' Grandparents (' . $subPctStr . ' + ' . $subPctStr . ')';
+                } elseif ($depth === 2) {
+                    $consistsOfLabel = 'Consists of Great-Grandparents (' . $subPctStr . ' + ' . $subPctStr . ')';
+                } elseif ($depth === 3) {
+                    $consistsOfLabel = 'Consists of 2nd Great-Grandparents (' . $subPctStr . ' + ' . $subPctStr . ')';
+                } else {
+                    $consistsOfLabel = 'Consists of Ancestral Parents (' . $subPctStr . ' + ' . $subPctStr . ')';
+                }
+
+                $consistsOfSummary = $childFatherBranch['formatted_pct'] . ' ' . $childFatherBranch['name'] . ' (' . $childFatherBranch['short_role'] . ') + '
+                    . $childMotherBranch['formatted_pct'] . ' ' . $childMotherBranch['name'] . ' (' . $childMotherBranch['short_role'] . ')';
+            } else {
+                // Leaf of the explicit ancestral tree: push to sub_segments for the 2nd tier of the chromosome bar
+                $subSegments[] = [
+                    'id' => $ancId,
+                    'percentage' => $pct,
+                    'formatted_pct' => $formattedPct,
+                    'name' => $fullName,
+                    'short_name' => $shortName,
+                    'role' => $role,
+                    'short_role' => $shortRole,
+                    'generation_depth' => $depth,
+                    'root_side' => $rootSide,
+                    'color' => $color,
+                    'is_unrecorded' => $isUnrecorded,
+                ];
+            }
+
+            return [
+                'id' => $ancId,
+                'slot' => $slot,
+                'root_side' => $rootSide,
+                'generation_depth' => $depth,
+                'role' => $role,
+                'short_role' => $shortRole,
+                'name' => $fullName,
+                'short_name' => $shortName,
+                'percentage' => $pct,
+                'formatted_pct' => $formattedPct,
+                'color' => $color,
+                'regions' => $ancRegions,
+                'is_unrecorded' => $isUnrecorded,
+                'ethnicity_summary' => $ethSummary,
+                'consists_of_label' => $consistsOfLabel,
+                'consists_of_summary' => $consistsOfSummary,
+                'consists_of' => $consistsOf,
+            ];
+        };
+
+        $fatherBranch = $buildBranch($fId, 'father', 'paternal', 1, [$nodeId]);
+        $motherBranch = $buildBranch($mId, 'mother', 'maternal', 1, [$nodeId]);
+        $branches = [$fatherBranch, $motherBranch];
+
+        $fShort = mb_strlen($fatherBranch['short_name']) > 10
+            ? mb_substr($fatherBranch['short_name'], 0, 9) . '…'
+            : $fatherBranch['short_name'];
+        $mShort = mb_strlen($motherBranch['short_name']) > 10
+            ? mb_substr($motherBranch['short_name'], 0, 9) . '…'
+            : $motherBranch['short_name'];
+
+        $parentLineSummary = '50% Father (' . $fShort . ') · 50% Mother (' . $mShort . ')';
+
+        $subLineSummary = '';
+        $subLineFull = '';
+        if (!empty($gpShortList) && !empty($ggpShortList)) {
+            $subLineFull = '↳ GP: ' . implode(' · ', $gpShortList) . ' | GGP: ' . implode(' · ', $ggpShortList);
+            $gpNamesOnly = array_map(static fn(string $s): string => preg_replace('/^[0-9.]+%\s*/', '', $s) ?? $s, array_slice($gpShortList, 0, 2));
+            $ggpNamesOnly = array_map(static fn(string $s): string => preg_replace('/^[0-9.]+%\s*/', '', $s) ?? $s, array_slice($ggpShortList, 0, 2));
+            $subLineSummary = '↳ GP 25% (' . implode(', ', $gpNamesOnly) . (count($gpShortList) > 2 ? '…' : '') . ') · GGP 12.5% (' . implode(', ', $ggpNamesOnly) . (count($ggpShortList) > 2 ? '…' : '') . ')';
+        } elseif (!empty($gpShortList)) {
+            $subLineFull = '↳ GP: ' . implode(' · ', $gpShortList);
+            $shownGp = array_slice($gpShortList, 0, 3);
+            $subLineSummary = '↳ GP: ' . implode(' · ', $shownGp) . (count($gpShortList) > 3 ? ' +' . (count($gpShortList) - 3) : '');
+        }
+
+        // Format multi-line ASCII tree for native tooltips
+        $tooltipLines = ['Explicit Tree DNA Make-up:'];
+        $renderTooltipBranch = function (array $b, string $indent, bool $isLast) use (&$renderTooltipBranch, &$tooltipLines): void {
+            $connector = $isLast ? '└─ ' : '├─ ';
+            $line = $indent . $connector . $b['formatted_pct'] . ' ' . $b['role'] . ': ' . $b['name'];
+            if ($b['ethnicity_summary'] !== '') {
+                $line .= ' [' . $b['ethnicity_summary'] . ']';
+            }
+            $tooltipLines[] = $line;
+            if (!empty($b['consists_of'])) {
+                $childIndent = $indent . ($isLast ? '   ' : '│  ');
+                $tooltipLines[] = $childIndent . '↳ ' . $b['consists_of_label'] . ':';
+                $count = count($b['consists_of']);
+                foreach ($b['consists_of'] as $idx => $childB) {
+                    $renderTooltipBranch($childB, $childIndent . '  ', $idx === $count - 1);
+                }
+            }
+        };
+        $renderTooltipBranch($fatherBranch, '', false);
+        $renderTooltipBranch($motherBranch, '', true);
+
+        return [
+            'has_ancestors' => true,
+            'is_founder' => false,
+            'max_depth' => $maxDepth,
+            'founder_label' => null,
+            'parent_line_summary' => $parentLineSummary,
+            'sub_line_summary' => $subLineSummary,
+            'sub_line_full' => $subLineFull,
+            'branches' => $branches,
+            'sub_segments' => $subSegments,
+            'tooltip_tree_text' => implode("\n", $tooltipLines),
+        ];
     }
 
     /**
@@ -829,37 +1213,31 @@ final class KinshipCalculatorService
         $birthCode = trim((string)($n['birth_family_code'] ?? ''));
         $isPlaceholder = !empty($n['is_placeholder']);
 
-        if ($maiden !== '') {
-            return $maiden . ' Ancestral Line';
-        }
-        if ($birthCode !== '') {
-            return '#' . $birthCode . ' Ancestral Line';
-        }
-
         if ($isPlaceholder) {
-            return $gender === 'female' ? 'Maternal Ancestral Line' : 'Paternal Ancestral Line';
+            return $gender === 'female' ? 'Maternal line' : 'Paternal line';
         }
 
-        // If female founder has no maiden name recorded, include first name so Maternal & Paternal lines stay distinct
-        if ($gender === 'female') {
-            if ($first !== '' && !in_array(strtolower($first), ['mother', 'mum', 'mom', 'wife', 'grandmother', 'relative'], true)) {
-                return $first . ($last !== '' ? ' (' . $last . ')' : '') . ' Maternal Line';
-            }
-            return $last !== '' ? ($last . ' Maternal Line') : 'Maternal Ancestral Line';
+        if ($maiden !== '' && strtolower($maiden) !== strtolower($last)) {
+            return $maiden . ' line';
+        }
+
+        if ($first !== '' && !in_array(strtolower($first), ['father', 'dad', 'husband', 'grandfather', 'mother', 'mum', 'mom', 'wife', 'grandmother', 'relative'], true)) {
+            return $first . ' line';
+        }
+
+        if ($maiden !== '') {
+            return $maiden . ' line';
+        }
+
+        if ($birthCode !== '') {
+            return '#' . $birthCode . ' line';
         }
 
         if ($last !== '') {
-            if ($first !== '' && !in_array(strtolower($first), ['father', 'dad', 'husband', 'grandfather', 'relative'], true)) {
-                return $last . ' (' . $first . ') Line';
-            }
-            return $last . ' Paternal Line';
+            return $last . ($gender === 'female' ? ' Maternal line' : ' Paternal line');
         }
 
-        if ($first !== '') {
-            return $first . ' Ancestral Line';
-        }
-
-        return 'Ancestral Founder Line';
+        return 'Ancestral line';
     }
 
     /**

@@ -95,12 +95,13 @@ final class PostShareController
                 $appUrl = $scheme . ($_SERVER['HTTP_HOST'] ?? 'localhost');
             }
 
-            if (!empty($post['post_img0'])) {
-                $ogImage = $appUrl . '/resources/images/post/' . ltrim($post['post_img0'], '/');
-            } elseif (!empty($post['profileImg'])) {
-                $ogImage = $appUrl . '/resources/images/profile/' . ltrim($post['profileImg'], '/');
-            } else {
-                $ogImage = $appUrl . '/public/img/og-invite.jpg';
+            // Designed preview card (photo, words and author in FamilyPlatform's couture style)
+            $ogImage = $appUrl . '/post/' . $postNo . '/card.jpg?v=' . substr(md5($rawMessage . ($post['post_img0'] ?? '')), 0, 8);
+            $kind = $hasVideo ? 'video memory' : ($hasPhoto ? 'photo memory' : ($hasVoice ? 'voice note' : 'update'));
+            $ogTitle = "{$authorName} shared a family {$kind}";
+            if ($cleanCaption !== '') {
+                $ogDescription = '“' . (mb_strlen($cleanCaption) > 150 ? rtrim(mb_substr($cleanCaption, 0, 147)) . '…' : $cleanCaption) . '”'
+                    . ($cleanFamCode !== '' ? " · {$cleanFamCode} family circle" : '');
             }
 
             $canonicalUrl = $appUrl . '/post/' . $postNo;
@@ -283,6 +284,87 @@ final class PostShareController
         } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(['status' => 'error', 'message' => 'Unable to share post: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * GET /post/{postNo}/card.jpg
+     * 1200x630 designed preview card for a shared post, rendered by the festive card engine.
+     * Shows only what the share page already exposes (author, a short excerpt, the first photo).
+     */
+    public function cardImage(int|string|null $postNo = null): void
+    {
+        $postNo = (int)$postNo;
+        try {
+            $stmt = Db::connect2()->prepare('SELECT post_no, fullName, postMessage, post_img0, voice_capsule_url FROM post WHERE post_no = ? AND date_deleted IS NULL LIMIT 1');
+            $stmt->execute([$postNo]);
+            $post = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if (!$post) {
+                http_response_code(404);
+                return;
+            }
+
+            $raw = (string)($post['postMessage'] ?? '');
+            $text = preg_replace('/https?:\/\/[^\s]+|\/resources\/(?:videos|images|profile)\/[^\s]+|post_vid_[^\s]+|\[style:[a-z0-9_]+\]/i', '', $raw) ?? '';
+            $text = trim(preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8'))) ?? '');
+            $isVideo = (bool)preg_match('/(\/resources\/videos\/|\.webm|\.mp4|\.mov|post_vid_)/i', $raw);
+
+            $img = trim((string)($post['post_img0'] ?? ''));
+            $heroUrl = '';
+            if ($img !== '' && !preg_match('#^https?://#i', $img) && !str_contains($img, '..')) {
+                $heroUrl = (str_starts_with($img, '/resources/') || str_starts_with($img, '/public/'))
+                    ? $img
+                    : '/resources/images/post/' . basename($img);
+            }
+
+            // Headline = first sentence (short); verse = the rest, capped
+            $headline = $text;
+            $verse = '';
+            if (preg_match('/^(.{12,90}?[.!?])\s+(.+)$/us', $text, $m)) {
+                $headline = $m[1];
+                $verse = $m[2];
+            } elseif (mb_strlen($text) > 90) {
+                $headline = rtrim(mb_substr($text, 0, 80)) . '…';
+                $verse = '';
+            }
+            if (mb_strlen($verse) > 220) {
+                $verse = rtrim(mb_substr($verse, 0, 217)) . '…';
+            }
+            $kind = $isVideo ? 'A FAMILY VIDEO' : ($heroUrl !== '' ? 'A FAMILY PHOTO' : (!empty($post['voice_capsule_url']) ? 'A FAMILY VOICE NOTE' : 'A FAMILY UPDATE'));
+            if ($headline === '') {
+                $headline = ucwords(strtolower($kind));
+            }
+
+            $card = \App\services\AtgFestiveCardService::hydrate([
+                'share_token' => 'post' . $postNo . '_' . substr(md5($raw . $img), 0, 10),
+                'occasion' => 'custom',
+                'custom_occasion' => $kind,
+                'mood' => 'joyful',
+                'theme' => $heroUrl !== '' ? 'gold_champagne' : 'celestial_navy',
+                'template_style' => $heroUrl !== '' ? 'spatial_3d' : 'translucent',
+                'headline' => $headline,
+                'verse' => $verse,
+                'sign_off' => 'Shared with love by',
+                'sender_name' => (static function (string $n): string {
+                    $n = trim($n);
+                    // Script fonts read badly in ALL CAPS: "OLAW OLAOGUN" -> "Olaw Olaogun"
+                    return $n === '' ? 'A family member' : ($n === mb_strtoupper($n) ? mb_convert_case(mb_strtolower($n), MB_CASE_TITLE) : $n);
+                })((string)($post['fullName'] ?? '')),
+                'recipient_name' => '',
+                'hero_photo_url' => $heroUrl,
+            ]);
+            $card['brand_line'] = 'FAMILYPLATFORM  ·  TAP TO SEE IT IN THE FAMILY HUB';
+
+            $jpg = \App\services\AtgFestiveCardRenderer::renderJpeg($card, 'og');
+            header('Content-Type: image/jpeg');
+            header('Cache-Control: public, max-age=86400');
+            header('Content-Length: ' . strlen($jpg));
+            if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'HEAD') {
+                echo $jpg;
+            }
+        } catch (\Throwable $e) {
+            error_log('[PostShareController::cardImage] ' . $e->getMessage());
+            http_response_code(500);
         }
     }
 

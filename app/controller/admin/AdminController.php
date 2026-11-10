@@ -9,6 +9,7 @@ use App\services\FamilyPlatformAccountService;
 use Src\Admin\AdminService;
 use Src\Admin\BroadcastService;
 use Src\Db;
+use Src\FileUploader;
 use PDO;
 
 /**
@@ -473,20 +474,17 @@ class AdminController extends BaseController
         $message = trim((string)($input['postMessage'] ?? ''));
         $imgUrl = !empty($input['img_url']) ? trim((string)$input['img_url']) : null;
 
-        // Handle uploaded image file if present
+        // Handle uploaded image file if present via shared-lib FileUploader (sniffed MIME, auto-downscaling, EXIF strip)
         if (isset($_FILES['post_img']) && is_array($_FILES['post_img']) && !empty($_FILES['post_img']['tmp_name'])) {
-            $tmpFile = $_FILES['post_img']['tmp_name'];
-            $origName = basename((string)($_FILES['post_img']['name'] ?? ''));
-            $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
-            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'], true)) {
-                $safeName = 'official_' . bin2hex(random_bytes(8)) . '.' . $ext;
-                $targetDir = dirname(__DIR__, 2) . '/../public/images/post';
+            try {
+                $targetDir = 'public/images/post/';
                 if (!is_dir($targetDir)) {
                     @mkdir($targetDir, 0755, true);
                 }
-                if (@move_uploaded_file($tmpFile, $targetDir . '/' . $safeName)) {
-                    $imgUrl = '/public/images/post/' . $safeName;
-                }
+                $uploadResult = FileUploader::fileUploadSingle($targetDir, 'post_img');
+                $imgUrl = '/public/images/post/' . $uploadResult['fileName'];
+            } catch (\Throwable $uploadEx) {
+                error_log('[AdminController::publishOfficialAccountPost] Image upload failed: ' . $uploadEx->getMessage());
             }
         }
 

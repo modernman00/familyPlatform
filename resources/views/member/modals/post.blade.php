@@ -1158,22 +1158,114 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
             window.syncEditorToTextarea();
         });
 
-        // Strip rich HTML on paste to keep editor clean text + 3D emojis
-        editor.addEventListener('paste', function(e) {
-            e.preventDefault();
-            const text = (e.clipboardData || window.clipboardData).getData('text/plain');
-            if (document.queryCommandSupported('insertText')) {
-                document.execCommand('insertText', false, text);
-            } else {
-                const sel = window.getSelection();
-                if (sel && sel.rangeCount > 0) {
-                    const range = sel.getRangeAt(0);
-                    range.deleteContents();
-                    range.insertNode(document.createTextNode(text));
+        // Helper to extract image files from clipboard (handles files, screenshots, copied browser bitmaps)
+        function extractClipboardImages(clipboard) {
+            if (!clipboard) return [];
+            const images = [];
+
+            if (clipboard.files && clipboard.files.length) {
+                for (let i = 0; i < clipboard.files.length; i++) {
+                    const f = clipboard.files[i];
+                    if (f && f.type && f.type.startsWith('image/')) {
+                        images.push(f);
+                    }
                 }
             }
-            editor.dispatchEvent(new Event('input', { bubbles: true }));
+
+            if (!images.length && clipboard.items && clipboard.items.length) {
+                for (let i = 0; i < clipboard.items.length; i++) {
+                    const item = clipboard.items[i];
+                    if (item && item.kind === 'file' && item.type && item.type.startsWith('image/')) {
+                        const blob = item.getAsFile();
+                        if (blob) {
+                            const ext = item.type.split('/')[1] ? item.type.split('/')[1].replace('+xml', '') : 'png';
+                            const file = new File([blob], `pasted_image_${Date.now()}_${i}.${ext}`, { type: item.type });
+                            images.push(file);
+                        }
+                    }
+                }
+            }
+
+            return images;
+        }
+
+        // Helper to assign pasted images into #imageUpload and trigger the media preview pipeline
+        function attachPastedImagesToComposer(images) {
+            if (!images || !images.length) return false;
+            const imageInput = document.getElementById('imageUpload');
+            if (!imageInput) return false;
+
+            const dt = new DataTransfer();
+            images.forEach(f => dt.items.add(f));
+            imageInput.files = dt.files;
+            imageInput.dispatchEvent(new Event('change', { bubbles: true }));
+            return true;
+        }
+
+        // Intercept paste on the rich text editor (handles both image attachments and clean plain text)
+        editor.addEventListener('paste', function(e) {
+            const clipboard = e.clipboardData || window.clipboardData;
+            if (!clipboard) return;
+
+            const pastedImages = extractClipboardImages(clipboard);
+            if (pastedImages.length > 0) {
+                e.preventDefault();
+                e.__fpImagePasteHandled = true;
+                attachPastedImagesToComposer(pastedImages);
+            }
+
+            const text = clipboard.getData('text/plain');
+            if (text) {
+                e.preventDefault();
+                if (document.queryCommandSupported('insertText')) {
+                    document.execCommand('insertText', false, text);
+                } else {
+                    const sel = window.getSelection();
+                    if (sel && sel.rangeCount > 0) {
+                        const range = sel.getRangeAt(0);
+                        range.deleteContents();
+                        range.insertNode(document.createTextNode(text));
+                    }
+                }
+                editor.dispatchEvent(new Event('input', { bubbles: true }));
+            } else if (pastedImages.length === 0) {
+                e.preventDefault();
+            }
         });
+
+        // Modal-level paste listener so pasting anywhere in the open composer attaches images
+        const composerModalEl = document.getElementById('postModal');
+        if (composerModalEl) {
+            composerModalEl.addEventListener('paste', function(e) {
+                if (e.__fpImagePasteHandled || e.defaultPrevented) return;
+                const activeEl = document.activeElement;
+                const isOtherTextInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA') && activeEl.id !== 'postMessage';
+
+                const clipboard = e.clipboardData || window.clipboardData;
+                const pastedImages = extractClipboardImages(clipboard);
+                if (pastedImages.length > 0) {
+                    e.preventDefault();
+                    e.__fpImagePasteHandled = true;
+                    attachPastedImagesToComposer(pastedImages);
+                } else if (!isOtherTextInput && activeEl !== editor) {
+                    const text = clipboard ? clipboard.getData('text/plain') : '';
+                    if (text && editor) {
+                        editor.focus();
+                        if (document.queryCommandSupported('insertText')) {
+                            document.execCommand('insertText', false, text);
+                        } else {
+                            const sel = window.getSelection();
+                            if (sel && sel.rangeCount > 0) {
+                                const range = sel.getRangeAt(0);
+                                range.deleteContents();
+                                range.insertNode(document.createTextNode(text));
+                            }
+                        }
+                        editor.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+            });
+        }
     }
 
     if (tabStandardBtn && tab3dBtn && standardPane && atg3dPane) {

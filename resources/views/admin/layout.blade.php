@@ -193,6 +193,11 @@
                 <span>GDPR Erasure</span>
             </a>
 
+            <a href="{{ $adminPrefix }}/moderation" class="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold <?= ($activeTab ?? '') === 'moderation' ? 'bg-rose-600 text-white shadow-sm' : 'text-rose-400 hover:text-rose-300 hover:bg-rose-950/40' ?> transition-colors">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>Content Safety &amp; Moderation</span>
+            </a>
+
             <a href="{{ $adminPrefix }}/members" class="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold <?= ($activeTab ?? '') === 'members' ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-900/60' ?> transition-colors">
                 <i class="fa-solid fa-address-book"></i>
                 <span>Platform Directory</span>

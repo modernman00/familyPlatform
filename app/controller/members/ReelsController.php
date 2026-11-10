@@ -238,6 +238,15 @@ final class ReelsController extends BaseController
                 throw new Exception('Unauthorized user session: no family code found', 401);
             }
 
+            // Capture session display names before releasing session lock
+            $sessionFName = (string)($_SESSION['fName'] ?? '');
+            $sessionLName = (string)($_SESSION['lName'] ?? '');
+
+            // Fast-Response Decoupling: Release PHP session lock early so concurrent user requests are not stalled
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+
             $caption = isset($_POST['caption']) ? trim((string)$_POST['caption']) : '';
             $category = isset($_POST['category']) ? trim((string)$_POST['category']) : 'milestone';
             if ($category === 'custom') {
@@ -290,6 +299,11 @@ final class ReelsController extends BaseController
                 $targetPath = $targetDir . $uniqueName;
                 if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
                     throw new Exception('Failed to save uploaded video on server.', 500);
+                }
+
+                // Host-Portable Pure-PHP FastStart: Relocate `moov` atom ahead of `mdat` so Reel streaming starts in <100ms on Namecheap or any host
+                if ($ext === 'mp4' || $ext === 'mov') {
+                    \App\services\VideoAutoTrimService::optimiseMp4FastStart($targetPath);
                 }
 
                 $videoPath = '/resources/videos/reels/' . $uniqueName;
@@ -416,8 +430,8 @@ final class ReelsController extends BaseController
             } elseif (!empty($_POST['audio_url'])) {
                 // Curated library track OR "Use This Sound" track
                 $candidateAudioUrl = trim((string)$_POST['audio_url']);
-                // Strict validation: must be internal relative path starting with /audio/reels/ or /resources/videos/reels/
-                if (preg_match('#^/(audio/reels/|resources/videos/reels/)[a-zA-Z0-9_.-]+(\.[a-zA-Z0-9]{3,4})?$#', $candidateAudioUrl) && !str_contains($candidateAudioUrl, '..')) {
+                // Strict validation: must be internal relative path starting with /audio/reels/ (with optional subdirectories like library/ or custom/) or /resources/videos/reels/
+                if (preg_match('#^/(audio/reels/(library/|custom/)?|resources/videos/reels/)[a-zA-Z0-9_.-]+(\.[a-zA-Z0-9]{3,4})?$#', $candidateAudioUrl) && !str_contains($candidateAudioUrl, '..') && !str_contains($candidateAudioUrl, '\\')) {
                     $audioUrl = $candidateAudioUrl;
                 }
             }
@@ -466,11 +480,41 @@ final class ReelsController extends BaseController
                 'has_upload' => !empty($_FILES['video_file']['name']),
             ]);
 
-            // Notify family members about the new Family Reel
+            // Output HTTP 200 JSON success response immediately
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response (Content-Type: application/json); json_encode escapes the payload.
+            $responsePayload = json_encode([
+                'status' => 'success',
+                'message' => 'Family Reel published successfully!',
+                'data' => $createdReel
+            ], JSON_UNESCAPED_SLASHES);
+
+            if (!headers_sent()) {
+                header('Content-Type: application/json');
+                header('Connection: close');
+                if ($responsePayload !== false) {
+                    header('Content-Length: ' . (string)strlen($responsePayload));
+                }
+            }
+            http_response_code(200);
+            echo $responsePayload;
+
+            // Decouple client connection: flush buffers and disconnect HTTP request so the browser redirects instantly
+            if (php_sapi_name() !== 'cli') {
+                while (ob_get_level() > 0) {
+                    ob_end_flush();
+                }
+                flush();
+                if (function_exists('fastcgi_finish_request')) {
+                    fastcgi_finish_request();
+                }
+            }
+            ignore_user_abort(true);
+
+            // ── DECOUPLED POST-RESPONSE NOTIFICATION PIPELINE ──
             try {
                 $creatorName = trim(($createdReel['firstName'] ?? '') . ' ' . ($createdReel['lastName'] ?? ''));
                 if ($creatorName === '') {
-                    $creatorName = trim(($_SESSION['fName'] ?? '') . ' ' . ($_SESSION['lName'] ?? ''));
+                    $creatorName = trim(($sessionFName !== '' ? $sessionFName : ($_SESSION['fName'] ?? '')) . ' ' . ($sessionLName !== '' ? $sessionLName : ($_SESSION['lName'] ?? '')));
                 }
                 if ($creatorName === '') {
                     $creatorName = 'A family member';
@@ -488,11 +532,13 @@ final class ReelsController extends BaseController
                     VALUES (?, ?, ?, ?, 'Reel', ?, ?, 'new', NOW())
                 ");
 
+                $recipientIds = [];
                 foreach ($members as $member) {
                     $targetId = (string)($member['id'] ?? '');
                     if ($targetId === '' || $targetId === $userId) {
                         continue;
                     }
+                    $recipientIds[] = $targetId;
 
                     try {
                         $stmt->execute([
@@ -504,16 +550,21 @@ final class ReelsController extends BaseController
                             $reelUrl
                         ]);
                     } catch (\Throwable) {}
+                }
 
+                // Batch WebPush dispatch across all verified recipients in a single multi-subscription flush
+                if (!empty($recipientIds)) {
                     try {
                         PushNotificationClass::sendPushNotification(
-                            userId: $targetId,
+                            userId: $recipientIds,
                             message: $notifMsg,
                             url: $reelUrl,
                             title: '🎬 New Family Reel',
                             tag: 'reel-' . $reelId
                         );
-                    } catch (\Throwable) {}
+                    } catch (\Throwable $pushEx) {
+                        error_log('[ReelsController::uploadReel batched push warning] ' . $pushEx->getMessage());
+                    }
                 }
 
                 // Notify mentioned members in reel caption
@@ -528,7 +579,9 @@ final class ReelsController extends BaseController
                             (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
                             VALUES (?, ?, ?, 'Reel Tag', 'Reel', ?, ?, 'new', NOW())
                         ");
+                        $tagRecipientIds = [];
                         foreach ($captionMentioned as $cId) {
+                            $tagRecipientIds[] = (string)$cId;
                             try {
                                 $cmStmt->execute([
                                     $userId,
@@ -537,15 +590,18 @@ final class ReelsController extends BaseController
                                     $cMentionMsg,
                                     $cMentionUrl
                                 ]);
-                                PushNotificationClass::sendPushNotification(
-                                    userId: $cId,
-                                    message: $cMentionMsg,
-                                    url: $cMentionUrl,
-                                    title: $cMentionTitle,
-                                    tag: 'reel-tag-' . $reelId
-                                );
                             } catch (\Throwable) {}
                         }
+
+                        try {
+                            PushNotificationClass::sendPushNotification(
+                                userId: $tagRecipientIds,
+                                message: $cMentionMsg,
+                                url: $cMentionUrl,
+                                title: $cMentionTitle,
+                                tag: 'reel-tag-' . $reelId
+                            );
+                        } catch (\Throwable) {}
                     }
                 } catch (\Throwable $capEx) {
                     error_log('[ReelsController::uploadReel caption mentions warning] ' . $capEx->getMessage());
@@ -553,13 +609,6 @@ final class ReelsController extends BaseController
             } catch (\Throwable $notifEx) {
                 error_log('[ReelsController::uploadReel notification error] ' . $notifEx->getMessage());
             }
-
-            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response (Content-Type: application/json); json_encode escapes the payload.
-            echo json_encode([
-                'status' => 'success',
-                'message' => 'Family Reel published successfully!',
-                'data' => $createdReel
-            ]);
         } catch (\Throwable $e) {
             http_response_code($e->getCode() >= 400 && $e->getCode() < 600 ? $e->getCode() : 400);
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);

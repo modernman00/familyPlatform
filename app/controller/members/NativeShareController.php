@@ -110,6 +110,16 @@ final class NativeShareController
                     continue;
                 }
 
+                // If raster image, route through shared-lib FileUploader (auto-downscale >1920px, strip EXIF, optimize)
+                if (in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'heic'], true)) {
+                    try {
+                        $targetPath = \Src\FileUploader::finaliseImage($targetPath, $extension);
+                        $secureFileName = basename($targetPath);
+                    } catch (\Throwable $optEx) {
+                        error_log('[NativeShareController] FileUploader finaliseImage fallback: ' . $optEx->getMessage());
+                    }
+                }
+
                 $savedFiles[] = $secureFileName;
             }
 

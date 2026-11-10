@@ -130,11 +130,13 @@ final class FamilyAnnouncementController extends BaseController
                     VALUES (?, ?, ?, ?, 'Announcement', ?, ?, 'new', NOW())
                 ");
 
+                $recipientIds = [];
                 foreach ($members as $member) {
                     $targetId = (string)($member['id'] ?? '');
                     if ($targetId === '' || $targetId === $this->userId) {
                         continue;
                     }
+                    $recipientIds[] = $targetId;
 
                     try {
                         $stmt->execute([
@@ -146,10 +148,12 @@ final class FamilyAnnouncementController extends BaseController
                             $actionUrl
                         ]);
                     } catch (\Throwable) {}
+                }
 
+                if (!empty($recipientIds)) {
                     try {
                         PushNotificationClass::sendPushNotification(
-                            userId: $targetId,
+                            userId: $recipientIds,
                             message: $notifMsg,
                             url: $actionUrl,
                             title: $notifTitle,

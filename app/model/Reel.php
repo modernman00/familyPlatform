@@ -410,7 +410,27 @@ final class Reel extends Select
             return null;
         }
         $url = trim($raw);
-        if ($url === '' || strlen($url) > 2048 || !filter_var($url, FILTER_VALIDATE_URL)) {
+        if ($url === '' || strlen($url) > 2048) {
+            return null;
+        }
+
+        // Allow internal sovereign ATG brand GIFs and dynasty GIFs
+        if (str_starts_with($url, '/images/brand/gifs/')) {
+            $basename = basename($url);
+            if (preg_match('/^[a-z0-9_]+\.gif$/i', $basename)) {
+                return '/images/brand/gifs/' . $basename;
+            }
+            return null;
+        }
+        if (str_starts_with($url, '/api/atg/gif/')) {
+            $path = parse_url($url, PHP_URL_PATH);
+            if (is_string($path) && preg_match('#^/api/atg/gif/(view/[a-z0-9_]+|custom)#i', $path)) {
+                return $url;
+            }
+            return null;
+        }
+
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
             return null;
         }
         $parts = parse_url($url);
@@ -988,6 +1008,15 @@ final class Reel extends Select
         }
         if (isset($reel['audio_url']) && is_string($reel['audio_url'])) {
             $reel['audio_url'] = str_replace('/public/audio/reels/', '/audio/reels/', $reel['audio_url']);
+        }
+        // Self-heal audio_url if it was omitted but a curated library track was chosen
+        if (empty($reel['audio_url']) && !empty($reel['music_title']) && $reel['music_title'] !== 'Original Family Audio' && $reel['music_title'] !== 'Original Audio') {
+            foreach (self::getAudioLibrary() as $libTrack) {
+                if (strcasecmp((string)$libTrack['title'], (string)$reel['music_title']) === 0) {
+                    $reel['audio_url'] = $libTrack['url'];
+                    break;
+                }
+            }
         }
         return $reel;
     }

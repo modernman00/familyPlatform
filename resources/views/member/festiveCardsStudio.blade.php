@@ -88,7 +88,14 @@
 .fs-pal[aria-pressed="true"] { border-color: var(--fs-gold); box-shadow: 0 6px 16px -10px rgba(201,162,75,.9); }
 .fs-pal__dot { width: 34px; height: 34px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 2px rgba(255,255,255,.7), 0 2px 6px rgba(0,0,0,.25); }
 
-/* Photo drop */
+/* Centrepiece modes & Photo drop */
+.fs-centre-modes { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.fs-cmode { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--fs-line); background: var(--fs-surface); cursor: pointer; font: inherit; font-size: .8rem; font-weight: 600; color: var(--fs-ink); white-space: nowrap; flex-shrink: 0; transition: border-color .2s, box-shadow .2s, transform .15s; }
+.fs-cmode:hover { border-color: #d9c38f; }
+.fs-cmode:active { transform: scale(0.98); }
+.fs-cmode[aria-pressed="true"] { border-color: var(--fs-gold); background: linear-gradient(160deg, rgba(243,220,154,.24), transparent); box-shadow: 0 6px 16px -10px rgba(201,162,75,.9); }
+.fs-scene-pill { display: flex; align-items: center; gap: 10px; padding: 10px 14px; margin-bottom: 12px; border-radius: 14px; border: 1px solid rgba(201,162,75,.38); background: rgba(243,220,154,.12); font-size: .8rem; color: var(--fs-ink); }
+.fs-scene-pill i { color: #b48a35; font-size: 1rem; flex: none; }
 .fs-drop { position: relative; display: flex; align-items: center; gap: 16px; padding: 16px; min-height: 96px; border-radius: 18px; border: 1.5px dashed #cdb47a; background: var(--fs-soft); cursor: pointer; transition: background .2s, border-color .2s; }
 .fs-drop:hover, .fs-drop.is-over { background: rgba(243,220,154,.18); border-color: var(--fs-gold); }
 .fs-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
@@ -133,7 +140,7 @@
 .fs-item__body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
 .fs-item__title { font-weight: 700; font-size: .88rem; line-height: 1.25; color: var(--fs-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fs-item__meta { color: var(--fs-muted); font-size: .74rem; display: flex; gap: 10px; flex-wrap: wrap; }
-.fs-item__actions { display: flex; gap: 6px; margin-top: 10px; }
+.fs-item__actions { display: flex; gap: 8px; margin-top: 10px; }
 .fs-icon-btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; min-width: 44px; border-radius: 12px; border: 1px solid var(--fs-line); background: var(--fs-soft); color: var(--fs-ink); font-size: .8rem; font-weight: 600; cursor: pointer; text-decoration: none; }
 .fs-icon-btn:hover { border-color: #d9c38f; color: var(--fs-ink); text-decoration: none; }
 .fs-icon-btn--wa { background: #128c4a; border-color: #128c4a; color: #fff; }
@@ -283,9 +290,27 @@
                     </div>
                 </section>
 
-                {{-- 4. Photo --}}
+                {{-- 4. Centrepiece & Photo --}}
                 <section class="fs-step" aria-labelledby="fsStepPhoto">
-                    <div class="fs-step__head"><span class="fs-step__num">IV</span><h2 class="fs-step__title" id="fsStepPhoto">Add a photo <span style="font-size:.8rem;color:var(--fs-muted);font-family:inherit">(optional)</span></h2></div>
+                    <div class="fs-step__head"><span class="fs-step__num">IV</span><h2 class="fs-step__title" id="fsStepPhoto">Centrepiece &amp; photo <span style="font-size:.8rem;color:var(--fs-muted);font-family:inherit">(optional)</span></h2></div>
+                    <div class="fs-centre-modes" role="group" aria-label="Centrepiece style">
+                        <button type="button" class="fs-cmode" :aria-pressed="heroMode === 'art'" @click="heroMode = 'art'">
+                            <i class="bi bi-stars" aria-hidden="true"></i>
+                            <span>Festive Illustration</span>
+                        </button>
+                        <button type="button" class="fs-cmode" :aria-pressed="heroMode === 'photo'" @click="heroMode = 'photo'">
+                            <i class="bi bi-camera" aria-hidden="true"></i>
+                            <span>Family Photo</span>
+                        </button>
+                        <button type="button" class="fs-cmode" :aria-pressed="heroMode === 'crest'" @click="heroMode = 'crest'">
+                            <i class="bi bi-shield-shaded" aria-hidden="true"></i>
+                            <span>Family Monogram</span>
+                        </button>
+                    </div>
+                    <div class="fs-scene-pill" x-show="heroMode === 'art'" x-cloak>
+                        <i class="bi bi-palette2" aria-hidden="true"></i>
+                        <span><strong x-text="selectedOccasion.scene_title || 'Bespoke Occasion Artwork'"></strong> — crafted for your chosen celebration, or upload a family photo below.</span>
+                    </div>
                     <label class="fs-drop" :class="{ 'is-over': dragOver }" @dragover.prevent="dragOver = true" @dragleave="dragOver = false" @drop.prevent="dragOver = false; onPhoto($event.dataTransfer.files[0])">
                         <input type="file" accept="image/*" @change="onPhoto($event.target.files[0]); $event.target.value = ''" aria-label="Upload a photo">
                         <span class="fs-drop__thumb">
@@ -293,8 +318,8 @@
                             <template x-if="!photoUrl"><i class="bi" :class="photoBusy ? 'bi-hourglass-split' : 'bi-image'" aria-hidden="true"></i></template>
                         </span>
                         <span style="flex:1;min-width:0">
-                            <b x-text="photoUrl ? 'Photo added — looking lovely' : (photoBusy ? 'Preparing your photo…' : 'Tap to choose or drop a photo')"></b>
-                            <small>Without a photo, your family monogram becomes the centrepiece. Location data is always removed.</small>
+                            <b x-text="photoUrl ? 'Photo added — looking lovely' : (photoBusy ? 'Preparing your photo…' : 'Tap to choose or drop a family photo')"></b>
+                            <small x-text="heroMode === 'crest' ? 'Your gilded family monogram crest is active as the centrepiece. Location data is always removed.' : 'Without a photo, the bespoke occasion illustration shines at the centre. Location data is always removed.'"></small>
                         </span>
                         <button type="button" class="fs-link-btn" x-show="photoUrl" x-cloak @click.prevent.stop="removePhoto()">Remove</button>
                     </label>
@@ -464,6 +489,7 @@ function festiveStudioWizard() {
         verse: occasions.christmas.default_verse,
         signOff: occasions.christmas.default_sign_off,
         senderName: defaultSender,
+        heroMode: 'art',
         photoBlob: null,
         photoUrl: '',
         photoBusy: false,
@@ -498,6 +524,12 @@ function festiveStudioWizard() {
         /* Everything the shared card partial binds to */
         get c() {
             const fp = window.FPCards;
+            const resolvedMode = (this.heroMode === 'photo' && this.photoUrl)
+                ? 'photo'
+                : (this.heroMode === 'crest' ? 'crest' : 'art');
+            const artKey = fp && fp.resolveArtKey
+                ? fp.resolveArtKey(this.occasionKey, this.mood, this.customOccasion)
+                : (this.occasionKey === 'custom' ? 'milestone' : this.occasionKey);
             return {
                 style: this.templateStyle,
                 vars: fp ? fp.cardVars(this.selectedTheme, this.headline, this.verse) : '',
@@ -508,6 +540,8 @@ function festiveStudioWizard() {
                 signOff: this.signOff,
                 sender: this.senderName || 'The Family',
                 photo: this.photoUrl,
+                heroMode: resolvedMode,
+                art: artKey,
                 monogram: fp ? fp.monogram(this.senderName) : 'F',
             };
         },
@@ -546,6 +580,7 @@ function festiveStudioWizard() {
                 if (this.photoUrl) URL.revokeObjectURL(this.photoUrl);
                 this.photoBlob = out.blob;
                 this.photoUrl = out.url;
+                this.heroMode = 'photo';
             } catch (e) {
                 this.photoError = e.message || 'We could not read that photo.';
             } finally {
@@ -556,6 +591,7 @@ function festiveStudioWizard() {
             if (this.photoUrl) URL.revokeObjectURL(this.photoUrl);
             this.photoBlob = null;
             this.photoUrl = '';
+            if (this.heroMode === 'photo') this.heroMode = 'art';
         },
 
         csrf() { return document.querySelector('input[name="token"]')?.value || ''; },
@@ -585,8 +621,9 @@ function festiveStudioWizard() {
                 fd.append('verse', this.verse.trim());
                 fd.append('sign_off', this.signOff.trim());
                 fd.append('sender_name', this.senderName.trim());
-                fd.append('hero_type', this.photoBlob ? 'photo' : 'crest');
-                if (this.photoBlob) fd.append('hero_photo', this.photoBlob, 'photo.jpg');
+                const usePhoto = !!(this.photoBlob && this.heroMode === 'photo');
+                fd.append('hero_type', usePhoto ? 'photo' : (this.heroMode === 'crest' ? 'crest' : 'avatar'));
+                if (usePhoto) fd.append('hero_photo', this.photoBlob, 'photo.jpg');
 
                 const response = await fetch('/api/festive-cards/create', { method: 'POST', body: fd, headers: { 'Accept': 'application/json' } });
                 const res = await response.json().catch(() => ({}));

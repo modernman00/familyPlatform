@@ -8,6 +8,7 @@
         'name' => __('reg.err_name', 'Use at least 2 letters.'),
         'email' => __('reg.err_email', 'Enter an email like name@example.com.'),
         'dob' => __('reg.err_dob', 'Choose your day, month and year of birth.'),
+        'gender' => __('reg.err_gender', 'Please choose your gender.'),
         'mobile' => __('reg.err_mobile', 'Enter your full mobile number.'),
         'password' => __('reg.err_password', 'Use at least 8 characters.'),
         'code' => __('reg.err_code', 'Enter the family code (at least 4 characters).'),
@@ -67,12 +68,13 @@
         firstName: () => (val('firstName').length >= 2 ? '' : MSG.name),
         lastName: () => (val('lastName').length >= 2 ? '' : MSG.name),
         Date_of_Birth: () => (['day', 'month', 'year'].every((k) => { const v = val(k); return v && v !== 'select'; }) ? '' : MSG.dob),
+        gender: () => (['Female', 'Male', 'Other'].includes(val('gender')) ? '' : MSG.gender),
         email: () => (/^[\w\-.+]+@[a-zA-Z0-9.\-]+\.[a-zA-Z0-9]{2,}$/.test(val('email')) ? '' : MSG.email),
         mobile: () => (val('mobile').replace(/\D/g, '').length >= 8 ? '' : MSG.mobile),
         password: () => (isOauth || val('password').length >= 8 ? '' : MSG.password),
         checkbox: () => (document.getElementById('checkbox') && document.getElementById('checkbox').checked ? '' : MSG.consent),
     };
-    const stepFields = { 1: ['famCode', 'familySurname'], 2: ['firstName', 'lastName', 'Date_of_Birth', 'email', 'mobile'], 3: ['password', 'checkbox'] };
+    const stepFields = { 1: ['famCode', 'familySurname'], 2: ['firstName', 'lastName', 'Date_of_Birth', 'gender', 'email', 'mobile'], 3: ['password', 'checkbox'] };
 
     const validateStep = (n) => {
         let firstBad = null;

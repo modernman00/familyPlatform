@@ -135,6 +135,7 @@
     $selDay = $fv('day');
     $selMonth = $fv('month');
     $selYear = $fv('year');
+    $selGender = $fv('gender');
     $monthNames = explode(',', __('reg.months', 'January,February,March,April,May,June,July,August,September,October,November,December'));
     $monthKeys = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     $months = [];
@@ -423,6 +424,17 @@
                         <p class="fpr-err" id="month_error"></p>
                         <p class="fpr-err" id="year_error"></p>
                     </fieldset>
+
+                    <div class="fpr-field">
+                        <label class="fpr-label" for="gender">{{ __('reg.gender', 'Gender') }}</label>
+                        <select class="fpr-select" name="gender" id="gender" aria-describedby="gender_error" autocomplete="sex">
+                            <option value="">{{ __('reg.select_gender', 'Select gender') }}</option>
+                            <option value="Female" {{ $selGender === 'Female' ? 'selected' : '' }}>{{ __('reg.female', 'Female') }}</option>
+                            <option value="Male" {{ $selGender === 'Male' ? 'selected' : '' }}>{{ __('reg.male', 'Male') }}</option>
+                            <option value="Other" {{ $selGender === 'Other' ? 'selected' : '' }}>{{ __('reg.other', 'Other') }}</option>
+                        </select>
+                        <p class="fpr-err" id="gender_error" role="alert"></p>
+                    </div>
 
                     <div class="fpr-field">
                         <label class="fpr-label" for="email">{{ __('reg.email', 'Email') }}</label>

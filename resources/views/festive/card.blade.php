@@ -8,6 +8,7 @@
              @include('festive.card', ['live' => true, 'styleExpr' => "'plaque'"]) — same content, forced style
     Options: 'tilt' => true (pointer/gyro parallax), 'thumb' => true (lighter), 'animateIn' => true
 --}}
+@include('festive.occasionArt')
 @php
     $live = (bool)($live ?? false);
     $tilt = (bool)($tilt ?? false);
@@ -18,6 +19,12 @@
 
     $styleKey = (string)($card['template_style'] ?? 'classic');
     $heroUrl = (string)($card['hero_url'] ?? '');
+    $heroMode = (string)($card['hero_mode'] ?? ($heroUrl !== '' ? 'photo' : ((($card['hero_type'] ?? 'avatar') === 'crest') ? 'crest' : 'art')));
+    $artKey = (string)($card['art_key'] ?? \App\services\AtgFestiveCardService::resolveArtKey(
+        (string)($card['occasion'] ?? 'christmas'),
+        (string)($card['mood'] ?? 'joyful'),
+        (string)($card['custom_occasion'] ?? '')
+    ));
     $mono = (string)($card['monogram'] ?? 'F');
     $isPair = mb_strlen($mono) > 1;
     $vars = !$live ? \App\services\AtgFestiveCardService::cssVars(
@@ -25,13 +32,13 @@
         (string)($card['headline'] ?? ''),
         (string)($card['verse'] ?? '')
     ) : '';
-    $staticClasses = 'fc-style-' . $styleKey . ' ' . ($heroUrl !== '' ? 'fc-has-photo' : 'fc-no-photo');
+    $staticClasses = 'fc-style-' . $styleKey . ' fc-occ-' . $artKey . ' ' . ($heroMode === 'photo' ? 'fc-has-photo' : ($heroMode === 'crest' ? 'fc-no-photo fc-has-crest' : 'fc-has-art'));
     $baseClasses = 'fc-card fc-idle' . ($thumb ? ' fc-thumb' : '') . ($animateIn ? ' fc-animate-in' : '');
 @endphp
 <article
     class="{{ $baseClasses }} {{ $live ? '' : $staticClasses }}"
     @if($live)
-        :class="['fc-style-' + ({{ $styleExpr }}), c.photo ? 'fc-has-photo' : 'fc-no-photo']"
+        :class="['fc-style-' + ({{ $styleExpr }}), 'fc-occ-' + c.art, c.heroMode === 'photo' ? 'fc-has-photo' : (c.heroMode === 'crest' ? 'fc-no-photo fc-has-crest' : 'fc-has-art')]"
         :style="c.vars"
     @else
         style="{{ $vars }}"
@@ -45,6 +52,10 @@
             <div class="fc-bg"></div>
             <div class="fc-fx" aria-hidden="true"><i></i><i></i><i></i></div>
             <div class="fc-paperwrap" aria-hidden="true"><div class="fc-paper"></div></div>
+            <svg class="fc-scene-backdrop" width="100%" height="100%" aria-hidden="true" focusable="false">
+                <use href="#fc-backdrop-{{ $artKey }}" @if($live) :href="'#fc-backdrop-' + c.art" @endif></use>
+            </svg>
+            <div class="fc-weather" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
             <div class="fc-frame" aria-hidden="true"></div>
             <span class="fc-corner fc-corner--tl" aria-hidden="true"></span>
             <span class="fc-corner fc-corner--tr" aria-hidden="true"></span>
@@ -58,9 +69,16 @@
                 <figure class="fc-hero">
                     <div class="fc-hero__frame">
                         @if($live)
-                            <img class="fc-hero__img" :src="c.photo || ''" x-show="c.photo" alt="Card photo">
-                        @elseif($heroUrl !== '')
+                            <img class="fc-hero__img" :src="c.photo || ''" x-show="c.heroMode === 'photo'" alt="Card photo">
+                            <svg class="fc-hero__art" width="100%" height="100%" x-show="c.heroMode === 'art'" aria-hidden="true" focusable="false">
+                                <use href="#fc-art-christmas" :href="'#fc-art-' + c.art"></use>
+                            </svg>
+                        @elseif($heroMode === 'photo' && $heroUrl !== '')
                             <img class="fc-hero__img" src="{{ $heroUrl }}" alt="Card photo" loading="{{ $thumb ? 'lazy' : 'eager' }}" decoding="async">
+                        @elseif($heroMode === 'art')
+                            <svg class="fc-hero__art" width="100%" height="100%" aria-hidden="true" focusable="false">
+                                <use href="#fc-art-{{ $artKey }}"></use>
+                            </svg>
                         @endif
                     </div>
                     <div class="fc-crest" aria-hidden="true">

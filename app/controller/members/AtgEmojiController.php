@@ -161,11 +161,21 @@ final class AtgEmojiController extends BaseController
             $id = (string)($_GET['id'] ?? '');
         }
 
-        $size = isset($_GET['size']) ? (int)$_GET['size'] : 120;
+        $size = isset($_GET['size']) ? max(24, min(512, (int)$_GET['size'])) : 120;
+        $etag = '"' . hash('sha256', "atg_emoji_svg:{$id}:{$size}:v2") . '"';
+
+        header('ETag: ' . $etag);
+        header('Cache-Control: public, max-age=31536000, immutable');
+        header('X-Content-Type-Options: nosniff');
+
+        if (trim((string)($_SERVER['HTTP_IF_NONE_MATCH'] ?? '')) === $etag) {
+            http_response_code(304);
+            return;
+        }
+
         $svg = $this->service->renderSvgEmoji($id, $size);
 
-        header('Content-Type: image/svg+xml');
-        header('Cache-Control: public, max-age=86400');
+        header('Content-Type: image/svg+xml; charset=UTF-8');
         echo $svg;
     }
 

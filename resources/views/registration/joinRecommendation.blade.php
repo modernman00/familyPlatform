@@ -5,13 +5,10 @@
 @section('data-page-id', 'joinRecommendation')
 
 @section('og_tags')
-    {{-- Referral landing page: personalised rich-preview card for WhatsApp / iMessage / Telegram --}}
+    {{-- Referral landing page: high-converting rich-preview card for WhatsApp / iMessage / Telegram --}}
     @php
-        $ogInviter  = !empty($inviterName) ? htmlspecialchars(strip_tags($inviterName), ENT_QUOTES, 'UTF-8') : null;
-        $ogTitle    = $ogInviter
-            ? "{$ogInviter} invited you to FamilyPlatform 🔒"
-            : 'Start Your Private Family Sanctuary — FamilyPlatform';
-        $ogDesc     = 'Your own 100% private family network — secure family tree, milestone vault, and memories. Zero public feeds. Zero algorithms.';
+        $ogTitle    = "Don't Let Family Memories Get Lost in Chat Feeds 📜";
+        $ogDesc     = "Your family's private, forever sanctuary — living family tree, oral history voice vault, and cherished milestone heirlooms. 100% private. Ad-free.";
         $ogImageUrl = rtrim(getenv('APP_URL') ?: 'https://myfamilyplatform.com', '/') . '/public/img/og-invite.jpg';
         $ogUrl      = rtrim(getenv('APP_URL') ?: 'https://myfamilyplatform.com', '/') . '/join' . (!empty($refToken) ? '?ref=' . urlencode($refToken) : '');
     @endphp
@@ -23,14 +20,14 @@
     <meta property="og:image"        content="{{ $ogImageUrl }}">
     <meta property="og:image:width"  content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt"    content="FamilyPlatform — Your Private Family Sanctuary">
+    <meta property="og:image:alt"    content="A Living Archive for Our Family's Heritage & Memories">
     <meta property="og:url"          content="{{ $ogUrl }}">
     {{-- Twitter / X --}}
     <meta name="twitter:card"        content="summary_large_image">
     <meta name="twitter:title"       content="{{ $ogTitle }}">
     <meta name="twitter:description" content="{{ $ogDesc }}">
     <meta name="twitter:image"       content="{{ $ogImageUrl }}">
-    <meta name="twitter:image:alt"   content="FamilyPlatform — Your Private Family Sanctuary">
+    <meta name="twitter:image:alt"   content="A Living Archive for Our Family's Heritage & Memories">
 @endsection
 
 @section('content')
@@ -208,34 +205,34 @@
           <span>🛡️</span> 100% Walled Sanctuary
         </div>
         <div class="usp-item-desc">
-          Only connected kins and approved family members can ever see through your wall.
+          Only connected kin and approved family members can ever enter. Zero public feeds, zero algorithms, zero ads.
         </div>
       </div>
 
       <div class="usp-item">
         <div class="usp-item-header">
-          <span>🌳</span> Your Own Family Tree
+          <span>🌳</span> Living Heritage Tree
         </div>
         <div class="usp-item-desc">
-          Build and explore your interactive organogram with your own private family code.
+          Visualise your multi-generational roots, kinship branches, and living pedigree with your private family code.
         </div>
       </div>
 
       <div class="usp-item">
         <div class="usp-item-header">
-          <span>📸</span> Milestone Vault
+          <span>🎙️</span> Oral History &amp; Voice Vault
         </div>
         <div class="usp-item-desc">
-          Capture birthdays, anniversaries, and voice reels away from noisy public social media.
+          Preserve grandparents' voices, bedtime stories, secret family recipes, and milestone heirlooms before they fade.
         </div>
       </div>
 
       <div class="usp-item">
         <div class="usp-item-header">
-          <span>👑</span> Independent & Private
+          <span>🏰</span> Permanent Family Legacy
         </div>
         <div class="usp-item-desc">
-          Your family network is completely private and decoupled from external connections.
+          Stop letting precious memories get lost in noisy chat streams. Give your family a digital heirloom that lasts forever.
         </div>
       </div>
     </div>

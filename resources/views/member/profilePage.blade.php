@@ -71,7 +71,7 @@
             });
         });
 
-        window.appUrl = "{{ env('MIX_APP_URL') }}";
+        window.appUrl = "{{ $_ENV['MIX_APP_URL'] ?? getenv('MIX_APP_URL') ?: ($_ENV['APP_URL'] ?? getenv('APP_URL') ?: '') }}";
 
         //        // Image Modal functionality
         // function openModal(src) {

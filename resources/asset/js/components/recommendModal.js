@@ -41,6 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (inputShareLink) {
           inputShareLink.value = share.share_url || '';
         }
+        const linkDirect = document.getElementById('linkSanctuaryDirect');
+        if (linkDirect && share.share_url) {
+          linkDirect.setAttribute('href', share.share_url);
+        }
         if (btnShareWhatsApp && share.whatsapp_url) {
           btnShareWhatsApp.setAttribute('href', share.whatsapp_url);
         }

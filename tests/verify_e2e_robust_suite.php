@@ -69,7 +69,7 @@ runJourney("E2E Auth Lifecycle: Persistent HS256 JWT Issuance & Claims Recovery"
             $testId = 'FAM_' . time();
             $testEmail = 'e2e_family_' . uniqid() . '@familyplatform.test';
             $insert = $pdo->prepare("INSERT INTO account (id, email, password, role, type, token_version) VALUES (?, ?, ?, 'member', 'family_head', 1)");
-            $insert->execute([$testId, $testEmail, password_hash('TestPass123!', PASSWORD_BCRYPT)]);
+            $insert->execute([$testId, $testEmail, password_hash('TestPass123!', PASSWORD_BCRYPT, ['cost' => 4])]);
             $createdEphemeral = true;
             $testMember = [
                 'id' => $testId,
@@ -308,9 +308,9 @@ runJourney("E2E PartyPlatform Bridge: Kinship Tier Mapping, S2S Provisioning & B
 
     try {
         $insAcct = $pdo->prepare("INSERT INTO account (id, email, password, status, type, token_version) VALUES (?, ?, ?, 'active', 'user', 1)");
-        $insAcct->execute([$hostId, $hostId . '@familyplatform.test', password_hash('TestPass123!', PASSWORD_BCRYPT)]);
-        $insAcct->execute([$siblingId, $siblingId . '@familyplatform.test', password_hash('TestPass123!', PASSWORD_BCRYPT)]);
-        $insAcct->execute([$rivalId, $rivalId . '@familyplatform.test', password_hash('TestPass123!', PASSWORD_BCRYPT)]);
+        $insAcct->execute([$hostId, $hostId . '@familyplatform.test', password_hash('TestPass123!', PASSWORD_BCRYPT, ['cost' => 4])]);
+        $insAcct->execute([$siblingId, $siblingId . '@familyplatform.test', password_hash('TestPass123!', PASSWORD_BCRYPT, ['cost' => 4])]);
+        $insAcct->execute([$rivalId, $rivalId . '@familyplatform.test', password_hash('TestPass123!', PASSWORD_BCRYPT, ['cost' => 4])]);
 
         $insPersonal = $pdo->prepare("INSERT INTO personal (id, firstName, lastName, famCode, gender) VALUES (?, ?, ?, ?, ?)");
         $insPersonal->execute([$hostId, 'Wally', 'Olaogun', $famCode, 'Male']);

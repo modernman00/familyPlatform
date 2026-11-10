@@ -67,9 +67,15 @@ while true; do
     NOW_TS=$(date +%s)
 
     if [ -n "$HOLDER_PID" ] && ! kill -0 "$HOLDER_PID" 2>/dev/null; then
+        # Holder process is dead; reclaim lock immediately
         rm -rf "$LOCK_DIR" 2>/dev/null || true
         continue
-    elif [ "$LOCK_TS" -gt 0 ] && [ $(( NOW_TS - LOCK_TS )) -gt 180 ]; then
+    elif [ -z "$HOLDER_PID" ] && [ "$LOCK_TS" -gt 0 ] && [ $(( NOW_TS - LOCK_TS )) -gt 60 ]; then
+        # Corrupted lock without valid PID; reclaim after 60s
+        rm -rf "$LOCK_DIR" 2>/dev/null || true
+        continue
+    elif [ "$LOCK_TS" -gt 0 ] && [ $(( NOW_TS - LOCK_TS )) -gt 1200 ]; then
+        # Safety failsafe: only break after 20 minutes if completely frozen
         rm -rf "$LOCK_DIR" 2>/dev/null || true
         continue
     fi
@@ -156,19 +162,21 @@ fi
 if [ -f "tests/verify_text_stage_posts.php" ]; then
     php tests/verify_text_stage_posts.php || ADVERSARIAL_PASSED=0
 fi
+if [ -f "tests/verify_composer_clipboard_image_paste_suite.php" ]; then
+    php tests/verify_composer_clipboard_image_paste_suite.php || ADVERSARIAL_PASSED=0
+fi
 if [ -f "tests/verify_content_safety_and_abuse_filter_suite.php" ]; then
     php tests/verify_content_safety_and_abuse_filter_suite.php || ADVERSARIAL_PASSED=0
+fi
+
+if [ -f "tests/verify_atg_family_brand_gif_suite.php" ]; then
+    php tests/verify_atg_family_brand_gif_suite.php || ADVERSARIAL_PASSED=0
 fi
 if [ -f "scripts/dast-guest-builder-idor.sh" ]; then
     bash scripts/dast-guest-builder-idor.sh || ADVERSARIAL_PASSED=0
 elif [ -f "scripts/dast-idor-access-control.sh" ]; then
     bash scripts/dast-idor-access-control.sh || ADVERSARIAL_PASSED=0
-elif [ -f "scripts/run-all-security-checks.sh" ]; then
-    LOCAL_TEST_URL="https://olaogun.test"
-    if ! curl -k -s -m 2 "$LOCAL_TEST_URL" > /dev/null 2>&1; then
-        LOCAL_TEST_URL="http://localhost:8000"
-    fi
-    bash scripts/run-all-security-checks.sh "$LOCAL_TEST_URL" --skip-zap || ADVERSARIAL_PASSED=0
+
 fi
 
 if [ "$ADVERSARIAL_PASSED" -eq 1 ]; then

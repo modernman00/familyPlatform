@@ -682,6 +682,11 @@ PROMPT;
 
         $parsed = null;
 
+        // Deterministic bypass during automated test suites to prevent network timeout & flakiness
+        if (($this->getEnvVar('APP_ENV') === 'testing' || getenv('APP_ENV') === 'testing') && empty($this->getEnvVar('FORCE_LIVE_AI'))) {
+            return $this->deterministicReconciliatoryFallback($partyA, $partyB, $initiatorName, $category, $grievance, $docketDetails);
+        }
+
         // Tier 1: Google Gemini Flash Engine (Fast, High Quality, Native JSON Mode)
         try {
             $parsed = $this->callGeminiEngine($systemPrompt, $docketDetails);

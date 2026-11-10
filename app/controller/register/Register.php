@@ -187,6 +187,7 @@ final class Register extends Db
                         'day' => '12',
                         'month' => 'Mar',
                         'year' => '1990',
+                        'gender' => 'Male',
                     ];
                 }
                 view('registration/register', ['registerPostData' => $registerPostData, 'inviteTokenError' => $inviteTokenError]);
@@ -287,10 +288,15 @@ final class Register extends Db
                 'joining_via_invitation',
                 'claim_node',
                 'website_hp',
+                'gender',
             ];
 
             // Sanitise the data and get the cleaned data
             $cleanData = LoginUtility::getSanitisedInputData($generateId, $data, $optionalFields);
+
+            if (isset($cleanData['gender'])) {
+                $cleanData['gender'] = \App\services\FamilyGraphService::normaliseGender((string)$cleanData['gender'], 'Other');
+            }
 
             // Normalize mobile to E.164 with country awareness
             if (!empty($cleanData['mobile'])) {

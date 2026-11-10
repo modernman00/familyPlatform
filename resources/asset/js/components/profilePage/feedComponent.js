@@ -4,7 +4,11 @@ import { format } from 'timeago.js';
 import Swal from 'sweetalert2';
 import { extractVideoFromText, extractVideosFromText, cleanPostMessage } from './videoParser';
 import { getCsrfToken } from '../global';
-import { getPostImageUrl, getProfileImageUrl, getPostImageVariantUrl } from '../helper/imageUrls';
+import { getPostImageUrl, getProfileImageUrl, getPostImageVariantUrl, isGifMedia } from '../helper/imageUrls';
+if (typeof window !== 'undefined') {
+    window.isGifMedia = isGifMedia;
+    window.getPostImageUrl = getPostImageUrl;
+}
 import { FAMILY_GIFS, GIF_CATEGORIES, isAllowedGifUrl } from './gifCatalog';
 import { getPreferredSkinTone, setPreferredSkinTone, SKIN_TONES } from '../emojiPicker';
 import { HEIRLOOM_REACTIONS, getHeirloomGlassSvg, triggerHeirloomBurst } from './heirloomGlassReactions';
@@ -54,6 +58,7 @@ export function profileFeed(opts = {}) {
         sharePortalUrl: '',
         sharePortalTitle: '',
         sharePortalText: '',
+        sharePortalWaText: '',
         sharePortalImg: '',
         sharePortalCopied: false,
         touchStartX: 0,
@@ -1056,6 +1061,10 @@ export function profileFeed(opts = {}) {
 
         getPostImageVariantUrl(img, variant = 'fallback') {
             return getPostImageVariantUrl(img, variant);
+        },
+
+        isGifMedia(img) {
+            return isGifMedia(img);
         },
 
         getProfileImageUrl(img) {
@@ -2097,6 +2106,78 @@ export function profileFeed(opts = {}) {
                     confirmButtonColor: '#a31621'
                 });
             }
+        },
+
+        async openReportModal(targetType, targetId) {
+            const isComment = targetType === 'comment';
+            const htmlContent = `
+                <div class="text-start" style="font-size: 0.92rem;">
+                    <p class="text-muted mb-3">Please select the reason for flagging this ${isComment ? 'comment' : 'post'}. Our super admin moderation team reviews all flagged items.</p>
+                    <div class="mb-3">
+                        <label for="swal-report-reason" class="form-label fw-semibold">Reason for Report <span class="text-danger">*</span></label>
+                        <select id="swal-report-reason" class="form-select" style="min-height: 44px; font-size: 0.95rem;">
+                            <option value="hate_speech">Hate speech or abusive slurs</option>
+                            <option value="harassment">Harassment, bullying, or threats</option>
+                            <option value="inappropriate">Inappropriate or offensive content</option>
+                            <option value="spam">Spam or misleading information</option>
+                            <option value="other">Other violation of family values</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="swal-report-details" class="form-label fw-semibold">Additional Details (Optional)</label>
+                        <textarea id="swal-report-details" class="form-control" rows="3" maxlength="500" placeholder="Provide extra context to help our administrators investigate..."></textarea>
+                    </div>
+                </div>
+            `;
+
+            const result = await Swal.fire({
+                title: isComment ? 'Flag Comment' : 'Report Post',
+                html: htmlContent,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Submit Report',
+                cancelButtonText: 'Cancel',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: () => !Swal.isLoading(),
+                preConfirm: async () => {
+                    const reason = document.getElementById('swal-report-reason')?.value || 'hate_speech';
+                    const details = document.getElementById('swal-report-details')?.value || '';
+                    const token = getCsrfToken();
+
+                    try {
+                        const res = await axios.post(
+                            '/member/content/report',
+                            {
+                                target_type: targetType,
+                                target_id: targetId,
+                                reason: reason,
+                                details: details
+                            },
+                            {
+                                headers: {
+                                    ...(token ? { 'X-CSRF-TOKEN': token, 'X-XSRF-TOKEN': token } : {})
+                                }
+                            }
+                        );
+                        return res.data;
+                    } catch (err) {
+                        const msg = err?.response?.data?.error || err?.response?.data?.message || 'Unable to submit report. Please try again.';
+                        Swal.showValidationMessage(msg);
+                        return false;
+                    }
+                }
+            });
+
+            if (!result.isConfirmed || !result.value) return;
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Report Submitted',
+                text: result.value.message || 'Thank you for helping keep our family community safe. Administrators have been notified.',
+                confirmButtonColor: '#059669'
+            });
         },
 
         // ── Comment edit/delete (comment author or post author) ─────────────
@@ -3176,6 +3257,7 @@ export function profileFeed(opts = {}) {
             }
 
             this.sharePortalText = this.getCleanShareText(post);
+            this.sharePortalWaText = this.getWhatsAppShareText(post);
 
             // Resolve preview image
             if (Array.isArray(post.images) && post.images.length > 0 && post.images[0]) {
@@ -3244,8 +3326,28 @@ export function profileFeed(opts = {}) {
             }
         },
 
+        // WhatsApp-native message: short teaser with *bold*/_italic_; the link goes last so WhatsApp
+        // renders the designed preview card (/post/{n}/card.jpg) instead of repeating the whole post.
+        getWhatsAppShareText(post) {
+            const author = ((post && post.fullName) || '').trim() || 'A relative';
+            let raw = ((post && (post.displayMessage || post.postMessage)) || '').trim();
+            raw = raw.replace(/\[style:[a-z0-9_]+\]\s*/gi, '')
+                .replace(/(?:https?:\/\/[^\s]+|\/resources\/(?:videos|images|profile)\/[^\s]+|post_vid_[^\s]+|[a-f0-9_]+_Sho_[^\s]+|\.(?:webm|mp4|mov|jpg|jpeg|png|gif|webp|avif)(?:#[^\s]*)?)/gi, '')
+                .replace(/\s+/g, ' ').trim();
+            const hasVideo = !!(post && (post.video || (Array.isArray(post.videos) && post.videos.length)));
+            const hasPhoto = !!(post && Array.isArray(post.images) && post.images.length);
+            const kind = hasVideo ? ['🎬', 'a family video'] : hasPhoto ? ['📸', 'a family photo'] : (post && post.voice_capsule_url) ? ['🎙️', 'a voice note'] : ['💬', 'a family update'];
+            const lines = [`${kind[0]} *${author}* shared ${kind[1]}`];
+            if (raw) {
+                const teaser = raw.length > 120 ? raw.slice(0, 117).replace(/\s+\S*$/, '') + '…' : raw;
+                lines.push('', `_“${teaser.replace(/[_*]/g, '')}”_`);
+            }
+            lines.push('', 'Tap to see it in our private family hub 👇', this.sharePortalUrl);
+            return lines.join('\n');
+        },
+
         getSharePortalWhatsappUrl() {
-            const text = encodeURIComponent(`${this.sharePortalText}\n\n${this.sharePortalUrl}`);
+            const text = encodeURIComponent(this.sharePortalWaText || `${this.sharePortalText}\n\n${this.sharePortalUrl}`);
             return `https://api.whatsapp.com/send?text=${text}`;
         },
 
@@ -3365,14 +3467,26 @@ export function profileFeed(opts = {}) {
             return container ? container.querySelector('video') : null;
         },
 
+        getVideoModalTrimBounds(vEl) {
+            const activeVid = this.videoModalVideos ? this.videoModalVideos[this.videoModalIndex] : null;
+            const rawStart = (activeVid && typeof activeVid.trimStart === 'number' && activeVid.trimStart > 0) ? activeVid.trimStart : 0;
+            const rawEnd = (activeVid && typeof activeVid.trimEnd === 'number' && activeVid.trimEnd > rawStart) ? activeVid.trimEnd : (rawStart + 60);
+            const rawDur = (vEl && vEl.duration && !isNaN(vEl.duration) && vEl.duration > 0) ? vEl.duration : rawEnd;
+            const end = Math.min(rawDur, rawEnd, rawStart + 60);
+            const clipDur = Math.max(0.1, end - rawStart);
+            return { start: rawStart, end, clipDur };
+        },
+
         onVideoModalMetadata(vEl) {
             if (!vEl) return;
             if (vEl.videoWidth && vEl.videoHeight) {
                 this.videoModalIsPortrait = (vEl.videoHeight >= vEl.videoWidth * 0.95);
             }
             if (vEl.duration && !isNaN(vEl.duration)) {
-                this.videoModalDuration = this.formatVideoTime(vEl.duration);
-                const rem = Math.max(0, vEl.duration - (vEl.currentTime || 0));
+                const { start, clipDur } = this.getVideoModalTrimBounds(vEl);
+                this.videoModalDuration = this.formatVideoTime(clipDur);
+                const relCur = Math.max(0, Math.min(clipDur, (vEl.currentTime || start) - start));
+                const rem = Math.max(0, clipDur - relCur);
                 this.videoModalRemainingTime = '-' + this.formatVideoTime(rem);
             }
         },
@@ -3486,24 +3600,26 @@ export function profileFeed(opts = {}) {
             const track = event.currentTarget;
             const vEl = this.getVideoModalElement();
             if (!track || !vEl || !vEl.duration) return;
+            const { start, clipDur } = this.getVideoModalTrimBounds(vEl);
             const rect = track.getBoundingClientRect();
             const clickX = Math.max(0, Math.min(event.clientX - rect.left, rect.width));
             const ratio = clickX / rect.width;
-            vEl.currentTime = ratio * vEl.duration;
+            vEl.currentTime = start + (ratio * clipDur);
         },
 
         onVideoModalTimeUpdate(vEl) {
             if (!vEl || !vEl.duration) return;
-            this.videoModalProgress = Math.min(100, Math.max(0, (vEl.currentTime / vEl.duration) * 100));
-            this.videoModalCurrentTime = this.formatVideoTime(vEl.currentTime);
-            this.videoModalDuration = this.formatVideoTime(vEl.duration);
-            const remaining = Math.max(0, vEl.duration - vEl.currentTime);
-            this.videoModalRemainingTime = '-' + this.formatVideoTime(remaining);
-
-            const activeVid = this.videoModalVideos[this.videoModalIndex];
-            if (activeVid && typeof activeVid.trimEnd === 'number' && vEl.currentTime >= activeVid.trimEnd) {
+            const { start, end, clipDur } = this.getVideoModalTrimBounds(vEl);
+            if (vEl.currentTime >= end) {
                 this.onVideoModalEnded();
+                return;
             }
+            const relCur = Math.max(0, Math.min(clipDur, vEl.currentTime - start));
+            this.videoModalProgress = Math.min(100, Math.max(0, (relCur / clipDur) * 100));
+            this.videoModalCurrentTime = this.formatVideoTime(relCur);
+            this.videoModalDuration = this.formatVideoTime(clipDur);
+            const remaining = Math.max(0, clipDur - relCur);
+            this.videoModalRemainingTime = '-' + this.formatVideoTime(remaining);
         },
 
         onVideoModalEnded() {

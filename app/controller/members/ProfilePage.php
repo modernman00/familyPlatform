@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\controller\members;
 use Src\functionality\middleware\FileUploadProcess;
+use Src\FileUploader;
 
 use App\model\{
     SingleCustomerData,
@@ -216,18 +217,26 @@ final class ProfilePage extends ProcessImg
             }
             // Attached family GIF support & SSRF hardening (Dr. Viktor Kovács & Marcus)
             $attachedGif = !empty($_POST['attached_gif_url']) ? trim((string)$_POST['attached_gif_url']) : null;
-            if ($attachedGif && strlen($attachedGif) <= 2048 && filter_var($attachedGif, FILTER_VALIDATE_URL)) {
-                $parsed = parse_url($attachedGif);
-                $scheme = strtolower($parsed['scheme'] ?? '');
-                $host = strtolower($parsed['host'] ?? '');
-                if (in_array($scheme, ['https', 'http'], true) 
-                    && !empty($host) 
-                    && !in_array($host, ['localhost', '127.0.0.1', '::1', '0.0.0.0'], true)
-                    && !str_starts_with($host, '169.254.')
-                    && !str_starts_with($host, '10.')
-                    && !str_starts_with($host, '192.168.')
-                ) {
+            if ($attachedGif && strlen($attachedGif) <= 2048) {
+                // Allow sovereign ATG brand GIFs or synthesized dynasty GIFs
+                if (str_starts_with($attachedGif, '/images/brand/gifs/') || str_starts_with($attachedGif, '/api/atg/gif/')) {
                     $hasGif = true;
+                } elseif (filter_var($attachedGif, FILTER_VALIDATE_URL)) {
+                    $parsed = parse_url($attachedGif);
+                    $scheme = strtolower($parsed['scheme'] ?? '');
+                    $host = strtolower($parsed['host'] ?? '');
+                    if (in_array($scheme, ['https', 'http'], true) 
+                        && !empty($host) 
+                        && !in_array($host, ['localhost', '127.0.0.1', '::1', '0.0.0.0'], true)
+                        && !str_starts_with($host, '169.254.')
+                        && !str_starts_with($host, '10.')
+                        && !str_starts_with($host, '192.168.')
+                    ) {
+                        $hasGif = true;
+                    } else {
+                        $hasGif = false;
+                        $attachedGif = null;
+                    }
                 } else {
                     $hasGif = false;
                     $attachedGif = null;
@@ -338,6 +347,30 @@ final class ProfilePage extends ProcessImg
                 $userFamCode = trim((string)$_POST['postFamCode']);
             }
 
+            $resolvedFullName = trim(($_SESSION['fName'] ?? '') . ' ' . ($_SESSION['lName'] ?? ''));
+            if ($resolvedFullName === '') {
+                $pStmt = \Src\Db::connect2()->prepare("SELECT CONCAT(TRIM(COALESCE(firstName, '')), ' ', TRIM(COALESCE(lastName, ''))) as name FROM personal WHERE id = ? LIMIT 1");
+                $pStmt->execute([$id]);
+                $dbName = trim((string)$pStmt->fetchColumn());
+                if ($dbName !== '') {
+                    $resolvedFullName = $dbName;
+                    $parts = explode(' ', $dbName, 2);
+                    $_SESSION['fName'] = $parts[0] ?? '';
+                    $_SESSION['lName'] = $parts[1] ?? '';
+                }
+            }
+
+            // Fast-Response Session Unlock: Release PHP session file lock before media inspection,
+            // image optimisation, and DB transactions so concurrent AJAX/video requests never queue.
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+
+            // Sovereign Media Safety Gate (Option A: Perceptual Hashing & Adult Media Screening)
+            if (!empty($_FILES['post_img'])) {
+                \App\services\MediaSafetyInspectionService::assertSafeUploads($_FILES['post_img'], 'feed_post');
+            }
+
             // Dual-Lineage Post Audience Scope (All vs. Birth vs. Married)
             $audienceService = new \App\services\FamilyPostAudienceService();
             $userAudiences = $audienceService->resolveUserAudiences((string)$id);
@@ -365,19 +398,6 @@ final class ProfilePage extends ProcessImg
                 $cleanMultiLineMessage = \App\dto\PostDto::embedStyleToken($cleanMultiLineMessage, $postStyle);
             } else {
                 $cleanMultiLineMessage = \App\dto\PostDto::stripStyleToken($cleanMultiLineMessage);
-            }
-
-            $resolvedFullName = trim(($_SESSION['fName'] ?? '') . ' ' . ($_SESSION['lName'] ?? ''));
-            if ($resolvedFullName === '') {
-                $pStmt = \Src\Db::connect2()->prepare("SELECT CONCAT(TRIM(COALESCE(firstName, '')), ' ', TRIM(COALESCE(lastName, ''))) as name FROM personal WHERE id = ? LIMIT 1");
-                $pStmt->execute([$id]);
-                $dbName = trim((string)$pStmt->fetchColumn());
-                if ($dbName !== '') {
-                    $resolvedFullName = $dbName;
-                    $parts = explode(' ', $dbName, 2);
-                    $_SESSION['fName'] = $parts[0] ?? '';
-                    $_SESSION['lName'] = $parts[1] ?? '';
-                }
             }
 
             $newInput = [
@@ -512,6 +532,15 @@ final class ProfilePage extends ProcessImg
                         if (file_exists($srcPath)) {
                             if (rename($srcPath, $destPath) || copy($srcPath, $destPath)) {
                                 @unlink($srcPath); // nosemgrep: php.lang.security.unlink-use.unlink-use
+                                $tempExt = strtolower(pathinfo($tempFile, PATHINFO_EXTENSION));
+                                if (in_array($tempExt, ['jpg', 'jpeg', 'png', 'webp', 'heic'], true)) {
+                                    try {
+                                        $finalDest = FileUploader::finaliseImage($destPath, $tempExt);
+                                        $tempFile = basename($finalDest);
+                                    } catch (\Throwable $finalEx) {
+                                        error_log('[ProfilePage PWA share] FileUploader finaliseImage fallback: ' . $finalEx->getMessage());
+                                    }
+                                }
                                 (new \Src\Update('post'))->updateTable(
                                     column: 'post_img' . $imgIndex,
                                     columnAnswer: $tempFile,
@@ -868,9 +897,9 @@ final class ProfilePage extends ProcessImg
             // Handle uploaded sticker or GIF (e.g. pasted directly from mobile keyboard)
             $uploadedMediaUrl = null;
             if (isset($_FILES['comment_media']) && is_array($_FILES['comment_media']) && !empty($_FILES['comment_media']['tmp_name'])) {
-                $uploadedMediaUrl = self::processUploadedCommentMedia($_FILES['comment_media']);
+                $uploadedMediaUrl = self::processUploadedCommentMedia('comment_media', $_FILES['comment_media']);
             } elseif (isset($_FILES['comment_img']) && is_array($_FILES['comment_img']) && !empty($_FILES['comment_img']['tmp_name'])) {
-                $uploadedMediaUrl = self::processUploadedCommentMedia($_FILES['comment_img']);
+                $uploadedMediaUrl = self::processUploadedCommentMedia('comment_img', $_FILES['comment_img']);
             }
 
             // Optional curated GIF or external/internal media URL.
@@ -1039,7 +1068,15 @@ final class ProfilePage extends ProcessImg
      * Validates MIME type via finfo, caps size to 10MB, and writes with a cryptographically
      * random filename into resources/images/post/.
      */
-    private static function processUploadedCommentMedia(array $file): ?string
+    /**
+     * Store an uploaded sticker or GIF comment attachment via shared-lib FileUploader.
+     * Validates MIME type, enforces size limits, downscales oversized images,
+     * strips metadata/EXIF, and writes with a safe filename into resources/images/post/.
+     *
+     * @param string $formKey The form key in $_FILES
+     * @param array<string, mixed> $file The $_FILES entry
+     */
+    private static function processUploadedCommentMedia(string $formKey, array $file): ?string
     {
         if (empty($file['tmp_name'])) {
             return null;
@@ -1049,41 +1086,16 @@ final class ProfilePage extends ProcessImg
             throw new \Src\Exceptions\ValidationException('Attached media exceeds the 10MB limit.');
         }
 
-        if (!is_uploaded_file((string) $file['tmp_name']) && !isTestEnv()) {
-            return null;
+        // Sovereign Media Safety Gate (Option A: Perceptual Hashing & Adult Media Screening)
+        \App\services\MediaSafetyInspectionService::assertSafeUpload($file, 'comment_media');
+
+        $targetDir = 'resources/images/post/';
+        if (!is_dir($targetDir)) {
+            @mkdir($targetDir, 0755, true);
         }
 
-        $finfo = new \finfo(FILEINFO_MIME_TYPE);
-        $mime = $finfo->file((string) $file['tmp_name']);
-
-        $allowedMimes = [
-            'image/gif'  => 'gif',
-            'image/png'  => 'png',
-            'image/jpeg' => 'jpg',
-            'image/webp' => 'webp',
-        ];
-
-        if (!is_string($mime) || !isset($allowedMimes[$mime])) {
-            throw new \Src\Exceptions\ValidationException('Invalid media format. Only GIF, PNG, JPEG, and WebP are allowed.');
-        }
-
-        $extension = $allowedMimes[$mime];
-        $targetDir = realpath(__DIR__ . '/../../../resources/images/post');
-        if (!$targetDir || !is_dir($targetDir)) {
-            $targetDir = __DIR__ . '/../../../resources/images/post';
-            if (!is_dir($targetDir)) {
-                @mkdir($targetDir, 0755, true);
-            }
-        }
-
-        $filename = 'comment_' . time() . '_' . bin2hex(random_bytes(8)) . '.' . $extension;
-        $destPath = rtrim($targetDir, '/') . '/' . $filename;
-
-        if (move_uploaded_file((string) $file['tmp_name'], $destPath)) {
-            return '/resources/images/post/' . $filename;
-        }
-
-        return null;
+        $uploadResult = FileUploader::fileUploadSingle($targetDir, $formKey);
+        return '/resources/images/post/' . $uploadResult['fileName'];
     }
 
     /**
@@ -1106,6 +1118,22 @@ final class ProfilePage extends ProcessImg
             $basename = basename($url);
             if (preg_match('/^comment_[0-9]+_[a-f0-9]+\.(gif|png|jpe?g|webp)$/i', $basename)) {
                 return '/resources/images/post/' . $basename;
+            }
+            return null;
+        }
+
+        // Allow internal sovereign ATG brand GIFs and dynasty GIFs
+        if (str_starts_with($url, '/images/brand/gifs/')) {
+            $basename = basename($url);
+            if (preg_match('/^[a-z0-9_]+\.gif$/i', $basename)) {
+                return '/images/brand/gifs/' . $basename;
+            }
+            return null;
+        }
+        if (str_starts_with($url, '/api/atg/gif/')) {
+            $path = parse_url($url, PHP_URL_PATH);
+            if (is_string($path) && preg_match('#^/api/atg/gif/(view/[a-z0-9_]+|custom)#i', $path)) {
+                return $url;
             }
             return null;
         }
@@ -1169,7 +1197,17 @@ final class ProfilePage extends ProcessImg
     {
         try {
             \App\controller\BaseController::validateCsrf();
-            $coverUrl = (new \App\services\CoverPhotoService())->upload();
+            $targetId = (string) $this->id;
+            $requestedTarget = $_POST['memberId'] ?? null;
+            if (!empty($requestedTarget) && is_string($requestedTarget) && $requestedTarget !== $targetId) {
+                $isAdmin = (!empty($_SESSION['auth']['type']) && in_array((string)($_SESSION['auth']['type'] ?? ''), ['admin', 'super_admin'], true))
+                    || in_array((string)($_SESSION['type'] ?? ''), ['admin', 'super_admin'], true);
+                if (!$isAdmin) {
+                    throw new \Src\Exceptions\ForbiddenException('You can only upload for your own cover photo.');
+                }
+                $targetId = $requestedTarget;
+            }
+            $coverUrl = (new \App\services\CoverPhotoService())->upload($targetId);
             msgSuccess(200, ['coverUrl' => $coverUrl]);
         } catch (\Throwable $th) {
             showError($th);
@@ -1185,7 +1223,17 @@ final class ProfilePage extends ProcessImg
             $input = json_decode((string) file_get_contents('php://input'), true);
             $input = is_array($input) ? $input : $_POST;
             \App\controller\BaseController::validateCsrf($input);
-            (new \App\services\CoverPhotoService())->setPosition((string) $this->id, $input['x'] ?? null, $input['y'] ?? null);
+            $targetId = (string) $this->id;
+            $requestedTarget = $input['memberId'] ?? null;
+            if (!empty($requestedTarget) && is_string($requestedTarget) && $requestedTarget !== $targetId) {
+                $isAdmin = (!empty($_SESSION['auth']['type']) && in_array((string)($_SESSION['auth']['type'] ?? ''), ['admin', 'super_admin'], true))
+                    || in_array((string)($_SESSION['type'] ?? ''), ['admin', 'super_admin'], true);
+                if (!$isAdmin) {
+                    throw new \Src\Exceptions\ForbiddenException('You can only adjust your own cover photo.');
+                }
+                $targetId = $requestedTarget;
+            }
+            (new \App\services\CoverPhotoService())->setPosition($targetId, $input['x'] ?? null, $input['y'] ?? null);
             msgSuccess(200, ['saved' => true]);
         } catch (\Throwable $th) {
             showError($th);
@@ -1198,8 +1246,20 @@ final class ProfilePage extends ProcessImg
     public function removeCoverImage(): void
     {
         try {
-            \App\controller\BaseController::validateCsrf();
-            (new \App\services\CoverPhotoService())->remove((string) $this->id);
+            $input = json_decode((string) file_get_contents('php://input'), true);
+            $input = is_array($input) ? $input : $_POST;
+            \App\controller\BaseController::validateCsrf($input);
+            $targetId = (string) $this->id;
+            $requestedTarget = $input['memberId'] ?? null;
+            if (!empty($requestedTarget) && is_string($requestedTarget) && $requestedTarget !== $targetId) {
+                $isAdmin = (!empty($_SESSION['auth']['type']) && in_array((string)($_SESSION['auth']['type'] ?? ''), ['admin', 'super_admin'], true))
+                    || in_array((string)($_SESSION['type'] ?? ''), ['admin', 'super_admin'], true);
+                if (!$isAdmin) {
+                    throw new \Src\Exceptions\ForbiddenException('You can only remove your own cover photo.');
+                }
+                $targetId = $requestedTarget;
+            }
+            (new \App\services\CoverPhotoService())->remove($targetId);
             msgSuccess(200, ['coverUrl' => null]);
         } catch (\Throwable $th) {
             showError($th);

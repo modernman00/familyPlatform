@@ -126,6 +126,13 @@
                 </li>
               </div>
             </template>
+            <template x-if="!isOwnPost(post)">
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger" href="#" style="min-height: 44px;" @click.prevent="openReportModal('post', post.post_no)">
+                  <i class="bi bi-flag-fill"></i> {{ __('feed.report_post', 'Report Post') }}
+                </a>
+              </li>
+            </template>
             <template x-if="isUserTaggedInPost(post)">
               <li>
                 <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-warning" href="#" style="min-height: 44px;" @click.prevent="untagSelfFromPost(post)">
@@ -567,7 +574,7 @@
       <div class="position-relative feed-media-aura-container">
         <!-- Ambient Dynamic Backlight Glow (Cinematic Aura) -->
         <div class="feed-media-aura-backdrop" aria-hidden="true">
-          <img :src="(post.images[0] && (post.images[0].startsWith('/public/') || post.images[0].startsWith('/images/'))) ? post.images[0] : getPostImageUrl(post.images[0])" 
+          <img :src="getPostImageUrl(post.images[0])" 
                alt="" 
                loading="lazy" 
                decoding="async" 
@@ -587,17 +594,27 @@
              role="button" 
              aria-label="View enlarged photo or double tap to like" 
              style="display:block; overflow:hidden; border-radius:12px; position:relative; width:100%; height:100%;">
-            <picture class="w-100 h-100 d-block" style="border-radius: 12px; overflow: hidden; height: 100%;">
-              <source :srcset="getPostImageVariantUrl(post.images[0], 'avif')" type="image/avif">
-              <source :srcset="getPostImageVariantUrl(post.images[0], 'webp')" type="image/webp">
-              <img :src="(post.images[0] && (post.images[0].startsWith('/public/') || post.images[0].startsWith('/images/'))) ? post.images[0] : getPostImageUrl(post.images[0])" 
+            <template x-if="isGifMedia(post.images[0])">
+              <img :src="getPostImageUrl(post.images[0])" 
                    class="post-media-first-img living-canvas-img w-100 h-100"
-                   :style="'border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: cover; object-position: ' + singleFocal + '; cursor: pointer; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;'" 
-                   alt="Family post image" 
+                   :style="'border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: contain; cursor: pointer; image-rendering: -webkit-optimize-contrast;'" 
+                   alt="Family post GIF" 
                    @load="onSingleImageLoad($event.target)"
-                   loading="lazy"
-                   decoding="async">
-            </picture>
+                   loading="lazy">
+            </template>
+            <template x-if="!isGifMedia(post.images[0])">
+              <picture class="w-100 h-100 d-block" style="border-radius: 12px; overflow: hidden; height: 100%;">
+                <source :srcset="getPostImageVariantUrl(post.images[0], 'avif')" type="image/avif">
+                <source :srcset="getPostImageVariantUrl(post.images[0], 'webp')" type="image/webp">
+                <img :src="getPostImageUrl(post.images[0])" 
+                     class="post-media-first-img living-canvas-img w-100 h-100"
+                     :style="'border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: cover; object-position: ' + singleFocal + '; cursor: pointer; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;'" 
+                     alt="Family post image" 
+                     @load="onSingleImageLoad($event.target)"
+                     loading="lazy"
+                     decoding="async">
+              </picture>
+            </template>
           </a>
 
           <!-- Holographic Dynasty Specular Foil Shimmer Sheen -->
@@ -773,7 +790,7 @@
       <div class="position-relative feed-media-aura-container">
         <!-- Ambient Dynamic Backlight Glow for Carousel (Synchronised to Active Slide) -->
         <div class="feed-media-aura-backdrop" aria-hidden="true">
-          <img :src="((post.images[currentIdx] || post.images[0]) && ((post.images[currentIdx] || post.images[0]).startsWith('/public/') || (post.images[currentIdx] || post.images[0]).startsWith('/images/'))) ? (post.images[currentIdx] || post.images[0]) : getPostImageUrl(post.images[currentIdx] || post.images[0])" 
+          <img :src="getPostImageUrl(post.images[currentIdx] || post.images[0])" 
                alt="" 
                loading="lazy" 
                decoding="async" 
@@ -843,17 +860,27 @@
                    role="button" 
                    aria-label="View enlarged photo or double tap to like" 
                    style="display:block; overflow:hidden; border-radius:12px; position:relative; width:100%; height:100%;">
-                  <picture class="w-100 h-100 d-block" style="border-radius: 12px; overflow: hidden; height: 100%;">
-                    <source :srcset="getPostImageVariantUrl(img, 'avif')" type="image/avif">
-                    <source :srcset="getPostImageVariantUrl(img, 'webp')" type="image/webp">
-                    <img :src="(img && (img.startsWith('/public/') || img.startsWith('/images/'))) ? img : getPostImageUrl(img)" 
+                  <template x-if="isGifMedia(img)">
+                    <img :src="getPostImageUrl(img)" 
                          class="post-media-first-img living-canvas-img w-100 h-100"
-                         :style="'border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: cover; object-position: ' + (slideFocals[idx] || '50% 34%') + '; cursor: pointer; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;'" 
-                         alt="Family carousel slide" 
+                         :style="'border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: contain; cursor: pointer;'" 
+                         alt="Family carousel GIF slide" 
                          @load="onCarouselImageLoad($event.target, idx)"
-                         loading="lazy"
-                         decoding="async">
-                  </picture>
+                         loading="lazy">
+                  </template>
+                  <template x-if="!isGifMedia(img)">
+                    <picture class="w-100 h-100 d-block" style="border-radius: 12px; overflow: hidden; height: 100%;">
+                      <source :srcset="getPostImageVariantUrl(img, 'avif')" type="image/avif">
+                      <source :srcset="getPostImageVariantUrl(img, 'webp')" type="image/webp">
+                      <img :src="getPostImageUrl(img)" 
+                           class="post-media-first-img living-canvas-img w-100 h-100"
+                           :style="'border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: cover; object-position: ' + (slideFocals[idx] || '50% 34%') + '; cursor: pointer; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;'" 
+                           alt="Family carousel slide" 
+                           @load="onCarouselImageLoad($event.target, idx)"
+                           loading="lazy"
+                           decoding="async">
+                    </picture>
+                  </template>
                 </a>
 
                 <!-- Floating Generational Particle Celebration Fountain for Slide -->
@@ -1208,8 +1235,13 @@
                  },
                  onTimeUpdate(vEl) {
                    if (!vEl || !vEl.duration) return;
-                   this.progressPercent = Math.min(100, Math.max(0, (vEl.currentTime / vEl.duration) * 100));
-                   if (vid.trimEnd !== null && vEl.currentTime >= vid.trimEnd) {
+                   const rawStart = (vid && typeof vid.trimStart === 'number' && vid.trimStart > 0) ? vid.trimStart : 0;
+                   const rawEnd = (vid && typeof vid.trimEnd === 'number' && vid.trimEnd > rawStart) ? vid.trimEnd : (rawStart + 60);
+                   const effectiveEnd = Math.min(vEl.duration, rawEnd, rawStart + 60);
+                   const clipDur = Math.max(0.1, effectiveEnd - rawStart);
+                   const relCur = Math.max(0, Math.min(clipDur, vEl.currentTime - rawStart));
+                   this.progressPercent = Math.min(100, Math.max(0, (relCur / clipDur) * 100));
+                   if (vEl.currentTime >= effectiveEnd) {
                      onVideoEnded(vIdx, vEl);
                    }
                  }
@@ -1247,7 +1279,7 @@
                      alt="Video thumbnail preview"
                      x-on:error="$el.style.display = 'none'">
 
-                <video referrerpolicy="no-referrer" class="w-100 h-100 position-absolute top-0 start-0"
+                <video referrerpolicy="no-referrer" class="w-100 h-100 position-absolute top-0 start-0 atg-4k-video-render"
                        :src="vid.embedUrl"
                        :poster="(!hasCardMetadata && vid.thumbnailUrl) ? vid.thumbnailUrl : null"
                        width="640"
@@ -1414,25 +1446,34 @@
              videoEl.muted = !videoEl.muted;
              this.isVideoMuted = videoEl.muted;
            },
+           getTrimBounds(videoEl) {
+             const rawStart = (post.video && typeof post.video.trimStart === 'number' && post.video.trimStart > 0) ? post.video.trimStart : 0;
+             const rawEnd = (post.video && typeof post.video.trimEnd === 'number' && post.video.trimEnd > rawStart) ? post.video.trimEnd : (rawStart + 60);
+             const rawDur = (videoEl && videoEl.duration && !isNaN(videoEl.duration) && videoEl.duration > 0) ? videoEl.duration : rawEnd;
+             const end = Math.min(rawDur, rawEnd, rawStart + 60);
+             const clipDur = Math.max(0.1, end - rawStart);
+             return { start: rawStart, end, clipDur };
+           },
            handleTimeUpdate(videoEl) {
              if (!videoEl) return;
+             const { start, end, clipDur } = this.getTrimBounds(videoEl);
              const cur = videoEl.currentTime;
-             const dur = videoEl.duration;
-             if (dur && dur > 0) {
-               this.progressPercent = Math.min(100, Math.max(0, (cur / dur) * 100));
-               this.currentTimeFormatted = this.formatTime(cur);
-               this.durationFormatted = this.formatTime(dur);
+             if (cur >= end) {
+               videoEl.currentTime = start;
+               return;
              }
-             if (post.video && post.video.trimEnd !== null && cur >= post.video.trimEnd) {
-               videoEl.currentTime = post.video.trimStart || 0;
-             }
+             const relCur = Math.max(0, Math.min(clipDur, cur - start));
+             this.progressPercent = Math.min(100, Math.max(0, (relCur / clipDur) * 100));
+             this.currentTimeFormatted = this.formatTime(relCur);
+             this.durationFormatted = this.formatTime(clipDur);
            },
            seekVideo(event, videoEl) {
              if (!videoEl || !videoEl.duration) return;
+             const { start, clipDur } = this.getTrimBounds(videoEl);
              const rect = event.currentTarget.getBoundingClientRect();
              const clickX = event.clientX - rect.left;
              const ratio = Math.max(0, Math.min(1, clickX / rect.width));
-             videoEl.currentTime = ratio * videoEl.duration;
+             videoEl.currentTime = start + (ratio * clipDur);
            },
            initSingleVideoObserver() {
              const v = this.$el.querySelector('video');
@@ -1479,7 +1520,7 @@
              x-on:error="$el.style.display = 'none'">
 
         <!-- Main Video Element (Full-Bleed Cover: Zero White/Black Space) -->
-        <video referrerpolicy="no-referrer" class="feed-post-video w-100 h-100 position-relative"
+        <video referrerpolicy="no-referrer" class="feed-post-video atg-4k-video-render w-100 h-100 position-relative"
                :src="post.video.embedUrl"
                :poster="(!hasMetadata && post.video && post.video.thumbnailUrl) ? post.video.thumbnailUrl : null"
                playsinline
@@ -1491,16 +1532,19 @@
                @dblclick.stop="openVideoModal([post.video], 0, isVideoMuted, post)"
                @loadedmetadata="
                  detectVideoDimensions($el);
-                 if (post.video && post.video.trimStart !== null && $el.currentTime < post.video.trimStart) { 
-                   $el.currentTime = post.video.trimStart; 
+                 const b = getTrimBounds($el);
+                 durationFormatted = formatTime(b.clipDur);
+                 if ($el.currentTime < b.start) { 
+                   $el.currentTime = b.start; 
                  }
                "
                @loadeddata="hasMetadata = true; detectVideoDimensions($el)"
                @playing="hasMetadata = true"
                @play="
                  isPlaying = true;
-                 if (post.video && post.video.trimStart !== null && ($el.currentTime < post.video.trimStart || (post.video.trimEnd !== null && $el.currentTime >= post.video.trimEnd))) { 
-                   $el.currentTime = post.video.trimStart; 
+                 const b = getTrimBounds($el);
+                 if ($el.currentTime < b.start || $el.currentTime >= b.end) { 
+                   $el.currentTime = b.start; 
                  }
                "
                @pause="isPlaying = false"
@@ -1515,15 +1559,15 @@
             <span class="badge rounded-pill px-2.5 py-1.5 d-inline-flex align-items-center gap-1 pointer-events-none"
                   style="background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.22); color: #ffffff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;">
               <i class="bi bi-phone-fill text-info" style="font-size: 0.75rem;"></i>
-              <span>PORTRAIT HD</span>
+              <span>PORTRAIT 4K</span>
             </span>
           </template>
           <template x-if="!isPortrait && videoOrientation === 'landscape'">
             <div class="d-inline-flex align-items-center gap-1">
               <span class="badge rounded-pill px-2.5 py-1.5 d-inline-flex align-items-center gap-1 pointer-events-none"
                     style="background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.22); color: #ffffff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;">
-                <i class="bi bi-badge-hd-fill text-warning" style="font-size: 0.75rem;"></i>
-                <span>SUPER HD</span>
+                <i class="bi bi-badge-4k-fill text-warning" style="font-size: 0.75rem;"></i>
+                <span>4K ULTRA HD</span>
               </span>
               <!-- 1-Tap Reel / Cinema Mode Switcher -->
               <button type="button" 
@@ -1836,11 +1880,11 @@
              :data-post-bar="post.post_no"
              style="position:absolute; bottom:calc(100% + 8px); left:0; transform:none; display:flex; gap:6px; z-index:100; white-space:nowrap;">
           {{-- Perf: build the 6 glass-gem SVG buttons only once this post's picker has first been opened --}}
-          <template x-for="type in ((post.post_no in activeReactionBars) ? Object.keys(emojiMap) : [])" :key="type">
+          <template x-for="type in ((post.post_no in activeReactionBars) ? ['love', 'like', 'haha', 'shock', 'sad', 'celebrate'] : [])" :key="type">
             <button type="button"
                     @click="reactToPost(post.post_no, type, $event)"
-                    :title="emojiMap[type].label"
-                    :aria-label="emojiMap[type].label"
+                    :title="emojiMap[type]?.label || type"
+                    :aria-label="emojiMap[type]?.label || type"
                     :data-reaction-type="type"
                     :class="post.user_reaction === type ? 'heirloom-reaction-btn active' : 'heirloom-reaction-btn'"
                     :style="'--heirloom-glow:' + (emojiMap[type].glow || 'rgba(225,29,72,0.45)')">
@@ -2286,6 +2330,9 @@
               <template x-if="canModerateComment(post, c)">
                 <button type="button" class="comment-meta-btn text-muted" :title="canEditComment(c) ? 'Delete your comment' : 'Delete comment from your post'" @click="deleteComment(post.post_no, c.comment_no)">Delete</button>
               </template>
+              <template x-if="!canEditComment(c)">
+                <button type="button" class="comment-meta-btn text-danger" title="Report abusive comment" @click="openReportModal('comment', c.comment_no)">Flag</button>
+              </template>
 
               <!-- Comment View Count (Author-clickable) -->
               <span class="comment-meta-item comment-views-count text-muted"
@@ -2332,3 +2379,87 @@
   </div>
 
 </div>
+
+<script>
+  if (typeof window.openReportModal !== 'function') {
+    window.openReportModal = function(targetType, targetId) {
+      if (typeof Swal === 'undefined') {
+        alert('Reporting service is loading. Please try again.');
+        return;
+      }
+      var isComment = targetType === 'comment';
+      var htmlContent = `
+        <div class="text-start" style="font-size: 0.92rem;">
+          <p class="text-muted mb-3">Please select the reason for flagging this ${isComment ? 'comment' : 'post'}. Our super admin moderation team reviews all flagged items.</p>
+          <div class="mb-3">
+            <label for="swal-report-reason-fallback" class="form-label fw-semibold">Reason for Report <span class="text-danger">*</span></label>
+            <select id="swal-report-reason-fallback" class="form-select" style="min-height: 44px; font-size: 0.95rem;">
+              <option value="hate_speech">Hate speech or abusive slurs</option>
+              <option value="harassment">Harassment, bullying, or threats</option>
+              <option value="inappropriate">Inappropriate or offensive content</option>
+              <option value="spam">Spam or misleading information</option>
+              <option value="other">Other violation of family values</option>
+            </select>
+          </div>
+          <div class="mb-2">
+            <label for="swal-report-details-fallback" class="form-label fw-semibold">Additional Details (Optional)</label>
+            <textarea id="swal-report-details-fallback" class="form-control" rows="3" maxlength="500" placeholder="Provide extra context to help our administrators investigate..."></textarea>
+          </div>
+        </div>
+      `;
+
+      Swal.fire({
+        title: isComment ? 'Flag Comment' : 'Report Post',
+        html: htmlContent,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Submit Report',
+        cancelButtonText: 'Cancel',
+        showLoaderOnConfirm: true,
+        allowOutsideClick: function() { return !Swal.isLoading(); },
+        preConfirm: async function() {
+          var reason = document.getElementById('swal-report-reason-fallback')?.value || 'hate_speech';
+          var details = document.getElementById('swal-report-details-fallback')?.value || '';
+          var metaCsrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                         document.querySelector('input[name="_csrf_token"]')?.value || '';
+
+          try {
+            var resp = await fetch('/member/content/report', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                ...(metaCsrf ? { 'X-CSRF-TOKEN': metaCsrf } : {})
+              },
+              body: JSON.stringify({
+                target_type: targetType,
+                target_id: targetId,
+                reason: reason,
+                details: details
+              })
+            });
+            var data = await resp.json();
+            if (!resp.ok) {
+              throw new Error(data.error || 'Failed to submit report');
+            }
+            return data;
+          } catch (err) {
+            Swal.showValidationMessage(err.message || 'Unable to submit report.');
+            return false;
+          }
+        }
+      }).then(function(result) {
+        if (result.isConfirmed && result.value) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Report Submitted',
+            text: result.value.message || 'Thank you for helping keep our family community safe. Administrators have been notified.',
+            confirmButtonColor: '#059669'
+          });
+        }
+      });
+    };
+  }
+</script>

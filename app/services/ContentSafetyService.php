@@ -784,6 +784,27 @@ final class ContentSafetyService
     ];
 
     /**
+     * Comprehensive protected demographic demonyms (tribes, ethnic groups, nationalities, religions, sexual orientation).
+     */
+    private const DEMONYM_REGEX = '(?:'
+        . 'yoruba[s]?|igbo[s]?|hausa[s]?|fulani[s]?|zulu[s]?|xhosa[s]?|african[s]?|nigerian[s]?|ghanaian[s]?|kenyan[s]?|somali[s]?|ethiopian[s]?|jamaican[s]?|caribbean[s]?'
+        . '|indian[s]?|pakistani[s]?|bengali[s]?|bangladeshi[s]?|tamil[s]?|punjabi[s]?|chinese|japanese|korean[s]?|filipino[s]?|vietnamese|asian[s]?'
+        . '|arab[s]?|palestinian[s]?|israeli[s]?|persian[s]?|iranian[s]?|iraqi[s]?|turk[s]?|turkish|kurd[s]?|syrian[s]?|lebanese'
+        . '|hispanic[s]?|latino[s]?|latina[s]?|mexican[s]?|colombian[s]?|brazilian[s]?'
+        . '|jew[s]?|jewish(?:\s+people)?|white[s]?|caucasian[s]?|british|english|irish|scot[s]?|scottish|welsh|french|german[s]?|italian[s]?|spanish|spaniard[s]?|pole[s]?|polish|russian[s]?|ukrainian[s]?|romanian[s]?|roma|gyps(?:y|ies)|european[s]?'
+        . '|muslim[s]?|christian[s]?|hindu[s]?|sikh[s]?|buddhist[s]?|catholic[s]?|protestant[s]?'
+        . '|gay[s]?|gay\s+people|lesbian[s]?|trans(?:\s+people)?|transgender(?:\s+people)?|homosexual[s]?|bisexual[s]?|queer[s]?'
+        . '|immigrant[s]?|migrant[s]?|refugee[s]?|asylum\s+seeker[s]?|foreigner[s]?'
+        . ')';
+
+    /**
+     * Inanimate cultural and everyday modifiers that distinguish benign personal opinion/preference
+     * (e.g. "I hate Indian food", "I hate Nigerian traffic", "I hate French grammar")
+     * from targeted hatred against human beings ("I hate Indians", "I hate Yorubas").
+     */
+    private const INANIMATE_EXCEPTION_REGEX = '(?:food|cuisine|dishes|curry|cooking|rice|soup|stew|recipes?|spices?|weather|climate|rain|cold|heat|winter|traffic|trains|flights|roads|politics|politicians|government|economy|currency|inflation|taxes|laws|language|grammar|lessons|music|movies|films|songs|cinema|accent|novels|books|teams?|football|cricket|rugby)';
+
+    /**
      * Group-Directed Hate Speech & Animus Grammar Patterns.
      * Protects religious, racial, ethnic, national, and sexual identity groups from targeted animus,
      * extermination incitement, and dehumanisation predicates, while preserving legitimate personal expression.
@@ -791,18 +812,18 @@ final class ContentSafetyService
      * @var array<string, array{tier: int, category: string}>
      */
     private const GROUP_ANIMUS_PATTERNS = [
-        // 1. Direct Animus: (i\s+)?(really\s+|fucking\s+)?(hate|despise|loathe|detest|fuck)\s+(all\s+|the\s+)?(demographic group)
-        '/\b(?:i\s+)?(?:really\s+|fucking\s+|totally\s+)?(?:hate|despise|loathe|detest|fuck)\s+(?:all\s+)?(?:the\s+)?(?:jews|jewish\s+people|muslims|christians|hindus|sikhs|blacks|black\s+people|whites|asians|hispanics|latinos|arabs|gays|gay\s+people|lesbians|trans\s+people|transgender\s+people|homosexuals|refugees|immigrants)\b/iu' => [
+        // 1. Direct Animus against People: (i\s+)?(really\s+|fucking\s+)?(hate|despise|loathe|detest|fuck)\s+(all\s+|the\s+)?(demonym)(?! inanimate modifier)
+        '/\b(?:i\s+)?(?:really\s+|fucking\s+|totally\s+)?(?:hate|despise|loathe|detest|fuck)\s+(?:all\s+)?(?:the\s+)?' . self::DEMONYM_REGEX . '(?!\s+' . self::INANIMATE_EXCEPTION_REGEX . ')\b/iu' => [
             'tier' => self::TIER_1_HATE_SPEECH,
             'category' => self::CATEGORY_RACIAL_HATE,
         ],
-        // 2. Violent Incitement & Extermination: (kill|murder|exterminate|wipe\s+out|gas|slaughter|burn|death\s+to)\s+(all\s+|the\s+)?(demographic group)
-        '/\b(?:kill|murder|exterminate|wipe\s+out|gas|slaughter|burn|lynch|hang|death\s+to|destroy)\s+(?:all\s+)?(?:the\s+)?(?:jews|jewish\s+people|muslims|christians|hindus|sikhs|blacks|black\s+people|whites|asians|hispanics|latinos|arabs|gays|gay\s+people|lesbians|trans\s+people|transgender\s+people|homosexuals|refugees|immigrants)\b/iu' => [
+        // 2. Violent Incitement & Extermination: (kill|murder|exterminate|wipe\s+out|gas|slaughter|burn|death\s+to)\s+(all\s+|the\s+)?(demonym)
+        '/\b(?:kill|murder|exterminate|wipe\s+out|gas|slaughter|burn|lynch|hang|death\s+to|destroy)\s+(?:all\s+)?(?:the\s+)?' . self::DEMONYM_REGEX . '\b/iu' => [
             'tier' => self::TIER_1_HATE_SPEECH,
             'category' => self::CATEGORY_VIOLENT_THREAT,
         ],
-        // 3. Dehumanisation Predicates: (demographic group) + (are|r)\s+(all\s+)?(evil|parasites|subhuman|scum|cancer|vermin|trash|disease|monsters|animals)
-        '/\b(?:jews|muslims|christians|hindus|sikhs|blacks|whites|asians|hispanics|arabs|gays|lesbians|trans\s+people|homosexuals|immigrants)\s+(?:are|r)\s+(?:all\s+)?(?:evil|parasites|subhuman|scum|cancer|vermin|pests|trash|disease|monsters|animals|demons)\b/iu' => [
+        // 3. Dehumanisation Predicates: (demonym) + (are|r)\s+(all\s+)?(evil|parasites|subhuman|scum|cancer|vermin|trash|disease|monsters|animals)
+        '/\b' . self::DEMONYM_REGEX . '\s+(?:are|r)\s+(?:all\s+)?(?:evil|parasites|subhuman|scum|cancer|vermin|pests|trash|disease|monsters|animals|demons)\b/iu' => [
             'tier' => self::TIER_1_HATE_SPEECH,
             'category' => self::CATEGORY_RACIAL_HATE,
         ],

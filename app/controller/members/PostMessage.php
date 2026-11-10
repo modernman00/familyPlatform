@@ -962,12 +962,14 @@ final class PostMessage
         $pushTag = $pushTag ?? ('post-' . $postId);
         $inAppTitle = $inAppTitle ?? "New update from {$postOriginName}";
         $getPostProfilePics = self::getProfilePicsForPostAndComment($postId);
+        $pushTargetUserIds = [];
 
         foreach ($results as $memberData) {
             $targetUserId = (string)($memberData['id'] ?? '');
             if ($targetUserId === '' || $targetUserId === $postId) {
                 continue;
             }
+            $pushTargetUserIds[] = $targetUserId;
             $memberData['postOriginName'] = $postOriginName;
             $memberData['url'] = $url;
             $memberData['img'] = $getPostProfilePics;
@@ -1009,10 +1011,12 @@ final class PostMessage
             } catch (\Throwable $e) {
                 error_log('[PostMessage] Pusher notification failed: ' . $e->getMessage());
             }
+        }
 
-            // 3. Send push notification to member
+        // 3. Send batched WebPush notification across all family members in a single flush
+        if (!empty($pushTargetUserIds)) {
             PushNotificationClass::sendPushNotification(
-                userId: $targetUserId,
+                userId: $pushTargetUserIds,
                 message: $notificationMsg,
                 url: $url,
                 title: $pushTitle,

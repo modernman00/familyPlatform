@@ -144,10 +144,11 @@ final class CoverPhotoService
     /**
      * Validate and store an uploaded cover from $_FILES[FORM_INPUT].
      *
+     * @param string $userId Optional member ID override (for admin management)
      * @return string Public URL of the new cover
      * @throws ValidationException
      */
-    public function upload(): string
+    public function upload(string $userId = ''): string
     {
         $file = $_FILES[self::FORM_INPUT] ?? null;
         if (!is_array($file) || is_array($file['name'] ?? null) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
@@ -170,6 +171,12 @@ final class CoverPhotoService
 
         if (!is_string($fileName) || $fileName === '') {
             throw new ValidationException('Your cover photo could not be saved. Please try again.');
+        }
+
+        if ($userId !== '' && !empty($_SESSION['id']) && $userId !== $_SESSION['id']) {
+            $baseName = basename($fileName);
+            $upd = $this->pdo->prepare("UPDATE images SET id = ? WHERE img = ? AND where_from = ? AND id = ? ORDER BY no DESC LIMIT 1");
+            $upd->execute([$userId, $baseName, self::WHERE_FROM, (string)$_SESSION['id']]);
         }
 
         return self::PUBLIC_URL_PREFIX . rawurlencode(basename($fileName));

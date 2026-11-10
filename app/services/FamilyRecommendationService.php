@@ -119,11 +119,10 @@ final class FamilyRecommendationService
         // the branded 1200×630 card. Encoding a full text message suppresses the preview.
         $whatsappUrl = 'https://api.whatsapp.com/send?text=' . rawurlencode($shareUrl);
 
-        // SMS / clipboard fallback: personalised text with the link appended
-        $message = "🔒 *Private Family Sanctuary*\n\n" .
-            "Hey! {$firstName} uses FamilyPlatform to preserve private family trees, milestones, and memories away from public social media.\n\n" .
-            "Start your OWN private family network here — 100% walled and private (only connected kins and approved family can see through the wall):\n" .
-            "👉 {$shareUrl}";
+        // SMS / clipboard fallback: conversational, emotionally resonant text with clean Link Icon standard
+        $message = "Don't let our family memories get lost in noisy chat feeds 📜\n\n" .
+            "Start your family's private living sanctuary — interactive family tree, oral history voice vault, and cherished milestone heirlooms:\n\n" .
+            "🔗 Enter Private Sanctuary: {$shareUrl}";
 
         return [
             'share_url'    => $shareUrl,

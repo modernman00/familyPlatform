@@ -7,6 +7,22 @@
  */
 
 /**
+ * Detects whether a given image URL or path represents an animated GIF.
+ * 
+ * @param {string|null|undefined} url - Image path or URL
+ * @returns {boolean} True if GIF media
+ */
+export function isGifMedia(url) {
+    if (!url || typeof url !== 'string') return false;
+    const clean = url.trim().toLowerCase();
+    return clean.endsWith('.gif') || 
+           clean.includes('.gif?') || 
+           clean.includes('/gifs/') || 
+           clean.includes('/api/atg/gif/') ||
+           clean.startsWith('data:image/gif');
+}
+
+/**
  * Resolves a post image filename or path to a clean, absolute URL.
  * 
  * @param {string|null|undefined} img - Image filename or path
@@ -35,9 +51,14 @@ export function getPostImageUrl(img) {
         return '';
     }
 
-    // Direct path under public/images/ or images/ or resources/
-    if (clean.startsWith('/public/images/') || clean.startsWith('/images/')) {
+    // Absolute root path (e.g. /images/..., /public/..., /resources/..., /api/atg/gif/..., /storage/...)
+    if (clean.startsWith('/')) {
         return clean;
+    }
+
+    // Known root folders passed without leading slash
+    if (clean.startsWith('images/') || clean.startsWith('public/') || clean.startsWith('resources/') || clean.startsWith('api/atg/gif/')) {
+        return `/${clean}`;
     }
 
     // Extract clean basename if path contains directories
@@ -52,24 +73,36 @@ export function getPostImageUrl(img) {
 /**
  * Resolves a post image URL for a specific modern format variant ('avif', 'webp', or fallback).
  * 
+ * Note: Animated GIFs MUST NEVER be rewritten as .avif or .webp variants, as doing so causes
+ * 404 broken images in modern browsers using <picture><source>.
+ * 
  * @param {string|null|undefined} img - Image filename or path
  * @param {'avif'|'webp'|'fallback'} variant - Target format variant
- * @returns {string} Fully qualified or root-relative URL for the requested variant
+ * @returns {string} Fully qualified or root-relative URL for the requested variant, or empty string if not applicable
  */
 export function getPostImageVariantUrl(img, variant = 'fallback') {
     const fallbackUrl = getPostImageUrl(img);
-    if (!fallbackUrl || variant === 'fallback') {
+    if (!fallbackUrl) {
+        return '';
+    }
+
+    if (variant === 'fallback') {
         return fallbackUrl;
+    }
+
+    // GIFs MUST NOT be served as static AVIF or WebP variants
+    if (isGifMedia(fallbackUrl) || isGifMedia(img)) {
+        return '';
     }
 
     // Do not transform external URLs, blobs, or data URIs
     if (fallbackUrl.startsWith('http://') || fallbackUrl.startsWith('https://') || fallbackUrl.startsWith('blob:') || fallbackUrl.startsWith('data:')) {
-        return fallbackUrl;
+        return '';
     }
 
     const dotIndex = fallbackUrl.lastIndexOf('.');
     if (dotIndex <= 0) {
-        return fallbackUrl;
+        return '';
     }
 
     const basePath = fallbackUrl.substring(0, dotIndex);

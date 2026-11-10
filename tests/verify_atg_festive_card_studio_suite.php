@@ -200,6 +200,42 @@ $portrait = AtgFestiveCardRenderer::renderJpeg($custom, 'portrait');
 $dims = getimagesizefromstring($portrait);
 assertCondition(is_array($dims) && $dims[0] === 1080 && $dims[1] === 1350, "Portrait keepsake rendered at 1080x1350");
 
+// -------------------------------------------------------------------------
+// Phase 8: Bespoke Occasion Artwork, Ambient Backdrops & Firework Particles
+// -------------------------------------------------------------------------
+echo "\n[Phase 8] Auditing Bespoke Occasion Artwork (Christmas Tree, Snow & New Year Firecrackers)...\n";
+
+$artPartial = __DIR__ . '/../resources/views/festive/occasionArt.blade.php';
+assertCondition(file_exists($artPartial), "festive/occasionArt.blade.php SVG sprite exists");
+$artSvg = (string)file_get_contents($artPartial);
+
+$artKeys = [
+    'christmas', 'new_year', 'easter', 'eid', 'diwali', 'thanksgiving',
+    'mothers_day', 'fathers_day', 'reunion', 'milestone', 'birthday',
+    'wedding', 'new_baby', 'graduation', 'remembrance',
+];
+foreach ($artKeys as $ak) {
+    assertCondition(
+        str_contains($artSvg, 'id="fc-art-' . $ak . '"') && str_contains($artSvg, 'id="fc-backdrop-' . $ak . '"'),
+        "Occasion SVG sprite defines both #fc-art-{$ak} and #fc-backdrop-{$ak}"
+    );
+}
+
+assertCondition(AtgFestiveCardService::resolveArtKey('christmas') === 'christmas', "resolveArtKey maps christmas -> christmas");
+assertCondition(AtgFestiveCardService::resolveArtKey('new_year') === 'new_year', "resolveArtKey maps new_year -> new_year");
+assertCondition(AtgFestiveCardService::resolveArtKey('custom', 'jubilant', 'Midnight Firecracker Toast') === 'new_year', "resolveArtKey maps custom firecracker celebration -> new_year");
+
+$nyCard = $service->createCard('test_user_777', 'STERLING2026', [
+    'occasion' => 'new_year',
+    'template_style' => 'classic',
+    'sender_name' => 'The Sterling Clan',
+]);
+assertCondition(($nyCard['hero_mode'] ?? '') === 'art', "Default no-photo card hydrates with hero_mode === 'art' (Festive Illustration)");
+assertCondition(($nyCard['art_key'] ?? '') === 'new_year', "New Year card hydrates with art_key === 'new_year'");
+assertCondition(($nyCard['particle'] ?? '') === 'fireworks', "New Year card uses 'fireworks' particle engine");
+$nyPortrait = AtgFestiveCardRenderer::renderJpeg($nyCard, 'portrait');
+assertCondition(str_starts_with($nyPortrait, "\xFF\xD8") && strlen($nyPortrait) > 15000, "New Year portrait JPEG synthesized with procedural firework & firecracker art (" . strlen($nyPortrait) . " bytes)");
+
 // Cleanup test record
 $db->prepare('DELETE FROM festive_cards WHERE user_id = ?')->execute(['test_user_777']);
 

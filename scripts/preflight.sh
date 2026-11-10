@@ -70,9 +70,15 @@ while true; do
     NOW_TS=$(date +%s)
 
     if [ -n "$HOLDER_PID" ] && ! kill -0 "$HOLDER_PID" 2>/dev/null; then
+        # Holder process is dead; reclaim lock immediately
         rm -rf "$LOCK_DIR" 2>/dev/null || true
         continue
-    elif [ "$LOCK_TS" -gt 0 ] && [ $(( NOW_TS - LOCK_TS )) -gt 180 ]; then
+    elif [ -z "$HOLDER_PID" ] && [ "$LOCK_TS" -gt 0 ] && [ $(( NOW_TS - LOCK_TS )) -gt 60 ]; then
+        # Corrupted lock without valid PID; reclaim after 60s
+        rm -rf "$LOCK_DIR" 2>/dev/null || true
+        continue
+    elif [ "$LOCK_TS" -gt 0 ] && [ $(( NOW_TS - LOCK_TS )) -gt 1200 ]; then
+        # Safety failsafe: only break after 20 minutes if completely frozen
         rm -rf "$LOCK_DIR" 2>/dev/null || true
         continue
     fi
@@ -209,6 +215,10 @@ if [ -f "tests/verify_post_submission_suite.php" ]; then
     php tests/verify_post_submission_suite.php || GATE4_PASSED=0
 fi
 
+if [ -f "tests/verify_composer_clipboard_image_paste_suite.php" ]; then
+    php tests/verify_composer_clipboard_image_paste_suite.php || GATE4_PASSED=0
+fi
+
 if [ -f "tests/verify_account_setting_swal_alert.php" ]; then
     php tests/verify_account_setting_swal_alert.php || GATE4_PASSED=0
 fi
@@ -299,6 +309,22 @@ fi
 
 if [ -f "tests/verify_post_share_author_and_redirect.php" ]; then
     php tests/verify_post_share_author_and_redirect.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_family_tree_dna_makeup_suite.php" ]; then
+    php tests/verify_family_tree_dna_makeup_suite.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_atg_family_brand_gif_suite.php" ]; then
+    php tests/verify_atg_family_brand_gif_suite.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_feed_gif_rendering_suite.php" ]; then
+    php tests/verify_feed_gif_rendering_suite.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/test_url_link_pill_and_og_security.php" ]; then
+    php tests/test_url_link_pill_and_og_security.php || GATE4_PASSED=0
 fi
 
 if [ "$GATE4_PASSED" -eq 1 ]; then

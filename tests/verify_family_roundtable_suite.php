@@ -258,6 +258,11 @@ echo "  ✅ PASSED: Quick peacemaker delivered reconciliatory accord.\n";
 
 // [TEST 8] Financial Loan Contextual Accord Verification
 echo "[TEST 8] Verifying Financial Loan Dispute Contextual Accord...\n";
+$checkUser = $pdo->prepare("SELECT id FROM personal WHERE id = ? AND famCode = ?");
+$checkUser->execute(['RTB_PEACEMAKER', $famCode]);
+if (!$checkUser->fetch()) {
+    $ins->execute(['RTB_PEACEMAKER', 'Grandma', 'Elena', $famCode]);
+}
 $loanDispute = $service->fileDispute(
     famCode: $famCode,
     initiatorId: 'RTB_PEACEMAKER',

@@ -25,7 +25,7 @@ final class AtgFestiveCardRenderer
     public const WIDTH = 1200;
     public const HEIGHT = 630;
     private const SS = 2; // supersampling factor
-    private const CACHE_VERSION = 'v2';
+    private const CACHE_VERSION = 'v3';
 
     /** @var array<string, array{0:int,1:int}> */
     private const VARIANTS = [
@@ -191,8 +191,14 @@ SVG;
         $t = self::palette($card);
         $surface = (string)(($card['template_style_meta']['surface'] ?? null) ?: self::surfaceFor((string)($card['template_style'] ?? 'classic')));
         $style = (string)($card['template_style'] ?? 'classic');
+        $artKey = (string)($card['art_key'] ?? AtgFestiveCardService::resolveArtKey(
+            (string)($card['occasion'] ?? 'christmas'),
+            (string)($card['mood'] ?? 'joyful'),
+            (string)($card['custom_occasion'] ?? '')
+        ));
 
         self::paintSurface($img, $surface, $style, $t, $W, $H);
+        self::paintOccasionBackdrop($img, $artKey, $t, $surface, $W, $H);
 
         if ($variant === 'og') {
             self::layoutLandscape($img, $card, $t, $surface, $style, $W, $H);
@@ -231,7 +237,7 @@ SVG;
         ]);
 
         $brandCol = $surface !== 'paper' ? [214, 205, 188] : self::mix($t['ink'], [120, 110, 100], 0.4);
-        self::textCentredTracked($img, self::font('cinzel'), 11 * $S, 844 * $S, 596 * $S, 'FAMILYPLATFORM  ·  TAP TO OPEN YOUR ENVELOPE', $brandCol, 0.22, 40);
+        self::textCentredTracked($img, self::font('cinzel'), 11 * $S, 844 * $S, 596 * $S, self::str($card, 'brand_line', 'FAMILYPLATFORM  ·  TAP TO OPEN YOUR ENVELOPE'), $brandCol, 0.22, 40);
     }
 
     /**
@@ -250,8 +256,10 @@ SVG;
         self::ornamentRule($img, $mid, $y + 28 * $S, 180 * $S, $t['accent']);
 
         $hasPhoto = self::photoPath($card) !== null;
-        $hw = ($hasPhoto ? 580 : 380) * $S;
-        $hh = ($hasPhoto ? 520 : 380) * $S;
+        $heroMode = (string)($card['hero_mode'] ?? ($hasPhoto ? 'photo' : ((($card['hero_type'] ?? 'avatar') === 'crest') ? 'crest' : 'art')));
+        $hasFullHero = $heroMode !== 'crest';
+        $hw = ($hasFullHero ? 580 : 380) * $S;
+        $hh = ($hasFullHero ? 520 : 380) * $S;
         $hy = 176 * $S;
         self::paintHero($img, $card, $t, $surface, $style, (int)($mid - $hw / 2), $hy, $hw, $hh);
 
@@ -264,7 +272,7 @@ SVG;
             'rule' => 0,
             'head' => [[62, 1], [58, 2], [52, 2], [46, 2], [42, 3], [38, 3]],
             'recipient' => 44,
-            'verse' => $hasPhoto ? [[28, 4], [27, 3], [25, 3], [25, 2], [24, 2]] : [[30, 7], [29, 6], [28, 5], [27, 4], [26, 3]],
+            'verse' => $hasFullHero ? [[28, 4], [27, 3], [25, 3], [25, 2], [24, 2]] : [[30, 7], [29, 6], [28, 5], [27, 4], [26, 3]],
             'signoff' => 26,
             'sender' => 58,
         ]);
@@ -507,7 +515,9 @@ SVG;
             default => 'round',
         };
 
-        if ($path === null) {
+        $heroMode = (string)($card['hero_mode'] ?? ($path !== null ? 'photo' : ((($card['hero_type'] ?? 'avatar') === 'crest') ? 'crest' : 'art')));
+
+        if ($path === null && $heroMode === 'crest') {
             // Monogram medallion
             $d = min($w, $h);
             $cx = (int)($x + $w / 2);
@@ -551,11 +561,12 @@ SVG;
         $py = $y + $pad;
         $pw = $w - 2 * $pad;
         $ph = $h - 2 * $pad - ($shape === 'rect' ? 40 * $S : 0); // polaroid lip
-        $photo = self::coverPhoto($path, $pw, $ph);
-        if ($photo) {
-            self::blitShape($img, $photo, $px, $py, $shape);
-            imagedestroy($photo);
+        $photo = ($path !== null && $heroMode === 'photo') ? self::coverPhoto($path, $pw, $ph) : null;
+        if (!$photo) {
+            $photo = self::renderOccasionArtLayer($card, $t, $pw, $ph);
         }
+        self::blitShape($img, $photo, $px, $py, $shape);
+        imagedestroy($photo);
         // Inner hairline
         if ($shape === 'ellipse') {
             self::ellipseStroke($img, (int)($px + $pw / 2), (int)($py + $ph / 2), $pw, [255, 255, 255], 90, 1 * $S, $ph);
@@ -566,6 +577,297 @@ SVG;
             $sd = (int)(min($w, $h) * 0.24);
             self::waxSeal($img, $x + $w - (int)($sd * 0.35), $y + $h - (int)($sd * 0.4), $sd, $t, self::str($card, 'monogram', 'F'));
         }
+    }
+
+    /**
+     * Paint occasion-specific ambient motifs onto the card surface (snowflakes & holly on Christmas,
+     * firework bursts on New Year, lanterns on Eid, diyas on Diwali, starbursts on other celebrations).
+     *
+     * @param array<string, mixed> $t
+     */
+    private static function paintOccasionBackdrop(GdImage $img, string $artKey, array $t, string $surface, int $W, int $H): void
+    {
+        $S = self::SS;
+        $gold = $t['accent'];
+        $light = $t['light'];
+        $snowCol = $surface === 'paper' ? self::mix($t['accent'], [120, 95, 45], 0.35) : [255, 255, 255];
+
+        $spots = [
+            [(int)($W * 0.08), (int)($H * 0.14)],
+            [(int)($W * 0.92), (int)($H * 0.15)],
+            [(int)($W * 0.06), (int)($H * 0.52)],
+            [(int)($W * 0.94), (int)($H * 0.54)],
+            [(int)($W * 0.09), (int)($H * 0.86)],
+            [(int)($W * 0.91), (int)($H * 0.85)],
+        ];
+
+        if ($artKey === 'christmas') {
+            foreach ($spots as $idx => [$sx, $sy]) {
+                self::drawSnowflakeGd($img, $sx, $sy, (14 + ($idx % 3) * 4) * $S, $snowCol, 62);
+            }
+            // Corner holly berries
+            foreach ([[(int)($W * 0.07), (int)($H * 0.09)], [(int)($W * 0.93), (int)($H * 0.09)]] as [$hx, $hy]) {
+                imagefilledellipse($img, $hx - 10 * $S, $hy + 6 * $S, 22 * $S, 11 * $S, self::col($img, [21, 128, 61], 55));
+                imagefilledellipse($img, $hx + 10 * $S, $hy + 6 * $S, 22 * $S, 11 * $S, self::col($img, [22, 101, 52], 55));
+                imagefilledellipse($img, $hx, $hy, 8 * $S, 8 * $S, self::col($img, [225, 29, 72], 35));
+                imagefilledellipse($img, $hx - 6 * $S, $hy + 5 * $S, 7 * $S, 7 * $S, self::col($img, [244, 63, 94], 40));
+                imagefilledellipse($img, $hx + 6 * $S, $hy + 5 * $S, 7 * $S, 7 * $S, self::col($img, [190, 18, 60], 40));
+            }
+            return;
+        }
+
+        if ($artKey === 'new_year') {
+            $fwCols = [$gold, [251, 113, 133], [56, 189, 248], $light, [192, 132, 252], $gold];
+            foreach ($spots as $idx => [$sx, $sy]) {
+                self::drawFireworkGd($img, $sx, $sy, (22 + ($idx % 2) * 8) * $S, $fwCols[$idx % count($fwCols)], 55);
+            }
+            return;
+        }
+
+        foreach ($spots as $idx => [$sx, $sy]) {
+            self::drawStar4Gd($img, $sx, $sy, (12 + ($idx % 3) * 4) * $S, $idx % 2 === 0 ? $gold : $light, 68);
+        }
+    }
+
+    /**
+     * Render bespoke procedural occasion illustration into a hero canvas ($w x $h).
+     *
+     * @param array<string, mixed> $card
+     * @param array<string, mixed> $t
+     */
+    private static function renderOccasionArtLayer(array $card, array $t, int $w, int $h): GdImage
+    {
+        $artKey = (string)($card['art_key'] ?? AtgFestiveCardService::resolveArtKey(
+            (string)($card['occasion'] ?? 'christmas'),
+            (string)($card['mood'] ?? 'joyful'),
+            (string)($card['custom_occasion'] ?? '')
+        ));
+
+        $skyTop = self::mix($t['deep'], [6, 10, 24], 0.35);
+        $skyMid = self::mix($t['primary'], $t['deep'], 0.35);
+        $skyBot = self::mix($t['deep'], [0, 0, 0], 0.25);
+        $canvas = self::gradientLayer($w, $h, [[0, $skyTop], [0.62, $skyMid], [1, $skyBot]], 180);
+        imagealphablending($canvas, true);
+
+        $cx = (int)($w / 2);
+        $cy = (int)($h * 0.45);
+        self::radial($canvas, $cx, $cy, (int)(min($w, $h) * 0.92), $t['accent'], 78);
+
+        // Ambient stars in the sky
+        mt_srand(crc32($artKey));
+        for ($i = 0; $i < 22; $i++) {
+            $sx = mt_rand((int)($w * 0.08), (int)($w * 0.92));
+            $sy = mt_rand((int)($h * 0.06), (int)($h * 0.72));
+            $sr = mt_rand(2, 5);
+            imagefilledellipse($canvas, $sx, $sy, $sr, $sr, self::col($canvas, [255, 250, 225], mt_rand(25, 65)));
+        }
+        mt_srand();
+
+        switch ($artKey) {
+            case 'christmas':
+                // Snow hills at base
+                imagefilledellipse($canvas, (int)($w * 0.32), (int)($h * 0.98), (int)($w * 0.95), (int)($h * 0.28), self::col($canvas, [241, 245, 249], 12));
+                imagefilledellipse($canvas, (int)($w * 0.72), (int)($h * 1.0), (int)($w * 0.95), (int)($h * 0.30), self::col($canvas, [226, 232, 240], 10));
+                // Trunk
+                imagefilledrectangle($canvas, (int)($cx - $w * 0.045), (int)($h * 0.73), (int)($cx + $w * 0.045), (int)($h * 0.86), self::col($canvas, [120, 53, 15]));
+                // 4 pine tiers with snow rims
+                $tiers = [
+                    [0.76, 0.48, 0.30, [6, 78, 59]],
+                    [0.64, 0.37, 0.25, [4, 120, 87]],
+                    [0.51, 0.26, 0.20, [5, 150, 105]],
+                    [0.38, 0.16, 0.14, [16, 185, 129]],
+                ];
+                foreach ($tiers as [$by, $ty, $hwRatio, $green]) {
+                    $halfW = (int)($w * $hwRatio);
+                    $topY = (int)($h * $ty);
+                    $botY = (int)($h * $by);
+                    imagefilledpolygon($canvas, [$cx, $topY, $cx - $halfW, $botY, $cx + $halfW, $botY], self::col($canvas, $green));
+                    imagesetthickness($canvas, max(2, (int)($w * 0.012)));
+                    imageline($canvas, $cx - $halfW + 4, $botY, $cx + $halfW - 4, $botY, self::col($canvas, [255, 255, 255], 30));
+                }
+                imagesetthickness($canvas, 1);
+                // Ornaments (baubles)
+                $baubles = [
+                    [-0.08, 0.34, [225, 29, 72]], [0.09, 0.36, [251, 191, 36]],
+                    [-0.14, 0.48, [56, 189, 248]], [0.0, 0.46, [244, 63, 94]], [0.15, 0.49, [253, 224, 71]],
+                    [-0.20, 0.62, [251, 191, 36]], [-0.06, 0.64, [225, 29, 72]], [0.08, 0.63, [167, 139, 250]], [0.21, 0.61, [244, 63, 94]],
+                    [-0.24, 0.73, [225, 29, 72]], [0.24, 0.73, [251, 191, 36]],
+                ];
+                $bd = max(6, (int)($w * 0.042));
+                foreach ($baubles as [$ox, $oy, $bCol]) {
+                    $bx = $cx + (int)($w * $ox);
+                    $by = (int)($h * $oy);
+                    imagefilledellipse($canvas, $bx, $by, $bd, $bd, self::col($canvas, $bCol));
+                    imagefilledellipse($canvas, $bx - (int)($bd * 0.18), $by - (int)($bd * 0.18), (int)($bd * 0.35), (int)($bd * 0.35), self::col($canvas, [255, 255, 255], 35));
+                }
+                // Gifts at base
+                $gy = (int)($h * 0.76);
+                $gw = (int)($w * 0.12);
+                imagefilledrectangle($canvas, $cx - (int)($w * 0.22), $gy, $cx - (int)($w * 0.22) + $gw, $gy + $gw, self::col($canvas, [190, 18, 60]));
+                imagefilledrectangle($canvas, $cx - (int)($w * 0.22) + (int)($gw * 0.42), $gy, $cx - (int)($w * 0.22) + (int)($gw * 0.58), $gy + $gw, self::col($canvas, [253, 224, 71]));
+                imagefilledrectangle($canvas, $cx + (int)($w * 0.10), $gy + 4, $cx + (int)($w * 0.10) + $gw, $gy + $gw + 4, self::col($canvas, [30, 64, 175]));
+                imagefilledrectangle($canvas, $cx + (int)($w * 0.10) + (int)($gw * 0.42), $gy + 4, $cx + (int)($w * 0.10) + (int)($gw * 0.58), $gy + $gw + 4, self::col($canvas, [253, 224, 71]));
+                // Star of Bethlehem at peak
+                self::drawStar4Gd($canvas, $cx, (int)($h * 0.15), (int)($w * 0.095), [254, 240, 138], 5);
+                // Falling snowflakes
+                foreach ([[0.18, 0.20], [0.82, 0.22], [0.14, 0.46], [0.86, 0.44], [0.22, 0.68], [0.79, 0.66]] as [$fx, $fy]) {
+                    self::drawSnowflakeGd($canvas, (int)($w * $fx), (int)($h * $fy), (int)($w * 0.038), [255, 255, 255], 25);
+                }
+                break;
+
+            case 'new_year':
+                // Multi-ring fireworks in the night sky
+                self::drawFireworkGd($canvas, (int)($w * 0.27), (int)($h * 0.27), (int)($w * 0.17), [251, 113, 133], 10);
+                self::drawFireworkGd($canvas, (int)($w * 0.74), (int)($h * 0.25), (int)($w * 0.16), [56, 189, 248], 10);
+                self::drawFireworkGd($canvas, $cx, (int)($h * 0.19), (int)($w * 0.21), [253, 224, 71], 5);
+                // Twin red & gold firecrackers at left & right
+                foreach ([[-0.24, -1], [0.24, 1]] as [$ox, $dir]) {
+                    $fcX = $cx + (int)($w * $ox);
+                    $fcY = (int)($h * 0.66);
+                    $fcW = (int)($w * 0.085);
+                    $fcH = (int)($h * 0.22);
+                    imagefilledrectangle($canvas, $fcX - (int)($fcW / 2), $fcY - (int)($fcH / 2), $fcX + (int)($fcW / 2), $fcY + (int)($fcH / 2), self::col($canvas, [220, 38, 38]));
+                    imagefilledrectangle($canvas, $fcX - (int)($fcW / 2), $fcY - (int)($fcH / 2), $fcX + (int)($fcW / 2), $fcY - (int)($fcH * 0.34), self::col($canvas, [251, 191, 36]));
+                    imagefilledrectangle($canvas, $fcX - (int)($fcW / 2), $fcY + (int)($fcH * 0.34), $fcX + (int)($fcW / 2), $fcY + (int)($fcH / 2), self::col($canvas, [251, 191, 36]));
+                    self::diamond($canvas, $fcX, $fcY, (int)($fcW * 0.32), [254, 240, 138]);
+                    // Fuse spark
+                    self::drawFireworkGd($canvas, $fcX + $dir * 6, $fcY - (int)($fcH * 0.62), (int)($w * 0.055), [254, 240, 138], 8);
+                }
+                // Champagne flutes in the centre
+                $fluteY = (int)($h * 0.56);
+                $fluteW = (int)($w * 0.09);
+                $fluteH = (int)($h * 0.18);
+                foreach ([-1, 1] as $side) {
+                    $gx = $cx + $side * (int)($w * 0.065);
+                    imagefilledpolygon($canvas, [
+                        $gx - (int)($fluteW / 2), $fluteY,
+                        $gx + (int)($fluteW / 2), $fluteY,
+                        $gx + (int)($fluteW * 0.18), $fluteY + $fluteH,
+                        $gx - (int)($fluteW * 0.18), $fluteY + $fluteH,
+                    ], self::col($canvas, [253, 230, 138], 25));
+                    imagesetthickness($canvas, max(2, (int)($w * 0.008)));
+                    imageline($canvas, $gx, $fluteY + $fluteH, $gx, $fluteY + $fluteH + (int)($h * 0.12), self::col($canvas, [253, 224, 71]));
+                    imageline($canvas, $gx - (int)($fluteW * 0.4), $fluteY + $fluteH + (int)($h * 0.12), $gx + (int)($fluteW * 0.4), $fluteY + $fluteH + (int)($h * 0.12), self::col($canvas, [253, 224, 71]));
+                }
+                imagesetthickness($canvas, 1);
+                self::drawStar4Gd($canvas, $cx, $fluteY - (int)($h * 0.04), (int)($w * 0.06), [255, 255, 255], 10);
+                break;
+
+            case 'eid':
+                // Golden crescent moon
+                $mr = (int)(min($w, $h) * 0.34);
+                imagefilledellipse($canvas, $cx - (int)($w * 0.04), (int)($h * 0.38), $mr, $mr, self::col($canvas, [253, 224, 71]));
+                imagefilledellipse($canvas, $cx + (int)($w * 0.04), (int)($h * 0.34), (int)($mr * 0.84), (int)($mr * 0.84), self::col($canvas, $skyMid));
+                self::drawStar4Gd($canvas, $cx + (int)($w * 0.12), (int)($h * 0.28), (int)($w * 0.055), [254, 249, 195], 8);
+                // Mosque dome silhouette at base
+                imagefilledellipse($canvas, $cx, (int)($h * 0.84), (int)($w * 0.42), (int)($h * 0.32), self::col($canvas, $t['accent'], 25));
+                imagefilledrectangle($canvas, (int)($w * 0.16), (int)($h * 0.82), (int)($w * 0.84), $h, self::col($canvas, self::mix($t['deep'], [0, 0, 0], 0.4)));
+                break;
+
+            case 'diwali':
+                // Mandala rings
+                self::ellipseStroke($canvas, $cx, (int)($h * 0.44), (int)($w * 0.56), $t['accent'], 55, 2);
+                self::ellipseStroke($canvas, $cx, (int)($h * 0.44), (int)($w * 0.40), $t['light'], 45, 2);
+                // Glowing diya flame
+                imagefilledellipse($canvas, $cx, (int)($h * 0.42), (int)($w * 0.16), (int)($h * 0.26), self::col($canvas, [249, 115, 22]));
+                imagefilledellipse($canvas, $cx, (int)($h * 0.44), (int)($w * 0.10), (int)($h * 0.18), self::col($canvas, [254, 240, 138]));
+                // Diya bowl
+                imagefilledarc($canvas, $cx, (int)($h * 0.58), (int)($w * 0.48), (int)($h * 0.26), 0, 180, self::col($canvas, [180, 83, 9]), IMG_ARC_PIE);
+                break;
+
+            case 'birthday':
+                // 3-tier birthday cake + 3 lit candles + balloons
+                imagefilledellipse($canvas, (int)($w * 0.22), (int)($h * 0.34), (int)($w * 0.15), (int)($h * 0.20), self::col($canvas, [244, 63, 94], 15));
+                imagefilledellipse($canvas, (int)($w * 0.78), (int)($h * 0.34), (int)($w * 0.15), (int)($h * 0.20), self::col($canvas, [56, 189, 248], 15));
+                imagefilledrectangle($canvas, (int)($cx - $w * 0.24), (int)($h * 0.68), (int)($cx + $w * 0.24), (int)($h * 0.82), self::col($canvas, [244, 114, 182]));
+                imagefilledrectangle($canvas, (int)($cx - $w * 0.18), (int)($h * 0.54), (int)($cx + $w * 0.18), (int)($h * 0.68), self::col($canvas, [251, 207, 232]));
+                imagefilledrectangle($canvas, (int)($cx - $w * 0.12), (int)($h * 0.42), (int)($cx + $w * 0.12), (int)($h * 0.54), self::col($canvas, [254, 243, 199]));
+                foreach ([-0.06, 0.0, 0.06] as $coff) {
+                    $kx = $cx + (int)($w * $coff);
+                    imagefilledrectangle($canvas, $kx - 3, (int)($h * 0.31), $kx + 3, (int)($h * 0.42), self::col($canvas, [255, 255, 255]));
+                    imagefilledellipse($canvas, $kx, (int)($h * 0.28), 10, 16, self::col($canvas, [253, 224, 71]));
+                }
+                break;
+
+            default:
+                // Ornate celebratory centrepiece (golden starburst, laurel ring, and jewel emblem)
+                self::ellipseStroke($canvas, $cx, (int)($h * 0.50), (int)(min($w, $h) * 0.58), $t['accent'], 35, 3);
+                self::ellipseStroke($canvas, $cx, (int)($h * 0.50), (int)(min($w, $h) * 0.44), $t['light'], 50, 2);
+                self::drawFireworkGd($canvas, $cx, (int)($h * 0.50), (int)(min($w, $h) * 0.26), $t['light'], 15);
+                self::drawStar4Gd($canvas, $cx, (int)($h * 0.50), (int)(min($w, $h) * 0.16), [254, 249, 195], 5);
+                break;
+        }
+
+        return $canvas;
+    }
+
+    /**
+     * @param array{0:int,1:int,2:int} $rgb
+     */
+    private static function drawSnowflakeGd(GdImage $img, int $cx, int $cy, int $r, array $rgb, int $alpha = 30): void
+    {
+        $col = self::col($img, $rgb, $alpha);
+        imagesetthickness($img, max(1, (int)($r * 0.11)));
+        for ($i = 0; $i < 3; $i++) {
+            $a = $i * M_PI / 3;
+            $dx = (int)round(cos($a) * $r);
+            $dy = (int)round(sin($a) * $r);
+            imageline($img, $cx - $dx, $cy - $dy, $cx + $dx, $cy + $dy, $col);
+        }
+        imagesetthickness($img, 1);
+        imagefilledellipse($img, $cx, $cy, max(3, (int)($r * 0.32)), max(3, (int)($r * 0.32)), $col);
+    }
+
+    /**
+     * @param array{0:int,1:int,2:int} $rgb
+     */
+    private static function drawFireworkGd(GdImage $img, int $cx, int $cy, int $r, array $rgb, int $alpha = 20): void
+    {
+        $col = self::col($img, $rgb, $alpha);
+        $white = self::col($img, [255, 255, 255], max(0, $alpha - 10));
+        imagesetthickness($img, max(1, (int)($r * 0.07)));
+        for ($i = 0; $i < 12; $i++) {
+            $a = $i * M_PI / 6;
+            $r0 = (int)round($r * 0.22);
+            $r1 = (int)round($r * ($i % 2 === 0 ? 1.0 : 0.68));
+            imageline(
+                $img,
+                $cx + (int)round(cos($a) * $r0),
+                $cy + (int)round(sin($a) * $r0),
+                $cx + (int)round(cos($a) * $r1),
+                $cy + (int)round(sin($a) * $r1),
+                $i % 3 === 0 ? $white : $col
+            );
+            imagefilledellipse(
+                $img,
+                $cx + (int)round(cos($a) * $r1),
+                $cy + (int)round(sin($a) * $r1),
+                max(3, (int)($r * 0.12)),
+                max(3, (int)($r * 0.12)),
+                $col
+            );
+        }
+        imagesetthickness($img, 1);
+        imagefilledellipse($img, $cx, $cy, max(4, (int)($r * 0.22)), max(4, (int)($r * 0.22)), $white);
+    }
+
+    /**
+     * @param array{0:int,1:int,2:int} $rgb
+     */
+    private static function drawStar4Gd(GdImage $img, int $cx, int $cy, int $r, array $rgb, int $alpha = 20): void
+    {
+        $ri = max(2, (int)($r * 0.28));
+        $pts = [
+            $cx, $cy - $r,
+            $cx + $ri, $cy - $ri,
+            $cx + $r, $cy,
+            $cx + $ri, $cy + $ri,
+            $cx, $cy + $r,
+            $cx - $ri, $cy + $ri,
+            $cx - $r, $cy,
+            $cx - $ri, $cy - $ri,
+        ];
+        imagefilledpolygon($img, $pts, self::col($img, $rgb, $alpha));
     }
 
     // =====================================================================
@@ -1386,6 +1688,9 @@ SVG;
     {
         $v = $card[$key] ?? null;
         $v = is_scalar($v) ? html_entity_decode(trim((string)$v), ENT_QUOTES | ENT_HTML5, 'UTF-8') : '';
+        // GD/FreeType has no colour-emoji font: drop emoji & pictographs instead of printing tofu boxes
+        $v = (string)preg_replace('/[\x{1F000}-\x{1FAFF}\x{2600}-\x{27BF}\x{2B00}-\x{2BFF}\x{FE00}-\x{FE0F}\x{200D}\x{20E3}\x{E0020}-\x{E007F}]/u', '', $v);
+        $v = trim((string)preg_replace('/\s{2,}/u', ' ', $v));
         return $v !== '' ? $v : $default;
     }
 

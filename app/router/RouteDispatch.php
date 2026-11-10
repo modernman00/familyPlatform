@@ -80,6 +80,7 @@ final class RouteDispatch
             'App\controller\RealtimeBroadcastingController', // Sovereign Realtime Broadcasting SSE & Auth for FamilyPlatform
             'App\controller\PostShareController', // Public Shareable Post Link & Guest-to-Register Engine
             'App\controller\members\FestiveCardController', // RFC-0019 Omni-Occasion Festive Card & Living Envelope Engine
+            'App\controller\members\AtgGifController', // ATG Sovereign Brand GIF Studio & Synthesizer
         ];
 
         if (\class_exists('\App\controller\BaseController')) {

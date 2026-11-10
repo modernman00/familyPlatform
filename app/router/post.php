@@ -139,6 +139,14 @@ $router->map(
   name: 'post_shareable_link'
 );
 
+// Designed 1200x630 link-preview card for shared posts (WhatsApp, iMessage, Facebook, X)
+$router->map(
+  method: 'GET|HEAD',
+  route: '/post/[i:postNo]/card.jpg',
+  target: 'App\controller\PostShareController@cardImage',
+  name: 'post_share_card_image'
+);
+
 // Author-Only Post Share Link Generator API (Strict SecOps Author Gate)
 $router->map(
   method: 'POST',
@@ -236,3 +244,19 @@ $router->map(
   target: 'App\controller\members\PostMessage@getPostViewers',
   name: 'post_get_viewers'
 );
+
+// COMMUNITY CONTENT FLAGGING & ABUSE REPORTING
+$router->map(
+  method: 'POST',
+  route: '/member/content/report',
+  target: 'App\controller\members\ContentReportController@submitReport',
+  name: 'member_content_report'
+);
+
+$router->map(
+  method: 'POST',
+  route: '/api/content/report',
+  target: 'App\controller\members\ContentReportController@submitReport',
+  name: 'api_content_report'
+);
+

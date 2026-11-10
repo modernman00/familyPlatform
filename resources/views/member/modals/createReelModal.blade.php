@@ -219,9 +219,15 @@
 
                         <!-- Dual-Track Volume Faders & Start Scrubber (Revealed when a sound/music is selected) -->
                         <div id="reelDualTrackControls" class="d-none mt-3 pt-3 border-top">
-                            <div class="fw-semibold text-dark small mb-2 d-flex align-items-center justify-content-between">
+                            <div class="fw-semibold text-dark small mb-2 d-flex align-items-center justify-content-between flex-wrap gap-1">
                                 <span><i class="bi bi-sliders2 text-primary me-1"></i>Dual-Track Audio Balance</span>
-                                <span class="badge bg-light text-primary border" style="font-size: 0.68rem;" id="reelAudioBalanceBadge">Mixed Audio</span>
+                                <div class="d-flex align-items-center gap-1.5">
+                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-1 d-inline-flex align-items-center gap-1" id="btnPreviewSoundtrackMix" style="font-size: 0.72rem; min-height: 32px; white-space: nowrap; flex-shrink: 0;">
+                                        <i class="bi bi-play-circle-fill" id="iconPreviewSoundtrackMix"></i>
+                                        <span id="textPreviewSoundtrackMix">Preview Music</span>
+                                    </button>
+                                    <span class="badge bg-light text-primary border" style="font-size: 0.68rem;" id="reelAudioBalanceBadge">Mixed Audio</span>
+                                </div>
                             </div>
 
                             <!-- Fader 1: Video Speech/Voices -->
@@ -281,6 +287,23 @@
                                     <!-- Populated dynamically via /api/reels/recent-clusters -->
                                 </select>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Real-Time Upload Progress Telemetry (WCAG AA & Fitts's Law Compliant) -->
+                    <div class="mb-3 d-none p-3 rounded-4 border bg-light-subtle" id="reelUploadProgressWrapper">
+                        <div class="d-flex justify-content-between align-items-center mb-1.5 small">
+                            <span class="fw-semibold text-dark d-flex align-items-center gap-1.5" id="reelUploadStatusText">
+                                <i class="bi bi-cloud-arrow-up-fill text-primary"></i> Uploading video…
+                            </span>
+                            <span class="fw-bold text-primary" id="reelUploadPercentText">0%</span>
+                        </div>
+                        <div class="progress" style="height: 10px; border-radius: 9999px; background-color: #e2e8f0; overflow: hidden;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" id="reelUploadProgressBar" role="progressbar" style="width: 0%; transition: width 0.2s ease;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-1.5 text-muted" style="font-size: 0.72rem;">
+                            <span id="reelUploadSizeIndicator">0 MB / 0 MB</span>
+                            <span id="reelUploadSpeedSubtext">Please keep this window open</span>
                         </div>
                     </div>
 

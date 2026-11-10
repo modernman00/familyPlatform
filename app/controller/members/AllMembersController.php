@@ -135,28 +135,8 @@ final class AllMembersController extends AllMembersData
             $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: 'images', identifier1: "id");
             $pictures = Select::selectFn2(query: $query, bind: [$id]);
 
-            // Fetch relatives for immediate family card
-            $relativesWithImgs = [];
-            $roles = [
-                ['table' => 'otherFamily', 'who' => 'spouse', 'defaultRel' => 'Spouse'],
-                ['table' => 'otherFamily', 'who' => 'father', 'defaultRel' => 'Father'],
-                ['table' => 'otherFamily', 'who' => 'mother', 'defaultRel' => 'Mother'],
-                ['table' => 'sibling', 'who' => 'sibling', 'defaultRel' => 'Sibling'],
-                ['table' => 'children', 'who' => 'children', 'defaultRel' => 'Child'],
-            ];
-
-            foreach ($roles as $role) {
-                $relations = BaseController::fetchRelationsData($id, $role['table'], $role['who']);
-                if (!empty($relations)) {
-                    foreach ($relations as $rel) {
-                        if (!empty($rel['fullName'])) {
-                            $rel['relationship'] = $rel['relationship'] ?? $role['defaultRel'];
-                            $rel['img'] = !empty($rel['profilePics']) ? "/resources/images/profile/{$rel['profilePics']}" : ($rel['img'] ?? '/resources/images/profile/avatarM.png');
-                            $relativesWithImgs[] = $rel;
-                        }
-                    }
-                }
-            }
+            // Fetch authoritative immediate family (Family Tree DAG + Reciprocal Bridge)
+            $relativesWithImgs = (new \App\services\ImmediateFamilyService())->getImmediateFamily((string) $id);
 
             // Fetch total published posts count
             $db = \Src\Db::connect();
@@ -167,7 +147,13 @@ final class AllMembersController extends AllMembersData
             // Fetch public photos only
             $publicPhotos = \App\model\Post::getAllImagesByAuthor($id, true);
 
-            \App\controller\BaseController::viewWithCsp('member/getProfile', compact('data', 'pictures', 'relativesWithImgs', 'postCount', 'publicPhotos') + ['viewedMemberId' => (string) $id]);
+            // Fetch active cover photo and check edit permissions (member themselves or admin)
+            $cover = (new \App\services\CoverPhotoService())->getCurrent((string) $id);
+            $isAdmin = (!empty($_SESSION['auth']['type']) && in_array((string)($_SESSION['auth']['type'] ?? ''), ['admin', 'super_admin'], true))
+                || in_array((string)($_SESSION['type'] ?? ''), ['admin', 'super_admin'], true);
+            $canEditCover = ($sessId === $id || $isAdmin);
+
+            \App\controller\BaseController::viewWithCsp('member/getProfile', compact('data', 'pictures', 'relativesWithImgs', 'postCount', 'publicPhotos', 'cover', 'canEditCover') + ['viewedMemberId' => (string) $id]);
         } catch (Exception $e) {
             showError($e);
         }

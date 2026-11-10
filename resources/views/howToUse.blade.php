@@ -141,7 +141,7 @@
               <li class="mb-2">Record oral histories, lullabies, ancestral blessings, or life advice.</li>
               <li class="mb-2">Recordings are encrypted and streamable exclusively by authenticated family members.</li>
               <li class="mb-2"><strong>Honouring Deceased Ancestors:</strong> Relatives marked as deceased are respectfully distinguished with a 🕊️ In Memory banner, silver/slate ribbons, grayscale portraits, and lifespan dates across the Canvas Tree, Pedigree Outline, and Radial Fan Chart.</li>
-              <li><strong>DNA Make-Up &amp; Mendelian Consanguinity (Layers 1 &amp; 2):</strong> Every tree node automatically displays your <strong>Shared DNA % &amp; centiMorgans (cM)</strong> calculated via Wright's Coefficient of Relationship ($r = \sum (1/2)^L$) alongside a multi-segment <strong>Ancestral Chromosome Bar</strong>. Click any node and select <strong>"Curate DNA &amp; Ethnicity Make-up"</strong> to record regional DNA test breakdowns (e.g., 23andMe, AncestryDNA) or Y-DNA/mtDNA haplogroups—which automatically propagate 50/50 Mendelian inheritance down your family tree!</li>
+              <li><strong>Explicit Recursive DNA Make-Up &amp; Mendelian Consanguinity (Layers 1 &amp; 2):</strong> Every tree node automatically displays your <strong>Shared DNA % &amp; centiMorgans (cM)</strong> calculated via Wright's Coefficient of Relationship ($r = \sum (1/2)^L$) alongside a <strong>2-Tier Stacked Chromosome Bar</strong> and an <strong>Explicit Hierarchical Ancestral Breakdown</strong> showing how <strong>50% Father</strong> and <strong>50% Mother</strong> each consist of <strong>25% Grandparents</strong>, <strong>12.5% Great-Grandparents</strong>, and <strong>6.25% 2nd Great-Grandparents</strong> when present in your tree. Click any node and select <strong>"Curate DNA &amp; Ethnicity Make-up"</strong> to record regional DNA test breakdowns or Y-DNA/mtDNA haplogroups!</li>
             </ol>
           </div>
         </div>
@@ -807,6 +807,56 @@
                   <p class="small text-muted mb-0">Posts inviting relatives to grow the family tree or add their branch automatically embed a glowing <strong>Add Your Branch to Family Tree</strong> button linking directly to the organogram.</p>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar: ATG Sovereign Family Brand GIF Engine & Dynasty Synthesiser -->
+        <div id="atg-gifs" class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(163,22,33, 0.12); color: #a31621;">
+                <i class="bi bi-filetype-gif fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">ATG Sovereign Family Brand GIF Engine &amp; Dynasty Synthesiser</h3>
+                <span class="badge text-white" style="background: #a31621;">Sovereign Animated Visuals (ATG Pods 3 &amp; 4)</span>
+              </div>
+            </div>
+
+            <p class="lead text-secondary">
+              FamilyPlatform operates a sovereign animated GIF engine engineered natively by the Advanced Technology Group (ATG). Relatives express kinship, heritage, and milestone joy with high-impact 400&times;400 looping animations, free from third-party tracking, external API costs, or broken placeholder links.
+            </p>
+
+            <div class="row g-3 mt-1">
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-danger text-white mb-2">8 Curated Brand Invariants</span>
+                  <h6 class="fw-bold text-dark">Heritage &amp; Kinship Visuals</h6>
+                  <p class="small text-muted mb-0">From the glowing <strong>Heritage Tree Bloom</strong> and <strong>Kinship Pulse</strong> to <strong>Reunion Champagne Toasts</strong> and <strong>Warmest Family Hugs</strong>, official brand GIFs celebrate what makes our family unique.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge text-white mb-2" style="background: #c9a24b;">✨ Dynasty Synthesiser</span>
+                  <h6 class="fw-bold text-dark">Dynamic Customised GIFs</h6>
+                  <p class="small text-muted mb-0">Generate a custom animated GIF stamped with your exact family surname (e.g. <em>The Olaogun Family</em>), custom motto, and choice of royal crimson, midnight, or emerald palettes in under a second.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-success text-white mb-2">💎 First-Class Picker</span>
+                  <h6 class="fw-bold text-dark">Feed, Comment &amp; Chat Ready</h6>
+                  <p class="small text-muted mb-0">Select <strong>💎 Family Brand</strong> directly inside the feed post composer and comment box, copy direct share links, or download for WhatsApp and family chat groups.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <span class="text-muted small">Available inside feed composer, comments, and the dedicated studio.</span>
+              <a href="/member/gif-studio" class="btn btn-outline-danger btn-sm font-semibold rounded-pill px-4 min-h-[44px] d-inline-flex align-items-center gap-2">
+                <i class="bi bi-palette-fill"></i> Open Brand GIF Studio &rarr;
+              </a>
             </div>
           </div>
         </div>

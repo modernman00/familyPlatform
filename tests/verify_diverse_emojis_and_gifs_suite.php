@@ -37,9 +37,12 @@ if (!file_exists($gifCatalogPath)) {
         $errors[] = "Expected at least 40 curated GIFs, found " . count($urls);
     }
 
-    // Verify all URLs match Giphy whitelist
+    // Verify all URLs match Giphy whitelist or sovereign ATG Brand GIFs
     $invalidUrls = [];
     foreach ($urls as $url) {
+        if (str_starts_with($url, '/images/brand/gifs/') || str_starts_with($url, '/api/atg/gif/')) {
+            continue;
+        }
         $parts = parse_url($url);
         $host = strtolower((string)($parts['host'] ?? ''));
         $scheme = strtolower((string)($parts['scheme'] ?? ''));

@@ -287,55 +287,62 @@
               `You are invited to join our *${surname} Birth Family Network & Heritage Tree* on FamilyPlatform.\n\n` +
               `🔑 *Birth Family Code:* #${code}\n\n` +
               `✨ Claim your branch on our live family tree, preserve our heritage, share memories, and connect across generations.\n\n` +
-              `👉 Tap here to join our family sanctuary:\n${url}\n\n` +
+              `🔗 Tap to Enter Our Family Sanctuary:\n${url}\n\n` +
               `Welcome to our living family legacy! 🏰`
             : `🌳 *Family Heritage Invitation* 🌳\n\n` +
-              `You are invited to join our *${surname} Family Network & Heritage Tree* on FamilyPlatform.\n\n` +
+              `You are invited to join our *${surname} Family Network & Heritage Tree*.\n\n` +
               `🔑 *Family Code:* #${code}\n\n` +
-              `✨ Claim your branch on our live family tree, preserve our heritage, share memories, and connect across generations.\n\n` +
-              `👉 Tap here to join our family sanctuary:\n${url}\n\n` +
+              `✨ Claim your branch on our live family tree, preserve our oral histories, share memories, and connect across generations.\n\n` +
+              `🔗 Tap to Enter Our Family Sanctuary:\n${url}\n\n` +
               `Welcome to our living family legacy! 🏰`,
         'Mum': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Mum* 🌳\n\n` +
             `Hi Mum,\n\n` +
-            `I've set up our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* sanctuary on FamilyPlatform.\n\n` +
+            `I've set up our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* sanctuary.\n\n` +
             `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
-            `✨ Tap here to view our lineage, see photos, and claim your spot on our living family tree:\n${url}\n\n` +
+            `✨ View our ancestral lineage, see cherished photos, and claim your spot on our living family tree:\n\n` +
+            `🔗 Tap to Claim Your Branch:\n${url}\n\n` +
             `Welcome to our living family legacy! 🏰`,
         'Dad': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Dad* 🌳\n\n` +
             `Hi Dad,\n\n` +
-            `I've set up our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* sanctuary on FamilyPlatform.\n\n` +
+            `I've set up our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* sanctuary.\n\n` +
             `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
-            `✨ Tap here to view our lineage, see photos, and claim your spot on our living family tree:\n${url}\n\n` +
+            `✨ View our ancestral lineage, see cherished photos, and claim your spot on our living family tree:\n\n` +
+            `🔗 Tap to Claim Your Branch:\n${url}\n\n` +
             `Welcome to our living family legacy! 🏰`,
         'Sister': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Sister* 🌳\n\n` +
             `Hey sis,\n\n` +
-            `Join me on FamilyPlatform for our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* hub.\n\n` +
+            `Join our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* heritage hub.\n\n` +
             `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
-            `✨ Tap here to claim your spot on our living family tree and share memories:\n${url}\n\n` +
+            `✨ Claim your branch on our living family tree, share memories, and preserve our stories:\n\n` +
+            `🔗 Tap to Claim Your Branch:\n${url}\n\n` +
             `Welcome to our living family legacy! 🏰`,
         'Brother': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Brother* 🌳\n\n` +
             `Hey bro,\n\n` +
-            `Join me on FamilyPlatform for our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* hub.\n\n` +
+            `Join our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* heritage hub.\n\n` +
             `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
-            `✨ Tap here to claim your spot on our living family tree and share memories:\n${url}\n\n` +
+            `✨ Claim your branch on our living family tree, share memories, and preserve our stories:\n\n` +
+            `🔗 Tap to Claim Your Branch:\n${url}\n\n` +
             `Welcome to our living family legacy! 🏰`,
         'Child': (surname, url, code) => `🌳 *Family Heritage Invitation* 🌳\n\n` +
             `Hey,\n\n` +
-            `I've added you to our official *${surname} Family Tree* on FamilyPlatform.\n\n` +
+            `I've added you to our official *${surname} Family Tree*.\n\n` +
             `🔑 *Family Code:* #${code}\n\n` +
-            `✨ Tap here to claim your profile, view our ancestral roots, and share memories:\n${url}\n\n` +
+            `✨ Claim your profile, view our ancestral roots, and share memories:\n\n` +
+            `🔗 Tap to Claim Your Profile:\n${url}\n\n` +
             `Welcome to our living family legacy! 🏰`,
         'Grandparent': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Grandparent* 🌳\n\n` +
             `Dear Grandparent,\n\n` +
-            `Our *${surname} ${isBirth ? 'Birth Family' : 'Family'}* tree and heritage have been preserved on FamilyPlatform.\n\n` +
+            `Our *${surname} ${isBirth ? 'Birth Family' : 'Family'}* tree and heritage have been preserved.\n\n` +
             `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
-            `✨ Tap here to view our family branches, photos, and ancestral records:\n${url}\n\n` +
+            `✨ View our family branches, photos, oral history recordings, and ancestral records:\n\n` +
+            `🔗 Tap to View Our Family Tree:\n${url}\n\n` +
             `Welcome to our living family legacy! 🏰`,
         'Cousin': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Cousin* 🌳\n\n` +
             `Hey cousin,\n\n` +
-            `We are bringing the *${surname} ${isBirth ? 'Birth Family' : 'Family'}* together on our private FamilyPlatform hub.\n\n` +
+            `We are bringing the *${surname} ${isBirth ? 'Birth Family' : 'Family'}* together on our private family hub.\n\n` +
             `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
-            `✨ Tap here to claim your branch on our live family tree:\n${url}\n\n` +
+            `✨ Claim your branch on our live family tree and view our roots:\n\n` +
+            `🔗 Tap to Claim Your Branch:\n${url}\n\n` +
             `Welcome to our living family legacy! 🏰`
     };
 

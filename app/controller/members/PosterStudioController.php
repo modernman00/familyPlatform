@@ -37,7 +37,7 @@ final class PosterStudioController
         $famCode = is_string($_SESSION['famCode'] ?? null) ? $_SESSION['famCode'] : '';
 
         $pdo = Db::connect2();
-        $stmt = $pdo->prepare('SELECT firstName, lastName FROM account WHERE id = ? LIMIT 1');
+        $stmt = $pdo->prepare('SELECT firstName, lastName FROM personal WHERE id = ? LIMIT 1');
         $stmt->execute([$userId]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
@@ -148,7 +148,7 @@ final class PosterStudioController
             }
 
             $pdo = Db::connect2();
-            $u = $pdo->prepare('SELECT firstName, lastName, (SELECT img FROM profilePics WHERE id = account.id LIMIT 1) AS profile_img FROM account WHERE id = ? LIMIT 1');
+            $u = $pdo->prepare('SELECT firstName, lastName, (SELECT img FROM profilePics WHERE id = personal.id LIMIT 1) AS profile_img FROM personal WHERE id = ? LIMIT 1');
             $u->execute([$userId]);
             $author = $u->fetch(PDO::FETCH_ASSOC) ?: [];
             $fullName = trim(($author['firstName'] ?? '') . ' ' . ($author['lastName'] ?? '')) ?: 'Family member';
