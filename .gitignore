@@ -96,6 +96,8 @@ storage/framework/
 # IDE Configs
 .vscode/
 .idea/
+.antigravity/
+reports/
 # ------------------------------------------
 storage/reports/
 storage/uploads/
