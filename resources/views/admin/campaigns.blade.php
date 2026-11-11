@@ -158,7 +158,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 function openNewCampaignModal() {
     document.getElementById('newCampaignModal').classList.remove('hidden');
 }

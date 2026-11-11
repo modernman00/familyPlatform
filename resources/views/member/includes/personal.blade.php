@@ -223,7 +223,7 @@ input[type="file"] {
 
  
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
   const profile = {
           requesterFirstName: @json($data['firstName']),
           requesterLastName: @json($data['lastName']),

@@ -21,7 +21,7 @@
 {{-- @include('layouts.footer') --}}
 
 {{--  <script src="/index.js" type="text/javascript"></script>  --}}
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 // Accordion
 function myFunction(id) {
   var x = document.getElementById(id);
@@ -39,11 +39,11 @@ function myFunction(id) {
 
 
 </script>
-    <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/manifest.js"></script>
-    <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/vendor.js"></script>
-    <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/index.js"></script>
+    <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/manifest.js"></script>
+    <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/vendor.js"></script>
+    <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/index.js"></script>
       
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 
 
     // Utility function to convert VAPID public key to Uint8Array

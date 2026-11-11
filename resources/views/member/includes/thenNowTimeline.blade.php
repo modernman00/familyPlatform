@@ -21,7 +21,7 @@
 
 @includeIf('member.modals.thenNowComparisonModal')
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function () {
     var root = document.getElementById('thenNowSection') || document.getElementById(@json($tnId));
     if (!root) return;

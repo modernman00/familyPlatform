@@ -1,6 +1,6 @@
 {{-- Alpine component driving the family-code check + inviter verification
      modal. Kept out of register.blade.php so the page template stays markup. --}}
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
     function familyCodeApprovalComponent() {
         const urlParams = new URLSearchParams(window.location.search);

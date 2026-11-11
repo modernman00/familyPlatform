@@ -179,7 +179,7 @@
     @endif
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 function adminModerationConsole() {
     return {
         async executeAction(reportId, action) {

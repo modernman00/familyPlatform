@@ -412,12 +412,14 @@ final class ProfilePage extends ProcessImg
             }
 
             $removeKeys = [
-                'poll_question', 'poll_options', 'token', 'post_no',
+                'poll_question', 'poll_options', 'token', '_token', 'csrf_token', 'post_no',
                 'attached_gif_url', 'attached_video_url', 'attached_video_urls', 'tagged_user_ids', 'shared_temp_images',
                 'then_now', 'then_label', 'now_label', 'reply_to_post',
                 'comparison_mode', 'mystery_year', 'then_now_voice_base64',
                 'attached_ar_emoji', 'target_scope', 'target_fam_code', 'post_style',
-                'submit', 'button'
+                'submit', 'button',
+                'g-recaptcha-response', 'grecaptcharesponse', 'siteKey', 'action',
+                'website_hp', 'hp_username', 'hp_email', 'fax_number', 'phone_number_hp', 'company_website_trap'
             ];
             if ($arEmoji === null) {
                 $removeKeys[] = 'ar_emoji';
@@ -433,6 +435,7 @@ final class ProfilePage extends ProcessImg
                 removeKeys: $removeKeys,
                 optionalFields: [
                     'poll_question', 'poll_options', 'postMessage', 'post_no',
+                    'token', '_token', 'csrf_token',
                     'attached_gif_url', 'attached_video_url', 'attached_video_urls', 'tagged_user_ids', 'shared_temp_images',
                     'postFamCode', 'profileImg',
                     'then_now', 'then_label', 'now_label', 'reply_to_post',
@@ -979,9 +982,17 @@ final class ProfilePage extends ProcessImg
             ];
             $result = SubmitPostData::submitToOneTablenImage(
                 table: 'comment',
+                removeKeys: [
+                    'submit', 'button', 'token', '_token', 'csrf_token',
+                    'g-recaptcha-response', 'grecaptcharesponse', 'siteKey', 'action',
+                    'website_hp', 'hp_username', 'hp_email', 'fax_number', 'phone_number_hp', 'company_website_trap'
+                ],
                 newInput: $newInput,
                 isCaptcha: false,
-                optionalFields: $gifUrl !== null ? ['comment'] : null
+                optionalFields: array_merge(
+                    ['token', '_token', 'csrf_token'],
+                    $gifUrl !== null ? ['comment'] : []
+                )
             );
             if ($result) {
                 $_SESSION["LAST_INSERT_ID_COMMENT"] = $result;

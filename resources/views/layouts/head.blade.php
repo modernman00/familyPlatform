@@ -39,9 +39,9 @@
   <link rel="apple-touch-startup-image" href="/public/img/favicon/android-chrome-512x512.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)">
   <link rel="apple-touch-startup-image" href="/public/img/favicon/android-chrome-512x512.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)">
 
-      <script nonce="{{ $nonce }}" src="https://www.google.com/recaptcha/api.js" async defer></script>
-      <script nonce="{{ $nonce }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>
-      <script nonce="{{ $nonce }}" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
+      <script nonce="{{ csp_nonce($nonce ?? null) }}" src="https://www.google.com/recaptcha/api.js" async defer></script>
+      <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>
+      <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
 
   
 

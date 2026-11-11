@@ -45,7 +45,7 @@
 <div id="{{ $targetLoaderId }}" style="display: none;" class="d-none" aria-hidden="true"></div>
 @endunless
 
-<script nonce="{{ $nonce ?? '' }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function () {
     'use strict';
 

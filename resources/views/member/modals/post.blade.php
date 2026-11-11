@@ -789,7 +789,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 // Global Drawer Mutual Exclusivity Coordinator (Prevents crowded modal drawers)
 window.closeAllComposerDrawers = function(exceptId) {
     const drawers = [

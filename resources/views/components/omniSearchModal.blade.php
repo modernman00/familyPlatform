@@ -450,7 +450,7 @@ body.dark-mode .omni-kbd {
 }
 </style>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
     'use strict';
 

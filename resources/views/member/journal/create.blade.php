@@ -265,8 +265,8 @@
 @include('component.submitSpinner')
 
 @push('scripts')
-<script nonce="{{ $nonce ?? '' }}" src="https://cdn.jsdelivr.net/npm/quill@1.3.6/dist/quill.min.js"></script>
-<script nonce="{{ $nonce ?? '' }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}" src="https://cdn.jsdelivr.net/npm/quill@1.3.6/dist/quill.min.js"></script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 document.addEventListener('DOMContentLoaded', function() {
     let quill = null;
     const quillContainer = document.getElementById('quillEditor');

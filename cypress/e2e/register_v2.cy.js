@@ -32,6 +32,7 @@ describe('Register v2 — guided sign-up', () => {
     cy.get('#day').select('4');
     cy.get('#month').select('Jun');
     cy.get('#year').select('1988');
+    cy.get('#gender').select('Female');
     cy.get('#email').clear().type(email);
     cy.get('#mobile').clear().type('+44 7700900123');
   };
@@ -84,7 +85,7 @@ describe('Register v2 — guided sign-up', () => {
       cy.get('[data-fpr-step="2"]').should('be.visible');
 
       cy.get('#fprNext').click();
-      ['firstName', 'lastName', 'Date_of_Birth', 'email', 'mobile'].forEach((id) => {
+      ['firstName', 'lastName', 'Date_of_Birth', 'gender', 'email', 'mobile'].forEach((id) => {
         cy.get(`#${id}_error`).should('not.be.empty');
       });
 

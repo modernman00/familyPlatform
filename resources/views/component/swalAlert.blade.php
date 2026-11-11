@@ -4,7 +4,7 @@
   Intercepts native window.alert to guarantee zero thread-blocking OS dialogs.
   Adheres to Global Design Standards v2.0 & British English invariants.
 --}}
-<script nonce="{{ $nonce ?? '' }}" src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}" src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
   .swal2-popup.swal2-toast {
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
@@ -44,7 +44,7 @@
     transform: scale(0.98) !important;
   }
 </style>
-<script nonce="{{ $nonce ?? '' }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
   'use strict';
   if (window.SwalAlertManagerInitialized) return;

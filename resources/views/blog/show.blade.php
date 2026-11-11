@@ -34,7 +34,7 @@
 @section('data-page-id', 'blog-show')
 
 @section('extra_schema')
-<script type="application/ld+json" nonce="{{ $nonce ?? '' }}">
+<script type="application/ld+json" nonce="{{ csp_nonce($nonce ?? null) }}">
 {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
@@ -64,7 +64,7 @@
 @endsection
 
 @section('content')
-<style nonce="{{ $nonce ?? '' }}">
+<style nonce="{{ csp_nonce($nonce ?? null) }}">
     .article-container {
         max-width: 860px;
         margin: 0 auto;
@@ -498,7 +498,7 @@
 @endsection
 
 @section('extra_js')
-<script nonce="{{ $nonce ?? '' }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 document.addEventListener('DOMContentLoaded', function () {
     const shareModalEl = document.getElementById('blogShareModal');
     let shareModal = null;

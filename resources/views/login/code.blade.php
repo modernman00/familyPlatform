@@ -8,7 +8,7 @@
 
 @include('partials.loader', ['scriptOnly' => true])
 
-<style nonce="{{ $nonce }}">
+<style nonce="{{ csp_nonce($nonce ?? null) }}">
     .otp-box {
         width: 54px;
         min-width: 42px;
@@ -143,7 +143,7 @@
     </form>
 </div>
 
-<script nonce="{{ $nonce }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 function otpComponent() {
     return {
         digits: ['', '', '', '', '', ''],

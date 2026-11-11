@@ -384,7 +384,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 /**
  * Alpine component managing the 3-Month Upcoming Events Interactive Modal Schedule
  */

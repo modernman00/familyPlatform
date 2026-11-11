@@ -176,7 +176,7 @@
   </main>
 
   <!-- Interactive Kinship Logic Script -->
-  <script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}">
     (function() {
       const TABLE = {
         // [g1, g2] relative to common ancestor

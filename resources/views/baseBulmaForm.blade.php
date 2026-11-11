@@ -22,7 +22,7 @@
         <link rel="stylesheet" href="/public/noscript.css" />
     </noscript>
 
-    <script nonce="{{ $nonce }}" src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}" src="https://www.google.com/recaptcha/api.js" async defer></script>
 
 
     <!-- Favicons -->
@@ -273,7 +273,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
         document.addEventListener('DOMContentLoaded', () => {
             const burger = document.querySelector('.navbar-burger');
             const menu = document.getElementById('navbarMenu');
@@ -285,12 +285,12 @@
         });
     </script>
 
-    <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/manifest.js"></script>
-    <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/vendor.js"></script>
-    <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/index.js"></script>
-    <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
+    <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/manifest.js"></script>
+    <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/vendor.js"></script>
+    <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/index.js"></script>
+    <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
     {{-- 
-    <script type="text/javascript" nonce="{{ $nonce }}"  src="public/js/shared-lib.js" defer></script> --}}
+    <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}"  src="public/js/shared-lib.js" defer></script> --}}
 
 
     @yield('extra_js')

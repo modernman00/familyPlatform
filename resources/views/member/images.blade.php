@@ -416,7 +416,7 @@
 
     </div>
 
-    <script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
         // Gallery Lightbox State
         const galleryImages = @json(array_values($data ?? []));
         let currentLightboxIndex = 0;

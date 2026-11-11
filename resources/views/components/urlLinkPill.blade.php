@@ -89,7 +89,7 @@
     <span class="visually-hidden" id="{{ $pillId }}_raw" aria-hidden="true">{{ $pillUrl }}</span>
 </div>
 
-<script nonce="{{ $nonce ?? '' }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
     var copyBtn = document.getElementById('{{ $pillId }}_copyBtn');
     if (!copyBtn) return;

@@ -194,7 +194,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 if (typeof window.discoveryJourneyWidget !== 'function') {
     window.discoveryJourneyWidget = function() {
         return {

@@ -44,7 +44,7 @@
 </div>
 
 <script src="/public/js/heirloom-animator.js"></script>
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 document.addEventListener('DOMContentLoaded', function() {
     var canvas = document.getElementById('heirloomCanvas');
     var startBtn = document.getElementById('startHeirloomAnimBtn');

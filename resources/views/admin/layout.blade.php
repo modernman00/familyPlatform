@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="/public/css/standards-v21.css?v={{ assetVersion('css/standards-v21.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -256,7 +256,7 @@
     </footer>
 
     <!-- Global Scripts -->
-    <script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
         function switchAppFilter(appName) {
             const currentUrl = new URL(window.location.href);
             if (appName === 'all') {

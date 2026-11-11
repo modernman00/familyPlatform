@@ -16,7 +16,7 @@
   <button type="submit">Upload</button>
 </form>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 document.getElementById('uploadButton').addEventListener('click', function() {
   document.getElementById('fileInput').click();
 });

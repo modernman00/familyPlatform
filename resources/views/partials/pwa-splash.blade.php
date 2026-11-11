@@ -324,7 +324,7 @@ html.fp-pwa-splash-active #fp-pwa-splash {
 }
 </style>
 
-<script nonce="{{ $nonce ?? '' }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
     try {
         var splash = document.getElementById('fp-pwa-splash');

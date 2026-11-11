@@ -44,7 +44,7 @@ describe('Family Hub tool dock', () => {
         cy.get('#flyerEngineFrame').should('have.attr', 'src', '/poster-studio?app=familyplatform');
         cy.get('#flyerEngineCard .fhub-engine-stage', { timeout: 20000 }).should('have.class', 'is-ready');
         cy.get('#flyerEngineFrame').its('0.contentDocument.body').should('not.be.empty')
-            .find('#presetSelect').should('exist');
+            .find('#psCanvas').should('exist');
         cy.get('#btnFlyerEngineGuide').should('not.be.disabled');
     });
 });

@@ -396,7 +396,7 @@
                 </div>
             </div>
         </div>
-        <script>
+        <script nonce="{{ csp_nonce($nonce ?? null) }}">
             function toggleWeddingDatePrompt(status) {
                 var container = document.getElementById('weddingDateContainer');
                 if (!container) return;

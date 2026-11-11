@@ -493,7 +493,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
     // Quadrant 1: Stages Definition
     const stages = [
         {

@@ -212,7 +212,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 async function updateAudienceCount() {
     const targetApp = document.getElementById('broadcastTargetApp').value;
     const channel = document.getElementById('broadcastChannel').value;

@@ -318,7 +318,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
         // Add functionality to the buttons
         document.querySelectorAll('.btn-confirm').forEach(button => {
             button.addEventListener('click', function() {

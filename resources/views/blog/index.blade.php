@@ -14,7 +14,7 @@
 @section('data-page-id', 'blog-index')
 
 @section('extra_schema')
-<script type="application/ld+json" nonce="{{ $nonce ?? '' }}">
+<script type="application/ld+json" nonce="{{ csp_nonce($nonce ?? null) }}">
 {
   "@context": "https://schema.org",
   "@type": "Blog",
@@ -35,7 +35,7 @@
 @endsection
 
 @section('content')
-<style nonce="{{ $nonce ?? '' }}">
+<style nonce="{{ csp_nonce($nonce ?? null) }}">
     .blog-hero {
         background: radial-gradient(circle at 10% 20%, rgba(163,22,33, 0.12) 0%, rgba(122,14,22, 0.07) 90%);
         border-radius: 1.5rem;
@@ -438,7 +438,7 @@
 @endsection
 
 @section('extra_js')
-<script nonce="{{ $nonce ?? '' }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 document.addEventListener('DOMContentLoaded', function () {
     const shareModalEl = document.getElementById('blogShareModal');
     let shareModal = null;

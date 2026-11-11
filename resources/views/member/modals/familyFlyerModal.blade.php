@@ -95,7 +95,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
     let flyerRendered = false;
     let flyerInviteUrl = window.location.origin + '/register';

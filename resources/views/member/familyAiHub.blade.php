@@ -1892,7 +1892,7 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
     // 🛡️ INLINE FAMILY ROUNDTABLE PEACEMAKER ARBITRATION
     async function handleInlineArbitrate(e) {
         e.preventDefault();
@@ -2855,7 +2855,7 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
     });
 </script>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
     // 🎨 FLYER STUDIO — lazy-mount the shared Universal Poster Engine when the tab is first opened
     document.addEventListener('DOMContentLoaded', function () {
         const tabBtn = document.getElementById('tab-flyer-btn');
@@ -2901,7 +2901,7 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
     });
 </script>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
     // ✨ HUB TOOL DOCK — sticky offset, shareable ?tool= link per tool, remembers last-used tool
     // (a query param, not #hash: navbar.js highlights any element whose id contains the hash)
     document.addEventListener('DOMContentLoaded', function () {

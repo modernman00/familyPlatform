@@ -225,7 +225,7 @@
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
 <!-- Initialize Quill editor, AI Story Generation and Form Submission -->
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize Quill
     var quill = new Quill('#editor-container', {

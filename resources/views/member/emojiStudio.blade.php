@@ -309,7 +309,7 @@
     </div>
 </div>
 
-<script nonce="{{ $nonce ?? '' }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
     function switchAtgTab(tabId, btn) {
         document.querySelectorAll('.atg-tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.atg-tab-content').forEach(c => c.style.display = 'none');

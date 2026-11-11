@@ -58,7 +58,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 document.addEventListener('DOMContentLoaded', function() {
     var mode2DBtn = document.getElementById('familyMode2DBtn');
     var mode3DBtn = document.getElementById('familyMode3DBtn');

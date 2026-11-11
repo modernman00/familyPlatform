@@ -882,7 +882,7 @@
             </div>
         </div>
     </div>
-    <script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
         function openFillParentModal(nodeData) {
             document.getElementById('fillParentNodeId').value = nodeData.id;
             document.getElementById('fillParentTitle').textContent = 'Add ' + (/^(Father|Mother)$/.test(nodeData.name || '') ? nodeData.name.toLowerCase() : (nodeData.name || 'details'));
@@ -1364,7 +1364,7 @@
 @include('member.includes.treeAccessModals')
 @include('component.swalAlert')
 <script src="/public/js/vendor/kinshiptree.js?v=10.2"></script>
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
     window.__ROOT_USER_ID__ = '{{ $data['id'] ?? '' }}';
     window.__LOGGED_IN_USER_ID__ = '{{ $_SESSION['id'] ?? '' }}';
     window.__VIEWED_MEMBER_NAME__ = '{{ trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? '')) }}';

@@ -59,7 +59,7 @@
     }
 @endphp
 
-<style nonce="{{ $nonce ?? '' }}">
+<style nonce="{{ csp_nonce($nonce ?? null) }}">
     /* ══════════════════════════════════════════════════════════════════════
        PORTFOLIO UNIVERSAL SOCIAL SHARE DOCK (Desktop & Mobile)
        Strict v2.0 Design Standard: Fitts's Law >=44px, WCAG AA Contrast,
@@ -407,7 +407,7 @@
     </div>
 </div>
 
-<script nonce="{{ $nonce ?? '' }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
     const universalShareData = {
         title: "{{ addslashes($finalShareTitle) }}",
         text: "{{ addslashes($finalShareText) }}",

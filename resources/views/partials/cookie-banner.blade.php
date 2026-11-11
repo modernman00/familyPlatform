@@ -24,7 +24,7 @@
   </div>
 </div>
 
-<style nonce="{{ $nonce ?? '' }}">
+<style nonce="{{ csp_nonce($nonce ?? null) }}">
   #cookieBanner {
     position: fixed;
     left: 0; right: 0; bottom: 0;
@@ -85,7 +85,7 @@
   }
 </style>
 
-<script nonce="{{ $nonce ?? '' }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function () {
   'use strict';
   if (window.__cookieConsent) return;

@@ -308,7 +308,7 @@
     </div>
 
     @if($isApproved)
-    <script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
         // Celebratory confetti particles
         (function() {
             const colors = ['#a31621', '#7a0e16', '#f59e0b', '#ec4899', '#b8202c', '#10b981'];

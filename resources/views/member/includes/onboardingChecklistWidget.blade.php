@@ -158,7 +158,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 if (typeof window.onboardingChecklist !== 'function') {
     window.onboardingChecklist = function() {
         return {

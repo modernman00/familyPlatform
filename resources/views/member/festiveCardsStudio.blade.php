@@ -182,7 +182,7 @@
 
 @section('content')
 @include('member.creativeStudioTabs', ['creativeTab' => 'cards'])
-<script nonce="{{ $nonce ?? '' }}" src="/public/js/festive-cards.js?v={{ assetVersion('js/festive-cards.js') }}"></script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/festive-cards.js?v={{ assetVersion('js/festive-cards.js') }}"></script>
 
 <div class="fs-wrap" x-data="festiveStudioWizard()">
     @include('csrf')
@@ -468,7 +468,7 @@
     </div>
 </div>
 
-<script nonce="{{ $nonce ?? '' }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 function festiveStudioWizard() {
     const occasions = @json($occasions, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
     const themes = @json($themes, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);

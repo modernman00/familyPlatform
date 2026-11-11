@@ -58,7 +58,7 @@
     </div>
 </div>
 
-<script nonce="{{ $nonce ?? '' }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 function closeAdulthoodModal() {
     const modal = document.getElementById('adulthoodMilestoneModal');
     if (modal) {

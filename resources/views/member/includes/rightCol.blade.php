@@ -97,7 +97,7 @@
  </div>
 
  <script src="https://unpkg.com/file-upload-with-preview@4.1.0/dist/file-upload-with-preview.min.js"></script>
- <script>
+ <script nonce="{{ csp_nonce($nonce ?? null) }}">
    const upload = new FileUploadWithPreview("myUniqueUploadId", {
      showDeleteButtonOnImages: true
    });

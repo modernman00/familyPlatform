@@ -530,7 +530,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
     let activeDisputeId = null;
     const selectedWitnesses = new Map();
 

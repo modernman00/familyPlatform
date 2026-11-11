@@ -463,7 +463,7 @@
 @include('component.submitSpinner')
 
 @push('scripts')
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 function atgGifStudio(config) {
     return {
         activeTab: 'collection',

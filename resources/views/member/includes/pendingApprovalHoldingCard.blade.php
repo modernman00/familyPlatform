@@ -132,7 +132,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 function pendingApprovalWidget(initialData) {
     return {
         requestId: initialData.no || 0,

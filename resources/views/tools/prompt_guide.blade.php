@@ -167,7 +167,7 @@
   </main>
 
   <!-- Interactive Script for Copy & Share Buttons -->
-  <script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}">
     document.addEventListener('DOMContentLoaded', function () {
       const guideTitle = {!! json_encode($guide['title'] ?? 'Oral History Guide') !!};
       const guideUrl = window.location.href;

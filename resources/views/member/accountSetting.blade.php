@@ -1348,7 +1348,7 @@
     </div>
   </div>
 
-  <script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}">
   document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 

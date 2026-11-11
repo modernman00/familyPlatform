@@ -74,6 +74,15 @@ class BaseController
 
     public static function viewWithCsp(string $view, array $data = []): void
     {
+        $resolvedNonce = function_exists('csp_nonce')
+            ? csp_nonce(isset($data['nonce']) && is_string($data['nonce']) ? $data['nonce'] : null)
+            : (defined('CSP_NONCE') ? (string) CSP_NONCE : '');
+        if ($resolvedNonce !== '') {
+            $data['nonce'] = $resolvedNonce;
+            if (!isset($data['csp_nonce']) || $data['csp_nonce'] === '') {
+                $data['csp_nonce'] = $resolvedNonce;
+            }
+        }
         Utility::view($view, $data);
     }
 

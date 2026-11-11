@@ -10,7 +10,7 @@
     <meta name="keywords" content="family platform, heritage tree, family social network, private family memories, family archive">
     <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
 
-    <script nonce="{{ $nonce }}">
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
         window.APP_LOCALE = '{{ \App\classes\I18n::getLocale() }}';
         window.__TRANSLATIONS__ = {!! json_encode(\App\classes\I18n::transArray()) !!};
         window.__ = function(k, fb) { return (window.__TRANSLATIONS__ && window.__TRANSLATIONS__[k]) || fb || k; };
@@ -31,7 +31,7 @@
 
     @include('partials.pwa-head')
 
-    <style nonce="{{ $nonce }}">
+    <style nonce="{{ csp_nonce($nonce ?? null) }}">
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
 
         [x-cloak] {
@@ -466,9 +466,9 @@
 
     @if(($_ENV['APP_ENV'] ?? '') !== 'local')
     @if(!empty($_ENV['RECAPTCHA_SITE_KEY']))
-    <script nonce="{{ $nonce }}" src="https://www.google.com/recaptcha/enterprise.js?render={{ $_ENV['RECAPTCHA_SITE_KEY'] }}" async defer></script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}" src="https://www.google.com/recaptcha/enterprise.js?render={{ $_ENV['RECAPTCHA_SITE_KEY'] }}" async defer></script>
     @endif
-    <script nonce="{{ $nonce }}">
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
         window.RECAPTCHA_SITE_KEY = "{{ $_ENV['RECAPTCHA_SITE_KEY'] ?? '' }}";
     </script>
     @endif

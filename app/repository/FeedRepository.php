@@ -68,6 +68,21 @@ class FeedRepository
     }
 
     /**
+     * Build a correlated EXISTS predicate checking whether $userId holds an approved
+     * requestMgt connection with post.id without multiplying feed rows.
+     */
+    private function approvedConnectionExistsSql(): string
+    {
+        return "EXISTS (
+            SELECT 1
+            FROM requestMgt rm
+            WHERE ((rm.requester_id = ? AND rm.approver_id = post.id)
+                OR (rm.approver_id = ? AND rm.requester_id = post.id))
+              AND LOWER(rm.status) IN ('approved', 'accepted')
+        )";
+    }
+
+    /**
      * Count total visible posts matching user and family codes.
      *
      * @param string $userId
@@ -90,34 +105,27 @@ class FeedRepository
                 ? "post.postFamCode IN ($inQuery)"
                 : "1 = 0";
 
+            $approvedConn = $this->approvedConnectionExistsSql();
+
             $query = "SELECT COUNT(*) as total
                 FROM post
-                LEFT JOIN (
-                    SELECT requester_id, approver_id, status, requesterCode
-                    FROM requestMgt
-                    WHERE (requester_id = ? OR approver_id = ?)
-                      AND LOWER(status) IN ('approved', 'accepted')
-                ) AS rm ON (post.id = rm.approver_id OR post.id = rm.requester_id)
                 WHERE (
                     post.id = ?
                     OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_no = post.post_no AND pt.user_id = ?)
                     OR post.id = ?
                     OR (
                         EXISTS (SELECT 1 FROM post_family_targets pft_all WHERE pft_all.post_no = post.post_no)
-                        AND (
-                            {$targetCheck}
-                            OR (
-                                COALESCE(post.target_scope, 'all') = 'all'
-                                AND (rm.approver_id IS NOT NULL OR rm.requester_id IS NOT NULL)
-                            )
-                        )
+                        AND {$targetCheck}
                     )
                     OR (
                         NOT EXISTS (SELECT 1 FROM post_family_targets pft_none WHERE pft_none.post_no = post.post_no)
+                        AND {$legacyCodeCheck}
+                    )
+                    OR (
+                        {$approvedConn}
                         AND (
-                            {$legacyCodeCheck}
-                            OR rm.approver_id IS NOT NULL
-                            OR rm.requester_id IS NOT NULL
+                            NOT EXISTS (SELECT 1 FROM post_family_targets pft_none2 WHERE pft_none2.post_no = post.post_no)
+                            OR COALESCE(post.target_scope, 'all') = 'all'
                         )
                     )
                 )
@@ -127,13 +135,13 @@ class FeedRepository
             $params = [
                 $userId,
                 $userId,
-                $userId,
-                $userId,
                 \App\services\FamilyPlatformAccountService::getAccountId()
             ];
             if ($hasFamCodes) {
                 $params = array_merge($params, $cleanedCodes, $cleanedCodes);
             }
+            $params[] = $userId;
+            $params[] = $userId;
 
             if ($filter === 'tagged') {
                 $query .= " AND EXISTS (SELECT 1 FROM post_tags pt_filter WHERE pt_filter.post_no = post.post_no AND pt_filter.user_id = ?)";
@@ -163,9 +171,10 @@ class FeedRepository
     public function getPostByNo(int $postNo, ?string $currentUserId = null): ?PostDto
     {
         try {
-            $query = "SELECT post.*, pp.img, NULLIF(TRIM(CONCAT(COALESCE(p_author.firstName, ''), ' ', COALESCE(p_author.lastName, ''))), '') AS personalFullName
+            $query = "SELECT post.*,
+                    (SELECT pp.img FROM profilePics pp WHERE pp.id = post.id ORDER BY pp.no DESC LIMIT 1) AS img,
+                    NULLIF(TRIM(CONCAT(COALESCE(p_author.firstName, ''), ' ', COALESCE(p_author.lastName, ''))), '') AS personalFullName
                 FROM post
-                LEFT JOIN profilePics pp ON post.id = pp.id
                 LEFT JOIN personal p_author ON post.id = p_author.id
                 WHERE post.post_no = ?
                 AND post.date_deleted IS NULL
@@ -218,35 +227,29 @@ class FeedRepository
                 ? "post.postFamCode IN ($inQuery)"
                 : "1 = 0";
 
-            $query = "SELECT post.*, pp.img, rm.requester_id, rm.approver_id, rm.status, rm.requesterCode, NULLIF(TRIM(CONCAT(COALESCE(p_author.firstName, ''), ' ', COALESCE(p_author.lastName, ''))), '') AS personalFullName
+            $approvedConn = $this->approvedConnectionExistsSql();
+
+            $query = "SELECT post.*,
+                    (SELECT pp.img FROM profilePics pp WHERE pp.id = post.id ORDER BY pp.no DESC LIMIT 1) AS img,
+                    NULLIF(TRIM(CONCAT(COALESCE(p_author.firstName, ''), ' ', COALESCE(p_author.lastName, ''))), '') AS personalFullName
                 FROM post
-                LEFT JOIN profilePics pp ON post.id = pp.id
                 LEFT JOIN personal p_author ON post.id = p_author.id
-                LEFT JOIN (
-                    SELECT requester_id, approver_id, status, requesterCode
-                    FROM requestMgt
-                    WHERE (requester_id = ? OR approver_id = ?)
-                      AND LOWER(status) IN ('approved', 'accepted')
-                ) AS rm ON (post.id = rm.approver_id OR post.id = rm.requester_id)
                 WHERE (
                     post.id = ?
                     OR post.id = ?
                     OR (
                         EXISTS (SELECT 1 FROM post_family_targets pft_all WHERE pft_all.post_no = post.post_no)
-                        AND (
-                            {$targetCheck}
-                            OR (
-                                COALESCE(post.target_scope, 'all') = 'all'
-                                AND (rm.approver_id IS NOT NULL OR rm.requester_id IS NOT NULL)
-                            )
-                        )
+                        AND {$targetCheck}
                     )
                     OR (
                         NOT EXISTS (SELECT 1 FROM post_family_targets pft_none WHERE pft_none.post_no = post.post_no)
+                        AND {$legacyCodeCheck}
+                    )
+                    OR (
+                        {$approvedConn}
                         AND (
-                            {$legacyCodeCheck}
-                            OR rm.approver_id IS NOT NULL
-                            OR rm.requester_id IS NOT NULL
+                            NOT EXISTS (SELECT 1 FROM post_family_targets pft_none2 WHERE pft_none2.post_no = post.post_no)
+                            OR COALESCE(post.target_scope, 'all') = 'all'
                         )
                     )
                 ) 
@@ -257,13 +260,13 @@ class FeedRepository
 
             $params = [
                 $userId,
-                $userId,
-                $userId,
                 \App\services\FamilyPlatformAccountService::getAccountId()
             ];
             if ($hasFamCodes) {
                 $params = array_merge($params, $cleanedCodes, $cleanedCodes);
             }
+            $params[] = $userId;
+            $params[] = $userId;
 
             $stmt = $this->db->prepare($query);
             foreach ($params as $key => $val) {
@@ -314,36 +317,30 @@ class FeedRepository
                 ? "post.postFamCode IN ($inQuery)"
                 : "1 = 0";
 
-            $query = "SELECT post.*, pp.img, rm.requester_id, rm.approver_id, rm.status, rm.requesterCode, NULLIF(TRIM(CONCAT(COALESCE(p_author.firstName, ''), ' ', COALESCE(p_author.lastName, ''))), '') AS personalFullName
+            $approvedConn = $this->approvedConnectionExistsSql();
+
+            $query = "SELECT post.*,
+                    (SELECT pp.img FROM profilePics pp WHERE pp.id = post.id ORDER BY pp.no DESC LIMIT 1) AS img,
+                    NULLIF(TRIM(CONCAT(COALESCE(p_author.firstName, ''), ' ', COALESCE(p_author.lastName, ''))), '') AS personalFullName
                 FROM post
-                LEFT JOIN profilePics pp ON post.id = pp.id
                 LEFT JOIN personal p_author ON post.id = p_author.id
-                LEFT JOIN (
-                    SELECT requester_id, approver_id, status, requesterCode
-                    FROM requestMgt
-                    WHERE (requester_id = ? OR approver_id = ?)
-                      AND LOWER(status) IN ('approved', 'accepted')
-                ) AS rm ON (post.id = rm.approver_id OR post.id = rm.requester_id)
                 WHERE (
                     post.id = ?
                     OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_no = post.post_no AND pt.user_id = ?)
                     OR post.id = ?
                     OR (
                         EXISTS (SELECT 1 FROM post_family_targets pft_all WHERE pft_all.post_no = post.post_no)
-                        AND (
-                            {$targetCheck}
-                            OR (
-                                COALESCE(post.target_scope, 'all') = 'all'
-                                AND (rm.approver_id IS NOT NULL OR rm.requester_id IS NOT NULL)
-                            )
-                        )
+                        AND {$targetCheck}
                     )
                     OR (
                         NOT EXISTS (SELECT 1 FROM post_family_targets pft_none WHERE pft_none.post_no = post.post_no)
+                        AND {$legacyCodeCheck}
+                    )
+                    OR (
+                        {$approvedConn}
                         AND (
-                            {$legacyCodeCheck}
-                            OR rm.approver_id IS NOT NULL
-                            OR rm.requester_id IS NOT NULL
+                            NOT EXISTS (SELECT 1 FROM post_family_targets pft_none2 WHERE pft_none2.post_no = post.post_no)
+                            OR COALESCE(post.target_scope, 'all') = 'all'
                         )
                     )
                 )
@@ -353,13 +350,13 @@ class FeedRepository
             $params = [
                 $userId,
                 $userId,
-                $userId,
-                $userId,
                 \App\services\FamilyPlatformAccountService::getAccountId()
             ];
             if ($hasFamCodes) {
                 $params = array_merge($params, $cleanedCodes, $cleanedCodes);
             }
+            $params[] = $userId;
+            $params[] = $userId;
 
             if ($filter === 'tagged') {
                 $query .= " AND EXISTS (SELECT 1 FROM post_tags pt_filter WHERE pt_filter.post_no = post.post_no AND pt_filter.user_id = ?)";
@@ -421,10 +418,10 @@ class FeedRepository
         try {
             $tagPlaceholders = implode(',', array_fill(0, count($postIds), '?'));
             $tagSql = sprintf(
-                "SELECT pt.post_no, pt.user_id, pt.tagged_by, p.firstName, p.lastName, pp.img 
+                "SELECT pt.post_no, pt.user_id, pt.tagged_by, p.firstName, p.lastName,
+                    (SELECT pp.img FROM profilePics pp WHERE pp.id = pt.user_id ORDER BY pp.no DESC LIMIT 1) AS img
                 FROM post_tags pt 
                 JOIN personal p ON pt.user_id = p.id 
-                LEFT JOIN profilePics pp ON pt.user_id = pp.id 
                 WHERE pt.post_no IN (%s)
                 ORDER BY pt.id ASC",
                 $tagPlaceholders

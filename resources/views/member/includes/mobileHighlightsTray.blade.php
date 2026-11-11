@@ -256,7 +256,7 @@ foreach(($eventData ?? []) as $event) {
 }
 </style>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 if (typeof window.mobileHighlightsTray !== 'function') {
     window.mobileHighlightsTray = function(initialEvents) {
         return {

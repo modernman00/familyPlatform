@@ -22,7 +22,7 @@
         'family' => __('reg.tree_family', 'Your family'),
     ];
 @endphp
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function () {
     'use strict';
     const MSG = @json($fprMsg);

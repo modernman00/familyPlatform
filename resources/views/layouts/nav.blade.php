@@ -120,7 +120,7 @@
   </a>
 </div>
 
-<script defer>
+<script nonce="{{ csp_nonce($nonce ?? null) }}" defer>
   const openNavBar = () => {
     const x = document.getElementById("navDemo");
     if(x.className.indexOf("w3-show") == -1){

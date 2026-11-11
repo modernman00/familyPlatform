@@ -84,7 +84,7 @@
     </form>
 </div>
 
-<script nonce="{{ $nonce }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 function forgotComponent() {
     return {
         email: ''

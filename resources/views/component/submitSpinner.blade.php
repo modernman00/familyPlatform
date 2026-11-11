@@ -33,7 +33,7 @@
     pointer-events: none !important;
   }
 </style>
-<script nonce="{{ $nonce ?? '' }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
   if (window.FamilyPlatformSpinner) return;
 

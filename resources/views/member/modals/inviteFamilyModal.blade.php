@@ -256,7 +256,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
     let primaryInviteData = {
         invite_url: '',

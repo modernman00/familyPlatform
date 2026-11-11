@@ -10,11 +10,11 @@ describe('Button Sleekness, Modernity and Mobile Touch Ergonomics', () => {
     it('verifies desktop buttons are sleek, modern and styled correctly', () => {
         cy.viewport(1280, 800);
         cy.visit('/login');
-        cy.get('.stitch-submit').should('be.visible').then(($btn) => {
+        cy.get('#login #button.btn-primary').should('be.visible').then(($btn) => {
             const borderRadius = parseFloat($btn.css('border-radius'));
             expect(borderRadius).to.be.at.least(8);
         });
-        cy.get('.stitch-social-btn.google').should('be.visible');
+        cy.get('a.btn-outline-social[href^="/auth/google"]').should('be.visible');
         cy.screenshot('button_login_desktop');
     });
 
@@ -22,13 +22,13 @@ describe('Button Sleekness, Modernity and Mobile Touch Ergonomics', () => {
         cy.viewport(390, 844); // iPhone 14 / standard modern mobile
         cy.visit('/login');
 
-        cy.get('.stitch-submit').should('be.visible').then(($btn) => {
+        cy.get('#login #button.btn-primary').should('be.visible').then(($btn) => {
             const height = $btn.outerHeight();
             expect(height).to.be.at.least(44); // Segun & Apple touch target >= 44px
-            expect(height).to.be.lessThan(52); // Sleek, non-bulky (under 52px)
+            expect(height).to.be.lessThan(56); // Sleek, non-bulky touch-friendly primary CTA
         });
 
-        cy.get('.stitch-social-btn.google').should('be.visible').then(($btn) => {
+        cy.get('a.btn-outline-social[href^="/auth/google"]').should('be.visible').then(($btn) => {
             const height = $btn.outerHeight();
             expect(height).to.be.at.least(44);
             expect(height).to.be.lessThan(52);
@@ -47,10 +47,10 @@ describe('Button Sleekness, Modernity and Mobile Touch Ergonomics', () => {
         cy.viewport(390, 844);
         cy.visit('/login/forgot?verify=1');
 
-        cy.get('.stitch-submit').should('be.visible').then(($btn) => {
+        cy.get('#forgot #button.btn-primary').should('be.visible').then(($btn) => {
             const height = $btn.outerHeight();
             expect(height).to.be.at.least(44);
-            expect(height).to.be.lessThan(52);
+            expect(height).to.be.lessThan(56);
             const borderRadius = parseFloat($btn.css('border-radius'));
             expect(borderRadius).to.be.at.least(10);
         });
@@ -103,7 +103,7 @@ describe('Button Sleekness, Modernity and Mobile Touch Ergonomics', () => {
         cy.visit('/login');
         cy.window().then((win) => {
             expect(win.FamilyPlatformSpinner).to.exist;
-            const btn = win.document.querySelector('.stitch-submit');
+            const btn = win.document.querySelector('#login #button.btn-primary');
             expect(btn).to.exist;
             
             // Trigger spinner

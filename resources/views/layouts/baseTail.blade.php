@@ -46,7 +46,7 @@
     <link rel="stylesheet" href="/public/css/standards-v21.css?v={{ assetVersion('css/standards-v21.css') }}" />
 
 
-    <script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
         tailwind.config = {
             darkMode: "class",
             theme: {
@@ -289,7 +289,7 @@
                 href="/aboutus">About us</a>
         </div>
     </div>
-    <script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
         // Simple toggle for dark mode demonstration (optional, usually handled by system pref)
         // Checks system preference on load
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -297,12 +297,12 @@
         }
     </script>
 
-      <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/manifest.js" defer></script>
-    <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/vendor.js" defer></script>
-    <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/index.js" defer></script>
-    <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/pwa-notifications.js" defer></script>
-    <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>
-    <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
+      <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="public/js/manifest.js" defer></script>
+    <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="public/js/vendor.js" defer></script>
+    <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="public/js/index.js" defer></script>
+    <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/pwa-notifications.js" defer></script>
+    <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>
+    <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
     @include('partials.push-notification-banner')
     @include('component.submitSpinner')
     @include('partials.pwa-register')

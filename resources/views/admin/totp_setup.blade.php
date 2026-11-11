@@ -103,7 +103,7 @@
 {{-- QRCode.js CDN --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
     // Render QR code
     const otpauthUri = "{{ $qrUri }}";
     new QRCode(document.getElementById('qrcode'), {

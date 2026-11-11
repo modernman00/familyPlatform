@@ -2,7 +2,7 @@
   PWA Service Worker Registration & Push Notification Self-Healing Partial: FamilyPlatform
   Registers the canonical root-scoped /sw.js worker and initializes continuous self-healing push subscription (ExecMind Gold Standard).
 --}}
-<script nonce="{{ $nonce ?? '' }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
   'use strict';
 

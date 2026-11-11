@@ -43,7 +43,7 @@
 
 @section('extra_js')
 @include('components.auth.family-code-script')
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 // Register v2: the post-sign-up dialog. Submission itself is handled in
 // registration/include/registerSteps.blade.php, which calls window.fprShowDone().
 (function () {
@@ -276,7 +276,7 @@
                 <span class="d-block" style="font-size: 0.85rem;">For fastest 1-tap sign-in with Google, tap the menu (<strong>⋮</strong> or <strong>⋯</strong>) and choose <strong>"Open in Browser"</strong>.</span>
             </div>
         </div>
-        <script>
+        <script nonce="{{ csp_nonce($nonce ?? null) }}">
             (function() {
                 const ua = navigator.userAgent || navigator.vendor || window.opera;
                 if (ua && (ua.includes('FBAN') || ua.includes('FBAV') || ua.includes('Instagram') || ua.includes('WhatsApp'))) {
@@ -566,7 +566,7 @@
 </div>
 
 @if (getenv('APP_ENV') === 'development' || getenv('APP_ENV') === 'local')
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
     document.addEventListener("DOMContentLoaded", function() {
         const termsCheckbox = document.getElementById('checkbox');
         if (termsCheckbox && @json(!empty($registerPostData['password']))) termsCheckbox.checked = true;

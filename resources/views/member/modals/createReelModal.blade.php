@@ -126,7 +126,7 @@
                         <input type="text" name="custom_category" id="reelCustomCategory" maxlength="30"
                                class="form-control rounded-pill mt-2 d-none" placeholder="e.g. Game Night"
                                style="font-size: 0.88rem; padding: 8px 16px;" autocomplete="off">
-                        <script>
+                        <script nonce="{{ csp_nonce($nonce ?? null) }}">
                         (function () {
                             var sel = document.currentScript.parentElement.querySelector('select[name="category"]');
                             var inp = document.getElementById('reelCustomCategory');

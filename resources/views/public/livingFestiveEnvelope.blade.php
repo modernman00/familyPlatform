@@ -46,7 +46,7 @@
     <link rel="stylesheet" href="/public/css/festive-cards.css?v={{ assetVersion('css/festive-cards.css') }}">
     <link rel="preload" as="image" href="{{ $card['portrait_image_url'] }}">
 
-    <style nonce="{{ $nonce ?? '' }}">
+    <style nonce="{{ csp_nonce($nonce ?? null) }}">
         :root {
             --primary: {{ $theme['primary_color'] ?? '#7a0f2a' }};
             --accent: {{ $theme['accent_color'] ?? '#d4af37' }};
@@ -281,8 +281,8 @@
         The private home for your family’s stories, tree and celebrations. <a href="{{ $replyHref }}">Create yours</a>
     </footer>
 
-    <script nonce="{{ $nonce ?? '' }}" src="/public/js/festive-cards.js?v={{ assetVersion('js/festive-cards.js') }}"></script>
-    <script nonce="{{ $nonce ?? '' }}">
+    <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/festive-cards.js?v={{ assetVersion('js/festive-cards.js') }}"></script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
         const FESTIVE = {
             particle: {!! json_encode((string)($card['particle'] ?? 'snow'), $jsonSafeFlags) !!},
             mood: {!! json_encode($mood, $jsonSafeFlags) !!},
@@ -523,6 +523,6 @@
             };
         })();
     </script>
-    <script nonce="{{ $nonce ?? '' }}" defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}" defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
 </body>
 </html>

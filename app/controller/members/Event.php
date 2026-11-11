@@ -66,12 +66,12 @@ final class Event extends AllMembersData
                     'min'  => [3,  0],
                     'max'  => [100, 500]
                 ],
-                removeKeys: ['submit', 'token', 'grecaptcharesponse', 'awnqylrds9sip', 'enable_party_platform'],
+                removeKeys: ['submit', 'button', 'token', '_token', 'csrf_token', 'g-recaptcha-response', 'grecaptcharesponse', 'siteKey', 'action', 'awnqylrds9sip', 'enable_party_platform'],
                 newInput: [
                     'eventCode' => $famCodeRaw,
                     'id' => $hostIdRaw
                 ],
-                optionalFields: ['eventDescription']
+                optionalFields: ['eventDescription', 'token', '_token', 'csrf_token']
             );
 
             if (!$retunLastId) {

@@ -18,67 +18,71 @@ describe('Kinship Suggestion Engine (People You May Know)', () => {
     // ------------------------------------------------------------------
     describe('Kinship Radar Widget', () => {
 
-        it('renders the Kinship Radar widget in the right sidebar', () => {
-            cy.get('#kinshipRadarWidget', { timeout: 15000 }).should('exist');
-            cy.get('#kinshipRadarWidget').within(() => {
+        it('renders the Kinship Radar widget in the feed carousel', () => {
+            cy.get('#kinshipRadarWidgetMobile', { timeout: 15000 }).should('exist').and('be.visible');
+            cy.get('#kinshipRadarWidgetMobile').within(() => {
                 cy.contains('Suggested Kin & In-Laws').should('be.visible');
                 cy.contains('Kinship Radar').should('be.visible');
             });
         });
 
         it('shows suggestion cards with match percentage and kinship type', () => {
-            cy.get('#kinshipRadarWidget', { timeout: 15000 }).should('exist');
+            cy.get('#kinshipRadarWidgetMobile', { timeout: 15000 }).should('exist').and('be.visible');
             // cy.get() retries until it finds at least one match and fails the test
             // on timeout if none ever appear, so it can't itself yield an empty
             // collection for a "0 or more" check - query through cy.get('body').find()
             // instead, which returns whatever it finds (including zero) immediately.
             cy.get('body').then(($body) => {
-                const $cards = $body.find('#kinshipRadarWidget .kinship-item-card');
+                const $cards = $body.find('#kinshipRadarWidgetMobile .kinship-item-card--carousel');
                 if ($cards.length > 0) {
                     // Each card should have a match badge and kinship type
                     cy.wrap($cards.first()).within(() => {
                         cy.get('.kin-match-pill').should('contain.text', 'Match');
-                        cy.get('.kin-type-label').invoke('text').should('have.length.gt', 0); // kinship type label
+                        cy.get('.kin-type-badge').invoke('text').should('have.length.gt', 0);
                     });
                 } else {
                     // Empty state message should be visible
-                    cy.get('#kinshipRadarWidget').should('contain.text', 'connected to all nearby kin');
+                    cy.get('#kinshipRadarWidgetMobile').should('contain.text', 'connected to all nearby kin');
                 }
             });
         });
 
         it('can dismiss a suggestion card', () => {
-            cy.get('#kinshipRadarWidget', { timeout: 15000 }).should('exist');
+            cy.get('#kinshipRadarWidgetMobile', { timeout: 15000 }).should('exist').and('be.visible');
             cy.get('body').then(($body) => {
-                const $cards = $body.find('#kinshipRadarWidget .kinship-item-card');
+                const $cards = $body.find('#kinshipRadarWidgetMobile .kinship-item-card--carousel');
                 if ($cards.length > 0) {
                     const initialCount = $cards.length;
-                    // Click the dismiss button on the first card in the desktop
-                    // widget. Scoped to #kinshipRadarWidget — the mobile
-                    // feed-column copy shares the .btn-dismiss-kin class but is
-                    // CSS-hidden (d-lg-none) at this viewport, so a bare
-                    // .first() resolves to an invisible element.
-                    cy.get('#kinshipRadarWidget .btn-dismiss-kin').first().click();
+                    cy.get('#kinshipRadarWidgetMobile .btn-dismiss-kin').first().click();
                     // Card is removed after a 250ms animation; retry until the
                     // count drops below the initial value.
-                    cy.get('#kinshipRadarWidget .kinship-item-card')
+                    cy.get('#kinshipRadarWidgetMobile .kinship-item-card--carousel')
                         .should('have.length.lt', initialCount);
                 }
             });
         });
 
         it('Connect button sends a kinship request', () => {
-            cy.get('#kinshipRadarWidget', { timeout: 15000 }).should('exist');
+            cy.get('#kinshipRadarWidgetMobile', { timeout: 15000 }).should('exist').and('be.visible');
             cy.get('body').then(($body) => {
-                const $cards = $body.find('#kinshipRadarWidget .kinship-item-card');
+                const $cards = $body.find('#kinshipRadarWidgetMobile .kinship-item-card--carousel');
                 if ($cards.length > 0) {
                     cy.intercept('POST', '/members/familyRequestMgt').as('connectReq');
-                    cy.get('#kinshipRadarWidget .btn-connect-kin').first().click();
+                    cy.get('#kinshipRadarWidgetMobile .btn-connect-kin').first().then(($btn) => {
+                        const $track = $btn.closest('.kinship-suggestions-scroll');
+                        if ($track.length) {
+                            $track[0].style.scrollBehavior = 'auto';
+                            $track[0].style.scrollSnapType = 'none';
+                            const $card = $btn.closest('.kinship-item-card--carousel');
+                            $track[0].scrollLeft = $card.length ? Math.max(0, $card[0].offsetLeft - 8) : 260;
+                        }
+                    });
+                    cy.get('#kinshipRadarWidgetMobile .btn-connect-kin').first().click();
                     // Wait for the request to actually fire, then assert the
                     // button reaches its success state. (`.or()` is not a
                     // Cypress chainer.)
                     cy.wait('@connectReq');
-                    cy.get('#kinshipRadarWidget .btn-connect-kin').first()
+                    cy.get('#kinshipRadarWidgetMobile .btn-connect-kin').first()
                         .should('contain.text', 'Request Sent');
                 }
             });
@@ -201,9 +205,9 @@ describe('Kinship Suggestion Engine (People You May Know)', () => {
                 statusCode: 422,
                 body: { status: 'error', message: { first_name: ['First name is invalid'], email: ['Email is invalid'] } },
             }).as('inviteGenerate');
-            cy.get('#inviteFirstName').type('Defensive');
-            cy.get('#btnSubmitInviteFamily').click();
-            cy.wait('@inviteGenerate');
+            cy.get('#inviteFirstName').clear().type('Defensive').should('have.value', 'Defensive');
+            cy.get('#btnSubmitInviteFamily').scrollIntoView().click();
+            cy.wait('@inviteGenerate', { timeout: 10000 });
             // Asserted on display state + text rather than viewport visibility: the alert sits at the
             // top of the modal's scroll container, so it can be scrolled out of view by the long form.
             cy.get('#inviteFamilyError').should('not.have.class', 'd-none').and('have.css', 'display', 'block')

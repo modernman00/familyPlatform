@@ -354,6 +354,15 @@ a:hover {
     @extend #pwa-install-banner;
 }
 
+/* Keep fixed bottom PWA/push prompts out of the way while a modal dialog is open */
+body.modal-open {
+    #pwa-install-banner,
+    #push-permission-banner,
+    #pwa-ios-overlay {
+        display: none !important;
+    }
+}
+
 /* 2. iOS Safari Add to Home Screen Overlay */
 #pwa-ios-overlay {
     position: fixed;

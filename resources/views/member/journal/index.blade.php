@@ -274,7 +274,7 @@
     @endif
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 document.addEventListener('DOMContentLoaded', function() {
     const filterButtons = document.querySelectorAll('#categoryFilters .filter-pill-btn');
     const cols = document.querySelectorAll('.journal-item-col');
@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @push('scripts')
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 function deleteFamilyJournal(id) {
     if (!confirm('Are you sure you want to remove this family chronicle? This cannot be undone.')) {
         return;

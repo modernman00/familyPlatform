@@ -280,7 +280,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
     // Current in-memory state for access policy modal
     window.__treeAccessState = {

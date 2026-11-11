@@ -148,7 +148,7 @@
   </main>
 
   <!-- Client-side Interactive Script -->
-  <script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}">
     (function() {
       const PROMPT_DATABASE = {
         grandparent: {

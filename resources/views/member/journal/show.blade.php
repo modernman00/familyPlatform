@@ -230,7 +230,7 @@
 </div>
 
 @if($isAuthor)
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 function deleteFamilyJournal(id) {
     if (!confirm('Are you sure you want to remove this family chronicle? This cannot be undone.')) {
         return;

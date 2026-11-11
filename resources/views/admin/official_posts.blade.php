@@ -395,7 +395,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 let currentPreset = 'feature';
 
 function selectPreset(preset) {

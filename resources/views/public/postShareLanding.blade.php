@@ -29,7 +29,7 @@
     @if(!empty($shouldRedirect) && !empty($targetRedirectUrl))
         <!-- Instant forward for human visitors -->
         <meta http-equiv="refresh" content="0;url={{ $targetRedirectUrl }}">
-        <script>
+        <script nonce="{{ csp_nonce($nonce ?? null) }}">
             try {
                 window.location.replace({!! json_encode($targetRedirectUrl) !!});
             } catch (e) {

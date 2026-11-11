@@ -179,7 +179,7 @@
       </div>
     </div>
   </div>
-  <script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}">
     (function() {
       if (sessionStorage.getItem('dismissed_anniversary_prompt') === '1') {
         var card = document.getElementById('weddingAnniversaryPromptCard');
@@ -331,7 +331,7 @@
       </div>
     @endforeach
 
-    <script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
       function handleJoinRequestAction(requestId, token, action) {
         const approveBtn = document.getElementById('btnApproveJoin-' + requestId);
         const denyBtn = document.getElementById('btnDenyJoin-' + requestId);
@@ -433,7 +433,7 @@
       </div>
     @endforeach
 
-    <script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
       function handleMigrationNudgeAction(migrationId, token, action) {
         const acceptBtn = document.getElementById('btnAcceptNudge-' + migrationId);
         const declineBtn = document.getElementById('btnDeclineNudge-' + migrationId);
@@ -538,7 +538,7 @@
       </div>
     @endforeach
 
-    <script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
       function handleMigrationRequestAction(migrationId, token, action) {
         const approveBtn = document.getElementById('btnApproveMigReq-' + migrationId);
         const denyBtn = document.getElementById('btnDenyMigReq-' + migrationId);
@@ -625,7 +625,7 @@
       </div>
     </div>
   </div>
-  <script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}">
     function claimFamilyNode(nodeId) {
       const btn = document.getElementById('btnClaimNode');
       if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Linking...'; }

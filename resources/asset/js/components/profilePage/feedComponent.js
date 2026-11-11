@@ -20,6 +20,8 @@ export function profileFeed(opts = {}) {
         feedHasMore: false,
         isLoadingMore: false,
         _serverLoaded: 0,
+        _fetchSeq: 0,
+        _pendingLivePosts: [],
         isLoading: true,
         errorMessage: '',
         lightboxOpen: false,
@@ -673,6 +675,7 @@ export function profileFeed(opts = {}) {
 
         async fetchPosts(options = {}) {
             const filter = options.filter || (this.activeStreamFilter === 'tagged' ? 'tagged' : '');
+            const seq = ++this._fetchSeq;
             this.isLoading = this.posts.length === 0;
             this.errorMessage = '';
 
@@ -680,6 +683,7 @@ export function profileFeed(opts = {}) {
             if (!filter && window.offlineSync && typeof window.offlineSync.getCachedFeed === 'function') {
                 try {
                     const cachedPosts = await window.offlineSync.getCachedFeed();
+                    if (seq !== this._fetchSeq) return;
                     if (Array.isArray(cachedPosts) && cachedPosts.length > 0 && this.posts.length === 0) {
                         // Only hydrate the first page from cache; the rest streams in on scroll.
                         this.posts = cachedPosts.slice(0, this.feedPageSize).map(p => this.normalizePost(p));
@@ -697,12 +701,33 @@ export function profileFeed(opts = {}) {
                 const params = new URLSearchParams({ limit: String(depth), offset: '0' });
                 if (filter) params.set('filter', filter);
                 const response = await axios.get(`/post/getAllPostCommentByFamCode?${params.toString()}`);
+                if (seq !== this._fetchSeq) return;
                 const rawPosts = response?.data?.message?.message;
                 
                 if (Array.isArray(rawPosts)) {
                     this._serverLoaded = rawPosts.length;
                     this.feedHasMore = !!response?.data?.message?.pagination?.has_more;
-                    this.posts = rawPosts.map(p => this.normalizePost(p));
+                    const now = Date.now();
+                    const serverPosts = rawPosts.map(p => this.normalizePost(p));
+                    const serverIds = new Set(serverPosts.map(p => String(p.post_no)));
+                    const stillPending = [];
+                    const missingLive = [];
+                    for (const entry of (this._pendingLivePosts || [])) {
+                        if (!entry || !entry.post || (now - entry.ts) > 30000) continue;
+                        const idKey = String(entry.post.post_no);
+                        if (serverIds.has(idKey)) {
+                            // Server snapshot caught up; keep comparison metadata if server copy lacks it yet.
+                            if (entry.post.comparison) {
+                                const srv = serverPosts.find(p => String(p.post_no) === idKey);
+                                if (srv && !srv.comparison) srv.comparison = entry.post.comparison;
+                            }
+                            continue;
+                        }
+                        stillPending.push(entry);
+                        if (!filter) missingLive.push(entry.post);
+                    }
+                    this._pendingLivePosts = stillPending;
+                    this.posts = missingLive.length > 0 ? [...missingLive, ...serverPosts] : serverPosts;
                     // Update offline store in background if main stream
                     if (!filter && window.offlineSync && typeof window.offlineSync.cacheFeed === 'function') {
                         window.offlineSync.cacheFeed(rawPosts).catch(() => {});
@@ -2940,6 +2965,12 @@ export function profileFeed(opts = {}) {
                     }
 
                     const normalized = this.normalizePost(newPostData);
+                    if (normalized.post_no) {
+                        this._pendingLivePosts = [
+                            { post: normalized, ts: Date.now() },
+                            ...(this._pendingLivePosts || []).filter(e => String(e?.post?.post_no) !== String(normalized.post_no))
+                        ].slice(0, 20);
+                    }
                     const existing = this.posts.find(p => String(p.post_no) === String(normalized.post_no));
                     if (!existing) {
                         this.posts.unshift(normalized);
@@ -3845,7 +3876,14 @@ export function profileFeed(opts = {}) {
                                 return;
                             }
                             if (!this.posts.some(p => String(p.post_no) === String(item?.post_no))) {
-                                this.posts.unshift(this.normalizePost(item));
+                                const normalized = this.normalizePost(item);
+                                if (normalized.post_no) {
+                                    this._pendingLivePosts = [
+                                        { post: normalized, ts: Date.now() },
+                                        ...(this._pendingLivePosts || []).filter(e => String(e?.post?.post_no) !== String(normalized.post_no))
+                                    ].slice(0, 20);
+                                }
+                                this.posts.unshift(normalized);
                             }
                         });
                         this.observeFeedVideos();

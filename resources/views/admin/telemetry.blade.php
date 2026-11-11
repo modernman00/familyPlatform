@@ -170,7 +170,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 document.addEventListener('DOMContentLoaded', function () {
     async function loadTelemetryStats() {
         try {

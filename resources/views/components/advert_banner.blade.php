@@ -332,7 +332,7 @@
 }
 </style>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
     const bannerId = '{{ $bannerId }}';
     const storageKey = 'pp_dismiss_banner_' + bannerId;

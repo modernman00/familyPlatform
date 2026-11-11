@@ -107,7 +107,7 @@
         <input type="text" id="{{ $customInputId }}" class="form-control {{ $isCustom ? '' : 'd-none' }}" placeholder="e.g. Monsieur, Sensei, Laird, etc." value="{{ $isCustom ? htmlspecialchars($currentVal) : '' }}" style="min-height: 40px; max-width: 160px;" oninput="handleCustomTitleInput(this, '{{ $selectId }}')">
     </div>
 </div>
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
     if (typeof window.handleTitleSelectChange === 'undefined') {
         window.handleTitleSelectChange = function(selectEl, customInputId) {
             const customInput = document.getElementById(customInputId);

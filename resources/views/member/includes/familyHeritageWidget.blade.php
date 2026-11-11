@@ -117,7 +117,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
     function loadSideWidgetHeritage() {
         fetch('/api/lineage/quests')

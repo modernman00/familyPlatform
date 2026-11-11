@@ -333,7 +333,7 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
 
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 if (typeof window.memoriesMilestonesWidget !== 'function') {
     window.memoriesMilestonesWidget = function(widgetId) {
         return {

@@ -7,7 +7,7 @@
   <meta name="robots" content="index, follow">
   <meta name="author" content="Family Platform Team">
   <meta name="language" content="{{ \App\classes\I18n::getLocale() }}">
-  <script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}">
     window.APP_LOCALE = '{{ \App\classes\I18n::getLocale() }}';
     window.__TRANSLATIONS__ = {!! json_encode(\App\classes\I18n::transArray()) !!};
     window.__ = function(k, fb) { return (window.__TRANSLATIONS__ && window.__TRANSLATIONS__[k]) || fb || k; };
@@ -109,8 +109,8 @@
   <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js" integrity="sha384-kW+oWsYx3YpxvjtZjFXqazFpA7UP/MbiY4jvs+RWZo2+N94PFZ36T6TFkc9O3qoB" crossorigin="anonymous"></script>
   
 @if(($_ENV['APP_ENV'] ?? '') !== 'local')
-<script nonce="{{ $nonce }}" src="https://www.google.com/recaptcha/enterprise.js?render={{ $_ENV['RECAPTCHA_SITE_KEY'] }}"></script>
-<script nonce="{{ $nonce }}">window.RECAPTCHA_SITE_KEY = "{{ $_ENV['RECAPTCHA_SITE_KEY'] }}";</script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}" src="https://www.google.com/recaptcha/enterprise.js?render={{ $_ENV['RECAPTCHA_SITE_KEY'] }}"></script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">window.RECAPTCHA_SITE_KEY = "{{ $_ENV['RECAPTCHA_SITE_KEY'] }}";</script>
 @endif
 
   <style>
@@ -257,7 +257,7 @@
   @include('partials.pwa-register')
   @include('partials.social-share')
 @if(($_ENV['APP_ENV'] ?? '') !== 'local')
-   <script nonce="{{ $nonce }}">
+   <script nonce="{{ csp_nonce($nonce ?? null) }}">
         window.RECAPTCHA_SITE_KEY = "{{ $_ENV['RECAPTCHA_SITE_KEY'] }}";
     </script>
 @endif

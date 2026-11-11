@@ -129,6 +129,11 @@ if (($_ENV['APP_ENV'] ?? '') === 'local') {
     header('X-Frame-Options: SAMEORIGIN', true);
 }
 
+if (!defined('CSP_NONCE')) {
+    define('CSP_NONCE', bin2hex(random_bytes(16)));
+}
+$GLOBALS['csp_nonce'] = (string) CSP_NONCE;
+
 // The shared-lib's CSP::apply() (invoked later, during view rendering) sets a
 // Content-Security-Policy that omits domains our own integrations need
 // (GA4 beacon calls, Chart.js sourcemaps), and its 'extra directives' merge

@@ -118,7 +118,7 @@
     @endif
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 function dismissAnnouncement(announcementId) {
     if (!confirm('Dismiss this family announcement?')) return;
 

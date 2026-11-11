@@ -578,7 +578,7 @@
   </section>
 </main>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
   function playVoiceDemo(btn) {
     const icon = btn.querySelector('i');
     if (icon.classList.contains('fa-play')) {

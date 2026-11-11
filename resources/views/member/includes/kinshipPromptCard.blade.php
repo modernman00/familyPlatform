@@ -64,7 +64,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
     function initKinshipPrompt() {
         const card = document.getElementById('kinshipPromptCard');

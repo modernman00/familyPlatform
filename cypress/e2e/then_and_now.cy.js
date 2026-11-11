@@ -24,7 +24,8 @@ describe('Then & Now photo comparison (RFC-0002)', () => {
     it('publishes a comparison and renders an accessible slider', () => {
         const label = `Cypress ${Date.now()}`;
         openModal('postModal');
-        cy.get('textarea#postMessage').invoke('val', label).trigger('input').trigger('change');
+        cy.get('#postMessageEditor').should('be.visible').then(() => cy.get('textarea#postMessage'))
+            .invoke('val', label).trigger('input', { force: true }).trigger('change', { force: true });
         cy.get('#addThenNowBtn').click();
         cy.get('input[name="then_label"]').type('1998');
         cy.get('input[name="now_label"]').type('2026');

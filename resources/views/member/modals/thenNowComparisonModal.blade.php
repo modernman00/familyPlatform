@@ -187,7 +187,7 @@ define('THEN_NOW_COMPARISON_MODAL_RENDERED', true);
 }
 </style>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
     var currentItems = [];
     var currentIndex = 0;

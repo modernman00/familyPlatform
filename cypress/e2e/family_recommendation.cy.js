@@ -35,7 +35,7 @@ describe('Family Platform Recommendation & Walled Sanctuary Spawning', () => {
 
             cy.get('body').should('contain.text', 'Start Your Private Family Sanctuary');
             cy.get('body').should('contain.text', '100% Walled Sanctuary');
-            cy.get('body').should('contain.text', 'Only connected kins and approved family members can ever see through your wall');
+            cy.get('body').should('contain.text', 'Only connected kin and approved family members can ever enter');
 
             cy.get('#btnCreateFamilyNetwork')
                 .should('be.visible')

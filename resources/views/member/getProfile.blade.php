@@ -322,7 +322,7 @@
         <div id="seeProfileLightboxCaption" class="see-profile-lightbox-caption"></div>
     </div>
 
-    <script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
         const seeProfilePublicPhotos = @json(array_values($publicPhotos ?? []));
 
         function getSafeSeeProfileImgUrl(img) {

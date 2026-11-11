@@ -247,7 +247,7 @@
                 100% { box-shadow: 0 0 0 0 rgba(163, 22, 33, 0); }
             }
             </style>
-            <script>
+            <script nonce="{{ csp_nonce($nonce ?? null) }}">
             window.scrollToProfileWidget = function(targetId, modalFallbackId) {
                 var target = document.getElementById(targetId);
                 if (target && target.classList.contains('d-none')) {

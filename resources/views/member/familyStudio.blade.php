@@ -721,7 +721,7 @@
             </div>
         @endforeach
     </section>
-    <script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
         function resolveRelRequest(id, decision, btn) {
             const row = btn.closest('[data-rel-request]');
             row.querySelectorAll('button').forEach(b => b.disabled = true);
@@ -1577,7 +1577,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
     function toTitleCase(str) {
         if (!str) return '';
         if (typeof formatPersonName === 'function') {

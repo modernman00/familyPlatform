@@ -106,6 +106,7 @@ function generateSessionToken(): string
 function clearHistoryAndRedirect(string $path): never
 {
     preventPageCaching(true);
+    $nonceAttr = ' nonce="' . htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') . '"';
 
     // Output JavaScript to clear history and redirect
     echo <<<HTML
@@ -114,7 +115,7 @@ function clearHistoryAndRedirect(string $path): never
 <head>
     <title>Redirecting...</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script>
+    <script{$nonceAttr}>
         // Clear the current page from history
         if (window.history && window.history.replaceState) {
             window.history.replaceState(null, '', '{$path}');
@@ -197,5 +198,22 @@ if (!function_exists('e')) {
     function e(mixed $value, bool $doubleEncode = true): string
     {
         return htmlspecialchars((string)($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', $doubleEncode);
+    }
+}
+
+/**
+ * Resolve the per-request Content Security Policy nonce, generating it once if unset.
+ */
+if (!function_exists('csp_nonce')) {
+    function csp_nonce(?string $existing = null): string
+    {
+        if (is_string($existing) && $existing !== '') {
+            return $existing;
+        }
+        if (!defined('CSP_NONCE')) {
+            define('CSP_NONCE', bin2hex(random_bytes(16)));
+        }
+
+        return (string) CSP_NONCE;
     }
 }

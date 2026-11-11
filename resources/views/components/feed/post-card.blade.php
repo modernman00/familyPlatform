@@ -2444,7 +2444,7 @@
 
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
   if (typeof window.openReportModal !== 'function') {
     window.openReportModal = function(targetType, targetId) {
       if (typeof Swal === 'undefined') {

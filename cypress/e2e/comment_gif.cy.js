@@ -52,7 +52,7 @@ describe('GIFs in comments', () => {
         cy.reload();
         cy.get('#openPostModalTrigger', { timeout: 60000 }).should('be.visible');
         cy.contains(marker, { timeout: 60000 }).parents('.card')
-            .find('[data-testid="comment-gif"]').should('have.attr', 'src').and('match', /^https:\/\/media\d*\.giphy\.com\//);
+            .find('[data-testid="comment-gif"]').should('have.attr', 'src').and('match', /^(\/images\/brand\/gifs\/|https:\/\/media\d*\.giphy\.com\/)/);
     });
 
     it('opens emoji picker, inserts emoji into comment input, and posts successfully', () => {

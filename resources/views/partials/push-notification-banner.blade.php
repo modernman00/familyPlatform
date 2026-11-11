@@ -43,7 +43,7 @@
     </div>
 </div>
 
-<script nonce="{{ $nonce ?? '' }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function () {
     'use strict';
 

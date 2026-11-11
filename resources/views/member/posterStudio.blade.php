@@ -105,16 +105,24 @@
 
 @section('content')
 @include('member.creativeStudioTabs', ['creativeTab' => 'flyers'])
-<script nonce="{{ $nonce ?? '' }}">{!! $engineJs !!}</script>
-<script nonce="{{ $nonce ?? '' }}" src="/public/js/festive-cards.js?v={{ assetVersion('js/festive-cards.js') }}"></script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">{!! $engineJs !!}</script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/festive-cards.js?v={{ assetVersion('js/festive-cards.js') }}"></script>
 
 <div class="ps-wrap" x-data="posterStudio()">
     @include('csrf')
 
     <section class="ps-hero">
-        <div class="ps-eyebrow">Flyer &amp; Poster Studio</div>
-        <h1>Posters for <em>every</em> family moment</h1>
-        <p>Anniversaries, reunions, naming ceremonies, birthdays, weddings and celebrations of life. Pick an occasion, add a photo and the details — then share it on WhatsApp or post it to your family feed.</p>
+        <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+            <div>
+                <div class="ps-eyebrow">Flyer &amp; Poster Studio</div>
+                <h1>Posters for <em>every</em> family moment</h1>
+                <p>Anniversaries, reunions, naming ceremonies, birthdays, weddings and celebrations of life. Pick an occasion, add a photo and the details — then share it on WhatsApp or post it to your family feed.</p>
+            </div>
+            <button type="button" id="btnOpenLivingGuide" @click="guideOpen = true"
+                    class="ps-btn" style="min-height:44px;white-space:nowrap;flex-shrink:0;position:relative;z-index:1;">
+                <i class="bi bi-question-circle" aria-hidden="true"></i><span>How to use</span>
+            </button>
+        </div>
     </section>
 
     <div class="ps-grid">
@@ -260,9 +268,31 @@
             </div>
         </div>
     </div>
+
+    <div x-show="guideOpen" x-cloak x-trap.noscroll="guideOpen"
+         @keydown.escape.window="guideOpen = false"
+         @click.self="guideOpen = false"
+         role="dialog" aria-modal="true" aria-labelledby="psGuideHeading"
+         style="position:fixed;inset:0;z-index:2050;background:rgba(10,12,16,.72);display:flex;align-items:center;justify-content:center;padding:16px;">
+        <div class="ps-panel" style="max-width:560px;width:100%;max-height:90vh;overflow-y:auto;">
+            <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+                <h2 id="psGuideHeading" class="ps-step__title mb-0">How to design your family poster</h2>
+                <button type="button" class="ps-link" @click="guideOpen = false" aria-label="Close guide" style="min-width:44px;min-height:44px;">Close</button>
+            </div>
+            <ol class="mb-3" style="padding-left:1.25rem;display:grid;gap:8px;font-size:.94rem;">
+                <li><strong>Pick an occasion or upcoming event:</strong> Tap any milestone tile or load details straight from a family calendar event.</li>
+                <li><strong>Customise layout &amp; colours:</strong> Switch between five curated editorial styles and rich metallic palettes.</li>
+                <li><strong>Add a portrait:</strong> Optionally upload a photo and remove its background right on your device.</li>
+                <li><strong>Edit details &amp; share:</strong> Customise the headline, date, venue and RSVP QR link, then download, share on WhatsApp or post directly to your family feed.</li>
+            </ol>
+            <div class="d-flex justify-content-end">
+                <button type="button" class="ps-btn ps-btn--gold" @click="guideOpen = false" style="min-height:44px;white-space:nowrap;flex-shrink:0;">Got it</button>
+            </div>
+        </div>
+    </div>
 </div>
 
-<script nonce="{{ $nonce ?? '' }}">
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 /*
  * On-device person cut-out (MediaPipe selfie multiclass segmenter). The photo never leaves the device.
  * Returns a blob URL of a transparent PNG cropped to the person.
@@ -389,7 +419,7 @@ function posterStudio() {
         presetKey: 'anniversary', theme: 'family_heirloom_gold', archetype: 'vip_black_gold', ratio: 'portrait',
         d: { ...blank }, perks: '',
         photoSrc: null, photoUrl: '', cutoutUrl: null, cutting: false, cutout: true, ghost: true, scale: 1, offsetX: 0, offsetY: 0, hasBackdrop: false,
-        busy: false, posted: false, restoredDraft: false,
+        busy: false, posted: false, restoredDraft: false, guideOpen: false,
 
         async init() {
             const canvas = document.getElementById('psCanvas');

@@ -75,7 +75,7 @@
 
 @include('component.submitSpinner')
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 document.addEventListener('DOMContentLoaded', function() {
     const annForm = document.getElementById('familyAnnouncementForm');
     if (!annForm) return;

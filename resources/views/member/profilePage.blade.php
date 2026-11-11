@@ -44,7 +44,7 @@
 
     </div>
 
-    <script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
         // Defensive frontend: Check authentication status silently if needed without page refresh
         document.addEventListener('visibilitychange', function() {
             if (document.visibilityState === 'visible') {

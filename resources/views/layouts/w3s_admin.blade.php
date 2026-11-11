@@ -117,7 +117,7 @@
         <!-- End page content -->
     </div>
 
-    <script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
         // Get the Sidebar
 var mySidebar = document.getElementById("mySidebar");
 

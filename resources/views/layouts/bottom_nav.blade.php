@@ -145,7 +145,7 @@ body.dark-theme .pwa-tab-center-action .pwa-center-btn-bubble,
     </a>
 </nav>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
     try {
         var p = window.location.pathname.toLowerCase();

@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="language" content="{{ \App\classes\I18n::getLocale() }}">
   <title>{{ $_ENV['APP_NAME'] }}</title>
-  <script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}">
     window.APP_LOCALE = '{{ \App\classes\I18n::getLocale() }}';
     window.__TRANSLATIONS__ = {!! json_encode(\App\classes\I18n::transArray()) !!};
     window.__ = function(k, fb) { return (window.__TRANSLATIONS__ && window.__TRANSLATIONS__[k]) || fb || k; };
@@ -196,7 +196,7 @@
       </filter>
     </defs>
   </svg>
-  <style nonce="{{ $nonce }}">
+  <style nonce="{{ csp_nonce($nonce ?? null) }}">
     video.atg-4k-video-render,
     .feed-post-video,
     .reel-video-element {
@@ -246,17 +246,17 @@
       'tones'    => array_keys(\App\services\AtgEmojiService::EMOJI_TONES),
     ];
   @endphp
-  <script nonce="{{ $nonce }}">window.ATG_LIVING_EMOJIS = @json($atgLivingEmojis);</script>
-  <script nonce="{{ $nonce }}" src="/public/js/manifest.js?v={{ assetVersion('js/manifest.js') }}"></script>
-  <script nonce="{{ $nonce }}" src="/public/js/vendor.js?v={{ assetVersion('js/vendor.js') }}"></script>
-  <script nonce="{{ $nonce }}" src="/public/js/index.js?v={{ assetVersion('js/index.js') }}"></script>
-  <script nonce="{{ $nonce }}" src="/public/js/telemetry.js?v={{ assetVersion('js/telemetry.js') }}" defer></script>
-  <script nonce="{{ $nonce }}" src="/public/js/pwa-notifications.js?v=1.0.0" defer></script>
-  <script nonce="{{ $nonce }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>
-  <script nonce="{{ $nonce }}" src="/public/js/profilePhotoViewer.js?v={{ assetVersion('js/profilePhotoViewer.js') }}" defer></script>
-  <script nonce="{{ $nonce }}" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
-  <script nonce="{{ $nonce }}" src="/public/js/atg-emoji-engine.js?v={{ assetVersion('js/atg-emoji-engine.js') }}" defer></script>
-  <script nonce="{{ $nonce }}" src="/public/js/smart-nav-scroll.js?v={{ assetVersion('js/smart-nav-scroll.js') }}" defer></script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}">window.ATG_LIVING_EMOJIS = @json($atgLivingEmojis);</script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/manifest.js?v={{ assetVersion('js/manifest.js') }}"></script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/vendor.js?v={{ assetVersion('js/vendor.js') }}"></script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/index.js?v={{ assetVersion('js/index.js') }}"></script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/telemetry.js?v={{ assetVersion('js/telemetry.js') }}" defer></script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/pwa-notifications.js?v=1.0.0" defer></script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/profilePhotoViewer.js?v={{ assetVersion('js/profilePhotoViewer.js') }}" defer></script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/atg-emoji-engine.js?v={{ assetVersion('js/atg-emoji-engine.js') }}" defer></script>
+  <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/smart-nav-scroll.js?v={{ assetVersion('js/smart-nav-scroll.js') }}" defer></script>
 
   @include('components.atgArViewerModal')
   @include('component.submitSpinner')

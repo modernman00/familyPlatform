@@ -100,7 +100,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 async function changeUserStatus(userId, newStatus) {
     if (!confirm(`Are you sure you want to change User #${userId} status to "${newStatus}"?`)) {
         return;
