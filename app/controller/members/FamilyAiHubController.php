@@ -389,7 +389,7 @@ final class FamilyAiHubController extends BaseController
             $service = new \Src\Ai\AiEntertainmentService();
             $result = $service->generateFamilyTrivia($familyName, $familyFacts, $category, $questionCount);
 
-            if (empty($result['success']) || empty($result['questions']) || !is_array($result['questions'])) {
+            if ($result['questions'] === []) {
                 $cleanName = htmlspecialchars(trim($familyName !== '' ? $familyName : 'Our Family'), ENT_QUOTES, 'UTF-8');
                 $result = [
                     'success' => true,
@@ -411,71 +411,69 @@ final class FamilyAiHubController extends BaseController
                 ];
             }
 
-            if (!empty($result['success']) && !empty($result['questions']) && is_array($result['questions'])) {
-                $db = Db::connect2();
-                $userRow = SelectFn::selectOneRow('personal', 'id', $this->userId) ?: [];
-                $firstName = (string)($userRow['firstName'] ?? '');
-                $lastName = (string)($userRow['lastName'] ?? '');
-                $fullName = trim($firstName . ' ' . $lastName);
-                if ($fullName === '') {
-                    $fullName = $familyName . ' Member';
-                }
-
-                $pStmt = $db->prepare("SELECT img FROM profilePics WHERE id = ? LIMIT 1");
-                $pStmt->execute([$this->userId]);
-                $profileImg = (string)($pStmt->fetchColumn() ?: '');
-
-                $quizTitle = (string)($result['quiz_title'] ?? ($familyName . ' Family Game Show'));
-                $quizTitle = str_ireplace(['Dynasty Trivia Clash', 'Dynasty Trivia'], 'Family Game Show', $quizTitle);
-                $result['quiz_title'] = $quizTitle;
-
-                $postMsg = "🎮 Family Game Show: " . $quizTitle . "!\n\n";
-                $postMsg .= "We just launched our Family Game Show! Test how well you know our family stories and see who gets top marks.\n\n";
-                $postMsg .= "Round 1 question is live in the poll below. Cast your vote and share your memories in the comments!";
-
-                $currentTime = (string)(function_exists('milliSeconds') ? milliSeconds() : time());
-                $postStmt = $db->prepare(
-                    "INSERT INTO post (id, fullName, profileImg, postMessage, postFamCode, post_time, post_status, date_created) 
-                     VALUES (?, ?, ?, ?, ?, ?, 'published', NOW())"
-                );
-                $postStmt->execute([
-                    $this->userId,
-                    $fullName,
-                    $profileImg,
-                    $postMsg,
-                    $this->famCode,
-                    $currentTime
-                ]);
-                $postNo = (int)$db->lastInsertId();
-
-                if (!empty($result['questions'][0]['question']) && !empty($result['questions'][0]['options'])) {
-                    $q1 = $result['questions'][0];
-                    PollData::createPoll($postNo, (string)$q1['question'], (array)$q1['options']);
-                }
-
-                // Explicitly mark post as published
-                Post::updatePostByStatusAsPublished($postNo);
-
-                // Realtime broadcast via Pusher (resilient)
-                try {
-                    Pusher::broadcastToFamily($this->famCode, 'new-post', [[
-                        'post_no' => $postNo,
-                        'id' => $this->userId,
-                        'fullName' => $fullName,
-                        'profileImg' => $profileImg,
-                        'postMessage' => $postMsg,
-                        'postFamCode' => $this->famCode,
-                        'post_img0' => '',
-                        'date_created' => date('Y-m-d H:i:s'),
-                    ]]);
-                } catch (\Throwable $pusherEx) {
-                    // Resilient broadcast fallback
-                }
-
-                $result['posted'] = true;
-                $result['post_no'] = $postNo;
-                $result['post_url'] = '/profilePage?post_no=' . $postNo . '#post' . $postNo;
+            $db = Db::connect2();
+            $userRow = SelectFn::selectOneRow('personal', 'id', $this->userId) ?: [];
+            $firstName = (string)($userRow['firstName'] ?? '');
+            $lastName = (string)($userRow['lastName'] ?? '');
+            $fullName = trim($firstName . ' ' . $lastName);
+            if ($fullName === '') {
+                $fullName = $familyName . ' Member';
             }
+
+            $pStmt = $db->prepare("SELECT img FROM profilePics WHERE id = ? LIMIT 1");
+            $pStmt->execute([$this->userId]);
+            $profileImg = (string)($pStmt->fetchColumn() ?: '');
+
+            $quizTitle = $result['quiz_title'] !== '' ? $result['quiz_title'] : ($familyName . ' Family Game Show');
+            $quizTitle = str_ireplace(['Dynasty Trivia Clash', 'Dynasty Trivia'], 'Family Game Show', $quizTitle);
+            $result['quiz_title'] = $quizTitle;
+
+            $postMsg = "🎮 Family Game Show: " . $quizTitle . "!\n\n";
+            $postMsg .= "We just launched our Family Game Show! Test how well you know our family stories and see who gets top marks.\n\n";
+            $postMsg .= "Round 1 question is live in the poll below. Cast your vote and share your memories in the comments!";
+
+            $currentTime = (string)(function_exists('milliSeconds') ? milliSeconds() : time());
+            $postStmt = $db->prepare(
+                "INSERT INTO post (id, fullName, profileImg, postMessage, postFamCode, post_time, post_status, date_created) 
+                 VALUES (?, ?, ?, ?, ?, ?, 'published', NOW())"
+            );
+            $postStmt->execute([
+                $this->userId,
+                $fullName,
+                $profileImg,
+                $postMsg,
+                $this->famCode,
+                $currentTime
+            ]);
+            $postNo = (int)$db->lastInsertId();
+
+            if (!empty($result['questions'][0]['question']) && !empty($result['questions'][0]['options'])) {
+                $q1 = $result['questions'][0];
+                PollData::createPoll($postNo, (string)$q1['question'], (array)$q1['options']);
+            }
+
+            // Explicitly mark post as published
+            Post::updatePostByStatusAsPublished($postNo);
+
+            // Realtime broadcast via Pusher (resilient)
+            try {
+                Pusher::broadcastToFamily($this->famCode, 'new-post', [[
+                    'post_no' => $postNo,
+                    'id' => $this->userId,
+                    'fullName' => $fullName,
+                    'profileImg' => $profileImg,
+                    'postMessage' => $postMsg,
+                    'postFamCode' => $this->famCode,
+                    'post_img0' => '',
+                    'date_created' => date('Y-m-d H:i:s'),
+                ]]);
+            } catch (\Throwable $pusherEx) {
+                // Resilient broadcast fallback
+            }
+
+            $result['posted'] = true;
+            $result['post_no'] = $postNo;
+            $result['post_url'] = '/profilePage?post_no=' . $postNo . '#post' . $postNo;
 
             // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response (Content-Type: application/json); json_encode escapes output safely
             echo json_encode($result); // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
