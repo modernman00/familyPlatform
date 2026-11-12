@@ -37,11 +37,19 @@ function keyToBase64(subscription, name) {
 async function syncToServer(subscription) {
   if (!subscription || !subscription.endpoint) return;
   const currentEndpoint = subscription.endpoint;
+  const currentUserId = (typeof document !== 'undefined'
+    ? (document.querySelector('meta[name="user-id"]')?.getAttribute('content') || '')
+    : '') || (localStorage.getItem('requesterId') || '');
   const now = Date.now();
   const syncKey = 'fp_last_push_sync';
   try {
     const cached = JSON.parse(localStorage.getItem(syncKey) || 'null');
-    if (cached && cached.endpoint === currentEndpoint && (now - cached.time) < 12 * 60 * 60 * 1000) {
+    if (
+      cached &&
+      cached.userId === currentUserId &&
+      cached.endpoint === currentEndpoint &&
+      (now - cached.time) < 12 * 60 * 60 * 1000
+    ) {
       return;
     }
   } catch (_) {}
@@ -63,7 +71,7 @@ async function syncToServer(subscription) {
     },
   });
   try {
-    localStorage.setItem(syncKey, JSON.stringify({ endpoint: currentEndpoint, time: now }));
+    localStorage.setItem(syncKey, JSON.stringify({ userId: currentUserId, endpoint: currentEndpoint, time: now }));
     localStorage.setItem('fp_push_subscribed', 'true');
   } catch (_) {}
 }

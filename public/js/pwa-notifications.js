@@ -234,6 +234,11 @@
     if (document.hasFocus() || document.visibilityState === 'visible') {
       showFloatingToast(data);
     }
+
+    // Trigger live Connected Kin card refresh when push notification arrives
+    if (String(data.tag || '').startsWith('kinship-req-')) {
+      window.dispatchEvent(new CustomEvent('kin-request:received', { detail: data }));
+    }
   }
 
   if (syncChannel) {

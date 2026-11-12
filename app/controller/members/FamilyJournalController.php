@@ -403,7 +403,7 @@ final class FamilyJournalController extends BaseController
                     if ($authorName === '') {
                         $authorName = 'A family member';
                     }
-                    $members = AllMembersData::AllMembersEmailByFamCode($this->famCode, $this->userId);
+                    $members = AllMembersData::AllMembersEmailByFamCode($this->famCode, $this->userId, 'journals');
                     $journalUrl = '/familyJournal/' . (int)$insertedId;
                     $msg = "{$authorName} preserved a new story: \"{$title}\"";
 

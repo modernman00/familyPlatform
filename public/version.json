@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(tree-dna): implement family node DNA make-up, festive cards studio v2, and kinship enhancements",
+    "title": "Harden CSP nonces, stabilize feed/composer E2E suite, and calibrate deploy Cypress watchdog",
     "notes": [
-        "Feat(tree-dna): implement family node DNA make-up, festive cards studio v2, and kinship enhancements",
-        "Feat(deploy): implement hermetic CAS vendor cache engine with zero-symlink audit",
-        "Feat(festive): deliver RFC-0019 v2 festive cards with custom occasions, typography, rich share sheet and content safety"
+        "Harden CSP nonces, stabilize feed/composer E2E suite, and calibrate deploy Cypress watchdog",
+        "Fix(security): resolve OWASP ZAP DAST alerts, add SRI hashes, and fortify CSP/CSRF",
+        "Xx"
     ],
-    "released_at": "2026-11-10",
-    "commit": "14123aff"
+    "released_at": "2026-11-11",
+    "commit": "90600989"
 }

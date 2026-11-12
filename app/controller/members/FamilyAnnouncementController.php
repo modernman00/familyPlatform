@@ -117,7 +117,7 @@ final class FamilyAnnouncementController extends BaseController
                     $authorName = 'Family Leader';
                 }
 
-                $members = AllMembersData::AllMembersEmailByFamCode($this->famCode, $this->userId);
+                $members = AllMembersData::AllMembersEmailByFamCode($this->famCode, $this->userId, 'announcements');
                 $actionUrl = '/profilePage#familyAnnouncementsCard';
                 $snippet = mb_substr($message, 0, 80);
                 $notifTitle = "📢 Announcement: " . htmlspecialchars($title, ENT_QUOTES, 'UTF-8');

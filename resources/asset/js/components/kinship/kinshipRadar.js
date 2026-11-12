@@ -232,10 +232,16 @@ function openKinshipDetailsModal(kin) {
         }
     }
 
-    // Family Tree Link Button
+    // Family Tree Link Button — only show when viewer shares access to that family code
     const treeBtn = document.getElementById('kinModalTreeBtn');
     if (treeBtn) {
-        treeBtn.href = `/organogram/${kin.id}`;
+        if (kin.famCode) {
+            treeBtn.href = `/organogram/${kin.id}`;
+            treeBtn.classList.remove('d-none');
+        } else {
+            treeBtn.href = '#';
+            treeBtn.classList.add('d-none');
+        }
     }
 
     // Connect Button

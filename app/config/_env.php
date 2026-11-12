@@ -39,6 +39,21 @@ if ($envDir === '') {
 $dotEnv = Dotenv::createUnsafeImmutable($envDir);
 $dotEnv->load();
 
+// When variables_order omits "E" (e.g. "GPCS") and a parent PHP process
+// exported .env keys via putenv(), spawned CLI children (like
+// post_background_worker.php) inherit those vars in getenv() while $_ENV
+// remains empty — causing createUnsafeImmutable() to skip them and leaving
+// $_ENV['LOGGER_NAME'] unset. Backfill missing $_ENV/$_SERVER entries from
+// OS getenv() without overwriting any existing explicit values.
+foreach (getenv() as $osKey => $osValue) {
+    if ($osKey !== '' && (!isset($_ENV[$osKey]) || $_ENV[$osKey] === '')) {
+        $_ENV[$osKey] = $osValue;
+        if (!isset($_SERVER[$osKey]) || $_SERVER[$osKey] === '') {
+            $_SERVER[$osKey] = $osValue;
+        }
+    }
+}
+
 // phpdotenv leaves a ${VAR} reference to a never-defined variable as literal
 // text. That literal then silently poisons whatever reads it — e.g. an
 // unresolved ADMIN_EMAIL flows into PHPMailer::setFrom() and throws

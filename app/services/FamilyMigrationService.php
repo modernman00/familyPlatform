@@ -183,14 +183,30 @@ final class FamilyMigrationService
     {
         $requesterId = trim($requesterId);
         $cleanTargetCode = strtoupper(trim(str_replace('#', '', $targetFamilyCode)));
+        $cleanTargetUser = ($targetUserId !== null && trim($targetUserId) !== '') ? trim($targetUserId) : null;
+        $resolvedViaTargetUser = false;
 
-        if ($requesterId === '' || $cleanTargetCode === '') {
+        if ($requesterId === '') {
+            return ['success' => false, 'message' => 'Please provide a valid family code to join.'];
+        }
+
+        if ($cleanTargetCode === '' && $cleanTargetUser !== null) {
+            $stmtTarget = $this->pdo->prepare('SELECT famCode FROM personal WHERE id = ? LIMIT 1');
+            $stmtTarget->execute([$cleanTargetUser]);
+            $targetRowCode = (string)($stmtTarget->fetchColumn() ?: '');
+            $cleanTargetCode = strtoupper(trim(str_replace('#', '', $targetRowCode)));
+            $resolvedViaTargetUser = true;
+        }
+
+        if ($cleanTargetCode === '') {
             return ['success' => false, 'message' => 'Please provide a valid family code to join.'];
         }
 
         $approvalService = new FamilyCodeApprovalService($this->pdo);
         if (!$approvalService->familyCodeExists($cleanTargetCode)) {
-            return ['success' => false, 'message' => "Family code '#{$cleanTargetCode}' does not exist on the platform."];
+            return ['success' => false, 'message' => $resolvedViaTargetUser
+                ? 'Target family network could not be found.'
+                : "Family code '#{$cleanTargetCode}' does not exist on the platform."];
         }
 
         // Fetch requester details
@@ -204,7 +220,9 @@ final class FamilyMigrationService
 
         $oldFamilyCode = strtoupper(trim(str_replace('#', '', (string)($requester['famCode'] ?? ''))));
         if ($oldFamilyCode === $cleanTargetCode) {
-            return ['success' => false, 'message' => "You are already a registered member of family code #{$cleanTargetCode}."];
+            return ['success' => false, 'message' => $resolvedViaTargetUser
+                ? 'You are already a registered member of that family network.'
+                : "You are already a registered member of family code #{$cleanTargetCode}."];
         }
 
         // Prevent duplicate active pending migration requests
@@ -215,12 +233,13 @@ final class FamilyMigrationService
         );
         $stmtCheck->execute([$requesterId, $cleanTargetCode]);
         if ($stmtCheck->fetchColumn()) {
-            return ['success' => false, 'message' => "You already have an active pending migration request for family code #{$cleanTargetCode}."];
+            return ['success' => false, 'message' => $resolvedViaTargetUser
+                ? 'You already have an active pending migration request for that family network.'
+                : "You already have an active pending migration request for family code #{$cleanTargetCode}."];
         }
 
         $expiresAt = date('Y-m-d H:i:s', strtotime('+7 days'));
         $tempToken = bin2hex(random_bytes(16));
-        $cleanTargetUser = ($targetUserId !== null && trim($targetUserId) !== '') ? trim($targetUserId) : null;
 
         $cleanNote = $note !== null ? trim($note) : null;
         if ($cleanNote === '') {
@@ -254,7 +273,9 @@ final class FamilyMigrationService
 
         return [
             'success' => true,
-            'message' => "Your migration request to join family code #{$cleanTargetCode} has been sent and is awaiting family approval.",
+            'message' => $resolvedViaTargetUser
+                ? 'Your migration request has been sent and is awaiting family approval.'
+                : "Your migration request to join family code #{$cleanTargetCode} has been sent and is awaiting family approval.",
             'migration_id' => $migrationId,
             'token' => $token,
             'email_sent' => $emailSent

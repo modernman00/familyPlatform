@@ -87,7 +87,7 @@ final class FamilyRequestFlowTest extends FamilyRequestTestCase
 
         $notification = $this->latestNotificationFor($approverId);
         $this->assertNotNull($notification, 'Expected the approver to receive a notification row.');
-        $this->assertSame('Friend Request', $notification['notification_type']);
+        $this->assertSame('Connected Kin Request', $notification['notification_type']);
         $this->assertSame($requesterId, $notification['sender_id']);
     }
 

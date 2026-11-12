@@ -57,7 +57,7 @@ class Pusher
                 [
                     'cluster' => $cluster !== '' ? $cluster : 'eu',
                     'useTLS' => true,
-                    'timeout' => 5,
+                    'timeout' => 2,
                 ]
             );
         } catch (\Throwable $e) {
@@ -68,24 +68,51 @@ class Pusher
 
     public static function broadcast(string $theChannel, string $theEvent, array $theData): void
     {
-        // 1. Primary Attempt: Pusher (Free Tier)
+        self::trigger([$theChannel], $theEvent, $theData);
+    }
+
+    /**
+     * High-concurrency multi-channel broadcast trigger.
+     * Batches all channels into a single HTTP request to Pusher instead of N round-trips.
+     *
+     * @param string|list<string> $channels
+     * @param string $event
+     * @param array<string, mixed> $data
+     */
+    public static function trigger(string|array $channels, string $event, array $data): void
+    {
+        $rawList = is_array($channels) ? $channels : [$channels];
+        /** @var list<string> $channelList */
+        $channelList = array_values(array_unique(array_filter(array_map('strval', $rawList))));
+        if (empty($channelList)) {
+            return;
+        }
+
+        // 1. Primary Attempt: Pusher Multi-Channel trigger (1 single HTTP request for up to 100 channels)
         try {
             $pusher = self::pusher();
             if ($pusher !== null) {
-                $pusher->trigger($theChannel, $theEvent, $theData);
+                $pusher->trigger($channelList, $event, $data);
             }
         } catch (\Throwable $e) {
-            error_log("[Pusher] Broadcast to {$theChannel} failed: " . $e->getMessage() . ". Defaulting to SovereignBroadcaster.");
+            error_log("[Pusher] Multi-channel broadcast to (" . implode(',', $channelList) . ") failed: " . $e->getMessage() . ". Defaulting to SovereignBroadcaster.");
         }
 
         // 2. Local Fallback & Synchronisation Rail: SovereignBroadcaster
         try {
             if (class_exists('\\Src\\Realtime\\SovereignBroadcaster')) {
                 $broadcaster = new \Src\Realtime\SovereignBroadcaster();
-                $broadcaster->trigger($theChannel, $theEvent, $theData);
+                /** @var array<string, mixed> $payload */
+                $payload = [];
+                foreach ($data as $k => $v) {
+                    $payload[(string)$k] = $v;
+                }
+                foreach ($channelList as $ch) {
+                    $broadcaster->trigger($ch, $event, $payload);
+                }
             }
         } catch (\Throwable $e) {
-            error_log("[SovereignBroadcaster] Broadcast to {$theChannel} failed: " . $e->getMessage());
+            error_log("[SovereignBroadcaster] Broadcast to (" . implode(',', $channelList) . ") failed: " . $e->getMessage());
         }
     }
 
@@ -211,7 +238,7 @@ class Pusher
         }
     }
 
-    private static function slug(string $value): string
+    public static function slug(string $value): string
     {
         return (string) preg_replace('/[^A-Za-z0-9_-]/', '', $value);
     }

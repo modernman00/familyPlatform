@@ -2146,6 +2146,58 @@ export function profileFeed(opts = {}) {
             }
         },
 
+        async restrictPostAuthor(post) {
+            const targetId = String(post?.id || '').trim();
+            if (!targetId || targetId === 'FAM_PLATFORM_OFFICIAL' || this.isOwnPost(post)) {
+                return;
+            }
+            const rawName = String(post?.fullName || 'this family member').trim();
+            const safeName = rawName.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] || c));
+
+            const confirm = await Swal.fire({
+                title: `Restrict ${rawName}?`,
+                html: `<p class="text-muted small mb-0 text-start"><strong>${safeName}</strong> will not be notified. They will no longer see your future posts, comments, video reels, events, family journals, announcements, time capsules, or receive notifications and emails from you. You can customise or remove this anytime in <strong>Privacy Settings</strong>.</p>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#a31621',
+                confirmButtonText: 'Restrict Silently',
+                cancelButtonText: 'Cancel',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: () => !Swal.isLoading(),
+                preConfirm: async () => {
+                    try {
+                        const res = await axios.post('/api/privacy/restrictions/update', {
+                            restricted_user_id: targetId,
+                            restrict_posts: true,
+                            restrict_comments: true,
+                            restrict_reels: true,
+                            restrict_events: true,
+                            restrict_journals: true,
+                            restrict_announcements: true,
+                            restrict_capsules: true,
+                            restrict_profile: false
+                        }, this.csrfOptions);
+                        return res.data;
+                    } catch (err) {
+                        Swal.showValidationMessage(err?.response?.data?.message || 'Unable to save member restriction.');
+                        return false;
+                    }
+                }
+            });
+
+            if (!confirm.isConfirmed || !confirm.value) {
+                return;
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Restriction Saved',
+                html: `<p class="small text-muted mb-2">${safeName} can no longer see your restricted updates.</p><a href="/accountSetting#v-pills-privacy" class="btn btn-sm btn-outline-secondary rounded-pill px-3" style="min-height: 44px; display: inline-flex; align-items: center;">Manage in Privacy Settings</a>`,
+                confirmButtonColor: '#a31621',
+                confirmButtonText: 'Done'
+            });
+        },
+
         async openReportModal(targetType, targetId) {
             const isComment = targetType === 'comment';
             const htmlContent = `
@@ -2946,7 +2998,157 @@ export function profileFeed(opts = {}) {
             return Number(game?.vote_percentages?.[idx] ?? 0);
         },
 
+        async syncKinshipBannerRequests() {
+            const container = document.getElementById('kinshipRequest');
+            const approverId = container?.dataset?.approverId
+                || this.currentUserId
+                || document.querySelector('meta[name="user-id"]')?.getAttribute('content')
+                || localStorage.getItem('requesterId')
+                || '';
+            if (!container || !approverId) return;
+
+            try {
+                const response = await axios.get(`/getFriendRequestById?id=${encodeURIComponent(approverId)}`, {
+                    timeout: 8000
+                });
+                const requests = response?.data?.message;
+                if (!Array.isArray(requests) || requests.length === 0) return;
+
+                container.classList.add('mb-4');
+                const encApprover = encodeURIComponent(approverId);
+
+                requests.forEach((req) => {
+                    const reqId = String(req?.id ?? req?.requesterId ?? '').trim();
+                    if (!reqId || document.getElementById(`kinshipRequest-${reqId}`)) return;
+
+                    const firstName = String(req?.firstName ?? req?.requesterFirstName ?? 'Family Member').trim();
+                    const lastName = String(req?.lastName ?? req?.requesterLastName ?? '').trim();
+                    const fullName = `${firstName} ${lastName}`.trim() || 'Family Member';
+                    const famCode = String(req?.famCode ?? req?.requesterFamCode ?? '');
+                    const relLabel = String(req?.relationship_full_label || req?.relationship_role || 'Connected Kin');
+                    const relNote = String(req?.relationship_note || '').trim();
+                    const rawImg = String(req?.img ?? req?.profilePics ?? 'avatarM.png');
+                    const reqImg = rawImg
+                        ? (rawImg.startsWith('/') ? rawImg : `/resources/images/profile/${rawImg}`)
+                        : '/resources/images/profile/avatarM.png';
+
+                    const encReqId = encodeURIComponent(reqId);
+                    const encFamCode = encodeURIComponent(famCode || 'none');
+                    const acceptUrl = `/member/request/${encReqId}/${encApprover}/50/${encFamCode}/pp`;
+                    const declineUrl = `/member/request/${encReqId}/${encApprover}/10/${encFamCode}/pp`;
+
+                    const card = document.createElement('div');
+                    card.className = 'card border-0 shadow-sm kinship-request-card surface-light';
+                    card.setAttribute('data-surface', 'light');
+                    card.id = `kinshipRequest-${reqId}`;
+                    card.style.cssText = 'border-radius: 16px; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border-left: 5px solid #059669 !important; color: #0f172a;';
+
+                    const body = document.createElement('div');
+                    body.className = 'card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3';
+
+                    const left = document.createElement('div');
+                    left.className = 'd-flex align-items-center gap-3';
+
+                    const avatar = document.createElement('img');
+                    avatar.src = reqImg;
+                    avatar.alt = fullName;
+                    avatar.className = 'rounded-circle shadow-sm flex-shrink-0';
+                    avatar.style.cssText = 'width: 52px; height: 52px; object-fit: cover;';
+
+                    const textWrap = document.createElement('div');
+
+                    const headingRow = document.createElement('div');
+                    headingRow.className = 'd-flex align-items-center gap-2 flex-wrap mb-1';
+
+                    const heading = document.createElement('h3');
+                    heading.className = 'fw-bold mb-0';
+                    heading.style.cssText = 'font-size: 1.05rem; color: #0f172a !important;';
+                    heading.appendChild(document.createTextNode('🤝 '));
+
+                    const strongName = document.createElement('strong');
+                    strongName.style.cssText = 'color: #0f172a !important;';
+                    strongName.textContent = fullName;
+                    heading.appendChild(strongName);
+
+                    const midSpan = document.createElement('span');
+                    midSpan.style.cssText = 'color: #0f172a !important;';
+                    midSpan.textContent = ' wants to connect as ';
+                    heading.appendChild(midSpan);
+
+                    const badgeOuter = document.createElement('span');
+                    badgeOuter.className = 'badge rounded-pill bg-white border px-2.5 py-1';
+                    badgeOuter.style.cssText = 'font-size: 0.8rem; border-color: #a7f3d0 !important; background-color: #ffffff !important; color: #065f46 !important;';
+                    const badgeInner = document.createElement('span');
+                    badgeInner.className = 'fw-bold';
+                    badgeInner.style.cssText = 'color: #047857 !important;';
+                    badgeInner.textContent = relLabel;
+                    badgeOuter.appendChild(badgeInner);
+                    heading.appendChild(badgeOuter);
+
+                    headingRow.appendChild(heading);
+                    textWrap.appendChild(headingRow);
+
+                    if (relNote) {
+                        const noteEl = document.createElement('p');
+                        noteEl.className = 'mb-1 fst-italic';
+                        noteEl.style.cssText = 'font-size: 0.88rem; line-height: 1.4; color: #334155 !important;';
+                        noteEl.textContent = `“${relNote}”`;
+                        textWrap.appendChild(noteEl);
+                    }
+
+                    const shieldRow = document.createElement('div');
+                    shieldRow.className = 'small';
+                    shieldRow.style.cssText = 'font-size: 0.78rem; color: #475569 !important;';
+                    const shieldIcon = document.createElement('i');
+                    shieldIcon.className = 'bi bi-shield-check text-success me-1';
+                    shieldRow.appendChild(shieldIcon);
+                    shieldRow.appendChild(document.createTextNode(' Connected Kin: Both family trees remain 100% private to your family codes.'));
+                    textWrap.appendChild(shieldRow);
+
+                    left.appendChild(avatar);
+                    left.appendChild(textWrap);
+
+                    const actions = document.createElement('div');
+                    actions.className = 'd-flex align-items-center gap-2';
+
+                    const acceptLink = document.createElement('a');
+                    acceptLink.href = acceptUrl;
+                    acceptLink.className = 'btn btn-sm btn-success text-white rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center justify-content-center text-nowrap';
+                    acceptLink.style.cssText = 'min-height: 44px; text-decoration: none; white-space: nowrap; flex-shrink: 0;';
+                    acceptLink.title = 'Accept as Connected Kin';
+                    const checkIcon = document.createElement('i');
+                    checkIcon.className = 'bi bi-check-lg me-1';
+                    acceptLink.appendChild(checkIcon);
+                    acceptLink.appendChild(document.createTextNode(' Accept Kinship'));
+
+                    const declineLink = document.createElement('a');
+                    declineLink.href = declineUrl;
+                    declineLink.className = 'btn btn-sm btn-outline-danger rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center justify-content-center text-nowrap';
+                    declineLink.style.cssText = 'min-height: 44px; text-decoration: none; white-space: nowrap; flex-shrink: 0;';
+                    declineLink.title = 'Decline';
+                    const xIcon = document.createElement('i');
+                    xIcon.className = 'bi bi-x-lg me-1';
+                    declineLink.appendChild(xIcon);
+                    declineLink.appendChild(document.createTextNode(' Decline'));
+
+                    actions.appendChild(acceptLink);
+                    actions.appendChild(declineLink);
+
+                    body.appendChild(left);
+                    body.appendChild(actions);
+                    card.appendChild(body);
+                    container.prepend(card);
+                });
+            } catch (err) {
+                console.warn('[feedComponent] syncKinshipBannerRequests warning:', err);
+            }
+        },
+
         initEventListeners() {
+            window.addEventListener('kin-request:received', () => {
+                this.syncKinshipBannerRequests();
+            });
+
             window.addEventListener('open-share-portal', (event) => {
                 if (event?.detail) {
                     this.openSharePortal(event.detail);
@@ -3844,28 +4046,8 @@ export function profileFeed(opts = {}) {
 
                 const channel = this.pusher.subscribe(`private-family-${famCode}`);
 
-                // Real-time notifications: subscribe to user-specific private channel & family channel
-                const rawUserId = this.currentUserId
-                    || document.querySelector('meta[name="user-id"]')?.getAttribute('content')
-                    || localStorage.getItem('requesterId')
-                    || '';
-                const userSlug = String(rawUserId).replace(/[^A-Za-z0-9_-]/g, '');
-                if (userSlug) {
-                    try {
-                        const userChannel = this.pusher.subscribe(`private-user-${userSlug}`);
-                        userChannel.bind('new-notification', (data) => {
-                            window.dispatchEvent(new CustomEvent('pwa:notification-received', { detail: data }));
-                        });
-                    } catch (e) {
-                        console.warn('[feedComponent] userChannel subscribe error:', e);
-                    }
-                }
-
-                channel.bind('new-notification', (data) => {
-                    window.dispatchEvent(new CustomEvent('pwa:notification-received', { detail: data }));
-                });
-
-                channel.bind('new-post', (data) => {
+                const handleIncomingNewPost = (raw) => {
+                    const data = Array.isArray(raw) ? raw : (Array.isArray(raw?.posts) ? raw.posts : null);
                     if (Array.isArray(data)) {
                         let needsRefetch = false;
                         data.forEach(item => {
@@ -3889,7 +4071,49 @@ export function profileFeed(opts = {}) {
                         this.observeFeedVideos();
                         if (needsRefetch) this.fetchPosts();
                     }
+                };
+
+                const handleIncomingNewComment = (data) => {
+                    if (Array.isArray(data)) {
+                        data.forEach(item => {
+                            const post = this.posts.find(p => String(p.post_no) === String(item?.post_no));
+                            if (post && !post.comments.some(c => String(c.comment_no) === String(item?.comment_no))) {
+                                post.comments.push(this.normalizeComment(item));
+                            }
+                        });
+                    }
+                };
+
+                // Real-time notifications: subscribe to user-specific private channel & family channel
+                const rawUserId = this.currentUserId
+                    || document.querySelector('meta[name="user-id"]')?.getAttribute('content')
+                    || localStorage.getItem('requesterId')
+                    || '';
+                const userSlug = String(rawUserId).replace(/[^A-Za-z0-9_-]/g, '');
+                if (userSlug) {
+                    try {
+                        const userChannel = this.pusher.subscribe(`private-user-${userSlug}`);
+                        userChannel.bind('new-notification', (data) => {
+                            window.dispatchEvent(new CustomEvent('pwa:notification-received', { detail: data }));
+                            if (data?.notification_type === 'Connected Kin Request') {
+                                window.dispatchEvent(new CustomEvent('kin-request:received', { detail: data }));
+                            }
+                        });
+                        userChannel.bind('new-request', (data) => {
+                            window.dispatchEvent(new CustomEvent('kin-request:received', { detail: data }));
+                        });
+                        userChannel.bind('new-post', handleIncomingNewPost);
+                        userChannel.bind('new-comment', handleIncomingNewComment);
+                    } catch (e) {
+                        console.warn('[feedComponent] userChannel subscribe error:', e);
+                    }
+                }
+
+                channel.bind('new-notification', (data) => {
+                    window.dispatchEvent(new CustomEvent('pwa:notification-received', { detail: data }));
                 });
+
+                channel.bind('new-post', handleIncomingNewPost);
 
                 channel.bind('two-truths-voted', (data) => {
                     const post = this.posts.find(p => p.two_truths && p.two_truths.id === data?.game_id);
@@ -3901,16 +4125,7 @@ export function profileFeed(opts = {}) {
                     }
                 });
 
-                channel.bind('new-comment', (data) => {
-                    if (Array.isArray(data)) {
-                        data.forEach(item => {
-                            const post = this.posts.find(p => String(p.post_no) === String(item?.post_no));
-                            if (post && !post.comments.some(c => String(c.comment_no) === String(item?.comment_no))) {
-                                post.comments.push(this.normalizeComment(item));
-                            }
-                        });
-                    }
-                });
+                channel.bind('new-comment', handleIncomingNewComment);
 
                 // Edit/delete broadcasts (PostMessage::deletePost/updatePost/
                 // updateComment/deleteComment) send a single flat object, not an

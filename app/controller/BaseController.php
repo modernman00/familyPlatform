@@ -415,6 +415,9 @@ class BaseController
         if ($memberId !== '' && hash_equals($sessionId, $memberId)) {
             return true;
         }
+        if ($memberId !== '' && \App\services\MemberRestrictionService::isRestricted(Db::connect2(), $memberId, $sessionId, 'profile')) {
+            return false;
+        }
         if (self::sessionSharesFamily($memberFamCode)) {
             return true;
         }
@@ -444,6 +447,140 @@ class BaseController
     {
         $id = $userId ?? (isset($_SESSION['id']) && is_scalar($_SESSION['id']) ? (string) $_SESSION['id'] : '');
         return \App\model\AllMembersData::isSuperAdmin($id);
+    }
+
+    /**
+     * Normalise a family code for case-insensitive equality checks (uppercase, no '#').
+     */
+    public static function normaliseFamilyCode(string $code): string
+    {
+        return strtoupper(ltrim(trim($code), '#'));
+    }
+
+    /**
+     * Return all approved family codes belonging to $userId (uppercase, normalised).
+     * Never fails open on DB error.
+     *
+     * @return list<string>
+     */
+    public static function getUserFamilyCodes(string $userId, bool $includeSession = true): array
+    {
+        $cleanUserId = trim($userId);
+        if ($cleanUserId === '') {
+            return [];
+        }
+
+        $codes = [];
+        $sessionId = isset($_SESSION['id']) && is_scalar($_SESSION['id']) ? trim((string) $_SESSION['id']) : '';
+        if ($includeSession && $sessionId !== '' && hash_equals($sessionId, $cleanUserId) && empty($_SESSION['is_pending_approval'])) {
+            if (!empty($_SESSION['famCode']) && is_string($_SESSION['famCode'])) {
+                $n = self::normaliseFamilyCode($_SESSION['famCode']);
+                if ($n !== '') {
+                    $codes[$n] = true;
+                }
+            }
+            $many = $_SESSION['famCodes'] ?? [];
+            if (is_string($many)) {
+                $many = [$many];
+            }
+            if (is_array($many)) {
+                foreach ($many as $fc) {
+                    if (is_string($fc)) {
+                        $n = self::normaliseFamilyCode($fc);
+                        if ($n !== '') {
+                            $codes[$n] = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        try {
+            $db = Db::connect2();
+            $stmtUf = $db->prepare("SELECT family_code, status FROM user_families WHERE user_id = ?");
+            $stmtUf->execute([$cleanUserId]);
+            $ufRows = $stmtUf->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+
+            $hasAnyUfRow = !empty($ufRows);
+            foreach ($ufRows as $row) {
+                if (strtolower((string)($row['status'] ?? '')) === 'approved') {
+                    $n = self::normaliseFamilyCode((string)($row['family_code'] ?? ''));
+                    if ($n !== '') {
+                        $codes[$n] = true;
+                    }
+                }
+            }
+
+            if (!$hasAnyUfRow || !empty($codes)) {
+                $stmtP = $db->prepare("SELECT famCode FROM personal WHERE id = ? LIMIT 1");
+                $stmtP->execute([$cleanUserId]);
+                $pCode = self::normaliseFamilyCode((string)($stmtP->fetchColumn() ?: ''));
+                if ($pCode !== '' && (!$hasAnyUfRow || isset($codes[$pCode]))) {
+                    $codes[$pCode] = true;
+                }
+            }
+        } catch (\Throwable $e) {
+            error_log('getUserFamilyCodes failed: ' . $e->getMessage());
+        }
+
+        return array_keys($codes);
+    }
+
+    /**
+     * Family codes must ONLY be known to members of that family code.
+     * Returns true iff the viewer belongs to $famCode (or $allowSuperAdmin is explicitly enabled for admin consoles).
+     */
+    public static function viewerCanSeeFamilyCode(string $famCode, ?string $viewerId = null, bool $allowSuperAdmin = false): bool
+    {
+        $normTarget = self::normaliseFamilyCode($famCode);
+        if ($normTarget === '') {
+            return false;
+        }
+
+        $resolvedViewer = $viewerId ?? (isset($_SESSION['id']) && is_scalar($_SESSION['id']) ? (string) $_SESSION['id'] : '');
+        $resolvedViewer = trim($resolvedViewer);
+        if ($resolvedViewer === '') {
+            return false;
+        }
+
+        if ($allowSuperAdmin && self::isSuperAdmin($resolvedViewer)) {
+            return true;
+        }
+
+        $viewerCodes = self::getUserFamilyCodes($resolvedViewer);
+        return in_array($normTarget, $viewerCodes, true);
+    }
+
+    /**
+     * Returns only those codes from $candidateCodes that the viewer is allowed to see.
+     *
+     * @param array<int|string, mixed> $candidateCodes
+     * @return list<string>
+     */
+    public static function filterVisibleFamilyCodes(array $candidateCodes, ?string $viewerId = null, bool $allowSuperAdmin = false): array
+    {
+        $resolvedViewer = trim($viewerId ?? (isset($_SESSION['id']) && is_scalar($_SESSION['id']) ? (string) $_SESSION['id'] : ''));
+        if ($resolvedViewer === '') {
+            return [];
+        }
+        $isAdmin = $allowSuperAdmin && self::isSuperAdmin($resolvedViewer);
+        $viewerCodes = $isAdmin ? [] : self::getUserFamilyCodes($resolvedViewer);
+
+        $visible = [];
+        foreach ($candidateCodes as $raw) {
+            if (!is_string($raw) && !is_scalar($raw)) {
+                continue;
+            }
+            $n = self::normaliseFamilyCode((string) $raw);
+            if ($n === '') {
+                continue;
+            }
+            if ($isAdmin || in_array($n, $viewerCodes, true)) {
+                $visible[$n] = true;
+            }
+        }
+
+        return array_keys($visible);
     }
 
     /**

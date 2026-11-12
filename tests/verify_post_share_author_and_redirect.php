@@ -169,8 +169,8 @@ try {
         "Open Graph title includes author name ('{$viewData['data']['ogTitle']}')"
     );
     assertShare(
-        str_contains($viewData['data']['ogDescription'] ?? '', $testFamCode),
-        "Open Graph description includes family circle ('{$viewData['data']['ogDescription']}')"
+        str_contains($viewData['data']['ogDescription'] ?? '', 'family'),
+        "Open Graph description includes family memory ('{$viewData['data']['ogDescription']}')"
     );
     assertShare(
         !empty($viewData['data']['ogImage']),

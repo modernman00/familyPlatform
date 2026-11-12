@@ -539,12 +539,12 @@ body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .sti
 }
 
 /* 🛡️ Inviolable Contrast Safeguard: Prevent dark-on-dark & dark-on-red in .public-layout dark/accent surfaces */
-:is(body, html) :is(.public-layout, [data-surface="light"], .surface-light) :is(.text-white, [data-surface="dark"], .surface-dark, .bg-dark, .bg-danger, header[style*="linear-gradient"], section[style*="linear-gradient"], div[style*="linear-gradient"], .card[style*="linear-gradient"]) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .feature-title, .stitch-title),
+:is(body, html) :is(.public-layout, [data-surface="light"], .surface-light) :is(.text-white, [data-surface="dark"], .surface-dark, .bg-dark, .bg-danger, header[style*="linear-gradient"]:not([data-surface="light"]), section[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white), div[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white), .card[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white)) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .feature-title, .stitch-title),
 :is(body, html) :is(.public-layout, [data-surface="light"], .surface-light) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .feature-title, .stitch-title):is(.text-white, [style*="color: #ffffff"], [style*="color: rgb(255, 255, 255)"], [style*="color: #fff"]) {
   color: #ffffff !important;
 }
 
-:is(body, html) :is(.public-layout, [data-surface="light"], .surface-light) :is(.text-white, [data-surface="dark"], .surface-dark, .bg-dark, .bg-danger, section[style*="linear-gradient"], div[style*="linear-gradient"], .card[style*="linear-gradient"]) :is(.text-muted, .text-secondary, p:not(.text-dark)) {
+:is(body, html) :is(.public-layout, [data-surface="light"], .surface-light) :is(.text-white, [data-surface="dark"], .surface-dark, .bg-dark, .bg-danger, section[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white), div[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white), .card[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white)) :is(.text-muted, .text-secondary, p:not(.text-dark)) {
   color: rgba(255, 255, 255, 0.9) !important;
 }
 

@@ -3,7 +3,7 @@
     <div class="row">
       <div class="col-lg-3 mb-4 mb-lg-0">
         <a class="navbar-brand d-flex align-items-center mb-3" href="/">
-          <img src="{{ getenv('APP_LOGO') }}" alt="Logo" style="height: 30px;" class="me-2">
+          <img src="{{ getenv('APP_LOGO') }}" alt="Logo" style="height: 30px;" width="30" height="30" class="me-2">
           <span class="fs-5" style="font-weight: 800; letter-spacing: -0.02em;"><span style="color: #2a0a0d;">Family</span><span style="color: var(--brand-primary);">Platform</span></span>
         </a>
         <p class="text-muted pe-lg-4">The ultimate social media site for families to connect, strengthen bonds, and share memories safely.</p>

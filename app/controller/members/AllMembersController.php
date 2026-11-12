@@ -132,6 +132,31 @@ final class AllMembersController extends AllMembersData
                 exit;
             }
 
+            $viewerId = (string)$sessId;
+            if ($viewerId !== (string)$id && !empty($data)) {
+                $visiblePrimary = BaseController::viewerCanSeeFamilyCode((string)($data['primaryFamCode'] ?? ($data['famCode'] ?? '')), $viewerId);
+                $visibleMaternal = BaseController::viewerCanSeeFamilyCode((string)($data['maternalFamCode'] ?? ($data['otherFamCode'] ?? '')), $viewerId);
+                if (!$visiblePrimary && !$visibleMaternal) {
+                    $data['famCode'] = '';
+                    $data['primaryFamCode'] = '';
+                    $data['maternalFamCode'] = '';
+                    $data['otherFamCode'] = '';
+                    $data['familyCode2'] = '';
+                } else {
+                    if (!$visiblePrimary) {
+                        $data['primaryFamCode'] = '';
+                        if (isset($data['famCode']) && !BaseController::viewerCanSeeFamilyCode((string)$data['famCode'], $viewerId)) {
+                            $data['famCode'] = (string)($data['maternalFamCode'] ?? ($data['otherFamCode'] ?? ''));
+                        }
+                    }
+                    if (!$visibleMaternal) {
+                        $data['maternalFamCode'] = '';
+                        $data['otherFamCode'] = '';
+                        $data['familyCode2'] = '';
+                    }
+                }
+            }
+
             $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: 'images', identifier1: "id");
             $pictures = Select::selectFn2(query: $query, bind: [$id]);
 

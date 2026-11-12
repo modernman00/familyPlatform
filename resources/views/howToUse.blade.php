@@ -478,7 +478,7 @@
 
             <div class="p-3 rounded-3 bg-light border">
               <p class="small text-muted mb-0">
-                Toggle <strong>Two-Factor Authentication (2FA)</strong> <strong>ON</strong> to require a 6-digit email verification code whenever you sign in with your password, or switch it <strong>OFF</strong> for direct password sign-in. You can also register <strong>FaceID / TouchID Passkeys</strong> for instant 1-tap biometric login.
+                Toggle <strong>Two-Factor Authentication (2FA)</strong> <strong>ON</strong> to require a 6-digit email verification code whenever you sign in with your password, or switch it <strong>OFF</strong> for direct password sign-in. You can also register <strong>FaceID / TouchID Passkeys</strong> for instant 1-tap biometric login, and silently <strong>Restrict Family Members</strong> to choose exactly which relatives can see your posts, comments, reels, events, journals, announcements, time capsules, and notifications.
               </p>
             </div>
           </div>
@@ -856,6 +856,104 @@
               <span class="text-muted small">Available inside feed composer, comments, and the dedicated studio.</span>
               <a href="/member/gif-studio" class="btn btn-outline-danger btn-sm font-semibold rounded-pill px-4 min-h-[44px] d-inline-flex align-items-center gap-2">
                 <i class="bi bi-palette-fill"></i> Open Brand GIF Studio &rarr;
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar: Kin Whispers & Artifact Messages (Option B - Sovereign Board Mandate) -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden" id="playbook-kin-whispers">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(184,32,44, 0.12); color: #b8202c;">
+                <i class="bi bi-chat-heart-fill fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">Kin Whispers &amp; Contextual Artifact Messaging</h3>
+                <span class="badge" style="background:#b8202c;">Intergenerational Safeguarding</span>
+              </div>
+            </div>
+            <p class="lead text-secondary">
+              Direct, private kin messaging anchored directly to family heritage artifacts—cherished photographs, tree lineage nodes, and memory milestones—with 60-second voice dedications and mandatory parental oversight.
+            </p>
+
+            <!-- 4-Quadrant Architecture -->
+            <div class="row g-4 mt-2">
+              <div class="col-md-6">
+                <div class="p-4 border rounded-3 bg-light h-100">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-primary">Quadrant 1</span>
+                    <h6 class="fw-bold text-dark mb-0">Artifact-Anchored Direct &amp; Multi-Kin Group Whispers</h6>
+                  </div>
+                  <p class="small text-muted mb-2">
+                    Unlike disposable, uncontextualised chat rooms that deteriorate into ghost towns, Kin Whispers are initiated directly from family artifacts or formed into dedicated family groups: asking an elder about a 1968 wedding photo, coordinating a reunion, or sharing private blessings.
+                  </p>
+                  <ul class="small text-muted ps-3 mb-0">
+                    <li>Anchors conversations to photos, memories, events, or lineage nodes.</li>
+                    <li><strong>Multi-Kin Group Whispers:</strong> Bring 2 to 50 verified connected kin together with custom group titles and live participant rosters.</li>
+                    <li>Avoids the friction and awkwardness of blank-canvas chat screens.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="p-4 border rounded-3 bg-light h-100">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-danger">Quadrant 2</span>
+                    <h6 class="fw-bold text-dark mb-0">Asynchronous Voice Notes (&le; 60s)</h6>
+                  </div>
+                  <p class="small text-muted mb-2">
+                    Elders and young family members often find typing on mobile keyboards tedious. Kin Whispers provides a native, one-tap voice recorder for authentic, spoken blessings and storytelling.
+                  </p>
+                  <ul class="small text-muted ps-3 mb-0">
+                    <li>Strict 60-second duration ceiling ensures messages remain concise and focused.</li>
+                    <li>Built-in audio waveform player with full mobile playback support.</li>
+                    <li>Stored securely in our private media vault, shielded from external scrapers.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="p-4 border rounded-3 bg-light h-100">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-success">Quadrant 3</span>
+                    <h6 class="fw-bold text-dark mb-0">UK Online Safety Act &amp; Minor Safeguarding</h6>
+                  </div>
+                  <p class="small text-muted mb-2">
+                    Private direct messaging can introduce grooming and harassment risks. FamilyPlatform enforces rigorous child protection invariants across all direct kin communications.
+                  </p>
+                  <ul class="small text-muted ps-3 mb-0">
+                    <li><strong>Parental Audit Trail:</strong> Any whisper thread involving a minor under 18 automatically links the verified parent/guardian.</li>
+                    <li><strong>Real-Time Alerts:</strong> Parents receive supervisory alerts whenever a new direct message is exchanged with their ward.</li>
+                    <li><strong>IDOR &amp; BOLA Immunity:</strong> Unauthorised relatives or external intruders are hard-blocked with 403 Forbidden.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="p-4 border rounded-3 bg-light h-100">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-warning text-dark">Quadrant 4</span>
+                    <h6 class="fw-bold text-dark mb-0">Multi-Rail Sovereign Calling Suite &amp; WhatsApp Bridge</h6>
+                  </div>
+                  <p class="small text-muted mb-2">
+                    Direct communication adapts to how your relatives communicate best. FamilyPlatform offers a comprehensive sovereign calling suite paired with tactile delivery feedback:
+                  </p>
+                  <ul class="small text-muted ps-3 mb-0">
+                    <li><strong>In-App Video &amp; Voice Calling:</strong> Peer-to-peer WebRTC video and audio calls with hardware-accelerated local preview and waveform indicators.</li>
+                    <li><strong>Multi-Rail Fallbacks:</strong> Instant one-tap cellular (<code>tel:</code>) and WhatsApp Voice/Video call bridges.</li>
+                    <li><strong>Read &amp; Seen Receipts:</strong> Live delivery badges ("✓ Delivered", "✓✓ Seen [time]", and "🛡️ Guardian Seen") give peace of mind.</li>
+                    <li><strong>Family Emojis &amp; Disappearing Whispers:</strong> 3D heritage emoji reactions, timed auto-disappearing messages, and one-click WhatsApp preview generation.</li>
+                    <li><strong>Sender-Only Message Deletion:</strong> Delete your own text or voice whispers permanently for everyone in the thread at any time (with an explicit confirmation prompt and instant audio purge).</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <span class="text-muted small">Experience thoughtful intergenerational communication anchored to our family heritage.</span>
+              <a href="/kin-whispers" class="btn btn-outline-danger btn-sm font-semibold rounded-pill px-4 min-h-[44px] d-inline-flex align-items-center gap-2">
+                <i class="bi bi-chat-heart-fill"></i> Open Kin Whispers Workspace &rarr;
               </a>
             </div>
           </div>

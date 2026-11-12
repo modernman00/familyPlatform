@@ -187,7 +187,7 @@ try {
                 let formData;
                 if (!isEditing) {
                     formData = new FormData(formExtra);
-                    if (!formData.has('postFamCode') || !formData.get('postFamCode')) {
+                    if ((!formData.has('postFamCode') || !formData.get('postFamCode')) && !formData.get('target_scope')) {
                         const requesterFamCodeValue = localStorage.getItem('requesterFamCode');
                         if (requesterFamCodeValue) {
                             formData.append('postFamCode', requesterFamCodeValue);

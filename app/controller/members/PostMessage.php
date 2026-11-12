@@ -102,7 +102,7 @@ final class PostMessage
 
             // 2. Loop through each post: MUST use the reference operator (&) to modify the original array.
             // One batched query for the whole page instead of one per post (N+1).
-            $commentsByPost = AllMembersData::commentProfilePicByPostNos(array_column($posts, 'post_no'));
+            $commentsByPost = AllMembersData::commentProfilePicByPostNos(array_column($posts, 'post_no'), $id);
 
             // Batch-hydrate current user's reaction across all comments on this page
             $allCommentNos = [];
@@ -253,12 +253,26 @@ final class PostMessage
                     $rawCode = !empty($post['postFamCode']) ? (string)$post['postFamCode'] : (is_string($famCode) ? $famCode : '');
                     $targetFamCodes = array_filter(array_map('trim', explode(',', $rawCode)));
                 }
+                $postAuthorId = (string)($post['id'] ?? $id);
+                $postTargetScope = (string)($post['target_scope'] ?? 'all');
                 foreach ($targetFamCodes as $targetFamCode) {
                     if ($targetFamCode === '') continue;
+                    self::broadcastScopedPusherEvent($targetFamCode, $postAuthorId, 'new-post', [$post], 'posts', $postTargetScope);
+                }
+                if ($postTargetScope === 'all' && $postAuthorId !== '') {
                     try {
-                        Pusher::broadcastToFamily($targetFamCode, 'new-post', [$post]);
-                    } catch (\Throwable $th) {
-                        error_log("Pusher post broadcast failed for family $targetFamCode: " . $th->getMessage());
+                        $connectedKin = AllMembersData::ConnectedKinEmailByUserId($postAuthorId, 'posts');
+                        foreach ($connectedKin as $kinRow) {
+                            $kinUserId = (string)($kinRow['id'] ?? '');
+                            $kinSlug = Pusher::slug($kinUserId);
+                            if ($kinSlug === '') {
+                                continue;
+                            }
+                            $kinPost = self::maskPostFamilyCodeForRecipient($post, $kinUserId);
+                            Pusher::trigger(["private-user-{$kinSlug}"], 'new-post', ['posts' => [$kinPost]]);
+                        }
+                    } catch (\Throwable $kinEx) {
+                        error_log('[PostMessage::getNewPostPusher connectedKin] ' . $kinEx->getMessage());
                     }
                 }
                 return;
@@ -273,14 +287,112 @@ final class PostMessage
         if (!empty($newPost)) {
             foreach ($newPost as $post) {
                 Post::updatePostByStatusAsPublished($post['post_no']);
-            }
-            
-            try {
-                Pusher::broadcastToFamily(is_string($famCode) ? $famCode : '', 'new-post', $newPost);
-            } catch (\Throwable $th) {
-                error_log("Pusher post broadcast failed: " . $th->getMessage());
+                self::broadcastScopedPusherEvent(
+                    is_string($famCode) ? $famCode : '',
+                    (string)($post['id'] ?? $id),
+                    'new-post',
+                    [$post],
+                    'posts',
+                    (string)($post['target_scope'] ?? 'all')
+                );
             }
         }
+    }
+
+    /**
+     * Broadcasts a post or comment payload over Pusher. When the author has no active
+     * member restrictions for the scope, broadcasts cleanly on private-family-*.
+     * When restrictions exist, suppresses the shared family broadcast and delivers only
+     * to allowed members' private-user-* channels (never leaking to restricted viewers).
+     *
+     * @param array<int, array<string, mixed>> $payload
+     */
+    private static function broadcastScopedPusherEvent(
+        string $familyCode,
+        string $authorId,
+        string $eventName,
+        array $payload,
+        string $scope = 'posts',
+        ?string $targetScope = 'all'
+    ): void {
+        if ($familyCode === '' || empty($payload)) {
+            return;
+        }
+
+        try {
+            $pdo = \Src\Db::connect2();
+            if ($authorId === '' || !\App\services\MemberRestrictionService::authorHasAnyRestriction($pdo, $authorId, $scope)) {
+                Pusher::broadcastToFamily($familyCode, $eventName, $payload);
+                return;
+            }
+
+            $pusher = Pusher::pusher();
+            if ($pusher === null) {
+                return;
+            }
+
+            $members = AllMembersData::AllMembersEmailByFamCode($familyCode);
+            $allowedRecipients = \App\services\MemberRestrictionService::filterRecipientRows($pdo, $authorId, $members, $scope);
+            $recipientIds = [];
+            foreach ($allowedRecipients as $m) {
+                $uid = trim((string)($m['id'] ?? ''));
+                if ($uid !== '') {
+                    $recipientIds[$uid] = true;
+                }
+            }
+            $recipientIds[$authorId] = true;
+
+            if ($scope === 'posts' && ($targetScope ?? 'all') === 'all') {
+                $rmStmt = $pdo->prepare(
+                    "SELECT CASE WHEN requester_id = ? THEN approver_id ELSE requester_id END AS peer_id
+                     FROM requestMgt
+                     WHERE (requester_id = ? OR approver_id = ?)
+                       AND LOWER(status) IN ('approved', 'accepted')"
+                );
+                $rmStmt->execute([$authorId, $authorId, $authorId]);
+                foreach ($rmStmt->fetchAll(\PDO::FETCH_COLUMN) as $peerId) {
+                    $pStr = trim((string)$peerId);
+                    if ($pStr !== '' && !\App\services\MemberRestrictionService::isRestricted($pdo, $authorId, $pStr, 'posts')) {
+                        if (!isset($recipientIds[$pStr])) {
+                            $recipientIds[$pStr] = false;
+                        }
+                    }
+                }
+            }
+
+            foreach ($recipientIds as $uid => $isSameFamily) {
+                $slug = Pusher::slug((string)$uid);
+                if ($slug === '') {
+                    continue;
+                }
+                $outboundPayload = $isSameFamily
+                    ? $payload
+                    : array_map(static fn(array $item): array => self::maskPostFamilyCodeForRecipient($item, (string)$uid), $payload);
+                $pusher->trigger("private-user-{$slug}", $eventName, $outboundPayload);
+            }
+        } catch (\Throwable $th) {
+            error_log("Scoped Pusher {$eventName} broadcast failed for family {$familyCode}: " . $th->getMessage());
+        }
+    }
+
+    /**
+     * Strip private family codes from a Pusher post payload when the recipient
+     * is an external Connected Kin who does not belong to that family code.
+     *
+     * @param array<string, mixed> $post
+     * @return array<string, mixed>
+     */
+    private static function maskPostFamilyCodeForRecipient(array $post, string $recipientId): array
+    {
+        $postCode = (string)($post['postFamCode'] ?? ($post['famCode'] ?? ''));
+        if ($postCode !== '' && $recipientId !== '' && \App\controller\BaseController::viewerCanSeeFamilyCode($postCode, $recipientId)) {
+            return $post;
+        }
+        $post['postFamCode'] = '';
+        if (array_key_exists('famCode', $post)) {
+            $post['famCode'] = '';
+        }
+        return $post;
     }
 
     /**
@@ -328,21 +440,34 @@ final class PostMessage
             }
 
             foreach ($commentsByFamily as $familyCode => $familyItems) {
-                try {
-                    $familyComments = array_column($familyItems, 'comment');
-                    Pusher::broadcastToFamily($familyCode, 'new-comment', $familyComments);
-                } catch (\Throwable $th) {
-                    error_log("Pusher comment broadcast failed: " . $th->getMessage());
-                }
-
-                // Send push notifications strictly to members of this verified family code
                 foreach ($familyItems as $item) {
                     $comment = $item['comment'];
                     $rawCommentAuthorId = \checkInput($comment['id'] ?? ($_SESSION['id'] ?? ''));
                     $commentAuthorId = is_string($rawCommentAuthorId) ? $rawCommentAuthorId : '';
                     $commentPostNo = (int)($comment['post_no'] ?? 0);
 
-                    $results = AllMembersData::AllMembersEmailByFamCode($familyCode, $commentAuthorId !== '' ? $commentAuthorId : null);
+                    self::broadcastScopedPusherEvent(
+                        (string)$familyCode,
+                        $commentAuthorId,
+                        'new-comment',
+                        [$comment],
+                        'comments'
+                    );
+
+                    $results = AllMembersData::AllMembersEmailByFamCode(
+                        $familyCode,
+                        $commentAuthorId !== '' ? $commentAuthorId : null,
+                        'comments'
+                    );
+                    $postAuthorId = (string)($item['postData']['id'] ?? '');
+                    if ($postAuthorId !== '') {
+                        $results = \App\services\MemberRestrictionService::filterRecipientRows(
+                            \Src\Db::connect2(),
+                            $postAuthorId,
+                            $results,
+                            'posts'
+                        );
+                    }
                     $url = self::buildCommentUrl($commentPostNo, $comment['comment_no'] ?? null);
                     $authorName = (string)($comment['fullName'] ?? 'A member');
 
@@ -783,8 +908,18 @@ final class PostMessage
                 $seenEmails = [];
                 foreach ($targetFamCodes as $tFamCode) {
                     if ($tFamCode === '') continue;
-                    $famMembers = AllMembersData::AllMembersEmailByFamCode($tFamCode, $id);
+                    $famMembers = AllMembersData::AllMembersEmailByFamCode($tFamCode, $id, 'posts');
                     foreach ($famMembers as $m) {
+                        $eKey = strtolower(trim((string)($m['email'] ?? '')));
+                        if ($eKey !== '' && !isset($seenEmails[$eKey])) {
+                            $seenEmails[$eKey] = true;
+                            $allResults[] = $m;
+                        }
+                    }
+                }
+                if ((string)($data['target_scope'] ?? 'all') === 'all' && $id !== '') {
+                    $connectedKinRows = AllMembersData::ConnectedKinEmailByUserId($id, 'posts');
+                    foreach ($connectedKinRows as $m) {
                         $eKey = strtolower(trim((string)($m['email'] ?? '')));
                         if ($eKey !== '' && !isset($seenEmails[$eKey])) {
                             $seenEmails[$eKey] = true;
@@ -902,6 +1037,7 @@ final class PostMessage
             return;
         }
 
+        $results = \App\services\MemberRestrictionService::filterRecipientRows(\Src\Db::connect2(), $postId, $results, 'posts');
         $getPostProfilePics = self::getProfilePicsForPostAndComment($postId);
 
         foreach ($results as $memberData) {
@@ -958,6 +1094,8 @@ final class PostMessage
         ?string $pushTag = null,
         ?string $inAppTitle = null
     ): void {
+        $restrictionScope = strtolower($notificationType) === 'comment' ? 'comments' : 'posts';
+        $results = \App\services\MemberRestrictionService::filterRecipientRows(\Src\Db::connect2(), $postId, $results, $restrictionScope);
         $pushTitle = $pushTitle ?? 'Family Platform Update';
         $pushTag = $pushTag ?? ('post-' . $postId);
         $inAppTitle = $inAppTitle ?? "New update from {$postOriginName}";

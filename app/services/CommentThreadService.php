@@ -118,9 +118,24 @@ final class CommentThreadService
             $url = "{$base}/profilePage?post_no={$cleanPostNo}#post{$cleanPostNo}";
         }
         $notified = [];
+        $postAuthorId = '';
+        if ($cleanPostNo > 0) {
+            try {
+                $pStmt = $pdo->prepare('SELECT id FROM post WHERE post_no = ? LIMIT 1');
+                $pStmt->execute([$cleanPostNo]);
+                $postAuthorId = (string)($pStmt->fetchColumn() ?: '');
+            } catch (\Throwable) {
+            }
+        }
 
         foreach ($targets as $targetId => $message) {
             $targetId = (string) $targetId;
+            if (
+                MemberRestrictionService::isRestricted($pdo, $authorId, $targetId, 'comments')
+                || ($postAuthorId !== '' && MemberRestrictionService::isRestricted($pdo, $postAuthorId, $targetId, 'posts'))
+            ) {
+                continue;
+            }
             try {
                 $pdo->prepare(
                     "INSERT INTO notification

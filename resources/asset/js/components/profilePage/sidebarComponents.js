@@ -32,6 +32,11 @@ export function profileSidebar(initialData) {
                 console.error('Failed to set localStorage profile credentials:', e);
             }
 
+            // Real-time listener for incoming kin requests
+            window.addEventListener('kin-request:received', () => {
+                this.fetchRequests();
+            });
+
             this.fetchRequests();
         },
 
@@ -50,7 +55,12 @@ export function profileSidebar(initialData) {
                         firstName: req?.firstName ?? req?.requesterFirstName ?? 'Unknown',
                         lastName: req?.lastName ?? req?.requesterLastName ?? '',
                         img: req?.img ?? req?.requesterProfileImg ?? 'avatarM.png',
-                        famCode: req?.famCode ?? req?.requesterFamCode ?? ''
+                        famCode: req?.famCode ?? req?.requesterFamCode ?? '',
+                        relationship_category: req?.relationship_category ?? '',
+                        relationship_category_label: req?.relationship_category_label ?? '',
+                        relationship_role: req?.relationship_role ?? '',
+                        relationship_note: req?.relationship_note ?? '',
+                        relationship_full_label: req?.relationship_full_label ?? ''
                     }));
                 } else {
                     this.friendRequests = [];
@@ -66,14 +76,15 @@ export function profileSidebar(initialData) {
         getAcceptUrl(req) {
             const requestId = encodeURIComponent(req?.id || '');
             const approverId = encodeURIComponent(this.userData?.id || '');
-            const requestCode = encodeURIComponent(req?.famCode || '');
+            const requestCode = encodeURIComponent(req?.famCode || 'kinship');
             return `/member/request/${requestId}/${approverId}/50/${requestCode}/pp`;
         },
 
         getDeclineUrl(req) {
             const requestId = encodeURIComponent(req?.id || '');
             const approverId = encodeURIComponent(this.userData?.id || '');
-            return `/member/request/${requestId}/${approverId}/10`;
+            const requestCode = encodeURIComponent(req?.famCode || 'none');
+            return `/member/request/${requestId}/${approverId}/10/${requestCode}/pp`;
         }
     };
 }

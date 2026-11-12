@@ -962,6 +962,149 @@
                 <button type="button" id="privacyBtn" class="btn-save mt-3">Save Privacy Settings</button>
               </form>
 
+              <!-- Restricted Family Members Card -->
+              <div id="memberRestrictionCard"
+                   class="mt-5 pt-4 border-top"
+                   x-data="memberRestrictionsPanel(@json($restrictionDirectory ?? []))"
+                   x-cloak>
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+                  <div>
+                    <h6 class="fw-bold mb-1" style="color: #0f172a;">
+                      <i class="bi bi-person-slash me-2" style="color: #a31621;"></i>Restricted Family Members
+                    </h6>
+                    <p class="text-muted small mb-0" style="color: #475569 !important;">
+                      Choose who cannot see your posts, comments, video reels, events, family journals, announcements, time capsules, or receive notifications and emails from you. Restricted members are never notified.
+                    </p>
+                  </div>
+                  <span class="badge rounded-pill px-3 py-2 fw-semibold"
+                        style="background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; white-space: nowrap; flex-shrink: 0;">
+                    <span x-text="restrictedCount"></span> Restricted
+                  </span>
+                </div>
+
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                  <div class="flex-grow-1" style="min-width: 220px;">
+                    <label for="restrictMemberSearch" class="visually-hidden">Search family members to restrict</label>
+                    <input type="search"
+                           id="restrictMemberSearch"
+                           class="form-control"
+                           style="min-height: 44px; background-color: #ffffff; color: #0f172a;"
+                           placeholder="Search by name or family code..."
+                           x-model.trim="searchQuery">
+                  </div>
+                  <div class="d-flex align-items-center gap-2 overflow-x-auto">
+                    <button type="button"
+                            class="btn btn-sm rounded-pill px-3"
+                            style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0; border: 1px solid #cbd5e1;"
+                            :style="{ backgroundColor: filterMode === 'all' ? '#a31621' : '#ffffff', color: filterMode === 'all' ? '#ffffff' : '#334155', borderColor: filterMode === 'all' ? '#a31621' : '#cbd5e1' }"
+                            @click="filterMode = 'all'">
+                      All Members (<span x-text="members.length"></span>)
+                    </button>
+                    <button type="button"
+                            class="btn btn-sm rounded-pill px-3"
+                            style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0; border: 1px solid #cbd5e1;"
+                            :style="{ backgroundColor: filterMode === 'restricted' ? '#a31621' : '#ffffff', color: filterMode === 'restricted' ? '#ffffff' : '#334155', borderColor: filterMode === 'restricted' ? '#a31621' : '#cbd5e1' }"
+                            @click="filterMode = 'restricted'">
+                      Restricted (<span x-text="restrictedCount"></span>)
+                    </button>
+                  </div>
+                </div>
+
+                <div x-show="errorMsg" class="alert alert-danger small rounded-3 py-2 px-3 mb-3" role="alert" x-text="errorMsg"></div>
+
+                <template x-if="members.length === 0">
+                  <div class="p-4 text-center border rounded-3" style="background-color: #f8fafc;">
+                    <i class="bi bi-people fs-3 text-muted d-block mb-2"></i>
+                    <div class="fw-semibold text-dark mb-1">No connected family members found yet</div>
+                    <p class="text-muted small mb-3">Once relatives join your family code or accept a connection request, you can manage their visibility here.</p>
+                    <a href="/allMembers" class="btn btn-outline-secondary btn-sm rounded-pill px-4" style="min-height: 44px; display: inline-flex; align-items: center;">
+                      Browse Family Directory
+                    </a>
+                  </div>
+                </template>
+
+                <template x-if="members.length > 0 && filteredMembers.length === 0">
+                  <div class="p-4 text-center border rounded-3" style="background-color: #f8fafc;">
+                    <div class="fw-semibold text-dark mb-1">No matching members</div>
+                    <p class="text-muted small mb-2">Try clearing your search or switching back to All Members.</p>
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;" @click="searchQuery = ''; filterMode = 'all';">
+                      Reset Filter
+                    </button>
+                  </div>
+                </template>
+
+                <div class="d-flex flex-column gap-2" x-show="filteredMembers.length > 0">
+                  <template x-for="member in filteredMembers" :key="member.id">
+                    <div class="p-3 rounded-3 border" :style="member.is_restricted ? 'background-color: #fff5f5; border-color: #fecaca;' : 'background-color: #f8fafc; border-color: #e2e8f0;'">
+                      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-3" style="min-width: 0; flex: 1 1 220px;">
+                          <img :src="member.avatar" :alt="member.fullName" class="rounded-circle flex-shrink-0" width="44" height="44" style="width: 44px; height: 44px; object-fit: cover;">
+                          <div style="min-width: 0;">
+                            <div class="fw-bold text-dark" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;" :title="member.fullName" x-text="member.fullName || 'Family Member'"></div>
+                            <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
+                              <span class="badge bg-light text-secondary border" style="font-size: 0.72rem;" x-show="member.famCode" x-text="'#' + member.famCode"></span>
+                              <span class="badge rounded-pill" style="background-color: #991b1b; color: #ffffff; font-size: 0.72rem;" x-show="member.is_restricted">Restricted</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                          <button type="button"
+                                  class="btn btn-sm rounded-pill px-3"
+                                  style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0; background-color: #ffffff; color: #334155; border: 1px solid #cbd5e1;"
+                                  @click="toggleExpand(member.id)">
+                            <i class="bi bi-sliders me-1"></i>
+                            <span x-text="expandedId === member.id ? 'Hide Options' : 'Customise'"></span>
+                          </button>
+
+                          <button type="button"
+                                  class="btn btn-sm rounded-pill px-3 fw-semibold"
+                                  style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0; border: 1px solid #a31621;"
+                                  :style="{ backgroundColor: member.is_restricted ? '#ffffff' : '#a31621', color: member.is_restricted ? '#0f172a' : '#ffffff', borderColor: member.is_restricted ? '#94a3b8' : '#a31621' }"
+                                  :disabled="savingId === member.id"
+                                  @click="quickToggle(member, $event.currentTarget)">
+                            <span x-text="member.is_restricted ? 'Unrestrict' : 'Restrict All'"></span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div x-show="expandedId === member.id" x-collapse class="mt-3 pt-3 border-top">
+                        <div class="row g-2 mb-3">
+                          <template x-for="scope in scopeOptions" :key="scope.key">
+                            <div class="col-12 col-sm-6 col-md-4">
+                              <label class="d-flex align-items-center gap-2 p-2 rounded border bg-white h-100" style="min-height: 44px; cursor: pointer;">
+                                <input type="checkbox" class="form-check-input mt-0" style="width: 20px; height: 20px;" x-model="member[scope.key]">
+                                <span class="small fw-medium text-dark" x-text="scope.label"></span>
+                              </label>
+                            </div>
+                          </template>
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="form-label small fw-semibold text-dark mb-1">Private Note (never shared with this member)</label>
+                          <input type="text"
+                                 class="form-control form-control-sm"
+                                 style="min-height: 44px; background-color: #ffffff; color: #0f172a;"
+                                 maxlength="255"
+                                 placeholder="Optional reminder for yourself..."
+                                 x-model="member.note">
+                        </div>
+
+                        <div class="d-flex flex-wrap justify-content-end gap-2">
+                          <button type="button"
+                                  class="btn btn-sm rounded-pill px-4 fw-semibold"
+                                  style="min-height: 44px; white-space: nowrap; flex-shrink: 0; background-color: #a31621; color: #ffffff; border: 1px solid #a31621;"
+                                  :disabled="savingId === member.id"
+                                  @click="saveMemberScopes(member, $event.currentTarget)">
+                            Save Preferences
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
               <!-- Biometric Passkeys Card -->
               <div class="mt-5 pt-4 border-top">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -1349,6 +1492,149 @@
   </div>
 
   <script nonce="{{ csp_nonce($nonce ?? null) }}">
+  window.memberRestrictionsPanel = function(initialMembers) {
+    return {
+      members: Array.isArray(initialMembers) ? initialMembers : [],
+      searchQuery: '',
+      filterMode: 'all',
+      expandedId: null,
+      savingId: null,
+      errorMsg: '',
+      scopeOptions: [
+        { key: 'restrict_posts', label: 'Posts & Memories' },
+        { key: 'restrict_comments', label: 'Comments & Replies' },
+        { key: 'restrict_reels', label: 'Video Reels' },
+        { key: 'restrict_events', label: 'Events & Calendar' },
+        { key: 'restrict_journals', label: 'Family Journals' },
+        { key: 'restrict_announcements', label: 'Announcements' },
+        { key: 'restrict_capsules', label: 'Time Capsules' },
+        { key: 'restrict_profile', label: 'Profile & Photos' }
+      ],
+      get restrictedCount() {
+        return this.members.filter(m => Boolean(m.is_restricted)).length;
+      },
+      get filteredMembers() {
+        const rawQ = (this.searchQuery || '').trim();
+        if (!rawQ) {
+          return this.members.filter(m => {
+            if (this.filterMode === 'restricted' && !m.is_restricted) return false;
+            return true;
+          });
+        }
+        const cleanQ = rawQ.replace(/^[#@]/, '').toLowerCase();
+        const tokens = cleanQ.split(/\s+/).filter(Boolean);
+        return this.members.filter(m => {
+          if (this.filterMode === 'restricted' && !m.is_restricted) return false;
+          const name = String(m.fullName || '').toLowerCase();
+          const code = String(m.famCode || '').toLowerCase();
+          const note = String(m.note || '').toLowerCase();
+          return tokens.every(t =>
+            name.includes(t) ||
+            code.includes(t) ||
+            ('#' + code).includes(t) ||
+            note.includes(t)
+          );
+        });
+      },
+      toggleExpand(memberId) {
+        this.expandedId = this.expandedId === memberId ? null : memberId;
+      },
+      resolveCsrf() {
+        return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+      },
+      async quickToggle(member, btnEl) {
+        if (!member || !member.id) return;
+        const willRestrict = !member.is_restricted;
+        if (willRestrict) {
+          member.restrict_posts = true;
+          member.restrict_comments = true;
+          member.restrict_reels = true;
+          member.restrict_events = true;
+          member.restrict_journals = true;
+          member.restrict_announcements = true;
+          member.restrict_capsules = true;
+          member.restrict_profile = false;
+        }
+        await this.persistMember(member, btnEl, willRestrict ? 'update' : 'remove');
+      },
+      async saveMemberScopes(member, btnEl) {
+        await this.persistMember(member, btnEl, 'update');
+      },
+      async persistMember(member, btnEl, mode) {
+        this.errorMsg = '';
+        this.savingId = member.id;
+        if (window.ScoreTenantSpinner && btnEl) {
+          window.ScoreTenantSpinner.start(btnEl);
+        }
+        try {
+          const csrf = this.resolveCsrf();
+          const endpoint = mode === 'remove' ? '/api/privacy/restrictions/remove' : '/api/privacy/restrictions/update';
+          const body = mode === 'remove'
+            ? { restricted_user_id: member.id, token: csrf }
+            : {
+                restricted_user_id: member.id,
+                restrict_posts: Boolean(member.restrict_posts),
+                restrict_comments: Boolean(member.restrict_comments),
+                restrict_reels: Boolean(member.restrict_reels),
+                restrict_events: Boolean(member.restrict_events),
+                restrict_journals: Boolean(member.restrict_journals),
+                restrict_announcements: Boolean(member.restrict_announcements),
+                restrict_capsules: Boolean(member.restrict_capsules),
+                restrict_profile: Boolean(member.restrict_profile),
+                note: String(member.note || '').trim(),
+                token: csrf
+              };
+
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-CSRF-TOKEN': csrf,
+              'X-XSRF-TOKEN': csrf
+            },
+            body: JSON.stringify(body)
+          });
+          const data = await res.json();
+          if (!res.ok || data.status === 'error') {
+            throw new Error(data.message || 'Unable to update member restriction.');
+          }
+
+          if (mode === 'remove' || data?.restriction?.removed) {
+            member.is_restricted = false;
+            this.scopeOptions.forEach(s => { member[s.key] = false; });
+          } else {
+            const updated = data.restriction || {};
+            member.is_restricted = Boolean(updated.active);
+            this.scopeOptions.forEach(s => {
+              if (Object.prototype.hasOwnProperty.call(updated, s.key)) {
+                member[s.key] = Boolean(updated[s.key]);
+              }
+            });
+          }
+
+          if (window.Swal) {
+            window.Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'success',
+              title: member.is_restricted ? 'Restriction saved silently' : 'Restriction removed',
+              showConfirmButton: false,
+              timer: 2200
+            });
+          }
+        } catch (err) {
+          this.errorMsg = err?.message || 'Unable to save restriction changes.';
+        } finally {
+          this.savingId = null;
+          if (window.ScoreTenantSpinner && btnEl) {
+            window.ScoreTenantSpinner.stop(btnEl);
+          }
+        }
+      }
+    };
+  };
+
   document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 

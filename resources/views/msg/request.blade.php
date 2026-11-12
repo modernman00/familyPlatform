@@ -67,7 +67,7 @@
 </table>
 
 <div style="text-align: center; margin-bottom: 30px;">
-    <a href="{{ $baseUrl }}/member/request/{{ $data['id'] }}/{{ $data['approverId'] }}/50/{{ $data['famCode'] }}/email" style="background-color: #a31621; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block; margin-right: 10px;">Accept Request</a>
+    <a href="{{ $baseUrl }}/member/request/{{ $data['id'] }}/{{ $data['approverId'] }}/50/{{ !empty($data['famCode']) ? $data['famCode'] : 'kinship' }}/email" style="background-color: #a31621; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block; margin-right: 10px;">Accept Request</a>
     <a href="{{ $baseUrl }}/member/request/{{ $data['id'] }}/{{ $data['approverId'] }}/10/request/email" style="background-color: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Decline</a>
 </div>
 

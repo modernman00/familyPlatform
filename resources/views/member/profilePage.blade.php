@@ -25,25 +25,28 @@
 
         @includeIf('member.includes.rightColumn')
 
-        @includeIf('member.modals.post')
-    
-        @includeIf('member.modals.share')
-        @includeIf('member.modals.createEvent')
-        @includeIf('member.modals.shareModal2')
-        @includeIf('member.modals.createReelModal')
-        @includeIf('member.modals.lineageQuestModal')
-        @includeIf('member.modals.familyFlyerModal')
-        @includeIf('member.modals.timeCapsuleModal')
-        @includeIf('member.modals.createAnnouncementModal')
-        @includeIf('member.modals.upcomingEventsModal')
-        @includeIf('member.modals.adulthoodCelebrationModal')
-        @includeIf('member.modals.kinshipDetailsModal')
-        @includeIf('member.modals.kinshipRadarSettingsModal')
-        @includeIf('member.modals.thenNowComparisonModal')
-
-
     </div>
 
+@endsection
+
+@section('modals')
+    @includeIf('member.modals.post')
+    @includeIf('member.modals.share')
+    @includeIf('member.modals.createEvent')
+    @includeIf('member.modals.shareModal2')
+    @includeIf('member.modals.createReelModal')
+    @includeIf('member.modals.lineageQuestModal')
+    @includeIf('member.modals.familyFlyerModal')
+    @includeIf('member.modals.timeCapsuleModal')
+    @includeIf('member.modals.createAnnouncementModal')
+    @includeIf('member.modals.upcomingEventsModal')
+    @includeIf('member.modals.adulthoodCelebrationModal')
+    @includeIf('member.modals.kinshipDetailsModal')
+    @includeIf('member.modals.kinshipRadarSettingsModal')
+    @includeIf('member.modals.thenNowComparisonModal')
+@endsection
+
+@push('scripts')
     <script nonce="{{ csp_nonce($nonce ?? null) }}">
         // Defensive frontend: Check authentication status silently if needed without page refresh
         document.addEventListener('visibilitychange', function() {
@@ -95,6 +98,4 @@
 
     </script>
 
-
-
-@endsection
+@endpush

@@ -70,22 +70,22 @@ final class PostShareController
             if ($cleanCaption !== '') {
                 $snippet = mb_strlen($cleanCaption) > 65 ? mb_substr($cleanCaption, 0, 62) . '...' : $cleanCaption;
                 $ogTitle = "“{$snippet}” — {$authorName}";
-                $ogDescription = "{$authorName} shared a family moment on FamilyPlatform. Connect with the {$cleanFamCode} family circle to view, comment, and celebrate together.";
+                $ogDescription = "{$authorName} shared a family moment on FamilyPlatform. Connect on FamilyPlatform to view, comment, and celebrate together.";
             } elseif ($hasVideo) {
                 $ogTitle = "{$authorName} shared a family video memory";
-                $ogDescription = "Watch {$authorName}’s family video memory on FamilyPlatform. Connect with the {$cleanFamCode} family circle to cherish moments together.";
+                $ogDescription = "Watch {$authorName}’s family video memory on FamilyPlatform. Connect with your family circle to cherish moments together.";
                 $mediaLabel = 'Video Memory';
             } elseif ($hasPhoto) {
                 $ogTitle = "{$authorName} shared a family photo memory";
-                $ogDescription = "View {$authorName}’s family photo on FamilyPlatform. Connect with the {$cleanFamCode} family circle to cherish moments together.";
+                $ogDescription = "View {$authorName}’s family photo on FamilyPlatform. Connect with your family circle to cherish moments together.";
                 $mediaLabel = 'Photo Memory';
             } elseif ($hasVoice) {
                 $ogTitle = "{$authorName} shared a family voice capsule";
-                $ogDescription = "Listen to {$authorName}’s voice recording on FamilyPlatform. Connect with the {$cleanFamCode} family circle.";
+                $ogDescription = "Listen to {$authorName}’s voice recording on FamilyPlatform.";
                 $mediaLabel = 'Voice Capsule';
             } else {
                 $ogTitle = "{$authorName} shared a family memory";
-                $ogDescription = "Cherish and preserve memories with the {$cleanFamCode} family on FamilyPlatform.";
+                $ogDescription = "Cherish and preserve shared family memories on FamilyPlatform.";
             }
 
             // Resolve absolute preview image URL
@@ -95,13 +95,23 @@ final class PostShareController
                 $appUrl = $scheme . ($_SERVER['HTTP_HOST'] ?? 'localhost');
             }
 
-            // Designed preview card (photo, words and author in FamilyPlatform's couture style)
-            $ogImage = $appUrl . '/post/' . $postNo . '/card.jpg?v=' . substr(md5($rawMessage . ($post['post_img0'] ?? '')), 0, 8);
-            $kind = $hasVideo ? 'video memory' : ($hasPhoto ? 'photo memory' : ($hasVoice ? 'voice note' : 'update'));
-            $ogTitle = "{$authorName} shared a family {$kind}";
-            if ($cleanCaption !== '') {
-                $ogDescription = '“' . (mb_strlen($cleanCaption) > 150 ? rtrim(mb_substr($cleanCaption, 0, 147)) . '…' : $cleanCaption) . '”'
-                    . ($cleanFamCode !== '' ? " · {$cleanFamCode} family circle" : '');
+            $authorId = (string)($post['id'] ?? '');
+            $hasRestrictions = $authorId !== '' && \App\services\MemberRestrictionService::authorHasAnyRestriction($db, $authorId, 'posts');
+
+            if ($hasRestrictions) {
+                $ogImage = $appUrl . '/public/img/favicon/android-chrome-512x512.png';
+                $ogTitle = 'Family Memory on FamilyPlatform';
+                $ogDescription = 'Sign in to FamilyPlatform to view moments shared with your family circle.';
+                $mediaLabel = 'Family Memory';
+                $hasVideo = false;
+            } else {
+                // Designed preview card (photo, words and author in FamilyPlatform's couture style)
+                $ogImage = $appUrl . '/post/' . $postNo . '/card.jpg?v=' . substr(md5($rawMessage . ($post['post_img0'] ?? '')), 0, 8);
+                $kind = $hasVideo ? 'video memory' : ($hasPhoto ? 'photo memory' : ($hasVoice ? 'voice note' : 'update'));
+                $ogTitle = "{$authorName} shared a family {$kind}";
+                if ($cleanCaption !== '') {
+                    $ogDescription = '“' . (mb_strlen($cleanCaption) > 150 ? rtrim(mb_substr($cleanCaption, 0, 147)) . '…' : $cleanCaption) . '”';
+                }
             }
 
             $canonicalUrl = $appUrl . '/post/' . $postNo;
@@ -158,8 +168,19 @@ final class PostShareController
                 }
             }
 
-            // Authenticated human: forward directly to the post on the family feed
+            // Authenticated human: enforce restriction & audience access before forwarding
             if ($isLoggedIn) {
+                $viewerId = trim((string)($_SESSION['id'] ?? ''));
+                if ($viewerId !== '' && !(new \App\services\FamilyPostAudienceService($db))->canUserAccessPost((int)$postNo, $viewerId)) {
+                    if ($isJsonRequest) {
+                        http_response_code(403);
+                        header('Content-Type: application/json; charset=utf-8');
+                        echo json_encode(['status' => 'error', 'message' => 'Post not available.']);
+                        return;
+                    }
+                    redirect('/profilePage');
+                    return;
+                }
                 if ($isJsonRequest) {
                     \App\controller\members\PostMessage::getSinglePost($postNo);
                     return;
@@ -296,12 +317,26 @@ final class PostShareController
     {
         $postNo = (int)$postNo;
         try {
-            $stmt = Db::connect2()->prepare('SELECT post_no, fullName, postMessage, post_img0, voice_capsule_url FROM post WHERE post_no = ? AND date_deleted IS NULL LIMIT 1');
+            $db = Db::connect2();
+            $stmt = $db->prepare('SELECT post_no, id, fullName, postMessage, post_img0, voice_capsule_url FROM post WHERE post_no = ? AND date_deleted IS NULL LIMIT 1');
             $stmt->execute([$postNo]);
             $post = $stmt->fetch(\PDO::FETCH_ASSOC);
             if (!$post) {
                 http_response_code(404);
                 return;
+            }
+
+            $authorId = (string)($post['id'] ?? '');
+            $viewerId = trim((string)($_SESSION['id'] ?? ''));
+            if ($authorId !== '') {
+                if ($viewerId !== '' && \App\services\MemberRestrictionService::isRestricted($db, $authorId, $viewerId, 'posts')) {
+                    http_response_code(403);
+                    return;
+                }
+                if ($viewerId === '' && \App\services\MemberRestrictionService::authorHasAnyRestriction($db, $authorId, 'posts')) {
+                    http_response_code(403);
+                    return;
+                }
             }
 
             $raw = (string)($post['postMessage'] ?? '');

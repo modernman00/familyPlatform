@@ -90,7 +90,7 @@ function myFunction(id) {
 // }
 
 // function subscribeUser(swReg) {
-//     const applicationServerKey = urlBase64ToUint8Array("{{ env('MIX_VAPID_PUBLIC_KEY') }}");  // Access public VAPID key
+//     const applicationServerKey = urlBase64ToUint8Array("{{ $_ENV['MIX_VAPID_PUBLIC_KEY'] ?? '' }}");  // Access public VAPID key
 
 //     swReg.pushManager.subscribe({
 //         userVisibleOnly: true,

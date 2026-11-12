@@ -289,9 +289,66 @@
     }
   </script>
   @endif
+
+  {{-- Connected Kin Requests Banner (Top of Feed — always mounted for live Pusher arrival) --}}
+  @php
+    $hasInitialRequests = !empty($requestData) && is_array($requestData) && count($requestData) > 0;
+  @endphp
+  <div id="kinshipRequest" class="d-flex flex-column gap-3 {{ $hasInitialRequests ? 'mb-4' : '' }}" data-approver-id="{{ htmlspecialchars((string)($_SESSION['id'] ?? ($data['id'] ?? ''))) }}">
+    @if($hasInitialRequests)
+      @foreach($requestData as $req)
+        @php
+          $reqFirstName = htmlspecialchars($req['firstName'] ?? 'Family Member');
+          $reqLastName = htmlspecialchars($req['lastName'] ?? '');
+          $reqFullName = trim("{$reqFirstName} {$reqLastName}");
+          $reqId = htmlspecialchars((string)($req['id'] ?? ''));
+          $reqFamCode = htmlspecialchars((string)($req['famCode'] ?? ''));
+          $approverId = htmlspecialchars((string)($_SESSION['id'] ?? ($data['id'] ?? '')));
+          $acceptUrl = "/member/request/{$reqId}/{$approverId}/50/{$reqFamCode}/pp";
+          $declineUrl = "/member/request/{$reqId}/{$approverId}/10/{$reqFamCode}/pp";
+          $relRole = htmlspecialchars((string)($req['relationship_role'] ?? 'Connected Kin'));
+          $relLabel = htmlspecialchars((string)($req['relationship_full_label'] ?? $relRole));
+          $relNote = htmlspecialchars((string)($req['relationship_note'] ?? ''));
+          $rawImg = (string)($req['img'] ?? ($req['profilePics'] ?? 'avatarM.png'));
+          $reqImg = !empty($rawImg) ? (str_starts_with($rawImg, '/') ? $rawImg : "/resources/images/profile/{$rawImg}") : '/resources/images/profile/avatarM.png';
+        @endphp
+        <div class="card border-0 shadow-sm kinship-request-card surface-light" data-surface="light" id="kinshipRequest-{{ $reqId }}" style="border-radius: 16px; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border-left: 5px solid #059669 !important; color: #0f172a;">
+          <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
+              <img src="{{ $reqImg }}" alt="{{ $reqFullName }}" class="rounded-circle shadow-sm flex-shrink-0" style="width: 52px; height: 52px; object-fit: cover;">
+              <div>
+                <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                  <h3 class="fw-bold mb-0" style="font-size: 1.05rem; color: #0f172a !important;">
+                    🤝 <strong style="color: #0f172a !important;">{{ $reqFullName }}</strong> <span style="color: #0f172a !important;">wants to connect as</span> <span class="badge rounded-pill bg-white border px-2.5 py-1" style="font-size: 0.8rem; border-color: #a7f3d0 !important; background-color: #ffffff !important; color: #065f46 !important;"><span class="fw-bold" style="color: #047857 !important;">{{ $relLabel }}</span></span>
+                  </h3>
+                </div>
+                @if(!empty($relNote))
+                  <p class="mb-1 fst-italic" style="font-size: 0.88rem; line-height: 1.4; color: #334155 !important;">
+                    “{{ $relNote }}”
+                  </p>
+                @endif
+                <div class="small" style="font-size: 0.78rem; color: #475569 !important;">
+                  <i class="bi bi-shield-check text-success me-1"></i> Connected Kin: Both family trees remain 100% private to your family codes.
+                </div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <a href="{{ $acceptUrl }}" class="btn btn-sm btn-success text-white rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center justify-content-center text-nowrap" style="min-height: 44px; text-decoration: none; white-space: nowrap; flex-shrink: 0;" title="Accept as Connected Kin">
+                <i class="bi bi-check-lg me-1"></i> Accept Kinship
+              </a>
+              <a href="{{ $declineUrl }}" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center justify-content-center text-nowrap" style="min-height: 44px; text-decoration: none; white-space: nowrap; flex-shrink: 0;" title="Decline">
+                <i class="bi bi-x-lg me-1"></i> Decline
+              </a>
+            </div>
+          </div>
+        </div>
+      @endforeach
+    @endif
+  </div>
+
   @if(!empty($pendingFamilyRequests))
     @foreach($pendingFamilyRequests as $joinReq)
-      <div class="card mb-4 border-0 shadow-sm family-join-request-card" id="familyJoinReq-{{ $joinReq['no'] }}" style="border-radius: 16px; background: linear-gradient(135deg, #fdf5f5 0%, #fbefef 100%); border-left: 5px solid #a31621 !important;">
+      <div class="card mb-4 border-0 shadow-sm family-join-request-card surface-light" data-surface="light" id="familyJoinReq-{{ $joinReq['no'] }}" style="border-radius: 16px; background: linear-gradient(135deg, #fdf5f5 0%, #fbefef 100%); border-left: 5px solid #a31621 !important; color: #0f172a;">
         <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
           <div class="d-flex align-items-center gap-3">
             <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px; background: #f3d9db; color: #8a1019; font-size: 1.3rem;">
@@ -299,8 +356,8 @@
             </div>
             <div>
               <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-                <h3 class="fw-bold mb-0 text-dark" style="font-size: 1rem;">
-                  👋 <strong>{{ htmlspecialchars($joinReq['requesterName'] ?? 'New Member') }}</strong> {{ __('family.wants_to_join', 'wants to join your :code family network', ['code' => htmlspecialchars($joinReq['family_code'] ?? '')]) }}
+                <h3 class="fw-bold mb-0" style="font-size: 1rem; color: #0f172a !important;">
+                  👋 <strong style="color: #0f172a !important;">{{ htmlspecialchars($joinReq['requesterName'] ?? 'New Member') }}</strong> <span style="color: #0f172a !important;">{{ __('family.wants_to_join', 'wants to join your :code family network', ['code' => htmlspecialchars($joinReq['family_code'] ?? '')]) }}</span>
                 </h3>
                 @if(!empty($joinReq['is_escalated']))
                   <span class="badge rounded-pill px-2.5 py-1" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-size: 0.76rem;">
@@ -508,7 +565,7 @@
             </div>
             <div>
               <h6 class="fw-bold mb-1 text-dark" style="font-size: 1rem;">
-                👋 <strong>{{ htmlspecialchars($migReq['requesterName'] ?? 'A relative') }}</strong> (currently code #{{ htmlspecialchars($migReq['old_family_code'] ?? '') }}) requested to migrate to your <strong>#{{ htmlspecialchars($migReq['new_family_code'] ?? '') }}</strong> family network!
+                👋 <strong>{{ htmlspecialchars($migReq['requesterName'] ?? 'A relative') }}</strong> requested to migrate to your <strong>#{{ htmlspecialchars($migReq['new_family_code'] ?? '') }}</strong> family network!
               </h6>
               <p class="mb-1 text-muted" style="font-size: 0.88rem;">
                 Approve to welcome them into your family tree, shared memories, and household timeline.
@@ -944,6 +1001,90 @@
       </template>
     </div>
 
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
+      if (typeof window.openReportModal !== 'function') {
+        window.openReportModal = function(targetType, targetId) {
+          if (typeof Swal === 'undefined') {
+            alert('Reporting service is loading. Please try again.');
+            return;
+          }
+          var isComment = targetType === 'comment';
+          var htmlContent = `
+            <div class="text-start" style="font-size: 0.92rem;">
+              <p class="text-muted mb-3">Please select the reason for flagging this ${isComment ? 'comment' : 'post'}. Our super admin moderation team reviews all flagged items.</p>
+              <div class="mb-3">
+                <label for="swal-report-reason-fallback" class="form-label fw-semibold">Reason for Report <span class="text-danger">*</span></label>
+                <select id="swal-report-reason-fallback" class="form-select" style="min-height: 44px; font-size: 0.95rem;">
+                  <option value="hate_speech">Hate speech or abusive slurs</option>
+                  <option value="harassment">Harassment, bullying, or threats</option>
+                  <option value="inappropriate">Inappropriate or offensive content</option>
+                  <option value="spam">Spam or misleading information</option>
+                  <option value="other">Other violation of family values</option>
+                </select>
+              </div>
+              <div class="mb-2">
+                <label for="swal-report-details-fallback" class="form-label fw-semibold">Additional Details (Optional)</label>
+                <textarea id="swal-report-details-fallback" class="form-control" rows="3" maxlength="500" placeholder="Provide extra context to help our administrators investigate..."></textarea>
+              </div>
+            </div>
+          `;
+
+          Swal.fire({
+            title: isComment ? 'Flag Comment' : 'Report Post',
+            html: htmlContent,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Submit Report',
+            cancelButtonText: 'Cancel',
+            showLoaderOnConfirm: true,
+            allowOutsideClick: function() { return !Swal.isLoading(); },
+            preConfirm: async function() {
+              var reason = document.getElementById('swal-report-reason-fallback')?.value || 'hate_speech';
+              var details = document.getElementById('swal-report-details-fallback')?.value || '';
+              var metaCsrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                             document.querySelector('input[name="_csrf_token"]')?.value || '';
+
+              try {
+                var resp = await fetch('/member/content/report', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    ...(metaCsrf ? { 'X-CSRF-TOKEN': metaCsrf } : {})
+                  },
+                  body: JSON.stringify({
+                    target_type: targetType,
+                    target_id: targetId,
+                    reason: reason,
+                    details: details
+                  })
+                });
+                var data = await resp.json();
+                if (!resp.ok) {
+                  throw new Error(data.error || 'Failed to submit report');
+                }
+                return data;
+              } catch (err) {
+                Swal.showValidationMessage(err.message || 'Unable to submit report.');
+                return false;
+              }
+            }
+          }).then(function(result) {
+            if (result.isConfirmed && result.value) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Report Submitted',
+                text: result.value.message || 'Thank you for helping keep our family community safe. Administrators have been notified.',
+                confirmButtonColor: '#059669'
+              });
+            }
+          });
+        };
+      }
+    </script>
+
     <!-- Infinite scroll sentinel: loads the next page of posts shortly before it scrolls into view -->
     <div x-cloak x-show="feedHasMore" aria-live="polite" class="text-center py-3">
       <div x-init="if ('IntersectionObserver' in window) { new IntersectionObserver((entries) => { if (entries[0].isIntersecting) loadMorePosts(); }, { rootMargin: '600px 0px' }).observe($el); }"
@@ -1060,7 +1201,7 @@
                                 <span class="fw-bold text-white text-truncate" style="font-size: 0.95rem; text-shadow: 0 1px 3px rgba(0,0,0,0.8);" x-text="lightboxPost.fullName || 'Family Member'"></span>
                                 <i class="bi bi-patch-check-fill text-info" style="font-size: 0.85rem;"></i>
                             </div>
-                            <span class="text-white-50 text-truncate" style="font-size: 0.78rem;" x-text="(lightboxPost.postFamCode || lightboxPost.famCode) ? ('#' + String(lightboxPost.postFamCode || lightboxPost.famCode).replace(/^#+/, '')) : ''"></span>
+                            <span class="text-white-50 text-truncate" style="font-size: 0.78rem;" x-text="lightboxPost.postFamCode ? ('#' + String(lightboxPost.postFamCode).replace(/^#+/, '')) : (lightboxPost.is_official ? 'FamilyPlatform' : 'Connected Kin')"></span>
                         </div>
                     </div>
 
@@ -1384,7 +1525,7 @@
                                     <span class="fw-bold text-white text-truncate" style="font-size: 0.95rem; text-shadow: 0 1px 3px rgba(0,0,0,0.8);" x-text="videoModalPost.fullName || 'Family Member'"></span>
                                     <i class="bi bi-patch-check-fill text-info" style="font-size: 0.85rem;"></i>
                                 </div>
-                                <span class="text-white-50 text-truncate" style="font-size: 0.78rem;" x-text="(videoModalPost.postFamCode || videoModalPost.famCode) ? ('#' + String(videoModalPost.postFamCode || videoModalPost.famCode).replace(/^#+/, '')) : ''"></span>
+                                <span class="text-white-50 text-truncate" style="font-size: 0.78rem;" x-text="videoModalPost.postFamCode ? ('#' + String(videoModalPost.postFamCode).replace(/^#+/, '')) : (videoModalPost.is_official ? 'FamilyPlatform' : 'Connected Kin')"></span>
                             </div>
                         </div>
 

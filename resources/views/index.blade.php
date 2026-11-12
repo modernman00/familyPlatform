@@ -4,6 +4,10 @@
 @section('meta_description', 'The private, secure social platform built exclusively for families. Preserve precious memories, build interactive family trees, and stay connected with relatives.')
 @section('data-page-id', 'home')
 
+@section('preload_lcp')
+  <link rel="preload" as="image" href="/public/img/hero-family.webp" type="image/webp" fetchpriority="high">
+@endsection
+
 @section('content')
   <!-- Hero Section -->
   <section class="hero-section">
@@ -36,7 +40,10 @@
           </div>
         </div>
         <div class="col-lg-6 text-center">
-          <img src="/public/img/hero-family.png" alt="Family Connection Network" class="hero-image img-fluid">
+          <picture>
+            <source srcset="/public/img/hero-family.webp" type="image/webp">
+            <img src="/public/img/hero-family.png" alt="Family Connection Network" class="hero-image img-fluid" width="600" height="600" fetchpriority="high" decoding="async">
+          </picture>
         </div>
       </div>
     </div>
@@ -86,7 +93,7 @@
   </section>
 
   <!-- Free Interactive Tools Section ("Engineering as Marketing") -->
-  <section class="py-5" style="background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%); border-top: 1px solid #e2e8f0;">
+  <section class="py-5 bg-slate-50" data-surface="light" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0;">
     <div class="container py-4">
       <div class="text-center max-w-700 mx-auto mb-5">
         <div class="badge rounded-pill px-3 py-2 mb-2 fw-bold text-uppercase" style="background: rgba(163,22,33,0.1); color: var(--brand-primary, #a31621); font-size: 0.8rem; letter-spacing: 0.05em;">
@@ -195,7 +202,16 @@
             @php
               $postSlug = $blog['slug'] ?? $blog['id'];
               $postUrl = '/blog/' . htmlspecialchars((string)$postSlug, ENT_QUOTES, 'UTF-8');
-              $coverImage = !empty($blog['cover_image']) ? $blog['cover_image'] : 'https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=800&q=80';
+              $rawCover = !empty($blog['cover_image']) ? (string)$blog['cover_image'] : '';
+              if ($rawCover !== '' && (str_starts_with($rawCover, 'http://') || str_starts_with($rawCover, 'https://'))) {
+                  $coverImage = $rawCover;
+              } elseif ($rawCover !== '' && file_exists(dirname(__DIR__, 2) . '/public/img/webImg/' . basename($rawCover))) {
+                  $coverImage = '/public/img/webImg/' . basename($rawCover);
+              } elseif ($rawCover !== '' && file_exists(dirname(__DIR__, 2) . '/' . ltrim($rawCover, '/'))) {
+                  $coverImage = '/' . ltrim($rawCover, '/');
+              } else {
+                  $coverImage = 'https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=800&q=80';
+              }
               $rawExcerpt = !empty($blog['summary']) ? $blog['summary'] : strip_tags($blog['content'] ?? '');
               $excerpt = function_exists('mb_substr') ? mb_substr(trim($rawExcerpt), 0, 110) : substr(trim($rawExcerpt), 0, 110);
             @endphp
@@ -336,11 +352,11 @@
   </section>
 
   <!-- CTA Section -->
-  <section class="py-5" style="background-color: var(--brand-secondary); color: white;">
+  <section class="py-5" style="background-color: var(--brand-secondary, #7a0e16); color: #ffffff;" data-surface="dark">
     <div class="container text-center py-5">
-      <h2 class="fw-bold mb-3">Ready to bring your family closer?</h2>
-      <p class="fs-5 mb-4 text-white-50">Join thousands of families who have already made the switch to a better network.</p>
-      <a href="/register" class="btn btn-light btn-lg px-4 px-md-5 fw-bold shadow-sm" style="color: var(--brand-secondary); border-radius: 12px;">Get Started</a>
+      <h2 class="fw-bold mb-3 text-white" style="color: #ffffff !important;">Ready to bring your family closer?</h2>
+      <p class="fs-5 mb-4 text-white-50" style="color: rgba(255, 255, 255, 0.85) !important;">Join thousands of families who have already made the switch to a better network.</p>
+      <a href="/register" class="btn btn-light btn-lg px-4 px-md-5 fw-bold shadow-sm" style="color: var(--brand-secondary, #7a0e16); border-radius: 12px;">Get Started</a>
     </div>
   </section>
 @endsection

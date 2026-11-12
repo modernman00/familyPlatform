@@ -225,7 +225,10 @@
                     @php
                         $kinAvatar = !empty($kin['profilePics']) ? (str_starts_with($kin['profilePics'], '/') ? $kin['profilePics'] : '/resources/images/profile/' . $kin['profilePics']) : '/resources/images/profile/avatarM.png';
                         $rawName = trim(($kin['firstName'] ?? '') . ' ' . ($kin['lastName'] ?? ''));
-                        $kinName = !empty($rawName) ? ucwords(strtolower($rawName)) : (!empty($kin['famCode']) ? __('kinship.family_relative', 'Family Relative') . ' (' . $kin['famCode'] . ')' : __('kinship.family_relative', 'Family Relative'));
+                        $radarViewerId = (string)($_SESSION['auth']['id'] ?? ($_SESSION['id'] ?? ''));
+                        $visibleRadarFamCode = (!empty($kin['famCode']) && \App\controller\BaseController::viewerCanSeeFamilyCode((string)$kin['famCode'], $radarViewerId)) ? (string)$kin['famCode'] : '';
+                        $visibleRadarFamilyCode2 = (!empty($kin['familyCode2']) && \App\controller\BaseController::viewerCanSeeFamilyCode((string)$kin['familyCode2'], $radarViewerId)) ? (string)$kin['familyCode2'] : '';
+                        $kinName = !empty($rawName) ? ucwords(strtolower($rawName)) : ($visibleRadarFamCode !== '' ? __('kinship.family_relative', 'Family Relative') . ' (' . $visibleRadarFamCode . ')' : __('kinship.family_relative', 'Family Relative'));
                         $kinId = $kin['user_id'] ?? '';
                         $kinType = $kin['kinship_type'] ?? 'Potential Kin';
                         $primaryReason = str_ireplace('Shared Family Surname', 'Shared Surname', (string)($kin['primary_reason'] ?? 'Shared family heritage network'));
@@ -253,7 +256,7 @@
                         $hasCustomPic = !empty($kin['profilePics']) && !str_contains($kin['profilePics'], 'avatarM.png') && !str_contains($kin['profilePics'], 'avatarF.png');
 
                         // Branch origin label
-                        $branchText = !empty($kin['famCode']) ? $kin['famCode'] . ' ' . __('kinship.family_branch', 'Branch') : '';
+                        $branchText = $visibleRadarFamCode !== '' ? $visibleRadarFamCode . ' ' . __('kinship.family_branch', 'Branch') : '';
 
                         $kinPayload = [
                             'id' => (string)$kinId,
@@ -263,8 +266,8 @@
                             'type' => $kinType,
                             'primaryReason' => $primaryReason,
                             'reasons' => $reasons,
-                            'famCode' => $kin['famCode'] ?? '',
-                            'familyCode2' => $kin['familyCode2'] ?? '',
+                            'famCode' => $visibleRadarFamCode,
+                            'familyCode2' => $visibleRadarFamilyCode2,
                             'maidenName' => $kin['maiden_name'] ?? '',
                             'mutualKinCount' => $mutualCount,
                         ];

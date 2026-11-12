@@ -1012,6 +1012,15 @@ final class LinkPreviewService
         $isPartyEvent = str_contains(strtolower($domain), 'partyplatform') || str_contains($url, '/e/');
 
         $rawImage = (string)($data['image_url'] ?? $data['image'] ?? '');
+        if (str_starts_with($rawImage, 'http://')) {
+            $isHttpsCurrent = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+                || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+                || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443);
+            $imgHost = (string)parse_url($rawImage, PHP_URL_HOST);
+            if ($isHttpsCurrent || str_ends_with($imgHost, '.test') || str_ends_with($imgHost, '.local')) {
+                $rawImage = 'https://' . substr($rawImage, 7);
+            }
+        }
 
         // Detect Google Photos albums/shares and direct image files (Zero-Storage Media Pipeline)
         $isGooglePhoto = str_contains(strtolower($domain), 'photos.app.goo.gl')

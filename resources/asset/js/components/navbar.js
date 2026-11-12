@@ -197,11 +197,60 @@ const fetchUserNotifications = () => {
             }
         });
 };
-export { updateNotificationBadge, fetchUserNotifications };
+// Update whisper unread badge and bell indicators across navbar & left column
+function updateWhisperBadge(count) {
+    const countNum = parseInt(count || '0', 10);
+    const displayStr = countNum > 9 ? '9+' : (countNum > 0 ? countNum.toString() : '');
+    const hasUnread = countNum > 0;
+
+    const navBadge = id('navbar_whisper_count');
+    const mobileBadge = id('mobile_whisper_count');
+    const portalBadges = document.querySelectorAll('.whisper-portal-unread-badge');
+    const portalCounts = document.querySelectorAll('.whisper-portal-unread-count');
+    const bellIndicators = document.querySelectorAll('.whisper-bell-indicator, .whisper-portal-bell-icon, .whisper-portal-bell-dot');
+
+    if (navBadge) {
+        navBadge.textContent = displayStr;
+        navBadge.classList.toggle('d-none', !hasUnread);
+    }
+    if (mobileBadge) {
+        mobileBadge.textContent = displayStr;
+        mobileBadge.classList.toggle('d-none', !hasUnread);
+    }
+    portalBadges.forEach(b => {
+        b.classList.toggle('d-none', !hasUnread);
+    });
+    portalCounts.forEach(c => {
+        c.textContent = displayStr;
+    });
+    bellIndicators.forEach(b => {
+        b.classList.toggle('d-none', !hasUnread);
+    });
+}
+
+const fetchWhisperUnreadCount = () => {
+    if (!document.getElementById('navbarWhispersBtn') && !document.getElementById('leftColumnKinWhispersPortal') && !document.getElementById('mobileWhispersBtn')) {
+        return;
+    }
+
+    axios.get('/api/kin-whispers/unread-count')
+        .then(res => {
+            if (res.data && res.data.success && typeof res.data.unread_count !== 'undefined') {
+                updateWhisperBadge(res.data.unread_count);
+            }
+        })
+        .catch(() => {
+            // Silently handle guest / unauthenticated
+        });
+};
+
+export { updateNotificationBadge, fetchUserNotifications, updateWhisperBadge, fetchWhisperUnreadCount };
 
 if (typeof window !== 'undefined') {
     window.updateNotificationBadge = updateNotificationBadge;
     window.fetchUserNotifications = fetchUserNotifications;
+    window.updateWhisperBadge = updateWhisperBadge;
+    window.fetchWhisperUnreadCount = fetchWhisperUnreadCount;
 }
 
 // Dropdown controls
@@ -244,10 +293,14 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         initNavbarControls();
         fetchUserNotifications();
+        fetchWhisperUnreadCount();
+        setInterval(fetchWhisperUnreadCount, 60000);
     });
 } else {
     initNavbarControls();
     fetchUserNotifications();
+    fetchWhisperUnreadCount();
+    setInterval(fetchWhisperUnreadCount, 60000);
 }
 
 // Smooth scroll and highlight an item navigated via notification
@@ -455,5 +508,12 @@ if (typeof window !== 'undefined') {
     });
     window.addEventListener('pwa:notification-received', () => {
         fetchUserNotifications();
+        fetchWhisperUnreadCount();
+    });
+    window.addEventListener('kin-whispers:read', () => {
+        fetchWhisperUnreadCount();
+    });
+    window.addEventListener('kin-whispers:refresh', () => {
+        fetchWhisperUnreadCount();
     });
 }

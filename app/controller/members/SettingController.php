@@ -29,12 +29,18 @@ final class SettingController extends BaseController
                 [(string)$accountData['id']]
             );
 
+            $restrictionDirectory = \App\services\MemberRestrictionService::getRestrictionDirectoryForOwner(
+                \Src\Db::connect2(),
+                (string)$accountData['id']
+            );
+
             Utility::view('/member/accountSetting', [
                 'accountData' => $accountData,
                 'pendingFamilyRequest' => $pendingFamilyRequest,
                 'birthFamily' => $birthFamily,
                 'codeRename' => $codeRename,
-                'passkeys' => $passkeys
+                'passkeys' => $passkeys,
+                'restrictionDirectory' => $restrictionDirectory
             ]);
 
         } catch (\Throwable $th) {

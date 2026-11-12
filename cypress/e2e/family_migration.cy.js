@@ -27,7 +27,12 @@ describe('Family Code Migration & Discovery Nudge E2E Journey', () => {
             .first()
             .within(() => {
                 cy.get('.btn-nudge-family').should('exist').and('contain.text', 'Nudge to Join Your Family Code');
-                cy.get('.btn-request-migration').should('exist').and('contain.text', 'Join #');
+                cy.get('.btn-request-migration')
+                    .should('exist')
+                    .and('contain.text', 'Join ')
+                    .and('contain.text', 'famcode')
+                    .and('not.contain.text', '#');
+                cy.contains('Tree (').should('not.exist');
             });
     });
 
@@ -63,7 +68,10 @@ describe('Family Code Migration & Discovery Nudge E2E Journey', () => {
 
         // SweetAlert modal should open
         cy.get('.swal2-modal', { timeout: 8000 }).should('be.visible');
-        cy.get('#swal2-title').should('contain.text', 'Join Family');
+        cy.get('#swal2-title')
+            .should('contain.text', 'Join ')
+            .and('contain.text', 'famcode')
+            .and('not.contain.text', '#');
         cy.get('#swal-req-note').should('exist');
         cy.get('.swal2-confirm').should('be.visible').and('contain.text', 'Submit Request');
         cy.get('.swal2-cancel').should('be.visible').click();

@@ -371,15 +371,22 @@ final class ProfilePage extends ProcessImg
                 \App\services\MediaSafetyInspectionService::assertSafeUploads($_FILES['post_img'], 'feed_post');
             }
 
-            // Dual-Lineage Post Audience Scope (All vs. Birth vs. Married)
+            // Dual-Lineage Post Audience Scope (All vs. Birth vs. Married vs. Paternal vs. Maternal vs. Household)
             $audienceService = new \App\services\FamilyPostAudienceService();
             $userAudiences = $audienceService->resolveUserAudiences((string)$id);
             $rawScope = trim((string)($_POST['target_scope'] ?? ''));
-            if (!in_array($rawScope, ['all', 'birth', 'married'], true)) {
-                $rawScope = $userAudiences['default_scope'] ?? 'all';
+            if (!in_array($rawScope, ['all', 'birth', 'married', 'paternal', 'maternal', 'household', 'maiden'], true)) {
+                $rawScope = $userAudiences['default_scope'];
             }
-            $explicitCode = !empty($_POST['target_fam_code']) ? trim((string)$_POST['target_fam_code']) : (!empty($_POST['postFamCode']) ? trim((string)$_POST['postFamCode']) : null);
-            unset($_POST['target_scope'], $_POST['target_fam_code'], $_REQUEST['target_scope'], $_REQUEST['target_fam_code']);
+            $explicitCode = ($rawScope !== 'all' && !empty($_POST['target_fam_code']))
+                ? trim((string)$_POST['target_fam_code'])
+                : null;
+            unset(
+                $_POST['target_scope'], $_POST['target_fam_code'],
+                $_POST['audience_choice'], $_POST['audience_choice_radio'],
+                $_REQUEST['target_scope'], $_REQUEST['target_fam_code'],
+                $_REQUEST['audience_choice'], $_REQUEST['audience_choice_radio']
+            );
 
             // Read attached 3D Augmented Reality (AR) Emoji upfront for single atomic insert
             $arEmoji = !empty($_POST['ar_emoji']) ? trim((string)$_POST['ar_emoji']) : (!empty($_POST['attached_ar_emoji']) ? trim((string)$_POST['attached_ar_emoji']) : null);
@@ -417,6 +424,7 @@ final class ProfilePage extends ProcessImg
                 'then_now', 'then_label', 'now_label', 'reply_to_post',
                 'comparison_mode', 'mystery_year', 'then_now_voice_base64',
                 'attached_ar_emoji', 'target_scope', 'target_fam_code', 'post_style',
+                'audience_choice', 'audience_choice_radio',
                 'submit', 'button',
                 'g-recaptcha-response', 'grecaptcharesponse', 'siteKey', 'action',
                 'website_hp', 'hp_username', 'hp_email', 'fax_number', 'phone_number_hp', 'company_website_trap'
@@ -441,7 +449,7 @@ final class ProfilePage extends ProcessImg
                     'then_now', 'then_label', 'now_label', 'reply_to_post',
                     'comparison_mode', 'mystery_year', 'then_now_voice_base64',
                     'ar_emoji', 'attached_ar_emoji', 'post_style',
-                    'target_scope', 'target_fam_code'
+                    'target_scope', 'target_fam_code', 'audience_choice', 'audience_choice_radio'
                 ]
             );
 
@@ -818,9 +826,10 @@ final class ProfilePage extends ProcessImg
                 // Spawning a detached CLI worker guarantees ~150ms HTTP completion.
                 $workerScript = realpath(__DIR__ . '/../../../scripts/post_background_worker.php');
                 if (!isTestEnv() && $workerScript && is_file($workerScript) && function_exists('exec')) {
+                    $phpCli = self::resolvePhpCliBinary();
                     $cmd = sprintf(
                         '%s %s %d > /dev/null 2>&1 &',
-                        escapeshellarg(PHP_BINARY ?: 'php'),
+                        escapeshellarg($phpCli),
                         escapeshellarg($workerScript),
                         (int)$result
                     );
@@ -1582,7 +1591,35 @@ final class ProfilePage extends ProcessImg
      * 
      * @return void
      */
-    public function setHeader()
+    /**
+     * Resolve the PHP CLI executable reliably across php-fpm, mod_php, lsphp, and CLI SAPIs
+     * so detached background workers never attempt to invoke php-fpm or httpd daemons.
+     */
+    private static function resolvePhpCliBinary(): string
+    {
+        if (PHP_SAPI === 'cli' && is_executable(PHP_BINARY)) {
+            return PHP_BINARY;
+        }
+        $candidates = [];
+        if (defined('PHP_BINDIR')) {
+            $candidates[] = rtrim((string) PHP_BINDIR, '/\\') . DIRECTORY_SEPARATOR . 'php';
+        }
+        if (!preg_match('/(fpm|httpd|apache|cgi)/i', PHP_BINARY)) {
+            $candidates[] = PHP_BINARY;
+        }
+        $candidates[] = '/opt/homebrew/bin/php';
+        $candidates[] = '/usr/local/bin/php';
+        $candidates[] = '/usr/bin/php';
+
+        foreach ($candidates as $bin) {
+            if (@is_file($bin) && @is_executable($bin)) {
+                return $bin;
+            }
+        }
+        return 'php';
+    }
+
+    public function setHeader(): void
     {
         $token = checkInput($_GET['token']);
         $token = is_string($token) ? $token : '';

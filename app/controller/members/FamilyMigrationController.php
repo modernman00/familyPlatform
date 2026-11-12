@@ -128,9 +128,9 @@ final class FamilyMigrationController extends BaseController
         $targetUserId = isset($input['target_user_id']) ? (string)$input['target_user_id'] : (isset($_POST['target_user_id']) ? (string)$_POST['target_user_id'] : null);
         $note = isset($input['note']) ? (string)$input['note'] : (isset($_POST['note']) ? (string)$_POST['note'] : null);
 
-        if ($familyCode === '') {
+        if ($familyCode === '' && ($targetUserId === null || trim($targetUserId) === '')) {
             http_response_code(400);
-            echo json_encode(['error' => 'Target family code is required.']);
+            echo json_encode(['error' => 'Target family code or relative is required.']);
             return;
         }
 

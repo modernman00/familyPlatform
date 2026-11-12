@@ -12,3 +12,17 @@ $router->map(
   target: 'App\controller\members\FamilyRequestController@approveDelete', 
   name: 'approve_request'
 );
+
+$router->map(
+  method: 'GET', 
+  route: '/member/request/[a:req]/[a:appr]/[a:dec]/[a:reqCode]', 
+  target: 'App\controller\members\FamilyRequestController@approveDelete', 
+  name: 'approve_request_4seg'
+);
+
+$router->map(
+  method: 'GET', 
+  route: '/member/request/[a:req]/[a:appr]/[a:dec]', 
+  target: 'App\controller\members\FamilyRequestController@approveDelete', 
+  name: 'approve_request_3seg'
+);

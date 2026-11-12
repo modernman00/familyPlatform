@@ -212,4 +212,32 @@ final class FamilyMigrationServiceTest extends TestCase
         $accept = $this->service->acceptNudge($migrationId, $userB, $token);
         $this->assertFalse($accept['success']);
     }
+
+    public function test_request_via_target_user_id_does_not_leak_family_code(): void
+    {
+        $famA = 'SECRET_A_' . strtoupper(bin2hex(random_bytes(2)));
+        $famB = 'SECRET_B_' . strtoupper(bin2hex(random_bytes(2)));
+        $userA = 'user_sec_a_' . bin2hex(random_bytes(4));
+        $userB = 'user_sec_b_' . bin2hex(random_bytes(4));
+
+        $this->provisionUser($userA, $famA, 'Laf', 'Olaogun', "laf_{$userA}@test.com");
+        $this->provisionUser($userB, $famB, 'Kemi', 'Adeyemi', "kemi_{$userB}@test.com");
+
+        // User B requests to join User A's family without knowing famA
+        $reqRes = $this->service->createRequest($userB, '', $userA, 'Please let me join!');
+        $this->assertTrue($reqRes['success'], $reqRes['message']);
+        $this->assertStringNotContainsString($famA, $reqRes['message']);
+
+        $migrationId = (int)$reqRes['migration_id'];
+        $req = $this->service->getMigrationRequest($migrationId);
+        $this->assertNotNull($req);
+        $this->assertSame($famA, $req['new_family_code']);
+        $this->assertSame($famB, $req['old_family_code']);
+        $this->assertSame($userA, $req['approver_id']);
+
+        // Duplicate request also does not leak famA
+        $dupRes = $this->service->createRequest($userB, '', $userA, 'Duplicate');
+        $this->assertFalse($dupRes['success']);
+        $this->assertStringNotContainsString($famA, $dupRes['message']);
+    }
 }

@@ -31,6 +31,12 @@ final class Organogram extends SingleCustomerData
             $data = BaseController::findMemberById($idStr);
             $primaryFamCode = strtoupper(trim((string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''))));
             $familyCode = $primaryFamCode;
+            $sessionId = (string)($_SESSION['id'] ?? '');
+
+            // Release session lock early so concurrent requests/assets never queue on session file lock
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
 
             if (empty($familyCode)) {
                 http_response_code(403);
@@ -38,7 +44,7 @@ final class Organogram extends SingleCustomerData
                 exit;
             }
 
-            $isSelf = (string)$idStr === (string)($_SESSION['id'] ?? '');
+            $isSelf = (string)$idStr === $sessionId;
             $birthFamily = ['state' => 'none', 'code' => '', 'origin' => ''];
             try {
                 $birthFamily = (new \App\services\BirthFamilyCodeService(Db::connect2()))->status($idStr);
@@ -152,13 +158,20 @@ final class Organogram extends SingleCustomerData
 
             $isReadOnly = !BaseController::sessionSharesFamily($familyCode);
 
-            // Ensure graph tables are initialized and synced with legacy records
-            $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
-            $this->repairOrphanedFamilyGraph($familyCode, $idStr);
-            \App\services\KinshipEntityResolver::healDuplicateNodes($familyCode);
+            // Guard: Only run heavy legacy synchronization and graph healing if the family graph has no nodes yet.
+            // Bypasses expensive table scans and repairs on subsequent read requests (Phase 2 TTFB optimization).
+            if (!\App\services\FamilyTreeCacheService::isFamilyInitialized($familyCode)) {
+                $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
+                $this->repairOrphanedFamilyGraph($familyCode, $idStr);
+                \App\services\KinshipEntityResolver::healDuplicateNodes($familyCode);
+            }
 
-            // Fetch 6-generation graph data
-            $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
+            // Fetch 6-generation graph data (cached for ultra-fast TTFB)
+            $graphData = \App\services\FamilyTreeCacheService::get($familyCode, $idStr);
+            if ($graphData === null) {
+                $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
+                \App\services\FamilyTreeCacheService::put($familyCode, $idStr, $graphData);
+            }
             $ownerPrivacy = \App\services\FamilyTreeAccessService::getPrivacySettings($idStr);
             $hideParentFirst = !empty($ownerPrivacy['hide_parent_first_name']);
             if ($hideParentFirst && !empty($graphData['nodes'])) {
@@ -298,6 +311,10 @@ final class Organogram extends SingleCustomerData
                 $primaryFamCode,
                 array_values(array_filter(array_merge([$maternalFamCode, $wifeFamCode], $heldCodes)))
             );
+
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
 
             view('member/organogram', compact(
                 'orgData',
@@ -574,10 +591,16 @@ final class Organogram extends SingleCustomerData
             $isReadOnly = !BaseController::sessionSharesFamily($familyCode);
 
             // Ensure graph is initialized & synced
-            $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
-            $this->repairOrphanedFamilyGraph($familyCode, $idStr);
-            \App\services\KinshipEntityResolver::healDuplicateNodes($familyCode);
-            $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
+            if (!\App\services\FamilyTreeCacheService::isFamilyInitialized($familyCode)) {
+                $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
+                $this->repairOrphanedFamilyGraph($familyCode, $idStr);
+                \App\services\KinshipEntityResolver::healDuplicateNodes($familyCode);
+            }
+            $graphData = \App\services\FamilyTreeCacheService::get($familyCode, $idStr);
+            if ($graphData === null) {
+                $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
+                \App\services\FamilyTreeCacheService::put($familyCode, $idStr, $graphData);
+            }
             $graphData['isReadOnly'] = $isReadOnly;
             $graphData['activeLineageScope'] = $activeLineageScope;
             $graphData['primaryFamCode'] = $primaryFamCode;
@@ -848,10 +871,16 @@ final class Organogram extends SingleCustomerData
             // Record viewer audit trail
             \App\services\FamilyTreeAccessService::recordTreeView($viewerId, $idStr, $familyCode);
 
-            $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
-            $this->repairOrphanedFamilyGraph($familyCode, $idStr);
-            \App\services\KinshipEntityResolver::healDuplicateNodes($familyCode);
-            $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
+            if (!\App\services\FamilyTreeCacheService::isFamilyInitialized($familyCode)) {
+                $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
+                $this->repairOrphanedFamilyGraph($familyCode, $idStr);
+                \App\services\KinshipEntityResolver::healDuplicateNodes($familyCode);
+            }
+            $graphData = \App\services\FamilyTreeCacheService::get($familyCode, $idStr);
+            if ($graphData === null) {
+                $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
+                \App\services\FamilyTreeCacheService::put($familyCode, $idStr, $graphData);
+            }
             $ownerPrivacy = \App\services\FamilyTreeAccessService::getPrivacySettings($idStr);
             $hideParentFirst = !empty($ownerPrivacy['hide_parent_first_name']);
             if ($hideParentFirst && !empty($graphData['nodes'])) {
@@ -1732,6 +1761,7 @@ final class Organogram extends SingleCustomerData
 
             $claimed = \App\services\FamilyClaimService::claimNodeById($nodeId, $userId, $famCode);
             if ($claimed) {
+                \App\services\FamilyTreeCacheService::invalidateFamily($famCode);
                 unset($_SESSION['dismissed_claim_node_' . $nodeId]);
                 echo json_encode(['status' => 'success', 'message' => 'Tree node successfully claimed!']);
             } else {
@@ -1838,8 +1868,14 @@ final class Organogram extends SingleCustomerData
                 throw new ForbiddenException('You can only export your own family dynasty poster.');
             }
 
-            $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
-            $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
+            if (!\App\services\FamilyTreeCacheService::isFamilyInitialized($familyCode)) {
+                $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
+            }
+            $graphData = \App\services\FamilyTreeCacheService::get($familyCode, $idStr);
+            if ($graphData === null) {
+                $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
+                \App\services\FamilyTreeCacheService::put($familyCode, $idStr, $graphData);
+            }
 
             $familyName = htmlspecialchars((string)($data['lastName'] ?? 'Family'), ENT_QUOTES, 'UTF-8');
             $nodes = $graphData['nodes'] ?? [];

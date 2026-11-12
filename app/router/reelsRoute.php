@@ -51,4 +51,12 @@ $router->map('GET', '/api/reels/audio-library', 'App\controller\members\ReelsCon
 // Sound-Peer Reels (Viral "Use This Sound")
 $router->map('GET', '/api/reels/sound-reels', 'App\controller\members\ReelsController@getReelsBySound', 'family_reels_sound_reels_api');
 
+// Family Living Archives & 4K Reel Cinematic Studio
+$router->map('GET', '/family-studio', 'App\controller\members\ReelsController@studio', 'family_video_studio');
+$router->map('GET', '/member/family-studio', 'App\controller\members\ReelsController@studio', 'family_video_studio_alias');
+
+// Direct-to-R2 Presigned Upload URL API
+$router->map('GET', '/api/reels/presigned-url', 'App\controller\members\ReelsController@presignedUploadUrl', 'family_reels_presigned_url_api');
+
+
 

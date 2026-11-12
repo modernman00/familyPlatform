@@ -145,6 +145,40 @@
                 </div>
             </div>
 
+            {{-- Whisper Direct Portal (Under Family Codes, Above Quick Actions) --}}
+            @php
+                $leftWhisperUnreadCount = !empty($_SESSION['id'])
+                    ? \App\services\KinWhisperService::getUnreadWhisperCount((string)$_SESSION['id'])
+                    : 0;
+            @endphp
+            <div class="w-100 px-2 mb-2.5" id="leftColumnKinWhispersPortal">
+                <a href="/kin-whispers" class="btn w-100 d-inline-flex align-items-center justify-content-between text-decoration-none position-relative"
+                   style="background: linear-gradient(135deg, rgba(163,22,33,0.08) 0%, rgba(201,162,75,0.12) 100%); border: 1px solid rgba(163,22,33,0.22); border-radius: 12px; padding: 8px 12px; min-height: 44px; white-space: nowrap; flex-shrink: 0;"
+                   title="{{ __('nav.whisper', 'Whisper — Private, artifact-anchored family messages and voice dedications') }}">
+                    <div class="d-inline-flex align-items-center gap-2 min-w-0 text-truncate">
+                        <span class="rounded-circle d-inline-flex align-items-center justify-content-center text-white flex-shrink-0 position-relative" style="width: 32px; height: 32px; background: #a31621; box-shadow: 0 3px 8px rgba(163,22,33,0.3);">
+                            <i class="bi bi-chat-dots-fill" style="font-size: 0.85rem;"></i>
+                            <span class="whisper-portal-bell-dot position-absolute top-0 end-0 translate-middle p-1 bg-warning border border-light rounded-circle {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="width: 8px; height: 8px;" title="New incoming whispers"></span>
+                        </span>
+                        <div class="text-start min-w-0 text-truncate">
+                            <div class="d-flex align-items-center gap-1.5">
+                                <span class="fw-bold d-block text-truncate" style="font-size: 0.86rem; color: var(--text-color, #0f172a); line-height: 1.2;">Whisper</span>
+                                <i class="bi bi-bell-fill text-warning whisper-portal-bell-icon {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.75rem;" title="Unread whispers available"></i>
+                            </div>
+                            <span class="d-block text-truncate" style="font-size: 0.72rem; color: var(--text-muted, #64748b); line-height: 1.2;">Private voice &amp; kin notes</span>
+                        </div>
+                    </div>
+                    <div class="d-inline-flex align-items-center gap-1.5 flex-shrink-0">
+                        <span class="badge rounded-pill bg-danger text-white whisper-portal-unread-badge {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.72rem; padding: 3px 7px; font-weight: 700; box-shadow: 0 2px 5px rgba(220,53,69,0.35);">
+                            <span class="whisper-portal-unread-count">{{ $leftWhisperUnreadCount > 9 ? '9+' : $leftWhisperUnreadCount }}</span>
+                        </span>
+                        <span class="badge rounded-pill text-white" style="background: #a31621; font-size: 0.68rem; padding: 3px 8px;">
+                            <i class="bi bi-chat-dots-fill me-0.5"></i> Whisper
+                        </span>
+                    </div>
+                </a>
+            </div>
+
             {{-- Mobile/tablet only: collapsible Quick actions toggle (desktop always shows the buttons) --}}
             <button type="button" id="profileQuickActionsToggle" class="profile-quick-toggle d-lg-none btn fw-bold w-100 mb-2 d-inline-flex align-items-center justify-content-between" aria-expanded="false" aria-controls="profileQuickActions" onclick="var p=document.getElementById('profileQuickActions');var o=p.classList.toggle('is-open');this.setAttribute('aria-expanded',o?'true':'false');">
                 <span><i class="bi bi-lightning-charge-fill me-1.5 text-warning"></i> {{ __('profile.quick_actions', 'Quick actions') }}</span>
@@ -195,6 +229,14 @@
 
                 <a href="/familyJournal" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;">
                     <i class="bi bi-journal-bookmark-fill me-1.5" style="color: #059669;"></i> Family Journal
+                </a>
+
+                <a href="/kin-whispers" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center position-relative" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" title="Whisper — Private artifact messages and 60-second voice dedications">
+                    <i class="bi bi-chat-dots-fill me-1.5" style="color: #a31621;"></i> Whisper
+                    <i class="bi bi-bell-fill text-warning ms-1 whisper-portal-bell-icon {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.75rem;" title="Unread whispers"></i>
+                    <span class="badge rounded-pill bg-danger text-white ms-1.5 whisper-portal-unread-badge {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.68rem; padding: 2px 6px;">
+                        <span class="whisper-portal-unread-count">{{ $leftWhisperUnreadCount > 9 ? '9+' : $leftWhisperUnreadCount }}</span>
+                    </span>
                 </a>
 
                 <a href="/family/roundtable" class="btn fw-semibold flex-fill text-decoration-none text-center shadow-xs" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #ffffff !important; border: 1.5px solid #d4af37; border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; flex-shrink: 0;">
@@ -663,7 +705,8 @@
     </div>
 
     <!-- Kin Requests Card (Only shown if there are pending requests) -->
-    <div class="card border-0 shadow-sm mt-4" 
+    <div id="kinshipRequestSidebar"
+         class="card border-0 shadow-sm mt-4 kinship-request-card" 
          x-show="!isLoadingRequests && friendRequests && friendRequests.length > 0" 
          x-cloak 
          x-transition
@@ -688,11 +731,24 @@
             <div class="d-flex flex-column gap-3">
                 <template x-for="req in friendRequests" :key="req.id">
                     <div class="d-flex flex-column align-items-center text-center p-3 border rounded-3" style="background-color: var(--hover-color); border-color: var(--border-color); border-radius: 14px;">
-                        <img :src="'/resources/images/profile/' + req.img" alt="Avatar" class="rounded-circle shadow-sm mb-2" style="width: 56px; height: 56px; object-fit: cover;">
-                        <span class="fw-semibold mb-2" style="font-size: 0.9rem;" x-text="req.firstName + ' ' + req.lastName"></span>
+                        <img :src="req.img ? (req.img.startsWith('/') ? req.img : '/resources/images/profile/' + req.img) : '/resources/images/profile/avatarM.png'" alt="Avatar" class="rounded-circle shadow-sm mb-2" style="width: 56px; height: 56px; object-fit: cover;">
+                        <span class="fw-semibold mb-1" style="font-size: 0.9rem;" x-text="req.firstName + ' ' + req.lastName"></span>
                         
+                        <!-- Declared Relationship Badge -->
+                        <span class="badge rounded-pill bg-light text-dark border mb-2 px-2.5 py-1" x-show="req.relationship_role || req.relationship_category" style="font-size: 0.76rem;">
+                            <span class="fw-semibold text-primary" x-text="req.relationship_full_label || req.relationship_role || req.relationship_category_label || req.relationship_category"></span>
+                        </span>
+
+                        <!-- Personal Note (if provided) -->
+                        <p class="small text-muted fst-italic mb-2 px-2" x-show="req.relationship_note" x-text="'“' + req.relationship_note + '”'" style="font-size: 0.78rem; line-height: 1.4;"></p>
+
+                        <!-- Privacy & Control Reassurance -->
+                        <div class="small text-muted mb-2.5 px-1 text-center" style="font-size: 0.72rem; opacity: 0.85;">
+                            <i class="bi bi-shield-check text-success me-1"></i> Connected Kin: Your family tree stays 100% private
+                        </div>
+
                         <div class="d-flex gap-2 w-100">
-                            <a :href="getAcceptUrl(req)" class="btn btn-primary btn-sm flex-grow-1 fw-bold rounded-pill" title="Accept" style="text-decoration: none;">
+                            <a :href="getAcceptUrl(req)" class="btn btn-primary btn-sm flex-grow-1 fw-bold rounded-pill" title="Accept as Connected Kin" style="text-decoration: none;">
                                 <i class="bi bi-check-lg"></i> Accept
                             </a>
                             <a :href="getDeclineUrl(req)" class="btn btn-outline-danger btn-sm flex-grow-1 fw-bold rounded-pill" title="Decline" style="text-decoration: none;">

@@ -1,4 +1,9 @@
 <!-- Google Stitch Navigation Bar -->
+@php
+    $navWhisperUnreadCount = !empty($_SESSION['id'])
+        ? \App\services\KinWhisperService::getUnreadWhisperCount((string)$_SESSION['id'])
+        : 0;
+@endphp
 <link rel="stylesheet" href="/public/css/navbar.css?v={{ time() }}">
 <nav class="navbar navbar-expand-lg sticky-top brand-navbar-stitch" id="mainNavbar">
     <div class="container-fluid px-3 px-lg-4">
@@ -16,6 +21,15 @@
         <button class="btn btn-icon-stitch btn-mobile-omni-trigger d-lg-none ms-auto me-2" type="button" data-bs-toggle="modal" data-bs-target="#omniSearchModal" aria-label="Search activities, memories, and family members" title="Search activities, memories, and family members">
             <i class="bi bi-search"></i>
         </button>
+
+        <!-- Quick mobile whisper icon with bell & counter -->
+        <a href="/kin-whispers" class="btn btn-icon-stitch d-lg-none me-2 position-relative text-decoration-none" id="mobileWhispersBtn" aria-label="{{ __('nav.whisper', 'Whisper — Private family messages') }}" title="{{ __('nav.whisper', 'Whisper — Private family messages & audio dedications') }}">
+            <i class="bi bi-chat-dots-fill" style="color: #a31621; font-size: 1.05rem;"></i>
+            <i class="bi bi-bell-fill text-warning whisper-bell-indicator position-absolute {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.55rem; top: 3px; right: 3px;" title="Unread whispers"></i>
+            <span class="whisper-nav-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-white {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" id="mobile_whisper_count" style="font-size: 0.6rem; padding: 2px 4px; pointer-events: none;">
+                {{ $navWhisperUnreadCount > 9 ? '9+' : $navWhisperUnreadCount }}
+            </span>
+        </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation" title="Toggle navigation menu">
             <span class="navbar-toggler-icon"></span>
@@ -99,6 +113,17 @@
                     <span class="d-none d-xl-inline">{{ __('nav.invite_others', 'Invite Others') }}</span>
                     <span class="d-inline d-xl-none">{{ __('nav.invite', 'Invite') }}</span>
                 </button>
+
+                <!-- Kin Whispers Direct Action Button with Bell & Unread Counter -->
+                <div class="whisper-nav-wrapper position-relative">
+                    <a href="/kin-whispers" class="btn btn-icon-stitch text-decoration-none d-inline-flex align-items-center justify-content-center position-relative" id="navbarWhispersBtn" title="{{ __('nav.whisper', 'Whisper — Private family messages, artifact reflections & voice dedications') }}" aria-label="Whispers">
+                        <i class="bi bi-chat-dots-fill" style="color: #a31621; font-size: 1.15rem;"></i>
+                        <i class="bi bi-bell-fill text-warning whisper-bell-indicator position-absolute {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.65rem; top: 4px; right: 4px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));" title="Unread whispers"></i>
+                    </a>
+                    <span class="whisper-nav-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-white {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" id="navbar_whisper_count" style="font-size: 0.68rem; padding: 2px 5px; font-weight: 700; box-shadow: 0 2px 6px rgba(220,53,69,0.45); pointer-events: none;">
+                        {{ $navWhisperUnreadCount > 9 ? '9+' : $navWhisperUnreadCount }}
+                    </span>
+                </div>
 
                 <!-- Notification Component -->
                 <div class="notification-wrapper position-relative">

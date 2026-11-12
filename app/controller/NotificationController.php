@@ -352,8 +352,13 @@ final class NotificationController extends Select
             return '/profilePage#migrationNudges';
         }
 
-        // 7. Friend Requests
-        if (strcasecmp($type, 'Friend Request') === 0 || stripos($name, 'Friend Request') !== false) {
+        // 7. Friend / Connected Kin Requests
+        if (
+            strcasecmp($type, 'Friend Request') === 0
+            || strcasecmp($type, 'Connected Kin Request') === 0
+            || stripos($name, 'Friend Request') !== false
+            || stripos($name, 'Connected Kin Request') !== false
+        ) {
             return '/profilePage#friendRequestsCard';
         }
 

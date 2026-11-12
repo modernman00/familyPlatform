@@ -148,6 +148,13 @@ class FeedRepository
                 $params[] = $userId;
             }
 
+            $restrictorIds = \App\services\MemberRestrictionService::getRestrictorIdsForViewer($this->db, $userId, 'posts');
+            if (!empty($restrictorIds)) {
+                $restrictClause = \App\services\MemberRestrictionService::buildNotInClause('post.id', $restrictorIds);
+                $query .= $restrictClause['sql'];
+                $params = array_merge($params, $restrictClause['params']);
+            }
+
             $stmt = $this->db->prepare($query);
             foreach ($params as $key => $val) {
                 $stmt->bindValue($key + 1, $val, PDO::PARAM_STR);
@@ -255,8 +262,7 @@ class FeedRepository
                 ) 
                 AND post.post_status = 'published'
                 AND post.date_created >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
-                AND post.date_created < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), INTERVAL 1 DAY)
-                ORDER BY post.date_created DESC";
+                AND post.date_created < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), INTERVAL 1 DAY)";
 
             $params = [
                 $userId,
@@ -267,6 +273,15 @@ class FeedRepository
             }
             $params[] = $userId;
             $params[] = $userId;
+
+            $memRestrictors = \App\services\MemberRestrictionService::getRestrictorIdsForViewer($this->db, $userId, 'posts');
+            if (!empty($memRestrictors)) {
+                $memClause = \App\services\MemberRestrictionService::buildNotInClause('post.id', $memRestrictors);
+                $query .= $memClause['sql'];
+                $params = array_merge($params, $memClause['params']);
+            }
+
+            $query .= " ORDER BY post.date_created DESC";
 
             $stmt = $this->db->prepare($query);
             foreach ($params as $key => $val) {
@@ -363,6 +378,13 @@ class FeedRepository
                 $params[] = $userId;
             }
 
+            $feedRestrictors = \App\services\MemberRestrictionService::getRestrictorIdsForViewer($this->db, $userId, 'posts');
+            if (!empty($feedRestrictors)) {
+                $feedClause = \App\services\MemberRestrictionService::buildNotInClause('post.id', $feedRestrictors);
+                $query .= $feedClause['sql'];
+                $params = array_merge($params, $feedClause['params']);
+            }
+
             $query .= " ORDER BY post.date_created DESC LIMIT ? OFFSET ?";
             $params[] = $limit;
             $params[] = $offset;
@@ -401,6 +423,54 @@ class FeedRepository
 
         if (empty($postIds)) {
             return;
+        }
+
+        // Mask unshared family codes so Connected Kin never see another family's code
+        if ($userId !== '') {
+            $viewerCodes = \App\controller\BaseController::getUserFamilyCodes($userId);
+            $viewerCodeSet = array_fill_keys($viewerCodes, true);
+            $postTargetCodes = [];
+            try {
+                $targetPlaceholders = implode(',', array_fill(0, count($postIds), '?'));
+                $targetSql = sprintf(
+                    'SELECT post_no, family_code FROM post_family_targets WHERE post_no IN (%s)',
+                    $targetPlaceholders
+                );
+                $targetStmt = $this->db->prepare($targetSql);
+                $targetStmt->execute($postIds);
+                while ($tRow = $targetStmt->fetch(PDO::FETCH_ASSOC)) {
+                    $tPostNo = (int)($tRow['post_no'] ?? 0);
+                    $tCode = \App\controller\BaseController::normaliseFamilyCode((string)($tRow['family_code'] ?? ''));
+                    if ($tPostNo > 0 && $tCode !== '') {
+                        $postTargetCodes[$tPostNo][] = $tCode;
+                    }
+                }
+            } catch (\Throwable $targetEx) {
+                $postTargetCodes = [];
+            }
+
+            foreach ($rows as &$maskRow) {
+                if ((string)($maskRow['id'] ?? '') === $userId) {
+                    continue;
+                }
+                $rawPostCode = \App\controller\BaseController::normaliseFamilyCode((string)($maskRow['postFamCode'] ?? ($maskRow['famCode'] ?? '')));
+                if ($rawPostCode !== '' && isset($viewerCodeSet[$rawPostCode])) {
+                    continue;
+                }
+                $pNoMask = (int)($maskRow['post_no'] ?? 0);
+                $matchedShared = '';
+                foreach ($postTargetCodes[$pNoMask] ?? [] as $candCode) {
+                    if (isset($viewerCodeSet[$candCode])) {
+                        $matchedShared = $candCode;
+                        break;
+                    }
+                }
+                $maskRow['postFamCode'] = $matchedShared;
+                if (isset($maskRow['famCode'])) {
+                    $maskRow['famCode'] = $matchedShared;
+                }
+            }
+            unset($maskRow);
         }
 
         $polls = PollData::getPollsForPosts($postIds, $userId);

@@ -1363,7 +1363,7 @@
 
 @include('member.includes.treeAccessModals')
 @include('component.swalAlert')
-<script src="/public/js/vendor/kinshiptree.js?v=10.2"></script>
+<script src="/public/js/vendor/kinshiptree.js?v=11.0"></script>
 <script nonce="{{ csp_nonce($nonce ?? null) }}">
     window.__ROOT_USER_ID__ = '{{ $data['id'] ?? '' }}';
     window.__LOGGED_IN_USER_ID__ = '{{ $_SESSION['id'] ?? '' }}';
@@ -1787,12 +1787,12 @@
 
         if (familyTreeNodes.length > 0) {
             /* --------------------------------------------------------------
-             * Adaptive node design: automatically scales dimensions for
-             * mobile screens (160x175) vs desktop screens (230x232).
+             * Adaptive node design: image is the main focal point taking
+             * ~60% of the node. Sized for mobile (190x290) vs desktop (250x340).
              * ------------------------------------------------------------ */
             const isMobileScreen = window.innerWidth < 768;
-            const NODE_W = isMobileScreen ? 160 : 230;
-            const NODE_H = isMobileScreen ? 175 : 232;
+            const NODE_W = isMobileScreen ? 190 : 250;
+            const NODE_H = isMobileScreen ? 290 : 340;
             const CX = NODE_W / 2;
 
             const initialRootId = String(graphData.root_node_id || getGraphNodeId(window.__ROOT_USER_ID__, '') || (familyTreeNodes[0] ? familyTreeNodes[0].id : ''));
@@ -1805,6 +1805,8 @@
                 mouseScrool: FamilyTree.action.zoom,
                 scaleInitial: "family",
                 rootId: initialRootId,
+                nodeWidth: NODE_W,
+                nodeHeight: NODE_H,
                 isReadOnly: Boolean(window.__IS_READ_ONLY__) || Boolean(graphData && graphData.isReadOnly),
                 nodeBinding: {
                     field_0: "nameL1",

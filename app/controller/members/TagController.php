@@ -138,6 +138,15 @@ class TagController
 
             $members = [];
             foreach ($rows as $row) {
+                $candidateId = (string)($row['id'] ?? '');
+                if (
+                    $candidateId !== '' && (
+                        \App\services\MemberRestrictionService::isRestricted($this->pdo, $candidateId, $userId, 'posts')
+                        || \App\services\MemberRestrictionService::isRestricted($this->pdo, $userId, $candidateId, 'posts')
+                    )
+                ) {
+                    continue;
+                }
                 $img = $row['img'] ?? null;
                 $profImg = '/resources/images/profile/avatarM.png';
                 if (!empty($img)) {
@@ -146,13 +155,16 @@ class TagController
                         : "/resources/images/profile/{$img}";
                 }
 
+                $rowFamCode = (string)($row['famCode'] ?? '');
+                $visibleFamCode = \App\controller\BaseController::viewerCanSeeFamilyCode($rowFamCode, $userId) ? $rowFamCode : '';
+
                 $members[] = [
                     'id' => (string)$row['id'],
                     'fullName' => trim(($row['firstName'] ?? '') . ' ' . ($row['lastName'] ?? '')),
                     'firstName' => (string)($row['firstName'] ?? ''),
                     'lastName' => (string)($row['lastName'] ?? ''),
                     'profileImg' => $profImg,
-                    'famCode' => (string)($row['famCode'] ?? ''),
+                    'famCode' => $visibleFamCode,
                 ];
             }
 
@@ -365,8 +377,13 @@ class TagController
             $validTagged = [];
             foreach ($taggedUserIds as $targetId) {
                 $targetId = trim((string)$targetId);
-                // Cannot tag self or empty ID
-                if ($targetId === '' || $targetId === $authorId) {
+                // Cannot tag self, empty ID, or a member restricted by author
+                if (
+                    $targetId === ''
+                    || $targetId === $authorId
+                    || \App\services\MemberRestrictionService::isRestricted($pdo, $authorId, $targetId, 'posts')
+                    || \App\services\MemberRestrictionService::isRestricted($pdo, $targetId, $authorId, 'posts')
+                ) {
                     continue;
                 }
 
@@ -415,8 +432,8 @@ class TagController
                 } catch (Throwable) {}
             }
 
-            // Real-time broadcast on family channel
-            if (!empty($validTagged) && $famCode !== '') {
+            // Real-time broadcast on family channel (suppressed if author has active post restrictions)
+            if (!empty($validTagged) && $famCode !== '' && !\App\services\MemberRestrictionService::authorHasAnyRestriction($pdo, $authorId, 'posts')) {
                 try {
                     if (class_exists(\App\classes\Pusher::class)) {
                         \App\classes\Pusher::broadcastToFamily($famCode, 'post-tag-event', [

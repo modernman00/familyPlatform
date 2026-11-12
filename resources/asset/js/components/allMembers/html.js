@@ -37,7 +37,8 @@ export const renderHtml = (el) => {
       roleChipHtml = `<span class="role-chip role-chip-family"><i class="bi bi-house-heart-fill"></i> Same Family</span>`;
     } else if (relType === 'approved_you' || relType === 'you_approved') {
       categoryKey = 'connected';
-      roleChipHtml = `<span class="role-chip role-chip-connected"><i class="bi bi-check2-circle"></i> Connected Kin</span>`;
+      const roleDetail = el.relationship_role ? ` (${esc(el.relationship_role)})` : '';
+      roleChipHtml = `<span class="role-chip role-chip-connected"><i class="bi bi-check2-circle"></i> Connected Kin${roleDetail}</span>`;
     } else {
       categoryKey = 'explore';
       roleChipHtml = `<span class="role-chip role-chip-directory"><i class="bi bi-globe2"></i> Directory</span>`;
@@ -49,8 +50,10 @@ export const renderHtml = (el) => {
     const lastName = toSentenceCase(el.lastName || '');
     const fullNameRaw = `${firstName} ${lastName}`.trim();
     const fullName = esc(fullNameRaw);
+    const firstNameSafe = esc(firstName || fullNameRaw || 'Relative');
     const location = esc(el.country ? toSentenceCase(el.country) : 'Location not set');
-    const famCode = esc(el.famCode ? String(el.famCode).toUpperCase() : 'CODE');
+    const showFamCode = relType === 'family' && Boolean(el.famCode);
+    const famCode = showFamCode ? esc(String(el.famCode).trim().toUpperCase()) : '';
     const emailSafe = esc(el.email || 'Email not provided');
     const imgSafe = esc(theImg);
 
@@ -59,7 +62,8 @@ export const renderHtml = (el) => {
                         id="nudgeMigrate${idSafe}" 
                         data-target-id="${idSafe}" 
                         data-target-name="${fullName}" 
-                        data-target-code="${famCode}" 
+                        data-target-first-name="${firstNameSafe}" 
+                        style="white-space: nowrap; flex-shrink: 0;"
                         title="Invite relative to migrate to your family network">
                     <i class="bi bi-send-check text-primary me-1" style="pointer-events: none;"></i> Nudge to Join Your Family Code
                 </button>
@@ -67,10 +71,10 @@ export const renderHtml = (el) => {
                         id="requestMigrate${idSafe}" 
                         data-target-id="${idSafe}" 
                         data-target-name="${fullName}" 
-                        data-target-code="${famCode}" 
-                        style="font-size: 0.82rem; opacity: 0.85;"
-                        title="Request to migrate into family #${famCode}">
-                    <i class="bi bi-box-arrow-in-right me-1" style="pointer-events: none;"></i> Join #${famCode}
+                        data-target-first-name="${firstNameSafe}" 
+                        style="font-size: 0.82rem; opacity: 0.85; white-space: nowrap; flex-shrink: 0;"
+                        title="Request to join ${firstNameSafe}'s family network">
+                    <i class="bi bi-box-arrow-in-right me-1" style="pointer-events: none;"></i> Join ${firstNameSafe} famcode
                 </button>
     `;
 
@@ -92,10 +96,12 @@ export const renderHtml = (el) => {
             </span>
 
             <div class="member-details">
+                ${showFamCode ? `
                 <div class="member-detail">
                     <i class="bi bi-hash"></i>
                     <span class="fw-bold">${famCode}</span>
                 </div>
+                ` : ''}
                 <div class="member-detail">
                     <i class="bi bi-envelope"></i>
                     <span class="text-truncate">${emailSafe}</span>
@@ -125,19 +131,17 @@ export const renderHtml = (el) => {
                 <button class="btn-stitch-primary" id="seeProfile${idSafe}">
                     <i class="bi bi-person-badge-fill" style="pointer-events: none;"></i> View Profile
                 </button>
-                <div class="d-flex gap-2">
-                    <button class="btn-stitch-tonal flex-grow-1" disabled style="opacity: 0.85; cursor: not-allowed; color: var(--stitch-text-secondary, #64748b);" title="Family tree is private: Only viewable by relatives sharing family code #${famCode}. Connected Kin can chat and view general posts.">
-                        <i class="bi bi-shield-lock-fill text-warning" style="pointer-events: none;"></i> Tree (#${famCode} Only)
-                    </button>
-                    <button class="btn-stitch-danger flex-grow-1" id="removeProfile${idSafe}" title="Remove Connection">
-                        <i class="bi bi-person-dash-fill" style="pointer-events: none;"></i> Remove
-                    </button>
-                </div>
+                <button class="btn-stitch-danger w-100" id="removeProfile${idSafe}" title="Remove Connection" style="white-space: nowrap; flex-shrink: 0;">
+                    <i class="bi bi-person-dash-fill" style="pointer-events: none;"></i> Remove
+                </button>
                 ${migrationButtonsHtml}
                 ` : `
                 <button class="btn-stitch-connect w-100" 
                         data-user-id="addFamily${idSafe}" 
                         id="addFamily${idSafe}"
+                        data-target-id="${idSafe}"
+                        data-target-name="${fullName}"
+                        data-target-img="${imgSafe}"
                         ${disableButton}>
                     <i class="bi bi-person-plus-fill" style="pointer-events: none;"></i> ${statusButtonHTML}
                 </button>

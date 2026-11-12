@@ -51,11 +51,11 @@ final class KinshipController extends BaseController
             $limit = min(isset($_GET['limit']) ? (int)$_GET['limit'] : 8, 20);
             $suggestions = KinshipEngineService::getSuggestedKin($userId, $limit);
 
-            // ── Privacy hardening: strip famCode from response ──
-            // famCode is an internal identifier and should not be exposed
-            // to the client. An attacker could enumerate family structures.
+            // ── Privacy hardening: strip famCode and familyCode2 from response ──
+            // famCode is a private family identifier and should not be exposed
+            // to external users or Connected Kin.
             $sanitisedSuggestions = array_map(static function (array $s): array {
-                unset($s['famCode']);
+                unset($s['famCode'], $s['familyCode2']);
                 return $s;
             }, $suggestions);
 

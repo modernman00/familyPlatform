@@ -71,7 +71,13 @@
                          class="profile-avatar profile-avatar-interactive"
                          data-profile-expand="true"
                          data-profile-name="{{ $data['fullName'] }}"
-                         data-profile-subtitle="Family Member • {{ $data['famCode'] ?? '' }}"
+                         @php
+                             $viewerIdForProfile = (string)($_SESSION['auth']['id'] ?? ($_SESSION['id'] ?? ''));
+                             $canSeeProfileFamCode = ($viewerIdForProfile !== '' && $viewerIdForProfile === (string)($data['id'] ?? ''))
+                                 || \App\controller\BaseController::viewerCanSeeFamilyCode((string)($data['primaryFamCode'] ?? ($data['famCode'] ?? '')), $viewerIdForProfile)
+                                 || \App\controller\BaseController::viewerCanSeeFamilyCode((string)($data['maternalFamCode'] ?? ($data['otherFamCode'] ?? '')), $viewerIdForProfile);
+                         @endphp
+                         data-profile-subtitle="{{ $canSeeProfileFamCode && !empty($data['famCode']) ? ('Family Member • ' . $data['famCode']) : 'Connected Kin' }}"
                          data-can-edit="false">
                     <div class="avatar-ring"></div>
                 </div>
@@ -83,11 +89,13 @@
                             <span>Lives in {{ $data['country'] ?? 'Not Specified' }}</span>
                         </div>
                         @php
-                            $heroPrimaryCode = ltrim((string)($data['primaryFamCode'] ?? ($data['famCode'] ?? '')), '#');
-                            $heroBirthCode = ltrim((string)($data['maternalFamCode'] ?? ($data['otherFamCode'] ?? '')), '#');
-                            $heroHasDualCodes = !empty($data['hasMaternalCode']) || ($heroBirthCode !== '' && strtoupper($heroBirthCode) !== strtoupper($heroPrimaryCode));
-                            $heroMarriedCode = ($heroHasDualCodes && $heroBirthCode !== '') ? $heroPrimaryCode : '';
-                            $heroEffectiveBirthCode = ($heroHasDualCodes && $heroBirthCode !== '') ? $heroBirthCode : $heroPrimaryCode;
+                            $heroRawPrimary = ltrim((string)($data['primaryFamCode'] ?? ($data['famCode'] ?? '')), '#');
+                            $heroRawBirth = ltrim((string)($data['maternalFamCode'] ?? ($data['otherFamCode'] ?? '')), '#');
+                            $heroPrimaryCode = ($viewerIdForProfile === (string)($data['id'] ?? '') || \App\controller\BaseController::viewerCanSeeFamilyCode($heroRawPrimary, $viewerIdForProfile)) ? $heroRawPrimary : '';
+                            $heroBirthCode = ($viewerIdForProfile === (string)($data['id'] ?? '') || \App\controller\BaseController::viewerCanSeeFamilyCode($heroRawBirth, $viewerIdForProfile)) ? $heroRawBirth : '';
+                            $heroHasDualCodes = ($heroPrimaryCode !== '' && $heroBirthCode !== '' && strtoupper($heroBirthCode) !== strtoupper($heroPrimaryCode));
+                            $heroMarriedCode = $heroHasDualCodes ? $heroPrimaryCode : '';
+                            $heroEffectiveBirthCode = $heroHasDualCodes ? $heroBirthCode : ($heroPrimaryCode !== '' ? $heroPrimaryCode : $heroBirthCode);
                         @endphp
                         <div class="meta-item d-inline-flex align-items-center gap-2 flex-wrap">
                             @if($heroMarriedCode !== '')
@@ -95,6 +103,9 @@
                             @endif
                             @if($heroEffectiveBirthCode !== '')
                                 <span class="family-code-badge" style="{{ $heroMarriedCode !== '' ? 'background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.45); color: #ecfdf5;' : '' }}" title="{{ __('profile.birth_family_code', 'Birth Code') }}">{{ __('profile.birth_family_code', 'Birth Code') }}: {{ $heroEffectiveBirthCode }}</span>
+                            @endif
+                            @if($heroMarriedCode === '' && $heroEffectiveBirthCode === '')
+                                <span class="family-code-badge" title="Connected Kin"><i class="bi bi-people-fill me-1"></i>Connected Kin</span>
                             @endif
                         </div>
                     </div>

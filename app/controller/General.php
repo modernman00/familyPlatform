@@ -124,11 +124,23 @@ final class General
             ToSendEmail::sendEmailGeneral($array, 'member');
 
             $sanitizedRecipientName = htmlspecialchars($recipientName);
-            echo json_encode(['status' => 'success', 'message' => "Message sent to " . $sanitizedRecipientName]);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'status'  => 'success',
+                'message' => "Message sent to " . $sanitizedRecipientName,
+                'email'   => (string)$payloadData['email']
+            ]);
 
         } catch (\Throwable $err) {
-            error_log((string)$err);
-            echo json_encode(['status' => 'error', 'message' => 'Failed to send message']);
+            error_log('[General::sendEmailToMember] Error: ' . $err->getMessage());
+            $validationErrors = ['Invalid payload', 'Unauthorized view path', 'Invalid recipient email'];
+            $isClientError = in_array($err->getMessage(), $validationErrors, true);
+            http_response_code($isClientError ? 400 : 500);
+            header('Content-Type: application/json; charset=utf-8');
+            $userMsg = $isClientError
+                ? $err->getMessage()
+                : 'Unable to deliver invitation email. Please verify the recipient address or try again shortly.';
+            echo json_encode(['status' => 'error', 'message' => $userMsg]);
         }
     }
 

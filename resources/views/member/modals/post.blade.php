@@ -10,8 +10,9 @@
     $marriedCodes = $postAudiences['married'] ?? (!empty($primaryFamCode) ? [$primaryFamCode] : []);
     $allCodes = $postAudiences['all'] ?? array_merge($marriedCodes, $birthCodes);
     $activeFamCode = $primaryFamCode ?? ($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
+    $audienceItems = $postAudiences['items'] ?? [];
 @endphp
-<div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel">
+<div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel" data-can-choose="{{ $canChooseAudience ? '1' : '0' }}">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content composer-sheet glass-modal glass-overlay shadow-lg border-0">
 
@@ -38,50 +39,14 @@
                                 </span>
                             </h6>
                             @if($canChooseAudience)
-                                <div class="dropdown d-inline-block mt-1" id="composerAudienceDropdown">
-                                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5 py-1 dropdown-toggle d-inline-flex align-items-center gap-1.5"
-                                            type="button" 
-                                            id="composerAudienceBtn" 
-                                            data-bs-toggle="dropdown" 
-                                            aria-expanded="false" 
-                                            style="font-size: 0.78rem; font-weight: 500; min-height: 32px; border-color: rgba(148, 163, 184, 0.4); background: rgba(248, 250, 252, 0.8);">
-                                        <i class="bi bi-people-fill text-primary" id="composerAudienceIcon"></i>
-                                        <span id="composerAudienceLabel">All (Birth &amp; Married)</span>
+                                <div class="d-inline-flex align-items-center gap-1.5 mt-1">
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-2.5 py-1 d-inline-flex align-items-center gap-1" style="font-size: 0.78rem;">
+                                        <i class="bi bi-people-fill text-primary" id="composerHeaderAudienceIcon"></i>
+                                        <span id="composerHeaderAudienceLabel">All Family Circles &amp; Connected Kin</span>
+                                    </span>
+                                    <button type="button" class="btn btn-link p-0 text-muted small text-decoration-none" style="font-size: 0.75rem;" onclick="window.showComposerAudienceStep()" title="Tap to choose target audience">
+                                        Change
                                     </button>
-                                    <ul class="dropdown-menu shadow-sm rounded-3 py-2 border-0" aria-labelledby="composerAudienceBtn" style="min-width: 320px; font-size: 0.85rem;">
-                                        <li><h6 class="dropdown-header text-uppercase text-muted fw-bold" style="font-size: 0.68rem; letter-spacing: 0.5px;">Who should see this post?</h6></li>
-                                        <li>
-                                            <button type="button" class="dropdown-item d-flex align-items-start gap-2 py-2 active" data-scope="all" onclick="selectPostAudience('all', 'All (Family &amp; Connected Kin)', 'bi-people-fill text-primary', '')">
-                                                <i class="bi bi-people-fill text-primary fs-5 mt-0.5"></i>
-                                                <div>
-                                                    <div class="fw-semibold">All Family Circles &amp; Connected Kin</div>
-                                                    <small class="text-muted d-block text-wrap">Broadcast to all birth &amp; married members ({{ implode(', ', array_map(fn($c) => '#' . $c, $allCodes)) }}) and approved Connected Kin</small>
-                                                </div>
-                                            </button>
-                                        </li>
-                                        @if(!empty($birthCodes))
-                                        <li>
-                                            <button type="button" class="dropdown-item d-flex align-items-start gap-2 py-2" data-scope="birth" onclick="selectPostAudience('birth', 'Birth Family Only', 'bi-heart-pulse-fill text-danger', '{{ $birthCodes[0] ?? '' }}')">
-                                                <i class="bi bi-heart-pulse-fill text-danger fs-5 mt-0.5"></i>
-                                                <div>
-                                                    <div class="fw-semibold">Birth / Maiden Family Only</div>
-                                                    <small class="text-muted d-block text-wrap">Visible only to your birth family ({{ implode(', ', array_map(fn($c) => '#' . $c, $birthCodes)) }}). Connected kin excluded.</small>
-                                                </div>
-                                            </button>
-                                        </li>
-                                        @endif
-                                        @if(!empty($marriedCodes))
-                                        <li>
-                                            <button type="button" class="dropdown-item d-flex align-items-start gap-2 py-2" data-scope="married" onclick="selectPostAudience('married', 'Married Family Only', 'bi-house-heart-fill text-success', '{{ $marriedCodes[0] ?? '' }}')">
-                                                <i class="bi bi-house-heart-fill text-success fs-5 mt-0.5"></i>
-                                                <div>
-                                                    <div class="fw-semibold">Married / Household Family Only</div>
-                                                    <small class="text-muted d-block text-wrap">Visible only to your married household ({{ implode(', ', array_map(fn($c) => '#' . $c, $marriedCodes)) }}). Connected kin excluded.</small>
-                                                </div>
-                                            </button>
-                                        </li>
-                                        @endif
-                                    </ul>
                                 </div>
                             @else
                                 <div class="d-inline-flex align-items-center gap-1.5 mt-1">
@@ -108,6 +73,9 @@
                     <input type="hidden" name="attached_video_url" id="attachedVideoUrl" value="">
                     <input type="hidden" name="attached_video_urls" id="attachedVideoUrls" value="">
                     <input type="hidden" name="post_style" id="composerPostStyleInput" value="">
+
+                    <!-- Step 1 View: Post Creator Content -->
+                    <div id="composerStep1" class="composer-step-view">
 
                     <div id="composerEditorStageWrapper" class="composer-editor-wrapper position-relative w-100">
                         <div id="composerStageHeaderBadge" class="d-none mb-2">
@@ -724,12 +692,94 @@
                         </div>
                     </div>
 
+                    <!-- Close Step 1 View -->
+                    </div>
+
+                    @if($canChooseAudience)
+                    <!-- Step 2 View: Who Should See This Post? Destination Screen -->
+                    <div id="composerStep2" class="composer-audience-step d-none py-1" data-confirmed="false">
+                        <div class="mb-3 px-1">
+                            <h6 class="fw-bold mb-1" style="color: var(--text-main, #0f172a); font-size: 1.05rem;">
+                                <i class="bi bi-shield-check text-primary me-1.5"></i> {{ __('modal.who_should_see_post', 'Who should see this post?') }}
+                            </h6>
+                            <p class="text-muted small mb-0">Choose which family circles or roots can view and interact with this memory.</p>
+                        </div>
+
+                        <div class="composer-audience-cards d-flex flex-column gap-2.5">
+                            <!-- Option 1: All Circles & Connected Kin -->
+                            <label class="composer-audience-card p-3 rounded-3 border d-flex align-items-start gap-3 cursor-pointer transition-all active" 
+                                   style="cursor: pointer; border-color: var(--brand-primary, #a31621) !important; background: rgba(163, 22, 33, 0.03);"
+                                   onclick="selectPostAudienceCard(this, 'all', 'All Family Circles &amp; Connected Kin', 'bi-people-fill text-primary', '')">
+                                <input type="radio" name="audience_choice_radio" value="all" data-scope="all" data-code="" class="form-check-input mt-1 flex-shrink-0" checked style="cursor: pointer; width: 1.15rem; height: 1.15rem;">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center gap-1.5 fw-bold" style="font-size: 0.95rem; color: var(--text-main, #0f172a);">
+                                        <i class="bi bi-people-fill text-primary fs-5"></i>
+                                        <span>All Family Circles &amp; Connected Kin</span>
+                                    </div>
+                                    <div class="text-muted small mt-0.5" style="font-size: 0.82rem; line-height: 1.4;">
+                                        Broadcast to all your branches ({{ implode(', ', array_map(fn($c) => '#' . $c, $allCodes)) }}) and approved Connected Kin.
+                                    </div>
+                                </div>
+                            </label>
+
+                            @if(!empty($audienceItems))
+                                @foreach($audienceItems as $item)
+                                    <label class="composer-audience-card p-3 rounded-3 border d-flex align-items-start gap-3 cursor-pointer transition-all" 
+                                           style="cursor: pointer; border-color: rgba(148, 163, 184, 0.3); background: rgba(248, 250, 252, 0.8);"
+                                           onclick="selectPostAudienceCard(this, '{{ $item['kind'] }}', '{{ addslashes($item['label']) }}', '{{ $item['icon'] }}', '{{ $item['code'] }}')">
+                                        <input type="radio" name="audience_choice_radio" value="{{ $item['code'] }}" data-scope="{{ $item['kind'] }}" data-code="{{ $item['code'] }}" class="form-check-input mt-1 flex-shrink-0" style="cursor: pointer; width: 1.15rem; height: 1.15rem;">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center gap-1.5 fw-bold" style="font-size: 0.95rem; color: var(--text-main, #0f172a);">
+                                                <i class="bi {{ $item['icon'] }} fs-5"></i>
+                                                <span>{{ $item['label'] }}</span>
+                                            </div>
+                                            <div class="text-muted small mt-0.5" style="font-size: 0.82rem; line-height: 1.4;">
+                                                {{ $item['description'] }}
+                                            </div>
+                                        </div>
+                                    </label>
+                                @endforeach
+                            @endif
+
+                            @if(count($birthCodes) > 1)
+                                <label class="composer-audience-card p-3 rounded-3 border d-flex align-items-start gap-3 cursor-pointer transition-all" 
+                                       style="cursor: pointer; border-color: rgba(148, 163, 184, 0.3); background: rgba(248, 250, 252, 0.8);"
+                                       onclick="selectPostAudienceCard(this, 'birth', 'All Birth Roots (Paternal &amp; Maternal)', 'bi-tree-fill text-warning', '')">
+                                    <input type="radio" name="audience_choice_radio" value="all_birth" data-scope="birth" data-code="" class="form-check-input mt-1 flex-shrink-0" style="cursor: pointer; width: 1.15rem; height: 1.15rem;">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center gap-1.5 fw-bold" style="font-size: 0.95rem; color: var(--text-main, #0f172a);">
+                                            <i class="bi bi-tree-fill text-warning fs-5"></i>
+                                            <span>All Birth Roots (Paternal &amp; Maternal)</span>
+                                        </div>
+                                        <div class="text-muted small mt-0.5" style="font-size: 0.82rem; line-height: 1.4;">
+                                            Visible to both paternal and maternal branches ({{ implode(', ', array_map(fn($c) => '#' . $c, $birthCodes)) }}). Connected Kin and marital household excluded.
+                                        </div>
+                                    </div>
+                                </label>
+                            @endif
+                        </div>
+                    </div>
+                    @endif
+
                 </div>
 
-                <!-- Sticky footer: the Post button is always on screen, whatever is attached above -->
-                <div class="composer-sheet__footer flex-shrink-0">
-                    <button type="button" id="submitPost" name="submit" class="btn btn-primary fw-semibold submitPost">{{ __('feed.post_btn', 'Post') }}</button>
+                <!-- Sticky footer: Step 1 Post Button and Step 2 Confirmation Buttons -->
+                <div class="composer-sheet__footer flex-shrink-0" id="composerFooterStep1">
+                    <button type="button" id="submitPost" name="submit" class="btn btn-primary fw-semibold submitPost w-100" style="min-height: 46px;">
+                        {{ __('feed.post_btn', 'Post') }}
+                    </button>
                 </div>
+
+                @if($canChooseAudience)
+                <div class="composer-sheet__footer flex-shrink-0 d-none align-items-center gap-2" id="composerFooterStep2">
+                    <button type="button" id="composerBackToStep1Btn" class="btn btn-outline-secondary rounded-pill px-3 fw-semibold" style="min-height: 46px; white-space: nowrap;">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Edit
+                    </button>
+                    <button type="button" id="composerConfirmShareBtn" class="btn btn-primary rounded-pill px-4 fw-bold flex-grow-1" style="min-height: 46px; white-space: nowrap;">
+                        <i class="bi bi-send-fill me-1.5"></i> Confirm &amp; Share Post
+                    </button>
+                </div>
+                @endif
 
             </form>
 
@@ -1656,6 +1706,79 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
     }
 })();
 
+window.showComposerAudienceStep = function() {
+    const step1 = document.getElementById('composerStep1');
+    const step2 = document.getElementById('composerStep2');
+    const footer1 = document.getElementById('composerFooterStep1');
+    const footer2 = document.getElementById('composerFooterStep2');
+    const titleEl = document.getElementById('postModalLabel');
+
+    if (step1) step1.classList.add('d-none');
+    if (step2) step2.classList.remove('d-none');
+    if (footer1) footer1.classList.add('d-none');
+    if (footer2) {
+        footer2.classList.remove('d-none');
+        footer2.classList.add('d-flex');
+    }
+    if (titleEl) {
+        titleEl.innerHTML = '<i class="bi bi-people-fill text-primary me-1.5"></i> Who should see this post?';
+    }
+    const body = document.querySelector('.composer-sheet__body');
+    if (body) body.scrollTop = 0;
+};
+
+window.hideComposerAudienceStep = function() {
+    const step1 = document.getElementById('composerStep1');
+    const step2 = document.getElementById('composerStep2');
+    const footer1 = document.getElementById('composerFooterStep1');
+    const footer2 = document.getElementById('composerFooterStep2');
+    const titleEl = document.getElementById('postModalLabel');
+
+    if (step2) step2.classList.add('d-none');
+    if (step1) step1.classList.remove('d-none');
+    if (footer2) {
+        footer2.classList.add('d-none');
+        footer2.classList.remove('d-flex');
+    }
+    if (footer1) footer1.classList.remove('d-none');
+    if (titleEl) {
+        titleEl.textContent = 'Create Post';
+    }
+};
+
+window.selectPostAudienceCard = function(labelEl, scope, label, iconClass, famCode) {
+    if (!labelEl) return;
+    const radio = labelEl.querySelector('input[type="radio"]');
+    if (radio) radio.checked = true;
+
+    document.querySelectorAll('.composer-audience-card').forEach(card => {
+        card.style.borderColor = 'rgba(148, 163, 184, 0.3)';
+        card.style.background = 'rgba(248, 250, 252, 0.8)';
+        card.classList.remove('active');
+    });
+    labelEl.style.borderColor = 'var(--brand-primary, #a31621)';
+    labelEl.style.background = 'rgba(163, 22, 33, 0.03)';
+    labelEl.classList.add('active');
+
+    const scopeInput = document.getElementById('composerTargetScope');
+    if (scopeInput) scopeInput.value = scope;
+    const codeInput = document.getElementById('composerTargetFamCode');
+    if (codeInput) {
+        if (famCode) {
+            codeInput.value = famCode;
+            codeInput.disabled = false;
+        } else {
+            codeInput.value = '';
+            codeInput.disabled = true;
+        }
+    }
+
+    const headerLabel = document.getElementById('composerHeaderAudienceLabel');
+    if (headerLabel) headerLabel.textContent = label;
+    const headerIcon = document.getElementById('composerHeaderAudienceIcon');
+    if (headerIcon) headerIcon.className = 'bi ' + iconClass;
+};
+
 window.selectPostAudience = function(scope, label, iconClass, famCode) {
     const scopeInput = document.getElementById('composerTargetScope');
     if (scopeInput) scopeInput.value = scope;
@@ -1669,19 +1792,131 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
             codeInput.disabled = true;
         }
     }
-    const labelEl = document.getElementById('composerAudienceLabel');
-    if (labelEl) labelEl.textContent = label;
-    const iconEl = document.getElementById('composerAudienceIcon');
-    if (iconEl) iconEl.className = 'bi ' + iconClass;
-    
-    document.querySelectorAll('#composerAudienceDropdown .dropdown-item').forEach(item => {
-        if (item.getAttribute('data-scope') === scope) {
-            item.classList.add('active');
-        } else {
-            item.classList.remove('active');
+    const headerLabel = document.getElementById('composerHeaderAudienceLabel');
+    if (headerLabel) headerLabel.textContent = label;
+    const headerIcon = document.getElementById('composerHeaderAudienceIcon');
+    if (headerIcon) headerIcon.className = 'bi ' + iconClass;
+};
+
+// ── 2-Step Post Flow Controller ──────────────────────────────────────────────
+(function() {
+    // Intercept click on #submitPost in capturing phase
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('#submitPost, .submitPost');
+        if (!btn) return;
+
+        const modal = document.getElementById('postModal');
+        if (!modal) return;
+
+        // Skip when editing an existing post
+        const editPostNo = document.getElementById('editPostNo')?.value;
+        if (editPostNo) return;
+
+        const step2 = document.getElementById('composerStep2');
+        if (!step2) return;
+
+        const isConfirmed = step2.getAttribute('data-confirmed') === 'true';
+        if (isConfirmed) return;
+
+        const canChoose = modal.getAttribute('data-can-choose') === '1';
+        if (!canChoose) return;
+
+        // Ensure editor is synced before checking contents
+        if (typeof window.syncEditorToTextarea === 'function') {
+            window.syncEditorToTextarea();
+        }
+
+        const msg = (document.getElementById('postMessage')?.value || '').trim();
+        const fileInput = document.getElementById('imageUpload');
+        const hasFiles = (fileInput && fileInput.files && fileInput.files.length > 0) || (typeof window.getSelectedPostFiles === 'function' && window.getSelectedPostFiles().length > 0);
+        const hasGif = Boolean(document.getElementById('attachedGifUrlInput')?.value);
+        const hasVideo = Boolean(document.getElementById('attachedVideoUrl')?.value);
+        const hasPoll = document.getElementById('pollCreationContainer') && !document.getElementById('pollCreationContainer').classList.contains('d-none');
+        const hasThenNow = document.getElementById('thenNowFlag')?.value === '1';
+
+        if (!msg && !hasFiles && !hasGif && !hasVideo && !hasPoll && !hasThenNow) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Empty Post',
+                    text: 'Please add some text, an image, a video, or a poll before posting.',
+                    confirmButtonColor: '#a31621'
+                });
+            }
+            return;
+        }
+
+        // Intercept: transition to Step 2!
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.showComposerAudienceStep();
+    }, true);
+
+    document.addEventListener('click', function(e) {
+        const backBtn = e.target.closest('#composerBackToStep1Btn');
+        if (backBtn) {
+            e.preventDefault();
+            window.hideComposerAudienceStep();
+            return;
+        }
+
+        const confirmBtn = e.target.closest('#composerConfirmShareBtn');
+        if (confirmBtn) {
+            e.preventDefault();
+            const checkedRadio = document.querySelector('#composerStep2 input[name="audience_choice_radio"]:checked');
+            if (checkedRadio) {
+                const chosenScope = checkedRadio.getAttribute('data-scope') || 'all';
+                const chosenCode = checkedRadio.getAttribute('data-code') || '';
+                const scopeInput = document.getElementById('composerTargetScope');
+                if (scopeInput) scopeInput.value = chosenScope;
+                const codeInput = document.getElementById('composerTargetFamCode');
+                if (codeInput) {
+                    if (chosenCode) {
+                        codeInput.value = chosenCode;
+                        codeInput.disabled = false;
+                    } else {
+                        codeInput.value = '';
+                        codeInput.disabled = true;
+                    }
+                }
+            }
+            const step2 = document.getElementById('composerStep2');
+            if (step2) {
+                step2.setAttribute('data-confirmed', 'true');
+            }
+            if (window.ScoreTenantSpinner) {
+                window.ScoreTenantSpinner.start(confirmBtn);
+            } else {
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1.5" role="status" aria-hidden="true"></span> Sharing...';
+            }
+            const submitBtn = document.getElementById('submitPost');
+            if (submitBtn) {
+                submitBtn.click();
+            }
         }
     });
-};
+
+    const modalEl = document.getElementById('postModal');
+    if (modalEl) {
+        modalEl.addEventListener('hidden.bs.modal', function() {
+            const step2 = document.getElementById('composerStep2');
+            if (step2) step2.setAttribute('data-confirmed', 'false');
+            window.hideComposerAudienceStep();
+            const firstCard = document.querySelector('#composerStep2 .composer-audience-card');
+            if (firstCard && typeof window.selectPostAudienceCard === 'function') {
+                window.selectPostAudienceCard(firstCard, 'all', 'All Family Circles & Connected Kin', 'bi-people-fill text-primary', '');
+            }
+            const confirmBtn = document.getElementById('composerConfirmShareBtn');
+            if (confirmBtn) {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="bi bi-send-fill me-1.5"></i> Confirm &amp; Share Post';
+            }
+        });
+    }
+})();
 
 // ── 3D Futuristic & Translucent Text Stage Studio Controller ─────────────────
 (function() {
@@ -1949,5 +2184,23 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
 #composerAudienceDropdown .dropdown-item.active i,
 #composerAudienceDropdown .dropdown-item.active .bi {
     color: #ffd700 !important; /* Luminous gold on red */
+}
+.composer-audience-card {
+    transition: transform 0.16s ease, border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+.composer-audience-card:hover {
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+.composer-audience-card:active {
+    transform: scale(0.985);
+}
+.composer-audience-card.active {
+    border-color: var(--brand-primary, #a31621) !important;
+    background: rgba(163, 22, 33, 0.04) !important;
+    box-shadow: 0 0 0 1px var(--brand-primary, #a31621), 0 4px 14px rgba(163, 22, 33, 0.12) !important;
 }
 </style>

@@ -31,27 +31,45 @@ final class ReelsController extends BaseController
 
             $ogMeta = null;
             if ($targetReel) {
-                $creatorName = trim(($targetReel['firstName'] ?? 'Family') . ' ' . ($targetReel['lastName'] ?? ''));
-                $title = "Family Reel by {$creatorName}";
-                $description = !empty($targetReel['caption']) ? (string)$targetReel['caption'] : "Watch this family memory by {$creatorName} on Family Platform.";
-                $rawThumb = !empty($targetReel['thumbnail_url']) ? (string)$targetReel['thumbnail_url'] : '';
+                $reelAuthorId = (string)($targetReel['user_id'] ?? '');
+                $sessionViewerId = trim((string)($_SESSION['id'] ?? ''));
+                $dbReels = Db::connect2();
 
-                if (str_starts_with($rawThumb, 'http://') || str_starts_with($rawThumb, 'https://')) {
-                    $image = $rawThumb;
-                } elseif (!empty($rawThumb)) {
-                    $image = $baseUrl . '/' . ltrim($rawThumb, '/');
-                } elseif (!empty($targetReel['profilePics'])) {
-                    $image = $baseUrl . '/resources/images/profile/' . basename((string)$targetReel['profilePics']);
+                if ($sessionViewerId !== '' && $reelAuthorId !== '' && \App\services\MemberRestrictionService::isRestricted($dbReels, $reelAuthorId, $sessionViewerId, 'reels')) {
+                    $targetReel = null;
                 } else {
-                    $image = $baseUrl . '/public/img/favicon/android-chrome-512x512.png';
-                }
+                    $isAuthorRestricted = $reelAuthorId !== '' && \App\services\MemberRestrictionService::authorHasAnyRestriction($dbReels, $reelAuthorId, 'reels');
+                    if ($isAuthorRestricted) {
+                        $ogMeta = [
+                            'title' => 'Family Reel on FamilyPlatform',
+                            'description' => 'Sign in to FamilyPlatform to view moments shared with your family circle.',
+                            'image' => $baseUrl . '/public/img/favicon/android-chrome-512x512.png',
+                            'url' => $baseUrl . '/reels',
+                        ];
+                    } else {
+                        $creatorName = trim(($targetReel['firstName'] ?? 'Family') . ' ' . ($targetReel['lastName'] ?? ''));
+                        $title = "Family Reel by {$creatorName}";
+                        $description = !empty($targetReel['caption']) ? (string)$targetReel['caption'] : "Watch this family memory by {$creatorName} on Family Platform.";
+                        $rawThumb = !empty($targetReel['thumbnail_url']) ? (string)$targetReel['thumbnail_url'] : '';
 
-                $ogMeta = [
-                    'title' => $title,
-                    'description' => $description,
-                    'image' => $image,
-                    'url' => $baseUrl . '/reels?id=' . $targetReel['id'],
-                ];
+                        if (str_starts_with($rawThumb, 'http://') || str_starts_with($rawThumb, 'https://')) {
+                            $image = $rawThumb;
+                        } elseif (!empty($rawThumb)) {
+                            $image = $baseUrl . '/' . ltrim($rawThumb, '/');
+                        } elseif (!empty($targetReel['profilePics'])) {
+                            $image = $baseUrl . '/resources/images/profile/' . basename((string)$targetReel['profilePics']);
+                        } else {
+                            $image = $baseUrl . '/public/img/favicon/android-chrome-512x512.png';
+                        }
+
+                        $ogMeta = [
+                            'title' => $title,
+                            'description' => $description,
+                            'image' => $image,
+                            'url' => $baseUrl . '/reels?id=' . $targetReel['id'],
+                        ];
+                    }
+                }
             }
 
             // Detect social bot/crawler scrapers for WhatsApp, iMessage, Facebook, Twitter, etc.
@@ -160,6 +178,40 @@ final class ReelsController extends BaseController
     }
 
     /**
+     * Render the Browser-Native Family Cinematic Studio & Living Archives Editor
+     */
+    public function studio(): void
+    {
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            $famCode = (string)($_SESSION['famCode'] ?? '');
+            if (empty($famCode) && !empty($userId)) {
+                $pStmt = Db::connect2()->prepare("SELECT famCode FROM personal WHERE id = ? LIMIT 1");
+                $pStmt->execute([$userId]);
+                $famCode = trim((string)$pStmt->fetchColumn());
+                if (!empty($famCode)) {
+                    $_SESSION['famCode'] = $famCode;
+                }
+            }
+
+            $data = $this->membersData();
+
+            view('member/family_studio', [
+                'data' => $data,
+                'userId' => $userId,
+                'famCode' => $famCode,
+                'pageTitle' => 'Family Living Archives Studio | 4K Reel Studio & Video Vault',
+            ]);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    /**
      * API: Get JSON Feed of Family Reels (Infinite Scroll)
      */
     public function getFeed(): void
@@ -200,6 +252,72 @@ final class ReelsController extends BaseController
     }
 
     /**
+     * API: Generate Presigned Direct-to-R2 Upload URL for Family Reels & Living Archives
+     */
+    public function presignedUploadUrl(): void
+    {
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=utf-8');
+        }
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            $famCode = (string)($_SESSION['famCode'] ?? '');
+            if (empty($famCode) && !empty($userId)) {
+                $pStmt = Db::connect2()->prepare("SELECT famCode FROM personal WHERE id = ? LIMIT 1");
+                $pStmt->execute([$userId]);
+                $famCode = trim((string)$pStmt->fetchColumn());
+                if (!empty($famCode)) {
+                    $_SESSION['famCode'] = $famCode;
+                }
+            }
+
+            if (empty($userId) || empty($famCode)) {
+                http_response_code(401);
+                // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+                echo json_encode(['status' => 401, 'message' => 'Unauthorised user session']);
+                return;
+            }
+
+            $extension = strtolower(trim((string)($_GET['ext'] ?? 'mp4')));
+            if (!in_array($extension, ['mp4', 'mov', 'webm', 'jpg', 'jpeg', 'png', 'webp', 'mp3', 'wav'], true)) {
+                $extension = 'mp4';
+            }
+
+            $mime = match ($extension) {
+                'mov'         => 'video/quicktime',
+                'webm'        => 'video/webm',
+                'jpg', 'jpeg' => 'image/jpeg',
+                'png'         => 'image/png',
+                'webp'        => 'image/webp',
+                'mp3'         => 'audio/mpeg',
+                'wav'         => 'audio/wav',
+                default       => 'video/mp4',
+            };
+
+            $reelUuid = 'reel_' . bin2hex(random_bytes(12));
+            $safeFamCode = preg_replace('/[^a-zA-Z0-9_-]/', '', $famCode) ?: 'general';
+            $objectKey = 'family_vault/' . $safeFamCode . '/' . $reelUuid . '.' . $extension;
+
+            $ticket = \Src\Media\R2StorageService::generatePresignedUploadUrl($objectKey, $mime, 3600);
+
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+            echo json_encode([
+                'status'    => 200,
+                'reel_uuid' => $reelUuid,
+                'ticket'    => $ticket,
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+            echo json_encode(['status' => 500, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
      * API: Upload & Publish a Family Reel
      */
     public function uploadReel(): void
@@ -222,7 +340,7 @@ final class ReelsController extends BaseController
             }
 
             if (empty($userId)) {
-                throw new Exception('Unauthorized user session', 401);
+                throw new Exception('Unauthorised user session', 401);
             }
 
             if (empty($famCode)) {
@@ -235,7 +353,7 @@ final class ReelsController extends BaseController
             }
 
             if (empty($famCode)) {
-                throw new Exception('Unauthorized user session: no family code found', 401);
+                throw new Exception('Unauthorised user session: no family code found', 401);
             }
 
             // Capture session display names before releasing session lock
@@ -256,8 +374,11 @@ final class ReelsController extends BaseController
             }
             $musicTitle = isset($_POST['music_title']) ? trim((string)$_POST['music_title']) : 'Original Family Audio';
             $videoUrlInput = isset($_POST['video_url']) ? trim((string)$_POST['video_url']) : '';
+            if (empty($videoUrlInput) && !empty($_POST['cloud_url'])) {
+                $videoUrlInput = trim((string)$_POST['cloud_url']);
+            }
             $videoPath = '';
-            $thumbnailPath = null;
+            $thumbnailPath = !empty($_POST['thumbnail_url']) ? trim((string)$_POST['thumbnail_url']) : null;
 
             // Handle direct video file upload
             if (!empty($_FILES['video_file']['name'])) {
@@ -520,7 +641,7 @@ final class ReelsController extends BaseController
                     $creatorName = 'A family member';
                 }
 
-                $members = AllMembersData::AllMembersEmailByFamCode($famCode, $userId);
+                $members = AllMembersData::AllMembersEmailByFamCode($famCode, $userId, 'reels');
                 $reelUrl = '/reels?id=' . (int)$reelId;
                 $captionSnippet = $caption !== '' ? mb_substr($caption, 0, 70) : 'Watch the latest family memory!';
                 $notifMsg = "{$creatorName} shared a new Family Reel: \"{$captionSnippet}\"";
@@ -644,6 +765,10 @@ final class ReelsController extends BaseController
 
         if (BaseController::isSuperAdmin($userId)) {
             return true;
+        }
+
+        if ($authorId !== '' && \App\services\MemberRestrictionService::isRestricted(Db::connect2(), $authorId, $userId, 'reels')) {
+            return false;
         }
 
         $reelFamCode = trim((string)($targetReel['famCode'] ?? ''));
@@ -972,7 +1097,10 @@ final class ReelsController extends BaseController
 
                 // Notify mentioned members in reel comment
                 try {
-                    $members = AllMembersData::AllMembersEmailByFamCode($famCode, $userId);
+                    $members = AllMembersData::AllMembersEmailByFamCode($famCode, $userId, 'comments');
+                    if ($ownerId !== '') {
+                        $members = \App\services\MemberRestrictionService::filterRecipientRows(Db::connect2(), $ownerId, $members, 'reels');
+                    }
                     $mentionedIds = \App\services\CommentThreadService::extractMentionedIds($commentText, $members, $userId);
                     if (!empty($mentionedIds)) {
                         $mTitle = '💬 Mentioned in a Reel Comment';

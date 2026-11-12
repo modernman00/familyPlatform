@@ -1406,9 +1406,11 @@ body[data-page-id="organogram"] .tree-container {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
+    min-height: 80vh !important;
     height: auto !important;
     padding: 0 !important;
     overflow: visible !important;
+    contain: layout;
 }
 
 /* =======================================================
@@ -1509,6 +1511,7 @@ body[data-page-id="organogram"] .tree-container {
     background: radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.85) 100%);
     border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+    contain: paint layout;
 }
 
 #tree {
@@ -1702,6 +1705,13 @@ body[data-page-id="organogram"] .tree-container {
     z-index: 35;
     display: none;
     animation: cardFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Never outgrow the canvas (#treeStage clips overflow): scroll inside the card instead. */
+    max-height: calc(100% - 48px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    box-sizing: border-box;
 }
 
 @keyframes cardFadeIn {

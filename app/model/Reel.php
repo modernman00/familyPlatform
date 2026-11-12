@@ -79,12 +79,35 @@ final class Reel extends Select
             $stmt->execute();
 
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $rows = self::filterReelsForViewer($pdo, $rows, (string)$userId);
             /** @var array<int, array<string, mixed>> $rows */
             return array_map([self::class, 'normalizeMediaUrls'], $rows);
         } catch (\Throwable $e) {
             error_log("[Reel::getReelsFeed] " . $e->getMessage());
             return [];
         }
+    }
+
+    /**
+     * Exclude reels whose creator restricted $viewerId on 'reels'.
+     *
+     * @param array<int, array<string, mixed>> $rows
+     * @return array<int, array<string, mixed>>
+     */
+    private static function filterReelsForViewer(PDO $pdo, array $rows, ?string $viewerId = null): array
+    {
+        $viewerStr = trim((string)($viewerId ?? ($_SESSION['id'] ?? '')));
+        if ($viewerStr === '' || empty($rows)) {
+            return $rows;
+        }
+        $blockedCreators = array_flip(\App\services\MemberRestrictionService::getRestrictorIdsForViewer($pdo, $viewerStr, 'reels'));
+        if (empty($blockedCreators)) {
+            return $rows;
+        }
+        return array_values(array_filter($rows, static function (array $row) use ($blockedCreators): bool {
+            $ownerId = (string)($row['user_id'] ?? '');
+            return $ownerId === '' || !isset($blockedCreators[$ownerId]);
+        }));
     }
 
     /**
@@ -306,6 +329,7 @@ final class Reel extends Select
             $stmt->execute();
 
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $rows = self::filterReelsForViewer($pdo, $rows);
             /** @var array<int, array<string, mixed>> $rows */
             return array_map([self::class, 'normalizeMediaUrls'], $rows);
         } catch (\Throwable $e) {
@@ -326,7 +350,7 @@ final class Reel extends Select
             $expiryDays = self::getExpirationDays();
             $expiryClause = $expiryDays > 0 ? " AND r.created_at >= DATE_SUB(NOW(), INTERVAL :expiryDays DAY)" : "";
 
-            $sql = "SELECT r.id, r.caption, r.thumbnail_url, r.video_url, r.chrono_sync_cluster_id, r.chrono_sync_label, r.created_at,
+            $sql = "SELECT r.id, r.user_id, r.caption, r.thumbnail_url, r.video_url, r.chrono_sync_cluster_id, r.chrono_sync_label, r.created_at,
                            p.firstName, p.lastName
                     FROM family_reels AS r
                     LEFT JOIN personal AS p ON r.user_id = p.id
@@ -343,6 +367,7 @@ final class Reel extends Select
             $stmt->execute();
 
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $rows = self::filterReelsForViewer($pdo, $rows);
             /** @var array<int, array<string, mixed>> $rows */
             return array_map([self::class, 'normalizeMediaUrls'], $rows);
         } catch (\Throwable $e) {
@@ -1123,6 +1148,7 @@ final class Reel extends Select
             $stmt->execute();
 
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $rows = self::filterReelsForViewer($pdo, $rows);
             /** @var array<int, array<string, mixed>> $rows */
             return array_map([self::class, 'normalizeMediaUrls'], $rows);
         } catch (\Throwable $e) {

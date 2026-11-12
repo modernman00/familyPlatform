@@ -384,6 +384,20 @@ class OmniSearchService
                 'priority' => 75,
             ],
             [
+                'id' => 'act_restrict_members',
+                'title' => 'Restrict Family Members',
+                'description' => 'Customise who can see your posts, comments, reels, events, journals, and alerts',
+                'keywords' => ['restrict', 'hide posts', 'mute member', 'block family member', 'privacy control', 'restrict member'],
+                'category' => 'Functions & Tools',
+                'icon' => 'bi-person-slash',
+                'iconColor' => '#b8202c',
+                'badge' => 'Privacy',
+                'url' => '/accountSetting#v-pills-privacy',
+                'targetElement' => '#memberRestrictionCard',
+                'actionType' => 'deep_link',
+                'priority' => 84,
+            ],
+            [
                 'id' => 'act_playbook',
                 'title' => 'Living Guide & Playbook',
                 'description' => 'Explore the architectural guide, how-to-use workflows, and tutorials',
@@ -543,9 +557,28 @@ class OmniSearchService
             'reels' => [],
         ];
 
+        $normalisedViewerCodes = array_values(array_unique(array_filter(array_map(
+            static fn(string $c): string => \App\controller\BaseController::normaliseFamilyCode($c),
+            $famCodes
+        ))));
+        if ($userId !== '') {
+            $normalisedViewerCodes = array_values(array_unique(array_merge(
+                $normalisedViewerCodes,
+                \App\controller\BaseController::getUserFamilyCodes($userId, false)
+            )));
+        }
+        $viewerCodeSet = array_fill_keys($normalisedViewerCodes, true);
+
         // 1. Members Search with Prefix Index Optimization & Phonetic Fallback
         try {
-            $memberParams = [$like, $like, $like, $like];
+            $memberParams = [$like, $like, $like];
+            $famCodeMatchSql = '';
+            if (!empty($normalisedViewerCodes)) {
+                $scPlaceholders = implode(',', array_fill(0, count($normalisedViewerCodes), '?'));
+                $famCodeMatchSql = " OR (p.famCode LIKE ? AND UPPER(TRIM(REPLACE(p.famCode, '#', ''))) IN ({$scPlaceholders}))";
+                $memberParams[] = $like;
+                $memberParams = array_merge($memberParams, $normalisedViewerCodes);
+            }
             $tokenSql = '';
             foreach ($tokens as $tok) {
                 $tokLike = '%' . $tok . '%';
@@ -555,15 +588,28 @@ class OmniSearchService
             }
 
             $famFilter = '';
-            if (!empty($famCodes)) {
-                $placeholders = implode(',', array_fill(0, count($famCodes), '?'));
-                $placeholdersUf = implode(',', array_fill(0, count($famCodes), '?'));
-                $famFilter = " AND (UPPER(TRIM(REPLACE(p.famCode, '#', ''))) IN ({$placeholders}) OR EXISTS (
-                    SELECT 1 FROM user_families uf 
-                    WHERE uf.user_id = p.id 
-                      AND UPPER(TRIM(REPLACE(uf.family_code, '#', ''))) IN ({$placeholdersUf})
-                ))";
-                $memberParams = array_merge($memberParams, $famCodes, $famCodes);
+            if (!empty($famCodes) || $userId !== '') {
+                $conditions = [];
+                if (!empty($famCodes)) {
+                    $placeholders = implode(',', array_fill(0, count($famCodes), '?'));
+                    $placeholdersUf = implode(',', array_fill(0, count($famCodes), '?'));
+                    $conditions[] = "(UPPER(TRIM(REPLACE(p.famCode, '#', ''))) IN ({$placeholders}) OR EXISTS (
+                        SELECT 1 FROM user_families uf 
+                        WHERE uf.user_id = p.id 
+                          AND UPPER(TRIM(REPLACE(uf.family_code, '#', ''))) IN ({$placeholdersUf})
+                    ))";
+                    $memberParams = array_merge($memberParams, $famCodes, $famCodes);
+                }
+                if ($userId !== '') {
+                    $conditions[] = "EXISTS (
+                        SELECT 1 FROM requestMgt rm 
+                        WHERE LOWER(rm.status) IN ('approved', 'accepted')
+                          AND ((rm.requester_id = p.id AND rm.approver_id = ?) OR (rm.approver_id = p.id AND rm.requester_id = ?))
+                    )";
+                    $memberParams[] = $userId;
+                    $memberParams[] = $userId;
+                }
+                $famFilter = ' AND (' . implode(' OR ', $conditions) . ')';
             }
 
             // Append prefix parameters for ORDER BY relevance scoring
@@ -580,7 +626,7 @@ class OmniSearchService
                     pp.img AS profileImg
                 FROM personal p
                 LEFT JOIN profilePics pp ON pp.id = p.id
-                WHERE ((p.firstName LIKE ? OR p.lastName LIKE ? OR CONCAT(p.firstName, ' ', p.lastName) LIKE ? OR p.famCode LIKE ?) {$tokenSql})
+                WHERE ((p.firstName LIKE ? OR p.lastName LIKE ? OR CONCAT(p.firstName, ' ', p.lastName) LIKE ?{$famCodeMatchSql}) {$tokenSql})
                 {$famFilter}
                 ORDER BY (p.firstName LIKE ? OR p.lastName LIKE ?) DESC, p.lastName ASC, p.firstName ASC
                 LIMIT 8
@@ -589,14 +635,20 @@ class OmniSearchService
             $stmtM->execute($memberParams);
             $rows = $stmtM->fetchAll(PDO::FETCH_ASSOC) ?: [];
             foreach ($rows as $r) {
+                $memberId = (string)$r['id'];
+                if ($userId !== '' && MemberRestrictionService::isRestricted($this->pdo, $memberId, $userId, 'profile')) {
+                    continue;
+                }
+                $rowFamNorm = \App\controller\BaseController::normaliseFamilyCode((string)($r['famCode'] ?? ''));
+                $canSeeRowCode = $rowFamNorm !== '' && isset($viewerCodeSet[$rowFamNorm]);
                 $results['members'][] = [
-                    'id' => (string)$r['id'],
+                    'id' => $memberId,
                     'title' => trim((string)$r['fullName']),
-                    'description' => 'Family Code: #' . ltrim((string)$r['famCode'], '#'),
-                    'category' => 'Family Members',
+                    'description' => $canSeeRowCode ? ('Family Code: #' . $rowFamNorm) : 'Connected Kin Network',
+                    'category' => $canSeeRowCode ? 'Family Members' : 'Connected Kin',
                     'icon' => 'bi-person-circle',
-                    'badge' => '#' . ltrim((string)$r['famCode'], '#'),
-                    'url' => '/organogram/' . urlencode((string)$r['id']) . '?mode=canvas',
+                    'badge' => $canSeeRowCode ? ('#' . $rowFamNorm) : 'Connected Kin',
+                    'url' => '/organogram/' . urlencode($memberId) . '?mode=canvas',
                     'avatar' => (string)($r['profileImg'] ?? ''),
                 ];
             }
@@ -607,15 +659,28 @@ class OmniSearchService
                     $soundexTerm = $tokens[0] ?? $cleanQuery;
                     $soundexParams = [$soundexTerm, $soundexTerm];
                     $soundexFamFilter = '';
-                    if (!empty($famCodes)) {
-                        $sPlaceholders = implode(',', array_fill(0, count($famCodes), '?'));
-                        $sPlaceholdersUf = implode(',', array_fill(0, count($famCodes), '?'));
-                        $soundexFamFilter = " AND (UPPER(TRIM(REPLACE(p.famCode, '#', ''))) IN ({$sPlaceholders}) OR EXISTS (
-                            SELECT 1 FROM user_families uf 
-                            WHERE uf.user_id = p.id 
-                              AND UPPER(TRIM(REPLACE(uf.family_code, '#', ''))) IN ({$sPlaceholdersUf})
-                        ))";
-                        $soundexParams = array_merge($soundexParams, $famCodes, $famCodes);
+                    if (!empty($famCodes) || $userId !== '') {
+                        $sConditions = [];
+                        if (!empty($famCodes)) {
+                            $sPlaceholders = implode(',', array_fill(0, count($famCodes), '?'));
+                            $sPlaceholdersUf = implode(',', array_fill(0, count($famCodes), '?'));
+                            $sConditions[] = "(UPPER(TRIM(REPLACE(p.famCode, '#', ''))) IN ({$sPlaceholders}) OR EXISTS (
+                                SELECT 1 FROM user_families uf 
+                                WHERE uf.user_id = p.id 
+                                  AND UPPER(TRIM(REPLACE(uf.family_code, '#', ''))) IN ({$sPlaceholdersUf})
+                            ))";
+                            $soundexParams = array_merge($soundexParams, $famCodes, $famCodes);
+                        }
+                        if ($userId !== '') {
+                            $sConditions[] = "EXISTS (
+                                SELECT 1 FROM requestMgt rm 
+                                WHERE LOWER(rm.status) IN ('approved', 'accepted')
+                                  AND ((rm.requester_id = p.id AND rm.approver_id = ?) OR (rm.approver_id = p.id AND rm.requester_id = ?))
+                            )";
+                            $soundexParams[] = $userId;
+                            $soundexParams[] = $userId;
+                        }
+                        $soundexFamFilter = ' AND (' . implode(' OR ', $sConditions) . ')';
                     }
 
                     $sqlSoundex = "
@@ -637,14 +702,20 @@ class OmniSearchService
                     $stmtS->execute($soundexParams);
                     $sRows = $stmtS->fetchAll(PDO::FETCH_ASSOC) ?: [];
                     foreach ($sRows as $sr) {
+                        $srId = (string)$sr['id'];
+                        if ($userId !== '' && MemberRestrictionService::isRestricted($this->pdo, $srId, $userId, 'profile')) {
+                            continue;
+                        }
+                        $srFamNorm = \App\controller\BaseController::normaliseFamilyCode((string)($sr['famCode'] ?? ''));
+                        $canSeeSrCode = $srFamNorm !== '' && isset($viewerCodeSet[$srFamNorm]);
                         $results['members'][] = [
-                            'id' => (string)$sr['id'],
+                            'id' => $srId,
                             'title' => trim((string)$sr['fullName']),
-                            'description' => 'Family Code: #' . ltrim((string)$sr['famCode'], '#') . ' • Phonetic match',
-                            'category' => 'Family Members',
+                            'description' => ($canSeeSrCode ? ('Family Code: #' . $srFamNorm) : 'Connected Kin Network') . ' • Phonetic match',
+                            'category' => $canSeeSrCode ? 'Family Members' : 'Connected Kin',
                             'icon' => 'bi-person-badge',
                             'badge' => 'Phonetic Match',
-                            'url' => '/organogram/' . urlencode((string)$sr['id']) . '?mode=canvas',
+                            'url' => '/organogram/' . urlencode($srId) . '?mode=canvas',
                             'avatar' => (string)($sr['profileImg'] ?? ''),
                         ];
                     }
@@ -694,6 +765,10 @@ class OmniSearchService
             $stmtJ->execute($journalParams);
             $jRows = $stmtJ->fetchAll(PDO::FETCH_ASSOC) ?: [];
             foreach ($jRows as $jr) {
+                $jAuthorId = (string)($jr['author_id'] ?? '');
+                if ($userId !== '' && $jAuthorId !== '' && MemberRestrictionService::isRestricted($this->pdo, $jAuthorId, $userId, 'journals')) {
+                    continue;
+                }
                 $results['journals'][] = [
                     'id' => (string)$jr['id'],
                     'title' => (string)$jr['title'],
@@ -729,6 +804,10 @@ class OmniSearchService
                 $stmtRecent->execute($recentParams);
                 $recentRows = $stmtRecent->fetchAll(PDO::FETCH_ASSOC) ?: [];
                 foreach ($recentRows as $rr) {
+                    $rAuthorId = (string)($rr['author_id'] ?? '');
+                    if ($userId !== '' && $rAuthorId !== '' && MemberRestrictionService::isRestricted($this->pdo, $rAuthorId, $userId, 'journals')) {
+                        continue;
+                    }
                     $idStr = (string)$rr['id'];
                     if (!in_array($idStr, $existingIds, true)) {
                         $results['journals'][] = [
@@ -780,6 +859,10 @@ class OmniSearchService
             $stmtP->execute($postParams);
             $pRows = $stmtP->fetchAll(PDO::FETCH_ASSOC) ?: [];
             foreach ($pRows as $pr) {
+                $pAuthorId = (string)($pr['id'] ?? '');
+                if ($userId !== '' && $pAuthorId !== '' && MemberRestrictionService::isRestricted($this->pdo, $pAuthorId, $userId, 'posts')) {
+                    continue;
+                }
                 $msg = strip_tags((string)$pr['postMessage']);
                 $snippet = strlen($msg) > 90 ? substr($msg, 0, 87) . '...' : $msg;
                 $results['posts'][] = [
@@ -821,6 +904,10 @@ class OmniSearchService
             $stmtE->execute($eventParams);
             $eRows = $stmtE->fetchAll(PDO::FETCH_ASSOC) ?: [];
             foreach ($eRows as $er) {
+                $eAuthorId = (string)($er['id'] ?? '');
+                if ($userId !== '' && $eAuthorId !== '' && MemberRestrictionService::isRestricted($this->pdo, $eAuthorId, $userId, 'events')) {
+                    continue;
+                }
                 $results['events'][] = [
                     'id' => (string)$er['no'],
                     'title' => (string)$er['eventName'],
@@ -846,7 +933,7 @@ class OmniSearchService
             }
 
             $sqlReels = "
-                SELECT id, caption, thumbnail_url, category, music_title
+                SELECT id, user_id, caption, thumbnail_url, category, music_title
                 FROM family_reels
                 WHERE (caption LIKE ? OR category LIKE ?)
                 {$rFamFilter}
@@ -857,6 +944,10 @@ class OmniSearchService
             $stmtR->execute($reelParams);
             $rRows = $stmtR->fetchAll(PDO::FETCH_ASSOC) ?: [];
             foreach ($rRows as $rr) {
+                $rAuthorId = (string)($rr['user_id'] ?? '');
+                if ($userId !== '' && $rAuthorId !== '' && MemberRestrictionService::isRestricted($this->pdo, $rAuthorId, $userId, 'reels')) {
+                    continue;
+                }
                 $cap = strip_tags((string)$rr['caption']);
                 $results['reels'][] = [
                     'id' => (string)$rr['id'],

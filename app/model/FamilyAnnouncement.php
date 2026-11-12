@@ -30,6 +30,16 @@ final class FamilyAnnouncement extends Select
 
         /** @var array<int, array<string, mixed>> $result */
         $result = parent::selectFn2(query: $query, bind: [$familyCode]);
+        $viewerId = trim((string)($_SESSION['id'] ?? ''));
+        if ($viewerId !== '' && !empty($result)) {
+            $blockedAuthors = array_flip(\App\services\MemberRestrictionService::getRestrictorIdsForViewer(self::connect2(), $viewerId, 'announcements'));
+            if (!empty($blockedAuthors)) {
+                $result = array_values(array_filter($result, static function (array $row) use ($blockedAuthors): bool {
+                    $authorId = (string)($row['author_id'] ?? '');
+                    return $authorId === '' || !isset($blockedAuthors[$authorId]);
+                }));
+            }
+        }
         return $result;
     }
 

@@ -101,9 +101,18 @@ class PushNotificationClass extends VapidClass
 
         try {
             $defaultOptions = [
-                'timeout' => 3, // Bounded 3-second timeout (Gate 4)
+                'TTL' => $isSilent ? 300 : 86400,
+                'urgency' => $isSilent ? 'low' : 'high',
+                'topic' => preg_replace('/[^A-Za-z0-9_-]/', '', $tag) ?: 'general',
             ];
-            $webPush = new WebPush($auth, $defaultOptions);
+            $timeout = 3; // Bounded 3-second timeout (Gate 4)
+            $clientOptions = [
+                'timeout' => 3.0,
+                'connect_timeout' => 2.0,
+                'allow_redirects' => false,
+                'http_errors' => false,
+            ];
+            $webPush = new WebPush($auth, $defaultOptions, $timeout, $clientOptions);
             $webPush->setReuseVAPIDHeaders(true);
 
             $payloadArray = [
@@ -197,18 +206,43 @@ class PushNotificationClass extends VapidClass
      */
     private static function getUserPushSubscriptions(string $userId): array
     {
+        $merged = [];
+        $seenEndpoints = [];
+
         try {
             $rows = Select::selectFn2(
-                'SELECT * FROM pushNotification WHERE id = ?',
+                'SELECT endpoint, p256dhKey, authKey FROM pushNotification WHERE id = ?',
                 [$userId]
             );
-            if (!empty($rows)) {
-                return isset($rows[0]) && is_array($rows[0]) ? $rows : [$rows];
+            $list = !empty($rows) ? (isset($rows[0]) && is_array($rows[0]) ? $rows : [$rows]) : [];
+            foreach ($list as $row) {
+                $ep = (string)($row['endpoint'] ?? '');
+                if ($ep !== '' && !isset($seenEndpoints[$ep])) {
+                    $seenEndpoints[$ep] = true;
+                    $merged[] = $row;
+                }
             }
-            return [];
         } catch (\Throwable $e) {
-            error_log('[PushNotification] DB Fetch error: ' . $e->getMessage());
-            return [];
+            error_log('[PushNotification] DB Fetch error (pushNotification): ' . $e->getMessage());
         }
+
+        // Fallback/supplement with centralized user_push_subscriptions table
+        try {
+            $db = \Src\Db::connect2();
+            $stmt = $db->prepare('SELECT endpoint, p256dh AS p256dhKey, auth_token AS authKey FROM user_push_subscriptions WHERE user_id = ?');
+            $stmt->execute([$userId]);
+            $extraRows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            foreach ($extraRows as $row) {
+                $ep = (string)($row['endpoint'] ?? '');
+                if ($ep !== '' && !isset($seenEndpoints[$ep])) {
+                    $seenEndpoints[$ep] = true;
+                    $merged[] = $row;
+                }
+            }
+        } catch (\Throwable) {
+            // Optional table; ignore if absent
+        }
+
+        return $merged;
     }
 }

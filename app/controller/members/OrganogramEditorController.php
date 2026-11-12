@@ -230,6 +230,7 @@ final class OrganogramEditorController extends BaseController
                     : [];
 
                 $db->commit();
+                $this->invalidateTreeCache($familyCode);
                 if ($partnerRequests) {
                     \App\services\FamilyRelationshipRequestService::notify($db, $familyCode, (string)($_SESSION['id'] ?? ''), $this->requesterName(), $partnerId, \App\services\FamilyRelationshipRequestService::FORMER_PARTNER, $partnerRequests);
                 }
@@ -329,6 +330,7 @@ final class OrganogramEditorController extends BaseController
                         $newPartnerRequests = \App\services\FamilyRelationshipRequestService::createFor($db, $familyCode, (string)($_SESSION['id'] ?? ''), $newPartnerId, \App\services\FamilyRelationshipRequestService::FORMER_PARTNER, $unionId);
                     }
                     $db->commit();
+                    $this->invalidateTreeCache($familyCode);
                     if ($newPartnerRequests) {
                         \App\services\FamilyRelationshipRequestService::notify($db, $familyCode, (string)($_SESSION['id'] ?? ''), $this->requesterName(), $newPartnerId, \App\services\FamilyRelationshipRequestService::FORMER_PARTNER, $newPartnerRequests);
                     }
@@ -442,6 +444,7 @@ final class OrganogramEditorController extends BaseController
                 }
 
                 $db->commit();
+                $this->invalidateTreeCache($familyCode);
                 msgSuccess(200, [
                     "message" => "Child added successfully." . ($childAccount ? " Child account provisioned." : ""),
                     "family_code" => $familyCode,
@@ -596,6 +599,7 @@ final class OrganogramEditorController extends BaseController
                 $insChild->execute([$unionId, $baseNodeId]);
 
                 $db->commit();
+                $this->invalidateTreeCache($familyCode);
                 msgSuccess(200, [
                     "message" => "Parents added successfully.",
                     "family_code" => $familyCode,
@@ -715,6 +719,7 @@ final class OrganogramEditorController extends BaseController
                 $parentage = \App\services\FamilyGraphService::normaliseParentage($_POST['parentage'] ?? '');
 
                 $db->commit();
+                $this->invalidateTreeCache($familyCode);
                 if ($relKind !== null && $relRequests) {
                     \App\services\FamilyRelationshipRequestService::notify($db, $familyCode, (string)($_SESSION['id'] ?? ''), $this->requesterName(), $sibId, $relKind, $relRequests);
                 }
@@ -1037,6 +1042,7 @@ final class OrganogramEditorController extends BaseController
                 $insChildLink->execute([$gpUnionId, $uncleAuntId]);
 
                 $db->commit();
+                $this->invalidateTreeCache($familyCode);
 
                 $treeLabel = ($ctx['lineage_scope'] === 'maternal') ? 'Birth Family' : 'Marital Tree';
 
@@ -1481,6 +1487,7 @@ final class OrganogramEditorController extends BaseController
                 }
 
                 $db->commit();
+                $this->invalidateTreeCache($familyCode);
 
                 $treeLabel = ($ctx['lineage_scope'] === 'wife') ? "Wife's Family Tree (#{$familyCode})" : "Marital Tree (#{$familyCode})";
 
@@ -1610,6 +1617,7 @@ final class OrganogramEditorController extends BaseController
                 $familyCode
             ]);
 
+            $this->invalidateTreeCache($familyCode);
             msgSuccess(200, "Relative details updated successfully.");
         } catch (\Throwable $th) {
             showError($th);
@@ -1770,6 +1778,7 @@ final class OrganogramEditorController extends BaseController
                 }
 
                 $db->commit();
+                $this->invalidateTreeCache($familyCode);
                 msgSuccess(200, [
                     "message" => "Relative removed from family tree successfully.",
                     "node_id" => $nodeId
@@ -3092,6 +3101,7 @@ final class OrganogramEditorController extends BaseController
                 }
 
                 $db->commit();
+                $this->invalidateTreeCache($familyCode);
 
                 $fullName = trim((string)($targetNode['first_name'] ?? '') . ' ' . (string)($targetNode['last_name'] ?? ''));
 
@@ -3129,6 +3139,14 @@ final class OrganogramEditorController extends BaseController
             $first = $cleanTitle . ' ' . $first;
         }
         return \App\services\NameFormatterService::formatFirstAndLast($first, $last);
+    }
+
+    /**
+     * Invalidate cached family trees for the mutated family code.
+     */
+    private function invalidateTreeCache(string $familyCode): void
+    {
+        \App\services\FamilyTreeCacheService::invalidateFamily($familyCode);
     }
 }
 

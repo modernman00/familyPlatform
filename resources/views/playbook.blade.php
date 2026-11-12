@@ -466,6 +466,14 @@
                             </div>
                             <p class="text-slate-500 small mb-0">All registered members default to Public profile visibility and active directory searchability so relatives can effortlessly discover and connect with them, with 1-click controls to switch to Family Only or Private anytime.</p>
                         </div>
+
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-3">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <strong class="text-slate-900 small">6. Selective Member Visibility &amp; Notification Restrictions</strong>
+                                <span class="badge bg-success text-white rounded-pill px-2 py-1"><i class="fas fa-user-slash me-1"></i>SILENT GUARD</span>
+                            </div>
+                            <p class="text-slate-500 small mb-0">Customise per-relative visibility silently from Privacy settings or any post menu. Restricted relatives are never notified and cannot view your restricted posts, comments, video reels, events, family journals, announcements, time capsules, search matches, or live alerts.</p>
+                        </div>
                     </div>
 
                     <!-- Live HMAC Anti-Tamper Invite Generator -->

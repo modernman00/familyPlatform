@@ -32,6 +32,16 @@ final class FamilyJournal extends Select
 
         /** @var array<int, array<string, mixed>> $result */
         $result = parent::selectFn2(query: $query, bind: [$familyCode]);
+        $viewerId = trim((string)($_SESSION['id'] ?? ''));
+        if ($viewerId !== '' && !empty($result)) {
+            $blockedAuthors = array_flip(\App\services\MemberRestrictionService::getRestrictorIdsForViewer(self::connect2(), $viewerId, 'journals'));
+            if (!empty($blockedAuthors)) {
+                $result = array_values(array_filter($result, static function (array $row) use ($blockedAuthors): bool {
+                    $authorId = (string)($row['author_id'] ?? '');
+                    return $authorId === '' || !isset($blockedAuthors[$authorId]);
+                }));
+            }
+        }
         foreach ($result as &$row) {
             if (isset($row['content'])) {
                 $row['content'] = EncryptionService::decrypt((string)$row['content'], $familyCode, 'journal');
@@ -64,6 +74,11 @@ final class FamilyJournal extends Select
         $result = parent::selectFn2(query: $query, bind: [(string)$id, $familyCode]);
         $row = $result[0] ?? null;
         if ($row !== null) {
+            $viewerId = trim((string)($_SESSION['id'] ?? ''));
+            $authorId = (string)($row['author_id'] ?? '');
+            if ($viewerId !== '' && $authorId !== '' && \App\services\MemberRestrictionService::isRestricted(self::connect2(), $authorId, $viewerId, 'journals')) {
+                return null;
+            }
             if (isset($row['content'])) {
                 $row['content'] = EncryptionService::decrypt((string)$row['content'], $familyCode, 'journal');
             }

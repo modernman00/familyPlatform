@@ -155,18 +155,42 @@ if (php_sapi_name() !== 'cli') {
                 $value = trim(substr($header, strlen('Content-Security-Policy:')));
 
                 // 1. Replace dangerous wildcard https: in script-src with approved origins
-                $approvedScripts = 'https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://use.fontawesome.com https://www.google.com https://www.gstatic.com https://recaptcha.google.com';
+                $approvedScripts = 'https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://use.fontawesome.com https://kit.fontawesome.com https://www.google.com https://www.gstatic.com https://recaptcha.google.com https://unpkg.com https://d3js.org https://canvasjs.com https://js.pusher.com';
                 $value = preg_replace(
                     "/script-src(?!-attr)([^;]*)\bhttps:\b([^;]*)/",
                     "script-src$1 $approvedScripts $2",
                     $value
                 ) ?? $value;
 
-                // 2. Ensure connect-src covers Google Analytics, Google APIs & jsDelivr
+                // 2. Ensure connect-src covers Google Analytics, Google APIs, jsDelivr, FontAwesome & Pusher Channels
                 if (strpos($value, 'google-analytics.com') === false) {
                     $value = preg_replace(
                         '/connect-src([^;]*)/',
                         'connect-src$1 https://*.google-analytics.com https://*.analytics.google.com https://cdn.jsdelivr.net',
+                        $value,
+                        1
+                    ) ?? $value;
+                }
+                if (strpos($value, 'pusher.com') === false) {
+                    $value = preg_replace(
+                        '/connect-src([^;]*)/',
+                        'connect-src$1 https://*.pusher.com wss://*.pusher.com https://*.pusherapp.com wss://*.pusherapp.com',
+                        $value,
+                        1
+                    ) ?? $value;
+                }
+                if (strpos($value, 'ka-f.fontawesome.com') === false) {
+                    $value = preg_replace(
+                        '/connect-src([^;]*)/',
+                        'connect-src$1 https://ka-f.fontawesome.com',
+                        $value,
+                        1
+                    ) ?? $value;
+                }
+                if (strpos($value, 'ka-f.fontawesome.com') === false) {
+                    $value = preg_replace(
+                        '/font-src([^;]*)/',
+                        'font-src$1 https://ka-f.fontawesome.com',
                         $value,
                         1
                     ) ?? $value;
@@ -210,8 +234,8 @@ if (php_sapi_name() !== 'cli') {
                 define('CSP_NONCE', $nonce);
             }
 
-            $scriptSrc = "script-src 'self' 'nonce-$nonce' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://use.fontawesome.com https://www.google.com https://www.gstatic.com https://recaptcha.google.com 'unsafe-eval'";
-            $connectSrc = "connect-src 'self' https://www.google.com https://www.gstatic.com https://*.google-analytics.com https://*.analytics.google.com https://cdn.jsdelivr.net";
+            $scriptSrc = "script-src 'self' 'nonce-$nonce' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://use.fontawesome.com https://kit.fontawesome.com https://www.google.com https://www.gstatic.com https://recaptcha.google.com https://unpkg.com https://d3js.org https://canvasjs.com https://js.pusher.com 'unsafe-eval'";
+            $connectSrc = "connect-src 'self' https://www.google.com https://www.gstatic.com https://*.google-analytics.com https://*.analytics.google.com https://cdn.jsdelivr.net https://*.pusher.com wss://*.pusher.com https://*.pusherapp.com wss://*.pusherapp.com https://ka-f.fontawesome.com";
 
             $path = (string)parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
             if (in_array(rtrim($path, '/'), ['/member/emoji-studio', '/poster-studio', '/flyer-studio'], true)) {
@@ -222,8 +246,8 @@ if (php_sapi_name() !== 'cli') {
             $defaultCsp = "default-src 'self'; "
                 . $scriptSrc . "; "
                 . "script-src-attr 'unsafe-inline'; "
-                . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
-                . "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; "
+                . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; "
+                . "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://ka-f.fontawesome.com; "
                 . "img-src 'self' data: https:; "
                 . $connectSrc . "; "
                 . "frame-src 'self' https://www.google.com https://recaptcha.google.com; "

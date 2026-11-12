@@ -42,7 +42,8 @@ class AllMembersData extends InnerJoin
                            WHEN rm.approver_id = :id6 AND rm.requester_id = p.id AND LOWER(rm.status) IN ('approved', 'accepted') THEN 'you_approved'
                            ELSE 'other'
                        END AS relationType,
-                       rm.requester_id, rm.approver_id, rm.status, rm.requesterCode
+                       rm.requester_id, rm.approver_id, rm.status, rm.requesterCode,
+                       rm.relationship_category, rm.relationship_role, rm.relationship_note
                 FROM personal AS p
                   INNER JOIN personal AS user_p ON user_p.id = :id1
                    LEFT JOIN otherFamily AS ofm ON p.id = ofm.id
@@ -64,7 +65,7 @@ class AllMembersData extends InnerJoin
             ]);
 
             $rows = $result->fetchAll(PDO::FETCH_ASSOC);
-            return $this->uniqueById($rows);
+            return $this->maskUnsharedFamilyCodes($this->uniqueById($rows), (string)$id);
         } catch (PDOException $e) {
             showError($e);
             return [];
@@ -138,7 +139,7 @@ class AllMembersData extends InnerJoin
      *
      * @return array An array containing the email, family code, first name, last name, and ID of each member.
      */
-    public static function AllMembersEmailByFamCode($famCode, array|string|null $id = null): array
+    public static function AllMembersEmailByFamCode($famCode, array|string|null $id = null, ?string $restrictionScope = null): array
     {
         try {
             $query = "SELECT DISTINCT a.email, COALESCE(NULLIF(p.famCode, ''), uf.family_code, fn.family_code, '') as famCode, COALESCE(NULLIF(p.firstName, ''), fn.first_name, '') as firstName, COALESCE(NULLIF(p.lastName, ''), fn.last_name, '') as lastName, a.id 
@@ -165,11 +166,57 @@ class AllMembersData extends InnerJoin
                 }
             }
 
-            $result = parent::connect2()->prepare($query);
+            $conn = parent::connect2();
+            $result = $conn->prepare($query);
             $result->execute($params);
-            return $result->fetchAll();
+            $rows = $result->fetchAll();
+            if ($restrictionScope !== null && is_scalar($id) && (string)$id !== '') {
+                $rows = \App\services\MemberRestrictionService::filterRecipientRows($conn, (string)$id, $rows, $restrictionScope);
+            }
+            return $rows;
         } catch (PDOException $e) {
             showError($e);
+            return [];
+        }
+    }
+
+    /**
+     * Retrieve email, famCode, firstName, lastName, and id for all approved Connected Kin
+     * of $authorId in requestMgt, respecting MemberRestrictionService.
+     *
+     * @param string $authorId
+     * @param string|null $restrictionScope
+     * @return array<int, array<string, mixed>>
+     */
+    public static function ConnectedKinEmailByUserId(string $authorId, ?string $restrictionScope = 'posts'): array
+    {
+        $authorId = trim($authorId);
+        if ($authorId === '') {
+            return [];
+        }
+        try {
+            $conn = parent::connect2();
+            $query = "SELECT DISTINCT a.email, COALESCE(p.famCode, '') AS famCode, COALESCE(p.firstName, '') AS firstName, COALESCE(p.lastName, '') AS lastName, a.id
+                      FROM requestMgt rm
+                      INNER JOIN account a ON a.id = (CASE WHEN rm.requester_id = :uid1 THEN rm.approver_id ELSE rm.requester_id END)
+                      LEFT JOIN personal p ON a.id = p.id
+                      WHERE (rm.requester_id = :uid2 OR rm.approver_id = :uid3)
+                        AND LOWER(rm.status) IN ('approved', 'accepted')
+                        AND a.id != :uid4";
+            $stmt = $conn->prepare($query);
+            $stmt->execute([
+                'uid1' => $authorId,
+                'uid2' => $authorId,
+                'uid3' => $authorId,
+                'uid4' => $authorId,
+            ]);
+            $rows = $stmt->fetchAll();
+            if ($restrictionScope !== null) {
+                $rows = \App\services\MemberRestrictionService::filterRecipientRows($conn, $authorId, $rows, $restrictionScope);
+            }
+            return $rows;
+        } catch (PDOException $e) {
+            error_log('[AllMembersData::ConnectedKinEmailByUserId] ' . $e->getMessage());
             return [];
         }
     }
@@ -302,7 +349,10 @@ class AllMembersData extends InnerJoin
                 rm.requester_id,
                 rm.approver_id,
                 rm.status,
-                rm.requesterCode
+                rm.requesterCode,
+                rm.relationship_category,
+                rm.relationship_role,
+                rm.relationship_note
             FROM personal AS p
             LEFT JOIN account AS acc ON p.id = acc.id
             LEFT JOIN otherFamily AS ofm ON p.id = ofm.id
@@ -342,7 +392,7 @@ class AllMembersData extends InnerJoin
             $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             /** @var array<int, array<string, mixed>> $result2 */
-            $result2 = $this->uniqueById($result);
+            $result2 = $this->maskUnsharedFamilyCodes($this->uniqueById($result), $userId);
 
             return $result2;
         } catch (\Throwable $e) {
@@ -441,7 +491,8 @@ class AllMembersData extends InnerJoin
             $conn = parent::connect2();
             $result = $conn->prepare($query);
             $result->execute([...$cleanedCodes, ...$cleanedCodes]);
-            return $result->fetchAll();
+            $rows = $result->fetchAll();
+            return self::filterEventsByViewerRestrictions($conn, $rows ?: []);
         } catch (\Throwable $th) {
             showError($th);
             return [];
@@ -487,11 +538,35 @@ class AllMembersData extends InnerJoin
             $conn = parent::connect2();
             $result = $conn->prepare($query);
             $result->execute([...$cleanedCodes, ...$cleanedCodes]);
-            return $result->fetchAll() ?: [];
+            $rows = $result->fetchAll() ?: [];
+            return self::filterEventsByViewerRestrictions($conn, $rows);
         } catch (\Throwable $th) {
             showError($th);
             return [];
         }
+    }
+
+    /**
+     * Filters events whose creator restricted the active session viewer.
+     *
+     * @param array<int, array<string, mixed>> $rows
+     * @return array<int, array<string, mixed>>
+     */
+    private static function filterEventsByViewerRestrictions(\PDO $conn, array $rows): array
+    {
+        $viewerId = trim((string)($_SESSION['id'] ?? ''));
+        if ($viewerId === '' || empty($rows)) {
+            return $rows;
+        }
+        $restrictors = \App\services\MemberRestrictionService::getRestrictorIdsForViewer($conn, $viewerId, 'events');
+        if (empty($restrictors)) {
+            return $rows;
+        }
+        $blockedMap = array_flip($restrictors);
+        return array_values(array_filter($rows, static function ($row) use ($blockedMap): bool {
+            $ownerId = (string)($row['id'] ?? '');
+            return $ownerId === '' || !isset($blockedMap[$ownerId]);
+        }));
     }
 
 
@@ -502,13 +577,19 @@ class AllMembersData extends InnerJoin
      * @param array<int|string> $postNos
      * @return array<string, array<int, array<string, mixed>>> post_no => comments (newest first)
      */
-    public static function commentProfilePicByPostNos(array $postNos): array
+    public static function commentProfilePicByPostNos(array $postNos, ?string $viewerId = null): array
     {
         $postNos = array_values(array_unique(array_map('strval', $postNos)));
         if ($postNos === []) {
             return [];
         }
         try {
+            $conn = parent::connect2();
+            $activeViewer = trim((string)($viewerId ?? ($_SESSION['id'] ?? '')));
+            $blockedCommenters = $activeViewer !== ''
+                ? array_flip(\App\services\MemberRestrictionService::getRestrictorIdsForViewer($conn, $activeViewer, 'comments'))
+                : [];
+
             $placeholders = implode(',', array_fill(0, count($postNos), '?'));
             $query = "SELECT comment.*, profilePics.img, profilePics.id 
               FROM comment
@@ -516,11 +597,15 @@ class AllMembersData extends InnerJoin
             WHERE comment.post_no IN ($placeholders)
             AND comment.date_deleted IS NULL
             ORDER BY comment.date_created DESC";
-            $stmt = parent::connect2()->prepare($query);
+            $stmt = $conn->prepare($query);
             $stmt->execute($postNos);
 
             $grouped = [];
             foreach ($stmt->fetchAll() as $row) {
+                $commentAuthorId = (string)($row['id'] ?? '');
+                if ($commentAuthorId !== '' && isset($blockedCommenters[$commentAuthorId])) {
+                    continue;
+                }
                 if (isset($row['comment']) && is_string($row['comment']) && $row['comment'] !== '') {
                     $row['comment'] = (string)preg_replace('/&amp;(#\d+|#x[0-9a-f]+|[a-z]+);/iu', '&$1;', $row['comment']);
                     $row['comment'] = html_entity_decode($row['comment'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -535,28 +620,39 @@ class AllMembersData extends InnerJoin
         }
     }
 
-    public static function commentProfilePicByPostNo($postNo): array
+    public static function commentProfilePicByPostNo($postNo, ?string $viewerId = null): array
     {
         try {
+            $conn = parent::connect2();
+            $activeViewer = trim((string)($viewerId ?? ($_SESSION['id'] ?? '')));
+            $blockedCommenters = $activeViewer !== ''
+                ? array_flip(\App\services\MemberRestrictionService::getRestrictorIdsForViewer($conn, $activeViewer, 'comments'))
+                : [];
+
             $query = "SELECT comment.*, profilePics.img, profilePics.id 
               FROM comment
               INNER JOIN profilePics ON comment.id = profilePics.id
             WHERE (comment.post_no = :postNo)
             AND comment.date_deleted IS NULL
             ORDER BY comment.date_created DESC";
-            $result = parent::connect2()->prepare($query);
+            $result = $conn->prepare($query);
             $result->execute(['postNo' => $postNo]);
 
             $rows = $result->fetchAll() ?: [];
-            foreach ($rows as &$row) {
+            $filtered = [];
+            foreach ($rows as $row) {
+                $commentAuthorId = (string)($row['id'] ?? '');
+                if ($commentAuthorId !== '' && isset($blockedCommenters[$commentAuthorId])) {
+                    continue;
+                }
                 if (isset($row['comment']) && is_string($row['comment']) && $row['comment'] !== '') {
                     $row['comment'] = (string)preg_replace('/&amp;(#\d+|#x[0-9a-f]+|[a-z]+);/iu', '&$1;', $row['comment']);
                     $row['comment'] = html_entity_decode($row['comment'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
                     $row['comment'] = (string)preg_replace('/&(?:#?0*39|#x0*27|apos);/iu', "'", $row['comment']);
                 }
+                $filtered[] = $row;
             }
-            unset($row);
-            return $rows;
+            return $filtered;
         } catch (PDOException $e) {
             showError($e);
             return [];
@@ -587,6 +683,27 @@ class AllMembersData extends InnerJoin
                 if ($getRequesterDataById['requester_id']) {
                     $custData = new SingleCustomerData();
                     $data = $custData->getCustomerData($getRequesterDataById['requester_id'], ['personal', 'contact', 'profilePics']);
+                    if (is_array($data)) {
+                        $reqFamCode = (string)($data['famCode'] ?? '');
+                        if ($reqFamCode !== '' && !\App\controller\BaseController::viewerCanSeeFamilyCode($reqFamCode, $id)) {
+                            $data['famCode'] = '';
+                            $data['otherFamCode'] = '';
+                            $data['familyCode2'] = '';
+                        }
+                        $relCat = $getRequesterDataById['relationship_category'] ?? 'family_friend';
+                        $relRole = $getRequesterDataById['relationship_role'] ?? 'Connected Kin';
+                        $relNote = $getRequesterDataById['relationship_note'] ?? '';
+                        $categoryLabels = [
+                            'in_laws' => 'In-Laws',
+                            'extended_lineage' => 'Extended Lineage',
+                            'family_friend' => 'Family Friend'
+                        ];
+                        $data['relationship_category'] = $relCat;
+                        $data['relationship_category_label'] = $categoryLabels[$relCat] ?? 'Connected Kin';
+                        $data['relationship_role'] = $relRole;
+                        $data['relationship_note'] = $relNote;
+                        $data['relationship_full_label'] = ($relRole !== '' && $relRole !== ($categoryLabels[$relCat] ?? '')) ? ($categoryLabels[$relCat] ?? 'Connected Kin') . " ({$relRole})" : ($categoryLabels[$relCat] ?? 'Connected Kin');
+                    }
 
                     array_push($result, $data);
                 } else {
@@ -690,7 +807,10 @@ class AllMembersData extends InnerJoin
                 rm.requester_id,
                 rm.approver_id,
                 rm.status,
-                rm.requesterCode
+                rm.requesterCode,
+                rm.relationship_category,
+                rm.relationship_role,
+                rm.relationship_note
             FROM personal AS p
             LEFT JOIN account AS acc ON p.id = acc.id
             LEFT JOIN otherFamily AS ofm ON p.id = ofm.id
@@ -719,7 +839,7 @@ class AllMembersData extends InnerJoin
                     OR acc.email LIKE :search_acc_email
                     OR c.mobile LIKE :search_mobile
                     OR REPLACE(REPLACE(REPLACE(c.mobile, ' ', ''), '-', ''), '+', '') LIKE :search_mobile_digits
-                    OR p.famCode LIKE :search_famCode
+                    OR ((:is_super_admin_search = 1 OR (p.famCode = :famCode_search AND p.famCode != '')) AND p.famCode LIKE :search_famCode)
                     OR c.country LIKE :search_country
                 )
             ORDER BY
@@ -757,6 +877,8 @@ class AllMembersData extends InnerJoin
             $stmt->bindValue(':req_order_outgoing', $requesterId, PDO::PARAM_STR);
             $stmt->bindValue(':req_order_incoming', $requesterId, PDO::PARAM_STR);
             $stmt->bindValue(':is_super_admin', $isSuperAdmin, PDO::PARAM_INT);
+            $stmt->bindValue(':is_super_admin_search', $isSuperAdmin, PDO::PARAM_INT);
+            $stmt->bindValue(':famCode_search', $famCode, PDO::PARAM_STR);
 
             // --- search term placeholders ---
             $stmt->bindValue(':search_firstName', $like, PDO::PARAM_STR);
@@ -780,13 +902,48 @@ class AllMembersData extends InnerJoin
 
             // Remove duplicate users by ID
             /** @var array<int, array<string, mixed>> $result2 */
-            $result2 = $this->uniqueById($result);
+            $result2 = $this->maskUnsharedFamilyCodes($this->uniqueById($result), $requesterId);
 
             return $result2;
         } catch (PDOException $e) {
             showError($e);
             return [];
         }
+    }
+
+    /**
+     * Ensure family codes are never exposed to users who do not belong to those families.
+     *
+     * @param array<int, array<string, mixed>> $rows
+     * @return array<int, array<string, mixed>>
+     */
+    private function maskUnsharedFamilyCodes(array $rows, string $viewerId): array
+    {
+        if (empty($rows)) {
+            return $rows;
+        }
+
+        $viewerCodes = \App\controller\BaseController::getUserFamilyCodes($viewerId);
+        $allowedMap = array_fill_keys($viewerCodes, true);
+
+        foreach ($rows as &$row) {
+            $normCode = \App\controller\BaseController::normaliseFamilyCode((string)($row['famCode'] ?? ''));
+            if ($normCode === '' || !isset($allowedMap[$normCode])) {
+                $row['famCode'] = '';
+                if (array_key_exists('requesterCode', $row)) {
+                    $row['requesterCode'] = '';
+                }
+                if (array_key_exists('otherFamCode', $row)) {
+                    $row['otherFamCode'] = '';
+                }
+                if (array_key_exists('familyCode2', $row)) {
+                    $row['familyCode2'] = '';
+                }
+            }
+        }
+        unset($row);
+
+        return $rows;
     }
 
     /**

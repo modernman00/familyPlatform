@@ -84,9 +84,16 @@
               <span class="badge rounded-pill" 
                     :class="post.target_scope === 'birth' ? 'bg-danger-subtle text-danger-emphasis border border-danger-subtle' : (post.target_scope === 'married' ? 'bg-success-subtle text-success-emphasis border border-success-subtle' : 'bg-secondary-subtle text-secondary-emphasis')" 
                     :style="post.target_scope === 'birth' ? 'color: #7f1d1d !important; background-color: #fee2e2 !important; border-color: #fca5a5 !important;' : (post.target_scope === 'married' ? 'color: #14532d !important; background-color: #dcfce7 !important; border-color: #86efac !important;' : '')"
-                    style="font-size: 0.78rem; font-weight: normal; padding: 2px 8px;">
+                    style="font-size: 0.78rem; font-weight: normal; padding: 2px 8px; white-space: nowrap; flex-shrink: 0;">
                 <i class="bi me-1" :class="post.target_scope === 'birth' ? 'bi-heart-pulse-fill' : (post.target_scope === 'married' ? 'bi-house-heart-fill' : 'bi-people')"></i>
                 <span x-text="'#' + String(post.postFamCode).replace(/^#+/, '')"></span>
+              </span>
+            </template>
+            <template x-if="!(post.id === 'FAMILY_PLATFORM_OFFICIAL' || post.is_official) && !post.postFamCode && !isOwnPost(post)">
+              <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis"
+                    style="font-size: 0.78rem; font-weight: normal; padding: 2px 8px; white-space: nowrap; flex-shrink: 0;">
+                <i class="bi bi-people me-1"></i>
+                <span>Connected Kin</span>
               </span>
             </template>
           </div>
@@ -127,11 +134,20 @@
               </div>
             </template>
             <template x-if="!isOwnPost(post)">
-              <li>
-                <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger" href="#" style="min-height: 44px;" @click.prevent="openReportModal('post', post.post_no)">
-                  <i class="bi bi-flag-fill"></i> {{ __('feed.report_post', 'Report Post') }}
-                </a>
-              </li>
+              <div>
+                <template x-if="post.id && post.id !== 'FAM_PLATFORM_OFFICIAL'">
+                  <li>
+                    <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" style="min-height: 44px; white-space: nowrap;" @click.prevent="restrictPostAuthor(post)">
+                      <i class="bi bi-person-slash text-warning"></i> {{ __('feed.restrict_member', 'Restrict Member') }}
+                    </a>
+                  </li>
+                </template>
+                <li>
+                  <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger" href="#" style="min-height: 44px; white-space: nowrap;" @click.prevent="openReportModal('post', post.post_no)">
+                    <i class="bi bi-flag-fill"></i> {{ __('feed.report_post', 'Report Post') }}
+                  </a>
+                </li>
+              </div>
             </template>
             <template x-if="isUserTaggedInPost(post)">
               <li>
@@ -2443,87 +2459,3 @@
   </div>
 
 </div>
-
-<script nonce="{{ csp_nonce($nonce ?? null) }}">
-  if (typeof window.openReportModal !== 'function') {
-    window.openReportModal = function(targetType, targetId) {
-      if (typeof Swal === 'undefined') {
-        alert('Reporting service is loading. Please try again.');
-        return;
-      }
-      var isComment = targetType === 'comment';
-      var htmlContent = `
-        <div class="text-start" style="font-size: 0.92rem;">
-          <p class="text-muted mb-3">Please select the reason for flagging this ${isComment ? 'comment' : 'post'}. Our super admin moderation team reviews all flagged items.</p>
-          <div class="mb-3">
-            <label for="swal-report-reason-fallback" class="form-label fw-semibold">Reason for Report <span class="text-danger">*</span></label>
-            <select id="swal-report-reason-fallback" class="form-select" style="min-height: 44px; font-size: 0.95rem;">
-              <option value="hate_speech">Hate speech or abusive slurs</option>
-              <option value="harassment">Harassment, bullying, or threats</option>
-              <option value="inappropriate">Inappropriate or offensive content</option>
-              <option value="spam">Spam or misleading information</option>
-              <option value="other">Other violation of family values</option>
-            </select>
-          </div>
-          <div class="mb-2">
-            <label for="swal-report-details-fallback" class="form-label fw-semibold">Additional Details (Optional)</label>
-            <textarea id="swal-report-details-fallback" class="form-control" rows="3" maxlength="500" placeholder="Provide extra context to help our administrators investigate..."></textarea>
-          </div>
-        </div>
-      `;
-
-      Swal.fire({
-        title: isComment ? 'Flag Comment' : 'Report Post',
-        html: htmlContent,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc2626',
-        cancelButtonColor: '#64748b',
-        confirmButtonText: 'Submit Report',
-        cancelButtonText: 'Cancel',
-        showLoaderOnConfirm: true,
-        allowOutsideClick: function() { return !Swal.isLoading(); },
-        preConfirm: async function() {
-          var reason = document.getElementById('swal-report-reason-fallback')?.value || 'hate_speech';
-          var details = document.getElementById('swal-report-details-fallback')?.value || '';
-          var metaCsrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
-                         document.querySelector('input[name="_csrf_token"]')?.value || '';
-
-          try {
-            var resp = await fetch('/member/content/report', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                ...(metaCsrf ? { 'X-CSRF-TOKEN': metaCsrf } : {})
-              },
-              body: JSON.stringify({
-                target_type: targetType,
-                target_id: targetId,
-                reason: reason,
-                details: details
-              })
-            });
-            var data = await resp.json();
-            if (!resp.ok) {
-              throw new Error(data.error || 'Failed to submit report');
-            }
-            return data;
-          } catch (err) {
-            Swal.showValidationMessage(err.message || 'Unable to submit report.');
-            return false;
-          }
-        }
-      }).then(function(result) {
-        if (result.isConfirmed && result.value) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Report Submitted',
-            text: result.value.message || 'Thank you for helping keep our family community safe. Administrators have been notified.',
-            confirmButtonColor: '#059669'
-          });
-        }
-      });
-    };
-  }
-</script>

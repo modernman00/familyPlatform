@@ -101,6 +101,9 @@ final class FamilyTimeCapsuleService
         foreach ($rows as $row) {
             $capsuleId = (int)$row['id'];
             $creatorId = (string)($row['creator_id'] ?? '');
+            if ($creatorId !== '' && $viewerUserId !== '' && MemberRestrictionService::isRestricted($db, $creatorId, $viewerUserId, 'capsules')) {
+                continue;
+            }
             $unlockDate = (string)($row['unlock_date'] ?? '');
             $isUnlocked = !empty($row['is_unlocked']);
 
@@ -208,7 +211,7 @@ final class FamilyTimeCapsuleService
 
             if ($famCode !== '') {
                 try {
-                    $members = AllMembersData::AllMembersEmailByFamCode($famCode, $creatorId !== '' ? $creatorId : null);
+                    $members = AllMembersData::AllMembersEmailByFamCode($famCode, $creatorId !== '' ? $creatorId : null, 'capsules');
                     foreach ($members as $m) {
                         $mId = (string)($m['id'] ?? '');
                         if ($mId === '' || $mId === $creatorId) {

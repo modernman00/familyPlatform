@@ -91,6 +91,9 @@
   
   <!-- Favicons -->
   <link rel="icon" type="image/png" sizes="32x32" href="{{ getenv('APP_LOGO') }}">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  @yield('preload_lcp')
   
   <!-- PWA Manifest & Mobile Meta -->
   <meta name="page-scope" content="public">
@@ -238,15 +241,12 @@
 
   @include('partials.back-to-top')
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-
-  <!-- SweetAlert2 for notifications -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-nLoOnA/BDh8A/jxqtckg4DumuCGOBYUnNJLZdQz/zfYNp3wcjGSoWTAzgko06G/2" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous" defer></script>
 
   <!-- App JS (Bundles Alpine.js, PWA, SweetAlert2) -->
-  <script type="text/javascript" src="/public/js/manifest.js?v=1.0.2"></script>
-  <script type="text/javascript" src="/public/js/vendor.js?v=1.0.2"></script>
-  <script type="text/javascript" src="/public/js/index.js?v=1.0.2"></script>
+  <script type="text/javascript" src="/public/js/manifest.js?v=1.0.2" defer></script>
+  <script type="text/javascript" src="/public/js/vendor.js?v=1.0.2" defer></script>
+  <script type="text/javascript" src="/public/js/index.js?v=1.0.2" defer></script>
   <script type="text/javascript" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
   <script type="text/javascript" src="/public/js/smart-nav-scroll.js?v={{ assetVersion('js/smart-nav-scroll.js') }}" defer></script>
   <script type="text/javascript" src="/public/js/telemetry.js?v={{ assetVersion('js/telemetry.js') }}" defer></script>
