@@ -244,9 +244,9 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous" defer></script>
 
   <!-- App JS (Bundles Alpine.js, PWA, SweetAlert2) -->
-  <script type="text/javascript" src="/public/js/manifest.js?v=1.0.2" defer></script>
-  <script type="text/javascript" src="/public/js/vendor.js?v=1.0.2" defer></script>
-  <script type="text/javascript" src="/public/js/index.js?v=1.0.2" defer></script>
+  <script type="text/javascript" src="/public/js/manifest.js?v={{ assetVersion('js/manifest.js') }}" defer></script>
+  <script type="text/javascript" src="/public/js/vendor.js?v={{ assetVersion('js/vendor.js') }}" defer></script>
+  <script type="text/javascript" src="/public/js/index.js?v={{ assetVersion('js/index.js') }}" defer></script>
   <script type="text/javascript" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
   <script type="text/javascript" src="/public/js/smart-nav-scroll.js?v={{ assetVersion('js/smart-nav-scroll.js') }}" defer></script>
   <script type="text/javascript" src="/public/js/telemetry.js?v={{ assetVersion('js/telemetry.js') }}" defer></script>

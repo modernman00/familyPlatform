@@ -47,6 +47,14 @@
     if (Notification.permission !== 'granted') {
       return false;
     }
+    var pathname = (window.location && window.location.pathname) ? window.location.pathname.toLowerCase() : '';
+    if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.includes('/verify-email') || pathname.includes('/auth/')) {
+      return false;
+    }
+    var userId = document.querySelector('meta[name="user-id"]')?.getAttribute('content') || '';
+    if (!userId || !userId.trim()) {
+      return false;
+    }
     try {
       var registration = await navigator.serviceWorker.ready;
       var subscription = await registration.pushManager.getSubscription();
@@ -159,9 +167,14 @@
 
       // Auto-Self-Healing: If permission was already granted, ensure this device's token is registered
       if ('Notification' in window && Notification.permission === 'granted') {
-        setTimeout(function() {
-          window.syncPushSubscription().catch(function() {});
-        }, 1500);
+        var pathname = (window.location && window.location.pathname) ? window.location.pathname.toLowerCase() : '';
+        var isAuth = pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.includes('/verify-email') || pathname.includes('/auth/');
+        var hasUser = !!(document.querySelector('meta[name="user-id"]')?.getAttribute('content')?.trim());
+        if (!isAuth && hasUser) {
+          setTimeout(function() {
+            window.syncPushSubscription().catch(function() {});
+          }, 1500);
+        }
       }
     });
 
@@ -169,10 +182,15 @@
     var lastVisibilitySync = 0;
     document.addEventListener('visibilitychange', function() {
       if (document.visibilityState === 'visible' && 'Notification' in window && Notification.permission === 'granted') {
-        var now = Date.now();
-        if (now - lastVisibilitySync > 60000) {
-          lastVisibilitySync = now;
-          window.syncPushSubscription().catch(function() {});
+        var pathname = (window.location && window.location.pathname) ? window.location.pathname.toLowerCase() : '';
+        var isAuth = pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.includes('/verify-email') || pathname.includes('/auth/');
+        var hasUser = !!(document.querySelector('meta[name="user-id"]')?.getAttribute('content')?.trim());
+        if (!isAuth && hasUser) {
+          var now = Date.now();
+          if (now - lastVisibilitySync > 60000) {
+            lastVisibilitySync = now;
+            window.syncPushSubscription().catch(function() {});
+          }
         }
       }
     });

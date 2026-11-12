@@ -455,9 +455,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-nLoOnA/BDh8A/jxqtckg4DumuCGOBYUnNJLZdQz/zfYNp3wcjGSoWTAzgko06G/2" crossorigin="anonymous"></script>
 
     <!-- App Scripts (Bundles Alpine.js 3.x, PWA, SweetAlert2) -->
-    <script type="text/javascript" src="/public/js/manifest.js?v=1.0.2"></script>
-    <script type="text/javascript" src="/public/js/vendor.js?v=1.0.2"></script>
-    <script type="text/javascript" src="/public/js/index.js?v=1.0.2"></script>
+    <script type="text/javascript" src="/public/js/manifest.js?v={{ assetVersion('js/manifest.js') }}"></script>
+    <script type="text/javascript" src="/public/js/vendor.js?v={{ assetVersion('js/vendor.js') }}"></script>
+    <script type="text/javascript" src="/public/js/index.js?v={{ assetVersion('js/index.js') }}"></script>
     <script type="text/javascript" src="/public/js/telemetry.js?v={{ assetVersion('js/telemetry.js') }}" defer></script>
 
     @include('component.submitSpinner')

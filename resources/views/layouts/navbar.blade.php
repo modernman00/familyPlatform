@@ -48,7 +48,7 @@
                     </a>
                 </li>
                 <li class="nav-item creativeStudioNav">
-                    <a class="nav-link stitch-nav-link" href="/creative-studio" title="Creative Studio — Tree Studio, Flyers &amp; Posters, and Festive Greeting Cards" data-tooltip="Creative Studio — Tree Studio, Flyers &amp; Posters, and Festive Greeting Cards" aria-describedby="creativeStudioTooltipCard">
+                    <a class="nav-link stitch-nav-link" href="/creative-studio" title="Creative Studio — Tree Studio, Flyers &amp; Posters, Festive Cards, and Living Archives" data-tooltip="Creative Studio — Tree Studio, Flyers &amp; Posters, Festive Cards, and Living Archives" aria-describedby="creativeStudioTooltipCard">
                         <span class="creative-3d-icon-wrap" aria-hidden="true">
                             <span class="creative-3d-gem">
                                 <span class="creative-3d-sheen"></span>
@@ -77,6 +77,10 @@
                             <li class="cs-tooltip-item">
                                 <i class="bi bi-envelope-heart-fill text-danger"></i>
                                 <span><strong>Festive Cards</strong> — Living 3D greeting envelopes</span>
+                            </li>
+                            <li class="cs-tooltip-item">
+                                <i class="bi bi-film text-light"></i>
+                                <span><strong>Living Archives</strong> — 4K Reel Studio &amp; Video Vault</span>
                             </li>
                         </ul>
                     </div>
@@ -209,7 +213,7 @@
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item py-2 px-3 fw-medium d-flex align-items-center gap-2" href="/creative-studio" title="Creative Studio — Tree Studio, Flyers &amp; Posters, and Festive Greeting Cards">
+                            <a class="dropdown-item py-2 px-3 fw-medium d-flex align-items-center gap-2" href="/creative-studio" title="Creative Studio — Tree Studio, Flyers &amp; Posters, Festive Cards, and Living Archives">
                                 <span class="creative-3d-icon-wrap" aria-hidden="true">
                                     <span class="creative-3d-gem">
                                         <span class="creative-3d-sheen"></span>

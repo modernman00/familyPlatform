@@ -42,6 +42,9 @@ class PWAManager {
   setupPushAutoSync() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return;
     if (Notification.permission !== 'granted') return;
+    if (this.isAuthOrRegistrationRoute()) return;
+    const userId = document.querySelector('meta[name="user-id"]')?.getAttribute('content') || '';
+    if (!userId || !userId.trim()) return;
 
     // Defer heavy Push Manager negotiation off the main thread evaluation path
     const scheduleSync = () => {
@@ -84,6 +87,9 @@ class PWAManager {
 
   syncSubscriptionToServer(subscription) {
     if (!subscription || !subscription.endpoint) return;
+    if (this.isAuthOrRegistrationRoute()) return;
+    const userId = document.querySelector('meta[name="user-id"]')?.getAttribute('content') || '';
+    if (!userId || !userId.trim()) return;
     const currentEndpoint = subscription.endpoint;
     const now = Date.now();
     const syncKey = 'fp_last_push_sync';
@@ -95,7 +101,6 @@ class PWAManager {
     } catch (_) {}
 
     const tokenMeta = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-    const userId = document.querySelector('meta[name="user-id"]')?.getAttribute('content') || '';
     const p256dh = subscription.getKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))) : '';
     const auth = subscription.getKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth')))) : '';
 
@@ -115,7 +120,10 @@ class PWAManager {
         token: tokenMeta,
         keys: { p256dh, auth }
       })
-    }).then((res) => res.json().catch(() => ({ status: 'ok' })))
+    }).then((res) => {
+      if (!res.ok) return null;
+      return res.json().catch(() => ({ status: 'ok' }));
+    })
       .then((data) => {
         if (data && data.status !== 'error') {
           try {
@@ -227,7 +235,7 @@ class PWAManager {
    */
   isAuthOrRegistrationRoute() {
     const p = window.location.pathname.toLowerCase();
-    return p.startsWith('/register') || p.startsWith('/login') || p.includes('/verify-email');
+    return p.startsWith('/register') || p.startsWith('/login') || p.includes('/verify-email') || p.includes('/auth/');
   }
 
   /**

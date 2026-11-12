@@ -1,4 +1,4 @@
-{{-- Creative Studio tab strip: shared by the hub, Tree Studio, and Festive Cards pages. $creativeTab = hub|tree|flyers|cards --}}
+{{-- Creative Studio tab strip: shared by the hub, Tree Studio, Flyers & Posters, Festive Cards, and Living Archives Studio. $creativeTab = hub|tree|flyers|cards|archives --}}
 @php $creativeTab = $creativeTab ?? 'hub'; @endphp
 <nav class="d-flex flex-nowrap gap-2 overflow-x-auto mb-4 pb-1" aria-label="Creative Studio sections" style="overflow-x:auto;">
     <a href="/creative-studio" class="btn {{ $creativeTab === 'hub' ? 'btn-dark' : 'btn-outline-secondary' }} fw-bold d-inline-flex align-items-center gap-2" style="white-space:nowrap;flex-shrink:0;min-height:44px;border-radius:12px;" title="Creative Studio — Tree Studio, Flyers &amp; Posters, and Festive Greeting Cards" @if($creativeTab === 'hub') aria-current="page" @endif>
@@ -22,5 +22,8 @@
     </a>
     <a href="/member/festive-cards" class="btn {{ $creativeTab === 'cards' ? 'btn-danger' : 'btn-outline-danger' }} fw-bold d-inline-flex align-items-center" style="white-space:nowrap;flex-shrink:0;min-height:44px;border-radius:12px;" title="Festive Cards — Send living 3D greeting envelopes for every occasion" @if($creativeTab === 'cards') aria-current="page" @endif>
         <i class="bi bi-envelope-heart-fill me-2"></i>Festive Cards
+    </a>
+    <a href="/family-studio" class="btn {{ $creativeTab === 'archives' ? 'btn-dark' : 'btn-outline-dark' }} fw-bold d-inline-flex align-items-center" style="white-space:nowrap;flex-shrink:0;min-height:44px;border-radius:12px;" title="Living Archives Studio — 4K Reel Studio &amp; Video Vault" @if($creativeTab === 'archives') aria-current="page" @endif>
+        <i class="bi bi-film me-2"></i>Living Archives
     </a>
 </nav>

@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Harden CSP nonces, stabilize feed/composer E2E suite, and calibrate deploy Cypress watchdog",
+    "title": "Fix(ai-hub): refine static types and resilient trivia fallback for PHPStan Level 8",
     "notes": [
-        "Harden CSP nonces, stabilize feed/composer E2E suite, and calibrate deploy Cypress watchdog",
-        "Fix(security): resolve OWASP ZAP DAST alerts, add SRI hashes, and fortify CSP/CSRF",
-        "Xx"
+        "Fix(ai-hub): refine static types and resilient trivia fallback for PHPStan Level 8",
+        "Fix(ai-hub): add zero-failure resilient fallback to generateFamilyTrivia",
+        "Feat(kin-whispers): deploy Kin Whispers encrypted messaging, member restrictions, Family Studio, and connected kin taxonomy"
     ],
-    "released_at": "2026-11-11",
-    "commit": "90600989"
+    "released_at": "2026-11-12",
+    "commit": "050854fd"
 }

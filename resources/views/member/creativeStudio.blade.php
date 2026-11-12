@@ -1,7 +1,7 @@
 @extends('layouts.profileBase')
 
 @section('title', 'Creative Studio — FamilyPlatform')
-@section('meta_description', 'Curate your family lineage in Tree Studio, and design family flyers, posters and festive greeting cards in one place.')
+@section('meta_description', 'Curate your family lineage in Tree Studio, design family flyers, posters and festive greeting cards, and craft 4K reels in Living Archives Studio.')
 
 @section('content')
 <div class="container py-4" style="max-width:1080px;">
@@ -20,12 +20,12 @@
         </span>
         <div>
             <h1 class="fs-2 fw-bold mb-1">Creative Studio</h1>
-            <p class="text-body-secondary mb-0">Curate your living family tree, or design bespoke flyers, posters and festive greeting cards to share with your family.</p>
+            <p class="text-body-secondary mb-0">Curate your living family tree, design bespoke flyers, posters and festive greeting cards, or craft 4K family reels in Living Archives Studio.</p>
         </div>
     </header>
 
     <div class="row g-3">
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-6">
             <a href="/familyStudio" class="text-decoration-none d-block h-100">
                 <div class="card h-100 border rounded-4 p-4 shadow-sm d-flex flex-column">
                     <i class="bi bi-diagram-3-fill text-primary fs-2 mb-3"></i>
@@ -35,7 +35,7 @@
                 </div>
             </a>
         </div>
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-6">
             <a href="/poster-studio" class="text-decoration-none d-block h-100">
                 <div class="card h-100 border rounded-4 p-4 shadow-sm d-flex flex-column">
                     <i class="bi bi-easel2-fill text-warning fs-2 mb-3"></i>
@@ -45,13 +45,23 @@
                 </div>
             </a>
         </div>
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-6">
             <a href="/member/festive-cards" class="text-decoration-none d-block h-100">
                 <div class="card h-100 border rounded-4 p-4 shadow-sm d-flex flex-column">
                     <i class="bi bi-envelope-heart-fill text-danger fs-2 mb-3"></i>
                     <h2 class="fs-5 fw-semibold text-body">Festive Cards</h2>
                     <p class="text-body-secondary small mb-3">Christmas, Easter, Eid, Diwali and more, sent as living envelopes in seven design styles.</p>
                     <span class="btn btn-danger text-white fw-bold mt-auto align-self-start" style="min-height:44px;white-space:nowrap;">Open Card Studio</span>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6">
+            <a href="/family-studio" class="text-decoration-none d-block h-100">
+                <div class="card h-100 border rounded-4 p-4 shadow-sm d-flex flex-column">
+                    <i class="bi bi-film text-dark fs-2 mb-3"></i>
+                    <h2 class="fs-5 fw-semibold text-body">Living Archives Studio</h2>
+                    <p class="text-body-secondary small mb-3">Browser-native 4K Reel Studio with multi-angle Chrono-Sync matrix, heritage motion templates and direct MP4 downloads.</p>
+                    <span class="btn btn-dark text-white fw-bold mt-auto align-self-start" style="min-height:44px;white-space:nowrap;">Open Living Archives</span>
                 </div>
             </a>
         </div>

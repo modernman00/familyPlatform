@@ -331,6 +331,7 @@
 
 @section('content')
 <div class="fvs-wrap" id="familyVideoStudioApp">
+    @include('member.creativeStudioTabs', ['creativeTab' => 'archives'])
 
     <!-- Hero Banner -->
     <header class="fvs-hero">
@@ -355,7 +356,7 @@
     </header>
 
     <!-- Hidden Direct File Inputs -->
-    <input type="file" id="fvsFileInput" accept="video/mp4,video/quicktime,video/webm" style="display:none;" onchange="handleDirectFileSelect(this)">
+    <input type="file" id="fvsFileInput" accept="video/mp4,video/quicktime,video/webm" multiple style="display:none;" onchange="handleDirectFileSelect(this)">
     <input type="file" id="fvsAudioInput" accept="audio/mp3,audio/wav,audio/mpeg,audio/aac" style="display:none;" onchange="handleAudioSelect(this)">
 
     <!-- Main Studio Grid -->
@@ -491,8 +492,8 @@
                 </div>
                 <div class="fvs-dropzone" onclick="document.getElementById('fvsFileInput').click()">
                     <i class="bi bi-cloud-arrow-up fs-1 text-warning d-block mb-2"></i>
-                    <h3 class="h6 mb-1 text-light">Drop Family Video File Here or Browse</h3>
-                    <p class="text-secondary small mb-0">Direct client-to-storage upload bypassing web server bandwidth limits.</p>
+                    <h3 class="h6 mb-1 text-light">Drop Up to 4 Family Video Clips or Browse</h3>
+                    <p class="text-secondary small mb-0">Select 1 clip for Solo Focus, 2 for Split Duo, or 4 for 2&times;2 Quad-View. Direct upload bypasses server limits.</p>
                 </div>
                 <div id="uploadProgressBarContainer" class="mt-3" style="display:none;">
                     <div class="d-flex justify-content-between text-secondary small mb-1">
@@ -558,8 +559,8 @@
 @endsection
 
 @push('scripts')
-<script src="/public/js/SovereignVideoStudioClient.js?v={{ time() }}"></script>
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignVideoStudioClient.js?v={{ time() }}"></script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
     'use strict';
 
@@ -576,6 +577,9 @@
         currentTime: 0,
         currentTemplate: 'golden_milestone',
         matrixMode: 'solo',
+        angles: [],
+        activeAngleIndex: 0,
+        isMuted: false,
         uploadedCloudUrl: '',
         animationFrameId: null,
         audioContext: null,
@@ -585,6 +589,8 @@
 
     state.ctx = state.canvas.getContext('2d');
     state.spectrumCtx = state.spectrumCanvas.getContext('2d');
+    const studioClient = window.SovereignVideoStudioClient ? new window.SovereignVideoStudioClient() : null;
+    const bootTimeMs = performance.now();
 
     // Initialise Canvas Rendering Loop
     function renderFrame() {
@@ -594,9 +600,23 @@
         const h = state.canvas.height;
         state.ctx.clearRect(0, 0, w, h);
 
-        // Render Base Video or Graphic Background
-        if (state.videoElement && state.videoElement.readyState >= 2) {
-            state.ctx.drawImage(state.videoElement, 0, 0, w, h);
+        // Render Base Video(s) or Graphic Background
+        const readyAngles = state.angles.filter(a => a.videoEl && a.videoEl.readyState >= 2);
+        const primaryEl = (state.angles[state.activeAngleIndex] && state.angles[state.activeAngleIndex].videoEl && state.angles[state.activeAngleIndex].videoEl.readyState >= 2)
+            ? state.angles[state.activeAngleIndex].videoEl
+            : (state.videoElement && state.videoElement.readyState >= 2 ? state.videoElement : null);
+
+        if (readyAngles.length > 0) {
+            if (state.matrixMode === 'solo' || readyAngles.length === 1 || !studioClient || typeof studioClient.renderMultiAngleMatrix !== 'function') {
+                if (primaryEl) {
+                    state.ctx.drawImage(primaryEl, 0, 0, w, h);
+                }
+            } else {
+                const ordered = readyAngles.map(a => a.videoEl);
+                studioClient.renderMultiAngleMatrix(state.ctx, state.canvas, ordered, state.matrixMode);
+            }
+        } else if (primaryEl) {
+            state.ctx.drawImage(primaryEl, 0, 0, w, h);
         } else {
             // Elegant sovereign gradient backdrop
             const grad = state.ctx.createLinearGradient(0, 0, 0, h);
@@ -618,20 +638,24 @@
             state.ctx.restore();
         }
 
+        const animTimeSec = (state.videoElement && state.videoElement.duration && state.isPlaying)
+            ? state.videoElement.currentTime
+            : (performance.now() - bootTimeMs) / 1000;
+
         // Overlay Sovereign Kinetic Template
-        if (window.SovereignVideoStudioClient && typeof window.SovereignVideoStudioClient.renderMotionFlyerFrame === 'function') {
+        if (studioClient && typeof studioClient.renderMotionFlyerFrame === 'function') {
             const eventMeta = {
                 title: 'Family Heritage Reel',
                 date: 'Celebrating Generations',
                 venue: 'Family Living Archive',
-                countdownSec: Math.max(0, 86400 - Math.floor(state.currentTime))
+                countdownSec: Math.max(0, 86400 - Math.floor(animTimeSec))
             };
-            window.SovereignVideoStudioClient.renderMotionFlyerFrame(
+            studioClient.renderMotionFlyerFrame(
                 state.ctx,
                 state.canvas,
                 state.currentTemplate,
                 eventMeta,
-                state.currentTime
+                animTimeSec
             );
         }
 
@@ -687,19 +711,24 @@
 
     // Playback Controls
     window.togglePlayback = function() {
-        if (!state.videoElement.src && !state.videoElement.currentSrc) {
-            alert('Please select or upload a video clip first.');
+        const activeVideos = state.angles.map(a => a.videoEl).filter(Boolean);
+        if (activeVideos.length === 0 && !state.videoElement.src && !state.videoElement.currentSrc) {
+            alert('Please select or upload at least one video clip first.');
             return;
         }
         if (state.isPlaying) {
-            state.videoElement.pause();
+            activeVideos.forEach(v => v.pause());
+            if (state.videoElement.src) state.videoElement.pause();
             if (state.audioElement.src) state.audioElement.pause();
             state.isPlaying = false;
             document.getElementById('playIcon').className = 'bi bi-play-fill fs-5';
             document.getElementById('fvsHudStatusText').textContent = 'PAUSED \u2022 60 FPS';
         } else {
-            state.videoElement.play();
-            if (state.audioElement.src) state.audioElement.play();
+            activeVideos.forEach(v => v.play().catch(() => {}));
+            if (state.videoElement.src && !activeVideos.includes(state.videoElement)) {
+                state.videoElement.play().catch(() => {});
+            }
+            if (state.audioElement.src) state.audioElement.play().catch(() => {});
             state.isPlaying = true;
             document.getElementById('playIcon').className = 'bi bi-pause-fill fs-5';
             document.getElementById('fvsHudStatusText').textContent = 'LIVE PREVIEW \u2022 60 FPS';
@@ -707,26 +736,38 @@
     };
 
     window.restartPlayback = function() {
-        if (state.videoElement) {
-            state.videoElement.currentTime = 0;
-            if (state.audioElement) state.audioElement.currentTime = 0;
-        }
+        state.angles.forEach(a => {
+            if (a.videoEl) a.videoEl.currentTime = 0;
+        });
+        if (state.videoElement) state.videoElement.currentTime = 0;
+        if (state.audioElement) state.audioElement.currentTime = 0;
     };
 
     window.toggleAudioMute = function() {
+        state.isMuted = !state.isMuted;
+        state.angles.forEach((a, idx) => {
+            if (a.videoEl) a.videoEl.muted = state.isMuted || idx !== state.activeAngleIndex;
+        });
         if (state.videoElement) {
-            state.videoElement.muted = !state.videoElement.muted;
-            const icon = document.getElementById('muteIcon');
-            if (icon) {
-                icon.className = state.videoElement.muted ? 'bi bi-volume-mute' : 'bi bi-volume-up';
-            }
+            state.videoElement.muted = state.isMuted;
+        }
+        const icon = document.getElementById('muteIcon');
+        if (icon) {
+            icon.className = state.isMuted ? 'bi bi-volume-mute' : 'bi bi-volume-up';
         }
     };
 
     window.scrubTimeline = function(pct) {
-        if (state.videoElement && state.duration > 0) {
+        if (state.duration > 0) {
             const targetSec = (pct / 100) * state.duration;
-            state.videoElement.currentTime = targetSec;
+            state.angles.forEach(a => {
+                if (a.videoEl && a.videoEl.duration) {
+                    a.videoEl.currentTime = Math.min(targetSec, a.videoEl.duration);
+                }
+            });
+            if (state.videoElement && state.videoElement.src) {
+                state.videoElement.currentTime = targetSec;
+            }
             if (state.audioElement && state.audioElement.src) {
                 state.audioElement.currentTime = targetSec;
             }
@@ -749,21 +790,147 @@
         document.getElementById('btnModeSplit').classList.toggle('active', mode === 'split_duo');
     };
 
-    // Direct Local File Handlers
-    window.handleDirectFileSelect = function(input) {
-        if (!input.files || !input.files[0]) return;
-        const file = input.files[0];
-        const url = URL.createObjectURL(file);
-        state.videoElement.src = url;
-        state.videoElement.load();
-        state.videoElement.onloadedmetadata = function() {
-            state.duration = state.videoElement.duration;
-            updateTimecodeUI();
-            document.getElementById('fvsHudStatusText').textContent = 'CLIP LOADED \u2022 READY';
-        };
+    function renderAngleList() {
+        const container = document.getElementById('chronoSyncClustersContainer');
+        const badge = document.getElementById('fvsAngleCountBadge');
+        const count = state.angles.length;
+        if (badge) {
+            badge.textContent = count === 0
+                ? '0 ANGLES ACTIVE'
+                : (count === 1 ? '1 ANGLE ACTIVE' : count + ' ANGLES ACTIVE');
+        }
+        if (!container) return;
 
-        // Proactively acquire direct R2 Presigned Ticket for cloud save
-        uploadFileDirectToR2(file);
+        if (count === 0) {
+            container.innerHTML = '<div class="d-flex align-items-center justify-content-between">'
+                + '<span><i class="bi bi-link-45deg text-warning"></i> Multi-Angle Cluster Sync:</span>'
+                + '<span class="text-success fw-bold">Live Synchronisation Ready</span>'
+                + '</div>';
+            return;
+        }
+
+        const listHtml = state.angles.map((a, idx) => {
+            const isPrimary = idx === state.activeAngleIndex;
+            const durText = a.duration ? formatTime(a.duration) : 'Loading...';
+            const safeName = String(a.name || 'Clip ' + (idx + 1))
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return '<div class="d-flex align-items-center justify-content-between gap-2 py-1 ' + (idx > 0 ? 'border-top border-secondary mt-1 pt-2' : '') + '">'
+                + '<button type="button" class="btn btn-sm ' + (isPrimary ? 'btn-warning text-dark' : 'btn-outline-light') + ' fw-bold text-truncate" style="min-height:44px;max-width:75%;text-align:left;" onclick="focusAngle(' + idx + ')" title="Focus CAM ' + (idx + 1) + '">'
+                + 'CAM ' + (idx + 1) + ' &bull; ' + safeName + ' (' + durText + ')'
+                + '</button>'
+                + '<button type="button" class="btn btn-sm btn-outline-danger" style="min-height:44px;min-width:44px;" onclick="removeAngle(' + idx + ')" title="Remove CAM ' + (idx + 1) + '" aria-label="Remove CAM ' + (idx + 1) + '">&times;</button>'
+                + '</div>';
+        }).join('');
+        container.innerHTML = listHtml;
+    }
+
+    window.focusAngle = function(idx) {
+        if (idx < 0 || idx >= state.angles.length) return;
+        state.activeAngleIndex = idx;
+        state.videoElement = state.angles[idx].videoEl;
+        state.duration = state.angles[idx].duration || 0;
+        state.angles.forEach((a, i) => {
+            if (a.videoEl) a.videoEl.muted = state.isMuted || i !== idx;
+        });
+        updateTimecodeUI();
+        renderAngleList();
+    };
+
+    window.removeAngle = function(idx) {
+        if (idx < 0 || idx >= state.angles.length) return;
+        const removed = state.angles.splice(idx, 1)[0];
+        if (removed && removed.videoEl) {
+            removed.videoEl.pause();
+            removed.videoEl.remove();
+        }
+        if (removed && removed.url) {
+            URL.revokeObjectURL(removed.url);
+        }
+        if (state.angles.length === 0) {
+            state.videoElement = document.getElementById('fvsSourceVideo');
+            state.activeAngleIndex = 0;
+            state.duration = 0;
+            state.currentTime = 0;
+            state.isPlaying = false;
+            document.getElementById('playIcon').className = 'bi bi-play-fill fs-5';
+            document.getElementById('fvsHudStatusText').textContent = 'STANDBY \u2022 60 FPS';
+        } else {
+            state.activeAngleIndex = Math.min(state.activeAngleIndex, state.angles.length - 1);
+            state.videoElement = state.angles[state.activeAngleIndex].videoEl;
+            state.duration = state.angles[state.activeAngleIndex].duration || 0;
+        }
+        updateTimecodeUI();
+        renderAngleList();
+    };
+
+    // Direct Local File Handlers (supports up to 4 multi-angle clips)
+    window.handleDirectFileSelect = function(input) {
+        if (!input.files || input.files.length === 0) return;
+
+        const remainingSlots = Math.max(0, 4 - state.angles.length);
+        const filesToAdd = Array.from(input.files).slice(0, remainingSlots || 4);
+        if (remainingSlots === 0) {
+            // Replace oldest batch if already at 4
+            while (state.angles.length > 0) {
+                removeAngle(0);
+            }
+        }
+
+        filesToAdd.forEach((file, offset) => {
+            const angleIdx = state.angles.length;
+            const url = URL.createObjectURL(file);
+            const videoEl = angleIdx === 0
+                ? document.getElementById('fvsSourceVideo')
+                : document.createElement('video');
+
+            if (angleIdx > 0) {
+                videoEl.playsInline = true;
+                videoEl.style.display = 'none';
+                document.body.appendChild(videoEl);
+            }
+
+            videoEl.muted = state.isMuted || angleIdx !== state.activeAngleIndex;
+            videoEl.src = url;
+            videoEl.load();
+
+            const angleObj = {
+                file,
+                url,
+                videoEl,
+                name: file.name,
+                duration: 0
+            };
+            state.angles.push(angleObj);
+
+            videoEl.onloadedmetadata = function() {
+                angleObj.duration = videoEl.duration || 0;
+                if (angleIdx === state.activeAngleIndex || state.duration === 0) {
+                    state.videoElement = videoEl;
+                    state.duration = angleObj.duration;
+                    updateTimecodeUI();
+                }
+                document.getElementById('fvsHudStatusText').textContent =
+                    state.angles.length > 1
+                        ? state.angles.length + ' ANGLES LOADED \u2022 READY'
+                        : 'CLIP LOADED \u2022 READY';
+                renderAngleList();
+            };
+
+            // Upload primary clip to R2 for Publish Reel
+            if (angleIdx === 0 && offset === 0) {
+                uploadFileDirectToR2(file);
+            }
+        });
+
+        // Auto-select matrix layout when multiple clips are loaded
+        if (state.angles.length >= 4) {
+            setMatrixMode('quad_view');
+        } else if (state.angles.length >= 2 && state.matrixMode === 'solo') {
+            setMatrixMode('split_duo');
+        }
+
+        renderAngleList();
+        input.value = '';
     };
 
     window.handleAudioSelect = function(input) {
@@ -840,27 +1007,43 @@
         }
     }
 
-    // Direct MP4 Export & Download
-    window.exportLivingReelVideo = function() {
+    // Direct Video Export & Download (WebCodecs / MediaRecorder)
+    window.exportLivingReelVideo = async function() {
         const btn = document.getElementById('btnExportDownload');
+        const hudStatus = document.getElementById('fvsHudStatusText');
         if (window.ScoreTenantSpinner && btn) {
             window.ScoreTenantSpinner.start(btn);
         }
 
         try {
-            // High-fidelity frame capture for instant sovereign download
-            const link = document.createElement('a');
-            link.download = 'family_heritage_reel_' + Date.now() + '.png';
-            link.href = state.canvas.toDataURL('image/png');
-            link.click();
-
-            setTimeout(() => {
-                if (window.ScoreTenantSpinner && btn) {
-                    window.ScoreTenantSpinner.stop(btn);
+            if (studioClient && typeof studioClient.exportCanvasVideo === 'function') {
+                const exportDuration = (state.duration && state.duration > 0)
+                    ? Math.min(state.duration, 15)
+                    : 3.5;
+                if (hudStatus) {
+                    hudStatus.textContent = 'COMPILING VIDEO \u2022 ' + exportDuration.toFixed(1) + 's';
                 }
-            }, 800);
+                const blob = await studioClient.exportCanvasVideo(state.canvas, {
+                    fps: 30,
+                    durationSeconds: exportDuration,
+                    filename: 'family_heritage_reel_' + Date.now()
+                });
+                if (hudStatus) {
+                    hudStatus.textContent = 'COMPILED (' + Math.round(blob.size / 1024) + ' KB) \u2022 READY';
+                }
+            } else {
+                // Fallback frame capture if MediaRecorder is unavailable
+                const link = document.createElement('a');
+                link.download = 'family_heritage_reel_' + Date.now() + '.png';
+                link.href = state.canvas.toDataURL('image/png');
+                link.click();
+            }
         } catch (e) {
             console.error('Export error:', e);
+            if (hudStatus) {
+                hudStatus.textContent = 'EXPORT ERROR \u2022 STANDBY';
+            }
+        } finally {
             if (window.ScoreTenantSpinner && btn) {
                 window.ScoreTenantSpinner.stop(btn);
             }

@@ -13,7 +13,7 @@
 
 'use strict';
 
-const SW_VERSION = 'v2.5.2'; // bumped to purge Me-sticker images cached cache-first
+const SW_VERSION = 'v2.5.3'; // bumped to purge stale ?v=1.0.2 JS bundles cached stale-while-revalidate
 const STATIC_CACHE = `fp-static-${SW_VERSION}`;
 const DYNAMIC_CACHE = `fp-dynamic-${SW_VERSION}`;
 const IMAGE_CACHE = `fp-images-${SW_VERSION}`;
