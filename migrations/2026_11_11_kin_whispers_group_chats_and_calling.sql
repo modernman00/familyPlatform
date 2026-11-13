@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS `kin_thread_participants` (
     `last_read_at` TIMESTAMP NULL DEFAULT NULL,
     `joined_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+    `is_pinned` TINYINT(1) NOT NULL DEFAULT 0,
+    `is_muted` TINYINT(1) NOT NULL DEFAULT 0,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_thread_user` (`thread_id`, `user_id`),
     KEY `idx_user_threads` (`user_id`, `deleted_at`),

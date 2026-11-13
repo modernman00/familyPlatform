@@ -82,6 +82,37 @@ final class KinWhisperService
     /** @var int */
     private static int $lastPruneTimestamp = 0;
 
+    /** @var bool */
+    private static bool $schemaEnsured = false;
+
+    /**
+     * Defensive self-healing schema assurance.
+     * Guarantees is_pinned and is_muted columns exist on kin_thread_participants.
+     */
+    public static function ensureSchema(?PDO $pdo = null): void
+    {
+        if (self::$schemaEnsured) {
+            return;
+        }
+
+        try {
+            $db = $pdo ?? Db::connect2();
+            $colPinned = $db->query("SHOW COLUMNS FROM `kin_thread_participants` LIKE 'is_pinned'");
+            if (!$colPinned || !$colPinned->fetch()) {
+                $db->exec("ALTER TABLE `kin_thread_participants` ADD COLUMN `is_pinned` TINYINT(1) NOT NULL DEFAULT 0 AFTER `deleted_at`");
+            }
+
+            $colMuted = $db->query("SHOW COLUMNS FROM `kin_thread_participants` LIKE 'is_muted'");
+            if (!$colMuted || !$colMuted->fetch()) {
+                $db->exec("ALTER TABLE `kin_thread_participants` ADD COLUMN `is_muted` TINYINT(1) NOT NULL DEFAULT 0 AFTER `is_pinned`");
+            }
+
+            self::$schemaEnsured = true;
+        } catch (\Throwable $e) {
+            error_log('[KinWhisperService::ensureSchema] ' . $e->getMessage());
+        }
+    }
+
     /**
      * Resolve a profile image filename or URL to a valid, publicly served asset URL.
      *
@@ -1287,48 +1318,93 @@ final class KinWhisperService
         self::pruneExpiredWhispers();
 
         $db = Db::connect2();
+        self::ensureSchema($db);
 
-        $stmt = $db->prepare(
-            'SELECT t.*,
-                    COALESCE((SELECT is_pinned FROM kin_thread_participants WHERE thread_id = t.id AND user_id = ? AND deleted_at IS NULL LIMIT 1), 0) AS is_pinned,
-                    COALESCE((SELECT is_muted FROM kin_thread_participants WHERE thread_id = t.id AND user_id = ? AND deleted_at IS NULL LIMIT 1), 0) AS is_muted,
-                    (SELECT COALESCE(NULLIF(body, ""), "Voice whisper") FROM kin_messages WHERE thread_id = t.id AND (expires_at IS NULL OR expires_at > NOW()) ORDER BY created_at DESC LIMIT 1) AS last_message_preview,
-                    CASE 
-                        WHEN t.thread_type = "group" THEN (
-                            SELECT COUNT(*) 
-                            FROM kin_messages m 
-                            JOIN kin_thread_participants p ON m.thread_id = p.thread_id AND p.user_id = ? AND p.deleted_at IS NULL
-                            WHERE m.thread_id = t.id 
-                              AND m.recipient_id IS NULL 
-                              AND m.sender_id != ? 
-                              AND (p.last_read_at IS NULL OR m.created_at > p.last_read_at)
-                              AND (m.expires_at IS NULL OR m.expires_at > NOW())
-                        )
-                        ELSE (
-                            SELECT COUNT(*) 
-                            FROM kin_messages 
-                            WHERE thread_id = t.id 
-                              AND recipient_id = ? 
-                              AND is_read = 0 
-                              AND (expires_at IS NULL OR expires_at > NOW())
-                        )
-                    END AS unread_count
-             FROM kin_threads t
-             WHERE (
-                 EXISTS (SELECT 1 FROM kin_thread_participants p WHERE p.thread_id = t.id AND p.user_id = ? AND p.deleted_at IS NULL)
-                 OR t.sender_id = ? 
-                 OR t.recipient_id = ? 
-                 OR (t.has_minor_participant = 1 AND t.supervisor_parent_id = ?)
-             )
-               AND t.status != "blocked"
-             ORDER BY is_pinned DESC, t.last_message_at DESC
-             LIMIT 100'
-        );
-        $stmt->execute([
-            $currentUserId, $currentUserId,
-            $currentUserId, $currentUserId, $currentUserId,
-            $currentUserId, $currentUserId, $currentUserId, $currentUserId
-        ]);
+        try {
+            $stmt = $db->prepare(
+                'SELECT t.*,
+                        COALESCE((SELECT is_pinned FROM kin_thread_participants WHERE thread_id = t.id AND user_id = ? AND deleted_at IS NULL LIMIT 1), 0) AS is_pinned,
+                        COALESCE((SELECT is_muted FROM kin_thread_participants WHERE thread_id = t.id AND user_id = ? AND deleted_at IS NULL LIMIT 1), 0) AS is_muted,
+                        (SELECT COALESCE(NULLIF(body, ""), "Voice whisper") FROM kin_messages WHERE thread_id = t.id AND (expires_at IS NULL OR expires_at > NOW()) ORDER BY created_at DESC LIMIT 1) AS last_message_preview,
+                        CASE 
+                            WHEN t.thread_type = "group" THEN (
+                                SELECT COUNT(*) 
+                                FROM kin_messages m 
+                                JOIN kin_thread_participants p ON m.thread_id = p.thread_id AND p.user_id = ? AND p.deleted_at IS NULL
+                                WHERE m.thread_id = t.id 
+                                  AND m.recipient_id IS NULL 
+                                  AND m.sender_id != ? 
+                                  AND (p.last_read_at IS NULL OR m.created_at > p.last_read_at)
+                                  AND (m.expires_at IS NULL OR m.expires_at > NOW())
+                            )
+                            ELSE (
+                                SELECT COUNT(*) 
+                                FROM kin_messages 
+                                WHERE thread_id = t.id 
+                                  AND recipient_id = ? 
+                                  AND is_read = 0 
+                                  AND (expires_at IS NULL OR expires_at > NOW())
+                            )
+                        END AS unread_count
+                 FROM kin_threads t
+                 WHERE (
+                     EXISTS (SELECT 1 FROM kin_thread_participants p WHERE p.thread_id = t.id AND p.user_id = ? AND p.deleted_at IS NULL)
+                     OR t.sender_id = ? 
+                     OR t.recipient_id = ? 
+                     OR (t.has_minor_participant = 1 AND t.supervisor_parent_id = ?)
+                 )
+                   AND t.status != "blocked"
+                 ORDER BY is_pinned DESC, t.last_message_at DESC
+                 LIMIT 100'
+            );
+            $stmt->execute([
+                $currentUserId, $currentUserId,
+                $currentUserId, $currentUserId, $currentUserId,
+                $currentUserId, $currentUserId, $currentUserId, $currentUserId
+            ]);
+        } catch (\PDOException) {
+            // Defensive fallback if is_pinned or is_muted columns cannot be queried or forward reference occurs
+            $stmt = $db->prepare(
+                'SELECT t.*,
+                        0 AS is_pinned,
+                        0 AS is_muted,
+                        (SELECT COALESCE(NULLIF(body, ""), "Voice whisper") FROM kin_messages WHERE thread_id = t.id AND (expires_at IS NULL OR expires_at > NOW()) ORDER BY created_at DESC LIMIT 1) AS last_message_preview,
+                        CASE 
+                            WHEN t.thread_type = "group" THEN (
+                                SELECT COUNT(*) 
+                                FROM kin_messages m 
+                                JOIN kin_thread_participants p ON m.thread_id = p.thread_id AND p.user_id = ? AND p.deleted_at IS NULL
+                                WHERE m.thread_id = t.id 
+                                  AND m.recipient_id IS NULL 
+                                  AND m.sender_id != ? 
+                                  AND (p.last_read_at IS NULL OR m.created_at > p.last_read_at)
+                                  AND (m.expires_at IS NULL OR m.expires_at > NOW())
+                            )
+                            ELSE (
+                                SELECT COUNT(*) 
+                                FROM kin_messages 
+                                WHERE thread_id = t.id 
+                                  AND recipient_id = ? 
+                                  AND is_read = 0 
+                                  AND (expires_at IS NULL OR expires_at > NOW())
+                            )
+                        END AS unread_count
+                 FROM kin_threads t
+                 WHERE (
+                     EXISTS (SELECT 1 FROM kin_thread_participants p WHERE p.thread_id = t.id AND p.user_id = ? AND p.deleted_at IS NULL)
+                     OR t.sender_id = ? 
+                     OR t.recipient_id = ? 
+                     OR (t.has_minor_participant = 1 AND t.supervisor_parent_id = ?)
+                 )
+                   AND t.status != "blocked"
+                 ORDER BY t.last_message_at DESC
+                 LIMIT 100'
+            );
+            $stmt->execute([
+                $currentUserId, $currentUserId, $currentUserId,
+                $currentUserId, $currentUserId, $currentUserId, $currentUserId
+            ]);
+        }
 
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         if (empty($rows)) {
@@ -1913,6 +1989,7 @@ final class KinWhisperService
         $threadId = trim($threadId);
 
         $db = Db::connect2();
+        self::ensureSchema($db);
         $stmt = $db->prepare('SELECT is_pinned FROM kin_thread_participants WHERE thread_id = ? AND user_id = ? AND deleted_at IS NULL LIMIT 1');
         $stmt->execute([$threadId, $currentUserId]);
         $val = $stmt->fetchColumn();
@@ -1941,6 +2018,7 @@ final class KinWhisperService
         $threadId = trim($threadId);
 
         $db = Db::connect2();
+        self::ensureSchema($db);
         $stmt = $db->prepare('SELECT is_muted FROM kin_thread_participants WHERE thread_id = ? AND user_id = ? AND deleted_at IS NULL LIMIT 1');
         $stmt->execute([$threadId, $currentUserId]);
         $val = $stmt->fetchColumn();
@@ -2669,11 +2747,16 @@ final class KinWhisperService
         }
 
         if (!isset($row['is_pinned']) || !isset($row['is_muted'])) {
-            $stmtPartPrefs = $db->prepare('SELECT is_pinned, is_muted FROM kin_thread_participants WHERE thread_id = ? AND user_id = ? AND deleted_at IS NULL LIMIT 1');
-            $stmtPartPrefs->execute([$threadId, $currentUserId]);
-            $pRow = $stmtPartPrefs->fetch(PDO::FETCH_ASSOC);
-            $row['is_pinned'] = (int)($pRow['is_pinned'] ?? 0);
-            $row['is_muted'] = (int)($pRow['is_muted'] ?? 0);
+            try {
+                $stmtPartPrefs = $db->prepare('SELECT is_pinned, is_muted FROM kin_thread_participants WHERE thread_id = ? AND user_id = ? AND deleted_at IS NULL LIMIT 1');
+                $stmtPartPrefs->execute([$threadId, $currentUserId]);
+                $pRow = $stmtPartPrefs->fetch(PDO::FETCH_ASSOC);
+                $row['is_pinned'] = (int)($pRow['is_pinned'] ?? 0);
+                $row['is_muted'] = (int)($pRow['is_muted'] ?? 0);
+            } catch (\Throwable) {
+                $row['is_pinned'] = 0;
+                $row['is_muted'] = 0;
+            }
         }
 
         return KinThreadDto::fromArray($row, $currentUserId, $participants);
