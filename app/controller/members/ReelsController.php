@@ -302,6 +302,13 @@ final class ReelsController extends BaseController
             $safeFamCode = preg_replace('/[^a-zA-Z0-9_-]/', '', $famCode) ?: 'general';
             $objectKey = 'family_vault/' . $safeFamCode . '/' . $reelUuid . '.' . $extension;
 
+            if (!class_exists(\Src\Media\R2StorageService::class)) {
+                $r2ServiceFile = __DIR__ . '/../../../vendor/modernman00/shared-lib/src/Media/R2StorageService.php';
+                if (is_file($r2ServiceFile)) {
+                    require_once $r2ServiceFile;
+                }
+            }
+
             $ticket = \Src\Media\R2StorageService::generatePresignedUploadUrl($objectKey, $mime, 3600);
 
             // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
@@ -313,6 +320,144 @@ final class ReelsController extends BaseController
         } catch (\Throwable $e) {
             http_response_code(500);
             // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+            echo json_encode(['status' => 500, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * API: Same-origin relay upload to Cloudflare R2 (or local vault fallback).
+     * Used automatically when browser direct-to-R2 PUT is blocked by bucket CORS.
+     */
+    public function r2ProxyUpload(): void
+    {
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=utf-8');
+        }
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            $famCode = (string)($_SESSION['famCode'] ?? '');
+            if (empty($famCode) && !empty($userId)) {
+                $pStmt = Db::connect2()->prepare("SELECT famCode FROM personal WHERE id = ? LIMIT 1");
+                $pStmt->execute([$userId]);
+                $famCode = trim((string)$pStmt->fetchColumn());
+                if (!empty($famCode)) {
+                    $_SESSION['famCode'] = $famCode;
+                }
+            }
+
+            if (empty($userId) || empty($famCode)) {
+                http_response_code(401);
+                echo json_encode(['status' => 401, 'message' => 'Unauthorised user session']);
+                return;
+            }
+
+            self::validateCsrf();
+
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+
+            if (!isset($_FILES['video']) || $_FILES['video']['error'] !== UPLOAD_ERR_OK) {
+                $errCode = $_FILES['video']['error'] ?? -1;
+                http_response_code(400);
+                echo json_encode(['status' => 400, 'message' => 'Video upload failed (code ' . $errCode . ').']);
+                return;
+            }
+
+            $file = $_FILES['video'];
+            $allowedMimes = [
+                'video/mp4'       => 'mp4',
+                'video/webm'      => 'webm',
+                'video/quicktime' => 'mov',
+                'video/ogg'       => 'ogv',
+            ];
+
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo !== false ? finfo_file($finfo, $file['tmp_name']) : false;
+            if ($finfo !== false) {
+                finfo_close($finfo);
+            }
+
+            if (!is_string($mimeType) || !isset($allowedMimes[$mimeType])) {
+                http_response_code(400);
+                echo json_encode(['status' => 400, 'message' => 'Invalid video format. Supported formats: MP4, WebM, MOV.']);
+                return;
+            }
+
+            if ($file['size'] > 1024 * 1024 * 1024) {
+                http_response_code(400);
+                echo json_encode(['status' => 400, 'message' => 'Video file exceeds maximum allowed size (1GB).']);
+                return;
+            }
+
+            $ext = $allowedMimes[$mimeType];
+            $reelUuid = 'reel_' . bin2hex(random_bytes(12));
+            $safeFamCode = preg_replace('/[^a-zA-Z0-9_-]/', '', $famCode) ?: 'general';
+            $objectKey = 'family_vault/' . $safeFamCode . '/' . $reelUuid . '.' . $ext;
+
+            if (!class_exists(\Src\Media\R2StorageService::class)) {
+                $r2ServiceFile = __DIR__ . '/../../../vendor/modernman00/shared-lib/src/Media/R2StorageService.php';
+                if (is_file($r2ServiceFile)) {
+                    require_once $r2ServiceFile;
+                }
+            }
+
+            if (class_exists(\Src\Media\R2StorageService::class) && \Src\Media\R2StorageService::isConfigured()) {
+                $ticket = \Src\Media\R2StorageService::generatePresignedUploadUrl($objectKey, $mimeType, 3600);
+                $fp = fopen($file['tmp_name'], 'rb');
+                if ($fp !== false) {
+                    $ch = curl_init((string)$ticket['upload_url']);
+                    curl_setopt_array($ch, [
+                        CURLOPT_PUT            => true,
+                        CURLOPT_INFILE         => $fp,
+                        CURLOPT_INFILESIZE     => (int)$file['size'],
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_TIMEOUT        => 300,
+                        CURLOPT_HTTPHEADER     => ['Content-Type: ' . $mimeType],
+                    ]);
+                    curl_exec($ch);
+                    $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    curl_close($ch);
+                    fclose($fp);
+
+                    if ($httpCode >= 200 && $httpCode < 300) {
+                        @unlink($file['tmp_name']);
+                        echo json_encode([
+                            'status'     => 200,
+                            'storage'    => 'r2',
+                            'reel_uuid'  => $reelUuid,
+                            'public_url' => $ticket['public_url'],
+                            'object_key' => $objectKey,
+                        ]);
+                        return;
+                    }
+                }
+            }
+
+            // Local storage fallback (e.g. local dev or unconfigured R2)
+            $uniqueName = 'reel_' . preg_replace('/[^a-zA-Z0-9_-]/', '', $userId) . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+            $targetDir = __DIR__ . '/../../../resources/videos/reels/';
+            if (!is_dir($targetDir)) {
+                mkdir($targetDir, 0755, true);
+            }
+            $targetPath = $targetDir . $uniqueName;
+            if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+                throw new Exception('Failed to save uploaded video.', 500);
+            }
+
+            echo json_encode([
+                'status'     => 200,
+                'storage'    => 'local',
+                'reel_uuid'  => $reelUuid,
+                'public_url' => '/resources/videos/reels/' . $uniqueName,
+                'object_key' => $uniqueName,
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
             echo json_encode(['status' => 500, 'message' => $e->getMessage()]);
         }
     }
@@ -1595,6 +1740,52 @@ final class ReelsController extends BaseController
             ]);
         } catch (\Throwable $e) {
             http_response_code($e->getCode() >= 400 && $e->getCode() < 600 ? $e->getCode() : 400);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * API: Process any of the 12 Sovereign Kinship Video Studio modules (Server Fallback & Validation).
+     */
+    public function studioProcessModule(): void
+    {
+        header('Content-Type: application/json');
+
+        $userId = (string) ($_SESSION['id'] ?? '');
+        if ($userId === '') {
+            http_response_code(401);
+            echo json_encode(['status' => 'error', 'message' => 'Authentication required.']);
+            return;
+        }
+
+        $rawBody = file_get_contents('php://input');
+        $decoded = is_string($rawBody) && $rawBody !== '' ? json_decode($rawBody, true) : null;
+        $payload = is_array($decoded) ? $decoded : $_POST;
+
+        $sessionToken = (string) ($_SESSION['token'] ?? '');
+        $providedToken = (string) ($payload['token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
+        if ($sessionToken === '' || $providedToken === '' || !hash_equals($sessionToken, $providedToken)) {
+            http_response_code(403);
+            echo json_encode(['status' => 'error', 'message' => 'Invalid CSRF security token.']);
+            return;
+        }
+
+        $module = (string) ($payload['module'] ?? '');
+
+        try {
+            $engine = new \App\services\AtgVideoEngine();
+            $result = $engine->processModule($module, $payload, $userId);
+            echo json_encode([
+                'status' => 'success',
+                'data'   => $result,
+            ]);
+        } catch (\Src\Exceptions\ValidationException $ve) {
+            $isSecurityOrGdpr = str_contains($ve->getMessage(), 'GDPR Article 9')
+                || str_contains($ve->getMessage(), 'SECURITY VIOLATION');
+            http_response_code($isSecurityOrGdpr ? 403 : 422);
+            echo json_encode(['status' => 'error', 'message' => $ve->getMessage()]);
+        } catch (\Throwable $e) {
+            http_response_code(400);
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }

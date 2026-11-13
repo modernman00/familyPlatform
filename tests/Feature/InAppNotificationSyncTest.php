@@ -182,4 +182,84 @@ final class InAppNotificationSyncTest extends SocialFeedTestCase
         $this->seededNotifNos[] = (int)$row['no'];
         $this->assertStringContainsString($testCode, (string)$row['notification_content']);
     }
+
+    public function testMarkAllReadSyncMarksAllNotificationsDeleted(): void
+    {
+        // Seed 3 unread notifications for authorId
+        $no1 = $this->seedNotification($this->authorId, 'Batch 1', date('Y-m-d H:i:s'));
+        $no2 = $this->seedNotification($this->authorId, 'Batch 2', date('Y-m-d H:i:s'));
+        $no3 = $this->seedNotification($this->authorId, 'Batch 3', date('Y-m-d H:i:s'));
+
+        $_SESSION['id'] = $this->authorId;
+        $_SESSION['famCode'] = $this->famCode;
+        $_SESSION['token'] = 'test_csrf_token_sync';
+        $_SERVER['HTTP_X_CSRF_TOKEN'] = 'test_csrf_token_sync';
+
+        $countBefore = NotificationController::getCalculatedUnreadCount($this->authorId);
+        $this->assertGreaterThanOrEqual(3, $countBefore);
+
+        // Execute markAllReadSync
+        ob_start();
+        NotificationController::markAllReadSync();
+        $output = ob_get_clean();
+
+        // Verify status in DB is now 'deleted'
+        $stmt = $this->pdo->prepare("SELECT notification_status FROM notification WHERE no IN (?, ?, ?)");
+        $stmt->execute([$no1, $no2, $no3]);
+        $statuses = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+
+        $this->assertCount(3, $statuses);
+        foreach ($statuses as $st) {
+            $this->assertSame('deleted', $st);
+        }
+
+        // Verify unread count is now 0 for these items
+        $stmt2 = $this->pdo->prepare("SELECT COUNT(*) FROM notification WHERE no IN (?, ?, ?) AND notification_status = 'new'");
+        $stmt2->execute([$no1, $no2, $no3]);
+        $this->assertSame(0, (int)$stmt2->fetchColumn());
+    }
+
+    public function testNotificationReadSupportsAllKeyword(): void
+    {
+        $noA = $this->seedNotification($this->authorId, 'All Test A', date('Y-m-d H:i:s'));
+        $noB = $this->seedNotification($this->authorId, 'All Test B', date('Y-m-d H:i:s'));
+
+        $_SESSION['id'] = $this->authorId;
+        $_SESSION['famCode'] = $this->famCode;
+        $_SESSION['token'] = 'test_csrf_token_sync';
+        $_SERVER['HTTP_X_CSRF_TOKEN'] = 'test_csrf_token_sync';
+
+        ob_start();
+        NotificationController::notificationRead('all');
+        ob_end_clean();
+
+        $stmt = $this->pdo->prepare("SELECT notification_status FROM notification WHERE no IN (?, ?)");
+        $stmt->execute([$noA, $noB]);
+        $statuses = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+
+        foreach ($statuses as $st) {
+            $this->assertSame('deleted', $st);
+        }
+    }
+
+    public function testGetCalculatedUnreadCountReturnsActualInteger(): void
+    {
+        $seeded = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $seeded[] = $this->seedNotification($this->authorId, "OverNine Notification {$i}", date('Y-m-d H:i:s'));
+        }
+
+        $_SESSION['id'] = $this->authorId;
+        $_SESSION['famCode'] = $this->famCode;
+        $_SESSION['token'] = 'test_csrf_token_sync';
+        $_SERVER['HTTP_X_CSRF_TOKEN'] = 'test_csrf_token_sync';
+
+        $count = NotificationController::getCalculatedUnreadCount($this->authorId);
+        $this->assertGreaterThanOrEqual(12, $count, 'Unread count must return exact integer > 9 rather than being capped');
+
+        // Cleanup
+        ob_start();
+        NotificationController::markAllReadSync();
+        ob_end_clean();
+    }
 }

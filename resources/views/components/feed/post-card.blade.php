@@ -2002,7 +2002,7 @@
       <button class="btn btn-action-glyph btn-action-comment rounded-circle"
               style="min-width: 44px; min-height: 44px;"
               type="button"
-              title="Share a family story or comment on this post"
+              title="Write or view family comments on this post"
               aria-label="Comment on this post"
               @click="toggleCommentForm(post.post_no)">
         <i class="bi bi-chat-quote-fill" style="font-size: 1.3rem; line-height: 1;"></i>
@@ -2013,12 +2013,21 @@
         <button class="btn btn-action-glyph btn-action-share rounded-circle"
                 style="min-width: 44px; min-height: 44px;"
                 type="button"
-                title="Send memory to family relatives"
+                title="Share with family relatives or via social apps"
                 aria-label="Share this memory"
                 @click.stop="sharePost(post)">
           <i class="bi bi-send-fill" style="font-size: 1.15rem; line-height: 1; transform: rotate(-15deg); display: inline-block;"></i>
         </button>
       </template>
+
+      <!-- Whisper about this (Private & supervised thread) -->
+      <a :href="'/kin-whispers?post_no=' + encodeURIComponent(post.post_no || '')"
+         class="btn btn-sm rounded-pill d-inline-flex align-items-center gap-1.5 px-3 py-1.5 text-decoration-none ms-1"
+         style="background: #f6f1ea; color: #5c4e43; border: 1px solid #ece4da; font-size: 0.78rem; font-weight: 600; min-height: 36px; white-space: nowrap; flex-shrink: 0;"
+         title="Whisper about this post privately with family">
+        <i class="bi bi-lock" style="font-size: 0.82rem; color: #a31621;"></i>
+        <span>Whisper about this</span>
+      </a>
 
 
     </div>

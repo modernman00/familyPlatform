@@ -8,9 +8,8 @@
 export function initAlpineStores(Alpine) {
   // 1. Notifications Reactive Store
   Alpine.store('notifications', {
-    unreadCount: 0,
+    unreadCount: Math.max(0, parseInt(sessionStorage.getItem('notificationCount'), 10) || parseInt(document.getElementById('notification_count')?.dataset?.serverCount, 10) || 0),
     get display() {
-      if (this.unreadCount > 9) return '9+';
       return this.unreadCount > 0 ? String(this.unreadCount) : '';
     },
     get hasUnread() {
@@ -41,7 +40,7 @@ export function initAlpineStores(Alpine) {
       }
     },
     _syncLegacyDom(num) {
-      const displayStr = num > 9 ? '9+' : (num > 0 ? String(num) : '');
+      const displayStr = num > 0 ? String(num) : '';
       const badgeIds = ['notification_count', 'header_notif_count', 'pwa_bottom_badge'];
       badgeIds.forEach((id) => {
         const el = document.getElementById(id);

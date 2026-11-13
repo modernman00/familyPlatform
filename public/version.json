@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(ai-hub): refine static types and resilient trivia fallback for PHPStan Level 8",
+    "title": "Fix(pwa): suppress unauthenticated push notification subscription pings on guest auth routes and refresh production bundles",
     "notes": [
+        "Fix(pwa): suppress unauthenticated push notification subscription pings on guest auth routes and refresh production bundles",
         "Fix(ai-hub): refine static types and resilient trivia fallback for PHPStan Level 8",
-        "Fix(ai-hub): add zero-failure resilient fallback to generateFamilyTrivia",
-        "Feat(kin-whispers): deploy Kin Whispers encrypted messaging, member restrictions, Family Studio, and connected kin taxonomy"
+        "Fix(ai-hub): add zero-failure resilient fallback to generateFamilyTrivia"
     ],
     "released_at": "2026-11-12",
-    "commit": "050854fd"
+    "commit": "3db8d5d5"
 }

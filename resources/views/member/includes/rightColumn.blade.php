@@ -97,7 +97,7 @@ foreach(($eventData ?? []) as $event) {
                 <div class="d-flex flex-column gap-3">
                     <template x-for="event in visibleEvents" :key="event.no">
                         <div class="event-card" :id="'linkNotification' + event.no">
-                            <div class="p-3 rounded-3" style="background-color: var(--card-bg, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+                            <div class="p-3 rounded-3" style="background-color: #ffffff; border: 1px solid var(--border-color, #e2e8f0); border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
                                 <div class="d-flex flex-column">
                                     <h6 class="fw-bold mb-1" style="color: var(--text-color); font-size: 0.95rem; line-height: 1.35; word-break: break-word;" x-text="event.eventName" :title="event.eventName"></h6>
                                     <div class="mb-2">

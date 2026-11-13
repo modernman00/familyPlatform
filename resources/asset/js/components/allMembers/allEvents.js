@@ -25,12 +25,12 @@ document.onclick = async (e) => {
       const targetName = btn.getAttribute('data-target-name') || 'this relative';
       const firstName = targetName.split(' ')[0] || targetName;
 
-      // 3-Pillar Taxonomy Presets for Connected Kin
+      // 3-Pillar Taxonomy Presets for Connected Kin (Artboards 18, 19, 20 — Line Icons, Zero Emoji)
       const kinshipPillars = {
         in_laws: {
           key: 'in_laws',
-          icon: '💍',
-          title: 'In-Laws',
+          icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/></svg>`,
+          title: 'In-laws',
           desc: 'Connected by marriage',
           roles: [
             'Brother-in-Law',
@@ -43,8 +43,8 @@ document.onclick = async (e) => {
         },
         extended_lineage: {
           key: 'extended_lineage',
-          icon: '🧬',
-          title: 'Extended Lineage',
+          icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.5"/><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M12 7.5V12m0 0H6v4.5m6-4.5h6v4.5"/></svg>`,
+          title: 'Extended lineage',
           desc: 'Maternal or blood branch',
           roles: [
             'Maternal Cousin',
@@ -57,9 +57,9 @@ document.onclick = async (e) => {
         },
         family_friend: {
           key: 'family_friend',
-          icon: '🤝',
-          title: 'Family Friend',
-          desc: 'Godparent, trusted associate',
+          icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`,
+          title: 'Family friend',
+          desc: 'Godparent, close to family',
           roles: [
             'Lifelong Family Friend',
             'Godparent / Godchild',
@@ -70,8 +70,8 @@ document.onclick = async (e) => {
         }
       };
 
-      let selectedCategory = 'in_laws';
-      let selectedRole = 'Brother-in-Law';
+      let selectedCategory = 'extended_lineage';
+      let selectedRole = 'Maternal Cousin';
       let hasUserManuallyEditedNote = false;
 
       // Smart Contextual Draft Templates per Pillar & Role
@@ -137,144 +137,175 @@ document.onclick = async (e) => {
       };
 
       const renderPillarCards = () => {
-        return Object.values(kinshipPillars).map(p => `
-          <div class="kinship-pillar-card ${p.key === selectedCategory ? 'active' : ''}" data-pillar="${p.key}" style="
-            border: 2px solid ${p.key === selectedCategory ? '#0284c7' : '#e2e8f0'};
-            background: ${p.key === selectedCategory ? '#f0f9ff' : '#ffffff'};
-            border-radius: 12px;
-            padding: 10px 8px;
+        return Object.values(kinshipPillars).map(p => {
+          const isActive = p.key === selectedCategory;
+          return `
+          <div class="kinship-pillar-card ${isActive ? 'active' : ''}" data-pillar="${p.key}" style="
+            border: 1.5px solid ${isActive ? '#a31621' : '#e6dfd5'};
+            background: ${isActive ? '#fdf2f2' : '#ffffff'};
+            border-radius: 14px;
+            padding: 12px 10px;
             cursor: pointer;
-            text-align: center;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: left;
+            transition: all 0.18s ease;
             user-select: none;
-            box-shadow: ${p.key === selectedCategory ? '0 4px 14px rgba(2, 132, 199, 0.12)' : '0 1px 3px rgba(0,0,0,0.04)'};
           ">
-            <div style="font-size: 1.5rem; line-height: 1; margin-bottom: 5px;">${p.icon}</div>
-            <div style="font-weight: 700; font-size: 0.86rem; color: #0f172a; margin-bottom: 3px;">${p.title}</div>
-            <div style="font-size: 0.71rem; color: #64748b; line-height: 1.3;">${p.desc}</div>
+            <div class="kinship-pillar-icon" style="color: ${isActive ? '#a31621' : '#5c5049'}; margin-bottom: 6px; display: inline-flex;">${p.icon}</div>
+            <div style="font-weight: 700; font-size: 0.86rem; color: #1c1412; margin-bottom: 2px;">${p.title}</div>
+            <div style="font-size: 0.72rem; color: #786c65; line-height: 1.3;">${p.desc}</div>
           </div>
-        `).join('');
+        `;
+        }).join('');
       };
 
       const renderRoleChips = (categoryKey) => {
-        const pillar = kinshipPillars[categoryKey] || kinshipPillars.in_laws;
-        return pillar.roles.map((r, idx) => `
-          <button type="button" class="kinship-role-chip ${r === selectedRole ? 'active' : ''}" data-role="${r}" style="
-            padding: 6px 14px;
+        const pillar = kinshipPillars[categoryKey] || kinshipPillars.extended_lineage;
+        return pillar.roles.map((r) => {
+          const isActive = r === selectedRole;
+          return `
+          <button type="button" class="kinship-role-chip ${isActive ? 'active' : ''}" data-role="${r}" style="
+            padding: 7px 14px;
             border-radius: 9999px;
-            border: 1px solid ${r === selectedRole ? '#0284c7' : '#cbd5e1'};
-            background: ${r === selectedRole ? '#0284c7' : '#f8fafc'};
-            color: ${r === selectedRole ? '#ffffff' : '#334155'};
-            font-size: 0.82rem;
-            font-weight: ${r === selectedRole ? '600' : '500'};
+            border: 1px solid ${isActive ? '#1c1412' : '#e2d9cd'};
+            background: ${isActive ? '#1c1412' : '#ffffff'};
+            color: ${isActive ? '#ffffff' : '#3d322c'};
+            font-size: 0.81rem;
+            font-weight: ${isActive ? '700' : '600'};
             cursor: pointer;
             transition: all 0.15s ease;
             white-space: nowrap;
-            min-height: 36px;
+            min-height: 44px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            box-shadow: ${r === selectedRole ? '0 2px 8px rgba(2, 132, 199, 0.22)' : 'none'};
           ">${r}</button>
-        `).join('');
+        `;
+        }).join('');
       };
 
       const renderDraftPills = (categoryKey, roleName) => {
         const drafts = getDraftTemplates(categoryKey, roleName, firstName);
         return drafts.map((d, idx) => `
           <button type="button" class="kinship-draft-pill" data-draft-idx="${idx}" style="
-            padding: 5px 12px;
+            padding: 6px 13px;
             border-radius: 9999px;
-            border: 1px solid #bae6fd;
-            background: #f0f9ff;
-            color: #0369a1;
-            font-size: 0.75rem;
-            font-weight: 500;
+            border: 1.5px solid ${idx === 0 ? '#a31621' : '#e2d9cd'};
+            background: ${idx === 0 ? '#fdf2f2' : '#ffffff'};
+            color: ${idx === 0 ? '#a31621' : '#3d322c'};
+            font-size: 0.76rem;
+            font-weight: ${idx === 0 ? '700' : '600'};
             cursor: pointer;
             transition: all 0.15s ease;
             white-space: nowrap;
-            min-height: 30px;
+            min-height: 36px;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
           ">
-            <i class="bi bi-chat-heart text-primary" style="pointer-events: none;"></i> ${d.label}
+            ${d.label}
           </button>
         `).join('');
       };
 
       const initialDrafts = getDraftTemplates(selectedCategory, selectedRole, firstName);
       const initialDefaultNote = initialDrafts[0]?.text || '';
+      const targetInitials = targetName.split(' ').filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase() || '').join('') || 'FK';
 
       const modalHtml = `
         <style>
           .swal2-popup.swal-kinship-modal {
-            width: 640px !important;
+            width: 780px !important;
             max-width: 95vw !important;
-            max-height: 90vh !important;
-            max-height: 90dvh !important;
+            max-height: 92vh !important;
+            max-height: 92dvh !important;
             display: flex !important;
             flex-direction: column !important;
             overflow: hidden !important;
             padding: 22px 24px 16px 24px !important;
-            border-radius: 20px !important;
+            border-radius: 24px !important;
+            background: #ffffff !important;
+            border: 1px solid #e6dfd5 !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
           }
           .swal2-popup.swal-kinship-modal .swal2-html-container {
             overflow-y: auto !important;
             overflow-x: hidden !important;
             flex: 1 1 auto !important;
-            max-height: calc(90dvh - 110px) !important;
+            max-height: calc(92dvh - 110px) !important;
             margin: 0 !important;
-            padding: 2px 6px 4px 2px !important;
+            padding: 2px 4px 4px 2px !important;
             scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 transparent;
+            scrollbar-color: #d5c8b8 transparent;
           }
-          .swal2-popup.swal-kinship-modal .swal2-html-container::-webkit-scrollbar {
-            width: 5px;
+          .swal-kinship-body-grid {
+            display: grid;
+            grid-template-columns: 1.08fr 0.92fr;
+            gap: 24px;
+            align-items: start;
           }
-          .swal2-popup.swal-kinship-modal .swal2-html-container::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 9999px;
+          @media (max-width: 859.98px) {
+            .swal2-popup.swal-kinship-modal {
+              width: 560px !important;
+            }
+            .swal-kinship-body-grid {
+              grid-template-columns: 1fr;
+              gap: 18px;
+            }
+          }
+          .kinship-step-badge {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #fdf2f2;
+            color: #a31621;
+            font-size: 0.74rem;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
           }
           .kinship-pillar-card:hover {
-            border-color: #38bdf8 !important;
-            transform: translateY(-2px);
+            border-color: #a31621 !important;
           }
           .kinship-role-chip:hover:not(.active) {
-            background-color: #e2e8f0 !important;
-            border-color: #94a3b8 !important;
-            color: #0f172a !important;
+            background-color: #faf6f0 !important;
+            border-color: #c5b8a8 !important;
+            color: #1c1412 !important;
           }
           .kinship-draft-pill:hover {
-            background-color: #e0f2fe !important;
-            border-color: #7dd3fc !important;
+            border-color: #a31621 !important;
           }
           .swal2-popup.swal-kinship-modal .swal2-actions {
             display: flex !important;
             justify-content: flex-end !important;
-            gap: 12px !important;
-            margin: 12px 0 0 0 !important;
-            padding: 12px 0 0 0 !important;
-            border-top: 1px solid #e2e8f0 !important;
+            gap: 10px !important;
+            margin: 14px 0 0 0 !important;
+            padding: 14px 0 0 0 !important;
+            border-top: 1px solid #efe8de !important;
             width: 100% !important;
             flex-shrink: 0 !important;
           }
-          .swal2-confirm {
+          .swal2-popup.swal-kinship-modal .swal2-confirm {
             min-height: 46px !important;
             border-radius: 12px !important;
-            font-weight: 600 !important;
-            padding: 10px 24px !important;
-            font-size: 0.92rem !important;
-            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.22) !important;
+            font-weight: 700 !important;
+            padding: 10px 22px !important;
+            font-size: 0.9rem !important;
+            background: #a31621 !important;
+            box-shadow: 0 6px 16px rgba(163, 22, 33, 0.22) !important;
             white-space: nowrap !important;
             flex-shrink: 0 !important;
           }
-          .swal2-cancel {
+          .swal2-popup.swal-kinship-modal .swal2-cancel {
             min-height: 46px !important;
             border-radius: 12px !important;
-            font-weight: 500 !important;
+            font-weight: 700 !important;
             padding: 10px 18px !important;
-            font-size: 0.92rem !important;
+            font-size: 0.9rem !important;
+            background: #ffffff !important;
+            color: #3d322c !important;
+            border: 1px solid #dfd7cc !important;
             white-space: nowrap !important;
             flex-shrink: 0 !important;
           }
@@ -282,125 +313,101 @@ document.onclick = async (e) => {
             .swal2-popup.swal-kinship-modal {
               padding: 16px 14px 12px 14px !important;
               max-height: 94dvh !important;
-              border-radius: 16px !important;
-            }
-            .swal2-popup.swal-kinship-modal .swal2-html-container {
-              max-height: calc(94dvh - 100px) !important;
+              border-radius: 20px !important;
             }
             .swal2-popup.swal-kinship-modal .swal2-actions {
-              margin-top: 8px !important;
+              margin-top: 10px !important;
               padding-top: 10px !important;
               gap: 8px !important;
             }
-            .swal2-confirm, .swal2-cancel {
+            .swal2-popup.swal-kinship-modal .swal2-confirm,
+            .swal2-popup.swal-kinship-modal .swal2-cancel {
               flex: 1 !important;
               min-height: 44px !important;
               padding: 10px 12px !important;
-              font-size: 0.88rem !important;
+              font-size: 0.86rem !important;
             }
             .kinship-pillar-grid {
-              gap: 6px !important;
-            }
-            .kinship-pillar-card {
-              padding: 8px 4px !important;
-            }
-            .kinship-pillar-card div:nth-child(2) {
-              font-size: 0.80rem !important;
-            }
-            .kinship-pillar-card div:nth-child(3) {
-              font-size: 0.68rem !important;
+              gap: 8px !important;
             }
           }
         </style>
 
-        <div class="text-start" style="font-family: inherit;">
-          <!-- Header Banner -->
-          <div class="d-flex align-items-center gap-3 p-3 mb-3 rounded-3" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #e2e8f0;">
-            <div class="d-flex align-items-center justify-content-center rounded-circle shadow-xs" style="width: 42px; height: 42px; background: #ffffff; border: 2px solid #e0f2fe; color: #0284c7; font-size: 1.2rem; flex-shrink: 0;">
-              <i class="bi bi-people-fill"></i>
-            </div>
-            <div class="flex-grow-1" style="min-width: 0;">
-              <div class="d-flex align-items-center gap-2 flex-wrap">
-                <h5 class="mb-0 fw-bold text-dark text-truncate" style="font-size: 1.05rem;">Connect with ${targetName}</h5>
-                <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary fw-semibold px-2.5 py-1" style="font-size: 0.72rem;">Connected Kin</span>
+        <div class="text-start" style="font-family: inherit; color: #1c1412;">
+          <!-- Header Row -->
+          <div class="d-flex align-items-center justify-content-between pb-3 mb-3" style="border-bottom: 1px solid #efe8de;">
+            <div class="d-flex align-items-center gap-3 min-w-0">
+              <div class="d-flex align-items-center justify-content-center rounded-circle fw-bold flex-shrink-0" style="width: 44px; height: 44px; background: #f4d8cd; color: #8a1019; font-size: 0.95rem;">
+                ${targetInitials}
               </div>
-              <div class="text-muted mt-0.5 small" style="font-size: 0.78rem;">
-                Sovereign Family Network • Connect as Kin
+              <div class="min-w-0">
+                <h5 class="mb-0 fw-bold text-truncate" style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; color: #1c1412; letter-spacing: -0.02em;">Connect with ${targetName}</h5>
+                <div style="font-size: 0.82rem; color: #786c65;">
+                  Extended family · Connect as kin
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Step 1: Select Kinship Category -->
-          <div class="d-flex align-items-center justify-content-between mb-2">
-            <div class="d-flex align-items-center gap-2">
-              <span class="d-inline-flex align-items-center justify-content-center rounded-circle fw-bold" style="width: 22px; height: 22px; background: #e0f2fe; color: #0284c7; font-size: 0.75rem;">1</span>
-              <span class="fw-bold text-dark" style="font-size: 0.88rem;">How are you connected to ${firstName}?</span>
-            </div>
-            <span class="small text-muted" style="font-size: 0.72rem;">Category</span>
-          </div>
-          <div id="kinshipPillarContainer" class="kinship-pillar-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;">
-            ${renderPillarCards()}
-          </div>
-
-          <!-- Step 2: Specific Role -->
-          <div class="d-flex align-items-center justify-content-between mb-2">
-            <div class="d-flex align-items-center gap-2">
-              <span class="d-inline-flex align-items-center justify-content-center rounded-circle fw-bold" style="width: 22px; height: 22px; background: #e0f2fe; color: #0284c7; font-size: 0.75rem;">2</span>
-              <span class="fw-bold text-dark" style="font-size: 0.88rem;">Specifically, who is ${firstName} to you?</span>
-            </div>
-            <span class="small text-muted" style="font-size: 0.72rem;">Select role</span>
-          </div>
-          <div id="kinshipRoleContainer" style="display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 16px;">
-            ${renderRoleChips(selectedCategory)}
-          </div>
-
-          <div class="mb-3" id="customRoleWrapper" style="display: none;">
-            <input type="text" id="kinshipCustomRole" class="form-control" placeholder="Specify custom relationship (e.g. Second Cousin, Foster Parent)" maxlength="100" style="border-radius: 10px; font-size: 0.86rem; padding: 8px 12px;">
-          </div>
-
-          <!-- Step 3: Optional Personal Note with Smart Drafts -->
-          <div class="mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-1.5">
-              <div class="d-flex align-items-center gap-2">
-                <span class="d-inline-flex align-items-center justify-content-center rounded-circle fw-bold" style="width: 22px; height: 22px; background: #e0f2fe; color: #0284c7; font-size: 0.75rem;">3</span>
-                <span class="fw-bold text-dark" style="font-size: 0.88rem;">Personal Note <span class="text-muted fw-normal" style="font-size: 0.78rem;">(Optional)</span></span>
+          <div class="swal-kinship-body-grid">
+            <!-- Left Column: Step 1 (Category) + Step 2 (Role) -->
+            <div>
+              <!-- Step 1: Select Kinship Category -->
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="kinship-step-badge">1</span>
+                <span class="fw-bold" style="font-size: 0.9rem; color: #1c1412;">How are you connected to ${firstName}?</span>
               </div>
-              <button type="button" id="kinshipClearNoteBtn" class="btn btn-link p-0 text-muted small text-decoration-none" style="font-size: 0.74rem;">
-                <i class="bi bi-x-circle me-1"></i> Clear Note
-              </button>
-            </div>
-
-            <!-- Contextual Draft Pills Box -->
-            <div class="mb-2 p-2.5 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
-              <div class="d-flex align-items-center gap-1.5 mb-1.5 text-muted" style="font-size: 0.76rem;">
-                <i class="bi bi-stars text-primary"></i> <span class="fw-semibold">Suggested drafts for <strong id="kinshipDraftRoleLabel" class="text-primary">${selectedRole}</strong>:</span>
+              <div id="kinshipPillarContainer" class="kinship-pillar-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px;">
+                ${renderPillarCards()}
               </div>
-              <div id="kinshipDraftPillsContainer" style="display: flex; flex-wrap: wrap; gap: 6px;">
-                ${renderDraftPills(selectedCategory, selectedRole)}
+
+              <!-- Step 2: Specific Role -->
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="kinship-step-badge">2</span>
+                <span class="fw-bold" style="font-size: 0.9rem; color: #1c1412;">Who is ${firstName} to you?</span>
+              </div>
+              <div id="kinshipRoleContainer" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+                ${renderRoleChips(selectedCategory)}
+              </div>
+
+              <div class="mt-2" id="customRoleWrapper" style="display: none;">
+                <input type="text" id="kinshipCustomRole" class="form-control" placeholder="Specify relationship (e.g. Second Cousin)" maxlength="100" style="border-radius: 10px; font-size: 0.85rem; padding: 8px 12px; min-height: 44px; border-color: #dfd7cc;">
               </div>
             </div>
 
-            <textarea id="kinshipNote" class="form-control" rows="2" maxlength="255" placeholder="Pick a draft above or write your own message..." style="border-radius: 10px; font-size: 0.86rem; line-height: 1.45; padding: 8px 12px; resize: none; border-color: #cbd5e1;">${initialDefaultNote}</textarea>
-            <div class="d-flex justify-content-between mt-1 text-muted px-1" style="font-size: 0.72rem;">
-              <span>Tap any draft to insert. You can freely edit or personalise it.</span>
-              <span id="kinshipCharCount" class="font-monospace">${initialDefaultNote.length}/255</span>
-            </div>
-          </div>
+            <!-- Right Column: Step 3 (Note with drafts) + Condensed 2-Line Privacy Card -->
+            <div>
+              <!-- Step 3: Optional Personal Note with Smart Drafts -->
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="kinship-step-badge">3</span>
+                    <span class="fw-bold" style="font-size: 0.9rem; color: #1c1412;">Add a note <span class="fw-normal" style="font-size: 0.8rem; color: #786c65;">(optional)</span></span>
+                  </div>
+                  <button type="button" id="kinshipClearNoteBtn" class="btn btn-link p-0 small text-decoration-none fw-semibold" style="font-size: 0.76rem; color: #786c65;">
+                    Clear
+                  </button>
+                </div>
 
-          <!-- Step 4: Transparency & Sovereign Privacy Safeguards -->
-          <div class="p-3 rounded-3" style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1px solid #a7f3d0; color: #166534;">
-            <div class="d-flex align-items-center gap-2 mb-1.5" style="color: #065f46;">
-              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 22px; height: 22px; background: #d1fae5; color: #059669; font-size: 0.85rem; flex-shrink: 0;">
-                <i class="bi bi-shield-check"></i>
+                <!-- Contextual Draft Pills -->
+                <div id="kinshipDraftPillsContainer" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
+                  ${renderDraftPills(selectedCategory, selectedRole)}
+                </div>
+                <span id="kinshipDraftRoleLabel" class="d-none">${selectedRole}</span>
+
+                <div class="position-relative">
+                  <textarea id="kinshipNote" class="form-control" rows="3" maxlength="255" placeholder="Pick a draft above or write your own message..." style="border-radius: 14px; font-size: 0.85rem; line-height: 1.5; padding: 12px 14px 26px; resize: none; border: 1px solid #dfd7cc; background: #ffffff; color: #1c1412;">${initialDefaultNote}</textarea>
+                  <span id="kinshipCharCount" class="font-monospace position-absolute" style="bottom: 8px; right: 12px; font-size: 0.72rem; color: #8c7e75;">${initialDefaultNote.length}/255</span>
+                </div>
               </div>
-              <span class="fw-bold" style="font-size: 0.84rem;">Connected Kin Privacy &amp; Lineage Safeguards</span>
-            </div>
-            <div class="d-flex flex-column gap-1 ps-1" style="font-size: 0.76rem; line-height: 1.4;">
-              <div>
-                <strong class="text-dark">Access Granted:</strong> Mutual profile updates, direct kin messaging, and general shared family moments.
-              </div>
-              <div>
-                <strong class="text-dark">Lineage Boundary:</strong> Both family trees remain <strong>100% private</strong> to your respective family codes. Sensitive lineage records and phone numbers remain strictly hidden.
+
+              <!-- Condensed 2-Line Privacy Block (Artboards 18, 19, 20) -->
+              <div class="p-3 rounded-3 d-flex align-items-start gap-2.5" style="background: #faf6f0; border: 1px solid #e6dfd5; color: #3d322c;">
+                <i class="bi bi-shield-check flex-shrink-0 mt-0.5" style="color: #a31621; font-size: 1rem;"></i>
+                <div style="font-size: 0.78rem; line-height: 1.48;">
+                  <div><strong style="color: #1c1412;">You'll share:</strong> family feed, stories and tree.</div>
+                  <div><strong style="color: #1c1412;">Stays private:</strong> phone, email, address and birth year — change anytime in Settings.</div>
+                </div>
               </div>
             </div>
           </div>
@@ -410,11 +417,11 @@ document.onclick = async (e) => {
       const { isConfirmed, value } = await Swal.fire({
         html: modalHtml,
         showCancelButton: true,
-        confirmButtonColor: '#0284c7',
-        cancelButtonColor: '#64748b',
-        confirmButtonText: '<i class="bi bi-send-check-fill me-1.5"></i> Send Connection Request',
+        confirmButtonColor: '#a31621',
+        cancelButtonColor: '#ffffff',
+        confirmButtonText: 'Send connection request',
         cancelButtonText: 'Cancel',
-        width: 640,
+        width: 780,
         customClass: {
           popup: 'rounded-4 shadow-lg border-0 swal-kinship-modal'
         },
@@ -441,15 +448,15 @@ document.onclick = async (e) => {
             const pills = draftPillsContainer.querySelectorAll('.kinship-draft-pill');
             pills.forEach((p, idx) => {
               if (idx === activeIdx) {
-                p.style.background = '#0284c7';
-                p.style.color = '#ffffff';
-                p.style.borderColor = '#0284c7';
-                p.style.fontWeight = '600';
+                p.style.background = '#fdf2f2';
+                p.style.color = '#a31621';
+                p.style.borderColor = '#a31621';
+                p.style.fontWeight = '700';
               } else {
-                p.style.background = '#f0f9ff';
-                p.style.color = '#0369a1';
-                p.style.borderColor = '#bae6fd';
-                p.style.fontWeight = '500';
+                p.style.background = '#ffffff';
+                p.style.color = '#3d322c';
+                p.style.borderColor = '#e2d9cd';
+                p.style.fontWeight = '600';
               }
             });
           };
@@ -497,16 +504,16 @@ document.onclick = async (e) => {
               chip.onclick = () => {
                 roleChips.forEach(c => {
                   c.classList.remove('active');
-                  c.style.background = '#f8fafc';
-                  c.style.color = '#334155';
-                  c.style.borderColor = '#cbd5e1';
-                  c.style.fontWeight = '500';
+                  c.style.background = '#ffffff';
+                  c.style.color = '#3d322c';
+                  c.style.borderColor = '#e2d9cd';
+                  c.style.fontWeight = '600';
                 });
                 chip.classList.add('active');
-                chip.style.background = '#0284c7';
+                chip.style.background = '#1c1412';
                 chip.style.color = '#ffffff';
-                chip.style.borderColor = '#0284c7';
-                chip.style.fontWeight = '600';
+                chip.style.borderColor = '#1c1412';
+                chip.style.fontWeight = '700';
                 selectedRole = chip.getAttribute('data-role') || '';
 
                 if (selectedRole.includes('Other')) {
@@ -525,13 +532,17 @@ document.onclick = async (e) => {
             card.onclick = () => {
               pillarCards.forEach(c => {
                 c.classList.remove('active');
-                c.style.borderColor = '#e2e8f0';
+                c.style.borderColor = '#e6dfd5';
                 c.style.background = '#ffffff';
+                const iconEl = c.querySelector('.kinship-pillar-icon');
+                if (iconEl) iconEl.style.color = '#5c5049';
               });
               card.classList.add('active');
-              card.style.borderColor = '#0284c7';
-              card.style.background = '#f0f9ff';
-              selectedCategory = card.getAttribute('data-pillar') || 'in_laws';
+              card.style.borderColor = '#a31621';
+              card.style.background = '#fdf2f2';
+              const activeIconEl = card.querySelector('.kinship-pillar-icon');
+              if (activeIconEl) activeIconEl.style.color = '#a31621';
+              selectedCategory = card.getAttribute('data-pillar') || 'extended_lineage';
               
               // Set default role for new category
               const defaultPillar = kinshipPillars[selectedCategory];

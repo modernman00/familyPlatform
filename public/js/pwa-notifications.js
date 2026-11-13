@@ -34,6 +34,15 @@
     const safeCount = Math.max(0, Math.floor(Number(count) || 0));
     currentUnreadCount = safeCount;
 
+    if (typeof window !== 'undefined' && window.Alpine && typeof window.Alpine.store === 'function') {
+      try {
+        const notifStore = window.Alpine.store('notifications');
+        if (notifStore && typeof notifStore.setCount === 'function') {
+          notifStore.setCount(safeCount);
+        }
+      } catch (e) {}
+    }
+
     const selectors = [
       '.nav-notification-badge',
       '[data-notification-counter]',
@@ -45,7 +54,7 @@
     const badges = document.querySelectorAll(selectors.join(', '));
     badges.forEach(function (badge) {
       if (safeCount > 0) {
-        badge.textContent = safeCount > 99 ? '99+' : String(safeCount);
+        badge.textContent = String(safeCount);
         badge.classList.remove('d-none', 'hidden');
         badge.style.display = '';
       } else {

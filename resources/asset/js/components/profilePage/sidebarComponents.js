@@ -1,5 +1,5 @@
 import axios from 'axios';
-import Pusher from 'pusher-js';
+import { createHybridRealtimeClient } from './sovereignRealtimeBridge';
 import Swal from 'sweetalert2';
 import { getCsrfToken } from '../global';
 
@@ -251,22 +251,15 @@ export function upcomingEvents(initialEvents) {
                     || process.env.MIX_PUSHER_APP_CLUSTER
                     || 'eu';
                 const famCode = (this.userData?.famCode || '').replace(/[^A-Za-z0-9_-]/g, '');
-                if (!key || !cluster || !famCode) {
+                if (!famCode) {
                     return;
                 }
 
-                // Per-family private channel — server-authorised in Pusher::authoriseChannel.
-                this.pusher = new Pusher(key, {
+                // Per-family private channel with automatic failover to SovereignBroadcaster SSE.
+                this.pusher = createHybridRealtimeClient({
+                    key,
                     cluster,
-                    forceTLS: true,
-                    channelAuthorization: {
-                        endpoint: '/pusher/auth',
-                        headersProvider: () => ({
-                            'X-CSRF-Token': getCsrfToken(),
-                            'X-XSRF-TOKEN': getCsrfToken(),
-                            'X-Requested-With': 'XMLHttpRequest',
-                        }),
-                    },
+                    getCsrfToken,
                 });
 
                 const channel = this.pusher.subscribe(`private-family-${famCode}`);

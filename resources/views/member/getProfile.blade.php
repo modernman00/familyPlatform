@@ -19,275 +19,351 @@
             $coverUrl = $cover['url'] ?? '';
             $coverX = isset($cover['x']) ? (int)$cover['x'] : 50;
             $coverY = isset($cover['y']) ? (int)$cover['y'] : 50;
+            $targetMemberId = (string)($viewedMemberId ?? ($data['id'] ?? ''));
+            $viewerIdForProfile = (string)($_SESSION['auth']['id'] ?? ($_SESSION['id'] ?? ''));
+            $canSeeProfileFamCode = ($viewerIdForProfile !== '' && $viewerIdForProfile === $targetMemberId)
+                || \App\controller\BaseController::viewerCanSeeFamilyCode((string)($data['primaryFamCode'] ?? ($data['famCode'] ?? '')), $viewerIdForProfile)
+                || \App\controller\BaseController::viewerCanSeeFamilyCode((string)($data['maternalFamCode'] ?? ($data['otherFamCode'] ?? '')), $viewerIdForProfile);
+            $heroRawPrimary = ltrim((string)($data['primaryFamCode'] ?? ($data['famCode'] ?? '')), '#');
+            $heroRawBirth = ltrim((string)($data['maternalFamCode'] ?? ($data['otherFamCode'] ?? '')), '#');
+            $heroPrimaryCode = ($viewerIdForProfile === $targetMemberId || \App\controller\BaseController::viewerCanSeeFamilyCode($heroRawPrimary, $viewerIdForProfile)) ? $heroRawPrimary : '';
+            $heroBirthCode = ($viewerIdForProfile === $targetMemberId || \App\controller\BaseController::viewerCanSeeFamilyCode($heroRawBirth, $viewerIdForProfile)) ? $heroRawBirth : '';
+            $heroHasDualCodes = ($heroPrimaryCode !== '' && $heroBirthCode !== '' && strtoupper($heroBirthCode) !== strtoupper($heroPrimaryCode));
+            $heroMarriedCode = $heroHasDualCodes ? $heroPrimaryCode : '';
+            $heroEffectiveBirthCode = $heroHasDualCodes ? $heroBirthCode : ($heroPrimaryCode !== '' ? $heroPrimaryCode : $heroBirthCode);
+            $relationshipChipLabel = !empty($data['relationship_to_viewer'])
+                ? (string)$data['relationship_to_viewer']
+                : ($viewerIdForProfile === $targetMemberId ? 'Your profile' : 'Connected kin · family branch');
         @endphp
-        <!-- Profile Hero Section -->
-        <div class="profile-hero {{ $hasCover ? 'has-cover' : '' }} {{ $canEdit ? 'can-edit-cover' : '' }}" id="seeProfileHero"
-             @if($hasCover) style="background-image: url('{{ $coverUrl }}'); background-position: {{ $coverX }}% {{ $coverY }}%;" @endif>
-            <div class="hero-background" id="seeProfileHeroBg"
-                 @if($hasCover) style="background-image: url('{{ $coverUrl }}'); background-position: {{ $coverX }}% {{ $coverY }}%;" @endif></div>
-            <div class="hero-scrim"></div>
 
-            @if($canEdit)
-                <!-- Hidden file upload input for cover photo -->
-                <input type="file" id="seeCoverInput" accept="image/jpeg,image/png,image/webp,image/heic" hidden onchange="handleSeeProfileCoverUpload(this)">
+        <!-- Profile Header Card (Artboards 13 & 14: Cover Banner + Identity Row + 4 Profile Tabs) -->
+        <div class="sp-header-card">
+            <div class="profile-hero {{ $hasCover ? 'has-cover' : '' }} {{ $canEdit ? 'can-edit-cover' : '' }}" id="seeProfileHero"
+                 @if($hasCover) style="background-image: url('{{ $coverUrl }}'); background-position: {{ $coverX }}% {{ $coverY }}%;" @endif>
+                <div class="hero-background" id="seeProfileHeroBg"
+                     @if($hasCover) style="background-image: url('{{ $coverUrl }}'); background-position: {{ $coverX }}% {{ $coverY }}%;" @endif></div>
+                <div class="hero-scrim"></div>
 
-                <!-- Controls on top right -->
-                <div class="see-profile-cover-controls" id="seeProfileCoverControls">
-                    @if($hasCover)
-                        <button type="button" class="btn-see-cover-control" id="seeProfileCoverRepositionBtn" onclick="startSeeProfileCoverAdjust(event)" title="Reposition cover photo">
-                            <i class="bi bi-arrows-move me-1"></i> Reposition
-                        </button>
-                        <button type="button" class="btn-see-cover-control btn-icon-only" id="seeProfileCoverMenuBtn" onclick="toggleSeeProfileCoverMenu(event)" title="Cover options" aria-label="Cover photo options">
-                            <i class="bi bi-three-dots-vertical"></i>
-                        </button>
-                        <div class="see-cover-dropdown d-none" id="seeProfileCoverDropdown" role="menu">
-                            <button type="button" role="menuitem" onclick="seeProfileCoverAction('change', event)"><i class="bi bi-image"></i> Change photo</button>
-                            <button type="button" role="menuitem" onclick="seeProfileCoverAction('adjust', event)"><i class="bi bi-arrows-move"></i> Reposition</button>
-                            <button type="button" role="menuitem" class="is-danger" onclick="seeProfileCoverAction('remove', event)"><i class="bi bi-trash3"></i> Remove</button>
-                        </div>
-                    @else
-                        <button type="button" class="btn-see-cover-control" id="seeProfileCoverAddBtn" onclick="seeProfileCoverAction('change', event)" title="Add cover photo">
-                            <i class="bi bi-image me-1"></i> Add Cover Photo
-                        </button>
-                    @endif
-                </div>
-
-                <!-- Adjust Mode Bar (Drag or Arrow Keys) -->
-                <div class="see-cover-adjust-bar d-none" id="seeProfileCoverAdjustBar">
-                    <span class="see-cover-adjust-hint">
-                        <i class="bi bi-arrows-move me-2"></i> Drag to reposition &bull; Arrow keys also move
-                    </span>
-                    <div class="d-flex align-items-center gap-2">
-                        <button type="button" class="btn-cover-pill btn-cover-cancel" id="seeCoverCancelBtn" onclick="endSeeProfileCoverAdjust(false)">Cancel</button>
-                        <button type="button" class="btn-cover-pill btn-cover-save" id="seeCoverSaveBtn" onclick="endSeeProfileCoverAdjust(true)">Save</button>
+                @if(!$hasCover)
+                    <div class="sp-cover-placeholder-label">
+                        <i class="bi bi-image"></i>
+                        <span>Family cover photo</span>
                     </div>
-                </div>
-            @endif
+                @endif
 
-            <div class="hero-content">
-                <div class="profile-avatar-wrapper" style="cursor: pointer;" title="Click to enlarge profile photo" role="button" tabindex="0" aria-label="View {{ $data['fullName'] }}'s profile photo in full size">
-                    <img src="/resources/images/profile/{{ $data['profilePics'] ?? 'avatarM.png' }}" 
-                         alt="{{ $data['fullName'] }}" 
-                         class="profile-avatar profile-avatar-interactive"
-                         data-profile-expand="true"
-                         data-profile-name="{{ $data['fullName'] }}"
-                         @php
-                             $viewerIdForProfile = (string)($_SESSION['auth']['id'] ?? ($_SESSION['id'] ?? ''));
-                             $canSeeProfileFamCode = ($viewerIdForProfile !== '' && $viewerIdForProfile === (string)($data['id'] ?? ''))
-                                 || \App\controller\BaseController::viewerCanSeeFamilyCode((string)($data['primaryFamCode'] ?? ($data['famCode'] ?? '')), $viewerIdForProfile)
-                                 || \App\controller\BaseController::viewerCanSeeFamilyCode((string)($data['maternalFamCode'] ?? ($data['otherFamCode'] ?? '')), $viewerIdForProfile);
-                         @endphp
-                         data-profile-subtitle="{{ $canSeeProfileFamCode && !empty($data['famCode']) ? ('Family Member • ' . $data['famCode']) : 'Connected Kin' }}"
-                         data-can-edit="false">
-                    <div class="avatar-ring"></div>
-                </div>
-                <div class="profile-main-info">
-                    <h1 class="profile-name">{{ $data['fullName'] }}</h1>
-                    <div class="profile-meta">
-                        <div class="meta-item">
-                            <i class="bi bi-geo-alt-fill"></i>
-                            <span>Lives in {{ $data['country'] ?? 'Not Specified' }}</span>
-                        </div>
-                        @php
-                            $heroRawPrimary = ltrim((string)($data['primaryFamCode'] ?? ($data['famCode'] ?? '')), '#');
-                            $heroRawBirth = ltrim((string)($data['maternalFamCode'] ?? ($data['otherFamCode'] ?? '')), '#');
-                            $heroPrimaryCode = ($viewerIdForProfile === (string)($data['id'] ?? '') || \App\controller\BaseController::viewerCanSeeFamilyCode($heroRawPrimary, $viewerIdForProfile)) ? $heroRawPrimary : '';
-                            $heroBirthCode = ($viewerIdForProfile === (string)($data['id'] ?? '') || \App\controller\BaseController::viewerCanSeeFamilyCode($heroRawBirth, $viewerIdForProfile)) ? $heroRawBirth : '';
-                            $heroHasDualCodes = ($heroPrimaryCode !== '' && $heroBirthCode !== '' && strtoupper($heroBirthCode) !== strtoupper($heroPrimaryCode));
-                            $heroMarriedCode = $heroHasDualCodes ? $heroPrimaryCode : '';
-                            $heroEffectiveBirthCode = $heroHasDualCodes ? $heroBirthCode : ($heroPrimaryCode !== '' ? $heroPrimaryCode : $heroBirthCode);
-                        @endphp
-                        <div class="meta-item d-inline-flex align-items-center gap-2 flex-wrap">
-                            @if($heroMarriedCode !== '')
-                                <span class="family-code-badge" title="{{ __('profile.married_family_code', 'Married Code') }}">{{ __('profile.married_family_code', 'Married Code') }}: {{ $heroMarriedCode }}</span>
-                            @endif
-                            @if($heroEffectiveBirthCode !== '')
-                                <span class="family-code-badge" style="{{ $heroMarriedCode !== '' ? 'background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.45); color: #ecfdf5;' : '' }}" title="{{ __('profile.birth_family_code', 'Birth Code') }}">{{ __('profile.birth_family_code', 'Birth Code') }}: {{ $heroEffectiveBirthCode }}</span>
-                            @endif
-                            @if($heroMarriedCode === '' && $heroEffectiveBirthCode === '')
-                                <span class="family-code-badge" title="Connected Kin"><i class="bi bi-people-fill me-1"></i>Connected Kin</span>
-                            @endif
-                        </div>
+                @if($canEdit)
+                    <!-- Hidden file upload input for cover photo -->
+                    <input type="file" id="seeCoverInput" accept="image/jpeg,image/png,image/webp,image/heic" hidden onchange="handleSeeProfileCoverUpload(this)">
+
+                    <!-- Controls on top right -->
+                    <div class="see-profile-cover-controls" id="seeProfileCoverControls">
+                        @if($hasCover)
+                            <button type="button" class="btn-see-cover-control" id="seeProfileCoverRepositionBtn" onclick="startSeeProfileCoverAdjust(event)" title="Reposition cover photo">
+                                <i class="bi bi-arrows-move me-1"></i> Reposition
+                            </button>
+                            <button type="button" class="btn-see-cover-control btn-icon-only" id="seeProfileCoverMenuBtn" onclick="toggleSeeProfileCoverMenu(event)" title="Cover options" aria-label="Cover photo options">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <div class="see-cover-dropdown d-none" id="seeProfileCoverDropdown" role="menu">
+                                <button type="button" role="menuitem" onclick="seeProfileCoverAction('change', event)"><i class="bi bi-image"></i> Change photo</button>
+                                <button type="button" role="menuitem" onclick="seeProfileCoverAction('adjust', event)"><i class="bi bi-arrows-move"></i> Reposition</button>
+                                <button type="button" role="menuitem" class="is-danger" onclick="seeProfileCoverAction('remove', event)"><i class="bi bi-trash3"></i> Remove</button>
+                            </div>
+                        @else
+                            <button type="button" class="btn-see-cover-control" id="seeProfileCoverAddBtn" onclick="seeProfileCoverAction('change', event)" title="Add cover photo">
+                                <i class="bi bi-image me-1"></i> Add Cover Photo
+                            </button>
+                        @endif
                     </div>
 
-                    <!-- Stats Bar -->
-                    <div class="profile-stats-bar">
-                        <div class="profile-stat-pill">
-                            <i class="bi bi-chat-square-text-fill"></i>
-                            <span><strong>{{ $postCount ?? 0 }}</strong> {{ ($postCount ?? 0) === 1 ? 'Post' : 'Posts' }}</span>
-                        </div>
-                        <div class="profile-stat-pill">
-                            <i class="bi bi-images"></i>
-                            <span><strong>{{ count($publicPhotos ?? []) }}</strong> {{ count($publicPhotos ?? []) === 1 ? 'Public Photo' : 'Public Photos' }}</span>
-                        </div>
-                        <div class="profile-stat-pill">
-                            <i class="bi bi-people-fill"></i>
-                            <span><strong>{{ count($relativesWithImgs ?? []) }}</strong> Immediate Family</span>
+                    <!-- Adjust Mode Bar (Drag or Arrow Keys) -->
+                    <div class="see-cover-adjust-bar d-none" id="seeProfileCoverAdjustBar">
+                        <span class="see-cover-adjust-hint">
+                            <i class="bi bi-arrows-move me-2"></i> Drag to reposition &bull; Arrow keys also move
+                        </span>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn-cover-pill btn-cover-cancel" id="seeCoverCancelBtn" onclick="endSeeProfileCoverAdjust(false)">Cancel</button>
+                            <button type="button" class="btn-cover-pill btn-cover-save" id="seeCoverSaveBtn" onclick="endSeeProfileCoverAdjust(true)">Save</button>
                         </div>
                     </div>
+                @endif
+            </div>
+
+            <!-- White Identity & Action Strip -->
+            <div class="sp-identity-strip">
+                <div class="hero-content">
+                    <div class="profile-avatar-wrapper" style="cursor: pointer;" title="Click to enlarge profile photo" role="button" tabindex="0" aria-label="View {{ $data['fullName'] }}'s profile photo in full size">
+                        <img src="/resources/images/profile/{{ $data['profilePics'] ?? 'avatarM.png' }}" 
+                             alt="{{ $data['fullName'] }}" 
+                             class="profile-avatar profile-avatar-interactive"
+                             data-profile-expand="true"
+                             data-profile-name="{{ $data['fullName'] }}"
+                             data-profile-subtitle="{{ $canSeeProfileFamCode && !empty($data['famCode']) ? ('Family Member • ' . $data['famCode']) : 'Connected Kin' }}"
+                             data-can-edit="false"
+                             onerror="this.src='/resources/images/profile/avatarM.png'">
+                        <div class="avatar-ring d-none"></div>
+                    </div>
+
+                    <div class="profile-main-info flex-grow-1 min-w-0">
+                        <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+                            <h1 class="profile-name mb-0">{{ $data['fullName'] }}</h1>
+                            <span class="sp-relation-chip">{{ $relationshipChipLabel }}</span>
+                        </div>
+                        <div class="profile-meta flex-wrap">
+                            <div class="meta-item">
+                                <i class="bi bi-geo-alt"></i>
+                                <span>Lives in {{ $data['country'] ?? 'Not Specified' }}</span>
+                            </div>
+                            <span class="sp-meta-dot">&middot;</span>
+                            <div class="meta-item d-inline-flex align-items-center gap-2 flex-wrap">
+                                @if($heroMarriedCode !== '')
+                                    <span class="family-code-badge" title="{{ __('profile.married_family_code', 'Married Code') }}">{{ __('profile.married_family_code', 'Married Code') }}: {{ $heroMarriedCode }}</span>
+                                @endif
+                                @if($heroEffectiveBirthCode !== '')
+                                    <span class="family-code-badge" title="{{ __('profile.birth_family_code', 'Birth Code') }}">{{ __('profile.birth_family_code', 'Birth Code') }}: {{ $heroEffectiveBirthCode }}</span>
+                                @endif
+                                @if($heroMarriedCode === '' && $heroEffectiveBirthCode === '')
+                                    <span class="family-code-badge" title="Connected Kin"><i class="bi bi-people me-1"></i>Connected Kin</span>
+                                @endif
+                            </div>
+                            <span class="sp-meta-dot">&middot;</span>
+                            <span class="sp-meta-stat">{{ count($relativesWithImgs ?? []) }} immediate family &middot; {{ count($publicPhotos ?? []) }} {{ count($publicPhotos ?? []) === 1 ? 'public photo' : 'public photos' }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Right-Aligned Action Pills (Artboards 13 & 14) -->
+                    <div class="sp-header-actions">
+                        <a href="/kin-whispers?recipient_id={{ urlencode($targetMemberId) }}" class="sp-action-pill sp-action-pill--primary" title="Send a private Whisper to {{ $data['fullName'] }}">
+                            <i class="bi bi-lock"></i>
+                            <span>Whisper</span>
+                        </a>
+                        <span class="sp-action-pill sp-action-pill--connected" title="Connected family member">
+                            <i class="bi bi-check2"></i>
+                            <span>Connected kin</span>
+                        </span>
+                        <a href="/organogram/{{ urlencode($targetMemberId) }}" class="sp-action-pill sp-action-pill--outline" title="Locate {{ $data['fullName'] }} on the interactive family tree">
+                            <i class="bi bi-diagram-3"></i>
+                            <span>Show in tree</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 4 Profile Section Tabs (About | Photos | Family | Timeline) -->
+                <div class="sp-tabs-bar" role="tablist" aria-label="Profile sections">
+                    <a href="#spSectionAbout" class="sp-tab-link active" data-sp-tab="about">About</a>
+                    <a href="#spSectionPhotos" class="sp-tab-link" data-sp-tab="photos">Photos ({{ count($publicPhotos ?? []) }})</a>
+                    <a href="#spSectionFamily" class="sp-tab-link" data-sp-tab="family">Family ({{ count($relativesWithImgs ?? []) }})</a>
+                    <a href="#spSectionTimeline" class="sp-tab-link" data-sp-tab="timeline">Timeline</a>
                 </div>
             </div>
         </div>
-
-        @includeIf('member.includes.thenNowTimeline', ['memberId' => (string)($viewedMemberId ?? ($data['id'] ?? '')), 'memberName' => (string)($data['fullName'] ?? ''), 'tnSuffix' => 'seen'])
-
-        @if(!empty($publicPhotos))
-        {{-- Public Photo Gallery — shown only when images exist, placed prominently above info cards --}}
-        <div class="profile-gallery-card" style="margin-bottom: 24px;">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-                <div>
-                    <h3 class="mb-1"><i class="bi bi-images me-2" style="color: var(--accent-color);"></i>Public Photo Gallery</h3>
-                    <p class="text-muted small mb-0">Photos made public by {{ $data['fullName'] }} from their gallery</p>
-                </div>
-                <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2">
-                    <i class="bi bi-camera-fill me-1"></i> {{ count($publicPhotos) }} {{ count($publicPhotos) === 1 ? 'Public Photo' : 'Public Photos' }}
-                </span>
-            </div>
-
-            <div class="public-gallery-grid">
-                @foreach ($publicPhotos as $idx => $photo)
-                    <div class="public-gallery-item" onclick="openSeeProfileLightbox({{ $idx }})">
-                        <img 
-                            src="/resources/images/post/{{ rawurlencode($photo['img']) }}" 
-                            alt="{{ $photo['caption'] ?? $photo['img'] }}" 
-                            class="public-gallery-img"
-                            loading="lazy"
-                            onerror="this.closest('.public-gallery-item').style.display='none';"
-                        >
-                        <div class="public-gallery-meta">
-                            <p class="public-gallery-caption" title="{{ $photo['caption'] ?? 'Shared memory' }}">
-                                {{ !empty($photo['caption']) ? $photo['caption'] : 'Shared memory' }}
-                            </p>
-                            @if(!empty($photo['created_at']))
-                                <span class="public-gallery-date">
-                                    <i class="bi bi-calendar3 me-1"></i>{{ date('M j, Y', strtotime($photo['created_at'])) }}
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-        @endif
 
         <div class="profile-content">
-            <!-- Left Column -->
+            <!-- Left Column (Basic info, Family info, Kin-only Contact, Public photo gallery, Timeline) -->
             <div class="left-column">
                 <!-- Basic Information Card -->
-                <div class="info-card">
-                    <h3><i class="bi bi-info-circle-fill me-2"></i>Basic Information</h3>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="{{ ($data['gender'] ?? '') == 'Female' ? 'bi bi-gender-female' : 'bi bi-gender-male' }}"></i></div>
-                        <div class="detail-content">
+                <div class="info-card" id="spSectionAbout">
+                    <h3>Basic information</h3>
+                    <div class="sp-kv-grid">
+                        <div class="sp-kv-cell">
                             <div class="detail-label">Gender</div>
                             <div class="detail-value">{{ $data['gender'] ?? 'Not Specified' }}</div>
                         </div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="bi bi-calendar-event"></i></div>
-                        <div class="detail-content">
+                        <div class="sp-kv-cell">
                             <div class="detail-label">Date of Birth</div>
                             <div class="detail-value">{{ !empty($data['day']) ? ($data['day'] . ' / ' . ($data['month'] ?? '') . ((($data['show_birth_year'] ?? 'off') === 'on' && !empty($data['year'])) ? ' / ' . $data['year'] : '')) : 'Not Specified' }}</div>
                         </div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="bi bi-heart"></i></div>
-                        <div class="detail-content">
-                            <div class="detail-label">Relationship Status</div>
+                        <div class="sp-kv-cell">
+                            <div class="detail-label">Relationship status</div>
                             <div class="detail-value">{{ $data['maritalStatus'] ?? 'Not Specified' }}</div>
+                        </div>
+                        <div class="sp-kv-cell">
+                            <div class="detail-label">Lives in</div>
+                            <div class="detail-value">{{ $data['country'] ?? 'Not Specified' }}</div>
+                        </div>
+                        <div class="sp-kv-cell">
+                            <div class="detail-label">Occupation</div>
+                            <div class="detail-value">{{ $data['occupation'] ?? 'Not Specified' }}</div>
+                        </div>
+                        <div class="sp-kv-cell">
+                            <div class="detail-label">Education</div>
+                            <div class="detail-value">{{ $data['education'] ?? 'Not Specified' }}</div>
+                        </div>
+                        <div class="sp-kv-cell sp-kv-cell--full">
+                            <div class="detail-label">Interests</div>
+                            <div class="detail-value">{{ $data['interests'] ?? 'Not Specified' }}</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Family Information Card -->
                 <div class="info-card">
-                    <h3><i class="bi bi-people-fill me-2"></i>Family Information</h3>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="bi bi-person"></i></div>
-                        <div class="detail-content">
+                    <h3>Family information</h3>
+                    <div class="sp-kv-grid">
+                        <div class="sp-kv-cell">
                             <div class="detail-label">Father</div>
                             <div class="detail-value">{{ !empty($data['father_name']) ? $data['father_name'] : ($data['father']['fullName'] ?? 'Not Provided') }}</div>
                         </div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="bi bi-person"></i></div>
-                        <div class="detail-content">
+                        <div class="sp-kv-cell">
                             <div class="detail-label">Mother</div>
                             <div class="detail-value">{{ !empty($data['mother_name']) ? $data['mother_name'] : ($data['mother']['fullName'] ?? 'Not Provided') }}</div>
                         </div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="bi bi-person-heart"></i></div>
-                        <div class="detail-content">
-                            <div class="detail-label">Spouse/Partner</div>
+                        <div class="sp-kv-cell">
+                            <div class="detail-label">Spouse / partner</div>
                             <div class="detail-value">{{ !empty($data['spouse_name']) ? $data['spouse_name'] : ($data['spouse']['fullName'] ?? 'Not Provided') }}</div>
                         </div>
-                    </div>
-                    @if($heroMarriedCode !== '')
-                        <div class="detail-item">
-                            <div class="detail-icon"><i class="bi bi-hash"></i></div>
-                            <div class="detail-content">
+                        @if($heroMarriedCode !== '')
+                            <div class="sp-kv-cell">
                                 <div class="detail-label">{{ __('profile.married_family_code', 'Married Code') }}</div>
-                                <div class="detail-value">{{ $heroMarriedCode }}</div>
+                                <div class="detail-value"><span class="sp-code-pill">{{ $heroMarriedCode }}</span></div>
+                            </div>
+                        @endif
+                        @if($heroEffectiveBirthCode !== '')
+                            <div class="sp-kv-cell">
+                                <div class="detail-label">{{ __('profile.birth_family_code', 'Birth Code') }}</div>
+                                <div class="detail-value"><span class="sp-code-pill">{{ $heroEffectiveBirthCode }}</span></div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Contact Card (Artboards 13 & 14: Marked as kin-only) -->
+                <div class="info-card">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                        <h3 class="mb-0">Contact</h3>
+                        <span class="sp-kin-lock-badge">
+                            <i class="bi bi-lock"></i>
+                            <span>Only connected kin can see this</span>
+                        </span>
+                    </div>
+                    <div class="sp-contact-grid">
+                        <div class="sp-contact-box">
+                            <div class="sp-contact-icon"><i class="bi bi-telephone"></i></div>
+                            <div class="min-w-0">
+                                <div class="sp-contact-label">Mobile</div>
+                                <div class="sp-contact-val text-truncate">{{ $data['mobile'] ?? 'Not Provided' }}</div>
                             </div>
                         </div>
-                    @endif
-                    @if($heroEffectiveBirthCode !== '')
-                        <div class="detail-item">
-                            <div class="detail-icon"><i class="bi bi-diagram-3"></i></div>
-                            <div class="detail-content">
-                                <div class="detail-label">{{ __('profile.birth_family_code', 'Birth Code') }}</div>
-                                <div class="detail-value">{{ $heroEffectiveBirthCode }}</div>
+                        <div class="sp-contact-box">
+                            <div class="sp-contact-icon"><i class="bi bi-envelope"></i></div>
+                            <div class="min-w-0">
+                                <div class="sp-contact-label">Email</div>
+                                <div class="sp-contact-val text-truncate" title="{{ $data['email'] ?? 'Not Provided' }}">{{ $data['email'] ?? 'Not Provided' }}</div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Public Photo Gallery Card -->
+                <div class="info-card" id="spSectionPhotos">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                        <h3 class="mb-0">Public photo gallery</h3>
+                        <span class="sp-gallery-count-link">{{ count($publicPhotos ?? []) }} {{ count($publicPhotos ?? []) === 1 ? 'photo' : 'photos' }}</span>
+                    </div>
+
+                    @if(!empty($publicPhotos))
+                        <div class="public-gallery-grid">
+                            @foreach ($publicPhotos as $idx => $photo)
+                                <div class="public-gallery-item" onclick="openSeeProfileLightbox({{ $idx }})">
+                                    <img 
+                                        src="/resources/images/post/{{ rawurlencode($photo['img']) }}" 
+                                        alt="{{ $photo['caption'] ?? $photo['img'] }}" 
+                                        class="public-gallery-img"
+                                        loading="lazy"
+                                        onerror="this.closest('.public-gallery-item').style.display='none';"
+                                    >
+                                    <div class="public-gallery-meta">
+                                        <p class="public-gallery-caption" title="{{ $photo['caption'] ?? 'Shared memory' }}">
+                                            {{ !empty($photo['caption']) ? $photo['caption'] : 'Shared memory' }}
+                                        </p>
+                                        @if(!empty($photo['created_at']))
+                                            <span class="public-gallery-date">
+                                                {{ date('j M Y', strtotime($photo['created_at'])) }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="sp-empty-gallery-placeholder">
+                            <i class="bi bi-images"></i>
+                            <span>No public gallery photos shared yet.</span>
                         </div>
                     @endif
                 </div>
 
-                <!-- Contact Information Card -->
-                <div class="info-card">
-                    <h3><i class="bi bi-telephone-fill me-2"></i>Contact Information</h3>
-                    <div class="contact-info">
-                        <div class="contact-item">
-                            <i class="bi bi-phone"></i> {{ $data['mobile'] ?? 'Not Provided' }}
-                        </div>
-                        <div class="contact-item">
-                            <i class="bi bi-envelope"></i> {{ $data['email'] ?? 'Not Provided' }}
-                        </div>
-                        <div class="contact-item">
-                            <i class="bi bi-house"></i> {{ $data['country'] ?? 'Not Provided' }}
-                        </div>
-                    </div>
+                <!-- Then & Now Timeline Section -->
+                <div id="spSectionTimeline">
+                    @includeIf('member.includes.thenNowTimeline', ['memberId' => $targetMemberId, 'memberName' => (string)($data['fullName'] ?? ''), 'tnSuffix' => 'seen'])
                 </div>
             </div>
 
-            <!-- Right Column -->
+            <!-- Right Column (How you're related + Immediate family + Coming up) -->
             <div class="right-column">
+                <!-- Deep Burgundy "How you're related" Path Card (Artboards 13 & 14) -->
+                <div class="sp-kinship-path-card">
+                    <div class="sp-kinship-eyebrow">HOW YOU'RE RELATED</div>
+                    @php
+                        $viewerDisplayName = trim((string)($_SESSION['fullName'] ?? ($_SESSION['firstName'] ?? 'You')));
+                        $viewerInitials = strtoupper(substr($viewerDisplayName, 0, 1)) ?: 'Y';
+                        $targetInitials = strtoupper(substr((string)($data['firstName'] ?? ($data['fullName'] ?? 'K')), 0, 1)) ?: 'K';
+                        $bridgeParentName = !empty($data['father_name'])
+                            ? (string)$data['father_name']
+                            : (!empty($data['mother_name']) ? (string)$data['mother_name'] : 'Shared family branch');
+                        $bridgeInitials = strtoupper(substr($bridgeParentName, 0, 1)) ?: 'F';
+                    @endphp
+                    <div class="sp-kinship-steps">
+                        <div class="sp-kinship-step">
+                            <div class="sp-kinship-node">{{ $viewerInitials }}</div>
+                            <div class="min-w-0">
+                                <div class="sp-kinship-name text-truncate">You ({{ $viewerDisplayName }})</div>
+                            </div>
+                        </div>
+                        <div class="sp-kinship-connector"></div>
+                        <div class="sp-kinship-step">
+                            <div class="sp-kinship-node">{{ $bridgeInitials }}</div>
+                            <div class="min-w-0">
+                                <div class="sp-kinship-name text-truncate">{{ $bridgeParentName }}</div>
+                                <div class="sp-kinship-sub">Family branch connection</div>
+                            </div>
+                        </div>
+                        <div class="sp-kinship-connector"></div>
+                        <div class="sp-kinship-step">
+                            <div class="sp-kinship-node sp-kinship-node--active">{{ $targetInitials }}</div>
+                            <div class="min-w-0">
+                                <div class="sp-kinship-name text-truncate">{{ $data['fullName'] }}</div>
+                                <div class="sp-kinship-sub sp-kinship-sub--highlight">{{ $relationshipChipLabel }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Immediate Family Card -->
-                <div class="info-card">
+                <div class="info-card" id="spSectionFamily">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3 class="mb-0"><i class="bi bi-diagram-3-fill me-2" style="color: var(--accent-color);"></i>Immediate Family</h3>
-                        @if(!empty($relativesWithImgs))
-                            <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1">
-                                {{ count($relativesWithImgs) }} {{ count($relativesWithImgs) === 1 ? 'Relative' : 'Relatives' }}
-                            </span>
-                        @endif
+                        <h3 class="mb-0">Immediate family <span class="sp-muted-count">&middot; {{ count($relativesWithImgs ?? []) }}</span></h3>
+                        <a href="/organogram/{{ urlencode($targetMemberId) }}" class="sp-card-action-link">Full tree</a>
                     </div>
                     @if(!empty($relativesWithImgs))
-                        <div class="family-members">
+                        <div class="sp-family-list">
                             @foreach ($relativesWithImgs as $relative)
                                 @if(!empty($relative['isLinked']) && !empty($relative['id']))
-                                    <a href="/allMembers/seeProfile/{{ $relative['id'] }}" class="family-member-link text-decoration-none" title="View {{ $relative['fullName'] }}'s profile">    
-                                        <div class="family-member">
-                                            <img src="{{ $relative['img'] }}" alt="{{ $relative['fullName'] }}" class="member-avatar" onerror="this.src='/resources/images/profile/avatarM.png'">
-                                            <div class="member-name text-truncate" title="{{ $relative['fullName'] }}">{{ $relative['fullName'] }}</div>
-                                            <div class="member-relation">{{ $relative['relationship'] }}</div>
+                                    <a href="/allMembers/seeProfile/{{ $relative['id'] }}" class="family-member-link sp-family-row text-decoration-none" title="View {{ $relative['fullName'] }}'s profile">
+                                        <img src="{{ $relative['img'] }}" alt="{{ $relative['fullName'] }}" class="sp-family-avatar" onerror="this.src='/resources/images/profile/avatarM.png'">
+                                        <div class="flex-grow-1 min-w-0">
+                                            <div class="sp-family-name text-truncate" title="{{ $relative['fullName'] }}">{{ $relative['fullName'] }}</div>
+                                            <div class="sp-family-rel">{{ $relative['relationship'] }}</div>
                                         </div>
+                                        <i class="bi bi-chevron-right sp-family-chevron"></i>
                                     </a>
                                 @else
-                                    <div class="family-member unlinked-member" title="{{ $relative['fullName'] }} (Not yet on FamilyPlatform)">
-                                        <img src="{{ $relative['img'] }}" alt="{{ $relative['fullName'] }}" class="member-avatar" onerror="this.src='/resources/images/profile/avatarM.png'">
-                                        <div class="member-name text-truncate" title="{{ $relative['fullName'] }}">{{ $relative['fullName'] }}</div>
-                                        <div class="member-relation">{{ $relative['relationship'] }}</div>
+                                    <div class="sp-family-row unlinked-member" title="{{ $relative['fullName'] }} (Not yet on FamilyPlatform)">
+                                        <img src="{{ $relative['img'] }}" alt="{{ $relative['fullName'] }}" class="sp-family-avatar" onerror="this.src='/resources/images/profile/avatarM.png'">
+                                        <div class="flex-grow-1 min-w-0">
+                                            <div class="sp-family-name text-truncate" title="{{ $relative['fullName'] }}">{{ $relative['fullName'] }}</div>
+                                            <div class="sp-family-rel">{{ $relative['relationship'] }}</div>
+                                        </div>
                                     </div>
                                 @endif
                             @endforeach
@@ -297,30 +373,23 @@
                     @endif
                 </div>
 
-                <!-- Additional Information Card -->
+                <!-- Coming Up Card (Artboard 13) -->
                 <div class="info-card">
-                    <h3><i class="bi bi-plus-circle-fill me-2"></i>Additional Information</h3>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="bi bi-briefcase"></i></div>
-                        <div class="detail-content">
-                            <div class="detail-label">Occupation</div>
-                            <div class="detail-value">{{ $data['occupation'] ?? 'Not Specified' }}</div>
+                    <h3 class="mb-3">Coming up</h3>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="sp-date-badge">
+                            <span class="sp-date-day">{{ !empty($data['day']) ? $data['day'] : '🎉' }}</span>
+                            <span class="sp-date-mon">{{ !empty($data['month']) ? strtoupper(substr((string)$data['month'], 0, 3)) : 'CEL' }}</span>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="fw-bold text-dark">{{ $data['firstName'] ?? $data['fullName'] }}'s birthday</div>
+                            <div class="text-muted small">Celebrate with a custom family keepsake</div>
                         </div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="bi bi-book"></i></div>
-                        <div class="detail-content">
-                            <div class="detail-label">Education</div>
-                            <div class="detail-value">{{ $data['education'] ?? 'Not Specified' }}</div>
-                        </div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="bi bi-star"></i></div>
-                        <div class="detail-content">
-                            <div class="detail-label">Interests</div>
-                            <div class="detail-value">{{ $data['interests'] ?? 'Not Specified' }}</div>
-                        </div>
-                    </div>
+                    <a href="/poster-studio?app=familyplatform" class="sp-poster-cta-btn">
+                        <i class="bi bi-stars"></i>
+                        <span>Create a birthday poster</span>
+                    </a>
                 </div>
             </div>
         </div>

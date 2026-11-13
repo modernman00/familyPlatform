@@ -1323,18 +1323,25 @@ body.dark-mode #notificationBtn { background: linear-gradient(180deg, #334155 0%
   #notificationBtn .bi-bell-fill, .notification-wrapper .notification-badge { animation: none !important; }
 }
 
-/* Declutter bell + badge: smaller bell, badge pushed to the corner, tighter badge text */
+/* Declutter bell + badge: responsive pill accommodating multi-digit numbers cleanly without clipping */
 #notificationBtn { font-size: 1.05rem; }
 .notification-wrapper .notification-badge {
-  top: -10px;
-  right: -12px;
-  min-width: 24px;
+  top: -8px;
+  right: -10px;
+  min-width: 20px;
+  width: auto;
   height: 20px;
-  padding: 0 5px;
-  font-size: 0.75rem;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
+  padding: 0 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  font-variant-numeric: normal;
   border-width: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  box-sizing: border-box;
 }
 .notification-wrapper { margin-right: 8px; }
 

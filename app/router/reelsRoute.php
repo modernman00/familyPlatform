@@ -58,5 +58,11 @@ $router->map('GET', '/member/family-studio', 'App\controller\members\ReelsContro
 // Direct-to-R2 Presigned Upload URL API
 $router->map('GET', '/api/reels/presigned-url', 'App\controller\members\ReelsController@presignedUploadUrl', 'family_reels_presigned_url_api');
 
+// Same-Origin R2 Relay Upload Fallback (handles buckets without CORS / local dev)
+$router->map('POST', '/api/reels/r2-proxy-upload', 'App\controller\members\ReelsController@r2ProxyUpload', 'family_reels_r2_proxy_upload_api');
+
+// Sovereign Kinship Video Studio 12-Module Server Fallback & Validation API
+$router->map('POST', '/api/family-studio/process-module', 'App\controller\members\ReelsController@studioProcessModule', 'family_studio_process_module_api');
+
 
 

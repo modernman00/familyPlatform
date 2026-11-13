@@ -80,6 +80,12 @@ $router->map(
   target: 'App\controller\RealtimeBroadcastingController@auth',
   name: 'api_broadcasting_auth'
 );
+$router->map(
+  method: 'GET',
+  route: '/api/broadcasting/status',
+  target: 'App\controller\RealtimeBroadcastingController@status',
+  name: 'api_broadcasting_status'
+);
 
 // VAPID public key endpoint for browser PushManager subscription (parity with ExecMind)
 $router->map(

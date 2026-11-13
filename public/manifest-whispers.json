@@ -1,0 +1,32 @@
+{
+  "name": "Kin Whispers — Private Family Messages & Calls",
+  "short_name": "Whispers",
+  "description": "Private, supervised family messages, voice dedications and in-app voice and video calls.",
+  "id": "/kin-whispers",
+  "start_url": "/kin-whispers?source=pwa_whispers",
+  "scope": "/kin-whispers",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "theme_color": "#a31621",
+  "background_color": "#7a0e16",
+  "categories": ["social", "lifestyle", "family"],
+  "icons": [
+    { "src": "/public/pwa/android/android-launchericon-48-48.png", "sizes": "48x48", "type": "image/png", "purpose": "any" },
+    { "src": "/public/pwa/android/android-launchericon-72-72.png", "sizes": "72x72", "type": "image/png", "purpose": "any" },
+    { "src": "/public/pwa/android/android-launchericon-96-96.png", "sizes": "96x96", "type": "image/png", "purpose": "any" },
+    { "src": "/public/pwa/android/android-launchericon-144-144.png", "sizes": "144x144", "type": "image/png", "purpose": "any" },
+    { "src": "/public/pwa/android/android-launchericon-192-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/public/pwa/android/android-launchericon-512-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/public/pwa/android/android-launchericon-192-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/public/pwa/android/android-launchericon-512-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Whisper",
+      "short_name": "New",
+      "url": "/kin-whispers?source=pwa_shortcut&compose=1",
+      "icons": [{ "src": "/public/pwa/android/android-launchericon-96-96.png", "sizes": "96x96", "type": "image/png" }]
+    }
+  ]
+}

@@ -2,12 +2,12 @@
   PWA Head Partial: FamilyPlatform
   Injects standard PWA metadata, manifest link, apple mobile web app capabilities, and theme color.
 --}}
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="@yield('manifest_href', '/manifest.json')">
 <meta name="theme-color" content="#a31621">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="FamilyPlatform">
+<meta name="apple-mobile-web-app-title" content="@yield('apple_app_title', 'FamilyPlatform')">
 <link rel="shortcut icon" href="/public/img/favicon/favicon.ico">
 <link rel="shortcut icon" href="/favicon.ico">
 <link rel="apple-touch-icon" sizes="180x180" href="/public/apple-touch-icon.png">

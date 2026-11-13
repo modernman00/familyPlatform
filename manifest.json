@@ -122,6 +122,19 @@
       ]
     },
     {
+      "name": "Kin Whispers & Calls",
+      "short_name": "Whispers",
+      "description": "Private family messages, voice dedications and WebRTC calls",
+      "url": "/kin-whispers?source=pwa_shortcut",
+      "icons": [
+        {
+          "src": "/public/pwa/android/android-launchericon-96-96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
       "name": "Family Chat",
       "short_name": "Chat",
       "description": "Real-time chat with your family",

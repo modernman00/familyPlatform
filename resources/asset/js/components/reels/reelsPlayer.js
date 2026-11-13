@@ -44,6 +44,8 @@ const REEL_REACTION_COLORS = {
 class FamilyReelsPlayer {
     constructor() {
         this.reels = [];
+        this.allReels = [];
+        this.activeFeedScope = 'family'; // 'family' | 'week' | 'mine'
         this.currentIndex = 0;
         this.isMuted = false;
         this.isLoading = false;
@@ -318,6 +320,7 @@ class FamilyReelsPlayer {
             if (!this.reels.length) {
                 await this.fetchReels();
             }
+            this.allReels = Array.isArray(this.reels) ? [...this.reels] : [];
 
             if (this.reels.length > 0) {
                 const urlParams = new URLSearchParams(window.location.search);
@@ -337,6 +340,26 @@ class FamilyReelsPlayer {
         } catch (error) {
             console.error('[ReelsPlayer] Init failed:', error);
         }
+    }
+
+    setFeedScope(scope) {
+        this.activeFeedScope = scope || 'family';
+        const base = Array.isArray(this.allReels) && this.allReels.length ? this.allReels : this.reels;
+        if (this.activeFeedScope === 'mine' && this.currentUserId) {
+            const mine = base.filter(r => String(r.user_id || '') === String(this.currentUserId));
+            this.reels = mine.length ? mine : base;
+        } else if (this.activeFeedScope === 'week') {
+            const weekAgo = Date.now() - 7 * 86400 * 1000;
+            const recent = base.filter(r => {
+                const ts = r.created_at ? new Date(r.created_at).getTime() : Date.now();
+                return !isNaN(ts) && ts >= weekAgo;
+            });
+            this.reels = recent.length ? recent : base;
+        } else {
+            this.reels = [...base];
+        }
+        this.currentIndex = 0;
+        this.renderCurrentReel();
     }
 
     async fetchReels() {
@@ -569,25 +592,28 @@ class FamilyReelsPlayer {
             ? `${currentAuthorIndex + 1} of ${authorReelsCount} moments`
             : `${this.currentIndex + 1} / ${totalReels}`;
 
-        let segmentsHtml = '';
-        if (authorReelsCount > 1) {
-            segmentsHtml = `
+        const segList = authorReelsCount > 1 ? authorReels : [reel];
+        const segActiveIdx = authorReelsCount > 1 ? currentAuthorIndex : 0;
+        const segmentsHtml = `
             <div class="reel-progress-segments-container" id="reelProgressSegments" aria-label="Moments progress">
-                ${authorReels.map((_, idx) => {
+                ${segList.map((_, idx) => {
                     let fillClass = '';
-                    if (idx < currentAuthorIndex) fillClass = 'is-past';
-                    else if (idx > currentAuthorIndex) fillClass = 'is-future';
+                    if (idx < segActiveIdx) fillClass = 'is-past';
+                    else if (idx > segActiveIdx) fillClass = 'is-future';
                     return `
                     <div class="reel-progress-segment-track" data-segment-idx="${idx}">
                         <div class="reel-progress-segment-fill ${fillClass}" id="segmentFill_${idx}"></div>
                     </div>`;
                 }).join('')}
             </div>`;
-        }
+
+        const activeScope = this.activeFeedScope || 'family';
+        const timeAgoStr = reel.created_at ? format(reel.created_at) : 'Recent';
+        const relationSubtitle = esc(reel.relationship_label || 'Family relative');
 
         this.viewport.innerHTML = `
         <div class="reel-card-container" id="activeReelCard">
-            <!-- Instagram-Style Multi-Segment Progress Bars (Grouped Author Moments) -->
+            <!-- Top Multi-Segment Progress Bars -->
             ${segmentsHtml}
 
             <!-- Ambient Blurred Backdrop for Cinema Mode (Landscape 16:9 Videos) -->
@@ -604,55 +630,35 @@ class FamilyReelsPlayer {
                 <i class="bi bi-play-fill"></i>
             </div>
 
-            <!-- Top Header Controls -->
+            <!-- Top Header Controls (Artboard 8: Centered Feed Switcher + Mute Circle) -->
             <div class="reel-top-controls">
-                <div class="d-flex align-items-center gap-2">
-                    <a href="/profilePage" class="reel-nav-pill-btn">
-                        <i class="bi bi-chevron-left me-1"></i> Back
-                    </a>
-                    <span class="reel-nav-pill-btn" style="cursor: default; font-size: 0.74rem; padding: 5px 10px;" title="Reel position">
-                        ${posLabel}
-                    </span>
+                <a href="/profilePage" class="reel-top-circle-btn d-none d-md-inline-flex" title="Back to Home">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+                <span class="d-md-none" style="width: 40px;"></span>
+
+                <div class="reel-feed-switcher-pill" id="reelsFeedSwitcher" role="tablist" aria-label="Reels feed filter">
+                    <button type="button" class="reel-feed-switch-btn ${activeScope === 'family' ? 'active' : ''}" data-reel-scope="family" role="tab" aria-selected="${activeScope === 'family' ? 'true' : 'false'}">Family</button>
+                    <button type="button" class="reel-feed-switch-btn ${activeScope === 'week' ? 'active' : ''}" data-reel-scope="week" role="tab" aria-selected="${activeScope === 'week' ? 'true' : 'false'}">This week</button>
+                    <button type="button" class="reel-feed-switch-btn ${activeScope === 'mine' ? 'active' : ''}" data-reel-scope="mine" role="tab" aria-selected="${activeScope === 'mine' ? 'true' : 'false'}">Mine</button>
                 </div>
+
                 <div class="d-flex align-items-center gap-1">
-                    <button type="button" class="reel-nav-pill-btn" id="btnToggleFitMode" title="Toggle Cinema Fit / 9:16 Fill (F)">
-                        <i class="bi bi-aspect-ratio"></i>
-                    </button>
-                    <button type="button" class="reel-nav-pill-btn" id="btnToggleMute" title="Mute / Unmute (M)">
-                        <i class="bi ${this.isMuted ? 'bi-volume-mute-fill' : 'bi-volume-up-fill'}"></i>
-                    </button>
-                    ${isOwner ? `
-                    <button type="button" class="reel-nav-pill-btn text-danger" id="btnDeleteReel" title="Delete Your Reel">
-                        <i class="bi bi-trash3-fill"></i>
-                    </button>
-                    ` : ''}
-                    <button type="button" class="reel-nav-pill-btn" data-bs-toggle="modal" data-bs-target="#createReelModal">
-                        <i class="bi bi-camera-video-fill me-1 text-warning"></i> Create
+                    <button type="button" class="reel-top-circle-btn" id="btnToggleMute" title="Mute / Unmute (M)">
+                        <i class="bi ${this.isMuted ? 'bi-volume-mute' : 'bi-volume-up'}"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Floating Action Stack (Right) -->
+            <!-- Floating Action Stack (Right Rail — Artboard 8: Crimson Heart, Comment, Lock Whisper, Share, More) -->
             <div class="reel-action-stack">
-                <!-- Prev / Next Quick Chevrons (for Desktop & Elders) -->
-                ${totalReels > 1 ? `
-                <div class="d-flex flex-column align-items-center gap-1 mb-1">
-                    <button type="button" class="reel-action-btn" id="btnPrevReel" style="width: 36px; height: 36px; font-size: 1rem;" title="Previous Reel (Up Arrow)" ${this.currentIndex === 0 ? 'disabled style="opacity:0.35;width:36px;height:36px;font-size:1rem;"' : ''}>
-                        <i class="bi bi-chevron-up"></i>
-                    </button>
-                    <button type="button" class="reel-action-btn" id="btnNextReel" style="width: 36px; height: 36px; font-size: 1rem;" title="Next Reel (Down Arrow)" ${this.currentIndex >= totalReels - 1 ? 'disabled style="opacity:0.35;width:36px;height:36px;font-size:1rem;"' : ''}>
-                        <i class="bi bi-chevron-down"></i>
-                    </button>
-                </div>
-                ` : ''}
-
-                <!-- Like & Celebratory Reaction Picker (Living Heirloom Glass 3D Dock) -->
+                <!-- Like & Celebratory Reaction Picker (Crimson Circle Button) -->
                 <div class="d-flex flex-column align-items-center position-relative" id="reelReactionWrapper">
                     <div class="reel-reaction-picker heirloom-glass-dock" id="reelReactionPicker">
                         ${reelPickerItems}
                     </div>
-                    <button class="reel-action-btn ${isLiked ? 'liked' : ''}" id="btnReelLike" title="Tap to React • Hover or Hold for Living Heirloom Glass Reactions">
-                        ${activeLikeContent}
+                    <button class="reel-action-btn reel-action-btn--crimson ${isLiked ? 'liked' : ''}" id="btnReelLike" title="Tap to React • Hover or Hold for Living Heirloom Glass Reactions">
+                        ${isLiked ? activeLikeContent : '<i class="bi bi-heart-fill"></i>'}
                     </button>
                     <span class="reel-action-count" id="reelLikeCount">${reel.likes_count || 0}</span>
                 </div>
@@ -660,87 +666,100 @@ class FamilyReelsPlayer {
                 <!-- Comment Drawer Button -->
                 <div class="d-flex flex-column align-items-center">
                     <button class="reel-action-btn" id="btnReelComments" title="Family Comments">
-                        <i class="bi bi-chat-dots-fill"></i>
+                        <i class="bi bi-chat"></i>
                     </button>
                     <span class="reel-action-count" id="reelCommentCount">${reel.comments_count || 0}</span>
                 </div>
 
-                <!-- Reel Views Indicator -->
-                <div class="d-flex flex-column align-items-center" title="${reel.views_count || 0} family views">
-                    <div class="reel-action-btn" style="cursor: default; pointer-events: none; opacity: 0.88;">
-                        <i class="bi bi-eye-fill text-info"></i>
-                    </div>
-                    <span class="reel-action-count" id="reelActionViewCount">${reel.views_count || 0}</span>
-                </div>
-
-                <!-- Family Tree Node Jump -->
+                <!-- Private Whisper Button (Artboard 8: Lock icon + Whisper label) -->
                 <div class="d-flex flex-column align-items-center">
-                    <a href="/organogram/${esc(String(reel.user_id || ''))}" class="reel-action-btn" title="View on Family Tree" style="text-decoration:none;">
-                        <i class="bi bi-diagram-3-fill text-warning"></i>
+                    <a href="/kin-whispers?recipient_id=${encodeURIComponent(String(reel.user_id || ''))}" class="reel-action-btn" id="btnReelWhisper" title="Send a private Whisper to ${fullName}" style="text-decoration:none;">
+                        <i class="bi bi-lock"></i>
                     </a>
-                    <span class="reel-action-count">Tree</span>
+                    <span class="reel-action-count">Whisper</span>
                 </div>
 
                 <!-- Share Link -->
                 <div class="d-flex flex-column align-items-center">
                     <button class="reel-action-btn" id="btnReelShare" title="Share Reel">
-                        <i class="bi bi-share-fill"></i>
+                        <i class="bi bi-share"></i>
                     </button>
                     <span class="reel-action-count">Share</span>
                 </div>
+
+                <!-- More Options Popover Trigger (...) -->
+                <div class="d-flex flex-column align-items-center position-relative">
+                    <button type="button" class="reel-action-btn" id="btnReelMore" title="More Reel Options (${posLabel})">
+                        <i class="bi bi-three-dots"></i>
+                    </button>
+                    <span class="reel-action-count d-none" id="reelActionViewCount">${reel.views_count || 0}</span>
+                    <div class="reel-more-popover d-none" id="reelMorePopover">
+                        <button type="button" class="reel-more-item" id="btnToggleFitMode">
+                            <i class="bi bi-aspect-ratio"></i> <span>Cinema / 9:16 Fit</span>
+                        </button>
+                        <a href="/organogram/${esc(String(reel.user_id || ''))}" class="reel-more-item" style="text-decoration:none;">
+                            <i class="bi bi-diagram-3"></i> <span>Show in family tree</span>
+                        </a>
+                        <button type="button" class="reel-more-item" data-bs-toggle="modal" data-bs-target="#createReelModal">
+                            <i class="bi bi-plus-circle"></i> <span>Create a reel</span>
+                        </button>
+                        ${isOwner ? `
+                        <button type="button" class="reel-more-item text-danger" id="btnDeleteReel">
+                            <i class="bi bi-trash3"></i> <span>Delete your reel</span>
+                        </button>
+                        ` : ''}
+                    </div>
+                </div>
             </div>
 
-            <!-- Bottom Metadata Overlay -->
+            <!-- Bottom-Left Translucent Caption Card (Artboard 8) -->
             <div class="reel-bottom-meta">
                 ${reel.chrono_sync_cluster_id ? `
                 <div class="reel-chrono-sync-badge-container mb-2">
-                    <button type="button" class="btn btn-sm btn-dark bg-opacity-75 text-white border border-warning rounded-pill px-2.5 py-1 d-inline-flex align-items-center gap-1.5 shadow-sm" id="btnToggleChronoSync" title="Switch Multi-Angle Family Perspectives">
-                        <i class="bi bi-camera-reels-fill text-warning"></i>
+                    <button type="button" class="btn btn-sm btn-dark bg-opacity-75 text-white border border-light border-opacity-25 rounded-pill px-2.5 py-1 d-inline-flex align-items-center gap-1.5 shadow-sm" id="btnToggleChronoSync" title="Switch Multi-Angle Family Perspectives">
+                        <i class="bi bi-camera-reels"></i>
                         <span class="fw-bold text-truncate" style="max-width: 135px;">${esc(reel.chrono_sync_label || 'Perspective')}</span>
-                        <span class="badge bg-warning text-dark rounded-pill px-1.5" style="font-size: 0.65rem;">Multi-Angle</span>
+                        <span class="badge bg-light text-dark rounded-pill px-1.5" style="font-size: 0.65rem;">Multi-Angle</span>
                         <i class="bi bi-chevron-down ms-0.5" style="font-size: 0.65rem;"></i>
                     </button>
                     <div class="reel-chrono-sync-dropdown d-none position-absolute bottom-100 start-0 mb-1 p-2 shadow-lg" id="reelChronoSyncDropdown" style="min-width: 220px; z-index: 25;">
                         <div class="text-white-50 small fw-bold px-1 mb-1" style="font-size: 0.68rem; text-transform: uppercase;">
-                            <i class="bi bi-camera-video me-1 text-warning"></i> Family Event Angles
+                            <i class="bi bi-camera-video me-1"></i> Family Event Angles
                         </div>
                         <div class="d-flex flex-column gap-1" id="reelChronoSyncList">
-                            <div class="text-center py-2"><div class="spinner-border spinner-border-sm text-warning" role="status"></div></div>
+                            <div class="text-center py-2"><div class="spinner-border spinner-border-sm text-light" role="status"></div></div>
                         </div>
                     </div>
                 </div>
                 ` : ''}
 
-                <div class="reel-author-row">
-                    <img src="${avatarUrl}" alt="${fullName}" class="reel-author-avatar" onerror="this.src='/resources/images/profile/avatarM.png'">
-                    <div>
-                        <div class="reel-author-name">${fullName}</div>
-                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <span class="reel-tag-pill"><i class="bi bi-stars text-warning"></i> ${categoryLabel}</span>
-                            <span class="reel-tag-pill" id="reelViewsPill" title="Family views"><i class="bi bi-eye-fill text-info me-1"></i><span id="reelViewCount">${reel.views_count || 0}</span> views</span>
+                <div class="reel-caption-card">
+                    <div class="reel-author-row">
+                        <img src="${avatarUrl}" alt="${fullName}" class="reel-author-avatar" onerror="this.src='/resources/images/profile/avatarM.png'">
+                        <div class="min-w-0">
+                            <div class="reel-author-name text-truncate">${fullName}</div>
+                            <div class="reel-author-sub">${relationSubtitle} · ${esc(timeAgoStr)}</div>
                         </div>
                     </div>
-                </div>
 
-                <div class="reel-caption-text">${esc(reel.caption || '')}</div>
+                    ${reel.caption ? `<div class="reel-caption-text">${esc(reel.caption)}</div>` : ''}
 
-                <div class="reel-music-tag d-flex align-items-center justify-content-between flex-wrap gap-2">
-                    <div class="d-flex align-items-center gap-1.5 text-truncate" style="max-width: 72%;">
-                        <div class="reel-audio-eq ${!this.isMuted ? 'playing' : ''}">
-                            <span></span><span></span><span></span>
-                        </div>
-                        <i class="bi bi-music-note-beamed text-warning"></i>
-                        <span class="text-truncate" title="${esc(reel.music_title || 'Original Family Audio')}">${esc(reel.music_title || 'Original Family Audio')} • ${reel.created_at ? format(reel.created_at) : 'Recent'}</span>
+                    <div class="d-flex align-items-center gap-1.5 flex-wrap mt-2">
+                        <button type="button" class="reel-tag-pill btn-use-sound border-0"
+                                data-sound-title="${esc(reel.music_title || 'Original Family Audio')}"
+                                data-sound-url="${esc(reel.audio_url || reel.video_url || '')}"
+                                data-creator-name="${fullName}"
+                                title="Create a Reel using this soundtrack">
+                            <i class="bi bi-music-note-beamed"></i>
+                            <span class="text-truncate" style="max-width: 145px;">${esc(reel.music_title || `Original audio · ${reel.firstName || 'Family'}`)}</span>
+                        </button>
+                        <span class="reel-tag-pill">
+                            <i class="bi bi-geo-alt"></i> ${categoryLabel.replace(/^#/, '')}
+                        </span>
+                        <span class="reel-tag-pill" id="reelViewsPill" title="Family views">
+                            <i class="bi bi-eye me-1"></i><span id="reelViewCount">${reel.views_count || 0}</span> views
+                        </span>
                     </div>
-                    <button type="button" class="btn btn-sm btn-light btn-use-sound rounded-pill shadow-sm px-2.5 py-1 d-inline-flex align-items-center gap-1"
-                            data-sound-title="${esc(reel.music_title || 'Original Family Audio')}"
-                            data-sound-url="${esc(reel.audio_url || reel.video_url || '')}"
-                            data-creator-name="${fullName}"
-                            style="font-size: 0.72rem; min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;"
-                            title="Create a Reel using this soundtrack">
-                        <i class="bi bi-disc text-primary"></i>
-                        <span class="fw-semibold">Use Sound</span>
-                    </button>
                 </div>
             </div>
 
@@ -872,11 +891,9 @@ class FamilyReelsPlayer {
                     if (progressFill) {
                         progressFill.style.width = `${pct}%`;
                     }
-                    if (authorReelsCount > 1) {
-                        const activeSegment = document.getElementById(`segmentFill_${currentAuthorIndex}`);
-                        if (activeSegment) {
-                            activeSegment.style.width = `${pct}%`;
-                        }
+                    const activeSegment = document.getElementById(`segmentFill_${segActiveIdx}`);
+                    if (activeSegment) {
+                        activeSegment.style.width = `${pct}%`;
                     }
 
                     // Autoplay threshold fallback if 'ended' event is delayed by edge mobile decoders
@@ -1033,6 +1050,28 @@ class FamilyReelsPlayer {
         document.getElementById('btnDeleteReel')?.addEventListener('click', () => this.deleteCurrentReel());
         document.getElementById('btnPrevReel')?.addEventListener('click', () => this.prevReel());
         document.getElementById('btnNextReel')?.addEventListener('click', () => this.nextReel());
+
+        // Top Feed Switcher (Family | This week | Mine)
+        this.viewport.querySelectorAll('[data-reel-scope]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const scope = btn.getAttribute('data-reel-scope') || 'family';
+                this.setFeedScope(scope);
+            });
+        });
+
+        // More (...) Popover Toggle
+        const btnReelMore = document.getElementById('btnReelMore');
+        const reelMorePopover = document.getElementById('reelMorePopover');
+        if (btnReelMore && reelMorePopover) {
+            btnReelMore.addEventListener('click', (e) => {
+                e.stopPropagation();
+                reelMorePopover.classList.toggle('d-none');
+            });
+            document.addEventListener('click', () => {
+                reelMorePopover.classList.add('d-none');
+            }, { once: false });
+        }
 
         // Use This Sound Click Handler (Viral Sound Creation)
         const useSoundBtn = document.querySelector('.btn-use-sound');

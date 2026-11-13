@@ -141,12 +141,17 @@ $postNo = (int)$pdo->lastInsertId();
 // Charlie attempts to delete Alice's post
 $_SESSION['id'] = $userC;
 http_response_code(200);
+$GLOBALS['__testError'] = null;
 ob_start();
 try {
     PostMessage::deletePost($postNo);
 } catch (\Throwable $e) {}
 $outCharliePost = ob_get_clean();
-$charlieBlocked = (http_response_code() === 403 || str_contains($outCharliePost, 'own posts'));
+$charlieBlocked = (
+    http_response_code() === 403
+    || str_contains($outCharliePost, 'own posts')
+    || (isset($GLOBALS['__testError']) && $GLOBALS['__testError'] instanceof \Src\Exceptions\ForbiddenException)
+);
 
 if ($charlieBlocked) {
     echo "  ✅ PASS: Non-author (Charlie) blocked from deleting Alice's post (HTTP 403).\n";
@@ -193,12 +198,17 @@ $commNo2 = (int)$pdo->lastInsertId();
 // 1. Charlie attempts to delete Bob's comment on Alice's post -> Must fail (403)
 $_SESSION['id'] = $userC;
 http_response_code(200);
+$GLOBALS['__testError'] = null;
 ob_start();
 try {
     PostMessage::deleteComment($commNo1);
 } catch (\Throwable $e) {}
 $outCharlieComm = ob_get_clean();
-$charlieCommBlocked = (http_response_code() === 403 || str_contains($outCharlieComm, 'delete'));
+$charlieCommBlocked = (
+    http_response_code() === 403
+    || str_contains($outCharlieComm, 'delete')
+    || (isset($GLOBALS['__testError']) && $GLOBALS['__testError'] instanceof \Src\Exceptions\ForbiddenException)
+);
 
 if ($charlieCommBlocked) {
     echo "  ✅ PASS: Unauthorized user (Charlie) blocked from deleting Bob's comment on Alice's post (HTTP 403).\n";

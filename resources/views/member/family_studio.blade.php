@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Montserrat:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/public/css/family_studio.css?v={{ time() }}">
 <style>
 .fvs-wrap {
     --fvs-primary: #a31621;
@@ -177,7 +178,7 @@
 .fvs-viewport-wrap {
     position: relative;
     width: 100%;
-    aspect-ratio: 9/16;
+    aspect-ratio: 16/9;
     max-height: 580px;
     background: #000000;
     border-radius: 16px;
@@ -188,6 +189,21 @@
     border: 1px solid var(--fvs-line);
     box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
     margin: 0 auto;
+    transition: aspect-ratio 0.2s ease;
+}
+.fvs-viewport-wrap[data-aspect="1:1"] {
+    aspect-ratio: 1/1;
+    max-width: 520px;
+}
+.fvs-viewport-wrap[data-aspect="9:16"] {
+    aspect-ratio: 9/16;
+    max-width: 340px;
+}
+.fvs-format-btn {
+    min-height: 44px;
+    min-width: 44px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 .fvs-canvas {
     width: 100%;
@@ -346,18 +362,18 @@
             <a href="/reels" class="fvs-btn fvs-btn-glass">
                 <i class="bi bi-arrow-left"></i> Return to Family Reels
             </a>
-            <button type="button" class="fvs-btn fvs-btn-gold" id="btnTriggerUpload" onclick="document.getElementById('fvsFileInput').click()">
+            <button type="button" class="fvs-btn fvs-btn-gold" id="btnTriggerUpload">
                 <i class="bi bi-cloud-arrow-up"></i> Upload Media (Direct to R2)
             </button>
-            <button type="button" class="fvs-btn fvs-btn-primary" id="btnExportDownload" onclick="exportLivingReelVideo()">
+            <button type="button" class="fvs-btn fvs-btn-primary" id="btnExportDownload">
                 <i class="bi bi-download"></i> Download Sovereign MP4
             </button>
         </div>
     </header>
 
     <!-- Hidden Direct File Inputs -->
-    <input type="file" id="fvsFileInput" accept="video/mp4,video/quicktime,video/webm" multiple style="display:none;" onchange="handleDirectFileSelect(this)">
-    <input type="file" id="fvsAudioInput" accept="audio/mp3,audio/wav,audio/mpeg,audio/aac" style="display:none;" onchange="handleAudioSelect(this)">
+    <input type="file" id="fvsFileInput" accept="video/mp4,video/quicktime,video/webm" multiple style="display:none;">
+    <input type="file" id="fvsAudioInput" accept="audio/mp3,audio/wav,audio/mpeg,audio/aac" style="display:none;">
 
     <!-- Main Studio Grid -->
     <div class="fvs-grid">
@@ -365,49 +381,54 @@
         <!-- Column 1: Studio Canvas & Interactive Playback -->
         <div class="fvs-card">
             <div class="fvs-card__header">
-                <h2 class="fvs-card__title">
-                    <i class="bi bi-film text-warning"></i> 9:16 Cinematic Canvas Viewport
+                <h2 class="fvs-card__title" id="fvsViewportTitle">
+                    <i class="bi bi-film text-warning"></i> 16:9 Cinematic Canvas Viewport
                 </h2>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-dark border border-secondary text-light" id="fvsResolutionBadge">1080 &times; 1920 (4K Ready)</span>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <div class="btn-group" role="group" aria-label="Canvas aspect ratio">
+                        <button type="button" class="btn btn-sm btn-warning text-dark fw-semibold fvs-format-btn" data-fvs-aspect="16:9">16:9</button>
+                        <button type="button" class="btn btn-sm btn-outline-light fvs-format-btn" data-fvs-aspect="1:1">1:1</button>
+                        <button type="button" class="btn btn-sm btn-outline-light fvs-format-btn" data-fvs-aspect="9:16">9:16</button>
+                    </div>
+                    <span class="badge bg-dark border border-secondary text-light" id="fvsResolutionBadge">1920 &times; 1080 (16:9)</span>
                 </div>
             </div>
 
             <!-- Viewport Screen -->
-            <div class="fvs-viewport-wrap" id="fvsViewportWrap">
+            <div class="fvs-viewport-wrap" id="fvsViewportWrap" data-aspect="16:9">
                 <div class="fvs-hud-badge">
                     <div class="fvs-rec-pulse"></div>
                     <span id="fvsHudStatusText">STANDBY &bull; 60 FPS</span>
                 </div>
-                <canvas id="fvsCanvas" class="fvs-canvas" width="720" height="1280"></canvas>
+                <canvas id="fvsCanvas" class="fvs-canvas" width="1280" height="720"></canvas>
             </div>
 
             <!-- Playback Timeline Scrub & Visualiser -->
             <div class="fvs-progress-bar-wrap">
-                <input type="range" class="fvs-progress-slider" id="fvsTimelineSlider" min="0" max="100" value="0" step="0.1" oninput="scrubTimeline(this.value)">
+                <input type="range" class="fvs-progress-slider" id="fvsTimelineSlider" min="0" max="100" value="0" step="0.1">
                 <canvas id="fvsSpectrumCanvas" class="fvs-spectrum-canvas" width="600" height="44"></canvas>
             </div>
 
             <!-- Playback Control Bar -->
             <div class="fvs-controls">
                 <div class="fvs-ctrl-group">
-                    <button type="button" class="fvs-btn fvs-btn-glass btn-sm" id="btnPlayPause" onclick="togglePlayback()" title="Play / Pause">
+                    <button type="button" class="fvs-btn fvs-btn-glass btn-sm" id="btnPlayPause" title="Play / Pause">
                         <i class="bi bi-play-fill fs-5" id="playIcon"></i>
                     </button>
-                    <button type="button" class="fvs-btn fvs-btn-glass btn-sm" onclick="restartPlayback()" title="Restart">
+                    <button type="button" class="fvs-btn fvs-btn-glass btn-sm" id="btnRestart" title="Restart">
                         <i class="bi bi-arrow-counterclockwise"></i>
                     </button>
-                    <button type="button" class="fvs-btn fvs-btn-glass btn-sm" id="btnMuteToggle" onclick="toggleAudioMute()" title="Mute Audio">
+                    <button type="button" class="fvs-btn fvs-btn-glass btn-sm" id="btnMuteToggle" title="Mute Audio">
                         <i class="bi bi-volume-up" id="muteIcon"></i>
                     </button>
                     <div class="fvs-timecode" id="fvsTimecodeDisplay">00:00.0 / 00:00.0</div>
                 </div>
 
                 <div class="fvs-ctrl-group">
-                    <button type="button" class="fvs-btn fvs-btn-glass btn-sm" onclick="document.getElementById('fvsAudioInput').click()" title="Add Audio Track">
+                    <button type="button" class="fvs-btn fvs-btn-glass btn-sm" id="btnAudioTrigger" title="Add Audio Track">
                         <i class="bi bi-music-note-beamed"></i> Audio
                     </button>
-                    <button type="button" class="fvs-btn fvs-btn-gold btn-sm" onclick="openPublishModal()" title="Publish to Family Reels Feed">
+                    <button type="button" class="fvs-btn fvs-btn-gold btn-sm" id="btnPublishTrigger" title="Publish to Family Reels Feed">
                         <i class="bi bi-send-fill"></i> Publish Reel
                     </button>
                 </div>
@@ -429,23 +450,23 @@
                     Transform family recordings into broadcast-grade reels with automated kinetic typography, golden badges, and memory overlays.
                 </p>
                 <div class="fvs-template-grid" id="fvsTemplateGrid">
-                    <div class="fvs-tpl-card active" data-template="golden_milestone" onclick="selectTemplate('golden_milestone')">
+                    <div class="fvs-tpl-card active" data-template="golden_milestone">
                         <div class="fvs-tpl-icon">👑</div>
                         <div class="fvs-tpl-name">Golden Milestone</div>
                     </div>
-                    <div class="fvs-tpl-card" data-template="vintage_nostalgia" onclick="selectTemplate('vintage_nostalgia')">
+                    <div class="fvs-tpl-card" data-template="vintage_nostalgia">
                         <div class="fvs-tpl-icon">📽️</div>
                         <div class="fvs-tpl-name">Vintage Nostalgia</div>
                     </div>
-                    <div class="fvs-tpl-card" data-template="birthday_celebration" onclick="selectTemplate('birthday_celebration')">
+                    <div class="fvs-tpl-card" data-template="birthday_celebration">
                         <div class="fvs-tpl-icon">🎂</div>
                         <div class="fvs-tpl-name">Birthday Party</div>
                     </div>
-                    <div class="fvs-tpl-card" data-template="family_tree_legacy" onclick="selectTemplate('family_tree_legacy')">
+                    <div class="fvs-tpl-card" data-template="family_tree_legacy">
                         <div class="fvs-tpl-icon">🌳</div>
                         <div class="fvs-tpl-name">Dynasty Legacy</div>
                     </div>
-                    <div class="fvs-tpl-card" data-template="minimalist_memoir" onclick="selectTemplate('minimalist_memoir')">
+                    <div class="fvs-tpl-card" data-template="minimalist_memoir">
                         <div class="fvs-tpl-icon">✨</div>
                         <div class="fvs-tpl-name">Minimalist Memoir</div>
                     </div>
@@ -464,13 +485,13 @@
                     Link videos recorded at the same moment across family members into a synchronized multi-angle switchable matrix.
                 </p>
                 <div class="d-flex flex-wrap gap-2 mb-3">
-                    <button type="button" class="fvs-btn fvs-btn-glass btn-sm active" id="btnModeSolo" onclick="setMatrixMode('solo')">
+                    <button type="button" class="fvs-btn fvs-btn-glass btn-sm active" id="btnModeSolo">
                         <i class="bi bi-person"></i> Solo Focus
                     </button>
-                    <button type="button" class="fvs-btn fvs-btn-glass btn-sm" id="btnModeQuad" onclick="setMatrixMode('quad_view')">
+                    <button type="button" class="fvs-btn fvs-btn-glass btn-sm" id="btnModeQuad">
                         <i class="bi bi-grid-fill"></i> 2&times;2 Quad-View
                     </button>
-                    <button type="button" class="fvs-btn fvs-btn-glass btn-sm" id="btnModeSplit" onclick="setMatrixMode('split_duo')">
+                    <button type="button" class="fvs-btn fvs-btn-glass btn-sm" id="btnModeSplit">
                         <i class="bi bi-layout-split"></i> Split Duo
                     </button>
                 </div>
@@ -490,18 +511,18 @@
                     </h2>
                     <span class="badge bg-success">SECURE TICKET</span>
                 </div>
-                <div class="fvs-dropzone" onclick="document.getElementById('fvsFileInput').click()">
+                <div class="fvs-dropzone" id="fvsDropzone">
                     <i class="bi bi-cloud-arrow-up fs-1 text-warning d-block mb-2"></i>
                     <h3 class="h6 mb-1 text-light">Drop Up to 4 Family Video Clips or Browse</h3>
                     <p class="text-secondary small mb-0">Select 1 clip for Solo Focus, 2 for Split Duo, or 4 for 2&times;2 Quad-View. Direct upload bypasses server limits.</p>
                 </div>
-                <div id="uploadProgressBarContainer" class="mt-3" style="display:none;">
-                    <div class="d-flex justify-content-between text-secondary small mb-1">
-                        <span id="uploadStatusLabel">Uploading to Family Vault...</span>
-                        <span id="uploadPercentLabel">0%</span>
+                <div id="uploadProgressBarContainer" class="mt-3 p-3 rounded-3 bg-dark border border-secondary" style="display:none;">
+                    <div class="d-flex justify-content-between align-items-center small mb-2">
+                        <span id="uploadStatusLabel" class="text-light fw-semibold">Uploading to Family Vault...</span>
+                        <span id="uploadPercentLabel" class="text-warning fw-bold font-monospace">0%</span>
                     </div>
-                    <div class="progress" style="height: 8px;">
-                        <div id="uploadProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" style="width: 0%"></div>
+                    <div class="progress" style="height: 24px; border-radius: 999px; background: rgba(255,255,255,0.08);">
+                        <div id="uploadProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-warning text-dark fw-bold" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
                     </div>
                 </div>
             </div>
@@ -517,7 +538,7 @@
                     <h5 class="modal-title font-monospace" id="fvsPublishModalLabel">⚜️ Publish to Family Reels</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="fvsPublishForm" onsubmit="submitPublishedReel(event)">
+                <form id="fvsPublishForm">
                     @include('csrf')
                     <div class="modal-body">
                         <div class="mb-3">
@@ -551,15 +572,224 @@
         </div>
     </div>
 
+    <!-- 4-Quadrant Non-Linear Video Editor (NLE) Workspace -->
+    <div id="sovereignNleRoot"></div>
+
+    <!-- Sovereign Kinship Video Studio: 12-Module Procedural & WASM Suite -->
+    <section class="sks-suite-panel" aria-label="Sovereign Kinship 12-Module Video Studio">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+            <div>
+                <h2 class="fvs-card__title mb-1"><i class="bi bi-cpu-fill text-warning"></i> Sovereign Kinship 12-Module Studio Suite</h2>
+                <p class="text-muted small mb-0">100% client-side WASM/WebGL/Web Audio procedural processing with deterministic PHP/FFmpeg fallbacks.</p>
+            </div>
+            <span class="sks-status-pill"><i class="bi bi-shield-check"></i> Zero-SaaS &amp; GDPR Art. 9 Protected</span>
+        </div>
+
+        <div class="sks-module-grid">
+            <!-- 1. Text-to-Video Generation -->
+            <div class="sks-module-card">
+                <h3>1. Text-to-Video Generation</h3>
+                <p>Procedural prompt-to-timeline storyboard assembler with kinetic typography and canvas B-roll synthesis.</p>
+                <input type="text" id="sksPromptInput" class="form-control form-control-sm bg-dark text-light border-secondary" value="Grandad Arthur arrived in London in 1962. Sixty years of family heritage." aria-label="Story prompt">
+                <button type="button" class="fvs-btn fvs-btn-gold btn-sm" onclick="window.sksStudio && window.sksStudio.runTextToVideo(document.getElementById('sksPromptInput').value)">
+                    <i class="bi bi-magic"></i> Assemble Storyboard
+                </button>
+                <span class="small" id="sksStatus_text_to_video">Ready</span>
+            </div>
+
+            <!-- 2. Image-to-Video Animation -->
+            <div class="sks-module-card">
+                <h3>2. Image-to-Video Animation</h3>
+                <p>Living Archives 2.5D depth-map parallax shaders and smooth Ken Burns zoom-bursts on family photos.</p>
+                <button type="button" class="fvs-btn fvs-btn-glass btn-sm" onclick="window.sksStudio && window.sksStudio.runImageToVideoParallax(0.04)">
+                    <i class="bi bi-layers-half"></i> Apply 2.5D Parallax
+                </button>
+                <span class="small" id="sksStatus_image_to_video">Ready</span>
+            </div>
+
+            <!-- 3. AI Avatars -->
+            <div class="sks-module-card">
+                <h3>3. AI Narrator Avatars</h3>
+                <p>Procedural 2D/2.5D lip-synced family narrator driven by real-time RMS visemes, blink cycles, and head nods.</p>
+                <button type="button" class="fvs-btn fvs-btn-glass btn-sm" onclick="window.sksStudio && window.sksStudio.toggleProceduralAvatar(0.45)">
+                    <i class="bi bi-person-bounding-box"></i> Toggle Narrator Avatar
+                </button>
+                <span class="small" id="sksStatus_ai_avatars">Ready</span>
+            </div>
+
+            <!-- 4. Auto Captions -->
+            <div class="sks-module-card">
+                <h3>4. Auto Captions (Karaoke)</h3>
+                <p>Word-level timestamped speech-to-text captions with kinetic karaoke highlighting.</p>
+                <input type="text" id="sksCaptionInput" class="form-control form-control-sm bg-dark text-light border-secondary" value="Celebrating our cherished family memories together." aria-label="Caption script">
+                <button type="button" class="fvs-btn fvs-btn-glass btn-sm" onclick="window.sksStudio && window.sksStudio.runAutoCaptions(document.getElementById('sksCaptionInput').value)">
+                    <i class="bi bi-badge-cc-fill"></i> Generate Karaoke Captions
+                </button>
+                <span class="small" id="sksStatus_auto_captions">Ready</span>
+            </div>
+
+            <!-- 5. Text-to-Speech Voiceovers -->
+            <div class="sks-module-card">
+                <h3>5. British English Voiceovers</h3>
+                <p>Oliver, Serena, and Elders en-GB synthesis with Web Audio DSP formant and prosody control.</p>
+                <select id="sksVoiceProfile" class="form-select form-select-sm bg-dark text-light border-secondary" aria-label="British voice profile">
+                    <option value="oliver">Oliver (British RP)</option>
+                    <option value="serena">Serena (Home Counties)</option>
+                    <option value="elders">Elders (Warm Heritage)</option>
+                </select>
+                <button type="button" class="fvs-btn fvs-btn-glass btn-sm" onclick="window.sksStudio && window.sksStudio.runBritishVoiceover(document.getElementById('sksCaptionInput').value, document.getElementById('sksVoiceProfile').value)">
+                    <i class="bi bi-volume-up-fill"></i> Synthesise Voiceover
+                </button>
+                <span class="small" id="sksStatus_tts_voiceovers">Ready</span>
+            </div>
+
+            <!-- 6. Voice Cloning & Dubbing (GDPR Art. 9 Gate) -->
+            <div class="sks-module-card">
+                <h3>6. Voice Cloning &amp; Dubbing</h3>
+                <p>Real-time DSP vocal timbre/formant profiler for lineage narration.</p>
+                <label class="sks-consent-box">
+                    <input type="checkbox" id="sksGdprArt9Consent">
+                    <span><strong>GDPR Article 9 Consent:</strong> I confirm explicit biometric voice consent has been granted by the speaker.</span>
+                </label>
+                <button type="button" class="fvs-btn fvs-btn-primary btn-sm" onclick="window.sksStudio && window.sksStudio.runVoiceCloning(document.getElementById('sksGdprArt9Consent').checked)">
+                    <i class="bi bi-mic-fill"></i> Profile &amp; Dub Voice
+                </button>
+                <span class="small" id="sksStatus_voice_cloning">Consent required</span>
+            </div>
+
+            <!-- 7. Auto-Cut & Silence Removal -->
+            <div class="sks-module-card">
+                <h3>7. Auto-Cut &amp; Silence Removal</h3>
+                <p>RMS waveform energy-threshold analyser for sub-second jump-cutting and dead-air trimming.</p>
+                <button type="button" class="fvs-btn fvs-btn-glass btn-sm" onclick="window.sksStudio && window.sksStudio.runSilenceRemoval(0.02)">
+                    <i class="bi bi-scissors"></i> Trim Dead Air
+                </button>
+                <span class="small" id="sksStatus_auto_cut_silence">Ready</span>
+            </div>
+
+            <!-- 8. Background Removal -->
+            <div class="sks-module-card">
+                <h3>8. Background Removal</h3>
+                <p>Real-time YCbCr chroma-keying, portrait edge segmentation, and virtual studio backdrops.</p>
+                <select id="sksBackdropSelect" class="form-select form-select-sm bg-dark text-light border-secondary" aria-label="Virtual studio backdrop">
+                    <option value="heritage_manor">Heritage Manor</option>
+                    <option value="warm_study">Warm Study</option>
+                    <option value="neon_lounge">Neon Lounge</option>
+                </select>
+                <button type="button" class="fvs-btn fvs-btn-glass btn-sm" onclick="window.sksStudio && window.sksStudio.runBackgroundRemoval(document.getElementById('sksBackdropSelect').value)">
+                    <i class="bi bi-person-square"></i> Apply Studio Backdrop
+                </button>
+                <span class="small" id="sksStatus_background_removal">Ready</span>
+            </div>
+
+            <!-- 9. Subject Tracking -->
+            <div class="sks-module-card">
+                <h3>9. Subject Tracking</h3>
+                <p>Lucas-Kanade optical flow feature tracking for smart pan-and-scan, callouts, and blur masks.</p>
+                <button type="button" class="fvs-btn fvs-btn-glass btn-sm" onclick="window.sksStudio && window.sksStudio.runSubjectTracking('callout')">
+                    <i class="bi bi-crosshair"></i> Lock Subject Tracker
+                </button>
+                <span class="small" id="sksStatus_subject_tracking">Ready</span>
+            </div>
+
+            <!-- 10. Video Upscaling -->
+            <div class="sks-module-card">
+                <h3>10. Lanczos-3 4K Upscaling</h3>
+                <p>Separable Lanczos-3 resampling, unsharp-mask edge sharpening, and temporal de-noising.</p>
+                <button type="button" class="fvs-btn fvs-btn-glass btn-sm" onclick="window.sksStudio && window.sksStudio.runLanczosUpscale()">
+                    <i class="bi bi-badge-4k-fill"></i> Restore &amp; Upscale
+                </button>
+                <span class="small" id="sksStatus_video_upscaling">Ready</span>
+            </div>
+
+            <!-- 11. AI Colour Matching & Enhancement -->
+            <div class="sks-module-card">
+                <h3>11. Colour Matching &amp; LUTs</h3>
+                <p>Shot-to-shot RGB/LAB histogram matching with 3D LUTs and skin-tone vector protection.</p>
+                <select id="sksColourPreset" class="form-select form-select-sm bg-dark text-light border-secondary" aria-label="Colour LUT preset">
+                    <option value="heritage_gold">Heritage Gold</option>
+                    <option value="cinema_teal_orange">Cinema Teal &amp; Orange</option>
+                    <option value="vintage_kodak">Vintage Kodak</option>
+                    <option value="crisp_natural">Crisp Natural</option>
+                </select>
+                <button type="button" class="fvs-btn fvs-btn-glass btn-sm" onclick="window.sksStudio && window.sksStudio.runColourMatching(document.getElementById('sksColourPreset').value)">
+                    <i class="bi bi-palette-fill"></i> Optimise Colour Grade
+                </button>
+                <span class="small" id="sksStatus_colour_matching">Ready</span>
+            </div>
+
+            <!-- 12. Audio Noise Reduction -->
+            <div class="sks-module-card">
+                <h3>12. Audio Noise Reduction</h3>
+                <p>Dual-pass spectral subtraction, 50/60Hz hum notch filtering, and vocal isolation.</p>
+                <button type="button" class="fvs-btn fvs-btn-glass btn-sm" onclick="window.sksStudio && window.sksStudio.runAudioNoiseReduction(0.015)">
+                    <i class="bi bi-soundwave"></i> Clean Audio Track
+                </button>
+                <span class="small" id="sksStatus_audio_noise_reduction">Ready</span>
+            </div>
+        </div>
+    </section>
+
 </div>
 
-<!-- Hidden Video Elements for Composition -->
-<video id="fvsSourceVideo" playsinline style="display:none;"></video>
-<audio id="fvsSourceAudio" style="display:none;"></audio>
+<!-- Hidden Video Elements for Composition (offscreen, not display:none, so browsers decode video frames) -->
+<video id="fvsSourceVideo" playsinline preload="auto" style="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0.001;pointer-events:none;"></video>
+<audio id="fvsSourceAudio" preload="auto" style="display:none;"></audio>
 @endsection
 
 @push('scripts')
 <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignVideoStudioClient.js?v={{ time() }}"></script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignNleEngine.js?v={{ time() }}"></script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignSpotlightTour.js?v={{ time() }}"></script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignHelpSearchEngine.js?v={{ time() }}"></script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignNleWorkspace.js?v={{ time() }}"></script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/family_studio.js?v={{ time() }}"></script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
+(function() {
+    'use strict';
+    window.sksStudio = new window.SovereignKinshipStudioController({
+        canvas: document.getElementById('fvsCanvas'),
+        csrfToken: '{{ $_SESSION['token'] ?? '' }}'
+    });
+    if (window.SovereignNleWorkspace && document.getElementById('sovereignNleRoot')) {
+        window.sovereignNleWorkspace = new window.SovereignNleWorkspace({
+            root: '#sovereignNleRoot',
+            appName: 'FamilyPlatform Living Archives',
+            aspectRatio: '16:9',
+            howToUseUrl: '/how-to-use',
+            csrfToken: '{{ $_SESSION['token'] ?? '' }}'
+        });
+    }
+
+    const aspectDimensions = {
+        '16:9': { w: 1280, h: 720, label: '1920 × 1080 (16:9)' },
+        '1:1':  { w: 720,  h: 720, label: '1080 × 1080 (1:1)' },
+        '9:16': { w: 720,  h: 1280, label: '1080 × 1920 (9:16)' }
+    };
+    document.querySelectorAll('[data-fvs-aspect]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const ratio = btn.getAttribute('data-fvs-aspect') || '16:9';
+            const spec = aspectDimensions[ratio] || aspectDimensions['16:9'];
+            const wrap = document.getElementById('fvsViewportWrap');
+            const canvasEl = document.getElementById('fvsCanvas');
+            const badgeEl = document.getElementById('fvsResolutionBadge');
+            const titleEl = document.getElementById('fvsViewportTitle');
+            if (wrap) wrap.setAttribute('data-aspect', ratio);
+            if (canvasEl) { canvasEl.width = spec.w; canvasEl.height = spec.h; }
+            if (badgeEl) badgeEl.textContent = spec.label;
+            if (titleEl) titleEl.innerHTML = '<i class="bi bi-film text-warning"></i> ' + ratio + ' Cinematic Canvas Viewport';
+            document.querySelectorAll('[data-fvs-aspect]').forEach(function(b) {
+                const isCurrent = b.getAttribute('data-fvs-aspect') === ratio;
+                b.className = 'btn btn-sm fvs-format-btn ' + (isCurrent ? 'btn-warning text-dark fw-semibold' : 'btn-outline-light');
+            });
+            if (window.sovereignNleWorkspace && window.sovereignNleWorkspace.engine) {
+                window.sovereignNleWorkspace.engine.setAspectRatio(ratio);
+                window.sovereignNleWorkspace.render();
+            }
+        });
+    });
+})();
+</script>
 <script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
     'use strict';
@@ -592,6 +822,135 @@
     const studioClient = window.SovereignVideoStudioClient ? new window.SovereignVideoStudioClient() : null;
     const bootTimeMs = performance.now();
 
+    const TEMPLATE_THEMES = {
+        golden_milestone: {
+            border: '#d4af37',
+            accent: '#ffd700',
+            badge: '👑 GOLDEN MILESTONE',
+            tint: 'rgba(212, 175, 55, 0.06)'
+        },
+        vintage_nostalgia: {
+            border: '#d97706',
+            accent: '#fde68a',
+            badge: '📽️ VINTAGE NOSTALGIA',
+            tint: 'rgba(120, 53, 15, 0.16)'
+        },
+        birthday_celebration: {
+            border: '#ec4899',
+            accent: '#f9a8d4',
+            badge: '🎂 BIRTHDAY PARTY',
+            tint: 'rgba(236, 72, 153, 0.08)'
+        },
+        family_tree_legacy: {
+            border: '#10b981',
+            accent: '#6ee7b7',
+            badge: '🌳 DYNASTY LEGACY',
+            tint: 'rgba(16, 185, 129, 0.08)'
+        },
+        minimalist_memoir: {
+            border: '#e2e8f0',
+            accent: '#ffffff',
+            badge: '✨ MINIMALIST MEMOIR',
+            tint: 'rgba(15, 23, 42, 0.05)'
+        }
+    };
+
+    function drawVideoCover(ctx, video, dx, dy, dw, dh) {
+        const vw = video.videoWidth || dw;
+        const vh = video.videoHeight || dh;
+        const scale = Math.max(dw / vw, dh / vh);
+        const sw = dw / scale;
+        const sh = dh / scale;
+        const sx = (vw - sw) / 2;
+        const sy = (vh - sh) / 2;
+        ctx.drawImage(video, sx, sy, sw, sh, dx, dy, dw, dh);
+    }
+
+    function renderHeritageOverlay(ctx, w, h, templateId, timeSec, hasVideo) {
+        const theme = TEMPLATE_THEMES[templateId] || TEMPLATE_THEMES.golden_milestone;
+        ctx.save();
+
+        if (hasVideo) {
+            // Subtle atmospheric tint only — keep the video crystal clear
+            ctx.fillStyle = theme.tint;
+            ctx.fillRect(0, 0, w, h);
+
+            // Top & bottom subtle gradient scrims for legible typography
+            const topScrim = ctx.createLinearGradient(0, 0, 0, 180);
+            topScrim.addColorStop(0, 'rgba(0, 0, 0, 0.65)');
+            topScrim.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = topScrim;
+            ctx.fillRect(0, 0, w, 180);
+
+            const botScrim = ctx.createLinearGradient(0, h - 220, 0, h);
+            botScrim.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            botScrim.addColorStop(1, 'rgba(0, 0, 0, 0.72)');
+            ctx.fillStyle = botScrim;
+            ctx.fillRect(0, h - 220, w, 220);
+        } else {
+            // Idle sovereign gradient backdrop when no clip is loaded
+            const grad = ctx.createLinearGradient(0, 0, 0, h);
+            grad.addColorStop(0, '#120306');
+            grad.addColorStop(0.5, '#29060d');
+            grad.addColorStop(1, '#0b0f19');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, w, h);
+
+            ctx.font = '700 30px "Cinzel", Georgia, serif';
+            ctx.fillStyle = theme.accent;
+            ctx.textAlign = 'center';
+            ctx.fillText('⚜️ FAMILY LIVING ARCHIVES', w / 2, h / 2 - 20);
+            ctx.font = '500 16px "Montserrat", sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.65)';
+            ctx.fillText('Select or drop a video clip to begin editing', w / 2, h / 2 + 20);
+        }
+
+        // Floating ambient particles
+        for (let i = 0; i < 18; i++) {
+            const seed = (i * 9301 + 49297) % 233280;
+            const px = (seed / 233280) * w;
+            const py = ((seed * 2 + timeSec * 45) % h);
+            const size = 1.5 + (i % 4);
+            ctx.fillStyle = theme.accent;
+            ctx.globalAlpha = hasVideo ? 0.35 : 0.45;
+            ctx.beginPath();
+            ctx.arc(px, py, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        // Kinetic template frame border
+        ctx.strokeStyle = theme.border;
+        ctx.lineWidth = templateId === 'minimalist_memoir' ? 2 : 5;
+        ctx.strokeRect(24, 24, w - 48, h - 48);
+        if (templateId !== 'minimalist_memoir') {
+            ctx.lineWidth = 1.25;
+            ctx.strokeRect(34, 34, w - 68, h - 68);
+        }
+
+        // Top template pill badge
+        ctx.textAlign = 'center';
+        ctx.fillStyle = theme.accent;
+        ctx.font = '700 18px "Montserrat", sans-serif';
+        ctx.fillText(theme.badge, w / 2, 74);
+
+        // Bottom watermark & subtle pulse bar
+        const bars = 20;
+        const barW = (w - 160) / bars;
+        for (let b = 0; b < bars; b++) {
+            const barH = 8 + Math.abs(Math.sin(timeSec * 5 + b * 0.6) * 28);
+            ctx.fillStyle = theme.accent;
+            ctx.globalAlpha = 0.75;
+            ctx.fillRect(80 + b * barW, h - 78 - barH, barW - 4, barH);
+        }
+        ctx.globalAlpha = 0.85;
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = '600 13px "Montserrat", sans-serif';
+        ctx.fillText('FAMILYPLATFORM LIVING ARCHIVES STUDIO', w / 2, h - 44);
+
+        ctx.restore();
+    }
+
     // Initialise Canvas Rendering Loop
     function renderFrame() {
         if (!state.ctx) return;
@@ -606,57 +965,31 @@
             ? state.angles[state.activeAngleIndex].videoEl
             : (state.videoElement && state.videoElement.readyState >= 2 ? state.videoElement : null);
 
+        const hasVideo = readyAngles.length > 0 || Boolean(primaryEl);
+
         if (readyAngles.length > 0) {
             if (state.matrixMode === 'solo' || readyAngles.length === 1 || !studioClient || typeof studioClient.renderMultiAngleMatrix !== 'function') {
                 if (primaryEl) {
-                    state.ctx.drawImage(primaryEl, 0, 0, w, h);
+                    drawVideoCover(state.ctx, primaryEl, 0, 0, w, h);
                 }
             } else {
                 const ordered = readyAngles.map(a => a.videoEl);
                 studioClient.renderMultiAngleMatrix(state.ctx, state.canvas, ordered, state.matrixMode);
             }
         } else if (primaryEl) {
-            state.ctx.drawImage(primaryEl, 0, 0, w, h);
-        } else {
-            // Elegant sovereign gradient backdrop
-            const grad = state.ctx.createLinearGradient(0, 0, 0, h);
-            grad.addColorStop(0, '#120306');
-            grad.addColorStop(0.5, '#29060d');
-            grad.addColorStop(1, '#0b0f19');
-            state.ctx.fillStyle = grad;
-            state.ctx.fillRect(0, 0, w, h);
-
-            // Watermark Crest
-            state.ctx.save();
-            state.ctx.font = '700 32px "Cinzel", Georgia, serif';
-            state.ctx.fillStyle = 'rgba(212,175,55,0.3)';
-            state.ctx.textAlign = 'center';
-            state.ctx.fillText('⚜️ FAMILY LIVING ARCHIVES', w / 2, h / 2 - 20);
-            state.ctx.font = '500 16px "Montserrat", sans-serif';
-            state.ctx.fillStyle = 'rgba(255,255,255,0.4)';
-            state.ctx.fillText('Select or drop a video clip to begin editing', w / 2, h / 2 + 20);
-            state.ctx.restore();
+            drawVideoCover(state.ctx, primaryEl, 0, 0, w, h);
         }
 
         const animTimeSec = (state.videoElement && state.videoElement.duration && state.isPlaying)
             ? state.videoElement.currentTime
             : (performance.now() - bootTimeMs) / 1000;
 
-        // Overlay Sovereign Kinetic Template
-        if (studioClient && typeof studioClient.renderMotionFlyerFrame === 'function') {
-            const eventMeta = {
-                title: 'Family Heritage Reel',
-                date: 'Celebrating Generations',
-                venue: 'Family Living Archive',
-                countdownSec: Math.max(0, 86400 - Math.floor(animTimeSec))
-            };
-            studioClient.renderMotionFlyerFrame(
-                state.ctx,
-                state.canvas,
-                state.currentTemplate,
-                eventMeta,
-                animTimeSec
-            );
+        // Overlay Transparent Kinetic Heritage Template (never covers video!)
+        renderHeritageOverlay(state.ctx, w, h, state.currentTemplate, animTimeSec, hasVideo);
+
+        // Render Active Sovereign 12-Module Effects (persists at 60fps)
+        if (window.sksStudio && typeof window.sksStudio.renderActiveEffects === 'function') {
+            window.sksStudio.renderActiveEffects(state.ctx, state.canvas, animTimeSec);
         }
 
         // Render Audio Visualiser Spectrum
@@ -841,7 +1174,12 @@
         const removed = state.angles.splice(idx, 1)[0];
         if (removed && removed.videoEl) {
             removed.videoEl.pause();
-            removed.videoEl.remove();
+            if (removed.videoEl.id === 'fvsSourceVideo') {
+                removed.videoEl.removeAttribute('src');
+                removed.videoEl.load();
+            } else {
+                removed.videoEl.remove();
+            }
         }
         if (removed && removed.url) {
             URL.revokeObjectURL(removed.url);
@@ -885,7 +1223,8 @@
 
             if (angleIdx > 0) {
                 videoEl.playsInline = true;
-                videoEl.style.display = 'none';
+                videoEl.preload = 'auto';
+                videoEl.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0.001;pointer-events:none;';
                 document.body.appendChild(videoEl);
             }
 
@@ -901,6 +1240,12 @@
                 duration: 0
             };
             state.angles.push(angleObj);
+
+            videoEl.onloadeddata = function() {
+                if (videoEl.currentTime === 0 && videoEl.duration > 0.1) {
+                    try { videoEl.currentTime = 0.05; } catch (_) {}
+                }
+            };
 
             videoEl.onloadedmetadata = function() {
                 angleObj.duration = videoEl.duration || 0;
@@ -951,8 +1296,11 @@
 
         progressContainer.style.display = 'block';
         statusLabel.textContent = 'Requesting secure R2 vault upload ticket...';
-        progressBar.style.width = '10%';
-        percentLabel.textContent = '10%';
+        progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-warning text-dark fw-bold';
+        progressBar.style.width = '5%';
+        progressBar.setAttribute('aria-valuenow', '5');
+        progressBar.textContent = '5%';
+        percentLabel.textContent = '5%';
 
         try {
             const ext = file.name.split('.').pop() || 'mp4';
@@ -976,35 +1324,116 @@
             }
 
             xhr.upload.onprogress = function(e) {
-                if (e.lengthComputable) {
-                    const pct = Math.round((e.loaded / e.total) * 100);
+                if (e.lengthComputable && e.total > 0) {
+                    const pct = Math.min(100, Math.round((e.loaded / e.total) * 100));
+                    const loadedMb = (e.loaded / (1024 * 1024)).toFixed(1);
+                    const totalMb = (e.total / (1024 * 1024)).toFixed(1);
                     progressBar.style.width = pct + '%';
+                    progressBar.setAttribute('aria-valuenow', String(pct));
+                    progressBar.textContent = pct + '%';
                     percentLabel.textContent = pct + '%';
+                    statusLabel.textContent = 'Uploading to Cloudflare R2 (' + loadedMb + ' MB / ' + totalMb + ' MB)...';
                 }
             };
 
             xhr.onload = function() {
                 if (xhr.status >= 200 && xhr.status < 300) {
                     statusLabel.textContent = 'Uploaded successfully to Cloudflare R2 Vault!';
-                    progressBar.className = 'progress-bar bg-success';
+                    progressBar.className = 'progress-bar bg-success text-white fw-bold';
+                    progressBar.style.width = '100%';
+                    progressBar.setAttribute('aria-valuenow', '100');
+                    progressBar.textContent = '100%';
+                    percentLabel.textContent = '100%';
                     state.uploadedCloudUrl = ticketData.ticket.public_url || ticketData.ticket.download_url;
                     document.getElementById('publishCloudUrl').value = state.uploadedCloudUrl;
                 } else {
-                    statusLabel.textContent = 'Upload failed with status ' + xhr.status;
-                    progressBar.className = 'progress-bar bg-danger';
+                    uploadViaSameOriginRelay(file, progressBar, percentLabel, statusLabel);
                 }
             };
 
             xhr.onerror = function() {
-                statusLabel.textContent = 'Network error during direct R2 upload.';
-                progressBar.className = 'progress-bar bg-danger';
+                // Automatic same-origin relay fallback (e.g., when R2 bucket CORS is not yet enabled)
+                uploadViaSameOriginRelay(file, progressBar, percentLabel, statusLabel);
             };
 
             xhr.send(file);
         } catch (err) {
             console.error('R2 Direct Upload Error:', err);
-            statusLabel.textContent = 'Upload notice: ' + err.message;
+            uploadViaSameOriginRelay(file, progressBar, percentLabel, statusLabel);
         }
+    }
+
+    function uploadViaSameOriginRelay(file, progressBar, percentLabel, statusLabel) {
+        statusLabel.textContent = 'Uploading via Sovereign Vault Relay...';
+        progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-warning text-dark fw-bold';
+        progressBar.style.width = '0%';
+        progressBar.setAttribute('aria-valuenow', '0');
+        progressBar.textContent = '0%';
+        percentLabel.textContent = '0%';
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+            || document.querySelector('#fvsPublishForm input[name="_token"]')?.value
+            || '';
+        const formData = new FormData();
+        formData.append('video', file);
+        if (csrfToken) {
+            formData.append('_token', csrfToken);
+        }
+
+        const relayXhr = new XMLHttpRequest();
+        relayXhr.open('POST', '/api/reels/r2-proxy-upload', true);
+        if (csrfToken) {
+            relayXhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+        }
+
+        relayXhr.upload.onprogress = function(e) {
+            if (e.lengthComputable && e.total > 0) {
+                const pct = Math.min(99, Math.round((e.loaded / e.total) * 100));
+                const loadedMb = (e.loaded / (1024 * 1024)).toFixed(1);
+                const totalMb = (e.total / (1024 * 1024)).toFixed(1);
+                progressBar.style.width = pct + '%';
+                progressBar.setAttribute('aria-valuenow', String(pct));
+                progressBar.textContent = pct + '%';
+                percentLabel.textContent = pct + '%';
+                statusLabel.textContent = 'Uploading to Family Vault (' + loadedMb + ' MB / ' + totalMb + ' MB)...';
+            }
+        };
+
+        relayXhr.onload = function() {
+            try {
+                const res = JSON.parse(relayXhr.responseText || '{}');
+                if (relayXhr.status >= 200 && relayXhr.status < 300 && res.status === 200 && res.public_url) {
+                    statusLabel.textContent = res.storage === 'r2'
+                        ? 'Uploaded successfully to Cloudflare R2 Vault!'
+                        : 'Uploaded successfully to Family Vault!';
+                    progressBar.className = 'progress-bar bg-success text-white fw-bold';
+                    progressBar.style.width = '100%';
+                    progressBar.setAttribute('aria-valuenow', '100');
+                    progressBar.textContent = '100%';
+                    percentLabel.textContent = '100%';
+                    state.uploadedCloudUrl = res.public_url;
+                    document.getElementById('publishCloudUrl').value = state.uploadedCloudUrl;
+                    return;
+                }
+                throw new Error(res.message || ('Upload failed with status ' + relayXhr.status));
+            } catch (e) {
+                statusLabel.textContent = 'Upload notice: ' + e.message;
+                progressBar.className = 'progress-bar bg-danger text-white fw-bold';
+                progressBar.style.width = '100%';
+                progressBar.textContent = 'Error';
+                percentLabel.textContent = '0%';
+            }
+        };
+
+        relayXhr.onerror = function() {
+            statusLabel.textContent = 'Upload notice: Network error during upload.';
+            progressBar.className = 'progress-bar bg-danger text-white fw-bold';
+            progressBar.style.width = '100%';
+            progressBar.textContent = 'Error';
+            percentLabel.textContent = '0%';
+        };
+
+        relayXhr.send(formData);
     }
 
     // Direct Video Export & Download (WebCodecs / MediaRecorder)
@@ -1099,6 +1528,30 @@
             }
         }
     };
+
+    // Bind all studio controls via addEventListener (CSP-safe & reliable)
+    document.getElementById('btnTriggerUpload')?.addEventListener('click', () => document.getElementById('fvsFileInput')?.click());
+    document.getElementById('fvsDropzone')?.addEventListener('click', () => document.getElementById('fvsFileInput')?.click());
+    document.getElementById('btnExportDownload')?.addEventListener('click', () => window.exportLivingReelVideo());
+    document.getElementById('fvsFileInput')?.addEventListener('change', function() { window.handleDirectFileSelect(this); });
+    document.getElementById('fvsAudioInput')?.addEventListener('change', function() { window.handleAudioSelect(this); });
+    document.getElementById('fvsTimelineSlider')?.addEventListener('input', function() { window.scrubTimeline(this.value); });
+    document.getElementById('btnPlayPause')?.addEventListener('click', () => window.togglePlayback());
+    document.getElementById('btnRestart')?.addEventListener('click', () => window.restartPlayback());
+    document.getElementById('btnMuteToggle')?.addEventListener('click', () => window.toggleAudioMute());
+    document.getElementById('btnAudioTrigger')?.addEventListener('click', () => document.getElementById('fvsAudioInput')?.click());
+    document.getElementById('btnPublishTrigger')?.addEventListener('click', () => window.openPublishModal());
+    document.getElementById('btnModeSolo')?.addEventListener('click', () => window.setMatrixMode('solo'));
+    document.getElementById('btnModeQuad')?.addEventListener('click', () => window.setMatrixMode('quad_view'));
+    document.getElementById('btnModeSplit')?.addEventListener('click', () => window.setMatrixMode('split_duo'));
+    document.getElementById('fvsPublishForm')?.addEventListener('submit', (e) => window.submitPublishedReel(e));
+
+    document.querySelectorAll('.fvs-tpl-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const tplId = card.getAttribute('data-template');
+            if (tplId) window.selectTemplate(tplId);
+        });
+    });
 
     // Kick off animation loop
     renderFrame();

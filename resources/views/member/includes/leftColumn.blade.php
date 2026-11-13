@@ -119,7 +119,7 @@
             </p>
 
             <!-- Family Code Headline & Tonal Pill(s) (Headline with Married - XXX and Birth - XXX badges) -->
-            <div class="family-code-container d-flex flex-column align-items-center mb-3 w-100" id="leftColumnDualFamilyCodes" role="group" aria-label="{{ __('profile.family_codes', 'Married and Birth Family Codes') }}">
+            <div class="family-code-container d-flex flex-column align-items-center gap-2 mb-3 w-100" style="background:#faf6f0;border:1px solid #e6dfd5;border-radius:14px;padding:10px 14px;margin-bottom:1rem !important;" id="leftColumnDualFamilyCodes" role="group" aria-label="{{ __('profile.family_codes', 'Married and Birth Family Codes') }}">
                 <span class="family-code-headline text-uppercase fw-bold mb-1.5" style="font-size: 0.72rem; letter-spacing: 0.08em; color: var(--text-muted, #64748b);">
                     <i class="bi bi-qr-code me-1 opacity-75"></i>{{ $leftMarriedCode !== '' ? __('profile.family_codes_headline', 'Family Codes') : __('profile.family_code_headline', 'Family Code') }}
                 </span>
@@ -129,7 +129,7 @@
                            class="family-code-pill family-code-pill--married text-decoration-none"
                            id="marriedFamCodePill"
                            title="{{ __('profile.view_married_tree_tooltip', 'View Married / Household Family Tree') }} (#{{ $leftMarriedCode }})">
-                            <span class="family-code-label me-1">{{ __('profile.married_code_short', 'Married') }} -</span>
+                            <span class="family-code-label me-1">{{ __('profile.married_code_short', 'M') }} -</span>
                             <span class="family-code-value">{{ $leftMarriedCode }}</span>
                         </a>
                     @endif
@@ -138,7 +138,7 @@
                            class="family-code-pill {{ $leftMarriedCode !== '' ? 'family-code-pill--birth' : '' }} text-decoration-none"
                            id="birthFamCodePill"
                            title="{{ __('profile.view_birth_tree_tooltip', 'View Birth / Maiden Family Tree') }} (#{{ $leftEffectiveBirthCode }})">
-                            <span class="family-code-label {{ $leftMarriedCode !== '' ? 'family-code-label--birth' : '' }} me-1">{{ __('profile.birth_code_short', 'Birth') }} -</span>
+                            <span class="family-code-label {{ $leftMarriedCode !== '' ? 'family-code-label--birth' : '' }} me-1">{{ __('profile.birth_code_short', 'B') }} -</span>
                             <span class="family-code-value {{ $leftMarriedCode !== '' ? 'family-code-value--birth' : '' }}">{{ $leftEffectiveBirthCode }}</span>
                         </a>
                     @endif
@@ -151,7 +151,7 @@
                     ? \App\services\KinWhisperService::getUnreadWhisperCount((string)$_SESSION['id'])
                     : 0;
             @endphp
-            <div class="w-100 px-2 mb-2.5" id="leftColumnKinWhispersPortal">
+            <div class="w-100 px-2 mb-4" style="margin-bottom:1.5rem !important;" id="leftColumnKinWhispersPortal">
                 <a href="/kin-whispers" class="btn w-100 d-inline-flex align-items-center justify-content-between text-decoration-none position-relative"
                    style="background: linear-gradient(135deg, rgba(163,22,33,0.08) 0%, rgba(201,162,75,0.12) 100%); border: 1px solid rgba(163,22,33,0.22); border-radius: 12px; padding: 8px 12px; min-height: 44px; white-space: nowrap; flex-shrink: 0;"
                    title="{{ __('nav.whisper', 'Whisper — Private, artifact-anchored family messages and voice dedications') }}">
@@ -170,7 +170,7 @@
                     </div>
                     <div class="d-inline-flex align-items-center gap-1.5 flex-shrink-0">
                         <span class="badge rounded-pill bg-danger text-white whisper-portal-unread-badge {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.72rem; padding: 3px 7px; font-weight: 700; box-shadow: 0 2px 5px rgba(220,53,69,0.35);">
-                            <span class="whisper-portal-unread-count">{{ $leftWhisperUnreadCount > 9 ? '9+' : $leftWhisperUnreadCount }}</span>
+                            <span class="whisper-portal-unread-count">{{ $leftWhisperUnreadCount > 0 ? $leftWhisperUnreadCount : '' }}</span>
                         </span>
                         <span class="badge rounded-pill text-white" style="background: #a31621; font-size: 0.68rem; padding: 3px 8px;">
                             <i class="bi bi-chat-dots-fill me-0.5"></i> Whisper
@@ -235,7 +235,7 @@
                     <i class="bi bi-chat-dots-fill me-1.5" style="color: #a31621;"></i> Whisper
                     <i class="bi bi-bell-fill text-warning ms-1 whisper-portal-bell-icon {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.75rem;" title="Unread whispers"></i>
                     <span class="badge rounded-pill bg-danger text-white ms-1.5 whisper-portal-unread-badge {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.68rem; padding: 2px 6px;">
-                        <span class="whisper-portal-unread-count">{{ $leftWhisperUnreadCount > 9 ? '9+' : $leftWhisperUnreadCount }}</span>
+                        <span class="whisper-portal-unread-count">{{ $leftWhisperUnreadCount > 0 ? $leftWhisperUnreadCount : '' }}</span>
                     </span>
                 </a>
 

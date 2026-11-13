@@ -8,54 +8,56 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400&family=Great+Vibes&family=Montserrat:wght@400;600;700;800;900&family=Pacifico&display=swap">
 <style>
-.ps-wrap { --g1: #f3dc9a; --g2: #c9a24b; --ink: #17120c; --line: #e8e1d4; --surface: #fff; --muted: #6b6257; --soft: #faf7f1;
+.ps-wrap { --g1: #fbe9eb; --g2: #a31621; --ink: #1c1412; --line: #ece4da; --surface: #ffffff; --muted: #7a6a5f; --soft: #faf6f0;
     max-width: 1320px; margin: 0 auto; padding: 8px 16px 80px; color: var(--ink); }
 .dark-mode .ps-wrap { --ink: #f4efe6; --line: #2d2a26; --surface: #18171a; --muted: #a79f94; --soft: #201e22; }
-.ps-hero { position: relative; overflow: hidden; border-radius: 28px; padding: 26px 24px; margin-bottom: 22px; color: #fbf6ea;
-    background: radial-gradient(70% 120% at 90% 0%, rgba(201,162,75,.35), transparent 60%), radial-gradient(60% 90% at 0% 100%, rgba(10,70,60,.55), transparent 70%), linear-gradient(135deg, #0b0c0e, #141a18 55%, #1d1a10); }
-.ps-hero::after { content: ''; position: absolute; inset: 10px; border: 1px solid rgba(243,220,154,.25); border-radius: 20px; pointer-events: none; }
-.ps-eyebrow { font-family: 'Cinzel', Georgia, serif; font-size: .72rem; letter-spacing: .32em; text-transform: uppercase; color: var(--g1); margin-bottom: 8px; }
-.ps-hero h1 { font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: clamp(1.6rem, 3.4vw, 2.4rem); margin: 0 0 8px; color: #fff; line-height: 1.15; }
-.ps-hero h1 em { font-family: 'Great Vibes', cursive; font-style: normal; font-size: 1.25em; background: linear-gradient(110deg,#f3dc9a,#c9a24b 40%,#fff1c4 60%,#c9a24b); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.ps-hero p { color: rgba(251,246,234,.78); margin: 0; max-width: 640px; }
+.ps-hero { position: relative; overflow: hidden; border-radius: 24px; padding: 24px 24px; margin-bottom: 22px; color: #fbf6ea;
+    background: radial-gradient(70% 120% at 90% 0%, rgba(163,22,33,.35), transparent 60%), linear-gradient(135deg, #1c1412, #2b1115 65%, #3d1218); }
+.ps-hero::after { content: ''; position: absolute; inset: 10px; border: 1px solid rgba(255,255,255,.14); border-radius: 18px; pointer-events: none; }
+.ps-eyebrow { font-family: 'Outfit', sans-serif; font-size: .72rem; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: #f5c2c7; margin-bottom: 8px; }
+.ps-hero h1 { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: clamp(1.6rem, 3.2vw, 2.25rem); margin: 0 0 8px; color: #fff; line-height: 1.15; letter-spacing: -0.02em; }
+.ps-hero h1 em { font-family: 'Great Vibes', cursive; font-style: normal; font-weight: 400; font-size: 1.25em; color: #fca5a5; }
+.ps-hero p { color: rgba(251,246,234,.82); margin: 0; max-width: 640px; }
 @media (max-width: 575.98px) { .ps-hero { padding: 20px 18px; margin-bottom: 14px; } .ps-hero p { display: none; } }
 
 .ps-grid { display: grid; grid-template-columns: minmax(0,1fr); gap: 22px; }
 @media (min-width: 992px) { .ps-grid { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 28px; } }
 .ps-preview-col { order: -1; }
 @media (min-width: 992px) { .ps-preview-col { order: 2; } }
-.ps-stage { position: sticky; top: 84px; border-radius: 28px; padding: 22px; background: radial-gradient(70% 55% at 50% 30%, rgba(201,162,75,.18), transparent 70%), #0e0c10; box-shadow: inset 0 0 0 1px rgba(243,220,154,.14), 0 30px 60px -36px rgba(0,0,0,.7); }
+.ps-stage { position: sticky; top: 84px; border-radius: 24px; padding: 22px; background: #1c1412; box-shadow: inset 0 0 0 1px rgba(255,255,255,.1), 0 24px 48px -28px rgba(28,20,18,.55); }
 @media (max-width: 991.98px) { .ps-stage { position: relative; top: 0; padding: 16px; } }
 .ps-canvas-wrap { position: relative; margin: 0 auto; max-width: 440px; }
 @media (max-width: 575.98px) { .ps-canvas-wrap { max-width: 320px; } }
-.ps-canvas-wrap canvas { display: block; width: 100%; height: auto; border-radius: 10px; box-shadow: 0 24px 50px -20px rgba(0,0,0,.85), 0 0 0 1px rgba(243,220,154,.18); background: #1b191d; }
+.ps-canvas-wrap canvas { display: block; width: 100%; height: auto; border-radius: 12px; box-shadow: 0 24px 50px -20px rgba(0,0,0,.75), 0 0 0 1px rgba(255,255,255,.12); background: #1b191d; }
 .ps-ratios { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-.ps-ratio { min-height: 44px; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(243,220,154,.25); background: rgba(255,255,255,.05); color: #efe6d4; font-size: .8rem; font-weight: 600; cursor: pointer; }
-.ps-ratio[aria-pressed="true"] { background: linear-gradient(110deg,#f3dc9a,#c9a24b); color: #1b1406; border-color: transparent; }
+.ps-ratio { min-height: 44px; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: #efe6d4; font-size: .8rem; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+.ps-ratio[aria-pressed="true"] { background: #a31621; color: #ffffff; border-color: #a31621; }
 .ps-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
-.ps-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 10px 14px; border-radius: 16px; border: 1px solid rgba(243,220,154,.22); background: rgba(255,255,255,.06); color: #f4efe6; font-weight: 600; font-size: .9rem; cursor: pointer; text-decoration: none; }
+.ps-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 10px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: #f4efe6; font-weight: 700; font-size: .9rem; cursor: pointer; text-decoration: none; white-space: nowrap; flex-shrink: 0; }
 .ps-btn:hover { background: rgba(255,255,255,.12); color: #fff; }
 .ps-btn[disabled] { opacity: .6; cursor: progress; }
-.ps-btn--wa { grid-column: 1 / -1; background: linear-gradient(135deg, #25d366, #128c4a); border: 0; color: #fff; font-size: 1rem; min-height: 54px; }
-.ps-btn--gold { background: linear-gradient(110deg, #f3dc9a, #c9a24b 50%, #f3dc9a); color: #1b1406; border: 0; }
-.ps-btn--gold:hover { color: #1b1406; }
-.ps-note { text-align: center; color: rgba(239,230,212,.55); font-size: .76rem; margin: 10px 0 0; }
+.ps-btn--wa { grid-column: 1 / -1; background: #a31621; border: 0; color: #fff; font-size: .96rem; min-height: 52px; }
+.ps-btn--wa:hover { background: #8a1019; color: #fff; }
+.ps-btn--gold { background: #ffffff; color: #1c1412; border: 0; }
+.ps-btn--gold:hover { background: #faf6f0; color: #1c1412; }
+.ps-note { text-align: center; color: rgba(239,230,212,.6); font-size: .76rem; margin: 10px 0 0; }
 
-.ps-panel { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 20px 18px; box-shadow: 0 20px 40px -32px rgba(23,18,12,.35); }
+.ps-panel { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 20px 18px; box-shadow: 0 12px 32px -20px rgba(28,20,18,.15); }
 @media (min-width: 768px) { .ps-panel { padding: 26px; } }
 .ps-step { padding-bottom: 22px; margin-bottom: 22px; border-bottom: 1px solid var(--line); }
 .ps-step:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
 .ps-step__head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
-.ps-step__num { font-family: 'Cinzel', Georgia, serif; font-size: .78rem; color: var(--g2); letter-spacing: .12em; }
-.ps-step__title { font-family: 'Playfair Display', Georgia, serif; font-size: 1.2rem; font-weight: 500; margin: 0; color: var(--ink); }
+.ps-step__num { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: .78rem; color: #a31621; letter-spacing: .12em; }
+.ps-step__title { font-family: 'Outfit', sans-serif; font-size: 1.18rem; font-weight: 800; margin: 0; color: var(--ink); letter-spacing: -0.01em; }
 .ps-sub { color: var(--muted); font-size: .84rem; margin: -4px 0 12px; }
 
 .ps-occasions { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
 @media (min-width: 576px) { .ps-occasions { grid-template-columns: repeat(3, minmax(0,1fr)); } }
-.ps-tile { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 10px 12px; border-radius: 16px; border: 1.5px solid var(--line); background: var(--soft); color: var(--ink); cursor: pointer; text-align: left; font: inherit; }
-.ps-tile[aria-pressed="true"] { border-color: var(--g2); background: linear-gradient(135deg, rgba(243,220,154,.3), rgba(201,162,75,.08)); box-shadow: 0 8px 20px -12px rgba(201,162,75,.8); }
-.ps-tile__emoji { font-size: 1.3rem; flex: none; }
-.ps-tile__name { font-size: .84rem; font-weight: 600; line-height: 1.2; }
+.ps-tile { display: flex; align-items: center; gap: 10px; min-height: 54px; padding: 10px 12px; border-radius: 16px; border: 1.5px solid var(--line); background: var(--soft); color: var(--ink); cursor: pointer; text-align: left; font: inherit; }
+.ps-tile[aria-pressed="true"] { border-color: #a31621; background: #fbe9eb; color: #a31621; box-shadow: 0 6px 16px -10px rgba(163,22,33,.45); }
+.ps-tile__emoji { width: 32px; height: 32px; border-radius: 10px; background: rgba(163,22,33,.08); color: #a31621; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; flex: none; }
+.ps-tile[aria-pressed="true"] .ps-tile__emoji { background: #a31621; color: #ffffff; }
+.ps-tile__name { font-size: .84rem; font-weight: 700; line-height: 1.2; }
 
 .ps-event { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; padding: 12px 14px; border-radius: 16px; border: 1px dashed #cdb47a; background: linear-gradient(160deg, rgba(243,220,154,.15), transparent); }
 .ps-event label { font-size: .82rem; font-weight: 700; color: var(--muted); }
@@ -155,7 +157,7 @@
                     <div class="ps-occasions" role="group" aria-label="Occasion">
                         <template x-for="p in presets" :key="p.key">
                             <button type="button" class="ps-tile" :aria-pressed="presetKey === p.key" @click="applyPreset(p.key)">
-                                <span class="ps-tile__emoji" x-text="p.emoji" aria-hidden="true"></span>
+                                <span class="ps-tile__emoji" aria-hidden="true"><i class="bi" :class="p.icon"></i></span>
                                 <span class="ps-tile__name" x-text="p.label"></span>
                             </button>
                         </template>
@@ -196,7 +198,7 @@
                     </div>
                 </section>
 
-                <section class="ps-step">
+                <section class="ps-step" x-show="archetype !== 'neon_script_clash'">
                     <div class="ps-step__head"><span class="ps-step__num">III</span><h2 class="ps-step__title">Add a photo <span style="font-size:.8rem;color:var(--muted)">(optional)</span></h2></div>
                     <label class="ps-drop">
                         <input type="file" accept="image/*" @change="onPhoto($event.target.files[0]); $event.target.value = ''" aria-label="Upload a photo">
@@ -361,24 +363,24 @@ function posterStudio() {
     const blank = { badge: '', kicker: '', title: '', titleSecondary: '', subtitle: '', accentMetric: '', date: '', time: '', venue: '', address: '', hosts: '', dressCode: '', musicBy: '', footerStrip: '', watermarkText: '', rsvpContact: '', regulatoryNotice: '' };
 
     const PRESETS = [
-        { key: 'anniversary', emoji: '💍', label: 'Wedding Anniversary', theme: 'family_heirloom_gold', archetype: 'vip_black_gold', ratio: 'portrait', perks: 'Thanksgiving, Dinner, Dancing',
+        { key: 'reunion', icon: 'bi-house-heart', label: 'Family Reunion', theme: 'family_botanical', archetype: 'floral_chrome_overlap', ratio: 'portrait', perks: 'Family tree unveiling, Feast, Games',
+          d: { badge: 'ANNUAL FAMILY GATHERING', kicker: 'Grand Family Reunion', title: FAMILY_UP.replace(/^THE /, '').replace(/ FAMILY$/, '') || 'ADEYEMI', titleSecondary: 'Reunion', date: '15 AUG', time: '1:00 PM', venue: 'KEW GARDENS', address: 'RICHMOND · LONDON', musicBy: 'LIVE MUSIC & STORYTELLING', footerStrip: 'ALL GENERATIONS WELCOME · BRING A DISH' } },
+        { key: 'birthday', icon: 'bi-gift', label: 'Milestone Birthday', theme: 'party_neon', archetype: 'neon_script_clash', ratio: 'portrait', perks: 'Dinner, Music, Cake',
+          d: { badge: 'YOU’RE INVITED TO', kicker: 'Mum’s', title: '70TH', titleSecondary: 'BIRTHDAY', accentMetric: '70', date: 'SAT 10 OCT', time: '6:00 PM', venue: 'THE IVY CHELSEA GARDEN · LONDON', dressCode: 'ELEGANT', rsvpContact: 'RSVP TO FUNMI · 07700 900200' } },
+        { key: 'anniversary', icon: 'bi-heart', label: 'Wedding Anniversary', theme: 'family_heirloom_gold', archetype: 'vip_black_gold', ratio: 'portrait', perks: 'Thanksgiving, Dinner, Dancing',
           d: { badge: FAMILY_UP + ' INVITES YOU', kicker: 'Golden 50th', title: 'ANNIVERSARY', titleSecondary: 'CELEBRATION', accentMetric: '50 YEARS', date: 'SAT 22 AUG', time: '4:00 PM', venue: 'THE GRAND HALL', address: 'Add the address', dressCode: 'GOLD & IVORY', rsvpContact: 'RSVP BY 1 AUG', watermarkText: 'FIFTY' } },
-        { key: 'reunion', emoji: '🏡', label: 'Family Reunion', theme: 'family_botanical', archetype: 'floral_chrome_overlap', ratio: 'portrait', perks: 'Family tree unveiling, Feast, Games',
-          d: { badge: 'ANNUAL FAMILY GATHERING', kicker: 'Grand Family\nReunion', title: FAMILY_UP.replace(/^THE /, '').replace(/ FAMILY$/, '') || 'FAMILY', titleSecondary: 'Reunion', date: '15 AUG', time: '1 PM', venue: 'Add the venue', musicBy: 'LIVE MUSIC & STORYTELLING', footerStrip: 'ALL GENERATIONS WELCOME • BRING A DISH' } },
-        { key: 'naming', emoji: '👶', label: 'Naming Ceremony', theme: 'family_pastel_baby', archetype: 'acrylic_keepsake_block', ratio: 'portrait', perks: '',
+        { key: 'naming', icon: 'bi-stars', label: 'Naming Ceremony', theme: 'family_pastel_baby', archetype: 'acrylic_keepsake_block', ratio: 'portrait', perks: '',
           d: { badge: 'JOYFUL BLESSINGS', kicker: 'Welcome', title: 'NAMING\nCEREMONY', date: 'SUNDAY 14 JUNE', time: '12 NOON', venue: 'Add the venue', hosts: 'PROUD PARENTS & GRANDPARENTS', rsvpContact: 'RSVP • add a number' } },
-        { key: 'birthday', emoji: '🎂', label: 'Milestone Birthday', theme: 'party_floral_chrome', archetype: 'floral_chrome_overlap', ratio: 'portrait', perks: 'Dinner, Music, Cake',
-          d: { badge: 'YOU’RE INVITED TO', kicker: 'Mum’s', title: '70TH', titleSecondary: 'BIRTHDAY', accentMetric: '70', date: 'SAT 10 OCT', time: '6:00 PM', venue: 'Add the venue', dressCode: 'ELEGANT', rsvpContact: 'RSVP • add a number' } },
-        { key: 'wedding', emoji: '💐', label: 'Wedding', theme: 'party_floral_chrome', archetype: 'floral_chrome_overlap', ratio: 'portrait', perks: 'Ceremony, Reception, Dancing',
+        { key: 'wedding', icon: 'bi-flower1', label: 'Wedding', theme: 'family_botanical', archetype: 'floral_chrome_overlap', ratio: 'portrait', perks: 'Ceremony, Reception, Dancing',
           d: { badge: 'TOGETHER WITH THEIR FAMILIES', kicker: 'Ada & Tunde', title: 'WEDDING', titleSecondary: 'Celebration', date: '12 SEP', time: '11 AM', venue: 'Add the venue', dressCode: 'TRADITIONAL ATTIRE', rsvpContact: 'RSVP BY 1 AUG' } },
-        { key: 'graduation', emoji: '🎓', label: 'Graduation', theme: 'party_black_gold', archetype: 'vip_black_gold', ratio: 'portrait', perks: 'Thanksgiving, Lunch',
-          d: { badge: 'CELEBRATE WITH US', kicker: 'Congratulations', title: 'GRADUATE', titleSecondary: 'CLASS OF 2026', date: 'SAT 18 JUL', time: '2:00 PM', venue: 'Add the venue', rsvpContact: 'RSVP • add a number' } },
-        { key: 'life', emoji: '🕊️', label: 'Celebration of Life', theme: 'family_heirloom_gold', archetype: 'vip_black_gold', ratio: 'portrait', perks: '',
+        { key: 'graduation', icon: 'bi-mortarboard', label: 'Graduation', theme: 'party_neon', archetype: 'neon_script_clash', ratio: 'portrait', perks: 'Thanksgiving, Lunch',
+          d: { badge: 'CELEBRATE WITH US', kicker: 'Congratulations', title: '2026', titleSecondary: 'GRADUATION', date: 'SAT 18 JUL', time: '2:00 PM', venue: 'Add the venue', dressCode: 'SMART ELEGANT', rsvpContact: 'RSVP • add a number' } },
+        { key: 'life', icon: 'bi-feather', label: 'Celebration of Life', theme: 'family_botanical', archetype: 'floral_chrome_overlap', ratio: 'portrait', perks: '',
           d: { badge: 'IN LOVING MEMORY', kicker: 'Celebrating the life of', title: 'FULL NAME', titleSecondary: '1945 – 2026', date: 'FRI 4 DEC', time: '10:00 AM', venue: 'Add the venue', address: 'Reception to follow', dressCode: 'WHITE & BLACK', footerStrip: 'FOREVER IN OUR HEARTS' } },
-        { key: 'thanksgiving', emoji: '🙏', label: 'Thanksgiving Service', theme: 'family_botanical', archetype: 'floral_chrome_overlap', ratio: 'portrait', perks: 'Service, Lunch',
+        { key: 'thanksgiving', icon: 'bi-sun', label: 'Thanksgiving Service', theme: 'family_botanical', archetype: 'floral_chrome_overlap', ratio: 'portrait', perks: 'Service, Lunch',
           d: { badge: FAMILY_UP + ' INVITES YOU', kicker: 'Thanksgiving', title: 'SERVICE', titleSecondary: 'with Gratitude', date: 'SUN 6 SEP', time: '10:00 AM', venue: 'Add the church / venue', rsvpContact: 'ALL ARE WELCOME' } },
-        { key: 'festive', emoji: '🎄', label: 'Festive Gathering', theme: 'party_floral_chrome', archetype: 'floral_chrome_overlap', ratio: 'portrait', perks: 'Dinner, Carols, Games',
-          d: { badge: FAMILY_UP, kicker: 'Christmas', title: 'FAMILY', titleSecondary: 'Get-together', date: 'SAT 26 DEC', time: '3:00 PM', venue: 'Add the venue', dressCode: 'FESTIVE RED & GOLD' } },
+        { key: 'festive', icon: 'bi-snow', label: 'Festive Gathering', theme: 'party_neon', archetype: 'neon_script_clash', ratio: 'portrait', perks: 'Dinner, Carols, Games',
+          d: { badge: FAMILY_UP, kicker: 'Christmas', title: '2026', titleSecondary: 'GET-TOGETHER', date: 'SAT 26 DEC', time: '3:00 PM', venue: 'Add the venue', dressCode: 'FESTIVE CRIMSON' } },
     ];
     // Wording for the engine's fixed captions (shared-lib >= v2.12.5; older engines ignore it)
     const LABELS_DEFAULT = { timeLead: 'FROM', venueLine1: 'VENUE', venueLine2: '', dressLine1: 'DRESS', dressLine2: 'CODE', rsvp: 'rsvp', sealTop: '', sealBottom: '' };
@@ -390,11 +392,11 @@ function posterStudio() {
     };
     PRESETS.forEach((p) => { p.labels = LABEL_SETS[p.key] || LABELS_DEFAULT; });
     const LAYOUTS = [
-        { id: 'vip_black_gold', label: 'Editorial Gold' },
         { id: 'floral_chrome_overlap', label: 'Botanical Bloom' },
+        { id: 'neon_script_clash', label: 'Neon Script' },
+        { id: 'vip_black_gold', label: 'Editorial Classic' },
         { id: 'acrylic_keepsake_block', label: 'Crystal Keepsake' },
         { id: 'pool_tropical_split', label: 'Bright Split' },
-        { id: 'neon_script_clash', label: 'Neon Script' },
     ];
     const THEMES = [
         { id: 'family_heirloom_gold', label: 'Heirloom Gold', swatch: 'linear-gradient(135deg,#0d3b2e 0 50%,#d4af37 50%)' },
@@ -411,12 +413,547 @@ function posterStudio() {
     let thumbTimer = null;
     let saveTimer = null;
 
+    if (typeof AtgUniversalPosterEngine !== 'undefined' && AtgUniversalPosterEngine.prototype) {
+        AtgUniversalPosterEngine.prototype._drawBotanicalCornerSprig = function (ctx, cx, cy, scale, rotationRad) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(rotationRad);
+            ctx.scale(scale, scale);
+
+            // Curved sage-green botanical stem
+            ctx.strokeStyle = '#3d4f41';
+            ctx.lineWidth = 3.2;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(-48, 36, -96, 86, -150, 148);
+            ctx.stroke();
+
+            // Secondary side stem
+            ctx.beginPath();
+            ctx.moveTo(-44, 34);
+            ctx.quadraticCurveTo(-110, 26, -156, 56);
+            ctx.stroke();
+
+            // Sage-green leaves along stems
+            const drawLeaf = (lx, ly, rx, ry, rot, fill) => {
+                ctx.save();
+                ctx.translate(lx, ly);
+                ctx.rotate(rot);
+                ctx.fillStyle = fill || '#6e8473';
+                ctx.beginPath();
+                ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#3d4f41';
+                ctx.lineWidth = 1.4;
+                ctx.beginPath();
+                ctx.moveTo(-rx * 0.75, 0);
+                ctx.lineTo(rx * 0.75, 0);
+                ctx.stroke();
+                ctx.restore();
+            };
+
+            drawLeaf(-34, 16, 22, 10, -0.55, '#6e8473');
+            drawLeaf(-62, 62, 24, 11, 0.45, '#839788');
+            drawLeaf(-96, 72, 22, 10, -0.65, '#6e8473');
+            drawLeaf(-118, 118, 20, 9, 0.35, '#839788');
+            drawLeaf(-108, 34, 20, 9, -0.25, '#839788');
+            drawLeaf(-148, 54, 18, 8, -0.45, '#6e8473');
+
+            // 5-petal crimson blossoms (#a31621) with warm ochre centre
+            const drawBlossom = (bx, by, r) => {
+                ctx.save();
+                ctx.translate(bx, by);
+                for (let i = 0; i < 5; i++) {
+                    const a = (i / 5) * Math.PI * 2 - Math.PI / 2;
+                    ctx.save();
+                    ctx.rotate(a);
+                    ctx.fillStyle = '#a31621';
+                    ctx.beginPath();
+                    ctx.ellipse(0, -r * 0.72, r * 0.52, r * 0.68, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+                ctx.fillStyle = '#d98a3c';
+                ctx.beginPath();
+                ctx.arc(0, 0, r * 0.32, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            };
+
+            drawBlossom(-48, 38, 22);
+            drawBlossom(-106, 98, 16);
+            drawBlossom(-136, 42, 13);
+            ctx.restore();
+        };
+
+        /* Artboard 11 — Botanical Bloom (Cream ground, arch photo frame, drawn sprigs, script over serif) */
+        AtgUniversalPosterEngine.prototype._renderArchetypeFloralChrome = function (ctx, w, h) {
+            const cx = w / 2;
+            const d = this.data || {};
+
+            // 1. Warm Cream Ground (#f6efe6)
+            ctx.save();
+            ctx.fillStyle = '#f6efe6';
+            ctx.fillRect(0, 0, w, h);
+
+            if (this.backgroundImage && this.backgroundImage.complete && this.backgroundImage.naturalWidth > 0 && !this._isBuiltInAsset(this.backgroundImage.src || '')) {
+                this._drawCoverImage(ctx, this.backgroundImage, w, h, 0.18);
+            }
+
+            // 2. Double Thin Sage-Green Inset Border (#4a5d4e outer, #839788 inner)
+            const m1 = Math.round(w * 0.042);
+            const m2 = Math.round(w * 0.054);
+            ctx.strokeStyle = '#4a5d4e';
+            ctx.lineWidth = 2.5;
+            ctx.strokeRect(m1, m1, w - m1 * 2, h - m1 * 2);
+
+            ctx.strokeStyle = '#839788';
+            ctx.lineWidth = 1.2;
+            ctx.strokeRect(m2, m2, w - m2 * 2, h - m2 * 2);
+            ctx.restore();
+
+            // 3. Drawn Botanical Sprigs in Top-Right and Bottom-Left Corners
+            const sprigScale = w / 1080;
+            this._drawBotanicalCornerSprig(ctx, w - m2 - 14, m2 + 14, sprigScale, 0);
+            this._drawBotanicalCornerSprig(ctx, m2 + 14, h - m2 - 90, sprigScale, Math.PI);
+
+            // 4. Top Tracked Uppercase Badge + Flowing Crimson Script Kicker + Sage Divider
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#3d4f41';
+            ctx.font = `700 ${Math.round(w * 0.020)}px "Outfit", "Montserrat", sans-serif`;
+            const topBadge = (d.badge || 'ANNUAL FAMILY GATHERING').toUpperCase();
+            this._drawTrackedText(ctx, topBadge, cx, h * 0.095, 5);
+
+            const scriptKicker = d.kicker || 'Grand Family Reunion';
+            ctx.fillStyle = '#a31621';
+            ctx.font = `400 ${Math.round(w * 0.068)}px "Great Vibes", "Sacramento", "Alex Brush", cursive`;
+            ctx.fillText(scriptKicker, cx, h * 0.155);
+
+            // Subtle horizontal sage line with central diamond
+            const lineY = h * 0.180;
+            const lineHalf = w * 0.18;
+            ctx.strokeStyle = '#839788';
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.moveTo(cx - lineHalf, lineY);
+            ctx.lineTo(cx - 14, lineY);
+            ctx.moveTo(cx + 14, lineY);
+            ctx.lineTo(cx + lineHalf, lineY);
+            ctx.stroke();
+
+            ctx.fillStyle = '#a31621';
+            ctx.beginPath();
+            ctx.moveTo(cx, lineY - 5);
+            ctx.lineTo(cx + 5, lineY);
+            ctx.lineTo(cx, lineY + 5);
+            ctx.lineTo(cx - 5, lineY);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+
+            // 5. Central Arch Photo Frame (Rounded Arch Top, Flat Bottom, Double Sage Border)
+            const archW = Math.round(w * 0.48);
+            const archH = Math.round(h * 0.37);
+            const archX = Math.round(cx - archW / 2);
+            const archY = Math.round(h * 0.205);
+            const archRadius = archW / 2;
+
+            const traceArchPath = (inset) => {
+                const ix = archX + inset;
+                const iy = archY + inset;
+                const iw = archW - inset * 2;
+                const ih = archH - inset * 2;
+                const ir = iw / 2;
+                ctx.beginPath();
+                ctx.arc(ix + ir, iy + ir, ir, Math.PI, 0, false);
+                ctx.lineTo(ix + iw, iy + ih);
+                ctx.lineTo(ix, iy + ih);
+                ctx.closePath();
+            };
+
+            ctx.save();
+            traceArchPath(0);
+            ctx.fillStyle = '#e8dccb';
+            ctx.fill();
+            ctx.clip();
+
+            // Subtle diagonal warm gradient inside the arch
+            const archGrad = ctx.createLinearGradient(archX, archY, archX + archW, archY + archH);
+            archGrad.addColorStop(0, '#efe5d6');
+            archGrad.addColorStop(1, '#dfd0bc');
+            ctx.fillStyle = archGrad;
+            ctx.fillRect(archX, archY, archW, archH);
+
+            // Render user's uploaded photo inside the arch if present, else clean labelled tinted placeholder
+            const userPhoto = this.processedSubjectCanvas || this.subjectImage;
+            const hasUserPhoto = userPhoto && (userPhoto.width > 0 || userPhoto.naturalWidth > 0);
+            if (hasUserPhoto) {
+                const pw = userPhoto.naturalWidth || userPhoto.width;
+                const ph = userPhoto.naturalHeight || userPhoto.height;
+                const userScale = Number(d.subjectScale) || 1;
+                const offX = (Number(d.subjectOffsetX) || 0) * (w / 100);
+                const offY = (Number(d.subjectOffsetY) || 0) * (h / 100);
+                const fitScale = Math.max(archW / pw, archH / ph) * userScale;
+                const dw = pw * fitScale;
+                const dh = ph * fitScale;
+                ctx.drawImage(userPhoto, cx - dw / 2 + offX, archY + (archH - dh) / 2 + offY, dw, dh);
+            } else {
+                // Warm labelled placeholder matching Artboard 11
+                ctx.strokeStyle = 'rgba(74, 93, 78, 0.45)';
+                ctx.lineWidth = 2.5;
+                const iconCy = archY + archH * 0.46;
+                ctx.beginPath();
+                ctx.arc(cx, iconCy - 18, 22, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(cx, iconCy + 34, 38, Math.PI * 1.15, Math.PI * 1.85, false);
+                ctx.stroke();
+
+                ctx.fillStyle = '#5c5349';
+                ctx.textAlign = 'center';
+                ctx.font = `600 ${Math.round(w * 0.022)}px "Outfit", "Montserrat", sans-serif`;
+                ctx.fillText('Family photo', cx, archY + archH * 0.72);
+            }
+            ctx.restore();
+
+            // Double sage-green arch border
+            ctx.save();
+            traceArchPath(0);
+            ctx.strokeStyle = '#3d4f41';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            traceArchPath(8);
+            ctx.strokeStyle = '#839788';
+            ctx.lineWidth = 1.4;
+            ctx.stroke();
+            ctx.restore();
+
+            // 6. Bold Deep-Green Serif Family Title ("ADEYEMI") + Crimson Script Overlay ("Reunion")
+            const mainTitle = String(d.title || 'ADEYEMI').toUpperCase();
+            const subScript = String(d.titleSecondary || 'Reunion');
+            const titleY = h * 0.675;
+
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#253529';
+            let titlePx = Math.round(w * 0.095);
+            ctx.font = `900 ${titlePx}px "Playfair Display", "Cinzel", Georgia, serif`;
+            while (titlePx > 36 && ctx.measureText(mainTitle).width > w * 0.80) {
+                titlePx -= 4;
+                ctx.font = `900 ${titlePx}px "Playfair Display", "Cinzel", Georgia, serif`;
+            }
+            this._drawTrackedText(ctx, mainTitle, cx, titleY, 6);
+
+            if (subScript) {
+                ctx.fillStyle = '#a31621';
+                ctx.font = `400 ${Math.round(w * 0.078)}px "Great Vibes", "Sacramento", "Alex Brush", cursive`;
+                ctx.fillText(subScript, cx, titleY + h * 0.048);
+            }
+            ctx.restore();
+
+            // 7. Three-Column Divided Metadata Bar (DATE | FROM | VENUE)
+            const metaTop = h * 0.760;
+            const metaBot = h * 0.855;
+            const metaLeft = w * 0.10;
+            const metaRight = w * 0.90;
+            const colW = (metaRight - metaLeft) / 3;
+
+            ctx.save();
+            ctx.strokeStyle = '#b7c4b9';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(metaLeft, metaTop);
+            ctx.lineTo(metaRight, metaTop);
+            ctx.moveTo(metaLeft, metaBot);
+            ctx.lineTo(metaRight, metaBot);
+            ctx.moveTo(metaLeft + colW, metaTop + 14);
+            ctx.lineTo(metaLeft + colW, metaBot - 14);
+            ctx.moveTo(metaLeft + colW * 2, metaTop + 14);
+            ctx.lineTo(metaLeft + colW * 2, metaBot - 14);
+            ctx.stroke();
+
+            const cols = [
+                { label: 'DATE', val: (d.date || 'SAT 24 AUG').toUpperCase() },
+                { label: 'FROM', val: (d.time || '1:00 PM').toUpperCase() },
+                { label: 'VENUE', val: (d.venue || 'VICTORIA PARK').toUpperCase() },
+            ];
+            cols.forEach((c, idx) => {
+                const colCx = metaLeft + colW * idx + colW / 2;
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#6e7f71';
+                ctx.font = `700 ${Math.round(w * 0.016)}px "Outfit", "Montserrat", sans-serif`;
+                this._drawTrackedText(ctx, c.label, colCx, metaTop + (metaBot - metaTop) * 0.36, 3);
+
+                ctx.fillStyle = '#253529';
+                let vPx = Math.round(w * 0.024);
+                ctx.font = `800 ${vPx}px "Playfair Display", Georgia, serif`;
+                while (vPx > 14 && ctx.measureText(c.val).width > colW - 18) {
+                    vPx -= 1;
+                    ctx.font = `800 ${vPx}px "Playfair Display", Georgia, serif`;
+                }
+                ctx.fillText(c.val, colCx, metaTop + (metaBot - metaTop) * 0.74);
+            });
+
+            if (d.address) {
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#5c5349';
+                ctx.font = `600 ${Math.round(w * 0.019)}px "Outfit", "Montserrat", sans-serif`;
+                ctx.fillText(d.address, cx, metaBot + h * 0.032);
+            }
+            ctx.restore();
+
+            // 8. Deep Forest-Green Bottom Footer Bar (#253529) with White Tracked Text
+            const barH = Math.round(h * 0.056);
+            const barY = h - m2 - barH;
+            const barX = m2;
+            const barW = w - m2 * 2;
+
+            ctx.save();
+            ctx.fillStyle = '#253529';
+            ctx.fillRect(barX, barY, barW, barH);
+
+            ctx.fillStyle = '#f6efe6';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = `700 ${Math.round(w * 0.017)}px "Outfit", "Montserrat", sans-serif`;
+            const perksStr = Array.isArray(d.perks) && d.perks.length
+                ? d.perks.join(' · ')
+                : (d.rsvpContact || d.hosts || 'ALL BRANCHES WELCOME · BRING A DISH TO SHARE');
+            this._drawTrackedText(ctx, String(perksStr).toUpperCase(), cx, barY + barH / 2, 3);
+            ctx.restore();
+        };
+
+        /* Artboard 12 — Neon Script (Text-only, hollow cyan "70TH", glowing pink script across it, neon tube frames) */
+        AtgUniversalPosterEngine.prototype._renderArchetypeNeonClash = function (ctx, w, h) {
+            const cx = w / 2;
+            const d = this.data || {};
+
+            // 1. Deep Midnight-Violet Ground (#12091c to #09040f) + Central Magenta/Cyan Radial Aura
+            ctx.save();
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+            bgGrad.addColorStop(0, '#140822');
+            bgGrad.addColorStop(0.5, '#1b0b2e');
+            bgGrad.addColorStop(1, '#090312');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, w, h);
+
+            const auraPink = ctx.createRadialGradient(cx, h * 0.36, 10, cx, h * 0.36, w * 0.48);
+            auraPink.addColorStop(0, 'rgba(255, 42, 133, 0.28)');
+            auraPink.addColorStop(0.55, 'rgba(0, 240, 255, 0.12)');
+            auraPink.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = auraPink;
+            ctx.fillRect(0, 0, w, h);
+            ctx.restore();
+
+            // 2. Concentric Glowing Neon Tube Frames (Outer Hot-Pink #ff2a85, Inner Cyan #00f0ff)
+            const mOuter = Math.round(w * 0.046);
+            const mInner = Math.round(w * 0.064);
+
+            ctx.save();
+            ctx.strokeStyle = '#ff2a85';
+            ctx.lineWidth = 4;
+            ctx.shadowColor = '#ff2a85';
+            ctx.shadowBlur = 22;
+            this._roundRect(ctx, mOuter, mOuter, w - mOuter * 2, h - mOuter * 2, 26);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 2.5;
+            ctx.shadowColor = '#00f0ff';
+            ctx.shadowBlur = 18;
+            this._roundRect(ctx, mInner, mInner, w - mInner * 2, h - mInner * 2, 18);
+            ctx.stroke();
+            ctx.restore();
+
+            // 3. Top Tracked White Invitation Badge ("YOU'RE INVITED TO")
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.font = `700 ${Math.round(w * 0.021)}px "Outfit", "Montserrat", sans-serif`;
+            this._drawTrackedText(ctx, (d.badge || "YOU'RE INVITED TO").toUpperCase(), cx, h * 0.135, 6);
+            ctx.restore();
+
+            // 4. Giant Hollow Cyan Neon Outline ("70TH") with Glowing Hot-Pink Script ("Mum's") Laid Across It
+            const rawTitle = String(d.title || '70TH').toUpperCase();
+            const rawKicker = String(d.kicker || "Mum's");
+            const rawSecondary = String(d.titleSecondary || 'BIRTHDAY').toUpperCase();
+
+            // Hollow Cyan Headline ("70TH")
+            ctx.save();
+            ctx.textAlign = 'center';
+            let bigPx = Math.round(w * 0.24);
+            ctx.font = `900 ${bigPx}px "Outfit", "Montserrat", sans-serif`;
+            while (bigPx > 72 && ctx.measureText(rawTitle).width > w * 0.78) {
+                bigPx -= 8;
+                ctx.font = `900 ${bigPx}px "Outfit", "Montserrat", sans-serif`;
+            }
+            const bigY = h * 0.395;
+
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 6;
+            ctx.shadowColor = '#00f0ff';
+            ctx.shadowBlur = 28;
+            ctx.strokeText(rawTitle, cx, bigY);
+
+            ctx.strokeStyle = '#e0faff';
+            ctx.lineWidth = 2.2;
+            ctx.shadowBlur = 8;
+            ctx.strokeText(rawTitle, cx, bigY);
+            ctx.restore();
+
+            // Glowing Hot-Pink Neon Script Laid Diagonally Across It ("Mum's")
+            if (rawKicker) {
+                this._renderNeonScriptText(
+                    ctx,
+                    rawKicker,
+                    cx,
+                    h * 0.285,
+                    Math.round(w * 0.125),
+                    '#ffd6e8',
+                    '#ff2a85',
+                    -0.08
+                );
+            }
+
+            // 5. Bold White Secondary Headline ("BIRTHDAY") Flanked by Neon Bars
+            const secY = h * 0.495;
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = '#ff2a85';
+            ctx.shadowBlur = 16;
+            ctx.font = `900 ${Math.round(w * 0.068)}px "Outfit", "Montserrat", sans-serif`;
+            this._drawTrackedText(ctx, rawSecondary, cx, secY, 10);
+
+            // Flanking horizontal neon bars under/beside secondary headline
+            const barY = secY + h * 0.032;
+            ctx.strokeStyle = '#ff2a85';
+            ctx.lineWidth = 3;
+            ctx.shadowColor = '#ff2a85';
+            ctx.shadowBlur = 14;
+            ctx.beginPath();
+            ctx.moveTo(cx - w * 0.26, barY);
+            ctx.lineTo(cx - w * 0.04, barY);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#00f0ff';
+            ctx.shadowColor = '#00f0ff';
+            ctx.beginPath();
+            ctx.moveTo(cx + w * 0.04, barY);
+            ctx.lineTo(cx + w * 0.26, barY);
+            ctx.stroke();
+            ctx.restore();
+
+            // 6. Subtitle ("A milestone evening of music, dinner & dancing")
+            const subText = d.subtitle || 'A milestone evening of music, dinner & dancing';
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#e2d4f0';
+            ctx.font = `500 ${Math.round(w * 0.023)}px "Outfit", "Montserrat", sans-serif`;
+            ctx.fillText(subText, cx, h * 0.575);
+            ctx.restore();
+
+            // 7. Three-Column Divided Neon Details Grid (DATE | FROM | DRESS CODE)
+            const gridTop = h * 0.620;
+            const gridBot = h * 0.715;
+            const gridLeft = w * 0.11;
+            const gridRight = w * 0.89;
+            const colW = (gridRight - gridLeft) / 3;
+
+            ctx.save();
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(gridLeft, gridTop);
+            ctx.lineTo(gridRight, gridTop);
+            ctx.moveTo(gridLeft, gridBot);
+            ctx.lineTo(gridRight, gridBot);
+            ctx.moveTo(gridLeft + colW, gridTop + 14);
+            ctx.lineTo(gridLeft + colW, gridBot - 14);
+            ctx.moveTo(gridLeft + colW * 2, gridTop + 14);
+            ctx.lineTo(gridLeft + colW * 2, gridBot - 14);
+            ctx.stroke();
+
+            const cols = [
+                { label: 'DATE', val: (d.date || 'SAT 14 NOV').toUpperCase() },
+                { label: 'FROM', val: (d.time || '6:00 PM').toUpperCase() },
+                { label: 'DRESS CODE', val: (d.dressCode || 'GOLD & BURGUNDY').toUpperCase() },
+            ];
+            cols.forEach((c, idx) => {
+                const colCx = gridLeft + colW * idx + colW / 2;
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#00f0ff';
+                ctx.font = `700 ${Math.round(w * 0.015)}px "Outfit", "Montserrat", sans-serif`;
+                this._drawTrackedText(ctx, c.label, colCx, gridTop + (gridBot - gridTop) * 0.36, 3);
+
+                ctx.fillStyle = '#ffffff';
+                let vPx = Math.round(w * 0.023);
+                ctx.font = `800 ${vPx}px "Outfit", "Montserrat", sans-serif`;
+                while (vPx > 13 && ctx.measureText(c.val).width > colW - 16) {
+                    vPx -= 1;
+                    ctx.font = `800 ${vPx}px "Outfit", "Montserrat", sans-serif`;
+                }
+                ctx.fillText(c.val, colCx, gridTop + (gridBot - gridTop) * 0.74);
+            });
+            ctx.restore();
+
+            // 8. Venue + Address Line + Glowing Hot-Pink Pill Ribbon ("DINNER · MUSIC · CAKE") + RSVP Footer
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `800 ${Math.round(w * 0.028)}px "Outfit", "Montserrat", sans-serif`;
+            ctx.fillText((d.venue || 'THE GRAND PALM HALL').toUpperCase(), cx, h * 0.770);
+
+            if (d.address) {
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = `500 ${Math.round(w * 0.019)}px "Outfit", "Montserrat", sans-serif`;
+                ctx.fillText(d.address, cx, h * 0.802);
+            }
+
+            // Glowing Hot-Pink Pill Ribbon
+            const pillW = Math.round(w * 0.56);
+            const pillH = Math.round(h * 0.044);
+            const pillX = Math.round(cx - pillW / 2);
+            const pillY = Math.round(h * 0.832);
+
+            ctx.fillStyle = 'rgba(255, 42, 133, 0.16)';
+            ctx.strokeStyle = '#ff2a85';
+            ctx.lineWidth = 2;
+            ctx.shadowColor = '#ff2a85';
+            ctx.shadowBlur = 16;
+            this._roundRect(ctx, pillX, pillY, pillW, pillH, pillH / 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#ffd6e8';
+            ctx.textBaseline = 'middle';
+            ctx.font = `800 ${Math.round(w * 0.018)}px "Outfit", "Montserrat", sans-serif`;
+            const perksLine = Array.isArray(d.perks) && d.perks.length
+                ? d.perks.join(' · ')
+                : 'DINNER · MUSIC · CAKE';
+            this._drawTrackedText(ctx, String(perksLine).toUpperCase(), cx, pillY + pillH / 2, 3);
+
+            // Bottom RSVP Line
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.78)';
+            ctx.font = `700 ${Math.round(w * 0.017)}px "Outfit", "Montserrat", sans-serif`;
+            const rsvpLine = [d.rsvpContact, d.hosts].filter(Boolean).join(' · ') || 'RSVP BY 1 NOV';
+            this._drawTrackedText(ctx, rsvpLine.toUpperCase(), cx, h * 0.912, 3);
+            ctx.restore();
+        };
+    }
+
     return {
         presets: PRESETS, themes: THEMES,
         // Bright Split suits pastel; Crystal Keepsake art is a baby teddy block, so only offer it for naming/baby posters
         get layouts() { return LAYOUTS.filter((l) => (l.id !== 'pool_tropical_split' || this.theme === 'family_pastel_baby') && (l.id !== 'acrylic_keepsake_block' || this.presetKey === 'naming')); },
         ratios: [{ id: 'portrait', label: 'Portrait 4:5' }, { id: 'story', label: 'WhatsApp Status 9:16' }, { id: 'feed', label: 'Square 1:1' }, { id: 'poster_a4', label: 'A4 Print' }],
-        presetKey: 'anniversary', theme: 'family_heirloom_gold', archetype: 'vip_black_gold', ratio: 'portrait',
+        presetKey: 'reunion', theme: 'family_botanical', archetype: 'floral_chrome_overlap', ratio: 'portrait',
         d: { ...blank }, perks: '',
         photoSrc: null, photoUrl: '', cutoutUrl: null, cutting: false, cutout: true, ghost: true, scale: 1, offsetX: 0, offsetY: 0, hasBackdrop: false,
         busy: false, posted: false, restoredDraft: false, guideOpen: false,
@@ -427,7 +964,7 @@ function posterStudio() {
             window.fpPosterEngine = engine;
             const draft = this.loadDraft();
             if (draft) { Object.assign(this, draft); this.restoredDraft = true; }
-            else { this.applyPreset('anniversary', true); }
+            else { this.applyPreset('reunion', true); }
             this.d.qrUrl = this.d.qrUrl || JOIN_URL;
             this.render();
             engine.preloadStudioAssets(ASSET).then(() => this.render());

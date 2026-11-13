@@ -27,6 +27,18 @@ final class KinWhisperService
     public const int MAX_MESSAGE_LENGTH = 2000;
     public const int MAX_AUDIO_DURATION_SECONDS = 60;
     public const int MAX_AUDIO_FILE_SIZE = 2097152; // 2MB
+    public const int MAX_MEDIA_FILE_SIZE = 15728640; // 15MB
+
+    public const array ALLOWED_MEDIA_MIMES = [
+        // Images
+        'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic',
+        // Documents
+        'application/pdf', 'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'text/plain',
+        // Video
+        'video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v', 'video/ogg'
+    ];
 
     public const array ALLOWED_CONTEXT_TYPES = [
         'catch_up',
@@ -64,6 +76,12 @@ final class KinWhisperService
         86400,  // 24 hours
     ];
 
+    /** @var array<string, string> */
+    private static array $avatarCache = [];
+
+    /** @var int */
+    private static int $lastPruneTimestamp = 0;
+
     /**
      * Resolve a profile image filename or URL to a valid, publicly served asset URL.
      *
@@ -78,35 +96,40 @@ final class KinWhisperService
         }
 
         $img = trim($img);
+        if (isset(self::$avatarCache[$img])) {
+            return self::$avatarCache[$img];
+        }
+
         if (
             $img === ''
             || str_contains($img, 'avatarM')
             || str_contains($img, 'avatarF')
             || str_contains($img, 'default-avatar')
         ) {
-            return str_contains($img, 'avatarF')
+            $res = str_contains($img, 'avatarF')
                 ? '/resources/images/profile/avatarF.png'
                 : $fallback;
+            return self::$avatarCache[$img] = $res;
         }
 
         if (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) {
-            return $img;
+            return self::$avatarCache[$img] = $img;
         }
 
         $basename = basename($img);
         if ($basename === '' || $basename === '.' || $basename === '..') {
-            return $fallback;
+            return self::$avatarCache[$img] = $fallback;
         }
 
         $baseDir = dirname(__DIR__, 2);
         if (is_file($baseDir . '/resources/images/profile/' . $basename)) {
-            return '/resources/images/profile/' . $basename;
+            return self::$avatarCache[$img] = '/resources/images/profile/' . $basename;
         }
         if (is_file($baseDir . '/public/img/profile/' . $basename)) {
-            return '/public/img/profile/' . $basename;
+            return self::$avatarCache[$img] = '/public/img/profile/' . $basename;
         }
 
-        return $fallback;
+        return self::$avatarCache[$img] = $fallback;
     }
 
     /**
@@ -570,6 +593,7 @@ final class KinWhisperService
      * @param int|null $audioDuration Optional duration in seconds (<= 60)
      * @param array<string, mixed>|null $metadata Contextual metadata
      * @param int|null $disappearSeconds Auto-disappear duration in seconds (30, 60, 1800, 3600, 86400)
+     * @param bool $deferNotifications Defer external push/socket dispatch for asynchronous execution
      * @return KinWhisperDto
      */
     public static function sendMessage(
@@ -580,7 +604,8 @@ final class KinWhisperService
         ?string $audioUrl = null,
         ?int $audioDuration = null,
         ?array $metadata = null,
-        ?int $disappearSeconds = null
+        ?int $disappearSeconds = null,
+        bool $deferNotifications = false
     ): KinWhisperDto {
         $currentUserId = trim($currentUserId);
         $threadId = trim($threadId);
@@ -625,8 +650,9 @@ final class KinWhisperService
         }
 
         // 2. Validate content
-        if ($cleanBody === '' && empty($audioUrl)) {
-            throw new ValidationException('Whisper cannot be empty. Please provide either a message or an audio dedication.');
+        $hasAttachments = !empty($metadata['attachments']) && is_array($metadata['attachments']);
+        if ($cleanBody === '' && empty($audioUrl) && !$hasAttachments) {
+            throw new ValidationException('Whisper cannot be empty. Please provide either a message, a voice dedication, or a media attachment.');
         }
 
         if (mb_strlen($cleanBody) > self::MAX_MESSAGE_LENGTH) {
@@ -648,6 +674,20 @@ final class KinWhisperService
             }
         } else {
             $messageType = 'text';
+        }
+
+        if ($cleanBody !== '' && empty($metadata['link_preview'])) {
+            try {
+                if (LinkPreviewService::extractFirstPreviewableUrl($cleanBody) !== null) {
+                    $preview = LinkPreviewService::getPreviewForPostText($cleanBody);
+                    if ($preview !== null && (!empty($preview['title']) || !empty($preview['image']) || !empty($preview['domain']))) {
+                        $metadata = $metadata ?? [];
+                        $metadata['link_preview'] = $preview;
+                    }
+                }
+            } catch (\Throwable $e) {
+                error_log('[KinWhisperService::sendMessage link_preview] ' . $e->getMessage());
+            }
         }
 
         $msgId = 'msg_' . bin2hex(random_bytes(16));
@@ -685,108 +725,156 @@ final class KinWhisperService
         $stmtPartRead = $db->prepare('UPDATE kin_thread_participants SET last_read_at = NOW() WHERE thread_id = ? AND user_id = ?');
         $stmtPartRead->execute([$threadId, $currentUserId]);
 
-        // 5. Fetch sender name for notifications
-        $stmtSenderName = $db->prepare('SELECT CONCAT(COALESCE(firstName, ""), " ", COALESCE(lastName, "")) AS full_name FROM personal WHERE id = ? LIMIT 1');
-        $stmtSenderName->execute([$currentUserId]);
-        $senderName = trim((string)($stmtSenderName->fetchColumn() ?: 'A family member'));
-
-        // 6. Multi-Channel Notifications (Recipient & Parent Safeguarding)
-        $actionUrl = '/kin-whispers?thread_id=' . urlencode($threadId);
-
-        if ($isGroup) {
-            $groupTitle = !empty($thread['title']) ? (string)$thread['title'] : 'Family Group';
-            $notifBody = ($messageType === 'audio_whisper')
-                ? sprintf('%s shared an audio whisper in "%s".', $senderName, $groupTitle)
-                : sprintf('%s (%s): "%s"', $senderName, $groupTitle, mb_substr($cleanBody, 0, 80));
-
-            $stmtGroupParts = $db->prepare('SELECT user_id FROM kin_thread_participants WHERE thread_id = ? AND user_id != ? AND deleted_at IS NULL');
-            $stmtGroupParts->execute([$threadId, $currentUserId]);
-            $recipientIds = $stmtGroupParts->fetchAll(PDO::FETCH_COLUMN) ?: [];
-
-            foreach ($recipientIds as $recipId) {
-                $targetId = (string)$recipId;
-                NotificationOrchestrator::dispatch(
-                    userId: $targetId,
-                    category: 'kin_whisper',
-                    priority: 'high',
-                    title: '👥 ' . $groupTitle,
-                    body: $notifBody,
-                    actionUrl: $actionUrl,
-                    tag: 'whisper_' . $threadId,
-                    familyCode: (string)$thread['family_code'],
-                    metadata: [
-                        'sender_id' => $currentUserId,
-                        'sender_name' => $senderName,
-                        'thread_id' => $threadId,
-                        'message_id' => $msgId,
-                        'is_group' => true,
-                    ]
-                );
-            }
-
-            // Batch multi-channel broadcast to all group members in 1 single network call
-            $targetChannels = array_values(array_map(fn($id) => 'private-user-' . strtolower((string)$id), $recipientIds));
-            if (!empty($targetChannels)) {
-                \App\classes\Pusher::trigger($targetChannels, 'kin-whisper', [
-                    'thread_id' => $threadId,
-                    'message_id' => $msgId,
-                    'is_group' => true,
-                ]);
-            }
-        } else {
-            $notifBody = ($messageType === 'audio_whisper')
-                ? sprintf('%s left a new audio whisper for you.', $senderName)
-                : sprintf('%s: "%s"', $senderName, mb_substr($cleanBody, 0, 80));
-
-            if (!empty($recipientId)) {
-                NotificationOrchestrator::dispatch(
-                    userId: $recipientId,
-                    category: 'kin_whisper',
-                    priority: 'high',
-                    title: '🎙️ New Kin Whisper',
-                    body: $notifBody,
-                    actionUrl: $actionUrl,
-                    tag: 'whisper_' . $threadId,
-                    familyCode: (string)$thread['family_code'],
-                    metadata: [
-                        'sender_id' => $currentUserId,
-                        'sender_name' => $senderName,
-                        'thread_id' => $threadId,
-                        'message_id' => $msgId,
-                        'message_type' => $messageType,
-                    ]
-                );
-
-                \App\classes\Pusher::trigger('private-user-' . strtolower($recipientId), 'kin-whisper', [
-                    'thread_id' => $threadId,
-                    'message_id' => $msgId,
-                ]);
-            }
-        }
-
-        // Child Safeguarding Alert (Parent Guardian Oversight)
-        $hasMinor = (int)($thread['has_minor_participant'] ?? 0) === 1;
-        $supervisorId = (string)($thread['supervisor_parent_id'] ?? '');
-
-        if ($hasMinor && $supervisorId !== '' && $supervisorId !== $currentUserId && $supervisorId !== $recipientId) {
-            NotificationOrchestrator::dispatch(
-                userId: $supervisorId,
-                category: 'child_supervision',
-                priority: 'normal',
-                title: '🛡️ Minor Kin Whisper Supervision',
-                body: sprintf('New kin communication recorded involving %s and your supervised ward.', $senderName),
-                actionUrl: $actionUrl,
-                tag: 'supervise_' . $threadId,
-                familyCode: (string)$thread['family_code'],
-                metadata: [
-                    'thread_id' => $threadId,
-                    'is_supervision' => true,
-                    'sender_id' => $currentUserId,
-                ]
-            );
+        // 5. Multi-Channel Notifications (Synchronous or Deferred)
+        if (!$deferNotifications) {
+            self::dispatchMessageNotifications($currentUserId, $thread, $msgId, $cleanBody, $messageType);
         }
 
         return self::getMessage($msgId);
+    }
+
+    /**
+     * Dispatch multi-channel notifications and push alerts for a message asynchronously or post-response.
+     *
+     * @param string $currentUserId Authenticated sender ID
+     * @param string|array<string, mixed> $threadOrId Target thread row or ID
+     * @param string $msgId Created message ID
+     * @param string $cleanBody Message text preview
+     * @param string $messageType 'text' | 'audio_whisper' | 'memory_prompt'
+     * @param string|null $senderName Optional resolved sender display name
+     */
+    public static function dispatchMessageNotifications(
+        string $currentUserId,
+        string|array $threadOrId,
+        string $msgId,
+        string $cleanBody,
+        string $messageType = 'text',
+        ?string $senderName = null
+    ): void {
+        try {
+            $db = Db::connect2();
+
+            $thread = is_array($threadOrId) ? $threadOrId : null;
+            $threadId = is_array($threadOrId) ? (string)($threadOrId['id'] ?? '') : (string)$threadOrId;
+
+            if ($thread === null) {
+                $stmtThread = $db->prepare('SELECT * FROM kin_threads WHERE id = ? LIMIT 1');
+                $stmtThread->execute([$threadId]);
+                $thread = $stmtThread->fetch(PDO::FETCH_ASSOC);
+            }
+
+            if (!$thread) {
+                return;
+            }
+
+            if ($senderName === null || $senderName === '') {
+                $stmtSenderName = $db->prepare('SELECT CONCAT(COALESCE(firstName, ""), " ", COALESCE(lastName, "")) AS full_name FROM personal WHERE id = ? LIMIT 1');
+                $stmtSenderName->execute([$currentUserId]);
+                $senderName = trim((string)($stmtSenderName->fetchColumn() ?: 'A family member'));
+            }
+
+            $isGroup = ((string)($thread['thread_type'] ?? 'direct')) === 'group';
+            $actionUrl = '/kin-whispers?thread_id=' . urlencode($threadId);
+
+            if ($isGroup) {
+                $groupTitle = !empty($thread['title']) ? (string)$thread['title'] : 'Family Group';
+                $notifBody = ($messageType === 'audio_whisper')
+                    ? sprintf('%s shared an audio whisper in "%s".', $senderName, $groupTitle)
+                    : sprintf('%s (%s): "%s"', $senderName, $groupTitle, mb_substr($cleanBody, 0, 80));
+
+                $stmtGroupParts = $db->prepare('SELECT user_id FROM kin_thread_participants WHERE thread_id = ? AND user_id != ? AND deleted_at IS NULL');
+                $stmtGroupParts->execute([$threadId, $currentUserId]);
+                $recipientIds = $stmtGroupParts->fetchAll(PDO::FETCH_COLUMN) ?: [];
+
+                foreach ($recipientIds as $recipId) {
+                    $targetId = (string)$recipId;
+                    NotificationOrchestrator::dispatch(
+                        userId: $targetId,
+                        category: 'kin_whisper',
+                        priority: 'high',
+                        title: '👥 ' . $groupTitle,
+                        body: $notifBody,
+                        actionUrl: $actionUrl,
+                        tag: 'whisper_' . $threadId,
+                        familyCode: (string)$thread['family_code'],
+                        metadata: [
+                            'sender_id' => $currentUserId,
+                            'sender_name' => $senderName,
+                            'thread_id' => $threadId,
+                            'message_id' => $msgId,
+                            'is_group' => true,
+                        ]
+                    );
+                }
+
+                // Batch multi-channel broadcast to all group members in 1 single network call
+                $targetChannels = array_values(array_map(fn($id) => 'private-user-' . strtolower((string)$id), $recipientIds));
+                if (!empty($targetChannels)) {
+                    \App\classes\Pusher::trigger($targetChannels, 'kin-whisper', [
+                        'thread_id' => $threadId,
+                        'message_id' => $msgId,
+                        'is_group' => true,
+                    ]);
+                }
+            } else {
+                $recipientId = ($currentUserId === (string)$thread['sender_id'])
+                    ? (string)$thread['recipient_id']
+                    : (string)$thread['sender_id'];
+
+                $notifBody = ($messageType === 'audio_whisper')
+                    ? sprintf('%s left a new audio whisper for you.', $senderName)
+                    : sprintf('%s: "%s"', $senderName, mb_substr($cleanBody, 0, 80));
+
+                if (!empty($recipientId)) {
+                    NotificationOrchestrator::dispatch(
+                        userId: $recipientId,
+                        category: 'kin_whisper',
+                        priority: 'high',
+                        title: '🎙️ New Kin Whisper',
+                        body: $notifBody,
+                        actionUrl: $actionUrl,
+                        tag: 'whisper_' . $threadId,
+                        familyCode: (string)$thread['family_code'],
+                        metadata: [
+                            'sender_id' => $currentUserId,
+                            'sender_name' => $senderName,
+                            'thread_id' => $threadId,
+                            'message_id' => $msgId,
+                            'message_type' => $messageType,
+                        ]
+                    );
+
+                    \App\classes\Pusher::trigger('private-user-' . strtolower($recipientId), 'kin-whisper', [
+                        'thread_id' => $threadId,
+                        'message_id' => $msgId,
+                    ]);
+                }
+            }
+
+            // Child Safeguarding Alert (Parent Guardian Oversight)
+            $hasMinor = (int)($thread['has_minor_participant'] ?? 0) === 1;
+            $supervisorId = (string)($thread['supervisor_parent_id'] ?? '');
+
+            if ($hasMinor && $supervisorId !== '' && $supervisorId !== $currentUserId && (!isset($recipientId) || $supervisorId !== $recipientId)) {
+                NotificationOrchestrator::dispatch(
+                    userId: $supervisorId,
+                    category: 'child_supervision',
+                    priority: 'normal',
+                    title: '🛡️ Minor Kin Whisper Supervision',
+                    body: sprintf('New kin communication recorded involving %s and your supervised ward.', $senderName),
+                    actionUrl: $actionUrl,
+                    tag: 'supervise_' . $threadId,
+                    familyCode: (string)$thread['family_code'],
+                    metadata: [
+                        'thread_id' => $threadId,
+                        'is_supervision' => true,
+                        'sender_id' => $currentUserId,
+                    ]
+                );
+            }
+        } catch (\Throwable $e) {
+            error_log('[KinWhisperService::dispatchMessageNotifications] ' . $e->getMessage());
+        }
     }
 
     /**
@@ -914,6 +1002,12 @@ final class KinWhisperService
         $rows = $stmtMsgs->fetchAll(PDO::FETCH_ASSOC);
         $results = [];
         foreach ($rows as $row) {
+            if (!empty($row['context_metadata'])) {
+                $meta = is_string($row['context_metadata']) ? json_decode($row['context_metadata'], true) : $row['context_metadata'];
+                if (is_array($meta) && !empty($meta['deleted_for_users']) && in_array($currentUserId, (array)$meta['deleted_for_users'], true)) {
+                    continue;
+                }
+            }
             $row['sender_avatar'] = self::resolveAvatarUrl($row['sender_avatar'] ?? null);
             $results[] = KinWhisperDto::fromArray($row);
         }
@@ -998,18 +1092,20 @@ final class KinWhisperService
     }
 
     /**
-     * Permanently delete a sender's own whisper message, unlink any attached audio,
-     * recompute thread preview metadata, and broadcast real-time removal.
+     * Delete a whisper message.
+     * Supports mode 'everyone' (sender only, purges row and unlinks audio) or 'me' (hides for current user).
      *
      * @param string $currentUserId
      * @param string $messageId
+     * @param string $mode 'everyone' | 'me'
      * @return array<string, mixed>
      * @throws BadRequestException|NotFoundException|ForbiddenException
      */
-    public static function deleteMessage(string $currentUserId, string $messageId): array
+    public static function deleteMessage(string $currentUserId, string $messageId, string $mode = 'everyone'): array
     {
         $currentUserId = trim($currentUserId);
         $messageId = trim($messageId);
+        $mode = in_array($mode, ['everyone', 'me'], true) ? $mode : 'everyone';
 
         if ($currentUserId === '' || $messageId === '') {
             throw new BadRequestException('User ID and message ID are required.');
@@ -1040,13 +1136,37 @@ final class KinWhisperService
             'has_minor_participant' => (int)($row['has_minor_participant'] ?? 0),
         ]);
 
-        // BOLA Prevention: Strictly enforce sender-only message deletion
+        $threadId = (string)$row['thread_id'];
+        $audioUrl = isset($row['audio_url']) ? (string)$row['audio_url'] : null;
+
+        if ($mode === 'me') {
+            $meta = [];
+            if (!empty($row['context_metadata'])) {
+                $decoded = is_string($row['context_metadata']) ? json_decode($row['context_metadata'], true) : $row['context_metadata'];
+                if (is_array($decoded)) {
+                    $meta = $decoded;
+                }
+            }
+            $delUsers = isset($meta['deleted_for_users']) && is_array($meta['deleted_for_users']) ? $meta['deleted_for_users'] : [];
+            if (!in_array($currentUserId, $delUsers, true)) {
+                $delUsers[] = $currentUserId;
+            }
+            $meta['deleted_for_users'] = $delUsers;
+            $metaJson = json_encode($meta, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            $stmtUp = $db->prepare('UPDATE kin_messages SET context_metadata = ? WHERE id = ?');
+            $stmtUp->execute([$metaJson, $messageId]);
+
+            return [
+                'deleted_message_id' => $messageId,
+                'thread_id' => $threadId,
+                'mode' => 'me'
+            ];
+        }
+
+        // BOLA Prevention: Strictly enforce sender-only message deletion for everyone
         if ((string)$row['sender_id'] !== $currentUserId) {
             throw new ForbiddenException('You can only delete your own messages.');
         }
-
-        $threadId = (string)$row['thread_id'];
-        $audioUrl = isset($row['audio_url']) ? (string)$row['audio_url'] : null;
 
         $db->beginTransaction();
         try {
@@ -1170,6 +1290,8 @@ final class KinWhisperService
 
         $stmt = $db->prepare(
             'SELECT t.*,
+                    COALESCE((SELECT is_pinned FROM kin_thread_participants WHERE thread_id = t.id AND user_id = ? AND deleted_at IS NULL LIMIT 1), 0) AS is_pinned,
+                    COALESCE((SELECT is_muted FROM kin_thread_participants WHERE thread_id = t.id AND user_id = ? AND deleted_at IS NULL LIMIT 1), 0) AS is_muted,
                     (SELECT COALESCE(NULLIF(body, ""), "Voice whisper") FROM kin_messages WHERE thread_id = t.id AND (expires_at IS NULL OR expires_at > NOW()) ORDER BY created_at DESC LIMIT 1) AS last_message_preview,
                     CASE 
                         WHEN t.thread_type = "group" THEN (
@@ -1199,18 +1321,50 @@ final class KinWhisperService
                  OR (t.has_minor_participant = 1 AND t.supervisor_parent_id = ?)
              )
                AND t.status != "blocked"
-             ORDER BY t.last_message_at DESC
+             ORDER BY is_pinned DESC, t.last_message_at DESC
              LIMIT 100'
         );
         $stmt->execute([
+            $currentUserId, $currentUserId,
             $currentUserId, $currentUserId, $currentUserId,
             $currentUserId, $currentUserId, $currentUserId, $currentUserId
         ]);
 
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (empty($rows)) {
+            return [];
+        }
+
+        // Batch-resolve user profiles to eliminate N+1 queries
+        $neededUserIds = [];
+        foreach ($rows as $r) {
+            $sId = (string)($r['sender_id'] ?? '');
+            $recId = (string)($r['recipient_id'] ?? '');
+            if ($sId !== '') {
+                $neededUserIds[$sId] = true;
+            }
+            if ($recId !== '') {
+                $neededUserIds[$recId] = true;
+            }
+        }
+
+        $userProfileMap = [];
+        if (!empty($neededUserIds)) {
+            $uIds = array_keys($neededUserIds);
+            $inClause = implode(',', array_fill(0, count($uIds), '?'));
+            $stmtUsers = $db->prepare("SELECT p.id, CONCAT(COALESCE(p.firstName, ''), ' ', COALESCE(p.lastName, '')) AS full_name, COALESCE(pic.img, '/avatar/avatarM.jpeg') AS avatar FROM personal p LEFT JOIN profilePics pic ON p.id = pic.id WHERE p.id IN ({$inClause})");
+            $stmtUsers->execute($uIds);
+            foreach ($stmtUsers->fetchAll(PDO::FETCH_ASSOC) as $uRow) {
+                $userProfileMap[(string)$uRow['id']] = [
+                    'name' => trim((string)$uRow['full_name']),
+                    'avatar' => self::resolveAvatarUrl($uRow['avatar'] ?? null),
+                ];
+            }
+        }
+
         $results = [];
         foreach ($rows as $row) {
-            $results[] = self::hydrateThreadDto($row, $currentUserId);
+            $results[] = self::hydrateThreadDto($row, $currentUserId, $userProfileMap);
         }
 
         return $results;
@@ -1235,8 +1389,14 @@ final class KinWhisperService
     /**
      * Purge expired ephemeral whispers and unlinks associated audio assets securely.
      */
-    public static function pruneExpiredWhispers(): int
+    public static function pruneExpiredWhispers(bool $force = false): int
     {
+        $now = time();
+        if (!$force && (self::$lastPruneTimestamp > 0) && ($now - self::$lastPruneTimestamp < 60)) {
+            return 0;
+        }
+        self::$lastPruneTimestamp = $now;
+
         $db = Db::connect2();
         $stmtExp = $db->query('SELECT audio_url FROM kin_messages WHERE expires_at IS NOT NULL AND expires_at <= NOW() AND audio_url IS NOT NULL');
         if ($stmtExp) {
@@ -1386,10 +1546,14 @@ final class KinWhisperService
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
         $results = [];
+        $codesSet = array_flip($codes);
+        $isSuper = \App\controller\BaseController::isSuperAdmin($currentUserId);
+
         foreach ($rows as $row) {
             $memberId = (string)$row['id'];
             $rawFamCode = (string)($row['famCode'] ?? '');
-            $canSeeCode = \App\controller\BaseController::viewerCanSeeFamilyCode($rawFamCode, $currentUserId);
+            $normCode = strtoupper(ltrim(trim($rawFamCode), '#'));
+            $canSeeCode = $isSuper || ($normCode !== '' && isset($codesSet[$normCode]));
             $isReq = ((string)$row['connection_type']) === 'connected_kin';
             $badge = $canSeeCode && $rawFamCode !== '' ? '#' . ltrim($rawFamCode, '#') : 'Connected Kin';
             $desc = $canSeeCode && $rawFamCode !== '' ? ('Family Code: ' . $badge) : 'Connected Kin Network';
@@ -1510,6 +1674,351 @@ final class KinWhisperService
             'url' => $publicUrl,
             'duration' => 30, // Default duration estimation
         ];
+    }
+
+    /**
+     * Upload a rich media attachment (Photo, Video, Document) for a whisper.
+     * Enforces UK Online Safety Act content restrictions, MIME inspection, and 10MB limits.
+     *
+     * @param string $currentUserId
+     * @param array<string, mixed> $file
+     * @return array<string, mixed>
+     * @throws ValidationException
+     */
+    public static function uploadMediaWhisper(string $currentUserId, array $file): array
+    {
+        if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            throw new ValidationException('Failed to upload media file. Please retry.');
+        }
+
+        if ((int)($file['size'] ?? 0) > self::MAX_MEDIA_FILE_SIZE) {
+            throw new ValidationException('Uploaded file exceeds the maximum permitted size of 15MB.');
+        }
+
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mime = (string)$finfo->file((string)$file['tmp_name']);
+
+        if (!in_array($mime, self::ALLOWED_MEDIA_MIMES, true)) {
+            throw new ValidationException('Unsupported file format. Please upload an image (JPG, PNG, WebP), document (PDF, Word), or video (MP4, WebM, MOV).');
+        }
+
+        $targetDir = dirname(__DIR__, 2) . '/public/storage/whispers/media';
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0755, true);
+        }
+
+        $type = 'document';
+        $ext = 'bin';
+        if (str_starts_with($mime, 'image/')) {
+            $type = 'image';
+            $ext = match ($mime) {
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
+                'image/webp' => 'webp',
+                'image/gif' => 'gif',
+                'image/heic' => 'heic',
+                default => 'jpg'
+            };
+        } elseif (str_starts_with($mime, 'video/')) {
+            $type = 'video';
+            $ext = match ($mime) {
+                'video/mp4' => 'mp4',
+                'video/webm' => 'webm',
+                'video/quicktime' => 'mov',
+                'video/x-m4v' => 'm4v',
+                'video/ogg' => 'ogv',
+                default => 'mp4'
+            };
+        } elseif ($mime === 'application/pdf') {
+            $ext = 'pdf';
+        } elseif (str_contains($mime, 'word')) {
+            $ext = 'docx';
+        } elseif ($mime === 'text/plain') {
+            $ext = 'txt';
+        }
+
+        $filename = sprintf('media_%s_%s.%s', bin2hex(random_bytes(8)), date('Ymd_His'), $ext);
+        $destination = $targetDir . '/' . $filename;
+
+        $isHttpUpload = is_uploaded_file((string)$file['tmp_name']);
+        $moved = $isHttpUpload
+            ? move_uploaded_file((string)$file['tmp_name'], $destination)
+            : copy((string)$file['tmp_name'], $destination);
+
+        if (!$moved) {
+            throw new ValidationException('Could not save uploaded media.');
+        }
+
+        $origName = basename(strip_tags((string)($file['name'] ?? 'attachment.' . $ext)));
+        return [
+            'url' => '/public/storage/whispers/media/' . $filename,
+            'name' => $origName,
+            'type' => $type,
+            'size' => (int)$file['size'],
+            'mime' => $mime,
+        ];
+    }
+
+    /**
+     * Toggle bookmark/star on a whisper message.
+     *
+     * @param string $currentUserId
+     * @param string $messageId
+     * @return array<string, mixed>
+     */
+    public static function toggleStar(string $currentUserId, string $messageId): array
+    {
+        $currentUserId = trim($currentUserId);
+        $messageId = trim($messageId);
+
+        if ($currentUserId === '' || $messageId === '') {
+            throw new BadRequestException('User ID and message ID are required.');
+        }
+
+        $db = Db::connect2();
+        $stmt = $db->prepare('SELECT m.*, t.sender_id AS thread_sender_id, t.recipient_id AS thread_recipient_id, t.supervisor_parent_id, t.has_minor_participant FROM kin_messages m JOIN kin_threads t ON m.thread_id = t.id WHERE m.id = ? LIMIT 1');
+        $stmt->execute([$messageId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            throw new NotFoundException('Message not found.');
+        }
+
+        self::assertCanAccessThread($currentUserId, [
+            'sender_id' => (string)$row['thread_sender_id'],
+            'recipient_id' => (string)$row['thread_recipient_id'],
+            'supervisor_parent_id' => isset($row['supervisor_parent_id']) ? (string)$row['supervisor_parent_id'] : null,
+            'has_minor_participant' => (int)($row['has_minor_participant'] ?? 0),
+        ]);
+
+        $meta = [];
+        if (!empty($row['context_metadata'])) {
+            $decoded = is_string($row['context_metadata']) ? json_decode($row['context_metadata'], true) : $row['context_metadata'];
+            if (is_array($decoded)) {
+                $meta = $decoded;
+            }
+        }
+
+        /** @var array<string> $starredBy */
+        $starredBy = isset($meta['starred_by']) && is_array($meta['starred_by']) ? $meta['starred_by'] : [];
+        $isStarred = false;
+
+        if (in_array($currentUserId, $starredBy, true)) {
+            $starredBy = array_values(array_diff($starredBy, [$currentUserId]));
+            $isStarred = false;
+        } else {
+            $starredBy[] = $currentUserId;
+            $isStarred = true;
+        }
+
+        $meta['starred_by'] = $starredBy;
+        $metaJson = json_encode($meta, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        $stmtUp = $db->prepare('UPDATE kin_messages SET context_metadata = ? WHERE id = ?');
+        $stmtUp->execute([$metaJson, $messageId]);
+
+        return [
+            'message_id' => $messageId,
+            'is_starred' => $isStarred,
+        ];
+    }
+
+    /**
+     * Edit a whisper message (WhatsApp 15-minute window invariant).
+     *
+     * @param string $currentUserId
+     * @param string $messageId
+     * @param string $newBody
+     * @return KinWhisperDto
+     */
+    public static function editMessage(string $currentUserId, string $messageId, string $newBody): KinWhisperDto
+    {
+        $currentUserId = trim($currentUserId);
+        $messageId = trim($messageId);
+        $cleanBody = trim(strip_tags($newBody));
+
+        if ($currentUserId === '' || $messageId === '') {
+            throw new BadRequestException('User ID and message ID are required.');
+        }
+
+        if ($cleanBody === '') {
+            throw new ValidationException('Edited whisper cannot be empty.');
+        }
+
+        if (mb_strlen($cleanBody) > self::MAX_MESSAGE_LENGTH) {
+            throw new ValidationException(sprintf('Message exceeds %d characters.', self::MAX_MESSAGE_LENGTH));
+        }
+
+        $db = Db::connect2();
+        $stmt = $db->prepare('SELECT m.*, t.sender_id AS thread_sender_id, t.recipient_id AS thread_recipient_id, t.supervisor_parent_id, t.has_minor_participant FROM kin_messages m JOIN kin_threads t ON m.thread_id = t.id WHERE m.id = ? LIMIT 1');
+        $stmt->execute([$messageId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            throw new NotFoundException('Message not found.');
+        }
+
+        if ((string)$row['sender_id'] !== $currentUserId) {
+            throw new ForbiddenException('You can only edit your own messages.');
+        }
+
+        // WhatsApp 15-minute edit window check:
+        $createdTs = strtotime((string)$row['created_at']);
+        if ($createdTs < (time() - 900)) {
+            throw new ValidationException('Whispers can only be edited within 15 minutes of sending.');
+        }
+
+        $meta = [];
+        if (!empty($row['context_metadata'])) {
+            $decoded = is_string($row['context_metadata']) ? json_decode($row['context_metadata'], true) : $row['context_metadata'];
+            if (is_array($decoded)) {
+                $meta = $decoded;
+            }
+        }
+
+        $meta['is_edited'] = true;
+        $meta['edited_at'] = date('Y-m-d H:i:s');
+        try {
+            if (LinkPreviewService::extractFirstPreviewableUrl($cleanBody) !== null) {
+                $preview = LinkPreviewService::getPreviewForPostText($cleanBody);
+                if ($preview !== null && (!empty($preview['title']) || !empty($preview['image']) || !empty($preview['domain']))) {
+                    $meta['link_preview'] = $preview;
+                } else {
+                    unset($meta['link_preview']);
+                }
+            } else {
+                unset($meta['link_preview']);
+            }
+        } catch (\Throwable $e) {
+            error_log('[KinWhisperService::editMessage link_preview] ' . $e->getMessage());
+        }
+        $metaJson = json_encode($meta, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        $stmtUp = $db->prepare('UPDATE kin_messages SET body = ?, context_metadata = ? WHERE id = ? AND sender_id = ?');
+        $stmtUp->execute([$cleanBody, $metaJson, $messageId, $currentUserId]);
+
+        return self::getMessage($messageId);
+    }
+
+    /**
+     * Toggle pinned state for a thread.
+     *
+     * @param string $currentUserId
+     * @param string $threadId
+     * @return bool
+     */
+    public static function togglePinThread(string $currentUserId, string $threadId): bool
+    {
+        $currentUserId = trim($currentUserId);
+        $threadId = trim($threadId);
+
+        $db = Db::connect2();
+        $stmt = $db->prepare('SELECT is_pinned FROM kin_thread_participants WHERE thread_id = ? AND user_id = ? AND deleted_at IS NULL LIMIT 1');
+        $stmt->execute([$threadId, $currentUserId]);
+        $val = $stmt->fetchColumn();
+
+        if ($val === false) {
+            throw new ForbiddenException('You are not an active participant in this thread.');
+        }
+
+        $newVal = ((int)$val === 1) ? 0 : 1;
+        $stmtUp = $db->prepare('UPDATE kin_thread_participants SET is_pinned = ? WHERE thread_id = ? AND user_id = ?');
+        $stmtUp->execute([$newVal, $threadId, $currentUserId]);
+
+        return $newVal === 1;
+    }
+
+    /**
+     * Toggle muted state for a thread.
+     *
+     * @param string $currentUserId
+     * @param string $threadId
+     * @return bool
+     */
+    public static function toggleMuteThread(string $currentUserId, string $threadId): bool
+    {
+        $currentUserId = trim($currentUserId);
+        $threadId = trim($threadId);
+
+        $db = Db::connect2();
+        $stmt = $db->prepare('SELECT is_muted FROM kin_thread_participants WHERE thread_id = ? AND user_id = ? AND deleted_at IS NULL LIMIT 1');
+        $stmt->execute([$threadId, $currentUserId]);
+        $val = $stmt->fetchColumn();
+
+        if ($val === false) {
+            throw new ForbiddenException('You are not an active participant in this thread.');
+        }
+
+        $newVal = ((int)$val === 1) ? 0 : 1;
+        $stmtUp = $db->prepare('UPDATE kin_thread_participants SET is_muted = ? WHERE thread_id = ? AND user_id = ?');
+        $stmtUp->execute([$newVal, $threadId, $currentUserId]);
+
+        return $newVal === 1;
+    }
+
+    /**
+     * Retrieve all shared media (photos, documents, audio) for a thread.
+     *
+     * @param string $currentUserId
+     * @param string $threadId
+     * @return array<string, array<int, array<string, mixed>>>
+     */
+    public static function getThreadMedia(string $currentUserId, string $threadId): array
+    {
+        $currentUserId = trim($currentUserId);
+        $threadId = trim($threadId);
+
+        $db = Db::connect2();
+        $stmtThread = $db->prepare('SELECT * FROM kin_threads WHERE id = ? LIMIT 1');
+        $stmtThread->execute([$threadId]);
+        $thread = $stmtThread->fetch(PDO::FETCH_ASSOC);
+
+        if (!$thread) {
+            throw new NotFoundException('Whisper thread not found.');
+        }
+
+        self::assertCanAccessThread($currentUserId, $thread);
+
+        $stmt = $db->prepare('SELECT id, sender_id, message_type, body, audio_url, audio_duration_seconds, context_metadata, created_at FROM kin_messages WHERE thread_id = ? AND (expires_at IS NULL OR expires_at > NOW()) ORDER BY created_at DESC LIMIT 200');
+        $stmt->execute([$threadId]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        $media = ['photos' => [], 'videos' => [], 'documents' => [], 'docs' => [], 'audio' => []];
+        foreach ($rows as $row) {
+            $meta = [];
+            if (!empty($row['context_metadata'])) {
+                $decoded = is_string($row['context_metadata']) ? json_decode($row['context_metadata'], true) : $row['context_metadata'];
+                if (is_array($decoded)) {
+                    $meta = $decoded;
+                }
+            }
+            if (!empty($meta['attachments']) && is_array($meta['attachments'])) {
+                foreach ($meta['attachments'] as $att) {
+                    $type = $att['type'] ?? 'image';
+                    $mime = strtolower((string)($att['mime'] ?? $att['mime_type'] ?? ''));
+                    $url = strtolower((string)($att['url'] ?? ''));
+                    $item = array_merge($att, ['message_id' => $row['id'], 'created_at' => $row['created_at']]);
+                    if ($type === 'image' || str_starts_with($mime, 'image/') || preg_match('/\.(jpe?g|png|gif|webp|heic)$/i', $url)) {
+                        $media['photos'][] = $item;
+                    } elseif ($type === 'video' || str_starts_with($mime, 'video/') || preg_match('/\.(mp4|webm|mov|m4v|ogv)$/i', $url)) {
+                        $media['videos'][] = $item;
+                    } else {
+                        $media['documents'][] = $item;
+                        $media['docs'][] = $item;
+                    }
+                }
+            }
+            if (!empty($row['audio_url'])) {
+                $media['audio'][] = [
+                    'message_id' => $row['id'],
+                    'url' => $row['audio_url'],
+                    'duration' => $row['audio_duration_seconds'],
+                    'created_at' => $row['created_at'],
+                ];
+            }
+        }
+
+        return $media;
     }
 
     /**
@@ -2096,9 +2605,10 @@ final class KinWhisperService
      *
      * @param array<string, mixed> $row
      * @param string $currentUserId
+     * @param array<string, array{name: string, avatar: string}>|null $userProfileMap Optional pre-fetched user profile cache
      * @return KinThreadDto
      */
-    private static function hydrateThreadDto(array $row, string $currentUserId): KinThreadDto
+    private static function hydrateThreadDto(array $row, string $currentUserId, ?array $userProfileMap = null): KinThreadDto
     {
         $db = Db::connect2();
         $threadId = (string)($row['id'] ?? '');
@@ -2112,22 +2622,33 @@ final class KinWhisperService
         }
 
         // Fetch sender
-        $stmtS = $db->prepare('SELECT CONCAT(COALESCE(p.firstName, ""), " ", COALESCE(p.lastName, "")) AS full_name, COALESCE(pic.img, "/avatar/avatarM.jpeg") AS avatar FROM personal p LEFT JOIN profilePics pic ON p.id = pic.id WHERE p.id = ? LIMIT 1');
-        $stmtS->execute([$senderId]);
-        $sData = $stmtS->fetch(PDO::FETCH_ASSOC);
-
-        // Fetch recipient if direct
-        $rData = null;
-        if ($recipientId !== '') {
-            $stmtR = $db->prepare('SELECT CONCAT(COALESCE(p.firstName, ""), " ", COALESCE(p.lastName, "")) AS full_name, COALESCE(pic.img, "/avatar/avatarM.jpeg") AS avatar FROM personal p LEFT JOIN profilePics pic ON p.id = pic.id WHERE p.id = ? LIMIT 1');
-            $stmtR->execute([$recipientId]);
-            $rData = $stmtR->fetch(PDO::FETCH_ASSOC);
+        if ($userProfileMap !== null && isset($userProfileMap[$senderId])) {
+            $row['sender_name'] = $userProfileMap[$senderId]['name'] !== '' ? $userProfileMap[$senderId]['name'] : 'Family Kin';
+            $row['sender_avatar'] = $userProfileMap[$senderId]['avatar'];
+        } else {
+            $stmtS = $db->prepare('SELECT CONCAT(COALESCE(p.firstName, ""), " ", COALESCE(p.lastName, "")) AS full_name, COALESCE(pic.img, "/avatar/avatarM.jpeg") AS avatar FROM personal p LEFT JOIN profilePics pic ON p.id = pic.id WHERE p.id = ? LIMIT 1');
+            $stmtS->execute([$senderId]);
+            $sData = $stmtS->fetch(PDO::FETCH_ASSOC);
+            $row['sender_name'] = !empty($sData['full_name']) ? trim($sData['full_name']) : 'Family Kin';
+            $row['sender_avatar'] = self::resolveAvatarUrl($sData['avatar'] ?? null);
         }
 
-        $row['sender_name'] = !empty($sData['full_name']) ? trim($sData['full_name']) : 'Family Kin';
-        $row['sender_avatar'] = self::resolveAvatarUrl($sData['avatar'] ?? null);
-        $row['recipient_name'] = !empty($rData['full_name']) ? trim($rData['full_name']) : ($threadType === 'group' ? (string)($row['title'] ?? 'Family Group') : 'Family Kin');
-        $row['recipient_avatar'] = self::resolveAvatarUrl($rData['avatar'] ?? null);
+        // Fetch recipient if direct
+        if ($recipientId !== '') {
+            if ($userProfileMap !== null && isset($userProfileMap[$recipientId])) {
+                $row['recipient_name'] = $userProfileMap[$recipientId]['name'] !== '' ? $userProfileMap[$recipientId]['name'] : 'Family Kin';
+                $row['recipient_avatar'] = $userProfileMap[$recipientId]['avatar'];
+            } else {
+                $stmtR = $db->prepare('SELECT CONCAT(COALESCE(p.firstName, ""), " ", COALESCE(p.lastName, "")) AS full_name, COALESCE(pic.img, "/avatar/avatarM.jpeg") AS avatar FROM personal p LEFT JOIN profilePics pic ON p.id = pic.id WHERE p.id = ? LIMIT 1');
+                $stmtR->execute([$recipientId]);
+                $rData = $stmtR->fetch(PDO::FETCH_ASSOC);
+                $row['recipient_name'] = !empty($rData['full_name']) ? trim($rData['full_name']) : 'Family Kin';
+                $row['recipient_avatar'] = self::resolveAvatarUrl($rData['avatar'] ?? null);
+            }
+        } else {
+            $row['recipient_name'] = $threadType === 'group' ? (string)($row['title'] ?? 'Family Group') : 'Family Kin';
+            $row['recipient_avatar'] = self::resolveAvatarUrl(null);
+        }
 
         if (!isset($row['unread_count'])) {
             if ($threadType === 'group') {
@@ -2147,6 +2668,149 @@ final class KinWhisperService
             }
         }
 
+        if (!isset($row['is_pinned']) || !isset($row['is_muted'])) {
+            $stmtPartPrefs = $db->prepare('SELECT is_pinned, is_muted FROM kin_thread_participants WHERE thread_id = ? AND user_id = ? AND deleted_at IS NULL LIMIT 1');
+            $stmtPartPrefs->execute([$threadId, $currentUserId]);
+            $pRow = $stmtPartPrefs->fetch(PDO::FETCH_ASSOC);
+            $row['is_pinned'] = (int)($pRow['is_pinned'] ?? 0);
+            $row['is_muted'] = (int)($pRow['is_muted'] ?? 0);
+        }
+
         return KinThreadDto::fromArray($row, $currentUserId, $participants);
+    }
+
+    /**
+     * Read a user's "Online & Last seen" privacy preference ('everyone' | 'nobody').
+     */
+    public static function getPresencePrivacy(string $userId): string
+    {
+        try {
+            $stmt = Db::connect2()->prepare('SELECT last_seen_privacy FROM user_presence_settings WHERE user_id = ? LIMIT 1');
+            $stmt->execute([$userId]);
+            $value = $stmt->fetchColumn();
+
+            return $value === 'nobody' ? 'nobody' : 'everyone';
+        } catch (\Throwable) {
+            return 'everyone';
+        }
+    }
+
+    /**
+     * Persist a user's presence privacy preference (strict allowlist).
+     *
+     * @throws ValidationException
+     */
+    public static function setPresencePrivacy(string $userId, string $privacy): string
+    {
+        if (!in_array($privacy, ['everyone', 'nobody'], true)) {
+            throw new ValidationException('Presence privacy must be "everyone" or "nobody".');
+        }
+        $stmt = Db::connect2()->prepare(
+            'INSERT INTO user_presence_settings (user_id, last_seen_privacy) VALUES (?, ?)
+             ON DUPLICATE KEY UPDATE last_seen_privacy = VALUES(last_seen_privacy)'
+        );
+        $stmt->execute([$userId, $privacy]);
+
+        return $privacy;
+    }
+
+    /**
+     * Record a heartbeat for the viewer and return privacy-filtered presence for the requested kin.
+     *
+     * Privacy rules (WhatsApp-style, reciprocal):
+     *  - A user who hides their presence is never reported as online and exposes no timestamp.
+     *  - A viewer who hides their own presence cannot see anyone else's.
+     *  - Only kin who share a thread with the viewer can be queried (no enumeration).
+     *
+     * @param array<int, mixed> $userIds
+     * @return array{privacy: string, presence: array<string, array{is_online: bool, last_seen_ts: ?int, is_hidden: bool}>}
+     */
+    public static function syncPresence(string $viewerId, array $userIds): array
+    {
+        $db = Db::connect2();
+
+        $beat = $db->prepare(
+            'INSERT INTO user_socket_presence (user_id, channel_name, is_active, last_heartbeat)
+             VALUES (?, ?, 1, NOW())
+             ON DUPLICATE KEY UPDATE is_active = 1, last_heartbeat = NOW()'
+        );
+        $beat->execute([$viewerId, 'kin-whispers-web']);
+
+        $myPrivacy = self::getPresencePrivacy($viewerId);
+
+        $ids = [];
+        foreach ($userIds as $candidate) {
+            $candidate = trim((string)$candidate);
+            if ($candidate !== '' && strlen($candidate) <= 191 && $candidate !== $viewerId) {
+                $ids[$candidate] = true;
+            }
+        }
+        $ids = array_slice(array_keys($ids), 0, 100);
+        if ($ids === []) {
+            return ['privacy' => $myPrivacy, 'presence' => []];
+        }
+
+        $marks = implode(',', array_fill(0, count($ids), '?'));
+
+        // 1. Restrict to kin who share a thread with the viewer.
+        $allowedSql = sprintf(
+            'SELECT DISTINCT u FROM (
+                SELECT recipient_id AS u FROM kin_threads WHERE sender_id = ? AND recipient_id IS NOT NULL
+                UNION SELECT sender_id AS u FROM kin_threads WHERE recipient_id = ?
+                UNION SELECT p2.user_id AS u FROM kin_thread_participants p1
+                      JOIN kin_thread_participants p2 ON p1.thread_id = p2.thread_id
+                      WHERE p1.user_id = ? AND p1.deleted_at IS NULL AND p2.deleted_at IS NULL
+             ) x WHERE u IN (%s)',
+            $marks
+        );
+        $stmtAllowed = $db->prepare($allowedSql);
+        $stmtAllowed->execute(array_merge([$viewerId, $viewerId, $viewerId], $ids));
+        $allowed = array_map('strval', $stmtAllowed->fetchAll(PDO::FETCH_COLUMN));
+        if ($allowed === []) {
+            return ['privacy' => $myPrivacy, 'presence' => []];
+        }
+        $marks = implode(',', array_fill(0, count($allowed), '?'));
+
+        // 2. Their privacy preferences.
+        $hidden = [];
+        try {
+            $stmtPriv = $db->prepare(sprintf('SELECT user_id FROM user_presence_settings WHERE last_seen_privacy = \'nobody\' AND user_id IN (%s)', $marks));
+            $stmtPriv->execute($allowed);
+            foreach ($stmtPriv->fetchAll(PDO::FETCH_COLUMN) as $hid) {
+                $hidden[(string)$hid] = true;
+            }
+        } catch (\Throwable) {
+            $hidden = [];
+        }
+
+        // 3. Heartbeats (only read for users we may disclose).
+        $beats = [];
+        $stmtBeat = $db->prepare(sprintf(
+            'SELECT user_id,
+                    MAX(CASE WHEN is_active = 1 AND last_heartbeat >= DATE_SUB(NOW(), INTERVAL 60 SECOND) THEN 1 ELSE 0 END) AS online,
+                    UNIX_TIMESTAMP(MAX(last_heartbeat)) AS ts
+             FROM user_socket_presence WHERE user_id IN (%s) GROUP BY user_id',
+            $marks
+        ));
+        $stmtBeat->execute($allowed);
+        foreach ($stmtBeat->fetchAll(PDO::FETCH_ASSOC) as $b) {
+            $beats[(string)$b['user_id']] = $b;
+        }
+
+        $presence = [];
+        foreach ($allowed as $uid) {
+            if ($myPrivacy === 'nobody' || isset($hidden[$uid])) {
+                $presence[$uid] = ['is_online' => false, 'last_seen_ts' => null, 'is_hidden' => true];
+                continue;
+            }
+            $b = $beats[$uid] ?? null;
+            $presence[$uid] = [
+                'is_online'    => $b !== null && (int)$b['online'] === 1,
+                'last_seen_ts' => $b !== null && $b['ts'] !== null ? (int)$b['ts'] : null,
+                'is_hidden'    => false,
+            ];
+        }
+
+        return ['privacy' => $myPrivacy, 'presence' => $presence];
     }
 }

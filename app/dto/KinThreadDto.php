@@ -47,7 +47,9 @@ final class KinThreadDto implements JsonSerializable
         public readonly bool $isSupervisorView,
         public readonly array $participants,
         public readonly int $participantCount,
-        public readonly string $createdAt
+        public readonly string $createdAt,
+        public readonly bool $isPinned = false,
+        public readonly bool $isMuted = false
     ) {}
 
     /**
@@ -106,7 +108,9 @@ final class KinThreadDto implements JsonSerializable
             isSupervisorView: $isSupervisor,
             participants: $participants,
             participantCount: $pCount,
-            createdAt: (string)($row['created_at'] ?? date('Y-m-d H:i:s'))
+            createdAt: (string)($row['created_at'] ?? date('Y-m-d H:i:s')),
+            isPinned: (bool)((int)($row['is_pinned'] ?? 0) === 1),
+            isMuted: (bool)((int)($row['is_muted'] ?? 0) === 1)
         );
     }
 
@@ -147,6 +151,8 @@ final class KinThreadDto implements JsonSerializable
             'participants' => $this->participants,
             'participant_count' => $this->participantCount,
             'created_at' => $this->createdAt,
+            'is_pinned' => $this->isPinned,
+            'is_muted' => $this->isMuted,
         ];
     }
 }

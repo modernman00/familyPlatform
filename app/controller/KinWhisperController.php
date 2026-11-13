@@ -60,6 +60,7 @@ final class KinWhisperController extends BaseController
                 'selected_thread' => $selectedThread,
                 'messages' => $messages,
                 'kin' => $kin,
+                'presence_privacy' => KinWhisperService::getPresencePrivacy($currentUserId),
                 'server_now_iso' => gmdate('Y-m-d\TH:i:s\Z'),
             ]);
         } catch (\Throwable $th) {
@@ -239,6 +240,15 @@ final class KinWhisperController extends BaseController
         $audioDuration = isset($input['audio_duration']) ? (int)$input['audio_duration'] : null;
         $disappearSeconds = isset($input['disappear_seconds']) ? (int)$input['disappear_seconds'] : null;
 
+        $metadata = isset($input['metadata']) && is_array($input['metadata']) ? $input['metadata'] : [];
+        if (isset($input['attachments']) && is_array($input['attachments'])) {
+            $metadata['attachments'] = $input['attachments'];
+        }
+        if (isset($input['reply_to']) && is_array($input['reply_to'])) {
+            $metadata['reply_to'] = $input['reply_to'];
+        }
+        $metaArg = !empty($metadata) ? $metadata : null;
+
         try {
             $message = KinWhisperService::sendMessage(
                 $currentUserId,
@@ -247,10 +257,23 @@ final class KinWhisperController extends BaseController
                 $messageType,
                 $audioUrl,
                 $audioDuration,
-                null,
-                $disappearSeconds
+                $metaArg,
+                $disappearSeconds,
+                deferNotifications: true
             );
-            echo json_encode(['success' => true, 'message' => $message, 'server_time' => gmdate('Y-m-d\TH:i:s\Z')]);
+            $response = json_encode(['success' => true, 'message' => $message, 'server_time' => gmdate('Y-m-d\TH:i:s\Z')]);
+            header('Content-Length: ' . strlen((string)$response));
+            echo $response;
+            if (function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request();
+            }
+            KinWhisperService::dispatchMessageNotifications(
+                $currentUserId,
+                $threadId,
+                $message->id,
+                $body,
+                $messageType
+            );
         } catch (\Throwable $th) {
             $this->handleJsonException($th);
         }
@@ -293,6 +316,46 @@ final class KinWhisperController extends BaseController
     }
 
     /**
+     * API: Upload a rich media attachment (Photo, Video, Document).
+     */
+    public function apiUploadMedia(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        $currentUserId = (string)($_SESSION['id'] ?? '');
+        if ($currentUserId === '') {
+            http_response_code(401);
+            echo json_encode(['error' => 'Unauthorized: Please sign in.']);
+            return;
+        }
+
+        if (\App\services\AnalyticsService::isRateLimited($currentUserId, 'kin_whisper_media_upload', 25, 60)) {
+            http_response_code(429);
+            echo json_encode(['error' => 'Media upload rate limit reached. Please wait a moment before uploading again.']);
+            return;
+        }
+
+        try {
+            self::validateCsrf();
+            session_write_close();
+
+            $file = $_FILES['media'] ?? ($_FILES['file'] ?? null);
+            if (!$file || !is_array($file)) {
+                http_response_code(400);
+                echo json_encode(['error' => 'No media file provided for upload.']);
+                return;
+            }
+
+            $result = KinWhisperService::uploadMediaWhisper($currentUserId, $file);
+            echo json_encode(['success' => true, 'attachment' => $result]);
+        } catch (\Throwable $th) {
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+            $this->handleJsonException($th);
+        }
+    }
+
+    /**
      * API: Toggle an emoji reaction on a message.
      *
      * @param mixed $params Route parameters or string message ID
@@ -306,22 +369,89 @@ final class KinWhisperController extends BaseController
             echo json_encode(['error' => 'Unauthorized: Please sign in.']);
             return;
         }
-        session_write_close();
-
-        $messageId = $this->resolveParamId($params, 'id');
-        $input = $this->parseJsonInput();
-        $emoji = trim((string)($input['emoji'] ?? ''));
-
         try {
+            $input = $this->parseJsonInput();
+            self::validateCsrf($input);
+            session_write_close();
+
+            $messageId = $this->resolveParamId($params, 'id');
+            $emoji = trim((string)($input['emoji'] ?? ''));
+
             $message = KinWhisperService::toggleReaction($currentUserId, $messageId, $emoji);
             echo json_encode(['success' => true, 'message' => $message, 'server_time' => gmdate('Y-m-d\TH:i:s\Z')]);
         } catch (\Throwable $th) {
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
             $this->handleJsonException($th);
         }
     }
 
     /**
-     * API: Permanently delete a sender's own whisper message.
+     * API: Toggle star/bookmark on a whisper message.
+     *
+     * @param mixed $params
+     */
+    public function apiToggleStar(mixed $params = null): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        $currentUserId = (string)($_SESSION['id'] ?? '');
+        if ($currentUserId === '') {
+            http_response_code(401);
+            echo json_encode(['error' => 'Unauthorized: Please sign in.']);
+            return;
+        }
+
+        try {
+            $input = $this->parseJsonInput();
+            self::validateCsrf($input);
+            session_write_close();
+
+            $messageId = $this->resolveParamId($params, 'id');
+            $result = KinWhisperService::toggleStar($currentUserId, $messageId);
+            echo json_encode(array_merge(['success' => true], $result));
+        } catch (\Throwable $th) {
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+            $this->handleJsonException($th);
+        }
+    }
+
+    /**
+     * API: Edit a whisper message within 15 minutes of sending.
+     *
+     * @param mixed $params
+     */
+    public function apiEditMessage(mixed $params = null): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        $currentUserId = (string)($_SESSION['id'] ?? '');
+        if ($currentUserId === '') {
+            http_response_code(401);
+            echo json_encode(['error' => 'Unauthorized: Please sign in.']);
+            return;
+        }
+
+        try {
+            $input = $this->parseJsonInput();
+            self::validateCsrf($input);
+            session_write_close();
+
+            $messageId = $this->resolveParamId($params, 'id');
+            $body = trim((string)($input['body'] ?? ''));
+            $message = KinWhisperService::editMessage($currentUserId, $messageId, $body);
+            echo json_encode(['success' => true, 'message' => $message]);
+        } catch (\Throwable $th) {
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+            $this->handleJsonException($th);
+        }
+    }
+
+    /**
+     * API: Delete a whisper message (for everyone or for current user).
      *
      * @param mixed $params Route parameters or string message ID
      */
@@ -341,7 +471,8 @@ final class KinWhisperController extends BaseController
             session_write_close();
 
             $messageId = $this->resolveParamId($params, 'id');
-            $result = KinWhisperService::deleteMessage($currentUserId, $messageId);
+            $mode = (string)($_GET['mode'] ?? ($input['mode'] ?? 'everyone'));
+            $result = KinWhisperService::deleteMessage($currentUserId, $messageId, $mode);
             echo json_encode(['success' => true] + $result + ['server_time' => gmdate('Y-m-d\TH:i:s\Z')]);
         } catch (\Throwable $th) {
             if (session_status() === PHP_SESSION_ACTIVE) {
@@ -513,7 +644,7 @@ final class KinWhisperController extends BaseController
      *
      * @param array<string, mixed> $params
      */
-    public function apiGetThreadEvents(array $params = []): void
+    public function apiGetThreadEvents(mixed $params = null): void
     {
         header('Content-Type: application/json; charset=utf-8');
         $currentUserId = (string)($_SESSION['id'] ?? '');
@@ -529,6 +660,148 @@ final class KinWhisperController extends BaseController
             $events = KinWhisperService::getThreadEvents($currentUserId, $threadId);
             echo json_encode(['success' => true, 'events' => $events]);
         } catch (\Throwable $th) {
+            $this->handleJsonException($th);
+        }
+    }
+
+    /**
+     * API: Retrieve shared media, documents, and audio for a thread.
+     *
+     * @param mixed $params
+     */
+    public function apiGetThreadMedia(mixed $params = null): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        $currentUserId = (string)($_SESSION['id'] ?? '');
+        if ($currentUserId === '') {
+            http_response_code(401);
+            echo json_encode(['error' => 'Unauthorized: Please sign in.']);
+            return;
+        }
+        session_write_close();
+
+        $threadId = $this->resolveParamId($params, 'id');
+        try {
+            $media = KinWhisperService::getThreadMedia($currentUserId, $threadId);
+            echo json_encode(['success' => true, 'media' => $media]);
+        } catch (\Throwable $th) {
+            $this->handleJsonException($th);
+        }
+    }
+
+    /**
+     * API: Toggle pin status of a thread.
+     *
+     * @param mixed $params
+     */
+    public function apiTogglePin(mixed $params = null): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        $currentUserId = (string)($_SESSION['id'] ?? '');
+        if ($currentUserId === '') {
+            http_response_code(401);
+            echo json_encode(['error' => 'Unauthorized: Please sign in.']);
+            return;
+        }
+        try {
+            $input = $this->parseJsonInput();
+            self::validateCsrf($input);
+            session_write_close();
+
+            $threadId = $this->resolveParamId($params, 'id');
+            $isPinned = KinWhisperService::togglePinThread($currentUserId, $threadId);
+            echo json_encode(['success' => true, 'is_pinned' => $isPinned]);
+        } catch (\Throwable $th) {
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+            $this->handleJsonException($th);
+        }
+    }
+
+    /**
+     * API: Toggle mute notifications of a thread.
+     *
+     * @param mixed $params
+     */
+    public function apiToggleMute(mixed $params = null): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        $currentUserId = (string)($_SESSION['id'] ?? '');
+        if ($currentUserId === '') {
+            http_response_code(401);
+            echo json_encode(['error' => 'Unauthorized: Please sign in.']);
+            return;
+        }
+
+        try {
+            $input = $this->parseJsonInput();
+            self::validateCsrf($input);
+            session_write_close();
+
+            $threadId = $this->resolveParamId($params, 'id');
+            $isMuted = KinWhisperService::toggleMuteThread($currentUserId, $threadId);
+            echo json_encode(['success' => true, 'is_muted' => $isMuted]);
+        } catch (\Throwable $th) {
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+            $this->handleJsonException($th);
+        }
+    }
+
+    /**
+     * API: Heartbeat + privacy-filtered presence lookup for kin.
+     */
+    public function apiPresenceSync(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        $currentUserId = (string)($_SESSION['id'] ?? '');
+        if ($currentUserId === '') {
+            http_response_code(401);
+            echo json_encode(['error' => 'Unauthorized: Please sign in.']);
+            return;
+        }
+
+        try {
+            $input = $this->parseJsonInput();
+            self::validateCsrf($input);
+            session_write_close();
+
+            $ids = is_array($input['user_ids'] ?? null) ? $input['user_ids'] : [];
+            echo json_encode(['success' => true] + KinWhisperService::syncPresence($currentUserId, $ids));
+        } catch (\Throwable $th) {
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+            $this->handleJsonException($th);
+        }
+    }
+
+    /**
+     * API: Update the current user's "Online & Last seen" privacy.
+     */
+    public function apiSetPresencePrivacy(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        $currentUserId = (string)($_SESSION['id'] ?? '');
+        if ($currentUserId === '') {
+            http_response_code(401);
+            echo json_encode(['error' => 'Unauthorized: Please sign in.']);
+            return;
+        }
+
+        try {
+            $input = $this->parseJsonInput();
+            self::validateCsrf($input);
+            session_write_close();
+
+            $privacy = KinWhisperService::setPresencePrivacy($currentUserId, (string)($input['last_seen_privacy'] ?? ''));
+            echo json_encode(['success' => true, 'last_seen_privacy' => $privacy]);
+        } catch (\Throwable $th) {
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
             $this->handleJsonException($th);
         }
     }

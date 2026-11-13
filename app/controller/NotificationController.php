@@ -488,9 +488,15 @@ final class NotificationController extends Select
                 throw new NotFoundException('Notification No not found');
             }
 
-
             $userId = isset($_SESSION['id']) ? (string) $_SESSION['id'] : '';
             if ($userId === '') throw new NotFoundException('Unauthorized');
+
+            \App\controller\BaseController::validateCsrf();
+
+            if ($no === 'all' || $no === 'read-all') {
+                self::markAllReadSync();
+                return;
+            }
 
             if (str_starts_with($no, 'far_')) {
                 if (!isset($_SESSION['dismissed_far']) || !is_array($_SESSION['dismissed_far'])) {
@@ -507,11 +513,19 @@ final class NotificationController extends Select
             $placeholders = implode(',', array_fill(0, count($receivers), '?'));
             $db = \Src\Db::connect2();
             $stmt = $db->prepare(
-                "UPDATE notification SET notification_status = 'deleted'
+                "UPDATE notification SET notification_status = 'deleted', updated_at = NOW()
                  WHERE no = ? AND receiver_id IN ($placeholders)"
             );
             $stmt->execute([$no, ...$receivers]);
 
+            try {
+                $stmtOrch = $db->prepare("
+                    UPDATE notification_orchestration 
+                    SET status = 'read', read_at = NOW() 
+                    WHERE id = ? AND (user_id = ? OR family_code IN ($placeholders))
+                ");
+                $stmtOrch->execute([$no, $userId, ...$receivers]);
+            } catch (\Throwable) {}
 
             // Call msgSuccess after returning the result
             msgSuccess(200, 'Notification marked as read');
@@ -829,6 +843,117 @@ final class NotificationController extends Select
     }
 
     /**
+     * Accurately calculates unread notification count across in-app notifications and pending approvals.
+     */
+    public static function getCalculatedUnreadCount(string $userId): int
+    {
+        if ($userId === '') {
+            return 0;
+        }
+
+        try {
+            $receivers = self::sessionReceiverIds($userId);
+            $placeholders = implode(',', array_fill(0, count($receivers), '?'));
+            $db = \Src\Db::connect2();
+            $stmt = $db->prepare("
+                SELECT COUNT(*) FROM notification 
+                WHERE receiver_id IN ($placeholders) 
+                  AND (sender_id IS NULL OR sender_id != ?) 
+                  AND notification_status = 'new'
+            ");
+            $stmt->execute([...$receivers, $userId]);
+            $notifCount = (int)$stmt->fetchColumn();
+
+            $approvals = self::getPendingApprovalNotifications($userId);
+            $approvalCount = count($approvals);
+
+            return $notifCount + $approvalCount;
+        } catch (\Throwable $e) {
+            error_log('[NotificationController] getCalculatedUnreadCount error: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Synchronized Cross-Device Batch Mark All as Read.
+     * Updates notification table, notification_orchestration, dismisses pending approvals in session,
+     * and broadcasts Pusher sync event to active open tabs.
+     */
+    public static function markAllReadSync(): void
+    {
+        try {
+            $userId = isset($_SESSION['id']) ? cleanSession((string) $_SESSION['id']) : '';
+            if (!is_string($userId) || $userId === '') {
+                msgException(401, 'Unauthorized');
+                return;
+            }
+
+            \App\controller\BaseController::validateCsrf();
+
+            $db = \Src\Db::connect2();
+            $receivers = self::sessionReceiverIds($userId);
+            $placeholders = implode(',', array_fill(0, count($receivers), '?'));
+
+            // 1. Update in-app notification table for the user and their family receivers
+            $stmt = $db->prepare("
+                UPDATE notification 
+                SET notification_status = 'deleted', updated_at = NOW() 
+                WHERE receiver_id IN ($placeholders) 
+                  AND notification_status = 'new'
+            ");
+            $stmt->execute($receivers);
+
+            // 2. Update notification_orchestration table
+            try {
+                $orchStmt = $db->prepare("
+                    UPDATE notification_orchestration 
+                    SET status = 'read', read_at = NOW() 
+                    WHERE (user_id = ? OR family_code IN ($placeholders)) 
+                      AND status = 'pending'
+                ");
+                $orchStmt->execute([$userId, ...$receivers]);
+            } catch (\Throwable $e) {
+                error_log('[NotificationController] markAllReadSync orchestration error: ' . $e->getMessage());
+            }
+
+            // 3. Dismiss any pending family approval cards in session
+            try {
+                $approvals = self::getPendingApprovalNotifications($userId);
+                if (!isset($_SESSION['dismissed_far']) || !is_array($_SESSION['dismissed_far'])) {
+                    $_SESSION['dismissed_far'] = [];
+                }
+                foreach ($approvals as $appr) {
+                    if (!empty($appr['no'])) {
+                        $_SESSION['dismissed_far'][] = (string)$appr['no'];
+                    }
+                }
+                $_SESSION['dismissed_far'] = array_values(array_unique($_SESSION['dismissed_far']));
+            } catch (\Throwable $e) {}
+
+            // 4. Broadcast Pusher sync event to active open tabs
+            try {
+                $pusher = \App\classes\Pusher::pusher();
+                if ($pusher !== null) {
+                    $cleanUid = preg_replace('/[^A-Za-z0-9_-]/', '', $userId);
+                    $pusher->trigger("private-user-{$cleanUid}", 'notification-synced', [
+                        'action' => 'MARK_ALL_READ',
+                        'unread_count' => 0,
+                    ]);
+                }
+            } catch (\Throwable) {}
+
+            msgSuccess(200, 'All notifications marked as read', [
+                'status' => 'success',
+                'unread_count' => 0,
+                'count' => 0
+            ]);
+        } catch (\Throwable $e) {
+            error_log('[NotificationController] markAllReadSync error: ' . $e->getMessage());
+            msgException(500, 'Failed to mark all notifications as read');
+        }
+    }
+
+    /**
      * Synchronized cross-device mark-as-read API.
      * Marks notification read, emits Pusher sync event, and triggers silent push dismiss.
      */
@@ -852,7 +977,24 @@ final class NotificationController extends Select
                 return;
             }
 
+            if ($notifId === 'all' || $notifId === 'read-all') {
+                self::markAllReadSync();
+                return;
+            }
+
             $success = \App\services\NotificationOrchestrator::markAsRead($notifId, $userId);
+
+            // Also ensure in-app notification table is updated
+            try {
+                $receivers = self::sessionReceiverIds($userId);
+                $placeholders = implode(',', array_fill(0, count($receivers), '?'));
+                $db = \Src\Db::connect2();
+                $stmt = $db->prepare(
+                    "UPDATE notification SET notification_status = 'deleted', updated_at = NOW()
+                     WHERE (no = ? OR notification_name = ?) AND receiver_id IN ($placeholders)"
+                );
+                $stmt->execute([$notifId, $notifId, ...$receivers]);
+            } catch (\Throwable) {}
 
             if ($success) {
                 msgSuccess(200, 'Notification marked as read across all devices');
@@ -880,8 +1022,8 @@ final class NotificationController extends Select
             $userChannel = \App\classes\Pusher::userChannel($userId);
             \App\services\NotificationOrchestrator::updatePresence($userId, $userChannel, true);
 
-            $unreadCount = \App\services\NotificationOrchestrator::getUnreadCount($userId);
-            msgSuccess(200, 'Presence updated', ['unread_count' => $unreadCount]);
+            $unreadCount = self::getCalculatedUnreadCount($userId);
+            msgSuccess(200, 'Presence updated', ['unread_count' => $unreadCount, 'count' => $unreadCount]);
         } catch (\Throwable $e) {
             error_log('[NotificationController] presence error: ' . $e->getMessage());
             msgException(500, 'Failed to update presence');
@@ -896,15 +1038,19 @@ final class NotificationController extends Select
         try {
             $userId = isset($_SESSION['id']) ? cleanSession((string) $_SESSION['id']) : '';
             if (!is_string($userId) || $userId === '') {
-                msgSuccess(200, 'Unread count', ['unread_count' => 0]);
+                msgSuccess(200, 'Unread count', ['unread_count' => 0, 'count' => 0]);
                 return;
             }
 
-            $unreadCount = \App\services\NotificationOrchestrator::getUnreadCount($userId);
-            msgSuccess(200, 'Unread count', ['unread_count' => $unreadCount]);
+            $unreadCount = self::getCalculatedUnreadCount($userId);
+            msgSuccess(200, 'Unread count', [
+                'status' => 'success',
+                'unread_count' => $unreadCount,
+                'count' => $unreadCount
+            ]);
         } catch (\Throwable $e) {
             error_log('[NotificationController] unread count error: ' . $e->getMessage());
-            msgSuccess(200, 'Unread count fallback', ['unread_count' => 0]);
+            msgSuccess(200, 'Unread count fallback', ['unread_count' => 0, 'count' => 0]);
         }
     }
 

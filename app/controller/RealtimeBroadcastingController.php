@@ -172,17 +172,28 @@ final class RealtimeBroadcastingController
             echo ": heartbeat " . time() . "\n\n";
             flush();
 
-            // Fetch any events missed since lastEventId
+            $sinceNow = isset($_GET['since_now']) && $_GET['since_now'] === '1';
+
+            // Fetch any events missed since lastEventId (or fast-forward cursor when since_now=1)
             $events = $broadcaster->getEvents($channel, $lastEventId, 25);
-            foreach ($events as $ev) {
-                $safeId = (int)($ev['id'] ?? 0);
-                $safeEvent = htmlspecialchars((string)preg_replace('/[^a-zA-Z0-9_.\-]/', '', (string)($ev['event'] ?? 'message')), ENT_QUOTES, 'UTF-8');
-                echo "id: {$safeId}\n"; // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
-                echo "event: {$safeEvent}\n"; // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
-                echo "data: " . json_encode($ev['data'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . "\n\n"; // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
-                $lastEventId = $safeId;
+            if ($sinceNow && $lastEventId === 0) {
+                foreach ($events as $ev) {
+                    $evId = (int)($ev['id'] ?? 0);
+                    if ($evId > $lastEventId) {
+                        $lastEventId = $evId;
+                    }
+                }
+            } else {
+                foreach ($events as $ev) {
+                    $safeId = (int)($ev['id'] ?? 0);
+                    $safeEvent = htmlspecialchars((string)preg_replace('/[^a-zA-Z0-9_.\-]/', '', (string)($ev['event'] ?? 'message')), ENT_QUOTES, 'UTF-8');
+                    echo "id: {$safeId}\n"; // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+                    echo "event: {$safeEvent}\n"; // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+                    echo "data: " . json_encode($ev['data'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . "\n\n"; // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+                    $lastEventId = $safeId;
+                }
+                flush();
             }
-            flush();
 
             // Long-poll / SSE poll loop (up to 20 seconds before graceful client reconnect)
             $startTime = time();
@@ -265,5 +276,28 @@ final class RealtimeBroadcastingController
             http_response_code(500);
             echo json_encode(['error' => 'Channel authorisation failed']);
         }
+    }
+
+    /**
+     * Lightweight broadcasting transport status endpoint.
+     * Route: GET /api/broadcasting/status
+     */
+    public function status(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-store, no-cache, must-revalidate');
+
+        $userId = isset($_SESSION['id']) && is_scalar($_SESSION['id']) ? trim((string)$_SESSION['id']) : '';
+        if ($userId === '') {
+            http_response_code(401);
+            echo json_encode(['error' => 'Unauthorised']);
+            return;
+        }
+
+        $degraded = \App\classes\Pusher::isQuotaDegraded() || \App\classes\Pusher::outboundBlocked();
+        echo json_encode([
+            'pusher_degraded' => $degraded,
+            'sse_endpoint' => '/api/broadcasting/events',
+        ]);
     }
 }

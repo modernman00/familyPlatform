@@ -50,7 +50,35 @@ $router->map(
 
 $router->map(
   method: 'PUT', 
-  route: '/removeNotification/[i:no]', 
+  route: '/removeNotification/[*:no]', 
   target: 'App\controller\NotificationController@notificationRead',
   name: 'delete notification by id'
+);
+
+$router->map(
+  method: 'DELETE', 
+  route: '/removeNotification/[*:no]', 
+  target: 'App\controller\NotificationController@notificationRead',
+  name: 'delete notification by id delete'
+);
+
+$router->map(
+  method: 'PUT', 
+  route: '/api/notifications/read-all', 
+  target: 'App\controller\NotificationController@markAllReadSync',
+  name: 'api notification mark all read'
+);
+
+$router->map(
+  method: 'POST', 
+  route: '/api/notifications/read-all', 
+  target: 'App\controller\NotificationController@markAllReadSync',
+  name: 'api notification mark all read post'
+);
+
+$router->map(
+  method: 'PUT', 
+  route: '/member/notifications/read-all', 
+  target: 'App\controller\NotificationController@markAllReadSync',
+  name: 'member notification mark all read'
 );

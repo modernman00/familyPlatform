@@ -1,5 +1,6 @@
 <!-- Google Stitch Navigation Bar -->
 @php
+    $navUnreadNotifCount = !empty($_SESSION['id']) ? \App\controller\NotificationController::getCalculatedUnreadCount((string)$_SESSION['id']) : 0;
     $navWhisperUnreadCount = !empty($_SESSION['id'])
         ? \App\services\KinWhisperService::getUnreadWhisperCount((string)$_SESSION['id'])
         : 0;
@@ -27,7 +28,7 @@
             <i class="bi bi-chat-dots-fill" style="color: #a31621; font-size: 1.05rem;"></i>
             <i class="bi bi-bell-fill text-warning whisper-bell-indicator position-absolute {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.55rem; top: 3px; right: 3px;" title="Unread whispers"></i>
             <span class="whisper-nav-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-white {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" id="mobile_whisper_count" style="font-size: 0.6rem; padding: 2px 4px; pointer-events: none;">
-                {{ $navWhisperUnreadCount > 9 ? '9+' : $navWhisperUnreadCount }}
+                {{ $navWhisperUnreadCount > 0 ? $navWhisperUnreadCount : '' }}
             </span>
         </a>
 
@@ -125,7 +126,7 @@
                         <i class="bi bi-bell-fill text-warning whisper-bell-indicator position-absolute {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.65rem; top: 4px; right: 4px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));" title="Unread whispers"></i>
                     </a>
                     <span class="whisper-nav-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-white {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" id="navbar_whisper_count" style="font-size: 0.68rem; padding: 2px 5px; font-weight: 700; box-shadow: 0 2px 6px rgba(220,53,69,0.45); pointer-events: none;">
-                        {{ $navWhisperUnreadCount > 9 ? '9+' : $navWhisperUnreadCount }}
+                        {{ $navWhisperUnreadCount > 0 ? $navWhisperUnreadCount : '' }}
                     </span>
                 </div>
 
@@ -134,7 +135,7 @@
                     <button class="btn btn-icon-stitch" id="notificationBtn" title="{{ __('nav.notifications', 'View alerts and family notifications') }}" type="button">
                         <i class="bi bi-bell-fill"></i>
                     </button>
-                    <span class="notification-badge" id="notification_count" x-data x-cloak x-show="$store.notifications.hasUnread" x-text="$store.notifications.display"></span>
+                    <span class="notification-badge" id="notification_count" x-data x-cloak x-show="$store.notifications.hasUnread" x-text="$store.notifications.display" data-server-count="{{ $navUnreadNotifCount }}"></span>
 
                     <!-- Google Stitch Notification Dropdown -->
                     <div class="notification-dropdown shadow-lg" id="notificationDropdown">

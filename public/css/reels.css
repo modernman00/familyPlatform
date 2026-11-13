@@ -1227,3 +1227,173 @@ body.dark-theme .reel-fb-create-label,
     opacity: 0;
   }
 }
+
+/* =========================================================
+   UI REVAMP v2.1 — ARTBOARD 8 (REELS MOBILE & THEATER)
+   ========================================================= */
+.reel-top-controls {
+  top: calc(18px + env(safe-area-inset-top, 0px));
+  left: 14px;
+  right: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 22;
+}
+
+.reel-feed-switcher-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(20, 14, 12, 0.62);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 9999px;
+  padding: 4px;
+}
+
+.reel-feed-switch-btn {
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  min-height: 36px;
+  border-radius: 9999px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.18s ease;
+}
+
+.reel-feed-switch-btn:hover {
+  color: #ffffff;
+}
+
+.reel-feed-switch-btn.active {
+  background: #ffffff;
+  color: #1c1412;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.reel-top-circle-btn {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  background: rgba(20, 14, 12, 0.62);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.18s ease;
+}
+
+.reel-top-circle-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+.reel-action-btn {
+  background: rgba(20, 14, 12, 0.66);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  width: 46px;
+  height: 46px;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 1.2rem;
+}
+
+.reel-action-btn--crimson,
+.reel-action-btn.liked {
+  background: #a31621 !important;
+  border-color: rgba(255, 255, 255, 0.24) !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 16px rgba(163, 22, 33, 0.45);
+}
+
+.reel-caption-card {
+  background: rgba(20, 14, 12, 0.74);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 12px 14px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.38);
+}
+
+.reel-author-sub {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.reel-tag-pill {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.71rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 9999px;
+}
+
+.reel-more-popover {
+  position: absolute;
+  right: 54px;
+  bottom: 0;
+  min-width: 190px;
+  background: rgba(20, 14, 12, 0.94);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 35;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+}
+
+.reel-more-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  min-height: 40px;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 9px;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.reel-more-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Dark Bottom Tab Bar on Reels Page (Artboard 8) */
+body[data-page-id="reelsPage"] #fpMobileBottomBar {
+  background: rgba(14, 10, 9, 0.94) !important;
+  border-top-color: rgba(255, 255, 255, 0.1) !important;
+}
+body[data-page-id="reelsPage"] #fpMobileBottomBar .fp-bottom-tab {
+  color: rgba(255, 255, 255, 0.58) !important;
+}
+body[data-page-id="reelsPage"] #fpMobileBottomBar .fp-bottom-tab.active {
+  color: #ffffff !important;
+}

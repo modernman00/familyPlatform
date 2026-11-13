@@ -120,6 +120,19 @@ try {
         $failCount
     );
 
+    // 5. Test Pusher Quota Circuit-Breaker Failover
+    Pusher::clearQuotaDegraded();
+    assertCondition(!Pusher::isQuotaDegraded(), 'Quota circuit-breaker starts clean', $passCount, $failCount);
+    Pusher::markQuotaDegraded(120);
+    assertCondition(Pusher::isQuotaDegraded(), 'Quota circuit-breaker trips when marked degraded', $passCount, $failCount);
+
+    $degradedChannel = 'private-user-degraded-' . uniqid();
+    Pusher::broadcast($degradedChannel, 'quota.failover_test', ['status' => 'ok']);
+    $degradedEvents = $broadcaster->getEvents($degradedChannel, 0, 10);
+    assertCondition(!empty($degradedEvents), 'SovereignBroadcaster still records events while Pusher circuit-breaker is open', $passCount, $failCount);
+    Pusher::clearQuotaDegraded();
+    assertCondition(!Pusher::isQuotaDegraded(), 'Quota circuit-breaker clears cleanly', $passCount, $failCount);
+
     echo "\n=================================================================\n";
     if ($failCount === 0) {
         echo "🏆 ALL SOVEREIGN BROADCASTING TESTS PASSED! ({$passCount} passed)\n";

@@ -195,6 +195,24 @@ if (php_sapi_name() !== 'cli') {
                         1
                     ) ?? $value;
                 }
+                if (strpos($value, 'r2.cloudflarestorage.com') === false) {
+                    $value = preg_replace(
+                        '/connect-src([^;]*)/',
+                        'connect-src$1 https://*.r2.cloudflarestorage.com',
+                        $value,
+                        1
+                    ) ?? $value;
+                }
+                if (stripos($value, 'media-src') === false) {
+                    $value .= "; media-src 'self' blob: https://*.r2.dev https://*.r2.cloudflarestorage.com";
+                } elseif (strpos($value, 'blob:') === false || strpos($value, 'r2.dev') === false) {
+                    $value = preg_replace(
+                        '/media-src([^;]*)/',
+                        'media-src$1 blob: https://*.r2.dev https://*.r2.cloudflarestorage.com',
+                        $value,
+                        1
+                    ) ?? $value;
+                }
 
                 // 3. Ensure directives with no fallback are defined (OWASP ZAP 10055)
                 if (strpos($value, 'object-src') === false) {
@@ -235,7 +253,7 @@ if (php_sapi_name() !== 'cli') {
             }
 
             $scriptSrc = "script-src 'self' 'nonce-$nonce' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://use.fontawesome.com https://kit.fontawesome.com https://www.google.com https://www.gstatic.com https://recaptcha.google.com https://unpkg.com https://d3js.org https://canvasjs.com https://js.pusher.com 'unsafe-eval'";
-            $connectSrc = "connect-src 'self' https://www.google.com https://www.gstatic.com https://*.google-analytics.com https://*.analytics.google.com https://cdn.jsdelivr.net https://*.pusher.com wss://*.pusher.com https://*.pusherapp.com wss://*.pusherapp.com https://ka-f.fontawesome.com";
+            $connectSrc = "connect-src 'self' https://www.google.com https://www.gstatic.com https://*.google-analytics.com https://*.analytics.google.com https://cdn.jsdelivr.net https://*.pusher.com wss://*.pusher.com https://*.pusherapp.com wss://*.pusherapp.com https://ka-f.fontawesome.com https://*.r2.cloudflarestorage.com";
 
             $path = (string)parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
             if (in_array(rtrim($path, '/'), ['/member/emoji-studio', '/poster-studio', '/flyer-studio'], true)) {
@@ -249,6 +267,7 @@ if (php_sapi_name() !== 'cli') {
                 . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; "
                 . "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://ka-f.fontawesome.com; "
                 . "img-src 'self' data: https:; "
+                . "media-src 'self' blob: https://*.r2.dev https://*.r2.cloudflarestorage.com; "
                 . $connectSrc . "; "
                 . "frame-src 'self' https://www.google.com https://recaptcha.google.com; "
                 . "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'";

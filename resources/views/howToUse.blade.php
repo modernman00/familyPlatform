@@ -959,6 +959,44 @@
           </div>
         </div>
 
+        <!-- Pillar 12: Warm Editorial Sanctuary Interface (Desktop, iPad & Mobile) -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden" id="playbook-editorial-ui">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(163, 22, 33, 0.12); color: #a31621;">
+                <i class="bi bi-layout-wtf fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">12. Unified Navigation, Kinship Path &amp; Poster Studio</h3>
+                <span class="badge" style="background: #a31621; color: #fff;">Editorial Design System</span>
+              </div>
+            </div>
+
+            <p class="lead text-secondary">
+              Every screen adapts across Desktop, iPad, and Mobile with warm cream surfaces, crimson accents, and crisp line icons so every generation can navigate effortlessly.
+            </p>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <h6 class="fw-bold text-dark"><i class="bi bi-compass me-1 text-danger"></i> Streamlined Navigation &amp; Whispers</h6>
+                  <p class="small text-muted mb-0">
+                    On mobile, a five-tab bottom bar provides instant access to <strong>Home, Tree, Create (+), Reels, and Whispers</strong>, while Search, Notifications, and your Account Menu live in the top bar. Kin Whispers opens directly into your conversations with a three-pane desktop workspace (Inbox, Chat, and Shared Details).
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <h6 class="fw-bold text-dark"><i class="bi bi-diagram-3 me-1 text-danger"></i> Interactive Tree &amp; Relationship Path</h6>
+                  <p class="small text-muted mb-0">
+                    Selecting any relative on the Family Tree opens their quick card with one-tap actions to <strong>Add relative</strong>, <strong>Whisper</strong>, or view their <strong>Profile</strong>. Visiting a relative's profile displays a visual <em>"How you're related"</em> path alongside kin-only contact protection.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Back to Family Tree CTA -->
         <div class="text-center mt-5">
           <a href="/organogram" class="btn btn-lg fw-bold px-5 py-3 text-white shadow-sm" style="background: linear-gradient(135deg, #a31621 0%, #7a0e16 100%); border-radius: 50px;">
@@ -1056,4 +1094,17 @@
   ]
 }
 </script>
+<section class="container my-5" aria-label="4-Quadrant Video Studio Guide">
+    <div class="card bg-dark text-light border-secondary rounded-4 p-4">
+        <h2 class="h4 text-warning mb-2">How to Use the 4-Quadrant Family Video Studio</h2>
+        <p class="small text-secondary mb-3">Organise, edit, and polish cherished family films right in your browser with zero external subscriptions.</p>
+        <ul class="small mb-0">
+            <li><strong>Top-Left Asset Dock:</strong> Pick Media, Audio, Text, Stickers, Captions, Charts &amp; PiP frames, or AI Narrator Avatars.</li>
+            <li><strong>Centre 60fps Player:</strong> Drag the golden handles on any clip to move, scale, or rotate it, and switch between 16:9, 9:16, or 1:1.</li>
+            <li><strong>Right-Hand Inspector:</strong> Adjust Transform, Remove Background, Masks, Skin Retouch, Bezier Speed Curves, Colour LUTs, and Keyframe Diamonds (&lt;&gt;).</li>
+            <li><strong>Bottom Multi-Track Timeline:</strong> Split, Ripple Delete, Freeze Frame, Reverse, Mirror, Crop, and toggle Magnetic Snapping or per-track Lock/Hide/Mute.</li>
+            <li><strong>1-Click Magic Recipes:</strong> Open <em>? How to Use</em> inside the studio for instant presets like <em>Polish Talking Head</em>, <em>Animate Old Photo</em>, and <em>Party Reel</em>.</li>
+        </ul>
+    </div>
+</section>
 @endsection

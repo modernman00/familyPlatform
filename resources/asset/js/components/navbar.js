@@ -18,7 +18,7 @@ function updateNotificationBadge(count) {
     const headerBadge = id('header_notif_count');
     const mobileBadge = id('pwa_bottom_badge');
     
-    const displayStr = countNum > 9 ? '9+' : (countNum > 0 ? countNum.toString() : '');
+    const displayStr = countNum > 0 ? countNum.toString() : '';
 
     if (badge) {
         if (countNum <= 0) {
@@ -200,7 +200,7 @@ const fetchUserNotifications = () => {
 // Update whisper unread badge and bell indicators across navbar & left column
 function updateWhisperBadge(count) {
     const countNum = parseInt(count || '0', 10);
-    const displayStr = countNum > 9 ? '9+' : (countNum > 0 ? countNum.toString() : '');
+    const displayStr = countNum > 0 ? countNum.toString() : '';
     const hasUnread = countNum > 0;
 
     const navBadge = id('navbar_whisper_count');
@@ -284,7 +284,13 @@ const initNavbarControls = () => {
             });
 
             sessionStorage.setItem('notificationCount', '0');
+            localStorage.setItem('notification_sync_trigger', Date.now().toString());
             updateNotificationBadge(0);
+
+            // Persist to backend API so all pages and devices synchronize
+            axios.put('/member/notifications/read-all').catch(err => {
+                console.warn('[navbar] mark-all-read backend sync error:', err);
+            });
         });
     }
 };
@@ -509,6 +515,12 @@ if (typeof window !== 'undefined') {
     window.addEventListener('pwa:notification-received', () => {
         fetchUserNotifications();
         fetchWhisperUnreadCount();
+    });
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'notification_sync_trigger') {
+            sessionStorage.setItem('notificationCount', '0');
+            updateNotificationBadge(0);
+        }
     });
     window.addEventListener('kin-whispers:read', () => {
         fetchWhisperUnreadCount();

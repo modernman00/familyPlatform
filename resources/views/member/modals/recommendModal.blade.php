@@ -10,40 +10,40 @@
       @endphp
       
       <!-- Modal Header -->
-      <div class="modal-header border-0" style="background: linear-gradient(135deg, #2a0a0d 0%, #2a0a0d 60%, #8a1019 100%); color: #ffffff; padding: 1.5rem 1.75rem;">
+      <div class="modal-header border-0" style="background: #ffffff; color: #1c1412; padding: 1.35rem 1.75rem; border-bottom: 1px solid #efe8de !important;">
         <div class="d-flex align-items-center gap-3">
-          <div style="width: 48px; height: 48px; min-width: 48px; min-height: 48px; border-radius: 14px; background: rgba(245, 158, 11, 0.25); color: #fbbf24; border: 1.5px solid rgba(245, 158, 11, 0.5); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
-            <i class="bi bi-person-plus-fill"></i>
+          <div style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 50%; background: #fdf2f2; color: #a31621; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+            <i class="bi bi-person-plus"></i>
           </div>
           <div>
             <div class="d-flex align-items-center gap-2 flex-wrap">
-              <h5 class="modal-title fw-bold mb-0 text-white" id="recommendFriendsModalLabel" style="font-size: 1.25rem;">
+              <h5 class="modal-title fw-bold mb-0" id="recommendFriendsModalLabel" style="font-family: 'Outfit', sans-serif; font-size: 1.3rem; color: #1c1412;">
                 Invite to FamilyPlatform
               </h5>
-              <span class="badge rounded-pill bg-warning text-dark fw-bold px-2 py-0.5" style="font-size: 0.72rem;">
+              <span class="badge rounded-pill fw-bold px-2.5 py-1" style="background: #fdf2f2; color: #a31621; font-size: 0.68rem;">
                 PRIVATE SANCTUARY
               </span>
             </div>
-            <small class="text-white-50" style="font-size: 0.85rem;">Invite relatives to join your family network or recommend friends to start their own</small>
+            <small style="color: #786c65; font-size: 0.84rem;">Invite relatives to join your family network or recommend friends to start their own</small>
           </div>
         </div>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <!-- Navigation Tabs: Family Network vs Friends/In-Laws -->
-      <div class="px-4 pt-3 pb-0 bg-light border-bottom">
-        <ul class="nav nav-pills nav-fill gap-2 p-1 rounded-pill bg-white border" id="inviteModalTabs" role="tablist">
+      <div class="px-4 pt-3 pb-2" style="background: #faf6f0; border-bottom: 1px solid #efe8de;">
+        <ul class="nav nav-pills nav-fill gap-2 p-1 rounded-pill bg-white border" id="inviteModalTabs" role="tablist" style="border-color: #e6dfd5 !important;">
           <li class="nav-item" role="presentation">
-            <button class="nav-link active rounded-pill fw-bold py-2 small d-flex align-items-center justify-content-center gap-1.5" id="tab-our-family" data-bs-toggle="pill" data-bs-target="#pane-our-family" type="button" role="tab" aria-controls="pane-our-family" aria-selected="true" style="min-height: 42px;">
-              <i class="bi bi-people-fill text-primary"></i> <span>Our Family Network</span>
+            <button class="nav-link active rounded-pill fw-bold py-2 small d-flex align-items-center justify-content-center gap-1.5" id="tab-our-family" data-bs-toggle="pill" data-bs-target="#pane-our-family" type="button" role="tab" aria-controls="pane-our-family" aria-selected="true" style="min-height: 44px;">
+              <i class="bi bi-people"></i> <span>Our Family Network</span>
               @if(!empty($modalFamCode))
                 <span class="badge bg-danger-subtle text-danger font-monospace ms-1">#{{ $modalFamCode }}</span>
               @endif
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link rounded-pill fw-bold py-2 small d-flex align-items-center justify-content-center gap-1.5 text-secondary" id="tab-external-friends" data-bs-toggle="pill" data-bs-target="#pane-external-friends" type="button" role="tab" aria-controls="pane-external-friends" aria-selected="false" style="min-height: 42px;">
-              <i class="bi bi-stars text-warning"></i> <span>Friends &amp; In-Laws (New Network)</span>
+            <button class="nav-link rounded-pill fw-bold py-2 small d-flex align-items-center justify-content-center gap-1.5 text-secondary" id="tab-external-friends" data-bs-toggle="pill" data-bs-target="#pane-external-friends" type="button" role="tab" aria-controls="pane-external-friends" aria-selected="false" style="min-height: 44px;">
+              <i class="bi bi-diagram-3"></i> <span>Friends &amp; In-Laws (New Network)</span>
             </button>
           </li>
         </ul>

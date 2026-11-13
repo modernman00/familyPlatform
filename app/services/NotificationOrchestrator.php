@@ -158,6 +158,11 @@ final class NotificationOrchestrator
         return CentralOrchestrator::markAsRead($notificationId, $userId);
     }
 
+    public static function markAllAsRead(string $userId): bool
+    {
+        return CentralOrchestrator::markAllAsRead($userId);
+    }
+
     public static function getUnreadCount(string $userId): int
     {
         return CentralOrchestrator::getUnreadCount($userId);

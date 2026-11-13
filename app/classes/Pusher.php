@@ -71,6 +71,60 @@ class Pusher
         self::trigger([$theChannel], $theEvent, $theData);
     }
 
+    private static function quotaBreakerPath(): string
+    {
+        return rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'fp_pusher_quota_breaker.txt';
+    }
+
+    /**
+     * True when Pusher recently rejected broadcasts due to daily quota / rate-limit exhaustion.
+     */
+    public static function isQuotaDegraded(): bool
+    {
+        if (function_exists('apcu_fetch')) {
+            $ok = false;
+            $val = apcu_fetch('fp_pusher_quota_degraded', $ok);
+            if ($ok && is_int($val) && $val > time()) {
+                return true;
+            }
+        }
+        $path = self::quotaBreakerPath();
+        if (!is_file($path)) {
+            return false;
+        }
+        $expiresAt = (int) @file_get_contents($path);
+        if ($expiresAt > time()) {
+            return true;
+        }
+        @unlink($path);
+        return false;
+    }
+
+    /**
+     * Trip the Pusher quota circuit-breaker for $ttlSeconds so requests fail over
+     * immediately to SovereignBroadcaster without burning 2s HTTP timeouts.
+     */
+    public static function markQuotaDegraded(int $ttlSeconds = 300): void
+    {
+        $ttl = max(30, min($ttlSeconds, 3600));
+        $expiresAt = time() + $ttl;
+        if (function_exists('apcu_store')) {
+            @apcu_store('fp_pusher_quota_degraded', $expiresAt, $ttl);
+        }
+        @file_put_contents(self::quotaBreakerPath(), (string) $expiresAt, LOCK_EX);
+    }
+
+    public static function clearQuotaDegraded(): void
+    {
+        if (function_exists('apcu_delete')) {
+            @apcu_delete('fp_pusher_quota_degraded');
+        }
+        $path = self::quotaBreakerPath();
+        if (is_file($path)) {
+            @unlink($path);
+        }
+    }
+
     /**
      * High-concurrency multi-channel broadcast trigger.
      * Batches all channels into a single HTTP request to Pusher instead of N round-trips.
@@ -89,13 +143,19 @@ class Pusher
         }
 
         // 1. Primary Attempt: Pusher Multi-Channel trigger (1 single HTTP request for up to 100 channels)
-        try {
-            $pusher = self::pusher();
-            if ($pusher !== null) {
-                $pusher->trigger($channelList, $event, $data);
+        if (!self::isQuotaDegraded()) {
+            try {
+                $pusher = self::pusher();
+                if ($pusher !== null) {
+                    $pusher->trigger($channelList, $event, $data);
+                }
+            } catch (\Throwable $e) {
+                $msg = $e->getMessage();
+                if (preg_match('/\b(403|429)\b|quota|limit|exceeded/i', $msg)) {
+                    self::markQuotaDegraded(300);
+                }
+                error_log("[Pusher] Multi-channel broadcast to (" . implode(',', $channelList) . ") failed: " . $msg . ". Defaulting to SovereignBroadcaster.");
             }
-        } catch (\Throwable $e) {
-            error_log("[Pusher] Multi-channel broadcast to (" . implode(',', $channelList) . ") failed: " . $e->getMessage() . ". Defaulting to SovereignBroadcaster.");
         }
 
         // 2. Local Fallback & Synchronisation Rail: SovereignBroadcaster

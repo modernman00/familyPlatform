@@ -438,24 +438,7 @@ img.rounded-circle {
   margin-top: 10px;
 }
 
-.notification-badge {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  background-color: red;
-  color: white;
-  border-radius: 50%;
-  width: 18px;
-  height: 18px;
-  font-size: 0.7rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.notification-badge:empty {
-  display: none !important;
-}
+/* Legacy badge override removed in favour of navbar.css unified standard */
 
 .image-preview {
   max-width: 100%;

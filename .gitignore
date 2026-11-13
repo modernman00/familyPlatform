@@ -91,6 +91,7 @@ coverage/
 .DS_Store
 # User Uploads & Framework Caches
 public/uploads/
+public/storage/
 storage/logs/
 storage/framework/
 # IDE Configs

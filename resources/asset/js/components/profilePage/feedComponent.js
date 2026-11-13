@@ -1,5 +1,5 @@
 import axios from 'axios';
-import Pusher from 'pusher-js';
+import { createHybridRealtimeClient } from './sovereignRealtimeBridge';
 import { format } from 'timeago.js';
 import Swal from 'sweetalert2';
 import { extractVideoFromText, extractVideosFromText, cleanPostMessage } from './videoParser';
@@ -4024,24 +4024,16 @@ export function profileFeed(opts = {}) {
                     || process.env.MIX_PUSHER_APP_CLUSTER
                     || 'eu';
                 const famCode = (this.currentFamCode || '').replace(/[^A-Za-z0-9_-]/g, '');
-                if (!key || !cluster || !famCode) {
+                if (!famCode) {
                     return;
                 }
 
-                // One private, per-family channel. The server (Pusher::authoriseChannel)
-                // only signs the subscription if this session belongs to <famCode>,
-                // so another family cannot read this feed even with the public key.
-                this.pusher = new Pusher(key, {
+                // One private, per-family channel with automatic failover to SovereignBroadcaster SSE
+                // if Pusher fails or exhausts its daily message quota.
+                this.pusher = createHybridRealtimeClient({
+                    key,
                     cluster,
-                    forceTLS: true,
-                    channelAuthorization: {
-                        endpoint: '/pusher/auth',
-                        headersProvider: () => ({
-                            'X-CSRF-Token': getCsrfToken(),
-                            'X-XSRF-TOKEN': getCsrfToken(),
-                            'X-Requested-With': 'XMLHttpRequest',
-                        }),
-                    },
+                    getCsrfToken,
                 });
 
                 const channel = this.pusher.subscribe(`private-family-${famCode}`);
@@ -4097,6 +4089,14 @@ export function profileFeed(opts = {}) {
                             window.dispatchEvent(new CustomEvent('pwa:notification-received', { detail: data }));
                             if (data?.notification_type === 'Connected Kin Request') {
                                 window.dispatchEvent(new CustomEvent('kin-request:received', { detail: data }));
+                            }
+                        });
+                        userChannel.bind('notification-synced', (data) => {
+                            if (data?.action === 'MARK_ALL_READ' || data?.unread_count === 0) {
+                                sessionStorage.setItem('notificationCount', '0');
+                                if (typeof window.updateNotificationBadge === 'function') {
+                                    window.updateNotificationBadge(0);
+                                }
                             }
                         });
                         userChannel.bind('new-request', (data) => {

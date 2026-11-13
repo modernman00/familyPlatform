@@ -10,6 +10,7 @@ use Src\{Db, SelectFn, Limiter};
 use Src\functionality\middleware\GetRequestData;
 use Src\Exceptions\NotFoundException;
 use Src\Exceptions\ForbiddenException;
+use Src\Utility;
 
 final class Organogram extends SingleCustomerData
 {
@@ -146,6 +147,21 @@ final class Organogram extends SingleCustomerData
             $treeAccessCheck = \App\services\FamilyTreeAccessService::canViewFamilyTree($viewerId, $idStr, $familyCode);
             if (!$treeAccessCheck['allowed']) {
                 http_response_code(403);
+                $accept = strtolower((string)($_SERVER['HTTP_ACCEPT'] ?? ''));
+                $isXhr = strtolower((string)($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '')) === 'xmlhttprequest';
+                $wantsJson = $isXhr || (str_contains($accept, 'application/json') && !str_contains($accept, 'text/html'));
+                if (!$wantsJson) {
+                    // Browser navigation: show a SweetAlert error modal instead of raw JSON.
+                    $referer = (string)($_SERVER['HTTP_REFERER'] ?? '');
+                    $refScheme = strtolower((string)parse_url($referer, PHP_URL_SCHEME));
+                    $refHost = (string)parse_url($referer, PHP_URL_HOST);
+                    $backUrl = ($referer !== '' && in_array($refScheme, ['http', 'https'], true) && $refHost === (string)($_SERVER['HTTP_HOST'] ?? '')) ? $referer : '/profilePage';
+                    Utility::view('member/treeAccessDenied', [
+                        'message' => (string)$treeAccessCheck['reason'],
+                        'backUrl' => $backUrl,
+                    ]);
+                    exit;
+                }
                 echo json_encode([
                     'error' => $treeAccessCheck['reason'],
                     'code' => $treeAccessCheck['code'],

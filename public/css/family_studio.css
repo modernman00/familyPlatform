@@ -1,0 +1,110 @@
+/* Sovereign Kinship Video Studio — 12-Module Stylesheet */
+.sks-suite-panel {
+    background: #141a29;
+    border: 1px solid #2d3748;
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 24px;
+    color: #f8fafc;
+}
+
+.sks-suite-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.sks-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.05);
+    color: #e2e8f0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.sks-tab-btn:hover {
+    background: rgba(212, 175, 55, 0.16);
+    border-color: rgba(212, 175, 55, 0.45);
+    color: #ffffff;
+}
+
+.sks-tab-btn.active {
+    background: linear-gradient(135deg, #d4af37 0%, #aa820a 100%);
+    color: #0b0f19;
+    border-color: #ffd700;
+}
+
+.sks-module-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.sks-module-card {
+    background: #1e2538;
+    border: 1px solid #334155;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sks-module-card h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fbbf24;
+    margin: 0;
+}
+
+.sks-module-card p {
+    font-size: 0.8125rem;
+    color: #cbd5e1;
+    margin: 0;
+    line-height: 1.45;
+}
+
+.sks-consent-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(163, 22, 33, 0.18);
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    font-size: 0.78rem;
+    color: #fecaca;
+}
+
+.sks-consent-box input[type="checkbox"] {
+    min-width: 22px;
+    min-height: 22px;
+    margin-top: 2px;
+    cursor: pointer;
+}
+
+.sks-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(16, 185, 129, 0.16);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
