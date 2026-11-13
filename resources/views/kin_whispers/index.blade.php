@@ -1054,7 +1054,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                   <template x-if="thread.is_pinned"><i class="bi bi-pin-angle-fill kw-pinned-icon" title="Pinned conversation"></i></template>
                   <template x-if="thread.is_muted"><i class="bi bi-bell-slash-fill kw-muted-icon" title="Muted notifications"></i></template>
                 </h3>
-                <span class="kw-thread__time" x-text="formatShort(thread.last_message_at)"></span>
+                <span class="kw-thread__time" x-text="formatShort(thread.last_message_at)" :title="formatFullDateTime(thread.last_message_at)"></span>
               </div>
               <div class="kw-thread__sub">
                 <template x-if="thread.thread_type === 'group'">
@@ -1202,7 +1202,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                 <i class="bi bi-camera-fill"></i>
                 <span x-text="evt.user_id === currentUserId ? 'You took a screenshot' : evt.user_name + ' took a screenshot'"></span>
                 &middot;
-                <span x-text="formatShort(evt.created_at)"></span>
+                <span x-text="formatShort(evt.created_at)" :title="formatFullDateTime(evt.created_at)"></span>
               </div>
             </template>
             <template x-for="msg in messages" :key="msg.id">
@@ -1366,7 +1366,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                           <i class="bi bi-hourglass-split"></i> <span x-text="formatTimeLeft(msg, nowTs)"></span>
                         </span>
                       </template>
-                      <span x-text="formatShort(msg.created_at)"></span>
+                      <span x-text="formatShort(msg.created_at)" :title="formatFullDateTime(msg.created_at)"></span>
                       <template x-if="msg.sender_id === currentUserId">
                         <span class="kw-seen-badge" :title="msg.status === 'sending' ? 'Sending whisper…' : (msg.status === 'failed' ? 'Failed to deliver — tap to retry' : (msg.is_read ? ('Read at ' + formatSeenTime(msg.read_at)) : 'Delivered'))">
                           <template x-if="msg.status === 'sending'">
@@ -2065,7 +2065,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
             <div class="kw-starred-item" @click="scrollToMessage(sm.id); showInfoDrawer = false;" title="Click to view in conversation">
               <div class="kw-starred-item__who" x-text="sm.sender_id === currentUserId ? 'You' : sm.sender_name"></div>
               <div class="kw-starred-item__body" x-text="sm.body || (sm.message_type === 'audio_whisper' ? 'Voice whisper' : 'Attached media')"></div>
-              <div class="kw-starred-item__time" x-text="formatShort(sm.created_at)"></div>
+              <div class="kw-starred-item__time" x-text="formatShort(sm.created_at)" :title="formatFullDateTime(sm.created_at)"></div>
             </div>
           </template>
         </div>
@@ -2315,6 +2315,7 @@ function kinWhisperApp() {
     remoteStream: null,
     peerConnection: null,
     incomingCall: null,
+    callRingingTimer: null,
     audioCtx: null,
     ringtoneInterval: null,
     pusher: null,
@@ -2383,6 +2384,14 @@ function kinWhisperApp() {
     myPresencePrivacy: @json($presencePrivacy ?? 'everyone'),
     savingPresencePrivacy: false,
     presenceTimer: null,
+
+    normId(id) {
+      return String(id || '').trim().toLowerCase();
+    },
+
+    isMe(id) {
+      return this.normId(id) === this.normId(this.currentUserId);
+    },
 
     init() {
       if (this.serverNowIso) {
@@ -3272,7 +3281,7 @@ function kinWhisperApp() {
       t = t || this.activeThread;
       if (!t) return 'Family Kin';
       if (t.thread_type === 'group') return t.title || 'Family Group';
-      return t.sender_id === this.currentUserId ? t.recipient_name : t.sender_name;
+      return this.isMe(t.sender_id) ? t.recipient_name : t.sender_name;
     },
     // Attachments exist in two shapes: optimistic (mime_type/original_name/size_bytes) and server-persisted
     // (mime/name/size/type). Normalise here so media never vanishes after the server sync.
@@ -3288,7 +3297,7 @@ function kinWhisperApp() {
     partnerId(t) {
       t = t || this.activeThread;
       if (!t || t.thread_type === 'group') return '';
-      return String(t.sender_id === this.currentUserId ? t.recipient_id : t.sender_id);
+      return String(this.isMe(t.sender_id) ? t.recipient_id : t.sender_id);
     },
     presenceOf(t) {
       const id = this.partnerId(t);
@@ -3363,21 +3372,53 @@ function kinWhisperApp() {
       const fallback = '/resources/images/profile/avatarM.png';
       if (!t) return fallback;
       if (t.thread_type === 'group') return fallback;
-      const raw = (t.sender_id === this.currentUserId) ? t.recipient_avatar : t.sender_avatar;
+      const raw = this.isMe(t.sender_id) ? t.recipient_avatar : t.sender_avatar;
       return this.resolveAvatar(raw);
     },
     labelFor(type) { return LABELS[type] || 'Whisper'; },
     iconFor(type) { return ICONS[type] || 'bi-pin-angle-fill'; },
     initials(name) { return (name || '?').trim().split(/\s+/).slice(0, 2).map(p => p[0]).join('').toUpperCase(); },
     formatSeconds(s) { return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); },
+    parseDate(str) {
+      if (!str) return null;
+      let s = String(str).trim();
+      if (!s.endsWith('Z') && !/[+-]\d{2}:?\d{2}$/.test(s)) {
+        s = s.replace(' ', 'T') + 'Z';
+      }
+      const d = new Date(s);
+      if (!isNaN(d.getTime())) return d;
+      const fallback = new Date(String(str).replace(' ', 'T'));
+      return isNaN(fallback.getTime()) ? null : fallback;
+    },
     formatShort(str) {
-      if (!str) return '';
-      const d = new Date(String(str).replace(' ', 'T'));
-      if (isNaN(d.getTime())) return str;
+      const d = this.parseDate(str);
+      if (!d) return str || '';
       const now = new Date();
-      return d.toDateString() === now.toDateString()
-        ? d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-        : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+      if (d.toDateString() === now.toDateString()) {
+        return 'Today, ' + time;
+      }
+      if (d.toDateString() === yesterday.toDateString()) {
+        return 'Yesterday, ' + time;
+      }
+      const isSameYear = d.getFullYear() === now.getFullYear();
+      const datePart = d.toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        ...(isSameYear ? {} : { year: 'numeric' })
+      });
+      return datePart + ', ' + time;
+    },
+    formatFullDateTime(str) {
+      const d = this.parseDate(str);
+      if (!d) return str || '';
+      return d.toLocaleDateString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      }) + ' at ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     },
     scrollToBottom() {
       this.$nextTick(() => { const s = document.getElementById('kwStream'); if (s) s.scrollTop = s.scrollHeight; });
@@ -3552,7 +3593,7 @@ function kinWhisperApp() {
       const attachmentThumb = this.pendingAttachmentThumb;
       const replyContext = this.replyingTo ? {
         id: this.replyingTo.id,
-        sender_name: this.replyingTo.sender_id === this.currentUserId ? 'You' : this.replyingTo.sender_name,
+        sender_name: this.isMe(this.replyingTo.sender_id) ? 'You' : this.replyingTo.sender_name,
         body: (this.replyingTo.body || (this.replyingTo.message_type === 'audio_whisper' ? 'Voice whisper' : 'Attachment')).substring(0, 100)
       } : null;
 
@@ -3575,7 +3616,7 @@ function kinWhisperApp() {
         sender_name: 'You',
         sender_avatar: this.partnerAvatar({ sender_id: this.currentUserId }) || '/resources/images/profile/avatarM.png',
         recipient_id: this.activeThread.thread_type === 'direct'
-          ? (this.activeThread.sender_id === this.currentUserId ? this.activeThread.recipient_id : this.activeThread.sender_id)
+          ? this.partnerId(this.activeThread)
           : null,
         message_type: hasAudio ? 'audio_whisper' : 'text',
         body: outgoingText,
@@ -3747,7 +3788,7 @@ function kinWhisperApp() {
         return 'Sharing is authorised by both kin — click to share on WhatsApp';
       }
       if (this.activeThread.share_status === 'pending') {
-        return this.activeThread.share_requested_by === this.currentUserId
+        return this.isMe(this.activeThread.share_requested_by)
           ? 'Awaiting approval from ' + this.partnerName(this.activeThread) + ' before sharing'
           : this.partnerName(this.activeThread) + ' requested to share — review consent banner below';
       }
@@ -3761,7 +3802,7 @@ function kinWhisperApp() {
         return;
       }
       if (this.activeThread.share_status === 'pending') {
-        if (this.activeThread.share_requested_by === this.currentUserId) {
+        if (this.isMe(this.activeThread.share_requested_by)) {
           this.toast('Awaiting approval from ' + this.partnerName(this.activeThread) + ' before this whisper can be shared on WhatsApp.');
         } else {
           const stream = document.getElementById('kwStream');
@@ -3966,7 +4007,7 @@ function kinWhisperApp() {
 
     partnerMobileNumber() {
       if (!this.activeThread || this.activeThread.thread_type === 'group') return null;
-      const partnerId = this.activeThread.sender_id === this.currentUserId ? this.activeThread.recipient_id : this.activeThread.sender_id;
+      const partnerId = this.partnerId(this.activeThread);
       const kinObj = this.kin.find(k => String(k.id) === String(partnerId));
       return (kinObj && kinObj.mobile) ? kinObj.mobile : null;
     },
@@ -4143,7 +4184,13 @@ function kinWhisperApp() {
 
       const pc = new RTCPeerConnection({
         iceServers: [
-          { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
+          { urls: [
+            'stun:stun.l.google.com:19302',
+            'stun:stun1.l.google.com:19302',
+            'stun:stun2.l.google.com:19302',
+            'stun:stun.cloudflare.com:3478',
+            'stun:global.stun.twilio.com:3478'
+          ] }
         ]
       });
 
@@ -4224,7 +4271,7 @@ function kinWhisperApp() {
         if (localVid) localVid.srcObject = stream;
       });
 
-      const partnerId = this.activeThread.sender_id === this.currentUserId ? this.activeThread.recipient_id : this.activeThread.sender_id;
+      const partnerId = this.partnerId(this.activeThread);
       const pc = this.createPeerConnection(this.activeThread.id, partnerId);
 
       try {
@@ -4233,6 +4280,16 @@ function kinWhisperApp() {
           headers: jsonHeaders(),
           body: JSON.stringify({ call_type: type })
         });
+        if (!res.ok) {
+          let errMsg = 'Server error (' + res.status + ')';
+          try {
+            const errData = await res.json();
+            errMsg = errData.error || errData.message || errMsg;
+          } catch (_) {}
+          this.toast('Could not initiate call: ' + errMsg);
+          this.endCall();
+          return;
+        }
         const data = await res.json();
         if (data.success && data.call) {
           this.callRoomId = data.call.room_id;
@@ -4242,10 +4299,13 @@ function kinWhisperApp() {
           return;
         }
 
-        const offer = await pc.createOffer();
+        const offer = await pc.createOffer({
+          offerToReceiveAudio: true,
+          offerToReceiveVideo: type === 'video'
+        });
         await pc.setLocalDescription(offer);
 
-        await fetch('/api/kin-whispers/threads/' + encodeURIComponent(this.activeThread.id) + '/call/signal', {
+        const sigRes = await fetch('/api/kin-whispers/threads/' + encodeURIComponent(this.activeThread.id) + '/call/signal', {
           method: 'POST',
           headers: jsonHeaders(),
           body: JSON.stringify({
@@ -4253,9 +4313,21 @@ function kinWhisperApp() {
             signal: { sdp: offer }
           })
         });
+        if (!sigRes.ok) {
+          console.warn('Initial call signal returned HTTP', sigRes.status);
+        }
+
+        if (this.callRingingTimer) clearTimeout(this.callRingingTimer);
+        this.callRingingTimer = setTimeout(() => {
+          if (this.isInCall && this.callConnectionState !== 'connected') {
+            this.toast((this.callPartnerName || 'Family kin') + ' is currently unavailable. Call ended.');
+            this.endCall();
+          }
+        }, 45000);
       } catch (err) {
         console.error('Call signaling error', err);
-        this.toast('Failed to connect call with server. Please check your network.');
+        const detail = (err && err.message) ? err.message : 'Please check your network.';
+        this.toast('Failed to connect call: ' + detail);
         this.endCall();
       }
     },
@@ -4387,6 +4459,10 @@ function kinWhisperApp() {
 
     endCall() {
       this.stopRingtone();
+      if (this.callRingingTimer) {
+        clearTimeout(this.callRingingTimer);
+        this.callRingingTimer = null;
+      }
       this.pendingOffer = null;
       this.pendingOfferSenderId = null;
       this.pendingCandidates = [];
@@ -4446,6 +4522,10 @@ function kinWhisperApp() {
     },
 
     markCallConnected() {
+      if (this.callRingingTimer) {
+        clearTimeout(this.callRingingTimer);
+        this.callRingingTimer = null;
+      }
       this.isCallRinging = false;
       if (this.callConnectionState !== 'connected') {
         this.callConnectionState = 'connected';
@@ -4519,7 +4599,7 @@ function kinWhisperApp() {
         });
 
         this.userChannel.bind('kin-call-incoming', (data) => {
-          if (data && data.caller_id !== this.currentUserId) {
+          if (data && !this.isMe(data.caller_id)) {
             this.incomingCall = data;
             this.pendingOffer = null;
             this.pendingOfferSenderId = null;
@@ -4530,6 +4610,7 @@ function kinWhisperApp() {
 
         this.userChannel.bind('kin-call-signal', async (data) => {
           if (!data || !data.signal) return;
+          if (data.sender_id && this.isMe(data.sender_id)) return;
           try {
             if (data.signal.sdp) {
               const sdp = data.signal.sdp;

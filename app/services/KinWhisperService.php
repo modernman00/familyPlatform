@@ -670,7 +670,7 @@ final class KinWhisperService
             }
         } else {
             // Direct thread recipient
-            $recipientId = ($currentUserId === (string)$thread['sender_id'])
+            $recipientId = (strcasecmp($currentUserId, (string)$thread['sender_id']) === 0)
                 ? (string)$thread['recipient_id']
                 : (string)$thread['sender_id'];
 
@@ -2141,8 +2141,8 @@ final class KinWhisperService
         $hasMinor = (int)($thread['has_minor_participant'] ?? 0) === 1;
         $supervisorId = (string)($thread['supervisor_parent_id'] ?? '');
 
-        $isParticipant = ($currentUserId === $senderId || ($recipientId !== '' && $currentUserId === $recipientId));
-        $isSupervisor = ($hasMinor && $supervisorId !== '' && $currentUserId === $supervisorId);
+        $isParticipant = (strcasecmp($currentUserId, $senderId) === 0 || ($recipientId !== '' && strcasecmp($currentUserId, $recipientId) === 0));
+        $isSupervisor = ($hasMinor && $supervisorId !== '' && strcasecmp($currentUserId, $supervisorId) === 0);
 
         if (!$isParticipant && !$isSupervisor) {
             if (!empty($thread['id'])) {
@@ -2224,13 +2224,31 @@ final class KinWhisperService
             $channels = array_values(array_map(fn($id) => 'private-user-' . strtolower((string)$id), $recipientIds));
             if (!empty($channels)) {
                 \App\classes\Pusher::trigger($channels, 'kin-call-incoming', $callPayload);
+                foreach ($recipientIds as $recId) {
+                    try {
+                        \App\classes\PushNotificationClass::sendPushNotification(
+                            userId: (string)$recId,
+                            message: "📞 Incoming {$callType} call from {$callerName} in {$threadTitle}...",
+                            url: "/kin-whispers?thread_id={$threadId}",
+                            title: "Incoming Family Call"
+                        );
+                    } catch (\Throwable) {}
+                }
             }
         } else {
-            $recipientId = ($currentUserId === (string)$thread['sender_id'])
+            $recipientId = (strcasecmp($currentUserId, (string)$thread['sender_id']) === 0)
                 ? (string)$thread['recipient_id']
                 : (string)$thread['sender_id'];
             if ($recipientId !== '') {
                 \App\classes\Pusher::trigger('private-user-' . strtolower($recipientId), 'kin-call-incoming', $callPayload);
+                try {
+                    \App\classes\PushNotificationClass::sendPushNotification(
+                        userId: $recipientId,
+                        message: "📞 Incoming {$callType} call from {$callerName}...",
+                        url: "/kin-whispers?thread_id={$threadId}",
+                        title: "Incoming Family Call"
+                    );
+                } catch (\Throwable) {}
             }
         }
 
@@ -2282,7 +2300,7 @@ final class KinWhisperService
                 \App\classes\Pusher::trigger($channels, 'kin-call-signal', $relayPayload);
             }
         } else {
-            $recipientId = ($currentUserId === (string)$thread['sender_id'])
+            $recipientId = (strcasecmp($currentUserId, (string)$thread['sender_id']) === 0)
                 ? (string)$thread['recipient_id']
                 : (string)$thread['sender_id'];
             if ($recipientId !== '') {

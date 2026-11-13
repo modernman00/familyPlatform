@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(pwa): suppress unauthenticated push notification subscription pings on guest auth routes and refresh production bundles",
+    "title": "Test(csrf): ensure HTTP_X_CSRF_TOKEN is isolated and sanitized across SocialFeed and Onboarding test cases",
     "notes": [
-        "Fix(pwa): suppress unauthenticated push notification subscription pings on guest auth routes and refresh production bundles",
-        "Fix(ai-hub): refine static types and resilient trivia fallback for PHPStan Level 8",
-        "Fix(ai-hub): add zero-failure resilient fallback to generateFamilyTrivia"
+        "Test(csrf): ensure HTTP_X_CSRF_TOKEN is isolated and sanitized across SocialFeed and Onboarding test cases",
+        "Feat(video-studio): upgrade to 18-module Sovereign Kinship Video Studio with NLE workspace, spotlight tour, and format switchers",
+        "Fix(pwa): suppress unauthenticated push notification subscription pings on guest auth routes and refresh production bundles"
     ],
-    "released_at": "2026-11-12",
-    "commit": "3db8d5d5"
+    "released_at": "2026-11-13",
+    "commit": "bdcb34d8"
 }

@@ -253,7 +253,7 @@ if (php_sapi_name() !== 'cli') {
             }
 
             $scriptSrc = "script-src 'self' 'nonce-$nonce' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://use.fontawesome.com https://kit.fontawesome.com https://www.google.com https://www.gstatic.com https://recaptcha.google.com https://unpkg.com https://d3js.org https://canvasjs.com https://js.pusher.com 'unsafe-eval'";
-            $connectSrc = "connect-src 'self' https://www.google.com https://www.gstatic.com https://*.google-analytics.com https://*.analytics.google.com https://cdn.jsdelivr.net https://*.pusher.com wss://*.pusher.com https://*.pusherapp.com wss://*.pusherapp.com https://ka-f.fontawesome.com https://*.r2.cloudflarestorage.com";
+            $connectSrc = "connect-src 'self' https://www.google.com https://www.gstatic.com https://*.google-analytics.com https://*.analytics.google.com https://cdn.jsdelivr.net https://*.pusher.com wss://*.pusher.com https://*.pusherapp.com wss://*.pusherapp.com https://ka-f.fontawesome.com https://*.r2.cloudflarestorage.com stun: stuns:";
 
             $path = (string)parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
             if (in_array(rtrim($path, '/'), ['/member/emoji-studio', '/poster-studio', '/flyer-studio'], true)) {
