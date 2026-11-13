@@ -37,6 +37,7 @@ final class InAppNotificationSyncTest extends SocialFeedTestCase
         $stmt = $this->pdo->prepare("DELETE FROM contact WHERE id = ?");
         $stmt->execute([$this->authorId]);
 
+        unset($_SERVER['HTTP_X_CSRF_TOKEN'], $_SERVER['HTTP_X_XSRF_TOKEN']);
         parent::tearDown();
     }
 

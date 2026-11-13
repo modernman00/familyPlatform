@@ -171,6 +171,7 @@ final class OnboardingSecurityTest extends SocialFeedTestCase
             'step' => 'explore_tree',
             'token' => 'invalid_csrf_token_attack',
         ];
+        $_SERVER['HTTP_X_CSRF_TOKEN'] = 'invalid_header_token';
         $_SERVER['HTTP_X_XSRF_TOKEN'] = 'invalid_header_token';
 
         $controller = new OnboardingController($this->service);

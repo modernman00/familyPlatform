@@ -53,6 +53,7 @@ abstract class SocialFeedTestCase extends TestCase
         $_FILES = [];
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_SERVER['CONTENT_TYPE'] = 'application/json';
+        $_SERVER['HTTP_X_CSRF_TOKEN'] = $token;
         $_SERVER['HTTP_X_XSRF_TOKEN'] = $token;
         // Unique per test so the DB-backed rate limiter's per-IP key (see
         // Src\Limiter / Utility::getUserIpAddr) can't accumulate across runs
@@ -72,6 +73,7 @@ abstract class SocialFeedTestCase extends TestCase
             $this->pdo->prepare('DELETE FROM comment WHERE post_no = ?')->execute([(string) $no]);
             $this->pdo->prepare('DELETE FROM post WHERE post_no = ?')->execute([$no]);
         }
+        unset($_SERVER['HTTP_X_CSRF_TOKEN'], $_SERVER['HTTP_X_XSRF_TOKEN']);
         parent::tearDown();
     }
 
