@@ -562,33 +562,53 @@
                             </div>
                         </div>
 
-                        <!-- 6. iOS Direct Apple Photos Shortcut Guide Drawer -->
+                        <!-- 6. Mobile Gallery Direct Share Guide Drawer (Android & Apple iOS) -->
                         <div id="iosShareDrawer" class="composer-drawer d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
                             <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
                                 <span class="fw-bold small text-dark d-flex align-items-center gap-1.5">
-                                    <i class="bi bi-apple fs-6"></i> iPhone Photos 1-Tap Share
+                                    <i class="bi bi-phone-fill text-primary fs-6"></i> Mobile Gallery 1-Tap Share
                                 </span>
                                 <button type="button" id="closeIosShareDrawerBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Close guide"></button>
                             </div>
-                            <p class="small text-muted mb-2.5" style="font-size: 0.8rem; line-height: 1.45;">
-                                Post photos and videos straight from your iPhone <strong>Photos</strong> app directly to your family feed:
-                            </p>
-                            <div class="d-flex flex-wrap gap-2 mb-2">
-                                @php
-                                    $signedDeviceToken = (!empty($_SESSION['id']) && !empty($_SESSION['famCode'])) 
-                                        ? \App\controller\members\NativeShareController::generateUserToken((string)$_SESSION['id'], (string)$_SESSION['famCode']) 
-                                        : '';
-                                @endphp
-                                <a href="/api/media/ios-shortcut?fam_code={{ $_SESSION['famCode'] ?? '' }}&amp;token={{ $signedDeviceToken }}&amp;format=shortcut" class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-bold d-flex align-items-center gap-1.5" style="font-size: 0.78rem;">
-                                    <i class="bi bi-download"></i> Install iPhone Shortcut
-                                </a>
-                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 fw-medium d-flex align-items-center gap-1.5" style="font-size: 0.78rem;" onclick="copyFamilyShareEndpoint('{{ $_SESSION['famCode'] ?? '' }}', '{{ $signedDeviceToken }}')">
-                                    <i class="bi bi-clipboard"></i> Copy Direct URL
-                                </button>
+                            
+                            <!-- Apple iPhone Section -->
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center gap-1.5 fw-semibold small text-dark mb-1">
+                                    <i class="bi bi-apple fs-6"></i> Apple iPhone (Apple Photos)
+                                </div>
+                                <p class="small text-muted mb-2" style="font-size: 0.8rem; line-height: 1.45;">
+                                    Share photos directly from <strong>Apple Photos</strong> without opening Safari:
+                                </p>
+                                <div class="d-flex flex-wrap gap-2 mb-2">
+                                    @php
+                                        $signedDeviceToken = (!empty($_SESSION['id']) && !empty($_SESSION['famCode'])) 
+                                            ? \App\controller\members\NativeShareController::generateUserToken((string)$_SESSION['id'], (string)$_SESSION['famCode']) 
+                                            : '';
+                                    @endphp
+                                    <a href="/api/media/ios-shortcut?fam_code={{ $_SESSION['famCode'] ?? '' }}&amp;token={{ $signedDeviceToken }}&amp;format=shortcut" class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-bold d-flex align-items-center gap-1.5" style="font-size: 0.78rem;">
+                                        <i class="bi bi-download"></i> Install iPhone Shortcut
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 fw-medium d-flex align-items-center gap-1.5" style="font-size: 0.78rem;" onclick="copyFamilyShareEndpoint('{{ $_SESSION['famCode'] ?? '' }}', '{{ $signedDeviceToken }}')">
+                                        <i class="bi bi-clipboard"></i> Copy Direct URL
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 fw-medium d-flex align-items-center gap-1.5" style="font-size: 0.78rem;" onclick="if(typeof window.pastePhotoFromClipboard==='function'){window.pastePhotoFromClipboard();}">
+                                        <i class="bi bi-clipboard2-plus-fill"></i> Paste from Camera Roll
+                                    </button>
+                                </div>
+                                <p class="small text-muted mb-0" style="font-size: 0.76rem; line-height: 1.4;">
+                                    <em>Frictionless tip:</em> You can also tap <strong>Copy</strong> on any picture in Apple Photos, then tap the blue <strong>Clipboard icon</strong> in the toolbar below to attach it instantly!
+                                </p>
                             </div>
-                            <p class="small text-muted mb-0" style="font-size: 0.78rem; line-height: 1.45;">
-                                After tapping <strong>Install iPhone Shortcut</strong>, Safari saves the file. Tap <strong>Copy Direct URL</strong> first, then install the shortcut (Safari ↓ Downloads, open the file, <strong>Add Shortcut</strong>) and paste the link when asked.
-                            </p>
+
+                            <!-- Android Section -->
+                            <div class="pt-2 border-top">
+                                <div class="d-flex align-items-center gap-1.5 fw-semibold small text-dark mb-1">
+                                    <i class="bi bi-android2 text-success fs-6"></i> Android (Google Photos &amp; Gallery)
+                                </div>
+                                <p class="small text-muted mb-0" style="font-size: 0.78rem; line-height: 1.45;">
+                                    Install FamilyPlatform to your home screen (tap browser menu &vellip; &rarr; <strong>Add to Home screen</strong>). Then in <strong>Google Photos</strong> or <strong>Samsung Gallery</strong>, tap <strong>Share</strong> &rarr; select <strong>FamilyPlatform</strong> to open the composer with your photo pre-loaded!
+                                </p>
+                            </div>
                         </div>
 
                         <!-- 7. Linked Media Drawer (Zero-Storage Architecture: Photos & Videos) -->
@@ -686,8 +706,12 @@
                                 <i class="bi bi-hourglass-split"></i>
                             </button>
 
-                            <button type="button" class="btn-composer-action composer-tool action-apple" id="iosShareBtn" title="iPhone Share - Direct 1-tap sharing from Apple Photos gallery" aria-label="iPhone Photos Direct Share">
-                                <i class="bi bi-apple"></i>
+                            <button type="button" class="btn-composer-action composer-tool action-clipboard" id="pasteClipboardBtn" title="Paste Photo - 1-Tap attach copied photo from Apple Photos or phone gallery" aria-label="Paste copied photo from camera roll" onclick="if(typeof window.pastePhotoFromClipboard==='function'){window.pastePhotoFromClipboard();}" style="color: #0284c7;">
+                                <i class="bi bi-clipboard2-plus-fill"></i>
+                            </button>
+
+                            <button type="button" class="btn-composer-action composer-tool action-apple" id="iosShareBtn" title="Phone Gallery Share - Setup 1-tap sharing from Apple Photos or Android gallery" aria-label="Phone Gallery Direct Share Setup">
+                                <i class="bi bi-phone-fill"></i>
                             </button>
                         </div>
                     </div>
@@ -1833,7 +1857,8 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
 
         const msg = (document.getElementById('postMessage')?.value || '').trim();
         const fileInput = document.getElementById('imageUpload');
-        const hasFiles = (fileInput && fileInput.files && fileInput.files.length > 0) || (typeof window.getSelectedPostFiles === 'function' && window.getSelectedPostFiles().length > 0);
+        const hasSharedTemp = Boolean(document.querySelector('input[name="shared_temp_images[]"]'));
+        const hasFiles = (fileInput && fileInput.files && fileInput.files.length > 0) || (typeof window.getSelectedPostFiles === 'function' && window.getSelectedPostFiles().length > 0) || hasSharedTemp;
         const hasGif = Boolean(document.getElementById('attachedGifUrlInput')?.value);
         const hasVideo = Boolean(document.getElementById('attachedVideoUrl')?.value);
         const hasPoll = document.getElementById('pollCreationContainer') && !document.getElementById('pollCreationContainer').classList.contains('d-none');

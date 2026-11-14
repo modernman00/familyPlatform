@@ -9,9 +9,16 @@
     border: 1px solid #e6dfd5;
     box-shadow: 0 24px 60px rgba(28, 20, 18, 0.22);
     overflow: hidden;
+    padding: 0; /* main.css gives every .modal-content 20px side padding, which insets the sheet and clips the right edge */
+    max-height: calc(100dvh - 2rem);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     color: #1c1412;
 }
+#inviteFamilyModal .modal-body { min-width: 0; overflow-x: hidden; }
+#inviteFamilyModal .ifm-header > div:first-child { min-width: 0; flex: 1 1 auto; }
+#inviteFamilyModal .ifm-footer { gap: 12px; flex-wrap: nowrap; }
+#inviteFamilyModal .ifm-footer-note { min-width: 0; line-height: 1.3; }
+#inviteFamilyModal .ifm-tabs-wrap { padding: 12px 24px 8px; background: #faf6f0; border-bottom: 1px solid #efe8de; }
 #inviteFamilyModal .ifm-header {
     padding: 20px 24px 16px;
     border-bottom: 1px solid #efe8de;
@@ -67,7 +74,7 @@
 }
 #inviteFamilyModal .ifm-body-grid {
     display: grid;
-    grid-template-columns: 1.08fr 0.92fr;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
     gap: 24px;
     padding: 20px 24px 16px;
 }
@@ -76,7 +83,7 @@
         max-width: 560px;
     }
     #inviteFamilyModal .ifm-body-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 18px;
     }
 }
@@ -84,10 +91,48 @@
     #inviteFamilyModal .ifm-dialog {
         margin: auto 0 0 0;
         max-width: 100%;
+        min-height: 0;
     }
     #inviteFamilyModal .ifm-content {
         border-radius: 24px 24px 0 0;
+        border-bottom: 0;
+        max-height: 92dvh;
     }
+    #inviteFamilyModal .ifm-content::before {
+        content: '';
+        display: block;
+        width: 40px;
+        height: 4px;
+        border-radius: 4px;
+        background: #d9cfc2;
+        margin: 8px auto 0;
+        flex-shrink: 0;
+    }
+    #inviteFamilyModal .ifm-header { padding: 12px 16px; gap: 10px; }
+    #inviteFamilyModal .ifm-header-icon { display: none; }
+    #inviteFamilyModal .ifm-title { font-size: 1.2rem; }
+    #inviteFamilyModal .ifm-subtitle { font-size: 0.8rem; line-height: 1.4; }
+    #inviteFamilyModal .ifm-tabs-wrap { padding: 10px 16px 8px; }
+    #inviteFamilyModal .ifm-body-grid { padding: 16px 16px 12px; gap: 16px; }
+    #inviteFamilyModal .ifm-lineage-grid { gap: 8px; }
+    #inviteFamilyModal .ifm-lineage-card { padding: 10px 12px; align-items: center; }
+    /* chips: a tidy 2-column grid instead of a ragged row that runs off-screen */
+    #inviteFamilyModal #kinshipChipsContainer {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px !important;
+    }
+    #inviteFamilyModal .kinship-chip {
+        white-space: normal;
+        justify-content: flex-start;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        min-width: 0;
+    }
+    #inviteFamilyModal .ifm-preview-card { max-height: 120px; }
+    #inviteFamilyModal .ifm-secondary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #inviteFamilyModal .ifm-footer { padding: 10px 16px calc(10px + env(safe-area-inset-bottom)) !important; }
+    #inviteFamilyModal .ifm-footer-note { font-size: 0.72rem !important; }
 }
 #inviteFamilyModal .ifm-section-label {
     font-size: 0.72rem;
@@ -100,14 +145,15 @@
     align-items: center;
     justify-content: space-between;
 }
+#inviteFamilyModal .ifm-body-grid > * { min-width: 0; }
 #inviteFamilyModal .ifm-lineage-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 10px;
 }
 @media (max-width: 479.98px) {
     #inviteFamilyModal .ifm-lineage-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 #inviteFamilyModal .ifm-lineage-card {
@@ -251,7 +297,7 @@
             </div>
 
             <!-- Audience tabs: relatives join YOUR family; friends & in-laws start their OWN network -->
-            <div class="px-4 pt-3 pb-2 flex-shrink-0" style="background:#faf6f0;border-bottom:1px solid #efe8de;">
+            <div class="ifm-tabs-wrap flex-shrink-0">
                 <ul class="nav nav-pills nav-fill gap-2 p-1 rounded-pill bg-white border" id="inviteModalTabs" role="tablist" style="border-color:#e6dfd5 !important;">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active rounded-pill fw-bold py-2 small d-flex align-items-center justify-content-center gap-1" id="inviteTabFamily" data-bs-toggle="pill" data-bs-target="#inviteTabFamilyPane" type="button" role="tab" aria-controls="inviteTabFamilyPane" aria-selected="true" style="min-height:44px;">
@@ -520,12 +566,12 @@
             </div>
 
             <!-- Modal Footer -->
-            <div class="modal-footer border-0 px-4 py-2.5 d-flex justify-content-between flex-shrink-0" style="background:#faf6f0;border-top:1px solid #efe8de !important;">
-                <span class="small d-flex align-items-center gap-1.5" style="color:#786c65;font-size:0.76rem;">
+            <div class="modal-footer ifm-footer border-0 px-4 py-2 d-flex justify-content-between align-items-center flex-shrink-0" style="background:#faf6f0;border-top:1px solid #efe8de !important;">
+                <span class="ifm-footer-note small d-flex align-items-center gap-1" style="color:#786c65;font-size:0.76rem;">
                     <i class="bi bi-lock" style="color:#a31621;"></i>
                     <span>Private link · Only people you invite can join</span>
                 </span>
-                <button type="button" class="btn btn-sm px-3 fw-bold rounded-pill" data-bs-dismiss="modal" style="min-height: 44px; background:#ffffff; border:1px solid #dfd7cc; color:#1c1412;">
+                <button type="button" class="btn btn-sm px-4 fw-bold rounded-pill flex-shrink-0" data-bs-dismiss="modal" style="min-height: 44px; background:#ffffff; border:1px solid #dfd7cc; color:#1c1412;">
                     Done
                 </button>
             </div>

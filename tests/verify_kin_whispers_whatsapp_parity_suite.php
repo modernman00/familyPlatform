@@ -288,6 +288,7 @@ try {
     assert(str_contains($pwaNotifJs, 'isWhisperNotification('), 'pwa-notifications.js must detect whisper_ notifications');
     assert(str_contains($pwaNotifJs, 'isViewingWhisperThread('), 'pwa-notifications.js must suppress toast when viewing active thread');
     assert(str_contains($pwaNotifJs, "setAttribute('data-toast-variant', isWhisper ? 'whisper' : 'standard')"), 'pwa-notifications.js must tag whisper toast variant');
+    assert(str_contains($pwaNotifJs, 'window.showFamilyChatPopup = showFloatingToast'), 'pwa-notifications.js must expose window.showFamilyChatPopup for iOS Safari / Pusher / polling fallbacks');
 
     $swJs = (string)file_get_contents(dirname(__DIR__) . '/public/sw.js');
     assert(str_contains($swJs, '[60, 40, 60]'), 'Service Worker must use chat vibration pattern [60, 40, 60] for whispers');
@@ -301,6 +302,9 @@ try {
     assert(str_contains($viewContent, '@click="installWhispersApp()"'), 'Install popup button must wire to installWhispersApp()');
     assert(str_contains($viewContent, '@click="popOutWhisperWindow()"'), 'Header and popup buttons must wire to popOutWhisperWindow()');
     assert(str_contains($viewContent, 'Add to Home Screen'), 'iOS Safari Share -> Add to Home Screen guide must be present');
+    assert(str_contains($viewContent, 'isIosDevice:'), 'Kin Whispers view must detect all iPhone/iPad browsers via isIosDevice');
+    assert(str_contains($viewContent, 'isHostStandalone:'), 'Kin Whispers view must distinguish main FamilyPlatform standalone mode from FamilyChat standalone mode');
+    assert(str_contains($viewContent, 'kw_familychat_install_dismissed_at'), 'Kin Whispers view must use expiring dismissal timestamp so iPhone users are not permanently suppressed');
 
     $manifestWhispers = json_decode((string)file_get_contents(dirname(__DIR__) . '/public/manifest-whispers.json'), true);
     assert(is_array($manifestWhispers) && ($manifestWhispers['id'] ?? '') === '/kin-whispers', 'manifest-whispers.json must have id /kin-whispers');

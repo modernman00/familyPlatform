@@ -153,6 +153,13 @@ self.addEventListener('fetch', (event) => {
   // Web Share Target Level 2: Intercept OS gallery media share POST
   if (request.method === 'POST' && (url.pathname === '/share-target' || url.pathname === '/share-target/')) {
     event.respondWith((async () => {
+      let networkFallbackRequest = null;
+      try {
+        networkFallbackRequest = event.request.clone();
+      } catch (cloneErr) {
+        return fetch(event.request);
+      }
+
       try {
         const formData = await event.request.formData();
         const mediaFiles = formData.getAll('media');
@@ -172,11 +179,11 @@ self.addEventListener('fetch', (event) => {
           return Response.redirect('/profilePage?pwa_shared=1', 303);
         }
 
-        // Fallback to server processing
-        return fetch(event.request);
+        // Fallback to server processing with unconsumed stream
+        return fetch(networkFallbackRequest);
       } catch (err) {
-        console.warn('[SW] Web Share Target handling fallback to network:', err);
-        return fetch(event.request).catch(() => Response.redirect('/profilePage?pwa_shared=1', 303));
+        console.warn('[SW] Web Share Target formData parsing failed, falling back to server network:', err);
+        return fetch(networkFallbackRequest || event.request).catch(() => Response.redirect('/profilePage?pwa_shared=1', 303));
       }
     })());
     return;

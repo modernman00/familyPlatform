@@ -81,6 +81,8 @@ final class RouteDispatch
             'App\controller\PostShareController', // Public Shareable Post Link & Guest-to-Register Engine
             'App\controller\members\FestiveCardController', // RFC-0019 Omni-Occasion Festive Card & Living Envelope Engine
             'App\controller\members\AtgGifController', // ATG Sovereign Brand GIF Studio & Synthesizer
+            'App\controller\members\ShareTargetController', // W3C Web Share Target API L2 (Android Native Gallery Share)
+            'App\controller\members\NativeShareController', // Apple iOS Photo Share Sheet & Shortcuts Endpoint (Self-Authenticating)
         ];
 
         if (\class_exists('\App\controller\BaseController')) {

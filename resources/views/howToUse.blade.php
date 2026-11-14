@@ -5,10 +5,10 @@
 
 @section('content')
   <!-- Header Banner -->
-  <header class="doc-center-header" style="background: linear-gradient(135deg, #7a0e16 0%, #a31621 100%); padding: 60px 0; color: #ffffff; text-align: center;">
+  <header class="doc-center-header" style="background: #a31621 linear-gradient(135deg, #7a0e16 0%, #a31621 100%); padding: 60px 0; color: #ffffff; text-align: center;">
     <div class="container">
       <h1 class="display-5 fw-bold mb-2">Living Product Guide</h1>
-      <p class="fs-5 text-white-50 mb-0">Master your family tree, preserve oral heirlooms, and connect generations.</p>
+      <p class="fs-5 mb-0" style="color: #fff7ed;">Master your family tree, preserve oral heirlooms, and connect generations.</p>
     </div>
   </header>
 
@@ -997,6 +997,18 @@
                   <p class="small text-muted mb-0">
                     Selecting any relative on the Family Tree opens their quick card with one-tap actions to <strong>Add relative</strong>, <strong>FamilyChat</strong>, or view their <strong>Profile</strong>. Visiting a relative's profile displays a visual <em>"How you're related"</em> path alongside kin-only contact protection.
                   </p>
+                </div>
+              </div>
+              <div class="col-md-12 mt-3">
+                <div class="p-3 border rounded-3 bg-light">
+                  <h6 class="fw-bold text-dark"><i class="bi bi-phone-fill me-1 text-danger"></i> Mobile Gallery Direct Photo Sharing (Android &amp; Apple iOS)</h6>
+                  <p class="small text-muted mb-2">
+                    Share memories directly from your phone's camera roll without manual file browsing:
+                  </p>
+                  <ul class="small text-muted mb-0 ps-3">
+                    <li class="mb-1"><strong>Android (Google Photos &amp; Samsung Gallery):</strong> Install FamilyPlatform to your home screen via Chrome. In your phone's photo gallery, tap <em>Share &rarr; FamilyPlatform</em> to launch the composer with your photo pre-loaded.</li>
+                    <li><strong>Apple iPhone (Apple Photos):</strong> Open the composer on FamilyPlatform, tap the <em>Phone Share</em> icon to install the 1-tap iPhone Shortcut, or simply tap <em>Copy</em> on any picture in Apple Photos and tap the blue <em>Clipboard icon</em> in the composer dock to attach it instantly!</li>
+                  </ul>
                 </div>
               </div>
             </div>

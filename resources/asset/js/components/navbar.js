@@ -364,6 +364,13 @@ export const scrollToAndHighlightItem = (hash) => {
     if (!hash || hash === '#' || hash === '#!') return;
     const rawId = hash.replace(/^#/, '');
 
+    // Posts and comments are rendered (and thread-expanded / lazily fetched) by the feed component.
+    // Fuzzy [id*=] matching here would land on the wrong item (#comment5 matches #comment50).
+    if (/^(post|comment)-?\d+$/i.test(rawId)) {
+        window.dispatchEvent(new CustomEvent('feed:scroll-to-target'));
+        return;
+    }
+
     let attempts = 0;
     const maxAttempts = 30; // 3 seconds total (polling every 100ms)
     const interval = setInterval(() => {
@@ -439,11 +446,18 @@ export const handleNotificationClickNavigation = (targetUrl, e) => {
                 e.preventDefault();
             }
 
-            if (parsed.hash) {
-                if (window.location.hash !== parsed.hash) {
-                    history.pushState(null, '', parsed.hash);
+            const hasQueryTarget = /[?&](post_no|comment_no|post|comment)=\d+/.test(parsed.search);
+            if (parsed.hash || hasQueryTarget) {
+                // Keep the full URL (query + hash) in sync so the feed can resolve the exact post/comment.
+                const nextUrl = parsed.pathname + parsed.search + parsed.hash;
+                if (window.location.pathname + window.location.search + window.location.hash !== nextUrl) {
+                    history.pushState(null, '', nextUrl);
                 }
-                scrollToAndHighlightItem(parsed.hash);
+                if (hasQueryTarget || /^#(post|comment)-?\d+$/i.test(parsed.hash)) {
+                    window.dispatchEvent(new CustomEvent('feed:scroll-to-target'));
+                } else {
+                    scrollToAndHighlightItem(parsed.hash);
+                }
             } else {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }

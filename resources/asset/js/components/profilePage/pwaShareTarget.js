@@ -42,6 +42,7 @@ async function getAndClearSharedFromIndexedDB() {
 export async function initPwaShareTargetHandler() {
     const urlParams = new URLSearchParams(window.location.search);
     const hasPwaShareParam = urlParams.has('pwa_shared');
+    const ticket = urlParams.get('ticket');
 
     let sharedData = null;
 
@@ -52,10 +53,11 @@ export async function initPwaShareTargetHandler() {
         console.warn('[PWA Share Target] IndexedDB lookup error:', idbErr);
     }
 
-    // 2. Check Server Session fallback if IndexedDB had nothing
+    // 2. Check Server Session / Ticket fallback if IndexedDB had nothing
     if (!sharedData) {
         try {
-            const resp = await fetch('/api/media/pwa-shared');
+            const ticketParam = ticket ? `?ticket=${encodeURIComponent(ticket)}` : '';
+            const resp = await fetch('/api/media/pwa-shared' + ticketParam);
             if (resp.ok) {
                 const json = await resp.json();
                 if (json.status === 'success' && json.data) {
@@ -67,12 +69,12 @@ export async function initPwaShareTargetHandler() {
         }
     }
 
-    if (!sharedData && !hasPwaShareParam) {
+    if (!sharedData && !hasPwaShareParam && !ticket) {
         return;
     }
 
     // Clean up query param from URL without page reload
-    if (hasPwaShareParam) {
+    if (hasPwaShareParam || ticket) {
         const cleanUrl = window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
     }
@@ -91,6 +93,11 @@ export async function initPwaShareTargetHandler() {
                     if (textarea) {
                         textarea.value = captionText;
                         textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                    const editor = document.getElementById('postMessageEditor');
+                    if (editor) {
+                        editor.innerText = captionText;
+                        editor.dispatchEvent(new Event('input', { bubbles: true }));
                     }
                 }
 
@@ -129,22 +136,142 @@ export async function initPwaShareTargetHandler() {
                         hidden.value = fileName;
                         previewContainer.appendChild(hidden);
                     });
+
+                    const countEl = document.getElementById('postModalImgFileNames');
+                    if (countEl) {
+                        countEl.textContent = `${sharedData.files.length} shared memory`;
+                    }
                 }
 
-                // 3. User Feedback Toast in Modal
+                // 3. User Feedback & 1-Tap Quick Publish Action in Modal
                 const notif = document.getElementById('formPostMessageModal_notification');
                 if (notif) {
                     notif.innerHTML = `
-                        <div class="alert alert-success py-2 px-3 small rounded-3 d-flex align-items-center justify-content-between mb-3 shadow-xs">
+                        <div class="alert alert-light border border-success-subtle py-2.5 px-3 small rounded-3 mb-3 shadow-xs d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2" style="background: rgba(16, 185, 129, 0.05);">
                             <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-phone-fill text-success fs-5"></i>
-                                <span><strong>Gallery Photo Received!</strong> Shared directly into your family composer.</span>
+                                <i class="bi bi-phone-fill text-success fs-5 flex-shrink-0"></i>
+                                <div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.85rem;">Gallery Photo Received!</div>
+                                    <div class="text-muted" style="font-size: 0.78rem;">Ready to publish to your family timeline.</div>
+                                </div>
                             </div>
-                            <span class="badge bg-success-subtle text-success border border-success-subtle">Web Share Target</span>
+                            <div class="d-flex align-items-center gap-1.5 flex-shrink-0">
+                                <button type="button" id="quickPublishBtn" class="btn btn-sm btn-primary rounded-pill fw-bold px-3 py-1.5 d-flex align-items-center gap-1 shadow-xs" style="font-size: 0.78rem; background-color: #a31621; border-color: #a31621; min-height: 38px;">
+                                    <i class="bi bi-send-fill"></i> Publish Now
+                                </button>
+                                <button type="button" id="addStoryCaptionBtn" class="btn btn-sm btn-outline-secondary rounded-pill fw-medium px-2.5 py-1.5" style="font-size: 0.78rem; min-height: 38px;">
+                                    Add Story
+                                </button>
+                            </div>
                         </div>
                     `;
+
+                    const quickBtn = document.getElementById('quickPublishBtn');
+                    if (quickBtn) {
+                        quickBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const submitBtn = document.getElementById('submitPost');
+                            if (submitBtn) {
+                                submitBtn.click();
+                            }
+                        });
+                    }
+
+                    const storyBtn = document.getElementById('addStoryCaptionBtn');
+                    if (storyBtn) {
+                        storyBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const editor = document.getElementById('postMessageEditor') || document.getElementById('postMessage');
+                            if (editor) {
+                                editor.focus();
+                            }
+                        });
+                    }
                 }
             }
         }, 350);
     }
+}
+
+/**
+ * Smart Clipboard Camera Roll Bridge (Zero-Install iOS & Desktop Solution)
+ */
+export function initSmartClipboardPaste() {
+    window.pastePhotoFromClipboard = async function() {
+        if (!navigator.clipboard || !navigator.clipboard.read) {
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Clipboard Access',
+                    text: 'To attach a copied photo, press Cmd+V (Mac) or Ctrl+V (Windows/Android) whilst the composer is open.',
+                    confirmButtonColor: '#a31621'
+                });
+            }
+            return;
+        }
+
+        try {
+            const items = await navigator.clipboard.read();
+            const files = [];
+            for (const item of items) {
+                for (const type of item.types) {
+                    if (type.startsWith('image/')) {
+                        const blob = await item.getType(type);
+                        const ext = type.split('/')[1] ? type.split('/')[1].replace('+xml', '') : 'png';
+                        const file = new File([blob], `clipboard_photo_${Date.now()}.${ext}`, { type });
+                        files.push(file);
+                    }
+                }
+            }
+
+            if (files.length > 0) {
+                const imageInput = document.getElementById('imageUpload');
+                if (imageInput && window.DataTransfer) {
+                    const dt = new DataTransfer();
+                    files.forEach(f => dt.items.add(f));
+                    imageInput.files = dt.files;
+                    imageInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+
+                const postModalEl = document.getElementById('postModal');
+                if (postModalEl && window.bootstrap && window.bootstrap.Modal) {
+                    const modal = window.bootstrap.Modal.getOrCreateInstance(postModalEl);
+                    modal.show();
+                }
+
+                if (window.Swal) {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Photo attached from camera roll clipboard!'
+                    });
+                }
+            } else {
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'No Photo in Clipboard',
+                        text: 'Open Apple Photos or your phone gallery, tap Share &rarr; Copy (or copy a photo), then tap this button again.',
+                        confirmButtonColor: '#a31621'
+                    });
+                }
+            }
+        } catch (err) {
+            console.warn('[Smart Clipboard] Error reading clipboard:', err);
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Clipboard Permission',
+                    text: 'Please allow clipboard access when prompted to paste photos directly from your camera roll.',
+                    confirmButtonColor: '#a31621'
+                });
+            }
+        }
+    };
 }

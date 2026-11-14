@@ -11,9 +11,13 @@
 (function () {
   try {
     var q = new URLSearchParams(window.location.search);
-    var standalone = (window.navigator && window.navigator.standalone === true) ||
-      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
-    if (q.get('mode') === 'popup' || standalone) {
+    var src = q.get('source') || '';
+    if (src === 'pwa_whispers' || src === 'pwa_shortcut') {
+      try { sessionStorage.setItem('kw_whispers_standalone', '1'); } catch (e) {}
+    }
+    var isWhispersStandalone = src === 'pwa_whispers' || src === 'pwa_shortcut' ||
+      (function () { try { return sessionStorage.getItem('kw_whispers_standalone') === '1'; } catch (e) { return false; } })();
+    if (q.get('mode') === 'popup' || isWhispersStandalone) {
       document.documentElement.classList.add('kw-popup');
     }
   } catch (e) {}
@@ -121,7 +125,7 @@ html.kw-popup .kw-notice { display: none !important; }
 
 /* Linked PWA Install & Pop-out Floating Popup */
 .kw-install-popup {
-    position: fixed; right: 24px; bottom: 24px; z-index: 1045;
+    position: fixed; right: 24px; bottom: 24px; z-index: 1070;
     width: calc(100vw - 32px); max-width: 396px;
     background: var(--kw-card); color: var(--kw-ink);
     border: 1px solid var(--kw-line); border-radius: 20px;
@@ -790,7 +794,8 @@ html.kw-popup .kw-notice { display: none !important; }
         padding: 0; margin-right: 0;
     }
     .kw-install-popup {
-        right: 16px; left: 16px; bottom: 84px; width: auto; max-width: none;
+        right: 12px; left: 12px; bottom: calc(82px + env(safe-area-inset-bottom, 0px)); width: auto; max-width: none;
+        max-height: calc(100dvh - 104px); overflow-y: auto; -webkit-overflow-scrolling: touch;
     }
     .kw-threads { max-height: none; }
     .kw-stream { padding: 12px 14px; min-height: 0; }
@@ -1297,6 +1302,9 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
               </button>
               <button type="button" class="kw-btn kw-btn--ghost kw-btn--square" @click="openCallModal()" title="Start video or voice call with kin" aria-label="Start call">
                 <i class="bi bi-telephone"></i>
+              </button>
+              <button type="button" class="kw-btn kw-btn--ghost kw-btn--square" x-show="!isStandaloneApp" @click="openInstallPopup()" title="Download FamilyChat as a linked app" aria-label="Download FamilyChat app">
+                <i class="bi bi-download"></i>
               </button>
               <button type="button" class="kw-btn kw-btn--ghost kw-btn--square" x-show="!isPopupMode && !isStandaloneApp" @click="popOutWhisperWindow()" title="Pop out FamilyChat into a dedicated window" aria-label="Pop out FamilyChat window">
                 <i class="bi bi-box-arrow-up-right"></i>
@@ -2453,18 +2461,21 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
       </span>
     </div>
 
-    {{-- iOS / iPadOS Safari Share -> Add to Home Screen Guide --}}
-    <div class="kw-install-popup__guide" x-show="isIosSafari || showIosInstallGuide" x-cloak>
-      <strong><i class="bi bi-apple"></i> iPhone &amp; iPad Safari (Share &rarr; Add to Home Screen):</strong>
+    {{-- iOS / iPadOS Safari & iPhone Home Screen Guide --}}
+    <div class="kw-install-popup__guide" x-show="isIosSafari || isIosDevice || showIosInstallGuide" x-cloak>
+      <strong><i class="bi bi-apple"></i> iPhone &amp; iPad (Share &rarr; Add to Home Screen):</strong>
+      <p x-show="isHostStandalone" x-cloak style="margin:6px 0 6px; font-size:0.78rem; color:var(--kw-primary); font-weight:600;">
+        You are currently inside the main FamilyPlatform app. To add a separate <strong>FamilyChat</strong> icon on your iPhone Home Screen, copy the link below and open it in Safari:
+      </p>
       <ol>
-        <li>Tap the <strong>Share</strong> button (<i class="bi bi-box-arrow-up"></i>) in Safari's toolbar.</li>
+        <li>Tap the <strong>Share</strong> button (<i class="bi bi-box-arrow-up"></i>) in your iPhone browser toolbar.</li>
         <li>Choose <strong>Add to Home Screen</strong> (<i class="bi bi-plus-square"></i>) from the menu.</li>
         <li>Tap <strong>Add</strong> to launch <strong>FamilyChat</strong> as its own linked app.</li>
       </ol>
     </div>
 
     {{-- Desktop / Browser Menu Fallback Guide when native beforeinstallprompt is not active --}}
-    <div class="kw-install-popup__guide" x-show="showBrowserInstallGuide && !isIosSafari" x-cloak>
+    <div class="kw-install-popup__guide" x-show="showBrowserInstallGuide && !isIosSafari && !isIosDevice" x-cloak>
       <strong><i class="bi bi-laptop"></i> Install or Pop Out FamilyChat:</strong>
       <p style="margin:4px 0 0;">Click the <strong>Install</strong> icon in your browser's address bar (or open your browser menu <strong>⋮ &rarr; Install FamilyChat / Add to Home Screen</strong>), or use <strong>Pop Out Window</strong> below for an instant standalone messenger window.</p>
     </div>
@@ -2473,21 +2484,21 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
       <button type="button"
               class="kw-btn kw-btn--primary"
               @click="installWhispersApp()">
-        <i class="bi" :class="isIosSafari ? 'bi-phone' : 'bi-download'"></i>
-        <span x-text="isIosSafari ? 'Share → Add to Home Screen' : 'Install FamilyChat App'"></span>
+        <i class="bi" :class="(isIosSafari || isIosDevice) ? 'bi-phone' : 'bi-download'"></i>
+        <span x-text="isHostStandalone ? 'Copy Link for Safari' : ((isIosSafari || isIosDevice) ? 'Share → Add to Home Screen' : 'Install FamilyChat App')"></span>
       </button>
       <button type="button"
               class="kw-btn kw-btn--ghost"
               x-show="!isPopupMode"
               @click="popOutWhisperWindow()">
         <i class="bi bi-box-arrow-up-right"></i>
-        <span>Pop Out Window</span>
+        <span x-text="isIosDevice ? 'Full-Screen Mode' : 'Pop Out Window'"></span>
       </button>
       <button type="button"
               class="kw-btn kw-btn--ghost"
-              x-show="!isIosSafari"
+              x-show="!isIosSafari && !isIosDevice"
               @click="showIosInstallGuide = !showIosInstallGuide"
-              style="padding: 0 14px; font-size: 0.78rem;">
+              style="padding: 0 14px; font-size: 0.78rem; min-height: 44px;">
         <i class="bi bi-phone"></i>
         <span x-text="showIosInstallGuide ? 'Hide iOS Guide' : 'iOS Guide'"></span>
       </button>
@@ -2549,9 +2560,20 @@ function kinWhisperApp() {
     showCallModal: false,
     isPopupMode: document.documentElement.classList.contains('kw-popup'),
     isStandaloneApp: Boolean(
-      (window.navigator && window.navigator.standalone === true) ||
-      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
-      new URLSearchParams(window.location.search).get('source') === 'pwa_whispers'
+      new URLSearchParams(window.location.search).get('source') === 'pwa_whispers' ||
+      new URLSearchParams(window.location.search).get('source') === 'pwa_shortcut' ||
+      (function () { try { return sessionStorage.getItem('kw_whispers_standalone') === '1'; } catch (e) { return false; } })()
+    ),
+    isHostStandalone: Boolean(
+      ((window.navigator && window.navigator.standalone === true) ||
+       (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)) &&
+      new URLSearchParams(window.location.search).get('source') !== 'pwa_whispers' &&
+      new URLSearchParams(window.location.search).get('source') !== 'pwa_shortcut' &&
+      !(function () { try { return sessionStorage.getItem('kw_whispers_standalone') === '1'; } catch (e) { return false; } })()
+    ),
+    isIosDevice: Boolean(
+      typeof navigator !== 'undefined' &&
+      (/iphone|ipad|ipod/i.test(navigator.userAgent || '') || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
     ),
     isIosSafari: Boolean(
       typeof navigator !== 'undefined' &&
@@ -3530,8 +3552,52 @@ function kinWhisperApp() {
       window.addEventListener('focus', () => this.pollUpdates());
     },
 
+    isActivelyViewingThread(threadId) {
+      if (!threadId || !this.activeThread || document.hidden) return false;
+      const isMobileList = (typeof window !== 'undefined' && window.innerWidth < 768 && this.pane === 'list');
+      if (isMobileList) return false;
+      return String(this.activeThread.id) === String(threadId);
+    },
+
+    async pollThreadListOnly() {
+      if (document.hidden) return;
+      try {
+        const res = await fetch('/api/kin-whispers/threads', {
+          headers: { 'Accept': 'application/json' }
+        });
+        const data = await res.json();
+        if (data.success && Array.isArray(data.threads)) {
+          const prevMap = {};
+          (this.threads || []).forEach(t => { prevMap[String(t.id)] = parseInt(t.unread_count, 10) || 0; });
+          this.threads = data.threads;
+          for (const t of data.threads) {
+            const nextUnread = parseInt(t.unread_count, 10) || 0;
+            const prevUnread = prevMap[String(t.id)] || 0;
+            if (nextUnread > prevUnread && !t.is_muted) {
+              this.playWhisperChime();
+              if (typeof window.showFamilyChatPopup === 'function') {
+                window.showFamilyChatPopup({
+                  title: this.partnerName(t) || 'New FamilyChat Message',
+                  body: t.last_message_preview || 'Sent you a message in FamilyChat',
+                  thread_id: t.id,
+                  category: 'kin_whisper',
+                  tag: 'whisper_' + t.id,
+                  url: '/kin-whispers?thread_id=' + encodeURIComponent(t.id)
+                });
+              }
+              break;
+            }
+          }
+        }
+      } catch (e) {}
+    },
+
     async pollUpdates() {
-      if (!this.activeThread || document.hidden) return;
+      if (document.hidden) return;
+      const isMobileList = (typeof window !== 'undefined' && window.innerWidth < 768 && this.pane === 'list');
+      if (isMobileList || !this.activeThread) {
+        return this.pollThreadListOnly();
+      }
       const pollingThreadId = this.activeThread.id;
       try {
         const res = await fetch('/api/kin-whispers/threads/' + encodeURIComponent(pollingThreadId), {
@@ -4336,6 +4402,13 @@ function kinWhisperApp() {
     },
 
     popOutWhisperWindow() {
+      if (this.isIosDevice) {
+        document.documentElement.classList.toggle('kw-popup');
+        this.isPopupMode = document.documentElement.classList.contains('kw-popup');
+        this.showInstallPopup = false;
+        this.toast(this.isPopupMode ? 'Full-screen FamilyChat messenger enabled.' : 'Standard FamilyChat view restored.');
+        return;
+      }
       const threadPart = this.activeThread ? '&thread_id=' + encodeURIComponent(this.activeThread.id) : '';
       const win = window.open(
         '/kin-whispers?mode=popup' + threadPart,
@@ -4343,7 +4416,9 @@ function kinWhisperApp() {
         'popup=yes,width=440,height=760,menubar=no,toolbar=no,location=no,status=no'
       );
       if (!win) {
-        this.toast('Your browser blocked the pop-out window. Please allow pop-ups for this site.');
+        document.documentElement.classList.add('kw-popup');
+        this.isPopupMode = true;
+        this.toast('Full-screen FamilyChat mode enabled (pop-up windows are blocked in your browser).');
         return;
       }
       win.focus();
@@ -4363,12 +4438,18 @@ function kinWhisperApp() {
 
       let dismissed = false;
       try {
-        dismissed = localStorage.getItem('kw_install_popup_dismissed') === '1';
+        const dismissedAt = parseInt(localStorage.getItem('kw_familychat_install_dismissed_at') || '0', 10);
+        if (dismissedAt > 0 && (Date.now() - dismissedAt) < 24 * 60 * 60 * 1000) {
+          dismissed = true;
+        } else {
+          localStorage.removeItem('kw_install_popup_dismissed');
+          localStorage.removeItem('kw_familychat_install_dismissed_at');
+        }
       } catch (e) {}
 
       if (!this.isStandaloneApp && !this.isPopupMode && !dismissed) {
         this.showInstallPopup = true;
-        if (this.isIosSafari) {
+        if (this.isIosSafari || this.isIosDevice) {
           this.showIosInstallGuide = true;
         }
       }
@@ -4410,8 +4491,10 @@ function kinWhisperApp() {
               if (this.shouldChimeForThread(incomingThreadId, p.sender_id)) {
                 this.playWhisperChime();
               }
-              if (this.activeThread && String(this.activeThread.id) === String(incomingThreadId) && !document.hidden) {
+              if (this.isActivelyViewingThread(incomingThreadId)) {
                 this.pollUpdates();
+              } else {
+                this.pollThreadListOnly();
               }
             }
           }
@@ -4435,7 +4518,7 @@ function kinWhisperApp() {
 
     openInstallPopup() {
       this.showInstallPopup = true;
-      if (this.isIosSafari) {
+      if (this.isIosSafari || this.isIosDevice) {
         this.showIosInstallGuide = true;
       }
     },
@@ -4446,13 +4529,26 @@ function kinWhisperApp() {
       this.showBrowserInstallGuide = false;
       try {
         localStorage.setItem('kw_install_popup_dismissed', '1');
+        localStorage.setItem('kw_familychat_install_dismissed_at', String(Date.now()));
       } catch (e) {}
     },
 
     async installWhispersApp() {
       this.showInstallPopup = true;
-      if (this.isIosSafari) {
+      if (this.isHostStandalone) {
+        const installUrl = window.location.origin + '/kin-whispers';
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(installUrl);
+          }
+        } catch (e) {}
         this.showIosInstallGuide = true;
+        this.toast('FamilyChat link copied! Paste it in Safari and tap Share → Add to Home Screen.');
+        return;
+      }
+      if (this.isIosSafari || this.isIosDevice) {
+        this.showIosInstallGuide = true;
+        this.toast('Tap the Share button in your iPhone browser toolbar and choose "Add to Home Screen".');
         return;
       }
       if (!this.installPromptEvent) {
@@ -4474,7 +4570,7 @@ function kinWhisperApp() {
     shouldChimeForThread(threadId, senderId) {
       if (!threadId) return false;
       if (senderId && this.isMe(senderId)) return false;
-      if (this.activeThread && String(this.activeThread.id) === String(threadId) && !document.hidden) {
+      if (this.isActivelyViewingThread(threadId)) {
         return false;
       }
       const thread = (this.threads || []).find(x => String(x.id) === String(threadId)) ||
@@ -5058,11 +5154,26 @@ function kinWhisperApp() {
             if (this.shouldChimeForThread(data.thread_id, data.sender_id)) {
               this.playWhisperChime();
             }
-            if (this.activeThread && this.activeThread.id === data.thread_id) {
+            if (this.isActivelyViewingThread(data.thread_id)) {
               this.pollUpdates();
             } else {
-              const t = this.threads.find(x => x.id === data.thread_id);
-              if (t) t.unread_count = (t.unread_count || 0) + 1;
+              const t = this.threads.find(x => String(x.id) === String(data.thread_id));
+              if (t) {
+                t.unread_count = (parseInt(t.unread_count, 10) || 0) + 1;
+                if (data.preview || data.body) t.last_message_preview = data.preview || data.body;
+              } else {
+                this.pollThreadListOnly();
+              }
+              if (this.shouldChimeForThread(data.thread_id, data.sender_id) && typeof window.showFamilyChatPopup === 'function') {
+                window.showFamilyChatPopup({
+                  title: (data.sender_name || (t ? this.partnerName(t) : '')) || 'New FamilyChat Message',
+                  body: data.preview || data.body || (t && t.last_message_preview) || 'Sent you a message in FamilyChat',
+                  thread_id: data.thread_id,
+                  category: 'kin_whisper',
+                  tag: 'whisper_' + data.thread_id,
+                  url: '/kin-whispers?thread_id=' + encodeURIComponent(data.thread_id)
+                });
+              }
             }
           }
         });

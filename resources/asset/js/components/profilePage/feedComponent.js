@@ -21,6 +21,7 @@ export function profileFeed(opts = {}) {
         isLoadingMore: false,
         _serverLoaded: 0,
         _fetchSeq: 0,
+        _handledDeepLink: '',
         _pendingLivePosts: [],
         isLoading: true,
         errorMessage: '',
@@ -571,106 +572,113 @@ export function profileFeed(opts = {}) {
             };
 
             // Deep-link listener for in-page hash changes
-            window.addEventListener('hashchange', () => this.scrollToHashPost());
+            window.addEventListener('hashchange', () => this.scrollToHashPost(true));
         },
 
-        // Jump to (and briefly highlight) the post or comment referenced by a #postNNN or #commentNNN link
-        // or ?post_no=NNN query param (e.g. from an email/push notification). Posts and comments render
+        // Jump to (and briefly highlight) the post or comment referenced by a #postNNN / #commentNNN link
+        // or ?post_no=NNN&comment_no=NNN query params (notifications, email, push). Posts and comments render
         // asynchronously, so browser native hash scroll never finds the element in time.
-        scrollToHashPost() {
-            let targetId = '';
-            let isComment = false;
+        // `force` is true for an explicit navigation (notification click); background feed refreshes
+        // only handle a given deep link once so they never yank the user back to it.
+        scrollToHashPost(force = false) {
+            let postNo = 0;
+            let commentNo = 0;
 
-            // 1. Check window.location.hash
             const rawHash = (window.location.hash || '').replace(/^[#?]+/, '');
-            if (rawHash) {
-                if (rawHash.startsWith('post-') || rawHash.startsWith('post')) {
-                    const num = rawHash.replace(/\D/g, '');
-                    if (num) targetId = 'post' + num;
-                } else if (rawHash.startsWith('comment-') || rawHash.startsWith('comment')) {
-                    const num = rawHash.replace(/\D/g, '');
-                    if (num) {
-                        targetId = 'comment' + num;
-                        isComment = true;
-                    }
-                }
+            const hashMatch = rawHash.match(/^(post|comment)-?(\d+)$/i);
+            if (hashMatch) {
+                if (hashMatch[1].toLowerCase() === 'comment') commentNo = parseInt(hashMatch[2], 10);
+                else postNo = parseInt(hashMatch[2], 10);
             }
 
-            // 2. Fallback to query parameters (?post_no=NNN, ?comment_no=NNN)
-            if (!targetId && window.location.search) {
+            if (window.location.search) {
                 try {
                     const params = new URLSearchParams(window.location.search);
-                    const commentNo = params.get('comment_no') || params.get('comment');
-                    const postNo = params.get('post_no') || params.get('post');
-                    if (commentNo && /^\d+$/.test(commentNo)) {
-                        targetId = 'comment' + commentNo;
-                        isComment = true;
-                    } else if (postNo && /^\d+$/.test(postNo)) {
-                        targetId = 'post' + postNo;
-                    }
+                    const qComment = params.get('comment_no') || params.get('comment');
+                    const qPost = params.get('post_no') || params.get('post');
+                    if (!commentNo && qComment && /^\d+$/.test(qComment)) commentNo = parseInt(qComment, 10);
+                    if (!postNo && qPost && /^\d+$/.test(qPost)) postNo = parseInt(qPost, 10);
                 } catch (e) {
                     console.warn('[Feed] Search param parse error:', e);
                 }
             }
 
-            if (!targetId) return;
+            if (!postNo && !commentNo) return;
 
-            // 3. If targeting a comment, ensure its thread is expanded if collapsed
-            if (isComment) {
-                const cNo = parseInt(targetId.replace('comment', ''), 10);
-                if (cNo && Array.isArray(this.posts)) {
-                    for (const p of this.posts) {
-                        if (Array.isArray(p.comments)) {
-                            const found = p.comments.find(c => parseInt(c.comment_no, 10) === cNo);
-                            if (found) {
-                                const rootNo = found.parent_comment_no ? String(found.parent_comment_no) : String(found.comment_no);
-                                this.threadExpanded[rootNo] = true;
-                                break;
-                            }
-                        }
-                    }
+            const key = `${postNo}:${commentNo}:${window.location.search}${window.location.hash}`;
+            if (!force && this._handledDeepLink === key) return;
+            this._handledDeepLink = key;
+
+            const findPostLocal = () => (Array.isArray(this.posts) ? this.posts : []).find(p =>
+                (postNo && parseInt(p?.post_no, 10) === postNo)
+                || (commentNo && Array.isArray(p?.comments) && p.comments.some(c => parseInt(c?.comment_no, 10) === commentNo))
+            );
+
+            const expandThread = () => {
+                if (!commentNo) return;
+                const owner = findPostLocal();
+                const found = owner?.comments?.find(c => parseInt(c.comment_no, 10) === commentNo);
+                if (found) {
+                    const rootNo = found.parent_comment_no ? String(found.parent_comment_no) : String(found.comment_no);
+                    this.threadExpanded[rootNo] = true;
                 }
-            }
+            };
 
-            // 4. Polling loop with timeout up to 3 seconds (30 attempts @ 100ms)
-            let attempts = 0;
-            const maxAttempts = 30;
-            const interval = setInterval(() => {
-                attempts++;
-                const target = document.getElementById(targetId)
-                    || document.querySelector(`[data-id="${targetId}"]`)
-                    || (isComment ? document.querySelector(`[data-comment-no="${targetId.replace('comment', '')}"]`) : null);
+            const highlight = (el, cls) => {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.classList.add(cls);
+                setTimeout(() => el.classList.remove(cls), 2500);
+            };
 
-                if (target) {
-                    clearInterval(interval);
-                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    const highlightClass = isComment ? 'highlighted-comment' : 'highlighted-post';
-                    target.classList.add(highlightClass);
-                    setTimeout(() => target.classList.remove(highlightClass), 2500);
-                } else if (attempts >= maxAttempts) {
-                    clearInterval(interval);
-                    // 5. Fallback: If targeted post was not in initial batch (e.g. older tagged post from notification), fetch dynamically
-                    if (!isComment && targetId.startsWith('post')) {
-                        const pNo = parseInt(targetId.replace('post', ''), 10);
-                        if (pNo > 0 && !this.posts.some(p => parseInt(p?.post_no, 10) === pNo)) {
-                            axios.get(`/api/posts/${pNo}`).then(res => {
-                                if (res?.data?.status === 'success' && res?.data?.data) {
-                                    const postData = this.normalizePost(res.data.data);
-                                    this.posts.unshift(postData);
-                                    setTimeout(() => {
-                                        const el = document.getElementById(targetId) || document.querySelector(`[data-post-no="${pNo}"]`);
-                                        if (el) {
-                                            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                            el.classList.add('highlighted-post');
-                                            setTimeout(() => el.classList.remove('highlighted-post'), 2500);
-                                        }
-                                    }, 120);
-                                }
-                            }).catch(() => {});
-                        }
-                    }
+            const locate = () => {
+                if (commentNo) {
+                    const c = document.getElementById('comment' + commentNo)
+                        || document.querySelector(`[data-comment-no="${commentNo}"]`);
+                    if (c) return { el: c, cls: 'highlighted-comment' };
                 }
-            }, 100);
+                if (postNo) {
+                    const p = document.getElementById('post' + postNo)
+                        || document.querySelector(`[data-post-no="${postNo}"]`);
+                    if (p) return { el: p, cls: 'highlighted-post' };
+                }
+                return null;
+            };
+
+            // Poll until the target renders. A comment target waits for the comment itself, and only
+            // falls back to its parent post if the comment never shows (e.g. it was deleted).
+            const poll = (maxAttempts, onTimeout) => {
+                let attempts = 0;
+                const interval = setInterval(() => {
+                    attempts++;
+                    expandThread();
+                    const hit = locate();
+                    const commentPending = commentNo && hit && hit.cls === 'highlighted-post' && attempts < maxAttempts;
+                    if (hit && !commentPending) {
+                        clearInterval(interval);
+                        highlight(hit.el, hit.cls);
+                    } else if (attempts >= maxAttempts) {
+                        clearInterval(interval);
+                        if (onTimeout) onTimeout();
+                    }
+                }, 100);
+            };
+
+            // 5. The post is not in the loaded feed batch (older or tagged post): fetch it, then retry.
+            const fetchMissingPost = () => {
+                if (findPostLocal() || !postNo) return;
+                axios.get(`/api/posts/${postNo}`).then(res => {
+                    if (res?.data?.status === 'success' && res?.data?.data) {
+                        const postData = this.normalizePost(res.data.data);
+                        if (!this.posts.some(p => parseInt(p?.post_no, 10) === postNo)) {
+                            this.posts.unshift(postData);
+                        }
+                        poll(30);
+                    }
+                }).catch(() => {});
+            };
+
+            expandThread();
+            poll(30, fetchMissingPost);
         },
 
         async fetchPosts(options = {}) {
@@ -3294,6 +3302,10 @@ export function profileFeed(opts = {}) {
             window.addEventListener('kin-request:received', () => {
                 this.syncKinshipBannerRequests();
             });
+
+            // Fired by the navbar when a notification points at an item on the page the user is already on
+            // (pushState does not emit hashchange, so the feed has to be told explicitly).
+            window.addEventListener('feed:scroll-to-target', () => this.scrollToHashPost(true));
 
             window.addEventListener('open-share-portal', (event) => {
                 if (event?.detail) {

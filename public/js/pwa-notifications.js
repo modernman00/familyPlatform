@@ -215,7 +215,7 @@
     const isWhisper = isWhisperNotification(payload);
     const rawTitle = payload.title;
     const rawBody = payload.body;
-    const toastTitle = typeof rawTitle === 'string' ? rawTitle : (rawTitle?.title || rawTitle?.name || (isWhisper ? 'New Kin Whisper' : 'FamilyPlatform'));
+    const toastTitle = typeof rawTitle === 'string' ? rawTitle : (rawTitle?.title || rawTitle?.name || (isWhisper ? 'New FamilyChat Message' : 'FamilyPlatform'));
     const toastBody = typeof rawBody === 'string' ? rawBody : (rawBody?.body || rawBody?.message || rawBody?.content || '');
 
     const existing = document.getElementById('pwa-notification-toast');
@@ -232,7 +232,7 @@
     toast.style.cssText = isWhisper
       ? `
         position: fixed;
-        top: 20px;
+        top: calc(16px + env(safe-area-inset-top, 0px));
         right: 20px;
         max-width: 392px;
         width: calc(100% - 40px);
@@ -256,7 +256,7 @@
       `
       : `
         position: fixed;
-        top: 20px;
+        top: calc(16px + env(safe-area-inset-top, 0px));
         right: 20px;
         max-width: 380px;
         width: calc(100% - 40px);
@@ -282,7 +282,7 @@
     const iconSrc = payload.icon || '/public/img/favicon/android-chrome-192x192.png';
     const whisperPillHtml = isWhisper
       ? `<div style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #fce79a; background: rgba(255, 247, 237, 0.14); border: 1px solid rgba(252, 231, 154, 0.3); border-radius: 999px; padding: 2px 8px; margin-bottom: 5px;">
-           <span>🎙️ Kin Whisper</span>
+           <span>💬 FamilyChat</span>
            <span style="opacity: 0.85;">• Tap to reply</span>
          </div>`
       : '';
@@ -436,12 +436,55 @@
     syncWithServer();
   });
 
+  // Expose FamilyChat popup helpers for iOS Safari / Pusher / polling fallbacks
+  if (typeof window !== 'undefined') {
+    window.showFamilyChatPopup = showFloatingToast;
+    window.playFamilyChatChime = playWhisperToastChime;
+  }
+
+  let lastKnownWhisperUnread = null;
+  function pollWhisperPopupFallback() {
+    if (document.visibilityState !== 'visible') return;
+    const pathname = (window.location && window.location.pathname) ? window.location.pathname : '';
+    if (pathname.startsWith('/kin-whispers')) return;
+    fetch('/api/kin-whispers/unread-count', {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      credentials: 'same-origin'
+    })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (json) {
+      if (!json || typeof json.unread_count === 'undefined') return;
+      const nextCount = Math.max(0, parseInt(json.unread_count, 10) || 0);
+      if (lastKnownWhisperUnread !== null && nextCount > lastKnownWhisperUnread) {
+        if (typeof window.updateWhisperBadge === 'function') {
+          window.updateWhisperBadge(nextCount);
+        }
+        playWhisperToastChime();
+        showFloatingToast({
+          title: 'New FamilyChat Message',
+          body: 'You have ' + nextCount + ' unread message' + (nextCount === 1 ? '' : 's') + ' in FamilyChat.',
+          category: 'kin_whisper',
+          tag: 'whisper_unread',
+          url: '/kin-whispers'
+        });
+      }
+      lastKnownWhisperUnread = nextCount;
+    })
+    .catch(function () {});
+  }
+
   setInterval(sendPresenceHeartbeat, 60000);
+  setInterval(pollWhisperPopupFallback, 15000);
 
   // Initial Boot Sync
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
     syncWithServer();
+    pollWhisperPopupFallback();
   } else {
-    document.addEventListener('DOMContentLoaded', syncWithServer);
+    document.addEventListener('DOMContentLoaded', function () {
+      syncWithServer();
+      pollWhisperPopupFallback();
+    });
   }
 })();
