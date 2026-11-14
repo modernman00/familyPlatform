@@ -40,6 +40,7 @@ final class RegisterTableData {
                 'country' => $cleanPostData['country'] ?? null,
                 'mobile' => $cleanPostData['mobile'] ?? null,
                 'email_notifications' => $cleanPostData['email_notifications'] ?? 'on',
+                'post_email_notifications' => $cleanPostData['post_email_notifications'] ?? 'off',
                 'sms_notifications' => $cleanPostData['sms_notifications'] ?? 'on',
                 'profile_visibility' => $cleanPostData['profile_visibility'] ?? 'Public',
                 'show_my_profile' => $cleanPostData['show_my_profile'] ?? 'on',

@@ -54,7 +54,7 @@ final class KinWhisperController extends BaseController
             $kin = KinWhisperService::getConnectedKinMembers($currentUserId);
 
             Utility::view('kin_whispers/index', [
-                'page_title' => 'Kin Whispers & Artifact Messages — FamilyPlatform',
+                'page_title' => 'FamilyChat & Artifact Messages — FamilyPlatform',
                 'current_user_id' => $currentUserId,
                 'threads' => $threads,
                 'selected_thread' => $selectedThread,
@@ -247,6 +247,12 @@ final class KinWhisperController extends BaseController
         if (isset($input['reply_to']) && is_array($input['reply_to'])) {
             $metadata['reply_to'] = $input['reply_to'];
         }
+        if (isset($input['link_preview']) && is_array($input['link_preview']) && !empty($input['link_preview']['url'])) {
+            $lpUrl = trim((string)$input['link_preview']['url']);
+            if (preg_match('#^https?://#i', $lpUrl)) {
+                $metadata['link_preview'] = $input['link_preview'];
+            }
+        }
         $metaArg = !empty($metadata) ? $metadata : null;
 
         try {
@@ -262,11 +268,27 @@ final class KinWhisperController extends BaseController
                 deferNotifications: true
             );
             $response = json_encode(['success' => true, 'message' => $message, 'server_time' => gmdate('Y-m-d\TH:i:s\Z')]);
-            header('Content-Length: ' . strlen((string)$response));
-            echo $response;
-            if (function_exists('fastcgi_finish_request')) {
-                fastcgi_finish_request();
+            if (function_exists('apache_setenv')) {
+                @apache_setenv('no-gzip', '1');
             }
+            @ini_set('zlib.output_compression', 'Off');
+            if (!headers_sent()) {
+                header('Content-Encoding: none');
+                header('Connection: close');
+                header('Content-Length: ' . strlen((string)$response));
+            }
+            echo $response;
+            if (php_sapi_name() !== 'cli') {
+                while (ob_get_level() > 0) {
+                    ob_end_flush();
+                }
+                flush();
+                if (function_exists('fastcgi_finish_request')) {
+                    fastcgi_finish_request();
+                }
+            }
+            ignore_user_abort(true);
+            KinWhisperService::resolveDeferredMessageLinkPreview($message->id, $body);
             KinWhisperService::dispatchMessageNotifications(
                 $currentUserId,
                 $threadId,

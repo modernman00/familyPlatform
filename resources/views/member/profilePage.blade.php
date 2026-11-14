@@ -19,6 +19,11 @@
     @endphp --}}
     <div class="container-main" style="min-height: 100vh;">
 
+        <!-- Mobile-first above-the-fold Post Composer (<992px) -->
+        <div class="mobile-composer-slot d-lg-none w-100">
+            @include('member.includes.postComposer', ['composerId' => 'openPostModalTriggerMobile'])
+        </div>
+
         @includeIf('member.includes.leftColumn')
 
         @includeIf('member.includes.middleColumn')

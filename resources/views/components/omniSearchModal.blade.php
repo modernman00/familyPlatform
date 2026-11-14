@@ -723,8 +723,9 @@ body.dark-mode .omni-kbd {
             icon: 'bi-envelope-heart-fill',
             iconColor: '#f59e0b',
             badge: 'Growth',
-            url: 'modal:recommendFriendsModal',
-            targetElement: '#recommendFriendsModal',
+            url: 'modal:inviteFamilyModal',
+            targetElement: '#inviteFamilyModal',
+            modalTab: 'friends',
             actionType: 'modal_trigger',
             priority: 97
         },
@@ -999,8 +1000,9 @@ body.dark-mode .omni-kbd {
     }
 
     function filterLocalActionsImmediately(query) {
-        const cleanQuery = query.toLowerCase().trim();
-        const tokens = cleanQuery.split(/\s+/).filter(t => t.length > 1);
+        const cleanQuery = query.toLowerCase().replace(/[^\w\s-]/g, ' ').replace(/\s+/g, ' ').trim();
+        const stopWords = new Set(['i', 'me', 'my', 'want', 'to', 'a', 'an', 'the', 'for', 'how', 'do', 'can', 'would', 'like', 'please', 'need', 'is', 'are']);
+        const tokens = cleanQuery.split(/\s+/).filter(t => t.length > 1 && !stopWords.has(t));
 
         const scored = [];
         localActionCatalog.forEach(act => {
@@ -1010,15 +1012,15 @@ body.dark-mode .omni-kbd {
             const keywords = Array.isArray(act.keywords) ? act.keywords.map(k => k.toLowerCase()) : [];
 
             // Exact phrase match
-            if (title === cleanQuery) score += 300;
-            else if (title.includes(cleanQuery)) score += 200;
+            if (cleanQuery && title === cleanQuery) score += 300;
+            else if (cleanQuery && title.includes(cleanQuery)) score += 200;
 
             keywords.forEach(k => {
-                if (k === cleanQuery) score += 280;
-                else if (k.includes(cleanQuery)) score += 140;
+                if (cleanQuery && k === cleanQuery) score += 280;
+                else if (cleanQuery && k.includes(cleanQuery)) score += 140;
             });
 
-            if (desc.includes(cleanQuery)) score += 80;
+            if (cleanQuery && desc.includes(cleanQuery)) score += 80;
 
             // Multi-token overlap
             tokens.forEach(tok => {
@@ -1038,6 +1040,12 @@ body.dark-mode .omni-kbd {
             }
             if (cleanQuery.includes('tree') && (act.id === 'act_view_tree' || act.id === 'act_add_relative')) {
                 score += 200;
+            }
+            if ((cleanQuery.includes('card') || cleanQuery.includes('celebrat') || cleanQuery.includes('festiv') || cleanQuery.includes('birthday') || cleanQuery.includes('greeting')) && act.id === 'act_festive_cards_studio') {
+                score += 280;
+            }
+            if ((cleanQuery.includes('poster') || cleanQuery.includes('flyer')) && act.id === 'act_poster_studio') {
+                score += 240;
             }
 
             if (score > 0) {
@@ -1206,7 +1214,7 @@ body.dark-mode .omni-kbd {
                             if (modal) modal.hide();
                         }
                         setTimeout(function() {
-                            const recModal = document.getElementById('recommendFriendsModal');
+                            const recModal = document.getElementById('inviteFamilyModal');
                             if (recModal && window.bootstrap && window.bootstrap.Modal) {
                                 const m = window.bootstrap.Modal.getOrCreateInstance(recModal);
                                 m.show();
@@ -1306,7 +1314,13 @@ body.dark-mode .omni-kbd {
                 const targetModal = document.querySelector(modalId.startsWith('#') ? modalId : '#' + modalId);
                 if (targetModal && window.bootstrap && window.bootstrap.Modal) {
                     const m = window.bootstrap.Modal.getOrCreateInstance(targetModal);
-                    m.show();
+                    // Optional deep-link into a modal tab (read by the modal's show.bs.modal handler)
+                    let trigger;
+                    if (itemData.modalTab) {
+                        trigger = document.createElement('span');
+                        trigger.setAttribute('data-invite-tab', itemData.modalTab);
+                    }
+                    m.show(trigger);
                 } else {
                     window.location.href = '/profilePage?action=invite';
                 }

@@ -710,7 +710,7 @@ final class KinWhisperService
         if ($cleanBody !== '' && empty($metadata['link_preview'])) {
             try {
                 if (LinkPreviewService::extractFirstPreviewableUrl($cleanBody) !== null) {
-                    $preview = LinkPreviewService::getPreviewForPostText($cleanBody);
+                    $preview = LinkPreviewService::getPreviewForPostText($cleanBody, !$deferNotifications);
                     if ($preview !== null && (!empty($preview['title']) || !empty($preview['image']) || !empty($preview['domain']))) {
                         $metadata = $metadata ?? [];
                         $metadata['link_preview'] = $preview;
@@ -765,6 +765,35 @@ final class KinWhisperService
     }
 
     /**
+     * Post-response deferred OpenGraph link preview hydration so sending a chat message with an uncached link
+     * never blocks the HTTP response.
+     */
+    public static function resolveDeferredMessageLinkPreview(string $msgId, string $cleanBody): void
+    {
+        if ($cleanBody === '' || LinkPreviewService::extractFirstPreviewableUrl($cleanBody) === null) {
+            return;
+        }
+        try {
+            $db = Db::connect2();
+            $stmt = $db->prepare('SELECT context_metadata FROM kin_messages WHERE id = ? LIMIT 1');
+            $stmt->execute([$msgId]);
+            $rawMeta = $stmt->fetchColumn();
+            $meta = is_string($rawMeta) && $rawMeta !== '' ? (json_decode($rawMeta, true) ?: []) : [];
+            if (!empty($meta['link_preview'])) {
+                return;
+            }
+            $preview = LinkPreviewService::getPreviewForPostText($cleanBody, true);
+            if ($preview !== null && (!empty($preview['title']) || !empty($preview['image']) || !empty($preview['domain']))) {
+                $meta['link_preview'] = $preview;
+                $up = $db->prepare('UPDATE kin_messages SET context_metadata = ? WHERE id = ?');
+                $up->execute([json_encode($meta, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), $msgId]);
+            }
+        } catch (\Throwable $e) {
+            error_log('[KinWhisperService::resolveDeferredMessageLinkPreview] ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Dispatch multi-channel notifications and push alerts for a message asynchronously or post-response.
      *
      * @param string $currentUserId Authenticated sender ID
@@ -813,12 +842,16 @@ final class KinWhisperService
                     ? sprintf('%s shared an audio whisper in "%s".', $senderName, $groupTitle)
                     : sprintf('%s (%s): "%s"', $senderName, $groupTitle, mb_substr($cleanBody, 0, 80));
 
-                $stmtGroupParts = $db->prepare('SELECT user_id FROM kin_thread_participants WHERE thread_id = ? AND user_id != ? AND deleted_at IS NULL');
+                $stmtGroupParts = $db->prepare('SELECT user_id, COALESCE(is_muted, 0) AS is_muted FROM kin_thread_participants WHERE thread_id = ? AND user_id != ? AND deleted_at IS NULL');
                 $stmtGroupParts->execute([$threadId, $currentUserId]);
-                $recipientIds = $stmtGroupParts->fetchAll(PDO::FETCH_COLUMN) ?: [];
+                $participantRows = $stmtGroupParts->fetchAll(PDO::FETCH_ASSOC) ?: [];
+                $recipientIds = array_map(fn($r) => (string)$r['user_id'], $participantRows);
 
-                foreach ($recipientIds as $recipId) {
-                    $targetId = (string)$recipId;
+                foreach ($participantRows as $pRow) {
+                    $targetId = (string)$pRow['user_id'];
+                    if ((int)($pRow['is_muted'] ?? 0) === 1) {
+                        continue;
+                    }
                     NotificationOrchestrator::dispatch(
                         userId: $targetId,
                         category: 'kin_whisper',
@@ -857,27 +890,34 @@ final class KinWhisperService
                     : sprintf('%s: "%s"', $senderName, mb_substr($cleanBody, 0, 80));
 
                 if (!empty($recipientId)) {
-                    NotificationOrchestrator::dispatch(
-                        userId: $recipientId,
-                        category: 'kin_whisper',
-                        priority: 'high',
-                        title: '🎙️ New Kin Whisper',
-                        body: $notifBody,
-                        actionUrl: $actionUrl,
-                        tag: 'whisper_' . $threadId,
-                        familyCode: (string)$thread['family_code'],
-                        metadata: [
-                            'sender_id' => $currentUserId,
-                            'sender_name' => $senderName,
-                            'thread_id' => $threadId,
-                            'message_id' => $msgId,
-                            'message_type' => $messageType,
-                        ]
-                    );
+                    $stmtMute = $db->prepare('SELECT COALESCE(is_muted, 0) FROM kin_thread_participants WHERE thread_id = ? AND user_id = ? AND deleted_at IS NULL LIMIT 1');
+                    $stmtMute->execute([$threadId, $recipientId]);
+                    $isRecipientMuted = (int)($stmtMute->fetchColumn() ?: 0) === 1;
+
+                    if (!$isRecipientMuted) {
+                        NotificationOrchestrator::dispatch(
+                            userId: $recipientId,
+                            category: 'kin_whisper',
+                            priority: 'high',
+                            title: '🎙️ New Kin Whisper',
+                            body: $notifBody,
+                            actionUrl: $actionUrl,
+                            tag: 'whisper_' . $threadId,
+                            familyCode: (string)$thread['family_code'],
+                            metadata: [
+                                'sender_id' => $currentUserId,
+                                'sender_name' => $senderName,
+                                'thread_id' => $threadId,
+                                'message_id' => $msgId,
+                                'message_type' => $messageType,
+                            ]
+                        );
+                    }
 
                     \App\classes\Pusher::trigger('private-user-' . strtolower($recipientId), 'kin-whisper', [
                         'thread_id' => $threadId,
                         'message_id' => $msgId,
+                        'sender_id' => $currentUserId,
                     ]);
                 }
             }
@@ -1823,6 +1863,10 @@ final class KinWhisperService
 
         if (!$moved) {
             throw new ValidationException('Could not save uploaded media.');
+        }
+
+        if ($type === 'video') {
+            VideoAutoTrimService::optimiseMp4FastStart($destination);
         }
 
         $origName = basename(strip_tags((string)($file['name'] ?? 'attachment.' . $ext)));

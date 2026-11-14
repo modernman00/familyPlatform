@@ -1,12 +1,12 @@
 /**
- * Recommend FamilyPlatform Modal Component
+ * Friends & In-Laws tab of the merged Invite Others modal (#inviteFamilyModal)
  *
  * Handles async fetching of personalized referral tokens, 1-tap WhatsApp sharing,
  * clipboard copying with animated feedback, and tracking the Walled Sanctuary USP.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  const modalElem = document.getElementById('recommendFriendsModal');
+  const modalElem = document.getElementById('inviteFamilyModal');
   if (!modalElem) return;
 
   const inputShareLink = document.getElementById('inputShareLink');

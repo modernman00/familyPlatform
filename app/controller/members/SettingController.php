@@ -108,8 +108,8 @@ final class SettingController extends BaseController
                     $chk->execute([$uid]);
                     if (!$chk->fetch()) {
                         $email = (string) ($_SESSION['auth']['email'] ?? $_SESSION['email'] ?? '');
-                        $ins = $db->prepare('INSERT INTO contact (id, email, country, mobile, profile_visibility, show_my_profile, email_notifications, sms_notifications) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-                        $ins->execute([$uid, substr($email, 0, 50), '', '', 'Public', 'on', 'on', 'on']);
+                        $ins = $db->prepare('INSERT INTO contact (id, email, country, mobile, profile_visibility, show_my_profile, email_notifications, post_email_notifications, sms_notifications) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+                        $ins->execute([$uid, substr($email, 0, 50), '', '', 'Public', 'on', 'on', 'off', 'on']);
                     }
                 };
 
@@ -119,6 +119,7 @@ final class SettingController extends BaseController
                     $data = [
                         'id' => $_POST['id'],
                         'email_notifications' => $normalizeSwitch($_POST['email_notifications'] ?? 'off'),
+                        'post_email_notifications' => $normalizeSwitch($_POST['post_email_notifications'] ?? 'off'),
                         'sms_notifications' => $normalizeSwitch($_POST['sms_notifications'] ?? 'off'),
                     ];
                     UpdateFn::updateMultiple('contact', $data, 'id');

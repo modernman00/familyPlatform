@@ -2,7 +2,7 @@ import axios from 'axios';
 import { createHybridRealtimeClient } from './sovereignRealtimeBridge';
 import { format } from 'timeago.js';
 import Swal from 'sweetalert2';
-import { extractVideoFromText, extractVideosFromText, cleanPostMessage } from './videoParser';
+import { parseVideoUrl, formatVideoDescriptor, extractVideoFromText, extractVideosFromText, cleanPostMessage } from './videoParser';
 import { getCsrfToken } from '../global';
 import { getPostImageUrl, getProfileImageUrl, getPostImageVariantUrl, isGifMedia } from '../helper/imageUrls';
 if (typeof window !== 'undefined') {
@@ -795,41 +795,48 @@ export function profileFeed(opts = {}) {
             }
             const cleanMsg = this.decodeHtml(p?.postMessage || '');
             let detectedVideos = (Array.isArray(p?.videos) && p.videos.length > 0)
-                ? p.videos
-                : extractVideosFromText(cleanMsg, 3);
-            if (!detectedVideos || detectedVideos.length === 0) {
-                const videoFilesFromSlots = this.extractVideosFromSlots(p);
-                if (videoFilesFromSlots && videoFilesFromSlots.length > 0) {
-                    detectedVideos = videoFilesFromSlots.map(videoFile => {
-                        let slotUrl = null;
-                        let matchThumb = null;
-                        if (Array.isArray(p?.videos)) {
-                            const match = p.videos.find(v => v && (v.originalUrl === videoFile || v.embedUrl === videoFile));
-                            if (match && match.embedUrl) {
-                                slotUrl = match.embedUrl;
-                            }
-                            if (match && match.thumbnailUrl) {
-                                matchThumb = match.thumbnailUrl;
-                            }
-                        }
-                        if (!slotUrl) {
-                            slotUrl = (videoFile.startsWith('/') || videoFile.startsWith('http'))
-                                ? videoFile
-                                : `/resources/videos/posts/${videoFile}`;
-                        }
-                        const thumb = matchThumb
-                            || (videoFile.includes('googleusercontent.com') ? videoFile.replace(/=.*$/i, '=s1600-no') : null);
-                        return {
-                            type: 'direct',
-                            videoId: null,
-                            thumbnailUrl: thumb,
-                            embedUrl: slotUrl,
-                            originalUrl: videoFile,
-                            trimStart: null,
-                            trimEnd: null,
-                        };
+                ? p.videos.map(v => formatVideoDescriptor(v)).filter(Boolean)
+                : [];
+            const videoFilesFromSlots = this.extractVideosFromSlots(p);
+            if (videoFilesFromSlots && videoFilesFromSlots.length > 0) {
+                videoFilesFromSlots.forEach(videoFile => {
+                    if (detectedVideos.length >= 6) return;
+                    let slotUrl = null;
+                    let matchThumb = null;
+                    if (Array.isArray(p?.videos)) {
+                        const match = p.videos.find(v => v && (v.originalUrl === videoFile || v.embedUrl === videoFile));
+                        if (match && match.embedUrl) slotUrl = match.embedUrl;
+                        if (match && match.thumbnailUrl) matchThumb = match.thumbnailUrl;
+                    }
+                    const desc = formatVideoDescriptor({
+                        originalUrl: videoFile,
+                        embedUrl: slotUrl || undefined,
+                        thumbnailUrl: matchThumb || (videoFile.includes('googleusercontent.com') ? videoFile.replace(/=.*$/i, '=s1600-no') : null),
                     });
-                }
+                    if (!desc) return;
+                    const isDup = detectedVideos.some(ev =>
+                        ev && (
+                            (ev.videoId && desc.videoId && ev.videoId === desc.videoId) ||
+                            ev.originalUrl === desc.originalUrl ||
+                            ev.embedUrl === desc.embedUrl
+                        )
+                    );
+                    if (!isDup) detectedVideos.push(desc);
+                });
+            }
+            const textVideos = extractVideosFromText(cleanMsg, 6);
+            if (textVideos && textVideos.length > 0) {
+                textVideos.forEach(tv => {
+                    if (detectedVideos.length >= 6 || !tv) return;
+                    const isDup = detectedVideos.some(ev =>
+                        ev && (
+                            (ev.videoId && tv.videoId && ev.videoId === tv.videoId) ||
+                            ev.originalUrl === tv.originalUrl ||
+                            ev.embedUrl === tv.embedUrl
+                        )
+                    );
+                    if (!isDup) detectedVideos.push(tv);
+                });
             }
             const primaryVideo = detectedVideos.length > 0 ? detectedVideos[0] : null;
             const initialDisplay = p?.displayMessage 
@@ -902,11 +909,18 @@ export function profileFeed(opts = {}) {
             // Always guarantee displayMessage has all raw media links stripped
             normalized.displayMessage = this.getMediaCaption(normalized);
 
-            // Progressive enhancement: lazy unfurl link preview if server hasn't pre-hydrated
-            if (!normalized.link_preview && normalized.postMessage && !normalized.video) {
-                const urlMatch = normalized.postMessage.match(/(https?:\/\/[^\s<>"']+)/i);
-                if (urlMatch && urlMatch[1]) {
-                    this.lazyFetchLinkPreview(normalized, urlMatch[1]);
+            // Progressive enhancement: lazy unfurl link preview(s) in parallel if server hasn't pre-hydrated all links
+            if (normalized.postMessage) {
+                const allUrlMatches = normalized.postMessage.match(/https?:\/\/[^\s<>"']+/gi) || [];
+                const uniqueUrls = Array.from(new Set(allUrlMatches.map(u => u.replace(/[.,;!?)]+$/, '')))).filter(u => {
+                    if (/\.(?:jpe?g|png|webp|avif|gif)(?:\?.*)?$/i.test(u)) return false;
+                    if (parseVideoUrl(u)) return false;
+                    return true;
+                }).slice(0, 6);
+                if (uniqueUrls.length > 1) {
+                    this.lazyFetchAllLinkPreviews(normalized, uniqueUrls);
+                } else if (uniqueUrls.length === 1 && !normalized.link_preview && !normalized.video) {
+                    this.lazyFetchLinkPreview(normalized, uniqueUrls[0]);
                 }
             }
 
@@ -1409,13 +1423,34 @@ export function profileFeed(opts = {}) {
                 });
             }
 
+            if (!this._feedVideoPreloadObserver) {
+                this._feedVideoPreloadObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (!entry.isIntersecting) return;
+                        const el = entry.target;
+                        const videos = (el instanceof HTMLVideoElement)
+                            ? [el]
+                            : Array.from(el.querySelectorAll('video'));
+                        videos.forEach(v => {
+                            if (v && v.preload !== 'auto') {
+                                v.preload = 'auto';
+                            }
+                        });
+                        this._feedVideoPreloadObserver.unobserve(el);
+                    });
+                }, {
+                    rootMargin: '450px 0px'
+                });
+            }
+
             setTimeout(() => {
-                // Observe multi-video containers for sequential autoplay
+                // Observe multi-video containers for sequential autoplay & pre-buffering
                 const multiContainers = document.querySelectorAll('.multi-video-horizontal-container');
                 multiContainers.forEach(mc => {
                     if (!mc.dataset.multiFeedObserved) {
                         mc.dataset.multiFeedObserved = 'true';
                         this._feedMultiVideoObserver.observe(mc);
+                        this._feedVideoPreloadObserver.observe(mc);
                     }
                 });
 
@@ -1439,10 +1474,11 @@ export function profileFeed(opts = {}) {
                             video._userManuallyPaused = false;
                         });
 
+                        this._feedVideoPreloadObserver.observe(video);
                         this._feedVideoObserver.observe(video);
                     }
                 });
-            }, 300);
+            }, 120);
         },
 
         async openPostViewersModal(post) {
@@ -1598,46 +1634,81 @@ export function profileFeed(opts = {}) {
 
         async lazyFetchLinkPreview(post, url) {
             if (!post || !url) return;
-            try {
-                const res = await axios.get(`/api/link-preview?url=${encodeURIComponent(url)}`);
-                if (res?.data?.status === 'success' && res?.data?.data) {
-                    const d = res.data.data;
-                    // `post` may be the raw object from normalizePost(); assigning to it
-                    // bypasses Alpine's proxy, so write to the reactive copy in this.posts.
-                    const target = this.posts?.find(p => p?.post_no === post.post_no) || post;
-                    target.link_preview = d;
-                    target.displayMessage = this.getMediaCaption(target);
+            return this.lazyFetchAllLinkPreviews(post, [url]);
+        },
 
-                    // If linked album contains multiple photos or videos, promote to native multi-media carousel
+        async lazyFetchAllLinkPreviews(post, urls) {
+            if (!post || !Array.isArray(urls) || urls.length === 0) return;
+            try {
+                const results = await Promise.all(
+                    urls.slice(0, 6).map(u =>
+                        axios.get(`/api/link-preview?url=${encodeURIComponent(u)}`)
+                            .then(res => (res?.data?.status === 'success' && res?.data?.data) ? { url: u, data: res.data.data } : null)
+                            .catch(() => null)
+                    )
+                );
+                const valid = results.filter(Boolean);
+                if (valid.length === 0) return;
+
+                const target = this.posts?.find(p => p?.post_no === post.post_no) || post;
+                if (!target.link_preview) {
+                    target.link_preview = valid[0].data;
+                }
+
+                const mergedImages = Array.isArray(target.images) ? [...target.images] : [];
+                const mergedVideos = Array.isArray(target.videos) ? [...target.videos] : [];
+
+                valid.forEach(({ url, data: d }) => {
                     if (Array.isArray(d.album_images) && d.album_images.length > 0) {
-                        target.images = d.album_images;
+                        d.album_images.forEach(img => {
+                            if (img && !mergedImages.includes(img) && mergedImages.length < 6) {
+                                mergedImages.push(img);
+                            }
+                        });
                     } else if (
-                        (!target.images || target.images.length === 0)
-                        && (!target.videos || target.videos.length === 0)
-                        && !target.video
-                        && (d.is_photo_link || d.is_google_photo)
+                        (d.is_photo_link || d.is_google_photo)
                         && (d.photo_url || d.image)
                         && !d.is_video
                         && (!d.album_videos || d.album_videos.length === 0)
                     ) {
                         const photoAsset = d.photo_url || d.image;
-                        target.images = [photoAsset];
+                        if (photoAsset && !mergedImages.includes(photoAsset) && mergedImages.length < 6) {
+                            mergedImages.push(photoAsset);
+                        }
                     }
 
                     if (Array.isArray(d.album_videos) && d.album_videos.length > 0) {
-                        target.videos = d.album_videos.map(vUrl => ({
-                            type: 'direct',
-                            videoId: null,
-                            thumbnailUrl: vUrl.replace(/=.*$/i, '=s1600-no'),
-                            embedUrl: `/member/stream-video?url=${encodeURIComponent(vUrl)}`,
-                            originalUrl: vUrl,
-                            trimStart: null,
-                            trimEnd: null
-                        }));
-                        target.video = target.videos[0];
+                        d.album_videos.forEach(vUrl => {
+                            if (mergedVideos.length >= 6) return;
+                            const desc = formatVideoDescriptor({
+                                originalUrl: vUrl,
+                                embedUrl: vUrl.includes('googleusercontent.com') || vUrl.includes('googlevideo.com')
+                                    ? `/member/stream-video?url=${encodeURIComponent(vUrl)}`
+                                    : vUrl,
+                                thumbnailUrl: vUrl.includes('googleusercontent.com')
+                                    ? vUrl.replace(/=.*$/i, '=s1600-no')
+                                    : null,
+                            });
+                            if (!desc) return;
+                            const isDup = mergedVideos.some(ev => ev && (ev.originalUrl === desc.originalUrl || ev.embedUrl === desc.embedUrl));
+                            if (!isDup) mergedVideos.push(desc);
+                        });
+                    } else if (d.is_video && (d.video_url || d.url)) {
+                        const rawVidUrl = d.video_url || d.url;
+                        const desc = formatVideoDescriptor({
+                            originalUrl: rawVidUrl,
+                            embedUrl: rawVidUrl.includes('googleusercontent.com') || rawVidUrl.includes('googlevideo.com')
+                                ? `/member/stream-video?url=${encodeURIComponent(rawVidUrl)}`
+                                : rawVidUrl,
+                            thumbnailUrl: d.image || d.photo_url || null,
+                        });
+                        if (desc && mergedVideos.length < 6) {
+                            const isDup = mergedVideos.some(ev => ev && (ev.originalUrl === desc.originalUrl || ev.embedUrl === desc.embedUrl));
+                            if (!isDup) mergedVideos.push(desc);
+                        }
                     }
 
-                    if (d.is_photo_link || d.is_google_photo || d.album_images?.length || d.album_videos?.length) {
+                    if (d.is_photo_link || d.is_google_photo || d.album_images?.length || d.album_videos?.length || d.is_video) {
                         const origUrl = d.original_url || url || '';
                         const canonUrl = d.url || '';
                         let cleanText = target.displayMessage || target.postMessage || '';
@@ -1646,7 +1717,16 @@ export function profileFeed(opts = {}) {
                         cleanText = cleanText.replace(/https?:\/\/(?:photos\.app\.goo\.gl|photos\.google\.com)\/[^\s<>"']+/gi, '');
                         target.displayMessage = this.normalizeEmojiText(cleanText.trim());
                     }
+                });
+
+                if (mergedVideos.length > 0) {
+                    target.videos = mergedVideos;
+                    target.video = mergedVideos[0];
                 }
+                if (mergedImages.length > 0 && mergedVideos.length === 0) {
+                    target.images = mergedImages;
+                }
+                target.displayMessage = this.getMediaCaption(target);
             } catch (_) {
                 // Silently ignore if unresolvable
             }
@@ -1922,6 +2002,53 @@ export function profileFeed(opts = {}) {
             const replyTo = this.replyingTo[postNo]?.comment_no;
             if (replyTo) formData.append('parent_comment_no', String(replyTo));
 
+            // Optimistic UI: insert comment immediately so the user sees 0ms latency
+            const post = this.posts.find(p => String(p.post_no) === String(postNo));
+            const tempCommentNo = `temp_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+            const optimisticMediaUrl = isBlob ? rawGif : gifUrl;
+            const optimisticIsVideo = attachedFile && typeof attachedFile.type === 'string' && attachedFile.type.startsWith('video/');
+
+            if (post) {
+                if (!Array.isArray(post.comments)) {
+                    post.comments = [];
+                }
+                const optimisticComment = this.normalizeComment({
+                    comment_no: tempCommentNo,
+                    post_no: postNo,
+                    parent_comment_no: replyTo || null,
+                    id: this.currentUserId,
+                    fullName: window.currentUserFullName || 'You',
+                    profileImg: window.currentUserProfileImg || '',
+                    comment: commentText,
+                    gif_url: optimisticMediaUrl,
+                    _isVideoMedia: optimisticIsVideo,
+                    _optimistic: true,
+                    post_time: Date.now().toString(),
+                    comment_time: Date.now().toString(),
+                    date_created: new Date().toISOString(),
+                    reactions: {},
+                    user_reaction: null
+                });
+                post.comments.push(optimisticComment);
+
+                if (replyTo) {
+                    const root = this.getThreadRoot(post, { comment_no: replyTo, parent_comment_no: replyTo });
+                    if (root?.comment_no) {
+                        this.threadExpanded[String(root.comment_no)] = true;
+                    }
+                }
+            }
+
+            // Reset composer immediately so the user can type a follow-up without waiting
+            this.commentInputs[postNo] = '';
+            this.clearCommentSticker(postNo);
+            if (this.commentGifs) this.commentGifs[postNo] = '';
+            if (this.commentFiles) this.commentFiles[postNo] = null;
+            this.commentGifOpen[postNo] = false;
+            this.mentionOpen[postNo] = false;
+            this.mentionMatches[postNo] = [];
+            this.cancelReply(postNo);
+
             try {
                 const response = await axios.post('/postCommentProfile', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
@@ -1935,48 +2062,39 @@ export function profileFeed(opts = {}) {
                             ? parseInt(respData, 10)
                             : Date.now();
 
-                    const post = this.posts.find(p => String(p.post_no) === String(postNo));
-                    if (post) {
-                        if (!Array.isArray(post.comments)) {
-                            post.comments = [];
-                        }
-                        if (!post.comments.some(c => String(c.comment_no) === String(commentNo))) {
-                            const newComment = this.normalizeComment({
-                                comment_no: commentNo,
-                                post_no: postNo,
-                                parent_comment_no: (respData && typeof respData === 'object' && respData.parent_comment_no) || null,
-                                id: this.currentUserId,
-                                fullName: (respData && typeof respData === 'object' && respData.fullName) || 'You',
-                                profileImg: (respData && typeof respData === 'object' && respData.profileImg) || '',
-                                comment: commentText,
-                                gif_url: (respData && typeof respData === 'object' && respData.gif_url) || (isBlob ? '' : gifUrl),
-                                post_time: (respData && typeof respData === 'object' && respData.post_time) || Date.now().toString(),
-                                comment_time: (respData && typeof respData === 'object' && respData.comment_time) || Date.now().toString(),
-                                date_created: (respData && typeof respData === 'object' && respData.date_created) || new Date().toISOString(),
-                                reactions: {},
-                                user_reaction: null
-                            });
-                            post.comments.push(newComment);
-                        }
+                    if (post && Array.isArray(post.comments)) {
+                        const confirmedComment = this.normalizeComment({
+                            comment_no: commentNo,
+                            post_no: postNo,
+                            parent_comment_no: (respData && typeof respData === 'object' && respData.parent_comment_no) || replyTo || null,
+                            id: this.currentUserId,
+                            fullName: (respData && typeof respData === 'object' && respData.fullName) || 'You',
+                            profileImg: (respData && typeof respData === 'object' && respData.profileImg) || '',
+                            comment: commentText,
+                            gif_url: (respData && typeof respData === 'object' && respData.gif_url) || (isBlob ? '' : gifUrl),
+                            post_time: (respData && typeof respData === 'object' && respData.post_time) || Date.now().toString(),
+                            comment_time: (respData && typeof respData === 'object' && respData.comment_time) || Date.now().toString(),
+                            date_created: (respData && typeof respData === 'object' && respData.date_created) || new Date().toISOString(),
+                            reactions: {},
+                            user_reaction: null
+                        });
+                        // Remove any duplicate pushed by realtime socket before or during HTTP completion
+                        post.comments = post.comments.filter(c =>
+                            String(c.comment_no) !== String(tempCommentNo) &&
+                            String(c.comment_no) !== String(commentNo)
+                        );
+                        post.comments.push(confirmedComment);
                     }
-
-                    if (replyTo) {
-                        const root = this.getThreadRoot(post, { comment_no: replyTo, parent_comment_no: replyTo });
-                        if (root?.comment_no) {
-                            this.threadExpanded[String(root.comment_no)] = true;
-                        }
+                    if (isBlob) {
+                        try { URL.revokeObjectURL(rawGif); } catch (_) {}
                     }
-
-                    this.commentInputs[postNo] = '';
-                    this.clearCommentSticker(postNo);
-                    this.clearCommentGif(postNo);
-                    this.commentGifOpen[postNo] = false;
-                    this.mentionOpen[postNo] = false;
-                    this.mentionMatches[postNo] = [];
-                    this.cancelReply(postNo);
                 }
             } catch (err) {
                 console.error('Failed to submit comment:', err);
+                if (post && Array.isArray(post.comments)) {
+                    post.comments = post.comments.filter(c => String(c.comment_no) !== String(tempCommentNo));
+                }
+                this.commentInputs[postNo] = typedText;
                 Swal.fire({
                     icon: 'error',
                     title: 'Submission Failed',
@@ -2619,21 +2737,49 @@ export function profileFeed(opts = {}) {
             }
         },
 
+        attachCommentMedia(postNo, ev) {
+            const file = ev?.target?.files?.[0];
+            if (!file) return;
+            const isImg = file.type.startsWith('image/');
+            const isVid = file.type.startsWith('video/');
+            if (!isImg && !isVid) return;
+            if (!this.commentFiles) this.commentFiles = {};
+            this.commentFiles[postNo] = file;
+            const objectUrl = URL.createObjectURL(file);
+            this.commentGifs[postNo] = objectUrl;
+            this.commentGifOpen[postNo] = false;
+            if (ev?.target) ev.target.value = '';
+        },
+
+        isCommentVideoMedia(urlOrComment, postNo = null) {
+            if (!urlOrComment) return false;
+            if (typeof urlOrComment === 'object') {
+                if (urlOrComment._isVideoMedia) return true;
+                const u = String(urlOrComment.gif_url || '');
+                return /\.(mp4|webm|mov|m4v)(\?|$)/i.test(u) || u.startsWith('/resources/videos/');
+            }
+            const u = String(urlOrComment);
+            if (postNo !== null && this.commentFiles?.[postNo]?.type?.startsWith('video/')) {
+                return true;
+            }
+            return /\.(mp4|webm|mov|m4v)(\?|$)/i.test(u) || u.startsWith('/resources/videos/');
+        },
+
         handleCommentPaste(postNo, ev) {
             const clipboard = ev.clipboardData || window.clipboardData;
             if (!clipboard) return;
 
-            // 1. Binary image / sticker / GIF from mobile keyboard (Gboard, iOS, Memoji)
+            // 1. Binary image / video / sticker / GIF from mobile keyboard (Gboard, iOS, Memoji)
             const items = clipboard.items;
             if (items && items.length) {
                 for (let i = 0; i < items.length; i++) {
                     const item = items[i];
-                    if (item.kind === 'file' && item.type.startsWith('image/')) {
+                    if (item.kind === 'file' && (item.type.startsWith('image/') || item.type.startsWith('video/'))) {
                         const blob = item.getAsFile();
                         if (blob) {
                             ev.preventDefault();
-                            const ext = item.type.split('/')[1] || 'png';
-                            const file = new File([blob], `sticker_${Date.now()}.${ext}`, { type: item.type });
+                            const ext = item.type.split('/')[1] || (item.type.startsWith('video/') ? 'mp4' : 'png');
+                            const file = new File([blob], `media_${Date.now()}.${ext}`, { type: item.type });
                             if (!this.commentFiles) this.commentFiles = {};
                             this.commentFiles[postNo] = file;
                             const objectUrl = URL.createObjectURL(blob);
@@ -3647,17 +3793,7 @@ export function profileFeed(opts = {}) {
             });
 
             // Normalize entries
-            list = list.map(v => {
-                if (typeof v === 'string') {
-                    return {
-                        type: 'direct',
-                        videoId: null,
-                        embedUrl: (v.startsWith('/') || v.startsWith('http')) ? v : `/resources/videos/posts/${v}`,
-                        originalUrl: v
-                    };
-                }
-                return v;
-            });
+            list = list.map(v => formatVideoDescriptor(v)).filter(Boolean);
 
             const safeIndex = (index >= 0 && index < list.length) ? index : 0;
             this.videoModalVideos = list;

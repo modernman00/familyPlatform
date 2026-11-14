@@ -205,6 +205,13 @@
       display: inline-block;
       width: 44px;
       height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch::after {
+      content: "";
+      position: absolute;
+      inset: -10px 0;
     }
 
     /* Hide default HTML checkbox */
@@ -789,12 +796,26 @@
                 <div class="custom-switch">
                   <div class="switch-info">
                     <h6>Email Notifications</h6>
-                    <p>Receive alerts about events and activities via email.</p>
+                    <p>Receive alerts about events, digests, and account activities via email.</p>
                   </div>
                   <div class="toggle-group">
                     <span class="toggle-label">{{ ($accountData['email_notifications'] ?? 'on') === 'on' ? 'ON' : 'OFF' }}</span>
                     <label class="switch">
                       <input type="checkbox" name="email_notifications" value="{{ ($accountData['email_notifications'] ?? 'on') === 'on' ? 'on' : 'off' }}" {{ ($accountData['email_notifications'] ?? 'on') === 'on' ? 'checked' : '' }}>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="custom-switch">
+                  <div class="switch-info">
+                    <h6>New Post Email Alerts</h6>
+                    <p>Opt in to receive an immediate email for every new family post (off by default — weekly digests and push alerts remain active).</p>
+                  </div>
+                  <div class="toggle-group">
+                    <span class="toggle-label">{{ ($accountData['post_email_notifications'] ?? 'off') === 'on' ? 'ON' : 'OFF' }}</span>
+                    <label class="switch">
+                      <input type="checkbox" name="post_email_notifications" value="{{ ($accountData['post_email_notifications'] ?? 'off') === 'on' ? 'on' : 'off' }}" {{ ($accountData['post_email_notifications'] ?? 'off') === 'on' ? 'checked' : '' }}>
                       <span class="slider"></span>
                     </label>
                   </div>

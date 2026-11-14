@@ -3741,6 +3741,17 @@ video.feed-post-video::-webkit-media-controls-play-button,
     padding-bottom: env(safe-area-inset-bottom, 0px);
     box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.24) !important;
   }
+  /* Let the body scroll inside the height-capped sheet (content has overflow:hidden) */
+  .modal .modal-dialog:not(.modal-fullscreen) > .modal-content > .modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .modal .modal-dialog:not(.modal-fullscreen) > .modal-content > .modal-header,
+  .modal .modal-dialog:not(.modal-fullscreen) > .modal-content > .modal-footer {
+    flex-shrink: 0;
+  }
   .modal .modal-dialog:not(.modal-fullscreen) > .modal-content::before {
     content: "";
     display: block;

@@ -1397,3 +1397,42 @@ body[data-page-id="reelsPage"] #fpMobileBottomBar .fp-bottom-tab {
 body[data-page-id="reelsPage"] #fpMobileBottomBar .fp-bottom-tab.active {
   color: #ffffff !important;
 }
+
+/* Manual previous / next reel navigation */
+.reel-nav-stack {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 20;
+}
+
+.reel-nav-btn {
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+@media (hover: hover) {
+  .reel-nav-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.3); }
+}
+
+.reel-nav-btn:active:not(:disabled) { transform: scale(0.98); }
+.reel-nav-btn:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
+.reel-nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }

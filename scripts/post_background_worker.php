@@ -41,7 +41,7 @@ $tVseStart = microtime(true);
 try {
     $postBaseDir = realpath($baseDir . '/resources/images/post');
     $postRecord = \App\model\Post::postByNo($postNo);
-    if (is_array($postRecord)) {
+    if (!empty($postRecord)) {
         for ($i = 0; $i < 6; $i++) {
             $imgCol = 'post_img' . $i;
             $imgVal = trim((string)($postRecord[$imgCol] ?? ''));
@@ -57,6 +57,13 @@ try {
                 }
             } elseif (str_contains($imgVal, 'googleusercontent.com') && preg_match('/=(?:m18|m22|m37|dv)/i', $imgVal)) {
                 \App\services\LinkPreviewService::cacheExternalVideoLocally($imgVal);
+            }
+        }
+        $rawPostMsg = (string)($postRecord['postMessage'] ?? '');
+        if ($rawPostMsg !== '' && (str_contains($rawPostMsg, 'http://') || str_contains($rawPostMsg, 'https://'))) {
+            $bgAssets = \App\services\LinkPreviewService::extractPhotoAssetsFromText($rawPostMsg, 6);
+            foreach ($bgAssets['videos'] as $extVidUrl) {
+                \App\services\LinkPreviewService::cacheExternalVideoLocally((string)$extVidUrl);
             }
         }
     }

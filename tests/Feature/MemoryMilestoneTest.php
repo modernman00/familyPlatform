@@ -170,4 +170,65 @@ final class MemoryMilestoneTest extends SocialFeedTestCase
         $this->assertArrayHasKey('memories', $json['data']);
         $this->assertArrayHasKey('milestones', $json['data']);
     }
+
+    public function testAnniversaryCardCreateUrlPreFillsOccasionAndRecipient(): void
+    {
+        $url = $this->service->buildAnniversaryCardCreateUrl("Ada & Tunde's Anniversary", '10th Tin Anniversary 🔔');
+        $this->assertStringStartsWith('/member/festive-cards?', $url);
+        $this->assertStringContainsString('occasion=wedding', $url);
+        $this->assertStringContainsString('recipient=Ada+%26+Tunde', $url);
+        $this->assertStringContainsString('headline=Happy+10th+Tin+Anniversary', $url);
+    }
+
+    public function testNotificationEnrichmentAttachesCelebratoryCardContextForAnniversaries(): void
+    {
+        $_SESSION['id'] = $this->authorId;
+        $_SESSION['famCode'] = $this->famCode;
+        $_SESSION['famCodes'] = [$this->famCode];
+
+        $tokenOwn = bin2hex(random_bytes(8));
+        $tokenOther = bin2hex(random_bytes(8));
+        $otherFamCode = 'OTHER_FAM_' . bin2hex(random_bytes(4));
+
+        $insertCard = $this->pdo->prepare(
+            "INSERT INTO festive_cards (uuid, share_token, user_id, fam_code, occasion, template_style, theme, headline, verse, sign_off, sender_name)
+             VALUES (?, ?, ?, ?, 'wedding', 'classic', 'onyx_gold', ?, 'Happy anniversary!', 'With love', ?)"
+        );
+        $insertCard->execute([bin2hex(random_bytes(16)), $tokenOwn, $this->authorId, $this->famCode, 'Golden Anniversary Card', 'Ada']);
+        $insertCard->execute([bin2hex(random_bytes(16)), $tokenOther, 'other_user', $otherFamCode, 'Secret Other Family Card', 'Stranger']);
+
+        $items = [
+            [
+                'no' => 101,
+                'notification_type' => 'Milestones',
+                'notification_name' => "💍 Ada & Tunde's Anniversary",
+                'notification_content' => "Happy Anniversary! Ada & Tunde's Anniversary is today (10th Tin Anniversary).",
+                'action_url' => '/profilePage#memoriesCard',
+            ],
+            [
+                'no' => 102,
+                'notification_type' => 'Comment',
+                'notification_name' => 'New comment',
+                'notification_content' => 'Someone commented on your post.',
+                'action_url' => '/profilePage',
+            ],
+        ];
+
+        $enriched = \App\controller\NotificationController::enrichWithActionUrls($items, $this->authorId);
+
+        // Anniversary notification has prominent card CTA + only own family's created card
+        $this->assertArrayHasKey('celebration_card_url', $enriched[0]);
+        $this->assertStringContainsString('/member/festive-cards?occasion=wedding', (string)$enriched[0]['celebration_card_url']);
+        $this->assertArrayHasKey('celebration_cards', $enriched[0]);
+        $tokens = array_column($enriched[0]['celebration_cards'], 'share_token');
+        $this->assertContains($tokenOwn, $tokens);
+        $this->assertNotContains($tokenOther, $tokens, 'IDOR violation: Cross-family celebratory card leaked');
+
+        // Non-anniversary notification does NOT receive celebratory card metadata
+        $this->assertArrayNotHasKey('celebration_card_url', $enriched[1]);
+        $this->assertArrayNotHasKey('celebration_cards', $enriched[1]);
+
+        // Cleanup
+        $this->pdo->prepare("DELETE FROM festive_cards WHERE share_token IN (?, ?)")->execute([$tokenOwn, $tokenOther]);
+    }
 }

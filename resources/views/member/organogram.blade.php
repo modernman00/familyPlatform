@@ -161,6 +161,9 @@
                     <i class="bi bi-person-slash"></i> Limit Access
                 </button>
                 @endif
+                <button type="button" class="btn btn-outline-light text-white-50 border-0 d-inline-flex align-items-center justify-content-center" onclick="dismissTreeSecurityBanner()" title="Dismiss" aria-label="Dismiss privacy guard banner" style="border-radius: 50px; min-height: 44px; min-width: 44px;">
+                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                </button>
             </div>
         </div>
 
@@ -664,27 +667,32 @@
                 </div>
 
                 <!-- Floating Controls Dock (Kinship Controls) -->
-                <div class="controls-dock">
-                    <button type="button" class="dock-btn" onclick="centerOnMe()" title="Center on Me">
-                        <i class="bi bi-crosshair2"></i>
-                    </button>
-                    <button type="button" class="dock-btn" onclick="fitTreeScreen()" title="Fit Family to Screen">
+                <div class="controls-dock" x-data="{ moreOpen: false }" @click.outside="moreOpen = false">
+                    <div class="dock-secondary-group" :class="{ 'is-open': moreOpen }">
+                        <button type="button" class="dock-btn" onclick="centerOnMe()" title="Centre on me" aria-label="Centre on me">
+                            <i class="bi bi-crosshair2"></i>
+                        </button>
+                        <button type="button" class="dock-btn" onclick="toggleFullscreenTree()" id="btnTreeFullscreen" title="Fullscreen Canvas" aria-label="Fullscreen Canvas">
+                            <i class="bi bi-arrows-fullscreen"></i>
+                        </button>
+                        <button type="button" class="dock-btn" onclick="if(window.family && window.family.exportPNG) window.family.exportPNG('Dynasty_Family_Tree.png', 2);" title="Download Heritage Poster (PNG)" aria-label="Download Heritage Poster (PNG)">
+                            <i class="bi bi-image"></i>
+                        </button>
+                        <button type="button" class="dock-btn" onclick="if(window.family && window.family.exportSVG) window.family.exportSVG('Dynasty_Family_Tree.svg');" title="Download Vector Tree (SVG)" aria-label="Download Vector Tree (SVG)">
+                            <i class="bi bi-filetype-svg"></i>
+                        </button>
+                    </div>
+                    <button type="button" class="dock-btn" onclick="fitTreeScreen()" title="Fit Family to Screen" aria-label="Fit Family to Screen">
                         <i class="bi bi-aspect-ratio"></i>
                     </button>
-                    <button type="button" class="dock-btn" onclick="zoomInTree()" title="Zoom In">
+                    <button type="button" class="dock-btn" onclick="zoomInTree()" title="Zoom In" aria-label="Zoom In">
                         <i class="bi bi-plus-lg"></i>
                     </button>
-                    <button type="button" class="dock-btn" onclick="zoomOutTree()" title="Zoom Out">
+                    <button type="button" class="dock-btn" onclick="zoomOutTree()" title="Zoom Out" aria-label="Zoom Out">
                         <i class="bi bi-dash-lg"></i>
                     </button>
-                    <button type="button" class="dock-btn" onclick="toggleFullscreenTree()" id="btnTreeFullscreen" title="Fullscreen Canvas">
-                        <i class="bi bi-arrows-fullscreen"></i>
-                    </button>
-                    <button type="button" class="dock-btn" onclick="if(window.family && window.family.exportPNG) window.family.exportPNG('Dynasty_Family_Tree.png', 2);" title="Download Heritage Poster (PNG)">
-                        <i class="bi bi-image"></i>
-                    </button>
-                    <button type="button" class="dock-btn" onclick="if(window.family && window.family.exportSVG) window.family.exportSVG('Dynasty_Family_Tree.svg');" title="Download Vector Tree (SVG)">
-                        <i class="bi bi-filetype-svg"></i>
+                    <button type="button" class="dock-btn dock-more-toggle" @click="moreOpen = !moreOpen" :aria-expanded="moreOpen.toString()" title="More tree tools" aria-label="More tree tools">
+                        <i class="bi" :class="moreOpen ? 'bi-x-lg' : 'bi-three-dots'"></i>
                     </button>
                 </div>
             </div>
@@ -826,25 +834,33 @@
         </div>
 
         <!-- Legend (Canvas mode) -->
-        <div class="family-legend" id="familyLegend" role="group" aria-label="How to read the family tree">
-            <div class="legend-row">
-                <span class="legend-heading">People</span>
-                <div class="legend-item"><div class="legend-color legend-male"></div><span>Male</span></div>
-                <div class="legend-item"><div class="legend-color legend-female"></div><span>Female</span></div>
-                <div class="legend-item"><span class="legend-chip legend-chip-member">✓</span><span>Registered member</span></div>
-                <div class="legend-item"><span class="legend-chip legend-chip-memory">🕊️</span><span>In memory</span></div>
-                <div class="legend-item"><span class="legend-chip legend-chip-ghost"></span><span>Parent not added yet</span></div>
-                <div class="legend-item"><span class="legend-chip legend-chip-pending">?</span><span>Awaiting confirmation</span></div>
-            </div>
-            <div class="legend-row">
-                <span class="legend-heading">Relationships</span>
-                <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#f43f5e" stroke-width="2.5" stroke-dasharray="6 4"/></svg><span>Spouse / Partner</span></div>
-                <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 4"/></svg><span class="legend-stamp legend-stamp-divorced">DIVORCED</span></div>
-                <div class="legend-item"><span class="legend-stamp legend-stamp-separated">SEPARATED</span></div>
-                <div class="legend-item"><span class="legend-stamp legend-stamp-widowed">WIDOWED</span></div>
-                <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#ef6b73" stroke-width="2.5"/></svg><span>Parent &amp; child</span></div>
-                <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#ef6b73" stroke-width="2.5" stroke-dasharray="8 5"/></svg><span>Half-sibling (one shared parent)</span></div>
-                <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#ef6b73" stroke-width="2.5" stroke-dasharray="2 5" stroke-linecap="round"/></svg><span>Step / adopted</span></div>
+        <div class="family-legend" id="familyLegend" role="group" aria-label="How to read the family tree" x-data="{ open: false }">
+            <button type="button" class="family-legend-toggle" @click="open = !open" :aria-expanded="open.toString()" aria-controls="familyLegendBody">
+                <span class="family-legend-toggle-label">
+                    <i class="bi bi-info-circle me-2"></i>People &amp; Relationships Legend
+                </span>
+                <i class="bi" :class="open ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+            </button>
+            <div class="family-legend-body" id="familyLegendBody" :class="{ 'is-open': open }">
+                <div class="legend-row">
+                    <span class="legend-heading">People</span>
+                    <div class="legend-item"><div class="legend-color legend-male"></div><span>Male</span></div>
+                    <div class="legend-item"><div class="legend-color legend-female"></div><span>Female</span></div>
+                    <div class="legend-item"><span class="legend-chip legend-chip-member">✓</span><span>Registered member</span></div>
+                    <div class="legend-item"><span class="legend-chip legend-chip-memory">🕊️</span><span>In memory</span></div>
+                    <div class="legend-item"><span class="legend-chip legend-chip-ghost"></span><span>Parent not added yet</span></div>
+                    <div class="legend-item"><span class="legend-chip legend-chip-pending">?</span><span>Awaiting confirmation</span></div>
+                </div>
+                <div class="legend-row">
+                    <span class="legend-heading">Relationships</span>
+                    <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#f43f5e" stroke-width="2.5" stroke-dasharray="6 4"/></svg><span>Spouse / Partner</span></div>
+                    <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 4"/></svg><span class="legend-stamp legend-stamp-divorced">DIVORCED</span></div>
+                    <div class="legend-item"><span class="legend-stamp legend-stamp-separated">SEPARATED</span></div>
+                    <div class="legend-item"><span class="legend-stamp legend-stamp-widowed">WIDOWED</span></div>
+                    <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#ef6b73" stroke-width="2.5"/></svg><span>Parent &amp; child</span></div>
+                    <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#ef6b73" stroke-width="2.5" stroke-dasharray="8 5"/></svg><span>Half-sibling (one shared parent)</span></div>
+                    <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#ef6b73" stroke-width="2.5" stroke-dasharray="2 5" stroke-linecap="round"/></svg><span>Step / adopted</span></div>
+                </div>
             </div>
         </div>
 
@@ -1921,6 +1937,11 @@
 
         // Initialize tree studio discovery banner persistence
         try {
+            if (localStorage.getItem('fp_dismissed_tree_security_banner') === '1') {
+                window.__fpDismissedSecurityBanner = true;
+                const sb = document.getElementById('treeSecurityBanner');
+                if (sb) sb.classList.add('d-none');
+            }
             if (localStorage.getItem('fp_dismissed_tree_studio_banner') === '1') {
                 const b = document.getElementById('treeStudioDiscoveryBanner');
                 if (b) b.classList.add('d-none');
@@ -1968,6 +1989,18 @@
             setTimeout(() => { banner.classList.add('d-none'); }, 300);
         }
         try { localStorage.setItem('fp_dismissed_tree_studio_banner', '1'); } catch(_) {}
+    };
+
+    window.dismissTreeSecurityBanner = function() {
+        const banner = document.getElementById('treeSecurityBanner');
+        window.__fpDismissedSecurityBanner = true;
+        if (banner) {
+            banner.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            banner.style.opacity = '0';
+            banner.style.transform = 'translateY(-10px)';
+            setTimeout(() => { banner.classList.add('d-none'); }, 300);
+        }
+        try { localStorage.setItem('fp_dismissed_tree_security_banner', '1'); } catch(_) {}
     };
 
     window.closeNodeModalAndOpenStudio = function() {

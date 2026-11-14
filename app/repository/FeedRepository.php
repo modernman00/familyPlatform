@@ -560,6 +560,20 @@ class FeedRepository
             \error_log('[FeedRepository::hydrateEngagement twoTruths] ' . $ttEx->getMessage());
         }
 
+        // Batch prefetch any uncached external URLs across the feed page in parallel
+        $batchExternalUrls = [];
+        foreach ($rows as $rItem) {
+            $rMsg = (string)($rItem['postMessage'] ?? ($rItem['content'] ?? ''));
+            if ($rMsg !== '' && (str_contains($rMsg, 'http://') || str_contains($rMsg, 'https://'))) {
+                foreach (\App\services\LinkPreviewService::extractAllPreviewableUrls($rMsg, 6) as $extU) {
+                    $batchExternalUrls[] = \App\services\LinkPreviewService::recoverTruncatedPartyPlatformUrl($extU, $rMsg);
+                }
+            }
+        }
+        if (!empty($batchExternalUrls)) {
+            \App\services\LinkPreviewService::prefetchUncachedUrlsParallel($batchExternalUrls);
+        }
+
         foreach ($rows as &$post) {
             $pNo = (int)($post['post_no'] ?? 0);
             $post['poll'] = $polls[$pNo] ?? null;
@@ -628,21 +642,13 @@ class FeedRepository
                     $hook = \App\dto\PostDto::deriveHookFromMessage($msg ?? ($post['postMessage'] ?? ''));
                     $formattedVideos = [];
                     foreach ($finalVideos as $vUrl) {
-                        $thumb = null;
-                        if (preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|ggpht\.com)/#i', $vUrl)) {
-                            $thumb = preg_replace('/=.*$/i', '=s1600-no', $vUrl);
+                        $desc = \App\classes\VideoParser::formatVideoDescriptor((string)$vUrl, $hook);
+                        if ($desc['type'] === 'direct' && preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|googlevideo\.com)/#i', $desc['originalUrl'])) {
+                            $desc['embedUrl'] = \App\services\LinkPreviewService::getProxiedVideoUrl($desc['originalUrl']);
                         }
-                        $formattedVideos[] = [
-                            'type' => 'direct',
-                            'videoId' => null,
-                            'thumbnailUrl' => $thumb,
-                            'embedUrl' => \App\services\LinkPreviewService::getProxiedVideoUrl($vUrl),
-                            'originalUrl' => $vUrl,
-                            'trimStart' => null,
-                            'trimEnd' => null,
-                            'hookText' => $hook,
-                            'aspectMode' => 'reel',
-                        ];
+                        $desc['hookText'] = $hook;
+                        $desc['aspectMode'] = 'reel';
+                        $formattedVideos[] = $desc;
                     }
                     $post['videos'] = $formattedVideos;
                     $post['video'] = $formattedVideos[0];
@@ -668,51 +674,53 @@ class FeedRepository
                 if (!empty($existingExternalImages)) {
                     $post['images'] = $existingExternalImages;
                 }
-                if (!empty($existingExternalVideos) && empty($post['videos'])) {
+                $allVideoUrls = $existingExternalVideos;
+                if ($hasExternalUrl) {
+                    foreach (\App\classes\VideoParser::extractAllVideosFromText($msg, 6) as $parsedVid) {
+                        if (!in_array($parsedVid['originalUrl'], $allVideoUrls, true) && count($allVideoUrls) < 6) {
+                            $allVideoUrls[] = $parsedVid['originalUrl'];
+                        }
+                    }
+                }
+                if (!empty($allVideoUrls) && empty($post['videos'])) {
                     $hook = \App\dto\PostDto::deriveHookFromMessage($msg ?? ($post['postMessage'] ?? ''));
                     $formattedVideos = [];
-                    foreach ($existingExternalVideos as $vUrl) {
-                        $thumb = null;
-                        if (preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|ggpht\.com)/#i', $vUrl)) {
-                            $thumb = preg_replace('/=.*$/i', '=s1600-no', $vUrl);
+                    foreach ($allVideoUrls as $vUrl) {
+                        $desc = \App\classes\VideoParser::formatVideoDescriptor((string)$vUrl, $hook);
+                        if ($desc['type'] === 'direct' && preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|googlevideo\.com)/#i', $desc['originalUrl'])) {
+                            $desc['embedUrl'] = \App\services\LinkPreviewService::getProxiedVideoUrl($desc['originalUrl']);
                         }
-                        $formattedVideos[] = [
-                            'type' => 'direct',
-                            'videoId' => null,
-                            'thumbnailUrl' => $thumb,
-                            'embedUrl' => \App\services\LinkPreviewService::getProxiedVideoUrl($vUrl),
-                            'originalUrl' => $vUrl,
-                            'trimStart' => null,
-                            'trimEnd' => null,
-                            'hookText' => $hook,
-                            'aspectMode' => 'reel',
-                        ];
+                        $desc['hookText'] = $hook;
+                        $desc['aspectMode'] = 'reel';
+                        $formattedVideos[] = $desc;
                     }
                     $post['videos'] = $formattedVideos;
                     $post['video'] = $formattedVideos[0];
                 }
-            } elseif (!empty($existingExternalVideos) && empty($post['videos'])) {
-                $hook = \App\dto\PostDto::deriveHookFromMessage($msg ?? ($post['postMessage'] ?? ''));
-                $formattedVideos = [];
-                foreach ($existingExternalVideos as $vUrl) {
-                    $thumb = null;
-                    if (preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|ggpht\.com)/#i', $vUrl)) {
-                        $thumb = preg_replace('/=.*$/i', '=s1600-no', $vUrl);
+            } elseif ((!empty($existingExternalVideos) || $hasExternalUrl) && empty($post['videos'])) {
+                $allVideoUrls = $existingExternalVideos;
+                if ($hasExternalUrl) {
+                    foreach (\App\classes\VideoParser::extractAllVideosFromText($msg, 6) as $parsedVid) {
+                        if (!in_array($parsedVid['originalUrl'], $allVideoUrls, true) && count($allVideoUrls) < 6) {
+                            $allVideoUrls[] = $parsedVid['originalUrl'];
+                        }
                     }
-                    $formattedVideos[] = [
-                        'type' => 'direct',
-                        'videoId' => null,
-                        'thumbnailUrl' => $thumb,
-                        'embedUrl' => \App\services\LinkPreviewService::getProxiedVideoUrl($vUrl),
-                        'originalUrl' => $vUrl,
-                        'trimStart' => null,
-                        'trimEnd' => null,
-                        'hookText' => $hook,
-                        'aspectMode' => 'reel',
-                    ];
                 }
-                $post['videos'] = $formattedVideos;
-                $post['video'] = $formattedVideos[0];
+                if (!empty($allVideoUrls)) {
+                    $hook = \App\dto\PostDto::deriveHookFromMessage($msg ?? ($post['postMessage'] ?? ''));
+                    $formattedVideos = [];
+                    foreach ($allVideoUrls as $vUrl) {
+                        $desc = \App\classes\VideoParser::formatVideoDescriptor((string)$vUrl, $hook);
+                        if ($desc['type'] === 'direct' && preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|googlevideo\.com)/#i', $desc['originalUrl'])) {
+                            $desc['embedUrl'] = \App\services\LinkPreviewService::getProxiedVideoUrl($desc['originalUrl']);
+                        }
+                        $desc['hookText'] = $hook;
+                        $desc['aspectMode'] = 'reel';
+                        $formattedVideos[] = $desc;
+                    }
+                    $post['videos'] = $formattedVideos;
+                    $post['video'] = $formattedVideos[0];
+                }
             }
         }
         unset($post);

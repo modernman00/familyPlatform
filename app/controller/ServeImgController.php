@@ -6,6 +6,9 @@ final class ServeImgController {
      * @return never
      */
     public function ProfileDir($imgName) {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
         $filename = $imgName;
 
         if (empty($filename)) {
@@ -31,26 +34,19 @@ final class ServeImgController {
             }
         }
 
-        // On-demand Next-Gen VSE variant generation if .avif or .webp is requested for an older post
+        // Fast-path fallback if .avif or .webp is requested before background VSE finishes:
+        // Serve the existing source image immediately without blocking the HTTP request on synchronous encoding.
         if (!$filePath) {
             $ext = strtolower(pathinfo($safeName, PATHINFO_EXTENSION));
             if ($ext === 'avif' || $ext === 'webp') {
                 $baseNameNoExt = pathinfo($safeName, PATHINFO_FILENAME);
-                $candidateExts = ['jpg', 'jpeg', 'png', 'webp', 'avif'];
+                $candidateExts = ['webp', 'jpg', 'jpeg', 'png', 'avif'];
                 foreach ($searchPaths as $dir) {
                     foreach ($candidateExts as $cExt) {
                         $sourceCandidate = $dir . $baseNameNoExt . '.' . $cExt;
                         if (file_exists($sourceCandidate) && is_file($sourceCandidate)) {
-                            \App\services\VisualSupremacyService::processInPlace($sourceCandidate);
-                            $newVariantPath = $dir . $safeName;
-                            if (file_exists($newVariantPath) && is_file($newVariantPath)) {
-                                $filePath = $newVariantPath;
-                                break 2;
-                            }
-                            // Defensive Fallback (David Structural Safety Gate):
-                            // If VSE generation fails (e.g. missing avifenc on production host),
-                            // NEVER return 404 to an HTML5 <picture> element! Fall back to source.
                             $filePath = $sourceCandidate;
+                            break 2;
                         }
                     }
                 }
@@ -95,6 +91,9 @@ final class ServeImgController {
      * @return never
      */
     public function PostDir($imgName) {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
         $filename = $imgName;
 
         if (empty($filename)) {
@@ -123,26 +122,19 @@ final class ServeImgController {
             }
         }
 
-        // On-demand Next-Gen VSE variant generation if .avif or .webp is requested for an older post
+        // Fast-path fallback if .avif or .webp is requested before background VSE finishes:
+        // Serve the existing source image immediately without blocking concurrent multi-photo loads.
         if (!$filePath) {
             $ext = strtolower(pathinfo($safeName, PATHINFO_EXTENSION));
             if ($ext === 'avif' || $ext === 'webp') {
                 $baseNameNoExt = pathinfo($safeName, PATHINFO_FILENAME);
-                $candidateExts = ['jpg', 'jpeg', 'png', 'webp', 'avif'];
+                $candidateExts = ['webp', 'jpg', 'jpeg', 'png', 'avif'];
                 foreach ($searchPaths as $dir) {
                     foreach ($candidateExts as $cExt) {
                         $sourceCandidate = $dir . $baseNameNoExt . '.' . $cExt;
                         if (file_exists($sourceCandidate) && is_file($sourceCandidate)) {
-                            \App\services\VisualSupremacyService::processInPlace($sourceCandidate);
-                            $newVariantPath = $dir . $safeName;
-                            if (file_exists($newVariantPath) && is_file($newVariantPath)) {
-                                $filePath = $newVariantPath;
-                                break 2;
-                            }
-                            // Defensive Fallback (David Structural Safety Gate):
-                            // If VSE generation fails (e.g. missing avifenc on production host),
-                            // NEVER return 404 to an HTML5 <picture> element! Fall back to source.
                             $filePath = $sourceCandidate;
+                            break 2;
                         }
                     }
                 }
@@ -185,6 +177,9 @@ final class ServeImgController {
      */
     public function StreamReel(string $videoName): never
     {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
         if (empty($videoName)) {
             http_response_code(400);
             header('Content-Type: text/plain');
@@ -310,6 +305,9 @@ final class ServeImgController {
      */
     public function ReelThumb(string $thumbName): never
     {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
         if (empty($thumbName)) {
             http_response_code(400);
             header('Content-Type: text/plain');
@@ -364,6 +362,9 @@ final class ServeImgController {
      */
     public function StreamPostVideo(string $videoName): never
     {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
         if (empty($videoName)) {
             http_response_code(400);
             header('Content-Type: text/plain');

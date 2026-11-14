@@ -630,6 +630,16 @@ class FamilyReelsPlayer {
                 <i class="bi bi-play-fill"></i>
             </div>
 
+            <!-- Manual Previous / Next Reel Navigation -->
+            <div class="reel-nav-stack" role="group" aria-label="Reel navigation">
+                <button type="button" class="reel-nav-btn" id="btnReelPrev" title="Previous reel (↑)" aria-label="Previous reel" ${this.currentIndex <= 0 ? 'disabled' : ''}>
+                    <i class="bi bi-chevron-up"></i>
+                </button>
+                <button type="button" class="reel-nav-btn" id="btnReelNext" title="Next reel (↓)" aria-label="Next reel" ${this.currentIndex >= this.reels.length - 1 ? 'disabled' : ''}>
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+            </div>
+
             <!-- Top Header Controls (Artboard 8: Centered Feed Switcher + Mute Circle) -->
             <div class="reel-top-controls">
                 <a href="/profilePage" class="reel-top-circle-btn d-none d-md-inline-flex" title="Back to Home">
@@ -671,12 +681,12 @@ class FamilyReelsPlayer {
                     <span class="reel-action-count" id="reelCommentCount">${reel.comments_count || 0}</span>
                 </div>
 
-                <!-- Private Whisper Button (Artboard 8: Lock icon + Whisper label) -->
+                <!-- Private FamilyChat Button (Artboard 8: Lock icon + FamilyChat label) -->
                 <div class="d-flex flex-column align-items-center">
-                    <a href="/kin-whispers?recipient_id=${encodeURIComponent(String(reel.user_id || ''))}" class="reel-action-btn" id="btnReelWhisper" title="Send a private Whisper to ${fullName}" style="text-decoration:none;">
+                    <a href="/kin-whispers?recipient_id=${encodeURIComponent(String(reel.user_id || ''))}" class="reel-action-btn" id="btnReelWhisper" title="Send a private FamilyChat message to ${fullName}" style="text-decoration:none;">
                         <i class="bi bi-lock"></i>
                     </a>
-                    <span class="reel-action-count">Whisper</span>
+                    <span class="reel-action-count">FamilyChat</span>
                 </div>
 
                 <!-- Share Link -->
@@ -1047,6 +1057,8 @@ class FamilyReelsPlayer {
         // Attach listeners for top & right action buttons
         document.getElementById('btnToggleFitMode')?.addEventListener('click', () => this.toggleFitMode());
         document.getElementById('btnToggleMute')?.addEventListener('click', () => this.toggleMute());
+        document.getElementById('btnReelPrev')?.addEventListener('click', (e) => { e.stopPropagation(); this.prevReel(); });
+        document.getElementById('btnReelNext')?.addEventListener('click', (e) => { e.stopPropagation(); this.nextReel(); });
         document.getElementById('btnDeleteReel')?.addEventListener('click', () => this.deleteCurrentReel());
         document.getElementById('btnPrevReel')?.addEventListener('click', () => this.prevReel());
         document.getElementById('btnNextReel')?.addEventListener('click', () => this.nextReel());
@@ -1117,24 +1129,50 @@ class FamilyReelsPlayer {
         const reactionWrapper = document.getElementById('reelReactionWrapper');
         const reactionPicker = document.getElementById('reelReactionPicker');
 
+        // Close the picker instantly (no waiting on the network) and cancel any pending auto-dismiss
+        let pickerTimer = null;
+        const closePicker = () => {
+            clearTimeout(pickerTimer);
+            reactionPicker?.classList.remove('open');
+        };
+        const openPicker = (autoCloseMs = 0) => {
+            reactionPicker?.classList.add('open');
+            clearTimeout(pickerTimer);
+            if (autoCloseMs) pickerTimer = setTimeout(closePicker, autoCloseMs);
+        };
+
         if (likeBtn) {
+            let longPressTimer = null;
+            let longPressed = false;
+
             likeBtn.addEventListener('click', (e) => {
+                if (longPressed) { longPressed = false; return; }
+                closePicker();
                 const defaultReact = reel.user_reaction || 'love';
                 this.spawnFloatingEmoji(defaultReact);
                 triggerHeirloomBurst(defaultReact, e);
                 this.toggleLike(defaultReact);
             });
+
+            // Touch: hold to open the picker (auto-dismisses); tap reacts straight away
+            likeBtn.addEventListener('touchstart', () => {
+                longPressed = false;
+                longPressTimer = setTimeout(() => { longPressed = true; openPicker(4000); }, 450);
+            }, { passive: true });
+            ['touchend', 'touchmove', 'touchcancel'].forEach(evt =>
+                likeBtn.addEventListener(evt, () => clearTimeout(longPressTimer), { passive: true }));
         }
         if (reactionWrapper && reactionPicker) {
-            reactionWrapper.addEventListener('mouseenter', () => reactionPicker.classList.add('open'));
-            reactionWrapper.addEventListener('mouseleave', () => reactionPicker.classList.remove('open'));
+            // Mouse only: touch devices emulate mouseenter on tap and never fire mouseleave, leaving the picker stuck open
+            reactionWrapper.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') openPicker(); });
+            reactionWrapper.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') closePicker(); });
             reactionPicker.querySelectorAll('[data-reaction]').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const rType = btn.getAttribute('data-reaction') || 'love';
+                    closePicker();
                     this.spawnFloatingEmoji(rType);
                     triggerHeirloomBurst(rType, e);
-                    reactionPicker.classList.remove('open');
                     this.toggleLike(rType);
                 });
             });
@@ -1372,6 +1410,19 @@ class FamilyReelsPlayer {
         const likeBtn = document.getElementById('btnReelLike');
         const likeCount = document.getElementById('reelLikeCount');
 
+        // Optimistic UI: show the reaction immediately, reconcile with the server response below
+        const prev = { reaction: reel.user_reaction || '', html: likeBtn?.innerHTML, liked: likeBtn?.classList.contains('liked') };
+        if (likeBtn) {
+            if (prev.reaction === reactionType) {
+                likeBtn.classList.remove('liked');
+                likeBtn.innerHTML = '<i class="bi bi-heart"></i>';
+            } else {
+                const optimistic = (reactionType === 'bless' || reactionType === 'proud') ? 'celebrate' : reactionType;
+                likeBtn.classList.add('liked');
+                likeBtn.innerHTML = `<span class="d-inline-flex align-items-center justify-content-center heirloom-active-icon">${getHeirloomGlassSvg(optimistic, 26)}</span>`;
+            }
+        }
+
         try {
             const res = await axios.post('/api/reels/react', {
                 reel_id: reel.id,
@@ -1397,6 +1448,10 @@ class FamilyReelsPlayer {
             }
         } catch (error) {
             console.error('[ReelsPlayer] Reaction error:', error);
+            if (likeBtn) {
+                likeBtn.innerHTML = prev.html;
+                likeBtn.classList.toggle('liked', !!prev.liked);
+            }
         }
     }
 
@@ -2657,7 +2712,8 @@ class FamilyReelsPlayer {
                     const detectedDur = (previewVideo && previewVideo.duration && isFinite(previewVideo.duration))
                         ? previewVideo.duration
                         : null;
-                    if (selectedFile && shouldOptimiseVideoOnDevice(selectedFile, { trimStart: 0, trimEnd: 30, originalDuration: detectedDur })) {
+                    // Fast path: files up to 40 MB skip the slow real-time re-encode unless they need trimming.
+                    if (selectedFile && shouldOptimiseVideoOnDevice(selectedFile, { trimStart: 0, trimEnd: 30, originalDuration: detectedDur, fastPassBytes: 40 * 1024 * 1024 })) {
                         if (statusText) {
                             statusText.innerHTML = '<i class="bi bi-stars text-warning"></i> Optimising video for 4K clarity & fast upload…';
                         }
@@ -2677,6 +2733,36 @@ class FamilyReelsPlayer {
                         if (optResult && optResult.compressed && optResult.file) {
                             formData.set('video_file', optResult.file, optResult.file.name || selectedFile.name || 'reel.mp4');
                         }
+                    }
+                }
+
+                // Direct-to-R2 upload: send the video straight to storage, then post metadata only.
+                // Any failure (R2 unconfigured, bucket CORS) silently falls back to the legacy server upload.
+                const videoToSend = formData.get('video_file');
+                if (hasFile && videoToSend instanceof File && videoToSend.size > 0) {
+                    try {
+                        const extGuess = (videoToSend.name.split('.').pop() || 'mp4').toLowerCase();
+                        const ticketRes = await axios.get('/api/reels/presigned-url', { params: { ext: extGuess } });
+                        const ticket = ticketRes.data?.ticket;
+                        if (ticket?.upload_url && ticket?.public_url) {
+                            if (statusText) statusText.innerHTML = '<i class="bi bi-cloud-arrow-up-fill text-primary"></i> Uploading video…';
+                            await axios.put(ticket.upload_url, videoToSend, {
+                                headers: { 'Content-Type': videoToSend.type || 'video/mp4' },
+                                transformRequest: [(d) => d],
+                                timeout: 300000,
+                                onUploadProgress: (pe) => {
+                                    if (!pe.total) return;
+                                    const pct = Math.min(99, Math.round((pe.loaded * 100) / pe.total));
+                                    if (progressBar) progressBar.style.width = `${pct}%`;
+                                    if (percentText) percentText.textContent = `${pct}%`;
+                                    if (sizeIndicator) sizeIndicator.textContent = `${(pe.loaded / 1048576).toFixed(1)} MB / ${(pe.total / 1048576).toFixed(1)} MB`;
+                                }
+                            });
+                            formData.delete('video_file');
+                            formData.set('video_url', ticket.public_url);
+                        }
+                    } catch (directErr) {
+                        console.warn('[Reels] Direct upload unavailable, using server upload', directErr?.message);
                     }
                 }
 
@@ -2706,13 +2792,9 @@ class FamilyReelsPlayer {
                     if (progressBar) progressBar.style.width = '100%';
                     if (percentText) percentText.textContent = '100%';
                     if (statusText) statusText.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Reel published!';
+                    // Non-blocking toast: redirect immediately instead of waiting for a click.
                     if (typeof Swal !== 'undefined') {
-                        await Swal.fire({
-                            icon: 'success',
-                            title: 'Reel Published! 🎉',
-                            text: 'Your family reel is now live.',
-                            confirmButtonColor: '#a31621'
-                        });
+                        Swal.fire({ icon: 'success', title: 'Reel published! 🎉', toast: true, position: 'top', showConfirmButton: false, timer: 1500 });
                     }
                     window.location.href = `/reels?id=${res.data?.data?.id || ''}`;
                 }

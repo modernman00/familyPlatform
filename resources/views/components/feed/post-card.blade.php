@@ -1270,6 +1270,7 @@
                x-data="{
                  isMuted: true,
                  isPlaying: false,
+                 isBuffering: false,
                  hasCardMetadata: false,
                  progressPercent: 0,
                  isCardLandscape: (vid.type !== 'direct'),
@@ -1369,17 +1370,27 @@
                        muted
                        preload="metadata"
                        @loadedmetadata="detectCardDimensions($el)"
-                       @loadeddata="hasCardMetadata = true; detectCardDimensions($el)"
-                       @playing="hasCardMetadata = true"
+                       @loadeddata="hasCardMetadata = true; isBuffering = false; detectCardDimensions($el)"
+                       @waiting="isBuffering = true"
+                       @canplay="isBuffering = false"
+                       @playing="hasCardMetadata = true; isBuffering = false"
+                       x-on:error="if (!$el.dataset.retried && vid.originalUrl && $el.src !== vid.originalUrl && vid.originalUrl.startsWith('http')) { $el.dataset.retried = '1'; $el.src = vid.originalUrl; $el.load(); }"
                        @click.stop="togglePlay($el)"
                        @dblclick.stop="openVideoModal(post.videos, vIdx, isMuted, post)"
                        @play="isPlaying = true"
-                       @pause="isPlaying = false"
+                       @pause="isPlaying = false; isBuffering = false"
                        @ended="onVideoEnded(vIdx, $el)"
                        @timeupdate="onTimeUpdate($el)"
                        style="object-fit: cover !important; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 2; cursor: pointer; border-radius: 12px; background: #0b0f19;">
                   <track kind="captions" srclang="en" label="English Captions">
                 </video>
+
+                <!-- Buffering Spinner Overlay -->
+                <div x-show="isBuffering" x-cloak class="position-absolute top-50 start-50 translate-middle pointer-events-none" style="z-index: 5;">
+                  <div class="spinner-border text-light" role="status" style="width: 2rem; height: 2rem; border-width: 2.5px; opacity: 0.88;">
+                    <span class="visually-hidden">Loading video…</span>
+                  </div>
+                </div>
 
                 <!-- Bottom Scrubber Bar -->
                 <div class="position-absolute bottom-0 start-0 w-100" style="height: 4px; background: rgba(255, 255, 255, 0.2); z-index: 5;">
@@ -1415,11 +1426,11 @@
     </div>
   </template>
 
-  <!-- Embedded Video (YouTube, Vimeo, Cloud Stream) -->
-  <template x-if="(!post.videos || post.videos.length <= 1) && post.video && (post.video.type === 'youtube' || post.video.type === 'vimeo' || post.video.type === 'cloudflare')">
+  <!-- Embedded Video (YouTube, Vimeo, Cloud Stream, TikTok) -->
+  <template x-if="(!post.videos || post.videos.length <= 1) && post.video && (post.video.type === 'youtube' || post.video.type === 'vimeo' || post.video.type === 'cloudflare' || post.video.type === 'tiktok')">
     <div class="video-embed-container mb-3 px-1"
          x-data="{
-           isShort: (post.video.originalUrl && post.video.originalUrl.includes('/shorts/'))
+           isShort: (post.video.type === 'tiktok' || (post.video.originalUrl && post.video.originalUrl.includes('/shorts/')))
          }">
       <div class="rounded-3 overflow-hidden shadow-sm border border-light-subtle mx-auto position-relative"
            :class="isShort ? 'ratio ratio-9x16' : 'ratio ratio-16x9'"
@@ -1449,6 +1460,7 @@
          x-data="{
            isVideoMuted: true,
            isPlaying: false,
+           isBuffering: false,
            videoOrientation: 'portrait',
            videoRatio: '9 / 16',
            videoMaxHeight: '580px',
@@ -1618,8 +1630,11 @@
                    $el.currentTime = b.start; 
                  }
                "
-               @loadeddata="hasMetadata = true; detectVideoDimensions($el)"
-               @playing="hasMetadata = true"
+               @loadeddata="hasMetadata = true; isBuffering = false; detectVideoDimensions($el)"
+               @waiting="isBuffering = true"
+               @canplay="isBuffering = false"
+               @playing="hasMetadata = true; isBuffering = false"
+               x-on:error="if (!$el.dataset.retried && post.video && post.video.originalUrl && $el.src !== post.video.originalUrl && post.video.originalUrl.startsWith('http')) { $el.dataset.retried = '1'; $el.src = post.video.originalUrl; $el.load(); }"
                @play="
                  isPlaying = true;
                  const b = getTrimBounds($el);
@@ -1627,10 +1642,17 @@
                    $el.currentTime = b.start; 
                  }
                "
-               @pause="isPlaying = false"
+               @pause="isPlaying = false; isBuffering = false"
                @timeupdate="handleTimeUpdate($el)"
                @volumechange="isVideoMuted = $el.muted"
                style="width: 100%; height: 100%; object-fit: cover !important; z-index: 2; border-radius: 16px; cursor: pointer; background: #0b0f19;"></video>
+
+        <!-- Buffering Spinner Overlay -->
+        <div x-show="isBuffering" x-cloak class="position-absolute top-50 start-50 translate-middle pointer-events-none" style="z-index: 5;">
+          <div class="spinner-border text-light" role="status" style="width: 2.25rem; height: 2.25rem; border-width: 2.5px; opacity: 0.88;">
+            <span class="visually-hidden">Loading video…</span>
+          </div>
+        </div>
 
         <!-- Format Badge & 1-Tap Reel/Cinema Switcher (Top-Left) -->
         <div class="position-absolute d-inline-flex align-items-center gap-1.5 shadow-sm"
@@ -2020,13 +2042,13 @@
         </button>
       </template>
 
-      <!-- Whisper about this (Private & supervised thread) -->
+      <!-- FamilyChat about this (Private & supervised thread) -->
       <a :href="'/kin-whispers?post_no=' + encodeURIComponent(post.post_no || '')"
          class="btn btn-sm rounded-pill d-inline-flex align-items-center gap-1.5 px-3 py-1.5 text-decoration-none ms-1"
          style="background: #f6f1ea; color: #5c4e43; border: 1px solid #ece4da; font-size: 0.78rem; font-weight: 600; min-height: 36px; white-space: nowrap; flex-shrink: 0;"
-         title="Whisper about this post privately with family">
+         title="FamilyChat about this post privately with family">
         <i class="bi bi-lock" style="font-size: 0.82rem; color: #a31621;"></i>
-        <span>Whisper about this</span>
+        <span>FamilyChat about this</span>
       </a>
 
 
@@ -2253,12 +2275,19 @@
         <form @submit.prevent="submitComment(post.post_no, $event)" class="comment-composer">
           @include('csrf')
           <div class="comment-composer__field">
-            <!-- Selected GIF preview (inside the field, like Facebook) -->
+            <!-- Selected GIF / Photo / Video preview (inside the field, like Facebook) -->
             <div x-show="commentGifs[post.post_no]" x-cloak class="comment-composer__gif" data-testid="comment-gif-preview">
-              <img :src="commentGifs[post.post_no] || null" alt="Selected GIF"
-                   style="display:block; width:auto; height:auto; max-width:200px; max-height:120px; object-fit:contain;"
-                   x-on:error="clearCommentGif(post.post_no)">
-              <button type="button" @click="clearCommentGif(post.post_no)" aria-label="Remove GIF">
+              <template x-if="isCommentVideoMedia(commentGifs[post.post_no], post.post_no)">
+                <video :src="commentGifs[post.post_no] || null" muted playsinline preload="metadata"
+                       style="display:block; width:auto; height:auto; max-width:200px; max-height:120px; object-fit:contain; border-radius:8px;"
+                       x-on:error="clearCommentGif(post.post_no)"></video>
+              </template>
+              <template x-if="!isCommentVideoMedia(commentGifs[post.post_no], post.post_no)">
+                <img :src="commentGifs[post.post_no] || null" alt="Selected media"
+                     style="display:block; width:auto; height:auto; max-width:200px; max-height:120px; object-fit:contain;"
+                     x-on:error="clearCommentGif(post.post_no)">
+              </template>
+              <button type="button" @click="clearCommentGif(post.post_no)" aria-label="Remove media">
                 <i class="bi bi-x-lg"></i>
               </button>
             </div>
@@ -2278,6 +2307,12 @@
                      @input="handleCommentInput(post.post_no, $event)"
                      @paste="handleCommentPaste(post.post_no, $event)"
                      @keydown="handleCommentKeydown(post.post_no, $event)">
+              <label class="comment-composer__tool mb-0 d-inline-flex align-items-center justify-content-center"
+                     style="cursor: pointer; min-width: 44px; min-height: 44px;"
+                     title="Attach Photo or Video to your comment" aria-label="Attach photo or video">
+                <i class="bi bi-camera"></i>
+                <input type="file" accept="image/*,video/mp4,video/webm,video/quicktime" class="d-none" @change="attachCommentMedia(post.post_no, $event)">
+              </label>
               <button type="button" class="comment-composer__tool"
                       @click.stop="toggleCommentEmoji(post.post_no)"
                       :aria-expanded="commentEmojiOpen[post.post_no] ? 'true' : 'false'"
@@ -2315,8 +2350,16 @@
                 <div class="fw-semibold text-dark" style="font-size: 0.8125rem; line-height: 1.2;" x-text="c.fullName"></div>
                 <div x-show="c.comment" class="mt-1 comment-bubble-text" style="font-size: 0.875rem; color: #050505; word-break: break-word; line-height: 1.35; font-variant-emoji: emoji;" x-html="renderCommentText(c.comment)"></div>
                 <template x-if="c.gif_url">
-                  <img :src="c.gif_url" alt="GIF" loading="lazy" class="mt-1 rounded-3 comment-gif" data-testid="comment-gif"
-                       style="display:block; width:auto; height:auto; max-width:100%; max-height:220px; object-fit:contain;">
+                  <div>
+                    <template x-if="isCommentVideoMedia(c)">
+                      <video :src="c.gif_url" controls playsinline preload="metadata" class="mt-1 rounded-3 comment-gif" data-testid="comment-video"
+                             style="display:block; width:auto; height:auto; max-width:100%; max-height:240px; object-fit:contain; background:#0b0f19;"></video>
+                    </template>
+                    <template x-if="!isCommentVideoMedia(c)">
+                      <img :src="c.gif_url" alt="Attached media" loading="lazy" class="mt-1 rounded-3 comment-gif" data-testid="comment-gif"
+                           style="display:block; width:auto; height:auto; max-width:100%; max-height:220px; object-fit:contain;">
+                    </template>
+                  </div>
                 </template>
               </div>
             </template>

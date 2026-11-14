@@ -8,19 +8,23 @@ describe('Family Platform Recommendation & Walled Sanctuary Spawning', () => {
             loginFully();
         });
 
-        it('displays the Recommend Friends button in navigation and opens modal', () => {
-            cy.get('a[data-bs-target="#recommendFriendsModal"], button[data-bs-target="#recommendFriendsModal"]')
+        it('displays the Invite Others button in navigation and opens the merged modal', () => {
+            cy.get('a[data-bs-target="#inviteFamilyModal"], button[data-bs-target="#inviteFamilyModal"]')
                 .first()
                 .should('exist')
                 .click({ force: true });
 
-            cy.get('#recommendFriendsModal').should('have.class', 'show');
+            cy.get('#inviteFamilyModal').should('have.class', 'show');
+
+            // Friends & In-Laws lives in a tab of the merged Invite Others modal
+            cy.get('#inviteFamilyModal').should('contain.text', 'Invite others');
+            cy.get('#inviteTabFriends').click({ force: true });
+            cy.get('#inviteTabFriendsPane').should('have.class', 'active');
 
             // Verify Walled Sanctuary USP copy is present in the modal
-            cy.get('#recommendFriendsModal').should('contain.text', 'Invite to FamilyPlatform');
-            cy.get('#recommendFriendsModal').should('contain.text', 'The Walled Sanctuary Guarantee');
-            cy.get('#recommendFriendsModal').should('contain.text', 'own independent family network');
-            cy.get('#recommendFriendsModal').should('contain.text', 'strictly private');
+            cy.get('#inviteFamilyModal').should('contain.text', 'The Walled Sanctuary Guarantee');
+            cy.get('#inviteFamilyModal').should('contain.text', 'own independent family network');
+            cy.get('#inviteFamilyModal').should('contain.text', 'strictly private');
 
             // Verify input and WhatsApp buttons exist
             cy.get('#inputShareLink').should('exist');

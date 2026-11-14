@@ -167,8 +167,6 @@
   <meta name="description" content="@yield('meta_description', 'Your private family space on FamilyPlatform: share moments, stay connected and keep your family history together.')">
   @stack('meta')
 
-  <link rel="manifest" href="/manifest.json">
-
   {{-- reCAPTCHA is only used on the auth forms (login/register/forgot/code). Loading
        enterprise.js with ?render= here made it run an assessment on every member page,
        which triggered the "Unrecognized feature: 'private-token'" warning and a 401 on
@@ -226,7 +224,6 @@
   {{-- Rendered before the app scripts so the profile-page chunk (which may execute
        from prefetch cache before the parser gets here) always finds this markup. --}}
   @includeIf('member.modals.editProfile')
-  @includeIf('member.modals.recommendModal')
   @includeIf('member.modals.inviteFamilyModal')
   @includeIf('components.profilePhotoViewer')
   @includeIf('components.omniSearchModal')

@@ -196,4 +196,58 @@ class CronController
             echo json_encode(['status' => 'error', 'message' => $th->getMessage()]);
         }
     }
+
+    /**
+     * Endpoint to dispatch exact-time in-app reminders for Family Commitments.
+     * Enforces CRON_SECRET auth and non-blocking process lock.
+     */
+    public function commitments(): void
+    {
+        header('Content-Type: application/json');
+
+        $providedSecret = (string) ($_REQUEST['secret'] ?? ($_SERVER['HTTP_X_CRON_SECRET'] ?? ''));
+        $expectedSecret = (string) ($_ENV['CRON_SECRET'] ?? (getenv('CRON_SECRET') ?: ''));
+
+        if (empty($expectedSecret) || !hash_equals($expectedSecret, $providedSecret)) {
+            http_response_code(403);
+            echo json_encode([
+                'status'  => 'error',
+                'message' => 'Unauthorized. Invalid or missing secret.',
+            ]);
+            return;
+        }
+
+        $lockPath = sys_get_temp_dir() . '/familyplatform-commitments-cron.lock';
+        $lockHandle = fopen($lockPath, 'c');
+        if ($lockHandle === false || !flock($lockHandle, LOCK_EX | LOCK_NB)) {
+            if (is_resource($lockHandle)) {
+                fclose($lockHandle);
+            }
+            http_response_code(409);
+            echo json_encode([
+                'status'  => 'error',
+                'message' => 'Commitments reminder cron is currently running on another process.',
+            ]);
+            return;
+        }
+
+        try {
+            $service = new \App\services\FamilyCommitmentService();
+            $stats = $service->dispatchDueReminders();
+            http_response_code(200);
+            echo json_encode([
+                'status' => 'success',
+                'data'   => $stats,
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode([
+                'status'  => 'error',
+                'message' => 'Failed to dispatch commitment reminders: ' . $e->getMessage(),
+            ]);
+        } finally {
+            flock($lockHandle, LOCK_UN);
+            fclose($lockHandle);
+        }
+    }
 }

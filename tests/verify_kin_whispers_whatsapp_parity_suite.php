@@ -221,7 +221,7 @@ try {
 
     // --- TEST 10: My Story Removal Invariant ---
     echo "\n[TEST 10] Verifying 'My Story' Bar Removal from Kin Whispers View...\n";
-    $viewContent = file_get_contents(dirname(__DIR__) . '/resources/views/kin_whispers/index.blade.php');
+    $viewContent = (string)file_get_contents(dirname(__DIR__) . '/resources/views/kin_whispers/index.blade.php');
     assert(strpos($viewContent, 'kw-stories-bar') === false, 'kw-stories-bar CSS/HTML must be removed');
     assert(strpos($viewContent, 'My Story') === false, "'My Story' must not appear in kin whispers view");
     echo "  ✅ 'My Story' strip cleanly removed from Kin Whispers view.\n";
@@ -279,8 +279,40 @@ try {
     assert($threwValidation === true, 'Invalid privacy value must be rejected with ValidationException');
     echo "  🛡️  [INPUT VALIDATION] Illegal privacy value rejected.\n";
 
+    // --- TEST 13: Distinct Whisper Alert Experience (Chime, Toast Variant & SW Routing) ---
+    echo "\n[TEST 13] Verifying Distinct Whisper Alerts (Web Audio Chime, Foreground Toast & SW Routing)...\n";
+    assert(str_contains($viewContent, 'playWhisperChime()'), 'Kin Whispers view must implement playWhisperChime()');
+    assert(str_contains($viewContent, 'shouldChimeForThread('), 'Kin Whispers view must implement shouldChimeForThread() mute/active guard');
+
+    $pwaNotifJs = (string)file_get_contents(dirname(__DIR__) . '/public/js/pwa-notifications.js');
+    assert(str_contains($pwaNotifJs, 'isWhisperNotification('), 'pwa-notifications.js must detect whisper_ notifications');
+    assert(str_contains($pwaNotifJs, 'isViewingWhisperThread('), 'pwa-notifications.js must suppress toast when viewing active thread');
+    assert(str_contains($pwaNotifJs, "setAttribute('data-toast-variant', isWhisper ? 'whisper' : 'standard')"), 'pwa-notifications.js must tag whisper toast variant');
+
+    $swJs = (string)file_get_contents(dirname(__DIR__) . '/public/sw.js');
+    assert(str_contains($swJs, '[60, 40, 60]'), 'Service Worker must use chat vibration pattern [60, 40, 60] for whispers');
+    assert(str_contains($swJs, "client.url.includes('/kin-whispers')"), 'Service Worker notificationclick must prefer open /kin-whispers window');
+    echo "  ✅ Distinct Whisper chime, crimson/gold foreground toast, active-thread suppression, and SW window routing verified.\n";
+
+    // --- TEST 14: Separate-but-Linked Kin Whispers PWA Install Popup & Pop-Out Controls ---
+    echo "\n[TEST 14] Verifying Separate-but-Linked PWA Install Popup & Header Controls...\n";
+    assert(str_contains($viewContent, 'id="kwInstallPopup"'), 'Dismissible #kwInstallPopup must exist in Kin Whispers view');
+    assert(str_contains($viewContent, '@click="openInstallPopup()"'), 'Header button must wire to openInstallPopup()');
+    assert(str_contains($viewContent, '@click="installWhispersApp()"'), 'Install popup button must wire to installWhispersApp()');
+    assert(str_contains($viewContent, '@click="popOutWhisperWindow()"'), 'Header and popup buttons must wire to popOutWhisperWindow()');
+    assert(str_contains($viewContent, 'Add to Home Screen'), 'iOS Safari Share -> Add to Home Screen guide must be present');
+
+    $manifestWhispers = json_decode((string)file_get_contents(dirname(__DIR__) . '/public/manifest-whispers.json'), true);
+    assert(is_array($manifestWhispers) && ($manifestWhispers['id'] ?? '') === '/kin-whispers', 'manifest-whispers.json must have id /kin-whispers');
+    assert(($manifestWhispers['short_name'] ?? '') === 'FamilyChat', 'manifest-whispers.json short_name must be FamilyChat');
+    assert(($manifestWhispers['display'] ?? '') === 'standalone', 'manifest-whispers.json must be standalone');
+
+    $profileBase = (string)file_get_contents(dirname(__DIR__) . '/resources/views/layouts/profileBase.blade.php');
+    assert(substr_count($profileBase, 'rel="manifest"') === 0, 'profileBase.blade.php must delegate manifest link solely to partials.pwa-head without duplicate');
+    echo "  ✅ Linked PWA install popup, header controls, iOS Safari guide, and manifest-whispers.json verified.\n";
+
     echo "\n=================================================================\n";
-    echo "🏆 ALL 12 WHATSAPP PARITY TESTS PASSED CLEANLY!\n";
+    echo "🏆 ALL 14 WHATSAPP PARITY & LINKED PWA TESTS PASSED CLEANLY!\n";
     echo "=================================================================\n";
 
 } finally {

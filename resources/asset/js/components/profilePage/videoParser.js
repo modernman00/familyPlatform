@@ -11,10 +11,47 @@
 
 'use strict';
 
+export function normaliseDropboxStreamUrl(url) {
+  if (!url || typeof url !== 'string') return url;
+  const trimmed = url.trim();
+  const dropboxRegex = /^https?:\/\/(?:www\.|dl\.)?dropbox(?:usercontent)?\.com\/(?:s|scl\/fi)\/[^\s"'<>?#]+\.(?:mp4|webm|mov|ogg|m4v)(?:\?[^\s"'<>#]*)?$/i;
+  if (!dropboxRegex.test(trimmed)) return trimmed;
+  try {
+    const dbUrl = new URL(trimmed);
+    dbUrl.searchParams.delete('dl');
+    dbUrl.searchParams.set('raw', '1');
+    return dbUrl.toString();
+  } catch (_) {
+    return trimmed;
+  }
+}
+
 export function parseVideoUrl(url) {
   if (!url || typeof url !== 'string') return null;
 
   const trimmed = url.trim();
+  if (!trimmed) return null;
+
+  // 0. Already-proxied sovereign stream URL (/member/stream-video?url=...)
+  if (trimmed.startsWith('/member/stream-video?url=')) {
+    const rawParam = trimmed.slice('/member/stream-video?url='.length).split('&')[0];
+    let decoded = rawParam;
+    try {
+      decoded = decodeURIComponent(rawParam);
+    } catch (_) {}
+    const poster = decoded.includes('googleusercontent.com')
+      ? decoded.replace(/=.*$/i, '=s1600-no')
+      : null;
+    return {
+      type: 'direct',
+      videoId: null,
+      thumbnailUrl: poster,
+      embedUrl: trimmed,
+      originalUrl: decoded || trimmed,
+      trimStart: null,
+      trimEnd: null,
+    };
+  }
 
   // 1. YouTube Matcher
   // Matches: youtube.com/watch?v=ID, youtube.com/watch?vID, youtu.be/ID, youtube.com/shorts/ID, youtube.com/embed/ID, youtube.com/live/ID
@@ -24,6 +61,7 @@ export function parseVideoUrl(url) {
     return {
       type: 'youtube',
       videoId: ytMatch[1],
+      thumbnailUrl: `https://i.ytimg.com/vi/${ytMatch[1]}/hqdefault.jpg`,
       embedUrl: `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?rel=0&modestbranding=1&autoplay=0`,
       originalUrl: trimmed
     };
@@ -38,6 +76,7 @@ export function parseVideoUrl(url) {
     return {
       type: 'vimeo',
       videoId: vimeoId,
+      thumbnailUrl: null,
       embedUrl: `https://player.vimeo.com/video/${vimeoId}?dnt=1&title=0&byline=0&portrait=0`,
       originalUrl: trimmed
     };
@@ -51,48 +90,52 @@ export function parseVideoUrl(url) {
     return {
       type: 'cloudflare',
       videoId: cfMatch[1],
+      thumbnailUrl: `https://videodelivery.net/${cfMatch[1]}/thumbnails/thumbnail.jpg`,
       embedUrl: `https://iframe.videodelivery.net/${cfMatch[1]}`,
       originalUrl: trimmed
     };
   }
 
-  // 3b. TikTok (tiktok.com/@user/video/ID) — embeddable player
-  const tiktokMatch = trimmed.match(/^https?:\/\/(?:www\.)?tiktok\.com\/@[\w.-]+\/video\/(\d{8,25})/i);
+  // 3b. TikTok (tiktok.com/@user/video/ID or tiktok.com/embed/v2/ID) — embeddable player
+  const tiktokMatch = trimmed.match(/^https?:\/\/(?:www\.)?tiktok\.com\/(?:@[\w.-]+\/video\/|embed\/v2\/)(\d{8,25})/i);
   if (tiktokMatch) {
     return {
       type: 'tiktok',
       videoId: tiktokMatch[1],
+      thumbnailUrl: null,
       embedUrl: `https://www.tiktok.com/embed/v2/${tiktokMatch[1]}`,
       originalUrl: trimmed
     };
   }
 
   // 3c. Dropbox shared video files — force raw streaming (dl=0 returns an HTML page, raw=1 returns the file)
-  const dropboxRegex = /^https?:\/\/(?:www\.)?dropbox\.com\/(?:s|scl\/fi)\/[^\s"'<>?#]+\.(?:mp4|webm|mov|ogg)(?:\?[^\s"'<>#]*)?$/i;
+  const dropboxRegex = /^https?:\/\/(?:www\.|dl\.)?dropbox(?:usercontent)?\.com\/(?:s|scl\/fi)\/[^\s"'<>?#]+\.(?:mp4|webm|mov|ogg|m4v)(?:\?[^\s"'<>#]*)?$/i;
   if (dropboxRegex.test(trimmed)) {
-    const dbUrl = new URL(trimmed);
-    dbUrl.searchParams.delete('dl');
-    dbUrl.searchParams.set('raw', '1');
     return {
       type: 'direct',
       videoId: null,
-      embedUrl: dbUrl.toString(),
+      thumbnailUrl: null,
+      embedUrl: normaliseDropboxStreamUrl(trimmed),
       originalUrl: trimmed,
       trimStart: null,
       trimEnd: null,
     };
   }
 
-  // 4. Direct HTML5 Video (.mp4, .webm, .ogg, .mov) — supports absolute http(s) and sovereign /resources/videos/ paths with optional #t=start,end
-  const directVideoRegex = /^(?:https?:\/\/[^\s"'<>]+|\/resources\/(?:videos|images)\/[^\s"'<>]+)\.(mp4|webm|ogg|mov)(?:\?[^\s"'<>#]*)?(?:#t=([0-9.]+)(?:,([0-9.]+))?)?$/i;
-  const directMatch = trimmed.match(directVideoRegex);
-  if (directMatch) {
-    const trimStart = directMatch[2] !== undefined ? parseFloat(directMatch[2]) : null;
-    const trimEnd = directMatch[3] !== undefined ? parseFloat(directMatch[3]) : null;
+  // 4. Direct HTML5 Video (.mp4, .webm, .ogg, .mov, .m4v) — supports absolute http(s), sovereign /resources/videos/ or /public/uploads/, and bare filenames
+  const directVideoRegex = /^(?:https?:\/\/[^\s"'<>]+|\/(?:resources\/(?:videos|images)|public\/uploads)\/[^\s"'<>]+|[a-zA-Z0-9_-]+\.(?:mp4|webm|ogg|mov|m4v))(?:\.(mp4|webm|ogg|mov|m4v))?(?:\?[^\s"'<>#]*)?(?:#t=([0-9.]+)(?:,([0-9.]+))?)?$/i;
+  if (/\.(mp4|webm|ogg|mov|m4v)(?:\?[^\s"'<>#]*)?(?:#t=[0-9.]+(?:,[0-9.]+)?)?$/i.test(trimmed)) {
+    const directMatch = trimmed.match(directVideoRegex);
+    const trimStart = directMatch && directMatch[2] !== undefined ? parseFloat(directMatch[2]) : null;
+    const trimEnd = directMatch && directMatch[3] !== undefined ? parseFloat(directMatch[3]) : null;
+    const resolvedEmbed = (trimmed.startsWith('/') || trimmed.startsWith('http'))
+      ? trimmed
+      : `/resources/videos/posts/${trimmed}`;
     return {
       type: 'direct',
       videoId: null,
-      embedUrl: trimmed,
+      thumbnailUrl: null,
+      embedUrl: resolvedEmbed,
       originalUrl: trimmed,
       trimStart: Number.isFinite(trimStart) ? trimStart : null,
       trimEnd: Number.isFinite(trimEnd) ? trimEnd : null,
@@ -110,13 +153,54 @@ export function parseVideoUrl(url) {
       type: 'direct',
       videoId: null,
       thumbnailUrl: poster,
-      embedUrl: trimmed,
+      embedUrl: `/member/stream-video?url=${encodeURIComponent(trimmed)}`,
       originalUrl: trimmed,
       trimStart: null,
       trimEnd: null,
     };
   }
 
+  return null;
+}
+
+/**
+ * Normalize a raw video URL or existing video descriptor object into a canonical video descriptor.
+ */
+export function formatVideoDescriptor(videoOrUrl) {
+  if (!videoOrUrl) return null;
+  if (typeof videoOrUrl === 'string') {
+    const parsed = parseVideoUrl(videoOrUrl);
+    if (parsed) return parsed;
+    const resolved = (videoOrUrl.startsWith('/') || videoOrUrl.startsWith('http'))
+      ? videoOrUrl
+      : `/resources/videos/posts/${videoOrUrl}`;
+    return {
+      type: 'direct',
+      videoId: null,
+      thumbnailUrl: null,
+      embedUrl: resolved,
+      originalUrl: videoOrUrl,
+      trimStart: null,
+      trimEnd: null,
+    };
+  }
+  if (typeof videoOrUrl === 'object') {
+    const candidateUrl = videoOrUrl.originalUrl || videoOrUrl.embedUrl || '';
+    const parsed = parseVideoUrl(candidateUrl);
+    if (parsed) {
+      return {
+        ...parsed,
+        embedUrl: (videoOrUrl.embedUrl && videoOrUrl.embedUrl.startsWith('/member/stream-video'))
+          ? videoOrUrl.embedUrl
+          : parsed.embedUrl,
+        thumbnailUrl: videoOrUrl.thumbnailUrl || parsed.thumbnailUrl || null,
+        trimStart: videoOrUrl.trimStart ?? parsed.trimStart ?? null,
+        trimEnd: videoOrUrl.trimEnd ?? parsed.trimEnd ?? null,
+        hook: videoOrUrl.hook || null,
+      };
+    }
+    return videoOrUrl;
+  }
   return null;
 }
 
@@ -131,7 +215,7 @@ export function extractVideoFromText(text) {
 /**
  * Extract up to max video URLs from post message text
  */
-export function extractVideosFromText(text, max = 3) {
+export function extractVideosFromText(text, max = 6) {
   if (!text || typeof text !== 'string') return [];
 
   const urlRegex = /((?:https?:\/\/|\/resources\/(?:videos|images)\/)[^\s"'<>]+)/g;

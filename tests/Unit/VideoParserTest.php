@@ -79,4 +79,40 @@ final class VideoParserTest extends TestCase
         $result = VideoParser::parseVideoUrl('https://example.com/article/123');
         $this->assertNull($result);
     }
+
+    public function test_parses_tiktok_video_url(): void
+    {
+        $url = 'https://www.tiktok.com/@familycreator/video/7345678901234567890';
+        $result = VideoParser::parseVideoUrl($url);
+
+        $this->assertNotNull($result);
+        $this->assertSame('tiktok', $result['type']);
+        $this->assertSame('7345678901234567890', $result['videoId']);
+        $this->assertSame('https://www.tiktok.com/embed/v2/7345678901234567890', $result['embedUrl']);
+    }
+
+    public function test_normalises_dropbox_shared_video_link_to_raw_stream(): void
+    {
+        $url = 'https://www.dropbox.com/scl/fi/abc123xyz/family_reunion.mp4?rlkey=secret123&dl=0';
+        $result = VideoParser::parseVideoUrl($url);
+
+        $this->assertNotNull($result);
+        $this->assertSame('direct', $result['type']);
+        $this->assertStringContainsString('raw=1', $result['embedUrl']);
+        $this->assertStringNotContainsString('dl=0', $result['embedUrl']);
+    }
+
+    public function test_extracts_multiple_videos_from_post_text_with_accurate_descriptors(): void
+    {
+        $text = "Watch these 3 clips!\nhttps://youtu.be/dQw4w9WgXcQ\nhttps://vimeo.com/76979871\nhttps://www.dropbox.com/s/xyz987/clip3.mp4?dl=0";
+        $videos = VideoParser::extractAllVideosFromText($text, 6);
+
+        $this->assertCount(3, $videos);
+        $this->assertSame('youtube', $videos[0]['type']);
+        $this->assertSame('dQw4w9WgXcQ', $videos[0]['videoId']);
+        $this->assertSame('vimeo', $videos[1]['type']);
+        $this->assertSame('76979871', $videos[1]['videoId']);
+        $this->assertSame('direct', $videos[2]['type']);
+        $this->assertStringContainsString('raw=1', $videos[2]['embedUrl']);
+    }
 }

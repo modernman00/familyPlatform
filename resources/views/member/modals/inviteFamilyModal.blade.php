@@ -236,11 +236,12 @@
                     </div>
                     <div>
                         <h5 class="ifm-title" id="inviteFamilyModalLabel">
-                            Invite family
+                            Invite others
                         </h5>
                         <p class="ifm-subtitle" id="modalFamilyContextSub">
                             Personalise a private link for your <span id="modalFamilyLineageTypeLabel" class="fw-semibold text-dark">Marital / Household family</span> (<span class="font-monospace fw-bold" id="modalFamilyCodeBadge">#{{ $data['famCode'] ?? '...' }}</span>)
                         </p>
+                        <p class="ifm-subtitle d-none" id="modalFriendsContextSub">Recommend friends &amp; in-laws to start their own private family network</p>
                         <span class="d-none" id="modalFamilyContextHeading">100% Private Family Network</span>
                     </div>
                 </div>
@@ -249,7 +250,25 @@
                 </button>
             </div>
 
-            <div class="modal-body p-0" style="overflow-y: auto;">
+            <!-- Audience tabs: relatives join YOUR family; friends & in-laws start their OWN network -->
+            <div class="px-4 pt-3 pb-2 flex-shrink-0" style="background:#faf6f0;border-bottom:1px solid #efe8de;">
+                <ul class="nav nav-pills nav-fill gap-2 p-1 rounded-pill bg-white border" id="inviteModalTabs" role="tablist" style="border-color:#e6dfd5 !important;">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active rounded-pill fw-bold py-2 small d-flex align-items-center justify-content-center gap-1" id="inviteTabFamily" data-bs-toggle="pill" data-bs-target="#inviteTabFamilyPane" type="button" role="tab" aria-controls="inviteTabFamilyPane" aria-selected="true" style="min-height:44px;">
+                            <i class="bi bi-people"></i> <span>Our Family</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill fw-bold py-2 small d-flex align-items-center justify-content-center gap-1 text-secondary" id="inviteTabFriends" data-bs-toggle="pill" data-bs-target="#inviteTabFriendsPane" type="button" role="tab" aria-controls="inviteTabFriendsPane" aria-selected="false" style="min-height:44px;">
+                            <i class="bi bi-diagram-3"></i> <span>Friends &amp; In-Laws</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="modal-body p-0 tab-content" style="overflow-y: auto;">
+                <!-- TAB 1: Our Family (personalised kinship inviter) -->
+                <div class="tab-pane fade show active" id="inviteTabFamilyPane" role="tabpanel" aria-labelledby="inviteTabFamily" tabindex="0">
                 <div class="ifm-body-grid">
                     <!-- Left Column: Step 1 (Which family) + Step 2 (Who are you inviting?) -->
                     <div>
@@ -403,6 +422,101 @@
                 <div id="inviteFeedbackAlert" class="alert alert-success d-none py-2 px-3 mx-4 mb-3 text-center small rounded-3 border-0 shadow-sm" role="alert">
                     <i class="bi bi-check-circle-fill me-1"></i> <span id="inviteFeedbackText">Link copied to clipboard!</span>
                 </div>
+                </div>
+
+                <!-- TAB 2: Friends & In-Laws (starts their own independent network) -->
+                <div class="tab-pane fade" id="inviteTabFriendsPane" role="tabpanel" aria-labelledby="inviteTabFriends" tabindex="0">
+                    <div class="p-4">
+          
+          <!-- USP Sanctuary Promise Box -->
+          <div class="modal-sub-card-green p-3 mb-3">
+            <div class="d-flex align-items-start gap-2">
+              <span style="font-size: 1.25rem;">🛡️</span>
+              <div>
+                <strong class="d-block mb-1" style="font-size: 0.95rem;">The Walled Sanctuary Guarantee</strong>
+                <p class="mb-0 text-muted" style="font-size: 0.825rem; line-height: 1.4;">
+                  Your friends &amp; in-laws will create their <strong>own independent family network</strong> with their own private family code. Your family tree and posts remain 100% strictly private.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1-Tap WhatsApp Share Button -->
+          <div class="mb-3">
+            <a href="#" target="_blank" id="btnShareWhatsApp" class="btn w-100 d-flex align-items-center justify-content-center gap-2 py-2 fw-bold" style="background: #25D366; color: #ffffff; border-radius: 12px; min-height: 44px; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25); text-decoration: none;">
+              <i class="bi bi-whatsapp fs-5"></i> Share via WhatsApp
+            </a>
+          </div>
+
+          <div class="d-flex align-items-center my-3">
+            <hr class="flex-grow-1 my-0" style="border-color: #e2e8f0;">
+            <span class="px-3 text-muted fw-semibold" style="font-size: 0.8rem;">OR COPY LINK</span>
+            <hr class="flex-grow-1 my-0" style="border-color: #e2e8f0;">
+          </div>
+
+          <!-- Tactile Link Icon & Hidden URL Standard -->
+          <div class="mb-3">
+            <label class="form-label text-muted fw-semibold small mb-1.5 d-flex align-items-center justify-content-between">
+              <span>Private Sanctuary Link</span>
+              <span class="badge bg-light text-muted border font-monospace" style="font-size: 0.72rem;">URL Hidden • 1-Click Entry</span>
+            </label>
+            
+            <div class="sanctuary-url-pill d-flex align-items-center justify-content-between p-2 rounded-3"
+                 id="sanctuarySharePillContainer"
+                 style="background: #fdf2f2; border: 1.5px solid rgba(163, 22, 33, 0.22); box-shadow: 0 2px 8px rgba(163, 22, 33, 0.06); transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+                
+                <!-- Clickable Action: Hides raw URL behind Link Icon + Title -->
+                <a href="#" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   id="linkSanctuaryDirect"
+                   class="d-flex align-items-center gap-2.5 text-decoration-none text-dark flex-grow-1 min-w-0 px-2 py-1"
+                   style="min-height: 44px; touch-action: manipulation; outline: none;"
+                   title="Enter Private Family Sanctuary">
+                    
+                    <div class="sanctuary-link-icon-badge flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle"
+                         style="width: 38px; height: 38px; background: rgba(163, 22, 33, 0.12); color: #8a1019; font-size: 1.25rem;">
+                        <span aria-hidden="true">🔗</span>
+                    </div>
+
+                    <div class="d-flex flex-column min-w-0 me-2">
+                        <span class="fw-bold text-dark text-truncate" style="font-size: 0.92rem; letter-spacing: -0.01em; line-height: 1.25;" id="linkSanctuaryTitle">
+                            Enter Private Family Sanctuary
+                        </span>
+                        <span class="text-muted small text-truncate" style="font-size: 0.76rem; font-weight: 500;">
+                            myfamilyplatform.com • 100% Private
+                        </span>
+                    </div>
+
+                    <i class="bi bi-arrow-up-right-circle text-primary ms-auto me-1 opacity-75" style="font-size: 1.05rem;" aria-hidden="true"></i>
+                </a>
+
+                <!-- 1-Tap Copy Button -->
+                <button type="button" 
+                        id="btnCopyShareLink"
+                        class="btn btn-sm btn-outline-primary d-inline-flex align-items-center justify-content-center gap-1.5 px-3 rounded-pill fw-semibold shadow-xs flex-shrink-0 ms-1"
+                        style="min-height: 44px; min-width: 44px; font-size: 0.82rem; white-space: nowrap; border-color: rgba(163, 22, 33, 0.35); color: #8a1019;"
+                        aria-label="Copy private sanctuary link">
+                    <i class="bi bi-clipboard" id="iconCopyShareLink"></i>
+                    <span id="textCopyShareLink">Copy</span>
+                </button>
+            </div>
+
+            <!-- Hidden input preserved for script fallback & clipboard -->
+            <input type="hidden" id="inputShareLink" value="">
+            
+            <div id="copySuccessFeedback" class="text-success small fw-semibold mt-1.5 d-none">
+              <i class="bi bi-check-circle-fill me-1"></i> Private link copied to clipboard!
+            </div>
+          </div>
+
+          <!-- Stats / Impact Ribbon -->
+          <div class="modal-sub-card d-flex align-items-center justify-content-between p-2 px-3 mt-3">
+            <span class="text-muted small">Family Hubs Spawned:</span>
+            <span class="badge bg-primary rounded-pill px-3 py-1 fw-bold" id="badgeSpawnedCount">0</span>
+          </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Modal Footer -->
@@ -418,6 +532,28 @@
         </div>
     </div>
 </div>
+
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
+(function() {
+    // Tab-aware header copy + optional deep-link: data-invite-tab="friends" on any trigger opens the Friends & In-Laws tab
+    document.addEventListener('DOMContentLoaded', function() {
+        var modalEl = document.getElementById('inviteFamilyModal');
+        if (!modalEl || !window.bootstrap) return;
+        var familySub = document.getElementById('modalFamilyContextSub');
+        var friendsSub = document.getElementById('modalFriendsContextSub');
+        modalEl.addEventListener('show.bs.modal', function(e) {
+            var want = e.relatedTarget && e.relatedTarget.getAttribute ? e.relatedTarget.getAttribute('data-invite-tab') : null;
+            var btn = document.getElementById(want === 'friends' ? 'inviteTabFriends' : 'inviteTabFamily');
+            if (btn) window.bootstrap.Tab.getOrCreateInstance(btn).show();
+        });
+        modalEl.addEventListener('shown.bs.tab', function(e) {
+            var isFriends = e.target && e.target.id === 'inviteTabFriends';
+            if (familySub) familySub.classList.toggle('d-none', isFriends);
+            if (friendsSub) friendsSub.classList.toggle('d-none', !isFriends);
+        });
+    });
+})();
+</script>
 
 <script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {

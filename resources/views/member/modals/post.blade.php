@@ -1657,10 +1657,15 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
                 currentVal = currentVal ? `${currentVal}\n${link}` : link;
             }
 
+            // Pre-warm server link preview cache in parallel while the user finishes composing
+            if (link.startsWith('http://') || link.startsWith('https://')) {
+                fetch('/api/link-preview?url=' + encodeURIComponent(link), { credentials: 'same-origin' }).catch(() => {});
+            }
+
             // If a video link is entered, also render attached video embed preview if available
             if (typeof window.parseVideoUrl === 'function' && typeof window.renderAttachedVideoPreview === 'function') {
                 const parsedVid = window.parseVideoUrl(link);
-                if (parsedVid && (parsedVid.type === 'youtube' || parsedVid.type === 'vimeo' || parsedVid.type === 'cloudflare')) {
+                if (parsedVid && (parsedVid.type === 'youtube' || parsedVid.type === 'vimeo' || parsedVid.type === 'cloudflare' || parsedVid.type === 'tiktok')) {
                     try {
                         window.renderAttachedVideoPreview(link, parsedVid.trimStart ?? null, parsedVid.trimEnd ?? null);
                     } catch (_) {}

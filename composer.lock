@@ -1555,16 +1555,16 @@
         },
         {
             "name": "modernman00/shared-lib",
-            "version": "v2.12.9",
+            "version": "v2.12.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/modernman00/shared-lib.git",
-                "reference": "07be7c34a317f9e45e70ab0ff14794ecac075f80"
+                "reference": "2b7e487986867167a5ceb328f00130480d620ca9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/07be7c34a317f9e45e70ab0ff14794ecac075f80",
-                "reference": "07be7c34a317f9e45e70ab0ff14794ecac075f80",
+                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/2b7e487986867167a5ceb328f00130480d620ca9",
+                "reference": "2b7e487986867167a5ceb328f00130480d620ca9",
                 "shasum": ""
             },
             "require": {
@@ -1626,10 +1626,10 @@
             ],
             "description": "Shared library for common functions and classes across projects",
             "support": {
-                "source": "https://github.com/modernman00/shared-lib/tree/v2.12.9",
+                "source": "https://github.com/modernman00/shared-lib/tree/v2.12.10",
                 "issues": "https://github.com/modernman00/shared-lib/issues"
             },
-            "time": "2026-11-13T11:05:41+00:00"
+            "time": "2026-11-14T03:22:10+00:00"
         },
         {
             "name": "monolog/monolog",

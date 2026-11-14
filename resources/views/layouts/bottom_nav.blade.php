@@ -125,13 +125,14 @@ body.dark-theme .pwa-tab-center-action .pwa-center-btn-bubble,
         <span class="pwa-tab-label">{{ __('nav.add_photo', 'Add Photo') }}</span>
     </button>
 
-    <!-- Tree Studio / Reels -->
-    <a href="/familyStudio" class="pwa-tab-item" data-tab="reels" title="{{ __('nav.studio', 'Tree Studio') }} - Watch captivating family reels and celebrations">
-        <div class="pwa-tab-icon-wrap">
-            <i class="bi bi-camera-reels pwa-tab-icon-outline"></i>
-            <i class="bi bi-camera-reels-fill pwa-tab-icon-filled"></i>
+    <!-- FamilyChat (private kin messages) -->
+    <a href="/kin-whispers" class="pwa-tab-item position-relative" id="pwaWhisperTab" data-tab="whisper" title="{{ __('nav.whisper', 'FamilyChat') }} - Private kin notes and voice dedications">
+        <div class="pwa-tab-icon-wrap position-relative">
+            <i class="bi bi-chat-dots pwa-tab-icon-outline"></i>
+            <i class="bi bi-chat-dots-fill pwa-tab-icon-filled"></i>
+            <span class="pwa-tab-badge whisper-portal-unread-badge d-none"><span class="whisper-portal-unread-count"></span></span>
         </div>
-        <span class="pwa-tab-label">{{ __('nav.studio', 'Tree Studio') }}</span>
+        <span class="pwa-tab-label">{{ __('nav.whisper', 'FamilyChat') }}</span>
     </a>
 
     <!-- Notifications & Alerts -->
@@ -156,7 +157,7 @@ body.dark-theme .pwa-tab-center-action .pwa-center-btn-bubble,
             var dt = t.dataset.tab;
             if (dt === 'tree' && p.indexOf('/organogram') !== -1) {
                 t.classList.add('active');
-            } else if (dt === 'reels' && (p.indexOf('/reels') !== -1 || p.indexOf('/familystudio') !== -1)) {
+            } else if (dt === 'whisper' && p.indexOf('/kin-whispers') !== -1) {
                 t.classList.add('active');
             } else if (dt === 'members' && p.indexOf('/allmembers') !== -1) {
                 t.classList.add('active');

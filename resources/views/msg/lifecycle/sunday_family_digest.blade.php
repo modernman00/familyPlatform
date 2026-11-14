@@ -20,6 +20,7 @@
     $trivia = $data['trivia'] ?? null;
     $milestones = $data['milestones'] ?? [];
     $quest = $data['quest'] ?? null;
+    $recentPosts = $data['recent_posts'] ?? [];
 @endphp
 
 <p style="margin: 0 0 16px 0; font-size: 16px; color: #292524; line-height: 1.65;">
@@ -71,8 +72,22 @@
     </div>
     <ul style="margin: 0; padding-left: 20px; color: #44403c; font-size: 14px; line-height: 1.8;">
         @foreach($milestones as $m)
-            <li>
+            <li style="margin-bottom: 6px;">
                 <strong>{{ $m['title'] ?? '' }}</strong> — {{ $m['date_badge'] ?? 'This Week' }}
+                @if(($m['type'] ?? '') === 'anniversary')
+                    @php
+                        $annivRecipient = trim((string)preg_replace("/'s\s+Anniversary$/i", '', (string)($m['title'] ?? '')));
+                        $annivCardUrl = $baseUrl . '/member/festive-cards?' . http_build_query(array_filter([
+                            'occasion' => 'wedding',
+                            'headline' => 'Happy Wedding Anniversary',
+                            'recipient' => ($annivRecipient !== '' && strcasecmp($annivRecipient, 'Wedding Anniversary') !== 0) ? $annivRecipient : null,
+                        ]));
+                    @endphp
+                    <br>
+                    <a href="{{ $annivCardUrl }}" target="_blank" style="display: inline-block; margin-top: 6px; padding: 8px 14px; border-radius: 999px; background-color: #a31621; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 13px;">
+                        💍 Create Celebratory Card &rarr;
+                    </a>
+                @endif
             </li>
         @endforeach
     </ul>
@@ -92,6 +107,27 @@
     <a href="{{ $baseUrl }}/organogram" style="color: #a31621; font-weight: 700; text-decoration: underline; font-size: 14px;">
         Open Family Tree Canvas &amp; Quests &rarr;
     </a>
+</div>
+@endif
+
+<!-- 4. Recent Family Updates (Weekly Post Digest) -->
+@if(!empty($recentPosts) && count($recentPosts) > 0)
+<div style="background-color: #ffffff; border: 1px solid #efe4d8; border-radius: 12px; padding: 20px 22px; margin: 0 0 26px 0;">
+    <div style="margin-bottom: 12px;">
+        <h4 style="margin: 0; color: #1c1917; font-size: 16px; font-weight: 700;"><span style="font-size: 18px; margin-right: 6px;">📰</span>Family Updates You May Have Missed
+        </h4>
+    </div>
+    <ul style="margin: 0; padding-left: 20px; color: #44403c; font-size: 14px; line-height: 1.7;">
+        @foreach($recentPosts as $rp)
+            <li style="margin-bottom: 8px;">
+                <strong>{{ $rp['author'] ?? 'Family Member' }}:</strong>
+                {{ $rp['excerpt'] ?? 'Shared a new update' }}
+                @if(!empty($rp['post_no']))
+                    <a href="{{ $baseUrl }}/profilePage?post_no={{ (int)$rp['post_no'] }}#post{{ (int)$rp['post_no'] }}" target="_blank" style="color: #a31621; font-weight: 600; text-decoration: underline;">View post</a>
+                @endif
+            </li>
+        @endforeach
+    </ul>
 </div>
 @endif
 

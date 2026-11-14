@@ -677,6 +677,66 @@
   display: block;
 }
 
+/* Prominent Anniversary Celebratory Card Actions */
+.notif-card-stitch--anniversary {
+  border-left: 3px solid #c9a24b;
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.28), rgba(255, 255, 255, 1));
+}
+.notif-card-stitch--anniversary:hover {
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.42), rgba(248, 250, 252, 1));
+}
+.notif-celebration-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.notif-celebration-cta,
+.notif-celebration-view {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none !important;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+.notif-celebration-cta {
+  background: #a31621;
+  color: #ffffff !important;
+  border: 1px solid #a31621;
+  box-shadow: 0 4px 12px rgba(163, 22, 33, 0.22);
+}
+.notif-celebration-cta:hover {
+  filter: brightness(1.08);
+  color: #ffffff !important;
+}
+.notif-celebration-view {
+  background: #fffbeb;
+  color: #78350f !important;
+  border: 1px solid #c9a24b;
+}
+.notif-celebration-view:hover {
+  background: #fef3c7;
+  color: #78350f !important;
+}
+.notif-celebration-cta:active,
+.notif-celebration-view:active {
+  transform: scale(0.98);
+}
+.notif-celebration-cta:focus-visible,
+.notif-celebration-view:focus-visible {
+  outline: 2px solid #c9a24b;
+  outline-offset: 2px;
+}
+
 /* Tactile Highlight for Target Item Navigated via Notification */
 .notif-item-target-highlight {
   animation: notifTargetGlowPulse 2.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
@@ -951,6 +1011,22 @@ body.dark-mode .notif-card-stitch:hover {
 }
 body.dark-mode .notif-card-stitch.unread {
   background: rgba(184,32,44, 0.12) !important;
+}
+body.dark-mode .notif-card-stitch--anniversary {
+  background: linear-gradient(135deg, rgba(201, 162, 75, 0.14), rgba(30, 41, 59, 1)) !important;
+  border-left: 3px solid #c9a24b !important;
+}
+body.dark-mode .notif-card-stitch--anniversary:hover {
+  background: linear-gradient(135deg, rgba(201, 162, 75, 0.22), rgba(40, 53, 72, 1)) !important;
+}
+body.dark-mode .notif-celebration-view {
+  background: rgba(201, 162, 75, 0.16) !important;
+  color: #fef3c7 !important;
+  border-color: #c9a24b !important;
+}
+body.dark-mode .notif-celebration-view:hover {
+  background: rgba(201, 162, 75, 0.26) !important;
+  color: #ffffff !important;
 }
 
 body.dark-mode .notif-item-title {

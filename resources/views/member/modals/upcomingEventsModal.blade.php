@@ -405,7 +405,8 @@ function allUpcomingEventsModal() {
             { key: 'Anniversary', label: 'Anniversaries 💍' },
             { key: 'Reunion', label: 'Reunions 🤝' },
             { key: 'Party', label: 'Parties ✨' },
-            { key: 'Milestone', label: 'Milestones 🏆' }
+            { key: 'Milestone', label: 'Milestones 🏆' },
+            { key: 'Commitment', label: 'Commitments ❤️' }
         ],
 
         init() {

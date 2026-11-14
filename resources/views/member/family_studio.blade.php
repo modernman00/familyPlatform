@@ -1259,6 +1259,20 @@
                         ? state.angles.length + ' ANGLES LOADED \u2022 READY'
                         : 'CLIP LOADED \u2022 READY';
                 renderAngleList();
+
+                // Bridge uploaded clip into the 4-Quadrant NLE Workspace
+                if (window.sovereignNleWorkspace && typeof window.sovereignNleWorkspace.attachMediaClip === 'function') {
+                    const targetTrack = angleIdx === 0 ? 'V1' : 'V2';
+                    const targetType = angleIdx === 0 ? 'video' : 'pip';
+                    window.sovereignNleWorkspace.attachMediaClip({
+                        src: url,
+                        mediaEl: videoEl,
+                        title: file.name,
+                        durationSec: angleObj.duration || 6.0,
+                        track: targetTrack,
+                        type: targetType
+                    });
+                }
             };
 
             // Upload primary clip to R2 for Publish Reel

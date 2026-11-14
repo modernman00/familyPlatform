@@ -479,14 +479,29 @@ class MemoryMilestoneService
                     };
 
                     $subtitle = !empty($ms['subtitle']) ? (string)$ms['subtitle'] : 'Celebration';
+                    $msTitle = (string)($ms['title'] ?? 'Wedding Anniversary');
+                    $cardCreateUrl = $msType === 'anniversary'
+                        ? $this->buildAnniversaryCardCreateUrl($msTitle, $subtitle)
+                        : null;
+
                     $body = match ($msType) {
                         'birthday' => "Today is " . (string)($ms['title'] ?? 'Family Birthday') . " ({$subtitle})! Celebrate this milestone.",
-                        'anniversary' => "Happy Anniversary! " . (string)($ms['title'] ?? 'Wedding Anniversary') . " is today ({$subtitle}). Tap to view.",
+                        'anniversary' => "Happy Anniversary! {$msTitle} is today ({$subtitle}). Create a celebratory card or tap to view memories.",
                         default => "Family event milestone today: " . (string)($ms['title'] ?? 'Special Event') . ". Tap to view.",
                     };
 
                     $actionUrl = '/profilePage#memoriesCard';
                     $famCode = (string)($cleanedCodes[0] ?? '');
+
+                    $metadata = [
+                        'type' => 'milestones',
+                        'milestone_type' => $msType,
+                        'sender_id' => 'system',
+                        'sender_name' => 'Family Milestones',
+                    ];
+                    if ($cardCreateUrl !== null) {
+                        $metadata['card_create_url'] = $cardCreateUrl;
+                    }
 
                     NotificationOrchestrator::dispatch(
                         userId: $userId,
@@ -497,12 +512,7 @@ class MemoryMilestoneService
                         actionUrl: $actionUrl,
                         tag: $milestoneTag,
                         familyCode: $famCode !== '' ? $famCode : null,
-                        metadata: [
-                            'type' => 'milestones',
-                            'milestone_type' => $msType,
-                            'sender_id' => 'system',
-                            'sender_name' => 'Family Milestones',
-                        ]
+                        metadata: $metadata
                     );
 
                     $milestonesDispatched++;
@@ -772,6 +782,27 @@ class MemoryMilestoneService
             100 => '100th Centenary Milestone 🏆',
             default => "Turning {$age}",
         };
+    }
+
+    /**
+     * Builds a pre-filled Festive Cards Studio URL for an anniversary milestone.
+     */
+    public function buildAnniversaryCardCreateUrl(string $title, string $subtitle = ''): string
+    {
+        $recipient = preg_replace("/'s\s+Anniversary$/i", '', trim($title)) ?? trim($title);
+        $headline = $subtitle !== '' && stripos($subtitle, 'Celebration') === false
+            ? "Happy {$subtitle}"
+            : 'Happy Wedding Anniversary';
+
+        $params = [
+            'occasion' => 'wedding',
+            'headline' => $headline,
+        ];
+        if ($recipient !== '' && strcasecmp($recipient, 'Wedding Anniversary') !== 0) {
+            $params['recipient'] = $recipient;
+        }
+
+        return '/member/festive-cards?' . http_build_query($params);
     }
 
     /**

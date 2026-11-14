@@ -496,6 +496,7 @@ final class Event extends AllMembersData
 
                 $enriched[] = [
                     'no' => $event['no'],
+                    'itemType' => 'event',
                     'id' => (string)$event['id'],
                     'eventName' => $event['eventName'],
                     'eventDate' => dateFormat($rawDate),
@@ -523,6 +524,20 @@ final class Event extends AllMembersData
                     'gCalUrl' => $gCalUrl,
                 ];
             }
+
+            // Merge dynamically projected Family Commitments for the same 3-month window
+            $commitmentService = new \App\services\FamilyCommitmentService();
+            $famCodeList = is_array($famCodes) ? array_values(array_map('strval', $famCodes)) : [];
+            $projectedCommitments = $commitmentService->projectCalendarOccurrences(
+                $userId,
+                $famCodeList,
+                date('Y-m-d'),
+                date('Y-m-d', strtotime('+3 months'))
+            );
+            $enriched = array_merge($enriched, $projectedCommitments);
+            usort($enriched, static function (array $a, array $b): int {
+                return strcmp((string)($a['eventDateRaw'] ?? ''), (string)($b['eventDateRaw'] ?? ''));
+            });
 
             \msgSuccess(200, $enriched);
         } catch (\Throwable $th) {

@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Test(csrf): ensure HTTP_X_CSRF_TOKEN is isolated and sanitized across SocialFeed and Onboarding test cases",
+    "title": "Fix(kin-whispers): resolve WebRTC voice and video call signaling, CSP STUN traversal and user ID case normalisation",
     "notes": [
-        "Test(csrf): ensure HTTP_X_CSRF_TOKEN is isolated and sanitized across SocialFeed and Onboarding test cases",
-        "Feat(video-studio): upgrade to 18-module Sovereign Kinship Video Studio with NLE workspace, spotlight tour, and format switchers",
-        "Fix(pwa): suppress unauthenticated push notification subscription pings on guest auth routes and refresh production bundles"
+        "Fix(kin-whispers): resolve WebRTC voice and video call signaling, CSP STUN traversal and user ID case normalisation",
+        "Fix(kin-whispers): resolve SQL 1247 forward reference on is_pinned with self-healing schema assurance",
+        "Test(csrf): ensure HTTP_X_CSRF_TOKEN is isolated and sanitized across SocialFeed and Onboarding test cases"
     ],
     "released_at": "2026-11-13",
-    "commit": "bdcb34d8"
+    "commit": "bb15fe5f"
 }

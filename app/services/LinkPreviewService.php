@@ -17,9 +17,9 @@ use Throwable;
  */
 final class LinkPreviewService
 {
-    private const CACHE_TTL_SECONDS = 86400; // 24 Hours
-    private const MAX_BODY_BYTES = 131072;   // 128 KB (Head section inspection)
-    private const HTTP_TIMEOUT_SECS = 4;
+    private const CACHE_TTL_SECONDS = 604800; // 7 Days (with stale-cache resilience)
+    private const MAX_BODY_BYTES = 131072;    // 128 KB (Head section inspection)
+    private const HTTP_TIMEOUT_SECS = 3;
     private const CONNECT_TIMEOUT_SECS = 2;
 
     /**
@@ -198,9 +198,10 @@ final class LinkPreviewService
      *
      * @param string|null $text
      * @param int $max
+     * @param bool $allowNetworkFetch
      * @return array{images: array<string>, videos: array<string>, cleaned_message: string, preview: array<string, mixed>|null}
      */
-    public static function extractPhotoAssetsFromText(?string $text, int $max = 6): array
+    public static function extractPhotoAssetsFromText(?string $text, int $max = 6, bool $allowNetworkFetch = true): array
     {
         if ($text === null || trim($text) === '') {
             return ['images' => [], 'videos' => [], 'cleaned_message' => '', 'preview' => null];
@@ -211,7 +212,7 @@ final class LinkPreviewService
             return ['images' => [], 'videos' => [], 'cleaned_message' => trim($text), 'preview' => null];
         }
 
-        if (count($urls) > 1) {
+        if ($allowNetworkFetch && count($urls) > 1) {
             self::prefetchUncachedUrlsParallel($urls);
         }
 
@@ -221,17 +222,18 @@ final class LinkPreviewService
         $firstPreview = null;
 
         foreach ($urls as $url) {
-            // Respect standard external video links (YouTube, Vimeo, Cloudflare, direct mp4/webm/mov/ogg)
+            // Respect standard external video links (YouTube, Vimeo, Cloudflare, TikTok, Dropbox, direct mp4/webm/mov/ogg)
             if (self::isVideoLinkUrl($url)) {
-                if (!in_array($url, $videos, true)) {
-                    $videos[] = $url;
+                $normalisedVideoUrl = \App\classes\VideoParser::normaliseDropboxStreamUrl($url);
+                if (!in_array($normalisedVideoUrl, $videos, true) && count($videos) < $max) {
+                    $videos[] = $normalisedVideoUrl;
                 }
                 $urlsToStrip[] = $url;
                 continue;
             }
 
             $recovered = self::recoverTruncatedPartyPlatformUrl($url, $text);
-            $preview = self::fetchPreview($recovered);
+            $preview = self::fetchPreview($recovered, $allowNetworkFetch);
 
             if ($firstPreview === null && $preview !== null) {
                 $firstPreview = $preview;
@@ -258,7 +260,7 @@ final class LinkPreviewService
 
                 // If it's a single Google Photos video
                 if (!empty($preview['is_video']) && !empty($preview['video_url'])) {
-                    if (!in_array($preview['video_url'], $videos, true) && count($videos) < 3) {
+                    if (!in_array($preview['video_url'], $videos, true) && count($videos) < $max) {
                         $videos[] = (string)$preview['video_url'];
                     }
                     $urlsToStrip[] = $url;
@@ -288,7 +290,7 @@ final class LinkPreviewService
 
         return [
             'images' => array_slice($images, 0, $max),
-            'videos' => array_slice($videos, 0, 3),
+            'videos' => array_slice($videos, 0, $max),
             'cleaned_message' => $cleanedMsg,
             'preview' => $firstPreview,
         ];
@@ -304,24 +306,36 @@ final class LinkPreviewService
     {
         $db = Db::connect2();
         $uncached = [];
+        $seenHashes = [];
         foreach ($urls as $u) {
             $u = trim((string)$u);
-            if ($u === '' || self::isVideoLinkUrl($u) || !self::isSafeUrl($u)) {
+            if ($u === '' || self::isVideoLinkUrl($u) || preg_match('/\.(jpe?g|png|webp|avif|gif)(\?.*)?$/i', $u)) {
                 continue;
             }
             $urlHash = hash('sha256', $u);
+            if (isset($seenHashes[$urlHash])) {
+                continue;
+            }
+            $seenHashes[$urlHash] = true;
             try {
-                $stmt = $db->prepare("SELECT 1 FROM link_preview_cache WHERE url_hash = ? AND expires_at > NOW() LIMIT 1");
+                $stmt = $db->prepare("SELECT 1 FROM link_preview_cache WHERE url_hash = ? LIMIT 1");
                 $stmt->execute([$urlHash]);
                 if (!$stmt->fetch()) {
-                    $uncached[] = $u;
+                    if (self::isSafeUrl($u)) {
+                        $uncached[] = $u;
+                    }
                 }
             } catch (Throwable) {
-                $uncached[] = $u;
+                if (self::isSafeUrl($u)) {
+                    $uncached[] = $u;
+                }
+            }
+            if (count($uncached) >= 8) {
+                break;
             }
         }
 
-        if (count($uncached) <= 1) {
+        if (count($uncached) === 0) {
             return;
         }
 
@@ -337,12 +351,14 @@ final class LinkPreviewService
                 CURLOPT_RETURNTRANSFER => false,
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_MAXREDIRS => 5,
-                CURLOPT_TIMEOUT => 6,
-                CURLOPT_CONNECTTIMEOUT => 3,
-                CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_SSL_VERIFYHOST => false,
+                CURLOPT_TIMEOUT => 3,
+                CURLOPT_CONNECTTIMEOUT => 2,
+                CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+                CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
                 CURLOPT_HTTPHEADER => [
-                    'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'User-Agent: facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php) WhatsApp/2.23.20.0',
                     'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                     'Accept-Language: en-GB,en-US;q=0.9,en;q=0.8',
                 ],
@@ -567,9 +583,11 @@ final class LinkPreviewService
     /**
      * Fetches OpenGraph data with caching and resilient fallback.
      *
+     * @param string $rawUrl
+     * @param bool $allowNetworkFetch
      * @return array<string, mixed>|null
      */
-    public static function fetchPreview(string $rawUrl): ?array
+    public static function fetchPreview(string $rawUrl, bool $allowNetworkFetch = true): ?array
     {
         $url = trim($rawUrl);
         if ($url === '') {
@@ -579,28 +597,27 @@ final class LinkPreviewService
         $urlHash = hash('sha256', $url);
         $db = Db::connect2();
 
-        // 1. Check local cache
+        // 1. Check local cache (serve valid or stale-with-content cache immediately to prevent UI stalls)
         try {
-            $stmt = $db->prepare("SELECT * FROM link_preview_cache WHERE url_hash = ? AND expires_at > NOW() LIMIT 1");
+            $stmt = $db->prepare("SELECT * FROM link_preview_cache WHERE url_hash = ? LIMIT 1");
             $stmt->execute([$urlHash]);
             $cached = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($cached) {
-                if (!empty($cached['extra_data']) && is_string($cached['extra_data'])) {
-                    $extra = json_decode($cached['extra_data'], true);
-                    if (is_array($extra)) {
-                        $cached = array_merge($cached, $extra);
+                $isFresh = !empty($cached['expires_at']) && strtotime((string)$cached['expires_at']) > time();
+                $hasRichContent = !empty($cached['image_url']) || !empty($cached['extra_data']) || !empty($cached['title']);
+                if ($isFresh || $hasRichContent || !$allowNetworkFetch) {
+                    if (!empty($cached['extra_data']) && is_string($cached['extra_data'])) {
+                        $extra = json_decode($cached['extra_data'], true);
+                        if (is_array($extra)) {
+                            $cached = array_merge($cached, $extra);
+                        }
                     }
+                    return self::formatPreviewPayload($cached, $url);
                 }
-                return self::formatPreviewPayload($cached, $url);
             }
         } catch (Throwable $e) {
             // Self-heal table if missing
             self::ensureSchema($db);
-        }
-
-        // 2. SSRF Safety Verification
-        if (!self::isSafeUrl($url)) {
-            return null;
         }
 
         // 2b. Direct Image Detection (Instant zero-scrape resolution for standard image URLs)
@@ -618,6 +635,15 @@ final class LinkPreviewService
                 'card_type' => 'summary_large_image',
             ];
             return self::formatPreviewPayload($directData, $url);
+        }
+
+        if (!$allowNetworkFetch) {
+            return null;
+        }
+
+        // 2. SSRF Safety Verification
+        if (!self::isSafeUrl($url)) {
+            return null;
         }
 
         // 3. Outbound fetch with WhatsApp/FamilyPlatform bot User-Agent
@@ -697,9 +723,11 @@ final class LinkPreviewService
      * Resolves the link preview for a given post message text.
      * Handles truncated PartyPlatform URL recovery automatically.
      *
+     * @param string|null $postMessage
+     * @param bool $allowNetworkFetch
      * @return array<string, mixed>|null
      */
-    public static function getPreviewForPostText(?string $postMessage): ?array
+    public static function getPreviewForPostText(?string $postMessage, bool $allowNetworkFetch = true): ?array
     {
         if ($postMessage === null || trim($postMessage) === '') {
             return null;
@@ -713,7 +741,7 @@ final class LinkPreviewService
         // Recover truncated PartyPlatform URL if needed
         $url = self::recoverTruncatedPartyPlatformUrl($rawUrl, $postMessage);
 
-        return self::fetchPreview($url);
+        return self::fetchPreview($url, $allowNetworkFetch);
     }
 
     /**
@@ -1102,23 +1130,28 @@ final class LinkPreviewService
     }
 
     /**
-     * Checks if a given URL is a known video link (YouTube, Vimeo, Cloudflare Stream, or direct video asset).
+     * Checks if a given URL is a known video link (YouTube, Vimeo, Cloudflare Stream, TikTok, Dropbox video, or direct video asset).
      */
     public static function isVideoLinkUrl(?string $url): bool
     {
         if ($url === null || trim($url) === '') {
             return false;
         }
-        $lower = strtolower(trim($url));
+        $trimmed = trim($url);
+        $lower = strtolower($trimmed);
         if (str_contains($lower, 'youtube.com')
             || str_contains($lower, 'youtu.be')
             || str_contains($lower, 'vimeo.com')
             || str_contains($lower, 'videodelivery.net')
             || str_contains($lower, 'cloudflarestream.com')
+            || (bool)preg_match('#^https?://(?:www\.|m\.)?tiktok\.com/(?:@[\w.-]+/video|embed/v2|v)/\d+#i', $trimmed)
         ) {
             return true;
         }
-        return (bool)preg_match('/\.(mp4|webm|ogg|mov)(\?.*)?$/i', $lower);
+        if ((bool)preg_match('/\.(mp4|webm|ogg|mov|m4v)(\?.*)?(#.*)?$/i', $lower)) {
+            return true;
+        }
+        return \App\classes\VideoParser::isVideoUrl($trimmed);
     }
 
     /**
@@ -1236,6 +1269,7 @@ final class LinkPreviewService
 
         if ($ok && ($status === 200 || $status === 206) && is_file($tmpPath) && filesize($tmpPath) > 4096 && !str_contains($contentType, 'text/html')) {
             @rename($tmpPath, $finalPath);
+            VideoAutoTrimService::optimiseMp4FastStart($finalPath);
             return '/resources/videos/posts/' . $cacheFileName;
         }
 
@@ -1284,11 +1318,12 @@ final class LinkPreviewService
         // Strip known photo host links (iCloud Photos, Imgur, Flickr, PostImage, etc.)
         $cleaned = (string)preg_replace('#https?://(?:www\.)?(?:icloud\.com/photos|i\.imgur\.com|imgur\.com|ibb\.co|postimg\.cc)/[^\s<>"\'`]+#i', '', $cleaned);
 
-        // Strip video URLs (YouTube, Vimeo, Cloudflare Stream, direct mp4/webm/mov/ogg)
-        $cleaned = (string)preg_replace('#https?://(?:www\.)?(?:youtube\.com/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v[=_]?)|youtu\.be/)[a-zA-Z0-9_-]{11}#i', '', $cleaned);
-        $cleaned = (string)preg_replace('#https?://(?:player\.)?vimeo\.com/(?:channels/(?:\w+/)?|groups/[^/]+/videos/|album/\d+/video/|video/|)\d+(?:$|/|\?)#i', '', $cleaned);
-        $cleaned = (string)preg_replace('#https?://(?:iframe\.videodelivery\.net|watch\.cloudflarestream\.com|customer-[a-zA-Z0-9_-]+\.cloudflarestream\.com)/[a-zA-Z0-9]{32}#i', '', $cleaned);
-        $cleaned = (string)preg_replace('~(?:https?://[^\s<>"\'`]+|/resources/(?:videos|images)/[^\s<>"\'`]+)\.(?:mp4|webm|ogg|mov)(?:\?[^\s<>"\'`#]*)?(?:#t=[0-9.]+(?:,[0-9.]+)?)?~i', '', $cleaned);
+        // Strip video URLs (YouTube, Vimeo, Cloudflare Stream, TikTok, Dropbox, direct mp4/webm/mov/ogg/m4v)
+        $cleaned = (string)preg_replace('#https?://(?:www\.)?(?:youtube\.com/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v[=_]?)|youtu\.be/)[a-zA-Z0-9_-]{11}(?:[^\s<>"\'`]*)?#i', '', $cleaned);
+        $cleaned = (string)preg_replace('#https?://(?:www\.|player\.)?vimeo\.com/(?:channels/(?:\w+/)?|groups/[^/]+/videos/|album/\d+/video/|video/|)\d+(?:[^\s<>"\'`]*)?#i', '', $cleaned);
+        $cleaned = (string)preg_replace('#https?://(?:iframe\.videodelivery\.net|watch\.cloudflarestream\.com|customer-[a-zA-Z0-9_-]+\.cloudflarestream\.com)/[a-zA-Z0-9]{32}(?:[^\s<>"\'`]*)?#i', '', $cleaned);
+        $cleaned = (string)preg_replace('#https?://(?:www\.|m\.)?tiktok\.com/(?:@[\w.-]+/video|embed/v2|v)/\d+(?:[^\s<>"\'`]*)?#i', '', $cleaned);
+        $cleaned = (string)preg_replace('~(?:https?://[^\s<>"\'`]+|/resources/(?:videos|images)/[^\s<>"\'`]+)\.(?:mp4|webm|ogg|mov|m4v)(?:\?[^\s<>"\'`#]*)?(?:#t=[0-9.]+(?:,[0-9.]+)?)?~i', '', $cleaned);
 
         // Clean up redundant blank lines or multiple spaces while preserving intentional paragraphs
         $lines = explode("\n", $cleaned);

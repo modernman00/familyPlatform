@@ -13,7 +13,7 @@
 
 'use strict';
 
-const SW_VERSION = 'v2.5.3'; // bumped to purge stale ?v=1.0.2 JS bundles cached stale-while-revalidate
+const SW_VERSION = 'v2.5.4'; // bumped for Kin Whispers distinct alerts & linked PWA manifest
 const STATIC_CACHE = `fp-static-${SW_VERSION}`;
 const DYNAMIC_CACHE = `fp-dynamic-${SW_VERSION}`;
 const IMAGE_CACHE = `fp-images-${SW_VERSION}`;
@@ -23,6 +23,7 @@ const MAX_IMAGE_CACHE_ENTRIES = 200;
 const PRECACHE_ASSETS = [
   '/offline.html',
   '/manifest.json',
+  '/public/manifest-whispers.json',
   '/public/css/main.css',
   '/public/css/standards-v21.css',
   '/public/css/organogram.css',
@@ -515,22 +516,35 @@ self.addEventListener('push', (event) => {
   }
 
   // C. Unconditional OS Notification Dispatch (ExecMind / Tier-1 PWA Gold Standard)
+  const resolvedTag = (typeof data.tag === 'string' && data.tag) ? data.tag : 'family-alert';
+  const isWhisper = resolvedTag.startsWith('whisper_') || data.category === 'kin_whisper';
+  const resolvedUrl = (typeof data.url === 'string' && data.url) ? data.url : (isWhisper ? '/kin-whispers' : '/profilePage');
+  const resolvedThreadId = data.thread_id || (data.metadata && data.metadata.thread_id) || (resolvedTag.startsWith('whisper_') ? resolvedTag.slice('whisper_'.length) : null);
+
   const options = {
     body: notificationBody,
     icon: (typeof data.icon === 'string' && data.icon) ? data.icon : '/public/img/favicon/android-chrome-192x192.png',
     badge: (typeof data.badge === 'string' && data.badge) ? data.badge : '/public/img/favicon/favicon-32x32.png',
-    tag: (typeof data.tag === 'string' && data.tag) ? data.tag : 'family-alert',
+    tag: resolvedTag,
     renotify: true,
     data: {
       id: data.targetNotificationId || data.id,
-      url: (typeof data.url === 'string' && data.url) ? data.url : '/profilePage'
+      url: resolvedUrl,
+      tag: resolvedTag,
+      category: data.category || (isWhisper ? 'kin_whisper' : 'general'),
+      thread_id: resolvedThreadId
     },
-    vibrate: data.isSilent ? [] : [100, 50, 100],
+    vibrate: data.isSilent ? [] : (isWhisper ? [60, 40, 60] : [100, 50, 100]),
     silent: !!data.isSilent,
-    actions: [
-      { action: 'open', title: 'Open' },
-      { action: 'mark_read', title: 'Mark as Read' }
-    ]
+    actions: isWhisper
+      ? [
+          { action: 'open', title: 'Reply in Whispers' },
+          { action: 'mark_read', title: 'Mark as Read' }
+        ]
+      : [
+          { action: 'open', title: 'Open' },
+          { action: 'mark_read', title: 'Mark as Read' }
+        ]
   };
 
   pushPromises.push(self.registration.showNotification(notificationTitle, options));
@@ -538,6 +552,9 @@ self.addEventListener('push', (event) => {
   // D. Broadcast to all open client windows (for live in-app toasts & bell counter updates)
   const broadcastPayload = {
     ...data,
+    tag: resolvedTag,
+    url: resolvedUrl,
+    thread_id: resolvedThreadId,
     title: notificationTitle,
     body: notificationBody
   };
@@ -595,23 +612,28 @@ self.addEventListener('notificationclick', (event) => {
 
   clickPromises.push(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      for (const client of clientList) {
-        if (client.url.includes(self.location.origin) && 'focus' in client) {
-          if ('navigate' in client) {
-            client.navigate(targetUrl);
-          }
-          client.postMessage({
+      const isWhisperTarget = (typeof targetUrl === 'string' && targetUrl.includes('/kin-whispers')) ||
+        String(notifData.tag || '').startsWith('whisper_');
+      const originClients = clientList.filter((client) => client.url && client.url.includes(self.location.origin) && 'focus' in client);
+      const preferredClient = (isWhisperTarget
+        ? originClients.find((client) => client.url.includes('/kin-whispers'))
+        : null) || originClients[0] || null;
+
+      if (preferredClient) {
+        if ('navigate' in preferredClient) {
+          preferredClient.navigate(targetUrl);
+        }
+        preferredClient.postMessage({
+          type: 'NOTIFICATION_CLICKED',
+          payload: notifData
+        });
+        if (syncBroadcastChannel) {
+          syncBroadcastChannel.postMessage({
             type: 'NOTIFICATION_CLICKED',
             payload: notifData
           });
-          if (syncBroadcastChannel) {
-            syncBroadcastChannel.postMessage({
-              type: 'NOTIFICATION_CLICKED',
-              payload: notifData
-            });
-          }
-          return client.focus();
         }
+        return preferredClient.focus();
       }
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);

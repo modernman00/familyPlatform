@@ -1,6 +1,6 @@
 {
-  "name": "Kin Whispers — Private Family Messages & Calls",
-  "short_name": "Whispers",
+  "name": "FamilyChat — FamilyPlatform Messages & Calls",
+  "short_name": "FamilyChat",
   "description": "Private, supervised family messages, voice dedications and in-app voice and video calls.",
   "id": "/kin-whispers",
   "start_url": "/kin-whispers?source=pwa_whispers",
@@ -23,7 +23,7 @@
   ],
   "shortcuts": [
     {
-      "name": "New Whisper",
+      "name": "New FamilyChat",
       "short_name": "New",
       "url": "/kin-whispers?source=pwa_shortcut&compose=1",
       "icons": [{ "src": "/public/pwa/android/android-launchericon-96-96.png", "sizes": "96x96", "type": "image/png" }]

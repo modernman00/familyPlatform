@@ -660,6 +660,7 @@ class BaseController
             'show_my_profile' => $data['show_my_profile'] ?? 'on',
             'show_birth_year' => $data['show_birth_year'] ?? 'off',
             'email_notifications' => $data['email_notifications'] ?? 'on',
+            'post_email_notifications' => $data['post_email_notifications'] ?? 'off',
             'sms_notifications' => $data['sms_notifications'] ?? 'on',
             'profilePics' => $data['img'] ?? null,
             'profileImg' => !empty($data['img']) ? $data['img'] : $sex,

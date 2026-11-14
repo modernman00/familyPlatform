@@ -133,9 +133,9 @@
 
                     <!-- Right-Aligned Action Pills (Artboards 13 & 14) -->
                     <div class="sp-header-actions">
-                        <a href="/kin-whispers?recipient_id={{ urlencode($targetMemberId) }}" class="sp-action-pill sp-action-pill--primary" title="Send a private Whisper to {{ $data['fullName'] }}">
+                        <a href="/kin-whispers?recipient_id={{ urlencode($targetMemberId) }}" class="sp-action-pill sp-action-pill--primary" title="Send a private FamilyChat message to {{ $data['fullName'] }}">
                             <i class="bi bi-lock"></i>
-                            <span>Whisper</span>
+                            <span>FamilyChat</span>
                         </a>
                         <span class="sp-action-pill sp-action-pill--connected" title="Connected family member">
                             <i class="bi bi-check2"></i>

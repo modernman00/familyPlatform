@@ -162,11 +162,122 @@ final class NotificationController extends Select
     public static function enrichWithActionUrls(array $items, string $userId = ''): array
     {
         $enriched = [];
+        $hasAnniversary = false;
+
         foreach ($items as $item) {
             $item['action_url'] = self::resolveNotificationActionUrl($item, $userId);
+            if (self::isAnniversaryNotification($item)) {
+                $hasAnniversary = true;
+                $item['celebration_card_url'] = self::buildAnniversaryCardUrl($item);
+                $item['celebration_cards_archive_url'] = '/member/festive-cards#fsArchive';
+            }
             $enriched[] = $item;
         }
+
+        if ($hasAnniversary && $userId !== '') {
+            $recentCards = self::fetchRecentAnniversaryCards($userId);
+            foreach ($enriched as &$item) {
+                if (self::isAnniversaryNotification($item)) {
+                    $item['celebration_cards'] = $recentCards;
+                }
+            }
+            unset($item);
+        }
+
         return $enriched;
+    }
+
+    /**
+     * Determines whether a notification represents a wedding or family anniversary.
+     *
+     * @param array<string, mixed> $notif
+     */
+    public static function isAnniversaryNotification(array $notif): bool
+    {
+        $type = strtolower(trim((string)($notif['notification_type'] ?? '')));
+        $name = (string)($notif['notification_name'] ?? '');
+        $content = (string)($notif['notification_content'] ?? '');
+
+        if ($type === 'anniversary') {
+            return true;
+        }
+
+        $haystack = $name . ' ' . $content;
+        return stripos($haystack, 'anniversary') !== false;
+    }
+
+    /**
+     * Builds a pre-filled Festive Cards Studio URL for an anniversary notification.
+     *
+     * @param array<string, mixed> $notif
+     */
+    private static function buildAnniversaryCardUrl(array $notif): string
+    {
+        $rawName = trim((string)($notif['notification_name'] ?? ''));
+        // Strip leading ring/champagne emojis and "'s Anniversary" suffix for clean recipient pre-fill
+        $clean = preg_replace('/^[^\p{L}\p{N}]+/u', '', $rawName) ?? $rawName;
+        $recipient = preg_replace("/'s\s+Anniversary$/i", '', trim($clean)) ?? trim($clean);
+
+        $params = [
+            'occasion' => 'wedding',
+            'headline' => 'Happy Wedding Anniversary',
+        ];
+        if ($recipient !== '' && strcasecmp($recipient, 'Wedding Anniversary') !== 0 && stripos($recipient, 'Anniversary Milestone') === false) {
+            $params['recipient'] = $recipient;
+        }
+
+        return '/member/festive-cards?' . http_build_query($params);
+    }
+
+    /**
+     * Fetches recently created celebratory cards for anniversary occasions within the user's approved families.
+     *
+     * @return array<int, array{share_token: string, headline: string, sender_name: string, public_url: string}>
+     */
+    private static function fetchRecentAnniversaryCards(string $userId): array
+    {
+        try {
+            $receivers = self::sessionReceiverIds($userId);
+            $famCodes = array_values(array_filter($receivers, static fn(string $id): bool => $id !== $userId && $id !== ''));
+            if ($famCodes === []) {
+                return [];
+            }
+
+            $db = \Src\Db::connect2();
+            $placeholders = implode(',', array_fill(0, count($famCodes), '?'));
+            $sql = sprintf(
+                "SELECT share_token, headline, sender_name
+                 FROM festive_cards
+                 WHERE fam_code IN (%s)
+                   AND deleted_at IS NULL
+                   AND occasion IN ('wedding', 'milestone')
+                   AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+                 ORDER BY id DESC
+                 LIMIT 3",
+                $placeholders
+            );
+            $stmt = $db->prepare($sql);
+            $stmt->execute($famCodes);
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $cards = [];
+            foreach ($rows as $row) {
+                $token = (string)($row['share_token'] ?? '');
+                if ($token === '') {
+                    continue;
+                }
+                $cards[] = [
+                    'share_token' => $token,
+                    'headline' => (string)($row['headline'] ?? 'Anniversary Card'),
+                    'sender_name' => (string)($row['sender_name'] ?? 'Family'),
+                    'public_url' => '/greetings/f/' . $token,
+                ];
+            }
+
+            return $cards;
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     /**

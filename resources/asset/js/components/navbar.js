@@ -59,6 +59,13 @@ function updateNotificationBadge(count) {
     }
 }
 
+const escapeAttr = (str = '') => String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
 // Google Stitch Notification Item Template
 const notificationHTML = (data) => {
     // Determine friendly emoji / icon based on type and content
@@ -94,24 +101,67 @@ const notificationHTML = (data) => {
     const timestamp = created_at || notification_date;
     const timeAgoStr = timestamp ? format(timestamp) : 'Just now';
 
+    const combinedText = `${data.notification_type || ''} ${notification_name || ''} ${notification_content || ''}`.toLowerCase();
+    const isAnniversary = Boolean(data.celebration_card_url) || combinedText.includes('anniversary');
+    const cardCreateUrl = data.celebration_card_url || '/member/festive-cards?occasion=wedding&headline=Happy+Wedding+Anniversary';
+    const createdCards = Array.isArray(data.celebration_cards) ? data.celebration_cards : [];
+    const archiveUrl = data.celebration_cards_archive_url || '/member/festive-cards#fsArchive';
+
+    let anniversaryActionsHtml = '';
+    if (isAnniversary) {
+        let viewCardBtnHtml = '';
+        if (createdCards.length === 1) {
+            const firstCard = createdCards[0];
+            viewCardBtnHtml = `
+                <a href="${escapeAttr(firstCard.public_url || archiveUrl)}"
+                   class="notif-celebration-view"
+                   data-no="${escapeAttr(no)}"
+                   title="View celebratory card created by ${escapeAttr(firstCard.sender_name || 'Family')}">
+                    ✨ View Card
+                </a>`;
+        } else if (createdCards.length > 1) {
+            viewCardBtnHtml = `
+                <a href="${escapeAttr(archiveUrl)}"
+                   class="notif-celebration-view"
+                   data-no="${escapeAttr(no)}"
+                   title="View ${createdCards.length} celebratory cards created">
+                    ✨ View Cards (${createdCards.length})
+                </a>`;
+        }
+
+        anniversaryActionsHtml = `
+            <div class="notif-celebration-actions">
+                <a href="${escapeAttr(cardCreateUrl)}"
+                   class="notif-celebration-cta"
+                   data-no="${escapeAttr(no)}"
+                   title="Create a living celebratory card for this anniversary">
+                    💍 Create Celebratory Card
+                </a>
+                ${viewCardBtnHtml}
+            </div>`;
+    }
+
     return `
-    <div id="${bannerId}" class="notif-card-stitch ${isUnread ? 'unread' : ''}">
+    <div id="${bannerId}" class="notif-card-stitch ${isUnread ? 'unread' : ''} ${isAnniversary ? 'notif-card-stitch--anniversary' : ''}">
         <div class="notif-emoji-icon">
             <span>${emoji}</span>
         </div>
         
-        <a href="${data.action_url || '/profilePage'}" 
-           class="notif-details-link flex-grow-1 text-decoration-none"
-           data-no="${no}"
-           data-action-url="${data.action_url || '/profilePage'}">
-            <h6 class="notif-item-title">${formattedTitle}</h6>
-            <p class="notif-item-desc">${notification_content || ''}</p>
-            <span class="notif-item-time">${timeAgoStr}</span>
-        </a>
+        <div class="notif-card-body flex-grow-1 min-w-0">
+            <a href="${escapeAttr(data.action_url || '/profilePage')}" 
+               class="notif-details-link d-block text-decoration-none"
+               data-no="${escapeAttr(no)}"
+               data-action-url="${escapeAttr(data.action_url || '/profilePage')}">
+                <h6 class="notif-item-title">${escapeAttr(formattedTitle)}</h6>
+                <p class="notif-item-desc">${escapeAttr(notification_content || '')}</p>
+                <span class="notif-item-time">${escapeAttr(timeAgoStr)}</span>
+            </a>
+            ${anniversaryActionsHtml}
+        </div>
 
         <button class="notif-dismiss-btn" 
-                data-no="${no}"
-                data-is="${sender_id}"
+                data-no="${escapeAttr(no)}"
+                data-is="${escapeAttr(sender_id)}"
                 type="button"
                 id="deleteNotification${sender_id}${randomNumber}"
                 title="Dismiss">
@@ -229,7 +279,7 @@ function updateWhisperBadge(count) {
 }
 
 const fetchWhisperUnreadCount = () => {
-    if (!document.getElementById('navbarWhispersBtn') && !document.getElementById('leftColumnKinWhispersPortal') && !document.getElementById('mobileWhispersBtn')) {
+    if (!document.getElementById('navbarWhispersBtn') && !document.getElementById('leftColumnKinWhispersPortal') && !document.getElementById('pwaWhisperTab') && !document.getElementById('mobileWhispersBtn')) {
         return;
     }
 
@@ -414,6 +464,28 @@ const initDeleteOnce = () => {
     if (!tab) return;
 
     tab.addEventListener('click', e => {
+        // Handle clicking celebratory card CTAs inside anniversary notifications
+        const celebrationCta = e.target.closest('.notif-celebration-cta, .notif-celebration-view');
+        if (celebrationCta) {
+            const no = celebrationCta.getAttribute('data-no');
+            if (no) {
+                axios.put(`/removeNotification/${encodeURIComponent(no)}`).catch(() => {});
+            }
+            const card = celebrationCta.closest('.notif-card-stitch');
+            if (card && card.classList.contains('unread')) {
+                card.classList.remove('unread');
+                const currentCount = parseInt(sessionStorage.getItem('notificationCount') || '1', 10) - 1;
+                const newValues = currentCount > 0 ? currentCount : 0;
+                sessionStorage.setItem('notificationCount', newValues);
+                updateNotificationBadge(newValues);
+            }
+            const dropdown = document.getElementById('notificationDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+            return;
+        }
+
         // Handle clicking the notification body to navigate directly to the item itself
         const link = e.target.closest('.notif-details-link');
         if (link) {

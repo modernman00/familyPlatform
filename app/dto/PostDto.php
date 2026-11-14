@@ -226,21 +226,13 @@ final class PostDto implements JsonSerializable
             if (!empty($finalVideos)) {
                 $hook = self::deriveHookFromMessage($message ?? ($row['postMessage'] ?? ''));
                 $rowVideos = array_map(function ($v) use ($hook) {
-                    $thumb = null;
-                    if (preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|ggpht\.com)/#i', $v)) {
-                        $thumb = preg_replace('/=.*$/i', '=s1600-no', $v);
+                    $desc = \App\classes\VideoParser::formatVideoDescriptor((string)$v, $hook);
+                    if ($desc['type'] === 'direct' && preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|googlevideo\.com)/#i', $desc['originalUrl'])) {
+                        $desc['embedUrl'] = \App\services\LinkPreviewService::getProxiedVideoUrl($desc['originalUrl']);
                     }
-                    return [
-                        'type' => 'direct',
-                        'videoId' => null,
-                        'thumbnailUrl' => $thumb,
-                        'embedUrl' => \App\services\LinkPreviewService::getProxiedVideoUrl($v),
-                        'originalUrl' => $v,
-                        'trimStart' => null,
-                        'trimEnd' => null,
-                        'hookText' => $hook,
-                        'aspectMode' => 'reel',
-                    ];
+                    $desc['hookText'] = $hook;
+                    $desc['aspectMode'] = 'reel';
+                    return $desc;
                 }, $finalVideos);
                 $row['videos'] = $rowVideos;
                 $row['video'] = $rowVideos[0];
@@ -262,27 +254,29 @@ final class PostDto implements JsonSerializable
                     array_merge($finalImages, $finalVideos)
                 );
             }
-        } elseif (!empty($existingExternalVideos) && empty($rowVideos)) {
-            $hook = self::deriveHookFromMessage($message ?? ($row['postMessage'] ?? ''));
-            $rowVideos = array_map(function ($v) use ($hook) {
-                $thumb = null;
-                if (preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|ggpht\.com)/#i', $v)) {
-                    $thumb = preg_replace('/=.*$/i', '=s1600-no', $v);
+        } elseif ((!empty($existingExternalVideos) || $hasExternalLinkInMessage) && empty($rowVideos)) {
+            $allVideoUrls = $existingExternalVideos;
+            if ($hasExternalLinkInMessage) {
+                foreach (\App\classes\VideoParser::extractAllVideosFromText($message, 6) as $parsedVid) {
+                    if (!in_array($parsedVid['originalUrl'], $allVideoUrls, true) && count($allVideoUrls) < 6) {
+                        $allVideoUrls[] = $parsedVid['originalUrl'];
+                    }
                 }
-                return [
-                    'type' => 'direct',
-                    'videoId' => null,
-                    'thumbnailUrl' => $thumb,
-                    'embedUrl' => \App\services\LinkPreviewService::getProxiedVideoUrl($v),
-                    'originalUrl' => $v,
-                    'trimStart' => null,
-                    'trimEnd' => null,
-                    'hookText' => $hook,
-                    'aspectMode' => 'reel',
-                ];
-            }, $existingExternalVideos);
-            $row['videos'] = $rowVideos;
-            $row['video'] = $rowVideos[0];
+            }
+            if (!empty($allVideoUrls)) {
+                $hook = self::deriveHookFromMessage($message ?? ($row['postMessage'] ?? ''));
+                $rowVideos = array_map(function ($v) use ($hook) {
+                    $desc = \App\classes\VideoParser::formatVideoDescriptor((string)$v, $hook);
+                    if ($desc['type'] === 'direct' && preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|googlevideo\.com)/#i', $desc['originalUrl'])) {
+                        $desc['embedUrl'] = \App\services\LinkPreviewService::getProxiedVideoUrl($desc['originalUrl']);
+                    }
+                    $desc['hookText'] = $hook;
+                    $desc['aspectMode'] = 'reel';
+                    return $desc;
+                }, $allVideoUrls);
+                $row['videos'] = $rowVideos;
+                $row['video'] = $rowVideos[0];
+            }
         }
 
         // Hydrate images array from post_img0..5 slots if not already hydrated, filtering out video streams

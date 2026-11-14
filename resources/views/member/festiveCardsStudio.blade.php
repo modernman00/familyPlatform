@@ -503,6 +503,20 @@ function festiveStudioWizard() {
         stageVisible: true,
 
         init() {
+            const params = new URLSearchParams(window.location.search);
+            const qOccasion = params.get('occasion');
+            if (qOccasion && Object.prototype.hasOwnProperty.call(this.occasions, qOccasion)) {
+                this.selectOccasion(qOccasion);
+            }
+            const qRecipient = params.get('recipient');
+            if (qRecipient && qRecipient.trim() !== '') {
+                this.recipientName = qRecipient.trim().slice(0, 80);
+            }
+            const qHeadline = params.get('headline');
+            if (qHeadline && qHeadline.trim() !== '') {
+                this.headline = qHeadline.trim().slice(0, 90);
+                this.headlineTouched = true;
+            }
             if (window.FPCards) window.FPCards.initTilt(this.$el);
             const stage = this.$el.querySelector('.fs-stage');
             if (stage && 'IntersectionObserver' in window) {

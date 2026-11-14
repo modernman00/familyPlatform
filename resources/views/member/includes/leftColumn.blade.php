@@ -154,18 +154,17 @@
             <div class="w-100 px-2 mb-4" style="margin-bottom:1.5rem !important;" id="leftColumnKinWhispersPortal">
                 <a href="/kin-whispers" class="btn w-100 d-inline-flex align-items-center justify-content-between text-decoration-none position-relative"
                    style="background: linear-gradient(135deg, rgba(163,22,33,0.08) 0%, rgba(201,162,75,0.12) 100%); border: 1px solid rgba(163,22,33,0.22); border-radius: 12px; padding: 8px 12px; min-height: 44px; white-space: nowrap; flex-shrink: 0;"
-                   title="{{ __('nav.whisper', 'Whisper — Private, artifact-anchored family messages and voice dedications') }}">
+                   title="{{ __('nav.whisper', 'FamilyChat — Private, artifact-anchored family messages and voice dedications') }}">
                     <div class="d-inline-flex align-items-center gap-2 min-w-0 text-truncate">
-                        <span class="rounded-circle d-inline-flex align-items-center justify-content-center text-white flex-shrink-0 position-relative" style="width: 32px; height: 32px; background: #a31621; box-shadow: 0 3px 8px rgba(163,22,33,0.3);">
-                            <i class="bi bi-chat-dots-fill" style="font-size: 0.85rem;"></i>
-                            <span class="whisper-portal-bell-dot position-absolute top-0 end-0 translate-middle p-1 bg-warning border border-light rounded-circle {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="width: 8px; height: 8px;" title="New incoming whispers"></span>
+                        <span class="whisper-3d-icon d-inline-flex align-items-center justify-content-center text-white flex-shrink-0 position-relative" aria-hidden="true">
+                            <i class="bi bi-chat-dots-fill"></i>
+                            <span class="whisper-portal-bell-dot position-absolute top-0 end-0 translate-middle p-1 bg-warning border border-light rounded-circle {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="width: 8px; height: 8px;" title="New incoming FamilyChat messages"></span>
                         </span>
                         <div class="text-start min-w-0 text-truncate">
                             <div class="d-flex align-items-center gap-1.5">
-                                <span class="fw-bold d-block text-truncate" style="font-size: 0.86rem; color: var(--text-color, #0f172a); line-height: 1.2;">Whisper</span>
-                                <i class="bi bi-bell-fill text-warning whisper-portal-bell-icon {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.75rem;" title="Unread whispers available"></i>
+                                <span class="fw-bold d-block text-truncate" style="font-size: 0.86rem; color: var(--text-color, #0f172a); line-height: 1.2;">FamilyChat</span>
+                                <i class="bi bi-bell-fill text-warning whisper-portal-bell-icon {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.75rem;" title="Unread FamilyChat messages available"></i>
                             </div>
-                            <span class="d-block text-truncate" style="font-size: 0.72rem; color: var(--text-muted, #64748b); line-height: 1.2;">Private voice &amp; kin notes</span>
                         </div>
                     </div>
                     <div class="d-inline-flex align-items-center gap-1.5 flex-shrink-0">
@@ -173,7 +172,7 @@
                             <span class="whisper-portal-unread-count">{{ $leftWhisperUnreadCount > 0 ? $leftWhisperUnreadCount : '' }}</span>
                         </span>
                         <span class="badge rounded-pill text-white" style="background: #a31621; font-size: 0.68rem; padding: 3px 8px;">
-                            <i class="bi bi-chat-dots-fill me-0.5"></i> Whisper
+                            <i class="bi bi-chat-dots-fill me-0.5"></i> FamilyChat
                         </span>
                     </div>
                 </a>
@@ -189,6 +188,10 @@
             <div id="profileQuickActions" class="profile-quick-actions d-flex flex-row flex-wrap flex-lg-column gap-2 px-2 w-100">
                 <a href="/family/hub" class="btn fw-bold flex-fill text-decoration-none text-center shadow-sm" style="background: linear-gradient(135deg, #6d28d9 0%, #db2777 100%); color: #ffffff !important; border: none; border-radius: 12px; padding: 10px 12px; font-size: 0.92rem; box-shadow: 0 4px 14px rgba(109, 40, 217, 0.3); min-height: 44px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; flex-shrink: 0;" title="Family Hub - Access shared family applications and tools">
                     <i class="bi bi-grid-fill me-1.5 text-warning"></i> {{ __('profile.family_hub', 'Family Hub') }}
+                </a>
+
+                <a href="/creative-studio" class="btn fw-bold flex-fill text-decoration-none text-center shadow-sm" style="background: linear-gradient(135deg, #b45309 0%, #d97706 55%, #f59e0b 100%); color: #ffffff !important; border: none; border-radius: 12px; padding: 10px 12px; font-size: 0.92rem; box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3); min-height: 44px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; flex-shrink: 0;" title="{{ __('profile.creative_studio', 'Creative Studio') }} - Tree Studio, flyers &amp; posters, festive cards and living archives">
+                    <i class="bi bi-brush-fill me-1.5"></i> {{ __('profile.creative_studio', 'Creative Studio') }}
                 </a>
 
                 <a href="/organogram/{{ $data['id'] ?? '' }}?mode=canvas" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" title="Family Tree - View and build your interactive family lineage">
@@ -215,8 +218,8 @@
                     <i class="bi bi-qr-code me-1.5" style="color: #8b5cf6;"></i> {{ __('profile.family_code_mgt', 'Family Code Mgt') }}
                 </a>
 
-                <button type="button" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" data-bs-toggle="modal" data-bs-target="#inviteFamilyModal" title="{{ __('profile.invite_family', 'Invite Family') }} - Share your family code via WhatsApp or SMS">
-                    <i class="bi bi-person-plus-fill me-1.5" style="color: #b8202c;"></i> {{ __('profile.invite_family', 'Invite Family') }}
+                <button type="button" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" data-bs-toggle="modal" data-bs-target="#inviteFamilyModal" title="{{ __('profile.invite_others', 'Invite Others') }} - Share your family code via WhatsApp or SMS">
+                    <i class="bi bi-person-plus-fill me-1.5" style="color: #b8202c;"></i> {{ __('profile.invite_others', 'Invite Others') }}
                 </button>
 
                 <button type="button" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" data-bs-toggle="modal" data-bs-target="#createEventModal">
@@ -229,6 +232,10 @@
 
                 <a href="/familyJournal" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;">
                     <i class="bi bi-journal-bookmark-fill me-1.5" style="color: #059669;"></i> Family Journal
+                </a>
+
+                <a href="/commitments" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" title="Family Commitments — Set recurring targets, view on Family Calendar, and log check-ins">
+                    <i class="bi bi-calendar2-heart-fill me-1.5" style="color: #a31621;"></i> Family Commitments
                 </a>
 
                 <a href="/kin-whispers" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center position-relative" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" title="Whisper — Private artifact messages and 60-second voice dedications">
@@ -249,6 +256,10 @@
 
                 <button type="button" id="quickLinkThenNow" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" onclick="scrollToProfileWidget('thenNowSection')" aria-label="{{ __('profile.then_and_now', 'Then & Now') }}">
                     <i class="bi bi-hourglass-split me-1.5" style="color: #b8202c;"></i> {{ __('profile.then_and_now', 'Then & Now') }}
+                </button>
+
+                <button type="button" id="quickLinkMemoriesMilestones" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" onclick="scrollToProfileWidget('memoriesWidgetDesktop')" aria-label="{{ __('milestones.title', 'Memories & Milestones') }}">
+                    <i class="bi bi-stars me-1.5" style="color: #d97706;"></i> {{ __('milestones.title', 'Memories & Milestones') }}
                 </button>
 
                 <button type="button" id="quickLinkUpcomingEvents" class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" onclick="scrollToProfileWidget('upcomingEventsSection', 'allUpcomingEventsModal')" aria-label="{{ __('profile.upcoming_events', 'Upcoming Events') }}">
@@ -279,6 +290,40 @@
             @endif
 
             <style>
+            /* Whisper portal: glossy 3D chat bubble that draws the eye without shouting */
+            .whisper-3d-icon {
+                width: 40px; height: 40px; border-radius: 50%;
+                font-size: 1.1rem;
+                background:
+                    radial-gradient(circle at 32% 24%, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0) 38%),
+                    radial-gradient(circle at 50% 120%, rgba(255,214,102,0.55) 0%, rgba(255,214,102,0) 55%),
+                    linear-gradient(145deg, #e63946 0%, #a31621 55%, #6e0d15 100%);
+                box-shadow:
+                    inset 0 -4px 6px rgba(0,0,0,0.28),
+                    inset 0 2px 3px rgba(255,255,255,0.45),
+                    0 6px 12px rgba(163,22,33,0.45),
+                    0 2px 0 #6e0d15;
+                text-shadow: 0 2px 3px rgba(0,0,0,0.35);
+                animation: whisper3dFloat 3.2s ease-in-out infinite;
+                transform-style: preserve-3d;
+            }
+            .whisper-3d-icon::after {
+                content: ''; position: absolute; inset: -4px; border-radius: 50%;
+                border: 2px solid rgba(163,22,33,0.35);
+                animation: whisper3dRing 2.4s ease-out infinite;
+                pointer-events: none;
+            }
+            @keyframes whisper3dFloat {
+                0%, 100% { transform: translateY(0) rotateX(0deg); }
+                50% { transform: translateY(-2px) rotateX(8deg); }
+            }
+            @keyframes whisper3dRing {
+                0% { transform: scale(0.9); opacity: 0.8; }
+                100% { transform: scale(1.35); opacity: 0; }
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .whisper-3d-icon, .whisper-3d-icon::after { animation: none; }
+            }
             .highlight-section-pulse {
                 animation: profileWidgetPulse 2.5s ease-out;
                 scroll-margin-top: 80px;

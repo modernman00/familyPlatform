@@ -875,6 +875,13 @@ final class ProfilePage extends ProcessImg
                                 \App\services\LinkPreviewService::cacheExternalVideoLocally($imgVal);
                             }
                         }
+                        $rawPostMsg = (string)($postRecord['postMessage'] ?? '');
+                        if ($rawPostMsg !== '' && (str_contains($rawPostMsg, 'http://') || str_contains($rawPostMsg, 'https://'))) {
+                            $bgAssets = \App\services\LinkPreviewService::extractPhotoAssetsFromText($rawPostMsg, 6);
+                            foreach ($bgAssets['videos'] as $extVidUrl) {
+                                \App\services\LinkPreviewService::cacheExternalVideoLocally((string)$extVidUrl);
+                            }
+                        }
                     }
                 } catch (\Throwable $e) {
                     error_log('[VisualSupremacyService::post background] ' . $e->getMessage());
@@ -1035,18 +1042,6 @@ final class ProfilePage extends ProcessImg
                     );
                 }
 
-                // Trigger background notifications server-side
-                \App\controller\members\PostMessage::getNewCommentPusher();
-
-                $this->notifyReplyAndMentions(
-                    authorId: $id,
-                    authorName: (string) $newInput['fullName'],
-                    postNo: (string) ($_POST['post_no'] ?? ''),
-                    text: $cleanComment,
-                    parentAuthorId: $thread['parentAuthorId'] ?? null,
-                    commentNo: (int) $result
-                );
-
                 $commentData = [
                     'comment_no' => (int) $result,
                     'post_no' => (string) ($_POST['post_no'] ?? ''),
@@ -1061,7 +1056,60 @@ final class ProfilePage extends ProcessImg
                     'date_created' => date('Y-m-d H:i:s'),
                 ];
 
-                msgSuccess(200, $commentData);
+                $flushedEarly = false;
+                if (!isTestEnv() && php_sapi_name() !== 'cli') {
+                    $jsonPayload = json_encode([
+                        'message' => $commentData,
+                        'token'   => null,
+                        'status'  => 'success',
+                    ], JSON_UNESCAPED_SLASHES);
+                    if (function_exists('apache_setenv')) {
+                        @apache_setenv('no-gzip', '1');
+                    }
+                    @ini_set('zlib.output_compression', 'Off');
+                    if (!headers_sent()) {
+                        header('Content-Type: application/json');
+                        header('Content-Encoding: none');
+                        header('Connection: close');
+                        if ($jsonPayload !== false) {
+                            header('Content-Length: ' . strlen($jsonPayload));
+                        }
+                    }
+                    http_response_code(200);
+                    echo $jsonPayload;
+                    if (session_status() === PHP_SESSION_ACTIVE) {
+                        session_write_close();
+                    }
+                    while (ob_get_level() > 0) {
+                        ob_end_flush();
+                    }
+                    flush();
+                    if (function_exists('fastcgi_finish_request')) {
+                        fastcgi_finish_request();
+                    }
+                    ignore_user_abort(true);
+                    $flushedEarly = true;
+                }
+
+                // Trigger background notifications server-side (decoupled after HTTP response flush)
+                try {
+                    \App\controller\members\PostMessage::getNewCommentPusher();
+                } catch (\Throwable $pusherErr) {
+                    error_log('[ProfilePage::postComment pusher] ' . $pusherErr->getMessage());
+                }
+
+                $this->notifyReplyAndMentions(
+                    authorId: $id,
+                    authorName: (string) $newInput['fullName'],
+                    postNo: (string) ($_POST['post_no'] ?? ''),
+                    text: $cleanComment,
+                    parentAuthorId: $thread['parentAuthorId'] ?? null,
+                    commentNo: (int) $result
+                );
+
+                if (!$flushedEarly) {
+                    msgSuccess(200, $commentData);
+                }
             }
         } catch (\Throwable $th) {
   
@@ -1118,12 +1166,35 @@ final class ProfilePage extends ProcessImg
             return null;
         }
 
-        if ((int) ($file['size'] ?? 0) > 10 * 1024 * 1024) {
-            throw new \Src\Exceptions\ValidationException('Attached media exceeds the 10MB limit.');
+        if ((int) ($file['size'] ?? 0) > 25 * 1024 * 1024) {
+            throw new \Src\Exceptions\ValidationException('Attached media exceeds the 25MB limit.');
         }
 
         // Sovereign Media Safety Gate (Option A: Perceptual Hashing & Adult Media Screening)
         \App\services\MediaSafetyInspectionService::assertSafeUpload($file, 'comment_media');
+
+        $tmpPath = is_string($file['tmp_name']) ? $file['tmp_name'] : '';
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $detectedMime = $tmpPath !== '' && is_file($tmpPath) ? (string)$finfo->file($tmpPath) : '';
+        $allowedVideoMimes = [
+            'video/mp4' => 'mp4',
+            'video/webm' => 'webm',
+            'video/quicktime' => 'mov',
+        ];
+        if (isset($allowedVideoMimes[$detectedMime])) {
+            $ext = $allowedVideoMimes[$detectedMime];
+            $videoDir = 'resources/videos/posts/';
+            if (!is_dir($videoDir)) {
+                @mkdir($videoDir, 0755, true);
+            }
+            $safeVideoName = 'comment_video_' . time() . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
+            $destVideoPath = $videoDir . $safeVideoName;
+            if (@move_uploaded_file($tmpPath, $destVideoPath) || @copy($tmpPath, $destVideoPath)) {
+                \App\services\VideoAutoTrimService::optimiseMp4FastStart($destVideoPath);
+                return '/resources/videos/posts/' . $safeVideoName;
+            }
+            throw new \Src\Exceptions\ValidationException('Could not save attached comment video.');
+        }
 
         $targetDir = 'resources/images/post/';
         if (!is_dir($targetDir)) {
@@ -1149,11 +1220,22 @@ final class ProfilePage extends ProcessImg
             return null;
         }
 
-        // Allow internal uploaded comment media
+        if (str_contains($url, '..')) {
+            return null;
+        }
+
+        // Allow internal uploaded comment media (images and videos)
         if (str_starts_with($url, '/resources/images/post/comment_')) {
             $basename = basename($url);
-            if (preg_match('/^comment_[0-9]+_[a-f0-9]+\.(gif|png|jpe?g|webp)$/i', $basename)) {
+            if ($url === '/resources/images/post/' . $basename && preg_match('/^comment_(?:media_)?[0-9]+_[a-f0-9]+\.(gif|png|jpe?g|webp)$/i', $basename)) {
                 return '/resources/images/post/' . $basename;
+            }
+            return null;
+        }
+        if (str_starts_with($url, '/resources/videos/posts/comment_video_')) {
+            $basename = basename($url);
+            if ($url === '/resources/videos/posts/' . $basename && preg_match('/^comment_video_[0-9]+_[a-f0-9]+\.(mp4|webm|mov)$/i', $basename)) {
+                return '/resources/videos/posts/' . $basename;
             }
             return null;
         }

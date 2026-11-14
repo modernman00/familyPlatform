@@ -36,6 +36,8 @@ final class CommentGifUrlTest extends TestCase
             'media host' => ['https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.gif'],
             'numbered media host' => ['https://media2.giphy.com/media/abc/giphy.gif'],
             'bare host' => ['https://giphy.com/gifs/abc'],
+            'local comment video mp4' => ['/resources/videos/posts/comment_video_1700000000_abcd1234.mp4'],
+            'local comment image webp' => ['/resources/images/post/comment_media_1700000000_abcd1234.webp'],
         ];
     }
 
@@ -61,6 +63,7 @@ final class CommentGifUrlTest extends TestCase
             'javascript scheme' => ['javascript:alert(1)'],
             'data uri' => ['data:image/gif;base64,R0lGODlhAQABAAAAACw='],
             'too long' => ['https://media.giphy.com/' . str_repeat('a', 2100)],
+            'local video traversal' => ['/resources/videos/posts/../../etc/passwd.mp4'],
         ];
     }
 }

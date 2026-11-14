@@ -448,6 +448,7 @@ final class ReelsController extends BaseController
             if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
                 throw new Exception('Failed to save uploaded video.', 500);
             }
+            \App\services\VideoAutoTrimService::optimiseMp4FastStart($targetPath);
 
             echo json_encode([
                 'status'     => 200,

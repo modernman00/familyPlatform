@@ -737,6 +737,11 @@
   <!-- Pinned Family Announcements Bulletin -->
   @includeIf('member.includes.announcementBanner')
 
+  <!-- Post Composer (Desktop >=992px; mobile renders above the fold at top of container-main) -->
+  <div class="d-none d-lg-block">
+    @include('member.includes.postComposer', ['composerId' => 'openPostModalTrigger'])
+  </div>
+
   <!-- Family Reels & Stories Tray -->
   @includeIf('member.includes.reelsTray')
 
@@ -759,115 +764,6 @@
       'tags' => ['party', 'event', 'celebration', 'birthday', 'milestone'],
     ]
   ])
-
-  <!-- Post Composer (kept above the Kinship widget - creating a post is the
-       primary action; kin discovery is secondary) -->
-  <div class="card post-composer mb-4 border-0 shadow-sm" id="openPostModalTrigger" style="border-radius: 16px; overflow: hidden; background-color: var(--card-bg);">
-    <div class="card-body p-3 p-sm-4">
-      <div class="d-flex align-items-center gap-3">
-        <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="profile" class="rounded-circle flex-shrink-0 composer-avatar-img" width="44" height="44" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; max-width: 44px; max-height: 44px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 50%;">
-
-        <div role="button" tabindex="0" class="composer-prompt flex-grow-1 rounded-pill px-3 py-3 text-truncate" data-bs-toggle="modal" data-bs-target="#postModal"
-          style="background-color: #f1f5f9; border: 1.5px solid #cbd5e1; cursor: text; transition: all 0.2s ease-in-out;">
-          <span style="font-size: 0.95rem; font-weight: 500;">{{ __('feed.share_prompt', 'Share a moment with your family...') }}</span>
-        </div>
-      </div>
-
-      <style>
-        .composer-icon-btn {
-          width: 42px;
-          height: 42px;
-          min-width: 42px;
-          min-height: 42px;
-          border-radius: 12px !important;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0;
-          transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
-        }
-        .composer-icon-btn:hover {
-          transform: translateY(-2px);
-          filter: brightness(1.08);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
-        }
-        .composer-icon-btn:active {
-          transform: scale(0.94);
-        }
-        body.dark-mode .composer-icon-btn,
-        [data-bs-theme="dark"] .composer-icon-btn {
-          border-color: rgba(255, 255, 255, 0.12) !important;
-        }
-      </style>
-      <div class="composer-quick-actions d-flex align-items-center justify-content-between mt-3 pt-3 gap-2" style="border-top: 1px solid var(--border-color, #e2e8f0);">
-        <div class="d-flex align-items-center justify-content-between justify-content-sm-start gap-2 flex-grow-1 flex-sm-grow-0">
-          <!-- 1. Then & Now -->
-          <button type="button" class="btn composer-icon-btn shadow-xs"
-                  data-bs-toggle="modal" data-bs-target="#postModal"
-                  onclick="setTimeout(function () { if (window.__openThenNow) window.__openThenNow(''); }, 0)"
-                  title="Then &amp; Now - Compare milestone photos across years"
-                  aria-label="{{ __('feed.then_now', 'Then & Now photo comparison') }}"
-                  style="background: rgba(163, 22, 33, 0.1); color: #a31621; border: 1px solid rgba(163, 22, 33, 0.2);">
-            <i class="bi bi-hourglass-split" style="font-size: 1.15rem;"></i>
-          </button>
-          
-          <!-- 2. Photo -->
-          <button type="button" class="btn composer-icon-btn shadow-xs"
-                  data-bs-toggle="modal" data-bs-target="#postModal"
-                  title="Upload Photos - Add memories from your device or camera"
-                  aria-label="{{ __('feed.photo', 'Add a photo to post') }}"
-                  style="background: rgba(220, 38, 38, 0.1); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.2);">
-            <i class="bi bi-camera-fill" style="font-size: 1.15rem;"></i>
-          </button>
-
-          <!-- 3. Video -->
-          <button type="button" class="btn composer-icon-btn shadow-xs"
-                  data-bs-toggle="modal" data-bs-target="#postModal"
-                  onclick="setTimeout(function () { var vb = document.getElementById('addVideoBtn'); var vc = document.getElementById('videoEmbedContainer'); if (vc && vc.classList.contains('d-none') && vb) vb.click(); }, 120)"
-                  title="Upload Video - Embed or share family video clips"
-                  aria-label="{{ __('feed.video', 'Add a video to post') }}"
-                  style="background: rgba(220, 38, 38, 0.1); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.2);">
-            <i class="bi bi-play-btn-fill" style="font-size: 1.15rem;"></i>
-          </button>
-
-          <!-- 4. Announcement -->
-          <button type="button" class="btn composer-icon-btn shadow-xs"
-                  data-bs-toggle="modal" data-bs-target="#createAnnouncementModal"
-                  title="Family Announcement - Broadcast pinned notices to all relatives"
-                  aria-label="{{ __('feed.announcement', 'Broadcast family announcement') }}"
-                  style="background: rgba(217, 119, 6, 0.1); color: #d97706; border: 1px solid rgba(217, 119, 6, 0.2);">
-            <i class="bi bi-megaphone-fill" style="font-size: 1.15rem;"></i>
-          </button>
-
-          <!-- 5. Journal -->
-          <button type="button" class="btn composer-icon-btn shadow-xs"
-                  onclick="window.location.href='/familyJournal/create'"
-                  title="Family Journal - Write memoirs, stories, and chronicles"
-                  aria-label="{{ __('feed.journal', 'Write family journal chronicle') }}"
-                  style="background: rgba(5, 150, 105, 0.1); color: #059669; border: 1px solid rgba(5, 150, 105, 0.2);">
-            <i class="bi bi-journal-bookmark-fill" style="font-size: 1.15rem;"></i>
-          </button>
-
-          <!-- 6. Poll -->
-          <button type="button" class="btn composer-icon-btn shadow-xs"
-                  data-bs-toggle="modal" data-bs-target="#postModal"
-                  title="Family Poll - Gather opinions and vote on dates or plans"
-                  aria-label="{{ __('feed.poll', 'Create a poll') }}"
-                  style="background: rgba(234, 88, 12, 0.1); color: #ea580c; border: 1px solid rgba(234, 88, 12, 0.2);">
-            <i class="bi bi-bar-chart-fill" style="font-size: 1.15rem;"></i>
-          </button>
-        </div>
-
-        <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-2 fw-semibold d-none d-sm-inline-flex align-items-center gap-1.5 shadow-xs flex-shrink-0"
-                data-bs-toggle="modal" data-bs-target="#postModal"
-                title="Create Post - Share stories, photos, and milestones with family"
-                style="background-color: var(--primary-color, #a31621); color: #ffffff !important; border: none; min-height: 40px; white-space: nowrap;">
-          <i class="bi bi-plus-lg"></i> <span>{{ __('feed.post_btn', 'Post') }}</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
 
   <!-- Suggested Kin & In-Laws: Facebook-Style Horizontal Carousel (Visible in feed across mobile & desktop) -->
   @if(!empty($suggestedKin))
@@ -1477,6 +1373,7 @@
                            @loadedmetadata="onVideoModalMetadata($el)"
                            @loadeddata="videoModalHasFrame = true; onVideoModalMetadata($el)"
                            @playing="videoModalHasFrame = true; videoModalPlaying = true"
+                           x-on:error="if (!$el.dataset.retried && videoModalVideos[videoModalIndex]?.originalUrl && $el.src !== videoModalVideos[videoModalIndex].originalUrl && videoModalVideos[videoModalIndex].originalUrl.startsWith('http')) { $el.dataset.retried = '1'; $el.src = videoModalVideos[videoModalIndex].originalUrl; $el.load(); $el.play().catch(() => {}); }"
                            @play="videoModalPlaying = true"
                            @pause="videoModalPlaying = false"
                            @ended="onVideoModalEnded()"

@@ -44,15 +44,6 @@ foreach(($eventData ?? []) as $event) {
     </div>
     @endif
 
-    <!-- Family Heritage & Weekly Rituals Hub Widget -->
-    @includeIf('member.includes.familyHeritageWidget')
-
-    <!-- Family Memories & Milestones Widget -->
-    @includeIf('member.includes.memoriesMilestonesWidget')
-
-    <!-- Then & Now timeline (own) -->
-    @includeIf('member.includes.thenNowTimeline', ['memberId' => (string)($_SESSION['id'] ?? ''), 'memberName' => '', 'tnSuffix' => 'self'])
-
     <!-- Events Card -->
     <div class="card border-0 shadow-sm mb-4" id="upcomingEventsSection" style="border-radius: 20px; background-color: var(--card-bg); scroll-margin-top: 80px;">
         <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4" id="eventHeader">
@@ -205,6 +196,15 @@ foreach(($eventData ?? []) as $event) {
             </template>
         </div>
     </div>
+
+    <!-- Then & Now timeline (own) -->
+    @includeIf('member.includes.thenNowTimeline', ['memberId' => (string)($_SESSION['id'] ?? ''), 'memberName' => '', 'tnSuffix' => 'self'])
+
+    <!-- Family Memories & Milestones Widget -->
+    @includeIf('member.includes.memoriesMilestonesWidget')
+
+    <!-- Family Heritage & Weekly Rituals Hub Widget -->
+    @includeIf('member.includes.familyHeritageWidget')
 
     <!-- Family Members Metric Card -->
     <div class="card border-0 text-white text-center shadow-lg position-relative overflow-hidden" style="background: linear-gradient(135deg, #2a0a0d 0%, #2a0a0d 40%, #8a1019 80%, #b8202c 100%); border-radius: 20px; padding: 28px 20px; box-shadow: 0 16px 32px -4px rgba(42,10,13, 0.35);">

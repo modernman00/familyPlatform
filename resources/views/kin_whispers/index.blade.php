@@ -1,10 +1,10 @@
 @extends('layouts.profileBase')
 
-@section('title', 'Kin Whispers & Artifact Messages — FamilyPlatform')
+@section('title', 'FamilyChat & Artifact Messages — FamilyPlatform')
 @section('meta_description', 'Private, thoughtful messages and voice dedications anchored to your family photographs, memories and lineage.')
 
 @section('manifest_href', '/public/manifest-whispers.json')
-@section('apple_app_title', 'Whispers')
+@section('apple_app_title', 'FamilyChat')
 
 @push('styles')
 <script nonce="{{ csp_nonce($nonce ?? null) }}">
@@ -95,8 +95,11 @@ html.kw-popup .kw-notice { display: none !important; }
     min-width: 0; min-height: 0; height: 100%; max-height: 100%; overflow: hidden;
 }
 .kw-side__head {
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    padding: 18px 18px 12px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 16px 16px 12px; flex-shrink: 0;
+}
+.kw-side__actions {
+    display: flex; align-items: center; gap: 8px; flex-shrink: 0;
 }
 .kw-side__title {
     font-family: 'Outfit', 'Inter', sans-serif; font-size: 1.375rem; font-weight: 800;
@@ -104,22 +107,66 @@ html.kw-popup .kw-notice { display: none !important; }
 }
 .kw-side__sub {
     display: flex; align-items: center; gap: 5px; font-size: 0.75rem; font-weight: 500;
-    color: var(--kw-muted); margin: 3px 0 0;
+    color: var(--kw-muted); margin: 3px 0 0; white-space: nowrap;
 }
 .kw-new-btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    min-height: 40px; padding: 0 16px; border-radius: 999px; border: 0;
+    min-height: 44px; min-width: 44px; padding: 0 14px; border-radius: 999px; border: 0;
     background: var(--kw-primary); color: #ffffff; font-size: 0.8125rem; font-weight: 700;
     white-space: nowrap; flex-shrink: 0; cursor: pointer; transition: filter 0.15s ease, transform 0.15s ease;
 }
 .kw-new-btn:hover { filter: brightness(1.06); }
 .kw-new-btn:active { transform: scale(0.98); }
+.kw-new-btn:focus-visible { outline: 2px solid var(--kw-primary); outline-offset: 2px; }
+
+/* Linked PWA Install & Pop-out Floating Popup */
+.kw-install-popup {
+    position: fixed; right: 24px; bottom: 24px; z-index: 1045;
+    width: calc(100vw - 32px); max-width: 396px;
+    background: var(--kw-card); color: var(--kw-ink);
+    border: 1px solid var(--kw-line); border-radius: 20px;
+    padding: 18px; box-shadow: 0 24px 48px -12px rgba(28, 20, 18, 0.32), 0 0 0 1px rgba(163, 22, 33, 0.12);
+    display: flex; flex-direction: column; gap: 12px;
+    animation: kwPopoverPop .22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.kw-install-popup__head {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+}
+.kw-install-popup__brand {
+    display: flex; align-items: center; gap: 12px; min-width: 0;
+}
+.kw-install-popup__icon {
+    width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+    background: var(--kw-primary); color: #ffffff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.25rem; box-shadow: 0 6px 14px rgba(163, 22, 33, 0.28);
+}
+.kw-install-popup__title {
+    font-family: 'Outfit', 'Inter', sans-serif; font-size: 1rem; font-weight: 800;
+    margin: 0; color: var(--kw-ink); line-height: 1.25;
+}
+.kw-install-popup__sub {
+    font-size: 0.78rem; color: var(--kw-muted); margin: 3px 0 0; line-height: 1.4;
+}
+.kw-install-popup__guide {
+    background: var(--kw-soft); border: 1px solid var(--kw-line); border-radius: 14px;
+    padding: 12px 14px; font-size: 0.8125rem; line-height: 1.5; color: var(--kw-ink);
+}
+.kw-install-popup__guide ol {
+    margin: 6px 0 0; padding-left: 18px;
+}
+.kw-install-popup__guide li {
+    margin-bottom: 4px;
+}
+.kw-install-popup__actions {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+}
 
 .kw-search { padding: 0 16px 10px; position: relative; flex-shrink: 0; }
 .kw-search i { position: absolute; left: 30px; top: calc(50% - 5px); transform: translateY(-50%); color: var(--kw-muted); pointer-events: none; font-size: 0.875rem; }
 .kw-input, .kw-select, .kw-textarea {
     width: 100%; background: var(--kw-soft); color: var(--kw-ink); border: 1px solid transparent; border-radius: 999px;
-    padding: 9px 14px; font-size: .875rem; line-height: 1.4; min-height: 42px;
+    padding: 9px 14px; font-size: .875rem; line-height: 1.4; min-height: 44px;
 }
 .kw-modal .kw-input, .kw-modal .kw-select, .kw-modal .kw-textarea { border-radius: 12px; border-color: var(--kw-line); background: var(--kw-card); }
 .kw-search .kw-input { padding-left: 38px; }
@@ -127,14 +174,14 @@ html.kw-popup .kw-notice { display: none !important; }
 .kw-textarea { resize: none; border-radius: 18px; }
 
 .kw-filter-pills {
-    display: flex; align-items: center; gap: 6px; padding: 0 16px 12px;
+    display: flex; align-items: center; gap: 8px; padding: 0 16px 12px;
     border-bottom: 1px solid var(--kw-line); overflow-x: auto; flex-shrink: 0;
     scrollbar-width: none;
 }
 .kw-filter-pills::-webkit-scrollbar { display: none; }
 .kw-filter-pill {
     display: inline-flex; align-items: center; justify-content: center;
-    min-height: 32px; padding: 4px 13px; border-radius: 999px;
+    min-height: 44px; min-width: 44px; padding: 6px 14px; border-radius: 999px;
     border: 1px solid var(--kw-line); background: var(--kw-card); color: var(--kw-muted);
     font-size: 0.78rem; font-weight: 700; white-space: nowrap; flex-shrink: 0; cursor: pointer;
     transition: all 0.15s ease;
@@ -496,12 +543,37 @@ html.kw-popup .kw-notice { display: none !important; }
     font-weight: 600; font-size: .75rem; color: var(--kw-ink);
 }
 
+.kw-quick-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px;
+}
+.kw-quick-emojis {
+    display: flex; align-items: center; gap: 4px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; flex: 1; min-width: 0;
+}
+.kw-quick-emojis::-webkit-scrollbar { display: none; }
+.kw-disappear-helper-btn {
+    display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px;
+    border-radius: 999px; background: var(--kw-soft); border: 1px solid var(--kw-line);
+    font-size: .72rem; font-weight: 600; color: var(--kw-muted); cursor: pointer;
+    white-space: nowrap; transition: all .15s ease;
+}
+.kw-disappear-helper-btn:hover { background: var(--kw-card); color: var(--kw-ink); }
+.kw-disappear-helper-btn.is-active {
+    background: #fef2f2; border-color: #fecaca; color: #dc2626; font-weight: 700;
+}
+.dark-mode .kw-disappear-helper-btn.is-active {
+    background: rgba(220,38,38,0.2); border-color: rgba(220,38,38,0.4); color: #fca5a5;
+}
+.kw-disappear-helper-label { font-size: .7rem; font-weight: 600; }
+.kw-quick-bar .kw-disappear-popover {
+    left: auto; right: 0;
+}
+
 /* Rich ContentEditable Composer & Inline 3D Emoji */
 .kw-editable-composer {
-    display: block !important; width: 100% !important; min-width: 100% !important; box-sizing: border-box !important;
-    min-height: 58px; max-height: 150px; overflow-y: auto; white-space: pre-wrap;
+    display: block !important; flex: 1 1 auto !important; width: auto !important; min-width: 0 !important; box-sizing: border-box !important;
+    min-height: 42px; max-height: 150px; overflow-y: auto; white-space: pre-wrap;
     word-break: normal; overflow-wrap: break-word; user-select: text; outline: none;
-    line-height: 1.55; padding: 12px 16px;
+    line-height: 1.5; padding: 9px 12px;
 }
 .kw-editable-composer:empty::before {
     content: attr(data-placeholder); color: var(--kw-muted); pointer-events: none; display: inline-block;
@@ -699,7 +771,7 @@ html.kw-popup .kw-notice { display: none !important; }
         display: none;
     }
     .kw-new-btn {
-        width: 40px; height: 40px; min-width: 40px; padding: 0; border-radius: 50%;
+        width: 44px; height: 44px; min-width: 44px; min-height: 44px; padding: 0; border-radius: 50%;
     }
 }
 @media (max-width: 767.98px) {
@@ -712,11 +784,88 @@ html.kw-popup .kw-notice { display: none !important; }
     .kw-side { border-right: 0; }
     .kw-shell[data-pane="chat"] .kw-side { display: none; }
     .kw-shell[data-pane="list"] .kw-main { display: none; }
-    .kw-back { display: inline-flex; }
+    .kw-back {
+        display: inline-flex;
+        width: 44px; height: 44px; min-width: 44px; min-height: 44px;
+        padding: 0; margin-right: 0;
+    }
+    .kw-install-popup {
+        right: 16px; left: 16px; bottom: 84px; width: auto; max-width: none;
+    }
     .kw-threads { max-height: none; }
-    .kw-stream { padding: 14px 16px; min-height: 0; }
-    .kw-head, .kw-composer { padding: 10px 14px; }
-    .kw-bubble__container { max-width: 86%; }
+    .kw-stream { padding: 12px 14px; min-height: 0; }
+    .kw-head {
+        padding: 8px 10px;
+        gap: 8px;
+    }
+    .kw-head__who {
+        gap: 8px;
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+    .kw-head__actions {
+        gap: 8px !important;
+    }
+    .kw-head__actions .kw-btn--square {
+        width: 44px; height: 44px; min-width: 44px; min-height: 44px; font-size: 0.95rem;
+    }
+    .kw-head__who .kw-avatar-wrap {
+        width: 38px; height: 38px; flex-shrink: 0;
+    }
+    .kw-head__who .kw-avatar {
+        width: 38px; height: 38px; min-width: 38px; min-height: 38px;
+    }
+    .kw-head__title {
+        font-size: .875rem;
+        line-height: 1.25;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .kw-head__sub {
+        font-size: .72rem;
+        line-height: 1.2;
+        margin: 1px 0 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        gap: 4px;
+    }
+    .kw-head__desktop-context {
+        display: none !important;
+    }
+    .kw-presence-text {
+        font-size: .72rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Mobile Composer Ergonomics (Roomy, Never Squeezed) */
+    .kw-composer {
+        padding: 8px 10px 10px;
+    }
+    .kw-composer__pill-bar {
+        padding: 3px 5px 3px 6px;
+        gap: 4px;
+    }
+    .kw-composer__tools {
+        gap: 2px;
+    }
+    .kw-icon-tool {
+        width: 34px; height: 34px; min-width: 34px; min-height: 34px; font-size: 1rem;
+    }
+    .kw-send-circle {
+        width: 36px; height: 36px; min-width: 36px; min-height: 36px;
+    }
+    .kw-editable-composer {
+        min-height: 40px !important;
+        max-height: 110px !important;
+        padding: 8px 10px !important;
+        font-size: .9rem !important;
+        line-height: 1.4 !important;
+    }
+    .kw-bubble__container { max-width: 88%; }
     .kw-bubble { max-width: 100%; }
     .kw-bubble__actions { top: -10px; padding: 1px 3px; gap: 1px; }
     .kw-react-trigger { width: 22px; height: 22px; min-width: 22px; min-height: 22px; font-size: .68rem; }
@@ -990,31 +1139,47 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
   <header class="kw-hero">
     <div>
       <div class="kw-hero__eyebrow"><i class="bi bi-chat-heart-fill"></i> &nbsp;Private &amp; Supervised</div>
-      <h1>Kin Whispers</h1>
+      <h1>FamilyChat</h1>
       <p>Thoughtful private messages and 60-second voice dedications, anchored to the photographs, memories and people that matter to your family.</p>
     </div>
     <button type="button" class="kw-btn kw-btn--gold" @click="openCompose()">
-      <i class="bi bi-plus-lg"></i><span>New Whisper</span>
+      <i class="bi bi-plus-lg"></i><span>New Chat</span>
     </button>
   </header>
 
   <div class="kw-notice" role="note">
     <i class="bi bi-shield-check"></i>
-    <div><strong>Safeguarding:</strong> any whisper involving a member under 18 is visible to their parent or guardian, who is notified of new messages.</div>
+    <div><strong>Safeguarding:</strong> any FamilyChat thread involving a member under 18 is visible to their parent or guardian, who is notified of new messages.</div>
   </div>
 
-  <section class="kw-shell" :data-pane="pane" aria-label="Kin whispers workspace">
+  <section class="kw-shell" :data-pane="pane" aria-label="FamilyChat workspace">
 
     {{-- Thread list --}}
     <aside class="kw-side" aria-label="Conversations">
       <div class="kw-side__head">
         <div>
-          <h1 class="kw-side__title">Whispers</h1>
+          <h1 class="kw-side__title">FamilyChat</h1>
           <p class="kw-side__sub"><i class="bi bi-lock"></i> Private &amp; supervised</p>
         </div>
-        <button type="button" class="kw-new-btn" @click="openCompose()" aria-label="New whisper" title="Start a new whisper">
-          <i class="bi bi-plus-lg"></i><span>New whisper</span>
-        </button>
+        <div class="kw-side__actions">
+          <button type="button" class="kw-btn kw-btn--ghost kw-btn--square"
+                  x-show="!isStandaloneApp"
+                  @click="openInstallPopup()"
+                  aria-label="Download FamilyChat app"
+                  title="Download FamilyChat as a linked app">
+            <i class="bi bi-download"></i>
+          </button>
+          <button type="button" class="kw-btn kw-btn--ghost kw-btn--square"
+                  x-show="!isPopupMode && !isStandaloneApp"
+                  @click="popOutWhisperWindow()"
+                  aria-label="Pop out FamilyChat window"
+                  title="Open FamilyChat in a separate pop-out window">
+            <i class="bi bi-box-arrow-up-right"></i>
+          </button>
+          <button type="button" class="kw-new-btn" @click="openCompose()" aria-label="New whisper" title="Start a new whisper">
+            <i class="bi bi-plus-lg"></i><span>New</span>
+          </button>
+        </div>
       </div>
 
       <div class="kw-search">
@@ -1103,7 +1268,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
               </div>
               <span class="kw-presence-dot" x-show="isPartnerOnline(activeThread)" x-cloak aria-hidden="true"></span>
               </div>
-              <div style="min-width:0;">
+              <div style="min-width:0; flex:1 1 auto;">
                 <h2 class="kw-head__title">
                   <span x-text="partnerName(activeThread)"></span>
                   <template x-if="activeThread.is_pinned"><i class="bi bi-pin-angle-fill kw-pinned-icon" title="Pinned conversation"></i></template>
@@ -1111,25 +1276,30 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                 </h2>
                 <p class="kw-head__sub">
                   <template x-if="presenceLabel(activeThread)">
-                    <span class="kw-presence-text" :class="{'is-online': isPartnerOnline(activeThread)}" x-text="presenceLabel(activeThread)" aria-live="polite"></span>
+                    <span class="kw-presence-text" :class="{'is-online': isPartnerOnline(activeThread)}" x-text="presenceLabel(activeThread)" :title="presenceLabel(activeThread)" aria-live="polite"></span>
                   </template>
-                  <template x-if="presenceLabel(activeThread)"><span>&middot;</span></template>
                   <template x-if="activeThread.thread_type === 'group'">
                     <span><span x-text="((activeThread?.participants || []).length || (activeThread.participant_count || 2)) + ' family members'"></span> &middot; <button type="button" @click.stop="showGroupRosterModal = true" style="background:none; border:none; padding:0; color:var(--kw-primary); font-weight:700; text-decoration:underline; cursor:pointer;">View roster</button></span>
                   </template>
                   <template x-if="activeThread.thread_type !== 'group'">
-                    <span x-text="activeThread.context_title || labelFor(activeThread.context_type)"></span>
+                    <span class="kw-head__desktop-context" x-show="activeThread.context_title || labelFor(activeThread.context_type)">
+                      <template x-if="presenceLabel(activeThread)"><span> &middot; </span></template>
+                      <span x-text="activeThread.context_title || labelFor(activeThread.context_type)"></span>
+                    </span>
                   </template>
-                  <template x-if="activeThread.has_minor_participant"><span> &middot; <i class="bi bi-shield-check"></i> Supervised</span></template>
+                  <template x-if="activeThread.has_minor_participant"><span class="kw-head__supervised"> &middot; <i class="bi bi-shield-check"></i> Supervised</span></template>
                 </p>
               </div>
             </div>
-            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+            <div class="kw-head__actions" style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
               <button type="button" class="kw-btn kw-btn--ghost kw-btn--square" :class="{'is-active': showInChatSearch}" @click="toggleInChatSearch()" title="Search in conversation" aria-label="Search in conversation">
                 <i class="bi bi-search"></i>
               </button>
               <button type="button" class="kw-btn kw-btn--ghost kw-btn--square" @click="openCallModal()" title="Start video or voice call with kin" aria-label="Start call">
                 <i class="bi bi-telephone"></i>
+              </button>
+              <button type="button" class="kw-btn kw-btn--ghost kw-btn--square" x-show="!isPopupMode && !isStandaloneApp" @click="popOutWhisperWindow()" title="Pop out FamilyChat into a dedicated window" aria-label="Pop out FamilyChat window">
+                <i class="bi bi-box-arrow-up-right"></i>
               </button>
               <button type="button" class="kw-btn kw-btn--ghost kw-btn--square" @click="openInfoDrawer()" title="Conversation info, shared media & starred whispers" aria-label="Conversation info">
                 <i class="bi bi-info-circle"></i>
@@ -1307,32 +1477,59 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
 
                     <template x-if="msg.body"><p class="kw-bubble__text" x-html="renderHighlightedBody(msg.body)"></p></template>
 
-                    {{-- Rich OpenGraph Link Preview Card --}}
+                    {{-- Rich OpenGraph Link Preview Card (with Native Video & Multi-Photo Album Support) --}}
                     <template x-if="resolveMessageLinkPreview(msg)">
-                      <a :href="resolveMessageLinkPreview(msg).url"
-                         target="_blank"
-                         rel="noopener noreferrer"
-                         class="kw-link-preview"
-                         @click.stop>
-                        <template x-if="resolveMessageLinkPreview(msg).image">
-                          <div class="kw-link-preview__media">
-                            <img :src="resolveMessageLinkPreview(msg).image"
-                                 :alt="resolveMessageLinkPreview(msg).title || 'Link preview image'"
-                                 loading="lazy"
-                                 x-on:error="$el.parentElement.style.display='none'">
+                      <div class="kw-link-preview-wrap" @click.stop>
+                        <template x-if="resolveMessageLinkPreview(msg).album_videos && resolveMessageLinkPreview(msg).album_videos.length > 0">
+                          <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-top:6px;">
+                            <template x-for="(vUrl, vIdx) in resolveMessageLinkPreview(msg).album_videos" :key="'kw_lv_' + vIdx">
+                              <video :src="vUrl.includes('googleusercontent.com') || vUrl.includes('googlevideo.com') ? ('/member/stream-video?url=' + encodeURIComponent(vUrl)) : vUrl"
+                                     controls playsinline preload="metadata"
+                                     style="max-width:240px; max-height:220px; border-radius:10px; background:#000; flex-shrink:0;"></video>
+                            </template>
                           </div>
                         </template>
-                        <div class="kw-link-preview__body">
-                          <div class="kw-link-preview__meta">
-                            <span class="text-truncate" x-text="resolveMessageLinkPreview(msg).site_name || resolveMessageLinkPreview(msg).domain || 'Web Link'"></span>
-                            <span class="kw-link-preview__cta" x-text="resolveMessageLinkPreview(msg).cta_label || 'Open Link →'"></span>
+                        <template x-if="(!resolveMessageLinkPreview(msg).album_videos || resolveMessageLinkPreview(msg).album_videos.length === 0) && resolveMessageLinkPreview(msg).is_video && resolveMessageLinkPreview(msg).video_url">
+                          <div style="margin-top:6px;">
+                            <video :src="(resolveMessageLinkPreview(msg).video_url.includes('googleusercontent.com') || resolveMessageLinkPreview(msg).video_url.includes('googlevideo.com')) ? ('/member/stream-video?url=' + encodeURIComponent(resolveMessageLinkPreview(msg).video_url)) : resolveMessageLinkPreview(msg).video_url"
+                                   :poster="resolveMessageLinkPreview(msg).image || null"
+                                   controls playsinline preload="metadata"
+                                   style="width:100%; max-width:300px; max-height:260px; border-radius:10px; background:#000;"></video>
                           </div>
-                          <div class="kw-link-preview__title" x-text="resolveMessageLinkPreview(msg).title || resolveMessageLinkPreview(msg).domain || resolveMessageLinkPreview(msg).url"></div>
-                          <template x-if="resolveMessageLinkPreview(msg).description">
-                            <div class="kw-link-preview__desc" x-text="resolveMessageLinkPreview(msg).description"></div>
+                        </template>
+                        <template x-if="resolveMessageLinkPreview(msg).album_images && resolveMessageLinkPreview(msg).album_images.length > 1">
+                          <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; margin-top:6px; max-width:300px;">
+                            <template x-for="(imgUrl, iIdx) in resolveMessageLinkPreview(msg).album_images.slice(0, 4)" :key="'kw_li_' + iIdx">
+                              <img :src="imgUrl" alt="Shared album photo" loading="lazy"
+                                   @click.stop="activeLightboxImg = imgUrl"
+                                   style="width:100%; height:110px; object-fit:cover; border-radius:8px; cursor:pointer;">
+                            </template>
+                          </div>
+                        </template>
+                        <a :href="resolveMessageLinkPreview(msg).url"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="kw-link-preview">
+                          <template x-if="resolveMessageLinkPreview(msg).image && (!resolveMessageLinkPreview(msg).album_images || resolveMessageLinkPreview(msg).album_images.length <= 1) && !resolveMessageLinkPreview(msg).is_video">
+                            <div class="kw-link-preview__media">
+                              <img :src="resolveMessageLinkPreview(msg).image"
+                                   :alt="resolveMessageLinkPreview(msg).title || 'Link preview image'"
+                                   loading="lazy"
+                                   x-on:error="$el.parentElement.style.display='none'">
+                            </div>
                           </template>
-                        </div>
-                      </a>
+                          <div class="kw-link-preview__body">
+                            <div class="kw-link-preview__meta">
+                              <span class="text-truncate" x-text="resolveMessageLinkPreview(msg).site_name || resolveMessageLinkPreview(msg).domain || 'Web Link'"></span>
+                              <span class="kw-link-preview__cta" x-text="resolveMessageLinkPreview(msg).cta_label || 'Open Link →'"></span>
+                            </div>
+                            <div class="kw-link-preview__title" x-text="resolveMessageLinkPreview(msg).title || resolveMessageLinkPreview(msg).domain || resolveMessageLinkPreview(msg).url"></div>
+                            <template x-if="resolveMessageLinkPreview(msg).description">
+                              <div class="kw-link-preview__desc" x-text="resolveMessageLinkPreview(msg).description"></div>
+                            </template>
+                          </div>
+                        </a>
+                      </div>
                     </template>
 
                     {{-- Reactions display --}}
@@ -1405,19 +1602,45 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
           </div>
 
           <div class="kw-composer">
-            {{-- Quick Emojis --}}
-            <div class="kw-quick-emojis" aria-label="Quick family emojis">
-              <span class="kw-quick-emojis__label">Quick:</span>
-              <template x-for="emo in quickEmojis" :key="emo">
-                <button type="button" class="kw-emoji-chip" @click="insertEmoji(emo)" :title="'Insert ' + emo">
-                  <template x-if="emo.endsWith('_3d')">
-                    <img :src="'/img/emoji/' + emo + '.svg'" class="atg-3d-emoji" width="22" height="22" :alt="emo" x-on:error="$el.src='/img/emoji/' + emo + '.png'">
-                  </template>
-                  <template x-if="!emo.endsWith('_3d')">
-                    <span x-text="emo"></span>
-                  </template>
+            {{-- Quick Emojis & Disappearing Timer Bar --}}
+            <div class="kw-quick-bar" aria-label="Quick family actions">
+              <div class="kw-quick-emojis" aria-label="Quick family emojis">
+                <span class="kw-quick-emojis__label">Quick:</span>
+                <template x-for="emo in quickEmojis" :key="emo">
+                  <button type="button" class="kw-emoji-chip" @click="insertEmoji(emo)" :title="'Insert ' + emo">
+                    <template x-if="emo.endsWith('_3d')">
+                      <img :src="'/img/emoji/' + emo + '.svg'" class="atg-3d-emoji" width="22" height="22" :alt="emo" x-on:error="$el.src='/img/emoji/' + emo + '.png'">
+                    </template>
+                    <template x-if="!emo.endsWith('_3d')">
+                      <span x-text="emo"></span>
+                    </template>
+                  </button>
+                </template>
+              </div>
+
+              {{-- Disappearing message timer toggle in quick helper bar --}}
+              <div style="position:relative; flex-shrink:0;">
+                <button type="button" class="kw-disappear-helper-btn"
+                        :class="{'is-active': activeDisappearSeconds > 0}"
+                        @click="showDisappearMenu = !showDisappearMenu"
+                        :title="activeDisappearSeconds > 0 ? ('Auto-disappears in ' + disappearLabel(activeDisappearSeconds)) : 'Auto-disappear message timer (Off)'"
+                        aria-label="Auto-disappear message timer">
+                  <i class="bi bi-clock" :style="activeDisappearSeconds > 0 ? 'color:#dc2626; font-weight:bold;' : ''"></i>
+                  <span x-show="activeDisappearSeconds > 0" class="kw-disappear-pill" x-text="disappearShort(activeDisappearSeconds)"></span>
+                  <span x-show="activeDisappearSeconds === 0" class="kw-disappear-helper-label">Timer</span>
                 </button>
-              </template>
+                <div class="kw-disappear-popover" x-show="showDisappearMenu" @click.outside="showDisappearMenu = false" x-cloak>
+                  <div class="kw-disappear-popover__title"><i class="bi bi-stopwatch"></i> Disappearing Message</div>
+                  <template x-for="opt in disappearOptions" :key="opt.seconds">
+                    <button type="button" class="kw-disappear-opt"
+                            :class="{'is-selected': activeDisappearSeconds === opt.seconds}"
+                            @click="activeDisappearSeconds = opt.seconds; showDisappearMenu = false;">
+                      <span x-text="opt.label"></span>
+                      <i class="bi bi-check" x-show="activeDisappearSeconds === opt.seconds"></i>
+                    </button>
+                  </template>
+                </div>
+              </div>
             </div>
 
             {{-- Collapsible Emoji Drawer --}}
@@ -1517,29 +1740,9 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                   <button type="button" class="kw-icon-tool" @click="$refs.mediaFileInput.click()" aria-label="Attach photo, video or document" title="Attach photo, video or document">
                     <i class="bi bi-paperclip" style="font-size:1.1rem;"></i>
                   </button>
-
-                  {{-- Disappearing message timer toggle --}}
-                  <div style="position:relative;">
-                    <button type="button" class="kw-icon-tool"
-                            :class="{'is-active': activeDisappearSeconds > 0}"
-                            @click="showDisappearMenu = !showDisappearMenu"
-                            :title="activeDisappearSeconds > 0 ? ('Auto-disappears in ' + disappearLabel(activeDisappearSeconds)) : 'Auto-disappear timer (Off)'"
-                            aria-label="Auto-disappear message timer">
-                      <i class="bi bi-clock" :style="activeDisappearSeconds > 0 ? 'color:#dc2626; font-weight:bold;' : ''"></i>
-                      <span x-show="activeDisappearSeconds > 0" class="kw-disappear-pill" x-text="disappearShort(activeDisappearSeconds)"></span>
-                    </button>
-                    <div class="kw-disappear-popover" x-show="showDisappearMenu" @click.outside="showDisappearMenu = false" x-cloak>
-                      <div class="kw-disappear-popover__title"><i class="bi bi-stopwatch"></i> Disappearing Message</div>
-                      <template x-for="opt in disappearOptions" :key="opt.seconds">
-                        <button type="button" class="kw-disappear-opt"
-                                :class="{'is-selected': activeDisappearSeconds === opt.seconds}"
-                                @click="activeDisappearSeconds = opt.seconds; showDisappearMenu = false;">
-                          <span x-text="opt.label"></span>
-                          <i class="bi bi-check" x-show="activeDisappearSeconds === opt.seconds"></i>
-                        </button>
-                      </template>
-                    </div>
-                  </div>
+                  <button type="button" class="kw-icon-tool" :class="{'is-active': showEmojiDrawer}" @click="showEmojiDrawer = !showEmojiDrawer" aria-label="Emoji picker" title="Open family emoji palette">
+                    <i class="bi bi-emoji-smile"></i>
+                  </button>
                 </div>
 
                 <div id="kw_body"
@@ -1549,18 +1752,20 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                      aria-multiline="true"
                      data-placeholder="Write a private message…"
                      @input="onComposerInput($event)"
+                     @paste="handleComposerPaste($event)"
                      @keydown.enter.prevent.exact="sendMessage()"></div>
 
                 <div class="kw-composer__actions">
-                  <button type="button" class="kw-icon-tool" :class="{'is-active': showEmojiDrawer}" @click="showEmojiDrawer = !showEmojiDrawer" aria-label="Emoji picker" title="Open family emoji palette">
-                    <i class="bi bi-emoji-smile"></i>
-                  </button>
-                  <button type="button" class="kw-icon-tool" :class="{'is-live': isRecording}" @click="toggleAudioRecording()" :aria-label="isRecording ? 'Stop recording' : 'Record a voice whisper'" title="Record a voice whisper">
-                    <i class="bi" :class="isRecording ? 'bi-stop-fill' : 'bi-mic'"></i>
-                  </button>
-                  <button type="submit" class="kw-send-circle" :disabled="!newMessageBody.trim() && !recordedAudioBlob && !pendingAttachment" aria-label="Send whisper" title="Send whisper">
-                    <i class="bi bi-send-fill" style="font-size:0.9rem;"></i>
-                  </button>
+                  <template x-if="!newMessageBody.trim() && !recordedAudioBlob && !pendingAttachment">
+                    <button type="button" class="kw-icon-tool kw-mic-btn" :class="{'is-live': isRecording}" @click="toggleAudioRecording()" :aria-label="isRecording ? 'Stop recording' : 'Record a voice whisper'" title="Record a voice whisper">
+                      <i class="bi" :class="isRecording ? 'bi-stop-fill' : 'bi-mic'"></i>
+                    </button>
+                  </template>
+                  <template x-if="newMessageBody.trim() || recordedAudioBlob || pendingAttachment">
+                    <button type="submit" class="kw-send-circle" aria-label="Send whisper" title="Send whisper">
+                      <i class="bi bi-send-fill" style="font-size:0.9rem;"></i>
+                    </button>
+                  </template>
                 </div>
               </div>
             </form>
@@ -1650,6 +1855,12 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
               <button type="button" class="kw-details__opt" @click="toggleMuteThread()">
                 <span class="kw-details__opt-left"><i class="bi" :class="activeThread.is_muted ? 'bi-bell-slash' : 'bi-bell'"></i><span x-text="activeThread.is_muted ? 'Unmute notifications' : 'Mute notifications'"></span></span>
               </button>
+              <button type="button" class="kw-details__opt" x-show="!isStandaloneApp" @click="openInstallPopup()">
+                <span class="kw-details__opt-left"><i class="bi bi-download"></i><span>Download linked FamilyChat app</span></span>
+              </button>
+              <button type="button" class="kw-details__opt" x-show="!isPopupMode && !isStandaloneApp" @click="popOutWhisperWindow()">
+                <span class="kw-details__opt-left"><i class="bi bi-box-arrow-up-right"></i><span>Pop out messenger window</span></span>
+              </button>
             </div>
           </div>
 
@@ -1673,17 +1884,17 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
        @keydown.escape.window="showCompose = false" @click.self="showCompose = false">
     <div class="kw-modal__card" x-trap.noscroll="showCompose">
       <div class="kw-modal__head">
-        <h2 id="kw_modal_title" x-text="composeMode === 'group' ? 'New Family Group Whisper' : 'New Direct Kin Whisper'"></h2>
+        <h2 id="kw_modal_title" x-text="composeMode === 'group' ? 'New Family Group Chat' : 'New Direct FamilyChat'"></h2>
         <button type="button" class="kw-btn kw-btn--ghost kw-btn--square" @click="showCompose = false" aria-label="Close"><i class="bi bi-x-lg"></i></button>
       </div>
 
       {{-- Dual-Mode Tabs --}}
       <div class="kw-modal-tabs">
         <button type="button" class="kw-modal-tab" :class="{'is-active': composeMode === 'direct'}" @click="composeMode = 'direct'">
-          <i class="bi bi-person"></i> Direct Whisper
+          <i class="bi bi-person"></i> Direct Chat
         </button>
         <button type="button" class="kw-modal-tab" :class="{'is-active': composeMode === 'group'}" @click="composeMode = 'group'">
-          <i class="bi bi-people-fill"></i> Group Whisper
+          <i class="bi bi-people-fill"></i> Group Chat
         </button>
       </div>
 
@@ -1770,7 +1981,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
         <div class="kw-modal__foot">
           <button type="button" class="kw-btn kw-btn--ghost" @click="showCompose = false">Cancel</button>
           <button type="submit" class="kw-btn kw-btn--primary" data-spin="true" :disabled="!newRecipientId || isCreating">
-            <span x-text="isCreating ? 'Opening…' : 'Start whisper'"></span>
+            <span x-text="isCreating ? 'Opening…' : 'Start chat'"></span>
           </button>
         </div>
       </form>
@@ -1830,7 +2041,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
         <div class="kw-modal__foot">
           <button type="button" class="kw-btn kw-btn--ghost" @click="showCompose = false">Cancel</button>
           <button type="submit" class="kw-btn kw-btn--primary" data-spin="true" :disabled="selectedGroupMembers.length < 1 || !newGroupTitle.trim() || isCreating">
-            <span x-text="isCreating ? 'Creating group…' : 'Create Group Whisper'"></span>
+            <span x-text="isCreating ? 'Creating group…' : 'Create Group Chat'"></span>
           </button>
         </div>
       </form>
@@ -2209,6 +2420,79 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
       </button>
     </div>
   </div>
+
+  {{-- Dismissible Separate-but-Linked PWA Install & Pop-Out Popup --}}
+  <div id="kwInstallPopup"
+       class="kw-install-popup"
+       x-show="showInstallPopup && !isStandaloneApp"
+       x-cloak
+       role="region"
+       aria-label="Download FamilyChat linked app">
+    <div class="kw-install-popup__head">
+      <div class="kw-install-popup__brand">
+        <div class="kw-install-popup__icon" aria-hidden="true">
+          <i class="bi bi-chat-heart-fill"></i>
+        </div>
+        <div>
+          <h3 class="kw-install-popup__title">Get FamilyChat as a Linked App</h3>
+          <p class="kw-install-popup__sub">Install a dedicated messenger on your home screen or dock while staying connected to your FamilyPlatform account, live alerts and unread counts.</p>
+        </div>
+      </div>
+      <button type="button"
+              class="kw-btn kw-btn--ghost kw-btn--square"
+              @click="dismissInstallPopup()"
+              aria-label="Dismiss install popup"
+              title="Dismiss">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div>
+      <span class="kw-chip kw-chip--green">
+        <i class="bi bi-link-45deg"></i> Shared login, push alerts &amp; live unread badge sync
+      </span>
+    </div>
+
+    {{-- iOS / iPadOS Safari Share -> Add to Home Screen Guide --}}
+    <div class="kw-install-popup__guide" x-show="isIosSafari || showIosInstallGuide" x-cloak>
+      <strong><i class="bi bi-apple"></i> iPhone &amp; iPad Safari (Share &rarr; Add to Home Screen):</strong>
+      <ol>
+        <li>Tap the <strong>Share</strong> button (<i class="bi bi-box-arrow-up"></i>) in Safari's toolbar.</li>
+        <li>Choose <strong>Add to Home Screen</strong> (<i class="bi bi-plus-square"></i>) from the menu.</li>
+        <li>Tap <strong>Add</strong> to launch <strong>FamilyChat</strong> as its own linked app.</li>
+      </ol>
+    </div>
+
+    {{-- Desktop / Browser Menu Fallback Guide when native beforeinstallprompt is not active --}}
+    <div class="kw-install-popup__guide" x-show="showBrowserInstallGuide && !isIosSafari" x-cloak>
+      <strong><i class="bi bi-laptop"></i> Install or Pop Out FamilyChat:</strong>
+      <p style="margin:4px 0 0;">Click the <strong>Install</strong> icon in your browser's address bar (or open your browser menu <strong>⋮ &rarr; Install FamilyChat / Add to Home Screen</strong>), or use <strong>Pop Out Window</strong> below for an instant standalone messenger window.</p>
+    </div>
+
+    <div class="kw-install-popup__actions">
+      <button type="button"
+              class="kw-btn kw-btn--primary"
+              @click="installWhispersApp()">
+        <i class="bi" :class="isIosSafari ? 'bi-phone' : 'bi-download'"></i>
+        <span x-text="isIosSafari ? 'Share → Add to Home Screen' : 'Install FamilyChat App'"></span>
+      </button>
+      <button type="button"
+              class="kw-btn kw-btn--ghost"
+              x-show="!isPopupMode"
+              @click="popOutWhisperWindow()">
+        <i class="bi bi-box-arrow-up-right"></i>
+        <span>Pop Out Window</span>
+      </button>
+      <button type="button"
+              class="kw-btn kw-btn--ghost"
+              x-show="!isIosSafari"
+              @click="showIosInstallGuide = !showIosInstallGuide"
+              style="padding: 0 14px; font-size: 0.78rem;">
+        <i class="bi bi-phone"></i>
+        <span x-text="showIosInstallGuide ? 'Hide iOS Guide' : 'iOS Guide'"></span>
+      </button>
+    </div>
+  </div>
 </div>
 @endsection
 
@@ -2264,8 +2548,24 @@ function kinWhisperApp() {
     selectedGroupMembers: [],
     showCallModal: false,
     isPopupMode: document.documentElement.classList.contains('kw-popup'),
+    isStandaloneApp: Boolean(
+      (window.navigator && window.navigator.standalone === true) ||
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+      new URLSearchParams(window.location.search).get('source') === 'pwa_whispers'
+    ),
+    isIosSafari: Boolean(
+      typeof navigator !== 'undefined' &&
+      (/iphone|ipad|ipod/i.test(navigator.userAgent || '') || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) &&
+      /safari/i.test(navigator.userAgent || '') &&
+      !/crios|fxios|opios|edgios/i.test(navigator.userAgent || '')
+    ),
     canInstall: false,
     installPromptEvent: null,
+    showInstallPopup: false,
+    showIosInstallGuide: false,
+    showBrowserInstallGuide: false,
+    lastWhisperChimeAt: 0,
+    syncBroadcastChannel: null,
     showGroupRosterModal: false,
     showShareRequestModal: false,
     isRequestingShare: false,
@@ -2994,12 +3294,18 @@ function kinWhisperApp() {
     handleFileSelected(event) {
       const files = event.target.files;
       if (!files || files.length === 0) return;
-      const file = files[0];
+      this.setPendingAttachment(files[0]);
+      event.target.value = '';
+    },
+
+    // Shared by the file picker and clipboard paste.
+    setPendingAttachment(file) {
+      if (!file) return;
       if (file.size > 15 * 1024 * 1024) {
         this.toast('Attachment exceeds maximum allowed size of 15MB.');
-        event.target.value = '';
         return;
       }
+      this.removePendingAttachment();
       this.pendingAttachment = file;
       if (file.type && file.type.startsWith('image/')) {
         const reader = new FileReader();
@@ -3010,7 +3316,22 @@ function kinWhisperApp() {
       } else {
         this.pendingAttachmentThumb = null;
       }
-      event.target.value = '';
+    },
+
+    // Paste an image or video from the clipboard into the composer.
+    handleComposerPaste(event) {
+      const items = event.clipboardData && event.clipboardData.items ? Array.from(event.clipboardData.items) : [];
+      const mediaItem = items.find((it) => it.kind === 'file' && it.type && (it.type.startsWith('image/') || it.type.startsWith('video/')));
+      if (!mediaItem) return; // plain text paste falls through to the default behaviour
+      const blob = mediaItem.getAsFile();
+      if (!blob) return;
+      event.preventDefault();
+      const isVid = blob.type.startsWith('video/');
+      const ext = (blob.type.split('/')[1] || (isVid ? 'mp4' : 'png')).replace('jpeg', 'jpg').replace(/[^a-z0-9]/gi, '');
+      const named = (blob.name && blob.name !== 'image.png')
+        ? blob
+        : new File([blob], (isVid ? 'pasted-video-' : 'pasted-image-') + Date.now() + '.' + ext, { type: blob.type });
+      this.setPendingAttachment(named);
     },
 
     removePendingAttachment() {
@@ -3482,6 +3803,7 @@ function kinWhisperApp() {
     async selectThread(thread) {
       if (!thread) return;
       this.activeThread = thread;
+      window.__activeWhisperThreadId = String(thread.id);
       this.pane = 'chat';
       this.clearComposer();
       this.discardRecordedAudio();
@@ -3708,7 +4030,8 @@ function kinWhisperApp() {
             audio_duration: uploadedAudioUrl ? audioDuration : null,
             disappear_seconds: outgoingDisappear,
             attachments: uploadedAttachments,
-            reply_to: replyContext
+            reply_to: replyContext,
+            link_preview: outgoingLinkPreview
           })
         });
         const data = await res.json();
@@ -3912,7 +4235,7 @@ function kinWhisperApp() {
         const data = await res.json();
         if (data.success && data.event && !data.throttled) {
           this.threadEvents.push(data.event);
-          this.toast('📸 Screenshot recorded by Kin Whispers and notified to ' + this.partnerName(this.activeThread) + '.');
+          this.toast('📸 Screenshot recorded by FamilyChat and notified to ' + this.partnerName(this.activeThread) + '.');
         }
       } catch (e) {
         console.warn('Screenshot audit log error', e);
@@ -4026,33 +4349,176 @@ function kinWhisperApp() {
       win.focus();
     },
 
+    syncActiveWhisperThreadId() {
+      const isMobileList = (typeof window !== 'undefined' && window.innerWidth < 768 && this.pane === 'list');
+      window.__activeWhisperThreadId = (!isMobileList && this.activeThread && this.activeThread.id)
+        ? String(this.activeThread.id)
+        : null;
+    },
+
     initInstallAndBadge() {
+      this.syncActiveWhisperThreadId();
+      this.$watch('activeThread', () => this.syncActiveWhisperThreadId());
+      this.$watch('pane', () => this.syncActiveWhisperThreadId());
+
+      let dismissed = false;
+      try {
+        dismissed = localStorage.getItem('kw_install_popup_dismissed') === '1';
+      } catch (e) {}
+
+      if (!this.isStandaloneApp && !this.isPopupMode && !dismissed) {
+        this.showInstallPopup = true;
+        if (this.isIosSafari) {
+          this.showIosInstallGuide = true;
+        }
+      }
+
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         this.installPromptEvent = e;
         this.canInstall = true;
+        if (!this.isStandaloneApp && !dismissed) {
+          this.showInstallPopup = true;
+        }
       });
       window.addEventListener('appinstalled', () => {
         this.installPromptEvent = null;
         this.canInstall = false;
-        this.toast('Kin Whispers installed. Look for it on your home screen or dock.');
+        this.isStandaloneApp = true;
+        this.showInstallPopup = false;
+        this.toast('FamilyChat installed. Look for it on your home screen or dock.');
       });
       this.$watch('threads', () => this.updateAppBadge());
       this.updateAppBadge();
+
+      // Synchronise with root Service Worker & FamilyPlatform BroadcastChannel
+      const handleSyncEvent = (msg) => {
+        if (!msg || typeof msg !== 'object') return;
+        if (msg.type === 'NOTIFICATION_CLICKED' && msg.payload) {
+          const clickThreadId = msg.payload.thread_id ||
+            (String(msg.payload.tag || '').startsWith('whisper_') ? String(msg.payload.tag).slice('whisper_'.length) : null);
+          if (clickThreadId) {
+            const target = (this.threads || []).find(t => String(t.id) === String(clickThreadId));
+            if (target) this.selectThread(target);
+          }
+        } else if (msg.type === 'ON_APP_NOTIFICATION' && msg.payload) {
+          const p = msg.payload;
+          const tag = String(p.tag || '');
+          if (tag.startsWith('whisper_') || p.category === 'kin_whisper') {
+            const incomingThreadId = p.thread_id || (tag.startsWith('whisper_') ? tag.slice('whisper_'.length) : null);
+            if (incomingThreadId) {
+              if (this.shouldChimeForThread(incomingThreadId, p.sender_id)) {
+                this.playWhisperChime();
+              }
+              if (this.activeThread && String(this.activeThread.id) === String(incomingThreadId) && !document.hidden) {
+                this.pollUpdates();
+              }
+            }
+          }
+        }
+      };
+
+      try {
+        if (typeof BroadcastChannel !== 'undefined') {
+          this.syncBroadcastChannel = new BroadcastChannel('fp_notification_sync');
+          this.syncBroadcastChannel.addEventListener('message', (e) => handleSyncEvent(e.data));
+        }
+      } catch (e) {}
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', (e) => handleSyncEvent(e.data));
+      }
 
       const params = new URLSearchParams(window.location.search);
       if (params.get('compose') === '1') this.openCompose();
     },
 
+    openInstallPopup() {
+      this.showInstallPopup = true;
+      if (this.isIosSafari) {
+        this.showIosInstallGuide = true;
+      }
+    },
+
+    dismissInstallPopup() {
+      this.showInstallPopup = false;
+      this.showIosInstallGuide = false;
+      this.showBrowserInstallGuide = false;
+      try {
+        localStorage.setItem('kw_install_popup_dismissed', '1');
+      } catch (e) {}
+    },
+
     async installWhispersApp() {
+      this.showInstallPopup = true;
+      if (this.isIosSafari) {
+        this.showIosInstallGuide = true;
+        return;
+      }
       if (!this.installPromptEvent) {
-        this.toast('Use your browser menu and choose "Install app" or "Add to Home Screen".');
+        this.showBrowserInstallGuide = true;
+        this.toast('Use your browser menu and choose "Install app" or "Add to Home Screen", or click Pop Out Window.');
         return;
       }
       this.installPromptEvent.prompt();
-      try { await this.installPromptEvent.userChoice; } catch (e) {}
+      try {
+        const choice = await this.installPromptEvent.userChoice;
+        if (choice && choice.outcome === 'accepted') {
+          this.showInstallPopup = false;
+        }
+      } catch (e) {}
       this.installPromptEvent = null;
       this.canInstall = false;
+    },
+
+    shouldChimeForThread(threadId, senderId) {
+      if (!threadId) return false;
+      if (senderId && this.isMe(senderId)) return false;
+      if (this.activeThread && String(this.activeThread.id) === String(threadId) && !document.hidden) {
+        return false;
+      }
+      const thread = (this.threads || []).find(x => String(x.id) === String(threadId)) ||
+        (this.activeThread && String(this.activeThread.id) === String(threadId) ? this.activeThread : null);
+      if (thread && thread.is_muted) {
+        return false;
+      }
+      return true;
+    },
+
+    playWhisperChime() {
+      const nowMs = Date.now();
+      if (nowMs - this.lastWhisperChimeAt < 1500) return;
+      this.lastWhisperChimeAt = nowMs;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const t0 = ctx.currentTime;
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc1.type = 'sine';
+        osc2.type = 'triangle';
+        osc1.frequency.setValueAtTime(587.33, t0); // D5
+        osc1.frequency.setValueAtTime(880.0, t0 + 0.11); // A5
+        osc2.frequency.setValueAtTime(293.66, t0); // D4 warm undertone
+        osc2.frequency.setValueAtTime(440.0, t0 + 0.11); // A4
+        gain.gain.setValueAtTime(0.0001, t0);
+        gain.gain.linearRampToValueAtTime(0.075, t0 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.34);
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(ctx.destination);
+        osc1.start(t0);
+        osc2.start(t0);
+        osc1.stop(t0 + 0.35);
+        osc2.stop(t0 + 0.35);
+        setTimeout(() => {
+          try { ctx.close(); } catch (e) {}
+        }, 450);
+      } catch (e) {
+        console.warn('Whisper chime AudioContext unavailable', e);
+      }
     },
 
     updateAppBadge() {
@@ -4589,6 +5055,9 @@ function kinWhisperApp() {
 
         this.userChannel.bind('kin-whisper', (data) => {
           if (data && data.thread_id) {
+            if (this.shouldChimeForThread(data.thread_id, data.sender_id)) {
+              this.playWhisperChime();
+            }
             if (this.activeThread && this.activeThread.id === data.thread_id) {
               this.pollUpdates();
             } else {

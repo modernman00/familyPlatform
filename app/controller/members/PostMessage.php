@@ -1038,6 +1038,10 @@ final class PostMessage
         }
 
         $results = \App\services\MemberRestrictionService::filterRecipientRows(\Src\Db::connect2(), $postId, $results, 'posts');
+        $results = self::filterOptedInPostEmailRecipients($results);
+        if (empty($results)) {
+            return;
+        }
         $getPostProfilePics = self::getProfilePicsForPostAndComment($postId);
 
         foreach ($results as $memberData) {
@@ -1070,6 +1074,75 @@ final class PostMessage
                     'member'
                 );
             }
+        }
+    }
+
+    /**
+     * Filter post email recipients to only members who explicitly opted in
+     * (contact.post_email_notifications = 'on'), have email_notifications != 'off',
+     * and have not globally unsubscribed.
+     *
+     * @param array<int, array<string, mixed>> $results
+     * @param \PDO|null $db
+     * @return array<int, array<string, mixed>>
+     */
+    public static function filterOptedInPostEmailRecipients(array $results, ?\PDO $db = null): array
+    {
+        if (empty($results)) {
+            return [];
+        }
+
+        $userIds = [];
+        foreach ($results as $row) {
+            $uid = trim((string)($row['id'] ?? ''));
+            if ($uid !== '') {
+                $userIds[$uid] = $uid;
+            }
+        }
+        if (empty($userIds)) {
+            return [];
+        }
+
+        try {
+            $conn = $db ?? \Src\Db::connect2();
+            $idList = array_values($userIds);
+            $placeholders = implode(', ', array_fill(0, count($idList), '?'));
+            $sql = sprintf(
+                "SELECT a.id,
+                        COALESCE(c.email_notifications, 'on') AS email_notifications,
+                        COALESCE(c.post_email_notifications, 'off') AS post_email_notifications,
+                        COALESCE(a.email_unsubscribed, 0) AS email_unsubscribed
+                 FROM account a
+                 LEFT JOIN contact c ON a.id = c.id
+                 WHERE a.id IN (%s)",
+                $placeholders
+            );
+            $stmt = $conn->prepare($sql);
+            $stmt->execute($idList);
+            $prefsById = [];
+            while ($pref = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $prefsById[(string)$pref['id']] = $pref;
+            }
+
+            $filtered = [];
+            foreach ($results as $row) {
+                $uid = trim((string)($row['id'] ?? ''));
+                if ($uid === '' || !isset($prefsById[$uid])) {
+                    continue;
+                }
+                $pref = $prefsById[$uid];
+                $globalEmail = strtolower(trim((string)($pref['email_notifications'] ?? 'on')));
+                $postEmail = strtolower(trim((string)($pref['post_email_notifications'] ?? 'off')));
+                $unsubscribed = (int)($pref['email_unsubscribed'] ?? 0);
+
+                if ($postEmail === 'on' && $globalEmail !== 'off' && $unsubscribed === 0) {
+                    $filtered[] = $row;
+                }
+            }
+            return $filtered;
+        } catch (\Throwable $e) {
+            error_log('[PostMessage::filterOptedInPostEmailRecipients] ' . $e->getMessage());
+            return [];
         }
     }
 

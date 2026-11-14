@@ -24,12 +24,15 @@ class OmniSearchService
 {
     private PDO $pdo;
 
+    private OmniSearchMlEngine $mlEngine;
+
     /** @var array<string, array<string, mixed>> In-memory query micro-cache */
     private static array $queryCache = [];
 
-    public function __construct(?PDO $pdo = null)
+    public function __construct(?PDO $pdo = null, ?OmniSearchMlEngine $mlEngine = null)
     {
         $this->pdo = $pdo ?? Db::connect2();
+        $this->mlEngine = $mlEngine ?? new OmniSearchMlEngine();
     }
 
     /**
@@ -182,6 +185,90 @@ class OmniSearchService
 
             // --- Media & Memories ---
             [
+                'id' => 'act_festive_cards_studio',
+                'title' => 'Celebratory & Festive Cards Studio',
+                'description' => 'Design and send celebratory greeting cards, birthday wishes, anniversaries, and living envelopes',
+                'keywords' => ['celebratory card', 'celebration card', 'festive card', 'greeting card', 'birthday card', 'anniversary card', 'congratulations card', 'thank you card', 'holiday card', 'christmas card', 'eid card', 'wedding card', 'create card', 'make a card', 'design card', 'send card', 'living envelope', 'ecard', 'e-card', 'card studio', 'festivity studio', 'cards studio'],
+                'category' => 'Functions & Tools',
+                'icon' => 'bi-envelope-heart-fill',
+                'iconColor' => '#b8202c',
+                'badge' => 'Creative Studio',
+                'url' => '/member/festive-cards',
+                'targetElement' => '',
+                'actionType' => 'navigate',
+                'priority' => 99,
+            ],
+            [
+                'id' => 'act_creative_studio_hub',
+                'title' => 'Creative Studio Hub',
+                'description' => 'All-in-one studio for celebratory cards, event posters, flyers, GIFs, and 3D emojis',
+                'keywords' => ['creative studio', 'design studio', 'card studio', 'cards studio', 'make greeting', 'celebration studio', 'art studio', 'studio hub'],
+                'category' => 'Functions & Tools',
+                'icon' => 'bi-palette-fill',
+                'iconColor' => '#d97706',
+                'badge' => 'Creative Studio',
+                'url' => '/creative-studio',
+                'targetElement' => '',
+                'actionType' => 'navigate',
+                'priority' => 94,
+            ],
+            [
+                'id' => 'act_poster_studio',
+                'title' => 'Poster & Flyer Studio',
+                'description' => 'Design printable family reunion posters, birthday flyers, and milestone invitations',
+                'keywords' => ['poster studio', 'flyer studio', 'create poster', 'create flyer', 'event flyer', 'reunion poster', 'invitation card', 'printable poster', 'design flyer'],
+                'category' => 'Functions & Tools',
+                'icon' => 'bi-easel2-fill',
+                'iconColor' => '#0284c7',
+                'badge' => 'Creative Studio',
+                'url' => '/poster-studio',
+                'targetElement' => '',
+                'actionType' => 'navigate',
+                'priority' => 91,
+            ],
+            [
+                'id' => 'act_gif_studio',
+                'title' => 'Family GIF Studio',
+                'description' => 'Create custom animated family reaction GIFs and celebratory stickers',
+                'keywords' => ['gif studio', 'create gif', 'make gif', 'animated gif', 'family gif', 'reaction gif', 'stickers'],
+                'category' => 'Functions & Tools',
+                'icon' => 'bi-filetype-gif',
+                'iconColor' => '#059669',
+                'badge' => 'Creative Studio',
+                'url' => '/member/gif-studio',
+                'targetElement' => '',
+                'actionType' => 'navigate',
+                'priority' => 87,
+            ],
+            [
+                'id' => 'act_emoji_studio',
+                'title' => '3D Emoji & Avatar Studio',
+                'description' => 'Customise 3D family avatars and expressive reaction emojis',
+                'keywords' => ['emoji studio', '3d emoji', 'avatar studio', 'create avatar', 'custom emoji', 'family avatar'],
+                'category' => 'Functions & Tools',
+                'icon' => 'bi-emoji-laughing-fill',
+                'iconColor' => '#eab308',
+                'badge' => 'Creative Studio',
+                'url' => '/member/emoji-studio',
+                'targetElement' => '',
+                'actionType' => 'navigate',
+                'priority' => 85,
+            ],
+            [
+                'id' => 'act_video_studio',
+                'title' => '4K Family Video Studio',
+                'description' => 'Edit, narrate, and produce cinematic 4K family archive reels',
+                'keywords' => ['video studio', '4k studio', 'edit video', 'create video', 'cinematic reel', 'family video studio'],
+                'category' => 'Functions & Tools',
+                'icon' => 'bi-film',
+                'iconColor' => '#e11d48',
+                'badge' => 'Creative Studio',
+                'url' => '/family-studio',
+                'targetElement' => '',
+                'actionType' => 'navigate',
+                'priority' => 88,
+            ],
+            [
                 'id' => 'act_family_studio',
                 'title' => 'Family Studio & Photo Albums',
                 'description' => 'Browse, organise, and upload family photographs, milestones, and albums',
@@ -238,6 +325,62 @@ class OmniSearchService
                 'priority' => 93,
             ],
             [
+                'id' => 'act_kin_whispers',
+                'title' => 'FamilyChat & Private Messaging',
+                'description' => 'Send private messages, chats, and 60-second voice dedications to family members',
+                'keywords' => ['familychat', 'family chat', 'whisper', 'whispers', 'kin whispers', 'chat', 'private message', 'direct message', 'dm', 'send message', 'voice dedication', 'voice note', 'inbox'],
+                'category' => 'Functions & Tools',
+                'icon' => 'bi-chat-dots-fill',
+                'iconColor' => '#a31621',
+                'badge' => 'Messaging',
+                'url' => '/kin-whispers',
+                'targetElement' => '',
+                'actionType' => 'navigate',
+                'priority' => 94,
+            ],
+            [
+                'id' => 'act_upcoming_events',
+                'title' => 'Upcoming Family Events & Calendar',
+                'description' => 'View upcoming birthdays, anniversaries, reunions, and family calendar dates',
+                'keywords' => ['upcoming events', 'events', 'family events', 'calendar', 'schedule', 'upcoming birthdays', 'reunions', 'view events'],
+                'category' => 'Functions & Tools',
+                'icon' => 'bi-calendar-event-fill',
+                'iconColor' => '#2563eb',
+                'badge' => 'Events',
+                'url' => '/profilePage#upcomingEventsSection',
+                'targetElement' => '#upcomingEventsSection',
+                'actionType' => 'navigate',
+                'priority' => 92,
+            ],
+            [
+                'id' => 'act_create_event',
+                'title' => 'Create Family Event',
+                'description' => 'Schedule a new family gathering, birthday party, reunion, or celebration',
+                'keywords' => ['create event', 'new event', 'add event', 'schedule event', 'plan party', 'plan reunion', 'host gathering'],
+                'category' => 'Functions & Tools',
+                'icon' => 'bi-calendar-plus-fill',
+                'iconColor' => '#2563eb',
+                'badge' => 'Events',
+                'url' => 'modal:createEventModal',
+                'targetElement' => '#createEventModal',
+                'actionType' => 'modal_trigger',
+                'priority' => 91,
+            ],
+            [
+                'id' => 'act_create_announcement',
+                'title' => 'Make a Family Announcement',
+                'description' => 'Broadcast important family news, milestones, and announcements to your network',
+                'keywords' => ['announcement', 'make announcement', 'create announcement', 'family announcement', 'broadcast news', 'share news', 'announce'],
+                'category' => 'Functions & Tools',
+                'icon' => 'bi-megaphone-fill',
+                'iconColor' => '#d97706',
+                'badge' => 'Community',
+                'url' => 'modal:createAnnouncementModal',
+                'targetElement' => '#createAnnouncementModal',
+                'actionType' => 'modal_trigger',
+                'priority' => 91,
+            ],
+            [
                 'id' => 'act_create_post',
                 'title' => 'Create Post / Share Update',
                 'description' => 'Share a celebration, announcement, or message on the family timeline',
@@ -262,8 +405,9 @@ class OmniSearchService
                 'icon' => 'bi-person-plus-fill',
                 'iconColor' => '#f59e0b',
                 'badge' => 'Growth',
-                'url' => 'modal:recommendFriendsModal',
-                'targetElement' => '#recommendFriendsModal',
+                'url' => 'modal:inviteFamilyModal',
+                'targetElement' => '#inviteFamilyModal',
+                'modalTab' => 'friends',
                 'actionType' => 'modal_trigger',
                 'priority' => 97,
             ],
@@ -443,7 +587,8 @@ class OmniSearchService
     }
 
     /**
-     * Filters action catalog by user query using intelligent synonym and token matching.
+     * Filters action catalog by user query using the ATG Sovereign ML Intent &
+     * Semantic Similarity Engine with deterministic rule-based fallback.
      *
      * @param string $query
      * @param string $userId
@@ -461,62 +606,7 @@ class OmniSearchService
             return array_slice($catalog, 0, 8);
         }
 
-        $queryTokens = array_filter(preg_split('/\s+/', $cleanQuery) ?: [], static fn(string $t): bool => strlen($t) > 1);
-        $matches = [];
-
-        foreach ($catalog as $item) {
-            $score = 0;
-            $titleLower = strtolower((string)$item['title']);
-            $descLower = strtolower((string)$item['description']);
-            $keywords = array_map('strtolower', (array)($item['keywords'] ?? []));
-
-            // 1. Exact phrase match in title or keywords
-            if (str_contains($titleLower, $cleanQuery)) {
-                $score += 250;
-            }
-            foreach ($keywords as $kw) {
-                if ($kw === $cleanQuery) {
-                    $score += 300;
-                    break;
-                }
-                if (str_contains($kw, $cleanQuery)) {
-                    $score += 150;
-                }
-            }
-
-            // 2. Token overlap & partial word matching
-            foreach ($queryTokens as $tok) {
-                if (str_contains($titleLower, $tok)) {
-                    $score += 60;
-                }
-                if (str_contains($descLower, $tok)) {
-                    $score += 30;
-                }
-                foreach ($keywords as $kw) {
-                    if (str_contains($kw, $tok)) {
-                        $score += 50;
-                    }
-                }
-            }
-
-            // Direct intent boosts
-            if (str_contains($cleanQuery, 'journal') && in_array($item['id'], ['act_family_journal', 'act_write_journal'], true)) {
-                $score += 200;
-            }
-            if (str_contains($cleanQuery, 'code') && in_array($item['id'], ['act_create_family_code', 'act_link_birth_code', 'act_rename_family_code'], true)) {
-                $score += 180;
-            }
-            if (str_contains($cleanQuery, 'tree') && in_array($item['id'], ['act_view_tree', 'act_add_relative'], true)) {
-                $score += 180;
-            }
-
-            if ($score > 0) {
-                $item['matchScore'] = $score + ($item['priority'] ?? 0);
-                $matches[] = $item;
-            }
-        }
-
-        usort($matches, static fn(array $a, array $b): int => ((int)$b['matchScore']) <=> ((int)$a['matchScore']));
+        $matches = $this->mlEngine->scoreCatalog($cleanQuery, $catalog);
 
         return array_slice($matches, 0, 8);
     }
@@ -1012,6 +1102,12 @@ class OmniSearchService
                 'primary_family_code' => $primaryCode,
                 'has_actions' => !empty($actions),
                 'has_data' => ($totalMatches - count($actions)) > 0,
+                'ml_engine' => [
+                    'name' => 'ATG Sovereign TF-IDF + Intent Classifier',
+                    'top_intent' => $actions[0]['id'] ?? null,
+                    'top_confidence' => $actions[0]['mlConfidence'] ?? 0,
+                    'match_source' => $actions[0]['matchSource'] ?? 'none',
+                ],
             ],
         ];
 

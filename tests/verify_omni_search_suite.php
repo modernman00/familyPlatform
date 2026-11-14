@@ -240,6 +240,37 @@ runTest('OmniSearchService returns sub-millisecond cached results on repeated qu
     }
 });
 
+// TEST 10: ATG Sovereign ML Intent & Studio Routing
+runTest('ML intent engine routes "i want to create a celebratory card?" and natural-language studio queries to /member/festive-cards', function() use ($service) {
+    $queries = [
+        'i want to create a celebratory card?' => ['act_festive_cards_studio', '/member/festive-cards'],
+        'how do i make a birthday greeting for mum' => ['act_festive_cards_studio', '/member/festive-cards'],
+        'celebatory card' => ['act_festive_cards_studio', '/member/festive-cards'],
+        'design a family reunion flyer' => ['act_poster_studio', '/poster-studio'],
+    ];
+
+    foreach ($queries as $q => [$expectedId, $expectedUrl]) {
+        $res = $service->search($q, 'ml_test_user', 'FAMML');
+        $actions = $res['categories']['actions'] ?? [];
+        if (empty($actions)) {
+            throw new RuntimeException("No actions returned for query '{$q}'");
+        }
+        $top = $actions[0];
+        if ($top['id'] !== $expectedId) {
+            throw new RuntimeException("Query '{$q}' expected top action '{$expectedId}', got '{$top['id']}'");
+        }
+        if ($top['url'] !== $expectedUrl) {
+            throw new RuntimeException("Query '{$q}' expected URL '{$expectedUrl}', got '{$top['url']}'");
+        }
+        if (!isset($top['mlConfidence']) || !isset($top['matchSource'])) {
+            throw new RuntimeException("Query '{$q}' missing mlConfidence or matchSource metadata");
+        }
+        if (empty($res['meta']['ml_engine']['name'])) {
+            throw new RuntimeException("Query '{$q}' missing meta.ml_engine telemetry");
+        }
+    }
+});
+
 echo "\n======================================================\n";
 echo "🏁 OMNI-SEARCH VERIFICATION RESULTS: {$passed} PASSED, {$failed} FAILED\n";
 echo "======================================================\n";
