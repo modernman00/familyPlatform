@@ -75,7 +75,7 @@ final class FamilyCommitmentController extends BaseController
         $commitments = $this->service->listForUser($userId, $famCodes);
         $reminders = $this->service->getDueInAppReminders($userId);
 
-        $this->jsonResponse(200, [
+        $this->sendApiPayload(200, [
             'status' => 'success',
             'commitments' => $commitments,
             'reminders' => $reminders,
@@ -95,7 +95,7 @@ final class FamilyCommitmentController extends BaseController
 
         $payload = $this->readRequestPayload();
         if (!$this->verifyCsrf($payload)) {
-            $this->jsonResponse(403, ['status' => 'error', 'message' => 'Invalid or missing CSRF token.']);
+            $this->sendApiPayload(403, ['status' => 'error', 'message' => 'Invalid or missing CSRF token.']);
             return;
         }
 
@@ -104,15 +104,15 @@ final class FamilyCommitmentController extends BaseController
 
         try {
             $created = $this->service->createCommitment($userId, $primaryFamCode, $payload);
-            $this->jsonResponse(201, [
+            $this->sendApiPayload(201, [
                 'status' => 'success',
                 'message' => 'Commitment created.',
                 'commitment' => $created,
             ]);
         } catch (ValidationException $e) {
-            $this->jsonResponse(422, ['status' => 'error', 'message' => $e->getMessage()]);
+            $this->sendApiPayload(422, ['status' => 'error', 'message' => $e->getMessage()]);
         } catch (\Throwable $e) {
-            $this->jsonResponse(500, ['status' => 'error', 'message' => 'Unable to save commitment right now.']);
+            $this->sendApiPayload(500, ['status' => 'error', 'message' => 'Unable to save commitment right now.']);
         }
     }
 
@@ -129,25 +129,25 @@ final class FamilyCommitmentController extends BaseController
 
         $payload = $this->readRequestPayload();
         if (!$this->verifyCsrf($payload)) {
-            $this->jsonResponse(403, ['status' => 'error', 'message' => 'Invalid or missing CSRF token.']);
+            $this->sendApiPayload(403, ['status' => 'error', 'message' => 'Invalid or missing CSRF token.']);
             return;
         }
 
         try {
             $updated = $this->service->updateCommitment($userId, $id, $payload);
-            $this->jsonResponse(200, [
+            $this->sendApiPayload(200, [
                 'status' => 'success',
                 'message' => 'Commitment updated.',
                 'commitment' => $updated,
             ]);
         } catch (NotFoundException $e) {
-            $this->jsonResponse(404, ['status' => 'error', 'message' => $e->getMessage()]);
+            $this->sendApiPayload(404, ['status' => 'error', 'message' => $e->getMessage()]);
         } catch (ForbiddenException $e) {
-            $this->jsonResponse(403, ['status' => 'error', 'message' => $e->getMessage()]);
+            $this->sendApiPayload(403, ['status' => 'error', 'message' => $e->getMessage()]);
         } catch (ValidationException $e) {
-            $this->jsonResponse(422, ['status' => 'error', 'message' => $e->getMessage()]);
+            $this->sendApiPayload(422, ['status' => 'error', 'message' => $e->getMessage()]);
         } catch (\Throwable $e) {
-            $this->jsonResponse(500, ['status' => 'error', 'message' => 'Unable to update commitment right now.']);
+            $this->sendApiPayload(500, ['status' => 'error', 'message' => 'Unable to update commitment right now.']);
         }
     }
 
@@ -164,19 +164,19 @@ final class FamilyCommitmentController extends BaseController
 
         $payload = $this->readRequestPayload();
         if (!$this->verifyCsrf($payload)) {
-            $this->jsonResponse(403, ['status' => 'error', 'message' => 'Invalid or missing CSRF token.']);
+            $this->sendApiPayload(403, ['status' => 'error', 'message' => 'Invalid or missing CSRF token.']);
             return;
         }
 
         try {
             $this->service->deleteCommitment($userId, $id);
-            $this->jsonResponse(200, ['status' => 'success', 'message' => 'Commitment removed.']);
+            $this->sendApiPayload(200, ['status' => 'success', 'message' => 'Commitment removed.']);
         } catch (NotFoundException $e) {
-            $this->jsonResponse(404, ['status' => 'error', 'message' => $e->getMessage()]);
+            $this->sendApiPayload(404, ['status' => 'error', 'message' => $e->getMessage()]);
         } catch (ForbiddenException $e) {
-            $this->jsonResponse(403, ['status' => 'error', 'message' => $e->getMessage()]);
+            $this->sendApiPayload(403, ['status' => 'error', 'message' => $e->getMessage()]);
         } catch (\Throwable $e) {
-            $this->jsonResponse(500, ['status' => 'error', 'message' => 'Unable to delete commitment right now.']);
+            $this->sendApiPayload(500, ['status' => 'error', 'message' => 'Unable to delete commitment right now.']);
         }
     }
 
@@ -193,7 +193,7 @@ final class FamilyCommitmentController extends BaseController
 
         $payload = $this->readRequestPayload();
         if (!$this->verifyCsrf($payload)) {
-            $this->jsonResponse(403, ['status' => 'error', 'message' => 'Invalid or missing CSRF token.']);
+            $this->sendApiPayload(403, ['status' => 'error', 'message' => 'Invalid or missing CSRF token.']);
             return;
         }
 
@@ -201,20 +201,20 @@ final class FamilyCommitmentController extends BaseController
 
         try {
             $result = $this->service->logCheckin($userId, $famCodes, $id, $payload);
-            $this->jsonResponse(201, [
+            $this->sendApiPayload(201, [
                 'status' => 'success',
                 'message' => 'Check-in logged. Well done!',
                 'checkin_id' => $result['checkin_id'],
                 'commitment' => $result['commitment'],
             ]);
         } catch (NotFoundException $e) {
-            $this->jsonResponse(404, ['status' => 'error', 'message' => $e->getMessage()]);
+            $this->sendApiPayload(404, ['status' => 'error', 'message' => $e->getMessage()]);
         } catch (ForbiddenException $e) {
-            $this->jsonResponse(403, ['status' => 'error', 'message' => $e->getMessage()]);
+            $this->sendApiPayload(403, ['status' => 'error', 'message' => $e->getMessage()]);
         } catch (ValidationException $e) {
-            $this->jsonResponse(422, ['status' => 'error', 'message' => $e->getMessage()]);
+            $this->sendApiPayload(422, ['status' => 'error', 'message' => $e->getMessage()]);
         } catch (\Throwable $e) {
-            $this->jsonResponse(500, ['status' => 'error', 'message' => 'Unable to log check-in right now.']);
+            $this->sendApiPayload(500, ['status' => 'error', 'message' => 'Unable to log check-in right now.']);
         }
     }
 
@@ -231,13 +231,13 @@ final class FamilyCommitmentController extends BaseController
 
         $payload = $this->readRequestPayload();
         if (!$this->verifyCsrf($payload)) {
-            $this->jsonResponse(403, ['status' => 'error', 'message' => 'Invalid or missing CSRF token.']);
+            $this->sendApiPayload(403, ['status' => 'error', 'message' => 'Invalid or missing CSRF token.']);
             return;
         }
 
         $slotKey = trim((string)($payload['slot_key'] ?? ''));
         if ($slotKey === '') {
-            $this->jsonResponse(422, ['status' => 'error', 'message' => 'Missing reminder slot key.']);
+            $this->sendApiPayload(422, ['status' => 'error', 'message' => 'Missing reminder slot key.']);
             return;
         }
 
@@ -245,13 +245,13 @@ final class FamilyCommitmentController extends BaseController
 
         try {
             $this->service->dismissReminder($userId, $famCodes, $id, $slotKey);
-            $this->jsonResponse(200, ['status' => 'success', 'message' => 'Reminder dismissed.']);
+            $this->sendApiPayload(200, ['status' => 'success', 'message' => 'Reminder dismissed.']);
         } catch (NotFoundException $e) {
-            $this->jsonResponse(404, ['status' => 'error', 'message' => $e->getMessage()]);
+            $this->sendApiPayload(404, ['status' => 'error', 'message' => $e->getMessage()]);
         } catch (ForbiddenException $e) {
-            $this->jsonResponse(403, ['status' => 'error', 'message' => $e->getMessage()]);
+            $this->sendApiPayload(403, ['status' => 'error', 'message' => $e->getMessage()]);
         } catch (\Throwable $e) {
-            $this->jsonResponse(500, ['status' => 'error', 'message' => 'Unable to dismiss reminder right now.']);
+            $this->sendApiPayload(500, ['status' => 'error', 'message' => 'Unable to dismiss reminder right now.']);
         }
     }
 
@@ -264,7 +264,7 @@ final class FamilyCommitmentController extends BaseController
     {
         $userId = $this->currentUserId();
         if ($userId === '') {
-            $this->jsonResponse(401, ['status' => 'error', 'message' => 'Unauthorised. Please sign in.']);
+            $this->sendApiPayload(401, ['status' => 'error', 'message' => 'Unauthorised. Please sign in.']);
             return '';
         }
         return $userId;
@@ -319,13 +319,13 @@ final class FamilyCommitmentController extends BaseController
         $stmt->execute([$famCode, $currentUserId]);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
 
-        return array_map(static function (array $r): array {
+        return array_values(array_map(static function (array $r): array {
             $name = trim(((string)($r['firstName'] ?? '')) . ' ' . ((string)($r['lastName'] ?? '')));
             return [
                 'id' => (string)$r['id'],
                 'name' => $name !== '' ? $name : 'Family Member',
             ];
-        }, $rows);
+        }, $rows));
     }
 
     /**
@@ -378,12 +378,13 @@ final class FamilyCommitmentController extends BaseController
     /**
      * @param array<string, mixed> $data
      */
-    private function jsonResponse(int $status, array $data): void
+    private function sendApiPayload(int $status, array $data): void
     {
-        if (!headers_sent()) {
-            http_response_code($status);
-            header('Content-Type: application/json; charset=utf-8');
+        $message = isset($data['message']) && is_string($data['message']) ? $data['message'] : '';
+        if ($status >= 400) {
+            \Src\ApiResponse::error($message !== '' ? $message : 'Request failed.', $status, null, $data);
+            return;
         }
-        echo json_encode($data);
+        \Src\ApiResponse::success($data, $message !== '' ? $message : 'OK', $status);
     }
 }

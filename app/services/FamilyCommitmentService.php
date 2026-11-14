@@ -477,7 +477,7 @@ final class FamilyCommitmentService
              LIMIT 10"
         );
         $stmt->execute([$userId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        return array_values($stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
     }
 
     /**
@@ -498,7 +498,7 @@ final class FamilyCommitmentService
                  ORDER BY c.created_at DESC'
             );
             $stmt->execute([$userId, $userId]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            return array_values($stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
         }
 
         $placeholders = implode(',', array_fill(0, count($cleanFamCodes), '?'));
@@ -518,7 +518,7 @@ final class FamilyCommitmentService
         $params = array_merge([$userId, $userId], $cleanFamCodes);
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        return array_values($stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
     }
 
     /**
@@ -574,10 +574,8 @@ final class FamilyCommitmentService
         $targetCount = max(1, (int)$row['target_count']);
         $completedThisPeriod = $this->countCheckinsInPeriod($commitmentId, $periodKey);
 
-        $days = json_decode((string)($row['days_of_week'] ?? '[]'), true);
-        if (!is_array($days)) {
-            $days = [];
-        }
+        $daysRaw = json_decode((string)($row['days_of_week'] ?? '[]'), true);
+        $days = is_array($daysRaw) ? array_values(array_map('strval', $daysRaw)) : [];
 
         $nextOccurrence = $this->computeNextOccurrence($row, $days, $localNow);
         $recentCheckins = $this->fetchRecentCheckins($commitmentId, 5);
@@ -594,7 +592,7 @@ final class FamilyCommitmentService
             'schedule_mode' => (string)$row['schedule_mode'],
             'period_unit' => $periodUnit,
             'target_count' => $targetCount,
-            'days_of_week' => array_values($days),
+            'days_of_week' => $days,
             'month_day' => $row['month_day'] !== null ? (int)$row['month_day'] : null,
             'preferred_time' => (string)($row['preferred_time'] ?? ''),
             'visibility' => (string)$row['visibility'],
@@ -791,7 +789,7 @@ final class FamilyCommitmentService
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        return array_map(static function (array $r): array {
+        return array_values(array_map(static function (array $r): array {
             $name = trim(((string)($r['firstName'] ?? '')) . ' ' . ((string)($r['lastName'] ?? '')));
             return [
                 'id' => (string)$r['id'],
@@ -803,7 +801,7 @@ final class FamilyCommitmentService
                 'reflection_note' => (string)$r['reflection_note'],
                 'completed_at' => (string)$r['completed_at'],
             ];
-        }, $rows);
+        }, $rows));
     }
 
     /**
@@ -821,14 +819,14 @@ final class FamilyCommitmentService
         $stmt->execute([$commitmentId]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        return array_map(static function (array $r): array {
+        return array_values(array_map(static function (array $r): array {
             $name = trim(((string)($r['firstName'] ?? '')) . ' ' . ((string)($r['lastName'] ?? '')));
             return [
                 'user_id' => (string)$r['user_id'],
                 'role' => (string)$r['role'],
                 'name' => $name !== '' ? $name : 'Family Member',
             ];
-        }, $rows);
+        }, $rows));
     }
 
     private function computePeriodKey(string $periodUnit, DateTimeImmutable $dt): string

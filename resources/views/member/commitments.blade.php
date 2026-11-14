@@ -500,8 +500,8 @@
 @endsection
 
 @push('scripts')
-<script>
-function familyCommitmentsApp() {
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
+window.familyCommitmentsApp = function familyCommitmentsApp() {
     return {
         commitments: @json($commitments ?? []),
         reminders: @json($dueReminders ?? []),
@@ -662,10 +662,11 @@ function familyCommitmentsApp() {
             this.errorMessage = '';
             try {
                 const res = await fetch('/api/commitments', { headers: { 'Accept': 'application/json' } });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.message || 'Unable to load commitments.');
-                this.commitments = data.commitments || [];
-                this.reminders = data.reminders || [];
+                const body = await res.json();
+                const payload = body.data || body;
+                if (!res.ok) throw new Error(body.error || body.message || 'Unable to load commitments.');
+                this.commitments = payload.commitments || [];
+                this.reminders = payload.reminders || [];
             } catch (e) {
                 this.errorMessage = e.message || 'Unable to load commitments.';
             } finally {
@@ -683,8 +684,8 @@ function familyCommitmentsApp() {
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': this.csrfToken },
                     body: JSON.stringify({ ...this.form, csrf_token: this.csrfToken })
                 });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.message || 'Unable to save commitment.');
+                const body = await res.json();
+                if (!res.ok) throw new Error(body.error || body.message || 'Unable to save commitment.');
                 bootstrap.Modal.getOrCreateInstance(document.getElementById('commitmentFormModal')).hide();
                 this.showFormModal = false;
                 await this.refreshList();
@@ -704,8 +705,8 @@ function familyCommitmentsApp() {
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': this.csrfToken },
                     body: JSON.stringify({ csrf_token: this.csrfToken })
                 });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.message || 'Unable to remove commitment.');
+                const body = await res.json();
+                if (!res.ok) throw new Error(body.error || body.message || 'Unable to remove commitment.');
                 await this.refreshList();
                 if (typeof this.$toast === 'function') this.$toast('Commitment removed', 'info');
             } catch (e) {
@@ -728,8 +729,8 @@ function familyCommitmentsApp() {
                         csrf_token: this.csrfToken
                     })
                 });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.message || 'Unable to log check-in.');
+                const body = await res.json();
+                if (!res.ok) throw new Error(body.error || body.message || 'Unable to log check-in.');
                 bootstrap.Modal.getOrCreateInstance(document.getElementById('commitmentCheckinModal')).hide();
                 this.showCheckinModal = false;
                 await this.refreshList();
@@ -756,6 +757,6 @@ function familyCommitmentsApp() {
             }
         }
     };
-}
+};
 </script>
 @endpush
