@@ -77,6 +77,27 @@ final class ProfileTourTest extends TestCase
         $this->assertSame('Not authenticated', $decoded['message'] ?? null);
     }
 
+    public function testSaveTourPreferenceWithoutCsrfReturns403(): void
+    {
+        $_SESSION = [
+            'id' => 'user_csrf_test',
+            'token' => 'expected_csrf_token',
+        ];
+        $_POST = [];
+        unset($_SERVER['HTTP_X_CSRF_TOKEN'], $_SERVER['HTTP_X_XSRF_TOKEN']);
+
+        $controller = new OnboardingController();
+
+        ob_start();
+        $controller->saveProfileTourPreference();
+        $output = (string)ob_get_clean();
+
+        $decoded = json_decode($output, true);
+        $this->assertIsArray($decoded);
+        $this->assertSame('error', $decoded['status'] ?? null);
+        $this->assertSame(403, http_response_code());
+    }
+
     public function testProfilePageAndTemplatesExposeTourTriggersAndScripts(): void
     {
         $leftCol = (string)file_get_contents($this->rootDir . '/resources/views/member/includes/leftColumn.blade.php');

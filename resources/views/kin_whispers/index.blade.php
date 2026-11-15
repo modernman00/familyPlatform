@@ -1,10 +1,10 @@
 @extends('layouts.profileBase')
 
-@section('title', 'FamilyChat & Artifact Messages — FamilyPlatform')
+@section('title', 'FamChat & Artifact Messages — FamilyPlatform')
 @section('meta_description', 'Private, thoughtful messages and voice dedications anchored to your family photographs, memories and lineage.')
 
 @section('manifest_href', '/public/manifest-whispers.json')
-@section('apple_app_title', 'FamilyChat')
+@section('apple_app_title', 'FamChat')
 
 @push('styles')
 <style>
@@ -1137,7 +1137,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
   <header class="kw-hero">
     <div>
       <div class="kw-hero__eyebrow"><i class="bi bi-chat-heart-fill"></i> &nbsp;Private &amp; Supervised</div>
-      <h1>FamilyChat</h1>
+      <h1>FamChat</h1>
       <p>Thoughtful private messages and 60-second voice dedications, anchored to the photographs, memories and people that matter to your family.</p>
     </div>
     <button type="button" class="kw-btn kw-btn--gold" @click="openCompose()">
@@ -1147,16 +1147,16 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
 
   <div class="kw-notice" role="note">
     <i class="bi bi-shield-check"></i>
-    <div><strong>Safeguarding:</strong> any FamilyChat thread involving a member under 18 is visible to their parent or guardian, who is notified of new messages.</div>
+    <div><strong>Safeguarding:</strong> any FamChat thread involving a member under 18 is visible to their parent or guardian, who is notified of new messages.</div>
   </div>
 
-  <section class="kw-shell" :data-pane="pane" aria-label="FamilyChat workspace">
+  <section class="kw-shell" :data-pane="pane" aria-label="FamChat workspace">
 
     {{-- Thread list --}}
     <aside class="kw-side" aria-label="Conversations">
       <div class="kw-side__head">
         <div>
-          <h1 class="kw-side__title">FamilyChat</h1>
+          <h1 class="kw-side__title">FamChat</h1>
           <p class="kw-side__sub"><i class="bi bi-lock"></i> Private &amp; supervised</p>
         </div>
         <div class="kw-side__actions">
@@ -3491,9 +3491,8 @@ function kinWhisperApp() {
             const prevUnread = prevMap[String(t.id)] || 0;
             if (nextUnread > prevUnread && !t.is_muted) {
               this.playWhisperChime();
-              const notifyFn = window.showFamChatPopup || window.showFamilyChatPopup;
-              if (typeof notifyFn === 'function') {
-                notifyFn({
+              if (typeof window.showFamChatPopup === 'function') {
+                window.showFamChatPopup({
                   title: this.partnerName(t) || 'New FamChat Message',
                   body: t.last_message_preview || 'Sent you a message in FamChat',
                   thread_id: t.id,
@@ -5042,9 +5041,8 @@ function kinWhisperApp() {
           } else {
             this.pollThreadListOnly();
           }
-          const notifyFn = window.showFamChatPopup || window.showFamilyChatPopup;
-          if (this.shouldChimeForThread(data.thread_id, data.sender_id) && typeof notifyFn === 'function') {
-            notifyFn({
+          if (this.shouldChimeForThread(data.thread_id, data.sender_id) && typeof window.showFamChatPopup === 'function') {
+            window.showFamChatPopup({
               title: (data.sender_name || (t ? this.partnerName(t) : '')) || 'New FamChat Message',
               body: data.preview || data.body || (t && t.last_message_preview) || 'Sent you a message in FamChat',
               thread_id: data.thread_id,

@@ -51,13 +51,24 @@
         return relativeLuminance(rgb) < 0.12;
     }
 
+    function parseGradientFirstColor(bgImage) {
+        if (!bgImage || bgImage === 'none') return null;
+        const m = bgImage.match(/rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+(?:\s*,\s*[\d.]+)?\s*\)/i);
+        if (!m) return null;
+        return parseRgb(m[0]);
+    }
+
     function getEffectiveBackground(el) {
         let cur = el;
         while (cur && cur !== document.documentElement) {
-            const bg = window.getComputedStyle(cur).backgroundColor;
-            const parsed = parseRgb(bg);
+            const style = window.getComputedStyle(cur);
+            const parsed = parseRgb(style.backgroundColor);
             if (parsed && parsed.a >= 0.5) {
                 return parsed;
+            }
+            const grad = parseGradientFirstColor(style.backgroundImage);
+            if (grad && grad.a >= 0.5) {
+                return grad;
             }
             cur = cur.parentElement;
         }

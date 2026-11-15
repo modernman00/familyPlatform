@@ -295,28 +295,59 @@ try {
     assert(str_contains($swJs, "client.url.includes('/kin-whispers')"), 'Service Worker notificationclick must prefer open /kin-whispers window');
     echo "  ✅ Distinct Whisper chime, crimson/gold foreground toast, active-thread suppression, and SW window routing verified.\n";
 
-    // --- TEST 14: Separate-but-Linked Kin Whispers PWA Install Popup & Pop-Out Controls ---
-    echo "\n[TEST 14] Verifying Separate-but-Linked PWA Install Popup & Header Controls...\n";
-    assert(str_contains($viewContent, 'id="kwInstallPopup"'), 'Dismissible #kwInstallPopup must exist in Kin Whispers view');
-    assert(str_contains($viewContent, '@click="openInstallPopup()"'), 'Header button must wire to openInstallPopup()');
-    assert(str_contains($viewContent, '@click="installWhispersApp()"'), 'Install popup button must wire to installWhispersApp()');
-    assert(str_contains($viewContent, '@click="popOutWhisperWindow()"'), 'Header and popup buttons must wire to popOutWhisperWindow()');
-    assert(str_contains($viewContent, 'Add to Home Screen'), 'iOS Safari Share -> Add to Home Screen guide must be present');
-    assert(str_contains($viewContent, 'isIosDevice:'), 'Kin Whispers view must detect all iPhone/iPad browsers via isIosDevice');
-    assert(str_contains($viewContent, 'isHostStandalone:'), 'Kin Whispers view must distinguish main FamilyPlatform standalone mode from FamilyChat standalone mode');
-    assert(str_contains($viewContent, 'kw_familychat_install_dismissed_at'), 'Kin Whispers view must use expiring dismissal timestamp so iPhone users are not permanently suppressed');
+    // --- TEST 14: FamChat Rebrand, iPhone Popout Removal & Timer Visibility ---
+    echo "\n[TEST 14] Verifying FamChat Rebrand, iPhone Popout Removal & Timer Visibility...\n";
+    assert(!str_contains($viewContent, 'id="kwInstallPopup"'), 'Abandoned #kwInstallPopup must be removed from FamChat view');
+    assert(!str_contains($viewContent, 'popOutWhisperWindow'), 'Abandoned popOutWhisperWindow handler must be removed');
+    assert(!str_contains($viewContent, 'openInstallPopup'), 'Abandoned openInstallPopup handler must be removed');
+    assert(str_contains($viewContent, 'FamChat'), 'FamChat branding must be present in view');
+    assert(!str_contains($viewContent, 'FamilyChat'), 'Old FamilyChat branding must not remain in view');
+    assert(str_contains($viewContent, "activeDisappearSeconds > 0 ? ('Timer · ' + disappearShort(activeDisappearSeconds)) : 'Timer'"), 'Timer label must remain visible even when active');
 
     $manifestWhispers = json_decode((string)file_get_contents(dirname(__DIR__) . '/public/manifest-whispers.json'), true);
     assert(is_array($manifestWhispers) && ($manifestWhispers['id'] ?? '') === '/kin-whispers', 'manifest-whispers.json must have id /kin-whispers');
-    assert(($manifestWhispers['short_name'] ?? '') === 'FamilyChat', 'manifest-whispers.json short_name must be FamilyChat');
+    assert(($manifestWhispers['short_name'] ?? '') === 'FamChat', 'manifest-whispers.json short_name must be FamChat');
     assert(($manifestWhispers['display'] ?? '') === 'standalone', 'manifest-whispers.json must be standalone');
 
     $profileBase = (string)file_get_contents(dirname(__DIR__) . '/resources/views/layouts/profileBase.blade.php');
     assert(substr_count($profileBase, 'rel="manifest"') === 0, 'profileBase.blade.php must delegate manifest link solely to partials.pwa-head without duplicate');
-    echo "  ✅ Linked PWA install popup, header controls, iOS Safari guide, and manifest-whispers.json verified.\n";
+    echo "  ✅ FamChat rebrand, iPhone popout removal, Timer visibility, and manifest-whispers.json verified.\n";
+
+    // --- TEST 15: WebRTC Calling Signal Queue Fallback & Adversarial Guard ---
+    echo "\n[TEST 15] Verifying WebRTC Calling Signal Queue Fallback & Adversarial Guard...\n";
+    $callPayload = KinWhisperService::initiateCall($userA, $thread->id, 'video');
+    assert(($callPayload['status'] ?? '') === 'ringing', 'Call status must be ringing');
+    assert(!empty($callPayload['room_id']), 'Call room_id must be generated');
+
+    KinWhisperService::sendCallSignal($userA, $thread->id, [
+        'target_user_id' => $userB,
+        'signal' => ['sdp' => ['type' => 'offer', 'sdp' => 'v=0-mock-offer']],
+    ]);
+
+    $infoForB = KinWhisperService::getCallInfo($userB, $thread->id, 0);
+    assert(($infoForB['call_status'] ?? '') === 'ringing', 'Callee must see ringing status via getCallInfo');
+    assert(($infoForB['incoming_call']['room_id'] ?? '') === $callPayload['room_id'], 'Callee must receive incoming_call metadata via getCallInfo');
+    assert(count($infoForB['signals'] ?? []) === 1, 'Callee must receive queued offer signal via getCallInfo');
+    assert(($infoForB['signals'][0]['signal']['sdp']['type'] ?? '') === 'offer', 'Queued signal must contain SDP offer');
+
+    $infoAfterSeq = KinWhisperService::getCallInfo($userB, $thread->id, (int)($infoForB['signals'][0]['seq'] ?? 1));
+    assert(count($infoAfterSeq['signals'] ?? []) === 0, 'after_seq filter must prevent duplicate signal delivery');
+
+    $unauthorizedCallBlocked = false;
+    try {
+        KinWhisperService::getCallInfo('usr_intruder_999', $thread->id, 0);
+    } catch (\Throwable $e) {
+        $unauthorizedCallBlocked = ($e instanceof \App\classes\ForbiddenException || (int)$e->getCode() === 403);
+    }
+    assert($unauthorizedCallBlocked, 'Unauthorized user must be blocked from reading call info/signals (403 Forbidden)');
+
+    KinWhisperService::endCall($userA, $thread->id);
+    $infoAfterEnd = KinWhisperService::getCallInfo($userB, $thread->id, 0);
+    assert(($infoAfterEnd['call_status'] ?? '') === 'idle', 'Call status must return to idle after endCall');
+    echo "  ✅ WebRTC signal queue fallback, after_seq deduplication, and 403 IDOR guard verified.\n";
 
     echo "\n=================================================================\n";
-    echo "🏆 ALL 14 WHATSAPP PARITY & LINKED PWA TESTS PASSED CLEANLY!\n";
+    echo "🏆 ALL 15 FAMCHAT PARITY & CALLING TESTS PASSED CLEANLY!\n";
     echo "=================================================================\n";
 
 } finally {

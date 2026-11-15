@@ -244,6 +244,37 @@ const ProfileTourManager = require('../../public/js/profileTour.js');
     ]) {
         assert.ok(ids.includes(requiredId), `Includes step: ${requiredId}`);
     }
+    // 6. Calling start() while open runs afterLeave & completion/permanent dismiss don't fire onClose
+    {
+        window.localStorage.clear();
+        window.sessionStorage.clear();
+        let afterLeaveCalls = 0;
+        let closeCalls = 0;
+        let completeCalls = 0;
+        const tour = new SovereignSpotlightTour({
+            storageKey: 'test_reopen_while_open',
+            steps: [
+                {
+                    id: 's1',
+                    target: null,
+                    title: 'Step 1',
+                    description: 'First',
+                    afterLeave: () => { afterLeaveCalls += 1; },
+                },
+                { id: 's2', target: null, title: 'Step 2', description: 'Second' },
+            ],
+            onClose: () => { closeCalls += 1; },
+            onComplete: () => { completeCalls += 1; },
+        });
+        tour.start(0);
+        tour.start(0);
+        assert.equal(afterLeaveCalls, 1, 'Restarting while open triggers afterLeave on previous active step');
+        tour.next();
+        tour.next();
+        assert.equal(completeCalls, 1, 'onComplete fires once');
+        assert.equal(closeCalls, 0, 'Completion does not falsely trigger onClose');
+    }
+
     const allText = steps.map((s) => `${s.title} ${s.description} ${(s.uses || []).join(' ')} ${s.tip || ''}`).join(' ');
     assert.equal(/\b(personalize|customize|optimize|organize|color|center)\b/i.test(allText), false, 'Strictly uses British English');
 }
