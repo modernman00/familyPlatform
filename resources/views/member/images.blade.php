@@ -386,13 +386,16 @@
             <button class="lightbox-nav next" id="lightboxNext" onclick="navigateLightbox(1)" title="Next photo" aria-label="Next photo">&#10095;</button>
             <img class="lightbox-content" id="lightboxImg" alt="Enlarged photo">
             <div id="lightboxCaption" class="lightbox-caption"></div>
-            @if(!empty($isOwner))
-                <div class="lightbox-actions text-center mt-3 pb-3" style="position: relative; z-index: 2003;">
-                    <button type="button" class="btn btn-sm btn-danger px-4 py-2" id="lightboxDeleteBtn" style="border-radius: 20px; font-weight: 600; min-height: 44px; color: #ffffff; background-color: #dc2626; border-color: #dc2626;" title="Delete this picture permanently from your gallery" aria-label="Delete this picture">
+            <div class="lightbox-actions text-center mt-3 pb-3 d-flex justify-content-center flex-wrap gap-2" style="position: relative; z-index: 2003;">
+                <a href="/world-studio" id="lightboxEditLabBtn" class="btn btn-sm px-4 py-2 d-inline-flex align-items-center gap-1" style="border-radius: 20px; font-weight: 600; min-height: 44px; color: #ffffff; background: linear-gradient(135deg, #7c5cff, #ff3d7f); border: 0; white-space: nowrap; flex-shrink: 0;" title="Open a copy in Video &amp; Photo Lab">
+                    <i class="bi bi-film"></i>Edit in Video &amp; Photo Lab
+                </a>
+                @if(!empty($isOwner))
+                    <button type="button" class="btn btn-sm btn-danger px-4 py-2" id="lightboxDeleteBtn" style="border-radius: 20px; font-weight: 600; min-height: 44px; color: #ffffff; background-color: #dc2626; border-color: #dc2626; white-space: nowrap; flex-shrink: 0;" title="Delete this picture permanently from your gallery" aria-label="Delete this picture">
                         <i class="bi bi-trash3 me-1"></i>Delete This Picture
                     </button>
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
 
         <!-- Pagination -->
@@ -443,7 +446,17 @@
             
             lightbox.style.display = "block";
             lightboxImg.style.display = '';
-            lightboxImg.src = getSafePostImgUrl(item.img);
+            const safeUrl = getSafePostImgUrl(item.img);
+            lightboxImg.src = safeUrl;
+            const editLabBtn = document.getElementById('lightboxEditLabBtn');
+            if (editLabBtn) {
+                if (safeUrl && safeUrl.startsWith('/')) {
+                    editLabBtn.href = '/world-studio?kind=image&media_url=' + encodeURIComponent(safeUrl);
+                    editLabBtn.style.display = '';
+                } else {
+                    editLabBtn.href = '/world-studio';
+                }
+            }
             lightboxImg.onerror = function() {
                 this.onerror = null;
                 this.alt = 'Image could not be loaded';

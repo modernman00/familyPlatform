@@ -177,10 +177,31 @@ $sigRes = KinWhisperService::sendCallSignal($userA1, $threadAId, [
     'target_user_id' => $userA2,
     'signal' => ['sdp' => ['type' => 'offer', 'sdp' => 'v=0']],
 ]);
-if (empty($sigRes['success'])) {
-    fwrite(STDERR, "❌ FAIL: sendCallSignal() to valid participant failed!\n");
+if (empty($sigRes['success']) || empty($sigRes['seq'])) {
+    fwrite(STDERR, "❌ FAIL: sendCallSignal() to valid participant failed or did not assign seq!\n");
     exit(1);
 }
+
+// Verify getActiveIncomingCallForUser detects ringing call for recipient ($userA2) but not caller ($userA1)
+$incomingForA2 = KinWhisperService::getActiveIncomingCallForUser($userA2);
+$incomingForA1 = KinWhisperService::getActiveIncomingCallForUser($userA1);
+if (!$incomingForA2 || $incomingForA2['room_id'] !== $callInfo['room_id'] || $incomingForA1 !== null) {
+    fwrite(STDERR, "❌ FAIL: getActiveIncomingCallForUser() did not detect ringing call accurately!\n");
+    exit(1);
+}
+
+// Verify SDP answer transitions call_status from 'ringing' to 'in_call'
+$ansRes = KinWhisperService::sendCallSignal($userA2, $threadAId, [
+    'target_user_id' => $userA1,
+    'signal' => ['sdp' => ['type' => 'answer', 'sdp' => 'v=0']],
+]);
+$stmtInCall = $db->prepare('SELECT call_status FROM kin_threads WHERE id = ? LIMIT 1');
+$stmtInCall->execute([$threadAId]);
+if ($stmtInCall->fetchColumn() !== 'in_call') {
+    fwrite(STDERR, "❌ FAIL: SDP answer did not transition call_status to in_call!\n");
+    exit(1);
+}
+
 KinWhisperService::endCall($userA1, $threadAId);
 $stmtCallCheck = $db->prepare('SELECT call_status, active_call_room_id FROM kin_threads WHERE id = ? LIMIT 1');
 $stmtCallCheck->execute([$threadAId]);
@@ -189,7 +210,55 @@ if (!$callRow || $callRow['call_status'] !== 'idle' || $callRow['active_call_roo
     fwrite(STDERR, "❌ FAIL: endCall() did not reset call_status/active_call_room_id!\n");
     exit(1);
 }
-echo "  ✅ Same-family initiateCall(), sendCallSignal(), and endCall() lifecycle verified.\n";
+echo "  ✅ Same-family initiateCall(), getActiveIncomingCallForUser(), sendCallSignal() seq + in_call transition, and endCall() lifecycle verified.\n";
+
+// -----------------------------------------------------------------
+// TEST 1.7: Voice Whisper Recording Upload (WebM / MP4 containers) & Delivery
+// -----------------------------------------------------------------
+echo "[1.7] Testing Voice Whisper Upload (video/webm & video/mp4 containers) & Delivery...\n";
+$tmpWebm = tempnam(sys_get_temp_dir(), 'kw_webm_');
+// Write Matroska/WebM EBML magic bytes (\x1A\x45\xDF\xA3) + padding
+file_put_contents($tmpWebm, "\x1A\x45\xDF\xA3\x93\x42\x82\x88webm\x00" . str_repeat("\x00", 256));
+$uploadedAudio = KinWhisperService::uploadAudioWhisper($userA1, [
+    'tmp_name' => $tmpWebm,
+    'name' => 'whisper.webm',
+    'type' => 'video/webm',
+    'size' => filesize($tmpWebm),
+    'error' => UPLOAD_ERR_OK,
+], 9);
+@unlink($tmpWebm);
+
+if (empty($uploadedAudio['url']) || ($uploadedAudio['duration'] ?? 0) !== 9) {
+    fwrite(STDERR, "❌ FAIL: uploadAudioWhisper() failed for MediaRecorder WebM container!\n");
+    exit(1);
+}
+
+$voiceMsg = KinWhisperService::sendMessage(
+    $userA1,
+    $threadAId,
+    '',
+    'audio_whisper',
+    $uploadedAudio['url'],
+    $uploadedAudio['duration']
+);
+
+$recipientMessages = KinWhisperService::getMessages($userA2, $threadAId);
+$deliveredVoice = null;
+foreach ($recipientMessages as $m) {
+    if ($m->id === $voiceMsg->id) {
+        $deliveredVoice = $m;
+        break;
+    }
+}
+if (!$deliveredVoice || $deliveredVoice->messageType !== 'audio_whisper' || $deliveredVoice->audioUrl !== $uploadedAudio['url'] || $deliveredVoice->audioDurationSeconds !== 9) {
+    fwrite(STDERR, "❌ FAIL: Voice whisper was not persisted and delivered to recipient feed!\n");
+    exit(1);
+}
+$absVoiceFile = dirname(__DIR__) . $uploadedAudio['url'];
+if (is_file($absVoiceFile)) {
+    @unlink($absVoiceFile);
+}
+echo "  ✅ Voice whisper upload (WebM/MP4 containers), duration metadata, persistence, and recipient delivery verified.\n";
 
 $rbSrc = (string)file_get_contents(__DIR__ . '/../app/controller/RealtimeBroadcastingController.php');
 if (!str_contains($rbSrc, 'getEvents($channel, $lastEventId, 250)')) {

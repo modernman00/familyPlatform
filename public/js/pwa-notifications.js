@@ -443,6 +443,7 @@
   }
 
   let lastKnownWhisperUnread = null;
+  let lastShownCallRoomId = null;
   function pollWhisperPopupFallback() {
     if (document.visibilityState !== 'visible') return;
     const pathname = (window.location && window.location.pathname) ? window.location.pathname : '';
@@ -455,6 +456,17 @@
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (json) {
       if (!json || typeof json.unread_count === 'undefined') return;
+      if (json.incoming_call && json.incoming_call.room_id && json.incoming_call.room_id !== lastShownCallRoomId) {
+        lastShownCallRoomId = json.incoming_call.room_id;
+        playWhisperToastChime();
+        showFloatingToast({
+          title: '📞 Incoming Family Call',
+          body: (json.incoming_call.caller_name || 'A family member') + ' is calling you in FamilyChat. Tap to answer.',
+          category: 'kin_call',
+          tag: 'call_' + json.incoming_call.room_id,
+          url: '/kin-whispers?thread_id=' + encodeURIComponent(json.incoming_call.thread_id)
+        });
+      }
       const nextCount = Math.max(0, parseInt(json.unread_count, 10) || 0);
       if (lastKnownWhisperUnread !== null && nextCount > lastKnownWhisperUnread) {
         if (typeof window.updateWhisperBadge === 'function') {

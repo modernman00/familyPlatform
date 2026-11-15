@@ -12,13 +12,29 @@ describe('Profile Page Interactive Tour Engine', () => {
             headers: { 'content-type': 'image/svg+xml' },
             body: '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#a31621"/></svg>',
         });
-        cy.intercept('GET', '**/post/getAllPostCommentByFamCode*', {
+        cy.intercept('GET', '/post/getAllPostCommentByFamCode*', {
             statusCode: 200,
-            body: { status: 'success', message: { message: [], pagination: { has_more: false } }, posts: [], data: [], hasMore: false },
+            body: { status: 'success', posts: [], data: [], hasMore: false },
         });
-        cy.intercept('GET', '**/getFriendRequestById*', {
+        cy.intercept('GET', '/getFriendRequestById*', {
             statusCode: 200,
             body: { status: 'success', message: { message: [] }, data: [] },
+        });
+        cy.intercept('GET', '/allMembers/processApiData*', {
+            statusCode: 200,
+            body: { status: 'success', data: [], members: [] },
+        });
+        cy.intercept('GET', '/api/hashtags/trending*', {
+            statusCode: 200,
+            body: { status: 'success', data: [], hashtags: [] },
+        });
+        cy.intercept('GET', '/api/broadcasting/status*', {
+            statusCode: 200,
+            body: { status: 'success', enabled: false },
+        });
+        cy.intercept('GET', '/api/engagement/memories*', {
+            statusCode: 200,
+            body: { status: 'success', data: [] },
         });
         cy.on('window:before:load', (win) => {
             const origError = win.console.error.bind(win.console);
@@ -96,27 +112,24 @@ describe('Profile Page Interactive Tour Engine', () => {
 
     it('supports temporary close, permanent dismissal via API, and always-available relaunch on Desktop (1440x900)', () => {
         cy.viewport(1440, 900);
+        let allowAutoStart = true;
+        cy.on('window:before:load', (win) => {
+            if (allowAutoStart) {
+                resetTourClientState(win);
+                let cfg = { dismissed: false, isPendingApproval: false };
+                Object.defineProperty(win, '__FP_PROFILE_TOUR_CONFIG__', {
+                    configurable: true,
+                    get() { return cfg; },
+                    set(v) { cfg = Object.assign({}, v || {}, { dismissed: false, isPendingApproval: false }); },
+                });
+            }
+        });
         loginFully();
 
-        // Ensure server preference is reset to undismissed before testing auto-start
-        cy.window({ timeout: 15000 }).then({ timeout: 15000 }, (win) => {
-            resetTourClientState(win);
-            const csrf = win.document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-            return win.fetch('/api/profile/tour-preference', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': csrf,
-                },
-                body: JSON.stringify({ tour_key: 'profile_page_v1', dismissed: false, token: csrf }),
-            });
-        });
-
-        cy.reload();
-
         // 1. Auto-starts on first visit
-        cy.get('.sspot-overlay', { timeout: 6000 }).should('be.visible');
+        cy.get('.sspot-overlay', { timeout: 6000 }).should('be.visible').then(() => {
+            allowAutoStart = false;
+        });
         cy.get('.sspot-title').should('contain.text', 'Welcome to Your Family Sanctuary');
 
         // 2. Temporary close (×) suppresses auto-start in same session, without permanent dismissal

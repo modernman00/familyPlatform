@@ -154,16 +154,16 @@
             <div class="w-100 px-2 mb-4" style="margin-bottom:1.5rem !important;" id="leftColumnKinWhispersPortal">
                 <a href="/kin-whispers" class="btn w-100 d-inline-flex align-items-center justify-content-between text-decoration-none position-relative shadow-sm"
                    style="background: linear-gradient(135deg, #8b121c 0%, #a31621 60%, #be202e 100%); color: #ffffff !important; border: 1.5px solid rgba(212, 175, 55, 0.75); border-radius: 12px; padding: 10px 14px; min-height: 44px; white-space: nowrap; flex-shrink: 0; box-shadow: 0 4px 14px rgba(163, 22, 33, 0.28); transition: transform 0.15s ease, box-shadow 0.15s ease;"
-                   title="{{ __('nav.whisper', 'FamilyChat — Private, artifact-anchored family messages and voice dedications') }}">
+                   title="{{ __('nav.whisper', 'FamChat — Private, artifact-anchored family messages and voice dedications') }}">
                     <div class="d-inline-flex align-items-center gap-2 min-w-0">
                         <span class="d-inline-flex align-items-center justify-content-center flex-shrink-0 position-relative" style="width: 28px; height: 28px; border-radius: 8px; background: rgba(255, 255, 255, 0.16); color: #ffd700;" aria-hidden="true">
                             <i class="bi bi-chat-dots-fill" style="font-size: 0.95rem;"></i>
-                            <span class="whisper-portal-bell-dot position-absolute top-0 end-0 translate-middle p-1 bg-warning border border-light rounded-circle {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="width: 8px; height: 8px;" title="New incoming FamilyChat messages"></span>
+                            <span class="whisper-portal-bell-dot position-absolute top-0 end-0 translate-middle p-1 bg-warning border border-light rounded-circle {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="width: 8px; height: 8px;" title="New incoming FamChat messages"></span>
                         </span>
-                        <span class="fw-bold" style="font-size: 0.92rem; color: #ffffff !important; letter-spacing: 0.01em;">FamilyChat</span>
+                        <span class="fw-bold" style="font-size: 0.92rem; color: #ffffff !important; letter-spacing: 0.01em;">FamChat</span>
                     </div>
                     <div class="d-inline-flex align-items-center gap-1.5 flex-shrink-0">
-                        <i class="bi bi-bell-fill whisper-portal-bell-icon {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.8rem; color: #ffd700;" title="Unread FamilyChat messages available"></i>
+                        <i class="bi bi-bell-fill whisper-portal-bell-icon {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.8rem; color: #ffd700;" title="Unread FamChat messages available"></i>
                         <span class="badge rounded-pill whisper-portal-unread-badge {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="background: #ffd700; color: #1e1b4b; font-size: 0.72rem; padding: 3px 8px; font-weight: 800; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
                             <span class="whisper-portal-unread-count">{{ $leftWhisperUnreadCount > 0 ? $leftWhisperUnreadCount : '' }}</span>
                         </span>

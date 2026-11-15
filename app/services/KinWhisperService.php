@@ -26,7 +26,7 @@ final class KinWhisperService
 {
     public const int MAX_MESSAGE_LENGTH = 2000;
     public const int MAX_AUDIO_DURATION_SECONDS = 60;
-    public const int MAX_AUDIO_FILE_SIZE = 2097152; // 2MB
+    public const int MAX_AUDIO_FILE_SIZE = 10485760; // 10MB
     public const int MAX_MEDIA_FILE_SIZE = 15728640; // 15MB
 
     public const array ALLOWED_MEDIA_MIMES = [
@@ -56,11 +56,24 @@ final class KinWhisperService
 
     public const array ALLOWED_AUDIO_MIMES = [
         'audio/webm',
+        'video/webm',
         'audio/mp4',
+        'video/mp4',
+        'application/mp4',
         'audio/mpeg',
+        'audio/mp3',
         'audio/ogg',
+        'video/ogg',
+        'application/ogg',
         'audio/wav',
+        'audio/x-wav',
+        'audio/wave',
         'audio/x-m4a',
+        'audio/aac',
+        'audio/mp4a-latm',
+        'audio/3gpp',
+        'audio/3gpp2',
+        'video/3gpp',
     ];
 
     public const array ALLOWED_REACTIONS = [
@@ -683,7 +696,7 @@ final class KinWhisperService
                 : (string)$thread['sender_id'];
 
             // If supervisor is viewing, they cannot post on behalf of the child directly
-            if ($currentUserId !== (string)$thread['sender_id'] && $currentUserId !== (string)$thread['recipient_id']) {
+            if (strcasecmp($currentUserId, (string)$thread['sender_id']) !== 0 && strcasecmp($currentUserId, (string)$thread['recipient_id']) !== 0) {
                 throw new ForbiddenException('Supervising guardians have read-only audit permissions on minor kin threads.');
             }
         }
@@ -699,7 +712,7 @@ final class KinWhisperService
         }
 
         if (!empty($audioUrl)) {
-            if (!preg_match('#^/public/audio/whispers/[a-zA-Z0-9_-]+\.(webm|mp3|m4a|ogg|wav)$#', $audioUrl)) {
+            if (!preg_match('#^/public/audio/whispers/[a-zA-Z0-9_-]+\.(webm|mp3|m4a|mp4|ogg|wav)$#', $audioUrl)) {
                 throw new ValidationException('Invalid audio whisper source URL. Path traversal detected.');
             }
         }
@@ -885,11 +898,15 @@ final class KinWhisperService
                     \App\classes\Pusher::trigger($targetChannels, 'kin-whisper', [
                         'thread_id' => $threadId,
                         'message_id' => $msgId,
+                        'sender_id' => $currentUserId,
+                        'sender_name' => $senderName,
+                        'message_type' => $messageType,
+                        'preview' => $messageType === 'audio_whisper' ? '🎙️ Voice whisper' : mb_substr($cleanBody, 0, 100),
                         'is_group' => true,
                     ]);
                 }
             } else {
-                $recipientId = ($currentUserId === (string)$thread['sender_id'])
+                $recipientId = (strcasecmp($currentUserId, (string)$thread['sender_id']) === 0)
                     ? (string)$thread['recipient_id']
                     : (string)$thread['sender_id'];
 
@@ -926,6 +943,9 @@ final class KinWhisperService
                         'thread_id' => $threadId,
                         'message_id' => $msgId,
                         'sender_id' => $currentUserId,
+                        'sender_name' => $senderName,
+                        'message_type' => $messageType,
+                        'preview' => $messageType === 'audio_whisper' ? '🎙️ Voice whisper' : mb_substr($cleanBody, 0, 100),
                     ]);
                 }
             }
@@ -1750,23 +1770,40 @@ final class KinWhisperService
      *
      * @param string $currentUserId
      * @param array{name: string, type: string, tmp_name: string, error: int, size: int} $file
+     * @param int|null $durationSeconds
      * @return array{url: string, duration: int}
      */
-    public static function uploadAudioWhisper(string $currentUserId, array $file): array
+    public static function uploadAudioWhisper(string $currentUserId, array $file, ?int $durationSeconds = null): array
     {
         if ($file['error'] !== UPLOAD_ERR_OK) {
             throw new ValidationException('Failed to upload audio file. Please retry.');
         }
 
-        if ($file['size'] > self::MAX_AUDIO_FILE_SIZE) {
-            throw new ValidationException('Audio file exceeds the maximum permitted size of 2MB.');
+        if ((int)$file['size'] <= 0) {
+            throw new ValidationException('Recorded audio file is empty. Please record at least 1 second of audio.');
         }
 
+        if ($file['size'] > self::MAX_AUDIO_FILE_SIZE) {
+            throw new ValidationException('Audio file exceeds the maximum permitted size of 10MB.');
+        }
+
+        $tmpPath = (string)$file['tmp_name'];
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
-        $mime = (string)$finfo->file((string)$file['tmp_name']);
+        $mime = strtolower(trim((string)$finfo->file($tmpPath)));
+        $clientType = strtolower(trim(explode(';', (string)$file['type'])[0]));
+
+        // Browser MediaRecorder chunks can occasionally be detected as application/octet-stream by libmagic;
+        // verify magic bytes are not executable/text and honour a valid audio/video client MIME if so.
+        $headBytes = (string)@file_get_contents($tmpPath, false, null, 0, 64);
+        if (preg_match('/^\s*(<\?php|<!doctype|<html|<script|<svg)/i', $headBytes)) {
+            throw new ValidationException('Invalid audio file format.');
+        }
+        if ($mime === 'application/octet-stream' && (in_array($clientType, self::ALLOWED_AUDIO_MIMES, true) || str_starts_with($clientType, 'audio/'))) {
+            $mime = $clientType;
+        }
 
         if (!in_array($mime, self::ALLOWED_AUDIO_MIMES, true) && !str_starts_with($mime, 'audio/')) {
-            throw new ValidationException('Invalid audio file format. Only webm, mp3, mp4, ogg, or wav files are allowed.');
+            throw new ValidationException('Invalid audio file format. Only webm, mp3, mp4, m4a, ogg, or wav files are allowed.');
         }
 
         $targetDir = dirname(__DIR__, 2) . '/public/audio/whispers';
@@ -1777,7 +1814,7 @@ final class KinWhisperService
         $extension = 'webm';
         if (str_contains($mime, 'mpeg') || str_contains($mime, 'mp3')) {
             $extension = 'mp3';
-        } elseif (str_contains($mime, 'mp4') || str_contains($mime, 'm4a')) {
+        } elseif (str_contains($mime, 'mp4') || str_contains($mime, 'm4a') || str_contains($mime, 'aac') || str_contains($mime, '3gp')) {
             $extension = 'm4a';
         } elseif (str_contains($mime, 'ogg')) {
             $extension = 'ogg';
@@ -1788,15 +1825,20 @@ final class KinWhisperService
         $filename = sprintf('whisper_%s_%s.%s', bin2hex(random_bytes(8)), date('Ymd_His'), $extension);
         $destination = $targetDir . '/' . $filename;
 
-        if (!move_uploaded_file((string)$file['tmp_name'], $destination)) {
-            throw new ValidationException('Could not save uploaded audio.');
+        if (!move_uploaded_file($tmpPath, $destination)) {
+            if (!@copy($tmpPath, $destination)) {
+                throw new ValidationException('Could not save uploaded audio.');
+            }
         }
 
         $publicUrl = '/public/audio/whispers/' . $filename;
+        $safeDuration = ($durationSeconds !== null && $durationSeconds > 0)
+            ? min(self::MAX_AUDIO_DURATION_SECONDS, max(1, $durationSeconds))
+            : 30;
 
         return [
             'url' => $publicUrl,
-            'duration' => 30, // Default duration estimation
+            'duration' => $safeDuration,
         ];
     }
 
@@ -2361,11 +2403,28 @@ final class KinWhisperService
         $isGroup = ((string)($thread['thread_type'] ?? 'direct')) === 'group';
 
         $roomId = (string)($thread['active_call_room_id'] ?? '');
+        $signalObj = $signalData['signal'] ?? $signalData;
+        $sdpType = is_array($signalObj) && is_array($signalObj['sdp'] ?? null)
+            ? strtolower((string)($signalObj['sdp']['type'] ?? ''))
+            : '';
+
+        if ($sdpType === 'answer' && ((string)($thread['call_status'] ?? 'idle')) === 'ringing') {
+            $stmtAns = $db->prepare('UPDATE kin_threads SET call_status = "in_call" WHERE id = ?');
+            $stmtAns->execute([$threadId]);
+            if ($roomId !== '') {
+                $existingMeta = self::readCallMeta($roomId);
+                if (is_array($existingMeta)) {
+                    $existingMeta['status'] = 'in_call';
+                    self::storeCallMeta($roomId, $existingMeta);
+                }
+            }
+        }
+
         $relayPayload = [
             'thread_id' => $threadId,
             'sender_id' => $currentUserId,
             'room_id' => $roomId,
-            'signal' => $signalData['signal'] ?? $signalData,
+            'signal' => $signalObj,
         ];
 
         if ($targetUserId !== null && $targetUserId !== '') {
@@ -2389,14 +2448,12 @@ final class KinWhisperService
             $stmtParts = $db->prepare('SELECT user_id FROM kin_thread_participants WHERE thread_id = ? AND user_id != ? AND deleted_at IS NULL');
             $stmtParts->execute([$threadId, $currentUserId]);
             $recipientIds = $stmtParts->fetchAll(PDO::FETCH_COLUMN) ?: [];
-            if ($roomId !== '') {
-                foreach ($recipientIds as $recId) {
-                    self::appendCallSignal($roomId, (string)$recId, $relayPayload);
+            foreach ($recipientIds as $recId) {
+                $recPayload = $relayPayload;
+                if ($roomId !== '') {
+                    self::appendCallSignal($roomId, (string)$recId, $recPayload);
                 }
-            }
-            $channels = array_values(array_map(fn($id) => 'private-user-' . strtolower((string)$id), $recipientIds));
-            if (!empty($channels)) {
-                \App\classes\Pusher::trigger($channels, 'kin-call-signal', $relayPayload);
+                \App\classes\Pusher::trigger('private-user-' . strtolower((string)$recId), 'kin-call-signal', $recPayload);
             }
         } else {
             $recipientId = (strcasecmp($currentUserId, (string)$thread['sender_id']) === 0)
@@ -2410,7 +2467,10 @@ final class KinWhisperService
             }
         }
 
-        return ['success' => true];
+        return [
+            'success' => true,
+            'seq' => $relayPayload['seq'] ?? null,
+        ];
     }
 
     /**
@@ -2509,10 +2569,18 @@ final class KinWhisperService
 
         if ($roomId !== null && $callStatus !== 'idle') {
             $meta = self::readCallMeta($roomId);
-            if ($meta !== null && isset($meta['caller_id']) && strcasecmp((string)$meta['caller_id'], $currentUserId) !== 0) {
-                $incomingCall = $meta;
+            if ($meta === null && $callStatus === 'ringing') {
+                // Auto-heal stale ringing call whose 120s metadata TTL has expired
+                $stmtReset = $db->prepare('UPDATE kin_threads SET call_status = "idle", active_call_room_id = NULL WHERE id = ?');
+                $stmtReset->execute([$threadId]);
+                $callStatus = 'idle';
+                $roomId = null;
+            } else {
+                if ($meta !== null && isset($meta['caller_id']) && strcasecmp((string)$meta['caller_id'], $currentUserId) !== 0 && $callStatus === 'ringing') {
+                    $incomingCall = $meta;
+                }
+                $signals = self::readCallSignals($roomId, $currentUserId, $afterSeq);
             }
-            $signals = self::readCallSignals($roomId, $currentUserId, $afterSeq);
         }
 
         return [
@@ -2524,6 +2592,58 @@ final class KinWhisperService
             'incoming_call' => $incomingCall,
             'signals' => $signals,
         ];
+    }
+
+    /**
+     * Find any currently ringing incoming call across all threads for a user.
+     *
+     * @param string $currentUserId
+     * @return array<string, mixed>|null
+     */
+    public static function getActiveIncomingCallForUser(string $currentUserId): ?array
+    {
+        $currentUserId = trim($currentUserId);
+        if ($currentUserId === '') {
+            return null;
+        }
+
+        try {
+            $db = Db::connect2();
+            $stmt = $db->prepare(
+                'SELECT t.id, t.active_call_room_id
+                 FROM kin_threads t
+                 LEFT JOIN kin_thread_participants p ON t.id = p.thread_id AND p.deleted_at IS NULL
+                 WHERE t.call_status = "ringing"
+                   AND t.active_call_room_id IS NOT NULL
+                   AND (t.sender_id = ? OR t.recipient_id = ? OR p.user_id = ?)
+                 ORDER BY t.updated_at DESC
+                 LIMIT 10'
+            );
+            $stmt->execute([$currentUserId, $currentUserId, $currentUserId]);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $seenThreads = [];
+
+            foreach ($rows as $r) {
+                $tId = (string)($r['id'] ?? '');
+                $roomId = (string)($r['active_call_room_id'] ?? '');
+                if ($tId === '' || $roomId === '' || isset($seenThreads[$tId])) {
+                    continue;
+                }
+                $seenThreads[$tId] = true;
+                $meta = self::readCallMeta($roomId);
+                if ($meta === null) {
+                    $stmtReset = $db->prepare('UPDATE kin_threads SET call_status = "idle", active_call_room_id = NULL WHERE id = ?');
+                    $stmtReset->execute([$tId]);
+                    continue;
+                }
+                if (isset($meta['caller_id']) && strcasecmp((string)$meta['caller_id'], $currentUserId) !== 0) {
+                    return $meta;
+                }
+            }
+        } catch (\Throwable) {
+        }
+
+        return null;
     }
 
     private static function callSignalDir(): string
@@ -2581,7 +2701,7 @@ final class KinWhisperService
     /**
      * @param array<string, mixed> $payload
      */
-    private static function appendCallSignal(string $roomId, string $recipientId, array $payload): void
+    private static function appendCallSignal(string $roomId, string $recipientId, array &$payload): void
     {
         $safeRoom = self::safeCallToken($roomId);
         $safeUser = strtolower(self::safeCallToken($recipientId));
@@ -3048,6 +3168,16 @@ final class KinWhisperService
             } catch (\Throwable) {
                 $row['is_pinned'] = 0;
                 $row['is_muted'] = 0;
+            }
+        }
+
+        if (($row['call_status'] ?? 'idle') === 'ringing' && !empty($row['active_call_room_id'])) {
+            $meta = self::readCallMeta((string)$row['active_call_room_id']);
+            if ($meta === null) {
+                $stmtReset = $db->prepare('UPDATE kin_threads SET call_status = "idle", active_call_room_id = NULL WHERE id = ?');
+                $stmtReset->execute([$threadId]);
+                $row['call_status'] = 'idle';
+                $row['active_call_room_id'] = null;
             }
         }
 

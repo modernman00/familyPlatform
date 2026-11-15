@@ -1824,7 +1824,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                           <span><i class="bi bi-mic-fill"></i> Voice whisper</span>
                           <button type="button" class="kw-speed-btn" @click="cycleAudioSpeed($el)" title="Change playback speed (1x, 1.5x, 2x)">1x</button>
                         </div>
-                        <audio controls preload="none" :src="msg.audio_url"></audio>
+                        <audio controls preload="metadata" playsinline :src="msg.audio_url"></audio>
                       </div>
                     </template>
 
@@ -2113,7 +2113,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                       <i class="bi" :class="isRecording ? 'bi-stop-fill' : 'bi-mic'"></i>
                     </button>
                   </template>
-                  <template x-if="newMessageBody.trim() || recordedAudioBlob || pendingAttachment">
+                  <template x-if="newMessageBody.trim() || recordedAudioBlob || pendingAttachment || isRecording">
                     <button type="submit" class="kw-send-circle" aria-label="Send whisper" title="Send whisper">
                       <i class="bi bi-send-fill" style="font-size:0.9rem;"></i>
                     </button>
@@ -2717,7 +2717,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
       {{-- Video Stream View --}}
       <template x-if="callType === 'video'">
         <div class="kw-remote-video-wrap">
-          <video id="kwRemoteVideo" class="kw-remote-video" autoplay playsinline></video>
+          <video id="kwRemoteVideo" class="kw-remote-video" autoplay playsinline muted></video>
           <div class="kw-local-video-pip">
             <video id="kwLocalVideo" class="kw-local-video" autoplay playsinline muted></video>
           </div>
@@ -2923,6 +2923,11 @@ function kinWhisperApp() {
     sseSource: null,
     seenCallRoomIds: {},
     iceRestarted: false,
+    isAcceptingCall: false,
+    signalQueueChain: null,
+    recordingStopPromise: null,
+    recordingStopResolve: null,
+    pollTickCount: 0,
     iceServers: @json($ice_servers ?? [['urls' => ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun.cloudflare.com:3478']]]),
     isRecording: false,
     mediaRecorder: null,
@@ -3031,6 +3036,7 @@ function kinWhisperApp() {
         this.loadThreadMedia();
         window.dispatchEvent(new CustomEvent('kin-whispers:read'));
       }
+      this.checkInitialRingingCall();
       if (typeof window !== 'undefined') {
         const unlockAudio = () => {
           try {
@@ -3919,28 +3925,54 @@ function kinWhisperApp() {
             }
           }
           if (!this.isInCall && !this.incomingCall) {
-            const ringingThread = data.threads.find(t => t.call_status === 'ringing' && t.active_call_room_id && !this.seenCallRoomIds[t.active_call_room_id]);
-            if (ringingThread) {
-              try {
-                const callRes = await fetch('/api/kin-whispers/threads/' + encodeURIComponent(ringingThread.id) + '/call/info', {
-                  headers: { 'Accept': 'application/json' }
-                });
-                if (callRes.ok) {
-                  const info = await callRes.json();
-                  if (info && info.success && info.call && info.call.call_status === 'ringing' && info.call.incoming_call) {
-                    this.handleIncomingCallEvent(info.call.incoming_call);
-                    if (Array.isArray(info.call.signals)) {
-                      for (const sig of info.call.signals) {
-                        await this.handleCallSignalEvent(sig);
+            if (data.incoming_call && data.incoming_call.room_id && !this.seenCallRoomIds[data.incoming_call.room_id]) {
+              this.handleIncomingCallEvent(data.incoming_call);
+            } else {
+              const ringingThread = data.threads.find(t => t.call_status === 'ringing' && t.active_call_room_id && !this.seenCallRoomIds[t.active_call_room_id]);
+              if (ringingThread) {
+                try {
+                  const callRes = await fetch('/api/kin-whispers/threads/' + encodeURIComponent(ringingThread.id) + '/call/info', {
+                    headers: { 'Accept': 'application/json' }
+                  });
+                  if (callRes.ok) {
+                    const info = await callRes.json();
+                    if (info && info.success && info.call && info.call.call_status === 'ringing' && info.call.incoming_call) {
+                      this.handleIncomingCallEvent(info.call.incoming_call);
+                      if (Array.isArray(info.call.signals)) {
+                        for (const sig of info.call.signals) {
+                          await this.handleCallSignalEvent(sig);
+                        }
                       }
                     }
                   }
-                }
-              } catch (_) {}
+                } catch (_) {}
+              }
             }
           }
         }
       } catch (e) {}
+    },
+
+    async checkInitialRingingCall() {
+      if (this.isInCall || this.incomingCall) return;
+      const ringingThread = (this.threads || []).find(t => t.call_status === 'ringing' && t.active_call_room_id && !this.seenCallRoomIds[t.active_call_room_id]);
+      const targetId = ringingThread ? ringingThread.id : (this.activeThread && this.activeThread.call_status === 'ringing' ? this.activeThread.id : null);
+      if (!targetId) return;
+      try {
+        const res = await fetch('/api/kin-whispers/threads/' + encodeURIComponent(targetId) + '/call/info', {
+          headers: { 'Accept': 'application/json' }
+        });
+        if (!res.ok) return;
+        const info = await res.json();
+        if (info && info.success && info.call && info.call.call_status === 'ringing' && info.call.incoming_call) {
+          this.handleIncomingCallEvent(info.call.incoming_call);
+          if (Array.isArray(info.call.signals)) {
+            for (const sig of info.call.signals) {
+              await this.handleCallSignalEvent(sig);
+            }
+          }
+        }
+      } catch (_) {}
     },
 
     async pollUpdates() {
@@ -3948,6 +3980,10 @@ function kinWhisperApp() {
       const isMobileList = (typeof window !== 'undefined' && window.innerWidth < 768 && this.pane === 'list');
       if (isMobileList || !this.activeThread) {
         return this.pollThreadListOnly();
+      }
+      this.pollTickCount = (this.pollTickCount || 0) + 1;
+      if (this.pollTickCount % 3 === 0) {
+        this.pollThreadListOnly();
       }
       const pollingThreadId = this.activeThread.id;
       try {
@@ -3971,20 +4007,27 @@ function kinWhisperApp() {
           this.messages = [...validMessages, ...inFlightOptimistic];
           if (!this.threadCache) this.threadCache = {};
           this.threadCache[pollingThreadId] = this.messages;
+          if (!this.isInCall && !this.incomingCall && data.incoming_call && data.incoming_call.room_id && !this.seenCallRoomIds[data.incoming_call.room_id]) {
+            this.handleIncomingCallEvent(data.incoming_call);
+          }
           if (data.thread) {
             this.activeThread.last_message_preview = data.thread.last_message_preview;
             this.activeThread.last_message_at = data.thread.last_message_at;
             this.activeThread.share_status = data.thread.share_status;
             this.activeThread.share_requested_by = data.thread.share_requested_by;
             this.activeThread.share_approved_by = data.thread.share_approved_by;
+            this.activeThread.call_status = data.thread.call_status;
+            this.activeThread.active_call_room_id = data.thread.active_call_room_id;
             if (data.thread.call_status === 'ringing' && !this.isInCall && !this.incomingCall) {
               fetch('/api/kin-whispers/threads/' + encodeURIComponent(pollingThreadId) + '/call/info', {
                 headers: { 'Accept': 'application/json' }
-              }).then(r => r.ok ? r.json() : null).then(info => {
+              }).then(r => r.ok ? r.json() : null).then(async (info) => {
                 if (info && info.success && info.call && info.call.incoming_call) {
                   this.handleIncomingCallEvent(info.call.incoming_call);
                   if (Array.isArray(info.call.signals)) {
-                    info.call.signals.forEach(s => this.handleCallSignalEvent(s));
+                    for (const s of info.call.signals) {
+                      await this.handleCallSignalEvent(s);
+                    }
                   }
                 }
               }).catch(() => {});
@@ -4372,19 +4415,30 @@ function kinWhisperApp() {
       }
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        this.mediaRecorder = new MediaRecorder(stream);
+        const preferredMimes = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/ogg'];
+        const chosenMime = preferredMimes.find(m => typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported(m)) || '';
+        this.mediaRecorder = chosenMime ? new MediaRecorder(stream, { mimeType: chosenMime }) : new MediaRecorder(stream);
         this.audioChunks = [];
         this.recordingSeconds = 0;
         this.recordingStatusText = 'Recording';
-        this.mediaRecorder.ondataavailable = e => { if (e.data.size > 0) this.audioChunks.push(e.data); };
+        this.recordingStopPromise = new Promise(resolve => {
+          this.recordingStopResolve = resolve;
+        });
+        this.mediaRecorder.ondataavailable = e => { if (e.data && e.data.size > 0) this.audioChunks.push(e.data); };
         this.mediaRecorder.onstop = () => {
-          this.recordedAudioBlob = new Blob(this.audioChunks, { type: this.mediaRecorder.mimeType || 'audio/webm' });
+          const finalMime = (this.mediaRecorder && this.mediaRecorder.mimeType) || chosenMime || 'audio/webm';
+          this.recordedAudioBlob = new Blob(this.audioChunks, { type: finalMime });
           this.recordedAudioUrl = URL.createObjectURL(this.recordedAudioBlob);
           this.recordingStatusText = 'Recorded';
           clearInterval(this.recordingTimer);
           this.isRecording = false;
+          if (typeof this.recordingStopResolve === 'function') {
+            const resFn = this.recordingStopResolve;
+            this.recordingStopResolve = null;
+            resFn(this.recordedAudioBlob);
+          }
         };
-        this.mediaRecorder.start();
+        this.mediaRecorder.start(250);
         this.isRecording = true;
         this.recordingTimer = setInterval(() => {
           this.recordingSeconds++;
@@ -4395,9 +4449,26 @@ function kinWhisperApp() {
 
     stopAudioRecording() {
       if (this.mediaRecorder && this.isRecording) {
-        this.mediaRecorder.stop();
+        try {
+          if (this.mediaRecorder.state !== 'inactive') {
+            this.mediaRecorder.stop();
+          }
+        } catch (_) {}
         if (this.mediaRecorder.stream) this.mediaRecorder.stream.getTracks().forEach(t => t.stop());
       }
+    },
+
+    async stopAndFinalizeRecording() {
+      if (!this.isRecording || !this.mediaRecorder) {
+        return this.recordedAudioBlob;
+      }
+      const waitPromise = this.recordingStopPromise || Promise.resolve();
+      this.stopAudioRecording();
+      await Promise.race([
+        waitPromise,
+        new Promise(r => setTimeout(r, 800))
+      ]);
+      return this.recordedAudioBlob;
     },
 
     discardRecordedAudio() {
@@ -4407,10 +4478,15 @@ function kinWhisperApp() {
       this.recordedAudioBlob = null;
       this.recordingSeconds = 0;
       this.isRecording = false;
+      this.recordingStopPromise = null;
+      this.recordingStopResolve = null;
     },
 
     async sendMessage() {
       if (!this.activeThread) return;
+      if (this.isRecording) {
+        await this.stopAndFinalizeRecording();
+      }
       this.newMessageBody = this.getComposerText();
       const text = this.newMessageBody.trim();
       if (!text && !this.recordedAudioBlob && !this.pendingAttachment) return;
@@ -4456,6 +4532,7 @@ function kinWhisperApp() {
         message_type: hasAudio ? 'audio_whisper' : 'text',
         body: outgoingText,
         audio_url: audioLocalUrl || null,
+        audio_blob: audioBlobToUpload || null,
         audio_duration_seconds: hasAudio ? audioDuration : null,
         created_at: currentTs,
         is_read: 0,
@@ -4500,8 +4577,13 @@ function kinWhisperApp() {
       try {
         let uploadedAudioUrl = null;
         if (hasAudio && audioBlobToUpload) {
+          const blobMime = String(audioBlobToUpload.type || '').toLowerCase();
+          const audioExt = (blobMime.includes('mp4') || blobMime.includes('m4a') || blobMime.includes('aac'))
+            ? 'm4a'
+            : (blobMime.includes('ogg') ? 'ogg' : (blobMime.includes('wav') ? 'wav' : (blobMime.includes('mpeg') || blobMime.includes('mp3') ? 'mp3' : 'webm')));
           const fd = new FormData();
-          fd.append('audio', audioBlobToUpload, 'whisper.webm');
+          fd.append('audio', audioBlobToUpload, 'whisper.' + audioExt);
+          fd.append('duration', String(audioDuration));
           const upRes = await fetch('/api/kin-whispers/audio-upload', {
             method: 'POST',
             headers: { 'X-CSRF-TOKEN': csrf() },
@@ -4580,6 +4662,30 @@ function kinWhisperApp() {
       if (!failedMsg || !this.activeThread) return;
       failedMsg.status = 'sending';
       try {
+        let finalAudioUrl = failedMsg.audio_url;
+        if (failedMsg.message_type === 'audio_whisper' && (!finalAudioUrl || String(finalAudioUrl).startsWith('blob:')) && failedMsg.audio_blob) {
+          const blobMime = String(failedMsg.audio_blob.type || '').toLowerCase();
+          const audioExt = (blobMime.includes('mp4') || blobMime.includes('m4a') || blobMime.includes('aac'))
+            ? 'm4a'
+            : (blobMime.includes('ogg') ? 'ogg' : (blobMime.includes('wav') ? 'wav' : (blobMime.includes('mpeg') || blobMime.includes('mp3') ? 'mp3' : 'webm')));
+          const fd = new FormData();
+          fd.append('audio', failedMsg.audio_blob, 'whisper.' + audioExt);
+          fd.append('duration', String(failedMsg.audio_duration_seconds || 1));
+          const upRes = await fetch('/api/kin-whispers/audio-upload', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrf() },
+            body: fd
+          });
+          const up = await upRes.json();
+          if (!up.success || !up.audio || !up.audio.url) {
+            failedMsg.status = 'failed';
+            this.toast(up.error || 'Voice upload retry failed.');
+            return;
+          }
+          finalAudioUrl = up.audio.url;
+          failedMsg.audio_url = finalAudioUrl;
+        }
+
         const res = await fetch('/api/kin-whispers/messages', {
           method: 'POST',
           headers: jsonHeaders(),
@@ -4587,7 +4693,7 @@ function kinWhisperApp() {
             thread_id: failedMsg.thread_id,
             body: failedMsg.body,
             message_type: failedMsg.message_type || 'text',
-            audio_url: failedMsg.audio_url,
+            audio_url: finalAudioUrl,
             audio_duration: failedMsg.audio_duration_seconds
           })
         });
@@ -5061,22 +5167,22 @@ function kinWhisperApp() {
         const remoteAudio = document.getElementById('kwRemoteAudio');
         const remoteVid = document.getElementById('kwRemoteVideo');
 
+        if (remoteAudio) {
+          if (remoteAudio.srcObject !== stream) {
+            remoteAudio.srcObject = stream;
+          }
+          remoteAudio.play().catch(e => console.warn('Remote audio playback warning', e));
+        }
+
         if (this.callType === 'video') {
           if (remoteVid) {
-            remoteVid.srcObject = stream;
+            if (remoteVid.srcObject !== stream) {
+              remoteVid.srcObject = stream;
+            }
             remoteVid.play().catch(e => console.warn('Remote video playback warning', e));
           }
-          if (remoteAudio) {
-            remoteAudio.srcObject = null;
-          }
-        } else {
-          if (remoteAudio) {
-            remoteAudio.srcObject = stream;
-            remoteAudio.play().catch(e => console.warn('Remote audio playback warning', e));
-          }
-          if (remoteVid) {
-            remoteVid.srcObject = null;
-          }
+        } else if (remoteVid) {
+          remoteVid.srcObject = null;
         }
       });
     },
@@ -5183,8 +5289,14 @@ function kinWhisperApp() {
         try {
           stream = await navigator.mediaDevices.getUserMedia(constraints);
         } catch (constraintErr) {
-          if (type === 'video' && constraintErr && constraintErr.name === 'OverconstrainedError') {
-            stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+          if (type === 'video') {
+            try {
+              stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+            } catch (videoFallbackErr) {
+              stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+              this.isCameraOff = true;
+              this.toast('Camera unavailable — connecting with voice audio.');
+            }
           } else {
             throw constraintErr;
           }
@@ -5265,10 +5377,11 @@ function kinWhisperApp() {
     },
 
     async acceptCall() {
-      if (!this.incomingCall) return;
+      if (!this.incomingCall || this.isAcceptingCall) return;
       this.stopRingtone();
       const callData = this.incomingCall;
       this.incomingCall = null;
+      this.isAcceptingCall = true;
       this.callType = callData.call_type || 'video';
       this.callPartnerName = callData.caller_name || 'Family Kin';
       this.callRoomId = callData.room_id;
@@ -5279,6 +5392,7 @@ function kinWhisperApp() {
       this.callDurationSeconds = 0;
 
       if (!this.checkMediaSupport()) {
+        this.isAcceptingCall = false;
         this.endCall();
         return;
       }
@@ -5292,13 +5406,20 @@ function kinWhisperApp() {
         try {
           stream = await navigator.mediaDevices.getUserMedia(constraints);
         } catch (constraintErr) {
-          if (this.callType === 'video' && constraintErr && constraintErr.name === 'OverconstrainedError') {
-            stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+          if (this.callType === 'video') {
+            try {
+              stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+            } catch (videoFallbackErr) {
+              stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+              this.isCameraOff = true;
+              this.toast('Camera unavailable — connecting with voice audio.');
+            }
           } else {
             throw constraintErr;
           }
         }
       } catch (e) {
+        this.isAcceptingCall = false;
         this.toast(this.formatMediaError(e, this.callType));
         this.endCall();
         return;
@@ -5311,6 +5432,7 @@ function kinWhisperApp() {
       });
 
       const pc = this.createPeerConnection(callData.thread_id, callData.caller_id);
+      this.isAcceptingCall = false;
 
       const targetThread = this.threads.find(t => t.id === callData.thread_id);
       if (targetThread && (!this.activeThread || this.activeThread.id !== callData.thread_id)) {
@@ -5320,12 +5442,15 @@ function kinWhisperApp() {
       this.startCallSignalPoller(callData.thread_id);
 
       if (this.pendingOffer) {
+        const offerToProcess = this.pendingOffer;
+        const senderId = this.pendingOfferSenderId || callData.caller_id;
+        this.pendingOffer = null;
+        this.pendingOfferSenderId = null;
         try {
-          await pc.setRemoteDescription(new RTCSessionDescription(this.pendingOffer));
+          await pc.setRemoteDescription(new RTCSessionDescription(offerToProcess));
           const answer = await pc.createAnswer();
           await pc.setLocalDescription(answer);
 
-          const senderId = this.pendingOfferSenderId || callData.caller_id;
           const ansRes = await fetch('/api/kin-whispers/threads/' + encodeURIComponent(callData.thread_id) + '/call/signal', {
             method: 'POST',
             headers: jsonHeaders(),
@@ -5335,18 +5460,16 @@ function kinWhisperApp() {
             console.warn('Call answer signal returned HTTP', ansRes.status);
           }
 
-          this.pendingOffer = null;
-          this.pendingOfferSenderId = null;
-
           if (this.pendingCandidates.length > 0) {
-            for (const cand of this.pendingCandidates) {
+            const buffered = [...this.pendingCandidates];
+            this.pendingCandidates = [];
+            for (const cand of buffered) {
               try {
                 await pc.addIceCandidate(new RTCIceCandidate(cand));
               } catch (cErr) {
                 console.warn('Buffered candidate application skipped', cErr);
               }
             }
-            this.pendingCandidates = [];
           }
         } catch (signalErr) {
           console.error('Failed to answer buffered offer', signalErr);
@@ -5466,6 +5589,7 @@ function kinWhisperApp() {
         }).catch(() => {});
       }
       this.isInCall = false;
+      this.isAcceptingCall = false;
       this.isCallRinging = false;
       this.callConnectionState = 'connecting';
       this.callDurationSeconds = 0;
@@ -5559,11 +5683,14 @@ function kinWhisperApp() {
       this.callSignalPollerThreadId = threadId;
       this.lastCallSignalSeq = 0;
       this.seenCallSignalSeqs = {};
+      let isPollingSignals = false;
       const pollOnce = async () => {
+        if (isPollingSignals) return;
         if (!this.isInCall && !this.incomingCall) {
           this.stopCallSignalPoller();
           return;
         }
+        isPollingSignals = true;
         try {
           const res = await fetch('/api/kin-whispers/threads/' + encodeURIComponent(threadId) + '/call/info?after_seq=' + this.lastCallSignalSeq, {
             headers: { 'Accept': 'application/json' }
@@ -5580,7 +5707,10 @@ function kinWhisperApp() {
               await this.handleCallSignalEvent(sig);
             }
           }
-        } catch (e) {}
+        } catch (e) {
+        } finally {
+          isPollingSignals = false;
+        }
       };
       pollOnce();
       this.callSignalPoller = setInterval(pollOnce, 1200);
@@ -5615,9 +5745,28 @@ function kinWhisperApp() {
     },
 
     async handleCallSignalEvent(data) {
-      if (!data || !data.signal) return;
+      if (!data) return;
       if (data.sender_id && this.isMe(data.sender_id)) return;
       if (data.room_id && this.callRoomId && String(data.room_id) !== String(this.callRoomId)) return;
+
+      if (data.pull_required && data.thread_id) {
+        try {
+          const res = await fetch('/api/kin-whispers/threads/' + encodeURIComponent(data.thread_id) + '/call/info?after_seq=' + this.lastCallSignalSeq, {
+            headers: { 'Accept': 'application/json' }
+          });
+          if (res.ok) {
+            const info = await res.json();
+            if (info && info.success && info.call && Array.isArray(info.call.signals)) {
+              for (const sig of info.call.signals) {
+                await this.handleCallSignalEvent(sig);
+              }
+            }
+          }
+        } catch (e) {}
+        return;
+      }
+
+      if (!data.signal) return;
       if (data.seq) {
         const seqKey = String(data.room_id || '') + ':' + String(data.seq);
         if (this.seenCallSignalSeqs[seqKey]) return;
@@ -5626,82 +5775,88 @@ function kinWhisperApp() {
           this.lastCallSignalSeq = data.seq;
         }
       }
-      try {
-        if (data.signal.sdp) {
-          const sdp = data.signal.sdp;
-          if (sdp.type === 'offer') {
-            if (this.peerConnection && this.isInCall) {
-              if (this.peerConnection.remoteDescription) {
-                return;
-              }
-              await this.peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
-              const answer = await this.peerConnection.createAnswer();
-              await this.peerConnection.setLocalDescription(answer);
-              const threadId = this.activeCallThreadId || (this.activeThread ? this.activeThread.id : (this.incomingCall ? this.incomingCall.thread_id : data.thread_id));
-              if (threadId) {
-                const ansRes = await fetch('/api/kin-whispers/threads/' + encodeURIComponent(threadId) + '/call/signal', {
-                  method: 'POST',
-                  headers: jsonHeaders(),
-                  body: JSON.stringify({ target_user_id: data.sender_id, signal: { sdp: answer } })
-                });
-                if (!ansRes.ok) {
-                  console.warn('Call answer signal returned HTTP', ansRes.status);
+
+      this.signalQueueChain = (this.signalQueueChain || Promise.resolve()).then(async () => {
+        try {
+          if (data.signal.sdp) {
+            const sdp = data.signal.sdp;
+            if (sdp.type === 'offer') {
+              if (this.peerConnection && this.isInCall && !this.isAcceptingCall) {
+                if (this.peerConnection.remoteDescription || (this.peerConnection.signalingState !== 'stable' && this.peerConnection.signalingState !== 'have-remote-offer')) {
+                  return;
                 }
-              }
-              if (this.pendingCandidates.length > 0) {
-                for (const cand of this.pendingCandidates) {
-                  try {
-                    await this.peerConnection.addIceCandidate(new RTCIceCandidate(cand));
-                  } catch (cErr) {
-                    console.warn('Buffered ICE candidate skipped', cErr);
+                await this.peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
+                const answer = await this.peerConnection.createAnswer();
+                await this.peerConnection.setLocalDescription(answer);
+                const threadId = this.activeCallThreadId || (this.activeThread ? this.activeThread.id : (this.incomingCall ? this.incomingCall.thread_id : data.thread_id));
+                if (threadId) {
+                  const ansRes = await fetch('/api/kin-whispers/threads/' + encodeURIComponent(threadId) + '/call/signal', {
+                    method: 'POST',
+                    headers: jsonHeaders(),
+                    body: JSON.stringify({ target_user_id: data.sender_id, signal: { sdp: answer } })
+                  });
+                  if (!ansRes.ok) {
+                    console.warn('Call answer signal returned HTTP', ansRes.status);
                   }
                 }
-                this.pendingCandidates = [];
-              }
-            } else {
-              this.pendingOffer = sdp;
-              this.pendingOfferSenderId = data.sender_id;
-              this.pendingOfferRoomId = data.room_id || null;
-            }
-          } else if (sdp.type === 'answer') {
-            if (this.peerConnection) {
-              await this.peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
-              this.isCallRinging = false;
-              if (this.peerConnection.connectionState === 'connected' || this.peerConnection.iceConnectionState === 'connected' || this.peerConnection.iceConnectionState === 'completed') {
-                this.markCallConnected();
+                if (this.pendingCandidates.length > 0) {
+                  const buffered = [...this.pendingCandidates];
+                  this.pendingCandidates = [];
+                  for (const cand of buffered) {
+                    try {
+                      await this.peerConnection.addIceCandidate(new RTCIceCandidate(cand));
+                    } catch (cErr) {
+                      console.warn('Buffered ICE candidate skipped', cErr);
+                    }
+                  }
+                }
               } else {
-                this.callConnectionState = 'connecting';
+                this.pendingOffer = sdp;
+                this.pendingOfferSenderId = data.sender_id;
+                this.pendingOfferRoomId = data.room_id || null;
               }
-              if (this.pendingCandidates.length > 0) {
-                for (const cand of this.pendingCandidates) {
-                  try {
-                    await this.peerConnection.addIceCandidate(new RTCIceCandidate(cand));
-                  } catch (cErr) {
-                    console.warn('Buffered ICE candidate skipped', cErr);
+            } else if (sdp.type === 'answer') {
+              if (this.peerConnection && this.peerConnection.signalingState === 'have-local-offer') {
+                await this.peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
+                this.isCallRinging = false;
+                if (this.peerConnection.connectionState === 'connected' || this.peerConnection.iceConnectionState === 'connected' || this.peerConnection.iceConnectionState === 'completed') {
+                  this.markCallConnected();
+                } else {
+                  this.callConnectionState = 'connecting';
+                }
+                if (this.pendingCandidates.length > 0) {
+                  const buffered = [...this.pendingCandidates];
+                  this.pendingCandidates = [];
+                  for (const cand of buffered) {
+                    try {
+                      await this.peerConnection.addIceCandidate(new RTCIceCandidate(cand));
+                    } catch (cErr) {
+                      console.warn('Buffered ICE candidate skipped', cErr);
+                    }
                   }
                 }
-                this.pendingCandidates = [];
+              }
+            }
+          } else if (data.signal.candidate || Array.isArray(data.signal.candidates)) {
+            const cands = data.signal.candidate ? [data.signal.candidate] : data.signal.candidates;
+            for (const cand of cands) {
+              if (!cand) continue;
+              if (this.peerConnection && this.peerConnection.remoteDescription && this.peerConnection.remoteDescription.type) {
+                try {
+                  await this.peerConnection.addIceCandidate(new RTCIceCandidate(cand));
+                } catch (candErr) {
+                  console.warn('ICE candidate addition skipped', candErr);
+                }
+              } else {
+                this.pendingCandidates.push(cand);
               }
             }
           }
-        } else if (data.signal.candidate || Array.isArray(data.signal.candidates)) {
-          const cands = data.signal.candidate ? [data.signal.candidate] : data.signal.candidates;
-          for (const cand of cands) {
-            if (!cand) continue;
-            if (this.peerConnection && this.peerConnection.remoteDescription) {
-              try {
-                await this.peerConnection.addIceCandidate(new RTCIceCandidate(cand));
-              } catch (candErr) {
-                console.warn('ICE candidate addition skipped', candErr);
-              }
-            } else {
-              this.pendingCandidates.push(cand);
-            }
-          }
+        } catch (e) {
+          console.error('Signal handle error', e);
         }
-      } catch (e) {
-        console.error('Signal handle error', e);
-      }
+      });
+      return this.signalQueueChain;
     },
 
     handleCallEndedEvent(data) {

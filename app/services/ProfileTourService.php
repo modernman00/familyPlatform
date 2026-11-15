@@ -97,6 +97,9 @@ class ProfileTourService
         if (session_status() === PHP_SESSION_ACTIVE) {
             $_SESSION[$sessionKey] = $dismissed;
         }
+        if (function_exists('releaseSessionLock')) {
+            \releaseSessionLock();
+        }
 
         try {
             $this->ensureTable();

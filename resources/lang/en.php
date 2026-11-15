@@ -15,6 +15,7 @@ return [
     'nav.studio' => 'Tree Studio',
     'nav.journal' => 'Journal',
     'nav.reels' => 'Reels',
+    'nav.gallery' => 'Gallery',
     'nav.family' => 'Family',
     'nav.directory' => 'Directory',
     'nav.all_members' => 'All Members',

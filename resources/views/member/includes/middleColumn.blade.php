@@ -1174,6 +1174,19 @@
                             <i class="bi" :class="lightboxPost._saved ? 'bi-bookmark-fill text-warning' : 'bi-bookmark'" style="font-size: 0.95rem;"></i>
                         </button>
 
+                        <!-- Edit Copy in Video & Photo Lab -->
+                        <template x-if="lightboxImages.length && (getPostImageUrl(lightboxImages[lightboxIndex]) || '').startsWith('/')">
+                            <a :href="'/world-studio?kind=image&media_url=' + encodeURIComponent(getPostImageUrl(lightboxImages[lightboxIndex]))"
+                               @click.stop
+                               class="btn d-inline-flex align-items-center gap-1.5 px-3 rounded-pill text-white"
+                               title="Open a copy in Video &amp; Photo Lab"
+                               aria-label="Edit copy in Video &amp; Photo Lab"
+                               style="min-height: 44px; min-width: 44px; background: linear-gradient(135deg, #7c5cff, #ff3d7f); border: 0; font-size: 0.82rem; font-weight: 600; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                                <i class="bi bi-film"></i>
+                                <span>Edit in Lab</span>
+                            </a>
+                        </template>
+
                         <!-- Share Link Pill (Author Only - Swift Glider) -->
                         <template x-if="isOwnPost(lightboxPost)">
                             <button type="button"
@@ -1498,6 +1511,19 @@
                                     style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.18); flex-shrink: 0;">
                                 <i class="bi" :class="videoModalPost._saved ? 'bi-bookmark-fill text-warning' : 'bi-bookmark'" style="font-size: 0.95rem;"></i>
                             </button>
+
+                            <!-- Edit Copy in Video & Photo Lab -->
+                            <template x-if="videoModalVideos[videoModalIndex] && videoModalVideos[videoModalIndex].type === 'direct' && (videoModalVideos[videoModalIndex].embedUrl || '').startsWith('/')">
+                                <a :href="'/world-studio?kind=video&media_url=' + encodeURIComponent(videoModalVideos[videoModalIndex].embedUrl)"
+                                   @click.stop
+                                   class="btn d-inline-flex align-items-center gap-1.5 px-3 rounded-pill text-white"
+                                   title="Open a copy in Video &amp; Photo Lab"
+                                   aria-label="Edit copy in Video &amp; Photo Lab"
+                                   style="min-height: 44px; min-width: 44px; background: linear-gradient(135deg, #7c5cff, #ff3d7f); border: 0; font-size: 0.82rem; font-weight: 600; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                                    <i class="bi bi-film"></i>
+                                    <span>Edit in Lab</span>
+                                </a>
+                            </template>
 
                             <!-- Share Link Pill (Author Only - Swift Glider) -->
                             <template x-if="isOwnPost(videoModalPost)">

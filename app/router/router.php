@@ -66,6 +66,9 @@ if ($isNonProd) {
 // App-owned studio UI (navbar, family presets, events, feed posting) over the shared poster engine
 $router->map('GET', '/poster-studio', 'App\controller\members\PosterStudioController@index', 'atg_poster_studio');
 $router->map('GET', '/flyer-studio', 'App\controller\members\PosterStudioController@index', 'atg_flyer_studio');
+$router->map('GET', '/world-studio', 'App\controller\members\WorldStudioController@index', 'atg_world_studio');
+$router->map('GET', '/video-photo-lab', 'App\controller\members\WorldStudioController@index', 'atg_video_photo_lab');
+$router->map('GET', '/world-engine/font', 'App\controller\members\WorldStudioController@font', 'atg_world_engine_font');
 // Built-in studio art (backdrops, florals): static, non-sensitive, served without session work
 $router->map('GET', '/poster-studio-asset/[*:file]', function (string $file) {
     (new \Src\Media\UniversalPosterStudioController())->serveStudioAsset($file);

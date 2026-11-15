@@ -86,9 +86,9 @@
                         </ul>
                     </div>
                 </li>
-                <li class="nav-item reelsNav">
-                    <a class="nav-link stitch-nav-link" href="/reels" title="{{ __('nav.reels', 'Reels') }} - Watch captivating family video moments">
-                        <i class="bi bi-camera-reels-fill"></i>{{ __('nav.reels', 'Reels') }}
+                <li class="nav-item galleryNav">
+                    <a class="nav-link stitch-nav-link {{ str_starts_with(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '', '/profilepage/gallery') ? 'active' : '' }}" href="/profilepage/gallery" title="{{ __('nav.gallery', 'Gallery') }} - Browse your family photo and memory gallery">
+                        <i class="bi bi-images"></i>{{ __('nav.gallery', 'Gallery') }}
                     </a>
                 </li>
                 <li class="nav-item allMembersNav">

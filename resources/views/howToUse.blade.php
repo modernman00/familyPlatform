@@ -937,7 +937,7 @@
                   </p>
                   <ul class="small text-muted ps-3 mb-0">
                     <li>Strict 60-second duration ceiling ensures messages remain concise and focused.</li>
-                    <li>Built-in audio waveform player with full mobile playback support.</li>
+                    <li>One-tap Send while recording automatically finalises, uploads, and delivers the voice note across WebM, MP4/AAC, Ogg, and WAV containers with byte-range streaming playback.</li>
                     <li>Stored securely in our private media vault, shielded from external scrapers.</li>
                   </ul>
                 </div>
@@ -970,7 +970,7 @@
                     Direct communication adapts to how your relatives communicate best. FamilyPlatform offers a comprehensive sovereign calling suite paired with tactile delivery feedback:
                   </p>
                   <ul class="small text-muted ps-3 mb-0">
-                    <li><strong>In-App Video &amp; Voice Calling:</strong> Peer-to-peer WebRTC video and audio calls with hardware-accelerated local preview and waveform indicators.</li>
+                    <li><strong>In-App Video &amp; Voice Calling:</strong> Peer-to-peer WebRTC video and audio calls with cross-thread and cross-page incoming call detection, sequential signal queuing, and automatic camera-to-voice fallback if a camera is unavailable.</li>
                     <li><strong>Multi-Rail Fallbacks:</strong> Instant one-tap cellular (<code>tel:</code>) and WhatsApp Voice/Video call bridges.</li>
                     <li><strong>Read &amp; Seen Receipts:</strong> Live delivery badges ("✓ Delivered", "✓✓ Seen [time]", and "🛡️ Guardian Seen") give peace of mind.</li>
                     <li><strong>Distinct FamChat Alerts &amp; Calling:</strong> Incoming FamChat messages play a soft harmonic chime, display a bespoke crimson-and-gold FamChat banner when you are elsewhere in the app, use a two-pulse chat vibration pattern, and support in-app WebRTC voice and video calls with your kin.</li>

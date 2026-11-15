@@ -505,6 +505,13 @@
                         <span class="cs-marquee-tile__sub d-block">Reunions &amp; Events</span>
                     </span>
                 </a>
+                <a href="/world-studio" class="cs-marquee-tile">
+                    <span class="cs-marquee-tile__icon" style="background:rgba(124,92,255,0.25);color:#ddd6fe;"><i class="bi bi-film"></i></span>
+                    <span>
+                        <span class="cs-marquee-tile__title d-block">Video &amp; Photo Lab</span>
+                        <span class="cs-marquee-tile__sub d-block">Multi-Track Editor</span>
+                    </span>
+                </a>
                 <a href="/member/festive-cards" class="cs-marquee-tile">
                     <span class="cs-marquee-tile__icon" style="background:rgba(244,63,94,0.25);color:#fda4af;"><i class="bi bi-envelope-heart-fill"></i></span>
                     <span>
@@ -526,6 +533,7 @@
     <div class="cs-spark-strip" aria-label="Quick creative ideas">
         <span class="cs-spark-label"><i class="bi bi-stars text-warning me-1"></i>Try now:</span>
         <a href="/poster-studio" class="cs-spark-pill">🎉 Family Reunion Flyer</a>
+        <a href="/world-studio" class="cs-spark-pill">🎞️ Multi-Track Video &amp; Photo Lab</a>
         <a href="/member/festive-cards" class="cs-spark-pill">💌 3D Birthday Wax Card</a>
         <a href="/family-studio" class="cs-spark-pill">🎬 60s Milestone 4K Reel</a>
         <a href="/familyStudio" class="cs-spark-pill">🌳 Add Grandparents &amp; Cousins</a>

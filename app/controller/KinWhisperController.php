@@ -96,15 +96,18 @@ final class KinWhisperController extends BaseController
 
         try {
             $count = KinWhisperService::getUnreadWhisperCount($currentUserId);
+            $incomingCall = KinWhisperService::getActiveIncomingCallForUser($currentUserId);
             echo json_encode([
                 'success' => true,
                 'unread_count' => $count,
+                'incoming_call' => $incomingCall,
             ]);
         } catch (\Throwable $th) {
             error_log('[KinWhisperController::apiUnreadCount] ' . $th->getMessage());
             echo json_encode([
                 'success' => true,
                 'unread_count' => 0,
+                'incoming_call' => null,
             ]);
         }
     }
@@ -125,7 +128,12 @@ final class KinWhisperController extends BaseController
 
         try {
             $threads = KinWhisperService::listUserThreads($currentUserId);
-            echo json_encode(['success' => true, 'threads' => $threads]);
+            $incomingCall = KinWhisperService::getActiveIncomingCallForUser($currentUserId);
+            echo json_encode([
+                'success' => true,
+                'threads' => $threads,
+                'incoming_call' => $incomingCall,
+            ]);
         } catch (\Throwable $th) {
             $this->handleJsonException($th);
         }
@@ -175,10 +183,12 @@ final class KinWhisperController extends BaseController
         try {
             $thread = KinWhisperService::getThread($currentUserId, $threadId);
             $messages = KinWhisperService::getMessages($currentUserId, $threadId);
+            $incomingCall = KinWhisperService::getActiveIncomingCallForUser($currentUserId);
             echo json_encode([
                 'success' => true,
                 'thread' => $thread,
                 'messages' => $messages,
+                'incoming_call' => $incomingCall,
                 'server_time' => gmdate('Y-m-d\TH:i:s\Z'),
             ]);
         } catch (\Throwable $th) {
@@ -345,7 +355,8 @@ final class KinWhisperController extends BaseController
         try {
             /** @var array{name: string, type: string, tmp_name: string, error: int, size: int} $file */
             $file = $_FILES['audio'];
-            $result = KinWhisperService::uploadAudioWhisper($currentUserId, $file);
+            $duration = isset($_POST['duration']) && $_POST['duration'] !== '' ? (int)$_POST['duration'] : null;
+            $result = KinWhisperService::uploadAudioWhisper($currentUserId, $file, $duration);
             if (!empty($result['url'])) {
                 $uploaded = is_array($_SESSION['uploaded_whisper_assets'] ?? null) ? $_SESSION['uploaded_whisper_assets'] : [];
                 $uploaded[] = (string)$result['url'];
@@ -1171,7 +1182,7 @@ final class KinWhisperController extends BaseController
                     $stmt = $db->prepare(
                         'SELECT t.* FROM kin_messages m
                          JOIN kin_threads t ON t.id = m.thread_id
-                         WHERE m.metadata LIKE ? LIMIT 5'
+                         WHERE m.context_metadata LIKE ? LIMIT 5'
                     );
                     $stmt->execute(['%' . $safeFile . '%']);
                 }
@@ -1207,7 +1218,7 @@ final class KinWhisperController extends BaseController
             'webp' => 'image/webp',
             'gif' => 'image/gif',
             'pdf' => 'application/pdf',
-            'mp4' => 'video/mp4',
+            'mp4' => $kind === 'audio' ? 'audio/mp4' : 'video/mp4',
             'webm' => $kind === 'audio' ? 'audio/webm' : 'video/webm',
             'mov' => 'video/quicktime',
             'mp3' => 'audio/mpeg',
@@ -1216,12 +1227,63 @@ final class KinWhisperController extends BaseController
             'wav' => 'audio/wav',
         ];
         $mime = $mimeMap[$ext] ?? 'application/octet-stream';
+        $fileSize = (int)filesize($realFile);
+        $start = 0;
+        $end = max(0, $fileSize - 1);
+        $isPartial = false;
 
+        $rangeHeader = isset($_SERVER['HTTP_RANGE']) ? trim((string)$_SERVER['HTTP_RANGE']) : '';
+        if ($rangeHeader !== '' && $fileSize > 0 && preg_match('/^bytes=(\d*)-(\d*)$/i', $rangeHeader, $m)) {
+            $reqStart = $m[1] !== '' ? (int)$m[1] : null;
+            $reqEnd = $m[2] !== '' ? (int)$m[2] : null;
+            if ($reqStart === null && $reqEnd !== null) {
+                $start = max(0, $fileSize - $reqEnd);
+                $end = $fileSize - 1;
+            } elseif ($reqStart !== null) {
+                $start = $reqStart;
+                $end = ($reqEnd !== null && $reqEnd < $fileSize) ? $reqEnd : ($fileSize - 1);
+            }
+            if ($start > $end || $start >= $fileSize) {
+                http_response_code(416);
+                header('Content-Range: bytes */' . $fileSize);
+                return;
+            }
+            $isPartial = true;
+        }
+
+        if (!headers_sent()) {
+            header_remove('Pragma');
+            header_remove('Expires');
+        }
+        if ($isPartial) {
+            http_response_code(206);
+            header('Content-Range: bytes ' . $start . '-' . $end . '/' . $fileSize);
+        }
+        $length = ($fileSize > 0) ? ($end - $start + 1) : 0;
         header('Content-Type: ' . $mime);
-        header('Content-Length: ' . (string)filesize($realFile));
+        header('Accept-Ranges: bytes');
+        header('Content-Length: ' . (string)$length);
         header('X-Content-Type-Options: nosniff');
         header('Cache-Control: private, max-age=3600');
-        readfile($realFile);
+
+        if ($isPartial) {
+            $fh = @fopen($realFile, 'rb');
+            if ($fh) {
+                fseek($fh, $start);
+                $remaining = $length;
+                while ($remaining > 0 && !feof($fh)) {
+                    $chunk = fread($fh, min(65536, $remaining));
+                    if ($chunk === false || $chunk === '') {
+                        break;
+                    }
+                    echo $chunk;
+                    $remaining -= strlen($chunk);
+                }
+                fclose($fh);
+            }
+        } else {
+            readfile($realFile);
+        }
     }
 
     /**

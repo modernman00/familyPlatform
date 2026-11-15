@@ -160,7 +160,9 @@ final class RealtimeBroadcastingController
         header('Connection: keep-alive');
         header('X-Accel-Buffering: no'); // For Nginx
 
-        $lastEventId = isset($_SERVER['HTTP_LAST_EVENT_ID'])
+        $hasExplicitCursor = (isset($_SERVER['HTTP_LAST_EVENT_ID']) && $_SERVER['HTTP_LAST_EVENT_ID'] !== '')
+            || isset($_GET['last_event_id']);
+        $lastEventId = isset($_SERVER['HTTP_LAST_EVENT_ID']) && $_SERVER['HTTP_LAST_EVENT_ID'] !== ''
             ? max(0, (int)$_SERVER['HTTP_LAST_EVENT_ID'])
             : max(0, (int)($_GET['last_event_id'] ?? 0));
 
@@ -174,8 +176,8 @@ final class RealtimeBroadcastingController
 
             $sinceNow = isset($_GET['since_now']) && $_GET['since_now'] === '1';
 
-            // Fetch any events missed since lastEventId (or fast-forward cursor when since_now=1)
-            if ($sinceNow && $lastEventId === 0) {
+            // Fetch any events missed since lastEventId (or fast-forward cursor on first connect when since_now=1)
+            if ($sinceNow && !$hasExplicitCursor) {
                 while (true) {
                     $batch = $broadcaster->getEvents($channel, $lastEventId, 250);
                     if (empty($batch)) {
@@ -191,6 +193,8 @@ final class RealtimeBroadcastingController
                         break;
                     }
                 }
+                echo "retry: 1000\nid: {$lastEventId}\n: sync\n\n";
+                flush();
             } else {
                 $events = $broadcaster->getEvents($channel, $lastEventId, 25);
                 foreach ($events as $ev) {

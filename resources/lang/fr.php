@@ -14,6 +14,7 @@ return [
     'nav.studio' => 'Studio',
     'nav.journal' => 'Journal',
     'nav.reels' => 'Reels',
+    'nav.gallery' => 'Galerie',
     'nav.family' => 'Famille',
     'nav.directory' => 'Annuaire',
     'nav.all_members' => 'Tous les membres',

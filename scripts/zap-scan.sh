@@ -42,7 +42,7 @@ echo " Report : ${HTML_REPORT}"
 echo "======================================================================"
 
 # ── Attempt 1: Docker-based ZAP (preferred — isolated, always latest) ────────
-if command -v docker > /dev/null 2>&1; then
+if command -v docker > /dev/null 2>&1 && docker info > /dev/null 2>&1; then
     echo -e "\n🐳 Running ZAP via Docker (ghcr.io/zaproxy/zaproxy:stable)..."
 
     docker run --rm \
@@ -57,9 +57,14 @@ if command -v docker > /dev/null 2>&1; then
             -J "zap-report-${TIMESTAMP}.json" \
             -l WARN \
             -I \
-            --hook=/zap/auth_hook.py 2>/dev/null || ZAP_EXIT=$?
+            --hook=/zap/auth_hook.py || ZAP_EXIT=$?
 
     ZAP_EXIT="${ZAP_EXIT:-0}"
+
+    if [ ! -f "${HTML_REPORT}" ] && [ ! -f "${JSON_REPORT}" ]; then
+        echo "🛑 ERROR: ZAP container exited (${ZAP_EXIT}) without generating a report."
+        exit 1
+    fi
 
 # ── Attempt 2: Native ZAP installation ──────────────────────────────────────
 elif command -v zap.sh > /dev/null 2>&1 || command -v zaproxy > /dev/null 2>&1; then
@@ -75,9 +80,9 @@ elif command -v zap.sh > /dev/null 2>&1 || command -v zaproxy > /dev/null 2>&1; 
 
 # ── Fallback: curl-based lightweight header check ────────────────────────────
 else
-    echo -e "\n⚠️  WARNING: Neither Docker nor ZAP found locally."
+    echo -e "\n⚠️  WARNING: Docker daemon is not running and native ZAP was not found locally."
     echo "   Falling back to security header audit (curl-based)."
-    echo "   Install Docker or ZAP for full DAST coverage."
+    echo "   Start Docker/OrbStack or install ZAP for full DAST coverage."
     echo ""
     echo "   To install Docker:    https://docs.docker.com/get-docker/"
     echo "   To install ZAP:       https://www.zaproxy.org/download/"
@@ -139,8 +144,10 @@ else
     exit 2
 fi
 
-echo ""
-echo "📊 Reports saved:"
-echo "   HTML: $(pwd)/${HTML_REPORT}"
-[ -f "${JSON_REPORT}" ] && echo "   JSON: $(pwd)/${JSON_REPORT}"
+if [ -f "${HTML_REPORT}" ] || [ -f "${JSON_REPORT}" ]; then
+    echo ""
+    echo "📊 Reports saved:"
+    [ -f "${HTML_REPORT}" ] && echo "   HTML: $(pwd)/${HTML_REPORT}"
+    [ -f "${JSON_REPORT}" ] && echo "   JSON: $(pwd)/${JSON_REPORT}"
+fi
 echo "======================================================================"

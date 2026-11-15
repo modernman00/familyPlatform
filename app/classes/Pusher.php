@@ -147,7 +147,18 @@ class Pusher
             try {
                 $pusher = self::pusher();
                 if ($pusher !== null) {
-                    $pusher->trigger($channelList, $event, $data);
+                    $pusherData = $data;
+                    $encoded = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                    if (is_string($encoded) && strlen($encoded) > 9000 && $event === 'kin-call-signal') {
+                        $pusherData = [
+                            'thread_id' => $data['thread_id'] ?? null,
+                            'sender_id' => $data['sender_id'] ?? null,
+                            'room_id' => $data['room_id'] ?? null,
+                            'seq' => $data['seq'] ?? null,
+                            'pull_required' => true,
+                        ];
+                    }
+                    $pusher->trigger($channelList, $event, $pusherData);
                 }
             } catch (\Throwable $e) {
                 $msg = $e->getMessage();
