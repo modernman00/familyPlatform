@@ -157,3 +157,16 @@ docs/internal/*tat-approval*
 docs/internal/*tat-signoff*
 docs/internal/phase*-tat*
 public/resources/cache/festive_cards/*
+# --- Mobile App Builds & Signing Secrets ---
+mobile/node_modules/
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/android/build/
+mobile/ios/App/Pods/
+mobile/ios/App/build/
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
+*.ipa
+*.aab
