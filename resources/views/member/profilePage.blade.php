@@ -80,27 +80,12 @@
         });
 
         window.appUrl = "{{ $_ENV['MIX_APP_URL'] ?? getenv('MIX_APP_URL') ?: ($_ENV['APP_URL'] ?? getenv('APP_URL') ?: '') }}";
-
-        //        // Image Modal functionality
-        // function openModal(src) {
-        //     document.getElementById('imageModal').style.display = 'flex';
-        //     document.getElementById('modalImage').src = src;
-        //     document.body.style.overflow = 'hidden';
-        // }
-
-        // function closeModal() {
-        //     document.getElementById('imageModal').style.display = 'none';
-        //     document.body.style.overflow = 'auto';
-        // }
-
-        // // Close modal when clicking outside the image
-        // window.onclick = function(event) {
-        //     const modal = document.getElementById('imageModal');
-        //     if (event.target === modal) {
-        //         closeModal();
-        //     }
-        // }
-
+        window.__FP_PROFILE_TOUR_CONFIG__ = {
+            dismissed: @json((bool)($profileTourDismissed ?? false)),
+            isPendingApproval: @json((bool)($isPendingApproval ?? false))
+        };
     </script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignSpotlightTour.js?v={{ assetVersion('js/SovereignSpotlightTour.js') }}" defer></script>
+    <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/profileTour.js?v={{ assetVersion('js/profileTour.js') }}" defer></script>
 
 @endpush

@@ -23,10 +23,10 @@
             <i class="bi bi-search"></i>
         </button>
 
-        <!-- Quick mobile FamilyChat icon with bell & counter -->
-        <a href="/kin-whispers" class="btn btn-icon-stitch d-lg-none me-2 position-relative text-decoration-none" id="mobileWhispersBtn" aria-label="{{ __('nav.whisper', 'FamilyChat — Private family messages') }}" title="{{ __('nav.whisper', 'FamilyChat — Private family messages & audio dedications') }}">
+        <!-- Quick mobile FamChat icon with bell & counter -->
+        <a href="/kin-whispers" class="btn btn-icon-stitch d-lg-none me-2 position-relative text-decoration-none" id="mobileWhispersBtn" aria-label="{{ __('nav.whisper', 'FamChat — Private family messages') }}" title="{{ __('nav.whisper', 'FamChat — Private family messages & audio dedications') }}">
             <i class="bi bi-chat-dots-fill" style="color: #a31621; font-size: 1.05rem;"></i>
-            <i class="bi bi-bell-fill text-warning whisper-bell-indicator position-absolute {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.55rem; top: 3px; right: 3px;" title="Unread FamilyChat messages"></i>
+            <i class="bi bi-bell-fill text-warning whisper-bell-indicator position-absolute {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.55rem; top: 3px; right: 3px;" title="Unread FamChat messages"></i>
             <span class="whisper-nav-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-white {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" id="mobile_whisper_count" style="font-size: 0.6rem; padding: 2px 4px; pointer-events: none;">
                 {{ $navWhisperUnreadCount > 0 ? $navWhisperUnreadCount : '' }}
             </span>
@@ -119,11 +119,11 @@
                     <span class="d-inline d-xl-none">{{ __('nav.invite', 'Invite') }}</span>
                 </button>
 
-                <!-- FamilyChat Direct Action Button with Bell & Unread Counter -->
+                <!-- FamChat Direct Action Button with Bell & Unread Counter -->
                 <div class="whisper-nav-wrapper position-relative">
-                    <a href="/kin-whispers" class="btn btn-icon-stitch text-decoration-none d-inline-flex align-items-center justify-content-center position-relative" id="navbarWhispersBtn" title="{{ __('nav.whisper', 'FamilyChat — Private family messages, artifact reflections & voice dedications') }}" aria-label="FamilyChat">
+                    <a href="/kin-whispers" class="btn btn-icon-stitch text-decoration-none d-inline-flex align-items-center justify-content-center position-relative" id="navbarWhispersBtn" title="{{ __('nav.whisper', 'FamChat — Private family messages, artifact reflections & voice dedications') }}" aria-label="FamChat">
                         <i class="bi bi-chat-dots-fill" style="color: #a31621; font-size: 1.15rem;"></i>
-                        <i class="bi bi-bell-fill text-warning whisper-bell-indicator position-absolute {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.65rem; top: 4px; right: 4px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));" title="Unread FamilyChat messages"></i>
+                        <i class="bi bi-bell-fill text-warning whisper-bell-indicator position-absolute {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.65rem; top: 4px; right: 4px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));" title="Unread FamChat messages"></i>
                     </a>
                     <span class="whisper-nav-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-white {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" id="navbar_whisper_count" style="font-size: 0.68rem; padding: 2px 5px; font-weight: 700; box-shadow: 0 2px 6px rgba(220,53,69,0.45); pointer-events: none;">
                         {{ $navWhisperUnreadCount > 0 ? $navWhisperUnreadCount : '' }}

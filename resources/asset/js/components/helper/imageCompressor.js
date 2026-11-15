@@ -16,10 +16,6 @@ export function drawAtgSuperSampledImage(ctx, source, srcW, srcH, dstW, dstH) {
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
 
-    if (typeof ctx.filter === 'string') {
-        ctx.filter = 'contrast(1.025) saturate(1.03)';
-    }
-
     // Multi-pass octave step-down if downscaling by > 1.75x for DSLR/Instagram sharpness
     if (srcW > dstW * 1.75 && srcH > dstH * 1.75 && typeof document !== 'undefined') {
         let curW = Math.round(srcW * 0.5);
@@ -78,9 +74,9 @@ export async function compressImageFile(file, options = {}) {
     }
 
     const {
-        maxWidth = 2048,
-        maxHeight = 2048,
-        quality = 0.85,
+        maxWidth = 2400,
+        maxHeight = 2400,
+        quality = 0.92,
         mimeType = 'image/jpeg'
     } = options;
 
@@ -91,8 +87,8 @@ export async function compressImageFile(file, options = {}) {
             let width = bitmap.width;
             let height = bitmap.height;
 
-            // If already smaller than max dimensions and under 300KB, skip resizing
-            if (width <= maxWidth && height <= maxHeight && file.size < 300 * 1024) {
+            // If already smaller than max dimensions and under 2MB, skip re-encoding to preserve original quality & colour profile
+            if (width <= maxWidth && height <= maxHeight && file.size < 2 * 1024 * 1024) {
                 bitmap.close();
                 return file;
             }
@@ -174,7 +170,7 @@ export async function compressImageFile(file, options = {}) {
                     let width = img.naturalWidth || img.width;
                     let height = img.naturalHeight || img.height;
 
-                    if (width <= maxWidth && height <= maxHeight && file.size < 300 * 1024) {
+                    if (width <= maxWidth && height <= maxHeight && file.size < 2 * 1024 * 1024) {
                         return resolve(file);
                     }
 

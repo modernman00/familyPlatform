@@ -68,9 +68,28 @@ body {
     display: inline-flex;
     align-items: center;
     padding: 0.5rem 1rem;
+    white-space: nowrap;
     transition: color 0.2s ease, transform 0.15s ease;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .public-navbar .container {
+        max-width: 100% !important;
+        padding-inline: 16px;
+    }
+    .public-navbar .nav-link {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.85rem;
+    }
+    .public-navbar .btn-brand,
+    .public-navbar .btn-brand-outline {
+        width: auto !important;
+        padding: 0.45rem 0.9rem;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
 }
 
 .public-navbar .nav-link:active {

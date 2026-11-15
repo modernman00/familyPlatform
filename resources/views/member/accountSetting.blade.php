@@ -1235,7 +1235,7 @@
                       </p>
                     </div>
                     <div>
-                      <button type="button" id="copyCurrentFamCodeBtn" class="btn btn-outline-primary rounded-pill px-4 fw-semibold" data-code="{{ $accountData['famCode'] ?? '' }}">
+                      <button type="button" id="copyCurrentFamCodeBtn" class="btn btn-outline-primary rounded-pill px-4 fw-semibold" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;" data-code="{{ $accountData['famCode'] ?? '' }}">
                         <i class="bi bi-clipboard me-1"></i> Copy Code
                       </button>
                     </div>

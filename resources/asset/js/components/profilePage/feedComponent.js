@@ -1410,7 +1410,41 @@ export function profileFeed(opts = {}) {
                                 this._activePlayingFeedVideo = targetVideo;
                                 targetVideo.muted = true;
                                 targetVideo._autoPlaying = true;
-                                targetVideo.play().catch(() => {});
+                                const safeFeedPlay = () => {
+                                    if (this._activePlayingFeedVideo !== targetVideo || targetVideo._userManuallyPaused) return;
+                                    targetVideo.play().catch(() => {
+                                        if (targetVideo.paused) {
+                                            targetVideo.dispatchEvent(new CustomEvent('buffering-clear'));
+                                        }
+                                    });
+                                };
+                                if (targetVideo.readyState >= 2) {
+                                    safeFeedPlay();
+                                } else {
+                                    if (targetVideo.preload !== 'auto') {
+                                        targetVideo.preload = 'auto';
+                                    }
+                                    if (!targetVideo._awaitingFeedMultiPlay) {
+                                        targetVideo._awaitingFeedMultiPlay = true;
+                                        const onReady = () => {
+                                            targetVideo._awaitingFeedMultiPlay = false;
+                                            targetVideo.removeEventListener('loadeddata', onReady);
+                                            targetVideo.removeEventListener('canplay', onReady);
+                                            targetVideo.removeEventListener('error', onFail);
+                                            safeFeedPlay();
+                                        };
+                                        const onFail = () => {
+                                            targetVideo._awaitingFeedMultiPlay = false;
+                                            targetVideo.removeEventListener('loadeddata', onReady);
+                                            targetVideo.removeEventListener('canplay', onReady);
+                                            targetVideo.removeEventListener('error', onFail);
+                                            targetVideo.dispatchEvent(new CustomEvent('buffering-clear'));
+                                        };
+                                        targetVideo.addEventListener('loadeddata', onReady, { once: true });
+                                        targetVideo.addEventListener('canplay', onReady, { once: true });
+                                        targetVideo.addEventListener('error', onFail, { once: true });
+                                    }
+                                }
                             }
                         } else if (!entry.isIntersecting || entry.intersectionRatio < 0.15) {
                             // Scrolled away: pause all videos in this multi-video container

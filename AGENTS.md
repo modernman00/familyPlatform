@@ -20,7 +20,7 @@ Inspired by the 7-component automated production pipeline—and hardened with 3 
 | **5** | **UI Animator (Frontend)** | *Hyperframes* | Crafts components using `global_design_standards.md` v2.1 tokens, Alpine.js (`x-data`, `x-collapse`, `x-trap.noscroll`, `x-cloak`), and the **6-State Standard** (Happy Path, Extreme 3/80 chars, Empty State, Submitting Spinner, Error/Offline, Skeleton). |
 | **6** | **Sensory & Brand Designer** | *Epidemic Sound* | Applies strict British English (`en-GB`), tactile press states (`active:scale-[0.98]`), `ScoreTenantSpinner` (`data-spin="true"`), `$toast()` alerts, and `$clipboard()` haptics. |
 | **7** | **Adversarial & Static Gate** | *[Sovereign Layer]* | Runs `bash scripts/autonomous_gate.sh` (incremental `php -l`, targeted PHPStan L8, `verify_engineering_must_haves.php`, targeted PHPUnit tests) plus adversarial 401/403/404 attack neutralization. |
-| **8** | **Screen Editor (Browser QA)** | *Tella MCP* | Opens `$_ENV['APP_URL']` on Desktop (`1440×900`) and Mobile (`390×844`), runs `scripts/dom_audit.js` (`window.runSovereignDomAudit()`) to verify ≥44px touch targets, 0 horizontal overflow, 0 black-on-red or ghost contrast flaws, and 0 console errors, and captures visual screenshots. |
+| **8** | **Screen Editor (Browser QA)** | *Tella MCP* | Opens `$_ENV['APP_URL']` on Desktop (`1440×900`), iPad Portrait (`768×1024`), iPad Landscape (`1024×768`), and Mobile (`390×844`), runs `scripts/dom_audit.js` (`window.runSovereignDomAudit()`) to verify ≥44px touch targets, 0 horizontal overflow, 0 black-on-red or ghost contrast flaws, and 0 console errors, and captures visual screenshots. |
 | **9** | **Self-Healing Finisher** | *FFmpeg* | **Circuit-Breaker Loop (Max 5 Cycles):** If any check in Stages 7 or 8 fails, the agent **does not stop or ask the user**. It diagnoses the root cause, patches the code, and re-runs Stages 7–8 autonomously (up to 5 times) until Exit Code 0 is achieved. |
 | **10**| **Playbook & Proof Capsule** | *[Sovereign Layer]* | Updates `/playbook` or `/how-to-use` in lockstep and outputs the final **Empirical Proof Capsule** so the user returns to a finished, verified product. |
 
@@ -28,7 +28,8 @@ Inspired by the 7-component automated production pipeline—and hardened with 3 
 
 ## 0.1 Prompt Specialist & Auto-Triage Protocol (Stage 1 & 2)
 
-1. **Show `📝 Refined Brief` (3–6 lines) on Turn 1**:
+1. **MANDATORY FIRST-TEXT OUTPUT: Show `📝 Refined Brief` (3–6 lines) on Turn 1 BEFORE calling any tools**:
+   - You MUST emit this text directly to the user at the very start of Turn 1 so the user sees it immediately on their screen before any background commands run.
    - **Goal**, **Where** (route/file), **Tier** (1/2/3 inferred automatically), **Constraints** (UK English, privacy, domain guide), and **Done when**.
 2. **Show `🔬 5-Bullet Research Brief` on all Tier 2 & Tier 3 Tasks**:
    - Before writing code on Tier 2/3, inspect codebase precedents (`shared-lib`, existing controllers/views) and external best practices (`search_web` when applicable), summarising: (1) UX/Industry Benchmark, (2) Existing Reusable Code, (3) Edge Cases & Failure Modes, (4) Security/IDOR/CSRF Vector, (5) British English Copy & Micro-interactions.
@@ -45,7 +46,7 @@ Inspired by the 7-component automated production pipeline—and hardened with 3 
 | Tier | Scope | Required Autonomous Stages | Verification Gate |
 | :--- | :--- | :--- | :--- |
 | **🟢 Tier 1: Routine Velocity** | UI styling, copy fixes, self-contained bug fixes | Stages 1, 4–6, 7–9 (skips Research Brief & 4-Lens Matrix) | `bash scripts/autonomous_gate.sh` + Browser visual & `dom_audit.js` check |
-| **🟡 Tier 2: Strategic Features** | New UI flows, components, APIs, notification triggers | All Stages 1–10 (`🔬 Research Brief` + 4-Lens Matrix + Adversarial PoC) | `bash scripts/autonomous_gate.sh` + Browser Desktop/Mobile `dom_audit.js` (`preflight.sh` at deploy) |
+| **🟡 Tier 2: Strategic Features** | New UI flows, components, APIs, notification triggers | All Stages 1–10 (`🔬 Research Brief` + 4-Lens Matrix + Adversarial PoC) | `bash scripts/autonomous_gate.sh` + Browser Desktop/iPad/Mobile `dom_audit.js` (`preflight.sh` at deploy) |
 | **🔴 Tier 3: Core Architecture** | Schema migrations (`ALTER`/`CREATE`), Auth, Payments, `shared-lib`, `sw.js` | All Stages 1–10 + 1-Page RFC + Automated Rollback | Full `bash scripts/preflight.sh` (Exit 0) + TAT Executive Sign-Off |
 
 ---
@@ -78,7 +79,7 @@ No deliverable may be marked complete without providing the **Empirical Proof Ca
 1. **Research & Precedent Summary** *(Tier 2/3)*: The `🔬 5-Bullet Research Brief` confirming the feature was engineered against proven patterns.
 2. **Validation Terminal Output**: Verbatim output of `bash scripts/autonomous_gate.sh` (Exit Code 0) during iteration; full `bash scripts/preflight.sh` (Exit Code 0) run once at deployment.
 3. **Security Attack Neutralization**: Verbatim proof showing malicious payloads return `401 Unauthorized`, `403 Forbidden`, or `404 Not Found`.
-4. **Browser & DOM Audit Evidence**: Live browser inspection (`$_ENV['APP_URL']`) on Desktop and Mobile with `window.runSovereignDomAudit()` reporting `passed: true` (`0` violations) and `0` console errors.
+4. **Browser & DOM Audit Evidence**: Live browser inspection (`$_ENV['APP_URL']`) on Desktop (`1440×900`), iPad Portrait (`768×1024`), iPad Landscape (`1024×768`), and Mobile (`390×844`) with `window.runSovereignDomAudit()` reporting `passed: true` (`0` violations) and `0` console errors.
 5. **Living Guide Update**: Confirmation that `/playbook` or `/how-to-use` reflects the changes.
 
 ---

@@ -292,6 +292,7 @@
     @include('partials.back-to-top')
 
     @include('component.submitSpinner')
+    @include('partials.push-notification-banner')
     @include('partials.pwa-register')
 </body>
 

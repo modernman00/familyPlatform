@@ -133,7 +133,11 @@
             color: #64748b;
             font-size: 0.85rem;
             font-weight: 600;
-            padding: 6px 14px;
+            padding: 8px 14px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
             border-radius: var(--stitch-radius-pill);
             transition: all 0.2s ease;
             white-space: nowrap;
@@ -416,11 +420,130 @@
         #studioLineageScopeBanner .studio-lineage-option:has(input:focus-visible) { outline: 2px solid var(--stitch-primary); outline-offset: 2px; }
         #studioLineageScopeBanner #studioLineageScopeHelp { color: #475569 !important; font-size: .78rem; }
         #studioLineageScopeBanner #studioLineageScopeHelp strong { color: #0f172a; }
+
+        /* CapCut-Style Mobile Tree Studio Ergonomics */
+        .tree-mobile-bottom-bar {
+            display: none;
+        }
+        @media (max-width: 767.98px) {
+            .tree-studio-container {
+                padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px)) !important;
+            }
+            .studio-header {
+                padding: 0.9rem 1rem;
+                margin-bottom: 0.75rem;
+                border-radius: 16px;
+            }
+            .studio-header .studio-title-badge {
+                display: none;
+            }
+            .studio-header .display-6 {
+                font-size: 1.2rem;
+                margin-bottom: 0.5rem !important;
+            }
+            .studio-action-strip {
+                flex-wrap: nowrap !important;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x proximity;
+                padding-bottom: 4px;
+            }
+            .studio-action-strip > a,
+            .studio-action-strip > button {
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+            .studio-stats-row {
+                flex-wrap: nowrap !important;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin-top: 0.5rem;
+            }
+            .studio-stats-row > .col-6 {
+                flex: 0 0 auto;
+                width: auto;
+                min-width: 108px;
+            }
+            .stat-badge-card {
+                padding: 0.45rem 0.65rem;
+                border-radius: 12px;
+            }
+            .stat-badge-val {
+                font-size: 1.05rem;
+            }
+            .stat-badge-lbl {
+                font-size: 0.68rem;
+                white-space: nowrap;
+            }
+            .studio-toolbar {
+                position: sticky;
+                top: 56px;
+                z-index: 35;
+                padding: 0.55rem 0.65rem;
+                margin-bottom: 0.85rem;
+                gap: 0.5rem;
+                border-radius: 14px;
+                box-shadow: 0 10px 24px -10px rgba(15, 23, 42, 0.25);
+            }
+            .filter-nav-pills {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x proximity;
+                width: 100%;
+                gap: 6px;
+                padding-bottom: 2px;
+            }
+            .filter-pill-btn {
+                white-space: nowrap;
+                flex-shrink: 0;
+                min-height: 44px;
+            }
+            .search-input-stitch,
+            .search-input-stitch:focus {
+                width: 100%;
+                min-height: 44px;
+            }
+            .relative-card {
+                padding: 1rem;
+                border-radius: 16px;
+            }
+            .tree-mobile-bottom-bar {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 1040;
+                padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+                background: rgba(15, 23, 42, 0.96);
+                border-top: 1px solid rgba(255, 255, 255, 0.14);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+            }
+            .tree-mobile-bottom-bar > a,
+            .tree-mobile-bottom-bar > button {
+                flex: 1;
+                min-height: 44px;
+                white-space: nowrap;
+                font-size: 0.78rem;
+                padding: 8px 10px;
+                border-radius: 12px;
+            }
+        }
+        @media (max-width: 575.98px) {
+            .studio-hero-desc {
+                display: none;
+            }
+        }
     </style>
 @endpush
 
 @section('content')
-<div class="container py-4">
+<div class="container py-4 tree-studio-container">
     @include('member.creativeStudioTabs', ['creativeTab' => 'tree'])
 
     <!-- Hero Header with Mesh Elevation -->
@@ -437,7 +560,7 @@
                         Family Lineage Studio
                     @endif
                 </h1>
-                <p class="text-white-50 mb-3" style="font-size: 1.05rem; max-width: 520px; line-height: 1.5;">
+                <p class="text-white-50 mb-3 studio-hero-desc" style="font-size: 1.05rem; max-width: 520px; line-height: 1.5;">
                     @if(($activeLineageScope ?? 'primary') === 'maternal' && !empty($maternalFamCode))
                         Curating your Birth / Maiden Family lineage (<strong>#{{ $maternalFamCode }}</strong>). Manage your parents, birth siblings, and heritage with complete ease.
                     @else
@@ -445,16 +568,16 @@
                     @endif
                 </p>
                 @if(!empty($hasMaternalCode) && !empty($maternalFamCode))
-                <div class="d-inline-flex flex-wrap align-items-center gap-2 mb-3 p-1 rounded-pill" style="background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(255, 255, 255, 0.25);">
-                    <a href="?lineage=primary" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') !== 'maternal' ? 'btn-warning text-dark shadow-sm' : 'text-white' }}" style="min-height: 38px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                <div class="d-inline-flex flex-nowrap align-items-center gap-2 mb-3 p-1 rounded-pill" style="background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(255, 255, 255, 0.25); max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                    <a href="?lineage=primary" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') !== 'maternal' ? 'btn-warning text-dark shadow-sm' : 'text-white' }}" style="min-height: 44px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
                         <i class="bi bi-house-heart-fill"></i> Marital / Household Tree (#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})
                     </a>
-                    <a href="?lineage=birth" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') === 'maternal' ? 'btn-warning text-dark shadow-sm' : 'text-white' }}" style="min-height: 38px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                    <a href="?lineage=birth" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') === 'maternal' ? 'btn-warning text-dark shadow-sm' : 'text-white' }}" style="min-height: 44px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
                         <i class="bi bi-diagram-3-fill"></i> Birth / Maiden Family (#{{ $maternalFamCode }})
                     </a>
                 </div>
                 @endif
-                <div class="d-flex flex-wrap gap-2">
+                <div class="d-flex flex-wrap gap-2 studio-action-strip">
                     <a href="/organogram?mode=canvas{{ ($activeLineageScope ?? 'primary') === 'maternal' ? '&lineage=birth' : '' }}" class="btn btn-light fw-bold text-primary px-3 px-sm-4 py-2" style="border-radius: 12px; min-height: 44px; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                         <i class="bi bi-diagram-3-fill me-2"></i>View Interactive Tree
                     </a>
@@ -477,7 +600,7 @@
 
             <!-- Stats Grid -->
             <div class="col-lg-5">
-                <div class="row g-2">
+                <div class="row g-2 studio-stats-row">
                     <div class="col-6">
                         <div class="stat-badge-card">
                             <div class="stat-badge-val" id="statTotalMembers">{{ $stats['total_members'] ?? 0 }}</div>
@@ -2560,5 +2683,14 @@
         });
     }
 </script>
+{{-- CapCut-Style Mobile Sticky Bottom Action Bar --}}
+<div class="tree-mobile-bottom-bar" aria-label="Quick Tree Studio actions">
+    <a href="/organogram?mode=canvas{{ ($activeLineageScope ?? 'primary') === 'maternal' ? '&lineage=birth' : '' }}" class="btn btn-light fw-bold text-primary d-inline-flex align-items-center justify-content-center gap-1">
+        <i class="bi bi-diagram-3-fill"></i> Interactive Tree
+    </a>
+    <button type="button" class="btn btn-warning text-dark fw-bold d-inline-flex align-items-center justify-content-center gap-1" onclick="openStudioAddModal()">
+        <i class="bi bi-person-plus-fill"></i> Add Relative
+    </button>
+</div>
 @include('member.includes.treeAccessModals')
 @endsection

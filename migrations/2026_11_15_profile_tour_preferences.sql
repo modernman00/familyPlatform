@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS user_tour_preferences (
+    user_id VARCHAR(191) NOT NULL,
+    tour_key VARCHAR(100) NOT NULL,
+    is_dismissed TINYINT(1) NOT NULL DEFAULT 0,
+    dismissed_at TIMESTAMP NULL DEFAULT NULL,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, tour_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

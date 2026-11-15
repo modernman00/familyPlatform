@@ -422,7 +422,7 @@
                 <!-- Input Copy Bar -->
                 <div class="input-group">
                     <input type="text" id="modalShareUrlInput" class="form-control form-control-sm bg-light" readonly>
-                    <button class="btn btn-outline-secondary btn-sm fw-bold" type="button" id="btnInputCopy">
+                    <button class="btn btn-outline-secondary btn-sm fw-bold" type="button" id="btnInputCopy" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
                         <i class="far fa-copy me-1"></i> Copy
                     </button>
                 </div>

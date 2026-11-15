@@ -326,9 +326,9 @@ class OmniSearchService
             ],
             [
                 'id' => 'act_kin_whispers',
-                'title' => 'FamilyChat & Private Messaging',
+                'title' => 'FamChat & Private Messaging',
                 'description' => 'Send private messages, chats, and 60-second voice dedications to family members',
-                'keywords' => ['familychat', 'family chat', 'whisper', 'whispers', 'kin whispers', 'chat', 'private message', 'direct message', 'dm', 'send message', 'voice dedication', 'voice note', 'inbox'],
+                'keywords' => ['famChat', 'family chat', 'whisper', 'whispers', 'kin whispers', 'chat', 'private message', 'direct message', 'dm', 'send message', 'voice dedication', 'voice note', 'inbox'],
                 'category' => 'Functions & Tools',
                 'icon' => 'bi-chat-dots-fill',
                 'iconColor' => '#a31621',

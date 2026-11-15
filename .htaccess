@@ -66,7 +66,9 @@ RewriteRule "(^|/)\.(?!well-known/)" - [F,L]
 # ---------------------------------------------------------------------------
 RewriteCond %{REQUEST_URI} !^/tests/
 RewriteRule "^(app|bootstrap|database|scripts|tests|cypress|docs|storage|scratch|tmp|node_modules|vendor)(/|$)" - [F,L]
-RewriteRule "^resources/views(/|$)" - [F,L]
+RewriteRule "^resources/(views|lang|js)(/|$)" - [F,L]
+RewriteRule "^resources/assets/(js|sass)(/|$)" - [F,L]
+RewriteRule "^(resources/images|public/uploads)/.*\.(php[0-9]?|phtml|phar|html?|xhtml|svg|m?js|sh|cgi|pl|py)$" - [F,L,NC]
 
 # ---------------------------------------------------------------------------
 # 3. PHP execution lock-down — only the front controller runs.
@@ -116,6 +118,9 @@ RewriteRule "^resources/views(/|$)" - [F,L]
 # ---------------------------------------------------------------------------
 # 6. Front-controller routing
 # ---------------------------------------------------------------------------
+# Enforce session + thread-membership authorization on FamilyChat media & audio assets
+RewriteRule ^public/(storage/whispers/media|audio/whispers)/(.+)$ index.php [L,QSA]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [L]

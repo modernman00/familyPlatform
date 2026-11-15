@@ -43,6 +43,10 @@ $router->map('POST', '/api/kin-whispers/groups', 'App\controller\KinWhisperContr
 $router->map('POST', '/api/kin-whispers/groups/[*:id]/participants', 'App\controller\KinWhisperController@apiAddGroupParticipants', 'API_KIN_WHISPERS_ADD_PARTICIPANTS');
 $router->map('DELETE', '/api/kin-whispers/groups/[*:id]/participants/[*:userId]', 'App\controller\KinWhisperController@apiRemoveGroupParticipant', 'API_KIN_WHISPERS_REMOVE_PARTICIPANT');
 
+// Protected Media & Audio Asset Streaming (enforces session + thread membership)
+$router->map('GET', '/public/storage/whispers/media/[*:file]', 'App\controller\KinWhisperController@apiServeMediaAsset', 'API_KIN_WHISPERS_SERVE_MEDIA');
+$router->map('GET', '/public/audio/whispers/[*:file]', 'App\controller\KinWhisperController@apiServeAudioAsset', 'API_KIN_WHISPERS_SERVE_AUDIO');
+
 // Calling Engine & WebRTC Signaling Routes
 $router->map('POST', '/api/kin-whispers/threads/[*:id]/call/initiate', 'App\controller\KinWhisperController@apiInitiateCall', 'API_KIN_WHISPERS_CALL_INITIATE');
 $router->map('POST', '/api/kin-whispers/threads/[*:id]/call/signal', 'App\controller\KinWhisperController@apiSendCallSignal', 'API_KIN_WHISPERS_CALL_SIGNAL');

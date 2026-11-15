@@ -141,7 +141,7 @@
     .uni-social-sms svg   { fill: #1e293b; }
     .uni-social-copy      { background-color: #1e6823; }
 
-    /* Mobile Floating Action Button (Viewport < 992px) */
+    /* Mobile & Tablet Floating Action Button (Viewport < 1280px) */
     #universalMobileShareTrigger {
         position: fixed;
         bottom: 24px;
@@ -180,7 +180,7 @@
         fill: #ffffff;
     }
 
-    @media (max-width: 991.98px) {
+    @media (max-width: 1279.98px) {
         #universalSocialSidebar {
             display: none !important;
         }

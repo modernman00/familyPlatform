@@ -89,6 +89,13 @@ final class ProfilePage extends ProcessImg
             // Dual-Lineage post audiences (all, birth, married codes)
             $postAudiences = (new \App\services\FamilyPostAudienceService())->resolveUserAudiences((string)$this->id);
 
+            $profileTourDismissed = false;
+            try {
+                $profileTourDismissed = (new \App\services\ProfileTourService())->isDismissed((string)$this->id);
+            } catch (\Throwable $e) {
+                $profileTourDismissed = false;
+            }
+
             view('member/profilePage', [
                 'data' => $data['memberData'],
                 'primaryFamCode' => $data['primaryFamCode'] ?? ($data['famCode'] ?? ''),
@@ -117,7 +124,8 @@ final class ProfilePage extends ProcessImg
                 'pendingWeeklyReel' => $pendingWeeklyReel,
                 'cover' => (new \App\services\CoverPhotoService())->getCurrent((string) $this->id),
                 'isPendingApproval' => $data['isPendingApproval'] ?? false,
-                'pendingApprovalData' => $data['pendingApprovalData'] ?? null
+                'pendingApprovalData' => $data['pendingApprovalData'] ?? null,
+                'profileTourDismissed' => $profileTourDismissed
             ]);
 
         } catch (\Throwable $th) {

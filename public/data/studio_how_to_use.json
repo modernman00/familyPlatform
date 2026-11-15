@@ -29,59 +29,13 @@
   ],
   "articles": [
     {
-      "id": "one-click-auto-edit-and-commands",
-      "category": "advanced-features",
-      "title": "1-Click Auto-Edit, Real Audio Auto-Cut & Command Bar",
-      "summary": "Automatically remove silent gaps from real audio, apply Heritage Reel or Snappy Social recipes, or run zero-cost timestamped timeline commands.",
-      "keywords": [
-        "auto-edit",
-        "auto-cut",
-        "silence",
-        "recipe",
-        "heritage",
-        "snappy",
-        "command",
-        "cut",
-        "speed",
-        "title"
-      ],
-      "steps": [
-        "Upload a video via + Upload Video / Photo (V1) in the Asset Dock or via the top Cinematic Canvas uploader (which auto-syncs to V1).",
-        "Click Heritage Reel or Snappy Social under 1-Click Auto-Edit Recipes to automatically trim silent gaps, add a global colour grade (ADJ1), overlay (V2), and opening title (T1).",
-        "Click Auto-Cut Silences (Real Audio) to analyse the clip audio waveform and ripple-delete silent pauses (>0.65s).",
-        "Use the Timestamped Command Bar to type deterministic edits such as: cut 0:04-0:07, split at 0:05, speed 1.25x, or title \"London 2026\" at 0:01."
-      ]
-    },
-    {
       "id": "workspace-overview",
       "title": "Navigating the 4-Quadrant NLE Studio",
       "category": "getting-started",
-      "dock_tabs": [
-        "media",
-        "templates"
-      ],
-      "inspector_tabs": [
-        "basic"
-      ],
-      "keywords": [
-        "workspace",
-        "quadrant",
-        "dock",
-        "canvas",
-        "inspector",
-        "timeline",
-        "tour",
-        "shortcuts",
-        "layout"
-      ],
-      "action_verbs": [
-        "navigate",
-        "orient",
-        "inspect",
-        "preview",
-        "tour",
-        "open"
-      ],
+      "dock_tabs": ["media", "templates"],
+      "inspector_tabs": ["basic"],
+      "keywords": ["workspace", "quadrant", "dock", "canvas", "inspector", "timeline", "tour", "shortcuts", "layout"],
+      "action_verbs": ["navigate", "orient", "inspect", "preview", "tour", "open"],
       "goal": "Understand the four quadrants of the Sovereign Video Studio—Asset Dock, 60fps Centre Player, Inspector Panel, and Multi-Track Timeline—so you can edit efficiently.",
       "prerequisites": [
         "An active studio session on FamilyPlatform (/family-studio) or PartyPlatform (/video-studio/[eventId])."
@@ -91,7 +45,8 @@
         "2. Use the Top-Left Asset Dock to browse Media, Overlays, Audio, Text, Stickers, Effects, Transitions, Captions, Filters, Adjustment, Charts & PiP, Templates, and AI Avatars.",
         "3. Preview your composition in real time on the Centre 60fps Player (#snleMainCanvas) and drag golden handles to resize or rotate selected layers.",
         "4. Fine-tune clip properties in the Right-Hand Inspector Panel across Basic, Remove BG, Mask, Retouch, Speed, Animation, Tracking, Adjustment, Lighting, and Audio tabs.",
-        "5. Arrange, split, and trim clips on the Bottom Multi-Track Timeline using the toolbar and scrub bar."
+        "5. Arrange, split, and trim clips on the Bottom Multi-Track Timeline using the toolbar and scrub bar.",
+        "6. Tap Pop out (or scroll down on mobile/tablet) to keep a floating Picture-in-Picture preview visible while editing cards, posters, or video—tap it to expand full-screen or minimise it at any time."
       ],
       "expected_result": "You can move fluidly between asset selection, live canvas manipulation, inspector tuning, and timeline sequencing without leaving the single-screen workspace.",
       "common_issues": [
@@ -111,30 +66,10 @@
       "id": "upload-r2-vault",
       "title": "Uploading Media via the Direct R2 Vault & Media Dock",
       "category": "getting-started",
-      "dock_tabs": [
-        "media"
-      ],
-      "inspector_tabs": [
-        "basic"
-      ],
-      "keywords": [
-        "r2",
-        "vault",
-        "upload",
-        "media",
-        "video",
-        "photo",
-        "image",
-        "import",
-        "clip"
-      ],
-      "action_verbs": [
-        "upload",
-        "import",
-        "add",
-        "store",
-        "load"
-      ],
+      "dock_tabs": ["media"],
+      "inspector_tabs": ["basic"],
+      "keywords": ["r2", "vault", "upload", "media", "video", "photo", "image", "import", "clip"],
+      "action_verbs": ["upload", "import", "add", "store", "load"],
       "goal": "Upload video clips, photos, and audio straight to your Direct R2 Vault and place them onto the NLE timeline.",
       "prerequisites": [
         "A supported media file (MP4, WebM, MOV, JPEG, PNG, or MP3/WAV).",
@@ -164,32 +99,10 @@
       "id": "aspect-ratio-switcher",
       "title": "Choosing Your Format: 16:9, 1:1, and 9:16 Aspect Ratios",
       "category": "getting-started",
-      "dock_tabs": [
-        "media",
-        "templates"
-      ],
-      "inspector_tabs": [
-        "basic"
-      ],
-      "keywords": [
-        "aspect",
-        "ratio",
-        "16:9",
-        "1:1",
-        "9:16",
-        "format",
-        "portrait",
-        "landscape",
-        "square",
-        "viewport"
-      ],
-      "action_verbs": [
-        "switch",
-        "resize",
-        "format",
-        "reframe",
-        "orient"
-      ],
+      "dock_tabs": ["media", "templates"],
+      "inspector_tabs": ["basic"],
+      "keywords": ["aspect", "ratio", "16:9", "1:1", "9:16", "format", "portrait", "landscape", "square", "viewport"],
+      "action_verbs": ["switch", "resize", "format", "reframe", "orient"],
       "goal": "Optimise your canvas dimensions for widescreen television (16:9), square feeds (1:1), or vertical Reels and Stories (9:16).",
       "prerequisites": [
         "The studio viewport (#fvsViewportWrap) and 4-Quadrant NLE Studio loaded."
@@ -217,34 +130,10 @@
       "id": "split-duplicate-stretch",
       "title": "Splitting, Duplicating (Alt+Click), and Stretching (+2s) Clips",
       "category": "basic-editing",
-      "dock_tabs": [
-        "media"
-      ],
-      "inspector_tabs": [
-        "basic",
-        "speed"
-      ],
-      "keywords": [
-        "split",
-        "cut",
-        "trim",
-        "duplicate",
-        "clone",
-        "alt+click",
-        "stretch",
-        "duration",
-        "extend"
-      ],
-      "action_verbs": [
-        "split",
-        "trim",
-        "cut",
-        "duplicate",
-        "clone",
-        "copy",
-        "stretch",
-        "extend"
-      ],
+      "dock_tabs": ["media"],
+      "inspector_tabs": ["basic", "speed"],
+      "keywords": ["split", "cut", "trim", "duplicate", "clone", "alt+click", "stretch", "duration", "extend"],
+      "action_verbs": ["split", "trim", "cut", "duplicate", "clone", "copy", "stretch", "extend"],
       "goal": "Divide a clip at the playhead, clone clips rapidly, or extend clip duration by 2 seconds.",
       "prerequisites": [
         "At least one clip placed and selected on the Multi-Track Timeline."
@@ -273,30 +162,10 @@
       "id": "ripple-delete-snap",
       "title": "Ripple Delete & Magnetic Snap Alignment",
       "category": "basic-editing",
-      "dock_tabs": [
-        "media"
-      ],
-      "inspector_tabs": [
-        "basic"
-      ],
-      "keywords": [
-        "ripple",
-        "delete",
-        "remove",
-        "gap",
-        "snap",
-        "magnetic",
-        "align",
-        "timeline"
-      ],
-      "action_verbs": [
-        "delete",
-        "remove",
-        "ripple",
-        "snap",
-        "align",
-        "close"
-      ],
+      "dock_tabs": ["media"],
+      "inspector_tabs": ["basic"],
+      "keywords": ["ripple", "delete", "remove", "gap", "snap", "magnetic", "align", "timeline"],
+      "action_verbs": ["delete", "remove", "ripple", "snap", "align", "close"],
       "goal": "Remove unwanted clips without leaving black gaps and align clips cleanly with Magnetic Snap.",
       "prerequisites": [
         "Two or more clips arranged on a timeline track."
@@ -325,30 +194,10 @@
       "id": "freeze-reverse-mirror-crop",
       "title": "Freeze Frame, Reverse, Mirror & Crop 16:9",
       "category": "basic-editing",
-      "dock_tabs": [
-        "media"
-      ],
-      "inspector_tabs": [
-        "basic"
-      ],
-      "keywords": [
-        "freeze",
-        "frame",
-        "reverse",
-        "mirror",
-        "flip",
-        "crop",
-        "16:9",
-        "still"
-      ],
-      "action_verbs": [
-        "freeze",
-        "reverse",
-        "mirror",
-        "flip",
-        "crop",
-        "frame"
-      ],
+      "dock_tabs": ["media"],
+      "inspector_tabs": ["basic"],
+      "keywords": ["freeze", "frame", "reverse", "mirror", "flip", "crop", "16:9", "still"],
+      "action_verbs": ["freeze", "reverse", "mirror", "flip", "crop", "frame"],
       "goal": "Create dramatic still moments, reverse playback direction, mirror footage horizontally, or apply a 16:9 safe crop.",
       "prerequisites": [
         "A selected clip on the timeline."
@@ -377,38 +226,10 @@
       "id": "undo-redo-tracks",
       "title": "Undo/Redo History, Track Controls & Sequential V1 Merging",
       "category": "basic-editing",
-      "dock_tabs": [
-        "media",
-        "audio"
-      ],
-      "inspector_tabs": [
-        "basic"
-      ],
-      "keywords": [
-        "undo",
-        "redo",
-        "history",
-        "track",
-        "v1",
-        "v2",
-        "a1",
-        "merge",
-        "join",
-        "session",
-        "mute",
-        "solo",
-        "lock"
-      ],
-      "action_verbs": [
-        "undo",
-        "redo",
-        "merge",
-        "join",
-        "combine",
-        "mute",
-        "lock",
-        "add"
-      ],
+      "dock_tabs": ["media", "audio"],
+      "inspector_tabs": ["basic"],
+      "keywords": ["undo", "redo", "history", "track", "v1", "v2", "a1", "merge", "join", "session", "mute", "solo", "lock"],
+      "action_verbs": ["undo", "redo", "merge", "join", "combine", "mute", "lock", "add"],
       "goal": "Safely experiment with Undo/Redo, manage stacked tracks (+ Track, Mute/Lock), and understand how sequential V1 clips merge on export.",
       "prerequisites": [
         "An active studio session with one or more timeline tracks."
@@ -438,32 +259,10 @@
       "id": "overlays-blend-modes",
       "title": "Adding Overlays & Configuring Blend Modes",
       "category": "advanced-features",
-      "dock_tabs": [
-        "overlays",
-        "stickers",
-        "text"
-      ],
-      "inspector_tabs": [
-        "basic"
-      ],
-      "keywords": [
-        "overlay",
-        "blend",
-        "mode",
-        "multiply",
-        "screen",
-        "add",
-        "opacity",
-        "composite",
-        "layer"
-      ],
-      "action_verbs": [
-        "overlay",
-        "blend",
-        "composite",
-        "layer",
-        "mix"
-      ],
+      "dock_tabs": ["overlays", "stickers", "text"],
+      "inspector_tabs": ["basic"],
+      "keywords": ["overlay", "blend", "mode", "multiply", "screen", "add", "opacity", "composite", "layer"],
+      "action_verbs": ["overlay", "blend", "composite", "layer", "mix"],
       "goal": "Layer celebratory frames, light leaks, or text overlays on upper tracks and blend them naturally using Blend Modes.",
       "prerequisites": [
         "A base video clip on V1."
@@ -492,35 +291,10 @@
       "id": "masks-retouch",
       "title": "Precision Masking & Portrait Retouching",
       "category": "advanced-features",
-      "dock_tabs": [
-        "effects",
-        "filters"
-      ],
-      "inspector_tabs": [
-        "mask",
-        "retouch",
-        "removebg"
-      ],
-      "keywords": [
-        "mask",
-        "feather",
-        "circle",
-        "rectangle",
-        "retouch",
-        "skin",
-        "smooth",
-        "chroma",
-        "remove bg",
-        "background"
-      ],
-      "action_verbs": [
-        "mask",
-        "feather",
-        "retouch",
-        "smooth",
-        "key",
-        "isolate"
-      ],
+      "dock_tabs": ["effects", "filters"],
+      "inspector_tabs": ["mask", "retouch", "removebg"],
+      "keywords": ["mask", "feather", "circle", "rectangle", "retouch", "skin", "smooth", "chroma", "remove bg", "background"],
+      "action_verbs": ["mask", "feather", "retouch", "smooth", "key", "isolate"],
       "goal": "Isolate subjects with geometric or feathered masks, apply subtle portrait retouching, or key out backgrounds.",
       "prerequisites": [
         "A video or photo clip selected on the timeline."
@@ -549,36 +323,10 @@
       "id": "adjustment-lighting",
       "title": "Global Adjustment Layer & Cinematic Lighting",
       "category": "advanced-features",
-      "dock_tabs": [
-        "adjustment",
-        "filters"
-      ],
-      "inspector_tabs": [
-        "adjustment",
-        "lighting"
-      ],
-      "keywords": [
-        "adjustment",
-        "global",
-        "colour",
-        "color",
-        "grade",
-        "lighting",
-        "brightness",
-        "contrast",
-        "saturation",
-        "temperature",
-        "lut"
-      ],
-      "action_verbs": [
-        "colour",
-        "grade",
-        "adjust",
-        "brighten",
-        "warm",
-        "balance",
-        "light"
-      ],
+      "dock_tabs": ["adjustment", "filters"],
+      "inspector_tabs": ["adjustment", "lighting"],
+      "keywords": ["adjustment", "global", "colour", "color", "grade", "lighting", "brightness", "contrast", "saturation", "temperature", "lut"],
+      "action_verbs": ["colour", "grade", "adjust", "brighten", "warm", "balance", "light"],
       "goal": "Unify the colour grade across multiple clips using a Global Adjustment Layer and sculpt scene illumination in the Lighting tab.",
       "prerequisites": [
         "One or more video clips on the timeline."
@@ -607,37 +355,10 @@
       "id": "tracking-animation-speed",
       "title": "Motion Tracking, Keyframe Animation & Speed Curves",
       "category": "advanced-features",
-      "dock_tabs": [
-        "effects",
-        "transitions"
-      ],
-      "inspector_tabs": [
-        "tracking",
-        "animation",
-        "speed"
-      ],
-      "keywords": [
-        "tracking",
-        "callout",
-        "blur",
-        "privacy",
-        "animation",
-        "keyframe",
-        "diamond",
-        "speed",
-        "curve",
-        "slow motion",
-        "ramp"
-      ],
-      "action_verbs": [
-        "track",
-        "animate",
-        "keyframe",
-        "accelerate",
-        "slow",
-        "ramp",
-        "blur"
-      ],
+      "dock_tabs": ["effects", "transitions"],
+      "inspector_tabs": ["tracking", "animation", "speed"],
+      "keywords": ["tracking", "callout", "blur", "privacy", "animation", "keyframe", "diamond", "speed", "curve", "slow motion", "ramp"],
+      "action_verbs": ["track", "animate", "keyframe", "accelerate", "slow", "ramp", "blur"],
       "goal": "Lock callouts or privacy blurs to moving subjects, animate properties with keyframe diamonds, and sculpt speed ramps.",
       "prerequisites": [
         "A video clip selected on the timeline."
@@ -665,33 +386,10 @@
       "id": "charts-pip-captions",
       "title": "Charts & PiP Overlays and Karaoke Captions",
       "category": "advanced-features",
-      "dock_tabs": [
-        "charts",
-        "captions",
-        "avatars"
-      ],
-      "inspector_tabs": [
-        "basic",
-        "animation"
-      ],
-      "keywords": [
-        "charts",
-        "pip",
-        "picture in picture",
-        "captions",
-        "subtitles",
-        "karaoke",
-        "text",
-        "avatar"
-      ],
-      "action_verbs": [
-        "caption",
-        "subtitle",
-        "chart",
-        "overlay",
-        "embed",
-        "generate"
-      ],
+      "dock_tabs": ["charts", "captions", "avatars"],
+      "inspector_tabs": ["basic", "animation"],
+      "keywords": ["charts", "pip", "picture in picture", "captions", "subtitles", "karaoke", "text", "avatar"],
+      "action_verbs": ["caption", "subtitle", "chart", "overlay", "embed", "generate"],
       "goal": "Embed picture-in-picture overlays or data charts and generate animated word-by-word Karaoke Captions.",
       "prerequisites": [
         "A timeline project with a main video or narration track."
@@ -720,34 +418,10 @@
       "id": "audio-dsp-voice-cloning",
       "title": "Audio Noise Reduction, Auto-Cut Silence, TTS & Voice Cloning (GDPR Art 9)",
       "category": "advanced-features",
-      "dock_tabs": [
-        "audio"
-      ],
-      "inspector_tabs": [
-        "audio"
-      ],
-      "keywords": [
-        "audio",
-        "denoise",
-        "noise reduction",
-        "auto-cut",
-        "silence",
-        "tts",
-        "voiceover",
-        "voice cloning",
-        "gdpr",
-        "article 9",
-        "biometric"
-      ],
-      "action_verbs": [
-        "denoise",
-        "clean",
-        "cut",
-        "narrate",
-        "dub",
-        "clone",
-        "profile"
-      ],
+      "dock_tabs": ["audio"],
+      "inspector_tabs": ["audio"],
+      "keywords": ["audio", "denoise", "noise reduction", "auto-cut", "silence", "tts", "voiceover", "voice cloning", "gdpr", "article 9", "biometric"],
+      "action_verbs": ["denoise", "clean", "cut", "narrate", "dub", "clone", "profile"],
       "goal": "Clean up background hiss, strip silent pauses automatically, generate British English TTS voiceovers, and use GDPR Article 9-compliant voice cloning.",
       "prerequisites": [
         "An audio or video clip on the timeline (e.g. A1 or V1).",
@@ -778,32 +452,10 @@
       "id": "export-4k-publish-reel",
       "title": "Exporting a 4K Master & Publishing a Reel",
       "category": "advanced-features",
-      "dock_tabs": [
-        "effects",
-        "templates"
-      ],
-      "inspector_tabs": [
-        "basic"
-      ],
-      "keywords": [
-        "export",
-        "4k",
-        "master",
-        "upscale",
-        "lanczos",
-        "publish",
-        "reel",
-        "render",
-        "download"
-      ],
-      "action_verbs": [
-        "export",
-        "render",
-        "upscale",
-        "publish",
-        "share",
-        "download"
-      ],
+      "dock_tabs": ["effects", "templates"],
+      "inspector_tabs": ["basic"],
+      "keywords": ["export", "4k", "master", "upscale", "lanczos", "publish", "reel", "render", "download"],
+      "action_verbs": ["export", "render", "upscale", "publish", "share", "download"],
       "goal": "Optionally upscale footage with 4K Lanczos-3, render your final composition in-browser, and publish it as a Reel or Master download.",
       "prerequisites": [
         "At least one clip on the timeline.",
@@ -833,34 +485,10 @@
       "id": "troubleshoot-playback-export",
       "title": "Resolving Canvas Playback Stutters & 4K Export Failures",
       "category": "troubleshooting",
-      "dock_tabs": [
-        "media",
-        "effects"
-      ],
-      "inspector_tabs": [
-        "basic",
-        "speed"
-      ],
-      "keywords": [
-        "stutter",
-        "lag",
-        "slow",
-        "freeze",
-        "export",
-        "fail",
-        "crash",
-        "browser",
-        "fps",
-        "canvas"
-      ],
-      "action_verbs": [
-        "fix",
-        "resolve",
-        "troubleshoot",
-        "optimise",
-        "recover",
-        "debug"
-      ],
+      "dock_tabs": ["media", "effects"],
+      "inspector_tabs": ["basic", "speed"],
+      "keywords": ["stutter", "lag", "slow", "freeze", "export", "fail", "crash", "browser", "fps", "canvas"],
+      "action_verbs": ["fix", "resolve", "troubleshoot", "optimise", "recover", "debug"],
       "goal": "Diagnose and resolve dropped frames during 60fps preview or stalled 4K Master exports.",
       "prerequisites": [
         "An active studio session experiencing lag or export interruption."
@@ -889,31 +517,10 @@
       "id": "troubleshoot-r2-upload-audio",
       "title": "Fixing Direct R2 Upload Timeouts & Muted Audio Tracks",
       "category": "troubleshooting",
-      "dock_tabs": [
-        "media",
-        "audio"
-      ],
-      "inspector_tabs": [
-        "audio"
-      ],
-      "keywords": [
-        "timeout",
-        "r2",
-        "upload",
-        "mute",
-        "silent",
-        "no sound",
-        "audio",
-        "missing",
-        "error"
-      ],
-      "action_verbs": [
-        "fix",
-        "unmute",
-        "retry",
-        "check",
-        "troubleshoot"
-      ],
+      "dock_tabs": ["media", "audio"],
+      "inspector_tabs": ["audio"],
+      "keywords": ["timeout", "r2", "upload", "mute", "silent", "no sound", "audio", "missing", "error"],
+      "action_verbs": ["fix", "unmute", "retry", "check", "troubleshoot"],
       "goal": "Recover from Direct R2 upload interruptions and restore sound when a timeline track appears silent.",
       "prerequisites": [
         "A media upload error or missing audio during timeline playback."
@@ -936,6 +543,102 @@
       ],
       "screenshots": [
         "[INSERT SCREENSHOT: Track header Mute/Lock buttons and Audio Inspector volume slider]"
+      ]
+    },
+    {
+      "id": "quick-enhance-before-after",
+      "title": "1-Click Quick Enhance & Before/After Split-Screen Wipe",
+      "category": "getting-started",
+      "dock_tabs": ["templates", "filters"],
+      "inspector_tabs": ["adjustment", "lighting"],
+      "keywords": ["quick enhance", "magic recipe", "before", "after", "split", "wipe", "low light", "party rescue", "walkthrough", "tutorial"],
+      "action_verbs": ["enhance", "compare", "preview", "rescue", "polish", "watch"],
+      "goal": "Transform raw footage in under 3 minutes using 1-click Quick Enhance recipes and verify improvements with the live Before/After split-screen wipe.",
+      "prerequisites": [
+        "At least one video or photo clip on the timeline."
+      ],
+      "steps": [
+        "1. Click any preset in the top Quick Enhance bar (such as Polish Talking Head, Low-Light Party Rescue, or Documentary Look).",
+        "2. Click ◫ Before / After in the Centre Player bar to split the canvas between raw footage (left) and enhanced output (right).",
+        "3. Drag the Before / After slider to inspect shadow lift, colour balance, and sharpness side by side.",
+        "4. Open ? How to Use and click Watch Studio Walkthrough for a 6-chapter interactive video tutorial."
+      ],
+      "expected_result": "Your clip is enhanced in one click with immediate visual proof on the split-screen player.",
+      "common_issues": [
+        {
+          "issue": "Before and After look identical.",
+          "resolution": "Ensure an enhancement recipe, LUT filter, or lighting glow has been applied to the active clip."
+        }
+      ],
+      "example_use_cases": [
+        "Rescuing dimly lit evening celebration footage in 30 seconds before sharing."
+      ],
+      "screenshots": [
+        "[INSERT SCREENSHOT: Quick Enhance bar and live Before/After split-screen wipe on #snleMainCanvas]"
+      ]
+    },
+    {
+      "id": "documentary-3layer-lighting",
+      "title": "3-Layer Documentary Stack, Light Leaks, Vignette & Compound Clips",
+      "category": "advanced-features",
+      "dock_tabs": ["templates", "effects", "overlays"],
+      "inspector_tabs": ["lighting", "adjustment"],
+      "keywords": ["documentary", "3-layer", "light leaks", "radial glow", "vignette", "compound", "group", "parallax", "depth"],
+      "action_verbs": ["layer", "group", "compound", "light", "vignette", "stack"],
+      "goal": "Build cinematic documentary depth by combining Background, Subject, and Foreground Light Leaks, then grouping them into a Compound Clip for unified camera motion.",
+      "prerequisites": [
+        "Overlapping clips on V1/V2/V3 or an active timeline."
+      ],
+      "steps": [
+        "1. Open the Templates dock tab and click + 3-Layer Documentary Stack (or select Documentary Look in Quick Enhance).",
+        "2. Use the Effects dock tab to add Documentary Light Leaks or a Cinematic Vignette, and tune Temperature & Vignette in the Adjustment inspector.",
+        "3. Click ⛓ Compound Clip on the timeline toolbar to group overlapping layers at the playhead into one Compound Scene.",
+        "4. Animate Scale or Position on the Compound Clip to move all layers together, or click ⛓ Unpack Compound to edit layers individually."
+      ],
+      "expected_result": "Static portraits and scenes gain realistic depth, warm feathered light sources, and cohesive camera movement.",
+      "common_issues": [
+        {
+          "issue": "Compound Clip button says at least 2 overlapping layers are needed.",
+          "resolution": "Move the playhead over a section where at least two non-compound clips (e.g. V1 and V2) overlap in time."
+        }
+      ],
+      "example_use_cases": [
+        "Turning a family portrait and archive backdrop into a documentary-style tribute."
+      ],
+      "screenshots": [
+        "[INSERT SCREENSHOT: 3-Layer Documentary Stack grouped into a Compound Clip with Light Leaks and Vignette]"
+      ]
+    },
+    {
+      "id": "smart-export-stabilise-easing",
+      "title": "Smart Export Settings, Motion Stabilisation & Keyframe Easing Curves",
+      "category": "advanced-features",
+      "dock_tabs": ["effects", "transitions"],
+      "inspector_tabs": ["basic", "animation"],
+      "keywords": ["smart export", "4k", "reels", "whatsapp", "stabilise", "stabilization", "easing", "cubic", "quad", "curve", "keyframe"],
+      "action_verbs": ["export", "stabilise", "ease", "keyframe", "render", "download"],
+      "goal": "Stabilise shaky handheld clips, smooth keyframe motion with Cubic/Quad easing curves, and export at exact target presets with Smart Export Settings.",
+      "prerequisites": [
+        "A completed timeline ready for polishing and export."
+      ],
+      "steps": [
+        "1. Select a clip, open the Basic inspector tab, and click Stabilise Clip Motion (or choose Stabilise Selected Clip in the Effects dock).",
+        "2. Pick an Easing Curve preset (such as Cubic In or Quad Out) in Keyframe Easing before clicking the <> diamond button to add smooth motion keyframes.",
+        "3. Click Smart Export in the Top Bar and choose YouTube / Archive 4K Master (3840x2160), Studio 1080p, Reels / TikTok, or WhatsApp / Family Chat.",
+        "4. Click Start Smart Export to render the full timeline offscreen with selection handles automatically hidden."
+      ],
+      "expected_result": "Smooth, stabilised motion and a clean full-duration master video without selection boxes or frozen frames.",
+      "common_issues": [
+        {
+          "issue": "Exported video looks lower resolution than expected.",
+          "resolution": "Select YouTube / Archive 4K Master or Studio Full HD (1080p) in the Smart Export Settings modal."
+        }
+      ],
+      "example_use_cases": [
+        "Exporting both a 4K archive master and a compact 720p WhatsApp family share from the same timeline."
+      ],
+      "screenshots": [
+        "[INSERT SCREENSHOT: Smart Export Settings modal showing 4K, 1080p, Reels, and Family Chat presets]"
       ]
     }
   ],
@@ -967,73 +670,35 @@
     "gdpr-article-9",
     "export-4k",
     "publish-reel",
+    "quick-enhance",
+    "before-after",
+    "compound-clip",
+    "light-leaks",
+    "vignette",
+    "stabilise",
+    "easing-curves",
+    "smart-export",
     "troubleshooting"
   ],
   "cross_references": {
-    "workspace-overview": [
-      "upload-r2-vault",
-      "aspect-ratio-switcher",
-      "undo-redo-tracks"
-    ],
-    "upload-r2-vault": [
-      "aspect-ratio-switcher",
-      "troubleshoot-r2-upload-audio"
-    ],
-    "aspect-ratio-switcher": [
-      "freeze-reverse-mirror-crop",
-      "export-4k-publish-reel"
-    ],
-    "split-duplicate-stretch": [
-      "ripple-delete-snap",
-      "undo-redo-tracks"
-    ],
-    "ripple-delete-snap": [
-      "split-duplicate-stretch",
-      "undo-redo-tracks"
-    ],
-    "freeze-reverse-mirror-crop": [
-      "aspect-ratio-switcher",
-      "tracking-animation-speed"
-    ],
-    "undo-redo-tracks": [
-      "split-duplicate-stretch",
-      "export-4k-publish-reel"
-    ],
-    "overlays-blend-modes": [
-      "masks-retouch",
-      "charts-pip-captions"
-    ],
-    "masks-retouch": [
-      "overlays-blend-modes",
-      "adjustment-lighting"
-    ],
-    "adjustment-lighting": [
-      "masks-retouch",
-      "export-4k-publish-reel"
-    ],
-    "tracking-animation-speed": [
-      "masks-retouch",
-      "freeze-reverse-mirror-crop"
-    ],
-    "charts-pip-captions": [
-      "overlays-blend-modes",
-      "audio-dsp-voice-cloning"
-    ],
-    "audio-dsp-voice-cloning": [
-      "charts-pip-captions",
-      "troubleshoot-r2-upload-audio"
-    ],
-    "export-4k-publish-reel": [
-      "undo-redo-tracks",
-      "troubleshoot-playback-export"
-    ],
-    "troubleshoot-playback-export": [
-      "export-4k-publish-reel",
-      "tracking-animation-speed"
-    ],
-    "troubleshoot-r2-upload-audio": [
-      "upload-r2-vault",
-      "audio-dsp-voice-cloning"
-    ]
+    "workspace-overview": ["upload-r2-vault", "quick-enhance-before-after", "aspect-ratio-switcher"],
+    "quick-enhance-before-after": ["documentary-3layer-lighting", "smart-export-stabilise-easing"],
+    "documentary-3layer-lighting": ["quick-enhance-before-after", "smart-export-stabilise-easing"],
+    "smart-export-stabilise-easing": ["quick-enhance-before-after", "export-4k-publish-reel"],
+    "upload-r2-vault": ["aspect-ratio-switcher", "troubleshoot-r2-upload-audio"],
+    "aspect-ratio-switcher": ["freeze-reverse-mirror-crop", "export-4k-publish-reel"],
+    "split-duplicate-stretch": ["ripple-delete-snap", "undo-redo-tracks"],
+    "ripple-delete-snap": ["split-duplicate-stretch", "undo-redo-tracks"],
+    "freeze-reverse-mirror-crop": ["aspect-ratio-switcher", "tracking-animation-speed"],
+    "undo-redo-tracks": ["split-duplicate-stretch", "export-4k-publish-reel"],
+    "overlays-blend-modes": ["masks-retouch", "charts-pip-captions"],
+    "masks-retouch": ["overlays-blend-modes", "adjustment-lighting"],
+    "adjustment-lighting": ["masks-retouch", "export-4k-publish-reel"],
+    "tracking-animation-speed": ["masks-retouch", "freeze-reverse-mirror-crop"],
+    "charts-pip-captions": ["overlays-blend-modes", "audio-dsp-voice-cloning"],
+    "audio-dsp-voice-cloning": ["charts-pip-captions", "troubleshoot-r2-upload-audio"],
+    "export-4k-publish-reel": ["undo-redo-tracks", "troubleshoot-playback-export"],
+    "troubleshoot-playback-export": ["export-4k-publish-reel", "tracking-animation-speed"],
+    "troubleshoot-r2-upload-audio": ["upload-r2-vault", "audio-dsp-voice-cloning"]
   }
 }

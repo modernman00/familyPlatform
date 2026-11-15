@@ -9,7 +9,7 @@
     #push-notification-banner .push-banner-title { color: #0f172a; font-size: 1.125rem; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; }
     #push-notification-banner .push-banner-text { color: #334155; font-size: 0.875rem; font-weight: 500; line-height: 1.5; }
     #push-notification-banner .push-banner-icon { background: rgba(163, 22, 33, 0.1); color: #a31621; }
-    #push-notification-banner #enable-push-btn { background: linear-gradient(135deg, #a31621 0%, #7a0e16 100%); color: #ffffff; border: none; min-height: 44px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+    #push-notification-banner #enable-push-btn { background-color: #a31621; background-image: linear-gradient(135deg, #a31621 0%, #7a0e16 100%); color: #ffffff; border: none; min-height: 44px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
     #push-notification-banner #dismiss-push-btn { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; font-weight: 600; min-height: 44px; white-space: nowrap; flex-shrink: 0; }
     #push-notification-banner #close-push-banner { opacity: 0.8; }
     body.dark-mode #push-notification-banner, body.dark-theme #push-notification-banner, [data-bs-theme="dark"] #push-notification-banner, html.dark #push-notification-banner, html.dark-mode #push-notification-banner { background: #1e293b; border-color: rgba(239, 107, 115, 0.5); }
@@ -482,7 +482,8 @@
             }
 
             enableBtn.classList.remove('btn-primary');
-            enableBtn.style.background = 'linear-gradient(135deg, #475569 0%, #1e293b 100%)';
+            enableBtn.style.backgroundColor = '#1e293b';
+            enableBtn.style.backgroundImage = 'linear-gradient(135deg, #475569 0%, #1e293b 100%)';
             enableBtn.innerHTML = '<i class="bi bi-gear-wide-connected me-1.5"></i> How to Unblock';
             enableBtn.onclick = function(e) {
                 e.preventDefault();

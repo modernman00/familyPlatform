@@ -25,6 +25,15 @@
     if (isStandalone && !sessionStorage.getItem('fp_pwa_splash_shown')) {
       document.documentElement.classList.add('fp-pwa-splash-active');
     }
+    if (!window.__ppEarlyInstallBound) {
+      window.__ppEarlyInstallBound = true;
+      window.addEventListener('beforeinstallprompt', function(e) {
+        if (!window.__PWA_INSTALL_ACTIVE__ && !window.__familyPwaInstall) {
+          e.preventDefault();
+          window.__deferredInstallPrompt = e;
+        }
+      });
+    }
   } catch (e) {}
 })();
 </script>

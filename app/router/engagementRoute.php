@@ -9,6 +9,8 @@ $router->map('GET', '/api/memories/today', 'App\controller\members\MemoryMilesto
 $router->map('POST', '/api/memories/share', 'App\controller\members\MemoryMilestoneController@shareMemory', 'memories_share');
 $router->map('GET', '/api/onboarding/state', 'App\controller\members\OnboardingController@getOnboardingState', 'onboarding_state');
 $router->map('POST', '/api/onboarding/step', 'App\controller\members\OnboardingController@completeStep', 'onboarding_step');
+$router->map('GET', '/api/profile/tour-preference', 'App\controller\members\OnboardingController@getProfileTourPreference', 'profile_tour_preference_get');
+$router->map('POST', '/api/profile/tour-preference', 'App\controller\members\OnboardingController@saveProfileTourPreference', 'profile_tour_preference_save');
 $router->map('GET', '/api/discovery/journey', 'App\controller\members\OnboardingController@getDiscoveryJourney', 'discovery_journey');
 $router->map('POST', '/api/discovery/fast-forward', 'App\controller\members\OnboardingController@fastForwardFeature', 'discovery_fast_forward');
 $router->map('POST', '/api/telemetry/event', 'App\controller\members\TelemetryController@recordEvent', 'telemetry_event');

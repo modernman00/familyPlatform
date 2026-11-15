@@ -556,9 +556,9 @@
         },
         {
             num: 6,
-            title: "Stage 6: FamilyChat, Linked Standalone Messenger App & Real-Time Pusher Channels",
+            title: "Stage 6: FamChat, Voice/Video Calling & Real-Time Pusher Channels",
             route: "/kin-whispers",
-            desc: "Private group and one-on-one artifact-anchored FamilyChat threads for cousins, siblings, and elders with 0ms optimistic message delivery, deferred background link preview hydration, inline video and multi-photo album rendering, instant read receipts, presence indicators, voice/media sharing, a distinct FamilyChat alert experience (soft harmonic Web Audio chime, crimson-and-gold foreground toast, chat vibration, and dedicated window routing), plus a dismissible install popup and header controls to install FamilyChat as a separate-but-linked PWA app (including iOS Safari Share \u2192 Add to Home Screen guidance) or pop it out into a standalone messenger window.",
+            desc: "Private group and one-on-one artifact-anchored FamChat threads for cousins, siblings, and elders with 0ms optimistic message delivery, deferred background link preview hydration, inline video and multi-photo album rendering, instant read receipts, full last-seen presence indicators, disappearing message timers, WebRTC voice and video calls with resilient signaling fallback, voice/media sharing, and a distinct FamChat alert experience.",
             controller: "Family Member / Circle Communicator",
             state: "EVENT_COORDINATED \u2192 REALTIME_CONNECTED",
             db: "Encrypted Family Messenger Channels",

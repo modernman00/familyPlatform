@@ -73,9 +73,9 @@ if (!str_contains($standardsCssContent, '.carousel-fanciful-badge') || !str_cont
     $errors[] = "standards-v21.css is missing .carousel-fanciful-badge or .carousel-nav-btn classes!";
 }
 
-// Check 10: Super HD image-rendering & ATG GPU Convolution Lens optimizations are present in CSS
-if (!str_contains($standardsCssContent, 'image-rendering: -webkit-optimize-contrast') || !str_contains($standardsCssContent, '#atg-super-hd-lens')) {
-    $errors[] = "standards-v21.css is missing Super HD image-rendering or #atg-super-hd-lens GPU convolution filter!";
+// Check 10: Natural crisp image-rendering (no -webkit-optimize-contrast or #atg-super-hd-lens filter distortion)
+if (!str_contains($standardsCssContent, 'image-rendering: auto;') || str_contains($standardsCssContent, 'filter: url(#atg-super-hd-lens)')) {
+    $errors[] = "standards-v21.css should use image-rendering: auto and must not apply #atg-super-hd-lens filter distortion!";
 }
 
 // Check 11: ATG Fluid Per-Slide Aspect Morphing & Saliency Focal Points in post-card.blade.php

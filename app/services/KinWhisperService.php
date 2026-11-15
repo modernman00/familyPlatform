@@ -107,6 +107,14 @@ final class KinWhisperService
                 $db->exec("ALTER TABLE `kin_thread_participants` ADD COLUMN `is_muted` TINYINT(1) NOT NULL DEFAULT 0 AFTER `is_pinned`");
             }
 
+            $db->exec(
+                "CREATE TABLE IF NOT EXISTS `user_presence_settings` (
+                    `user_id` VARCHAR(191) NOT NULL PRIMARY KEY,
+                    `last_seen_privacy` ENUM('everyone', 'nobody') NOT NULL DEFAULT 'everyone',
+                    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+            );
+
             self::$schemaEnsured = true;
         } catch (\Throwable $e) {
             error_log('[KinWhisperService::ensureSchema] ' . $e->getMessage());
@@ -2034,12 +2042,24 @@ final class KinWhisperService
 
         $db = Db::connect2();
         self::ensureSchema($db);
+
+        $stmtThread = $db->prepare('SELECT * FROM kin_threads WHERE id = ? LIMIT 1');
+        $stmtThread->execute([$threadId]);
+        $thread = $stmtThread->fetch(PDO::FETCH_ASSOC);
+        if (!$thread) {
+            throw new NotFoundException('Whisper thread not found.');
+        }
+        self::assertCanAccessThread($currentUserId, $thread);
+
         $stmt = $db->prepare('SELECT is_pinned FROM kin_thread_participants WHERE thread_id = ? AND user_id = ? AND deleted_at IS NULL LIMIT 1');
         $stmt->execute([$threadId, $currentUserId]);
         $val = $stmt->fetchColumn();
 
         if ($val === false) {
-            throw new ForbiddenException('You are not an active participant in this thread.');
+            $role = (strcasecmp($currentUserId, (string)($thread['sender_id'] ?? '')) === 0) ? 'admin' : 'member';
+            $stmtIns = $db->prepare('INSERT IGNORE INTO kin_thread_participants (id, thread_id, user_id, role, joined_at, is_pinned, is_muted) VALUES (?, ?, ?, ?, NOW(), 1, 0)');
+            $stmtIns->execute(['part_' . bin2hex(random_bytes(16)), $threadId, $currentUserId, $role]);
+            return true;
         }
 
         $newVal = ((int)$val === 1) ? 0 : 1;
@@ -2063,12 +2083,24 @@ final class KinWhisperService
 
         $db = Db::connect2();
         self::ensureSchema($db);
+
+        $stmtThread = $db->prepare('SELECT * FROM kin_threads WHERE id = ? LIMIT 1');
+        $stmtThread->execute([$threadId]);
+        $thread = $stmtThread->fetch(PDO::FETCH_ASSOC);
+        if (!$thread) {
+            throw new NotFoundException('Whisper thread not found.');
+        }
+        self::assertCanAccessThread($currentUserId, $thread);
+
         $stmt = $db->prepare('SELECT is_muted FROM kin_thread_participants WHERE thread_id = ? AND user_id = ? AND deleted_at IS NULL LIMIT 1');
         $stmt->execute([$threadId, $currentUserId]);
         $val = $stmt->fetchColumn();
 
         if ($val === false) {
-            throw new ForbiddenException('You are not an active participant in this thread.');
+            $role = (strcasecmp($currentUserId, (string)($thread['sender_id'] ?? '')) === 0) ? 'admin' : 'member';
+            $stmtIns = $db->prepare('INSERT IGNORE INTO kin_thread_participants (id, thread_id, user_id, role, joined_at, is_pinned, is_muted) VALUES (?, ?, ?, ?, NOW(), 0, 1)');
+            $stmtIns->execute(['part_' . bin2hex(random_bytes(16)), $threadId, $currentUserId, $role]);
+            return true;
         }
 
         $newVal = ((int)$val === 1) ? 0 : 1;
@@ -2265,6 +2297,7 @@ final class KinWhisperService
             $stmtParts = $db->prepare('SELECT user_id FROM kin_thread_participants WHERE thread_id = ? AND user_id != ? AND deleted_at IS NULL');
             $stmtParts->execute([$threadId, $currentUserId]);
             $recipientIds = $stmtParts->fetchAll(PDO::FETCH_COLUMN) ?: [];
+            self::storeCallMeta($roomId, $callPayload);
             $channels = array_values(array_map(fn($id) => 'private-user-' . strtolower((string)$id), $recipientIds));
             if (!empty($channels)) {
                 \App\classes\Pusher::trigger($channels, 'kin-call-incoming', $callPayload);
@@ -2283,6 +2316,7 @@ final class KinWhisperService
             $recipientId = (strcasecmp($currentUserId, (string)$thread['sender_id']) === 0)
                 ? (string)$thread['recipient_id']
                 : (string)$thread['sender_id'];
+            self::storeCallMeta($roomId, $callPayload);
             if ($recipientId !== '') {
                 \App\classes\Pusher::trigger('private-user-' . strtolower($recipientId), 'kin-call-incoming', $callPayload);
                 try {
@@ -2326,19 +2360,40 @@ final class KinWhisperService
         $targetUserId = isset($signalData['target_user_id']) ? trim((string)$signalData['target_user_id']) : null;
         $isGroup = ((string)($thread['thread_type'] ?? 'direct')) === 'group';
 
+        $roomId = (string)($thread['active_call_room_id'] ?? '');
         $relayPayload = [
             'thread_id' => $threadId,
             'sender_id' => $currentUserId,
-            'room_id' => (string)($thread['active_call_room_id'] ?? ''),
+            'room_id' => $roomId,
             'signal' => $signalData['signal'] ?? $signalData,
         ];
 
         if ($targetUserId !== null && $targetUserId !== '') {
+            $isValidTarget = false;
+            if ($isGroup) {
+                $stmtTarget = $db->prepare('SELECT 1 FROM kin_thread_participants WHERE thread_id = ? AND user_id = ? AND deleted_at IS NULL LIMIT 1');
+                $stmtTarget->execute([$threadId, $targetUserId]);
+                $isValidTarget = (bool)$stmtTarget->fetchColumn();
+            } else {
+                $isValidTarget = (strcasecmp($targetUserId, (string)$thread['sender_id']) === 0)
+                    || ($thread['recipient_id'] !== null && strcasecmp($targetUserId, (string)$thread['recipient_id']) === 0);
+            }
+            if (!$isValidTarget) {
+                throw new ForbiddenException('Target user is not a participant of this call thread.');
+            }
+            if ($roomId !== '') {
+                self::appendCallSignal($roomId, $targetUserId, $relayPayload);
+            }
             \App\classes\Pusher::trigger('private-user-' . strtolower($targetUserId), 'kin-call-signal', $relayPayload);
         } elseif ($isGroup) {
             $stmtParts = $db->prepare('SELECT user_id FROM kin_thread_participants WHERE thread_id = ? AND user_id != ? AND deleted_at IS NULL');
             $stmtParts->execute([$threadId, $currentUserId]);
             $recipientIds = $stmtParts->fetchAll(PDO::FETCH_COLUMN) ?: [];
+            if ($roomId !== '') {
+                foreach ($recipientIds as $recId) {
+                    self::appendCallSignal($roomId, (string)$recId, $relayPayload);
+                }
+            }
             $channels = array_values(array_map(fn($id) => 'private-user-' . strtolower((string)$id), $recipientIds));
             if (!empty($channels)) {
                 \App\classes\Pusher::trigger($channels, 'kin-call-signal', $relayPayload);
@@ -2348,6 +2403,9 @@ final class KinWhisperService
                 ? (string)$thread['recipient_id']
                 : (string)$thread['sender_id'];
             if ($recipientId !== '') {
+                if ($roomId !== '') {
+                    self::appendCallSignal($roomId, $recipientId, $relayPayload);
+                }
                 \App\classes\Pusher::trigger('private-user-' . strtolower($recipientId), 'kin-call-signal', $relayPayload);
             }
         }
@@ -2378,8 +2436,12 @@ final class KinWhisperService
 
         self::assertCanAccessThread($currentUserId, $thread);
 
+        $previousRoomId = (string)($thread['active_call_room_id'] ?? '');
         $stmtUp = $db->prepare('UPDATE kin_threads SET call_status = "idle", active_call_room_id = NULL WHERE id = ?');
         $stmtUp->execute([$threadId]);
+        if ($previousRoomId !== '') {
+            self::clearCallRoomSignals($previousRoomId);
+        }
 
         $endPayload = [
             'thread_id' => $threadId,
@@ -2417,13 +2479,14 @@ final class KinWhisperService
     }
 
     /**
-     * Get active call info for a thread.
+     * Get active call info and queued WebRTC signals for a thread.
      *
      * @param string $currentUserId
      * @param string $threadId
+     * @param int $afterSeq
      * @return array<string, mixed>
      */
-    public static function getCallInfo(string $currentUserId, string $threadId): array
+    public static function getCallInfo(string $currentUserId, string $threadId, int $afterSeq = 0): array
     {
         $currentUserId = trim($currentUserId);
         $threadId = trim($threadId);
@@ -2439,13 +2502,180 @@ final class KinWhisperService
 
         self::assertCanAccessThread($currentUserId, $thread);
 
+        $roomId = !empty($thread['active_call_room_id']) ? (string)$thread['active_call_room_id'] : null;
+        $callStatus = (string)($thread['call_status'] ?? 'idle');
+        $incomingCall = null;
+        $signals = [];
+
+        if ($roomId !== null && $callStatus !== 'idle') {
+            $meta = self::readCallMeta($roomId);
+            if ($meta !== null && isset($meta['caller_id']) && strcasecmp((string)$meta['caller_id'], $currentUserId) !== 0) {
+                $incomingCall = $meta;
+            }
+            $signals = self::readCallSignals($roomId, $currentUserId, $afterSeq);
+        }
+
         return [
             'thread_id' => $threadId,
-            'call_status' => (string)($thread['call_status'] ?? 'idle'),
-            'active_call_room_id' => !empty($thread['active_call_room_id']) ? (string)$thread['active_call_room_id'] : null,
+            'call_status' => $callStatus,
+            'active_call_room_id' => $roomId,
             'thread_type' => (string)($thread['thread_type'] ?? 'direct'),
             'title' => (string)($thread['title'] ?? ''),
+            'incoming_call' => $incomingCall,
+            'signals' => $signals,
         ];
+    }
+
+    private static function callSignalDir(): string
+    {
+        $dir = rtrim(sys_get_temp_dir(), '/\\') . DIRECTORY_SEPARATOR . 'kw_call_signals';
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0770, true);
+        }
+        return $dir;
+    }
+
+    private static function safeCallToken(string $val): string
+    {
+        return (string)preg_replace('/[^A-Za-z0-9_-]/', '', $val);
+    }
+
+    /**
+     * @param array<string, mixed> $meta
+     */
+    private static function storeCallMeta(string $roomId, array $meta): void
+    {
+        $safeRoom = self::safeCallToken($roomId);
+        if ($safeRoom === '') {
+            return;
+        }
+        $file = self::callSignalDir() . DIRECTORY_SEPARATOR . 'meta_' . $safeRoom . '.json';
+        @file_put_contents($file, json_encode(['ts' => time(), 'meta' => $meta]), LOCK_EX);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private static function readCallMeta(string $roomId): ?array
+    {
+        $safeRoom = self::safeCallToken($roomId);
+        if ($safeRoom === '') {
+            return null;
+        }
+        $file = self::callSignalDir() . DIRECTORY_SEPARATOR . 'meta_' . $safeRoom . '.json';
+        if (!is_file($file)) {
+            return null;
+        }
+        $raw = @file_get_contents($file);
+        if (!is_string($raw) || $raw === '') {
+            return null;
+        }
+        $decoded = json_decode($raw, true);
+        if (!is_array($decoded) || (time() - (int)($decoded['ts'] ?? 0)) > 120) {
+            @unlink($file);
+            return null;
+        }
+        return is_array($decoded['meta'] ?? null) ? $decoded['meta'] : null;
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private static function appendCallSignal(string $roomId, string $recipientId, array $payload): void
+    {
+        $safeRoom = self::safeCallToken($roomId);
+        $safeUser = strtolower(self::safeCallToken($recipientId));
+        if ($safeRoom === '' || $safeUser === '') {
+            return;
+        }
+        $file = self::callSignalDir() . DIRECTORY_SEPARATOR . 'sig_' . $safeRoom . '_' . $safeUser . '.json';
+        $fh = @fopen($file, 'c+');
+        if (!$fh) {
+            return;
+        }
+        try {
+            if (flock($fh, LOCK_EX)) {
+                $content = stream_get_contents($fh);
+                $items = (is_string($content) && $content !== '') ? json_decode($content, true) : [];
+                if (!is_array($items)) {
+                    $items = [];
+                }
+                $now = time();
+                $items = array_values(array_filter($items, fn($it) => is_array($it) && ($now - (int)($it['ts'] ?? 0)) <= 120));
+                $lastSeq = 0;
+                foreach ($items as $it) {
+                    $lastSeq = max($lastSeq, (int)($it['seq'] ?? 0));
+                }
+                $payload['seq'] = $lastSeq + 1;
+                $items[] = ['seq' => $lastSeq + 1, 'ts' => $now, 'payload' => $payload];
+                ftruncate($fh, 0);
+                rewind($fh);
+                fwrite($fh, (string)json_encode($items));
+                fflush($fh);
+                flock($fh, LOCK_UN);
+            }
+        } finally {
+            fclose($fh);
+        }
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private static function readCallSignals(string $roomId, string $recipientId, int $afterSeq): array
+    {
+        $safeRoom = self::safeCallToken($roomId);
+        $safeUser = strtolower(self::safeCallToken($recipientId));
+        if ($safeRoom === '' || $safeUser === '') {
+            return [];
+        }
+        $file = self::callSignalDir() . DIRECTORY_SEPARATOR . 'sig_' . $safeRoom . '_' . $safeUser . '.json';
+        if (!is_file($file)) {
+            return [];
+        }
+        $raw = @file_get_contents($file);
+        if (!is_string($raw) || $raw === '') {
+            return [];
+        }
+        $items = json_decode($raw, true);
+        if (!is_array($items)) {
+            return [];
+        }
+        $now = time();
+        $out = [];
+        foreach ($items as $it) {
+            if (!is_array($it)) {
+                continue;
+            }
+            if (($now - (int)($it['ts'] ?? 0)) > 120) {
+                continue;
+            }
+            $seq = (int)($it['seq'] ?? 0);
+            if ($seq > $afterSeq && is_array($it['payload'] ?? null)) {
+                $out[] = $it['payload'];
+            }
+        }
+        return $out;
+    }
+
+    private static function clearCallRoomSignals(string $roomId): void
+    {
+        $safeRoom = self::safeCallToken($roomId);
+        if ($safeRoom === '') {
+            return;
+        }
+        $dir = self::callSignalDir();
+        $metaFile = $dir . DIRECTORY_SEPARATOR . 'meta_' . $safeRoom . '.json';
+        if (is_file($metaFile)) {
+            @unlink($metaFile);
+        }
+        $pattern = $dir . DIRECTORY_SEPARATOR . 'sig_' . $safeRoom . '_*.json';
+        $files = glob($pattern);
+        if (is_array($files)) {
+            foreach ($files as $f) {
+                @unlink($f);
+            }
+        }
     }
 
     /**
@@ -2830,7 +3060,9 @@ final class KinWhisperService
     public static function getPresencePrivacy(string $userId): string
     {
         try {
-            $stmt = Db::connect2()->prepare('SELECT last_seen_privacy FROM user_presence_settings WHERE user_id = ? LIMIT 1');
+            $db = Db::connect2();
+            self::ensureSchema($db);
+            $stmt = $db->prepare('SELECT last_seen_privacy FROM user_presence_settings WHERE user_id = ? LIMIT 1');
             $stmt->execute([$userId]);
             $value = $stmt->fetchColumn();
 
@@ -2850,7 +3082,9 @@ final class KinWhisperService
         if (!in_array($privacy, ['everyone', 'nobody'], true)) {
             throw new ValidationException('Presence privacy must be "everyone" or "nobody".');
         }
-        $stmt = Db::connect2()->prepare(
+        $db = Db::connect2();
+        self::ensureSchema($db);
+        $stmt = $db->prepare(
             'INSERT INTO user_presence_settings (user_id, last_seen_privacy) VALUES (?, ?)
              ON DUPLICATE KEY UPDATE last_seen_privacy = VALUES(last_seen_privacy)'
         );
@@ -2919,10 +3153,11 @@ final class KinWhisperService
         // 2. Their privacy preferences.
         $hidden = [];
         try {
+            self::ensureSchema($db);
             $stmtPriv = $db->prepare(sprintf('SELECT user_id FROM user_presence_settings WHERE last_seen_privacy = \'nobody\' AND user_id IN (%s)', $marks));
             $stmtPriv->execute($allowed);
             foreach ($stmtPriv->fetchAll(PDO::FETCH_COLUMN) as $hid) {
-                $hidden[(string)$hid] = true;
+                $hidden[strtolower((string)$hid)] = true;
             }
         } catch (\Throwable) {
             $hidden = [];
@@ -2939,16 +3174,17 @@ final class KinWhisperService
         ));
         $stmtBeat->execute($allowed);
         foreach ($stmtBeat->fetchAll(PDO::FETCH_ASSOC) as $b) {
-            $beats[(string)$b['user_id']] = $b;
+            $beats[strtolower((string)$b['user_id'])] = $b;
         }
 
         $presence = [];
         foreach ($allowed as $uid) {
-            if ($myPrivacy === 'nobody' || isset($hidden[$uid])) {
+            $uidKey = strtolower($uid);
+            if ($myPrivacy === 'nobody' || isset($hidden[$uidKey])) {
                 $presence[$uid] = ['is_online' => false, 'last_seen_ts' => null, 'is_hidden' => true];
                 continue;
             }
-            $b = $beats[$uid] ?? null;
+            $b = $beats[$uidKey] ?? null;
             $presence[$uid] = [
                 'is_online'    => $b !== null && (int)$b['online'] === 1,
                 'last_seen_ts' => $b !== null && $b['ts'] !== null ? (int)$b['ts'] : null,

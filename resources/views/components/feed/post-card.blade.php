@@ -677,7 +677,7 @@
             <template x-if="isGifMedia(post.images[0])">
               <img :src="getPostImageUrl(post.images[0])" 
                    class="post-media-first-img living-canvas-img w-100 h-100"
-                   :style="'border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: contain; cursor: pointer; image-rendering: -webkit-optimize-contrast;'" 
+                   :style="'border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: contain; cursor: pointer; image-rendering: auto;'" 
                    alt="Family post GIF" 
                    @load="onSingleImageLoad($event.target)"
                    loading="lazy">
@@ -688,7 +688,7 @@
                 <source :srcset="getPostImageVariantUrl(post.images[0], 'webp')" type="image/webp">
                 <img :src="getPostImageUrl(post.images[0])" 
                      class="post-media-first-img living-canvas-img w-100 h-100"
-                     :style="'border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: cover; object-position: ' + singleFocal + '; cursor: pointer; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;'" 
+                     :style="'border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: cover; object-position: ' + singleFocal + '; cursor: pointer; image-rendering: auto;'" 
                      alt="Family post image" 
                      @load="onSingleImageLoad($event.target)"
                      loading="lazy"
@@ -954,7 +954,7 @@
                       <source :srcset="getPostImageVariantUrl(img, 'webp')" type="image/webp">
                       <img :src="getPostImageUrl(img)" 
                            class="post-media-first-img living-canvas-img w-100 h-100"
-                           :style="'border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: cover; object-position: ' + (slideFocals[idx] || '50% 34%') + '; cursor: pointer; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality;'" 
+                           :style="'border-radius: 12px; width: 100%; height: 100%; max-height: 600px; object-fit: cover; object-position: ' + (slideFocals[idx] || '50% 34%') + '; cursor: pointer; image-rendering: auto;'" 
                            alt="Family carousel slide" 
                            @load="onCarouselImageLoad($event.target, idx)"
                            loading="lazy"
@@ -1103,7 +1103,7 @@
              const track = this.$refs.videoScrollTrack;
              return track ? Array.from(track.querySelectorAll('.multi-video-card')) : [];
            },
-           playCardVideo(idx) {
+           playCardVideo(idx, force = false) {
              const cards = this.getCards();
              const card = cards[idx];
              if (!card) return;
@@ -1114,34 +1114,59 @@
                }
              });
              if (!targetVid) return;
+             if (force) {
+               targetVid._userManuallyPaused = false;
+             } else if (targetVid._userManuallyPaused) {
+               return;
+             }
              targetVid.muted = true;
              targetVid.playsInline = true;
-             targetVid._userManuallyPaused = false;
              const attemptPlay = () => {
+               if (this.activeVidIdx !== idx || targetVid._userManuallyPaused) return;
+               targetVid._autoPlaying = true;
                const p = targetVid.play();
                if (p !== undefined) {
                  p.catch(() => {
                    targetVid.muted = true;
-                   targetVid.play().catch(() => {});
+                   targetVid.play().catch(() => {
+                     if (targetVid.paused) {
+                       targetVid.dispatchEvent(new CustomEvent('buffering-clear'));
+                     }
+                   });
                  });
                }
              };
              if (targetVid.readyState >= 2) {
                attemptPlay();
              } else {
-               const onReady = () => {
-                 targetVid.removeEventListener('loadeddata', onReady);
-                 targetVid.removeEventListener('canplay', onReady);
-                 if (this.activeVidIdx === idx) {
-                   attemptPlay();
-                 }
-               };
-               targetVid.addEventListener('loadeddata', onReady, { once: true });
-               targetVid.addEventListener('canplay', onReady, { once: true });
-               if (targetVid.networkState === 0 || targetVid.readyState === 0) {
+               if (targetVid.preload !== 'auto') {
+                 targetVid.preload = 'auto';
+               }
+               if (!targetVid._awaitingReadyPlay) {
+                 targetVid._awaitingReadyPlay = true;
+                 const onReady = () => {
+                   targetVid._awaitingReadyPlay = false;
+                   targetVid.removeEventListener('loadeddata', onReady);
+                   targetVid.removeEventListener('canplay', onReady);
+                   targetVid.removeEventListener('error', onFail);
+                   if (this.activeVidIdx === idx) {
+                     attemptPlay();
+                   }
+                 };
+                 const onFail = () => {
+                   targetVid._awaitingReadyPlay = false;
+                   targetVid.removeEventListener('loadeddata', onReady);
+                   targetVid.removeEventListener('canplay', onReady);
+                   targetVid.removeEventListener('error', onFail);
+                   targetVid.dispatchEvent(new CustomEvent('buffering-clear'));
+                 };
+                 targetVid.addEventListener('loadeddata', onReady, { once: true });
+                 targetVid.addEventListener('canplay', onReady, { once: true });
+                 targetVid.addEventListener('error', onFail, { once: true });
+               }
+               if (targetVid.networkState === 0 && !targetVid.currentSrc) {
                  try { targetVid.load(); } catch (_) {}
                }
-               attemptPlay();
              }
            },
            scrollToCard(idx, autoPlay = true) {
@@ -1156,10 +1181,10 @@
                const targetLeft = Math.max(0, card.offsetLeft - 4);
                track.scrollTo({ left: targetLeft, behavior: 'smooth' });
                if (autoPlay) {
-                 this.playCardVideo(safeIdx);
+                 this.playCardVideo(safeIdx, true);
                  setTimeout(() => {
                    this._isProgrammaticScroll = false;
-                   this.playCardVideo(safeIdx);
+                   this.playCardVideo(safeIdx, false);
                  }, 420);
                } else {
                  setTimeout(() => {
@@ -1271,10 +1296,28 @@
                  isMuted: true,
                  isPlaying: false,
                  isBuffering: false,
+                 _bufferingTimer: null,
                  hasCardMetadata: false,
                  progressPercent: 0,
                  isCardLandscape: (vid.type !== 'direct'),
                  cardAspect: (vid.type !== 'direct' ? '16 / 9' : '4 / 5'),
+                 setBuffering(val, vEl) {
+                   if (this._bufferingTimer) {
+                     clearTimeout(this._bufferingTimer);
+                     this._bufferingTimer = null;
+                   }
+                   if (val && vEl && (vEl.paused || vEl.ended || vEl.readyState >= 3)) {
+                     this.isBuffering = false;
+                     return;
+                   }
+                   this.isBuffering = !!val;
+                   if (this.isBuffering) {
+                     this._bufferingTimer = setTimeout(() => {
+                       this.isBuffering = false;
+                       this._bufferingTimer = null;
+                     }, 6000);
+                   }
+                 },
                  detectCardDimensions(el) {
                    if (!el) return;
                    requestAnimationFrame(() => {
@@ -1295,6 +1338,7 @@
                  togglePlay(vEl) {
                    if (!vEl) return;
                    if (vEl.paused) {
+                     vEl._userManuallyPaused = false;
                      const track = $el.closest('.multi-video-scroll-track');
                      if (track) {
                        track.querySelectorAll('video').forEach(other => {
@@ -1303,10 +1347,15 @@
                      }
                      vEl.play().then(() => {
                        this.isPlaying = true;
-                     }).catch(() => {});
+                       this.setBuffering(false, vEl);
+                     }).catch(() => {
+                       this.setBuffering(false, vEl);
+                     });
                    } else {
+                     vEl._userManuallyPaused = true;
                      vEl.pause();
                      this.isPlaying = false;
+                     this.setBuffering(false, vEl);
                    }
                  },
                  toggleMute(vEl) {
@@ -1370,17 +1419,23 @@
                        muted
                        preload="metadata"
                        @loadedmetadata="detectCardDimensions($el)"
-                       @loadeddata="hasCardMetadata = true; isBuffering = false; detectCardDimensions($el)"
-                       @waiting="isBuffering = true"
-                       @canplay="isBuffering = false"
-                       @playing="hasCardMetadata = true; isBuffering = false"
-                       x-on:error="if (!$el.dataset.retried && vid.originalUrl && $el.src !== vid.originalUrl && vid.originalUrl.startsWith('http')) { $el.dataset.retried = '1'; $el.src = vid.originalUrl; $el.load(); }"
+                       @loadeddata="hasCardMetadata = true; setBuffering(false, $el); detectCardDimensions($el)"
+                       @waiting="setBuffering(true, $el)"
+                       @canplay="setBuffering(false, $el)"
+                       @canplaythrough="setBuffering(false, $el)"
+                       @playing="hasCardMetadata = true; setBuffering(false, $el)"
+                       @seeked="setBuffering(false, $el)"
+                       @stalled="setBuffering(false, $el)"
+                       @abort="setBuffering(false, $el)"
+                       @emptied="setBuffering(false, $el)"
+                       @buffering-clear="setBuffering(false, $el)"
+                       x-on:error="setBuffering(false, $el); if (!$el.dataset.retried && vid.originalUrl && $el.src !== vid.originalUrl && vid.originalUrl.startsWith('http')) { $el.dataset.retried = '1'; $el.src = vid.originalUrl; $el.load(); }"
                        @click.stop="togglePlay($el)"
                        @dblclick.stop="openVideoModal(post.videos, vIdx, isMuted, post)"
                        @play="isPlaying = true"
-                       @pause="isPlaying = false; isBuffering = false"
-                       @ended="onVideoEnded(vIdx, $el)"
-                       @timeupdate="onTimeUpdate($el)"
+                       @pause="isPlaying = false; setBuffering(false, $el)"
+                       @ended="setBuffering(false, $el); onVideoEnded(vIdx, $el)"
+                       @timeupdate="if (isBuffering && !$el.paused && $el.readyState >= 2) setBuffering(false, $el); onTimeUpdate($el)"
                        style="object-fit: cover !important; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 2; cursor: pointer; border-radius: 12px; background: #0b0f19;">
                   <track kind="captions" srclang="en" label="English Captions">
                 </video>
@@ -1631,10 +1686,15 @@
                  }
                "
                @loadeddata="hasMetadata = true; isBuffering = false; detectVideoDimensions($el)"
-               @waiting="isBuffering = true"
+               @waiting="if (!$el.paused && !$el.ended && $el.readyState < 3) isBuffering = true"
                @canplay="isBuffering = false"
+               @canplaythrough="isBuffering = false"
                @playing="hasMetadata = true; isBuffering = false"
-               x-on:error="if (!$el.dataset.retried && post.video && post.video.originalUrl && $el.src !== post.video.originalUrl && post.video.originalUrl.startsWith('http')) { $el.dataset.retried = '1'; $el.src = post.video.originalUrl; $el.load(); }"
+               @seeked="isBuffering = false"
+               @stalled="isBuffering = false"
+               @abort="isBuffering = false"
+               @emptied="isBuffering = false"
+               x-on:error="isBuffering = false; if (!$el.dataset.retried && post.video && post.video.originalUrl && $el.src !== post.video.originalUrl && post.video.originalUrl.startsWith('http')) { $el.dataset.retried = '1'; $el.src = post.video.originalUrl; $el.load(); }"
                @play="
                  isPlaying = true;
                  const b = getTrimBounds($el);
@@ -1643,7 +1703,7 @@
                  }
                "
                @pause="isPlaying = false; isBuffering = false"
-               @timeupdate="handleTimeUpdate($el)"
+               @timeupdate="if (isBuffering && !$el.paused && $el.readyState >= 2) isBuffering = false; handleTimeUpdate($el)"
                @volumechange="isVideoMuted = $el.muted"
                style="width: 100%; height: 100%; object-fit: cover !important; z-index: 2; border-radius: 16px; cursor: pointer; background: #0b0f19;"></video>
 
@@ -2042,13 +2102,13 @@
         </button>
       </template>
 
-      <!-- FamilyChat about this (Private & supervised thread) -->
+      <!-- FamChat about this (Private & supervised thread) -->
       <a :href="'/kin-whispers?post_no=' + encodeURIComponent(post.post_no || '')"
          class="btn btn-sm rounded-pill d-inline-flex align-items-center gap-1.5 px-3 py-1.5 text-decoration-none ms-1"
          style="background: #f6f1ea; color: #5c4e43; border: 1px solid #ece4da; font-size: 0.78rem; font-weight: 600; min-height: 36px; white-space: nowrap; flex-shrink: 0;"
-         title="FamilyChat about this post privately with family">
+         title="FamChat about this post privately with family">
         <i class="bi bi-lock" style="font-size: 0.82rem; color: #a31621;"></i>
-        <span>FamilyChat about this</span>
+        <span>FamChat about this</span>
       </a>
 
 

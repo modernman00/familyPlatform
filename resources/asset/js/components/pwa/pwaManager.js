@@ -292,10 +292,10 @@ class PWAManager {
     window.__familyPwaInstall = true;
     this.wireAmbientInstallTriggers();
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-      // Prevent standard browser mini-infobar
-      e.preventDefault();
+    const handleNativePrompt = (e) => {
+      if (typeof e.preventDefault === 'function') e.preventDefault();
       this.deferredPrompt = e;
+      window.__deferredInstallPrompt = null;
       this.updateAmbientInstallButtons(true);
 
       // Singleton guard: if another install prompt is already active, suppress
@@ -311,7 +311,13 @@ class PWAManager {
       }
 
       this.showInstallBanner();
-    });
+    };
+
+    if (window.__deferredInstallPrompt) {
+      handleNativePrompt(window.__deferredInstallPrompt);
+    }
+
+    window.addEventListener('beforeinstallprompt', handleNativePrompt);
 
     // Android / Chrome proactive prompt: If beforeinstallprompt hasn't fired yet
     // because of browser heuristic scoring delays, but the user is browsing on mobile,

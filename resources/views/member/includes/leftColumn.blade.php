@@ -152,34 +152,41 @@
                     : 0;
             @endphp
             <div class="w-100 px-2 mb-4" style="margin-bottom:1.5rem !important;" id="leftColumnKinWhispersPortal">
-                <a href="/kin-whispers" class="btn w-100 d-inline-flex align-items-center justify-content-between text-decoration-none position-relative"
-                   style="background: linear-gradient(135deg, rgba(163,22,33,0.08) 0%, rgba(201,162,75,0.12) 100%); border: 1px solid rgba(163,22,33,0.22); border-radius: 12px; padding: 8px 12px; min-height: 44px; white-space: nowrap; flex-shrink: 0;"
+                <a href="/kin-whispers" class="btn w-100 d-inline-flex align-items-center justify-content-between text-decoration-none position-relative shadow-sm"
+                   style="background: linear-gradient(135deg, #8b121c 0%, #a31621 60%, #be202e 100%); color: #ffffff !important; border: 1.5px solid rgba(212, 175, 55, 0.75); border-radius: 12px; padding: 10px 14px; min-height: 44px; white-space: nowrap; flex-shrink: 0; box-shadow: 0 4px 14px rgba(163, 22, 33, 0.28); transition: transform 0.15s ease, box-shadow 0.15s ease;"
                    title="{{ __('nav.whisper', 'FamilyChat — Private, artifact-anchored family messages and voice dedications') }}">
-                    <div class="d-inline-flex align-items-center gap-2 min-w-0 text-truncate">
-                        <span class="whisper-3d-icon d-inline-flex align-items-center justify-content-center text-white flex-shrink-0 position-relative" aria-hidden="true">
-                            <i class="bi bi-chat-dots-fill"></i>
+                    <div class="d-inline-flex align-items-center gap-2 min-w-0">
+                        <span class="d-inline-flex align-items-center justify-content-center flex-shrink-0 position-relative" style="width: 28px; height: 28px; border-radius: 8px; background: rgba(255, 255, 255, 0.16); color: #ffd700;" aria-hidden="true">
+                            <i class="bi bi-chat-dots-fill" style="font-size: 0.95rem;"></i>
                             <span class="whisper-portal-bell-dot position-absolute top-0 end-0 translate-middle p-1 bg-warning border border-light rounded-circle {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="width: 8px; height: 8px;" title="New incoming FamilyChat messages"></span>
                         </span>
-                        <div class="text-start min-w-0 text-truncate">
-                            <div class="d-flex align-items-center gap-1.5">
-                                <span class="fw-bold d-block text-truncate" style="font-size: 0.86rem; color: var(--text-color, #0f172a); line-height: 1.2;">FamilyChat</span>
-                                <i class="bi bi-bell-fill text-warning whisper-portal-bell-icon {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.75rem;" title="Unread FamilyChat messages available"></i>
-                            </div>
-                        </div>
+                        <span class="fw-bold" style="font-size: 0.92rem; color: #ffffff !important; letter-spacing: 0.01em;">FamilyChat</span>
                     </div>
                     <div class="d-inline-flex align-items-center gap-1.5 flex-shrink-0">
-                        <span class="badge rounded-pill bg-danger text-white whisper-portal-unread-badge {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.72rem; padding: 3px 7px; font-weight: 700; box-shadow: 0 2px 5px rgba(220,53,69,0.35);">
+                        <i class="bi bi-bell-fill whisper-portal-bell-icon {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.8rem; color: #ffd700;" title="Unread FamilyChat messages available"></i>
+                        <span class="badge rounded-pill whisper-portal-unread-badge {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="background: #ffd700; color: #1e1b4b; font-size: 0.72rem; padding: 3px 8px; font-weight: 800; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
                             <span class="whisper-portal-unread-count">{{ $leftWhisperUnreadCount > 0 ? $leftWhisperUnreadCount : '' }}</span>
                         </span>
-                        <span class="badge rounded-pill text-white" style="background: #a31621; font-size: 0.68rem; padding: 3px 8px;">
-                            <i class="bi bi-chat-dots-fill me-0.5"></i> FamilyChat
-                        </span>
+                        <i class="bi bi-chevron-right" style="font-size: 0.95rem; color: #fef3c7;" aria-hidden="true"></i>
                     </div>
                 </a>
             </div>
 
-            {{-- Mobile/tablet only: collapsible Quick actions toggle (desktop always shows the buttons) --}}
-            <button type="button" id="profileQuickActionsToggle" class="profile-quick-toggle d-lg-none btn fw-bold w-100 mb-2 d-inline-flex align-items-center justify-content-between" aria-expanded="false" aria-controls="profileQuickActions" onclick="var p=document.getElementById('profileQuickActions');var o=p.classList.toggle('is-open');this.setAttribute('aria-expanded',o?'true':'false');">
+            {{-- Always-available Profile Tour Trigger (visible on all viewports & states) --}}
+            <div class="w-100 px-2 mb-3">
+                <button type="button"
+                        id="profileTourCardBtn"
+                        data-profile-tour-trigger="true"
+                        class="btn btn-surface-action w-100 fw-bold d-inline-flex align-items-center justify-content-center gap-2 shadow-xs"
+                        style="border-radius: 12px; padding: 9px 14px; font-size: 0.9rem; min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0; border: 1.5px solid rgba(163, 22, 33, 0.25);"
+                        title="Take an interactive guided tour of your Profile Page and all its features">
+                    <i class="bi bi-compass-fill" style="color: #a31621;"></i>
+                    <span>{{ __('profile.take_profile_tour', 'Profile Tour') }}</span>
+                </button>
+            </div>
+
+            {{-- Mobile/tablet only: collapsible Quick actions toggle (desktop >=1200px always shows the buttons) --}}
+            <button type="button" id="profileQuickActionsToggle" class="profile-quick-toggle d-xl-none btn fw-bold w-100 mb-2 d-inline-flex align-items-center justify-content-between" aria-expanded="false" aria-controls="profileQuickActions" onclick="var p=document.getElementById('profileQuickActions');var o=p.classList.toggle('is-open');this.setAttribute('aria-expanded',o?'true':'false');">
                 <span><i class="bi bi-lightning-charge-fill me-1.5 text-warning"></i> {{ __('profile.quick_actions', 'Quick actions') }}</span>
                 <i class="bi bi-chevron-down profile-quick-chevron" aria-hidden="true"></i>
             </button>
@@ -238,14 +245,6 @@
                     <i class="bi bi-calendar2-heart-fill me-1.5" style="color: #a31621;"></i> Family Commitments
                 </a>
 
-                <a href="/kin-whispers" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center position-relative" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" title="Whisper — Private artifact messages and 60-second voice dedications">
-                    <i class="bi bi-chat-dots-fill me-1.5" style="color: #a31621;"></i> Whisper
-                    <i class="bi bi-bell-fill text-warning ms-1 whisper-portal-bell-icon {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.75rem;" title="Unread whispers"></i>
-                    <span class="badge rounded-pill bg-danger text-white ms-1.5 whisper-portal-unread-badge {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.68rem; padding: 2px 6px;">
-                        <span class="whisper-portal-unread-count">{{ $leftWhisperUnreadCount > 0 ? $leftWhisperUnreadCount : '' }}</span>
-                    </span>
-                </a>
-
                 <a href="/family/roundtable" class="btn fw-semibold flex-fill text-decoration-none text-center shadow-xs" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #ffffff !important; border: 1.5px solid #d4af37; border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; flex-shrink: 0;">
                     <i class="bi bi-shield-shaded me-1.5 text-warning"></i> Family RoundTable
                 </a>
@@ -273,6 +272,15 @@
                 <a href="/how-to-use" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;">
                     <i class="bi bi-book-half me-1.5" style="color: #0284c7;"></i> {{ __('profile.how_to_use', 'How to Use Guide') }}
                 </a>
+
+                <button type="button"
+                        id="profileTourQuickBtn"
+                        data-profile-tour-trigger="true"
+                        class="btn btn-surface-action fw-semibold flex-fill d-inline-flex align-items-center justify-content-center"
+                        style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;"
+                        title="Take an interactive guided tour of your Profile Page">
+                    <i class="bi bi-compass-fill me-1.5" style="color: #a31621;"></i> {{ __('profile.take_profile_tour', 'Profile Tour') }}
+                </button>
             </div>
             @else
             <div id="profileQuickActions" class="profile-quick-actions d-flex flex-row flex-wrap flex-lg-column gap-2 px-2 w-100">

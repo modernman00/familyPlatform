@@ -37,15 +37,15 @@
 @endphp
 
 <div class="sanctuary-url-pill-wrapper my-2" id="{{ $pillId }}_wrap">
-    <div class="sanctuary-url-pill d-flex align-items-center justify-content-between p-2 rounded-3"
-         style="background: #fdf2f2; border: 1.5px solid rgba(163, 22, 33, 0.22); box-shadow: 0 2px 8px rgba(163, 22, 33, 0.06); transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+    <div class="sanctuary-url-pill d-flex align-items-center justify-content-between gap-2 p-2 rounded-3"
+         style="background: #fdf2f2; border: 1.5px solid rgba(163, 22, 33, 0.22); box-shadow: 0 2px 8px rgba(163, 22, 33, 0.06); transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); max-width: 100%; overflow: hidden;">
         
         <!-- Clickable Action Area: Hides full URL behind Link Icon + Title -->
         <a href="{{ $pillUrl }}" 
            target="{{ $target }}" 
            rel="noopener noreferrer"
-           class="d-flex align-items-center gap-2.5 text-decoration-none text-dark flex-grow-1 min-w-0 px-2 py-1"
-           style="min-height: 44px; touch-action: manipulation; outline: none;"
+           class="d-flex align-items-center gap-2 text-decoration-none text-dark flex-grow-1 min-w-0 px-1 py-1"
+           style="min-width: 0; flex: 1 1 0%; min-height: 44px; touch-action: manipulation; outline: none;"
            title="{{ $pillTitle }}">
             
             <!-- Link Icon -->
@@ -55,19 +55,19 @@
             </div>
 
             <!-- Relevant Title & Clean Subtitle (URL is hidden) -->
-            <div class="d-flex flex-column min-w-0 me-2">
-                <span class="fw-bold text-dark text-truncate" style="font-size: 0.92rem; letter-spacing: -0.01em; line-height: 1.25;">
+            <div class="d-flex flex-column min-w-0 flex-grow-1" style="min-width: 0;">
+                <span class="fw-bold text-dark text-truncate" style="font-size: 0.9rem; letter-spacing: -0.01em; line-height: 1.25;">
                     {{ $pillTitle }}
                 </span>
                 @if($pillSubtitle !== '')
-                    <span class="text-muted small text-truncate" style="font-size: 0.76rem; font-weight: 500;">
+                    <span class="text-muted small text-truncate" style="font-size: 0.75rem; font-weight: 500;">
                         {{ $pillSubtitle }}
                     </span>
                 @endif
             </div>
 
             <!-- External Arrow -->
-            <i class="bi bi-arrow-up-right-circle text-primary ms-auto me-1 opacity-75" style="font-size: 1.05rem;" aria-hidden="true"></i>
+            <i class="bi bi-arrow-up-right-circle text-primary flex-shrink-0 opacity-75" style="font-size: 1.05rem;" aria-hidden="true"></i>
         </a>
 
         @if($showCopy)
@@ -75,8 +75,8 @@
             <button type="button" 
                     id="{{ $pillId }}_copyBtn"
                     data-copy-url="{{ $pillUrl }}"
-                    class="btn btn-sm btn-outline-primary d-inline-flex align-items-center justify-content-center gap-1.5 px-3 rounded-pill fw-semibold shadow-xs flex-shrink-0 ms-1"
-                    style="min-height: 44px; min-width: 44px; font-size: 0.82rem; white-space: nowrap; border-color: rgba(163, 22, 33, 0.35); color: #8a1019;"
+                    class="btn btn-sm btn-outline-primary d-inline-flex align-items-center justify-content-center gap-1 px-3 rounded-pill fw-semibold flex-shrink-0"
+                    style="min-height: 44px; min-width: 44px; font-size: 0.82rem; white-space: nowrap; flex-shrink: 0; border-color: rgba(163, 22, 33, 0.35); color: #8a1019;"
                     aria-label="Copy link to clipboard">
                 <i class="bi bi-clipboard" id="{{ $pillId }}_copyIcon"></i>
                 <span id="{{ $pillId }}_copyText">Copy</span>

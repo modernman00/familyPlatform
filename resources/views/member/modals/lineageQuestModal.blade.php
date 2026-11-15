@@ -229,10 +229,10 @@
                     </div>
                 </div>
                 <div class="d-flex flex-wrap align-items-center gap-2 pt-2 border-top" style="border-color: rgba(0, 0, 0, 0.06) !important;">
-                    <a href="${escapeHtml(quest.whatsapp_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm px-3 py-2 fw-bold text-white shadow-sm flex-fill d-flex align-items-center justify-content-center" style="background: #25D366; border-radius: 10px; font-size: 0.85rem; min-height: 38px;">
+                    <a href="${escapeHtml(quest.whatsapp_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm px-3 py-2 fw-bold text-white shadow-sm flex-fill d-flex align-items-center justify-content-center" style="background: #25D366; border-radius: 10px; font-size: 0.85rem; min-height: 44px; white-space: nowrap;">
                         <i class="bi bi-whatsapp me-2 fs-6"></i> Ask on WhatsApp
                     </a>
-                    <button type="button" class="btn btn-light btn-sm px-3 py-2 border text-secondary fw-semibold flex-fill d-flex align-items-center justify-content-center" style="border-radius: 10px; font-size: 0.85rem; min-height: 38px;" onclick="copyQuestUrl('${escapeHtml(quest.invite_url)}')">
+                    <button type="button" class="btn btn-light btn-sm px-3 py-2 border text-secondary fw-semibold flex-fill d-flex align-items-center justify-content-center" style="border-radius: 10px; font-size: 0.85rem; min-height: 44px; white-space: nowrap;" onclick="copyQuestUrl('${escapeHtml(quest.invite_url)}')">
                         <i class="bi bi-clipboard me-2"></i> Copy Link
                     </button>
                 </div>

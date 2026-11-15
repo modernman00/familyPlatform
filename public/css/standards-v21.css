@@ -1401,27 +1401,53 @@ img.rounded-circle,
   body:has(.pwa-bottom-nav) { padding-bottom: calc(76px + var(--safe-bottom)); }
 }
 
-/* Tablet (iPad portrait & landscape): two columns instead of one long stack */
+/* Tablet (iPad portrait & landscape 768px–1199.98px): Facebook-style spacious single-column centered feed (720px) */
 @media (min-width: 768px) and (max-width: 1199.98px) {
   body .container-main {
-    display: grid;
-    grid-template-columns: minmax(0, 1.75fr) minmax(260px, 1fr);
-    gap: 20px;
-    padding: 20px;
-    align-items: start;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 16px !important;
+    max-width: 760px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 20px 20px calc(84px + env(safe-area-inset-bottom, 0px)) 20px !important;
+  }
+  body .container-main > .mobile-composer-slot {
+    order: 0 !important;
+    width: 100% !important;
+    max-width: 720px !important;
+    margin: 0 !important;
+  }
+  body .container-main > .feed-column {
+    order: 1 !important;
+    width: 100% !important;
+    max-width: 720px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   body .container-main > .profile-column {
-    grid-column: 1 / -1;
-    position: static;
-    max-height: none;
-    overflow: visible;
+    order: 2 !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 720px !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0 !important;
   }
-  body .container-main > .feed-column { grid-column: 1; grid-row: 2; }
   body .container-main > .sidebar-column {
-    grid-column: 2;
-    grid-row: 2;
-    position: sticky;
-    top: calc(80px + env(safe-area-inset-top, 0px));
+    order: 3 !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 720px !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0 !important;
+  }
+  /* Keep Quick Actions tucked behind the Family Hub toggle on iPad so the feed & Reels sit near the top */
+  .profile-quick-actions:not(.is-open) {
+    display: none !important;
   }
   body:has(.pwa-bottom-nav) { padding-bottom: calc(76px + var(--safe-bottom)); }
 }
@@ -1448,7 +1474,8 @@ h1, h2, .hero-title { text-wrap: balance; }
 }
 @media (min-width: 768px) and (max-width: 991.98px) {
   .hero-section .col-lg-6 { text-align: center; }
-  .hero-section .d-flex.flex-sm-row { justify-content: center; }
+  .hero-section .d-flex.flex-sm-row,
+  .hero-section .d-flex.align-items-center.gap-4 { justify-content: center; flex-wrap: wrap; }
 }
 
 /* Auth cards: float with a gutter on phones; brand-coloured native checkboxes/radios */
@@ -1897,13 +1924,33 @@ body.dark-mode #mainNavbar .btn-icon-stitch,
   vertical-align: middle;
 }
 
-/* Small laptops / iPad landscape (992-1199px): tighten the top bar so nothing is pushed off-screen */
+/* Small laptops / iPad landscape (992-1199.98px): compact top bar so all items stay on one row with zero overflow */
 @media (min-width: 992px) and (max-width: 1199.98px) {
-  #mainNavbar .container-fluid { padding-inline: 12px; }
-  #mainNavbar .stitch-nav-link { padding-inline: .45rem !important; font-size: .84rem; }
-  #mainNavbar .stitch-nav-link i { margin-right: .2rem !important; }
-  #mainNavbar .navbar-nav { gap: 0 !important; margin-left: .25rem !important; }
-  #mainNavbar .btn-user-stitch .user-name-label { max-width: 90px; }
+  #mainNavbar .container-fluid { padding-inline: 12px !important; }
+  #mainNavbar .brand-name-family,
+  #mainNavbar .brand-name-platform { font-size: 1.05rem; }
+  #mainNavbar .stitch-nav-link { padding-inline: 0.42rem !important; font-size: 0.8rem; gap: 0.25rem; }
+  #mainNavbar .stitch-nav-link i { margin-right: 0 !important; font-size: 0.85rem; }
+  #mainNavbar .navbar-nav .nav-item:not(.creativeStudioNav) > .stitch-nav-link > .bi {
+    width: 24px;
+    height: 24px;
+    margin-right: 4px !important;
+    font-size: 0.82rem;
+  }
+  #mainNavbar .navbar-nav { gap: 2px !important; margin-left: 0.25rem !important; }
+  #mainNavbar .navbar-actions-group { gap: 6px !important; }
+  #mainNavbar #omniSearchTriggerBtn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 10px !important;
+    justify-content: center;
+  }
+  #mainNavbar #omniSearchTriggerBtn .omni-trigger-text,
+  #mainNavbar #omniSearchTriggerBtn .omni-trigger-kbd { display: none !important; }
+  #mainNavbar .invite-3d-btn { padding-inline: 10px !important; font-size: 0.8rem; min-height: 40px; }
+  #mainNavbar .lang-btn { padding-inline: 10px !important; min-height: 40px; }
+  #mainNavbar .lang-btn .text-uppercase { display: none !important; }
+  #mainNavbar .btn-user-stitch .user-name-label { max-width: 72px; }
 }
 
 /* Centre "Add Photo" bubble follows the CTA colour */
@@ -2014,8 +2061,8 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, 
    Per design.md (v2.1 live specification)
    ========================================================================== */
 
-/* 1. Mobile Feed Layout: Profile Card & Feed (< 992px) */
-@media (max-width: 991.98px) {
+/* 1. Mobile Feed Layout: Profile Card & Feed (< 768px) */
+@media (max-width: 767.98px) {
   /* Left profile column with action buttons displayed prominently on mobile */
   .profile-column {
     display: block !important;
@@ -2028,6 +2075,33 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, 
     overflow: visible !important;
   }
 
+  .container-main {
+    flex-direction: column !important;
+    padding: 8px 4px calc(72px + env(safe-area-inset-bottom, 0px)) 4px !important;
+    max-width: 500px !important;
+    margin: 0 auto !important;
+  }
+
+  .feed-column {
+    order: 2 !important;
+    width: 100% !important;
+    max-width: 480px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+
+  .sidebar-column {
+    order: 3 !important;
+    width: 100% !important;
+    max-width: 480px !important;
+    margin: 16px auto 0 auto !important;
+    position: static !important;
+    max-height: none !important;
+  }
+}
+
+/* Quick actions & reels tray ergonomics for Phone & Tablet (< 1200px) */
+@media (max-width: 1199.98px) {
   /* Quick actions: collapsed by default on mobile/tablet so the feed stays near the top */
   .profile-quick-actions:not(.is-open) {
     display: none !important;
@@ -2082,30 +2156,6 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, 
     .profile-quick-toggle {
       transition: none;
     }
-  }
-
-  .container-main {
-    flex-direction: column !important;
-    padding: 8px 4px calc(72px + env(safe-area-inset-bottom, 0px)) 4px !important;
-    max-width: 500px !important;
-    margin: 0 auto !important;
-  }
-
-  .feed-column {
-    order: 2 !important;
-    width: 100% !important;
-    max-width: 480px !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
-  }
-
-  .sidebar-column {
-    order: 3 !important;
-    width: 100% !important;
-    max-width: 480px !important;
-    margin: 16px auto 0 auto !important;
-    position: static !important;
-    max-height: none !important;
   }
 
   .reels-tray-wrapper {
@@ -2320,8 +2370,8 @@ body.dark-theme .ig-story-count-badge {
   }
 }
 
-/* 4. Desktop Facebook Mirror Styling (> 992px) */
-@media (min-width: 992px) {
+/* 4. Desktop Facebook Mirror Styling (>= 1200px; 768px–1199.98px uses Tablet 2-Column Grid) */
+@media (min-width: 1200px) {
   .container-main {
     display: flex !important;
     gap: 24px !important;
@@ -2892,13 +2942,11 @@ body.dark-theme .family-tooltip-container,
   display: none !important;
 }
 
-/* Super HD Crisp Image Rendering & ATG GPU Convolution Unsharp Lens */
+/* Natural Crisp Image Rendering (no destructive SVG convolution or contrast-biased scaling) */
 .post-media-stage img,
 .post-media-first-img,
 .living-canvas-img {
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: high-quality;
-  filter: url(#atg-super-hd-lens) contrast(1.025) saturate(1.04);
+  image-rendering: auto;
 }
 
 /* Fanciful Glassmorphic Multi-Photo 3-Layer Luxury Stacked Cards Badge */
@@ -3549,24 +3597,14 @@ body.dark-mode .heirloom-reaction-btn.active {
   transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
 }
 
-/* 🌟 Viewport-Activated Living Motion: Only animates when active in viewport */
+/* 🌟 Viewport-Activated Living Motion: Keep 1:1 native sharpness without zoom upscaling */
 .post-media-stage.is-living-active:not(.living-drift-b):not(.living-drift-c) .post-media-first-img,
-.post-media-stage.is-living-active.living-drift-a .post-media-first-img {
-  animation: livingCanvasDriftA 16s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
-}
-
-/* Alternating directional variations for visual richness across feed cards */
-.post-media-stage.is-living-active.living-drift-b .post-media-first-img {
-  animation: livingCanvasDriftB 18s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
-}
-
-.post-media-stage.is-living-active.living-drift-c .post-media-first-img {
-  animation: livingCanvasDriftC 20s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
-}
-
-/* Multi-image Carousel: Active slide inherits the living drift */
+.post-media-stage.is-living-active.living-drift-a .post-media-first-img,
+.post-media-stage.is-living-active.living-drift-b .post-media-first-img,
+.post-media-stage.is-living-active.living-drift-c .post-media-first-img,
 .post-media-stage.is-living-active .carousel-slide-item.is-slide-active .living-canvas-img {
-  animation: livingCanvasDriftA 16s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+  animation: none;
+  transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
 }
 
 /* Ambient Backlight Aura breathes in theatre-grade synchrony with the photo */
@@ -3792,6 +3830,31 @@ video.feed-post-video::-webkit-media-controls-play-button,
   background-color: #334155 !important;
   color: #f8fafc !important; /* > 7:1 WCAG AAA Contrast */
   border: 1px solid #475569 !important;
+}
+
+/* 6. Bootstrap 5 Flex-Shrink & Gap Utilities + Sovereign URL Pill Containment */
+.min-w-0 {
+  min-width: 0 !important;
+}
+.gap-1\.5 {
+  gap: 0.375rem !important;
+}
+.gap-2\.5 {
+  gap: 0.625rem !important;
+}
+.sanctuary-url-pill {
+  max-width: 100%;
+  overflow: hidden;
+  gap: var(--space-2, 8px);
+}
+.sanctuary-url-pill > a {
+  min-width: 0 !important;
+  flex: 1 1 0%;
+  overflow: hidden;
+}
+.sanctuary-url-pill > button {
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
 }
 
 

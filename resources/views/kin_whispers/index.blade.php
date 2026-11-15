@@ -7,27 +7,7 @@
 @section('apple_app_title', 'FamilyChat')
 
 @push('styles')
-<script nonce="{{ csp_nonce($nonce ?? null) }}">
-(function () {
-  try {
-    var q = new URLSearchParams(window.location.search);
-    var src = q.get('source') || '';
-    if (src === 'pwa_whispers' || src === 'pwa_shortcut') {
-      try { sessionStorage.setItem('kw_whispers_standalone', '1'); } catch (e) {}
-    }
-    var isWhispersStandalone = src === 'pwa_whispers' || src === 'pwa_shortcut' ||
-      (function () { try { return sessionStorage.getItem('kw_whispers_standalone') === '1'; } catch (e) { return false; } })();
-    if (q.get('mode') === 'popup' || isWhispersStandalone) {
-      document.documentElement.classList.add('kw-popup');
-    }
-  } catch (e) {}
-})();
-</script>
 <style>
-/* Pop-out / installed-app mode: messenger-only chrome, no feed navigation */
-html.kw-popup #mainNavbar,
-html.kw-popup .kw-hero,
-html.kw-popup .kw-notice { display: none !important; }
 .kw-wrap {
     --kw-primary: #a31621;
     --kw-primary-dark: #7a0e16;
@@ -44,7 +24,7 @@ html.kw-popup .kw-notice { display: none !important; }
     --kw-theirs: #ffffff;
     max-width: 1400px;
     margin: 0 auto;
-    padding: 0 0 80px;
+    padding: 0;
     color: var(--kw-ink);
 }
 .dark-mode .kw-wrap {
@@ -91,8 +71,8 @@ html.kw-popup .kw-notice { display: none !important; }
     border-top: 1px solid var(--kw-line);
     border-bottom: 1px solid var(--kw-line);
     overflow: hidden;
-    height: calc(100vh - 70px);
-    min-height: 620px;
+    height: calc(100dvh - 64px);
+    min-height: 520px;
 }
 .kw-side {
     border-right: 1px solid var(--kw-line); background: var(--kw-card); display: flex; flex-direction: column;
@@ -548,17 +528,17 @@ html.kw-popup .kw-notice { display: none !important; }
 }
 
 .kw-quick-bar {
-    display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; position: relative; z-index: 20;
 }
 .kw-quick-emojis {
-    display: flex; align-items: center; gap: 4px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; flex: 1; min-width: 0;
+    display: flex; align-items: center; gap: 4px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; flex: 1 1 auto; min-width: 0;
 }
 .kw-quick-emojis::-webkit-scrollbar { display: none; }
 .kw-disappear-helper-btn {
-    display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px;
-    border-radius: 999px; background: var(--kw-soft); border: 1px solid var(--kw-line);
-    font-size: .72rem; font-weight: 600; color: var(--kw-muted); cursor: pointer;
-    white-space: nowrap; transition: all .15s ease;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 12px;
+    min-height: 44px; min-width: 44px; border-radius: 999px; background: var(--kw-soft); border: 1px solid var(--kw-line);
+    font-size: .75rem; font-weight: 600; color: var(--kw-muted); cursor: pointer;
+    white-space: nowrap; flex-shrink: 0; transition: all .15s ease;
 }
 .kw-disappear-helper-btn:hover { background: var(--kw-card); color: var(--kw-ink); }
 .kw-disappear-helper-btn.is-active {
@@ -567,9 +547,9 @@ html.kw-popup .kw-notice { display: none !important; }
 .dark-mode .kw-disappear-helper-btn.is-active {
     background: rgba(220,38,38,0.2); border-color: rgba(220,38,38,0.4); color: #fca5a5;
 }
-.kw-disappear-helper-label { font-size: .7rem; font-weight: 600; }
+.kw-disappear-helper-label { font-size: .75rem; font-weight: 600; white-space: nowrap; }
 .kw-quick-bar .kw-disappear-popover {
-    left: auto; right: 0;
+    left: auto; right: 0; z-index: 120;
 }
 
 /* Rich ContentEditable Composer & Inline 3D Emoji */
@@ -782,8 +762,22 @@ html.kw-popup .kw-notice { display: none !important; }
     .kw-shell {
         grid-template-columns: 1fr;
         grid-template-rows: 100%;
-        height: calc(100vh - 118px);
-        min-height: 500px;
+        height: calc(100dvh - 116px - env(safe-area-inset-bottom, 0px));
+        min-height: 0;
+    }
+    .kw-shell[data-pane="chat"] {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+        height: auto;
+        min-height: 0;
+        z-index: 1020;
+        border-top: 0;
+    }
+    body:has(.kw-editable-composer:focus, .kw-composer input:focus, .kw-composer textarea:focus) .kw-shell[data-pane="chat"] {
+        bottom: 0;
     }
     .kw-side { border-right: 0; }
     .kw-shell[data-pane="chat"] .kw-side { display: none; }
@@ -793,15 +787,12 @@ html.kw-popup .kw-notice { display: none !important; }
         width: 44px; height: 44px; min-width: 44px; min-height: 44px;
         padding: 0; margin-right: 0;
     }
-    .kw-install-popup {
-        right: 12px; left: 12px; bottom: calc(82px + env(safe-area-inset-bottom, 0px)); width: auto; max-width: none;
-        max-height: calc(100dvh - 104px); overflow-y: auto; -webkit-overflow-scrolling: touch;
-    }
     .kw-threads { max-height: none; }
     .kw-stream { padding: 12px 14px; min-height: 0; }
     .kw-head {
         padding: 8px 10px;
         gap: 8px;
+        min-height: 58px;
     }
     .kw-head__who {
         gap: 8px;
@@ -828,22 +819,24 @@ html.kw-popup .kw-notice { display: none !important; }
         text-overflow: ellipsis;
     }
     .kw-head__sub {
-        font-size: .72rem;
-        line-height: 1.2;
-        margin: 1px 0 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        font-size: .75rem;
+        line-height: 1.25;
+        margin: 2px 0 0;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
         gap: 4px;
+        flex-wrap: wrap;
     }
     .kw-head__desktop-context {
         display: none !important;
     }
     .kw-presence-text {
-        font-size: .72rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        font-size: .75rem;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+        word-break: break-word;
     }
 
     /* Mobile Composer Ergonomics (Roomy, Never Squeezed) */
@@ -883,7 +876,7 @@ html.kw-popup .kw-notice { display: none !important; }
 /* Presence: online dot & last seen */
 .kw-presence-dot { position: absolute; right: 0; bottom: 0; width: 12px; height: 12px; border-radius: 50%; background: #22c55e; border: 2px solid var(--kw-card); z-index: 2; }
 .kw-avatar-wrap { position: relative; flex-shrink: 0; width: 44px; height: 44px; }
-.kw-presence-text { font-size: .75rem; font-weight: 600; color: var(--kw-muted); white-space: nowrap; }
+.kw-presence-text { font-size: .75rem; font-weight: 600; color: var(--kw-muted); white-space: normal; word-break: break-word; }
 .kw-presence-text.is-online { color: #15803d; }
 .kw-presence-text.is-online::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: #22c55e; vertical-align: baseline; }
 .kw-privacy-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--kw-line); border-radius: 12px; background: var(--kw-soft); }
@@ -1167,20 +1160,6 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
           <p class="kw-side__sub"><i class="bi bi-lock"></i> Private &amp; supervised</p>
         </div>
         <div class="kw-side__actions">
-          <button type="button" class="kw-btn kw-btn--ghost kw-btn--square"
-                  x-show="!isStandaloneApp"
-                  @click="openInstallPopup()"
-                  aria-label="Download FamilyChat app"
-                  title="Download FamilyChat as a linked app">
-            <i class="bi bi-download"></i>
-          </button>
-          <button type="button" class="kw-btn kw-btn--ghost kw-btn--square"
-                  x-show="!isPopupMode && !isStandaloneApp"
-                  @click="popOutWhisperWindow()"
-                  aria-label="Pop out FamilyChat window"
-                  title="Open FamilyChat in a separate pop-out window">
-            <i class="bi bi-box-arrow-up-right"></i>
-          </button>
           <button type="button" class="kw-new-btn" @click="openCompose()" aria-label="New whisper" title="Start a new whisper">
             <i class="bi bi-plus-lg"></i><span>New</span>
           </button>
@@ -1254,6 +1233,14 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
 
     {{-- Conversation --}}
     <div class="kw-main">
+      @if(!empty($access_error))
+      <div class="kw-empty" role="alert" style="max-width:440px;">
+        <div class="kw-empty__icon" style="background:rgba(163,22,33,0.12); color:#a31621;"><i class="bi bi-shield-lock-fill"></i></div>
+        <h3>Conversation Access Blocked</h3>
+        <p>{{ $access_error }}</p>
+        <a href="/kin-whispers" class="kw-btn kw-btn--primary" style="min-height:44px;"><i class="bi bi-arrow-left"></i><span>Return to FamChat</span></a>
+      </div>
+      @endif
       <template x-if="activeThread">
         <div class="kw-conversation">
           <div class="kw-head">
@@ -1302,12 +1289,6 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
               </button>
               <button type="button" class="kw-btn kw-btn--ghost kw-btn--square" @click="openCallModal()" title="Start video or voice call with kin" aria-label="Start call">
                 <i class="bi bi-telephone"></i>
-              </button>
-              <button type="button" class="kw-btn kw-btn--ghost kw-btn--square" x-show="!isStandaloneApp" @click="openInstallPopup()" title="Download FamilyChat as a linked app" aria-label="Download FamilyChat app">
-                <i class="bi bi-download"></i>
-              </button>
-              <button type="button" class="kw-btn kw-btn--ghost kw-btn--square" x-show="!isPopupMode && !isStandaloneApp" @click="popOutWhisperWindow()" title="Pop out FamilyChat into a dedicated window" aria-label="Pop out FamilyChat window">
-                <i class="bi bi-box-arrow-up-right"></i>
               </button>
               <button type="button" class="kw-btn kw-btn--ghost kw-btn--square" @click="openInfoDrawer()" title="Conversation info, shared media & starred whispers" aria-label="Conversation info">
                 <i class="bi bi-info-circle"></i>
@@ -1634,8 +1615,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                         :title="activeDisappearSeconds > 0 ? ('Auto-disappears in ' + disappearLabel(activeDisappearSeconds)) : 'Auto-disappear message timer (Off)'"
                         aria-label="Auto-disappear message timer">
                   <i class="bi bi-clock" :style="activeDisappearSeconds > 0 ? 'color:#dc2626; font-weight:bold;' : ''"></i>
-                  <span x-show="activeDisappearSeconds > 0" class="kw-disappear-pill" x-text="disappearShort(activeDisappearSeconds)"></span>
-                  <span x-show="activeDisappearSeconds === 0" class="kw-disappear-helper-label">Timer</span>
+                  <span class="kw-disappear-helper-label" x-text="activeDisappearSeconds > 0 ? ('Timer · ' + disappearShort(activeDisappearSeconds)) : 'Timer'"></span>
                 </button>
                 <div class="kw-disappear-popover" x-show="showDisappearMenu" @click.outside="showDisappearMenu = false" x-cloak>
                   <div class="kw-disappear-popover__title"><i class="bi bi-stopwatch"></i> Disappearing Message</div>
@@ -1781,6 +1761,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
         </div>
       </template>
 
+      @if(empty($access_error))
       <template x-if="!activeThread">
         <div class="kw-empty">
           <div class="kw-empty__icon"><i class="bi bi-chat-heart"></i></div>
@@ -1789,6 +1770,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
           <button type="button" class="kw-btn kw-btn--primary" @click="openCompose()"><i class="bi bi-plus-lg"></i><span>New whisper</span></button>
         </div>
       </template>
+      @endif
     </div>
 
     {{-- 3rd Pane: Right Details Column (Desktop >= 1100px) --}}
@@ -1863,12 +1845,6 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
               <button type="button" class="kw-details__opt" @click="toggleMuteThread()">
                 <span class="kw-details__opt-left"><i class="bi" :class="activeThread.is_muted ? 'bi-bell-slash' : 'bi-bell'"></i><span x-text="activeThread.is_muted ? 'Unmute notifications' : 'Mute notifications'"></span></span>
               </button>
-              <button type="button" class="kw-details__opt" x-show="!isStandaloneApp" @click="openInstallPopup()">
-                <span class="kw-details__opt-left"><i class="bi bi-download"></i><span>Download linked FamilyChat app</span></span>
-              </button>
-              <button type="button" class="kw-details__opt" x-show="!isPopupMode && !isStandaloneApp" @click="popOutWhisperWindow()">
-                <span class="kw-details__opt-left"><i class="bi bi-box-arrow-up-right"></i><span>Pop out messenger window</span></span>
-              </button>
             </div>
           </div>
 
@@ -1892,7 +1868,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
        @keydown.escape.window="showCompose = false" @click.self="showCompose = false">
     <div class="kw-modal__card" x-trap.noscroll="showCompose">
       <div class="kw-modal__head">
-        <h2 id="kw_modal_title" x-text="composeMode === 'group' ? 'New Family Group Chat' : 'New Direct FamilyChat'"></h2>
+        <h2 id="kw_modal_title" x-text="composeMode === 'group' ? 'New Family Group Chat' : 'New Direct FamChat'"></h2>
         <button type="button" class="kw-btn kw-btn--ghost kw-btn--square" @click="showCompose = false" aria-label="Close"><i class="bi bi-x-lg"></i></button>
       </div>
 
@@ -2428,82 +2404,6 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
       </button>
     </div>
   </div>
-
-  {{-- Dismissible Separate-but-Linked PWA Install & Pop-Out Popup --}}
-  <div id="kwInstallPopup"
-       class="kw-install-popup"
-       x-show="showInstallPopup && !isStandaloneApp"
-       x-cloak
-       role="region"
-       aria-label="Download FamilyChat linked app">
-    <div class="kw-install-popup__head">
-      <div class="kw-install-popup__brand">
-        <div class="kw-install-popup__icon" aria-hidden="true">
-          <i class="bi bi-chat-heart-fill"></i>
-        </div>
-        <div>
-          <h3 class="kw-install-popup__title">Get FamilyChat as a Linked App</h3>
-          <p class="kw-install-popup__sub">Install a dedicated messenger on your home screen or dock while staying connected to your FamilyPlatform account, live alerts and unread counts.</p>
-        </div>
-      </div>
-      <button type="button"
-              class="kw-btn kw-btn--ghost kw-btn--square"
-              @click="dismissInstallPopup()"
-              aria-label="Dismiss install popup"
-              title="Dismiss">
-        <i class="bi bi-x-lg"></i>
-      </button>
-    </div>
-
-    <div>
-      <span class="kw-chip kw-chip--green">
-        <i class="bi bi-link-45deg"></i> Shared login, push alerts &amp; live unread badge sync
-      </span>
-    </div>
-
-    {{-- iOS / iPadOS Safari & iPhone Home Screen Guide --}}
-    <div class="kw-install-popup__guide" x-show="isIosSafari || isIosDevice || showIosInstallGuide" x-cloak>
-      <strong><i class="bi bi-apple"></i> iPhone &amp; iPad (Share &rarr; Add to Home Screen):</strong>
-      <p x-show="isHostStandalone" x-cloak style="margin:6px 0 6px; font-size:0.78rem; color:var(--kw-primary); font-weight:600;">
-        You are currently inside the main FamilyPlatform app. To add a separate <strong>FamilyChat</strong> icon on your iPhone Home Screen, copy the link below and open it in Safari:
-      </p>
-      <ol>
-        <li>Tap the <strong>Share</strong> button (<i class="bi bi-box-arrow-up"></i>) in your iPhone browser toolbar.</li>
-        <li>Choose <strong>Add to Home Screen</strong> (<i class="bi bi-plus-square"></i>) from the menu.</li>
-        <li>Tap <strong>Add</strong> to launch <strong>FamilyChat</strong> as its own linked app.</li>
-      </ol>
-    </div>
-
-    {{-- Desktop / Browser Menu Fallback Guide when native beforeinstallprompt is not active --}}
-    <div class="kw-install-popup__guide" x-show="showBrowserInstallGuide && !isIosSafari && !isIosDevice" x-cloak>
-      <strong><i class="bi bi-laptop"></i> Install or Pop Out FamilyChat:</strong>
-      <p style="margin:4px 0 0;">Click the <strong>Install</strong> icon in your browser's address bar (or open your browser menu <strong>⋮ &rarr; Install FamilyChat / Add to Home Screen</strong>), or use <strong>Pop Out Window</strong> below for an instant standalone messenger window.</p>
-    </div>
-
-    <div class="kw-install-popup__actions">
-      <button type="button"
-              class="kw-btn kw-btn--primary"
-              @click="installWhispersApp()">
-        <i class="bi" :class="(isIosSafari || isIosDevice) ? 'bi-phone' : 'bi-download'"></i>
-        <span x-text="isHostStandalone ? 'Copy Link for Safari' : ((isIosSafari || isIosDevice) ? 'Share → Add to Home Screen' : 'Install FamilyChat App')"></span>
-      </button>
-      <button type="button"
-              class="kw-btn kw-btn--ghost"
-              x-show="!isPopupMode"
-              @click="popOutWhisperWindow()">
-        <i class="bi bi-box-arrow-up-right"></i>
-        <span x-text="isIosDevice ? 'Full-Screen Mode' : 'Pop Out Window'"></span>
-      </button>
-      <button type="button"
-              class="kw-btn kw-btn--ghost"
-              x-show="!isIosSafari && !isIosDevice"
-              @click="showIosInstallGuide = !showIosInstallGuide"
-              style="padding: 0 14px; font-size: 0.78rem; min-height: 44px;">
-        <i class="bi bi-phone"></i>
-        <span x-text="showIosInstallGuide ? 'Hide iOS Guide' : 'iOS Guide'"></span>
-      </button>
-    </div>
-  </div>
 </div>
 @endsection
 
@@ -2548,7 +2448,7 @@ function kinWhisperApp() {
     messages: @json($messages ?? []),
     threadCache: {},
     kin: @json($kin ?? []),
-    pane: @json(!empty($selected_thread) && !empty($_GET['thread_id']) ? 'chat' : 'list'),
+    pane: @json((!empty($selected_thread) || !empty($access_error)) && !empty($_GET['thread_id']) ? 'chat' : 'list'),
     searchQuery: '',
     threadFilter: 'all',
     newMessageBody: '',
@@ -2558,34 +2458,9 @@ function kinWhisperApp() {
     newGroupTitle: '',
     selectedGroupMembers: [],
     showCallModal: false,
-    isPopupMode: document.documentElement.classList.contains('kw-popup'),
-    isStandaloneApp: Boolean(
-      new URLSearchParams(window.location.search).get('source') === 'pwa_whispers' ||
-      new URLSearchParams(window.location.search).get('source') === 'pwa_shortcut' ||
-      (function () { try { return sessionStorage.getItem('kw_whispers_standalone') === '1'; } catch (e) { return false; } })()
-    ),
-    isHostStandalone: Boolean(
-      ((window.navigator && window.navigator.standalone === true) ||
-       (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)) &&
-      new URLSearchParams(window.location.search).get('source') !== 'pwa_whispers' &&
-      new URLSearchParams(window.location.search).get('source') !== 'pwa_shortcut' &&
-      !(function () { try { return sessionStorage.getItem('kw_whispers_standalone') === '1'; } catch (e) { return false; } })()
-    ),
-    isIosDevice: Boolean(
-      typeof navigator !== 'undefined' &&
-      (/iphone|ipad|ipod/i.test(navigator.userAgent || '') || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
-    ),
-    isIosSafari: Boolean(
-      typeof navigator !== 'undefined' &&
-      (/iphone|ipad|ipod/i.test(navigator.userAgent || '') || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) &&
-      /safari/i.test(navigator.userAgent || '') &&
-      !/crios|fxios|opios|edgios/i.test(navigator.userAgent || '')
-    ),
-    canInstall: false,
-    installPromptEvent: null,
-    showInstallPopup: false,
-    showIosInstallGuide: false,
-    showBrowserInstallGuide: false,
+    callSignalPoller: null,
+    lastCallSignalSeq: 0,
+    seenCallSignalSeqs: {},
     lastWhisperChimeAt: 0,
     syncBroadcastChannel: null,
     showGroupRosterModal: false,
@@ -2621,6 +2496,7 @@ function kinWhisperApp() {
     candidateFlushTimer: null,
     pendingOffer: null,
     pendingOfferSenderId: null,
+    pendingOfferRoomId: null,
     pendingCandidates: [],
     isInCall: false,
     isCallRinging: false,
@@ -2628,6 +2504,7 @@ function kinWhisperApp() {
     activeActionMsgId: null,
     callType: 'video',
     callRoomId: null,
+    activeCallThreadId: null,
     callPartnerName: '',
     callDurationSeconds: 0,
     callDurationTimer: null,
@@ -2642,6 +2519,10 @@ function kinWhisperApp() {
     ringtoneInterval: null,
     pusher: null,
     userChannel: null,
+    sseSource: null,
+    seenCallRoomIds: {},
+    iceRestarted: false,
+    iceServers: @json($ice_servers ?? [['urls' => ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun.cloudflare.com:3478']]]),
     isRecording: false,
     mediaRecorder: null,
     audioChunks: [],
@@ -2703,7 +2584,7 @@ function kinWhisperApp() {
     pollTimer: null,
     countdownTimer: null,
     presence: {},
-    myPresencePrivacy: @json($presencePrivacy ?? 'everyone'),
+    myPresencePrivacy: @json($presence_privacy ?? 'everyone'),
     savingPresencePrivacy: false,
     presenceTimer: null,
 
@@ -2735,6 +2616,35 @@ function kinWhisperApp() {
         this.fetchThreadEvents();
         this.loadThreadMedia();
         window.dispatchEvent(new CustomEvent('kin-whispers:read'));
+      }
+      if (typeof window !== 'undefined') {
+        const unlockAudio = () => {
+          try {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (Ctx) {
+              const ctx = new Ctx();
+              if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+              setTimeout(() => { try { ctx.close(); } catch (_) {} }, 100);
+            }
+          } catch (_) {}
+          window.removeEventListener('pointerdown', unlockAudio);
+          window.removeEventListener('keydown', unlockAudio);
+        };
+        window.addEventListener('pointerdown', unlockAudio, { once: true });
+        window.addEventListener('keydown', unlockAudio, { once: true });
+
+        window.addEventListener('pagehide', () => {
+          const tId = this.activeCallThreadId || (this.incomingCall ? this.incomingCall.thread_id : null);
+          if ((this.isInCall || this.incomingCall) && tId) {
+            try {
+              fetch('/api/kin-whispers/threads/' + encodeURIComponent(tId) + '/call/end', {
+                method: 'POST',
+                headers: jsonHeaders(),
+                keepalive: true
+              }).catch(() => {});
+            } catch (_) {}
+          }
+        });
       }
     },
 
@@ -3407,18 +3317,21 @@ function kinWhisperApp() {
           method: 'POST',
           headers: jsonHeaders()
         });
-        const data = await res.json();
-        if (data.success) {
-          this.activeThread.is_pinned = data.is_pinned;
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.success) {
+          this.activeThread.is_pinned = Boolean(data.is_pinned);
           const idx = this.threads.findIndex(t => t.id === this.activeThread.id);
           if (idx > -1) {
-            this.threads[idx].is_pinned = data.is_pinned;
+            this.threads[idx].is_pinned = Boolean(data.is_pinned);
             this.sortThreads();
           }
           this.toast(data.is_pinned ? 'Conversation pinned to top.' : 'Conversation unpinned.');
+        } else {
+          this.toast(data.error || 'Could not update pin status.');
         }
       } catch (e) {
         console.warn('Pin toggle error', e);
+        this.toast('Could not update pin status.');
       }
     },
 
@@ -3429,17 +3342,20 @@ function kinWhisperApp() {
           method: 'POST',
           headers: jsonHeaders()
         });
-        const data = await res.json();
-        if (data.success) {
-          this.activeThread.is_muted = data.is_muted;
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.success) {
+          this.activeThread.is_muted = Boolean(data.is_muted);
           const idx = this.threads.findIndex(t => t.id === this.activeThread.id);
           if (idx > -1) {
-            this.threads[idx].is_muted = data.is_muted;
+            this.threads[idx].is_muted = Boolean(data.is_muted);
           }
           this.toast(data.is_muted ? 'Notifications muted for this conversation.' : 'Notifications unmuted.');
+        } else {
+          this.toast(data.error || 'Could not update mute status.');
         }
       } catch (e) {
         console.warn('Mute toggle error', e);
+        this.toast('Could not update mute status.');
       }
     },
 
@@ -3575,10 +3491,11 @@ function kinWhisperApp() {
             const prevUnread = prevMap[String(t.id)] || 0;
             if (nextUnread > prevUnread && !t.is_muted) {
               this.playWhisperChime();
-              if (typeof window.showFamilyChatPopup === 'function') {
-                window.showFamilyChatPopup({
-                  title: this.partnerName(t) || 'New FamilyChat Message',
-                  body: t.last_message_preview || 'Sent you a message in FamilyChat',
+              const notifyFn = window.showFamChatPopup || window.showFamilyChatPopup;
+              if (typeof notifyFn === 'function') {
+                notifyFn({
+                  title: this.partnerName(t) || 'New FamChat Message',
+                  body: t.last_message_preview || 'Sent you a message in FamChat',
                   thread_id: t.id,
                   category: 'kin_whisper',
                   tag: 'whisper_' + t.id,
@@ -3586,6 +3503,27 @@ function kinWhisperApp() {
                 });
               }
               break;
+            }
+          }
+          if (!this.isInCall && !this.incomingCall) {
+            const ringingThread = data.threads.find(t => t.call_status === 'ringing' && t.active_call_room_id && !this.seenCallRoomIds[t.active_call_room_id]);
+            if (ringingThread) {
+              try {
+                const callRes = await fetch('/api/kin-whispers/threads/' + encodeURIComponent(ringingThread.id) + '/call/info', {
+                  headers: { 'Accept': 'application/json' }
+                });
+                if (callRes.ok) {
+                  const info = await callRes.json();
+                  if (info && info.success && info.call && info.call.call_status === 'ringing' && info.call.incoming_call) {
+                    this.handleIncomingCallEvent(info.call.incoming_call);
+                    if (Array.isArray(info.call.signals)) {
+                      for (const sig of info.call.signals) {
+                        await this.handleCallSignalEvent(sig);
+                      }
+                    }
+                  }
+                }
+              } catch (_) {}
             }
           }
         }
@@ -3626,6 +3564,18 @@ function kinWhisperApp() {
             this.activeThread.share_status = data.thread.share_status;
             this.activeThread.share_requested_by = data.thread.share_requested_by;
             this.activeThread.share_approved_by = data.thread.share_approved_by;
+            if (data.thread.call_status === 'ringing' && !this.isInCall && !this.incomingCall) {
+              fetch('/api/kin-whispers/threads/' + encodeURIComponent(pollingThreadId) + '/call/info', {
+                headers: { 'Accept': 'application/json' }
+              }).then(r => r.ok ? r.json() : null).then(info => {
+                if (info && info.success && info.call && info.call.incoming_call) {
+                  this.handleIncomingCallEvent(info.call.incoming_call);
+                  if (Array.isArray(info.call.signals)) {
+                    info.call.signals.forEach(s => this.handleCallSignalEvent(s));
+                  }
+                }
+              }).catch(() => {});
+            }
           }
           if (hadNewMessages) {
             this.scrollToBottom();
@@ -3741,9 +3691,12 @@ function kinWhisperApp() {
           headers: jsonHeaders(),
           body: JSON.stringify({ last_seen_privacy: next })
         });
-        const data = await res.json();
-        if (data.success) {
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.success) {
           this.myPresencePrivacy = data.last_seen_privacy;
+          if (this.myPresencePrivacy === 'nobody') {
+            this.presence = {};
+          }
           this.toast(next === 'everyone' ? 'Online status and last seen are now visible to your kin.' : 'Online status and last seen are now hidden.');
           this.syncPresence();
         } else {
@@ -4301,7 +4254,7 @@ function kinWhisperApp() {
         const data = await res.json();
         if (data.success && data.event && !data.throttled) {
           this.threadEvents.push(data.event);
-          this.toast('📸 Screenshot recorded by FamilyChat and notified to ' + this.partnerName(this.activeThread) + '.');
+          this.toast('📸 Screenshot recorded by FamChat and notified to ' + this.partnerName(this.activeThread) + '.');
         }
       } catch (e) {
         console.warn('Screenshot audit log error', e);
@@ -4401,29 +4354,6 @@ function kinWhisperApp() {
       return (kinObj && kinObj.mobile) ? kinObj.mobile : null;
     },
 
-    popOutWhisperWindow() {
-      if (this.isIosDevice) {
-        document.documentElement.classList.toggle('kw-popup');
-        this.isPopupMode = document.documentElement.classList.contains('kw-popup');
-        this.showInstallPopup = false;
-        this.toast(this.isPopupMode ? 'Full-screen FamilyChat messenger enabled.' : 'Standard FamilyChat view restored.');
-        return;
-      }
-      const threadPart = this.activeThread ? '&thread_id=' + encodeURIComponent(this.activeThread.id) : '';
-      const win = window.open(
-        '/kin-whispers?mode=popup' + threadPart,
-        'KinWhispersPopup',
-        'popup=yes,width=440,height=760,menubar=no,toolbar=no,location=no,status=no'
-      );
-      if (!win) {
-        document.documentElement.classList.add('kw-popup');
-        this.isPopupMode = true;
-        this.toast('Full-screen FamilyChat mode enabled (pop-up windows are blocked in your browser).');
-        return;
-      }
-      win.focus();
-    },
-
     syncActiveWhisperThreadId() {
       const isMobileList = (typeof window !== 'undefined' && window.innerWidth < 768 && this.pane === 'list');
       window.__activeWhisperThreadId = (!isMobileList && this.activeThread && this.activeThread.id)
@@ -4435,40 +4365,6 @@ function kinWhisperApp() {
       this.syncActiveWhisperThreadId();
       this.$watch('activeThread', () => this.syncActiveWhisperThreadId());
       this.$watch('pane', () => this.syncActiveWhisperThreadId());
-
-      let dismissed = false;
-      try {
-        const dismissedAt = parseInt(localStorage.getItem('kw_familychat_install_dismissed_at') || '0', 10);
-        if (dismissedAt > 0 && (Date.now() - dismissedAt) < 24 * 60 * 60 * 1000) {
-          dismissed = true;
-        } else {
-          localStorage.removeItem('kw_install_popup_dismissed');
-          localStorage.removeItem('kw_familychat_install_dismissed_at');
-        }
-      } catch (e) {}
-
-      if (!this.isStandaloneApp && !this.isPopupMode && !dismissed) {
-        this.showInstallPopup = true;
-        if (this.isIosSafari || this.isIosDevice) {
-          this.showIosInstallGuide = true;
-        }
-      }
-
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        this.installPromptEvent = e;
-        this.canInstall = true;
-        if (!this.isStandaloneApp && !dismissed) {
-          this.showInstallPopup = true;
-        }
-      });
-      window.addEventListener('appinstalled', () => {
-        this.installPromptEvent = null;
-        this.canInstall = false;
-        this.isStandaloneApp = true;
-        this.showInstallPopup = false;
-        this.toast('FamilyChat installed. Look for it on your home screen or dock.');
-      });
       this.$watch('threads', () => this.updateAppBadge());
       this.updateAppBadge();
 
@@ -4514,57 +4410,6 @@ function kinWhisperApp() {
 
       const params = new URLSearchParams(window.location.search);
       if (params.get('compose') === '1') this.openCompose();
-    },
-
-    openInstallPopup() {
-      this.showInstallPopup = true;
-      if (this.isIosSafari || this.isIosDevice) {
-        this.showIosInstallGuide = true;
-      }
-    },
-
-    dismissInstallPopup() {
-      this.showInstallPopup = false;
-      this.showIosInstallGuide = false;
-      this.showBrowserInstallGuide = false;
-      try {
-        localStorage.setItem('kw_install_popup_dismissed', '1');
-        localStorage.setItem('kw_familychat_install_dismissed_at', String(Date.now()));
-      } catch (e) {}
-    },
-
-    async installWhispersApp() {
-      this.showInstallPopup = true;
-      if (this.isHostStandalone) {
-        const installUrl = window.location.origin + '/kin-whispers';
-        try {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(installUrl);
-          }
-        } catch (e) {}
-        this.showIosInstallGuide = true;
-        this.toast('FamilyChat link copied! Paste it in Safari and tap Share → Add to Home Screen.');
-        return;
-      }
-      if (this.isIosSafari || this.isIosDevice) {
-        this.showIosInstallGuide = true;
-        this.toast('Tap the Share button in your iPhone browser toolbar and choose "Add to Home Screen".');
-        return;
-      }
-      if (!this.installPromptEvent) {
-        this.showBrowserInstallGuide = true;
-        this.toast('Use your browser menu and choose "Install app" or "Add to Home Screen", or click Pop Out Window.');
-        return;
-      }
-      this.installPromptEvent.prompt();
-      try {
-        const choice = await this.installPromptEvent.userChoice;
-        if (choice && choice.outcome === 'accepted') {
-          this.showInstallPopup = false;
-        }
-      } catch (e) {}
-      this.installPromptEvent = null;
-      this.canInstall = false;
     },
 
     shouldChimeForThread(threadId, senderId) {
@@ -4640,6 +4485,9 @@ function kinWhisperApp() {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         if (!AudioContext) return;
         this.audioCtx = new AudioContext();
+        if (this.audioCtx.state === 'suspended') {
+          this.audioCtx.resume().catch(() => {});
+        }
         const playBeep = () => {
           if (!this.audioCtx || this.audioCtx.state === 'closed') return;
           const osc1 = this.audioCtx.createOscillator();
@@ -4743,17 +4591,20 @@ function kinWhisperApp() {
       if (this.peerConnection) {
         try { this.peerConnection.close(); } catch (e) {}
       }
+      this.iceRestarted = false;
 
-      const pc = new RTCPeerConnection({
-        iceServers: [
-          { urls: [
+      const servers = (Array.isArray(this.iceServers) && this.iceServers.length > 0)
+        ? this.iceServers
+        : [{ urls: [
             'stun:stun.l.google.com:19302',
             'stun:stun1.l.google.com:19302',
             'stun:stun2.l.google.com:19302',
             'stun:stun.cloudflare.com:3478',
             'stun:global.stun.twilio.com:3478'
-          ] }
-        ]
+          ] }];
+
+      const pc = new RTCPeerConnection({
+        iceServers: servers
       });
 
       if (this.localStream) {
@@ -4763,7 +4614,13 @@ function kinWhisperApp() {
       }
 
       pc.ontrack = (event) => {
-        const stream = (event.streams && event.streams[0]) ? event.streams[0] : new MediaStream([event.track]);
+        let stream = (event.streams && event.streams[0]) ? event.streams[0] : null;
+        if (!stream) {
+          stream = this.remoteStream instanceof MediaStream ? this.remoteStream : new MediaStream();
+          if (event.track && !stream.getTracks().some(t => t.id === event.track.id)) {
+            stream.addTrack(event.track);
+          }
+        }
         this.attachRemoteStream(stream);
         if (event.track) {
           event.track.onunmute = () => {
@@ -4780,7 +4637,13 @@ function kinWhisperApp() {
         const iState = pc.iceConnectionState;
         if (cState === 'connected' || iState === 'connected' || iState === 'completed') {
           this.markCallConnected();
-        } else if (cState === 'disconnected' || cState === 'failed' || iState === 'disconnected' || iState === 'failed' || cState === 'connecting' || iState === 'checking') {
+        } else if ((cState === 'failed' || iState === 'failed') && !this.iceRestarted && typeof pc.restartIce === 'function') {
+          this.iceRestarted = true;
+          try { pc.restartIce(); } catch (e) {}
+          if (this.callConnectionState !== 'connected') {
+            this.callConnectionState = 'connecting';
+          }
+        } else if ((cState === 'failed' || iState === 'failed' || (cState === 'disconnected' && iState === 'disconnected')) && this.callConnectionState !== 'connected') {
           this.callConnectionState = 'connecting';
         }
       };
@@ -4805,6 +4668,7 @@ function kinWhisperApp() {
 
       this.callType = type;
       this.callPartnerName = this.partnerName(this.activeThread);
+      this.activeCallThreadId = this.activeThread.id;
       this.isInCall = true;
       this.isCallRinging = true;
       this.callConnectionState = 'connecting';
@@ -4813,14 +4677,24 @@ function kinWhisperApp() {
       this.isCameraOff = false;
       this.pendingOffer = null;
       this.pendingOfferSenderId = null;
+      this.pendingOfferRoomId = null;
       this.pendingCandidates = [];
 
       let stream;
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
+        const constraints = {
           audio: true,
-          video: type === 'video'
-        });
+          video: type === 'video' ? { facingMode: 'user' } : false
+        };
+        try {
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (constraintErr) {
+          if (type === 'video' && constraintErr && constraintErr.name === 'OverconstrainedError') {
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+          } else {
+            throw constraintErr;
+          }
+        }
       } catch (mediaErr) {
         this.toast(this.formatMediaError(mediaErr, type));
         this.endCall();
@@ -4879,6 +4753,8 @@ function kinWhisperApp() {
           console.warn('Initial call signal returned HTTP', sigRes.status);
         }
 
+        this.startCallSignalPoller(this.activeThread.id);
+
         if (this.callRingingTimer) clearTimeout(this.callRingingTimer);
         this.callRingingTimer = setTimeout(() => {
           if (this.isInCall && this.callConnectionState !== 'connected') {
@@ -4902,6 +4778,7 @@ function kinWhisperApp() {
       this.callType = callData.call_type || 'video';
       this.callPartnerName = callData.caller_name || 'Family Kin';
       this.callRoomId = callData.room_id;
+      this.activeCallThreadId = callData.thread_id;
       this.isInCall = true;
       this.isCallRinging = false;
       this.callConnectionState = 'connecting';
@@ -4914,10 +4791,19 @@ function kinWhisperApp() {
 
       let stream;
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
+        const constraints = {
           audio: true,
-          video: this.callType === 'video'
-        });
+          video: this.callType === 'video' ? { facingMode: 'user' } : false
+        };
+        try {
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (constraintErr) {
+          if (this.callType === 'video' && constraintErr && constraintErr.name === 'OverconstrainedError') {
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+          } else {
+            throw constraintErr;
+          }
+        }
       } catch (e) {
         this.toast(this.formatMediaError(e, this.callType));
         this.endCall();
@@ -4937,6 +4823,8 @@ function kinWhisperApp() {
         this.selectThread(targetThread);
       }
 
+      this.startCallSignalPoller(callData.thread_id);
+
       if (this.pendingOffer) {
         try {
           await pc.setRemoteDescription(new RTCSessionDescription(this.pendingOffer));
@@ -4944,11 +4832,14 @@ function kinWhisperApp() {
           await pc.setLocalDescription(answer);
 
           const senderId = this.pendingOfferSenderId || callData.caller_id;
-          fetch('/api/kin-whispers/threads/' + encodeURIComponent(callData.thread_id) + '/call/signal', {
+          const ansRes = await fetch('/api/kin-whispers/threads/' + encodeURIComponent(callData.thread_id) + '/call/signal', {
             method: 'POST',
             headers: jsonHeaders(),
             body: JSON.stringify({ target_user_id: senderId, signal: { sdp: answer } })
           });
+          if (!ansRes.ok) {
+            console.warn('Call answer signal returned HTTP', ansRes.status);
+          }
 
           this.pendingOffer = null;
           this.pendingOfferSenderId = null;
@@ -4975,6 +4866,7 @@ function kinWhisperApp() {
       this.stopRingtone();
       this.pendingOffer = null;
       this.pendingOfferSenderId = null;
+      this.pendingOfferRoomId = null;
       this.pendingCandidates = [];
       if (this.incomingCall) {
         fetch('/api/kin-whispers/threads/' + encodeURIComponent(this.incomingCall.thread_id) + '/call/end', {
@@ -5019,14 +4911,16 @@ function kinWhisperApp() {
       }
     },
 
-    endCall() {
+    endCall(notifyServer = true) {
       this.stopRingtone();
+      this.stopCallSignalPoller();
       if (this.callRingingTimer) {
         clearTimeout(this.callRingingTimer);
         this.callRingingTimer = null;
       }
       this.pendingOffer = null;
       this.pendingOfferSenderId = null;
+      this.pendingOfferRoomId = null;
       this.pendingCandidates = [];
       if (this.candidateFlushTimer) {
         clearTimeout(this.candidateFlushTimer);
@@ -5070,16 +4964,19 @@ function kinWhisperApp() {
         localVid.srcObject = null;
       }
 
-      if (this.activeThread) {
-        fetch('/api/kin-whispers/threads/' + encodeURIComponent(this.activeThread.id) + '/call/end', {
+      const targetThreadId = this.activeCallThreadId || (this.incomingCall ? this.incomingCall.thread_id : null) || (this.activeThread ? this.activeThread.id : null);
+      if (notifyServer && targetThreadId) {
+        fetch('/api/kin-whispers/threads/' + encodeURIComponent(targetThreadId) + '/call/end', {
           method: 'POST',
           headers: jsonHeaders()
-        });
+        }).catch(() => {});
       }
       this.isInCall = false;
       this.isCallRinging = false;
       this.callConnectionState = 'connecting';
       this.callDurationSeconds = 0;
+      this.callRoomId = null;
+      this.activeCallThreadId = null;
       this.incomingCall = null;
     },
 
@@ -5130,10 +5027,285 @@ function kinWhisperApp() {
       }
     },
 
-    initPusher() {
+    handleIncomingWhisperEvent(data) {
+      if (data && data.thread_id) {
+        if (this.shouldChimeForThread(data.thread_id, data.sender_id)) {
+          this.playWhisperChime();
+        }
+        if (this.isActivelyViewingThread(data.thread_id)) {
+          this.pollUpdates();
+        } else {
+          const t = this.threads.find(x => String(x.id) === String(data.thread_id));
+          if (t) {
+            t.unread_count = (parseInt(t.unread_count, 10) || 0) + 1;
+            if (data.preview || data.body) t.last_message_preview = data.preview || data.body;
+          } else {
+            this.pollThreadListOnly();
+          }
+          const notifyFn = window.showFamChatPopup || window.showFamilyChatPopup;
+          if (this.shouldChimeForThread(data.thread_id, data.sender_id) && typeof notifyFn === 'function') {
+            notifyFn({
+              title: (data.sender_name || (t ? this.partnerName(t) : '')) || 'New FamChat Message',
+              body: data.preview || data.body || (t && t.last_message_preview) || 'Sent you a message in FamChat',
+              thread_id: data.thread_id,
+              category: 'kin_whisper',
+              tag: 'whisper_' + data.thread_id,
+              url: '/kin-whispers?thread_id=' + encodeURIComponent(data.thread_id)
+            });
+          }
+        }
+      }
+    },
+
+    startCallSignalPoller(threadId) {
+      if (!threadId) return;
+      if (this.callSignalPoller && this.callSignalPollerThreadId === threadId) {
+        return;
+      }
+      this.stopCallSignalPoller();
+      this.callSignalPollerThreadId = threadId;
+      this.lastCallSignalSeq = 0;
+      this.seenCallSignalSeqs = {};
+      const pollOnce = async () => {
+        if (!this.isInCall && !this.incomingCall) {
+          this.stopCallSignalPoller();
+          return;
+        }
+        try {
+          const res = await fetch('/api/kin-whispers/threads/' + encodeURIComponent(threadId) + '/call/info?after_seq=' + this.lastCallSignalSeq, {
+            headers: { 'Accept': 'application/json' }
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          if (!data || !data.success || !data.call) return;
+          if (data.call.call_status === 'idle' && (this.isInCall || this.incomingCall)) {
+            this.endCall(false);
+            return;
+          }
+          if (Array.isArray(data.call.signals)) {
+            for (const sig of data.call.signals) {
+              await this.handleCallSignalEvent(sig);
+            }
+          }
+        } catch (e) {}
+      };
+      pollOnce();
+      this.callSignalPoller = setInterval(pollOnce, 1200);
+    },
+
+    stopCallSignalPoller() {
+      if (this.callSignalPoller) {
+        clearInterval(this.callSignalPoller);
+        this.callSignalPoller = null;
+      }
+      this.callSignalPollerThreadId = null;
+      this.lastCallSignalSeq = 0;
+      this.seenCallSignalSeqs = {};
+    },
+
+    handleIncomingCallEvent(data) {
+      if (!data || this.isMe(data.caller_id)) return;
+      if (data.room_id && this.seenCallRoomIds[data.room_id]) return;
+      if (data.room_id) this.seenCallRoomIds[data.room_id] = true;
+      this.incomingCall = data;
+      this.activeCallThreadId = data.thread_id || null;
+      if (data.room_id && this.pendingOfferRoomId && this.pendingOfferRoomId !== data.room_id) {
+        this.pendingOffer = null;
+        this.pendingOfferSenderId = null;
+        this.pendingOfferRoomId = null;
+        this.pendingCandidates = [];
+      }
+      if (data.thread_id) {
+        this.startCallSignalPoller(data.thread_id);
+      }
+      this.playRingtone();
+    },
+
+    async handleCallSignalEvent(data) {
+      if (!data || !data.signal) return;
+      if (data.sender_id && this.isMe(data.sender_id)) return;
+      if (data.room_id && this.callRoomId && String(data.room_id) !== String(this.callRoomId)) return;
+      if (data.seq) {
+        const seqKey = String(data.room_id || '') + ':' + String(data.seq);
+        if (this.seenCallSignalSeqs[seqKey]) return;
+        this.seenCallSignalSeqs[seqKey] = true;
+        if (data.seq > this.lastCallSignalSeq) {
+          this.lastCallSignalSeq = data.seq;
+        }
+      }
+      try {
+        if (data.signal.sdp) {
+          const sdp = data.signal.sdp;
+          if (sdp.type === 'offer') {
+            if (this.peerConnection && this.isInCall) {
+              if (this.peerConnection.remoteDescription) {
+                return;
+              }
+              await this.peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
+              const answer = await this.peerConnection.createAnswer();
+              await this.peerConnection.setLocalDescription(answer);
+              const threadId = this.activeCallThreadId || (this.activeThread ? this.activeThread.id : (this.incomingCall ? this.incomingCall.thread_id : data.thread_id));
+              if (threadId) {
+                const ansRes = await fetch('/api/kin-whispers/threads/' + encodeURIComponent(threadId) + '/call/signal', {
+                  method: 'POST',
+                  headers: jsonHeaders(),
+                  body: JSON.stringify({ target_user_id: data.sender_id, signal: { sdp: answer } })
+                });
+                if (!ansRes.ok) {
+                  console.warn('Call answer signal returned HTTP', ansRes.status);
+                }
+              }
+              if (this.pendingCandidates.length > 0) {
+                for (const cand of this.pendingCandidates) {
+                  try {
+                    await this.peerConnection.addIceCandidate(new RTCIceCandidate(cand));
+                  } catch (cErr) {
+                    console.warn('Buffered ICE candidate skipped', cErr);
+                  }
+                }
+                this.pendingCandidates = [];
+              }
+            } else {
+              this.pendingOffer = sdp;
+              this.pendingOfferSenderId = data.sender_id;
+              this.pendingOfferRoomId = data.room_id || null;
+            }
+          } else if (sdp.type === 'answer') {
+            if (this.peerConnection) {
+              await this.peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
+              this.isCallRinging = false;
+              if (this.peerConnection.connectionState === 'connected' || this.peerConnection.iceConnectionState === 'connected' || this.peerConnection.iceConnectionState === 'completed') {
+                this.markCallConnected();
+              } else {
+                this.callConnectionState = 'connecting';
+              }
+              if (this.pendingCandidates.length > 0) {
+                for (const cand of this.pendingCandidates) {
+                  try {
+                    await this.peerConnection.addIceCandidate(new RTCIceCandidate(cand));
+                  } catch (cErr) {
+                    console.warn('Buffered ICE candidate skipped', cErr);
+                  }
+                }
+                this.pendingCandidates = [];
+              }
+            }
+          }
+        } else if (data.signal.candidate || Array.isArray(data.signal.candidates)) {
+          const cands = data.signal.candidate ? [data.signal.candidate] : data.signal.candidates;
+          for (const cand of cands) {
+            if (!cand) continue;
+            if (this.peerConnection && this.peerConnection.remoteDescription) {
+              try {
+                await this.peerConnection.addIceCandidate(new RTCIceCandidate(cand));
+              } catch (candErr) {
+                console.warn('ICE candidate addition skipped', candErr);
+              }
+            } else {
+              this.pendingCandidates.push(cand);
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Signal handle error', e);
+      }
+    },
+
+    handleCallEndedEvent(data) {
+      const currentThreadId = this.activeCallThreadId || (this.incomingCall ? this.incomingCall.thread_id : null);
+      if (data && data.thread_id && currentThreadId && String(data.thread_id) !== String(currentThreadId)) {
+        return;
+      }
+      const wasActiveOrRinging = this.isInCall || Boolean(this.incomingCall);
+      this.endCall(false);
+      if (wasActiveOrRinging && data && data.ended_by && !this.isMe(data.ended_by)) {
+        this.toast('Call ended.');
+      }
+    },
+
+    handleShareStatusEvent(data) {
+      if (!data || !data.thread_id) return;
+      const idx = this.threads.findIndex(t => t.id === data.thread_id);
+      if (idx > -1) {
+        this.threads[idx].share_status = data.status;
+      }
+      if (this.activeThread && this.activeThread.id === data.thread_id) {
+        this.activeThread.share_status = data.status;
+        if (data.status === 'pending' && data.actor_id) {
+          this.activeThread.share_requested_by = data.actor_id;
+          this.toast('🔒 ' + (data.actor_name || 'Your kin') + ' requested your approval to share this whisper on WhatsApp.');
+        } else if (data.status === 'approved') {
+          this.activeThread.share_approved_by = data.actor_id || null;
+          this.toast('✓ ' + (data.actor_name || 'Your kin') + ' authorised WhatsApp sharing for this whisper.');
+        } else if (data.status === 'declined') {
+          this.toast((data.actor_name || 'Your kin') + ' declined external WhatsApp sharing for this whisper.');
+        } else if (data.status === 'none') {
+          this.toast('WhatsApp sharing consent was revoked for this whisper.');
+        }
+      }
+    },
+
+    handleScreenshotEvent(data) {
+      if (!data || !data.thread_id) return;
+      if (this.activeThread && this.activeThread.id === data.thread_id) {
+        this.threadEvents.push({
+          id: data.event_id || Date.now(),
+          thread_id: data.thread_id,
+          user_id: data.actor_id,
+          user_name: data.actor_name || 'Family Kin',
+          event_type: 'screenshot_taken',
+          created_at: data.timestamp || new Date().toISOString()
+        });
+        this.toast('📸 ' + (data.actor_name || 'Your kin') + ' took a screenshot of this whisper.');
+      }
+    },
+
+    handleWhisperDeletedEvent(data) {
+      if (!data || !data.thread_id || !data.message_id) return;
+      this.applyDeletedMessageState(data.thread_id, data.message_id, data.last_message_preview, data.last_message_at);
+    },
+
+    initSseFallback() {
+      if (this.sseSource || typeof window.EventSource === 'undefined') return;
+      const channelName = 'private-user-' + String(this.currentUserId).toLowerCase();
+      try {
+        const url = '/api/broadcasting/events?channel=' + encodeURIComponent(channelName) + '&since_now=1';
+        const es = new window.EventSource(url, { withCredentials: true });
+        this.sseSource = es;
+
+        const parseData = (ev) => {
+          try { return JSON.parse(ev.data || '{}'); } catch (e) { return null; }
+        };
+        es.addEventListener('kin-whisper', (ev) => this.handleIncomingWhisperEvent(parseData(ev)));
+        es.addEventListener('kin-call-incoming', (ev) => this.handleIncomingCallEvent(parseData(ev)));
+        es.addEventListener('kin-call-signal', (ev) => this.handleCallSignalEvent(parseData(ev)));
+        es.addEventListener('kin-call-ended', (ev) => this.handleCallEndedEvent(parseData(ev)));
+        es.addEventListener('kin-share-status', (ev) => this.handleShareStatusEvent(parseData(ev)));
+        es.addEventListener('kin-screenshot-detected', (ev) => this.handleScreenshotEvent(parseData(ev)));
+        es.addEventListener('kin-whisper-deleted', (ev) => this.handleWhisperDeletedEvent(parseData(ev)));
+      } catch (e) {
+        console.warn('Sovereign SSE fallback setup error', e);
+      }
+    },
+
+    async initPusher() {
+      try {
+        const statusRes = await fetch('/api/broadcasting/status', { headers: { 'Accept': 'application/json' } });
+        if (statusRes.ok) {
+          const statusData = await statusRes.json().catch(() => ({}));
+          if (statusData && statusData.pusher_degraded) {
+            this.initSseFallback();
+            return;
+          }
+        }
+      } catch (e) {}
+
       const key = (document.querySelector('meta[name="pusher-key"]') || {}).content || '';
       const cluster = (document.querySelector('meta[name="pusher-cluster"]') || {}).content || 'eu';
-      if (!key || typeof window.Pusher === 'undefined') return;
+      if (!key || typeof window.Pusher === 'undefined') {
+        this.initSseFallback();
+        return;
+      }
 
       try {
         this.pusher = new window.Pusher(key, {
@@ -5146,160 +5318,30 @@ function kinWhisperApp() {
           }
         });
 
+        this.pusher.connection.bind('state_change', (states) => {
+          if (states && (states.current === 'unavailable' || states.current === 'failed' || states.current === 'disconnected')) {
+            this.initSseFallback();
+          }
+        });
+
         const channelName = 'private-user-' + String(this.currentUserId).toLowerCase();
         this.userChannel = this.pusher.subscribe(channelName);
 
-        this.userChannel.bind('kin-whisper', (data) => {
-          if (data && data.thread_id) {
-            if (this.shouldChimeForThread(data.thread_id, data.sender_id)) {
-              this.playWhisperChime();
-            }
-            if (this.isActivelyViewingThread(data.thread_id)) {
-              this.pollUpdates();
-            } else {
-              const t = this.threads.find(x => String(x.id) === String(data.thread_id));
-              if (t) {
-                t.unread_count = (parseInt(t.unread_count, 10) || 0) + 1;
-                if (data.preview || data.body) t.last_message_preview = data.preview || data.body;
-              } else {
-                this.pollThreadListOnly();
-              }
-              if (this.shouldChimeForThread(data.thread_id, data.sender_id) && typeof window.showFamilyChatPopup === 'function') {
-                window.showFamilyChatPopup({
-                  title: (data.sender_name || (t ? this.partnerName(t) : '')) || 'New FamilyChat Message',
-                  body: data.preview || data.body || (t && t.last_message_preview) || 'Sent you a message in FamilyChat',
-                  thread_id: data.thread_id,
-                  category: 'kin_whisper',
-                  tag: 'whisper_' + data.thread_id,
-                  url: '/kin-whispers?thread_id=' + encodeURIComponent(data.thread_id)
-                });
-              }
-            }
-          }
+        this.userChannel.bind('pusher:subscription_error', () => {
+          this.initSseFallback();
         });
 
-        this.userChannel.bind('kin-call-incoming', (data) => {
-          if (data && !this.isMe(data.caller_id)) {
-            this.incomingCall = data;
-            this.pendingOffer = null;
-            this.pendingOfferSenderId = null;
-            this.pendingCandidates = [];
-            this.playRingtone();
-          }
-        });
-
-        this.userChannel.bind('kin-call-signal', async (data) => {
-          if (!data || !data.signal) return;
-          if (data.sender_id && this.isMe(data.sender_id)) return;
-          try {
-            if (data.signal.sdp) {
-              const sdp = data.signal.sdp;
-              if (sdp.type === 'offer') {
-                if (this.peerConnection && this.isInCall) {
-                  await this.peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
-                  const answer = await this.peerConnection.createAnswer();
-                  await this.peerConnection.setLocalDescription(answer);
-                  const threadId = (this.activeThread ? this.activeThread.id : (this.incomingCall ? this.incomingCall.thread_id : data.thread_id));
-                  if (threadId) {
-                    fetch('/api/kin-whispers/threads/' + encodeURIComponent(threadId) + '/call/signal', {
-                      method: 'POST',
-                      headers: jsonHeaders(),
-                      body: JSON.stringify({ target_user_id: data.sender_id, signal: { sdp: answer } })
-                    });
-                  }
-                } else {
-                  this.pendingOffer = sdp;
-                  this.pendingOfferSenderId = data.sender_id;
-                }
-              } else if (sdp.type === 'answer') {
-                if (this.peerConnection) {
-                  await this.peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
-                  this.isCallRinging = false;
-                  if (this.peerConnection.connectionState === 'connected' || this.peerConnection.iceConnectionState === 'connected' || this.peerConnection.iceConnectionState === 'completed') {
-                    this.markCallConnected();
-                  } else {
-                    this.callConnectionState = 'connecting';
-                  }
-                  if (this.pendingCandidates.length > 0) {
-                    for (const cand of this.pendingCandidates) {
-                      try {
-                        await this.peerConnection.addIceCandidate(new RTCIceCandidate(cand));
-                      } catch (cErr) {
-                        console.warn('Buffered ICE candidate skipped', cErr);
-                      }
-                    }
-                    this.pendingCandidates = [];
-                  }
-                }
-              }
-            } else if (data.signal.candidate || Array.isArray(data.signal.candidates)) {
-              const cands = data.signal.candidate ? [data.signal.candidate] : data.signal.candidates;
-              for (const cand of cands) {
-                if (!cand) continue;
-                if (this.peerConnection && this.peerConnection.remoteDescription) {
-                  try {
-                    await this.peerConnection.addIceCandidate(new RTCIceCandidate(cand));
-                  } catch (candErr) {
-                    console.warn('ICE candidate addition skipped', candErr);
-                  }
-                } else {
-                  this.pendingCandidates.push(cand);
-                }
-              }
-            }
-          } catch (e) {
-            console.error('Signal handle error', e);
-          }
-        });
-
-        this.userChannel.bind('kin-call-ended', () => {
-          this.endCall();
-        });
-
-        this.userChannel.bind('kin-share-status', (data) => {
-          if (!data || !data.thread_id) return;
-          const idx = this.threads.findIndex(t => t.id === data.thread_id);
-          if (idx > -1) {
-            this.threads[idx].share_status = data.status;
-          }
-          if (this.activeThread && this.activeThread.id === data.thread_id) {
-            this.activeThread.share_status = data.status;
-            if (data.status === 'pending' && data.actor_id) {
-              this.activeThread.share_requested_by = data.actor_id;
-              this.toast('🔒 ' + (data.actor_name || 'Your kin') + ' requested your approval to share this whisper on WhatsApp.');
-            } else if (data.status === 'approved') {
-              this.activeThread.share_approved_by = data.actor_id || null;
-              this.toast('✓ ' + (data.actor_name || 'Your kin') + ' authorised WhatsApp sharing for this whisper.');
-            } else if (data.status === 'declined') {
-              this.toast((data.actor_name || 'Your kin') + ' declined external WhatsApp sharing for this whisper.');
-            } else if (data.status === 'none') {
-              this.toast('WhatsApp sharing consent was revoked for this whisper.');
-            }
-          }
-        });
-
-        this.userChannel.bind('kin-screenshot-detected', (data) => {
-          if (!data || !data.thread_id) return;
-          if (this.activeThread && this.activeThread.id === data.thread_id) {
-            this.threadEvents.push({
-              id: data.event_id || Date.now(),
-              thread_id: data.thread_id,
-              user_id: data.actor_id,
-              user_name: data.actor_name || 'Family Kin',
-              event_type: 'screenshot_taken',
-              created_at: data.timestamp || new Date().toISOString()
-            });
-            this.toast('📸 ' + (data.actor_name || 'Your kin') + ' took a screenshot of this whisper.');
-          }
-        });
-
-        this.userChannel.bind('kin-whisper-deleted', (data) => {
-          if (!data || !data.thread_id || !data.message_id) return;
-          this.applyDeletedMessageState(data.thread_id, data.message_id, data.last_message_preview, data.last_message_at);
-        });
+        this.userChannel.bind('kin-whisper', (data) => this.handleIncomingWhisperEvent(data));
+        this.userChannel.bind('kin-call-incoming', (data) => this.handleIncomingCallEvent(data));
+        this.userChannel.bind('kin-call-signal', (data) => this.handleCallSignalEvent(data));
+        this.userChannel.bind('kin-call-ended', (data) => this.handleCallEndedEvent(data));
+        this.userChannel.bind('kin-share-status', (data) => this.handleShareStatusEvent(data));
+        this.userChannel.bind('kin-screenshot-detected', (data) => this.handleScreenshotEvent(data));
+        this.userChannel.bind('kin-whisper-deleted', (data) => this.handleWhisperDeletedEvent(data));
 
       } catch (err) {
         console.warn('KinWhisper Pusher setup error', err);
+        this.initSseFallback();
       }
     },
 

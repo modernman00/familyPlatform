@@ -26,7 +26,7 @@ body.dark-theme .pwa-bottom-nav,
 }
 @media (max-width: 991.98px) {
     /* Android resizes the layout viewport for the keyboard and would float the bar over the input */
-    body:has(input:focus, textarea:focus, select:focus) .pwa-bottom-nav { display: none !important; }
+    body:has(input:focus, textarea:focus, select:focus, [contenteditable="true"]:focus) .pwa-bottom-nav { display: none !important; }
 }
 
 /* Active Tab Micro-Dot & Tonal Icon Fill */
@@ -125,14 +125,14 @@ body.dark-theme .pwa-tab-center-action .pwa-center-btn-bubble,
         <span class="pwa-tab-label">{{ __('nav.add_photo', 'Add Photo') }}</span>
     </button>
 
-    <!-- FamilyChat (private kin messages) -->
-    <a href="/kin-whispers" class="pwa-tab-item position-relative" id="pwaWhisperTab" data-tab="whisper" title="{{ __('nav.whisper', 'FamilyChat') }} - Private kin notes and voice dedications">
+    <!-- FamChat (private kin messages) -->
+    <a href="/kin-whispers" class="pwa-tab-item position-relative" id="pwaWhisperTab" data-tab="whisper" title="{{ __('nav.whisper', 'FamChat') }} - Private kin notes and voice dedications">
         <div class="pwa-tab-icon-wrap position-relative">
             <i class="bi bi-chat-dots pwa-tab-icon-outline"></i>
             <i class="bi bi-chat-dots-fill pwa-tab-icon-filled"></i>
             <span class="pwa-tab-badge whisper-portal-unread-badge d-none"><span class="whisper-portal-unread-count"></span></span>
         </div>
-        <span class="pwa-tab-label">{{ __('nav.whisper', 'FamilyChat') }}</span>
+        <span class="pwa-tab-label">{{ __('nav.whisper', 'FamChat') }}</span>
     </a>
 
     <!-- Notifications & Alerts -->

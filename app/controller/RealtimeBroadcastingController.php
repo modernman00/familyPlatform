@@ -31,7 +31,7 @@ final class RealtimeBroadcastingController
         $userSlug = self::slug($userId);
 
         if (preg_match('/^(?:private-)?user-(.+)$/', $channel, $m)) {
-            return $userSlug !== '' && hash_equals($userSlug, $m[1]);
+            return $userSlug !== '' && hash_equals(strtolower($userSlug), strtolower($m[1]));
         }
 
         if (preg_match('/^(?:private-)?family-(.+)$/', $channel, $m)) {
@@ -175,15 +175,24 @@ final class RealtimeBroadcastingController
             $sinceNow = isset($_GET['since_now']) && $_GET['since_now'] === '1';
 
             // Fetch any events missed since lastEventId (or fast-forward cursor when since_now=1)
-            $events = $broadcaster->getEvents($channel, $lastEventId, 25);
             if ($sinceNow && $lastEventId === 0) {
-                foreach ($events as $ev) {
-                    $evId = (int)($ev['id'] ?? 0);
-                    if ($evId > $lastEventId) {
-                        $lastEventId = $evId;
+                while (true) {
+                    $batch = $broadcaster->getEvents($channel, $lastEventId, 250);
+                    if (empty($batch)) {
+                        break;
+                    }
+                    foreach ($batch as $ev) {
+                        $evId = (int)($ev['id'] ?? 0);
+                        if ($evId > $lastEventId) {
+                            $lastEventId = $evId;
+                        }
+                    }
+                    if (count($batch) < 250) {
+                        break;
                     }
                 }
             } else {
+                $events = $broadcaster->getEvents($channel, $lastEventId, 25);
                 foreach ($events as $ev) {
                     $safeId = (int)($ev['id'] ?? 0);
                     $safeEvent = htmlspecialchars((string)preg_replace('/[^a-zA-Z0-9_.\-]/', '', (string)($ev['event'] ?? 'message')), ENT_QUOTES, 'UTF-8');

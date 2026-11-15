@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400&family=Great+Vibes&family=Montserrat:wght@400;600;700;800;900&family=Pacifico&display=swap">
+<link rel="stylesheet" href="/public/css/studio-pip.css?v={{ assetVersion('css/studio-pip.css') }}">
 <style>
 .ps-wrap { --g1: #fbe9eb; --g2: #a31621; --ink: #1c1412; --line: #ece4da; --surface: #ffffff; --muted: #7a6a5f; --soft: #faf6f0;
     max-width: 1320px; margin: 0 auto; padding: 8px 16px 80px; color: var(--ink); }
@@ -102,6 +103,142 @@
 .ps-draft { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; padding: 10px 14px; border-radius: 14px; background: rgba(201,162,75,.12); border: 1px solid rgba(201,162,75,.35); font-size: .84rem; }
 .fp-toast { position: fixed; left: 50%; bottom: 28px; z-index: 3000; transform: translate(-50%, 20px); opacity: 0; background: #17120c; color: #f4efe6; border: 1px solid rgba(243,220,154,.35); padding: 12px 18px; border-radius: 999px; font-size: .9rem; font-weight: 600; box-shadow: 0 16px 30px rgba(0,0,0,.35); transition: opacity .3s, transform .3s; }
 .fp-toast.is-in { opacity: 1; transform: translate(-50%, 0); }
+
+/* CapCut-Style Mobile Studio Ergonomics */
+.ps-capcut-dock,
+.ps-mobile-bottom-bar,
+.ps-mobile-collapse-btn {
+    display: none;
+}
+@media (min-width: 768px) {
+    .ps-step { display: block !important; }
+}
+@media (max-width: 767.98px) {
+    .ps-wrap { padding: 6px 10px calc(86px + env(safe-area-inset-bottom, 0px)); }
+    .ps-hero { padding: 10px 14px; border-radius: 16px; margin-bottom: 10px; }
+    .ps-eyebrow, .ps-hero p { display: none; }
+    .ps-hero h1 { font-size: 1.15rem; margin: 0; }
+    .ps-grid { gap: 10px; }
+    .ps-preview-col {
+        position: sticky;
+        top: 56px;
+        z-index: 35;
+    }
+    .ps-stage {
+        padding: 10px 12px;
+        border-radius: 18px;
+        box-shadow: 0 14px 32px -10px rgba(0,0,0,.75);
+    }
+    .ps-stage > .ps-actions,
+    .ps-stage > .ps-note {
+        display: none;
+    }
+    .ps-canvas-wrap { max-width: 165px; }
+    .ps-ratios { margin-top: 8px; }
+    .ps-ratio { min-height: 44px; padding: 6px 12px; font-size: .76rem; }
+    .ps-mobile-collapse-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        min-height: 44px;
+        min-width: 44px;
+        padding: 0 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,.18);
+        background: rgba(255,255,255,.08);
+        color: #f8fafc;
+        font-size: .76rem;
+        font-weight: 700;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .ps-capcut-dock {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+        padding: 4px 2px 10px;
+        margin-bottom: 4px;
+    }
+    .ps-capcut-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 44px;
+        padding: 8px 14px;
+        border-radius: 12px;
+        border: 1.5px solid var(--line);
+        background: var(--surface);
+        color: var(--ink);
+        font-size: .8rem;
+        font-weight: 700;
+        white-space: nowrap;
+        flex-shrink: 0;
+        scroll-snap-align: start;
+        cursor: pointer;
+    }
+    .ps-capcut-tab.is-active {
+        background: #a31621;
+        border-color: #a31621;
+        color: #ffffff;
+    }
+    .ps-panel { padding: 14px 12px; border-radius: 18px; }
+    .ps-step { padding-bottom: 12px; margin-bottom: 12px; border-bottom: 0; }
+    .ps-occasions {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 8px;
+        padding-bottom: 6px;
+    }
+    .ps-tile { flex: 0 0 auto; min-width: 136px; scroll-snap-align: start; }
+    .ps-layouts {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 10px;
+        padding-bottom: 6px;
+    }
+    .ps-layout { flex: 0 0 108px; scroll-snap-align: start; }
+    .ps-swatches,
+    .ps-ratios {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        justify-content: flex-start;
+        padding-bottom: 4px;
+    }
+    .ps-swatch { flex: 0 0 auto; }
+    .ps-event .ps-select { min-width: 0; }
+    .ps-mobile-bottom-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1040;
+        padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+        background: rgba(28, 20, 18, 0.96);
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+    .ps-mobile-bottom-bar .ps-btn {
+        flex: 1;
+        min-height: 44px;
+        padding: 8px 10px;
+        font-size: .78rem;
+    }
+}
 </style>
 @endpush
 
@@ -130,8 +267,21 @@
     <div class="ps-grid">
         <aside class="ps-preview-col" aria-label="Poster preview">
             <div class="ps-stage">
-                <div class="ps-canvas-wrap"><canvas id="psCanvas" aria-label="Poster preview"></canvas></div>
-                <div class="ps-ratios" role="group" aria-label="Size">
+                <div class="spip-stage-bar">
+                    <span class="spip-dock__time">Live preview</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="ps-mobile-collapse-btn" @click="mobilePreviewCollapsed = !mobilePreviewCollapsed" :aria-expanded="!mobilePreviewCollapsed">
+                            <i class="bi" :class="mobilePreviewCollapsed ? 'bi-chevron-down' : 'bi-chevron-up'"></i>
+                            <span x-text="mobilePreviewCollapsed ? 'Show' : 'Hide'"></span>
+                        </button>
+                        <button type="button" class="spip-trigger d-none d-md-inline-flex" @click="togglePipPopout()" :aria-pressed="pipForced && !pipMinimised" title="Pop out preview while editing">
+                            <i class="bi bi-pip" aria-hidden="true"></i>
+                            <span x-text="(pipForced && !pipMinimised) ? 'Docked' : 'Pop out'"></span>
+                        </button>
+                    </div>
+                </div>
+                <div class="ps-canvas-wrap" x-show="!mobilePreviewCollapsed" x-collapse><canvas id="psCanvas" aria-label="Poster preview"></canvas></div>
+                <div class="ps-ratios" role="group" aria-label="Size" x-show="!mobilePreviewCollapsed">
                     <template x-for="r in ratios" :key="r.id">
                         <button type="button" class="ps-ratio" :aria-pressed="ratio === r.id" @click="setRatio(r.id)" x-text="r.label"></button>
                     </template>
@@ -146,13 +296,19 @@
         </aside>
 
         <div>
+            <div class="ps-capcut-dock" role="tablist" aria-label="Poster studio tools">
+                <button type="button" class="ps-capcut-tab" :class="{ 'is-active': mobileStep === 'occasion' }" @click="mobileStep = 'occasion'">🎉 Occasion</button>
+                <button type="button" class="ps-capcut-tab" :class="{ 'is-active': mobileStep === 'layout' }" @click="mobileStep = 'layout'">🎨 Layout</button>
+                <button type="button" class="ps-capcut-tab" :class="{ 'is-active': mobileStep === 'photo' }" @click="mobileStep = 'photo'" x-show="archetype !== 'neon_script_clash'">🖼️ Photo</button>
+                <button type="button" class="ps-capcut-tab" :class="{ 'is-active': mobileStep === 'details' }" @click="mobileStep = 'details'">✍️ Details</button>
+            </div>
             <div class="ps-panel">
                 <div class="ps-draft" x-show="restoredDraft" x-cloak>
                     <span><i class="bi bi-clock-history" aria-hidden="true"></i> We restored your last poster.</span>
                     <button type="button" class="ps-link" @click="startOver()">Start over</button>
                 </div>
 
-                <section class="ps-step">
+                <section class="ps-step" x-show="mobileStep === 'occasion'">
                     <div class="ps-step__head"><span class="ps-step__num">I</span><h2 class="ps-step__title">What’s the occasion?</h2></div>
                     <div class="ps-occasions" role="group" aria-label="Occasion">
                         <template x-for="p in presets" :key="p.key">
@@ -175,7 +331,7 @@
                     @endif
                 </section>
 
-                <section class="ps-step">
+                <section class="ps-step" x-show="mobileStep === 'layout'">
                     <div class="ps-step__head"><span class="ps-step__num">II</span><h2 class="ps-step__title">Choose a layout</h2></div>
                     <p class="ps-sub">Each preview uses your words and photo.</p>
                     <div class="ps-layouts" role="group" aria-label="Layout">
@@ -198,7 +354,7 @@
                     </div>
                 </section>
 
-                <section class="ps-step" x-show="archetype !== 'neon_script_clash'">
+                <section class="ps-step" x-show="archetype !== 'neon_script_clash' && mobileStep === 'photo'">
                     <div class="ps-step__head"><span class="ps-step__num">III</span><h2 class="ps-step__title">Add a photo <span style="font-size:.8rem;color:var(--muted)">(optional)</span></h2></div>
                     <label class="ps-drop">
                         <input type="file" accept="image/*" @change="onPhoto($event.target.files[0]); $event.target.value = ''" aria-label="Upload a photo">
@@ -234,7 +390,7 @@
                     </details>
                 </section>
 
-                <section class="ps-step">
+                <section class="ps-step" x-show="mobileStep === 'details'">
                     <div class="ps-step__head"><span class="ps-step__num">IV</span><h2 class="ps-step__title">The details</h2></div>
                     <div class="ps-fields">
                         <div class="ps-span"><label class="ps-label" for="psBadge">Top line</label><input id="psBadge" class="ps-input" x-model="d.badge" @input="changed()" placeholder="e.g. The Olaogun Family invites you to"></div>
@@ -292,8 +448,31 @@
             </div>
         </div>
     </div>
+
+    {{-- CapCut-Style Mobile Sticky Bottom Export Bar --}}
+    <div class="ps-mobile-bottom-bar" aria-label="Quick poster export actions">
+        <button type="button" class="ps-btn ps-btn--wa" style="grid-column:auto;min-height:44px;font-size:.78rem;" @click="shareWhatsApp()" :disabled="busy">
+            <i class="bi bi-whatsapp" aria-hidden="true"></i><span>WhatsApp</span>
+        </button>
+        <button type="button" class="ps-btn" @click="download()">
+            <i class="bi bi-download" aria-hidden="true"></i><span>Save PNG</span>
+        </button>
+        <button type="button" class="ps-btn ps-btn--gold" @click="postToFeed()" :disabled="busy || posted">
+            <i class="bi" :class="posted ? 'bi-check2-circle' : 'bi-broadcast'" aria-hidden="true"></i>
+            <span x-text="posted ? 'Posted' : 'Post'"></span>
+        </button>
+    </div>
+
+    {{-- Floating PiP & Expandable Preview --}}
+    @include('member.includes.studioPip', [
+        'mode' => 'canvas',
+        'title' => 'Poster preview',
+        'blockedExpr' => 'guideOpen',
+        'hasVideoControls' => false,
+    ])
 </div>
 
+<script src="/public/js/studio-pip.js?v={{ assetVersion('js/studio-pip.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
 <script nonce="{{ csp_nonce($nonce ?? null) }}">
 /*
  * On-device person cut-out (MediaPipe selfie multiclass segmenter). The photo never leaves the device.
@@ -948,7 +1127,15 @@ function posterStudio() {
         };
     }
 
+    const pipMixin = window.FPStudioPip ? window.FPStudioPip.create({
+        stageSelector: '.ps-stage',
+        canvasSelector: '#psCanvas',
+        storageKey: 'fp_pip_poster',
+        fps: 6,
+    }) : {};
+
     return {
+        ...pipMixin,
         presets: PRESETS, themes: THEMES,
         // Bright Split suits pastel; Crystal Keepsake art is a baby teddy block, so only offer it for naming/baby posters
         get layouts() { return LAYOUTS.filter((l) => (l.id !== 'pool_tropical_split' || this.theme === 'family_pastel_baby') && (l.id !== 'acrylic_keepsake_block' || this.presetKey === 'naming')); },
@@ -957,6 +1144,7 @@ function posterStudio() {
         d: { ...blank }, perks: '',
         photoSrc: null, photoUrl: '', cutoutUrl: null, cutting: false, cutout: true, ghost: true, scale: 1, offsetX: 0, offsetY: 0, hasBackdrop: false,
         busy: false, posted: false, restoredDraft: false, guideOpen: false,
+        mobileStep: 'occasion', mobilePreviewCollapsed: false,
 
         async init() {
             const canvas = document.getElementById('psCanvas');
@@ -969,6 +1157,7 @@ function posterStudio() {
             this.render();
             engine.preloadStudioAssets(ASSET).then(() => this.render());
             if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => this.render());
+            if (typeof this.initPip === 'function') this.initPip();
         },
 
         applyPreset(key, silent) {

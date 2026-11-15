@@ -145,6 +145,7 @@ function myFunction(id) {
 </script>
       
   @include('component.submitSpinner')
+  @include('partials.push-notification-banner')
   @include('partials.pwa-register')
 </body>
 </html> 

@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Montserrat:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="/public/css/family_studio.css?v={{ time() }}">
+<link rel="stylesheet" href="/public/css/studio-pip.css?v={{ assetVersion('css/studio-pip.css') }}">
 <style>
 .fvs-wrap {
     --fvs-primary: #a31621;
@@ -102,7 +103,8 @@
     outline-offset: 2px;
 }
 .fvs-btn-gold {
-    background: linear-gradient(135deg, #d4af37 0%, #aa820a 100%);
+    background-color: #d4af37;
+    background-image: linear-gradient(135deg, #d4af37 0%, #aa820a 100%);
     color: #0b0f19;
     box-shadow: 0 4px 15px rgba(212,175,55,0.35);
 }
@@ -342,11 +344,194 @@
     border-color: var(--fvs-gold-bright);
     background: rgba(255,215,0,0.04);
 }
+
+/* CapCut-Style Mobile Studio Ergonomics */
+.fvs-capcut-dock,
+.fvs-mobile-bottom-bar,
+.fvs-mobile-collapse-btn {
+    display: none;
+}
+@media (min-width: 768px) {
+    .fvs-mobile-panel {
+        display: block !important;
+    }
+}
+@media (max-width: 767.98px) {
+    .fvs-wrap {
+        padding: 6px 10px calc(86px + env(safe-area-inset-bottom, 0px));
+    }
+    .fvs-hero {
+        padding: 10px 14px;
+        border-radius: 14px;
+        margin-bottom: 10px;
+    }
+    .fvs-hero__eyebrow,
+    .fvs-hero__desc,
+    .fvs-hero__actions {
+        display: none;
+    }
+    .fvs-hero__title {
+        font-size: 1.05rem;
+        margin-bottom: 0;
+    }
+    .fvs-grid {
+        gap: 10px;
+    }
+    .fvs-grid > * {
+        min-width: 0;
+    }
+    .fvs-stage-card {
+        position: sticky;
+        top: 56px;
+        z-index: 35;
+        background: rgba(11, 15, 25, 0.97);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-color: rgba(251, 191, 36, 0.28);
+        box-shadow: 0 14px 32px -8px rgba(0, 0, 0, 0.7);
+    }
+    .fvs-mobile-collapse-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        min-height: 44px;
+        min-width: 44px;
+        padding: 0 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.08);
+        color: #f8fafc;
+        font-size: 0.75rem;
+        font-weight: 700;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .fvs-card {
+        padding: 12px;
+        border-radius: 16px;
+        min-width: 0;
+    }
+    .fvs-card__header {
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 8px;
+        padding-bottom: 8px;
+    }
+    .fvs-viewport-wrap {
+        width: 100%;
+        max-width: 100%;
+        max-height: 27vh;
+        min-height: 0;
+    }
+    .fvs-viewport-wrap[data-aspect="1:1"] {
+        max-width: 200px;
+    }
+    .fvs-viewport-wrap[data-aspect="9:16"] {
+        max-width: 136px;
+        max-height: 26vh;
+    }
+    .fvs-controls {
+        padding: 8px 10px;
+        gap: 6px;
+        margin-top: 8px;
+    }
+    .fvs-ctrl-group {
+        flex-wrap: nowrap;
+        gap: 6px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .fvs-capcut-dock {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+        padding: 6px 2px 10px;
+        margin-bottom: 6px;
+    }
+    .fvs-capcut-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 44px;
+        padding: 8px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--fvs-line);
+        background: var(--fvs-card);
+        color: #e2e8f0;
+        font-size: 0.8rem;
+        font-weight: 700;
+        white-space: nowrap;
+        flex-shrink: 0;
+        scroll-snap-align: start;
+        cursor: pointer;
+    }
+    .fvs-capcut-tab.is-active {
+        background: linear-gradient(135deg, #d4af37, #b48a35);
+        border-color: #fde68a;
+        color: #0b0f19;
+    }
+    .fvs-template-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 10px;
+        padding-bottom: 6px;
+    }
+    .fvs-tpl-card {
+        flex: 0 0 112px;
+        scroll-snap-align: start;
+    }
+    .fvs-mobile-bottom-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1040;
+        padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+        background: rgba(11, 15, 25, 0.96);
+        border-top: 1px solid rgba(251, 191, 36, 0.25);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+    .fvs-mobile-bottom-bar .fvs-btn {
+        flex: 1;
+        min-height: 44px;
+        padding: 8px 10px;
+        font-size: 0.78rem;
+    }
+}
 </style>
 @endpush
 
 @section('content')
-<div class="fvs-wrap" id="familyVideoStudioApp">
+<script src="/public/js/studio-pip.js?v={{ assetVersion('js/studio-pip.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
+function videoStudioPip() {
+    const base = window.FPStudioPip ? window.FPStudioPip.create({
+        stageSelector: '#fvsViewportWrap',
+        canvasSelector: '#fvsCanvas',
+        storageKey: 'fp_pip_video',
+        fps: 24,
+        videoPlayBtnSelector: '#btnPlayPause',
+        videoPlayIconSelector: '#playIcon',
+        videoTimecodeSelector: '#fvsTimecodeDisplay',
+    }) : { stageVisible: true, pipForced: false, pipMinimised: false, pipExpanded: false, pipBottom: false, pipPlaying: false, pipTimecode: '00:00.0 / 00:00.0', initPip() {}, isPipDockVisible() { return false; }, isPipPillVisible() { return false; } };
+    return Object.assign(base, {
+        mobileTool: 'templates',
+        mobileCanvasCollapsed: false,
+    });
+}
+</script>
+<div class="fvs-wrap" id="familyVideoStudioApp" x-data="videoStudioPip()" x-init="initPip()">
     @include('member.creativeStudioTabs', ['creativeTab' => 'archives'])
 
     <!-- Hero Banner -->
@@ -379,7 +564,7 @@
     <div class="fvs-grid">
 
         <!-- Column 1: Studio Canvas & Interactive Playback -->
-        <div class="fvs-card">
+        <div class="fvs-card fvs-stage-card">
             <div class="fvs-card__header">
                 <h2 class="fvs-card__title" id="fvsViewportTitle">
                     <i class="bi bi-film text-warning"></i> 16:9 Cinematic Canvas Viewport
@@ -390,12 +575,20 @@
                         <button type="button" class="btn btn-sm btn-outline-light fvs-format-btn" data-fvs-aspect="1:1">1:1</button>
                         <button type="button" class="btn btn-sm btn-outline-light fvs-format-btn" data-fvs-aspect="9:16">9:16</button>
                     </div>
-                    <span class="badge bg-dark border border-secondary text-light" id="fvsResolutionBadge">1920 &times; 1080 (16:9)</span>
+                    <span class="badge bg-dark border border-secondary text-light d-none d-md-inline-block" id="fvsResolutionBadge">1920 &times; 1080 (16:9)</span>
+                    <button type="button" class="fvs-mobile-collapse-btn" @click="mobileCanvasCollapsed = !mobileCanvasCollapsed" :aria-expanded="!mobileCanvasCollapsed" title="Minimise or expand preview">
+                        <i class="bi" :class="mobileCanvasCollapsed ? 'bi-chevron-down' : 'bi-chevron-up'"></i>
+                        <span x-text="mobileCanvasCollapsed ? 'Show' : 'Hide'"></span>
+                    </button>
+                    <button type="button" class="spip-trigger d-none d-md-inline-flex" @click="togglePipPopout()" :aria-pressed="pipForced && !pipMinimised" title="Pop out preview while editing">
+                        <i class="bi bi-pip" aria-hidden="true"></i>
+                        <span x-text="(pipForced && !pipMinimised) ? 'Docked' : 'Pop out'"></span>
+                    </button>
                 </div>
             </div>
 
             <!-- Viewport Screen -->
-            <div class="fvs-viewport-wrap" id="fvsViewportWrap" data-aspect="16:9">
+            <div class="fvs-viewport-wrap" id="fvsViewportWrap" data-aspect="16:9" x-show="!mobileCanvasCollapsed" x-collapse>
                 <div class="fvs-hud-badge">
                     <div class="fvs-rec-pulse"></div>
                     <span id="fvsHudStatusText">STANDBY &bull; 60 FPS</span>
@@ -438,8 +631,24 @@
         <!-- Column 2: Kinetic Templates, Chrono-Sync & Upload Vault -->
         <div class="d-flex flex-column gap-4">
 
+            <!-- CapCut-Style Mobile Tool Dock -->
+            <div class="fvs-capcut-dock" role="tablist" aria-label="Video studio tools">
+                <button type="button" class="fvs-capcut-tab" :class="{ 'is-active': mobileTool === 'templates' }" @click="mobileTool = 'templates'">
+                    <i class="bi bi-magic"></i> Templates
+                </button>
+                <button type="button" class="fvs-capcut-tab" :class="{ 'is-active': mobileTool === 'multicam' }" @click="mobileTool = 'multicam'">
+                    <i class="bi bi-camera-reels"></i> Multi-Cam
+                </button>
+                <button type="button" class="fvs-capcut-tab" :class="{ 'is-active': mobileTool === 'upload' }" @click="mobileTool = 'upload'">
+                    <i class="bi bi-cloud-arrow-up"></i> Clips &amp; R2
+                </button>
+                <button type="button" class="fvs-capcut-tab" :class="{ 'is-active': mobileTool === 'suite' }" @click="mobileTool = 'suite'">
+                    <i class="bi bi-cpu-fill"></i> 12-Module AI
+                </button>
+            </div>
+
             <!-- 1-Click Kinetic Heritage Motion Templates -->
-            <div class="fvs-card">
+            <div class="fvs-card fvs-mobile-panel" x-show="mobileTool === 'templates'">
                 <div class="fvs-card__header">
                     <h2 class="fvs-card__title">
                         <i class="bi bi-magic text-warning"></i> 1-Click Kinetic Heritage Templates
@@ -474,7 +683,7 @@
             </div>
 
             <!-- Chrono-Sync Multi-Angle Camera Matrix -->
-            <div class="fvs-card">
+            <div class="fvs-card fvs-mobile-panel" x-show="mobileTool === 'multicam'">
                 <div class="fvs-card__header">
                     <h2 class="fvs-card__title">
                         <i class="bi bi-camera-reels text-warning"></i> Chrono-Sync Multi-Camera Matrix
@@ -495,16 +704,16 @@
                         <i class="bi bi-layout-split"></i> Split Duo
                     </button>
                 </div>
-                <div id="chronoSyncClustersContainer" class="p-3 rounded-3 bg-dark border border-secondary small">
+                <div id="chronoSyncClustersContainer" class="p-3 rounded-3 bg-dark text-light border border-secondary small">
                     <div class="d-flex align-items-center justify-content-between">
-                        <span><i class="bi bi-link-45deg text-warning"></i> Multi-Angle Cluster Sync:</span>
+                        <span class="text-light"><i class="bi bi-link-45deg text-warning"></i> Multi-Angle Cluster Sync:</span>
                         <span class="text-success fw-bold">Live Synchronisation Ready</span>
                     </div>
                 </div>
             </div>
 
             <!-- Zero-Server Direct-to-R2 Vault Uploader -->
-            <div class="fvs-card">
+            <div class="fvs-card fvs-mobile-panel" x-show="mobileTool === 'upload'">
                 <div class="fvs-card__header">
                     <h2 class="fvs-card__title">
                         <i class="bi bi-shield-check text-warning"></i> Direct R2 Zero-Egress Vault
@@ -576,11 +785,11 @@
     <div id="sovereignNleRoot"></div>
 
     <!-- Sovereign Kinship Video Studio: 12-Module Procedural & WASM Suite -->
-    <section class="sks-suite-panel" aria-label="Sovereign Kinship 12-Module Video Studio">
+    <section class="sks-suite-panel fvs-mobile-panel" x-show="mobileTool === 'suite'" aria-label="Sovereign Kinship 12-Module Video Studio">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
             <div>
                 <h2 class="fvs-card__title mb-1"><i class="bi bi-cpu-fill text-warning"></i> Sovereign Kinship 12-Module Studio Suite</h2>
-                <p class="text-muted small mb-0">100% client-side WASM/WebGL/Web Audio procedural processing with deterministic PHP/FFmpeg fallbacks.</p>
+                <p class="small mb-0" style="color: #cbd5e1;">100% client-side WASM/WebGL/Web Audio procedural processing with deterministic PHP/FFmpeg fallbacks.</p>
             </div>
             <span class="sks-status-pill"><i class="bi bi-shield-check"></i> Zero-SaaS &amp; GDPR Art. 9 Protected</span>
         </div>
@@ -730,6 +939,26 @@
         </div>
     </section>
 
+    {{-- CapCut-Style Mobile Sticky Bottom Export Bar --}}
+    <div class="fvs-mobile-bottom-bar" aria-label="Quick studio actions">
+        <button type="button" class="fvs-btn fvs-btn-glass" onclick="document.getElementById('btnTriggerUpload')?.click()">
+            <i class="bi bi-cloud-arrow-up"></i> Upload
+        </button>
+        <button type="button" class="fvs-btn fvs-btn-gold" onclick="document.getElementById('btnPublishTrigger')?.click()">
+            <i class="bi bi-send-fill"></i> Publish
+        </button>
+        <button type="button" class="fvs-btn fvs-btn-primary" onclick="document.getElementById('btnExportDownload')?.click()">
+            <i class="bi bi-download"></i> Export MP4
+        </button>
+    </div>
+
+    {{-- Floating PiP & Expandable Preview --}}
+    @include('member.includes.studioPip', [
+        'mode' => 'canvas',
+        'title' => 'Video preview',
+        'blockedExpr' => 'false',
+        'hasVideoControls' => true,
+    ])
 </div>
 
 <!-- Hidden Video Elements for Composition (offscreen, not display:none, so browsers decode video frames) -->

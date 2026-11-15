@@ -207,7 +207,7 @@ foreach(($eventData ?? []) as $event) {
     @includeIf('member.includes.familyHeritageWidget')
 
     <!-- Family Members Metric Card -->
-    <div class="card border-0 text-white text-center shadow-lg position-relative overflow-hidden" style="background: linear-gradient(135deg, #2a0a0d 0%, #2a0a0d 40%, #8a1019 80%, #b8202c 100%); border-radius: 20px; padding: 28px 20px; box-shadow: 0 16px 32px -4px rgba(42,10,13, 0.35);">
+    <div class="card border-0 text-white text-center shadow-lg position-relative overflow-hidden" id="familyNetworkCard" style="background: linear-gradient(135deg, #2a0a0d 0%, #2a0a0d 40%, #8a1019 80%, #b8202c 100%); border-radius: 20px; padding: 28px 20px; box-shadow: 0 16px 32px -4px rgba(42,10,13, 0.35);">
         <div class="d-inline-flex align-items-center gap-1 mb-2 px-3 py-1 rounded-pill mx-auto" style="background: rgba(255, 255, 255, 0.15); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
             <i class="bi bi-people-fill text-warning"></i> Family Network
         </div>

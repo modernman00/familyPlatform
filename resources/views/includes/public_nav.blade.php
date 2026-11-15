@@ -52,17 +52,17 @@
         </li>
 @if(\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('users'))
         <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
-          <a class="btn btn-brand w-100" href="/profilePage">{{ __('nav.dashboard', 'Go to Family Dashboard') }}</a>
+          <a class="btn btn-brand w-100 w-lg-auto" href="/profilePage">{{ __('nav.dashboard', 'Go to Family Dashboard') }}</a>
         </li>
         <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-          <a class="btn btn-brand-outline w-100" href="/signout">{{ __('nav.logout', 'Sign Out') }}</a>
+          <a class="btn btn-brand-outline w-100 w-lg-auto" href="/signout">{{ __('nav.logout', 'Sign Out') }}</a>
         </li>
 @else
         <li class="nav-item ms-lg-3 mt-3 mt-lg-0 loginNav signup_login">
-          <a class="btn btn-brand-outline w-100" href="/login">{{ __('nav.login', 'Log In') }}</a>
+          <a class="btn btn-brand-outline w-100 w-lg-auto" href="/login">{{ __('nav.login', 'Log In') }}</a>
         </li>
         <li class="nav-item ms-lg-2 mt-2 mt-lg-0 registerNav signup_login">
-          <a class="btn btn-brand w-100" href="/register">{{ __('nav.join_now', 'Join Now') }}</a>
+          <a class="btn btn-brand w-100 w-lg-auto" href="/register">{{ __('nav.join_now', 'Join Now') }}</a>
         </li>
 @endif
         <!-- Language Selector Dropdown -->

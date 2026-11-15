@@ -681,12 +681,12 @@ class FamilyReelsPlayer {
                     <span class="reel-action-count" id="reelCommentCount">${reel.comments_count || 0}</span>
                 </div>
 
-                <!-- Private FamilyChat Button (Artboard 8: Lock icon + FamilyChat label) -->
+                <!-- Private FamChat Button (Artboard 8: Lock icon + FamChat label) -->
                 <div class="d-flex flex-column align-items-center">
-                    <a href="/kin-whispers?recipient_id=${encodeURIComponent(String(reel.user_id || ''))}" class="reel-action-btn" id="btnReelWhisper" title="Send a private FamilyChat message to ${fullName}" style="text-decoration:none;">
+                    <a href="/kin-whispers?recipient_id=${encodeURIComponent(String(reel.user_id || ''))}" class="reel-action-btn" id="btnReelWhisper" title="Send a private FamChat message to ${fullName}" style="text-decoration:none;">
                         <i class="bi bi-lock"></i>
                     </a>
-                    <span class="reel-action-count">FamilyChat</span>
+                    <span class="reel-action-count">FamChat</span>
                 </div>
 
                 <!-- Share Link -->

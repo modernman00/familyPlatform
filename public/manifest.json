@@ -122,8 +122,8 @@
       ]
     },
     {
-      "name": "FamilyChat & Calls",
-      "short_name": "FamilyChat",
+      "name": "FamChat & Calls",
+      "short_name": "FamChat",
       "description": "Private family messages, voice dedications and WebRTC calls",
       "url": "/kin-whispers?source=pwa_shortcut",
       "icons": [

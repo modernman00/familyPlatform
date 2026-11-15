@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Great+Vibes&family=Playfair+Display:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="/public/css/festive-cards.css?v={{ assetVersion('css/festive-cards.css') }}">
+<link rel="stylesheet" href="/public/css/studio-pip.css?v={{ assetVersion('css/studio-pip.css') }}">
 <style>
 .fs-wrap { --fs-gold: #c9a24b; --fs-gold-2: #f3dc9a; --fs-ink: #17120c; --fs-line: #e8e1d4; --fs-surface: #ffffff; --fs-muted: #6b6257; --fs-soft: #faf7f1;
     max-width: 1240px; margin: 0 auto; padding: 8px 16px 72px; color: var(--fs-ink); }
@@ -177,6 +178,137 @@
 @keyframes fs-shimmer { from { background: #1c1a1e; } to { background: #2a2630; } }
 .fp-toast { position: fixed; left: 50%; bottom: 28px; z-index: 3000; transform: translate(-50%, 20px); opacity: 0; background: #17120c; color: #f4efe6; border: 1px solid rgba(243,220,154,.35); padding: 12px 18px; border-radius: 999px; font-size: .9rem; font-weight: 600; box-shadow: 0 16px 30px rgba(0,0,0,.35); transition: opacity .3s, transform .3s; }
 .fp-toast.is-in { opacity: 1; transform: translate(-50%, 0); }
+
+/* CapCut-Style Mobile Studio Ergonomics */
+.fs-capcut-dock,
+.fs-mobile-bottom-bar,
+.fs-mobile-collapse-btn {
+    display: none;
+}
+@media (min-width: 768px) {
+    .fs-step { display: block !important; }
+}
+@media (max-width: 767.98px) {
+    .fs-wrap { padding: 6px 10px calc(88px + env(safe-area-inset-bottom, 0px)); }
+    .fs-hero { padding: 10px 14px; border-radius: 16px; margin-bottom: 10px; }
+    .fs-hero__eyebrow, .fs-hero p { display: none; }
+    .fs-hero h1 { font-size: 1.15rem; margin: 0; }
+    .fs-pill-btn { min-height: 44px; padding: 6px 12px; font-size: .78rem; }
+    .fs-grid { gap: 10px; }
+    .fs-preview-col {
+        position: sticky;
+        top: 56px;
+        z-index: 35;
+    }
+    .fs-stage {
+        padding: 10px 12px 10px;
+        border-radius: 18px;
+        box-shadow: 0 14px 32px -10px rgba(0,0,0,.75);
+    }
+    .fs-stage__card { max-width: 175px; }
+    .fs-stage__meta, .fs-stage__hint { display: none; }
+    .fs-mobile-collapse-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        min-height: 44px;
+        min-width: 44px;
+        padding: 0 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,.18);
+        background: rgba(255,255,255,.08);
+        color: #f8fafc;
+        font-size: .76rem;
+        font-weight: 700;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .fs-capcut-dock {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+        padding: 4px 2px 10px;
+        margin-bottom: 4px;
+    }
+    .fs-capcut-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 44px;
+        padding: 8px 14px;
+        border-radius: 12px;
+        border: 1.5px solid var(--fs-line);
+        background: var(--fs-surface);
+        color: var(--fs-ink);
+        font-size: .8rem;
+        font-weight: 700;
+        white-space: nowrap;
+        flex-shrink: 0;
+        scroll-snap-align: start;
+        cursor: pointer;
+    }
+    .fs-capcut-tab.is-active {
+        background: linear-gradient(110deg, #f3dc9a, #c9a24b);
+        border-color: #c9a24b;
+        color: #1b1406;
+    }
+    .fs-panel { padding: 14px 12px; border-radius: 18px; }
+    .fs-step { padding-bottom: 12px; margin-bottom: 12px; border-bottom: 0; }
+    .fs-panel > .fs-submit { display: none; }
+    .fs-occasions {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 8px;
+        padding-bottom: 6px;
+    }
+    .fs-occ { flex: 0 0 auto; min-width: 132px; scroll-snap-align: start; }
+    .fs-occ--custom { min-width: 176px; }
+    .fs-styles {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 10px;
+        padding-bottom: 6px;
+    }
+    .fs-style { flex: 0 0 124px; scroll-snap-align: start; }
+    .fs-palettes,
+    .fs-centre-modes {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 6px;
+    }
+    .fs-pal { flex: 0 0 auto; }
+    .fs-mobile-bottom-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1040;
+        padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+        background: rgba(18, 16, 20, 0.96);
+        border-top: 1px solid rgba(243, 220, 154, 0.28);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+    .fs-mobile-bottom-bar .fs-submit {
+        min-height: 46px;
+        padding: 10px 18px;
+        font-size: .92rem;
+    }
+}
 </style>
 @endpush
 
@@ -207,7 +339,20 @@
         {{-- ─────────── Live preview ─────────── --}}
         <aside class="fs-preview-col" aria-label="Live preview">
             <div class="fs-stage">
-                <div class="fs-stage__card">
+                <div class="spip-stage-bar">
+                    <span class="spip-dock__time">Live preview</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="fs-mobile-collapse-btn" @click="mobilePreviewCollapsed = !mobilePreviewCollapsed" :aria-expanded="!mobilePreviewCollapsed">
+                            <i class="bi" :class="mobilePreviewCollapsed ? 'bi-chevron-down' : 'bi-chevron-up'"></i>
+                            <span x-text="mobilePreviewCollapsed ? 'Show' : 'Hide'"></span>
+                        </button>
+                        <button type="button" class="spip-trigger d-none d-md-inline-flex" @click="togglePipPopout()" :aria-pressed="pipForced && !pipMinimised" title="Pop out preview while editing">
+                            <i class="bi bi-pip" aria-hidden="true"></i>
+                            <span x-text="(pipForced && !pipMinimised) ? 'Docked' : 'Pop out'"></span>
+                        </button>
+                    </div>
+                </div>
+                <div class="fs-stage__card" x-show="!mobilePreviewCollapsed" x-collapse>
                     @include('festive.card', ['live' => true, 'tilt' => true, 'thumb' => false, 'animateIn' => false, 'styleExpr' => 'c.style', 'card' => []])
                 </div>
                 <div class="fs-stage__meta">
@@ -220,11 +365,18 @@
 
         {{-- ─────────── Studio form ─────────── --}}
         <div>
-            <form class="fs-panel" @submit.prevent="submit()" novalidate>
+            <div class="fs-capcut-dock" role="tablist" aria-label="Card studio steps">
+                <button type="button" class="fs-capcut-tab" :class="{ 'is-active': mobileStep === 'occasion' }" @click="mobileStep = 'occasion'">🎉 Occasion</button>
+                <button type="button" class="fs-capcut-tab" :class="{ 'is-active': mobileStep === 'style' }" @click="mobileStep = 'style'">✨ Style</button>
+                <button type="button" class="fs-capcut-tab" :class="{ 'is-active': mobileStep === 'palette' }" @click="mobileStep = 'palette'">🎨 Colour</button>
+                <button type="button" class="fs-capcut-tab" :class="{ 'is-active': mobileStep === 'photo' }" @click="mobileStep = 'photo'">🖼️ Photo</button>
+                <button type="button" class="fs-capcut-tab" :class="{ 'is-active': mobileStep === 'words' }" @click="mobileStep = 'words'">✍️ Words</button>
+            </div>
+            <form id="fsStudioForm" class="fs-panel" @submit.prevent="submit()" novalidate>
                 @csrf
 
                 {{-- 1. Occasion --}}
-                <section class="fs-step" aria-labelledby="fsStepOccasion">
+                <section class="fs-step" x-show="mobileStep === 'occasion'" aria-labelledby="fsStepOccasion">
                     <div class="fs-step__head"><span class="fs-step__num">I</span><h2 class="fs-step__title" id="fsStepOccasion">What are we celebrating?</h2></div>
                     <div class="fs-occasions" role="group" aria-label="Occasion">
                         @foreach($occasions as $key => $occ)
@@ -261,7 +413,7 @@
                 </section>
 
                 {{-- 2. Design style --}}
-                <section class="fs-step" aria-labelledby="fsStepStyle">
+                <section class="fs-step" x-show="mobileStep === 'style'" aria-labelledby="fsStepStyle">
                     <div class="fs-step__head"><span class="fs-step__num">II</span><h2 class="fs-step__title" id="fsStepStyle">Choose a design</h2></div>
                     <p class="fs-step__sub">Each preview uses your words and photo.</p>
                     <div class="fs-styles" role="group" aria-label="Design style">
@@ -278,7 +430,7 @@
                 </section>
 
                 {{-- 3. Palette --}}
-                <section class="fs-step" aria-labelledby="fsStepPalette">
+                <section class="fs-step" x-show="mobileStep === 'palette'" aria-labelledby="fsStepPalette">
                     <div class="fs-step__head"><span class="fs-step__num">III</span><h2 class="fs-step__title" id="fsStepPalette">Palette &amp; metal</h2></div>
                     <div class="fs-palettes" role="group" aria-label="Palette">
                         @foreach($themes as $tKey => $thm)
@@ -291,7 +443,7 @@
                 </section>
 
                 {{-- 4. Centrepiece & Photo --}}
-                <section class="fs-step" aria-labelledby="fsStepPhoto">
+                <section class="fs-step" x-show="mobileStep === 'photo'" aria-labelledby="fsStepPhoto">
                     <div class="fs-step__head"><span class="fs-step__num">IV</span><h2 class="fs-step__title" id="fsStepPhoto">Centrepiece &amp; photo <span style="font-size:.8rem;color:var(--fs-muted);font-family:inherit">(optional)</span></h2></div>
                     <div class="fs-centre-modes" role="group" aria-label="Centrepiece style">
                         <button type="button" class="fs-cmode" :aria-pressed="heroMode === 'art'" @click="heroMode = 'art'">
@@ -327,7 +479,7 @@
                 </section>
 
                 {{-- 5. Words --}}
-                <section class="fs-step" aria-labelledby="fsStepWords">
+                <section class="fs-step" x-show="mobileStep === 'words'" aria-labelledby="fsStepWords">
                     <div class="fs-step__head"><span class="fs-step__num">V</span><h2 class="fs-step__title" id="fsStepWords">Your words</h2></div>
 
                     <div class="fs-field">
@@ -426,12 +578,13 @@
         @endif
     </section>
 
-    {{-- Mobile: jump back to the live preview --}}
-    <button type="button" class="fs-fab" x-show="!stageVisible && !sheet" x-cloak x-transition.opacity
-            @click="document.querySelector('.fs-stage').scrollIntoView({ behavior: 'smooth', block: 'start' })" aria-label="See your card preview">
-        <span class="fs-fab__thumb" aria-hidden="true">@include('festive.card', ['live' => true, 'thumb' => true, 'tilt' => false, 'animateIn' => false, 'styleExpr' => 'c.style', 'card' => []])</span>
-        <span>Preview card</span>
-    </button>
+    {{-- Floating PiP & Expandable Preview --}}
+    @include('member.includes.studioPip', [
+        'mode' => 'card',
+        'title' => 'Card preview',
+        'blockedExpr' => 'sheet',
+        'hasVideoControls' => false,
+    ])
 
     {{-- ─────────── Share sheet ─────────── --}}
     <div class="fs-sheet" x-show="sheet" x-cloak x-transition.opacity @keydown.escape.window="closeSheet()" @click.self="closeSheet()" role="dialog" aria-modal="true" aria-labelledby="fsSheetTitle">
@@ -466,10 +619,23 @@
             </div>
         </template>
     </div>
+    {{-- CapCut-Style Mobile Sticky Bottom Seal & Send Bar --}}
+    <div class="fs-mobile-bottom-bar" aria-label="Seal and send card">
+        <button type="button" class="fs-submit" :disabled="busy" @click="submit()">
+            <span class="fs-spin" x-show="busy" x-cloak aria-hidden="true"></span>
+            <i class="bi bi-envelope-heart-fill" x-show="!busy" aria-hidden="true"></i>
+            <span x-text="busy ? 'Sealing envelope…' : 'Seal & Send Card'"></span>
+        </button>
+    </div>
 </div>
 
+<script src="/public/js/studio-pip.js?v={{ assetVersion('js/studio-pip.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
 <script nonce="{{ csp_nonce($nonce ?? null) }}">
 function festiveStudioWizard() {
+    const pipMixin = window.FPStudioPip ? window.FPStudioPip.create({
+        stageSelector: '.fs-stage',
+        storageKey: 'fp_pip_card',
+    }) : {};
     const occasions = @json($occasions, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
     const themes = @json($themes, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
     const templateStyles = @json($templateStyles, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
@@ -477,6 +643,9 @@ function festiveStudioWizard() {
     const defaultSender = @json(trim((string)($user['lastName'] ?? '')) !== '' ? 'The ' . trim((string)$user['lastName']) . ' Family' : (trim((string)($user['name'] ?? '')) ?: 'The Family'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
 
     return {
+        ...pipMixin,
+        mobileStep: 'occasion',
+        mobilePreviewCollapsed: false,
         occasions, themes, templateStyles, moods,
         occasionKey: 'christmas',
         customOccasion: '',
@@ -500,7 +669,6 @@ function festiveStudioWizard() {
         sheet: null,
         feedBusy: false,
         canNativeShare: !!navigator.share,
-        stageVisible: true,
 
         init() {
             const params = new URLSearchParams(window.location.search);
@@ -518,10 +686,7 @@ function festiveStudioWizard() {
                 this.headlineTouched = true;
             }
             if (window.FPCards) window.FPCards.initTilt(this.$el);
-            const stage = this.$el.querySelector('.fs-stage');
-            if (stage && 'IntersectionObserver' in window) {
-                new IntersectionObserver((entries) => { this.stageVisible = entries[0].isIntersecting; }, { threshold: 0.15 }).observe(stage);
-            }
+            if (typeof this.initPip === 'function') this.initPip();
         },
 
         get selectedOccasion() { return this.occasions[this.occasionKey] || this.occasions.christmas; },

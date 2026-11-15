@@ -462,8 +462,15 @@ img.rounded-circle {
   border-radius: 8px;
 }
 
-/* Mobile Responsiveness: Profile Card & Feed for Mobile/PWA & Tablet (< 992px) */
+/* Ensure .profile-column remains visible on tablet & mobile viewports */
 @media (max-width: 991.98px) {
+  .profile-column {
+    display: block;
+  }
+}
+
+/* Mobile Responsiveness: Single-column stack on Phones (< 768px); 768px–1199.98px uses Tablet 2-Column Grid */
+@media (max-width: 767.98px) {
   .container-main {
     flex-direction: column;
     padding: 8px 4px calc(70px + env(safe-area-inset-bottom, 0px)) 4px;
@@ -499,9 +506,11 @@ img.rounded-circle {
     position: static;
     max-height: none;
   }
+}
 
+@media (max-width: 991.98px) {
   .post-content p {
-    font-size: clamp(1rem, 3.8vw, 1.0625rem) !important;
+    font-size: clamp(1rem, 2.2vw, 1.0625rem) !important;
     line-height: 1.55 !important;
   }
 

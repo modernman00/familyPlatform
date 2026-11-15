@@ -128,7 +128,11 @@
             color: #64748b;
             font-size: 0.85rem;
             font-weight: 600;
-            padding: 6px 14px;
+            padding: 8px 14px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
             border-radius: var(--stitch-radius-pill);
             transition: all 0.2s ease;
             white-space: nowrap;
@@ -411,6 +415,61 @@
         #studioLineageScopeBanner .studio-lineage-option:has(input:focus-visible) { outline: 2px solid var(--stitch-primary); outline-offset: 2px; }
         #studioLineageScopeBanner #studioLineageScopeHelp { color: #475569 !important; font-size: .78rem; }
         #studioLineageScopeBanner #studioLineageScopeHelp strong { color: #0f172a; }
+
+        /* CapCut-Style Mobile Tree Studio Ergonomics */
+        @media (max-width: 767.98px) {
+            .studio-header {
+                padding: 1.15rem 1rem;
+                margin-bottom: 1rem;
+                border-radius: 18px;
+            }
+            .studio-header .display-6 {
+                font-size: 1.4rem;
+            }
+            .studio-action-strip {
+                flex-wrap: nowrap !important;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x proximity;
+                padding-bottom: 4px;
+            }
+            .studio-action-strip > a,
+            .studio-action-strip > button {
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+            .stat-badge-card {
+                padding: 0.65rem 0.5rem;
+                border-radius: 12px;
+            }
+            .stat-badge-val {
+                font-size: 1.25rem;
+            }
+            .studio-toolbar {
+                padding: 0.65rem 0.75rem;
+                margin-bottom: 1rem;
+                gap: 0.65rem;
+            }
+            .filter-nav-pills {
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x proximity;
+                width: 100%;
+            }
+            .search-input-stitch,
+            .search-input-stitch:focus {
+                width: 100%;
+                min-height: 44px;
+            }
+            .relative-card {
+                padding: 1rem;
+                border-radius: 16px;
+            }
+        }
+        @media (max-width: 575.98px) {
+            .studio-hero-desc {
+                display: none;
+            }
+        }
     </style>
 
 <div class="container py-4">
@@ -449,7 +508,7 @@
                         Family Lineage Studio
                     @endif
                 </h1>
-                <p class="text-white-50 mb-3" style="font-size: 1.05rem; max-width: 520px; line-height: 1.5;">
+                <p class="text-white-50 mb-3 studio-hero-desc" style="font-size: 1.05rem; max-width: 520px; line-height: 1.5;">
                     @if(($activeLineageScope ?? 'primary') === 'maternal' && !empty($maternalFamCode))
                         Curating your Birth / Maiden Family lineage (<strong>#{{ $maternalFamCode }}</strong>). Manage your parents, birth siblings, and heritage with complete ease.
                     @else
@@ -457,16 +516,16 @@
                     @endif
                 </p>
                 @if(!empty($hasMaternalCode) && !empty($maternalFamCode))
-                <div class="d-inline-flex flex-wrap align-items-center gap-2 mb-3 p-1 rounded-pill" style="background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(255, 255, 255, 0.25);">
-                    <a href="?lineage=primary" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') !== 'maternal' ? 'btn-warning text-dark shadow-sm' : 'text-white' }}" style="min-height: 38px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                <div class="d-inline-flex flex-nowrap align-items-center gap-2 mb-3 p-1 rounded-pill" style="background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(255, 255, 255, 0.25); max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                    <a href="?lineage=primary" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') !== 'maternal' ? 'btn-warning text-dark shadow-sm' : 'text-white' }}" style="min-height: 44px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
                         <i class="bi bi-house-heart-fill"></i> Marital / Household Tree (#{{ $primaryFamCode ?? ($data['famCode'] ?? '') }})
                     </a>
-                    <a href="?lineage=birth" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') === 'maternal' ? 'btn-warning text-dark shadow-sm' : 'text-white' }}" style="min-height: 38px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                    <a href="?lineage=birth" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3 {{ ($activeLineageScope ?? 'primary') === 'maternal' ? 'btn-warning text-dark shadow-sm' : 'text-white' }}" style="min-height: 44px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
                         <i class="bi bi-diagram-3-fill"></i> Birth / Maiden Family (#{{ $maternalFamCode }})
                     </a>
                 </div>
                 @endif
-                <div class="d-flex flex-wrap gap-2">
+                <div class="d-flex flex-wrap gap-2 studio-action-strip">
                     <a href="/organogram?mode=canvas{{ ($activeLineageScope ?? 'primary') === 'maternal' ? '&lineage=birth' : '' }}" class="btn btn-light fw-bold text-primary px-3 px-sm-4 py-2" style="border-radius: 12px; min-height: 44px; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                         <i class="bi bi-diagram-3-fill me-2"></i>View Interactive Tree
                     </a>

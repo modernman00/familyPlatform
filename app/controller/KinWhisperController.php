@@ -37,14 +37,26 @@ final class KinWhisperController extends BaseController
 
             $selectedThread = null;
             $messages = [];
+            $accessError = null;
             if ($selectedThreadId !== '') {
                 try {
                     $selectedThread = KinWhisperService::getThread($currentUserId, $selectedThreadId);
                     $messages = KinWhisperService::getMessages($currentUserId, $selectedThreadId);
-                } catch (\Throwable $e) {
-                    // Thread may not be found or access denied; fall back gracefully
+                } catch (ForbiddenException | UnauthorisedException $e) {
+                    http_response_code(403);
                     $selectedThread = null;
                     $messages = [];
+                    $accessError = 'Access denied: You do not have permission to view or join this FamilyChat conversation.';
+                } catch (NotFoundException $e) {
+                    http_response_code(404);
+                    $selectedThread = null;
+                    $messages = [];
+                    $accessError = 'This FamilyChat conversation could not be found.';
+                } catch (\Throwable $e) {
+                    http_response_code(403);
+                    $selectedThread = null;
+                    $messages = [];
+                    $accessError = 'Unable to open this FamilyChat conversation.';
                 }
             } elseif (!empty($threads)) {
                 $selectedThread = $threads[0];
@@ -61,6 +73,8 @@ final class KinWhisperController extends BaseController
                 'messages' => $messages,
                 'kin' => $kin,
                 'presence_privacy' => KinWhisperService::getPresencePrivacy($currentUserId),
+                'access_error' => $accessError,
+                'ice_servers' => self::buildIceServers(),
                 'server_now_iso' => gmdate('Y-m-d\TH:i:s\Z'),
             ]);
         } catch (\Throwable $th) {
@@ -313,15 +327,16 @@ final class KinWhisperController extends BaseController
             echo json_encode(['error' => 'Unauthorized: Please sign in.']);
             return;
         }
-        session_write_close();
 
         if (\App\services\AnalyticsService::isRateLimited($currentUserId, 'kin_whisper_audio_upload', 10, 60)) {
+            session_write_close();
             http_response_code(429);
             echo json_encode(['error' => 'Audio upload rate limit reached. Please wait a moment before recording again.']);
             return;
         }
 
         if (empty($_FILES['audio'])) {
+            session_write_close();
             http_response_code(400);
             echo json_encode(['error' => 'No audio file received.']);
             return;
@@ -331,8 +346,19 @@ final class KinWhisperController extends BaseController
             /** @var array{name: string, type: string, tmp_name: string, error: int, size: int} $file */
             $file = $_FILES['audio'];
             $result = KinWhisperService::uploadAudioWhisper($currentUserId, $file);
+            if (!empty($result['url'])) {
+                $uploaded = is_array($_SESSION['uploaded_whisper_assets'] ?? null) ? $_SESSION['uploaded_whisper_assets'] : [];
+                $uploaded[] = (string)$result['url'];
+                $_SESSION['uploaded_whisper_assets'] = array_slice($uploaded, -50);
+            }
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
             echo json_encode(['success' => true, 'audio' => $result]);
         } catch (\Throwable $th) {
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
             $this->handleJsonException($th);
         }
     }
@@ -351,6 +377,7 @@ final class KinWhisperController extends BaseController
         }
 
         if (\App\services\AnalyticsService::isRateLimited($currentUserId, 'kin_whisper_media_upload', 25, 60)) {
+            session_write_close();
             http_response_code(429);
             echo json_encode(['error' => 'Media upload rate limit reached. Please wait a moment before uploading again.']);
             return;
@@ -358,16 +385,24 @@ final class KinWhisperController extends BaseController
 
         try {
             self::validateCsrf();
-            session_write_close();
 
             $file = $_FILES['media'] ?? ($_FILES['file'] ?? null);
             if (!$file || !is_array($file)) {
+                session_write_close();
                 http_response_code(400);
                 echo json_encode(['error' => 'No media file provided for upload.']);
                 return;
             }
 
             $result = KinWhisperService::uploadMediaWhisper($currentUserId, $file);
+            if (!empty($result['url'])) {
+                $uploaded = is_array($_SESSION['uploaded_whisper_assets'] ?? null) ? $_SESSION['uploaded_whisper_assets'] : [];
+                $uploaded[] = (string)$result['url'];
+                $_SESSION['uploaded_whisper_assets'] = array_slice($uploaded, -50);
+            }
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
             echo json_encode(['success' => true, 'attachment' => $result]);
         } catch (\Throwable $th) {
             if (session_status() === PHP_SESSION_ACTIVE) {
@@ -1028,9 +1063,10 @@ final class KinWhisperController extends BaseController
         session_write_close();
 
         $threadId = $this->resolveParamId($params, 'id');
+        $afterSeq = max(0, (int)($_GET['after_seq'] ?? 0));
 
         try {
-            $info = KinWhisperService::getCallInfo($currentUserId, $threadId);
+            $info = KinWhisperService::getCallInfo($currentUserId, $threadId, $afterSeq);
             echo json_encode(['success' => true, 'call' => $info]);
         } catch (\Throwable $th) {
             $this->handleJsonException($th);
@@ -1052,6 +1088,184 @@ final class KinWhisperController extends BaseController
             }
         }
         return $_POST;
+    }
+
+    /**
+     * Serve a protected FamChat media attachment only to authorised thread participants.
+     *
+     * @param mixed $params
+     */
+    public function apiServeMediaAsset(mixed $params = null): void
+    {
+        $file = $this->resolveParamId($params, 'file');
+        $this->serveProtectedAsset('media', $file);
+    }
+
+    /**
+     * Serve a protected FamChat audio whisper only to authorised thread participants.
+     *
+     * @param mixed $params
+     */
+    public function apiServeAudioAsset(mixed $params = null): void
+    {
+        $file = $this->resolveParamId($params, 'file');
+        $this->serveProtectedAsset('audio', $file);
+    }
+
+    /**
+     * Enforce authentication and thread-membership authorisation before streaming a whisper asset.
+     */
+    private function serveProtectedAsset(string $kind, string $file): void
+    {
+        $currentUserId = (string)($_SESSION['id'] ?? '');
+        if ($currentUserId === '') {
+            http_response_code(401);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['error' => 'Unauthorized: Please sign in.']);
+            return;
+        }
+
+        $uploadedAssets = is_array($_SESSION['uploaded_whisper_assets'] ?? null) ? $_SESSION['uploaded_whisper_assets'] : [];
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+
+        $safeFile = basename(trim($file));
+        if ($safeFile === '' || !preg_match('/^[a-zA-Z0-9_.-]+$/', $safeFile) || str_contains($safeFile, '..')) {
+            http_response_code(400);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['error' => 'Invalid asset filename.']);
+            return;
+        }
+
+        $baseDir = dirname(__DIR__, 2);
+        if ($kind === 'audio') {
+            $dir = $baseDir . '/public/audio/whispers';
+            $assetUrl = '/public/audio/whispers/' . $safeFile;
+        } else {
+            $dir = $baseDir . '/public/storage/whispers/media';
+            $assetUrl = '/public/storage/whispers/media/' . $safeFile;
+        }
+
+        $realDir = realpath($dir);
+        $realFile = realpath($dir . '/' . $safeFile);
+        if (!$realDir || !$realFile || !str_starts_with($realFile, $realDir . DIRECTORY_SEPARATOR) || !is_file($realFile)) {
+            http_response_code(404);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['error' => 'Asset not found.']);
+            return;
+        }
+
+        $authorized = in_array($assetUrl, $uploadedAssets, true);
+        if (!$authorized) {
+            try {
+                $db = \Src\Db::connect2();
+                if ($kind === 'audio') {
+                    $stmt = $db->prepare(
+                        'SELECT t.* FROM kin_messages m
+                         JOIN kin_threads t ON t.id = m.thread_id
+                         WHERE m.audio_url = ? LIMIT 5'
+                    );
+                    $stmt->execute([$assetUrl]);
+                } else {
+                    $stmt = $db->prepare(
+                        'SELECT t.* FROM kin_messages m
+                         JOIN kin_threads t ON t.id = m.thread_id
+                         WHERE m.metadata LIKE ? LIMIT 5'
+                    );
+                    $stmt->execute(['%' . $safeFile . '%']);
+                }
+
+                $threads = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+                foreach ($threads as $thread) {
+                    try {
+                        KinWhisperService::assertCanAccessThread($currentUserId, $thread);
+                        $authorized = true;
+                        break;
+                    } catch (ForbiddenException) {
+                        // Try next matching thread if any
+                    }
+                }
+            } catch (\Throwable $e) {
+                error_log('[KinWhisperController::serveProtectedAsset] ' . $e->getMessage());
+                $authorized = false;
+            }
+        }
+
+        if (!$authorized) {
+            http_response_code(403);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['error' => 'Forbidden: You do not have permission to access this media.']);
+            return;
+        }
+
+        $ext = strtolower(pathinfo($realFile, PATHINFO_EXTENSION));
+        $mimeMap = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'webp' => 'image/webp',
+            'gif' => 'image/gif',
+            'pdf' => 'application/pdf',
+            'mp4' => 'video/mp4',
+            'webm' => $kind === 'audio' ? 'audio/webm' : 'video/webm',
+            'mov' => 'video/quicktime',
+            'mp3' => 'audio/mpeg',
+            'm4a' => 'audio/mp4',
+            'ogg' => 'audio/ogg',
+            'wav' => 'audio/wav',
+        ];
+        $mime = $mimeMap[$ext] ?? 'application/octet-stream';
+
+        header('Content-Type: ' . $mime);
+        header('Content-Length: ' . (string)filesize($realFile));
+        header('X-Content-Type-Options: nosniff');
+        header('Cache-Control: private, max-age=3600');
+        readfile($realFile);
+    }
+
+    /**
+     * Build WebRTC ICE server configuration (STUN + optional TURN from environment).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private static function buildIceServers(): array
+    {
+        $rawJson = trim((string)($_ENV['WEBRTC_ICE_SERVERS_JSON'] ?? getenv('WEBRTC_ICE_SERVERS_JSON') ?: ''));
+        if ($rawJson !== '') {
+            $decoded = json_decode($rawJson, true);
+            if (is_array($decoded) && !empty($decoded)) {
+                return $decoded;
+            }
+        }
+
+        $servers = [
+            [
+                'urls' => [
+                    'stun:stun.l.google.com:19302',
+                    'stun:stun1.l.google.com:19302',
+                    'stun:stun2.l.google.com:19302',
+                    'stun:stun.cloudflare.com:3478',
+                    'stun:global.stun.twilio.com:3478',
+                ],
+            ],
+        ];
+
+        $turnUrl = trim((string)($_ENV['TURN_URL'] ?? getenv('TURN_URL') ?: ''));
+        if ($turnUrl !== '') {
+            $turnEntry = ['urls' => $turnUrl];
+            $turnUser = trim((string)($_ENV['TURN_USERNAME'] ?? getenv('TURN_USERNAME') ?: ''));
+            $turnCred = trim((string)($_ENV['TURN_CREDENTIAL'] ?? getenv('TURN_CREDENTIAL') ?: ''));
+            if ($turnUser !== '') {
+                $turnEntry['username'] = $turnUser;
+            }
+            if ($turnCred !== '') {
+                $turnEntry['credential'] = $turnCred;
+            }
+            $servers[] = $turnEntry;
+        }
+
+        return $servers;
     }
 
     /**

@@ -459,6 +459,31 @@
           </div>
         </div>
 
+        <!-- Pillar 8c: Interactive Profile Tour -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(163,22,33, 0.12); color: #a31621;">
+                <i class="bi bi-compass-fill fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">8c. Interactive Profile Tour</h3>
+                <span class="badge" style="background: #a31621; color: #fff;">Guided Walkthrough</span>
+              </div>
+            </div>
+
+            <p class="lead text-secondary">
+              Explore every feature on your home profile page with an interactive step-by-step spotlight tour—covering your cover photo, Family Codes, FamChat, Quick Actions, Post Composer, Reels, Events, and Heritage Rituals.
+            </p>
+
+            <ul class="text-secondary small mb-3">
+              <li><strong>Close for now:</strong> Tap the close button (<strong>&times;</strong>), press <strong>Escape</strong>, or tap outside the card to pause the tour for your current session.</li>
+              <li><strong>Permanently dismiss:</strong> Tap <strong>Don&rsquo;t show again</strong> (or finish the final step) to stop the tour from opening automatically on future visits.</li>
+              <li><strong>Reopen anytime:</strong> Tap the <strong>Profile Tour</strong> button on your profile card or inside Quick Actions whenever you want a refresher.</li>
+            </ul>
+          </div>
+        </div>
+
         <!-- Pillar 9: Privacy, Two-Factor Authentication (2FA) & Passkeys -->
         <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
           <div class="card-body p-4 p-md-5">
@@ -874,7 +899,7 @@
                 <i class="bi bi-chat-heart-fill fs-4"></i>
               </div>
               <div>
-                <h3 class="fw-bold mb-0 text-dark">FamilyChat &amp; Contextual Artifact Messaging</h3>
+                <h3 class="fw-bold mb-0 text-dark">FamChat &amp; Contextual Artifact Messaging</h3>
                 <span class="badge" style="background:#b8202c;">Intergenerational Safeguarding</span>
               </div>
             </div>
@@ -891,7 +916,7 @@
                     <h6 class="fw-bold text-dark mb-0">Artifact-Anchored Direct &amp; Multi-Kin Group Chats</h6>
                   </div>
                   <p class="small text-muted mb-2">
-                    Unlike disposable, uncontextualised chat rooms that deteriorate into ghost towns, FamilyChat threads are initiated directly from family artifacts or formed into dedicated family groups: asking an elder about a 1968 wedding photo, coordinating a reunion, or sharing private blessings.
+                    Unlike disposable, uncontextualised chat rooms that deteriorate into ghost towns, FamChat threads are initiated directly from family artifacts or formed into dedicated family groups: asking an elder about a 1968 wedding photo, coordinating a reunion, or sharing private blessings.
                   </p>
                   <ul class="small text-muted ps-3 mb-0">
                     <li>Anchors conversations to photos, memories, events, or lineage nodes.</li>
@@ -908,7 +933,7 @@
                     <h6 class="fw-bold text-dark mb-0">Asynchronous Voice Notes (&le; 60s)</h6>
                   </div>
                   <p class="small text-muted mb-2">
-                    Elders and young family members often find typing on mobile keyboards tedious. FamilyChat provides a native, one-tap voice recorder for authentic, spoken blessings and storytelling.
+                    Elders and young family members often find typing on mobile keyboards tedious. FamChat provides a native, one-tap voice recorder for authentic, spoken blessings and storytelling.
                   </p>
                   <ul class="small text-muted ps-3 mb-0">
                     <li>Strict 60-second duration ceiling ensures messages remain concise and focused.</li>
@@ -928,7 +953,7 @@
                     Private direct messaging can introduce grooming and harassment risks. FamilyPlatform enforces rigorous child protection invariants across all direct kin communications.
                   </p>
                   <ul class="small text-muted ps-3 mb-0">
-                    <li><strong>Parental Audit Trail:</strong> Any FamilyChat thread involving a minor under 18 automatically links the verified parent/guardian.</li>
+                    <li><strong>Parental Audit Trail:</strong> Any FamChat thread involving a minor under 18 automatically links the verified parent/guardian.</li>
                     <li><strong>Real-Time Alerts:</strong> Parents receive supervisory alerts whenever a new direct message is exchanged with their ward.</li>
                     <li><strong>IDOR &amp; BOLA Immunity:</strong> Unauthorised relatives or external intruders are hard-blocked with 403 Forbidden.</li>
                   </ul>
@@ -948,7 +973,7 @@
                     <li><strong>In-App Video &amp; Voice Calling:</strong> Peer-to-peer WebRTC video and audio calls with hardware-accelerated local preview and waveform indicators.</li>
                     <li><strong>Multi-Rail Fallbacks:</strong> Instant one-tap cellular (<code>tel:</code>) and WhatsApp Voice/Video call bridges.</li>
                     <li><strong>Read &amp; Seen Receipts:</strong> Live delivery badges ("✓ Delivered", "✓✓ Seen [time]", and "🛡️ Guardian Seen") give peace of mind.</li>
-                    <li><strong>Distinct FamilyChat Alerts &amp; Linked App:</strong> Incoming FamilyChat messages play a soft harmonic chime, display a bespoke crimson-and-gold FamilyChat banner when you are elsewhere in the app, use a two-pulse chat vibration pattern, and let you install <strong>FamilyChat</strong> as a separate home-screen or dock app (or pop it out into a dedicated window) that remains linked to your FamilyPlatform login and unread badge.</li>
+                    <li><strong>Distinct FamChat Alerts &amp; Calling:</strong> Incoming FamChat messages play a soft harmonic chime, display a bespoke crimson-and-gold FamChat banner when you are elsewhere in the app, use a two-pulse chat vibration pattern, and support in-app WebRTC voice and video calls with your kin.</li>
                     <li><strong>Family Emojis &amp; Disappearing Messages:</strong> 3D heritage emoji reactions, timed auto-disappearing messages, and one-click WhatsApp preview generation.</li>
                     <li><strong>Sender-Only Message Deletion:</strong> Delete your own text or voice messages permanently for everyone in the thread at any time (with an explicit confirmation prompt and instant audio purge).</li>
                   </ul>
@@ -959,7 +984,7 @@
             <div class="mt-4 pt-3 border-top d-flex align-items-center justify-content-between flex-wrap gap-2">
               <span class="text-muted small">Experience thoughtful intergenerational communication anchored to our family heritage.</span>
               <a href="/kin-whispers" class="btn btn-outline-danger btn-sm font-semibold rounded-pill px-4 min-h-[44px] d-inline-flex align-items-center gap-2">
-                <i class="bi bi-chat-heart-fill"></i> Open FamilyChat Workspace &rarr;
+                <i class="bi bi-chat-heart-fill"></i> Open FamChat Workspace &rarr;
               </a>
             </div>
           </div>
@@ -985,9 +1010,9 @@
             <div class="row g-3">
               <div class="col-md-6">
                 <div class="p-3 border rounded-3 bg-light h-100">
-                  <h6 class="fw-bold text-dark"><i class="bi bi-compass me-1 text-danger"></i> Streamlined Navigation &amp; FamilyChat</h6>
+                  <h6 class="fw-bold text-dark"><i class="bi bi-compass me-1 text-danger"></i> Streamlined Navigation &amp; FamChat</h6>
                   <p class="small text-muted mb-0">
-                    On mobile, a five-tab bottom bar provides instant access to <strong>Home, Tree, Create (+), Reels, and FamilyChat</strong>, while Search, Notifications, and your Account Menu live in the top bar. FamilyChat opens directly into your conversations with a three-pane desktop workspace (Inbox, Chat, and Shared Details).
+                    On mobile, a five-tab bottom bar provides instant access to <strong>Home, Tree, Create (+), Reels, and FamChat</strong>, while Search, Notifications, and your Account Menu live in the top bar. FamChat opens directly into your conversations with a three-pane desktop workspace (Inbox, Chat, and Shared Details).
                   </p>
                 </div>
               </div>
@@ -995,7 +1020,7 @@
                 <div class="p-3 border rounded-3 bg-light h-100">
                   <h6 class="fw-bold text-dark"><i class="bi bi-diagram-3 me-1 text-danger"></i> Interactive Tree &amp; Relationship Path</h6>
                   <p class="small text-muted mb-0">
-                    Selecting any relative on the Family Tree opens their quick card with one-tap actions to <strong>Add relative</strong>, <strong>FamilyChat</strong>, or view their <strong>Profile</strong>. Visiting a relative's profile displays a visual <em>"How you're related"</em> path alongside kin-only contact protection.
+                    Selecting any relative on the Family Tree opens their quick card with one-tap actions to <strong>Add relative</strong>, <strong>FamChat</strong>, or view their <strong>Profile</strong>. Visiting a relative's profile displays a visual <em>"How you're related"</em> path alongside kin-only contact protection.
                   </p>
                 </div>
               </div>
