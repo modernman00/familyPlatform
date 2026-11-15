@@ -156,6 +156,7 @@ class ShareTargetControllerTest extends SocialFeedTestCase
         $ticket = basename($latestTicketFile, '.json');
 
         $_GET['ticket'] = $ticket;
+        $_SESSION['id'] = 'test_user_1';
         ob_start();
         (new ShareTargetController())->getPendingShare();
         $output = ob_get_clean();
