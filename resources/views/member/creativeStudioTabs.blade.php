@@ -17,7 +17,7 @@
     <a href="/familyStudio" class="btn {{ $creativeTab === 'tree' ? 'btn-primary' : 'btn-outline-primary' }} fw-bold d-inline-flex align-items-center" style="white-space:nowrap;flex-shrink:0;min-height:44px;border-radius:12px;" title="Tree Studio — Build &amp; curate your family lineage, unions and generations" @if($creativeTab === 'tree') aria-current="page" @endif>
         <i class="bi bi-diagram-3-fill me-2"></i>Tree Studio
     </a>
-    <a href="/poster-studio" class="btn {{ $creativeTab === 'flyers' ? 'btn-warning text-dark' : 'btn-outline-warning text-dark' }} fw-bold d-inline-flex align-items-center" style="white-space:nowrap;flex-shrink:0;min-height:44px;border-radius:12px;" title="Flyer Studio — Design reunion, jubilee &amp; milestone posters" @if($creativeTab === 'flyers') aria-current="page" @endif>
+    <a href="/poster-studio" class="btn {{ $creativeTab === 'flyers' ? 'btn-warning text-dark' : 'btn-outline-warning' }} fw-bold d-inline-flex align-items-center" style="white-space:nowrap;flex-shrink:0;min-height:44px;border-radius:12px;" title="Flyer Studio — Design reunion, jubilee &amp; milestone posters" @if($creativeTab === 'flyers') aria-current="page" @endif>
         <i class="bi bi-easel2-fill me-2"></i>Flyers &amp; Posters
     </a>
     <a href="/member/festive-cards" class="btn {{ $creativeTab === 'cards' ? 'btn-danger' : 'btn-outline-danger' }} fw-bold d-inline-flex align-items-center" style="white-space:nowrap;flex-shrink:0;min-height:44px;border-radius:12px;" title="Festive Cards — Send living 3D greeting envelopes for every occasion" @if($creativeTab === 'cards') aria-current="page" @endif>

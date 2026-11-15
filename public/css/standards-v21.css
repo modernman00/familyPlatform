@@ -632,6 +632,15 @@ body.dark-theme #memoriesCard,
 body.dark-theme #milestonesCard [style*="linear-gradient"],
 body.dark-theme #mobileMemoriesCard,
 body.dark-theme #mobileMilestonesCard,
+body.dark-mode .studio-toolbar,
+body.dark-mode .members-toolbar-stitch,
+body.dark-mode .relative-card,
+body.dark-mode .member-card,
+body.dark-mode .member-details,
+body.dark-mode .sidebar-card,
+body.dark-mode .content-card,
+body.dark-mode .journal-card,
+body.dark-mode .form-card,
 body.dark-theme .studio-toolbar,
 body.dark-theme .members-toolbar-stitch,
 body.dark-theme .relative-card,
@@ -644,6 +653,28 @@ body.dark-theme .form-card {
   background: var(--surface-card, #141416) !important;
   color: var(--text-main, #f8fafc) !important;
   border-color: var(--border-subtle, rgba(255, 255, 255, 0.12)) !important;
+}
+
+.btn-outline-warning {
+  color: #92400e;
+  border-color: #d97706;
+}
+.btn-outline-warning:hover {
+  color: #111827;
+  background-color: #fbbf24;
+  border-color: #fbbf24;
+}
+body.dark-mode .btn-outline-warning,
+body.dark-theme .btn-outline-warning,
+[data-bs-theme="dark"] .btn-outline-warning {
+  color: #fbbf24 !important;
+  border-color: #fbbf24 !important;
+}
+body.dark-mode .btn-outline-warning:hover,
+body.dark-theme .btn-outline-warning:hover,
+[data-bs-theme="dark"] .btn-outline-warning:hover {
+  color: #111827 !important;
+  background-color: #fbbf24 !important;
 }
 
 body.dark-mode .relative-name,

@@ -138,8 +138,10 @@ describe('Living Avatar & Emoji Studio', () => {
         cy.intercept('POST', '/api/emoji/save-avatar').as('saveAvatarReq');
         cy.intercept('POST', '/api/emoji/photo-to-avatar').as('photoToAvatarReq');
 
-        // 1. Click "Set as Profile Picture" (#atgSaveAvatarBtn) on the 3D Avatar stage
-        cy.get('#atgSaveAvatarBtn').click();
+        // 1. Switch to 3D Cartoon Avatar look and click "Set as Profile Picture" (#atgSaveAvatarBtn)
+        cy.get('.atg-look-btn[data-look="avatar"]').click();
+        cy.get('#atgSaveAvatarBtn').should('have.css', 'display').and('not.eq', 'none');
+        cy.get('#atgSaveAvatarBtn').click({ force: true });
         cy.wait('@saveAvatarReq').its('response.statusCode').should('eq', 200);
         cy.get('.swal2-confirm').click({ force: true });
 

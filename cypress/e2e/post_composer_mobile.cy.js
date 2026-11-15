@@ -11,7 +11,7 @@ describe('Create Post composer: mobile bottom sheet', () => {
     beforeEach(() => {
         cy.viewport(390, 844); // iPhone 14
         loginFully();
-        cy.get('#openPostModalTrigger', { timeout: 10000 }).should('be.visible');
+        cy.get('#openPostModalTriggerMobile, #openPostModalTrigger', { timeout: 10000 }).filter(':visible').should('have.length.at.least', 1);
     });
 
     const assertPostButtonOnScreen = () => {

@@ -29,7 +29,7 @@ describe('Then & Now v2 (RFC-0003)', () => {
 
     it('puts Then & Now one tap away on the feed composer and labels it in the post window', () => {
         // The composer quick-actions are icon-only buttons; the Then & Now one is identified by its accessible name.
-        cy.get('.composer-quick-actions button[aria-label*="Then & Now"]').should('be.visible').click();
+        cy.get('.composer-quick-actions button[aria-label*="Then & Now"]:visible').first().click();
         cy.get('#postModal').should('be.visible');
         cy.get('#thenNowContainer').should('not.have.class', 'd-none');
         cy.get('#thenNowFlag').should('have.value', '1');

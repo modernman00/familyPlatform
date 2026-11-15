@@ -383,6 +383,11 @@
     --fc-text-soft: color-mix(in srgb, var(--fc-ink) 78%, #4a3b2c);
     --fc-rule-gap: var(--fc-paper);
 }
+.fc-style-classic .fc-face,
+.fc-style-hollow .fc-face,
+.fc-style-origami .fc-face {
+    background: var(--fc-paper, #faf7f1);
+}
 .fc-style-classic .fc-bg {
     background:
         radial-gradient(120% 80% at 50% 0%, rgba(255, 255, 255, 0.75), transparent 60%),

@@ -68,7 +68,7 @@ RewriteCond %{REQUEST_URI} !^/tests/
 RewriteRule "^(app|bootstrap|database|scripts|tests|cypress|docs|storage|scratch|tmp|node_modules|vendor)(/|$)" - [F,L]
 RewriteRule "^resources/(views|lang|js)(/|$)" - [F,L]
 RewriteRule "^resources/assets/(js|sass)(/|$)" - [F,L]
-RewriteRule "^(resources/images|public/uploads)/.*\.(php[0-9]?|phtml|phar|html?|xhtml|svg|m?js|sh|cgi|pl|py)$" - [F,L,NC]
+RewriteRule "^(resources/images|public/uploads)/.*\.(php[0-9]?|phtml|phar|html?|xhtml|m?js|sh|cgi|pl|py)$" - [F,L,NC]
 
 # ---------------------------------------------------------------------------
 # 3. PHP execution lock-down — only the front controller runs.

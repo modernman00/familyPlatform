@@ -19,13 +19,42 @@
     function parseRgb(colorStr) {
         if (!colorStr) return null;
         const m = colorStr.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/i);
-        if (!m) return null;
-        return {
-            r: parseInt(m[1], 10),
-            g: parseInt(m[2], 10),
-            b: parseInt(m[3], 10),
-            a: m[4] !== undefined ? parseFloat(m[4]) : 1
-        };
+        if (m) {
+            return {
+                r: parseInt(m[1], 10),
+                g: parseInt(m[2], 10),
+                b: parseInt(m[3], 10),
+                a: m[4] !== undefined ? parseFloat(m[4]) : 1
+            };
+        }
+        const sp = colorStr.match(/rgba?\(\s*(\d+)\s+(\d+)\s+(\d+)(?:\s*\/\s*([\d.]+%?))?\s*\)/i);
+        if (sp) {
+            let a = 1;
+            if (sp[4] !== undefined) {
+                a = sp[4].endsWith('%') ? parseFloat(sp[4]) / 100 : parseFloat(sp[4]);
+            }
+            return {
+                r: parseInt(sp[1], 10),
+                g: parseInt(sp[2], 10),
+                b: parseInt(sp[3], 10),
+                a: a
+            };
+        }
+        const srgb = colorStr.match(/color\(\s*srgb\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)(?:\s*\/\s*([\d.]+%?))?\s*\)/i);
+        if (srgb) {
+            const clamp = (v) => Math.max(0, Math.min(255, Math.round(parseFloat(v) * 255)));
+            let a = 1;
+            if (srgb[4] !== undefined) {
+                a = srgb[4].endsWith('%') ? parseFloat(srgb[4]) / 100 : parseFloat(srgb[4]);
+            }
+            return {
+                r: clamp(srgb[1]),
+                g: clamp(srgb[2]),
+                b: clamp(srgb[3]),
+                a: a
+            };
+        }
+        return null;
     }
 
     function relativeLuminance(rgb) {
@@ -53,7 +82,7 @@
 
     function parseGradientFirstColor(bgImage) {
         if (!bgImage || bgImage === 'none') return null;
-        const m = bgImage.match(/rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+(?:\s*,\s*[\d.]+)?\s*\)/i);
+        const m = bgImage.match(/rgba?\([^)]+\)|color\(\s*srgb[^)]+\)/i);
         if (!m) return null;
         return parseRgb(m[0]);
     }
@@ -174,7 +203,7 @@
             if (ratio < 2.2) {
                 violations.push({
                     rule: 'GHOST_TYPOGRAPHY_CONTRAST',
-                    message: 'Severe low contrast (' + ratio.toFixed(2) + ':1) detected (Ghost Typography violation)',
+                    message: 'Severe low contrast (' + ratio.toFixed(2) + ':1) detected (Ghost Typography violation) [fg=' + style.color + ', bg=rgb(' + bg.r + ',' + bg.g + ',' + bg.b + ')]',
                     selector: getSelector(el),
                     text: text.slice(0, 40)
                 });

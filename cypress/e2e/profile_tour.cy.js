@@ -74,6 +74,7 @@ describe('Profile Page Interactive Tour Engine', () => {
         } else {
             cy.get('body').should('not.have.class', 'dark-mode');
         }
+        cy.wait(300); // Allow 200ms theme/navbar CSS transitions to settle
     }
 
     function assertSovereignDomAudit(label, tourOnly = false) {
@@ -113,9 +114,12 @@ describe('Profile Page Interactive Tour Engine', () => {
     it('supports temporary close, permanent dismissal via API, and always-available relaunch on Desktop (1440x900)', () => {
         cy.viewport(1440, 900);
         let allowAutoStart = true;
+        let forceServerNotDismissed = true;
         cy.on('window:before:load', (win) => {
             if (allowAutoStart) {
                 resetTourClientState(win);
+            }
+            if (forceServerNotDismissed) {
                 let cfg = { dismissed: false, isPendingApproval: false };
                 Object.defineProperty(win, '__FP_PROFILE_TOUR_CONFIG__', {
                     configurable: true,
@@ -178,7 +182,9 @@ describe('Profile Page Interactive Tour Engine', () => {
 
         // 5. Permanent dismissal persists via POST /api/profile/tour-preference
         cy.intercept('POST', '/api/profile/tour-preference').as('saveTourPref');
-        cy.get('[data-sspot-action="dismiss-permanent"]').should('be.visible').click();
+        cy.get('[data-sspot-action="dismiss-permanent"]').should('be.visible').click().then(() => {
+            forceServerNotDismissed = false;
+        });
         cy.wait('@saveTourPref').its('response.statusCode').should('eq', 200);
         cy.get('.sspot-overlay').should('not.exist');
 

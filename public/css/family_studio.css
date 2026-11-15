@@ -77,6 +77,11 @@
     line-height: 1.45;
 }
 
+.sks-module-card .small,
+.sks-module-card [id^="sksStatus_"] {
+    color: #cbd5e1;
+}
+
 .sks-consent-box {
     display: flex;
     align-items: flex-start;

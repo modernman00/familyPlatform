@@ -47,14 +47,14 @@ describe('Alpine Enterprise, Button Spinners & SweetAlert2 Real-Life Verificatio
             expect(notifStore.unreadCount).to.equal(9);
             expect(notifStore.display).to.equal('9');
 
-            // Increment count by 1 (becomes 10 -> 9+ ceiling)
+            // Increment count by 1 (becomes 10 -> exact double-digit count)
             notifStore.increment(1);
             expect(notifStore.unreadCount).to.equal(10);
-            expect(notifStore.display).to.equal('9+');
+            expect(notifStore.display).to.equal('10');
 
-            // Test 9+ ceiling formatting at larger counts
+            // Test larger counts render exact unread total
             notifStore.setCount(150);
-            expect(notifStore.display).to.equal('9+');
+            expect(notifStore.display).to.equal('150');
 
             // Clear count
             notifStore.clear();

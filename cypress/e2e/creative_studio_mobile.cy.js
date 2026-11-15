@@ -79,6 +79,7 @@ describe('Creative Studio & Sub-Studios Mobile CapCut Ergonomics', () => {
                 viewports.forEach((vp) => {
                     cy.viewport(vp.width, vp.height);
                     cy.visit(route.path);
+                    cy.wait(300); // Allow 200ms navbar/theme CSS transitions to settle
 
                     cy.window().then((win) => {
                         const docWidth = win.document.documentElement.scrollWidth;
