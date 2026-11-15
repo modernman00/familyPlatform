@@ -213,7 +213,7 @@
                                     class="btn btn-light fw-bold w-100 py-2 d-flex align-items-center justify-content-center gap-1.5 shadow-sm btn-upload-contacts-lead btn-spin-on-click"
                                     data-spin="true"
                                     aria-label="{{ __('kinship.upload_contacts_btn', 'Upload') }}"
-                                    style="border-radius: 10px; min-height: 44px; font-size: 0.88rem; font-weight: 700; color: var(--brand-primary, #a31621) !important; background-color: #ffffff; border: none; white-space: nowrap; flex-shrink: 0; transition: transform 0.15s ease;">
+                                    style="border-radius: 10px; min-height: 44px; font-size: 0.88rem; font-weight: 700; color: var(--brand-primary, #a31621) !important; background-color: #ffffff !important; border: none; white-space: nowrap; flex-shrink: 0; transition: transform 0.15s ease;">
                                 <i class="bi bi-person-lines-fill"></i>
                                 <span>{{ __('kinship.upload_contacts_btn', 'Upload') }}</span>
                             </button>

@@ -2102,16 +2102,6 @@
         </button>
       </template>
 
-      <!-- FamChat about this (Private & supervised thread) -->
-      <a :href="'/kin-whispers?post_no=' + encodeURIComponent(post.post_no || '')"
-         class="btn btn-sm rounded-pill d-inline-flex align-items-center gap-1.5 px-3 py-1.5 text-decoration-none ms-1"
-         style="background: #f6f1ea; color: #5c4e43; border: 1px solid #ece4da; font-size: 0.78rem; font-weight: 600; min-height: 36px; white-space: nowrap; flex-shrink: 0;"
-         title="FamChat about this post privately with family">
-        <i class="bi bi-lock" style="font-size: 0.82rem; color: #a31621;"></i>
-        <span>FamChat about this</span>
-      </a>
-
-
     </div>
 
     <!-- Bookmark / Save Memory Button (Right-Aligned) -->

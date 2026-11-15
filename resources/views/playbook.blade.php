@@ -558,7 +558,7 @@
             num: 6,
             title: "Stage 6: FamChat, Voice/Video Calling & Real-Time Pusher Channels",
             route: "/kin-whispers",
-            desc: "Private group and one-on-one artifact-anchored FamChat threads for cousins, siblings, and elders with 0ms optimistic message delivery, deferred background link preview hydration, inline video and multi-photo album rendering, instant read receipts, full last-seen presence indicators, disappearing message timers, WebRTC voice and video calls with resilient signaling fallback, voice/media sharing, and a distinct FamChat alert experience.",
+            desc: "Private group and one-on-one artifact-anchored FamChat threads with grouped Instagram-style message bubbles, selectable chat backgrounds and colour themes, prominent Active now and Last seen status pills, 0ms optimistic message delivery, deferred background link preview hydration, inline video and multi-photo album rendering, instant read receipts, disappearing message timers, WebRTC voice and video calls with resilient signaling fallback, voice/media sharing, and a distinct FamChat alert experience.",
             controller: "Family Member / Circle Communicator",
             state: "EVENT_COORDINATED \u2192 REALTIME_CONNECTED",
             db: "Encrypted Family Messenger Channels",

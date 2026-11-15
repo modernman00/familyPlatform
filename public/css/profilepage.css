@@ -1690,6 +1690,12 @@ a.family-code-pill:active {
   color: #064e3b;
 }
 
+body.dark-mode .family-code-container,
+[data-bs-theme="dark"] .family-code-container {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
 body.dark-mode .family-code-pill {
   background-color: rgba(184,32,44, 0.18) !important;
   border-color: rgba(184,32,44, 0.4) !important;

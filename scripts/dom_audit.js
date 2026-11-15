@@ -58,6 +58,11 @@
         return parseRgb(m[0]);
     }
 
+    function isTextClipped(style) {
+        const clip = (style.backgroundClip || style.webkitBackgroundClip || '').toLowerCase();
+        return clip === 'text';
+    }
+
     function getEffectiveBackground(el) {
         let cur = el;
         while (cur && cur !== document.documentElement) {
@@ -66,9 +71,11 @@
             if (parsed && parsed.a >= 0.5) {
                 return parsed;
             }
-            const grad = parseGradientFirstColor(style.backgroundImage);
-            if (grad && grad.a >= 0.5) {
-                return grad;
+            if (!isTextClipped(style)) {
+                const grad = parseGradientFirstColor(style.backgroundImage);
+                if (grad && grad.a >= 0.5) {
+                    return grad;
+                }
             }
             cur = cur.parentElement;
         }
@@ -150,6 +157,7 @@
 
             const style = window.getComputedStyle(el);
             const fg = parseRgb(style.color);
+            if (isTextClipped(style) && (!fg || fg.a < 0.2)) return;
             const bg = getEffectiveBackground(el);
             if (!fg || !bg) return;
 

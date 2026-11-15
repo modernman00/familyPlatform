@@ -1127,7 +1127,349 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
 .kw-video-overlay-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.28); color: #fff; font-size: 1.5rem; transition: transform 0.2s ease, background 0.2s ease; }
 .kw-media-thumb--video:hover .kw-video-overlay-icon { transform: scale(1.1); background: rgba(0,0,0,0.45); }
 
-@media (prefers-reduced-motion: reduce) { .kw-rec__dot { animation: none; } .kw-btn { transition: none; } }
+/* =========================================================================
+   Instagram-Style FamChat Redesign: Themes, Grouped Bubbles & Presence
+   ========================================================================= */
+.kw-main {
+    --kw-stream-bg: var(--kw-canvas);
+    --kw-mine-bg: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    --kw-mine-ink: #ffffff;
+    --kw-theirs-bg: #ffffff;
+    --kw-theirs-ink: #111827;
+    --kw-theirs-border: #e5e7eb;
+    --kw-stream-pill-bg: rgba(255, 255, 255, 0.88);
+    --kw-stream-pill-ink: #374151;
+    --kw-stream-meta-ink: #6b7280;
+    --kw-seen-ink: #4b5563;
+}
+.dark-mode .kw-main {
+    --kw-stream-bg: #0b0f19;
+    --kw-theirs-bg: #1e293b;
+    --kw-theirs-ink: #f8fafc;
+    --kw-theirs-border: #334155;
+    --kw-stream-pill-bg: rgba(30, 41, 59, 0.88);
+    --kw-stream-pill-ink: #e2e8f0;
+    --kw-stream-meta-ink: #94a3b8;
+    --kw-seen-ink: #cbd5e1;
+}
+.kw-main[data-chat-theme="instagram"] {
+    --kw-stream-bg: linear-gradient(160deg, #fdf2f8 0%, #f5f3ff 52%, #eff6ff 100%);
+    --kw-mine-bg: linear-gradient(135deg, #833ab4 0%, #c13584 55%, #e1306c 100%);
+    --kw-mine-ink: #ffffff;
+    --kw-theirs-bg: #ffffff;
+    --kw-theirs-ink: #18181b;
+    --kw-theirs-border: rgba(193, 53, 132, 0.16);
+    --kw-stream-pill-bg: rgba(255, 255, 255, 0.9);
+    --kw-stream-pill-ink: #4a044e;
+    --kw-seen-ink: #6b21a8;
+}
+.dark-mode .kw-main[data-chat-theme="instagram"] {
+    --kw-stream-bg: linear-gradient(160deg, #1f1024 0%, #17153b 55%, #0f172a 100%);
+    --kw-theirs-bg: #261c38;
+    --kw-theirs-ink: #f8fafc;
+    --kw-theirs-border: rgba(225, 48, 108, 0.28);
+    --kw-stream-pill-bg: rgba(38, 28, 56, 0.9);
+    --kw-stream-pill-ink: #f5d0fe;
+    --kw-seen-ink: #f0abfc;
+}
+.kw-main[data-chat-theme="heritage"] {
+    --kw-stream-bg: linear-gradient(180deg, #faf6f0 0%, #f5ece0 100%);
+    --kw-mine-bg: linear-gradient(135deg, #a31621 0%, #7a0e16 100%);
+    --kw-mine-ink: #ffffff;
+    --kw-theirs-bg: #ffffff;
+    --kw-theirs-ink: #1c1412;
+    --kw-theirs-border: #e7ddd0;
+    --kw-stream-pill-bg: rgba(255, 255, 255, 0.92);
+    --kw-stream-pill-ink: #5c2b29;
+    --kw-seen-ink: #7a0e16;
+}
+.dark-mode .kw-main[data-chat-theme="heritage"] {
+    --kw-stream-bg: linear-gradient(180deg, #160c0e 0%, #0f1420 100%);
+    --kw-theirs-bg: #1e2433;
+    --kw-theirs-ink: #f8fafc;
+    --kw-theirs-border: rgba(163, 22, 33, 0.35);
+    --kw-stream-pill-bg: rgba(30, 36, 51, 0.9);
+    --kw-stream-pill-ink: #fecdd3;
+    --kw-seen-ink: #fda4af;
+}
+.kw-main[data-chat-theme="midnight"] {
+    --kw-stream-bg: radial-gradient(circle at 20% 20%, #312e81 0%, #0f172a 55%, #090d16 100%);
+    --kw-mine-bg: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    --kw-mine-ink: #ffffff;
+    --kw-theirs-bg: #1e293b;
+    --kw-theirs-ink: #f8fafc;
+    --kw-theirs-border: #334155;
+    --kw-stream-pill-bg: rgba(30, 41, 59, 0.92);
+    --kw-stream-pill-ink: #e0e7ff;
+    --kw-seen-ink: #c7d2fe;
+}
+.kw-main[data-chat-theme="sunset"] {
+    --kw-stream-bg: linear-gradient(160deg, #fff7ed 0%, #ffedd5 48%, #ffe4e6 100%);
+    --kw-mine-bg: linear-gradient(135deg, #c2410c 0%, #be123c 100%);
+    --kw-mine-ink: #ffffff;
+    --kw-theirs-bg: #ffffff;
+    --kw-theirs-ink: #1c1917;
+    --kw-theirs-border: #fed7aa;
+    --kw-stream-pill-bg: rgba(255, 255, 255, 0.9);
+    --kw-stream-pill-ink: #7c2d12;
+    --kw-seen-ink: #9a3412;
+}
+.dark-mode .kw-main[data-chat-theme="sunset"] {
+    --kw-stream-bg: linear-gradient(160deg, #27120b 0%, #2a1019 100%);
+    --kw-theirs-bg: #291d1d;
+    --kw-theirs-ink: #fef2f2;
+    --kw-theirs-border: #5c2828;
+    --kw-stream-pill-bg: rgba(41, 29, 29, 0.92);
+    --kw-stream-pill-ink: #fed7aa;
+    --kw-seen-ink: #fdba74;
+}
+.kw-main[data-chat-theme="sage"] {
+    --kw-stream-bg: linear-gradient(160deg, #f0fdf4 0%, #dcfce7 50%, #ecfdf5 100%);
+    --kw-mine-bg: linear-gradient(135deg, #047857 0%, #0f766e 100%);
+    --kw-mine-ink: #ffffff;
+    --kw-theirs-bg: #ffffff;
+    --kw-theirs-ink: #14261c;
+    --kw-theirs-border: #bbf7d0;
+    --kw-stream-pill-bg: rgba(255, 255, 255, 0.92);
+    --kw-stream-pill-ink: #065f46;
+    --kw-seen-ink: #047857;
+}
+.dark-mode .kw-main[data-chat-theme="sage"] {
+    --kw-stream-bg: linear-gradient(160deg, #071e16 0%, #0b191e 100%);
+    --kw-theirs-bg: #132a23;
+    --kw-theirs-ink: #ecfdf5;
+    --kw-theirs-border: #1e463a;
+    --kw-stream-pill-bg: rgba(19, 42, 35, 0.92);
+    --kw-stream-pill-ink: #a7f3d0;
+    --kw-seen-ink: #6ee7b7;
+}
+.kw-main[data-chat-theme="ocean"] {
+    --kw-stream-bg: linear-gradient(160deg, #f0f9ff 0%, #e0f2fe 55%, #dbeafe 100%);
+    --kw-mine-bg: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
+    --kw-mine-ink: #ffffff;
+    --kw-theirs-bg: #ffffff;
+    --kw-theirs-ink: #0f172a;
+    --kw-theirs-border: #bae6fd;
+    --kw-stream-pill-bg: rgba(255, 255, 255, 0.92);
+    --kw-stream-pill-ink: #0c4a6e;
+    --kw-seen-ink: #0369a1;
+}
+.dark-mode .kw-main[data-chat-theme="ocean"] {
+    --kw-stream-bg: linear-gradient(160deg, #081c2e 0%, #0f172a 100%);
+    --kw-theirs-bg: #16263b;
+    --kw-theirs-ink: #f0f9ff;
+    --kw-theirs-border: #1e3a5f;
+    --kw-stream-pill-bg: rgba(22, 38, 59, 0.92);
+    --kw-stream-pill-ink: #bae6fd;
+    --kw-seen-ink: #7dd3fc;
+}
+.kw-main[data-chat-theme="royal"] {
+    --kw-stream-bg: linear-gradient(160deg, #fefce8 0%, #fef3c7 50%, #fae8ff 100%);
+    --kw-mine-bg: linear-gradient(135deg, #581c87 0%, #7e22ce 100%);
+    --kw-mine-ink: #ffffff;
+    --kw-theirs-bg: #ffffff;
+    --kw-theirs-ink: #1e1b2e;
+    --kw-theirs-border: #fde68a;
+    --kw-stream-pill-bg: rgba(255, 255, 255, 0.92);
+    --kw-stream-pill-ink: #4c1d95;
+    --kw-seen-ink: #6b21a8;
+}
+.dark-mode .kw-main[data-chat-theme="royal"] {
+    --kw-stream-bg: linear-gradient(160deg, #1b1129 0%, #1f170c 100%);
+    --kw-theirs-bg: #261b36;
+    --kw-theirs-ink: #faf5ff;
+    --kw-theirs-border: #4c3369;
+    --kw-stream-pill-bg: rgba(38, 27, 54, 0.92);
+    --kw-stream-pill-ink: #e9d5ff;
+    --kw-seen-ink: #d8b4fe;
+}
+
+.kw-stream {
+    background: var(--kw-stream-bg) !important;
+    gap: 12px;
+    transition: background 0.25s ease;
+}
+.kw-context-pill,
+.kw-stream-event {
+    background: var(--kw-stream-pill-bg) !important;
+    color: var(--kw-stream-pill-ink) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(128, 128, 128, 0.14);
+}
+.kw-context-pill strong { color: inherit !important; }
+
+/* Instagram-style grouped message rows & bubbles */
+.kw-row { align-items: flex-end; gap: 8px; }
+.kw-row.is-grouped-prev { margin-top: -8px; }
+.kw-msg-avatar {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; overflow: hidden;
+    background: #f3dce0; color: #7a1c24; font-size: 0.68rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; border: 1px solid var(--kw-theirs-border);
+}
+.kw-msg-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.kw-msg-avatar--spacer { width: 28px; flex-shrink: 0; }
+
+.kw-bubble {
+    border-radius: 22px;
+    background: var(--kw-theirs-bg);
+    color: var(--kw-theirs-ink);
+    border: 1px solid var(--kw-theirs-border);
+    padding: 10px 15px;
+    user-select: text;
+}
+.kw-row.is-mine .kw-bubble {
+    background: var(--kw-mine-bg);
+    color: var(--kw-mine-ink);
+    border-color: transparent;
+    border-bottom-right-radius: 6px;
+}
+.kw-row.is-mine.is-grouped-prev .kw-bubble { border-top-right-radius: 6px; }
+.kw-row.is-mine.is-grouped-next .kw-bubble { border-bottom-right-radius: 6px; }
+.kw-row:not(.is-mine) .kw-bubble { border-bottom-left-radius: 6px; }
+.kw-row:not(.is-mine).is-grouped-prev .kw-bubble { border-top-left-radius: 6px; }
+.kw-row:not(.is-mine).is-grouped-next .kw-bubble { border-bottom-left-radius: 6px; }
+
+.kw-row.is-mine .kw-quoted-box {
+    background: rgba(255, 255, 255, 0.16);
+    border-left-color: rgba(255, 255, 255, 0.85);
+    color: #ffffff;
+}
+.kw-row.is-mine .kw-quoted-box__sender,
+.kw-row.is-mine .kw-quoted-box__snippet { color: #ffffff; }
+
+.kw-ig-seen-line {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--kw-seen-ink);
+    text-align: right;
+    margin-top: 3px;
+    padding-right: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+/* High-Visibility Presence / Last Seen Badge (Mobile + Desktop + Inbox) */
+.kw-presence-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.35;
+    background: var(--kw-soft);
+    color: var(--kw-ink);
+    border: 1px solid var(--kw-line);
+    max-width: 100%;
+}
+.kw-presence-pill.is-online {
+    background: rgba(22, 163, 74, 0.14);
+    color: #15803d;
+    border-color: rgba(22, 163, 74, 0.32);
+}
+.dark-mode .kw-presence-pill.is-online {
+    background: rgba(34, 197, 94, 0.18);
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, 0.35);
+}
+.kw-presence-pill__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
+}
+.kw-thread__presence {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--kw-muted);
+}
+.kw-thread__presence.is-online {
+    color: #15803d;
+    font-weight: 700;
+}
+.dark-mode .kw-thread__presence.is-online {
+    color: #4ade80;
+}
+@media (max-width: 767.98px) {
+    .kw-presence-pill {
+        font-size: 0.76rem;
+        padding: 2px 8px;
+    }
+    .kw-head__actions .kw-btn--square {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+/* Theme Picker Swatch Grid */
+.kw-theme-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+.kw-theme-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 16px;
+    border: 2px solid var(--kw-line);
+    background: var(--kw-card);
+    color: var(--kw-ink);
+    cursor: pointer;
+    text-align: left;
+    min-height: 44px;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.kw-theme-card:hover { transform: translateY(-1px); border-color: var(--kw-primary); }
+.kw-theme-card.is-selected {
+    border-color: var(--kw-primary);
+    box-shadow: 0 0 0 3px rgba(163, 22, 33, 0.16);
+}
+.kw-theme-card__preview {
+    height: 54px;
+    border-radius: 10px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid rgba(128, 128, 128, 0.18);
+}
+.kw-theme-card__bubble-in {
+    width: 58%;
+    height: 12px;
+    border-radius: 999px;
+    align-self: flex-start;
+}
+.kw-theme-card__bubble-out {
+    width: 62%;
+    height: 12px;
+    border-radius: 999px;
+    align-self: flex-end;
+}
+.kw-theme-card__label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) { .kw-rec__dot { animation: none; } .kw-btn, .kw-stream, .kw-theme-card { transition: none; } }
 </style>
 @endpush
 
@@ -1210,7 +1552,14 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                   <span x-text="(thread.participant_count || 2) + ' family members'"></span>
                 </template>
                 <template x-if="thread.thread_type !== 'group'">
-                  <span x-text="thread.context_title || labelFor(thread.context_type)"></span>
+                  <span>
+                    <template x-if="presenceShortLabel(thread)">
+                      <span class="kw-thread__presence" :class="{'is-online': isPartnerOnline(thread)}" x-text="presenceShortLabel(thread)"></span>
+                    </template>
+                    <template x-if="!presenceShortLabel(thread)">
+                      <span x-text="thread.context_title || labelFor(thread.context_type)"></span>
+                    </template>
+                  </span>
                 </template>
               </div>
               <template x-if="thread.is_supervisor_view"><span class="kw-chip kw-chip--green"><i class="bi bi-eye"></i> Guardian view</span></template>
@@ -1232,7 +1581,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
     </aside>
 
     {{-- Conversation --}}
-    <div class="kw-main">
+    <div class="kw-main" :data-chat-theme="activeChatTheme">
       @if(!empty($access_error))
       <div class="kw-empty" role="alert" style="max-width:440px;">
         <div class="kw-empty__icon" style="background:rgba(163,22,33,0.12); color:#a31621;"><i class="bi bi-shield-lock-fill"></i></div>
@@ -1268,14 +1617,17 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                 </h2>
                 <p class="kw-head__sub">
                   <template x-if="presenceLabel(activeThread)">
-                    <span class="kw-presence-text" :class="{'is-online': isPartnerOnline(activeThread)}" x-text="presenceLabel(activeThread)" :title="presenceLabel(activeThread)" aria-live="polite"></span>
+                    <span class="kw-presence-pill" :class="{'is-online': isPartnerOnline(activeThread)}" :title="presenceLabel(activeThread)" aria-live="polite">
+                      <template x-if="isPartnerOnline(activeThread)"><span class="kw-presence-pill__dot" aria-hidden="true"></span></template>
+                      <template x-if="!isPartnerOnline(activeThread)"><i class="bi bi-clock" style="font-size:0.72rem; opacity:0.85;" aria-hidden="true"></i></template>
+                      <span x-text="presenceLabel(activeThread)"></span>
+                    </span>
                   </template>
                   <template x-if="activeThread.thread_type === 'group'">
                     <span><span x-text="((activeThread?.participants || []).length || (activeThread.participant_count || 2)) + ' family members'"></span> &middot; <button type="button" @click.stop="showGroupRosterModal = true" style="background:none; border:none; padding:0; color:var(--kw-primary); font-weight:700; text-decoration:underline; cursor:pointer;">View roster</button></span>
                   </template>
                   <template x-if="activeThread.thread_type !== 'group'">
                     <span class="kw-head__desktop-context" x-show="activeThread.context_title || labelFor(activeThread.context_type)">
-                      <template x-if="presenceLabel(activeThread)"><span> &middot; </span></template>
                       <span x-text="activeThread.context_title || labelFor(activeThread.context_type)"></span>
                     </span>
                   </template>
@@ -1284,6 +1636,9 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
               </div>
             </div>
             <div class="kw-head__actions" style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+              <button type="button" class="kw-btn kw-btn--ghost kw-btn--square" @click="openThemePicker()" title="Customise chat background & theme" aria-label="Customise chat background">
+                <i class="bi bi-palette2"></i>
+              </button>
               <button type="button" class="kw-btn kw-btn--ghost kw-btn--square" :class="{'is-active': showInChatSearch}" @click="toggleInChatSearch()" title="Search in conversation" aria-label="Search in conversation">
                 <i class="bi bi-search"></i>
               </button>
@@ -1364,8 +1719,17 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                 <span x-text="formatShort(evt.created_at)" :title="formatFullDateTime(evt.created_at)"></span>
               </div>
             </template>
-            <template x-for="msg in messages" :key="msg.id">
-              <div class="kw-row" :class="{'is-mine': msg.sender_id === currentUserId}" :id="'msg_' + msg.id">
+            <template x-for="(msg, msgIdx) in messages" :key="msg.id">
+              <div class="kw-row" :class="{'is-mine': msg.sender_id === currentUserId, 'is-grouped-prev': isGroupedPrev(msgIdx), 'is-grouped-next': isGroupedNext(msgIdx)}" :id="'msg_' + msg.id">
+                <template x-if="msg.sender_id !== currentUserId && !isGroupedNext(msgIdx)">
+                  <div class="kw-msg-avatar" :title="msg.sender_name || partnerName(activeThread)">
+                    <span x-text="initials(msg.sender_name || partnerName(activeThread))"></span>
+                    <img :src="activeThread?.thread_type === 'group' ? resolveAvatar(msg.sender_avatar) : partnerAvatar(activeThread)" alt="" loading="lazy" x-on:error="$el.remove()">
+                  </div>
+                </template>
+                <template x-if="msg.sender_id !== currentUserId && isGroupedNext(msgIdx)">
+                  <div class="kw-msg-avatar--spacer" aria-hidden="true"></div>
+                </template>
                 <div class="kw-bubble__container" @click.outside="if (activeActionMsgId === msg.id) activeActionMsgId = null">
                   <div class="kw-bubble__actions" :class="{'is-open': activeReactionMsgId === msg.id || activeActionMsgId === msg.id}">
                     <button type="button" class="kw-react-trigger" @click.stop="setReplyTo(msg); activeActionMsgId = null" aria-label="Reply" title="Quote & reply">
@@ -1412,7 +1776,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                     </div>
                   </div>
 
-                  <div class="kw-bubble" @click="activeActionMsgId = (activeActionMsgId === msg.id ? null : msg.id)">
+                  <div class="kw-bubble" @click="activeActionMsgId = (activeActionMsgId === msg.id ? null : msg.id)" @dblclick.stop="toggleReaction(msg.id, '❤️')">
                     <div class="kw-bubble__who" x-text="msg.sender_id === currentUserId ? 'You' : msg.sender_name"></div>
 
                     {{-- WhatsApp-style Quoted Reply Preview Box --}}
@@ -1790,6 +2154,9 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
               </template>
             </div>
             <h3 class="kw-details__name" x-text="partnerName(activeThread)"></h3>
+            <template x-if="presenceLabel(activeThread)">
+              <span class="kw-presence-pill" :class="{'is-online': isPartnerOnline(activeThread)}" style="margin:6px 0 4px;" x-text="presenceLabel(activeThread)"></span>
+            </template>
             <p class="kw-details__sub" x-text="activeThread.context_title || labelFor(activeThread.context_type)"></p>
             <div class="kw-details__btns" x-show="activeThread.thread_type !== 'group'">
               <a :href="'/allMembers/seeProfile/' + encodeURIComponent(partnerId(activeThread))" class="kw-details__pill-btn">View profile</a>
@@ -1834,6 +2201,10 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
               <h4 class="kw-details__sec-title">Options</h4>
             </div>
             <div class="kw-details__opt-list">
+              <button type="button" class="kw-details__opt" @click="openThemePicker()">
+                <span class="kw-details__opt-left"><i class="bi bi-palette2"></i><span>Chat theme &amp; background</span></span>
+                <span style="font-size:0.75rem; color:var(--kw-muted);" x-text="activeThemeMeta().name"></span>
+              </button>
               <button type="button" class="kw-details__opt" @click="showInfoDrawer = true; infoDrawerTab = 'starred'">
                 <span class="kw-details__opt-left"><i class="bi bi-star"></i><span>Starred whispers</span></span>
                 <span style="font-size:0.75rem; color:var(--kw-muted);" x-text="starredMessages.length || ''"></span>
@@ -2404,6 +2775,36 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
       </button>
     </div>
   </div>
+
+  {{-- Chat Background & Theme Picker Modal --}}
+  <div class="kw-modal" x-show="showThemePicker" x-cloak role="dialog" aria-modal="true" aria-labelledby="kw_theme_title"
+       @keydown.escape.window="showThemePicker = false" @click.self="showThemePicker = false">
+    <div class="kw-modal__card" x-trap.noscroll="showThemePicker" style="max-width:480px;">
+      <div class="kw-modal__head">
+        <h2 id="kw_theme_title"><i class="bi bi-palette2" style="color:var(--kw-primary); margin-right:6px;"></i>Chat Theme &amp; Background</h2>
+        <button type="button" class="kw-btn kw-btn--ghost kw-btn--square" @click="showThemePicker = false" aria-label="Close theme picker"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <p style="font-size:0.84rem; color:var(--kw-muted); margin:0;">Choose a background and bubble palette for this conversation. Every theme is tuned for crisp readability.</p>
+      <div class="kw-theme-grid">
+        <template x-for="theme in chatThemes" :key="theme.id">
+          <button type="button" class="kw-theme-card" :class="{'is-selected': activeChatTheme === theme.id}" @click="setChatTheme(theme.id)">
+            <div class="kw-theme-card__preview" :style="'background:' + theme.previewBg">
+              <span class="kw-theme-card__bubble-in" :style="'background:' + theme.previewTheirs"></span>
+              <span class="kw-theme-card__bubble-out" :style="'background:' + theme.previewMine"></span>
+            </div>
+            <div class="kw-theme-card__label">
+              <span x-text="theme.name"></span>
+              <i class="bi bi-check-circle-fill" x-show="activeChatTheme === theme.id" style="color:var(--kw-primary);"></i>
+            </div>
+          </button>
+        </template>
+      </div>
+      <div class="kw-modal__foot" style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:16px; flex-wrap:wrap;">
+        <button type="button" class="kw-btn kw-btn--ghost" @click="applyThemeToAll()">Apply to all chats</button>
+        <button type="button" class="kw-btn kw-btn--primary" @click="showThemePicker = false">Done</button>
+      </div>
+    </div>
+  </div>
 </div>
 @endsection
 
@@ -2587,6 +2988,18 @@ function kinWhisperApp() {
     myPresencePrivacy: @json($presence_privacy ?? 'everyone'),
     savingPresencePrivacy: false,
     presenceTimer: null,
+    showThemePicker: false,
+    activeChatTheme: 'instagram',
+    chatThemes: [
+      { id: 'instagram', name: 'Instagram Vibe', previewBg: 'linear-gradient(135deg, #fdf2f8, #eff6ff)', previewMine: 'linear-gradient(135deg, #833ab4, #e1306c)', previewTheirs: '#ffffff' },
+      { id: 'classic', name: 'Classic Clean', previewBg: '#f8fafc', previewMine: 'linear-gradient(135deg, #4f46e5, #7c3aed)', previewTheirs: '#ffffff' },
+      { id: 'heritage', name: 'Heritage Crimson', previewBg: '#faf6f0', previewMine: 'linear-gradient(135deg, #a31621, #7a0e16)', previewTheirs: '#ffffff' },
+      { id: 'midnight', name: 'Midnight Velvet', previewBg: 'linear-gradient(135deg, #312e81, #0f172a)', previewMine: 'linear-gradient(135deg, #6366f1, #8b5cf6)', previewTheirs: '#1e293b' },
+      { id: 'sunset', name: 'Sunset Glow', previewBg: 'linear-gradient(135deg, #fff7ed, #ffe4e6)', previewMine: 'linear-gradient(135deg, #c2410c, #be123c)', previewTheirs: '#ffffff' },
+      { id: 'sage', name: 'Sage Garden', previewBg: 'linear-gradient(135deg, #f0fdf4, #ecfdf5)', previewMine: 'linear-gradient(135deg, #047857, #0f766e)', previewTheirs: '#ffffff' },
+      { id: 'ocean', name: 'Ocean Breeze', previewBg: 'linear-gradient(135deg, #f0f9ff, #dbeafe)', previewMine: 'linear-gradient(135deg, #0369a1, #1d4ed8)', previewTheirs: '#ffffff' },
+      { id: 'royal', name: 'Royal Gold', previewBg: 'linear-gradient(135deg, #fefce8, #fae8ff)', previewMine: 'linear-gradient(135deg, #581c87, #7e22ce)', previewTheirs: '#ffffff' }
+    ],
 
     normId(id) {
       return String(id || '').trim().toLowerCase();
@@ -2606,6 +3019,7 @@ function kinWhisperApp() {
         this.threadCache[this.activeThread.id] = [...this.messages];
       }
       this.scrollToBottom();
+      this.loadChatTheme();
       this.startPolling();
       this.startCountdownLoop();
       this.startPresence();
@@ -3646,15 +4060,95 @@ function kinWhisperApp() {
     presenceLabel(t) {
       const p = this.presenceOf(t);
       if (!p || p.is_hidden) return '';
-      if (p.is_online) return 'Online';
+      if (p.is_online) return 'Active now';
       if (!p.last_seen_ts) return '';
       const d = new Date(p.last_seen_ts * 1000);
+      const diffMin = Math.max(0, Math.floor((Date.now() - d.getTime()) / 60000));
+      if (diffMin < 1) return 'Active just now';
+      if (diffMin < 60) return 'Last seen ' + diffMin + 'm ago';
       const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
       const now = new Date();
       const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
       if (d.toDateString() === now.toDateString()) return 'Last seen today at ' + time;
       if (d.toDateString() === yesterday.toDateString()) return 'Last seen yesterday at ' + time;
-      return 'Last seen ' + d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ' at ' + time;
+      const dayName = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+      return 'Last seen ' + dayName + ' at ' + time;
+    },
+    presenceShortLabel(t) {
+      const p = this.presenceOf(t);
+      if (!p || p.is_hidden) return '';
+      if (p.is_online) return 'Active now';
+      if (!p.last_seen_ts) return '';
+      const d = new Date(p.last_seen_ts * 1000);
+      const diffMin = Math.max(0, Math.floor((Date.now() - d.getTime()) / 60000));
+      if (diffMin < 60) return 'Last seen ' + Math.max(1, diffMin) + 'm ago';
+      const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      const now = new Date();
+      const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+      if (d.toDateString() === now.toDateString()) return 'Last seen ' + time;
+      if (d.toDateString() === yesterday.toDateString()) return 'Last seen yesterday';
+      return 'Last seen ' + d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+    },
+    themeStorageKey(threadId) {
+      const uid = String(this.currentUserId || 'guest');
+      const tid = String(threadId || 'default');
+      return 'kw_chat_theme_' + uid + '_' + tid;
+    },
+    loadChatTheme() {
+      try {
+        const tid = this.activeThread ? String(this.activeThread.id) : 'default';
+        const perThread = localStorage.getItem(this.themeStorageKey(tid));
+        const globalDef = localStorage.getItem('kw_chat_theme_' + String(this.currentUserId || 'guest') + '_global');
+        const chosen = perThread || globalDef || 'instagram';
+        const valid = (this.chatThemes || []).some(t => t.id === chosen);
+        this.activeChatTheme = valid ? chosen : 'instagram';
+      } catch (e) {
+        this.activeChatTheme = 'instagram';
+      }
+    },
+    openThemePicker() {
+      this.showThemePicker = true;
+    },
+    setChatTheme(themeId) {
+      this.activeChatTheme = themeId;
+      try {
+        const tid = this.activeThread ? String(this.activeThread.id) : 'default';
+        localStorage.setItem(this.themeStorageKey(tid), themeId);
+      } catch (e) {}
+    },
+    applyThemeToAll() {
+      try {
+        const uid = String(this.currentUserId || 'guest');
+        localStorage.setItem('kw_chat_theme_' + uid + '_global', this.activeChatTheme);
+        (this.threads || []).forEach(t => {
+          localStorage.setItem(this.themeStorageKey(t.id), this.activeChatTheme);
+        });
+        this.toast('Theme applied to all FamChat conversations.');
+        this.showThemePicker = false;
+      } catch (e) {
+        this.showThemePicker = false;
+      }
+    },
+    activeThemeMeta() {
+      return (this.chatThemes || []).find(t => t.id === this.activeChatTheme) || { id: 'instagram', name: 'Instagram Vibe' };
+    },
+    isGroupedPrev(idx) {
+      if (!this.messages || idx <= 0) return false;
+      const prev = this.messages[idx - 1];
+      const curr = this.messages[idx];
+      if (!prev || !curr || String(prev.sender_id) !== String(curr.sender_id)) return false;
+      const t1 = this.parseUtcTimestamp(prev.created_at);
+      const t2 = this.parseUtcTimestamp(curr.created_at);
+      return t1 > 0 && t2 > 0 && Math.abs(t2 - t1) <= 300000;
+    },
+    isGroupedNext(idx) {
+      if (!this.messages || idx < 0 || idx >= this.messages.length - 1) return false;
+      const curr = this.messages[idx];
+      const next = this.messages[idx + 1];
+      if (!curr || !next || String(curr.sender_id) !== String(next.sender_id)) return false;
+      const t1 = this.parseUtcTimestamp(curr.created_at);
+      const t2 = this.parseUtcTimestamp(next.created_at);
+      return t1 > 0 && t2 > 0 && Math.abs(t2 - t1) <= 300000;
     },
     startPresence() {
       if (this.presenceTimer) clearInterval(this.presenceTimer);
@@ -3823,6 +4317,7 @@ function kinWhisperApp() {
       this.activeThread = thread;
       window.__activeWhisperThreadId = String(thread.id);
       this.pane = 'chat';
+      this.loadChatTheme();
       this.clearComposer();
       this.discardRecordedAudio();
       if (!this.threadCache) this.threadCache = {};

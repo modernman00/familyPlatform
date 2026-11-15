@@ -176,15 +176,10 @@ describe('Profile Page Interactive Tour Engine', () => {
     ].forEach((vp) => {
         it(`renders cleanly with >=44px tap targets and zero horizontal overflow on ${vp.name} (${vp.width}x${vp.height})`, () => {
             cy.viewport(vp.width, vp.height);
-            loginFully();
-
-            // Ensure any auto-started tour from a prior run is closed before testing manual launch
-            cy.get('body').then(($body) => {
-                if ($body.find('[data-sspot-action="close"]').length > 0) {
-                    cy.get('[data-sspot-action="close"]').click();
-                    cy.get('.sspot-overlay').should('not.exist');
-                }
+            cy.on('window:before:load', (win) => {
+                win.sessionStorage.setItem('fp_profile_tour_closed_session_v1', '1');
             });
+            loginFully();
 
             cy.get('#profileTourCardBtn').scrollIntoView({ block: 'center' }).should('be.visible').then(($btn) => {
                 const r = $btn[0].getBoundingClientRect();

@@ -974,7 +974,8 @@
                     <li><strong>Multi-Rail Fallbacks:</strong> Instant one-tap cellular (<code>tel:</code>) and WhatsApp Voice/Video call bridges.</li>
                     <li><strong>Read &amp; Seen Receipts:</strong> Live delivery badges ("✓ Delivered", "✓✓ Seen [time]", and "🛡️ Guardian Seen") give peace of mind.</li>
                     <li><strong>Distinct FamChat Alerts &amp; Calling:</strong> Incoming FamChat messages play a soft harmonic chime, display a bespoke crimson-and-gold FamChat banner when you are elsewhere in the app, use a two-pulse chat vibration pattern, and support in-app WebRTC voice and video calls with your kin.</li>
-                    <li><strong>Family Emojis &amp; Disappearing Messages:</strong> 3D heritage emoji reactions, timed auto-disappearing messages, and one-click WhatsApp preview generation.</li>
+                    <li><strong>Family Emojis &amp; Disappearing Messages:</strong> 3D heritage emoji reactions (plus quick double-tap heart reactions), timed auto-disappearing messages, and one-click WhatsApp preview generation.</li>
+                    <li><strong>Customisable Chat Backgrounds &amp; Prominent Last Seen:</strong> Personalise each conversation with curated high-contrast themes (such as <em>Instagram Vibe</em>, <em>Heritage Crimson</em>, <em>Midnight Velvet</em>, or <em>Sage Garden</em>) and see clear <em>Active now</em> or <em>Last seen</em> status pills across both the inbox and chat header.</li>
                     <li><strong>Sender-Only Message Deletion:</strong> Delete your own text or voice messages permanently for everyone in the thread at any time (with an explicit confirmation prompt and instant audio purge).</li>
                   </ul>
                 </div>
