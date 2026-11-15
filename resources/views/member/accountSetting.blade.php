@@ -2339,7 +2339,7 @@
 
           const credential = await navigator.credentials.create({ publicKey });
           if (!credential) {
-            throw new Error('Passkey creation was canceled.');
+            throw new Error('Passkey creation was cancelled.');
           }
 
           const verifyRes = await fetch('/webauthn/register', {
@@ -2366,7 +2366,7 @@
         } catch (err) {
           console.warn(err);
           const msg = (err.name === 'NotAllowedError') 
-            ? 'Biometric prompt was canceled or timed out.' 
+            ? 'Biometric prompt was cancelled or timed out.' 
             : (err.message || 'Could not register biometric device.');
           showPasskeyMsg(msg, false);
         } finally {

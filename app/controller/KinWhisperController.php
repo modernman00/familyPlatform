@@ -208,6 +208,15 @@ final class KinWhisperController extends BaseController
             echo json_encode(['error' => 'Unauthorized: Please sign in.']);
             return;
         }
+
+        $input = $this->parseJsonInput();
+        try {
+            self::validateCsrf($input);
+        } catch (\Throwable $th) {
+            session_write_close();
+            $this->handleJsonException($th);
+            return;
+        }
         session_write_close();
 
         if (\App\services\AnalyticsService::isRateLimited($currentUserId, 'kin_whisper_thread_create', 20, 60)) {
@@ -216,7 +225,6 @@ final class KinWhisperController extends BaseController
             return;
         }
 
-        $input = $this->parseJsonInput();
         $recipientId = trim((string)($input['recipient_id'] ?? ''));
         $contextType = trim((string)($input['context_type'] ?? 'general'));
         $contextId = isset($input['context_id']) && $input['context_id'] !== '' ? trim((string)$input['context_id']) : null;
@@ -248,6 +256,17 @@ final class KinWhisperController extends BaseController
             echo json_encode(['error' => 'Unauthorized: Please sign in.']);
             return;
         }
+
+        $input = $this->parseJsonInput();
+        try {
+            self::validateCsrf($input);
+        } catch (\Throwable $th) {
+            session_write_close();
+            $this->handleJsonException($th);
+            return;
+        }
+
+        $uploadedAssets = is_array($_SESSION['uploaded_whisper_assets'] ?? null) ? $_SESSION['uploaded_whisper_assets'] : [];
         session_write_close();
 
         if (\App\services\AnalyticsService::isRateLimited($currentUserId, 'kin_whisper_send', 45, 60)) {
@@ -256,7 +275,6 @@ final class KinWhisperController extends BaseController
             return;
         }
 
-        $input = $this->parseJsonInput();
         $threadId = trim((string)($input['thread_id'] ?? ''));
         $body = trim((string)($input['body'] ?? ''));
         $messageType = trim((string)($input['message_type'] ?? 'text'));
@@ -264,22 +282,59 @@ final class KinWhisperController extends BaseController
         $audioDuration = isset($input['audio_duration']) ? (int)$input['audio_duration'] : null;
         $disappearSeconds = isset($input['disappear_seconds']) ? (int)$input['disappear_seconds'] : null;
 
-        $metadata = isset($input['metadata']) && is_array($input['metadata']) ? $input['metadata'] : [];
-        if (isset($input['attachments']) && is_array($input['attachments'])) {
-            $metadata['attachments'] = $input['attachments'];
-        }
-        if (isset($input['reply_to']) && is_array($input['reply_to'])) {
-            $metadata['reply_to'] = $input['reply_to'];
-        }
-        if (isset($input['link_preview']) && is_array($input['link_preview']) && !empty($input['link_preview']['url'])) {
-            $lpUrl = trim((string)$input['link_preview']['url']);
-            if (preg_match('#^https?://#i', $lpUrl)) {
-                $metadata['link_preview'] = $input['link_preview'];
-            }
-        }
-        $metaArg = !empty($metadata) ? $metadata : null;
-
         try {
+            if ($audioUrl !== null) {
+                $this->assertWhisperAssetOwnedOrInThread($audioUrl, $threadId, $uploadedAssets);
+            }
+
+            $metadata = [];
+            if (isset($input['attachments']) && is_array($input['attachments'])) {
+                $cleanAttachments = [];
+                foreach (array_slice($input['attachments'], 0, 10) as $att) {
+                    if (!is_array($att) || empty($att['url']) || !is_string($att['url'])) {
+                        continue;
+                    }
+                    $attUrl = trim($att['url']);
+                    if (!str_starts_with($attUrl, '/public/storage/whispers/media/')) {
+                        throw new ValidationException('Invalid whisper attachment source URL.');
+                    }
+                    $this->assertWhisperAssetOwnedOrInThread($attUrl, $threadId, $uploadedAssets);
+                    $cleanAttachments[] = [
+                        'url' => $attUrl,
+                        'name' => mb_substr(basename(strip_tags((string)($att['name'] ?? 'attachment'))), 0, 180),
+                        'type' => in_array((string)($att['type'] ?? ''), ['image', 'video', 'document', 'audio'], true) ? (string)$att['type'] : 'document',
+                        'size' => max(0, (int)($att['size'] ?? 0)),
+                        'mime' => mb_substr(strip_tags((string)($att['mime'] ?? 'application/octet-stream')), 0, 100),
+                    ];
+                }
+                if (!empty($cleanAttachments)) {
+                    $metadata['attachments'] = $cleanAttachments;
+                }
+            }
+            if (isset($input['reply_to']) && is_array($input['reply_to'])) {
+                $metadata['reply_to'] = [
+                    'id' => mb_substr(strip_tags((string)($input['reply_to']['id'] ?? '')), 0, 80),
+                    'sender_name' => mb_substr(strip_tags((string)($input['reply_to']['sender_name'] ?? '')), 0, 80),
+                    'body' => mb_substr(strip_tags((string)($input['reply_to']['body'] ?? '')), 0, 300),
+                ];
+            }
+            if (isset($input['link_preview']) && is_array($input['link_preview']) && !empty($input['link_preview']['url'])) {
+                $lpUrl = trim((string)$input['link_preview']['url']);
+                if (preg_match('#^https?://#i', $lpUrl)) {
+                    $lpImg = trim((string)($input['link_preview']['image'] ?? ''));
+                    if ($lpImg !== '' && !preg_match('#^(https?://|/)#i', $lpImg)) {
+                        $lpImg = '';
+                    }
+                    $metadata['link_preview'] = [
+                        'url' => mb_substr($lpUrl, 0, 1000),
+                        'title' => mb_substr(strip_tags((string)($input['link_preview']['title'] ?? '')), 0, 200),
+                        'description' => mb_substr(strip_tags((string)($input['link_preview']['description'] ?? '')), 0, 400),
+                        'image' => mb_substr($lpImg, 0, 1000),
+                        'domain' => mb_substr(strip_tags((string)($input['link_preview']['domain'] ?? '')), 0, 120),
+                    ];
+                }
+            }
+            $metaArg = !empty($metadata) ? $metadata : null;
             $message = KinWhisperService::sendMessage(
                 $currentUserId,
                 $threadId,
@@ -342,6 +397,14 @@ final class KinWhisperController extends BaseController
             session_write_close();
             http_response_code(429);
             echo json_encode(['error' => 'Audio upload rate limit reached. Please wait a moment before recording again.']);
+            return;
+        }
+
+        try {
+            self::validateCsrf();
+        } catch (\Throwable $th) {
+            session_write_close();
+            $this->handleJsonException($th);
             return;
         }
 
@@ -564,13 +627,19 @@ final class KinWhisperController extends BaseController
             echo json_encode(['error' => 'Unauthorized: Please sign in.']);
             return;
         }
-        session_write_close();
 
-        $threadId = $this->resolveParamId($params, 'id');
         try {
+            $input = $this->parseJsonInput();
+            self::validateCsrf($input);
+            session_write_close();
+
+            $threadId = $this->resolveParamId($params, 'id');
             $count = KinWhisperService::markThreadAsRead($currentUserId, $threadId);
             echo json_encode(['success' => true, 'marked_count' => $count]);
         } catch (\Throwable $th) {
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
             $this->handleJsonException($th);
         }
     }
@@ -591,9 +660,9 @@ final class KinWhisperController extends BaseController
         }
         session_write_close();
 
-        if (\App\services\AnalyticsService::isRateLimited($currentUserId, 'kin_whisper_audio_upload', 10, 60)) {
+        if (\App\services\AnalyticsService::isRateLimited($currentUserId, 'kin_whisper_whatsapp_bridge', 10, 60)) {
             http_response_code(429);
-            echo json_encode(['error' => 'Audio upload rate limit reached. Please wait a moment before recording again.']);
+            echo json_encode(['error' => 'Too many WhatsApp share requests. Please wait a moment.']);
             return;
         }
 
@@ -635,10 +704,13 @@ final class KinWhisperController extends BaseController
             echo json_encode(['error' => 'Unauthorized: Please sign in.']);
             return;
         }
-        session_write_close();
 
-        $threadId = $this->resolveParamId($params, 'id');
         try {
+            $input = $this->parseJsonInput();
+            self::validateCsrf($input);
+            session_write_close();
+
+            $threadId = $this->resolveParamId($params, 'id');
             $thread = KinWhisperService::requestShareApproval($currentUserId, $threadId);
             echo json_encode([
                 'success' => true,
@@ -646,6 +718,9 @@ final class KinWhisperController extends BaseController
                 'thread' => $thread,
             ]);
         } catch (\Throwable $th) {
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
             $this->handleJsonException($th);
         }
     }
@@ -664,13 +739,15 @@ final class KinWhisperController extends BaseController
             echo json_encode(['error' => 'Unauthorized: Please sign in.']);
             return;
         }
-        session_write_close();
-
-        $threadId = $this->resolveParamId($params, 'id');
-        $payload = $this->parseJsonInput();
-        $action = (string)($payload['action'] ?? '');
 
         try {
+            $payload = $this->parseJsonInput();
+            self::validateCsrf($payload);
+            session_write_close();
+
+            $threadId = $this->resolveParamId($params, 'id');
+            $action = (string)($payload['action'] ?? '');
+
             $thread = KinWhisperService::respondShareApproval($currentUserId, $threadId, $action);
             echo json_encode([
                 'success' => true,
@@ -678,6 +755,9 @@ final class KinWhisperController extends BaseController
                 'thread' => $thread,
             ]);
         } catch (\Throwable $th) {
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
             $this->handleJsonException($th);
         }
     }
@@ -696,13 +776,19 @@ final class KinWhisperController extends BaseController
             echo json_encode(['error' => 'Unauthorized: Please sign in.']);
             return;
         }
-        session_write_close();
 
-        $threadId = $this->resolveParamId($params, 'id');
         try {
+            $input = $this->parseJsonInput();
+            self::validateCsrf($input);
+            session_write_close();
+
+            $threadId = $this->resolveParamId($params, 'id');
             $res = KinWhisperService::recordScreenshotEvent($currentUserId, $threadId);
             echo json_encode($res);
         } catch (\Throwable $th) {
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
             $this->handleJsonException($th);
         }
     }
@@ -886,6 +972,15 @@ final class KinWhisperController extends BaseController
             echo json_encode(['error' => 'Unauthorized: Please sign in.']);
             return;
         }
+
+        $input = $this->parseJsonInput();
+        try {
+            self::validateCsrf($input);
+        } catch (\Throwable $th) {
+            session_write_close();
+            $this->handleJsonException($th);
+            return;
+        }
         session_write_close();
 
         if (\App\services\AnalyticsService::isRateLimited($currentUserId, 'kin_whisper_group_create', 15, 60)) {
@@ -894,7 +989,6 @@ final class KinWhisperController extends BaseController
             return;
         }
 
-        $input = $this->parseJsonInput();
         $title = trim((string)($input['title'] ?? ''));
         /** @var array<string> $participantIds */
         $participantIds = isset($input['participant_ids']) && is_array($input['participant_ids']) ? $input['participant_ids'] : [];
@@ -931,10 +1025,18 @@ final class KinWhisperController extends BaseController
             echo json_encode(['error' => 'Unauthorized: Please sign in.']);
             return;
         }
+
+        $input = $this->parseJsonInput();
+        try {
+            self::validateCsrf($input);
+        } catch (\Throwable $th) {
+            session_write_close();
+            $this->handleJsonException($th);
+            return;
+        }
         session_write_close();
 
         $threadId = $this->resolveParamId($params, 'id');
-        $input = $this->parseJsonInput();
         /** @var array<string> $participantIds */
         $participantIds = isset($input['participant_ids']) && is_array($input['participant_ids']) ? $input['participant_ids'] : [];
 
@@ -959,6 +1061,15 @@ final class KinWhisperController extends BaseController
         if ($currentUserId === '') {
             http_response_code(401);
             echo json_encode(['error' => 'Unauthorized: Please sign in.']);
+            return;
+        }
+
+        $input = $this->parseJsonInput();
+        try {
+            self::validateCsrf($input);
+        } catch (\Throwable $th) {
+            session_write_close();
+            $this->handleJsonException($th);
             return;
         }
         session_write_close();
@@ -990,10 +1101,18 @@ final class KinWhisperController extends BaseController
             echo json_encode(['error' => 'Unauthorized: Please sign in.']);
             return;
         }
+
+        $input = $this->parseJsonInput();
+        try {
+            self::validateCsrf($input);
+        } catch (\Throwable $th) {
+            session_write_close();
+            $this->handleJsonException($th);
+            return;
+        }
         session_write_close();
 
         $threadId = $this->resolveParamId($params, 'id');
-        $input = $this->parseJsonInput();
         $callType = trim((string)($input['call_type'] ?? 'video'));
 
         try {
@@ -1018,10 +1137,18 @@ final class KinWhisperController extends BaseController
             echo json_encode(['error' => 'Unauthorized: Please sign in.']);
             return;
         }
+
+        $input = $this->parseJsonInput();
+        try {
+            self::validateCsrf($input);
+        } catch (\Throwable $th) {
+            session_write_close();
+            $this->handleJsonException($th);
+            return;
+        }
         session_write_close();
 
         $threadId = $this->resolveParamId($params, 'id');
-        $input = $this->parseJsonInput();
 
         try {
             $result = KinWhisperService::sendCallSignal($currentUserId, $threadId, $input);
@@ -1043,6 +1170,15 @@ final class KinWhisperController extends BaseController
         if ($currentUserId === '') {
             http_response_code(401);
             echo json_encode(['error' => 'Unauthorized: Please sign in.']);
+            return;
+        }
+
+        $input = $this->parseJsonInput();
+        try {
+            self::validateCsrf($input);
+        } catch (\Throwable $th) {
+            session_write_close();
+            $this->handleJsonException($th);
             return;
         }
         session_write_close();
@@ -1184,7 +1320,7 @@ final class KinWhisperController extends BaseController
                          JOIN kin_threads t ON t.id = m.thread_id
                          WHERE m.context_metadata LIKE ? LIMIT 5'
                     );
-                    $stmt->execute(['%' . $safeFile . '%']);
+                    $stmt->execute(['%' . $assetUrl . '%']);
                 }
 
                 $threads = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
@@ -1225,6 +1361,8 @@ final class KinWhisperController extends BaseController
             'm4a' => 'audio/mp4',
             'ogg' => 'audio/ogg',
             'wav' => 'audio/wav',
+            'txt' => 'text/plain; charset=utf-8',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         ];
         $mime = $mimeMap[$ext] ?? 'application/octet-stream';
         $fileSize = (int)filesize($realFile);
@@ -1331,23 +1469,55 @@ final class KinWhisperController extends BaseController
     }
 
     /**
+     * Verify that a whisper media/audio URL was uploaded by the current session
+     * or already belongs to a message in the target thread (preventing cross-thread media exfiltration).
+     *
+     * @param array<int, string> $uploadedAssets
+     */
+    private function assertWhisperAssetOwnedOrInThread(string $assetUrl, string $threadId, array $uploadedAssets): void
+    {
+        if (in_array($assetUrl, $uploadedAssets, true)) {
+            return;
+        }
+        if ($threadId !== '') {
+            $db = \Src\Db::connect2();
+            $stmt = $db->prepare(
+                'SELECT 1 FROM kin_messages
+                 WHERE thread_id = ? AND (audio_url = ? OR context_metadata LIKE ?)
+                 LIMIT 1'
+            );
+            $stmt->execute([$threadId, $assetUrl, '%' . $assetUrl . '%']);
+            if ($stmt->fetchColumn()) {
+                return;
+            }
+        }
+        throw new ForbiddenException('You do not have permission to attach this media asset.');
+    }
+
+    /**
      * Standardised JSON exception handler.
      */
     private function handleJsonException(\Throwable $th): void
     {
         $code = 500;
+        $message = 'An unexpected error occurred. Please try again.';
         if ($th instanceof ValidationException || $th instanceof BadRequestException) {
             $code = 400;
+            $message = $th->getMessage();
         } elseif ($th instanceof ForbiddenException || $th instanceof UnauthorisedException) {
             $code = 403;
+            $message = $th->getMessage();
         } elseif ($th instanceof NotFoundException) {
             $code = 404;
+            $message = $th->getMessage();
+        } else {
+            error_log('[KinWhisperController] ' . $th->getMessage());
         }
 
         http_response_code($code);
         echo json_encode([
             'success' => false,
-            'error' => $th->getMessage(),
+            'error' => $message,
         ]);
     }
 }

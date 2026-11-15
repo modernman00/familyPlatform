@@ -520,7 +520,7 @@ final class KinWhisperService
         $stmtRole->execute([$threadId, $currentUserId]);
         $role = $stmtRole->fetchColumn();
 
-        if ($role !== 'admin' && (string)($thread['created_by'] ?? '') !== $currentUserId) {
+        if ($role !== 'admin' && strcasecmp((string)($thread['created_by'] ?? ''), $currentUserId) !== 0) {
             throw new ForbiddenException('Only group administrators can add new participants.');
         }
 
@@ -572,14 +572,14 @@ final class KinWhisperService
             throw new NotFoundException('Group thread not found.');
         }
 
-        $isSelf = ($currentUserId === $targetUserId);
+        $isSelf = (strcasecmp($currentUserId, $targetUserId) === 0);
 
         if (!$isSelf) {
             $stmtRole = $db->prepare('SELECT role FROM kin_thread_participants WHERE thread_id = ? AND user_id = ? AND deleted_at IS NULL LIMIT 1');
             $stmtRole->execute([$threadId, $currentUserId]);
             $role = $stmtRole->fetchColumn();
 
-            if ($role !== 'admin' && (string)($thread['created_by'] ?? '') !== $currentUserId) {
+            if ($role !== 'admin' && strcasecmp((string)($thread['created_by'] ?? ''), $currentUserId) !== 0) {
                 throw new ForbiddenException('Only group administrators can remove members from this group.');
             }
         }
@@ -2403,8 +2403,11 @@ final class KinWhisperService
         $isGroup = ((string)($thread['thread_type'] ?? 'direct')) === 'group';
 
         $roomId = (string)($thread['active_call_room_id'] ?? '');
-        $signalObj = $signalData['signal'] ?? $signalData;
-        $sdpType = is_array($signalObj) && is_array($signalObj['sdp'] ?? null)
+        $signalObj = is_array($signalData['signal'] ?? null) ? $signalData['signal'] : $signalData;
+        if (strlen((string)json_encode($signalObj)) > 65536) {
+            throw new ValidationException('Invalid or oversized call signal payload.');
+        }
+        $sdpType = is_array($signalObj['sdp'] ?? null)
             ? strtolower((string)($signalObj['sdp']['type'] ?? ''))
             : '';
 

@@ -38,6 +38,16 @@ final class ShareTargetController
     public function receive(): void
     {
         try {
+            $clientIp = trim((string)($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            if (\App\services\AnalyticsService::isRateLimited('ip_' . $clientIp, 'pwa_share_receive', 15, 60)) {
+                http_response_code(429);
+                header('Location: /profilePage?pwa_shared_err=1', true, 303);
+                if (!defined('PHPUNIT_COMPOSER_INSTALL')) {
+                    exit;
+                }
+                return;
+            }
+
             $title = trim((string)($_POST['title'] ?? ''));
             $text = trim((string)($_POST['text'] ?? ''));
             $url = trim((string)($_POST['url'] ?? ''));
@@ -63,7 +73,7 @@ final class ShareTargetController
             $filesPayload = $_FILES['media'] ?? $_FILES['photo'] ?? $_FILES['photos'] ?? $_FILES['file'] ?? null;
 
             if ($filesPayload && is_array($filesPayload['name'])) {
-                $count = count($filesPayload['name']);
+                $count = min(10, count($filesPayload['name']));
                 for ($i = 0; $i < $count; $i++) {
                     if ($filesPayload['error'][$i] === UPLOAD_ERR_OK && $filesPayload['size'][$i] <= self::MAX_FILE_SIZE) {
                         $finfo = new \finfo(FILEINFO_MIME_TYPE);
@@ -134,6 +144,13 @@ final class ShareTargetController
     {
         if (!headers_sent()) {
             header('Content-Type: application/json; charset=utf-8');
+        }
+
+        $userId = trim((string)($_SESSION['id'] ?? ''));
+        if ($userId === '') {
+            http_response_code(401);
+            echo json_encode(['status' => 'error', 'message' => 'Unauthorized: Please sign in.']);
+            return;
         }
 
         $ticket = trim((string)($_GET['ticket'] ?? ''));
