@@ -47,8 +47,9 @@ final class DataExportService
         'family_reel_reactions' => 'user_id',
         'requestMgt'            => '__request',
         'notification'          => '__notification',
-        'kinship_dismissed'     => 'user_id',
-        'platform_analytics'    => 'user_id',
+        'kinship_dismissed'          => 'user_id',
+        'user_member_restrictions' => 'owner_id',
+        'platform_analytics'         => 'user_id',
         'audit_logs'            => '__email',
         'login_events'          => 'user_id',
     ];

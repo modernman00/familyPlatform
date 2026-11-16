@@ -127,6 +127,18 @@ final class MemberRestrictionController
                 $note
             );
 
+            try {
+                if (class_exists(\Src\AuditLogger::class)) {
+                    \Src\AuditLogger::log('member_restriction_updated', [
+                        'owner_id' => $userId,
+                        'restricted_user_id' => $targetUserId,
+                        'active' => (bool)($record['active'] ?? false),
+                    ]);
+                }
+            } catch (Throwable) {
+                // Audit logging must not block privacy updates
+            }
+
             \msgSuccess(200, ['restriction' => $record, 'message' => 'Restriction preferences saved.']);
         } catch (UnauthorisedException $e) {
             \msgException(401, $e->getMessage());
@@ -162,6 +174,19 @@ final class MemberRestrictionController
             }
 
             $removed = MemberRestrictionService::removeRestriction($this->pdo, $userId, $targetUserId);
+
+            try {
+                if (class_exists(\Src\AuditLogger::class)) {
+                    \Src\AuditLogger::log('member_restriction_removed', [
+                        'owner_id' => $userId,
+                        'restricted_user_id' => $targetUserId,
+                        'removed' => $removed,
+                    ]);
+                }
+            } catch (Throwable) {
+                // Audit logging must not block privacy updates
+            }
+
             \msgSuccess(200, ['removed' => $removed, 'message' => 'Member restriction removed.']);
         } catch (UnauthorisedException $e) {
             \msgException(401, $e->getMessage());

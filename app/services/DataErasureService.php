@@ -107,6 +107,14 @@ final class DataErasureService
                 'pushNotification'      => 'user_id',
                 'family_biographies'    => 'user_id',
             ];
+            try {
+                $delRestrictions = $db->prepare('DELETE FROM user_member_restrictions WHERE owner_id = ? OR restricted_user_id = ?');
+                $delRestrictions->execute([$this->userId, $this->userId]);
+                $erasedTables[] = 'user_member_restrictions';
+            } catch (\Throwable $e) {
+                $failedTables[] = 'user_member_restrictions';
+                $errors['user_member_restrictions'] = $e->getMessage();
+            }
             foreach ($activityTables as $table => $col) {
                 try {
                     $del = $db->prepare("DELETE FROM `{$table}` WHERE `{$col}` = ?");

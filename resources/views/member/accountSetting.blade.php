@@ -280,6 +280,206 @@
       border-top: 1px dashed #e2e8f0;
     }
 
+    /* Privacy & Restriction Sub-cards (Light + Dark Theme) */
+    .setting-subcard {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #0f172a;
+    }
+
+    .restriction-title {
+      color: #0f172a;
+    }
+
+    .restriction-subtitle {
+      color: #475569;
+    }
+
+    .restriction-count-badge {
+      background-color: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .restriction-filter-btn,
+    .restriction-action-btn {
+      background-color: #ffffff;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      min-height: 44px;
+      min-width: 44px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .restriction-filter-btn.is-active {
+      background-color: #a31621;
+      color: #ffffff;
+      border-color: #a31621;
+    }
+
+    .restriction-member-card {
+      background-color: #f8fafc;
+      border-color: #e2e8f0;
+    }
+
+    .restriction-member-card.is-restricted {
+      background-color: #fff5f5;
+      border-color: #fecaca;
+    }
+
+    .restriction-action-btn.is-restrict-cta {
+      background-color: #a31621;
+      color: #ffffff;
+      border-color: #a31621;
+    }
+
+    .restriction-action-btn.is-unrestrict-cta {
+      background-color: #ffffff;
+      color: #0f172a;
+      border-color: #94a3b8;
+    }
+
+    .restriction-scope-tile {
+      background-color: #ffffff;
+      border-color: #e2e8f0;
+      color: #0f172a;
+    }
+
+    /* Dark Mode Overrides for Account Settings (WCAG AA Contrast) */
+    body.dark-mode {
+      background-color: #0b1120;
+      background-image: radial-gradient(at top left, rgba(163, 22, 33, 0.14) 0%, transparent 45%);
+      color: #f8fafc;
+    }
+
+    body.dark-mode .page-title,
+    body.dark-mode .section-title,
+    body.dark-mode .restriction-title {
+      color: #f8fafc !important;
+    }
+
+    body.dark-mode .page-subtitle,
+    body.dark-mode .section-subtitle,
+    body.dark-mode .restriction-subtitle {
+      color: #cbd5e1 !important;
+    }
+
+    body.dark-mode .sidebar-card,
+    body.dark-mode .content-card {
+      background: #1e293b !important;
+      border: 1px solid #334155 !important;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45);
+      color: #f8fafc;
+    }
+
+    body.dark-mode .nav-pills .nav-link {
+      color: #cbd5e1;
+    }
+
+    body.dark-mode .nav-pills .nav-link:hover {
+      background-color: #0f172a;
+      color: #ffffff;
+    }
+
+    body.dark-mode .nav-pills .nav-link.active {
+      background-color: rgba(163, 22, 33, 0.22);
+      color: #fecaca;
+      border-left-color: #f43f5e;
+    }
+
+    body.dark-mode .section-divider,
+    body.dark-mode .border-top {
+      background-color: #334155;
+      border-color: #334155 !important;
+    }
+
+    body.dark-mode .custom-switch,
+    body.dark-mode .setting-subcard,
+    body.dark-mode .restriction-member-card,
+    body.dark-mode .content-card [style*="background-color: #f8fafc"] {
+      background-color: #0f172a !important;
+      border-color: #334155 !important;
+      color: #f8fafc !important;
+    }
+
+    body.dark-mode .restriction-member-card.is-restricted {
+      background-color: rgba(153, 27, 27, 0.18) !important;
+      border-color: #991b1b !important;
+    }
+
+    body.dark-mode .switch-info h6 {
+      color: #f8fafc !important;
+    }
+
+    body.dark-mode .switch-info p,
+    body.dark-mode .toggle-label {
+      color: #cbd5e1 !important;
+    }
+
+    body.dark-mode .form-label {
+      color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .form-text {
+      color: #cbd5e1 !important;
+    }
+
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+      background-color: #0f172a !important;
+      color: #f8fafc !important;
+      border-color: #475569 !important;
+    }
+
+    body.dark-mode .form-select option {
+      background-color: #0f172a !important;
+      color: #f8fafc !important;
+    }
+
+    body.dark-mode .form-control::placeholder,
+    body.dark-mode .form-select::placeholder {
+      color: #94a3b8 !important;
+    }
+
+    body.dark-mode .form-control[readonly] {
+      background-color: #1e293b !important;
+      color: #cbd5e1 !important;
+    }
+
+    body.dark-mode .restriction-count-badge {
+      background-color: rgba(153, 27, 27, 0.32);
+      color: #fecaca;
+      border-color: #b91c1c;
+    }
+
+    body.dark-mode .restriction-filter-btn,
+    body.dark-mode .restriction-action-btn,
+    body.dark-mode .restriction-action-btn.is-unrestrict-cta {
+      background-color: #1e293b;
+      color: #f1f5f9;
+      border-color: #475569;
+    }
+
+    body.dark-mode .restriction-filter-btn.is-active,
+    body.dark-mode .restriction-action-btn.is-restrict-cta {
+      background-color: #a31621;
+      color: #ffffff;
+      border-color: #a31621;
+    }
+
+    body.dark-mode .restriction-scope-tile {
+      background-color: #1e293b !important;
+      border-color: #334155 !important;
+      color: #f8fafc !important;
+    }
+
+    body.dark-mode .legacy-settings-header {
+      border-top-color: #334155;
+    }
+
   </style>
 @endpush
 
@@ -944,12 +1144,16 @@
                 </div>
 
                 <div class="mb-4 mt-4">
-                  <label class="form-label fw-bold">Profile Visibility</label>
-                  <select class="form-select" name="profile_visibility" id="profileVisibilitySelect" style="background-color: #ffffff;">
+                  <label class="form-label fw-bold" for="profileVisibilitySelect">Profile Visibility</label>
+                  <select class="form-select" name="profile_visibility" id="profileVisibilitySelect">
                     <option value="Public" {{ ($accountData['profile_visibility'] ?? 'Public') === 'Public' ? 'selected' : '' }}>Public</option>
                     <option value="Family Only" {{ ($accountData['profile_visibility'] ?? '') === 'Family Only' ? 'selected' : '' }}>Family Only</option>
                     <option value="Private" {{ ($accountData['profile_visibility'] ?? '') === 'Private' ? 'selected' : '' }}>Private</option>
                   </select>
+                  <div class="form-text mt-1">
+                    Want to hide updates from specific relatives instead? Customise per-member visibility silently in
+                    <a href="#memberRestrictionCard" class="fw-semibold text-decoration-underline" style="color: inherit;">Restricted Family Members</a> below.
+                  </div>
                 </div>
 
                 <div class="custom-switch">
@@ -983,149 +1187,6 @@
                 <button type="button" id="privacyBtn" class="btn-save mt-3">Save Privacy Settings</button>
               </form>
 
-              <!-- Restricted Family Members Card -->
-              <div id="memberRestrictionCard"
-                   class="mt-5 pt-4 border-top"
-                   x-data="memberRestrictionsPanel(@json($restrictionDirectory ?? []))"
-                   x-cloak>
-                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
-                  <div>
-                    <h6 class="fw-bold mb-1" style="color: #0f172a;">
-                      <i class="bi bi-person-slash me-2" style="color: #a31621;"></i>Restricted Family Members
-                    </h6>
-                    <p class="text-muted small mb-0" style="color: #475569 !important;">
-                      Choose who cannot see your posts, comments, video reels, events, family journals, announcements, time capsules, or receive notifications and emails from you. Restricted members are never notified.
-                    </p>
-                  </div>
-                  <span class="badge rounded-pill px-3 py-2 fw-semibold"
-                        style="background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; white-space: nowrap; flex-shrink: 0;">
-                    <span x-text="restrictedCount"></span> Restricted
-                  </span>
-                </div>
-
-                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-                  <div class="flex-grow-1" style="min-width: 220px;">
-                    <label for="restrictMemberSearch" class="visually-hidden">Search family members to restrict</label>
-                    <input type="search"
-                           id="restrictMemberSearch"
-                           class="form-control"
-                           style="min-height: 44px; background-color: #ffffff; color: #0f172a;"
-                           placeholder="Search by name or family code..."
-                           x-model.trim="searchQuery">
-                  </div>
-                  <div class="d-flex align-items-center gap-2 overflow-x-auto">
-                    <button type="button"
-                            class="btn btn-sm rounded-pill px-3"
-                            style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0; border: 1px solid #cbd5e1;"
-                            :style="{ backgroundColor: filterMode === 'all' ? '#a31621' : '#ffffff', color: filterMode === 'all' ? '#ffffff' : '#334155', borderColor: filterMode === 'all' ? '#a31621' : '#cbd5e1' }"
-                            @click="filterMode = 'all'">
-                      All Members (<span x-text="members.length"></span>)
-                    </button>
-                    <button type="button"
-                            class="btn btn-sm rounded-pill px-3"
-                            style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0; border: 1px solid #cbd5e1;"
-                            :style="{ backgroundColor: filterMode === 'restricted' ? '#a31621' : '#ffffff', color: filterMode === 'restricted' ? '#ffffff' : '#334155', borderColor: filterMode === 'restricted' ? '#a31621' : '#cbd5e1' }"
-                            @click="filterMode = 'restricted'">
-                      Restricted (<span x-text="restrictedCount"></span>)
-                    </button>
-                  </div>
-                </div>
-
-                <div x-show="errorMsg" class="alert alert-danger small rounded-3 py-2 px-3 mb-3" role="alert" x-text="errorMsg"></div>
-
-                <template x-if="members.length === 0">
-                  <div class="p-4 text-center border rounded-3" style="background-color: #f8fafc;">
-                    <i class="bi bi-people fs-3 text-muted d-block mb-2"></i>
-                    <div class="fw-semibold text-dark mb-1">No connected family members found yet</div>
-                    <p class="text-muted small mb-3">Once relatives join your family code or accept a connection request, you can manage their visibility here.</p>
-                    <a href="/allMembers" class="btn btn-outline-secondary btn-sm rounded-pill px-4" style="min-height: 44px; display: inline-flex; align-items: center;">
-                      Browse Family Directory
-                    </a>
-                  </div>
-                </template>
-
-                <template x-if="members.length > 0 && filteredMembers.length === 0">
-                  <div class="p-4 text-center border rounded-3" style="background-color: #f8fafc;">
-                    <div class="fw-semibold text-dark mb-1">No matching members</div>
-                    <p class="text-muted small mb-2">Try clearing your search or switching back to All Members.</p>
-                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;" @click="searchQuery = ''; filterMode = 'all';">
-                      Reset Filter
-                    </button>
-                  </div>
-                </template>
-
-                <div class="d-flex flex-column gap-2" x-show="filteredMembers.length > 0">
-                  <template x-for="member in filteredMembers" :key="member.id">
-                    <div class="p-3 rounded-3 border" :style="member.is_restricted ? 'background-color: #fff5f5; border-color: #fecaca;' : 'background-color: #f8fafc; border-color: #e2e8f0;'">
-                      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-                        <div class="d-flex align-items-center gap-3" style="min-width: 0; flex: 1 1 220px;">
-                          <img :src="member.avatar" :alt="member.fullName" class="rounded-circle flex-shrink-0" width="44" height="44" style="width: 44px; height: 44px; object-fit: cover;">
-                          <div style="min-width: 0;">
-                            <div class="fw-bold text-dark" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;" :title="member.fullName" x-text="member.fullName || 'Family Member'"></div>
-                            <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
-                              <span class="badge bg-light text-secondary border" style="font-size: 0.72rem;" x-show="member.famCode" x-text="'#' + member.famCode"></span>
-                              <span class="badge rounded-pill" style="background-color: #991b1b; color: #ffffff; font-size: 0.72rem;" x-show="member.is_restricted">Restricted</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class="d-flex flex-wrap align-items-center gap-2">
-                          <button type="button"
-                                  class="btn btn-sm rounded-pill px-3"
-                                  style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0; background-color: #ffffff; color: #334155; border: 1px solid #cbd5e1;"
-                                  @click="toggleExpand(member.id)">
-                            <i class="bi bi-sliders me-1"></i>
-                            <span x-text="expandedId === member.id ? 'Hide Options' : 'Customise'"></span>
-                          </button>
-
-                          <button type="button"
-                                  class="btn btn-sm rounded-pill px-3 fw-semibold"
-                                  style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0; border: 1px solid #a31621;"
-                                  :style="{ backgroundColor: member.is_restricted ? '#ffffff' : '#a31621', color: member.is_restricted ? '#0f172a' : '#ffffff', borderColor: member.is_restricted ? '#94a3b8' : '#a31621' }"
-                                  :disabled="savingId === member.id"
-                                  @click="quickToggle(member, $event.currentTarget)">
-                            <span x-text="member.is_restricted ? 'Unrestrict' : 'Restrict All'"></span>
-                          </button>
-                        </div>
-                      </div>
-
-                      <div x-show="expandedId === member.id" x-collapse class="mt-3 pt-3 border-top">
-                        <div class="row g-2 mb-3">
-                          <template x-for="scope in scopeOptions" :key="scope.key">
-                            <div class="col-12 col-sm-6 col-md-4">
-                              <label class="d-flex align-items-center gap-2 p-2 rounded border bg-white h-100" style="min-height: 44px; cursor: pointer;">
-                                <input type="checkbox" class="form-check-input mt-0" style="width: 20px; height: 20px;" x-model="member[scope.key]">
-                                <span class="small fw-medium text-dark" x-text="scope.label"></span>
-                              </label>
-                            </div>
-                          </template>
-                        </div>
-
-                        <div class="mb-3">
-                          <label class="form-label small fw-semibold text-dark mb-1">Private Note (never shared with this member)</label>
-                          <input type="text"
-                                 class="form-control form-control-sm"
-                                 style="min-height: 44px; background-color: #ffffff; color: #0f172a;"
-                                 maxlength="255"
-                                 placeholder="Optional reminder for yourself..."
-                                 x-model="member.note">
-                        </div>
-
-                        <div class="d-flex flex-wrap justify-content-end gap-2">
-                          <button type="button"
-                                  class="btn btn-sm rounded-pill px-4 fw-semibold"
-                                  style="min-height: 44px; white-space: nowrap; flex-shrink: 0; background-color: #a31621; color: #ffffff; border: 1px solid #a31621;"
-                                  :disabled="savingId === member.id"
-                                  @click="saveMemberScopes(member, $event.currentTarget)">
-                            Save Preferences
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </template>
-                </div>
-              </div>
-
               <!-- Biometric Passkeys Card -->
               <div class="mt-5 pt-4 border-top">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -1143,7 +1204,7 @@
                 @if(!empty($passkeys) && count($passkeys) > 0)
                   <div class="d-flex flex-column gap-2 mt-3">
                     @foreach($passkeys as $pk)
-                      <div class="d-flex justify-content-between align-items-center p-3 rounded-3 border" style="background-color: #f8fafc;">
+                      <div class="d-flex justify-content-between align-items-center p-3 rounded-3 setting-subcard">
                         <div class="d-flex align-items-center gap-3">
                           <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
                             <i class="bi bi-laptop"></i>
@@ -1160,7 +1221,7 @@
                     @endforeach
                   </div>
                 @else
-                  <div class="p-3 text-center border rounded-3 text-muted small" style="background-color: #f8fafc;">
+                  <div class="p-3 text-center rounded-3 text-muted small setting-subcard">
                     No biometric devices registered yet. Click "Register This Device" above to enable passkey sign in.
                   </div>
                 @endif
@@ -1172,14 +1233,163 @@
                 <p>Download a copy of your personal data (Article 15) or manage account deletion (Article 17) with options for immediate permanent erasure or a 30-day scheduled grace period.</p>
               </div>
               <div class="d-flex flex-wrap gap-2 mt-2">
-                <button type="button" id="dataExportBtn" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <button type="button" id="dataExportBtn" class="btn btn-outline-secondary btn-sm rounded-pill px-3" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
                   <i class="bi bi-download me-1"></i> Download my data
                 </button>
-                <button type="button" id="dataDeleteBtn" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                <button type="button" id="dataDeleteBtn" class="btn btn-outline-danger btn-sm rounded-pill px-3" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
                   <i class="bi bi-trash3 me-1"></i> Delete account
                 </button>
               </div>
               <p id="dataExportStatus" class="small text-muted mt-2" style="display:none;"></p>
+
+              <!-- Restricted Family Members Card -->
+              @php
+                $restrictionDirectoryJson = json_encode($restrictionDirectory ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+              @endphp
+              <script type="application/json" id="restrictionDirectoryData" nonce="{{ csp_nonce($nonce ?? null) }}">{!! $restrictionDirectoryJson !!}</script>
+              <div id="memberRestrictionCard"
+                   class="mt-5 pt-4 border-top"
+                   x-data="memberRestrictionsPanel()"
+                   x-cloak>
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+                  <div>
+                    <h6 class="fw-bold mb-1 restriction-title">
+                      <i class="bi bi-person-slash me-2" style="color: #a31621;"></i>Restricted Family Members
+                    </h6>
+                    <p class="small mb-0 restriction-subtitle">
+                      Choose who cannot see your posts, comments, video reels, events, family journals, announcements, time capsules, or receive notifications and emails from you. Restricted members are never notified.
+                    </p>
+                  </div>
+                  <span class="badge rounded-pill px-3 py-2 fw-semibold restriction-count-badge">
+                    <span x-text="restrictedCount"></span> Restricted
+                  </span>
+                </div>
+
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                  <div class="flex-grow-1" style="min-width: 220px;">
+                    <label for="restrictMemberSearch" class="visually-hidden">Search family members to restrict</label>
+                    <input type="search"
+                           id="restrictMemberSearch"
+                           class="form-control"
+                           style="min-height: 44px;"
+                           placeholder="Search by name or family code..."
+                           x-model.trim="searchQuery">
+                  </div>
+                  <div class="d-flex align-items-center gap-2 overflow-x-auto">
+                    <button type="button"
+                            class="btn btn-sm rounded-pill px-3 restriction-filter-btn"
+                            :class="{ 'is-active': filterMode === 'all' }"
+                            @click="filterMode = 'all'">
+                      All Members (<span x-text="members.length"></span>)
+                    </button>
+                    <button type="button"
+                            class="btn btn-sm rounded-pill px-3 restriction-filter-btn"
+                            :class="{ 'is-active': filterMode === 'restricted' }"
+                            @click="filterMode = 'restricted'">
+                      Restricted (<span x-text="restrictedCount"></span>)
+                    </button>
+                  </div>
+                </div>
+
+                <div x-show="errorMsg" class="alert alert-danger small rounded-3 py-2 px-3 mb-3" role="alert" x-text="errorMsg"></div>
+
+                <template x-if="members.length === 0">
+                  <div class="p-4 text-center rounded-3 setting-subcard">
+                    <i class="bi bi-people fs-3 text-muted d-block mb-2"></i>
+                    <div class="fw-semibold text-dark mb-1">No connected family members found yet</div>
+                    <p class="text-muted small mb-3">Once relatives join your family code or accept a connection request, you can manage their visibility here.</p>
+                    <a href="/allMembers" class="btn btn-outline-secondary btn-sm rounded-pill px-4" style="min-height: 44px; display: inline-flex; align-items: center;">
+                      Browse Family Directory
+                    </a>
+                  </div>
+                </template>
+
+                <template x-if="members.length > 0 && filteredMembers.length === 0">
+                  <div class="p-4 text-center rounded-3 setting-subcard">
+                    <div class="fw-semibold text-dark mb-1">No matching members</div>
+                    <p class="text-muted small mb-2">Try clearing your search or switching back to All Members.</p>
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;" @click="searchQuery = ''; filterMode = 'all';">
+                      Reset Filter
+                    </button>
+                  </div>
+                </template>
+
+                <div class="d-flex flex-column gap-2" x-show="visibleMembers.length > 0">
+                  <template x-for="member in visibleMembers" :key="member.id">
+                    <div class="p-3 rounded-3 border restriction-member-card" :class="{ 'is-restricted': member.is_restricted }">
+                      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-3" style="min-width: 0; flex: 1 1 220px;">
+                          <img :src="member.avatar" :alt="member.fullName" class="rounded-circle flex-shrink-0" width="44" height="44" style="width: 44px; height: 44px; object-fit: cover;">
+                          <div style="min-width: 0;">
+                            <div class="fw-bold text-dark" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;" :title="member.fullName" x-text="member.fullName || 'Family Member'"></div>
+                            <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
+                              <span class="badge bg-light text-secondary border" style="font-size: 0.72rem;" x-show="member.famCode" x-text="'#' + member.famCode"></span>
+                              <span class="badge rounded-pill" style="background-color: #991b1b; color: #ffffff; font-size: 0.72rem;" x-show="member.is_restricted">Restricted</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                          <button type="button"
+                                  class="btn btn-sm rounded-pill px-3 restriction-action-btn"
+                                  @click="toggleExpand(member.id)">
+                            <i class="bi bi-sliders me-1"></i>
+                            <span x-text="expandedId === member.id ? 'Hide Options' : 'Customise'"></span>
+                          </button>
+
+                          <button type="button"
+                                  class="btn btn-sm rounded-pill px-3 fw-semibold restriction-action-btn"
+                                  :class="member.is_restricted ? 'is-unrestrict-cta' : 'is-restrict-cta'"
+                                  :disabled="savingId === member.id"
+                                  @click="quickToggle(member, $event.currentTarget)">
+                            <span x-text="member.is_restricted ? 'Unrestrict' : 'Restrict All'"></span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div x-show="expandedId === member.id" x-collapse class="mt-3 pt-3 border-top">
+                        <div class="row g-2 mb-3">
+                          <template x-for="scope in scopeOptions" :key="scope.key">
+                            <div class="col-12 col-sm-6 col-md-4">
+                              <label class="d-flex align-items-center gap-2 p-2 rounded border h-100 restriction-scope-tile" style="min-height: 44px; cursor: pointer;">
+                                <input type="checkbox" class="form-check-input mt-0" style="width: 20px; height: 20px;" x-model="member[scope.key]">
+                                <span class="small fw-medium" x-text="scope.label"></span>
+                              </label>
+                            </div>
+                          </template>
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="form-label small fw-semibold mb-1">Private Note (never shared with this member)</label>
+                          <input type="text"
+                                 class="form-control form-control-sm"
+                                 style="min-height: 44px;"
+                                 maxlength="255"
+                                 placeholder="Optional reminder for yourself..."
+                                 x-model="member.note">
+                        </div>
+
+                        <div class="d-flex flex-wrap justify-content-end gap-2">
+                          <button type="button"
+                                  class="btn btn-sm rounded-pill px-4 fw-semibold restriction-action-btn is-restrict-cta"
+                                  :disabled="savingId === member.id"
+                                  @click="saveMemberScopes(member, $event.currentTarget)">
+                            Save Preferences
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+
+                <div class="mt-3 text-center" x-show="!searchQuery.trim() && filterMode === 'all' && filteredMembers.length > initialLimit">
+                  <button type="button"
+                          class="btn btn-sm rounded-pill px-4 restriction-filter-btn"
+                          @click="showAllMembers = !showAllMembers">
+                    <span x-text="showAllMembers ? 'Show fewer members' : 'Show all (' + filteredMembers.length + ') members'"></span>
+                  </button>
+                </div>
+              </div>
             </div>
 
             <!-- FAMILY NETWORK & CODE TAB -->
@@ -1514,10 +1724,24 @@
 
   <script nonce="{{ csp_nonce($nonce ?? null) }}">
   window.memberRestrictionsPanel = function(initialMembers) {
+    let resolvedMembers = Array.isArray(initialMembers) ? initialMembers : [];
+    if (resolvedMembers.length === 0) {
+      try {
+        const rawJson = document.getElementById('restrictionDirectoryData')?.textContent || '[]';
+        const parsed = JSON.parse(rawJson);
+        if (Array.isArray(parsed)) {
+          resolvedMembers = parsed;
+        }
+      } catch (e) {
+        resolvedMembers = [];
+      }
+    }
     return {
-      members: Array.isArray(initialMembers) ? initialMembers : [],
+      members: resolvedMembers,
       searchQuery: '',
       filterMode: 'all',
+      showAllMembers: false,
+      initialLimit: 5,
       expandedId: null,
       savingId: null,
       errorMsg: '',
@@ -1556,6 +1780,12 @@
             note.includes(t)
           );
         });
+      },
+      get visibleMembers() {
+        if ((this.searchQuery || '').trim() !== '' || this.filterMode === 'restricted' || this.showAllMembers) {
+          return this.filteredMembers;
+        }
+        return this.filteredMembers.slice(0, this.initialLimit);
       },
       toggleExpand(memberId) {
         this.expandedId = this.expandedId === memberId ? null : memberId;

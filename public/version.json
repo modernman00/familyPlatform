@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(kin-whispers): resolve WebRTC voice and video call signaling, CSP STUN traversal and user ID case normalisation",
+    "title": "Test(share): restore authenticated session before getPendingShare",
     "notes": [
-        "Fix(kin-whispers): resolve WebRTC voice and video call signaling, CSP STUN traversal and user ID case normalisation",
-        "Fix(kin-whispers): resolve SQL 1247 forward reference on is_pinned with self-healing schema assurance",
-        "Test(csrf): ensure HTTP_X_CSRF_TOKEN is isolated and sanitized across SocialFeed and Onboarding test cases"
+        "Test(share): restore authenticated session before getPendingShare",
+        "Feat(campaign): add FamilyPlatform Google Flow campaign videos and pending app updates",
+        "Xx"
     ],
-    "released_at": "2026-11-13",
-    "commit": "bb15fe5f"
+    "released_at": "2026-11-15",
+    "commit": "bf791014"
 }

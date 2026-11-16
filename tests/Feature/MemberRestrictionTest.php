@@ -378,4 +378,32 @@ final class MemberRestrictionTest extends TestCase
         $this->assertNotNull(FamilyJournal::getJournalById($journalId, $this->famCode));
         $this->assertTrue((new FamilyPostAudienceService($this->pdo))->canUserAccessPost($searchPostNo, $this->restrictedId));
     }
+
+    public function testAccountSettingTemplateRendersSafeRestrictionJsonAndDarkModeRules(): void
+    {
+        $templatePath = dirname(__DIR__, 2) . '/resources/views/member/accountSetting.blade.php';
+        $html = (string)file_get_contents($templatePath);
+
+        $this->assertStringNotContainsString('x-data="memberRestrictionsPanel(@json', $html);
+        $this->assertStringContainsString('id="restrictionDirectoryData"', $html);
+        $this->assertStringContainsString('JSON_HEX_TAG', $html);
+        $this->assertStringContainsString('body.dark-mode .content-card', $html);
+
+        MemberRestrictionService::upsertRestriction(
+            $this->pdo,
+            $this->ownerId,
+            $this->restrictedId,
+            ['posts' => true],
+            'Note with "quotes" and </script><script>alert(1)</script>'
+        );
+
+        $directory = MemberRestrictionService::getRestrictionDirectoryForOwner($this->pdo, $this->ownerId);
+        $encoded = json_encode($directory, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+        $this->assertIsString($encoded);
+        $this->assertStringNotContainsString('</script>', $encoded);
+
+        $decoded = json_decode($encoded, true);
+        $this->assertIsArray($decoded);
+        $this->assertSame('Note with "quotes" and </script><script>alert(1)</script>', $decoded[0]['note']);
+    }
 }
