@@ -577,6 +577,8 @@
     </div>
 </div>
 
+<?= \Src\Admin\GrowthAndConciergeAdminService::renderAdminCardHtml('familyplatform') ?>
+
 <script nonce="{{ csp_nonce($nonce ?? null) }}">
     document.addEventListener('DOMContentLoaded', () => {
         // Traffic Chart
@@ -631,4 +633,5 @@
         }
     });
 </script>
+<?= \Src\Admin\GrowthAndConciergeAdminService::renderAdminWidget('familyplatform') ?>
 @endsection

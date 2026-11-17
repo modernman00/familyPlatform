@@ -742,6 +742,9 @@
     @include('member.includes.postComposer', ['composerId' => 'openPostModalTrigger'])
   </div>
 
+  <!-- Unified Daily Family Spark (Living Spark Card) -->
+  @includeIf('member.includes.dailyFamilySparkCard')
+
   <!-- Family Reels & Stories Tray -->
   @includeIf('member.includes.reelsTray')
 

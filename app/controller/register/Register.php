@@ -53,6 +53,7 @@ final class Register extends Db
                         Limiter::limit('invite_token_' . (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
                         $tokenData = \App\services\InviteTokenService::peek((string)$_GET['invite']);
                         if ($tokenData) {
+                            $_SESSION['invite_token'] = (string)$_GET['invite'];
                             $registerPostData['famCode'] = $tokenData['family_code'];
                             $registerPostData['claim_node'] = $tokenData['node_id'] ?? null;
                             $oauthSurname = self::getFamilySurnameByCode((string)$tokenData['family_code']);
@@ -66,6 +67,51 @@ final class Register extends Db
                         error_log('[Register] OAuth invite token error: ' . $e->getMessage());
                         $inviteTokenError = 'This invite link has expired or is invalid. Please ask your family member to send a new one.';
                     }
+                }
+
+                // Fallback: legacy signed invite_token on OAuth flow
+                if (empty($registerPostData['famCode']) && !empty($_GET['invite_token']) && is_string($_GET['invite_token'])) {
+                    $tokenData = \App\services\FamilyClaimService::verifySignedInviteToken((string)$_GET['invite_token']);
+                    if ($tokenData) {
+                        $registerPostData['famCode'] = $tokenData['family_code'];
+                        $registerPostData['claim_node'] = $tokenData['node_id'];
+                    }
+                }
+
+                // Preserve ?famCode= on OAuth flow
+                if (empty($registerPostData['famCode']) && !empty($_GET['famCode']) && is_string($_GET['famCode'])) {
+                    $sanitizedCode = (string)preg_replace('/[^A-Za-z0-9]/', '', $_GET['famCode']);
+                    if ($sanitizedCode !== '') {
+                        $resolvedCode = \App\services\FamilyCodeRenameService::resolveAlias(\Src\Db::connect2(), $sanitizedCode);
+                        $registerPostData['famCode'] = $resolvedCode === strtoupper($sanitizedCode) ? $sanitizedCode : $resolvedCode;
+                    }
+                }
+
+                // Preserve signed fp_share_intent cookie on OAuth flow
+                if (empty($registerPostData['famCode']) && !empty($_COOKIE['fp_share_intent'])) {
+                    $intent = \App\controller\PostShareController::parseShareIntentCookie();
+                    if (!empty($intent['famCode'])) {
+                        $sanitizedCode = (string)preg_replace('/[^A-Za-z0-9]/', '', $intent['famCode']);
+                        if ($sanitizedCode !== '') {
+                            $resolvedCode = \App\services\FamilyCodeRenameService::resolveAlias(\Src\Db::connect2(), $sanitizedCode);
+                            $registerPostData['famCode'] = $resolvedCode === strtoupper($sanitizedCode) ? $sanitizedCode : $resolvedCode;
+                        }
+                    }
+                }
+
+                // Preserve ?claim_node= on OAuth flow
+                if (empty($registerPostData['claim_node']) && !empty($_GET['claim_node']) && is_numeric($_GET['claim_node'])) {
+                    $registerPostData['claim_node'] = (int)$_GET['claim_node'];
+                }
+
+                if (!empty($registerPostData['famCode']) && empty($registerPostData['familySurname'])) {
+                    $oauthSurname = self::getFamilySurnameByCode((string)$registerPostData['famCode']);
+                    if ($oauthSurname) {
+                        $registerPostData['familySurname'] = $oauthSurname;
+                    }
+                }
+                if (empty($registerPostData['familySurname']) && !empty($registerPostData['lastName'])) {
+                    $registerPostData['familySurname'] = $registerPostData['lastName'];
                 }
                 view('registration/register', ['registerPostData' => $registerPostData, 'inviteTokenError' => $inviteTokenError]);
             } else {
@@ -90,6 +136,7 @@ final class Register extends Db
                     try {
                         $tokenData = \App\services\InviteTokenService::peek((string)$_GET['invite']);
                         if ($tokenData) {
+                            $_SESSION['invite_token'] = (string)$_GET['invite'];
                             $registerPostData['famCode'] = $tokenData['family_code'];
                             $registerPostData['firstName'] = $tokenData['first_name'] ?? '';
                             $registerPostData['lastName'] = $tokenData['last_name'] ?? '';
@@ -221,6 +268,12 @@ final class Register extends Db
         CorsHandler::setHeaders();
         try {
             $input = GetRequestData::getRequestData();
+            \App\controller\BaseController::validateCsrf($input);
+            try {
+                \Src\functionality\middleware\Validator::requireKeys($input, ['firstName', 'lastName', 'country', 'mobile', 'email', 'password', 'confirm_password']);
+            } catch (\InvalidArgumentException|\TypeError $e) {
+                throw new \Src\Exceptions\BadRequestException($e->getMessage());
+            }
             try {
                 Recaptcha::verifyCaptchaEnterprise($input, 'SUBMIT');
             } catch (RecaptchaException $re) {
@@ -330,17 +383,9 @@ final class Register extends Db
                 throw new ValidationException("Your email ({$cleanData['email']}) is already registered. Please sign in or reset your password.");
             }
 
-            // create sessions and some variables
-            sessSet('id', $cleanData['id']);
-            sessSet('firstName', $cleanData['firstName']);
-
             $firstName = $cleanData['firstName'];
 
-            Limiter::limit($cleanData['email']);  
-            
-            // Prevent brute-force abuse by clearing rate limits
-            Limiter::$argLimiter->reset();
-            Limiter::$ipLimiter->reset();
+            Limiter::limit($cleanData['email']);
             // time to submit the input data to database
 
             $getTableData = RegisterTableData::createRegisterTable($cleanData);
@@ -369,6 +414,17 @@ final class Register extends Db
                 }
 
                 $dbConnection->commit();
+
+                // Consume single-use invite token if registration used one
+                $inviteTokenToConsume = $_SESSION['invite_token'] ?? ($input['invite'] ?? ($_GET['invite'] ?? null));
+                if (is_string($inviteTokenToConsume) && strlen(trim($inviteTokenToConsume)) === 64 && ctype_xdigit(trim($inviteTokenToConsume))) {
+                    try {
+                        \App\services\InviteTokenService::consume(trim($inviteTokenToConsume));
+                        unset($_SESSION['invite_token']);
+                    } catch (\Throwable $consumeEx) {
+                        error_log('[Register.php] InviteTokenService::consume warning: ' . $consumeEx->getMessage());
+                    }
+                }
 
                 // Record creator in family_codes when founding a new family code
                 if (!$joiningViaInvitation && !empty($cleanData['famCode'])) {
@@ -534,6 +590,7 @@ final class Register extends Db
                     }
                 } else {
                     if ($joiningViaInvitation) {
+                        unset($_SESSION['id'], $_SESSION['loggedIn'], $_SESSION['manager_id']);
                         $successMsg = "Hello $firstName - Your registration is complete! An approval request has been sent to your family member. You can sign in to view your approval status, nudge your approver, and personalise your profile.";
                         msgSuccess(200, $successMsg, "/login");
                     } else {

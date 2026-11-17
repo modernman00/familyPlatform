@@ -52,4 +52,16 @@ class AdminAuthController extends BaseAdminAuthController
             'reset_token_expires_at'  => 'reset_token_expires_at',
         ];
     }
+
+    public function sendResetLink(): void
+    {
+        \App\controller\BaseController::validateCsrf($_POST);
+        parent::sendResetLink();
+    }
+
+    public function updatePassword(): void
+    {
+        \App\controller\BaseController::validateCsrf($_POST);
+        parent::updatePassword();
+    }
 }

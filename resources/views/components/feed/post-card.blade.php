@@ -1,5 +1,5 @@
 {{-- Scoped Feed Post Card Component --}}
-<div class="card border-0 shadow-sm mb-4 p-3 feed-post-card" :data-post-no="post.post_no" :id="'post' + post.post_no" :class="'post' + post.post_no" :style="(post.is_official || post.id === '{{ \App\services\FamilyPlatformAccountService::getAccountId() }}') ? 'border-radius: 12px; background-color: var(--card-bg); border-left: 4px solid #059669 !important;' : (isUserTaggedInPost(post) ? 'border-radius: 12px; background-color: var(--card-bg); border-left: 4px solid #a31621 !important;' : 'border-radius: 8px; background-color: var(--card-bg);')">
+<div class="card border-0 shadow-sm mb-4 p-3 feed-post-card" :data-post-no="post.post_no" :id="'post' + post.post_no" :class="'post' + post.post_no" :style="(post.is_official || post.id === '{{ \App\services\FamilyPlatformAccountService::getAccountId() }}') ? 'border-radius: 12px; background-color: var(--card-bg); border-left: 4px solid #059669 !important;' : ((post.is_historian || post.id === '{{ \App\services\FamilyHistorianService::HISTORIAN_ID }}') ? 'border-radius: 12px; background-color: var(--card-bg); border-left: 4px solid #4338ca !important;' : (isUserTaggedInPost(post) ? 'border-radius: 12px; background-color: var(--card-bg); border-left: 4px solid #a31621 !important;' : 'border-radius: 8px; background-color: var(--card-bg);'))">
 
   <!-- Tagged with You Heritage Ribbon -->
   <template x-if="isUserTaggedInPost(post)">
@@ -28,6 +28,12 @@
               <span class="badge rounded-pill text-white ms-1.5 px-2 py-0.5 d-inline-flex align-items-center gap-1 shadow-2xs" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); font-size: 0.72rem; font-weight: 600;" title="Verified FamilyPlatform Account">
                 <i class="bi bi-patch-check-fill" style="color: #ffffff; font-size: 0.75rem;"></i>
                 <span>{{ __('feed.official_badge', 'Official Update') }}</span>
+              </span>
+            </template>
+            <template x-if="post.is_historian || post.id === '{{ \App\services\FamilyHistorianService::HISTORIAN_ID }}'">
+              <span class="badge rounded-pill text-white ms-1.5 px-2 py-0.5 d-inline-flex align-items-center gap-1 shadow-2xs" style="background: linear-gradient(135deg, #312e81 0%, #4338ca 100%); color: #ffffff !important; font-size: 0.72rem; font-weight: 600; white-space: nowrap; flex-shrink: 0;" title="Automated Family Historian Digest">
+                <i class="bi bi-journal-richtext" style="color: #fde68a; font-size: 0.75rem;"></i>
+                <span>{{ __('feed.historian_badge', 'Do You Know?') }}</span>
               </span>
             </template>
             <template x-if="post.post_tags && post.post_tags.length > 0">
@@ -135,7 +141,7 @@
             </template>
             <template x-if="!isOwnPost(post)">
               <div>
-                <template x-if="post.id && post.id !== 'FAM_PLATFORM_OFFICIAL'">
+                <template x-if="post.id && post.id !== 'FAM_PLATFORM_OFFICIAL' && post.id !== 'FAMILY_HISTORIAN'">
                   <li>
                     <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" style="min-height: 44px; white-space: nowrap;" @click.prevent="restrictPostAuthor(post)">
                       <i class="bi bi-person-slash text-warning"></i> {{ __('feed.restrict_member', 'Restrict Member') }}

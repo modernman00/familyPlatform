@@ -523,7 +523,7 @@
             </div>
 
             <p class="lead text-secondary">
-              Members can preserve rich family chronicles with the built-in AI Story Assistant at <strong>Family Journal</strong>, post short-form video memories in <strong>Family Reels</strong>, stay informed with friendly verified <strong>Platform Announcements</strong> on everyone's feed, and explore public heritage articles on our <a href="/blogs" class="fw-bold text-decoration-none" style="color: #7a0e16;">Public Blog</a>.
+              Members can spark daily conversations with the <strong>Daily Family Spark</strong> card at the top of the feed (rotating quick polls, heritage questions, and archive flashbacks into one living thread, with 1-tap privacy-safe WhatsApp sharing), enjoy automated <strong>Family Historian "Do You Know?"</strong> timeline cards (celebrating monthly birthdays with Day & Month only, plus weekly rotating highlights on family occupations, tree roots, anniversaries, and favourite memories), preserve rich family chronicles with the built-in AI Story Assistant at <strong>Family Journal</strong>, post short-form video memories in <strong>Family Reels</strong>, stay informed with friendly verified <strong>Platform Announcements</strong> on everyone's feed, and explore public heritage articles on our <a href="/blogs" class="fw-bold text-decoration-none" style="color: #7a0e16;">Public Blog</a>.
             </p>
 
             <div class="row g-3 mb-3">

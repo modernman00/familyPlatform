@@ -281,7 +281,9 @@
             background: transparent;
             border: none;
             color: #64748b;
-            padding-right: 1.15rem;
+            min-width: 44px;
+            min-height: 44px;
+            padding: 0 0.75rem;
             cursor: pointer;
             display: flex;
             align-items: center;

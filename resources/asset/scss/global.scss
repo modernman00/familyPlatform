@@ -544,6 +544,7 @@ body.modal-open {
     align-items: center;
     justify-content: center;
     width: 100%;
+    min-height: 44px;
     padding: 10px 18px;
     border-radius: 12px;
     font-weight: 600;
@@ -568,8 +569,13 @@ body.modal-open {
 
 .pwa-btn-close {
     position: absolute;
-    top: 8px;
-    right: 8px;
+    top: 4px;
+    right: 4px;
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: transparent;
     border: none;
     font-size: 1.3rem;

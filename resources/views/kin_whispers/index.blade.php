@@ -767,7 +767,7 @@
     }
     .kw-shell[data-pane="chat"] {
         position: fixed;
-        top: 0;
+        top: var(--kw-mobile-top, calc(66px + env(safe-area-inset-top, 0px)));
         left: 0;
         right: 0;
         bottom: calc(60px + env(safe-area-inset-bottom, 0px));
@@ -793,14 +793,16 @@
         padding: 8px 10px;
         gap: 8px;
         min-height: 58px;
+        flex-wrap: wrap;
     }
     .kw-head__who {
         gap: 8px;
         min-width: 0;
-        flex: 1 1 auto;
+        flex: 1 1 220px;
     }
     .kw-head__actions {
         gap: 8px !important;
+        margin-left: auto;
     }
     .kw-head__actions .kw-btn--square {
         width: 44px; height: 44px; min-width: 44px; min-height: 44px; font-size: 0.95rem;
@@ -3014,7 +3016,29 @@ function kinWhisperApp() {
       return this.normId(id) === this.normId(this.currentUserId);
     },
 
+    syncMobileNavOffset() {
+      const shell = document.querySelector('.kw-shell');
+      const nav = document.getElementById('mainNavbar');
+      if (!shell || !nav) return;
+      const rect = nav.getBoundingClientRect();
+      const topPx = Math.max(0, Math.ceil(rect.bottom));
+      shell.style.setProperty('--kw-mobile-top', topPx + 'px');
+    },
+
     init() {
+      this.syncMobileNavOffset();
+      if (typeof window !== 'undefined') {
+        const onNavResize = () => this.syncMobileNavOffset();
+        window.addEventListener('resize', onNavResize);
+        const navEl = document.getElementById('mainNavbar');
+        if (navEl && typeof ResizeObserver !== 'undefined') {
+          this._navResizeObserver = new ResizeObserver(onNavResize);
+          this._navResizeObserver.observe(navEl);
+        }
+      }
+      if (typeof this.$watch === 'function') {
+        this.$watch('pane', () => this.$nextTick(() => this.syncMobileNavOffset()));
+      }
       if (this.serverNowIso) {
         const sTs = this.parseUtcTimestamp(this.serverNowIso);
         if (sTs > 0) this.serverClockOffset = Date.now() - sTs;

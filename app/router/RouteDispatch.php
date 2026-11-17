@@ -67,6 +67,7 @@ final class RouteDispatch
             'App\controller\test\E2ETestController',
             'App\controller\members\TelemetryController',
             'App\controller\members\RecommendationController',
+            'App\controller\members\ChildAccountController', // /login/child is public; provision() & celebration() enforce $_SESSION['id']
             // Admin Auth routes handle their own session state — must be public
             'App\controller\admin\AdminAuthController',
             'Src\functionality\WebAuthnFunctionality',

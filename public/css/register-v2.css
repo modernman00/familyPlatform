@@ -63,6 +63,7 @@
         radial-gradient(600px 380px at 110% 0%, rgba(245, 181, 68, 0.18), transparent 60%),
         radial-gradient(500px 400px at -20% 110%, rgba(236, 72, 99, 0.18), transparent 60%),
         linear-gradient(160deg, #2a0a0d 0%, #5a0b13 55%, #8a1019 100%);
+    background-color: #2a0a0d;
     display: flex;
     flex-direction: column;
     gap: 28px;

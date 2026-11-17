@@ -105,14 +105,28 @@ class BaseController
             $headerToken = (string) ($headers['X-XSRF-TOKEN'] ?? $headers['X-CSRF-TOKEN'] ?? $headers['X-XSRF-Token'] ?? $headers['X-CSRF-Token'] ?? $headers['x-xsrf-token'] ?? $headers['x-csrf-token'] ?? '');
         }
 
-        $bodyToken = (string) ($payload['token'] ?? ($payload['_token'] ?? ($_POST['token'] ?? ($_POST['_token'] ?? ''))));
+        $bodyCandidates = [
+            $payload['token'] ?? null,
+            $payload['_token'] ?? null,
+            $payload['csrf_token'] ?? null,
+            $_POST['token'] ?? null,
+            $_POST['_token'] ?? null,
+            $_POST['csrf_token'] ?? null,
+        ];
 
         $isValid = false;
         if ($headerToken !== '') {
             $isValid = hash_equals($sessionToken, $headerToken) || hash_equals($sessionToken, urldecode($headerToken));
         }
-        if (!$isValid && $bodyToken !== '') {
-            $isValid = hash_equals($sessionToken, $bodyToken) || hash_equals($sessionToken, urldecode($bodyToken));
+        if (!$isValid) {
+            foreach ($bodyCandidates as $candidate) {
+                if (is_string($candidate) && $candidate !== '') {
+                    if (hash_equals($sessionToken, $candidate) || hash_equals($sessionToken, urldecode($candidate))) {
+                        $isValid = true;
+                        break;
+                    }
+                }
+            }
         }
 
         if (!$isValid) {
@@ -154,6 +168,20 @@ class BaseController
             }
 
             $userData = (array) ($decoded->data ?? []);
+            $tokenRole = (string) ($decoded->role ?? $userData['role'] ?? 'users');
+            $tokenIat = isset($decoded->iat) && is_numeric($decoded->iat) ? (int) $decoded->iat : 0;
+            $tokenExp = isset($decoded->exp) && is_numeric($decoded->exp) ? (int) $decoded->exp : 0;
+            $configuredLoginTtl = (int) ($_ENV['COOKIE_EXPIRE'] ?? 2592000);
+
+            // Reject password-recovery JWTs (auth_forgot) or tokens containing a raw password hash
+            if (
+                $tokenRole === 'password_recovery'
+                || array_key_exists('password', $userData)
+                || ($tokenIat > 0 && $tokenExp > 0 && ($tokenExp - $tokenIat) <= 900 && $configuredLoginTtl > 900)
+            ) {
+                throw new \Exception("Invalid token purpose for login rehydration");
+            }
+
             $userId = (string) ($userData['id'] ?? $decoded->sub ?? '');
             $tokenVersion = (int) ($userData['token_version'] ?? $decoded->token_version ?? 1);
 
@@ -163,12 +191,17 @@ class BaseController
 
             // Silas Guard: Verify token_version against account table to prevent revoked sessions
             $dbTable = $_ENV['DB_TABLE_LOGIN'] ?? 'account';
-            $stmt = Db::connect2()->prepare("SELECT token_version, type, email FROM {$dbTable} WHERE id = ? LIMIT 1");
+            $stmt = Db::connect2()->prepare("SELECT token_version, type, email, status FROM {$dbTable} WHERE id = ? LIMIT 1");
             $stmt->execute([$userId]);
             $accountRow = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             if (!$accountRow) {
                 throw new \Exception("Account no longer exists");
+            }
+
+            $acctStatus = strtolower(trim((string) ($accountRow['status'] ?? '')));
+            if (in_array($acctStatus, ['suspended', 'banned', 'rejected', 'disabled', 'erased'], true)) {
+                throw new \Exception("Account is not active");
             }
 
             if (isset($accountRow['token_version']) && (int) $accountRow['token_version'] !== $tokenVersion) {
@@ -181,7 +214,8 @@ class BaseController
                 'identifyCust' => $userId,
                 'email' => (string) ($userData['email'] ?? $accountRow['email'] ?? ''),
                 'codeVerified' => true,
-                '2FA_token_ts' => time(),
+                'codeVerified_ts' => time(),
+                'flow' => 'authenticated',
                 'type' => (string) ($userData['type'] ?? $accountRow['type'] ?? 'user'),
             ];
             $_SESSION['user'] = $userData;
@@ -588,7 +622,7 @@ class BaseController
      * @param array $data
      * @return array
      */
-    private static function formatPerson(array $data): array
+    protected static function formatPerson(array $data): array
     {
         $sex = $data['gender'] === 'Male' ? 'avatarM.png' : 'avatarF.png';
 

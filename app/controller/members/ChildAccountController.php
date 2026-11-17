@@ -24,6 +24,12 @@ use Src\Limiter;
  */
 final class ChildAccountController extends BaseController
 {
+    public function __construct()
+    {
+        // Public /login/child must not invoke BaseController::__construct() (which throws 401 when unauthenticated).
+        // Protected methods (provision, celebration) enforce $_SESSION['id'] explicitly.
+    }
+
     /**
      * Provisions a child account from a family tree node.
      * Route: POST /api/family/children/provision
@@ -83,6 +89,9 @@ final class ChildAccountController extends BaseController
         } catch (NotFoundException $e) {
             http_response_code(404);
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        } catch (\Src\Exceptions\HttpException $e) {
+            http_response_code($e->getStatusCode());
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         } catch (\Throwable $e) {
             error_log('[ChildAccountController::provision] ' . $e->getMessage());
             http_response_code(500);
@@ -104,6 +113,8 @@ final class ChildAccountController extends BaseController
                 echo json_encode(['status' => 'error', 'message' => 'Method Not Allowed']);
                 return;
             }
+
+            BaseController::validateCsrf($_POST);
 
             $clientIp = (string)($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
             Limiter::limit('child_login_' . $clientIp, 'login');
@@ -145,6 +156,13 @@ final class ChildAccountController extends BaseController
                 \session_regenerate_id(true);
             }
 
+            \Src\JwtHandler::issueLoginCookie([
+                'id' => (string) $child['id'],
+                'email' => (string) ($child['email'] ?? ''),
+                'role' => 'users',
+                'token_version' => (int) ($child['token_version'] ?? 1),
+            ]);
+
             // Check if user has turned 18 on this login
             $graduation = AdulthoodTransitionService::checkAndProcessUserGraduation($child['id']);
 
@@ -157,6 +175,9 @@ final class ChildAccountController extends BaseController
                 'redirect' => '/member/profilePage',
                 'graduation' => $graduation,
             ]);
+        } catch (\Src\Exceptions\HttpException $e) {
+            http_response_code($e->getStatusCode());
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         } catch (\Throwable $e) {
             error_log('[ChildAccountController::login] ' . $e->getMessage());
             http_response_code(500);
@@ -188,6 +209,9 @@ final class ChildAccountController extends BaseController
                 'has_celebration' => $graduation !== null,
                 'celebration_data' => $graduation,
             ]);
+        } catch (\Src\Exceptions\HttpException $e) {
+            http_response_code($e->getStatusCode());
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         } catch (\Throwable $e) {
             error_log('[ChildAccountController::celebration] ' . $e->getMessage());
             http_response_code(500);

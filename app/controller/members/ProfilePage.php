@@ -441,6 +441,18 @@ final class ProfilePage extends ProcessImg
                 $removeKeys[] = 'ar_emoji';
             }
 
+            $pollQuestion = isset($_POST['poll_question']) && is_string($_POST['poll_question'])
+                ? htmlspecialchars(trim($_POST['poll_question']), ENT_QUOTES, 'UTF-8')
+                : null;
+            $pollOptionsRaw = is_array($_POST['poll_options'] ?? null) ? $_POST['poll_options'] : [];
+            $rawTaggedInput = $_POST['tagged_user_ids'] ?? [];
+            unset(
+                $_POST['poll_question'], $_POST['poll_options'], $_POST['tagged_user_ids'],
+                $_POST['shared_temp_images'], $_POST['attached_video_urls'],
+                $_REQUEST['poll_question'], $_REQUEST['poll_options'], $_REQUEST['tagged_user_ids'],
+                $_REQUEST['shared_temp_images'], $_REQUEST['attached_video_urls']
+            );
+
            $result =  SubmitPostData::submitToOneTablenImage(
                 table: 'post',
                 fileName: 'post_img',
@@ -643,13 +655,13 @@ final class ProfilePage extends ProcessImg
                     }
                 }
 
-                // Handle Poll Data
-                $pollQuestion = isset($_POST['poll_question']) ? htmlspecialchars(trim($_POST['poll_question']), ENT_QUOTES, 'UTF-8') : null;
-                $pollOptionsRaw = $_POST['poll_options'] ?? [];
-                
+                // Handle Poll Data (captured before SubmitPostData sanitisation)
                 $pollOptions = [];
                 foreach ($pollOptionsRaw as $opt) {
-                    $cleanOpt = htmlspecialchars(trim($opt), ENT_QUOTES, 'UTF-8');
+                    if (!is_string($opt) && !is_numeric($opt)) {
+                        continue;
+                    }
+                    $cleanOpt = htmlspecialchars(trim((string)$opt), ENT_QUOTES, 'UTF-8');
                     if (!empty($cleanOpt)) {
                         $pollOptions[] = $cleanOpt;
                     }
@@ -702,7 +714,7 @@ final class ProfilePage extends ProcessImg
                 try {
                     $famCode = (string)($_SESSION['famCode'] ?? '');
                     $authorIdStr = is_string($id) ? $id : (string)($_SESSION['id'] ?? '');
-                    $rawTagged = $_POST['tagged_user_ids'] ?? [];
+                    $rawTagged = $rawTaggedInput;
                     if (is_string($rawTagged)) {
                         $rawTagged = json_decode($rawTagged, true) ?: [$rawTagged];
                     }

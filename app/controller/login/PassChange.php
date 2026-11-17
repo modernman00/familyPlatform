@@ -32,6 +32,8 @@ final class PassChange
     public function verify(): void
     {
         try {
+            $input = \Src\functionality\middleware\GetRequestData::getRequestData();
+            \App\controller\BaseController::validateCsrf($input);
             PasswordResetFunctionality::process();
         } catch (\Throwable $th) {
                Utility::showError($th);

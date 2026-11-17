@@ -32,6 +32,11 @@ $router->map('POST', '/api/games/two-truths/vote', 'App\controller\members\TwoTr
 $router->map('POST', '/api/games/two-truths/create', 'App\controller\members\TwoTruthsGameController@create', 'games_two_truths_create');
 $router->map('POST', '/api/games/two-truths/reveal', 'App\controller\members\TwoTruthsGameController@reveal', 'games_two_truths_reveal');
 
+// Unified Daily Family Spark Engine
+$router->map('GET', '/api/sparks/active', 'App\controller\members\DailyFamilySparkController@getActive', 'sparks_active');
+$router->map('POST', '/api/sparks/respond', 'App\controller\members\DailyFamilySparkController@respond', 'sparks_respond');
+$router->map('POST', '/api/sparks/create', 'App\controller\members\DailyFamilySparkController@create', 'sparks_create');
+
 // RFC-0019: Festivity & Celebration Greeting Cards Studio (ATG)
 $router->map('GET', '/creative-studio', 'App\controller\members\FestiveCardController@hub', 'member_creative_studio');
 $router->map('GET', '/member/festive-cards', 'App\controller\members\FestiveCardController@index', 'member_festive_cards');

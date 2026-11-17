@@ -14,6 +14,11 @@ final class E2ETestBypass
 {
     public static function handle(): void
     {
+        $appEnv = strtolower((string) ($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'production'));
+        if (!in_array($appEnv, ['local', 'development', 'testing'], true)) {
+            return;
+        }
+
         $isCypressTest = isset($_SERVER['HTTP_X_CYPRESS_TEST']) ||
                          (isset($_SERVER['HTTP_USER_AGENT']) && str_contains($_SERVER['HTTP_USER_AGENT'], 'cypress'));
 

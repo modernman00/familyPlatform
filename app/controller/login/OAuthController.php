@@ -389,7 +389,7 @@ class OAuthController
         $db = Db::connect2();
 
         // Check if user exists
-        $stmt = $db->prepare("SELECT id, email, token_version FROM account WHERE email = ?");
+        $stmt = $db->prepare("SELECT id, email, token_version, status, deleted_at FROM account WHERE email = ?");
         $stmt->execute([$email]);
         $userRow = $stmt->fetch(\PDO::FETCH_ASSOC);
 
@@ -402,6 +402,23 @@ class OAuthController
 
         if ($userRow && !empty($userRow['id'])) {
             $userId = (string) $userRow['id'];
+            $acctStatus = strtolower(trim((string) ($userRow['status'] ?? '')));
+            if (in_array($acctStatus, ['suspended', 'banned', 'rejected', 'disabled', 'erased'], true)) {
+                http_response_code(403);
+                exit('Your account is currently ' . htmlspecialchars($acctStatus, ENT_QUOTES, 'UTF-8') . ' and cannot sign in.');
+            }
+
+            if ($acctStatus === 'pending_deletion') {
+                $deletedAt = !empty($userRow['deleted_at']) ? strtotime((string) $userRow['deleted_at']) : 0;
+                if ($deletedAt > 0 && (time() - $deletedAt) > (30 * 86400)) {
+                    (new \App\services\DataErasureService($userId))->erase('system_grace_period_expired');
+                    http_response_code(403);
+                    exit('This account has passed its 30-day grace period and has been permanently deleted.');
+                }
+                $db->prepare("UPDATE account SET status = 'approved', deleted_at = NULL, updated_at = NOW() WHERE id = ?")
+                    ->execute([$userId]);
+            }
+
             $column = match($provider) {
                 'google'   => 'google_id',
                 'apple'    => 'apple_id',
@@ -410,6 +427,34 @@ class OAuthController
             };
             $update = $db->prepare("UPDATE account SET {$column} = ? WHERE id = ?");
             $update->execute([$providerId, $userId]);
+
+            // Enforce 2FA if enabled on the account
+            $tfaStmt = $db->prepare("SELECT two_factor_auth FROM contact WHERE id = ? LIMIT 1");
+            $tfaStmt->execute([$userId]);
+            $twoFactorVal = $tfaStmt->fetchColumn();
+            if (is_string($twoFactorVal) && strtolower(trim($twoFactorVal)) === 'on') {
+                $userPayload = [
+                    'id' => $userId,
+                    'email' => (string) ($userRow['email'] ?? $email),
+                    'role' => 'users',
+                    'token_version' => (int) ($userRow['token_version'] ?? 1),
+                ];
+                $_SESSION['auth']['pendingUser'] = $userPayload;
+                $_SESSION['auth']['flow'] = 'login';
+                $pathToSentCodeNotification = (string) ($_ENV['PATH_TO_SENT_CODE_NOTIFICATION'] ?? 'msg/code');
+                try {
+                    \Src\Token::generateSendTokenEmail($userPayload, $pathToSentCodeNotification);
+                } catch (\Throwable $mailEx) {
+                    $appEnv = strtolower((string) ($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'production'));
+                    if (in_array($appEnv, ['local', 'development', 'testing'], true)) {
+                        error_log('[OAuth 2FA] Non-prod SMTP bypass: ' . $mailEx->getMessage());
+                    } else {
+                        throw $mailEx;
+                    }
+                }
+                redirect('/login/code');
+                return;
+            }
 
             // Log them in
             $this->loginUser($userId, $userRow);
@@ -466,7 +511,14 @@ class OAuthController
             '2FA_token_ts' => time(),
             'type' => 'member',
         ];
+        $getFamCode = \App\model\AllMembersData::getFamCode($userId);
+        $famCodes = $getFamCode['famCode'] ?? [];
+        if (!is_array($famCodes)) {
+            $famCodes = $famCodes !== '' ? [$famCodes] : ($famCode !== '' ? [$famCode] : []);
+        }
+
         $_SESSION['famCode'] = $famCode;
+        $_SESSION['famCodes'] = $famCodes;
         $_SESSION['loggedIn'] = true;
 
         // Create JWT cookie with exact user payload expected by RoleMiddleware

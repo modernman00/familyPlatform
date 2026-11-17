@@ -110,7 +110,8 @@ final class Login
             // for 'local'; we extend that to 'development' and 'testing' here
             // because the web server reads APP_ENV from .env (not the shell).
             $nonProdEnvs = ['local', 'development', 'testing'];
-            $isCaptchaV3 = !in_array((string) getenv('APP_ENV'), $nonProdEnvs, true);
+            $appEnv = strtolower((string) ($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'production'));
+            $isCaptchaV3 = !in_array($appEnv, $nonProdEnvs, true);
 
             // JwtHandler::authenticate() reads $_SERVER['HTTP_USER_AGENT'] and
             // $_SERVER['REMOTE_ADDR'] unconditionally. Headless HTTP clients
@@ -125,6 +126,7 @@ final class Login
             }
 
             $inputData = \Src\functionality\middleware\GetRequestData::getRequestData();
+            BaseController::validateCsrf($inputData);
             $loginEmail = trim((string) ($inputData['email'] ?? $inputData['username'] ?? ''));
 
             // Authoritative session flow marking: this is a login attempt, NOT password recovery
@@ -158,6 +160,18 @@ final class Login
                         ];
                     } else {
                         throw $loginEx;
+                    }
+                }
+
+                // Block suspended/banned/rejected/disabled/erased accounts even when 2FA path was taken
+                $pendingId = (string) ($result['id'] ?? ($_SESSION['auth']['pendingUser']['id'] ?? ''));
+                if ($pendingId !== '') {
+                    $stmtAcctStatus = \Src\Db::connect2()->prepare('SELECT status FROM account WHERE id = ? LIMIT 1');
+                    $stmtAcctStatus->execute([$pendingId]);
+                    $acctStatus = strtolower(trim((string) ($stmtAcctStatus->fetchColumn() ?: '')));
+                    if (in_array($acctStatus, ['suspended', 'banned', 'rejected', 'disabled', 'erased'], true)) {
+                        unset($_SESSION['auth']['pendingUser'], $_SESSION['auth']['2FA_token_ts'], $_SESSION['auth']['identifyCust']);
+                        throw new \Src\Exceptions\UnauthorisedException('Your account is currently ' . $acctStatus . ' and cannot sign in.');
                     }
                 }
             } else {
@@ -313,6 +327,18 @@ final class Login
         $userId = (string) ($user['id'] ?? '');
         $userEmail = (string) ($user['email'] ?? $email);
 
+        $accountStatus = strtolower(trim((string) ($user['status'] ?? '')));
+        if (in_array($accountStatus, ['suspended', 'banned', 'rejected', 'disabled', 'erased'], true)) {
+            \Src\LoginUtility::logAudit(
+                $userId,
+                $userEmail,
+                'failure',
+                (string) ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'),
+                (string) ($_SERVER['HTTP_USER_AGENT'] ?? 'Unknown')
+            );
+            throw new \Src\Exceptions\UnauthorisedException('Your account is currently ' . $accountStatus . ' and cannot sign in.');
+        }
+
         // GDPR Art. 17 — 30-Day Grace Period Management
         if (($user['status'] ?? '') === 'pending_deletion') {
             $deletedAt = !empty($user['deleted_at']) ? strtotime((string) $user['deleted_at']) : 0;
@@ -386,7 +412,10 @@ final class Login
             }
         }
 
-        \App\services\LoginAnomalyService::check($userId);
+        $anomaly = \App\services\LoginAnomalyService::check($userId);
+        if ($anomaly !== null) {
+            $_SESSION['login_anomaly_detected'] = true;
+        }
         \App\services\LoginAnomalyService::record($userId);
 
         return [

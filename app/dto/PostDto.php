@@ -123,7 +123,8 @@ final class PostDto implements JsonSerializable
         public readonly array $videos = [],
         public readonly ?array $video = null,
         public readonly string $targetScope = 'all',
-        public readonly ?string $postStyle = null
+        public readonly ?string $postStyle = null,
+        public readonly bool $isHistorianPost = false
     ) {}
 
     /**
@@ -310,6 +311,10 @@ final class PostDto implements JsonSerializable
         if ($isOfficialPost && (empty($profileImg) || str_contains($profileImg, 'avatarM') || str_contains($profileImg, 'avatarF'))) {
             $profileImg = '/images/logo/logo.png';
         }
+        $isHistorianPost = ($id === \App\services\FamilyHistorianService::HISTORIAN_ID) || !empty($row['is_historian']);
+        if ($isHistorianPost) {
+            $profileImg = \App\services\FamilyHistorianService::HISTORIAN_AVATAR;
+        }
 
         return new self(
             postNo: $postNo,
@@ -340,7 +345,8 @@ final class PostDto implements JsonSerializable
             videos: $rowVideos,
             video: $rowVideos[0] ?? null,
             targetScope: (string)($row['target_scope'] ?? 'all'),
-            postStyle: $postStyle
+            postStyle: $postStyle,
+            isHistorianPost: $isHistorianPost
         );
     }
 
@@ -378,6 +384,7 @@ final class PostDto implements JsonSerializable
         $arr['target_scope'] = $this->targetScope;
         $arr['voice_capsule_url'] = $this->voiceCapsuleUrl;
         $arr['is_official'] = $this->isOfficialPost;
+        $arr['is_historian'] = $this->isHistorianPost;
         $arr['ar_emoji'] = $this->arEmoji;
         $arr['post_style'] = $this->postStyle;
         $arr['videos'] = $this->videos;

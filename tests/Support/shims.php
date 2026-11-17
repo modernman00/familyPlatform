@@ -42,3 +42,12 @@ if (!function_exists(__NAMESPACE__ . '\\redirect')) {
     }
 }
 
+namespace App\controller\register;
+
+if (!function_exists(__NAMESPACE__ . '\\showError')) {
+    function showError(\Throwable $th): void
+    {
+        \Src\Utility::showError($th);
+    }
+}
+

@@ -3888,6 +3888,18 @@ video.feed-post-video::-webkit-media-controls-play-button,
   white-space: nowrap !important;
 }
 
+/* 7. PWA Install Banner Safe Touch Targets (Global Design Standards v2.1) */
+.pwa-btn {
+  min-height: var(--tap-min, 44px);
+}
+.pwa-btn-close {
+  min-width: var(--tap-min, 44px);
+  min-height: var(--tap-min, 44px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 
 
 

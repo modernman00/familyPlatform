@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Test(share): restore authenticated session before getPendingShare",
+    "title": "Fix(privacy): repair restricted members panel, dark-mode contrast, and GDPR parity on accountSetting",
     "notes": [
+        "Fix(privacy): repair restricted members panel, dark-mode contrast, and GDPR parity on accountSetting",
         "Test(share): restore authenticated session before getPendingShare",
-        "Feat(campaign): add FamilyPlatform Google Flow campaign videos and pending app updates",
-        "Xx"
+        "Feat(campaign): add FamilyPlatform Google Flow campaign videos and pending app updates"
     ],
-    "released_at": "2026-11-15",
-    "commit": "bf791014"
+    "released_at": "2026-11-16",
+    "commit": "fb935f73"
 }

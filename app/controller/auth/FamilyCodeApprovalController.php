@@ -137,11 +137,34 @@ class FamilyCodeApprovalController
     {
         header('Content-Type: application/json');
 
+        try {
+            Limiter::limit('complete_reg_' . (string) ($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1'));
+        } catch (\Throwable $e) {
+            http_response_code(429);
+            echo json_encode(['error' => 'Too many requests. Please slow down.']);
+            return;
+        }
+
         $rawInput = file_get_contents('php://input');
         $input = is_string($rawInput) && $rawInput !== '' ? json_decode($rawInput, true) : [];
         if (!is_array($input)) $input = [];
 
-        $userId = $input['user_id'] ?? '';
+        try {
+            \App\controller\BaseController::validateCsrf($input);
+        } catch (\Throwable $e) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Invalid or missing CSRF token.']);
+            return;
+        }
+
+        $userId = (string) ($input['user_id'] ?? '');
+        $sessionUserId = (string) ($_SESSION['id'] ?? '');
+        if ($sessionUserId === '' || $userId === '' || !hash_equals($sessionUserId, $userId)) {
+            http_response_code(401);
+            echo json_encode(['error' => 'Unauthorized']);
+            return;
+        }
+
         $familyCode = $input['family_code'] ?? '';
         $joiningViaInvitation = $input['joining_via_invitation'] ?? false;
 
@@ -222,6 +245,24 @@ class FamilyCodeApprovalController
         }
     }
 
+    private function isScannerOrPrefetchRequest(): bool
+    {
+        if (strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+            return false;
+        }
+        $secPurpose = strtolower((string) ($_SERVER['HTTP_SEC_PURPOSE'] ?? $_SERVER['HTTP_PURPOSE'] ?? $_SERVER['HTTP_X_MOZ'] ?? ''));
+        if (str_contains($secPurpose, 'prefetch') || str_contains($secPurpose, 'preview')) {
+            return true;
+        }
+        $ua = strtolower((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''));
+        foreach (['barracuda', 'mimecast', 'proofpoint', 'safelinks', 'urlscan', 'googleimageproxy', 'outlook-ios', 'slackbot', 'whatsapp', 'facebookexternalhit'] as $bot) {
+            if ($ua !== '' && str_contains($ua, $bot)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Approve a family code registration request
      * POST /api/family-code/approve/{id}
@@ -229,6 +270,12 @@ class FamilyCodeApprovalController
      */
     public function approveRequest(int $id): void
     {
+        if ($this->isScannerOrPrefetchRequest()) {
+            http_response_code(200);
+            echo '<!DOCTYPE html><html><head><title>Approval Link</title></head><body><p>Please open this link in your browser to confirm.</p></body></html>';
+            return;
+        }
+
         $wantsHtml = (strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET')
             && (!isset($_SERVER['HTTP_ACCEPT']) || str_contains($_SERVER['HTTP_ACCEPT'], 'text/html'));
 
@@ -364,6 +411,12 @@ class FamilyCodeApprovalController
      */
     public function denyRequest(int $id): void
     {
+        if ($this->isScannerOrPrefetchRequest()) {
+            http_response_code(200);
+            echo '<!DOCTYPE html><html><head><title>Decline Link</title></head><body><p>Please open this link in your browser to confirm.</p></body></html>';
+            return;
+        }
+
         $wantsHtml = (strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET')
             && (!isset($_SERVER['HTTP_ACCEPT']) || str_contains($_SERVER['HTTP_ACCEPT'], 'text/html'));
 

@@ -17,7 +17,7 @@
         @endphp
         <div class="d-flex align-items-center gap-1 p-1 rounded-pill" style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1);">
             @foreach ($supportedLocales as $locKey => $locMeta)
-                <a href="/locale/{{ $locKey }}" class="btn btn-sm py-0.5 px-2 rounded-pill {{ $locKey === $activeLocale ? 'btn-primary fw-bold text-white' : 'text-secondary' }}" style="font-size: 0.75rem; text-decoration: none; min-height: 28px; min-width: 28px;">
+                <a href="/locale/{{ $locKey }}" class="btn btn-sm py-0.5 px-2 rounded-pill {{ $locKey === $activeLocale ? 'btn-primary fw-bold text-white' : 'text-secondary' }}" style="font-size: 0.75rem; text-decoration: none; min-height: 44px; min-width: 44px; display: inline-flex; align-items: center;">
                     {{ $locMeta['flag'] }} {{ $locMeta['native'] }}
                 </a>
             @endforeach

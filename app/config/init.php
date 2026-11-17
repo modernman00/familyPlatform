@@ -24,29 +24,25 @@ if (PHP_SAPI !== 'cli') {
     }
 }
 
-// E2E test bypass: detect Cypress E2E requests and disable rate limiting for tests
-// Check multiple headers since different web servers handle header names differently
-$isCypressTest = false;
-if (isset($_SERVER['HTTP_X_CYPRESS_TEST'])) {
-    $isCypressTest = true;
-}
-// Also check variations of the header name
-if (!$isCypressTest && isset($_SERVER['HTTP_X_CYPRESS_TEST'])) {
-    $isCypressTest = true;
-}
-// Check if running via test/E2E controller
-if (!$isCypressTest && isset($_SERVER['HTTP_USER_AGENT']) && (str_contains($_SERVER['HTTP_USER_AGENT'], 'cypress') || str_contains($_SERVER['HTTP_USER_AGENT'], 'node'))) {
-    $isCypressTest = true;
-}
-// Allow test requests via specific path patterns
-if (!$isCypressTest && (str_contains($_SERVER['REQUEST_URI'] ?? '', '/tests/') || str_contains($_SERVER['REQUEST_URI'] ?? '', '/api/test/'))) {
-    $isCypressTest = true;
-}
-if ($isCypressTest && !defined('TESTING_ENV')) {
-    define('TESTING_ENV', true);
-}
-
 require_once __DIR__ . "/_env.php";
+
+// E2E test bypass: ONLY allow TESTING_ENV in explicit non-production environments
+// (local, development, testing) after _env.php has loaded APP_ENV.
+$appEnv = strtolower((string) ($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'production'));
+$isNonProdEnv = in_array($appEnv, ['local', 'development', 'testing'], true);
+$isCypressTest = false;
+if ($isNonProdEnv) {
+    if (isset($_SERVER['HTTP_X_CYPRESS_TEST'])) {
+        $isCypressTest = true;
+    } elseif (isset($_SERVER['HTTP_USER_AGENT']) && (str_contains($_SERVER['HTTP_USER_AGENT'], 'cypress') || str_contains($_SERVER['HTTP_USER_AGENT'], 'node'))) {
+        $isCypressTest = true;
+    } elseif (str_contains($_SERVER['REQUEST_URI'] ?? '', '/tests/') || str_contains($_SERVER['REQUEST_URI'] ?? '', '/api/test/')) {
+        $isCypressTest = true;
+    }
+    if ($isCypressTest && !defined('TESTING_ENV')) {
+        define('TESTING_ENV', true);
+    }
+}
 
 // Ensure Limiter static instances always have safe fallbacks in test/mock environments,
 // preventing fatal "reset() on null" errors when downstream functionality calls Limiter::$argLimiter->reset()

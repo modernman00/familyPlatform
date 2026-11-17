@@ -17,7 +17,19 @@ final class SettingController extends BaseController
             // This is a protected route — enforce auth here explicitly
             parent::__construct();
 
-            $accountData = parent::membersData();
+            try {
+                $accountData = parent::membersData();
+            } catch (\Src\Exceptions\NotFoundException $e) {
+                $uid = (string) ($_SESSION['id'] ?? '');
+                $setData = new \App\model\SingleCustomerData();
+                $rawMember = $setData->getCustomerData($uid, ['personal', 'contact', 'otherFamily', 'post', 'profilePics', 'work']);
+                if (!is_array($rawMember) || empty($rawMember['firstName']) || empty($rawMember['lastName'])) {
+                    throw $e;
+                }
+                $rawMember['id'] = $uid;
+                $rawMember['famCode'] = (string) ($rawMember['famCode'] ?? '');
+                $accountData = parent::formatPerson($rawMember);
+            }
 
             $approvalService = new \App\service\FamilyCodeApprovalService(\Src\Db::connect2());
             $pendingFamilyRequest = $approvalService->getPendingRequestForUser((string)$accountData['id']);
@@ -60,6 +72,7 @@ final class SettingController extends BaseController
         // Sanitise the data and get the cleaned data
 
         try {
+            parent::validateCsrf($_POST);
             $_POST['id'] = cleanSession((string)$_SESSION['id']);
 
             // Handle the new tabs (Password, Preferences, Privacy)
@@ -68,11 +81,14 @@ final class SettingController extends BaseController
 
                 // 1. Change Password
                 if ($action === 'updatePassword') {
-                    $currentPassword = $_POST['current_password'] ?? '';
-                    $newPassword = $_POST['new_password'] ?? '';
-                    $confirmPassword = $_POST['confirm_password'] ?? '';
+                    $userId = (string) $_POST['id'];
+                    \Src\Limiter::limit('pwd_change_' . $userId, 'post');
 
-                    if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
+                    $currentPassword = (string) ($_POST['current_password'] ?? '');
+                    $newPassword = (string) ($_POST['new_password'] ?? '');
+                    $confirmPassword = (string) ($_POST['confirm_password'] ?? '');
+
+                    if ($currentPassword === '' || $newPassword === '' || $confirmPassword === '') {
                         msgException(400, "All password fields are required.");
                         return;
                     }
@@ -80,21 +96,38 @@ final class SettingController extends BaseController
                         msgException(400, "New passwords do not match.");
                         return;
                     }
-                    if (strlen($newPassword) < 6) {
-                        msgException(400, "Password must be at least 6 characters.");
+                    if (strlen($newPassword) < 8) {
+                        msgException(400, "Password must be at least 8 characters.");
                         return;
                     }
 
-                    // Get current password hash
-                    $user = \App\model\SingleCustomerData::getCustById($_POST['id'], 'login');
-                    if (empty($user) || !password_verify($currentPassword, $user[0]['password'])) {
+                    $loginTable = preg_replace('/[^a-zA-Z0-9_]/', '', (string) ($_ENV['DB_TABLE_LOGIN'] ?? 'account')) ?: 'account';
+                    $db = Db::connect2();
+                    $stmtUser = $db->prepare(sprintf('SELECT id, email, password, type, COALESCE(token_version, 1) AS token_version FROM `%s` WHERE id = ? LIMIT 1', $loginTable));
+                    $stmtUser->execute([$userId]);
+                    $userRow = $stmtUser->fetch(\PDO::FETCH_ASSOC);
+
+                    if (!$userRow || !password_verify($currentPassword, (string) ($userRow['password'] ?? ''))) {
                         msgException(400, "Current password is incorrect.");
                         return;
                     }
 
-                    // Update password
+                    // Update password and increment token_version to revoke other active sessions
                     $hashedPassword = \hashPassword($newPassword);
-                    UpdateFn::updateMultiple('login', ['password' => $hashedPassword, 'id' => $_POST['id']], 'id');
+                    $newTokenVersion = ((int) ($userRow['token_version'] ?? 1)) + 1;
+                    $stmtUpdate = $db->prepare(sprintf('UPDATE `%s` SET password = ?, token_version = ? WHERE id = ?', $loginTable));
+                    $stmtUpdate->execute([$hashedPassword, $newTokenVersion, $userId]);
+
+                    if (session_status() === PHP_SESSION_ACTIVE) {
+                        session_regenerate_id(true);
+                    }
+
+                    \Src\JwtHandler::issueLoginCookie([
+                        'id' => $userId,
+                        'email' => (string) ($userRow['email'] ?? ''),
+                        'role' => 'users',
+                        'token_version' => $newTokenVersion,
+                    ]);
 
                     msgSuccess(200, "Password successfully updated.");
                     return;
