@@ -56,20 +56,20 @@ describe('Living emojis in the feed & comments', () => {
 
         cy.wait('@commentReq', { timeout: 90000 }).its('response.statusCode').should('eq', 200);
 
-        cy.contains(marker).parents('.card')
-            .find('.atg-live-emoji', { timeout: 60000 })
-            .filter(':has(img[src*="family_clap"])')
-            .should('be.visible')
-            .as('live');
+        const liveEmoji = () =>
+            cy.contains(marker).parents('.card')
+                .find('.atg-live-emoji', { timeout: 60000 })
+                .filter(':has(img[src*="family_clap"])')
+                .should('be.visible');
 
         // First tap: pop + particle burst, no AR modal
-        cy.get('@live').click();
-        cy.get('@live').should('have.class', 'atg-live-emoji--play');
+        liveEmoji().click();
+        liveEmoji().should('have.class', 'atg-live-emoji--play');
         cy.get('.atg-burst-layer .atg-burst-particle').should('have.length.at.least', 1);
         cy.get('#atgArEmojiModal').should('not.be.visible');
 
         // Second tap inside the window: opens the 3D / AR viewer
-        cy.get('@live').click();
+        liveEmoji().click();
         cy.get('#atgArEmojiModal', { timeout: 5000 }).should('be.visible');
         cy.get('#atgArEmojiName').should('contain.text', 'Applause');
     });

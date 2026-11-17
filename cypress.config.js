@@ -65,8 +65,9 @@ module.exports = defineConfig({
             }
             if (!uid) return true;
             await connection.execute('DELETE FROM family_approval_requests WHERE id = ?', [uid]);
-            await connection.execute("DELETE FROM user_families WHERE user_id = ? AND family_code != 'LAF123'", [uid]);
-            await connection.execute("UPDATE personal SET famCode = 'LAF123' WHERE id = ?", [uid]);
+            await connection.execute("DELETE FROM user_families WHERE user_id = ? AND family_code != 'SHO'", [uid]);
+            await connection.execute("INSERT IGNORE INTO user_families (user_id, family_code, status, role) VALUES (?, 'SHO', 'approved', 'member')", [uid]);
+            await connection.execute("UPDATE personal SET famCode = 'SHO' WHERE id = ?", [uid]);
             return true;
           } finally {
             await connection.end();
