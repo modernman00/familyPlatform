@@ -48,47 +48,83 @@ function authenticate(email, password, attempt = 1, maxAttempts = 3) {
         }
     });
 
+    function extractCsrfToken(html) {
+        if (typeof html !== 'string') return '';
+        const match = html.match(/name=["'](?:token|csrf_token)["'][^>]*value=["']([^"']+)["']/i)
+            || html.match(/value=["']([^"']+)["'][^>]*name=["'](?:token|csrf_token)["']/i)
+            || html.match(/<meta[^>]*name=["']csrf-token["'][^>]*content=["']([^"']+)["']/i);
+        return match ? match[1] : '';
+    }
+
     cy.request({
-        method: 'POST',
+        method: 'GET',
         url: '/login',
-        body: { email, password },
         failOnStatusCode: false,
         headers: { 'X-Cypress-Test': 'true' }
-    }).then((credRes) => {
-        const credOk = [200, 201].includes(credRes.status);
+    }).then((loginPageRes) => {
+        const loginToken = extractCsrfToken(loginPageRes.body);
 
-        if (!credOk) {
-            if (attempt >= maxAttempts) {
-                throw new Error(
-                    `loginFully: POST /login returned ${credRes.status} after ${attempt} attempts ` +
-                    `— ${JSON.stringify(credRes.body)}`
-                );
+        cy.request({
+            method: 'POST',
+            url: '/login',
+            body: { email, password, token: loginToken },
+            failOnStatusCode: false,
+            headers: {
+                'X-Cypress-Test': 'true',
+                ...(loginToken ? { 'X-CSRF-TOKEN': loginToken } : {})
             }
-            cy.log(`loginFully: POST /login -> ${credRes.status}, retrying (attempt ${attempt + 1})`);
-            authenticate(email, password, attempt + 1, maxAttempts);
-            return;
-        }
+        }).then((credRes) => {
+            const credOk = [200, 201].includes(credRes.status);
 
-        cy.task('getLatest2FACode', email).then((code) => {
-            expect(code, '2FA code from code_mgt').to.be.a('string');
+            if (!credOk) {
+                if (attempt >= maxAttempts) {
+                    throw new Error(
+                        `loginFully: POST /login returned ${credRes.status} after ${attempt} attempts ` +
+                        `— ${JSON.stringify(credRes.body)}`
+                    );
+                }
+                cy.log(`loginFully: POST /login -> ${credRes.status}, retrying (attempt ${attempt + 1})`);
+                authenticate(email, password, attempt + 1, maxAttempts);
+                return;
+            }
 
             cy.request({
-                method: 'POST',
+                method: 'GET',
                 url: '/login/code',
-                body: { code },
                 failOnStatusCode: false,
                 headers: { 'X-Cypress-Test': 'true' }
-            }).then((codeRes) => {
-                if (![200, 201].includes(codeRes.status)) {
-                    if (attempt >= maxAttempts) {
-                        throw new Error(
-                            `loginFully: POST /login/code returned ${codeRes.status} after ${attempt} attempts ` +
-                            `— ${JSON.stringify(codeRes.body)}`
-                        );
-                    }
-                    cy.log(`loginFully: POST /login/code -> ${codeRes.status}, retrying (attempt ${attempt + 1})`);
-                    authenticate(email, password, attempt + 1, maxAttempts);
-                }
+            }).then((codePageRes) => {
+                cy.getCookie('XSRF-TOKEN').then((xsrfCookie) => {
+                    const codeToken = extractCsrfToken(codePageRes.body)
+                        || (xsrfCookie && xsrfCookie.value ? decodeURIComponent(xsrfCookie.value) : '')
+                        || loginToken;
+
+                    cy.task('getLatest2FACode', email).then((code) => {
+                        expect(code, '2FA code from code_mgt').to.be.a('string');
+
+                        cy.request({
+                            method: 'POST',
+                            url: '/login/code',
+                            body: { code, token: codeToken },
+                            failOnStatusCode: false,
+                            headers: {
+                                'X-Cypress-Test': 'true',
+                                ...(codeToken ? { 'X-CSRF-TOKEN': codeToken } : {})
+                            }
+                        }).then((codeRes) => {
+                            if (![200, 201].includes(codeRes.status)) {
+                                if (attempt >= maxAttempts) {
+                                    throw new Error(
+                                        `loginFully: POST /login/code returned ${codeRes.status} after ${attempt} attempts ` +
+                                        `— ${JSON.stringify(codeRes.body)}`
+                                    );
+                                }
+                                cy.log(`loginFully: POST /login/code -> ${codeRes.status}, retrying (attempt ${attempt + 1})`);
+                                authenticate(email, password, attempt + 1, maxAttempts);
+                            }
+                        });
+                    });
+                });
             });
         });
     });
