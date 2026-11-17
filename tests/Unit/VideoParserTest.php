@@ -115,4 +115,21 @@ final class VideoParserTest extends TestCase
         $this->assertSame('direct', $videos[2]['type']);
         $this->assertStringContainsString('raw=1', $videos[2]['embedUrl']);
     }
+
+    public function test_google_photos_video_stream_uses_signed_external_stream_proxy(): void
+    {
+        $gpUrl = 'https://lh3.googleusercontent.com/pw/AP1GczNX-pHBA6IkZXN9JNkeUvR7LH9FhNn5X7nki7zi5SkLQ8SOUiSZWpdEzHBuDSMpMQuNrxxtQefDLsZj7g_xGoKlrv6Tnhk4MHhl0W58mQAL2y49Q5Ee=m22';
+        $result = VideoParser::parseVideoUrl($gpUrl);
+
+        $this->assertNotNull($result);
+        $this->assertSame('direct', $result['type']);
+        $this->assertStringStartsWith('/resources/videos/external-stream?url=', $result['embedUrl']);
+        $this->assertStringContainsString('&sig=', $result['embedUrl']);
+        $this->assertSame($gpUrl, $result['originalUrl']);
+        $this->assertStringEndsWith('=s1600-no', (string)$result['thumbnailUrl']);
+
+        $reParsed = VideoParser::parseVideoUrl($result['embedUrl']);
+        $this->assertNotNull($reParsed);
+        $this->assertSame($result['embedUrl'], $reParsed['embedUrl']);
+    }
 }

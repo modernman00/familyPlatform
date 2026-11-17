@@ -91,17 +91,20 @@ final class VideoParser
             ];
         }
 
-        // 3d. Already-proxied /member/stream-video?url=...
-        if (preg_match('/^\/member\/stream-video\?url=([^\s"\'<>#]+)/i', $trimmed, $proxyMatches) === 1) {
+        // 3d. Already-proxied /resources/videos/external-stream?url=... or legacy /member/stream-video?url=...
+        if (preg_match('/^\/(?:resources\/videos\/external-stream|member\/stream-video)\?url=([^\s"\'<>&#]+)/i', $trimmed, $proxyMatches) === 1) {
             $decodedInner = rawurldecode($proxyMatches[1]);
             $thumb = (stripos($decodedInner, 'googleusercontent.com') !== false)
                 ? (string)preg_replace('/=[^\/=?#]+$/i', '=s1600-no', $decodedInner)
                 : null;
+            $embedUrl = str_starts_with($trimmed, '/resources/videos/external-stream')
+                ? $trimmed
+                : \App\services\LinkPreviewService::getProxiedVideoUrl($decodedInner);
             return [
                 'type' => 'direct',
                 'videoId' => null,
                 'thumbnailUrl' => $thumb,
-                'embedUrl' => $trimmed,
+                'embedUrl' => $embedUrl,
                 'originalUrl' => $decodedInner,
                 'trimStart' => null,
                 'trimEnd' => null,
@@ -138,7 +141,7 @@ final class VideoParser
                 'type' => 'direct',
                 'videoId' => null,
                 'thumbnailUrl' => $thumb,
-                'embedUrl' => '/member/stream-video?url=' . rawurlencode($trimmed),
+                'embedUrl' => \App\services\LinkPreviewService::getProxiedVideoUrl($trimmed),
                 'originalUrl' => $trimmed,
                 'trimStart' => null,
                 'trimEnd' => null,
@@ -199,7 +202,7 @@ final class VideoParser
                 $isExternalGoogleStream = str_starts_with($origUrl, 'http')
                     && (stripos($origUrl, 'googleusercontent.com') !== false || stripos($origUrl, 'googlevideo.com') !== false);
                 if ($isExternalGoogleStream) {
-                    $embedUrl = '/member/stream-video?url=' . rawurlencode($origUrl);
+                    $embedUrl = \App\services\LinkPreviewService::getProxiedVideoUrl($origUrl);
                     if ($thumb === null && stripos($origUrl, 'googleusercontent.com') !== false) {
                         $thumb = (string)preg_replace('/=[^\/=?#]+$/i', '=s1600-no', $origUrl);
                     }
@@ -231,7 +234,7 @@ final class VideoParser
             && (stripos($fallbackUrl, 'googleusercontent.com') !== false || stripos($fallbackUrl, 'googlevideo.com') !== false);
         $thumb = $isExternalStream ? (string)preg_replace('/=[^\/=?#]+$/i', '=s1600-no', $fallbackUrl) : null;
         $embedUrl = $isExternalStream
-            ? ('/member/stream-video?url=' . rawurlencode($fallbackUrl))
+            ? \App\services\LinkPreviewService::getProxiedVideoUrl($fallbackUrl)
             : (stripos($fallbackUrl, 'dropbox.com') !== false ? self::normaliseDropboxStreamUrl($fallbackUrl) : $fallbackUrl);
 
         return [

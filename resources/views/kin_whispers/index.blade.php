@@ -1838,7 +1838,8 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                         <template x-if="resolveMessageLinkPreview(msg).album_videos && resolveMessageLinkPreview(msg).album_videos.length > 0">
                           <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-top:6px;">
                             <template x-for="(vUrl, vIdx) in resolveMessageLinkPreview(msg).album_videos" :key="'kw_lv_' + vIdx">
-                              <video :src="vUrl.includes('googleusercontent.com') || vUrl.includes('googlevideo.com') ? ('/member/stream-video?url=' + encodeURIComponent(vUrl)) : vUrl"
+                              <video referrerpolicy="no-referrer"
+                                     :src="(resolveMessageLinkPreview(msg).proxied_album_videos && resolveMessageLinkPreview(msg).proxied_album_videos[vIdx]) ? resolveMessageLinkPreview(msg).proxied_album_videos[vIdx] : vUrl"
                                      controls playsinline preload="metadata"
                                      style="max-width:240px; max-height:220px; border-radius:10px; background:#000; flex-shrink:0;"></video>
                             </template>
@@ -1846,7 +1847,8 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                         </template>
                         <template x-if="(!resolveMessageLinkPreview(msg).album_videos || resolveMessageLinkPreview(msg).album_videos.length === 0) && resolveMessageLinkPreview(msg).is_video && resolveMessageLinkPreview(msg).video_url">
                           <div style="margin-top:6px;">
-                            <video :src="(resolveMessageLinkPreview(msg).video_url.includes('googleusercontent.com') || resolveMessageLinkPreview(msg).video_url.includes('googlevideo.com')) ? ('/member/stream-video?url=' + encodeURIComponent(resolveMessageLinkPreview(msg).video_url)) : resolveMessageLinkPreview(msg).video_url"
+                            <video referrerpolicy="no-referrer"
+                                   :src="resolveMessageLinkPreview(msg).proxied_video_url || resolveMessageLinkPreview(msg).video_url"
                                    :poster="resolveMessageLinkPreview(msg).image || null"
                                    controls playsinline preload="metadata"
                                    style="width:100%; max-width:300px; max-height:260px; border-radius:10px; background:#000;"></video>

@@ -1435,7 +1435,7 @@
                        @abort="setBuffering(false, $el)"
                        @emptied="setBuffering(false, $el)"
                        @buffering-clear="setBuffering(false, $el)"
-                       x-on:error="setBuffering(false, $el); if (!$el.dataset.retried && vid.originalUrl && $el.src !== vid.originalUrl && vid.originalUrl.startsWith('http')) { $el.dataset.retried = '1'; $el.src = vid.originalUrl; $el.load(); }"
+                       x-on:error="setBuffering(false, $el); if (!$el.dataset.retried && vid.originalUrl && $el.src !== vid.originalUrl && vid.originalUrl.startsWith('http')) { $el.dataset.retried = '1'; const shouldAutoResume = !!(isPlaying || $el._autoPlaying); $el.src = vid.originalUrl; $el.load(); if (shouldAutoResume) { $el.addEventListener('canplay', () => { if (!$el._userManuallyPaused) { $el.muted = true; $el.play().catch(() => {}); } }, { once: true }); } }"
                        @click.stop="togglePlay($el)"
                        @dblclick.stop="openVideoModal(post.videos, vIdx, isMuted, post)"
                        @play="isPlaying = true"
@@ -1637,18 +1637,52 @@
                  const vidEl = this.$el.querySelector('video');
                  if (!vidEl) return;
                  if (entry.isIntersecting && entry.intersectionRatio >= 0.35) {
-                   if (vidEl.paused) {
-                     document.querySelectorAll('video.feed-post-video').forEach(other => {
-                       if (other !== vidEl && !other.paused) other.pause();
+                   if (vidEl._userManuallyPaused) return;
+                   document.querySelectorAll('video').forEach(other => {
+                     if (other !== vidEl && !other.paused) {
+                       other._autoPlaying = false;
+                       other.pause();
+                     }
+                   });
+                   vidEl.muted = this.isVideoMuted;
+                   vidEl.playsInline = true;
+                   const tryPlay = () => {
+                     if (vidEl._userManuallyPaused) return;
+                     vidEl._autoPlaying = true;
+                     vidEl.play().then(() => { this.isPlaying = true; }).catch(() => {
+                       if (!vidEl.muted) {
+                         vidEl.muted = true;
+                         this.isVideoMuted = true;
+                         vidEl.play().then(() => { this.isPlaying = true; }).catch(() => {});
+                       }
                      });
-                     vidEl.muted = this.isVideoMuted;
-                     vidEl.play().then(() => { this.isPlaying = true; }).catch(() => {});
+                   };
+                   if (vidEl.readyState >= 2) {
+                     tryPlay();
+                   } else {
+                     if (vidEl.preload !== 'auto') vidEl.preload = 'auto';
+                     if (!vidEl._awaitingSinglePlay) {
+                       vidEl._awaitingSinglePlay = true;
+                       const onReady = () => {
+                         vidEl._awaitingSinglePlay = false;
+                         vidEl.removeEventListener('loadeddata', onReady);
+                         vidEl.removeEventListener('canplay', onReady);
+                         tryPlay();
+                       };
+                       vidEl.addEventListener('loadeddata', onReady, { once: true });
+                       vidEl.addEventListener('canplay', onReady, { once: true });
+                     }
+                     if (vidEl.networkState === 0 && !vidEl.currentSrc) {
+                       try { vidEl.load(); } catch (_) {}
+                     }
                    }
                  } else if (!entry.isIntersecting || entry.intersectionRatio < 0.15) {
                    if (!vidEl.paused) {
+                     vidEl._autoPlaying = false;
                      vidEl.pause();
                      this.isPlaying = false;
                    }
+                   vidEl._userManuallyPaused = false;
                  }
                });
              }, { threshold: [0.0, 0.15, 0.35, 0.65] });
@@ -1700,7 +1734,7 @@
                @stalled="isBuffering = false"
                @abort="isBuffering = false"
                @emptied="isBuffering = false"
-               x-on:error="isBuffering = false; if (!$el.dataset.retried && post.video && post.video.originalUrl && $el.src !== post.video.originalUrl && post.video.originalUrl.startsWith('http')) { $el.dataset.retried = '1'; $el.src = post.video.originalUrl; $el.load(); }"
+               x-on:error="isBuffering = false; if (!$el.dataset.retried && post.video && post.video.originalUrl && $el.src !== post.video.originalUrl && post.video.originalUrl.startsWith('http')) { $el.dataset.retried = '1'; const shouldAutoResume = !!(isPlaying || $el._autoPlaying); $el.src = post.video.originalUrl; $el.load(); if (shouldAutoResume) { $el.addEventListener('canplay', () => { if (!$el._userManuallyPaused) { $el.muted = true; $el.play().catch(() => {}); } }, { once: true }); } }"
                @play="
                  isPlaying = true;
                  const b = getTrimBounds($el);

@@ -1086,6 +1086,10 @@ final class LinkPreviewService
             }
         }
 
+        $albumVideos = is_array($data['album_videos'] ?? null) ? array_values($data['album_videos']) : [];
+        $proxiedVideoUrl = $videoStreamUrl !== null ? self::getProxiedVideoUrl($videoStreamUrl) : null;
+        $proxiedAlbumVideos = array_map(static fn(string $v): string => self::getProxiedVideoUrl($v), $albumVideos);
+
         return [
             'url' => $url,
             'original_url' => $requestedUrl,
@@ -1094,9 +1098,11 @@ final class LinkPreviewService
             'image' => $photoUrl !== '' ? $photoUrl : $rawImage,
             'photo_url' => $isPhotoLink ? ($photoUrl !== '' ? $photoUrl : $rawImage) : null,
             'video_url' => $videoStreamUrl,
+            'proxied_video_url' => $proxiedVideoUrl,
             'is_video' => $isGoogleVideo || !empty($rawVideo),
             'album_images' => $data['album_images'] ?? [],
-            'album_videos' => $data['album_videos'] ?? [],
+            'album_videos' => $albumVideos,
+            'proxied_album_videos' => $proxiedAlbumVideos,
             'site_name' => $isGooglePhoto ? 'Google Photos' : (string)($data['site_name'] ?? $domain),
             'domain' => $domain,
             'card_type' => (string)($data['card_type'] ?? 'summary_large_image'),

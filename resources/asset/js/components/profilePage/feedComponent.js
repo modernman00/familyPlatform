@@ -1720,13 +1720,14 @@ export function profileFeed(opts = {}) {
                     }
 
                     if (Array.isArray(d.album_videos) && d.album_videos.length > 0) {
-                        d.album_videos.forEach(vUrl => {
+                        d.album_videos.forEach((vUrl, vIdx) => {
                             if (mergedVideos.length >= 6) return;
+                            const proxiedUrl = Array.isArray(d.proxied_album_videos) && d.proxied_album_videos[vIdx]
+                                ? d.proxied_album_videos[vIdx]
+                                : vUrl;
                             const desc = formatVideoDescriptor({
                                 originalUrl: vUrl,
-                                embedUrl: vUrl.includes('googleusercontent.com') || vUrl.includes('googlevideo.com')
-                                    ? `/member/stream-video?url=${encodeURIComponent(vUrl)}`
-                                    : vUrl,
+                                embedUrl: proxiedUrl,
                                 thumbnailUrl: vUrl.includes('googleusercontent.com')
                                     ? vUrl.replace(/=.*$/i, '=s1600-no')
                                     : null,
@@ -1737,11 +1738,10 @@ export function profileFeed(opts = {}) {
                         });
                     } else if (d.is_video && (d.video_url || d.url)) {
                         const rawVidUrl = d.video_url || d.url;
+                        const proxiedUrl = d.proxied_video_url || rawVidUrl;
                         const desc = formatVideoDescriptor({
                             originalUrl: rawVidUrl,
-                            embedUrl: rawVidUrl.includes('googleusercontent.com') || rawVidUrl.includes('googlevideo.com')
-                                ? `/member/stream-video?url=${encodeURIComponent(rawVidUrl)}`
-                                : rawVidUrl,
+                            embedUrl: proxiedUrl,
                             thumbnailUrl: d.image || d.photo_url || null,
                         });
                         if (desc && mergedVideos.length < 6) {
@@ -1764,6 +1764,7 @@ export function profileFeed(opts = {}) {
                 if (mergedVideos.length > 0) {
                     target.videos = mergedVideos;
                     target.video = mergedVideos[0];
+                    this.$nextTick(() => this.observeFeedVideos());
                 }
                 if (mergedImages.length > 0 && mergedVideos.length === 0) {
                     target.images = mergedImages;

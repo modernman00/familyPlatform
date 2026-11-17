@@ -32,9 +32,10 @@ export function parseVideoUrl(url) {
   const trimmed = url.trim();
   if (!trimmed) return null;
 
-  // 0. Already-proxied sovereign stream URL (/member/stream-video?url=...)
-  if (trimmed.startsWith('/member/stream-video?url=')) {
-    const rawParam = trimmed.slice('/member/stream-video?url='.length).split('&')[0];
+  // 0. Already-proxied sovereign stream URL (/resources/videos/external-stream?url=... or /member/stream-video?url=...)
+  if (trimmed.startsWith('/resources/videos/external-stream?url=') || trimmed.startsWith('/member/stream-video?url=')) {
+    const rawQuery = trimmed.split('?url=')[1] || '';
+    const rawParam = rawQuery.split('&')[0] || '';
     let decoded = rawParam;
     try {
       decoded = decodeURIComponent(rawParam);
@@ -46,7 +47,7 @@ export function parseVideoUrl(url) {
       type: 'direct',
       videoId: null,
       thumbnailUrl: poster,
-      embedUrl: trimmed,
+      embedUrl: trimmed.startsWith('/resources/videos/external-stream') ? trimmed : (decoded || trimmed),
       originalUrl: decoded || trimmed,
       trimStart: null,
       trimEnd: null,
@@ -153,7 +154,7 @@ export function parseVideoUrl(url) {
       type: 'direct',
       videoId: null,
       thumbnailUrl: poster,
-      embedUrl: `/member/stream-video?url=${encodeURIComponent(trimmed)}`,
+      embedUrl: trimmed,
       originalUrl: trimmed,
       trimStart: null,
       trimEnd: null,
@@ -187,10 +188,11 @@ export function formatVideoDescriptor(videoOrUrl) {
   if (typeof videoOrUrl === 'object') {
     const candidateUrl = videoOrUrl.originalUrl || videoOrUrl.embedUrl || '';
     const parsed = parseVideoUrl(candidateUrl);
+    const hasProxiedEmbed = typeof videoOrUrl.embedUrl === 'string' && videoOrUrl.embedUrl.startsWith('/resources/videos/');
     if (parsed) {
       return {
         ...parsed,
-        embedUrl: (videoOrUrl.embedUrl && videoOrUrl.embedUrl.startsWith('/member/stream-video'))
+        embedUrl: hasProxiedEmbed
           ? videoOrUrl.embedUrl
           : parsed.embedUrl,
         thumbnailUrl: videoOrUrl.thumbnailUrl || parsed.thumbnailUrl || null,
