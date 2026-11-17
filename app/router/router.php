@@ -44,6 +44,7 @@ include_once __DIR__ . "/emojiRoute.php";
 include_once __DIR__ . "/atgGifRoute.php";
 include_once __DIR__ . "/kinWhisperRoute.php";
 include_once __DIR__ . "/familyCommitmentRoute.php";
+include_once __DIR__ . "/giftWishlistRoute.php";
 
 // Internationalization & Diaspora Language Switching
 $router->map('GET|POST|HEAD', '/locale/[a:locale]', 'App\controller\LocaleController@switch', 'LOCALE_SWITCH');
