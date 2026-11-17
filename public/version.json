@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(privacy): repair restricted members panel, dark-mode contrast, and GDPR parity on accountSetting",
+    "title": "Fix(video): route Google Photos streams through signed external-stream proxy & rebuild prod assets",
     "notes": [
-        "Fix(privacy): repair restricted members panel, dark-mode contrast, and GDPR parity on accountSetting",
-        "Test(share): restore authenticated session before getPendingShare",
-        "Feat(campaign): add FamilyPlatform Google Flow campaign videos and pending app updates"
+        "Fix(video): route Google Photos streams through signed external-stream proxy & rebuild prod assets",
+        "Test(cypress): increase feed initial fetch timeout in loginFully to 40s",
+        "Test(cypress): restore SHO primary famCode on cleanup and avoid stale comment alias"
     ],
-    "released_at": "2026-11-16",
-    "commit": "fb935f73"
+    "released_at": "2026-11-17",
+    "commit": "eb094a8c"
 }
