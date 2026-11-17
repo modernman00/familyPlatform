@@ -245,6 +245,10 @@
                     <i class="bi bi-calendar2-heart-fill me-1.5" style="color: #a31621;"></i> Family Commitments
                 </a>
 
+                <a href="/wishlists" class="btn btn-surface-action fw-semibold flex-fill text-decoration-none text-center d-inline-flex align-items-center justify-content-center" style="border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" title="Gift Wishlists — Post Christmas & Birthday gift ideas pinned for your chosen days">
+                    <i class="bi bi-gift-fill me-1.5" style="color: #d97706;"></i> Gift Wishlists
+                </a>
+
                 <a href="/family/roundtable" class="btn fw-semibold flex-fill text-decoration-none text-center shadow-xs" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #ffffff !important; border: 1.5px solid #d4af37; border-radius: 12px; padding: 9px 12px; font-size: 0.9rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; flex-shrink: 0;">
                     <i class="bi bi-shield-shaded me-1.5 text-warning"></i> Family RoundTable
                 </a>

@@ -154,7 +154,7 @@
                                                 <i class="bi bi-patch-check-fill text-success ms-auto"></i>
                                             </template>
                                         </h6>
-                                        <p class="text-muted small mb-3" style="font-size: 0.8rem; line-height: 1.45;"
+                                        <p class="text-muted mb-3" style="font-size: 0.9rem; line-height: 1.5;"
                                            x-text="m.description"></p>
                                     </div>
 

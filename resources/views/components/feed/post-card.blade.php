@@ -1103,6 +1103,7 @@
     <div class="multi-video-horizontal-container mb-3 px-1 position-relative"
          x-data="{
            activeVidIdx: 0,
+           _isInView: false,
            _isProgrammaticScroll: false,
            _scrollEndTimer: null,
            getCards() {
@@ -1116,6 +1117,7 @@
              const targetVid = card.querySelector('video');
              document.querySelectorAll('video').forEach(other => {
                if (other !== targetVid && !other.paused) {
+                 other._autoPlaying = false;
                  other.pause();
                }
              });
@@ -1125,15 +1127,23 @@
              } else if (targetVid._userManuallyPaused) {
                return;
              }
+             targetVid.defaultMuted = true;
              targetVid.muted = true;
              targetVid.playsInline = true;
+             targetVid.setAttribute('playsinline', '');
+             targetVid.setAttribute('webkit-playsinline', '');
+             if (targetVid.preload !== 'auto') {
+               targetVid.preload = 'auto';
+             }
              const attemptPlay = () => {
-               if (this.activeVidIdx !== idx || targetVid._userManuallyPaused) return;
+               if ((!this._isInView && !force) || this.activeVidIdx !== idx || targetVid._userManuallyPaused) return;
+               if (!targetVid.paused) return;
                targetVid._autoPlaying = true;
                const p = targetVid.play();
                if (p !== undefined) {
                  p.catch(() => {
                    targetVid.muted = true;
+                   targetVid.defaultMuted = true;
                    targetVid.play().catch(() => {
                      if (targetVid.paused) {
                        targetVid.dispatchEvent(new CustomEvent('buffering-clear'));
@@ -1142,12 +1152,8 @@
                  });
                }
              };
-             if (targetVid.readyState >= 2) {
-               attemptPlay();
-             } else {
-               if (targetVid.preload !== 'auto') {
-                 targetVid.preload = 'auto';
-               }
+             attemptPlay();
+             if (targetVid.readyState < 2) {
                if (!targetVid._awaitingReadyPlay) {
                  targetVid._awaitingReadyPlay = true;
                  const onReady = () => {
@@ -1155,7 +1161,7 @@
                    targetVid.removeEventListener('loadeddata', onReady);
                    targetVid.removeEventListener('canplay', onReady);
                    targetVid.removeEventListener('error', onFail);
-                   if (this.activeVidIdx === idx) {
+                   if (this.activeVidIdx === idx && targetVid.paused) {
                      attemptPlay();
                    }
                  };
@@ -1240,19 +1246,49 @@
              }, 180);
            },
            initMultiVideoObserver() {
-             if (typeof IntersectionObserver === 'undefined') return;
-             const obs = new IntersectionObserver((entries) => {
-               entries.forEach(entry => {
-                 if (entry.isIntersecting && entry.intersectionRatio >= 0.35) {
+             if (window.__FPFeedVideoCoordinator) {
+               window.__FPFeedVideoCoordinator.register(this.$el, {
+                 getVideo: () => {
+                   const cards = this.getCards();
+                   const card = cards[this.activeVidIdx];
+                   return card ? card.querySelector('video') : null;
+                 },
+                 play: () => {
+                   this._isInView = true;
                    this.playCardVideo(this.activeVidIdx);
-                 } else if (!entry.isIntersecting || entry.intersectionRatio < 0.15) {
+                 },
+                 pause: () => {
+                   this._isInView = false;
                    this.getCards().forEach(c => {
                      const v = c.querySelector('video');
-                     if (v && !v.paused) v.pause();
+                     if (v) {
+                       v._autoPlaying = false;
+                       if (!v.paused) v.pause();
+                     }
                    });
                  }
                });
-             }, { threshold: [0.0, 0.15, 0.35, 0.65] });
+               return;
+             }
+             if (typeof IntersectionObserver === 'undefined') return;
+             const obs = new IntersectionObserver((entries) => {
+               entries.forEach(entry => {
+                 if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
+                   this._isInView = true;
+                   this.playCardVideo(this.activeVidIdx);
+                 } else if (!entry.isIntersecting || entry.intersectionRatio < 0.15) {
+                   this._isInView = false;
+                   this.getCards().forEach(c => {
+                     const v = c.querySelector('video');
+                     if (v) {
+                       v._autoPlaying = false;
+                       if (!v.paused) v.pause();
+                       v._userManuallyPaused = false;
+                     }
+                   });
+                 }
+               });
+             }, { threshold: [0.0, 0.15, 0.25, 0.5] });
              obs.observe(this.$el);
            }
          }"
@@ -1522,6 +1558,7 @@
            isVideoMuted: true,
            isPlaying: false,
            isBuffering: false,
+           _isInView: false,
            videoOrientation: 'portrait',
            videoRatio: '9 / 16',
            videoMaxHeight: '580px',
@@ -1581,10 +1618,17 @@
            togglePlayback(videoEl) {
              if (!videoEl) return;
              if (videoEl.paused) {
+               videoEl._userManuallyPaused = false;
+               videoEl.playsInline = true;
+               if (window.__FPFeedVideoCoordinator) {
+                 window.__FPFeedVideoCoordinator.notifyPlaying(this.$el);
+               }
                videoEl.play().then(() => {
                  this.isPlaying = true;
                }).catch(() => {});
              } else {
+               videoEl._userManuallyPaused = true;
+               videoEl._autoPlaying = false;
                videoEl.pause();
                this.isPlaying = false;
              }
@@ -1631,61 +1675,106 @@
            initSingleVideoObserver() {
              const v = this.$el.querySelector('video');
              if (v && v.videoWidth) this.detectVideoDimensions(v);
+             const playVideoInView = () => {
+               const vidEl = this.$el.querySelector('video');
+               if (!vidEl || vidEl._userManuallyPaused) return;
+               vidEl.defaultMuted = true;
+               vidEl.muted = this.isVideoMuted;
+               vidEl.playsInline = true;
+               vidEl.setAttribute('playsinline', '');
+               vidEl.setAttribute('webkit-playsinline', '');
+               if (vidEl.preload !== 'auto') vidEl.preload = 'auto';
+               const tryPlay = () => {
+                 if (!this._isInView || vidEl._userManuallyPaused) return;
+                 if (!vidEl.paused) {
+                   this.isPlaying = true;
+                   return;
+                 }
+                 vidEl._autoPlaying = true;
+                 const p = vidEl.play();
+                 if (p !== undefined) {
+                   p.then(() => { this.isPlaying = true; }).catch((err) => {
+                     if (!vidEl.muted) {
+                       vidEl.muted = true;
+                       vidEl.defaultMuted = true;
+                       this.isVideoMuted = true;
+                       vidEl.play().then(() => { this.isPlaying = true; }).catch(() => {});
+                     } else if (err && err.name === 'AbortError' && this._isInView && !vidEl._userManuallyPaused) {
+                       requestAnimationFrame(() => {
+                         if (this._isInView && !vidEl._userManuallyPaused && vidEl.paused) {
+                           vidEl.play().then(() => { this.isPlaying = true; }).catch(() => {});
+                         }
+                       });
+                     }
+                   });
+                 }
+               };
+               tryPlay();
+               if (vidEl.readyState < 2) {
+                 if (!vidEl._awaitingSinglePlay) {
+                   vidEl._awaitingSinglePlay = true;
+                   const onReady = () => {
+                     vidEl._awaitingSinglePlay = false;
+                     vidEl.removeEventListener('loadeddata', onReady);
+                     vidEl.removeEventListener('canplay', onReady);
+                     if (this._isInView && vidEl.paused) {
+                       tryPlay();
+                     }
+                   };
+                   vidEl.addEventListener('loadeddata', onReady, { once: true });
+                   vidEl.addEventListener('canplay', onReady, { once: true });
+                 }
+                 if (vidEl.networkState === 0 && !vidEl.currentSrc) {
+                   try { vidEl.load(); } catch (_) {}
+                 }
+               }
+             };
+             const pauseVideoOutOfView = () => {
+               const vidEl = this.$el.querySelector('video');
+               if (!vidEl) return;
+               if (!vidEl.paused) {
+                 vidEl._autoPlaying = false;
+                 vidEl.pause();
+                 this.isPlaying = false;
+               }
+             };
+
+             if (window.__FPFeedVideoCoordinator) {
+               window.__FPFeedVideoCoordinator.register(this.$el, {
+                 getVideo: () => this.$el.querySelector('video'),
+                 play: () => {
+                   this._isInView = true;
+                   playVideoInView();
+                 },
+                 pause: () => {
+                   this._isInView = false;
+                   pauseVideoOutOfView();
+                 }
+               });
+               return;
+             }
+
              if (typeof IntersectionObserver === 'undefined') return;
              const obs = new IntersectionObserver((entries) => {
                entries.forEach(entry => {
                  const vidEl = this.$el.querySelector('video');
                  if (!vidEl) return;
-                 if (entry.isIntersecting && entry.intersectionRatio >= 0.35) {
-                   if (vidEl._userManuallyPaused) return;
+                 if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
+                   this._isInView = true;
                    document.querySelectorAll('video').forEach(other => {
                      if (other !== vidEl && !other.paused) {
                        other._autoPlaying = false;
                        other.pause();
                      }
                    });
-                   vidEl.muted = this.isVideoMuted;
-                   vidEl.playsInline = true;
-                   const tryPlay = () => {
-                     if (vidEl._userManuallyPaused) return;
-                     vidEl._autoPlaying = true;
-                     vidEl.play().then(() => { this.isPlaying = true; }).catch(() => {
-                       if (!vidEl.muted) {
-                         vidEl.muted = true;
-                         this.isVideoMuted = true;
-                         vidEl.play().then(() => { this.isPlaying = true; }).catch(() => {});
-                       }
-                     });
-                   };
-                   if (vidEl.readyState >= 2) {
-                     tryPlay();
-                   } else {
-                     if (vidEl.preload !== 'auto') vidEl.preload = 'auto';
-                     if (!vidEl._awaitingSinglePlay) {
-                       vidEl._awaitingSinglePlay = true;
-                       const onReady = () => {
-                         vidEl._awaitingSinglePlay = false;
-                         vidEl.removeEventListener('loadeddata', onReady);
-                         vidEl.removeEventListener('canplay', onReady);
-                         tryPlay();
-                       };
-                       vidEl.addEventListener('loadeddata', onReady, { once: true });
-                       vidEl.addEventListener('canplay', onReady, { once: true });
-                     }
-                     if (vidEl.networkState === 0 && !vidEl.currentSrc) {
-                       try { vidEl.load(); } catch (_) {}
-                     }
-                   }
+                   playVideoInView();
                  } else if (!entry.isIntersecting || entry.intersectionRatio < 0.15) {
-                   if (!vidEl.paused) {
-                     vidEl._autoPlaying = false;
-                     vidEl.pause();
-                     this.isPlaying = false;
-                   }
+                   this._isInView = false;
+                   pauseVideoOutOfView();
                    vidEl._userManuallyPaused = false;
                  }
                });
-             }, { threshold: [0.0, 0.15, 0.35, 0.65] });
+             }, { threshold: [0.0, 0.15, 0.25, 0.5] });
              obs.observe(this.$el);
            }
          }"

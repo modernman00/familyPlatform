@@ -74,14 +74,34 @@
   .fp-spark-reply-bubble {
     background-color: #f8fafc;
     border: 1px solid #e2e8f0;
-    color: #0f172a;
+    color: #0f172a !important;
+    font-style: normal !important;
     border-radius: 14px;
+  }
+  .fp-spark-reply-author {
+    font-size: var(--text-sm, 0.9375rem);
+    font-style: normal !important;
+    color: #0f172a !important;
+  }
+  .fp-spark-reply-body {
+    font-size: var(--text-base, 1rem);
+    line-height: 1.5;
+    font-style: normal !important;
+    color: #1e293b !important;
   }
   body.dark-mode .fp-spark-reply-bubble,
   [data-bs-theme="dark"] .fp-spark-reply-bubble {
     background-color: #0f172a;
     border-color: #334155;
-    color: #f8fafc;
+    color: #f8fafc !important;
+  }
+  body.dark-mode .fp-spark-reply-author,
+  [data-bs-theme="dark"] .fp-spark-reply-author {
+    color: #f8fafc !important;
+  }
+  body.dark-mode .fp-spark-reply-body,
+  [data-bs-theme="dark"] .fp-spark-reply-body {
+    color: #e2e8f0 !important;
   }
   .fp-spark-skeleton {
     height: 16px;
@@ -109,7 +129,7 @@
     <div class="d-flex align-items-center gap-2 min-w-0">
       <span class="badge rounded-pill px-3 py-1 fw-bold fp-spark-badge"
             x-text="spark ? spark.badge_label : 'DAILY SPARK'"></span>
-      <span class="small fw-semibold opacity-90" style="color: #fef3c7 !important;"
+      <span class="fw-semibold opacity-90" style="color: #fef3c7 !important; font-size: var(--text-sm, 0.875rem);"
             x-text="spark ? ('By ' + spark.created_by_name) : 'Loading today\'s spark...'"></span>
     </div>
 
@@ -199,7 +219,7 @@
                       x-text="opt.percentage + '% (' + opt.votes + ')'"></span>
               </button>
             </template>
-            <div class="small opacity-75 d-flex align-items-center justify-content-between">
+            <div class="opacity-85 d-flex align-items-center justify-content-between flex-wrap gap-2" style="font-size: var(--text-sm, 0.875rem);">
               <span x-text="spark.total_votes + (spark.total_votes === 1 ? ' family vote' : ' family votes')"></span>
               <span x-show="spark.user_vote_index !== null">Tap another option anytime to change your vote</span>
             </div>
@@ -232,23 +252,23 @@
             <!-- State 3: Empty Replies State -->
             <template x-if="!spark.replies || spark.replies.length === 0">
               <div class="p-3 rounded-3 text-center fp-spark-reply-bubble">
-                <p class="mb-1 fw-semibold small">No family replies yet.</p>
-                <p class="mb-0 small opacity-75">Start the conversation below—your reply stays inside this single Living Spark Card.</p>
+                <p class="mb-1 fw-semibold fp-spark-reply-author">No family replies yet.</p>
+                <p class="mb-0 opacity-85" style="font-size: var(--text-sm, 0.875rem);">Start the conversation below—your reply stays inside this single Living Spark Card.</p>
               </div>
             </template>
 
             <!-- Aggregated Replies List -->
             <template x-for="reply in spark.replies" :key="reply.id">
-              <div class="p-2 p-sm-3 fp-spark-reply-bubble d-flex align-items-start gap-2">
+              <div class="p-3 fp-spark-reply-bubble d-flex align-items-start gap-3">
                 <img :src="reply.author_avatar || '/resources/images/profile/avatarM.png'"
                      alt=""
                      class="rounded-circle flex-shrink-0 object-fit-cover"
-                     style="width: 36px; height: 36px;">
+                     style="width: 40px; height: 40px;">
                 <div class="min-w-0 flex-grow-1">
                   <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
-                    <span class="fw-bold small" style="overflow-wrap: anywhere;" x-text="reply.author_name"></span>
+                    <span class="fw-bold fp-spark-reply-author" style="overflow-wrap: anywhere;" x-text="reply.author_name"></span>
                   </div>
-                  <p class="mb-0 small mt-1" style="line-height: 1.45; overflow-wrap: anywhere;" x-text="reply.body"></p>
+                  <p class="mb-0 mt-1 fp-spark-reply-body" style="overflow-wrap: anywhere;" x-text="reply.body"></p>
                 </div>
               </div>
             </template>

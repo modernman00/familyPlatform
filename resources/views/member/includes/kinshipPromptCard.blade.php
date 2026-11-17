@@ -28,7 +28,7 @@
                         Preserve Your Family Roots: Build Your Tree
                     </h5>
                 </div>
-                <p class="text-white-50 small mb-3" style="font-size: 0.86rem; line-height: 1.45; max-width: 580px;">
+                <p class="text-white-50 mb-3" style="font-size: 0.95rem; line-height: 1.5; max-width: 580px;">
                     Connecting your parents, siblings, and children locks in your family's oral history, unlocks automatic kinship recognition, and gives younger generations a permanent map of their roots.
                 </p>
 

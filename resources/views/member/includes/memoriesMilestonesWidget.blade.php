@@ -25,7 +25,7 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
             </div>
             <div>
                 <h5 class="mb-0 fw-bold" style="color: var(--text-color, #1f2937); font-size: 1rem;">{{ __('milestones.title', 'Memories & Milestones') }}</h5>
-                <p class="text-muted small mb-0" style="font-size: 0.78rem;">{{ __('milestones.subtitle', 'On this day flashbacks & family celebrations') }}</p>
+                <p class="text-muted mb-0" style="font-size: 0.875rem;">{{ __('milestones.subtitle', 'On this day flashbacks & family celebrations') }}</p>
             </div>
         </div>
         <button type="button" 
@@ -44,7 +44,7 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
         <template x-if="loading && !loaded">
             <div class="py-4 text-center">
                 <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
-                <p class="text-muted small mb-0" style="font-size: 0.8rem;">{{ __('milestones.gathering', 'Gathering family memories...') }}</p>
+                <p class="text-muted mb-0" style="font-size: 0.875rem;">{{ __('milestones.gathering', 'Gathering family memories...') }}</p>
             </div>
         </template>
 
@@ -286,7 +286,7 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
 
                                     <!-- Meaningful Emotional Tribute Message (The content that MEANS something to users!) -->
                                     <div class="p-2 rounded-3 mt-1.5" style="background: rgba(241, 245, 249, 0.65); border-left: 3px solid #b8202c;">
-                                        <p class="mb-0 fw-normal" style="font-size: 0.8rem; color: #334155; line-height: 1.45;" x-text="milestone.meaningful_message || milestone.subtitle"></p>
+                                        <p class="mb-0 fw-normal" style="font-size: 0.9375rem; color: #334155; line-height: 1.5;" x-text="milestone.meaningful_message || milestone.subtitle"></p>
                                     </div>
 
                                     <!-- 'in xx days' placed UNDER as requested by user -->
@@ -315,8 +315,8 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                              style="width: 44px; height: 44px; background: rgba(184,32,44, 0.08); color: var(--primary-color, #a31621);">
                             <i class="bi bi-camera-reels fs-4"></i>
                         </div>
-                        <h6 class="fw-bold mb-1" style="color: var(--text-color, #1f2937); font-size: 0.88rem;">No Flashbacks Today</h6>
-                        <p class="text-muted small mb-2" style="font-size: 0.78rem; line-height: 1.4;">
+                        <h6 class="fw-bold mb-1" style="color: var(--text-color, #1f2937); font-size: 0.95rem;">No Flashbacks Today</h6>
+                        <p class="text-muted mb-2" style="font-size: 0.875rem; line-height: 1.45;">
                             Keep sharing photos and family moments! They will reappear here as cherished memories on this day in future years.
                         </p>
                         <div>

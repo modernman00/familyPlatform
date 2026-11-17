@@ -836,7 +836,7 @@
         </button>
       </div>
       <template x-if="activeStreamFilter === 'tagged'">
-        <span class="small text-muted" style="font-size: 0.75rem;">{{ __('feed.showing_tagged', 'Showing memories featuring you') }}</span>
+        <span class="text-muted" style="font-size: 0.875rem;">{{ __('feed.showing_tagged', 'Showing memories featuring you') }}</span>
       </template>
     </div>
 
@@ -848,7 +848,7 @@
             <i class="bi bi-tags-fill text-primary" style="font-size: 1rem;"></i>
             <span class="fw-bold small text-dark" style="font-size: 0.88rem;">{{ __('feed.topics_milestones', 'Family Topics & Milestones') }}</span>
           </div>
-          <span class="text-muted small" style="font-size: 0.75rem;">{{ __('feed.click_to_filter', 'Click to filter') }}</span>
+          <span class="text-muted" style="font-size: 0.875rem;">{{ __('feed.click_to_filter', 'Click to filter') }}</span>
         </div>
         <div class="d-flex gap-2 flex-wrap align-items-center">
           <template x-for="item in trendingHashtags" :key="item.tag">
@@ -892,6 +892,147 @@
         <p class="text-muted mb-0" x-text="activeStreamFilter === 'tagged' ? (window.__ ? window.__('feed.no_tagged_desc', 'When relatives tag you in stories or milestone photos, they will appear in this personal scrapbook.') : 'When relatives tag you in stories or milestone photos, they will appear in this personal scrapbook.') : (window.__ ? window.__('feed.no_posts_desc', 'Share the first memory or event with your family above!') : 'Share the first memory or event with your family above!')"></p>
       </div>
     </template>
+
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
+      if (!window.__FPFeedVideoCoordinator && typeof IntersectionObserver !== 'undefined') {
+        window.__FPFeedVideoCoordinator = (function () {
+          const entries = new Map();
+          let activeEl = null;
+          let rafId = null;
+
+          const isSaveData = () => !!(navigator.connection && navigator.connection.saveData);
+
+          const viewObserver = new IntersectionObserver((obsEntries) => {
+            obsEntries.forEach((entry) => {
+              const rec = entries.get(entry.target);
+              if (!rec) return;
+              rec.ratio = entry.isIntersecting ? entry.intersectionRatio : 0;
+              if (rec.ratio < 0.15) {
+                const v = rec.getVideo();
+                if (v) v._userManuallyPaused = false;
+              }
+            });
+            scheduleEvaluate();
+          }, { threshold: [0.0, 0.15, 0.25, 0.5, 0.75] });
+
+          const preloadObserver = new IntersectionObserver((obsEntries) => {
+            if (isSaveData()) return;
+            obsEntries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              const rec = entries.get(entry.target);
+              if (!rec) return;
+              const v = rec.getVideo();
+              if (v && v.preload !== 'auto') {
+                v.preload = 'auto';
+                if (v.networkState === 0 && !v.currentSrc) {
+                  try { v.load(); } catch (_) {}
+                }
+              }
+            });
+          }, { rootMargin: '500px 0px', threshold: 0.0 });
+
+          function scheduleEvaluate() {
+            if (rafId !== null) return;
+            rafId = requestAnimationFrame(() => {
+              rafId = null;
+              evaluate();
+            });
+          }
+
+          function evaluate() {
+            if (document.hidden) {
+              pauseAllExcept(null);
+              return;
+            }
+            const vh = window.innerHeight || document.documentElement.clientHeight || 800;
+            const vCenter = vh * 0.5;
+            let bestEl = null;
+            let bestScore = -1;
+
+            entries.forEach((rec, el) => {
+              if (!el.isConnected) {
+                viewObserver.unobserve(el);
+                preloadObserver.unobserve(el);
+                entries.delete(el);
+                return;
+              }
+              const rect = el.getBoundingClientRect();
+              if (rect.height <= 0) return;
+              const visibleTop = Math.max(0, rect.top);
+              const visibleBottom = Math.min(vh, rect.bottom);
+              const liveRatio = Math.max(0, visibleBottom - visibleTop) / rect.height;
+              rec.ratio = liveRatio;
+              if (liveRatio < 0.15) {
+                const v = rec.getVideo();
+                if (v) v._userManuallyPaused = false;
+                return;
+              }
+              if (liveRatio < 0.25) return;
+              const centerDist = Math.abs((rect.top + rect.height * 0.5) - vCenter);
+              const score = liveRatio - (centerDist / vh) * 0.15;
+              if (score > bestScore) {
+                bestScore = score;
+                bestEl = el;
+              }
+            });
+
+            pauseAllExcept(bestEl);
+            activeEl = bestEl;
+
+            if (bestEl) {
+              const rec = entries.get(bestEl);
+              if (rec) rec.play();
+            }
+          }
+
+          function pauseAllExcept(winnerEl) {
+            entries.forEach((rec, el) => {
+              if (el !== winnerEl) {
+                rec.pause();
+              }
+            });
+          }
+
+          window.addEventListener('scroll', scheduleEvaluate, { passive: true });
+          document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+              pauseAllExcept(null);
+            } else {
+              scheduleEvaluate();
+            }
+          });
+
+          return {
+            register(el, handlers) {
+              if (!el) return;
+              entries.set(el, {
+                el,
+                ratio: 0,
+                getVideo: handlers.getVideo,
+                play: handlers.play,
+                pause: handlers.pause
+              });
+              viewObserver.observe(el);
+              preloadObserver.observe(el);
+            },
+            unregister(el) {
+              if (!el || !entries.has(el)) return;
+              viewObserver.unobserve(el);
+              preloadObserver.unobserve(el);
+              entries.delete(el);
+              if (activeEl === el) {
+                activeEl = null;
+                scheduleEvaluate();
+              }
+            },
+            notifyPlaying(el) {
+              activeEl = el;
+              pauseAllExcept(el);
+            }
+          };
+        })();
+      }
+    </script>
 
     <!-- Posts Loop -->
     <div id="postIt" class="postIt">
@@ -1583,10 +1724,10 @@
                                          alt="">
                                     <div class="p-2 px-2.5 rounded-3 flex-grow-1" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1);">
                                         <div class="d-flex align-items-center justify-content-between gap-2 mb-0.5">
-                                            <span class="fw-bold text-white" style="font-size: 0.8rem;" x-text="c.fullName || 'Family Member'"></span>
-                                            <span class="text-white-50" style="font-size: 0.7rem;" x-text="formatDate(c.comment_time || c.post_time || c.date_created)"></span>
+                                            <span class="fw-bold text-white" style="font-size: 0.9375rem;" x-text="c.fullName || 'Family Member'"></span>
+                                            <span class="text-white-50" style="font-size: 0.8125rem;" x-text="formatDate(c.comment_time || c.post_time || c.date_created)"></span>
                                         </div>
-                                        <div class="text-white" style="font-size: 0.85rem; line-height: 1.35; word-break: break-word;" x-text="c.comment"></div>
+                                        <div class="text-white" style="font-size: 0.9375rem; line-height: 1.45; word-break: break-word;" x-text="c.comment"></div>
                                     </div>
                                 </div>
                             </template>

@@ -14,27 +14,40 @@ declare(strict_types=1);
  * Usage: php scripts/verify_engineering_must_haves.php [target_directory]
  */
 
-$targetDir = $argv[1] ?? getcwd();
+$incrementalMode = (($argv[1] ?? '') === '--files');
+$targetDir = $incrementalMode ? getcwd() : ($argv[1] ?? getcwd());
 $exitCode = 0;
 $violations = [];
 
 echo "=================================================================\n";
 echo "🛡️  ENGINEERING MUST-HAVES AUTOMATED SCANNER (TAT & BRATS GATE)\n";
-echo "Scanning Directory: " . realpath($targetDir) . "\n";
-echo "=================================================================\n\n";
+if ($incrementalMode) {
+    $explicitFiles = array_values(array_filter(array_slice($argv, 2), static fn (string $p): bool => $p !== '' && is_file($p)));
+    echo "Scanning " . count($explicitFiles) . " modified file(s) (incremental mode)\n";
+    echo "=================================================================\n\n";
+    if ($explicitFiles === []) {
+        echo "✅ No modified files to scan.\n";
+        exit(0);
+    }
+    $iterator = array_map(static fn (string $p): SplFileInfo => new SplFileInfo($p), $explicitFiles);
+} else {
+    echo "Scanning Directory: " . realpath($targetDir) . "\n";
+    echo "=================================================================\n\n";
+
+    $dirIterator = new RecursiveDirectoryIterator($targetDir, RecursiveDirectoryIterator::SKIP_DOTS);
+    $filterIterator = new RecursiveCallbackFilterIterator($dirIterator, function ($current, $key, $iterator) {
+        if ($iterator->hasChildren()) {
+            $filename = $current->getFilename();
+            if (in_array($filename, ['vendor', '.git', '.phpunit.cache', '.php_tmp', 'cache', 'storage', 'node_modules', 'scripts', 'gen_class', 'scratch', 'php-uk', 'public', 'cypress', 'mobile'], true)) {
+                return false;
+            }
+        }
+        return true;
+    });
+    $iterator = new RecursiveIteratorIterator($filterIterator);
+}
 
 $fileExtensions = ['php', 'blade.php', 'html', 'phtml'];
-$dirIterator = new RecursiveDirectoryIterator($targetDir, RecursiveDirectoryIterator::SKIP_DOTS);
-$filterIterator = new RecursiveCallbackFilterIterator($dirIterator, function ($current, $key, $iterator) {
-    if ($iterator->hasChildren()) {
-        $filename = $current->getFilename();
-        if (in_array($filename, ['vendor', '.git', '.phpunit.cache', '.php_tmp', 'cache', 'storage', 'node_modules', 'scripts', 'gen_class', 'scratch', 'php-uk'], true)) {
-            return false;
-        }
-    }
-    return true;
-});
-$iterator = new RecursiveIteratorIterator($filterIterator);
 
 foreach ($iterator as $file) {
     if (!$file->isFile()) {
@@ -44,7 +57,7 @@ foreach ($iterator as $file) {
     $filePath = $file->getPathname();
 
     // Skip vendor, cache, git, scratch, temp dirs, 3rd party SDKs, and scripts directories
-    if (preg_match('#/(vendor|\.git|\.phpunit\.cache|\.php_tmp|cache|storage|node_modules|scripts|gen_class|scratch|php-uk)/#', $filePath)) {
+    if (preg_match('#(?:^|/)(vendor|\.git|\.phpunit\.cache|\.php_tmp|cache|storage|node_modules|scripts|gen_class|scratch|php-uk|public|cypress|mobile)/#', $filePath)) {
         continue;
     }
 

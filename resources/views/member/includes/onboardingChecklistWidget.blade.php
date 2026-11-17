@@ -28,7 +28,7 @@
                         <span x-text="state.completed_count"></span>/3 Done
                     </span>
                 </div>
-                <p class="mb-0 text-white-50 small" style="font-size: 0.82rem;">
+                <p class="mb-0 text-white-50" style="font-size: 0.9rem;">
                     Unlock the full power of your family dynasty in 3 fast steps
                 </p>
             </div>
@@ -71,7 +71,7 @@
                         <div class="fw-bold text-white" style="font-size: 0.9rem;" :class="{'text-decoration-line-through text-white-50': state.steps?.explore_tree?.done}">
                             1. Build Your Living Family Tree
                         </div>
-                        <div class="text-white-50 small" style="font-size: 0.78rem;">
+                        <div class="text-white-50" style="font-size: 0.875rem;">
                             Add parents and siblings to preserve family heritage, connect generations, and auto-track kinship.
                         </div>
                     </div>
@@ -101,7 +101,7 @@
                         <div class="fw-bold text-white" style="font-size: 0.9rem;" :class="{'text-decoration-line-through text-white-50': state.steps?.invite_family?.done}">
                             2. Invite Relatives to Connect
                         </div>
-                        <div class="text-white-50 small" style="font-size: 0.78rem;">
+                        <div class="text-white-50" style="font-size: 0.875rem;">
                             Share your code: <strong class="text-warning" x-text="state.invite_data?.family_code"></strong> with parents, siblings, or kin.
                         </div>
                     </div>
@@ -135,7 +135,7 @@
                         <div class="fw-bold text-white" style="font-size: 0.9rem;" :class="{'text-decoration-line-through text-white-50': state.steps?.post_memory?.done}">
                             3. Share Your First Family Photo/Update
                         </div>
-                        <div class="text-white-50 small" style="font-size: 0.78rem;">
+                        <div class="text-white-50" style="font-size: 0.875rem;">
                             Post a picture, story, or milestone to the private family feed.
                         </div>
                     </div>
