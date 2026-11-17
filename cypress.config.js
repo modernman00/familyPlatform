@@ -47,6 +47,24 @@ module.exports = defineConfig({
             await connection.end();
           }
         },
+
+        async cleanupCypressApprovalState(userId) {
+          if (!userId) return true;
+          const connection = await mysql.createConnection({
+            host: process.env.DB_HOST,
+            user: process.env.DB_USERNAME,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME,
+          });
+          try {
+            await connection.execute('DELETE FROM family_approval_requests WHERE id = ?', [userId]);
+            await connection.execute("DELETE FROM user_families WHERE user_id = ? AND family_code != 'LAF123'", [userId]);
+            await connection.execute("UPDATE personal SET famCode = 'LAF123' WHERE id = ?", [userId]);
+            return true;
+          } finally {
+            await connection.end();
+          }
+        },
         // Kinship Radar only renders while the member has undismissed, unrequested
         // candidates, and the Connect/Dismiss specs consume them on every run.
         // Restore the member to a fresh-radar state: drop their dismissals and the

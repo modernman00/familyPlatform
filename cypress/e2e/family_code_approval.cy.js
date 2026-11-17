@@ -1,3 +1,5 @@
+import { loginFully } from '../support/login';
+
 describe('Family Code Approval - Registration & Approval Flow', () => {
   Cypress.on('uncaught:exception', () => false);
 
@@ -12,6 +14,15 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
     cy.request({
       url: '/api/test/clear-rate-limits',
       failOnStatusCode: false
+    });
+  });
+
+  after(() => {
+    cy.window().then((win) => {
+      const uid = win.localStorage.getItem('requesterId');
+      if (uid) {
+        cy.task('cleanupCypressApprovalState', uid);
+      }
     });
   });
 
@@ -148,35 +159,49 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
     });
 
     it('completing registration through the API creates a pending approval request', () => {
-      // Drives the same endpoint the register form posts to, so we cover the
-      // server-side approval-request creation without the brittle UI submit.
-      cy.request('/api/test/get-valid-family-code-with-inviter').then((response) => {
-        const familyCode = response.body.code;
-        const inviter = response.body.inviter;
-        const userId = 'e2e-complete-' + Date.now();
+      // Drives the same endpoint the register form posts to with a real authenticated
+      // session and CSRF token (enforced by FamilyCodeApprovalController).
+      loginFully();
+      cy.window().then((win) => {
+        const userId = win.localStorage.getItem('requesterId');
+        expect(userId, 'authenticated requesterId').to.be.a('string').and.not.be.empty;
 
-        cy.request({
-          method: 'POST',
-          url: '/api/family-code/complete-registration',
-          failOnStatusCode: false,
-          body: {
-            user_id: userId,
-            family_code: familyCode,
-            joining_via_invitation: true,
-            inviter_first_name: inviter.firstName,
-            inviter_last_name: inviter.lastName,
-            inviter_email_or_mobile: inviter.email
-          }
-        }).then((res) => {
-          expect(res.status).to.be.oneOf([200, 201]);
-          expect(res.body.success).to.eq(true);
-          expect(res.body).to.have.property('temporary_code');
-        });
+        cy.getCookie('XSRF-TOKEN').then((xsrf) => {
+          const csrfToken = xsrf && xsrf.value ? decodeURIComponent(xsrf.value) : '';
 
-        cy.request('/api/test/get-pending-approval-requests').then((res) => {
-          const mine = res.body.filter((r) => r.id === userId);
-          expect(mine.length, 'pending request for the new user').to.be.greaterThan(0);
-          expect(mine[0].status).to.eq('pending');
+          cy.request('/api/test/get-valid-family-code-with-inviter').then((response) => {
+            const familyCode = response.body.code;
+            const inviter = response.body.inviter;
+
+            cy.request({
+              method: 'POST',
+              url: '/api/family-code/complete-registration',
+              failOnStatusCode: false,
+              headers: {
+                'X-XSRF-TOKEN': csrfToken,
+                'X-CSRF-TOKEN': csrfToken
+              },
+              body: {
+                csrf_token: csrfToken,
+                user_id: userId,
+                family_code: familyCode,
+                joining_via_invitation: true,
+                inviter_first_name: inviter.firstName,
+                inviter_last_name: inviter.lastName,
+                inviter_email_or_mobile: inviter.email
+              }
+            }).then((res) => {
+              expect(res.status).to.be.oneOf([200, 201]);
+              expect(res.body.success).to.eq(true);
+              expect(res.body).to.have.property('temporary_code');
+            });
+
+            cy.request('/api/test/get-pending-approval-requests').then((res) => {
+              const mine = res.body.filter((r) => r.id === userId);
+              expect(mine.length, 'pending request for the new user').to.be.greaterThan(0);
+              expect(mine[0].status).to.eq('pending');
+            });
+          });
         });
       });
     });
@@ -355,37 +380,45 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
 
     it('should prevent duplicate pending approvals from same inviter', () => {
       // Seed a pending request, then try to create another for the same user.
-      cy.request('/api/test/get-valid-family-code-with-inviter').then((response) => {
-        const familyCode = response.body.code;
-        const inviter = response.body.inviter;
-        const userId = 'e2e-dup-' + Date.now();
+      loginFully();
+      cy.window().then((win) => {
+        const userId = win.localStorage.getItem('requesterId');
+        cy.getCookie('XSRF-TOKEN').then((xsrf) => {
+          const csrfToken = xsrf && xsrf.value ? decodeURIComponent(xsrf.value) : '';
 
-        const payload = {
-          user_id: userId,
-          family_code: familyCode,
-          joining_via_invitation: true,
-          inviter_first_name: inviter.firstName,
-          inviter_last_name: inviter.lastName,
-          inviter_email_or_mobile: inviter.email
-        };
+          cy.request('/api/test/get-valid-family-code-with-inviter').then((response) => {
+            const familyCode = response.body.code;
+            const inviter = response.body.inviter;
 
-        cy.request({
-          method: 'POST',
-          url: '/api/family-code/complete-registration',
-          body: payload,
-          failOnStatusCode: false,
-          headers: { 'X-XSRF-TOKEN': cy.getCookie('XSRF-TOKEN')?.value || '' }
-        });
+            const payload = {
+              csrf_token: csrfToken,
+              user_id: userId,
+              family_code: familyCode,
+              joining_via_invitation: true,
+              inviter_first_name: inviter.firstName,
+              inviter_last_name: inviter.lastName,
+              inviter_email_or_mobile: inviter.email
+            };
 
-        cy.request({
-          method: 'POST',
-          url: '/api/family-code/complete-registration',
-          body: payload,
-          failOnStatusCode: false,
-          headers: { 'X-XSRF-TOKEN': cy.getCookie('XSRF-TOKEN')?.value || '' }
-        }).then((res) => {
-          // Should either reject or return existing request
-          expect(res.status).to.be.oneOf([400, 409, 422]);
+            cy.request({
+              method: 'POST',
+              url: '/api/family-code/complete-registration',
+              body: payload,
+              failOnStatusCode: false,
+              headers: { 'X-XSRF-TOKEN': csrfToken, 'X-CSRF-TOKEN': csrfToken }
+            });
+
+            cy.request({
+              method: 'POST',
+              url: '/api/family-code/complete-registration',
+              body: payload,
+              failOnStatusCode: false,
+              headers: { 'X-XSRF-TOKEN': csrfToken, 'X-CSRF-TOKEN': csrfToken }
+            }).then((res) => {
+              // Should either reject or return existing request
+              expect(res.status).to.be.oneOf([400, 409, 422]);
+            });
+          });
         });
       });
     });

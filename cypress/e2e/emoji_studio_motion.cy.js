@@ -138,6 +138,26 @@ describe('Living Avatar & Emoji Studio', () => {
         cy.intercept('POST', '/api/emoji/save-avatar').as('saveAvatarReq');
         cy.intercept('POST', '/api/emoji/photo-to-avatar').as('photoToAvatarReq');
 
+        // Ensure the user has a real/living photo on file so the look switcher renders
+        cy.get('body').then($body => {
+            if ($body.find('.atg-look-btn[data-look="avatar"]').length === 0) {
+                const tinyPng = Cypress.Buffer.from(
+                    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=',
+                    'base64'
+                );
+                cy.get('.atg-tab-btn[data-atg-tab="photo-avatar-tab"]').click();
+                cy.get('#atgPhotoUploadInput').selectFile(
+                    { contents: tinyPng, fileName: 'portrait.png', mimeType: 'image/png' },
+                    { force: true }
+                );
+                cy.wait('@photoToAvatarReq').its('response.statusCode').should('eq', 200);
+                cy.get('#atgSaveLivingPortraitBtn').click();
+                cy.wait('@saveAvatarReq').its('response.statusCode').should('eq', 200);
+                cy.visit('/member/emoji-studio');
+                cy.get('#atgAvatarViewport .atg-avatar-svg').should('exist');
+            }
+        });
+
         // 1. Switch to 3D Cartoon Avatar look and click "Set as Profile Picture" (#atgSaveAvatarBtn)
         cy.get('.atg-look-btn[data-look="avatar"]').click();
         cy.get('#atgSaveAvatarBtn').should('have.css', 'display').and('not.eq', 'none');

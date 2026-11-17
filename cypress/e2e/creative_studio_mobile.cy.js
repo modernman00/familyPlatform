@@ -1,3 +1,5 @@
+import { loginFully } from '../support/login';
+
 describe('Creative Studio & Sub-Studios Mobile CapCut Ergonomics', () => {
     Cypress.on('uncaught:exception', () => false);
 
@@ -16,45 +18,8 @@ describe('Creative Studio & Sub-Studios Mobile CapCut Ergonomics', () => {
         { path: '/family-studio', name: 'Living Archives Studio' },
     ];
 
-    function loginStudioSession() {
-        const email = Cypress.env('TEST_USER_EMAIL') || 'cypress_test@myfamilyplatform.com';
-        const password = Cypress.env('TEST_USER_PASSWORD') || 'National2';
-
-        cy.session(['studio', email], () => {
-            cy.request({
-                method: 'POST',
-                url: '/api/test/clear-rate-limit',
-                failOnStatusCode: false,
-                headers: { 'X-Cypress-Test': 'true' }
-            });
-            cy.request({
-                method: 'POST',
-                url: '/login',
-                form: true,
-                body: { email, password },
-                failOnStatusCode: false,
-                headers: { 'X-Cypress-Test': 'true' }
-            }).then((res) => {
-                expect([200, 201]).to.include(res.status);
-            });
-            cy.task('getLatest2FACode', email).then((code) => {
-                expect(code).to.be.a('string').and.not.be.empty;
-                cy.request({
-                    method: 'POST',
-                    url: '/login/code',
-                    form: true,
-                    body: { code },
-                    failOnStatusCode: false,
-                    headers: { 'X-Cypress-Test': 'true' }
-                }).then((codeRes) => {
-                    expect([200, 201]).to.include(codeRes.status);
-                });
-            });
-        });
-    }
-
     beforeEach(() => {
-        loginStudioSession();
+        loginFully();
     });
 
     it('renders engaging bespoke graphics for all 4 sub-containers on Creative Studio hub', () => {

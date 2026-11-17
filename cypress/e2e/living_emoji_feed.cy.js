@@ -57,9 +57,9 @@ describe('Living emojis in the feed & comments', () => {
         cy.wait('@commentReq', { timeout: 90000 }).its('response.statusCode').should('eq', 200);
 
         cy.contains(marker).parents('.card')
-            .find('.atg-live-emoji img[src*="family_clap"]', { timeout: 60000 })
+            .find('.atg-live-emoji', { timeout: 60000 })
+            .filter(':has(img[src*="family_clap"])')
             .should('be.visible')
-            .parent()
             .as('live');
 
         // First tap: pop + particle burst, no AR modal

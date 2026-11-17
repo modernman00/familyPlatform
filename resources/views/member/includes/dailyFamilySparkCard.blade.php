@@ -17,11 +17,13 @@
     background: linear-gradient(135deg, #5c0a12 0%, #8a1019 100%);
     color: #ffffff;
   }
-  .fp-spark-header h2,
-  .fp-spark-header h3,
-  .fp-spark-header p,
-  .fp-spark-header span {
+  .fp-spark-header > div:first-child span {
     color: #ffffff;
+  }
+  .fp-spark-header .btn-warning,
+  .fp-spark-header .btn-warning i,
+  .fp-spark-header .btn-warning span {
+    color: #0f172a !important;
   }
   .fp-spark-badge {
     background-color: rgba(254, 243, 199, 0.18);
