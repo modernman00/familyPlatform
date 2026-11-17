@@ -173,6 +173,11 @@
                 <span>Official Feed</span>
             </a>
 
+            <a href="{{ $adminPrefix }}/content-engine" class="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold <?= ($activeTab ?? '') === 'content_engine' ? 'bg-emerald-600 text-white shadow-sm' : 'text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/40' ?> transition-colors">
+                <i class="fa-solid fa-film text-emerald-300"></i>
+                <span>Video Engine</span>
+            </a>
+
             <a href="{{ $adminPrefix }}/broadcast<?= ($selectedApp ?? 'familyplatform') !== 'familyplatform' ? '?app=' . htmlspecialchars($selectedApp) : '' ?>" class="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold <?= ($activeTab ?? '') === 'broadcast' ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-900/60' ?> transition-colors">
                 <i class="fa-solid fa-tower-broadcast"></i>
                 <span>Broadcast Console</span>

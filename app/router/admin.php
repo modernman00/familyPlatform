@@ -77,6 +77,26 @@ $router->map('POST', $adminSecretPath . '/official-posts/delete', 'App\controlle
 $router->map('POST', '/admin/official-posts/summarise', 'App\controller\admin\AdminController@summariseFriendlyUpdate', 'admin_official_posts_summarise');
 $router->map('POST', $adminSecretPath . '/official-posts/summarise', 'App\controller\admin\AdminController@summariseFriendlyUpdate', 'admin_official_posts_summarise_secret');
 
+// CURATED VIDEO CONTENT ENGINE
+$router->map('GET', '/admin/content-engine', 'App\controller\admin\AdminController@contentEngine', 'admin_content_engine');
+$router->map('GET', $adminSecretPath . '/content-engine', 'App\controller\admin\AdminController@contentEngine', 'admin_content_engine_secret');
+$router->map('POST', '/admin/content-engine/fetch', 'App\controller\admin\AdminController@fetchContentEngineVideos', 'admin_content_engine_fetch');
+$router->map('POST', $adminSecretPath . '/content-engine/fetch', 'App\controller\admin\AdminController@fetchContentEngineVideos', 'admin_content_engine_fetch_secret');
+$router->map('POST', '/admin/content-engine/import', 'App\controller\admin\AdminController@importContentEngineVideo', 'admin_content_engine_import');
+$router->map('POST', $adminSecretPath . '/content-engine/import', 'App\controller\admin\AdminController@importContentEngineVideo', 'admin_content_engine_import_secret');
+$router->map('POST', '/admin/content-engine/publish', 'App\controller\admin\AdminController@publishCuratedVideo', 'admin_content_engine_publish');
+$router->map('POST', $adminSecretPath . '/content-engine/publish', 'App\controller\admin\AdminController@publishCuratedVideo', 'admin_content_engine_publish_secret');
+$router->map('POST', '/admin/content-engine/dismiss', 'App\controller\admin\AdminController@dismissCuratedVideo', 'admin_content_engine_dismiss');
+$router->map('POST', $adminSecretPath . '/content-engine/dismiss', 'App\controller\admin\AdminController@dismissCuratedVideo', 'admin_content_engine_dismiss_secret');
+$router->map('POST', '/admin/content-engine/sources/add', 'App\controller\admin\AdminController@addContentEngineSource', 'admin_content_engine_sources_add');
+$router->map('POST', $adminSecretPath . '/content-engine/sources/add', 'App\controller\admin\AdminController@addContentEngineSource', 'admin_content_engine_sources_add_secret');
+$router->map('POST', '/admin/content-engine/sources/toggle', 'App\controller\admin\AdminController@toggleContentEngineSource', 'admin_content_engine_sources_toggle');
+$router->map('POST', $adminSecretPath . '/content-engine/sources/toggle', 'App\controller\admin\AdminController@toggleContentEngineSource', 'admin_content_engine_sources_toggle_secret');
+$router->map('POST', '/admin/content-engine/sources/delete', 'App\controller\admin\AdminController@deleteContentEngineSource', 'admin_content_engine_sources_delete');
+$router->map('POST', $adminSecretPath . '/content-engine/sources/delete', 'App\controller\admin\AdminController@deleteContentEngineSource', 'admin_content_engine_sources_delete_secret');
+$router->map('POST', '/admin/content-engine/settings', 'App\controller\admin\AdminController@updateContentEngineSettings', 'admin_content_engine_settings');
+$router->map('POST', $adminSecretPath . '/content-engine/settings', 'App\controller\admin\AdminController@updateContentEngineSettings', 'admin_content_engine_settings_secret');
+
 // pSEO CMS & URL REGISTRY
 $router->map('GET', '/admin/pseo', 'App\controller\admin\AdminController@pseo', 'admin_pseo');
 $router->map('GET', $adminSecretPath . '/pseo', 'App\controller\admin\AdminController@pseo', 'admin_pseo_secret');

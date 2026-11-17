@@ -15,7 +15,11 @@
         </p>
     </div>
     <div class="flex items-center gap-2">
-        <a href="/member/profilePage" target="_blank" class="text-xs bg-gray-800/90 hover:bg-gray-700 text-gray-200 px-3.5 py-2 rounded-xl border border-gray-700 transition-colors flex items-center gap-1.5 font-medium">
+        <a href="{{ $adminPrefix }}/content-engine" class="min-h-[44px] text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl transition-colors flex items-center gap-1.5 font-semibold whitespace-nowrap">
+            <i class="fa-solid fa-film"></i>
+            <span>Video Content Engine</span>
+        </a>
+        <a href="/member/profilePage" target="_blank" class="min-h-[44px] text-xs bg-gray-800/90 hover:bg-gray-700 text-gray-200 px-3.5 py-2 rounded-xl border border-gray-700 transition-colors flex items-center gap-1.5 font-medium whitespace-nowrap">
             <i class="fa-solid fa-arrow-up-right-from-square text-emerald-400"></i>
             <span>View Live Member Feed</span>
         </a>

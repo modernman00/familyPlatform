@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\controller\admin;
 
 use App\controller\BaseController;
+use App\services\CuratedVideoEngineService;
 use App\services\FamilyPlatformAccountService;
 use Src\Admin\AdminService;
 use Src\Admin\BroadcastService;
@@ -655,6 +656,234 @@ class AdminController extends BaseController
             'status' => 'success',
             'friendly_copy' => $friendlyCopy,
         ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        exit;
+    }
+
+    /**
+     * Curated Video Content Engine Console.
+     */
+    public function contentEngine(): void
+    {
+        $this->getAuthenticatedAdminId();
+        $engine = new CuratedVideoEngineService($this->db, $this->officialAccountService);
+        $dashboard = $engine->getDashboardData();
+
+        $adminSecretPath = ($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH'));
+        $adminPrefix = !empty($adminSecretPath) ? '/' . trim((string)$adminSecretPath, '/') : '/admin';
+
+        view('admin.content_engine', [
+            'title' => 'Curated Video Content Engine',
+            'activeTab' => 'content_engine',
+            'selectedApp' => 'familyplatform',
+            'adminPrefix' => $adminPrefix,
+            'stats' => $dashboard['stats'],
+            'settings' => $dashboard['settings'],
+            'sources' => $dashboard['sources'],
+            'queued' => $dashboard['queued'],
+            'published' => $dashboard['published'],
+        ]);
+    }
+
+    /**
+     * Fetch new funny & family videos from all active sources.
+     */
+    public function fetchContentEngineVideos(): void
+    {
+        $this->getAuthenticatedAdminId();
+        $input = $this->readAdminActionInput();
+        self::validateCsrf($input);
+
+        try {
+            $engine = new CuratedVideoEngineService($this->db, $this->officialAccountService);
+            $result = $engine->fetchFromActiveSources();
+
+            $msg = sprintf(
+                'Checked %d active source(s) and queued %d new family-safe video(s).',
+                $result['sources_checked'],
+                $result['videos_added']
+            );
+            if (!empty($result['errors'])) {
+                $msg .= ' Note: ' . count($result['errors']) . ' source(s) could not be reached right now.';
+            }
+            $_SESSION['success'] = $msg;
+        } catch (\Throwable $e) {
+            $_SESSION['error'] = 'Could not fetch curated videos: ' . $e->getMessage();
+        }
+
+        $this->redirectToContentEngine();
+    }
+
+    /**
+     * Import a single YouTube/Vimeo video URL directly into the queue.
+     */
+    public function importContentEngineVideo(): void
+    {
+        $this->getAuthenticatedAdminId();
+        $input = $this->readAdminActionInput();
+        self::validateCsrf($input);
+
+        try {
+            $engine = new CuratedVideoEngineService($this->db, $this->officialAccountService);
+            $url = trim((string)($input['video_url'] ?? ''));
+            $category = trim((string)($input['category'] ?? 'funny'));
+            $title = trim((string)($input['custom_title'] ?? ''));
+            $engine->importSingleVideoUrl($url, $category, $title !== '' ? $title : null);
+            $_SESSION['success'] = 'Video added to the curation queue and ready to publish.';
+        } catch (\Throwable $e) {
+            $_SESSION['error'] = $e->getMessage();
+        }
+
+        $this->redirectToContentEngine();
+    }
+
+    /**
+     * Approve & publish a queued video to everyone's feed.
+     */
+    public function publishCuratedVideo(): void
+    {
+        $this->getAuthenticatedAdminId();
+        $input = $this->readAdminActionInput();
+        self::validateCsrf($input);
+
+        try {
+            $videoId = (int)($input['video_id'] ?? 0);
+            $caption = isset($input['caption']) ? trim((string)$input['caption']) : null;
+            $engine = new CuratedVideoEngineService($this->db, $this->officialAccountService);
+            $postNo = $engine->publishQueuedVideo($videoId, $caption);
+            $_SESSION['success'] = "Video published to everyone's feed (Post #{$postNo})!";
+        } catch (\Throwable $e) {
+            $_SESSION['error'] = $e->getMessage();
+        }
+
+        $this->redirectToContentEngine();
+    }
+
+    /**
+     * Dismiss a queued video.
+     */
+    public function dismissCuratedVideo(): void
+    {
+        $this->getAuthenticatedAdminId();
+        $input = $this->readAdminActionInput();
+        self::validateCsrf($input);
+
+        $videoId = (int)($input['video_id'] ?? 0);
+        if ($videoId > 0) {
+            $engine = new CuratedVideoEngineService($this->db, $this->officialAccountService);
+            $engine->dismissVideo($videoId);
+            $_SESSION['success'] = 'Video dismissed from the queue.';
+        }
+
+        $this->redirectToContentEngine();
+    }
+
+    /**
+     * Add a new YouTube channel, playlist, or RSS video source.
+     */
+    public function addContentEngineSource(): void
+    {
+        $this->getAuthenticatedAdminId();
+        $input = $this->readAdminActionInput();
+        self::validateCsrf($input);
+
+        try {
+            $engine = new CuratedVideoEngineService($this->db, $this->officialAccountService);
+            $engine->addSource(
+                (string)($input['name'] ?? ''),
+                (string)($input['source_identifier'] ?? ''),
+                (string)($input['source_type'] ?? 'youtube_channel'),
+                (string)($input['category'] ?? 'family')
+            );
+            $_SESSION['success'] = 'New video source added and activated.';
+        } catch (\Throwable $e) {
+            $_SESSION['error'] = $e->getMessage();
+        }
+
+        $this->redirectToContentEngine();
+    }
+
+    /**
+     * Toggle a curated video source active/paused.
+     */
+    public function toggleContentEngineSource(): void
+    {
+        $this->getAuthenticatedAdminId();
+        $input = $this->readAdminActionInput();
+        self::validateCsrf($input);
+
+        $sourceId = (int)($input['source_id'] ?? 0);
+        $isActive = !empty($input['is_active']);
+        if ($sourceId > 0) {
+            $engine = new CuratedVideoEngineService($this->db, $this->officialAccountService);
+            $engine->toggleSource($sourceId, $isActive);
+            $_SESSION['success'] = $isActive ? 'Source activated.' : 'Source paused.';
+        }
+
+        $this->redirectToContentEngine();
+    }
+
+    /**
+     * Delete a curated video source.
+     */
+    public function deleteContentEngineSource(): void
+    {
+        $this->getAuthenticatedAdminId();
+        $input = $this->readAdminActionInput();
+        self::validateCsrf($input);
+
+        $sourceId = (int)($input['source_id'] ?? 0);
+        if ($sourceId > 0) {
+            $engine = new CuratedVideoEngineService($this->db, $this->officialAccountService);
+            $engine->deleteSource($sourceId);
+            $_SESSION['success'] = 'Video source removed.';
+        }
+
+        $this->redirectToContentEngine();
+    }
+
+    /**
+     * Update Content Engine auto-publish cadence settings.
+     */
+    public function updateContentEngineSettings(): void
+    {
+        $this->getAuthenticatedAdminId();
+        $input = $this->readAdminActionInput();
+        self::validateCsrf($input);
+
+        $autoEnabled = !empty($input['auto_publish_enabled']);
+        $intervalHours = max(1, min(168, (int)($input['publish_interval_hours'] ?? 12)));
+        $maxPerSource = max(1, min(15, (int)($input['max_queue_per_source'] ?? 8)));
+
+        $engine = new CuratedVideoEngineService($this->db, $this->officialAccountService);
+        $engine->updateSettings($autoEnabled, $intervalHours, $maxPerSource);
+        $_SESSION['success'] = 'Content Engine cadence settings saved.';
+
+        $this->redirectToContentEngine();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function readAdminActionInput(): array
+    {
+        $input = $_POST;
+        if (empty($input)) {
+            $raw = file_get_contents('php://input');
+            if ($raw !== false && $raw !== '') {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) {
+                    $input = $decoded;
+                }
+            }
+        }
+        return $input;
+    }
+
+    private function redirectToContentEngine(): void
+    {
+        $adminSecretPath = ($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH'));
+        $adminPrefix = !empty($adminSecretPath) ? '/' . trim((string)$adminSecretPath, '/') : '/admin';
+        header('Location: ' . $adminPrefix . '/content-engine');
         exit;
     }
 }
