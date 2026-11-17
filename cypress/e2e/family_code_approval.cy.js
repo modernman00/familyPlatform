@@ -18,12 +18,7 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
   });
 
   after(() => {
-    cy.window().then((win) => {
-      const uid = win.localStorage.getItem('requesterId');
-      if (uid) {
-        cy.task('cleanupCypressApprovalState', uid);
-      }
-    });
+    cy.task('cleanupCypressApprovalState');
   });
 
   // The register form is an Alpine component (familyCodeApprovalForm). Grab its

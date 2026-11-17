@@ -49,7 +49,6 @@ module.exports = defineConfig({
         },
 
         async cleanupCypressApprovalState(userId) {
-          if (!userId) return true;
           const connection = await mysql.createConnection({
             host: process.env.DB_HOST,
             user: process.env.DB_USERNAME,
@@ -57,9 +56,17 @@ module.exports = defineConfig({
             database: process.env.DB_NAME,
           });
           try {
-            await connection.execute('DELETE FROM family_approval_requests WHERE id = ?', [userId]);
-            await connection.execute("DELETE FROM user_families WHERE user_id = ? AND family_code != 'LAF123'", [userId]);
-            await connection.execute("UPDATE personal SET famCode = 'LAF123' WHERE id = ?", [userId]);
+            let uid = userId;
+            if (!uid) {
+              const [rows] = await connection.execute(
+                "SELECT id FROM account WHERE email = 'cypress_test@myfamilyplatform.com' LIMIT 1"
+              );
+              uid = rows[0]?.id ?? null;
+            }
+            if (!uid) return true;
+            await connection.execute('DELETE FROM family_approval_requests WHERE id = ?', [uid]);
+            await connection.execute("DELETE FROM user_families WHERE user_id = ? AND family_code != 'LAF123'", [uid]);
+            await connection.execute("UPDATE personal SET famCode = 'LAF123' WHERE id = ?", [uid]);
             return true;
           } finally {
             await connection.end();
