@@ -1431,7 +1431,7 @@ function videoStudioPip() {
     };
 
     // Direct Local File Handlers (supports up to 4 multi-angle clips)
-    window.handleDirectFileSelect = function(input) {
+    window.handleDirectFileSelect = function(input, skipNleBridge = false) {
         if (!input.files || input.files.length === 0) return;
 
         const remainingSlots = Math.max(0, 4 - state.angles.length);
@@ -1490,7 +1490,7 @@ function videoStudioPip() {
                 renderAngleList();
 
                 // Bridge uploaded clip into the 4-Quadrant NLE Workspace
-                if (window.sovereignNleWorkspace && typeof window.sovereignNleWorkspace.attachMediaClip === 'function') {
+                if (!skipNleBridge && window.sovereignNleWorkspace && typeof window.sovereignNleWorkspace.attachMediaClip === 'function') {
                     const targetTrack = angleIdx === 0 ? 'V1' : 'V2';
                     const targetType = angleIdx === 0 ? 'video' : 'pip';
                     window.sovereignNleWorkspace.attachMediaClip({
@@ -1526,7 +1526,7 @@ function videoStudioPip() {
         const detail = ev && ev.detail ? ev.detail : null;
         if (!detail || !detail.file || detail.isImage) return;
         if (state.angles.some(a => a.name === detail.title)) return;
-        window.handleDirectFileSelect({ files: [detail.file], value: '' });
+        window.handleDirectFileSelect({ files: [detail.file], value: '' }, true);
     });
 
     window.handleAudioSelect = function(input) {
