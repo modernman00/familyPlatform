@@ -45,8 +45,7 @@
         "2. Use the Top-Left Asset Dock to browse Media, Overlays, Audio, Text, Stickers, Effects, Transitions, Captions, Filters, Adjustment, Charts & PiP, Templates, and AI Avatars.",
         "3. Preview your composition in real time on the Centre 60fps Player (#snleMainCanvas) and drag golden handles to resize or rotate selected layers.",
         "4. Fine-tune clip properties in the Right-Hand Inspector Panel across Basic, Remove BG, Mask, Retouch, Speed, Animation, Tracking, Adjustment, Lighting, and Audio tabs.",
-        "5. Arrange, split, and trim clips on the Bottom Multi-Track Timeline using the toolbar and scrub bar.",
-        "6. Tap Pop out (or scroll down on mobile/tablet) to keep a floating Picture-in-Picture preview visible while editing cards, posters, or video—tap it to expand full-screen or minimise it at any time."
+        "5. Arrange, split, and trim clips on the Bottom Multi-Track Timeline using the toolbar and scrub bar."
       ],
       "expected_result": "You can move fluidly between asset selection, live canvas manipulation, inspector tuning, and timeline sequencing without leaving the single-screen workspace.",
       "common_issues": [

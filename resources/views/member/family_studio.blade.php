@@ -1521,6 +1521,14 @@ function videoStudioPip() {
         input.value = '';
     };
 
+    // Bidirectional Sync: When a video is uploaded inside the 4-Quadrant NLE (Screen 2), also mount it in the Top Viewport (Screen 1)
+    window.addEventListener('sovereign:media-attached', function(ev) {
+        const detail = ev && ev.detail ? ev.detail : null;
+        if (!detail || !detail.file || detail.isImage) return;
+        if (state.angles.some(a => a.name === detail.title)) return;
+        window.handleDirectFileSelect({ files: [detail.file], value: '' });
+    });
+
     window.handleAudioSelect = function(input) {
         if (!input.files || !input.files[0]) return;
         const file = input.files[0];
