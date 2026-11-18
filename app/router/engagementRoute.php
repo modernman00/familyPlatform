@@ -36,6 +36,15 @@ $router->map('POST', '/api/games/two-truths/reveal', 'App\controller\members\Two
 $router->map('GET', '/api/sparks/active', 'App\controller\members\DailyFamilySparkController@getActive', 'sparks_active');
 $router->map('POST', '/api/sparks/respond', 'App\controller\members\DailyFamilySparkController@respond', 'sparks_respond');
 $router->map('POST', '/api/sparks/create', 'App\controller\members\DailyFamilySparkController@create', 'sparks_create');
+$router->map('POST', '/api/sparks/reply/update', 'App\controller\members\DailyFamilySparkController@updateReply', 'sparks_reply_update');
+$router->map('POST', '/api/sparks/reply/delete', 'App\controller\members\DailyFamilySparkController@deleteReply', 'sparks_reply_delete');
+$router->map('GET|HEAD', '/spark/[:sparkId]/card.jpg', 'App\controller\SharePreviewController@sparkCardImage', 'spark_share_card');
+$router->map('GET|HEAD', '/spark/[:sparkId]', 'App\controller\SharePreviewController@handleSparkLink', 'spark_share_view');
+
+// In-Feed Feature Discovery Spotlight Engine
+$router->map('GET', '/api/spotlights/feed', 'App\controller\members\FeatureSpotlightController@getFeedSpotlights', 'spotlights_feed');
+$router->map('POST', '/api/spotlights/interact', 'App\controller\members\FeatureSpotlightController@interact', 'spotlights_interact');
+$router->map('POST', '/api/spotlights/reset', 'App\controller\members\FeatureSpotlightController@reset', 'spotlights_reset');
 
 // RFC-0019: Festivity & Celebration Greeting Cards Studio (ATG)
 $router->map('GET', '/creative-studio', 'App\controller\members\FestiveCardController@hub', 'member_creative_studio');

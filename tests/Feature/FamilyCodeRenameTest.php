@@ -59,7 +59,7 @@ final class FamilyCodeRenameTest extends TestCase
 
     private function newCode(): string
     {
-        $code = 'TRN' . random_int(1000, 9999);
+        $code = 'TRN' . strtoupper(bin2hex(random_bytes(3)));
         $this->codes[] = $code;
         return $code;
     }

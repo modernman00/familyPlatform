@@ -118,8 +118,11 @@
             <button type="button" id="btnModeGlobe" class="layout-segment-btn" onclick="switchTreeViewMode('globe')" title="Globe: where your family lives around the world">
                 <i class="bi bi-globe-americas" aria-hidden="true"></i><span>Globe</span>
             </button>
-            <button type="button" id="btnToggleTreeDna" class="layout-segment-btn active" onclick="toggleTreeDnaOverlay()" title="Toggle Shared DNA % and Ancestral Chromosome Bars on tree nodes" aria-pressed="true">
+            <button type="button" id="btnToggleTreeDna" class="layout-segment-btn active" onclick="toggleTreeDnaOverlay()" title="Toggle estimated shared DNA % and ancestral heritage rings on tree nodes" aria-pressed="true">
                 <span aria-hidden="true" style="font-size: 0.9rem; line-height: 1;">🧬</span><span>DNA %</span>
+            </button>
+            <button type="button" id="btnToggleDnaLens" class="layout-segment-btn" onclick="toggleTreeDnaLens()" title="DNA Lens: highlight biological inheritance curves and shared DNA % along tree links" aria-pressed="false">
+                <i class="bi bi-bullseye" aria-hidden="true"></i><span>DNA Lens</span>
             </button>
             @if(empty($isReadOnly))
             <button type="button" id="btnModeStudio" class="layout-segment-btn layout-segment-btn--studio" onclick="switchTreeViewMode('studio')" title="Tree Studio: Curate and update relatives, unions, and lineage directly">
@@ -1379,7 +1382,7 @@
 
 @include('member.includes.treeAccessModals')
 @include('component.swalAlert')
-<script src="/public/js/vendor/kinshiptree.js?v=11.0"></script>
+<script src="/public/js/vendor/kinshiptree.js?v=12.0"></script>
 <script nonce="{{ csp_nonce($nonce ?? null) }}">
     window.__ROOT_USER_ID__ = '{{ $data['id'] ?? '' }}';
     window.__LOGGED_IN_USER_ID__ = '{{ $_SESSION['id'] ?? '' }}';
@@ -1843,6 +1846,18 @@
             family.on('inlaw_toggle', function (sender, args) {
                 if (typeof window.promptOrToggleSpouseInLawBranch === 'function') {
                     window.promptOrToggleSpouseInLawBranch(args.spouseId);
+                }
+            });
+
+            // In-Place Quick-Add (+ Parent / Partner / Child) directly from selected tree node
+            family.on('quick_add', function (sender, args) {
+                const action = (args && args.action) ? String(args.action) : 'child';
+                const targetNode = (args && args.node) ? args.node : null;
+                if (typeof window.openInviteFamilyModal === 'function') {
+                    window.openInviteFamilyModal(targetNode, action);
+                } else if (typeof window.openFamilyStudio === 'function') {
+                    window.switchTreeViewMode('studio');
+                    window.openFamilyStudio({ openAddModal: true });
                 }
             });
 
@@ -3258,6 +3273,26 @@
             window.family.render();
         }
         renderPedigreeOutline();
+    };
+
+    window.toggleTreeDnaLens = function() {
+        const nextState = !(window.family && window.family.dnaLensActive);
+        if (nextState && window.__SHOW_TREE_DNA__ === false) {
+            window.__SHOW_TREE_DNA__ = true;
+            const dnaBtn = document.getElementById('btnToggleTreeDna');
+            if (dnaBtn) {
+                dnaBtn.classList.add('active');
+                dnaBtn.setAttribute('aria-pressed', 'true');
+            }
+        }
+        const lensBtn = document.getElementById('btnToggleDnaLens');
+        if (lensBtn) {
+            lensBtn.classList.toggle('active', nextState);
+            lensBtn.setAttribute('aria-pressed', nextState ? 'true' : 'false');
+        }
+        if (window.family && typeof window.family.setDnaLens === 'function') {
+            window.family.setDnaLens(nextState);
+        }
     };
 
     window.openDnaMakeupModal = function(nodeId) {

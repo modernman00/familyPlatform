@@ -21,11 +21,19 @@ final class DailyFamilySparkService
 {
     private const MAX_RESPONSES_RETURNED = 25;
 
+    /** @var array<int, bool> */
+    private static array $ensuredConnections = [];
+
     /**
-     * Ensure the Daily Family Spark tables exist (idempotent DDL).
+     * Ensure the Daily Family Spark tables exist (idempotent DDL, once per connection per process).
      */
     public static function ensureTablesExist(PDO $db): void
     {
+        $connId = spl_object_id($db);
+        if (isset(self::$ensuredConnections[$connId])) {
+            return;
+        }
+        self::$ensuredConnections[$connId] = true;
         $db->exec(
             "CREATE TABLE IF NOT EXISTS daily_family_sparks (
                 id VARCHAR(64) NOT NULL PRIMARY KEY,
@@ -59,10 +67,20 @@ final class DailyFamilySparkService
                 body TEXT NULL,
                 selected_option_index INT NULL,
                 created_at DATETIME NOT NULL,
+                updated_at DATETIME NULL,
                 INDEX idx_spark_resp_spark (spark_id, created_at),
                 INDEX idx_spark_resp_user (spark_id, user_id, response_type)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
         );
+
+        try {
+            $colChk = $db->query("SHOW COLUMNS FROM daily_family_spark_responses LIKE 'updated_at'");
+            if ($colChk && $colChk->rowCount() === 0) {
+                $db->exec("ALTER TABLE daily_family_spark_responses ADD COLUMN updated_at DATETIME NULL AFTER created_at");
+            }
+        } catch (\Throwable $e) {
+            // Non-fatal if column already exists or schema check is restricted
+        }
     }
 
     private static function normaliseFamilyCode(string $famCode): string
@@ -247,6 +265,9 @@ final class DailyFamilySparkService
                  VALUES (?, ?, ?, ?, ?, ?, 'text', ?, NULL, ?)"
             );
             $ins->execute([$respId, $sparkId, $famCode, $userId, $cleanName, $avatar, $cleanBody, $now]);
+
+            // Best-effort non-blocking @mention notifications for Spark replies
+            self::notifyMentionedMembersInReply($db, $spark, $famCode, $userId, $cleanName, $cleanBody);
         }
 
         // Bump Spark activity timestamp so the Living Spark Card reflects fresh momentum
@@ -361,20 +382,189 @@ final class DailyFamilySparkService
     }
 
     /**
+     * Edit an existing text reply on a Daily Family Spark (author-only).
+     *
+     * @return array<string, mixed>
+     */
+    public static function updateReply(
+        string $sparkId,
+        string $replyId,
+        string $famCode,
+        string $userId,
+        string $body,
+        ?PDO $dbOverride = null
+    ): array {
+        $db = $dbOverride ?? Db::connect2();
+        self::ensureTablesExist($db);
+        $famCode = self::normaliseFamilyCode($famCode);
+
+        $sparkStmt = $db->prepare(
+            "SELECT id, famCode, spark_type, title, prompt_text, options_json, source_ref,
+                    media_url, created_by_user_id, created_by_name, spark_date, status,
+                    last_activity_at, created_at
+             FROM daily_family_sparks
+             WHERE id = ? AND famCode = ?
+             LIMIT 1"
+        );
+        $sparkStmt->execute([$sparkId, $famCode]);
+        /** @var array<string, mixed>|false $spark */
+        $spark = $sparkStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$spark) {
+            return [
+                'status' => 'error',
+                'http_code' => 404,
+                'message' => 'This Family Spark could not be found.',
+            ];
+        }
+
+        $replyStmt = $db->prepare(
+            "SELECT id, user_id, response_type
+             FROM daily_family_spark_responses
+             WHERE id = ? AND spark_id = ?
+             LIMIT 1"
+        );
+        $replyStmt->execute([$replyId, $sparkId]);
+        /** @var array<string, mixed>|false $reply */
+        $reply = $replyStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$reply || (string)($reply['response_type'] ?? '') !== 'text') {
+            return [
+                'status' => 'error',
+                'http_code' => 404,
+                'message' => 'This reply could not be found.',
+            ];
+        }
+
+        if ((string)($reply['user_id'] ?? '') !== $userId) {
+            return [
+                'status' => 'error',
+                'http_code' => 403,
+                'message' => 'You can only edit your own replies.',
+            ];
+        }
+
+        $cleanBody = mb_substr(trim(strip_tags($body)), 0, 500);
+        if ($cleanBody === '') {
+            return [
+                'status' => 'error',
+                'http_code' => 422,
+                'message' => 'Reply text cannot be empty.',
+            ];
+        }
+
+        $now = date('Y-m-d H:i:s');
+        $upd = $db->prepare(
+            "UPDATE daily_family_spark_responses
+             SET body = ?, updated_at = ?
+             WHERE id = ? AND spark_id = ? AND user_id = ?"
+        );
+        $upd->execute([$cleanBody, $now, $replyId, $sparkId, $userId]);
+
+        return [
+            'status' => 'success',
+            'http_code' => 200,
+            'message' => 'Your reply has been updated.',
+            'data' => self::hydrateSpark($db, $spark, $userId),
+        ];
+    }
+
+    /**
+     * Delete an existing text reply on a Daily Family Spark (author-only).
+     *
+     * @return array<string, mixed>
+     */
+    public static function deleteReply(
+        string $sparkId,
+        string $replyId,
+        string $famCode,
+        string $userId,
+        ?PDO $dbOverride = null
+    ): array {
+        $db = $dbOverride ?? Db::connect2();
+        self::ensureTablesExist($db);
+        $famCode = self::normaliseFamilyCode($famCode);
+
+        $sparkStmt = $db->prepare(
+            "SELECT id, famCode, spark_type, title, prompt_text, options_json, source_ref,
+                    media_url, created_by_user_id, created_by_name, spark_date, status,
+                    last_activity_at, created_at
+             FROM daily_family_sparks
+             WHERE id = ? AND famCode = ?
+             LIMIT 1"
+        );
+        $sparkStmt->execute([$sparkId, $famCode]);
+        /** @var array<string, mixed>|false $spark */
+        $spark = $sparkStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$spark) {
+            return [
+                'status' => 'error',
+                'http_code' => 404,
+                'message' => 'This Family Spark could not be found.',
+            ];
+        }
+
+        $replyStmt = $db->prepare(
+            "SELECT id, user_id, response_type
+             FROM daily_family_spark_responses
+             WHERE id = ? AND spark_id = ?
+             LIMIT 1"
+        );
+        $replyStmt->execute([$replyId, $sparkId]);
+        /** @var array<string, mixed>|false $reply */
+        $reply = $replyStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$reply || (string)($reply['response_type'] ?? '') !== 'text') {
+            return [
+                'status' => 'error',
+                'http_code' => 404,
+                'message' => 'This reply could not be found.',
+            ];
+        }
+
+        if ((string)($reply['user_id'] ?? '') !== $userId) {
+            return [
+                'status' => 'error',
+                'http_code' => 403,
+                'message' => 'You can only delete your own replies.',
+            ];
+        }
+
+        $del = $db->prepare(
+            "DELETE FROM daily_family_spark_responses
+             WHERE id = ? AND spark_id = ? AND user_id = ?"
+        );
+        $del->execute([$replyId, $sparkId, $userId]);
+
+        return [
+            'status' => 'success',
+            'http_code' => 200,
+            'message' => 'Your reply has been deleted.',
+            'data' => self::hydrateSpark($db, $spark, $userId),
+        ];
+    }
+
+    /**
      * Build a privacy-safe WhatsApp share URL and teaser message (zero PII / zero private media).
+     * Points to the public crawler-safe /spark/{id} Open Graph landing route so WhatsApp/Messages
+     * renders a rich 1200x630 preview card.
      *
      * @param array<string, mixed> $spark
      * @return array{whatsapp_url: string, teaser_text: string}
      */
     public static function buildPrivacySafeShareData(array $spark): array
     {
-        $baseUrl = class_exists(GeoSite::class) ? GeoSite::baseUrl() : 'https://familyplatform.co.uk';
-        $targetUrl = rtrim($baseUrl, '/') . '/member';
-        $teaser = "A new Daily Family Spark is live in our Family Hub! Tap to cast your vote or share your answer: " . $targetUrl;
+        $sparkId = rawurlencode((string)($spark['id'] ?? 'today'));
+        $shareUrl = ShareMetadataProtocol::baseUrl() . '/spark/' . $sparkId;
+        $type = (string)($spark['spark_type'] ?? 'poll');
+        $headline = $type === 'archive' ? '✨ *Archive Flashback*' : '✨ *Daily Family Spark*';
+        $summary = 'A new Daily Family Spark is live in our Family Hub! Tap to cast your vote or share your story:';
+        $teaser = $headline . "\n\n" . $summary . "\n" . $shareUrl;
 
         return [
             'teaser_text' => $teaser,
-            'whatsapp_url' => 'https://api.whatsapp.com/send?text=' . rawurlencode($teaser),
+            'whatsapp_url' => ShareMetadataProtocol::buildWhatsAppUrl($headline, $summary, $shareUrl),
         ];
     }
 
@@ -547,7 +737,7 @@ final class DailyFamilySparkService
 
         // Fetch text replies (newest last for conversational reading, capped at MAX_RESPONSES_RETURNED)
         $rStmt = $db->prepare(
-            "SELECT id, user_id, author_name, author_avatar, body, created_at
+            "SELECT id, user_id, author_name, author_avatar, body, created_at, updated_at
              FROM daily_family_spark_responses
              WHERE spark_id = ? AND response_type = 'text'
              ORDER BY created_at DESC
@@ -567,6 +757,7 @@ final class DailyFamilySparkService
 
         return [
             'id' => $sparkId,
+            'current_user_id' => $userId,
             'famCode' => (string)$spark['famCode'],
             'spark_type' => (string)$spark['spark_type'],
             'badge_label' => self::badgeLabelForType((string)$spark['spark_type']),
@@ -657,6 +848,50 @@ final class DailyFamilySparkService
             );
         } catch (\Throwable $e) {
             // Non-blocking fallback: never fail a Spark reply if notification dispatch fails
+        }
+    }
+
+    /**
+     * Non-blocking notification when a Spark reply @mentions family members.
+     *
+     * @param array<string, mixed> $spark
+     */
+    private static function notifyMentionedMembersInReply(
+        PDO $db,
+        array $spark,
+        string $famCode,
+        string $senderId,
+        string $senderName,
+        string $replyBody
+    ): void {
+        if (!str_contains($replyBody, '@') || !class_exists(CommentThreadService::class)) {
+            return;
+        }
+        try {
+            $mStmt = $db->prepare("SELECT id, firstName, lastName FROM personal WHERE famCode = ? OR famCode = ?");
+            $mStmt->execute([$famCode, '#' . $famCode]);
+            /** @var array<int, array<string, mixed>> $members */
+            $members = $mStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $mentionedIds = CommentThreadService::extractMentionedIds($replyBody, $members, $senderId);
+            if ($mentionedIds === [] || !class_exists(NotificationOrchestrator::class)) {
+                return;
+            }
+            $sparkTitle = trim((string)($spark['title'] ?? 'Daily Family Spark'));
+            foreach ($mentionedIds as $targetId) {
+                NotificationOrchestrator::dispatch(
+                    userId: $targetId,
+                    category: 'FamilySpark',
+                    priority: 'normal',
+                    title: "{$senderName} tagged you in {$sparkTitle}",
+                    body: mb_substr($replyBody, 0, 120),
+                    actionUrl: '/member',
+                    tag: 'family_spark_mention_' . (string)$spark['id'],
+                    familyCode: $famCode,
+                    metadata: ['sender_id' => $senderId, 'spark_id' => (string)$spark['id']]
+                );
+            }
+        } catch (\Throwable $e) {
+            // Non-blocking fallback
         }
     }
 

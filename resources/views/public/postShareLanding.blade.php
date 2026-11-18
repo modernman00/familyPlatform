@@ -9,11 +9,15 @@
 
     <!-- Open Graph & Social Previews (WhatsApp, Facebook, LinkedIn, iMessage) -->
     <meta property="og:site_name" content="FamilyPlatform">
+    <meta property="og:locale" content="en_GB">
     <meta property="og:type" content="{{ $ogType ?? 'article' }}">
     <meta property="og:title" content="{{ $ogTitle }}">
     <meta property="og:description" content="{{ $ogDescription }}">
     <meta property="og:image" content="{{ $ogImage }}">
     <meta property="og:image:secure_url" content="{{ $ogImage }}">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="{{ $ogTitle }}">
     <meta property="og:url" content="{{ $canonicalUrl }}">
 

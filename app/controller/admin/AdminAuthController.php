@@ -16,7 +16,7 @@ class AdminAuthController extends BaseAdminAuthController
 
     protected function getDashboardUrl(): string
     {
-        return '/admin/dashboard';
+        return admin_url('/dashboard');
     }
 
     protected function getClientIp(): string

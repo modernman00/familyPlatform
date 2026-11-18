@@ -15,7 +15,7 @@ final class Index
 
         $isAdmin = (!empty($_SESSION['auth']['type']) && in_array((string) $_SESSION['auth']['type'], ['admin', 'super_admin'], true));
         if ($isAdmin) {
-            redirect('/admin/dashboard');
+            redirect(admin_url('/dashboard'));
             return;
         }
 

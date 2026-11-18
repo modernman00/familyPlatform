@@ -39,6 +39,7 @@
     background: radial-gradient(85% 120% at 85% 15%, rgba(201,162,75,.35), transparent 65%),
                 radial-gradient(70% 90% at 5% 95%, rgba(163,22,33,.8), transparent 70%),
                 linear-gradient(135deg, #0d0204 0%, #22050b 50%, #3e0711 100%);
+    background-color: #22050b;
     box-shadow: 0 20px 45px -15px rgba(163,22,33,.45);
     border: 1px solid rgba(255,215,0,.25);
 }

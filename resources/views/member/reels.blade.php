@@ -85,10 +85,17 @@
             </div>
         </div>
 
-        <div class="reel-comment-input-bar">
+        <div class="reel-comment-input-bar position-relative">
+            <div id="reelMentionDropdown" class="mention-autocomplete shadow-lg d-none" role="listbox" aria-label="Mention a family member" style="background: #1e293b; border-color: #334155; color: #f8fafc;">
+                <div class="mention-autocomplete__header d-flex align-items-center justify-content-between px-2 py-1" style="border-bottom-color: #334155; color: #94a3b8;">
+                    <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Mention a family member</span>
+                    <span style="font-size: 0.7rem;">&uarr;&darr; &bull; Enter</span>
+                </div>
+                <div class="mention-autocomplete__list" id="reelMentionList"></div>
+            </div>
             <form id="reelCommentForm" class="d-flex gap-2 align-items-center">
     @include('csrf')
-                <input type="text" class="form-control rounded-pill bg-dark text-white border-secondary" id="reelCommentInput" placeholder="Add a family note..." style="font-size: 0.85rem; padding: 8px 16px;">
+                <input type="text" class="form-control rounded-pill bg-dark text-white border-secondary" id="reelCommentInput" placeholder="Add a family note or @tag..." style="font-size: 0.85rem; padding: 8px 16px;">
                 <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-2 fw-semibold text-white-50" id="reelGifToggleBtn" title="Attach Family GIF" style="font-size: 0.75rem; flex-shrink:0;">
                     GIF
                 </button>

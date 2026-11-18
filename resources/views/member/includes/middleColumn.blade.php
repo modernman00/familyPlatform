@@ -290,6 +290,9 @@
   </script>
   @endif
 
+  {{-- Dismissible "What's New This Week" Banner --}}
+  @include('member.includes.whatsNewBanner')
+
   {{-- Connected Kin Requests Banner (Top of Feed — always mounted for live Pusher arrival) --}}
   @php
     $hasInitialRequests = !empty($requestData) && is_array($requestData) && count($requestData) > 0;
@@ -1034,10 +1037,158 @@
       }
     </script>
 
+    <!-- Feature Discovery Spotlight Engine -->
+    @include('components.feed.feature-spotlight-styles')
+    <script nonce="{{ csp_nonce($nonce ?? null) }}">
+      if (typeof window.fpSpotlightEngine === 'undefined') {
+        window.fpSpotlightEngine = {
+          loaded: false,
+          loadingPromise: null,
+          spotlights: [],
+          dismissedIds: (() => {
+            try {
+              const raw = localStorage.getItem('fp_dismissed_spotlights_v1');
+              const parsed = raw ? JSON.parse(raw) : [];
+              return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+              return [];
+            }
+          })(),
+          saveDismissedLocal() {
+            try {
+              localStorage.setItem('fp_dismissed_spotlights_v1', JSON.stringify(this.dismissedIds));
+            } catch (e) {}
+          },
+          getCsrf() {
+            return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ $_SESSION['token'] ?? '' }}';
+          },
+          async ensureLoaded() {
+            if (this.loaded) return this.spotlights;
+            if (this.loadingPromise) return this.loadingPromise;
+            this.loadingPromise = (async () => {
+              try {
+                const res = await fetch('/api/spotlights/feed', {
+                  method: 'GET',
+                  credentials: 'same-origin',
+                  headers: { 'Accept': 'application/json' }
+                });
+                if (!res.ok) return [];
+                const data = await res.json();
+                if (data && data.status === 'success' && Array.isArray(data.spotlights)) {
+                  const localSet = new Set(this.dismissedIds);
+                  this.spotlights = data.spotlights.filter(s => s && s.id && !localSet.has(s.id));
+                  this.loaded = true;
+                }
+              } catch (err) {
+                console.warn('[FeatureSpotlight] Failed to load spotlights:', err);
+              }
+              return this.spotlights;
+            })();
+            return this.loadingPromise;
+          },
+          async recordInteraction(spotlightId, action) {
+            if (!spotlightId || !action) return;
+            if (action === 'dismiss' && !this.dismissedIds.includes(spotlightId)) {
+              this.dismissedIds.push(spotlightId);
+              this.saveDismissedLocal();
+              this.spotlights = this.spotlights.filter(s => s.id !== spotlightId);
+            }
+            try {
+              await fetch('/api/spotlights/interact', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                  'X-CSRF-TOKEN': this.getCsrf()
+                },
+                body: JSON.stringify({ spotlight_id: spotlightId, action })
+              });
+            } catch (err) {}
+          }
+        };
+      }
+
+      if (typeof window.featureSpotlightSlot !== 'function') {
+        window.featureSpotlightSlot = function(slotIndex) {
+          return {
+            slotIndex: Number(slotIndex) || 0,
+            deckOffset: 0,
+            currentSpotlight: null,
+            isHidden: false,
+            async initSlot() {
+              const list = await window.fpSpotlightEngine.ensureLoaded();
+              this.pickFromList(list);
+            },
+            pickFromList(list) {
+              if (!Array.isArray(list) || list.length === 0) {
+                this.currentSpotlight = null;
+                return;
+              }
+              if (this.slotIndex > 0 && list.length <= this.slotIndex) {
+                this.currentSpotlight = null;
+                return;
+              }
+              const idx = (this.slotIndex + this.deckOffset) % list.length;
+              this.currentSpotlight = list[idx] || null;
+            },
+            nextSpotlight() {
+              const list = window.fpSpotlightEngine.spotlights;
+              if (!Array.isArray(list) || list.length <= 1) return;
+              const prevId = this.currentSpotlight ? this.currentSpotlight.id : '';
+              this.deckOffset = (this.deckOffset + 1) % list.length;
+              this.pickFromList(list);
+              if (prevId) {
+                window.fpSpotlightEngine.recordInteraction(prevId, 'shuffle');
+              }
+            },
+            dismissCurrent() {
+              if (!this.currentSpotlight) return;
+              const id = this.currentSpotlight.id;
+              this.isHidden = true;
+              window.fpSpotlightEngine.recordInteraction(id, 'dismiss');
+              if (typeof window.fpToast === 'function') {
+                window.fpToast('Spotlight hidden — explore all features anytime in How to Use', 'info');
+              }
+            },
+            handleCtaClick(event) {
+              if (!this.currentSpotlight) return;
+              const item = this.currentSpotlight;
+              window.fpSpotlightEngine.recordInteraction(item.id, 'launch');
+              if (item.cta_action === 'modal' && item.cta_target) {
+                const modalEl = document.querySelector(item.cta_target);
+                if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                  event.preventDefault();
+                  bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                }
+              } else if (item.cta_action === 'scroll' && item.cta_target && typeof window.scrollToProfileWidget === 'function') {
+                event.preventDefault();
+                window.scrollToProfileWidget(item.cta_target);
+              }
+            }
+          };
+        };
+      }
+    </script>
+
     <!-- Posts Loop -->
     <div id="postIt" class="postIt">
-      <template x-for="post in posts" :key="post.post_no">
-        @include('components.feed.post-card')
+      <template x-for="(post, postIdx) in posts" :key="post.post_no">
+        <div class="fp-feed-item-wrapper">
+          @include('components.feed.post-card')
+          <template x-if="postIdx === 1">
+            @include('components.feed.feature-spotlight-card', ['slotIndex' => 0])
+          </template>
+          <template x-if="postIdx === 6">
+            @include('components.feed.feature-spotlight-card', ['slotIndex' => 1])
+          </template>
+        </div>
+      </template>
+
+      <template x-if="!isLoading && posts.length < 2">
+        <div>
+          @include('components.feed.feature-spotlight-card', ['slotIndex' => 0])
+        </div>
       </template>
     </div>
 

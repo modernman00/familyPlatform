@@ -385,6 +385,34 @@ if (file_exists($autoloadPath) && is_dir($viewsDir)) {
     }
 }
 
+
+// --- CHECK 9: OPEN GRAPH / WHATSAPP / IMESSAGE RICH LINK PREVIEW INVARIANT ---
+$ogFallbackJpg = $targetDir . '/public/resources/assets/images/og-share-card.jpg';
+if (!file_exists($ogFallbackJpg) || filesize($ogFallbackJpg) > 307200) {
+    $violations[] = [
+        'severity' => 'CRITICAL',
+        'rule' => 'MUST-HAVE #9: Default OG Share Image Missing or Exceeds 300 KB WhatsApp Limit',
+        'file' => $ogFallbackJpg,
+        'line' => 1,
+        'remediation' => 'Ensure public/resources/assets/images/og-share-card.jpg exists and is under 300 KB (307,200 bytes) for WhatsApp rich previews.',
+    ];
+    $exitCode = 1;
+}
+
+foreach ($bladeFiles as $bladePath) {
+    $bContent = file_get_contents($bladePath) ?: '';
+    if (str_contains($bContent, 'og-share-card.png')) {
+        $violations[] = [
+            'severity' => 'CRITICAL',
+            'rule' => 'MUST-HAVE #9: Oversized og-share-card.png Referenced',
+            'file' => $bladePath,
+            'line' => 1,
+            'remediation' => 'Replace og-share-card.png with og-share-card.jpg?v=3 (< 300 KB WhatsApp limit).',
+        ];
+        $exitCode = 1;
+    }
+}
+
 // Display report
 if (empty($violations)) {
     echo "✅ ALL MUST-HAVE CHECKS PASSED!\n";

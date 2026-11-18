@@ -192,7 +192,7 @@
                         $navNameParts = preg_split('/\s+/', $navFullName, -1, PREG_SPLIT_NO_EMPTY) ?: ['A'];
                         $navInitials = mb_strtoupper(mb_substr($navNameParts[0], 0, 1) . (count($navNameParts) > 1 ? mb_substr(end($navNameParts), 0, 1) : ''));
                         $navRawImg = trim((string)($_SESSION['img'] ?? ($_SESSION['profilePics'] ?? '')));
-                        $navHasPhoto = $navRawImg !== '' && !str_contains($navRawImg, 'avatarM.png') && !str_contains($navRawImg, 'avatarF.png');
+                        $navHasPhoto = $navRawImg !== '' && !str_contains($navRawImg, 'avatarM.png') && !str_contains($navRawImg, 'avatarF.png') && !str_contains($navRawImg, 'default-avatar.');
                         $navImgSrc = $navHasPhoto ? (str_starts_with($navRawImg, '/') ? $navRawImg : '/resources/images/profile/' . rawurlencode($navRawImg)) : '';
                     @endphp
                     <button class="btn btn-user-stitch btn-user-compact dropdown-toggle d-flex align-items-center" type="button" id="userMenu" data-bs-toggle="dropdown" data-bs-display="dynamic" aria-expanded="false" aria-label="{{ $navFullName }} — account menu" title="{{ $navFullName }} — account profile and preferences">

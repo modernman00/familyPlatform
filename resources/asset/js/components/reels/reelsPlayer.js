@@ -63,6 +63,11 @@ class FamilyReelsPlayer {
         this.commentsList = document.getElementById('reelCommentsList');
         this.commentForm = document.getElementById('reelCommentForm');
         this.commentInput = document.getElementById('reelCommentInput');
+        this.mentionDropdown = document.getElementById('reelMentionDropdown');
+        this.mentionList = document.getElementById('reelMentionList');
+        this.familyRoster = [];
+        this.mentionMatches = [];
+        this.mentionIndex = 0;
 
         this.replyTarget = null;
         this.attachedGifUrl = null;
@@ -432,6 +437,11 @@ class FamilyReelsPlayer {
             });
         }
 
+        if (this.commentInput) {
+            this.commentInput.addEventListener('input', () => this.handleReelMentionInput());
+            this.commentInput.addEventListener('keydown', (e) => this.handleReelMentionKeydown(e));
+        }
+
         if (this.gifToggleBtn && this.gifPickerDrawer) {
             this.gifToggleBtn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -461,6 +471,153 @@ class FamilyReelsPlayer {
         }
 
         this.renderGifPicker();
+
+        document.addEventListener('click', (e) => {
+            if (this.mentionDropdown && !this.mentionDropdown.classList.contains('d-none')) {
+                if (!this.mentionDropdown.contains(e.target) && e.target !== this.commentInput) {
+                    this.closeReelMentionDropdown();
+                }
+            }
+        });
+    }
+
+    async loadReelFamilyRoster() {
+        if (this.familyRoster.length > 0) return;
+        try {
+            const res = await fetch('/allMembers/processApiData', {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin'
+            });
+            const json = await res.json();
+            const members = json?.data || json?.message || [];
+            if (Array.isArray(members)) {
+                this.familyRoster = members.map(m => ({
+                    id: String(m.id || ''),
+                    firstName: String(m.firstName || '').trim(),
+                    lastName: String(m.lastName || '').trim(),
+                    img: m.img || ''
+                }));
+            }
+        } catch (_) {}
+    }
+
+    async handleReelMentionInput() {
+        if (!this.commentInput || !this.mentionDropdown || !this.mentionList) return;
+        const text = this.commentInput.value || '';
+        const cursorPos = this.commentInput.selectionEnd ?? text.length;
+        const match = text.slice(0, cursorPos).match(/(?:^|\s)@([A-Za-z0-9_'\- ]{0,40})$/);
+        if (!match) {
+            this.closeReelMentionDropdown();
+            return;
+        }
+        if (this.familyRoster.length === 0) {
+            await this.loadReelFamilyRoster();
+        }
+        const latestText = this.commentInput.value || '';
+        const latestPos = this.commentInput.selectionEnd ?? latestText.length;
+        const latestMatch = latestText.slice(0, latestPos).match(/(?:^|\s)@([A-Za-z0-9_'\- ]{0,40})$/);
+        if (!latestMatch) {
+            this.closeReelMentionDropdown();
+            return;
+        }
+        const query = (latestMatch[1] || '').trim().toLowerCase();
+        const meId = String(this.currentUserId || '');
+        const matches = this.familyRoster.filter(m => {
+            if (!m.firstName && !m.lastName) return false;
+            if (meId && String(m.id) === meId) return false;
+            const full = `${m.firstName} ${m.lastName}`.toLowerCase();
+            if (!query) return true;
+            return full.includes(query) || m.firstName.toLowerCase().startsWith(query) || m.lastName.toLowerCase().startsWith(query);
+        }).slice(0, 6);
+
+        this.mentionMatches = matches;
+        this.mentionIndex = 0;
+        if (matches.length > 0) {
+            this.renderReelMentionDropdown();
+        } else {
+            this.closeReelMentionDropdown();
+        }
+    }
+
+    handleReelMentionKeydown(event) {
+        if (!this.mentionDropdown || this.mentionDropdown.classList.contains('d-none') || !this.mentionMatches.length) return;
+        const len = this.mentionMatches.length;
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            this.mentionIndex = (this.mentionIndex + 1) % len;
+            this.renderReelMentionDropdown();
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            this.mentionIndex = (this.mentionIndex - 1 + len) % len;
+            this.renderReelMentionDropdown();
+        } else if (event.key === 'Enter' || event.key === 'Tab') {
+            const chosen = this.mentionMatches[this.mentionIndex];
+            if (chosen) {
+                event.preventDefault();
+                this.selectReelMention(chosen);
+            }
+        } else if (event.key === 'Escape') {
+            this.closeReelMentionDropdown();
+        }
+    }
+
+    renderReelMentionDropdown() {
+        if (!this.mentionDropdown || !this.mentionList) return;
+        this.mentionList.innerHTML = '';
+        this.mentionMatches.forEach((m, idx) => {
+            const isActive = idx === this.mentionIndex;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `mention-autocomplete__item d-flex align-items-center gap-2 w-100 text-start px-2 py-1.5 border-0 ${isActive ? 'mention-autocomplete__item--active' : ''}`;
+            btn.style.cssText = `color: #f8fafc; min-height: 44px; ${isActive ? 'background: rgba(255,255,255,0.1);' : ''}`;
+            btn.setAttribute('role', 'option');
+            btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            const escHtml = (v) => String(v || '').replace(/[&<>"']/g, (c) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+            }[c]));
+            const rawImg = m.img ? ((m.img.startsWith('/') || m.img.startsWith('http')) ? m.img : `/resources/images/profile/${m.img}`) : '/resources/images/profile/avatarM.png';
+            const img = escHtml(rawImg);
+            const fullName = escHtml(`${m.firstName} ${m.lastName}`);
+            btn.innerHTML = `
+                <img src="${img}" alt="" class="rounded-circle flex-shrink-0" width="26" height="26" style="object-fit: cover;">
+                <div class="flex-grow-1 min-w-0">
+                    <span class="text-truncate d-block fw-semibold" style="font-size: 0.84rem; color: #f8fafc;">${fullName}</span>
+                </div>
+                <span class="badge rounded-pill flex-shrink-0" style="font-size: 0.68rem; background: #0f172a; color: #cbd5e1; border: 1px solid #334155;">Family</span>
+            `;
+            btn.addEventListener('mousedown', (ev) => ev.preventDefault());
+            btn.addEventListener('click', (ev) => {
+                ev.preventDefault();
+                this.selectReelMention(m);
+            });
+            this.mentionList.appendChild(btn);
+        });
+        this.mentionDropdown.classList.remove('d-none');
+    }
+
+    selectReelMention(member) {
+        if (!this.commentInput || !member) return;
+        const text = this.commentInput.value || '';
+        const cursorPos = typeof this.commentInput.selectionEnd === 'number' ? this.commentInput.selectionEnd : text.length;
+        const before = text.slice(0, cursorPos);
+        const after = text.slice(cursorPos);
+        const replacedBefore = before.replace(/(?:^|\s)@([A-Za-z0-9_'\- ]*)$/, (m) => {
+            const prefix = m.startsWith(' ') ? ' ' : '';
+            return `${prefix}@${member.firstName} ${member.lastName} `;
+        });
+        const newCaret = replacedBefore.length;
+        this.commentInput.value = replacedBefore + after;
+        this.closeReelMentionDropdown();
+        this.commentInput.focus();
+        this.commentInput.setSelectionRange(newCaret, newCaret);
+    }
+
+    closeReelMentionDropdown() {
+        if (this.mentionDropdown) {
+            this.mentionDropdown.classList.add('d-none');
+        }
+        this.mentionMatches = [];
+        this.mentionIndex = 0;
     }
 
     handleSwipe() {

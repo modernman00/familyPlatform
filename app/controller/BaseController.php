@@ -799,7 +799,7 @@ class BaseController
 
     private static function hasProperImage(array $person): bool
     {
-        $defaultAvatars = ['avatarF.png', 'avatarM.png'];
+        $defaultAvatars = ['avatarF.png', 'avatarM.png', 'avatarM.jpeg', 'default-avatar.png', 'default-avatar.svg'];
 
         // accept both profilePics and profilepics
         $profile = $person['profilePics'] ?? $person['profilepics'] ?? '';

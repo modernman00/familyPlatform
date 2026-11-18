@@ -282,34 +282,10 @@ fi
 echo -e "\n🔍 [2/8] Verifying Git & Workspace Integrity..."
 
 git update-index -q --refresh 2>/dev/null || true
-if ! git diff-index --quiet HEAD -- 2>/dev/null; then
-    echo "⚠️  WARNING: Uncommitted changes detected in workspace:"
-    git status -s
-    echo ""
-    if [ "${NON_INTERACTIVE:-0}" -eq 1 ] || [ ! -t 0 ] || [ ! -r /dev/tty ]; then
-        echo "🛑 ERROR: Non-interactive terminal detected. Please commit changes before deploying."
-        exit 1
-    fi
-    read -r -p "Do you want to commit these changes now before deploying? (y/N): " AUTO_COMMIT < /dev/tty || AUTO_COMMIT="n"
-    if [[ "$AUTO_COMMIT" =~ ^[yY]$ ]]; then
-        read -r -p "📝 Enter commit message: " COMMIT_MSG < /dev/tty
-        if [ -z "$COMMIT_MSG" ]; then
-            echo "🛑 FATAL: Commit message cannot be empty. Aborting."
-            exit 1
-        fi
-        git add -u
-        git commit -m "$COMMIT_MSG"
-        COMMIT=$(git rev-parse HEAD)
-        echo "✅ Changes committed successfully (${COMMIT:0:8})."
-    else
-        echo "🛑 FATAL: Enterprise policy forbids deploying uncommitted code. Aborting."
-        exit 1
-    fi
-fi
 
-# Guard against accidental secret leaks (exclude legitimate version-controlled schema migrations)
-UNTRACKED_SECRETS=$(git status --porcelain | grep -E "^\?\?.*(\\.env|\\.pem|\\.sql|\\.key|\\.crt|\\.backup)" | grep -vE '^\?\?\s+migrations/' || true)
-STAGED_SECRETS=$(git diff --cached --name-only | grep -E "(\\.env|\\.pem|\\.sql|\\.key|\\.crt|\\.backup)" | grep -vE '^migrations/' || true)
+# Guard against accidental secret leaks BEFORE staging/committing (exclude legitimate version-controlled schema migrations)
+UNTRACKED_SECRETS=$(git status --porcelain | grep -E "^\?\?.*(\.env|\.pem|\.sql|\.key|\.crt|\.backup)" | grep -vE '^\?\?\s+migrations/' || true)
+STAGED_SECRETS=$(git diff --cached --name-only | grep -E "(\.env|\.pem|\.sql|\.key|\.crt|\.backup)" | grep -vE '^migrations/' || true)
 
 if [ -n "$UNTRACKED_SECRETS" ]; then
     echo "🛑 SEC-OPS ALERT: Potential untracked secret files detected in workspace:"
@@ -321,6 +297,25 @@ if [ -n "$STAGED_SECRETS" ]; then
     echo "🛑 SEC-OPS ALERT: Potential secret files are STAGED for commit:"
     echo "$STAGED_SECRETS"
     exit 1
+fi
+
+if [ -n "$(git status --porcelain)" ]; then
+    echo "📝 Uncommitted changes detected in workspace — staging and committing..."
+    git status -s
+    git add -A
+    STAGED_SECRETS=$(git diff --cached --name-only | grep -E "(\.env|\.pem|\.sql|\.key|\.crt|\.backup)" | grep -vE '^migrations/' || true)
+    if [ -n "$STAGED_SECRETS" ]; then
+        git reset -q
+        echo "🛑 SEC-OPS ALERT: Potential secret files would be committed:"
+        echo "$STAGED_SECRETS"
+        exit 1
+    fi
+    if ! git diff --cached --quiet; then
+        AUTO_COMMIT_MSG="${DEPLOY_COMMIT_MSG:-chore(deploy): auto-commit before ${APP_NAME} deployment (${RELEASE_ID})}"
+        git commit -m "$AUTO_COMMIT_MSG"
+        COMMIT=$(git rev-parse HEAD)
+        echo "✅ Changes committed successfully (${COMMIT:0:8})."
+    fi
 fi
 
 echo "✅ Git workspace clean. No secret leaks detected."

@@ -308,7 +308,7 @@ final class PostDto implements JsonSerializable
             $row['displayMessage'] = self::stripStyleToken(isset($row['displayMessage']) && is_string($row['displayMessage']) ? $row['displayMessage'] : $message);
         }
         $isOfficialPost = ($id === \App\services\FamilyPlatformAccountService::getAccountId()) || !empty($row['is_official']);
-        if ($isOfficialPost && (empty($profileImg) || str_contains($profileImg, 'avatarM') || str_contains($profileImg, 'avatarF'))) {
+        if ($isOfficialPost && (empty($profileImg) || str_contains($profileImg, 'avatarM') || str_contains($profileImg, 'avatarF') || str_contains($profileImg, 'default-avatar'))) {
             $profileImg = '/images/logo/logo.png';
         }
         $isHistorianPost = ($id === \App\services\FamilyHistorianService::HISTORIAN_ID) || !empty($row['is_historian']);

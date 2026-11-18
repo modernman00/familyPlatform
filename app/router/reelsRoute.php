@@ -58,6 +58,11 @@ $router->map('GET', '/member/family-studio', 'App\controller\members\ReelsContro
 // Direct-to-R2 Presigned Upload URL API
 $router->map('GET', '/api/reels/presigned-url', 'App\controller\members\ReelsController@presignedUploadUrl', 'family_reels_presigned_url_api');
 
+// Sovereign Studio Licensing & Headless Render API v1
+$router->map('POST', '/api/v1/sovereign-studio/job', 'App\controller\api\SovereignStudioApiController@executeJob', 'sovereign_studio_api_job');
+$router->map('GET', '/api/v1/sovereign-studio/sdk-manifest', 'App\controller\api\SovereignStudioApiController@sdkManifest', 'sovereign_studio_api_sdk_manifest');
+$router->map('GET', '/api/v1/sovereign-studio/openapi.json', 'App\controller\api\SovereignStudioApiController@openApi', 'sovereign_studio_api_openapi');
+
 // Same-Origin R2 Relay Upload Fallback (handles buckets without CORS / local dev)
 $router->map('POST', '/api/reels/r2-proxy-upload', 'App\controller\members\ReelsController@r2ProxyUpload', 'family_reels_r2_proxy_upload_api');
 

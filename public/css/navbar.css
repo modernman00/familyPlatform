@@ -521,6 +521,7 @@
   height: 26px;
   border-radius: 50%;
   background: linear-gradient(135deg, #a31621 0%, #8a1019 100%);
+  background-color: #8a1019;
   color: #ffffff;
   font-size: 0.72rem;
   font-weight: 700;
@@ -1308,6 +1309,7 @@ body.dark-mode .btn-mobile-omni-trigger {
   touch-action: manipulation;
   border: 1px solid rgba(255, 255, 255, 0.28);
   background: linear-gradient(180deg, #e0303c 0%, #b8202c 48%, #8f1520 100%);
+  background-color: #9f1239;
   color: #fff;
   text-shadow: 0 1px 1px rgba(80, 8, 14, 0.55);
   box-shadow:
@@ -1377,6 +1379,7 @@ body.dark-mode .btn-mobile-omni-trigger {
   height: 22px;
   font-size: 0.75rem;
   background: linear-gradient(180deg, #f43f5e 0%, #be123c 100%);
+  background-color: #be123c;
   box-shadow: 0 2px 0 #881337, 0 4px 10px rgba(190, 18, 60, 0.5);
   animation: notifBadgePulse 2.4s ease-in-out infinite;
 }

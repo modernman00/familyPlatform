@@ -14,6 +14,10 @@
   
   <!-- PWA & Mobile Web App Capabilities -->
   @include('partials.pwa-head')
+  @include('partials.og-meta', [
+      'ogTitle' => trim((string) $__env->yieldContent('og_title', $__env->yieldContent('title', 'FamilyPlatform — Private Family Social Network & Living Heritage'))) ?: 'FamilyPlatform — Private Family Social Network & Living Heritage',
+      'ogDescription' => trim((string) $__env->yieldContent('meta_description', 'Preserve precious family memories, build interactive family trees, and stay connected on FamilyPlatform.')) ?: 'Preserve precious family memories, build interactive family trees, and stay connected on FamilyPlatform.',
+  ])
   <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
   <meta name="user-id" content="{{ $_SESSION['id'] ?? '' }}">
   <meta name="vapid-public-key" content="{{ $_ENV['VAPID_PUBLIC_KEY'] ?? $_SERVER['VAPID_PUBLIC_KEY'] ?? (getenv('VAPID_PUBLIC_KEY') ?: ($_ENV['MIX_VAPID_PUBLIC_KEY'] ?? '')) }}">

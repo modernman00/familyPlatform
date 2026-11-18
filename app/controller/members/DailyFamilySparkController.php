@@ -221,4 +221,154 @@ final class DailyFamilySparkController extends BaseController
             ]);
         }
     }
+
+    /**
+     * POST /api/sparks/reply/update
+     *
+     * Allows the author of a Daily Family Spark / Archive Flashback reply to edit it.
+     */
+    public function updateReply(): void
+    {
+        CorsHandler::setHeaders();
+        header('Content-Type: application/json');
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            if ($userId === '') {
+                http_response_code(401);
+                echo json_encode(['status' => 'error', 'message' => 'Authentication required.']);
+                return;
+            }
+
+            /** @var array<string, mixed>|null $decoded */
+            $decoded = json_decode((string)file_get_contents('php://input'), true);
+            /** @var array<string, mixed> $input */
+            $input = is_array($decoded) ? $decoded : $_POST;
+
+            self::validateCsrf($input);
+            Limiter::limit($userId . ':spark_reply_update');
+
+            $requestedFamilyCode = isset($input['family_code']) && is_string($input['family_code'])
+                ? trim($input['family_code'])
+                : '';
+            $primaryFamCode = (string)($_SESSION['famCode'] ?? '');
+            $familyCode = ltrim(strtoupper($requestedFamilyCode !== '' ? $requestedFamilyCode : $primaryFamCode), '#');
+
+            if ($familyCode === '' || !BaseController::sessionSharesFamily($familyCode)) {
+                http_response_code(403);
+                echo json_encode(['status' => 'error', 'message' => 'Access denied to this family network.']);
+                return;
+            }
+
+            $sparkId = trim((string)($input['spark_id'] ?? ''));
+            $replyId = trim((string)($input['reply_id'] ?? ''));
+            $body = (string)($input['body'] ?? '');
+
+            if ($sparkId === '' || $replyId === '') {
+                http_response_code(422);
+                echo json_encode(['status' => 'error', 'message' => 'Spark and reply identifiers are required.']);
+                return;
+            }
+
+            $result = DailyFamilySparkService::updateReply(
+                sparkId: $sparkId,
+                replyId: $replyId,
+                famCode: $familyCode,
+                userId: $userId,
+                body: $body
+            );
+
+            $httpCode = (int)($result['http_code'] ?? 200);
+            unset($result['http_code']);
+            http_response_code($httpCode);
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response (Content-Type: application/json); json_encode escapes output safely
+            echo json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        } catch (\Src\Exceptions\HttpException $e) {
+            http_response_code($e->getStatusCode());
+            echo json_encode([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Unable to update your reply right now.',
+            ]);
+        }
+    }
+
+    /**
+     * POST /api/sparks/reply/delete
+     *
+     * Allows the author of a Daily Family Spark / Archive Flashback reply to delete it.
+     */
+    public function deleteReply(): void
+    {
+        CorsHandler::setHeaders();
+        header('Content-Type: application/json');
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            if ($userId === '') {
+                http_response_code(401);
+                echo json_encode(['status' => 'error', 'message' => 'Authentication required.']);
+                return;
+            }
+
+            /** @var array<string, mixed>|null $decoded */
+            $decoded = json_decode((string)file_get_contents('php://input'), true);
+            /** @var array<string, mixed> $input */
+            $input = is_array($decoded) ? $decoded : $_POST;
+
+            self::validateCsrf($input);
+            Limiter::limit($userId . ':spark_reply_delete');
+
+            $requestedFamilyCode = isset($input['family_code']) && is_string($input['family_code'])
+                ? trim($input['family_code'])
+                : '';
+            $primaryFamCode = (string)($_SESSION['famCode'] ?? '');
+            $familyCode = ltrim(strtoupper($requestedFamilyCode !== '' ? $requestedFamilyCode : $primaryFamCode), '#');
+
+            if ($familyCode === '' || !BaseController::sessionSharesFamily($familyCode)) {
+                http_response_code(403);
+                echo json_encode(['status' => 'error', 'message' => 'Access denied to this family network.']);
+                return;
+            }
+
+            $sparkId = trim((string)($input['spark_id'] ?? ''));
+            $replyId = trim((string)($input['reply_id'] ?? ''));
+
+            if ($sparkId === '' || $replyId === '') {
+                http_response_code(422);
+                echo json_encode(['status' => 'error', 'message' => 'Spark and reply identifiers are required.']);
+                return;
+            }
+
+            $result = DailyFamilySparkService::deleteReply(
+                sparkId: $sparkId,
+                replyId: $replyId,
+                famCode: $familyCode,
+                userId: $userId
+            );
+
+            $httpCode = (int)($result['http_code'] ?? 200);
+            unset($result['http_code']);
+            http_response_code($httpCode);
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response (Content-Type: application/json); json_encode escapes output safely
+            echo json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        } catch (\Src\Exceptions\HttpException $e) {
+            http_response_code($e->getStatusCode());
+            echo json_encode([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Unable to delete your reply right now.',
+            ]);
+        }
+    }
 }

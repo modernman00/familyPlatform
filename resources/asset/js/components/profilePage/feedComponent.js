@@ -1947,7 +1947,7 @@ export function profileFeed(opts = {}) {
             this.replyingTo[postNo] = null;
         },
 
-        handleCommentInput(postNo, event) {
+        async handleCommentInput(postNo, event) {
             const input = event.target;
             const text = input.value || '';
             const cursorPos = input.selectionEnd ?? text.length;
@@ -1960,12 +1960,28 @@ export function profileFeed(opts = {}) {
                 return;
             }
 
-            const query = (match[1] || '').trim().toLowerCase();
-            const currentUserId = String(this.currentUserId || '');
-
             if (!this.familyRoster || this.familyRoster.length === 0) {
-                this.loadFamilyRoster();
+                await this.loadFamilyRoster();
+                const latestText = input.value || '';
+                const latestPos = input.selectionEnd ?? latestText.length;
+                const latestMatch = latestText.slice(0, latestPos).match(/(?:^|\s)@([A-Za-z0-9_'\- ]{0,40})$/);
+                if (!latestMatch) {
+                    this.mentionOpen[postNo] = false;
+                    this.mentionMatches[postNo] = [];
+                    return;
+                }
             }
+
+            const activeText = (input.value || '').slice(0, input.selectionEnd ?? (input.value || '').length);
+            const activeMatch = activeText.match(/(?:^|\s)@([A-Za-z0-9_'\- ]{0,40})$/);
+            if (!activeMatch) {
+                this.mentionOpen[postNo] = false;
+                this.mentionMatches[postNo] = [];
+                return;
+            }
+
+            const query = (activeMatch[1] || '').trim().toLowerCase();
+            const currentUserId = String(this.currentUserId || '');
 
             const matches = (this.familyRoster || []).filter(m => {
                 const first = (m.firstName || '').trim();
@@ -2006,20 +2022,28 @@ export function profileFeed(opts = {}) {
 
         selectMention(postNo, member) {
             if (!member) return;
+            const el = document.querySelector(`input[data-comment-input="${postNo}"]`);
             const text = this.commentInputs[postNo] || '';
-            const replaced = text.replace(/(?:^|\s)@([A-Za-z0-9_'\- ]*)$/, (match) => {
+            const cursorPos = el && typeof el.selectionEnd === 'number' ? el.selectionEnd : text.length;
+            const before = text.slice(0, cursorPos);
+            const after = text.slice(cursorPos);
+
+            let newCaret = cursorPos;
+            const replacedBefore = before.replace(/(?:^|\s)@([A-Za-z0-9_'\- ]*)$/, (match) => {
                 const prefix = match.startsWith(' ') ? ' ' : '';
                 return `${prefix}@${member.firstName} ${member.lastName} `;
             });
-            this.commentInputs[postNo] = replaced;
+            newCaret = replacedBefore.length;
+
+            this.commentInputs[postNo] = replacedBefore + after;
             this.mentionOpen[postNo] = false;
             this.mentionMatches[postNo] = [];
 
             this.$nextTick(() => {
-                const el = document.querySelector(`input[data-comment-input="${postNo}"]`);
-                if (el) {
-                    el.focus();
-                    el.setSelectionRange(el.value.length, el.value.length);
+                const target = document.querySelector(`input[data-comment-input="${postNo}"]`);
+                if (target) {
+                    target.focus();
+                    target.setSelectionRange(newCaret, newCaret);
                 }
             });
         },

@@ -5,7 +5,11 @@
     background-color: var(--card-bg, #ffffff);
     border: 1px solid var(--border-color, #e2e8f0);
     color: var(--text-color, #0f172a);
-    overflow: hidden;
+    overflow: visible;
+  }
+  .fp-spark-header {
+    border-top-left-radius: 19px;
+    border-top-right-radius: 19px;
   }
   body.dark-mode .fp-spark-card,
   [data-bs-theme="dark"] .fp-spark-card {
@@ -266,32 +270,231 @@
                      style="width: 40px; height: 40px;">
                 <div class="min-w-0 flex-grow-1">
                   <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
-                    <span class="fw-bold fp-spark-reply-author" style="overflow-wrap: anywhere;" x-text="reply.author_name"></span>
+                    <div class="d-flex align-items-center gap-2 min-w-0">
+                      <span class="fw-bold fp-spark-reply-author" style="overflow-wrap: anywhere;" x-text="reply.author_name"></span>
+                      <span class="small opacity-75" x-show="reply.updated_at" style="font-size: 0.72rem;">(edited)</span>
+                    </div>
+                    <template x-if="spark.current_user_id && String(reply.user_id) === String(spark.current_user_id)">
+                      <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary rounded-pill px-3 fp-spark-btn-action d-inline-flex align-items-center gap-1"
+                                @click="startEditReply(reply)"
+                                :disabled="editingReplyId === reply.id || deletingReplyId === reply.id"
+                                aria-label="Edit reply"
+                                title="Edit your reply">
+                          <i class="bi bi-pencil" aria-hidden="true"></i>
+                          <span>Edit</span>
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger rounded-pill px-3 fp-spark-btn-action d-inline-flex align-items-center gap-1"
+                                @click="deleteReply(reply)"
+                                :disabled="deletingReplyId === reply.id"
+                                aria-label="Delete reply"
+                                title="Delete your reply">
+                          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" x-show="deletingReplyId === reply.id"></span>
+                          <i class="bi bi-trash" aria-hidden="true" x-show="deletingReplyId !== reply.id"></i>
+                          <span x-text="deletingReplyId === reply.id ? 'Deleting...' : 'Delete'"></span>
+                        </button>
+                      </div>
+                    </template>
                   </div>
-                  <p class="mb-0 mt-1 fp-spark-reply-body" style="overflow-wrap: anywhere;" x-text="reply.body"></p>
+
+                  <!-- Display Mode -->
+                  <template x-if="editingReplyId !== reply.id">
+                    <p class="mb-0 mt-1 fp-spark-reply-body" style="overflow-wrap: anywhere;" x-html="formatSparkReplyBody(reply.body)"></p>
+                  </template>
+
+                  <!-- Inline Edit Mode -->
+                  <template x-if="editingReplyId === reply.id">
+                    <form @submit.prevent="saveEditReply(reply)" class="mt-2 d-flex flex-column gap-2">
+                      @include('csrf')
+                      <label :for="'sparkEditInput_' + reply.id" class="visually-hidden">Edit your reply</label>
+                      <input :id="'sparkEditInput_' + reply.id"
+                             type="text"
+                             class="form-control rounded-pill px-3"
+                             style="min-height: 44px;"
+                             maxlength="500"
+                             x-model="editReplyText"
+                             :disabled="savingEditReplyId === reply.id"
+                             required>
+                      <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <button type="submit"
+                                class="btn btn-danger rounded-pill px-3 fw-semibold fp-spark-btn-action d-inline-flex align-items-center gap-2 text-white"
+                                :disabled="savingEditReplyId === reply.id || editReplyText.trim() === ''">
+                          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" x-show="savingEditReplyId === reply.id"></span>
+                          <span x-text="savingEditReplyId === reply.id ? 'Saving...' : 'Save'"></span>
+                        </button>
+                        <button type="button"
+                                class="btn btn-outline-secondary rounded-pill px-3 fp-spark-btn-action"
+                                @click="cancelEditReply()"
+                                :disabled="savingEditReplyId === reply.id">
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </template>
                 </div>
               </div>
             </template>
 
-            <!-- Inline Reply Form (Universal CSRF + Universal Button Spinner) -->
-            <form @submit.prevent="submitReply()" class="d-flex align-items-stretch gap-2 mt-1">
-              @include('csrf')
-              <label for="sparkReplyInput" class="visually-hidden">Write a family reply</label>
-              <input id="sparkReplyInput"
-                     type="text"
-                     class="form-control rounded-pill px-3"
-                     style="min-height: 44px;"
-                     maxlength="500"
-                     placeholder="Add your answer or story..."
-                     x-model="replyText"
-                     :disabled="submittingReply">
-              <button type="submit"
-                      class="btn btn-danger rounded-pill px-4 fw-semibold fp-spark-btn-action d-inline-flex align-items-center justify-content-center gap-2 text-white"
-                      :disabled="submittingReply || replyText.trim() === ''">
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" x-show="submittingReply"></span>
-                <span x-text="submittingReply ? 'Sending...' : 'Reply'"></span>
-              </button>
-            </form>
+            <!-- Inline Reply Form with @Mention Autocomplete & Emoji Studio Picker (Universal CSRF + Universal Button Spinner) -->
+            <div class="position-relative mt-1" style="overflow: visible;">
+              <!-- Emoji Picker Popup (Standard + Living 3D + Me Stickers) -->
+              <div x-show="sparkEmojiOpen"
+                   x-cloak
+                   x-transition.opacity.duration.120ms
+                   @click.outside="sparkEmojiOpen = false"
+                   @keydown.escape.window="sparkEmojiOpen = false"
+                   role="dialog"
+                   aria-label="Choose an emoji"
+                   data-testid="spark-emoji-picker"
+                   class="comment-picker comment-picker--emoji">
+                <!-- Fitzpatrick Skin Tone Palette -->
+                <div :class="sparkEmojiTab === 'me' ? 'd-none' : 'd-flex'"
+                     class="align-items-center justify-content-between px-2 py-1 border-bottom mb-1 bg-light rounded"
+                     role="toolbar"
+                     aria-label="Spark emoji skin tone diversity selector">
+                  <span class="text-muted fw-semibold" style="font-size: 0.68rem;">Skin:</span>
+                  <div class="d-flex align-items-center gap-1">
+                    <template x-for="st in sparkSkinTones" :key="st.tone">
+                      <button type="button"
+                              class="btn btn-sm p-0 border-0 rounded-circle"
+                              :class="sparkSkinTone === st.tone ? 'shadow-sm border border-primary' : 'opacity-75'"
+                              style="font-size: 0.82rem; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;"
+                              :title="st.label"
+                              :aria-label="st.label"
+                              @click.stop="setSparkSkinTone(st.tone)"
+                              x-text="st.swatch"></button>
+                    </template>
+                  </div>
+                </div>
+
+                <div class="comment-emoji-tabs" role="tablist" aria-label="Emoji type">
+                  <button type="button" class="comment-emoji-tab" role="tab"
+                          :class="sparkEmojiTab === 'standard' ? 'active' : ''"
+                          :aria-selected="sparkEmojiTab === 'standard' ? 'true' : 'false'"
+                          @click.stop="sparkEmojiTab = 'standard'">😀 Standard</button>
+                  <button type="button" class="comment-emoji-tab" role="tab"
+                          :class="sparkEmojiTab === 'living' ? 'active' : ''"
+                          :aria-selected="sparkEmojiTab === 'living' ? 'true' : 'false'"
+                          @click.stop="sparkEmojiTab = 'living'">✨ Living</button>
+                  <button type="button" class="comment-emoji-tab" role="tab"
+                          :class="sparkEmojiTab === 'me' ? 'active' : ''"
+                          :aria-selected="sparkEmojiTab === 'me' ? 'true' : 'false'"
+                          @click.stop="openSparkMeTab()">🙋 Me</button>
+                </div>
+
+                <template x-if="sparkEmojiOpen && sparkEmojiTab === 'me'">
+                  <div class="me-sticker-grid me-sticker-grid--comment">
+                    <span class="me-sticker-hint" x-show="sparkMeStickers && sparkMeStickers.available">Your avatar comes from <a href="/member/emoji-studio">Emoji Studio</a>.</span>
+                    <span class="text-muted small" x-show="!sparkMeStickers && !sparkMeStickersError">Loading your avatar…</span>
+                    <span class="text-muted small" x-show="sparkMeStickersError">Could not load your avatar.</span>
+                    <template x-if="sparkMeStickers && !sparkMeStickers.available">
+                      <a href="/member/emoji-studio" class="btn btn-sm btn-warning rounded-pill fw-semibold me-sticker-unlock">🎨 Design your avatar in Emoji Studio</a>
+                    </template>
+                    <template x-for="st in (sparkMeStickers && sparkMeStickers.available ? sparkMeStickers.stickers : [])" :key="st.reaction">
+                      <button type="button" class="me-sticker-btn" :title="st.label" :aria-label="'Add my avatar: ' + st.label"
+                              @click="selectSparkMeSticker(st.token, st.url, st.label)">
+                        <img :src="st.url" width="52" height="52" alt="" loading="lazy">
+                        <span x-text="st.label"></span>
+                      </button>
+                    </template>
+                  </div>
+                </template>
+
+                <div class="comment-emoji-grid" x-show="sparkEmojiTab === 'standard'">
+                  <template x-for="emoji in sparkEmojiPalette" :key="emoji">
+                    <button type="button" class="comment-emoji-btn"
+                            @click="insertSparkEmoji(emoji)"
+                            :aria-label="'Insert ' + emoji"
+                            x-text="emoji"></button>
+                  </template>
+                </div>
+
+                <template x-if="sparkEmojiOpen && sparkEmojiTab === 'living'">
+                  <div class="comment-living-grid">
+                    <template x-for="le in sparkLivingPalette" :key="le.id">
+                      <button type="button" class="comment-living-btn" :data-emoji-id="le.id"
+                              @click="insertSparkLivingEmoji(le.id)"
+                              :title="le.title"
+                              :aria-label="'Insert living emoji ' + le.title">
+                        <img :src="'/public/img/emoji/' + le.id + '.svg?v=20261107a'" :alt="le.title" width="38" height="38" loading="lazy" class="atg-3d-emoji">
+                      </button>
+                    </template>
+                  </div>
+                </template>
+              </div>
+
+              <!-- @Mention Autocomplete Dropdown -->
+              <div x-show="sparkMentionOpen && sparkMentionMatches.length > 0"
+                   x-cloak
+                   x-transition.opacity.duration.100ms
+                   @click.outside="sparkMentionOpen = false"
+                   role="listbox"
+                   aria-label="Mention a family member"
+                   class="mention-autocomplete shadow-lg">
+                <div class="mention-autocomplete__header d-flex align-items-center justify-content-between px-2 py-1">
+                  <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Mention a family member</span>
+                  <span style="font-size: 0.7rem;">&uarr;&darr; &bull; Enter</span>
+                </div>
+                <div class="mention-autocomplete__list">
+                  <template x-for="(m, idx) in sparkMentionMatches" :key="m.id">
+                    <button type="button"
+                            class="mention-autocomplete__item d-flex align-items-center gap-2 w-100 text-start px-2 py-1.5 border-0"
+                            :class="{ 'mention-autocomplete__item--active': sparkMentionIndex === idx }"
+                            @click="selectSparkMention(m)"
+                            @mouseenter="sparkMentionIndex = idx"
+                            :aria-selected="sparkMentionIndex === idx">
+                      <img :src="m.img ? ((m.img.startsWith('/') || m.img.startsWith('http')) ? m.img : '/resources/images/profile/' + m.img) : '/resources/images/profile/avatarM.png'"
+                           alt="" class="rounded-circle flex-shrink-0" width="26" height="26" style="object-fit: cover;">
+                      <div class="flex-grow-1 min-w-0">
+                        <span class="mention-autocomplete__name text-truncate d-block" x-text="m.firstName + ' ' + m.lastName"></span>
+                      </div>
+                      <span class="badge rounded-pill mention-autocomplete__badge flex-shrink-0">Family</span>
+                    </button>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Selected Me-Sticker Preview Chip -->
+              <div x-show="sparkSticker" x-cloak class="comment-composer__gif comment-composer__sticker mb-2">
+                <img :src="sparkSticker?.url || null" :alt="'My avatar: ' + (sparkSticker?.label || '')" width="64" height="64" style="display:block; width:64px; height:64px;">
+                <button type="button" @click="sparkSticker = null" aria-label="Remove sticker">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+
+              <form @submit.prevent="submitReply()" class="d-flex align-items-stretch gap-2">
+                @include('csrf')
+                <label for="sparkReplyInput" class="visually-hidden">Write a family reply</label>
+                <input id="sparkReplyInput"
+                       type="text"
+                       class="form-control rounded-pill px-3"
+                       style="min-height: 44px;"
+                       maxlength="500"
+                       placeholder="Add your answer or @tag someone..."
+                       x-model="replyText"
+                       @input="handleSparkReplyInput($event)"
+                       @keydown="handleSparkReplyKeydown($event)"
+                       :disabled="submittingReply">
+                <button type="button"
+                        class="btn btn-outline-secondary rounded-pill fp-spark-btn-action d-inline-flex align-items-center justify-content-center"
+                        style="min-width: 44px; min-height: 44px;"
+                        @click.stop="sparkEmojiOpen = !sparkEmojiOpen"
+                        :aria-expanded="sparkEmojiOpen ? 'true' : 'false'"
+                        data-testid="spark-emoji-btn"
+                        title="Add Emoji - Standard, Living 3D & Me stickers"
+                        aria-label="Add emoji">
+                  <i class="bi bi-emoji-smile" aria-hidden="true"></i>
+                </button>
+                <button type="submit"
+                        class="btn btn-danger rounded-pill px-4 fw-semibold fp-spark-btn-action d-inline-flex align-items-center justify-content-center gap-2 text-white"
+                        :disabled="submittingReply || (replyText.trim() === '' && !sparkSticker)">
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" x-show="submittingReply"></span>
+                  <span x-text="submittingReply ? 'Sending...' : 'Reply'"></span>
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
@@ -378,12 +581,338 @@ function dailyFamilySparkWidget() {
     votingOption: null,
     submittingReply: false,
     replyText: '',
+    editingReplyId: null,
+    editReplyText: '',
+    savingEditReplyId: null,
+    deletingReplyId: null,
+    sparkFamilyRoster: [],
+    sparkMentionOpen: false,
+    sparkMentionMatches: [],
+    sparkMentionIndex: 0,
+    sparkEmojiOpen: false,
+    sparkEmojiTab: 'standard',
+    sparkSkinTone: (typeof localStorage !== 'undefined' ? (parseInt(localStorage.getItem('fp_skin_tone') || '0', 10) || 0) : 0),
+    sparkSkinTones: [
+      { tone: 0, swatch: '🟡', label: 'Default' },
+      { tone: 1, swatch: '🏻', label: 'Light' },
+      { tone: 2, swatch: '🏼', label: 'Medium-Light' },
+      { tone: 3, swatch: '🏽', label: 'Medium' },
+      { tone: 4, swatch: '🏾', label: 'Medium-Dark' },
+      { tone: 5, swatch: '🏿', label: 'Dark' },
+    ],
+    sparkEmojiItems: [
+      { base: '👍', skins: ['👍', '👍🏻', '👍🏼', '👍🏽', '👍🏾', '👍🏿'] },
+      { base: '👋', skins: ['👋', '👋🏻', '👋🏼', '👋🏽', '👋🏾', '👋🏿'] },
+      { base: '👏', skins: ['👏', '👏🏻', '👏🏼', '👏🏽', '👏🏾', '👏🏿'] },
+      { base: '🙏', skins: ['🙏', '🙏🏻', '🙏🏼', '🙏🏽', '🙏🏾', '🙏🏿'] },
+      { base: '🙌', skins: ['🙌', '🙌🏻', '🙌🏼', '🙌🏽', '🙌🏾', '🙌🏿'] },
+      { base: '💪', skins: ['💪', '💪🏻', '💪🏼', '💪🏽', '💪🏾', '💪🏿'] },
+      { base: '🤝', skins: ['🤝', '🤝🏻', '🤝🏼', '🤝🏽', '🤝🏾', '🤝🏿'] },
+      { base: '🫶', skins: ['🫶', '🫶🏻', '🫶🏼', '🫶🏽', '🫶🏾', '🫶🏿'] },
+      { base: '✌️', skins: ['✌️', '✌🏻', '✌🏼', '✌🏽', '✌🏾', '✌🏿'] },
+      '❤️', '💖', '🥰', '😍', '😂', '🤣',
+      '😊', '🥹', '🥳', '😎', '🤗', '😮',
+      '😢', '😭', '🔥', '💯', '🎉', '✨',
+      '🎂', '🎈', '🥂', '💐', '🌟', '👑',
+      '🍰', '☕', '🍕', '🏡', '🌸', '🍀',
+      '🤔', '😅', '👀', '🏆', '🎁', '📸',
+    ],
+    sparkMeStickers: null,
+    sparkMeStickersError: false,
+    sparkSticker: null,
+
+    get sparkEmojiPalette() {
+      const tone = this.sparkSkinTone || 0;
+      return this.sparkEmojiItems.map(item => (typeof item === 'string' ? item : ((item.skins && item.skins[tone]) ? item.skins[tone] : item.base)));
+    },
+
+    get sparkLivingPalette() {
+      const cfg = window.ATG_LIVING_EMOJIS;
+      if (!cfg || !Array.isArray(cfg.catalog)) return [];
+      const toneKey = (cfg.tones || [])[(this.sparkSkinTone || 0) - 1] || null;
+      const toneable = new Set(cfg.toneable || []);
+      return cfg.catalog.map(e => ({
+        id: (toneKey && toneable.has(e.id)) ? e.id.replace(/_3d$/, `_${toneKey}_3d`) : e.id,
+        title: e.title,
+      }));
+    },
+
+    setSparkSkinTone(tone) {
+      this.sparkSkinTone = tone;
+      try { localStorage.setItem('fp_skin_tone', String(tone)); } catch (_) {}
+    },
+
+    openSparkMeTab() {
+      this.sparkEmojiTab = 'me';
+      if (this.sparkMeStickers || !window.AtgEmojiEngine || !window.AtgEmojiEngine.getMeStickers) return;
+      this.sparkMeStickersError = false;
+      window.AtgEmojiEngine.getMeStickers()
+        .then(d => { this.sparkMeStickers = d || { available: false }; })
+        .catch(() => { this.sparkMeStickersError = true; });
+    },
+
+    insertSparkEmoji(emoji) {
+      const input = document.getElementById('sparkReplyInput');
+      const current = this.replyText || '';
+      if (input && typeof input.selectionStart === 'number') {
+        const start = input.selectionStart;
+        const end = input.selectionEnd ?? start;
+        this.replyText = current.slice(0, start) + emoji + current.slice(end);
+        const caret = start + emoji.length;
+        this.$nextTick(() => {
+          input.focus();
+          input.setSelectionRange(caret, caret);
+        });
+      } else {
+        this.replyText = current + emoji;
+      }
+      this.sparkEmojiOpen = false;
+    },
+
+    insertSparkLivingEmoji(emojiId) {
+      if (!/^[a-z0-9_]+_3d$/.test(emojiId)) return;
+      const current = this.replyText || '';
+      const sep = current && !/\s$/.test(current) ? ' ' : '';
+      this.replyText = `${current}${sep}:${emojiId}: `;
+      this.sparkEmojiOpen = false;
+    },
+
+    selectSparkMeSticker(token, url = '', label = '') {
+      if (!/^:me_[a-z]+@[A-Za-z0-9_-]{1,64}:$/.test(token)) return;
+      this.sparkSticker = { token, url: String(url || ''), label: String(label || '') };
+      this.sparkEmojiOpen = false;
+    },
     showCreateModal: false,
     submittingCreate: false,
     createErrorMessage: '',
     newSparkTitle: '',
     newSparkPrompt: '',
     newSparkOptions: '',
+
+    async loadSparkRoster() {
+      if (this.sparkFamilyRoster.length > 0) return;
+      try {
+        const res = await fetch('/allMembers/processApiData', {
+          headers: { 'Accept': 'application/json' },
+          credentials: 'same-origin'
+        });
+        const json = await res.json();
+        const members = json?.data || json?.message || [];
+        if (Array.isArray(members)) {
+          this.sparkFamilyRoster = members.map(m => ({
+            id: String(m.id || ''),
+            firstName: String(m.firstName || '').trim(),
+            lastName: String(m.lastName || '').trim(),
+            img: m.img || ''
+          }));
+        }
+      } catch (_) {}
+    },
+
+    async handleSparkReplyInput(event) {
+      const input = event.target;
+      const text = input.value || '';
+      const cursorPos = input.selectionEnd ?? text.length;
+      const match = text.slice(0, cursorPos).match(/(?:^|\s)@([A-Za-z0-9_'\- ]{0,40})$/);
+      if (!match) {
+        this.sparkMentionOpen = false;
+        this.sparkMentionMatches = [];
+        return;
+      }
+      if (this.sparkFamilyRoster.length === 0) {
+        await this.loadSparkRoster();
+      }
+      const latestText = input.value || '';
+      const latestPos = input.selectionEnd ?? latestText.length;
+      const latestMatch = latestText.slice(0, latestPos).match(/(?:^|\s)@([A-Za-z0-9_'\- ]{0,40})$/);
+      if (!latestMatch) {
+        this.sparkMentionOpen = false;
+        this.sparkMentionMatches = [];
+        return;
+      }
+      const query = (latestMatch[1] || '').trim().toLowerCase();
+      const meId = String(this.spark?.current_user_id || '');
+      const matches = this.sparkFamilyRoster.filter(m => {
+        if (!m.firstName && !m.lastName) return false;
+        if (meId && String(m.id) === meId) return false;
+        const full = `${m.firstName} ${m.lastName}`.toLowerCase();
+        if (!query) return true;
+        return full.includes(query) || m.firstName.toLowerCase().startsWith(query) || m.lastName.toLowerCase().startsWith(query);
+      }).slice(0, 6);
+      this.sparkMentionMatches = matches;
+      this.sparkMentionIndex = 0;
+      this.sparkMentionOpen = matches.length > 0;
+    },
+
+    handleSparkReplyKeydown(event) {
+      if (!this.sparkMentionOpen || !this.sparkMentionMatches.length) return;
+      const len = this.sparkMentionMatches.length;
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        this.sparkMentionIndex = (this.sparkMentionIndex + 1) % len;
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        this.sparkMentionIndex = (this.sparkMentionIndex - 1 + len) % len;
+      } else if (event.key === 'Enter' || event.key === 'Tab') {
+        const chosen = this.sparkMentionMatches[this.sparkMentionIndex];
+        if (chosen) {
+          event.preventDefault();
+          this.selectSparkMention(chosen);
+        }
+      } else if (event.key === 'Escape') {
+        this.sparkMentionOpen = false;
+      }
+    },
+
+    selectSparkMention(member) {
+      if (!member) return;
+      const input = document.getElementById('sparkReplyInput');
+      const text = this.replyText || '';
+      const cursorPos = input && typeof input.selectionEnd === 'number' ? input.selectionEnd : text.length;
+      const before = text.slice(0, cursorPos);
+      const after = text.slice(cursorPos);
+      const replacedBefore = before.replace(/(?:^|\s)@([A-Za-z0-9_'\- ]*)$/, (m) => {
+        const prefix = m.startsWith(' ') ? ' ' : '';
+        return `${prefix}@${member.firstName} ${member.lastName} `;
+      });
+      const newCaret = replacedBefore.length;
+      this.replyText = replacedBefore + after;
+      this.sparkMentionOpen = false;
+      this.sparkMentionMatches = [];
+      this.$nextTick(() => {
+        if (input) {
+          input.focus();
+          input.setSelectionRange(newCaret, newCaret);
+        }
+      });
+    },
+
+    formatSparkReplyBody(raw) {
+      let esc = String(raw || '').replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+      }[c]));
+      const stickerRe = /:(?:[a-z0-9_]+_3d|me_[a-z]+@[A-Za-z0-9_-]{1,64}):/gi;
+      const emojiOnly = /:(?:[a-z0-9_]+_3d|me_[a-z]+@[A-Za-z0-9_-]{1,64}):/i.test(raw || '') && String(raw || '').replace(stickerRe, '').trim() === '';
+      const liveClass = emojiOnly ? 'atg-emoji-container atg-live-emoji atg-live-emoji--jumbo' : 'atg-emoji-container atg-live-emoji';
+      const meClass = emojiOnly ? 'atg-me-sticker atg-me-sticker--jumbo' : 'atg-me-sticker';
+
+      esc = esc.replace(/:me_(hello|laugh|wow|love|nod|dance|point|clap)@([A-Za-z0-9_-]{1,64}):/g, (m, reaction, uid) => {
+        return `<span class="${meClass}" role="button" tabindex="0" onclick="event.stopPropagation(); window.AtgEmojiEngine && window.AtgEmojiEngine.tapSticker(this, '${reaction}')"><img src="/api/emoji/avatar-sticker/${uid}/${reaction}?v=live2" loading="lazy" width="56" height="56" alt="Avatar sticker: ${reaction}" onerror="this.closest('.atg-me-sticker').remove()"></span>`;
+      });
+
+      const cfg = window.ATG_LIVING_EMOJIS;
+      const knownIds = new Set();
+      if (cfg && Array.isArray(cfg.catalog)) {
+        const tones = cfg.tones || [];
+        const toneable = new Set(cfg.toneable || []);
+        cfg.catalog.forEach(e => {
+          knownIds.add(String(e.id || '').toLowerCase());
+          if (toneable.has(e.id)) {
+            tones.forEach(t => knownIds.add(String(e.id).replace(/_3d$/, `_${t}_3d`).toLowerCase()));
+          }
+        });
+      }
+
+      esc = esc.replace(/:([a-z0-9_]+_3d):/gi, (m, rawId) => {
+        const id = rawId.toLowerCase();
+        if (knownIds.size > 0 && !knownIds.has(id)) return m;
+        return `<span class="${liveClass}" role="button" tabindex="0" onclick="event.stopPropagation(); window.AtgEmojiEngine && window.AtgEmojiEngine.tapLive(this, '${id}')"><img src="/public/img/emoji/${id}.svg?v=20261107a" onerror="this.src='/img/emoji/${id}.svg?v=20261107a'" class="atg-3d-emoji" loading="lazy" width="26" height="26" alt="${id}" title="Tap to play"></span>`;
+      });
+
+      return esc.replace(/(^|\s)(@[A-Za-z0-9_'\-]+(?:\s+[A-Za-z0-9_'\-]+)?)/g, '$1<span class="mention-chip">$2</span>');
+    },
+
+    startEditReply(reply) {
+      this.editingReplyId = reply.id;
+      this.editReplyText = reply.body || '';
+      this.$nextTick(() => {
+        const el = document.getElementById('sparkEditInput_' + reply.id);
+        if (el) el.focus();
+      });
+    },
+
+    cancelEditReply() {
+      this.editingReplyId = null;
+      this.editReplyText = '';
+    },
+
+    async saveEditReply(reply) {
+      if (!this.spark || !reply || this.savingEditReplyId || this.editReplyText.trim() === '') return;
+      this.savingEditReplyId = reply.id;
+      this.errorMessage = '';
+      try {
+        const res = await fetch('/api/sparks/reply/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': this.getCsrfToken()
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify({
+            csrf_token: this.getCsrfToken(),
+            spark_id: this.spark.id,
+            reply_id: reply.id,
+            body: this.editReplyText.trim()
+          })
+        });
+        const json = await res.json();
+        if (!res.ok || json.status !== 'success') {
+          throw new Error(json.message || 'Could not update your reply.');
+        }
+        this.spark = json.data;
+        this.editingReplyId = null;
+        this.editReplyText = '';
+        if (typeof this.$toast === 'function') {
+          this.$toast('Reply updated!', 'success');
+        }
+      } catch (err) {
+        this.errorMessage = err.message || 'Unable to update your reply.';
+      } finally {
+        this.savingEditReplyId = null;
+      }
+    },
+
+    async deleteReply(reply) {
+      if (!this.spark || !reply || this.deletingReplyId) return;
+      if (typeof window.confirm === 'function' && !window.confirm('Delete this reply? This cannot be undone.')) {
+        return;
+      }
+      this.deletingReplyId = reply.id;
+      this.errorMessage = '';
+      try {
+        const res = await fetch('/api/sparks/reply/delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': this.getCsrfToken()
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify({
+            csrf_token: this.getCsrfToken(),
+            spark_id: this.spark.id,
+            reply_id: reply.id
+          })
+        });
+        const json = await res.json();
+        if (!res.ok || json.status !== 'success') {
+          throw new Error(json.message || 'Could not delete your reply.');
+        }
+        this.spark = json.data;
+        if (this.editingReplyId === reply.id) {
+          this.editingReplyId = null;
+          this.editReplyText = '';
+        }
+        if (typeof this.$toast === 'function') {
+          this.$toast('Reply deleted.', 'success');
+        }
+      } catch (err) {
+        this.errorMessage = err.message || 'Unable to delete your reply.';
+      } finally {
+        this.deletingReplyId = null;
+      }
+    },
 
     getCsrfToken() {
       if (typeof this.$csrf === 'function') {
@@ -456,7 +985,10 @@ function dailyFamilySparkWidget() {
     },
 
     async submitReply() {
-      if (!this.spark || this.submittingReply || this.replyText.trim() === '') return;
+      const typed = (this.replyText || '').trim();
+      const stickerTok = this.sparkSticker?.token || '';
+      const combined = [typed, stickerTok].filter(Boolean).join(' ');
+      if (!this.spark || this.submittingReply || combined === '') return;
       this.submittingReply = true;
       this.errorMessage = '';
       try {
@@ -472,7 +1004,7 @@ function dailyFamilySparkWidget() {
             csrf_token: this.getCsrfToken(),
             spark_id: this.spark.id,
             response_type: 'text',
-            body: this.replyText.trim()
+            body: combined
           })
         });
         const json = await res.json();
@@ -481,6 +1013,7 @@ function dailyFamilySparkWidget() {
         }
         this.spark = json.data;
         this.replyText = '';
+        this.sparkSticker = null;
         this.showReplies = true;
         if (typeof this.$toast === 'function') {
           this.$toast('Reply added to the Spark!', 'success');

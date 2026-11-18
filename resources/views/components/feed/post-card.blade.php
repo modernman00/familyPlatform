@@ -2422,9 +2422,9 @@
              role="listbox" aria-label="Mention family member"
              data-testid="mention-autocomplete"
              class="mention-autocomplete shadow-md">
-          <div class="mention-autocomplete__header d-flex align-items-center justify-content-between px-2 py-1 text-muted">
+          <div class="mention-autocomplete__header d-flex align-items-center justify-content-between px-2 py-1">
             <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Mention a family member</span>
-            <span style="font-size: 0.7rem;">&uarr;&darr; to navigate &bull; Enter to select</span>
+            <span style="font-size: 0.7rem;">&uarr;&darr; &bull; Enter</span>
           </div>
           <div class="mention-autocomplete__list">
             <template x-for="(m, idx) in mentionMatches[post.post_no]" :key="m.id">
@@ -2435,11 +2435,11 @@
                       @mouseenter="mentionIndex[post.post_no] = idx"
                       :aria-selected="(mentionIndex[post.post_no] || 0) === idx">
                 <img :src="m.img ? ((m.img.startsWith('/') || m.img.startsWith('http')) ? m.img : `/resources/images/profile/${m.img}`) : '/public/avatar/avatarM.png'"
-                     alt="Avatar" class="rounded-circle" width="24" height="24" style="object-fit: cover;">
+                     alt="Avatar" class="rounded-circle flex-shrink-0" width="24" height="24" style="object-fit: cover;">
                 <div class="flex-grow-1 min-w-0">
-                  <span class="fw-semibold text-dark text-truncate d-block" style="font-size: 0.8125rem;" x-text="m.firstName + ' ' + m.lastName"></span>
+                  <span class="mention-autocomplete__name text-truncate d-block" x-text="m.firstName + ' ' + m.lastName"></span>
                 </div>
-                <span class="badge rounded-pill bg-light text-muted border" style="font-size: 0.68rem;">Family</span>
+                <span class="badge rounded-pill mention-autocomplete__badge flex-shrink-0">Family</span>
               </button>
             </template>
           </div>

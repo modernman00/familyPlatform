@@ -1301,7 +1301,7 @@ body.dark-mode .heirloom-reaction-btn.active {
 
 .comment-emoji-grid {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(6, minmax(44px, 1fr));
     gap: 2px;
 }
 
@@ -1389,31 +1389,44 @@ body.dark-mode .heirloom-reaction-btn.active {
     position: absolute;
     bottom: calc(100% + 8px);
     left: 0;
-    width: 280px;
+    width: min(320px, 90vw);
     max-width: 90vw;
     background: var(--card-bg, #ffffff);
+    color: var(--text-main, #0f172a);
     border: 1px solid var(--border-color, #e5e7eb);
     border-radius: 14px;
     padding: 6px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    z-index: 250;
+    box-shadow: 0 12px 30px -6px rgba(15, 23, 42, 0.22), 0 8px 12px -6px rgba(15, 23, 42, 0.12);
+    z-index: 1060;
+
+    &--below {
+        top: calc(100% + 4px);
+        bottom: auto;
+        width: min(360px, 92vw);
+    }
 
     &__header {
         border-bottom: 1px solid var(--border-color, #f1f5f9);
         margin-bottom: 4px;
+        color: var(--text-muted-aa, #475569);
+        gap: 8px;
     }
 
     &__list {
         max-height: 220px;
         overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
     }
 
     &__item {
         background: transparent;
+        color: var(--text-main, #0f172a);
         border-radius: 8px;
         transition: background 0.12s ease;
         cursor: pointer;
-        min-height: 40px;
+        min-height: 44px;
 
         &:hover,
         &--active {

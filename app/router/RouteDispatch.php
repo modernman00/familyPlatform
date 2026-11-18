@@ -73,6 +73,7 @@ final class RouteDispatch
             'Src\functionality\WebAuthnFunctionality',
             // Headless Kinship REST API handles API key authentication
             'App\controller\api\KinshipApiController',
+            'App\controller\api\SovereignStudioApiController',
             'App\controller\PlaybookController',
             'App\controller\LocaleController',
             'App\controller\About',
@@ -80,6 +81,7 @@ final class RouteDispatch
             'App\controller\members\OmniSearchController',
             'App\controller\RealtimeBroadcastingController', // Sovereign Realtime Broadcasting SSE & Auth for FamilyPlatform
             'App\controller\PostShareController', // Public Shareable Post Link & Guest-to-Register Engine
+            'App\controller\SharePreviewController', // Public Crawler-Safe Rich OG Share Preview Engine
             'App\controller\members\FestiveCardController', // RFC-0019 Omni-Occasion Festive Card & Living Envelope Engine
             'App\controller\members\AtgGifController', // ATG Sovereign Brand GIF Studio & Synthesizer
             'App\controller\members\ShareTargetController', // W3C Web Share Target API L2 (Android Native Gallery Share)

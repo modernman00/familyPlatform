@@ -1,10 +1,21 @@
 @php
     $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
-    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http');
+    $protocol = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https') ? 'https' : 'http';
     $httpHost = $_SERVER['HTTP_HOST'] ?? 'localhost';
     $rawBaseUrl = !empty($baseUrl) ? $baseUrl : (!empty($_ENV['APP_URL']) ? $_ENV['APP_URL'] : ($protocol . '://' . $httpHost));
     $cleanBaseUrl = rtrim($rawBaseUrl, '/');
-    $currentShareUrl = $cleanBaseUrl . (strtok($requestUri, '?') ?: '/');
+    $parsedShareUri = parse_url($requestUri);
+    $sharePath = $parsedShareUri['path'] ?? '/';
+    $shareQuery = '';
+    if (!empty($parsedShareUri['query'])) {
+        parse_str($parsedShareUri['query'], $qParams);
+        foreach ($qParams as $k => $v) {
+            $kl = strtolower((string) $k);
+            if (in_array($kl, ['token', 'vault_token', 'rsvp_code', 'auth', 'fbclid', 'gclid', 'ref'], true) || str_starts_with($kl, 'utm_')) { unset($qParams[$k]); }
+        }
+        if ($qParams !== []) { $shareQuery = '?' . http_build_query($qParams); }
+    }
+    $currentShareUrl = $cleanBaseUrl . $sharePath . $shareQuery;
     
     // Determine Application Name & Tailored Share Copy
     $detectedAppName = $_ENV['APP_NAME'] ?? 'Platform';
@@ -50,7 +61,8 @@
     $encUrl = rawurlencode($currentShareUrl);
     $encTitle = rawurlencode($finalShareTitle);
     $encText = rawurlencode($finalShareText);
-    $encWa = rawurlencode($finalShareText . ' ' . $currentShareUrl);
+    $waPayload = str_contains($finalShareText, $currentShareUrl) ? $finalShareText : ($finalShareText . ' ' . $currentShareUrl);
+    $encWa = rawurlencode($waPayload);
 
     // App Logo
     $appLogoUrl = trim($_ENV['APP_LOGO'] ?? '', " '\"") ?: '/apple-touch-icon.png';

@@ -29,7 +29,7 @@ final class Login
 
         $isAdmin = (!empty($_SESSION['auth']['type']) && in_array((string) $_SESSION['auth']['type'], ['admin', 'super_admin'], true));
         if ($isAdmin) {
-            redirect('/admin/dashboard');
+            redirect(admin_url('/dashboard'));
             return;
         }
 
@@ -66,7 +66,7 @@ final class Login
             || (\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('admin'));
 
         if ($isAdmin) {
-            redirect('/admin/dashboard');
+            redirect(admin_url('/dashboard'));
             return;
         }
         try {

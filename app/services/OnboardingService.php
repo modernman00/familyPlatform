@@ -45,7 +45,7 @@ class OnboardingService
         $famCode = trim($famCode);
 
         // 1. Check completed steps dynamically from database and session
-        $treeExplored = $this->hasExploredTree($userId);
+        $treeExplored = $this->hasExploredTree($userId, $famCode);
         $familyInvited = $this->hasInvitedFamily($userId, $famCode);
         $firstPostCreated = $this->hasCreatedPost($userId);
 
@@ -198,16 +198,23 @@ class OnboardingService
         ];
     }
 
-    private function hasExploredTree(string $userId): bool
+    private function hasExploredTree(string $userId, string $famCode): bool
     {
         if (!empty($_SESSION['onboarding_step_explore_tree'])) {
             return true;
         }
 
+        if ($famCode === '') {
+            return false;
+        }
+
         try {
-            // Check if user has linked or created tree nodes
-            $stmt = $this->db->prepare("SELECT id FROM family_nodes WHERE user_id = ? LIMIT 1");
-            $stmt->execute([$userId]);
+            // Exclude the user's own auto-created root node and empty placeholders;
+            // the tree is only "built" once at least one real relative node exists.
+            $stmt = $this->db->prepare(
+                "SELECT id FROM family_nodes WHERE family_code = ? AND (user_id IS NULL OR user_id != ?) AND is_placeholder = 0 LIMIT 1"
+            );
+            $stmt->execute([$famCode, $userId]);
             return (bool)$stmt->fetchColumn();
         } catch (PDOException $e) {
             return false;

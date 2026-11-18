@@ -104,6 +104,8 @@ No deliverable may be marked complete without providing the **Empirical Proof Ca
     - Before starting a gate or E2E run, check `pgrep -fl "autonomous_gate|preflight\.sh|playwright|chrome-headless-shell"`; wait for an active run you own or terminate stale/orphaned processes before starting a new one.
     - Keep E2E execution single-worker (`--workers=1` for Playwright) and ensure no orphaned `chrome-headless-shell`, `playwright`, or `autonomous_gate.sh` processes remain when your task finishes.
 
+14. **Open Graph / WhatsApp / Messages Rich Preview Invariant**: Every shareable route and standalone `<head>` view MUST serve static `og:title`, `og:description`, `og:image` (< 300 KB JPEG/PNG, 1200×630 or 1080×1080; use `@include('partials.og-meta')` and `og-share-card.jpg?v=3`), `og:url` (HTTPS, stripped of capability tokens like `token`/`vault_token`/`rsvp_code`), `og:type`, and `twitter:card="summary_large_image"`. WhatsApp (`api.whatsapp.com/send` / `wa.me`) and SMS (`sms:?&body=`) payloads must use absolute, non-duplicated URLs.
+
 ### 🚨 Critical Defensive Traps & Fatal Patterns
 - **Trap A: PHP `readonly` Constructor Trap (PHP 8.1+)**:
   NEVER combine constructor-promoted `readonly` properties with body-level reassignment (`$this->prop = $prop ?? new ...`). It causes a fatal runtime error. Either drop `readonly` or provide a static factory constructor `create()`.

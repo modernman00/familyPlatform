@@ -2003,7 +2003,6 @@ function updateComposerMentionActiveItem() {
     items.forEach((item, idx) => {
         const isActive = idx === composerMentionActiveIndex;
         item.classList.toggle('mention-autocomplete__item--active', isActive);
-        item.style.background = isActive ? 'var(--hover-color, #f1f5f9)' : 'transparent';
         item.setAttribute('aria-selected', isActive ? 'true' : 'false');
         if (isActive) {
             item.scrollIntoView({ block: 'nearest' });
@@ -2024,10 +2023,7 @@ function renderComposerMentionDropdown() {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = `mention-autocomplete__item d-flex align-items-center gap-2 w-100 text-start px-2 py-1.5 border-0 ${isActive ? 'mention-autocomplete__item--active' : ''}`;
-        btn.style.cssText = 'background: transparent; border-radius: 8px; cursor: pointer; min-height: 40px;';
-        if (isActive) {
-            btn.style.background = 'var(--hover-color, #f1f5f9)';
-        }
+        btn.style.cssText = 'border-radius: 8px; cursor: pointer; min-height: 44px;';
         btn.setAttribute('role', 'option');
         btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
 
@@ -2039,9 +2035,9 @@ function renderComposerMentionDropdown() {
         btn.innerHTML = `
             <img src="${profImg}" alt="" class="rounded-circle flex-shrink-0" width="28" height="28" style="object-fit: cover;">
             <div class="flex-grow-1 min-w-0">
-                <span class="fw-semibold text-dark text-truncate d-block" style="font-size: 0.8125rem;">${safeFullName}</span>
+                <span class="mention-autocomplete__name text-truncate d-block">${safeFullName}</span>
             </div>
-            <span class="badge rounded-pill bg-light text-muted border flex-shrink-0" style="font-size: 0.68rem;">
+            <span class="badge rounded-pill mention-autocomplete__badge flex-shrink-0">
                 ${m.famCode ? '#' + m.famCode : 'Family'}
             </span>
         `;

@@ -156,7 +156,7 @@ final class AuthLoginSecurityTest extends TestCase
 
         (new \App\controller\Index())->index();
 
-        $this->assertSame('/admin/dashboard', $GLOBALS['__testRedirect'] ?? null);
+        $this->assertSame(admin_url('/dashboard'), $GLOBALS['__testRedirect'] ?? null);
     }
 
     public function test_authenticated_member_on_login_is_redirected_to_profile_page(): void
@@ -184,8 +184,7 @@ final class AuthLoginSecurityTest extends TestCase
 
         (new \App\controller\login\Login())->show();
 
-        $this->assertSame('/profilePage' === ($GLOBALS['__testRedirect'] ?? null) ? '/profilePage' : '/admin/dashboard', $GLOBALS['__testRedirect'] ?? null);
-        $this->assertSame('/admin/dashboard', $GLOBALS['__testRedirect'] ?? null);
+        $this->assertSame(admin_url('/dashboard'), $GLOBALS['__testRedirect'] ?? null);
     }
 
     // ---- Two-Factor Authentication (2FA) Toggle & Direct Login Alignment ----

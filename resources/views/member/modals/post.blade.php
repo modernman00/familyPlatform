@@ -95,10 +95,10 @@
                             rows="2"></textarea>
 
                         <!-- Inline @mention Autocomplete Dropdown for Post Composer -->
-                        <div id="composerMentionDropdown" class="mention-autocomplete shadow-lg d-none" role="listbox" aria-label="Mention a family member" style="position: absolute; top: 100%; left: 0; right: 0; max-width: 360px; z-index: 1060; margin-top: 4px;">
-                            <div class="mention-autocomplete__header d-flex align-items-center justify-content-between px-2 py-1 text-muted">
+                        <div id="composerMentionDropdown" class="mention-autocomplete mention-autocomplete--below shadow-lg d-none" role="listbox" aria-label="Mention a family member">
+                            <div class="mention-autocomplete__header d-flex align-items-center justify-content-between px-2 py-1">
                                 <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Mention a family member</span>
-                                <span style="font-size: 0.7rem;">&uarr;&darr; to navigate &bull; Enter to select</span>
+                                <span style="font-size: 0.7rem;">&uarr;&darr; &bull; Enter</span>
                             </div>
                             <div class="mention-autocomplete__list" id="composerMentionList"></div>
                         </div>

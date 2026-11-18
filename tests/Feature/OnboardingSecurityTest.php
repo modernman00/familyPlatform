@@ -208,4 +208,48 @@ final class OnboardingSecurityTest extends SocialFeedTestCase
         $this->assertStringNotContainsString('<script>', $inviteData['invite_url']);
         $this->assertStringNotContainsString('"', $inviteData['whatsapp_url']);
     }
+
+    /**
+     * Regression test: Auto-created self root node must not mark explore_tree as completed.
+     * Step 1 should only be completed once a real relative node exists (or step is explicitly marked).
+     */
+    public function testExploreTreeIsNotCompletedWhenOnlySelfRootNodeExists(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            @session_start();
+        }
+        unset($_SESSION['onboarding_step_explore_tree']);
+
+        $isolatedFamCode = 'TST' . substr(md5((string)microtime(true)), 0, 5);
+        $isolatedUserId = 'usr_' . substr(md5((string)microtime(true)), 0, 8);
+
+        try {
+            $insSelf = $this->pdo->prepare(
+                "INSERT INTO family_nodes (family_code, user_id, first_name, last_name, gender, generation_level, is_placeholder) VALUES (?, ?, 'Self', 'Tester', 'Male', 0, 0)"
+            );
+            $insSelf->execute([$isolatedFamCode, $isolatedUserId]);
+
+            $stateBefore = $this->service->getOnboardingState($isolatedUserId, $isolatedFamCode);
+            $this->assertFalse($stateBefore['steps']['explore_tree']['done']);
+
+            $insPlaceholder = $this->pdo->prepare(
+                "INSERT INTO family_nodes (family_code, user_id, first_name, last_name, gender, generation_level, is_placeholder) VALUES (?, NULL, 'Father', '', 'Male', -1, 1)"
+            );
+            $insPlaceholder->execute([$isolatedFamCode]);
+
+            $statePlaceholder = $this->service->getOnboardingState($isolatedUserId, $isolatedFamCode);
+            $this->assertFalse($statePlaceholder['steps']['explore_tree']['done']);
+
+            $insRelative = $this->pdo->prepare(
+                "INSERT INTO family_nodes (family_code, user_id, first_name, last_name, gender, generation_level, is_placeholder) VALUES (?, NULL, 'John', 'Tester', 'Male', -1, 0)"
+            );
+            $insRelative->execute([$isolatedFamCode]);
+
+            $stateAfter = $this->service->getOnboardingState($isolatedUserId, $isolatedFamCode);
+            $this->assertTrue($stateAfter['steps']['explore_tree']['done']);
+        } finally {
+            $del = $this->pdo->prepare("DELETE FROM family_nodes WHERE family_code = ?");
+            $del->execute([$isolatedFamCode]);
+        }
+    }
 }

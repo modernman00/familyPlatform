@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(video): route Google Photos streams through signed external-stream proxy & rebuild prod assets",
+    "title": "Feat(studio): bidirectional media sync & studio guide update",
     "notes": [
-        "Fix(video): route Google Photos streams through signed external-stream proxy & rebuild prod assets",
-        "Test(cypress): increase feed initial fetch timeout in loginFully to 40s",
-        "Test(cypress): restore SHO primary famCode on cleanup and avoid stale comment alias"
+        "Feat(studio): bidirectional media sync & studio guide update",
+        "Feat(content-engine): curated family video engine, admin UI and header-auth cron",
+        "Feat(wishlist): add family gift wishlists with claim flow"
     ],
-    "released_at": "2026-11-17",
-    "commit": "eb094a8c"
+    "released_at": "2026-11-18",
+    "commit": "2e49ee48"
 }

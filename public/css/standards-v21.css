@@ -2024,29 +2024,52 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, 
     position: absolute;
     bottom: calc(100% + 8px);
     left: 0;
-    width: 280px;
+    width: min(320px, 90vw);
     max-width: 90vw;
     background: var(--card-bg, #ffffff);
+    color: var(--text-main, #0f172a);
     border: 1px solid var(--border-color, #e5e7eb);
     border-radius: 14px;
     padding: 6px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    z-index: 250;
+    box-shadow: 0 12px 30px -6px rgba(15, 23, 42, 0.22), 0 8px 12px -6px rgba(15, 23, 42, 0.12);
+    z-index: 1060;
+}
+.mention-autocomplete--below {
+    top: calc(100% + 4px);
+    bottom: auto;
+    width: min(360px, 92vw);
 }
 .mention-autocomplete__header {
     border-bottom: 1px solid var(--border-color, #f1f5f9);
     margin-bottom: 4px;
+    color: var(--text-muted-aa, #475569);
+    gap: 8px;
 }
 .mention-autocomplete__list {
     max-height: 220px;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 .mention-autocomplete__item {
     background: transparent;
+    color: var(--text-main, #0f172a);
     border-radius: 8px;
     transition: background 0.12s ease;
     cursor: pointer;
-    min-height: 40px;
+    min-height: 44px;
+}
+.mention-autocomplete__name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main, #0f172a);
+}
+.mention-autocomplete__badge {
+    font-size: 0.68rem;
+    background: var(--hover-color, #f1f5f9);
+    color: var(--text-muted-aa, #475569);
+    border: 1px solid var(--border-color, #e2e8f0);
 }
 .mention-autocomplete__item:hover,
 .mention-autocomplete__item--active {
@@ -2055,6 +2078,35 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, 
 .mention-autocomplete__item:focus-visible {
     outline: 2px solid var(--primary-color, #a31621);
     outline-offset: -1px;
+}
+body.dark-mode .mention-autocomplete,
+[data-bs-theme="dark"] .mention-autocomplete {
+    background: var(--card-bg, #1e293b);
+    color: var(--text-main, #f8fafc);
+    border-color: var(--border-color, #334155);
+}
+body.dark-mode .mention-autocomplete__header,
+[data-bs-theme="dark"] .mention-autocomplete__header {
+    border-bottom-color: #334155;
+    color: #94a3b8;
+}
+body.dark-mode .mention-autocomplete__item,
+body.dark-mode .mention-autocomplete__name,
+[data-bs-theme="dark"] .mention-autocomplete__item,
+[data-bs-theme="dark"] .mention-autocomplete__name {
+    color: #f8fafc;
+}
+body.dark-mode .mention-autocomplete__badge,
+[data-bs-theme="dark"] .mention-autocomplete__badge {
+    background: #0f172a;
+    color: #cbd5e1;
+    border-color: #334155;
+}
+body.dark-mode .mention-autocomplete__item:hover,
+body.dark-mode .mention-autocomplete__item--active,
+[data-bs-theme="dark"] .mention-autocomplete__item:hover,
+[data-bs-theme="dark"] .mention-autocomplete__item--active {
+    background: rgba(255, 255, 255, 0.08);
 }
 .mention-chip {
     display: inline-flex;
