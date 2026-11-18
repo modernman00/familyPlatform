@@ -71,7 +71,13 @@ while true; do
     if [ -n "$HOLDER_PID" ] && ! kill -0 "$HOLDER_PID" 2>/dev/null; then
         rm -rf "$LOCK_DIR" 2>/dev/null || true
         continue
-    elif [ "$LOCK_TS" -gt 0 ] && [ $(( NOW_TS - LOCK_TS )) -gt 180 ]; then
+    elif [ -z "$HOLDER_PID" ] && [ "$LOCK_TS" -gt 0 ] && [ $(( NOW_TS - LOCK_TS )) -gt 60 ]; then
+        rm -rf "$LOCK_DIR" 2>/dev/null || true
+        continue
+    elif [ "$LOCK_TS" -gt 0 ] && [ $(( NOW_TS - LOCK_TS )) -gt 1200 ]; then
+        if [ -n "$HOLDER_PID" ]; then
+            kill -TERM "$HOLDER_PID" 2>/dev/null || true
+        fi
         rm -rf "$LOCK_DIR" 2>/dev/null || true
         continue
     fi

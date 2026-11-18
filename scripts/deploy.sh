@@ -126,8 +126,20 @@ SANDBOX=$(mktemp -d "/tmp/${APP_NAME}_deploy_XXXXXX")
 DEPLOY_LOCK_PATH="${REMOTE_ROOT}/.deploy.lock"
 DEPLOY_LOCK_HELD=false
 
+# Global Local Cross-Chat Mutex Queue (prevents concurrent local deploy/gate stampedes)
+renice -n 10 $$ >/dev/null 2>&1 || true
+LOCAL_GATE_LOCK_DIR="/tmp/portfolio_gate_mutex.lock"
+LOCAL_GATE_LOCK_ACQUIRED=0
+LOCAL_WAIT_ANNOUNCED=0
+LOCAL_WAIT_START=$(date +%s)
+
 cleanup() {
     rm -rf "$SANDBOX"
+    if [ "$LOCAL_GATE_LOCK_ACQUIRED" -eq 1 ] && [ -f "$LOCAL_GATE_LOCK_DIR/pid" ]; then
+        if [ "$(cat "$LOCAL_GATE_LOCK_DIR/pid" 2>/dev/null)" = "$$" ]; then
+            rm -rf "$LOCAL_GATE_LOCK_DIR" 2>/dev/null || true
+        fi
+    fi
     if [ "$DEPLOY_LOCK_HELD" = "true" ]; then
         ssh -p "$SSH_PORT" -o ConnectTimeout=10 -o BatchMode=yes \
             "${SSH_USER}@${SSH_HOST}" "rmdir '${DEPLOY_LOCK_PATH}' 2>/dev/null || true" 2>/dev/null || true
@@ -135,6 +147,44 @@ cleanup() {
     fi
 }
 trap cleanup EXIT INT TERM
+
+while true; do
+    if mkdir "$LOCAL_GATE_LOCK_DIR" 2>/dev/null; then
+        echo "$$" > "$LOCAL_GATE_LOCK_DIR/pid"
+        echo "${APP_NAME}:deploy" > "$LOCAL_GATE_LOCK_DIR/owner"
+        date +%s > "$LOCAL_GATE_LOCK_DIR/timestamp"
+        LOCAL_GATE_LOCK_ACQUIRED=1
+        if [ "$LOCAL_WAIT_ANNOUNCED" -eq 1 ]; then
+            echo "⚡ [GLOBAL QUEUE] Local slot acquired after $(( $(date +%s) - LOCAL_WAIT_START ))s. Proceeding with deploy..."
+        fi
+        break
+    fi
+
+    HOLDER_PID="$(cat "$LOCAL_GATE_LOCK_DIR/pid" 2>/dev/null || echo "")"
+    HOLDER_OWNER="$(cat "$LOCAL_GATE_LOCK_DIR/owner" 2>/dev/null || echo "another workspace")"
+    LOCK_TS="$(cat "$LOCAL_GATE_LOCK_DIR/timestamp" 2>/dev/null || echo "0")"
+    NOW_TS=$(date +%s)
+
+    if [ -n "$HOLDER_PID" ] && ! kill -0 "$HOLDER_PID" 2>/dev/null; then
+        rm -rf "$LOCAL_GATE_LOCK_DIR" 2>/dev/null || true
+        continue
+    elif [ -z "$HOLDER_PID" ] && [ "$LOCK_TS" -gt 0 ] && [ $(( NOW_TS - LOCK_TS )) -gt 60 ]; then
+        rm -rf "$LOCAL_GATE_LOCK_DIR" 2>/dev/null || true
+        continue
+    elif [ "$LOCK_TS" -gt 0 ] && [ $(( NOW_TS - LOCK_TS )) -gt 1200 ]; then
+        if [ -n "$HOLDER_PID" ]; then
+            kill -TERM "$HOLDER_PID" 2>/dev/null || true
+        fi
+        rm -rf "$LOCAL_GATE_LOCK_DIR" 2>/dev/null || true
+        continue
+    fi
+
+    if [ "$LOCAL_WAIT_ANNOUNCED" -eq 0 ]; then
+        echo "⏳ [GLOBAL QUEUE] Another gate/deploy is active in ${HOLDER_OWNER} (PID ${HOLDER_PID:-unknown}). Queuing..."
+        LOCAL_WAIT_ANNOUNCED=1
+    fi
+    sleep 1
+done
 
 # Watchdog runner: runs command with hard timeout preventing CI/CD hangs
 run_with_watchdog() {
