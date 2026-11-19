@@ -96,6 +96,24 @@ final class ProfilePage extends ProcessImg
                 $profileTourDismissed = false;
             }
 
+            $pinnedWishlists = [];
+            try {
+                $famCodesForWishlists = array_values(array_unique(array_filter([
+                    (string) ($data['famCode'] ?? ''),
+                    (string) ($data['primaryFamCode'] ?? ''),
+                    (string) ($data['maternalFamCode'] ?? ''),
+                ], static fn (string $c): bool => $c !== '')));
+                if ($famCodesForWishlists !== []) {
+                    $allWishlists = (new \App\services\GiftWishlistService())->listWishlistsForFamilyCodes($famCodesForWishlists);
+                    $pinnedWishlists = array_values(array_filter(
+                        $allWishlists,
+                        static fn (array $w): bool => !empty($w['is_pinned'])
+                    ));
+                }
+            } catch (\Throwable $e) {
+                $pinnedWishlists = [];
+            }
+
             view('member/profilePage', [
                 'data' => $data['memberData'],
                 'primaryFamCode' => $data['primaryFamCode'] ?? ($data['famCode'] ?? ''),
@@ -125,7 +143,8 @@ final class ProfilePage extends ProcessImg
                 'cover' => (new \App\services\CoverPhotoService())->getCurrent((string) $this->id),
                 'isPendingApproval' => $data['isPendingApproval'] ?? false,
                 'pendingApprovalData' => $data['pendingApprovalData'] ?? null,
-                'profileTourDismissed' => $profileTourDismissed
+                'profileTourDismissed' => $profileTourDismissed,
+                'pinnedWishlists' => $pinnedWishlists
             ]);
 
         } catch (\Throwable $th) {

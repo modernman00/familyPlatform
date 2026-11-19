@@ -64,6 +64,63 @@
     align-items: center;
     margin-bottom: 10px;
 }
+.fw-partner-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
+}
+.fw-partner-card {
+    background-color: var(--card-bg, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.fw-partner-card:hover {
+    transform: translateY(-2px);
+    border-color: #f59e0b;
+}
+.fw-idea-card {
+    background-color: var(--card-bg, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+}
+.fw-quickshop-link {
+    min-height: 36px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+}
+.fw-badge-neutral {
+    background-color: #e2e8f0 !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    font-weight: 600;
+}
+.fw-badge-amber {
+    background-color: #fbbf24 !important;
+    color: #0f172a !important;
+    font-weight: 700;
+}
 @media (max-width: 640px) {
     .fw-item-row { grid-template-columns: 1fr; }
 }
@@ -82,7 +139,7 @@
                     Post your Christmas, Birthday, or occasion gift ideas &amp; links—pinned at the top for as many days as you choose.
                 </p>
             </div>
-            <button type="button" class="fw-btn btn btn-warning text-dark" @click="showForm = !showForm">
+            <button type="button" class="fw-btn btn btn-warning text-dark" @click="showForm ? (showForm = false) : openForm()">
                 <i class="bi bi-pin-angle-fill" aria-hidden="true"></i>
                 <span x-text="showForm ? 'Close Form' : 'Post a Wishlist'"></span>
             </button>
@@ -90,7 +147,7 @@
     </div>
 
     {{-- Post a Pinned Wishlist Form --}}
-    <div class="fw-card mb-4" x-show="showForm" x-collapse x-cloak>
+    <div id="fw-form-card" class="fw-card mb-4" x-show="showForm" x-collapse x-cloak>
         <h2 class="h5 fw-bold mb-3">Share a Pinned Gift Wishlist</h2>
         <div class="alert alert-danger" x-show="errorMsg" x-text="errorMsg" x-cloak role="alert"></div>
 
@@ -157,7 +214,7 @@
     <div class="d-flex flex-wrap gap-2 mb-3">
         <button type="button" class="fw-pill" :class="{ active: occasionFilter === 'all' }" @click="occasionFilter = 'all'">All</button>
         @foreach($occasions as $occ)
-            <button type="button" class="fw-pill" :class="{ active: occasionFilter === @json($occ) }" @click="occasionFilter = @json($occ)">{{ $occ }}</button>
+            <button type="button" class="fw-pill" :class="{ active: occasionFilter === {{ json_encode($occ) }} }" @click="occasionFilter = {{ json_encode($occ) }}">{{ $occ }}</button>
         @endforeach
     </div>
 
@@ -167,7 +224,7 @@
             <i class="bi bi-gift fs-1 text-warning d-block mb-2" aria-hidden="true"></i>
             <h2 class="h5 fw-bold">No gift wishlists shared yet</h2>
             <p class="text-muted mb-3">Post your Christmas or Birthday ideas so family members know exactly what to get you.</p>
-            <button type="button" class="fw-btn btn text-white" style="background: #a31621;" @click="showForm = true">
+            <button type="button" class="fw-btn btn text-white" style="background: #a31621;" @click="openForm()">
                 <i class="bi bi-plus-circle" aria-hidden="true"></i>
                 <span>Post Your First Wishlist</span>
             </button>
@@ -184,18 +241,18 @@
                 <article
                     id="wishlist-{{ $wlId }}"
                     class="fw-card {{ $isPinned ? 'fw-card-pinned' : '' }}"
-                    x-show="occasionFilter === 'all' || occasionFilter === @json($wl['occasion'])"
+                    x-show="occasionFilter === 'all' || occasionFilter === {{ json_encode($wl['occasion']) }}"
                     x-cloak
                 >
                     <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-2">
                         <div>
                             <div class="d-flex flex-wrap gap-2 mb-2">
                                 @if($isPinned)
-                                    <span class="badge rounded-pill text-bg-warning text-dark">
+                                    <span class="badge rounded-pill fw-badge-amber">
                                         📌 Pinned &middot; {{ $daysLeft }} {{ $daysLeft === 1 ? 'day' : 'days' }} left
                                     </span>
                                 @endif
-                                <span class="badge rounded-pill text-bg-light border text-dark">{{ $wl['occasion'] }}</span>
+                                <span class="badge rounded-pill fw-badge-neutral">{{ $wl['occasion'] }}</span>
                             </div>
                             <h2 class="h5 fw-bold mb-0">{{ $wl['title'] }}</h2>
                             <small class="text-muted">Posted by {{ $wl['author_name'] }}</small>
@@ -232,11 +289,17 @@
                                     </div>
                                     <div class="d-flex flex-wrap gap-2 align-items-center">
                                         @if(!empty($it['item_url']))
-                                            <a href="{{ $it['item_url'] }}" target="_blank" rel="noopener noreferrer" class="fw-btn btn btn-outline-dark btn-sm">
+                                            <a href="{{ $it['item_url'] }}" target="_blank" rel="noopener noreferrer sponsored" class="fw-btn btn btn-outline-dark btn-sm">
                                                 <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
                                                 <span>View Link</span>
                                             </a>
                                         @endif
+                                        @foreach(\App\services\GiftWishlistAffiliateService::buildQuickShopLinksForItem((string) $it['item_title']) as $qLink)
+                                            <a href="{{ $qLink['url'] }}" target="_blank" rel="noopener noreferrer sponsored" class="fw-quickshop-link border border-secondary-subtle text-dark bg-white">
+                                                <i class="bi bi-bag" aria-hidden="true"></i>
+                                                <span>{{ $qLink['name'] }}</span>
+                                            </a>
+                                        @endforeach
                                         <template x-if="claimedIds.includes({{ $itId }}) || {{ $isClaimed ? 'true' : 'false' }}">
                                             <span class="badge rounded-pill text-bg-success py-2 px-3">
                                                 ✓ Claimed
@@ -262,13 +325,134 @@
             @endforeach
         </div>
     @endif
+
+    {{-- Affiliate Gift Retailers & Curated Ideas Hub --}}
+    <section class="fw-card mt-4" aria-labelledby="fw-affiliate-heading">
+        <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
+            <div>
+                <span class="badge rounded-pill text-bg-warning text-dark mb-2">🛍️ Partner Gift Directory</span>
+                <h2 id="fw-affiliate-heading" class="h5 fw-bold mb-1">Trusted Gift Retailers &amp; Curated Ideas</h2>
+                <p class="text-muted small mb-0">
+                    Browse 18 trusted UK &amp; global retailers or add curated gift ideas straight into your wishlist.
+                </p>
+            </div>
+            <span class="badge rounded-pill fw-badge-neutral py-2 px-3">
+                Partner Links &middot; Small commission at no extra cost
+            </span>
+        </div>
+
+        {{-- Curated One-Click Gift Ideas --}}
+        @if(!empty($curatedIdeas))
+            <div class="mb-4">
+                <h3 class="h6 fw-bold mb-2">Popular Gift Ideas (One-Click Add to Wishlist)</h3>
+                <div class="fw-partner-grid">
+                    @foreach($curatedIdeas as $idea)
+                        <div
+                            class="fw-idea-card"
+                            x-show="occasionFilter === 'all' || occasionFilter === {{ json_encode($idea['occasion']) }}"
+                            x-cloak
+                        >
+                            <div>
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                                    <span class="badge rounded-pill fw-badge-neutral">{{ $idea['occasion'] }}</span>
+                                    <span class="small fw-semibold text-warning">£{{ $idea['approx_price'] }}</span>
+                                </div>
+                                <strong class="d-block mb-1">{{ $idea['title'] }}</strong>
+                                <small class="text-muted">Via {{ $idea['partner_name'] }}</small>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                <button
+                                    type="button"
+                                    class="fw-btn btn text-white btn-sm flex-grow-1"
+                                    style="background: #a31621;"
+                                    @click="addCuratedIdea({{ json_encode($idea) }})"
+                                >
+                                    <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                                    <span>Add to Wishlist</span>
+                                </button>
+                                <a
+                                    href="{{ $idea['url'] }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer sponsored"
+                                    class="fw-btn btn btn-outline-secondary btn-sm"
+                                >
+                                    <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                                    <span>Shop</span>
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        {{-- Retailer Search & Category Filter --}}
+        <div class="mb-3">
+            <h3 class="h6 fw-bold mb-2">Shop &amp; Search Across {{ count($affiliatePartners ?? []) }} Partner Retailers</h3>
+            <div class="mb-3">
+                <label for="fw-partner-search" class="visually-hidden">Search gift ideas across partner retailers</label>
+                <input
+                    id="fw-partner-search"
+                    type="search"
+                    class="form-control"
+                    style="min-height: 44px;"
+                    x-model="partnerQuery"
+                    placeholder="Type a gift idea (e.g. AirPods, LEGO, Cashmere, Hamper) to search any store below..."
+                >
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="fw-pill" :class="{ active: partnerCategory === 'all' }" @click="partnerCategory = 'all'">
+                    All Retailers
+                </button>
+                @foreach(($partnerCategories ?? []) as $pCat)
+                    <button
+                        type="button"
+                        class="fw-pill"
+                        :class="{ active: partnerCategory === {{ json_encode($pCat) }} }"
+                        @click="partnerCategory = {{ json_encode($pCat) }}"
+                    >
+                        {{ $pCat }}
+                    </button>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="fw-partner-grid">
+            @foreach(($affiliatePartners ?? []) as $partner)
+                <div
+                    class="fw-partner-card"
+                    x-show="partnerCategory === 'all' || partnerCategory === {{ json_encode($partner['category']) }}"
+                    x-cloak
+                >
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                            <strong class="fs-6">{{ $partner['name'] }}</strong>
+                            <span class="badge rounded-pill fw-badge-neutral">{{ $partner['badge'] }}</span>
+                        </div>
+                        <p class="text-muted small mb-0">{{ $partner['tagline'] }}</p>
+                    </div>
+                    <a
+                        :href="partnerUrl({{ json_encode($partner['base_url']) }}, {{ json_encode($partner['search_template']) }})"
+                        target="_blank"
+                        rel="noopener noreferrer sponsored"
+                        class="fw-btn btn btn-warning text-dark btn-sm w-100"
+                    >
+                        <i class="bi bi-bag-check" aria-hidden="true"></i>
+                        <span x-text="partnerQuery.trim() ? 'Search ' + {{ json_encode($partner['name']) }} : 'Visit ' + {{ json_encode($partner['name']) }}"></span>
+                    </a>
+                </div>
+            @endforeach
+        </div>
+    </section>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 function familyWishlistApp() {
     return {
         showForm: false,
         occasionFilter: 'all',
+        partnerCategory: 'all',
+        partnerQuery: '',
         occasion: 'Christmas',
         title: '',
         notes: '',
@@ -277,6 +461,41 @@ function familyWishlistApp() {
         submitting: false,
         errorMsg: '',
         claimedIds: [],
+
+        openForm() {
+            this.showForm = true;
+            this.$nextTick(() => {
+                const el = document.getElementById('fw-form-card');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const titleInput = document.getElementById('fw-title');
+                if (titleInput) titleInput.focus();
+            });
+        },
+
+        partnerUrl(baseUrl, searchTemplate) {
+            const q = (this.partnerQuery || '').trim();
+            if (!q) return baseUrl;
+            return searchTemplate.replace('{query}', encodeURIComponent(q));
+        },
+
+        addCuratedIdea(idea) {
+            if (!idea || !idea.title) return;
+            if (idea.occasion) {
+                this.occasion = idea.occasion;
+            }
+            const emptyIdx = this.items.findIndex((it) => !(it.item_title || '').trim());
+            const payload = {
+                item_title: idea.title,
+                item_url: idea.url || '',
+                approx_price: idea.approx_price || '',
+            };
+            if (emptyIdx !== -1) {
+                this.items.splice(emptyIdx, 1, payload);
+            } else if (this.items.length < 15) {
+                this.items.push(payload);
+            }
+            this.openForm();
+        },
 
         addItem() {
             if (this.items.length >= 15) return;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\controller\members;
 
 use App\controller\BaseController;
+use App\services\GiftWishlistAffiliateService;
 use App\services\GiftWishlistService;
 use InvalidArgumentException;
 use Src\functionality\SignIn;
@@ -38,13 +39,20 @@ final class GiftWishlistController extends BaseController
         $occasion = is_string($_GET['occasion'] ?? null) ? trim($_GET['occasion']) : null;
 
         $wishlists = $this->service->listWishlistsForFamilyCodes($famCodes, $occasion);
+        $affiliatePartners = GiftWishlistAffiliateService::getRetailPartners();
+        $partnerCategories = GiftWishlistAffiliateService::getPartnerCategories();
+        $curatedIdeas = GiftWishlistAffiliateService::getCuratedGiftIdeas();
 
         if (empty($_SESSION['token'])) {
             $_SESSION['token'] = bin2hex(random_bytes(32));
         }
 
         if ($this->wantsJson()) {
-            \Src\ApiResponse::success(['wishlists' => $wishlists], 'Wishlists loaded.', 200);
+            \Src\ApiResponse::success([
+                'wishlists' => $wishlists,
+                'affiliate_partners' => $affiliatePartners,
+                'curated_ideas' => $curatedIdeas,
+            ], 'Wishlists loaded.', 200);
             return;
         }
 
@@ -54,6 +62,9 @@ final class GiftWishlistController extends BaseController
             'famCodes' => $famCodes,
             'wishlists' => $wishlists,
             'occasions' => GiftWishlistService::OCCASIONS,
+            'affiliatePartners' => $affiliatePartners,
+            'partnerCategories' => $partnerCategories,
+            'curatedIdeas' => $curatedIdeas,
             'csrfToken' => (string) $_SESSION['token'],
         ]);
     }
@@ -91,6 +102,11 @@ final class GiftWishlistController extends BaseController
                 'currency' => $payload['currency'] ?? '£',
                 'items' => is_array($payload['items'] ?? null) ? $payload['items'] : [],
             ]);
+
+            $feedPostNo = $this->service->publishFeedPost($userId, $authorName, $primaryFamCode, $created);
+            if ($feedPostNo !== null) {
+                $created['feed_post_no'] = $feedPostNo;
+            }
 
             if ($this->wantsJson()) {
                 \Src\ApiResponse::success(['wishlist' => $created], 'Your gift wishlist is now pinned at the top!', 201);
@@ -211,7 +227,7 @@ final class GiftWishlistController extends BaseController
             }
         }
         if ($codes === [] && $userId !== '') {
-            $user = SelectFn::selectOneRow('users', 'id', $userId);
+            $user = SelectFn::selectOneRow('personal', 'id', $userId);
             if (is_array($user) && !empty($user['famCode'])) {
                 $codes[] = trim((string) $user['famCode']);
             }

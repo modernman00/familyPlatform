@@ -28,13 +28,97 @@ final class GiftWishlistService
     private const MAX_PIN_DAYS = 90;
     private const MAX_ITEMS_PER_WISHLIST = 15;
 
+    private bool $schemaEnsured = false;
+
     public function __construct(private ?PDO $db = null)
     {
     }
 
     private function db(): PDO
     {
-        return $this->db ??= Db::connect2();
+        $pdo = $this->db ??= Db::connect2();
+        if (!$this->schemaEnsured) {
+            self::ensureSchema($pdo);
+            $this->schemaEnsured = true;
+        }
+        return $pdo;
+    }
+
+    /**
+     * Ensure wishlist tables and expected columns exist on both local and live environments.
+     */
+    public static function ensureSchema(PDO $pdo): void
+    {
+        try {
+            $pdo->exec(
+                'CREATE TABLE IF NOT EXISTS `family_gift_wishlists` (
+                    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                    `user_id` VARCHAR(255) NOT NULL,
+                    `author_name` VARCHAR(120) NOT NULL,
+                    `family_code` VARCHAR(64) NOT NULL,
+                    `occasion` VARCHAR(60) NOT NULL DEFAULT \'Christmas\',
+                    `title` VARCHAR(160) NOT NULL,
+                    `notes` VARCHAR(500) NULL DEFAULT NULL,
+                    `pin_days` INT UNSIGNED NOT NULL DEFAULT 14,
+                    `pinned_until` DATETIME NOT NULL,
+                    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (`id`),
+                    KEY `idx_fgw_fam_pin` (`family_code`, `pinned_until`, `created_at`),
+                    KEY `idx_fgw_user` (`user_id`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+            );
+
+            $pdo->exec(
+                'CREATE TABLE IF NOT EXISTS `family_gift_wishlist_items` (
+                    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                    `wishlist_id` BIGINT UNSIGNED NOT NULL,
+                    `item_title` VARCHAR(160) NOT NULL,
+                    `item_url` VARCHAR(500) NULL DEFAULT NULL,
+                    `approx_price` DECIMAL(10,2) NULL DEFAULT NULL,
+                    `currency` VARCHAR(10) NOT NULL DEFAULT \'£\',
+                    `claimed_by_user_id` VARCHAR(255) NULL DEFAULT NULL,
+                    `claimed_by_name` VARCHAR(120) NULL DEFAULT NULL,
+                    `claimed_at` DATETIME NULL DEFAULT NULL,
+                    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (`id`),
+                    KEY `idx_fgwi_wishlist` (`wishlist_id`),
+                    CONSTRAINT `fk_fgwi_wishlist` FOREIGN KEY (`wishlist_id`) REFERENCES `family_gift_wishlists` (`id`) ON DELETE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+            );
+
+            $wStmt = $pdo->query('SHOW COLUMNS FROM `family_gift_wishlists`');
+            $wishlistCols = $wStmt !== false ? ($wStmt->fetchAll(PDO::FETCH_COLUMN) ?: []) : [];
+            $wishlistAdditions = [
+                'author_name' => 'ALTER TABLE `family_gift_wishlists` ADD COLUMN `author_name` VARCHAR(120) NOT NULL DEFAULT \'Family Member\'',
+                'occasion' => 'ALTER TABLE `family_gift_wishlists` ADD COLUMN `occasion` VARCHAR(60) NOT NULL DEFAULT \'Christmas\'',
+                'notes' => 'ALTER TABLE `family_gift_wishlists` ADD COLUMN `notes` VARCHAR(500) NULL DEFAULT NULL',
+                'pin_days' => 'ALTER TABLE `family_gift_wishlists` ADD COLUMN `pin_days` INT UNSIGNED NOT NULL DEFAULT 14',
+                'pinned_until' => 'ALTER TABLE `family_gift_wishlists` ADD COLUMN `pinned_until` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP',
+            ];
+            foreach ($wishlistAdditions as $col => $alterSql) {
+                if (!in_array($col, $wishlistCols, true)) {
+                    $pdo->exec($alterSql);
+                }
+            }
+
+            $iStmt = $pdo->query('SHOW COLUMNS FROM `family_gift_wishlist_items`');
+            $itemCols = $iStmt !== false ? ($iStmt->fetchAll(PDO::FETCH_COLUMN) ?: []) : [];
+            $itemAdditions = [
+                'item_url' => 'ALTER TABLE `family_gift_wishlist_items` ADD COLUMN `item_url` VARCHAR(500) NULL DEFAULT NULL',
+                'approx_price' => 'ALTER TABLE `family_gift_wishlist_items` ADD COLUMN `approx_price` DECIMAL(10,2) NULL DEFAULT NULL',
+                'currency' => 'ALTER TABLE `family_gift_wishlist_items` ADD COLUMN `currency` VARCHAR(10) NOT NULL DEFAULT \'£\'',
+                'claimed_by_user_id' => 'ALTER TABLE `family_gift_wishlist_items` ADD COLUMN `claimed_by_user_id` VARCHAR(255) NULL DEFAULT NULL',
+                'claimed_by_name' => 'ALTER TABLE `family_gift_wishlist_items` ADD COLUMN `claimed_by_name` VARCHAR(120) NULL DEFAULT NULL',
+                'claimed_at' => 'ALTER TABLE `family_gift_wishlist_items` ADD COLUMN `claimed_at` DATETIME NULL DEFAULT NULL',
+            ];
+            foreach ($itemAdditions as $col => $alterSql) {
+                if (!in_array($col, $itemCols, true)) {
+                    $pdo->exec($alterSql);
+                }
+            }
+        } catch (\Throwable $e) {
+            error_log('[GiftWishlistService::ensureSchema] ' . $e->getMessage());
+        }
     }
 
     /**
@@ -285,6 +369,65 @@ final class GiftWishlistService
         $fetch->execute([$itemId]);
         $row = $fetch->fetch(PDO::FETCH_ASSOC);
         return is_array($row) ? $row : [];
+    }
+
+    /**
+     * Publish an automatic announcement post to the family feed when a wishlist is created.
+     *
+     * @param array<string, mixed> $wishlist
+     */
+    public function publishFeedPost(string $userId, string $authorName, string $familyCode, array $wishlist): ?int
+    {
+        try {
+            $pdo = $this->db();
+            $uStmt = $pdo->prepare('SELECT img FROM profilePics WHERE id = ? LIMIT 1');
+            $uStmt->execute([$userId]);
+            $profileImg = (string) ($uStmt->fetchColumn() ?: 'default.png');
+
+            $occasion = (string) ($wishlist['occasion'] ?? 'Gift');
+            $title = (string) ($wishlist['title'] ?? "{$authorName}'s Wishlist");
+            $pinDays = (int) ($wishlist['pin_days'] ?? 14);
+            $wishlistId = (int) ($wishlist['id'] ?? 0);
+            $items = is_array($wishlist['items'] ?? null) ? $wishlist['items'] : [];
+
+            $lines = ["🎁 New {$occasion} Gift Wishlist: {$title}"];
+            $previewCount = 0;
+            foreach ($items as $it) {
+                if ($previewCount >= 5) {
+                    break;
+                }
+                $itemTitle = trim((string) ($it['item_title'] ?? ''));
+                if ($itemTitle === '') {
+                    continue;
+                }
+                $pricePart = '';
+                if (!empty($it['approx_price'])) {
+                    $curr = (string) ($it['currency'] ?? '£');
+                    $pricePart = ' (' . $curr . number_format((float) $it['approx_price'], 2) . ')';
+                }
+                $lines[] = "• {$itemTitle}{$pricePart}";
+                $previewCount++;
+            }
+            if (count($items) > 5) {
+                $more = count($items) - 5;
+                $lines[] = "• …and {$more} more gift " . ($more === 1 ? 'idea' : 'ideas');
+            }
+            $lines[] = "📌 Pinned for {$pinDays} " . ($pinDays === 1 ? 'day' : 'days') . " — view & claim gifts at /wishlists#wishlist-{$wishlistId}";
+
+            $postMessage = implode("\n", $lines);
+            $postTime = function_exists('milliSeconds') ? (string) milliSeconds() : date('Y-m-d H:i:s');
+
+            $ins = $pdo->prepare(
+                "INSERT INTO post (id, fullName, profileImg, postMessage, postFamCode, post_time, post_status, post_img0, date_created)
+                 VALUES (?, ?, ?, ?, ?, ?, 'published', '', NOW())"
+            );
+            $ins->execute([$userId, $authorName, $profileImg, $postMessage, $familyCode, $postTime]);
+
+            return (int) $pdo->lastInsertId();
+        } catch (\Throwable $e) {
+            error_log('[GiftWishlistService::publishFeedPost] ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**

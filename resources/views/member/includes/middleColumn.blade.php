@@ -778,6 +778,9 @@
   </div>
   @endif
 
+  <!-- Pinned Family Gift Wishlists (Top of Feed) -->
+  @includeIf('member.includes.pinnedWishlistsFeedCard')
+
   <!-- Reactive Alpine.js Feed -->
   <div x-data="profileFeed({ famCode: '{{ $data['famCode'] ?? '' }}', userId: '{{ $data['id'] ?? '' }}', familyRoster: {{ json_encode($data['familyRoster'] ?? []) }} })" class="feed-posts-container">
     <!-- Error Alert if loading fails -->
