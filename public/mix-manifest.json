@@ -1,6 +1,8 @@
 {
-    "/js/index.js": "/js/index.js?id=8aac390cfc8667c580ab820c0c4c3b50",
-    "/js/manifest.js": "/js/manifest.js?id=b7d7d22c82e714aa941c0e2373ed6a63",
+    "/js/index.js": "/js/index.js?id=8409ada84fbe9698bc202d796c9b0a69",
+    "/js/studio-app.js": "/js/studio-app.js?id=f3ea15e08686c21e7a143ecf31b65c7b",
+    "/js/organogram-app.js": "/js/organogram-app.js?id=1c00c10242825890074d656e4f807d9e",
+    "/js/manifest.js": "/js/manifest.js?id=56da967162250daab8c28faf70a5aa51",
     "/js/register.js?v=4c84ab68": "/js/register.js?v=4c84ab68?id=18d8f63fd059d7e4dd8c2c6a55d5e74d",
     "/js/all_members.js?v=6def94e0": "/js/all_members.js?v=6def94e0?id=f710d790739b581dd40c63d1e018acf2",
     "/js/reels.js?v=c5218122": "/js/reels.js?v=c5218122?id=41d761ea29f02fa37ebf5403acc0e0fa",
@@ -16,5 +18,5 @@
     "/js/accountSetting.js?v=b36bc567": "/js/accountSetting.js?v=b36bc567?id=71d11a7b1ef2fe545a2c1a550974dee0",
     "/js/organogram.js?v=9640b212": "/js/organogram.js?v=9640b212?id=8cc7f7e2e1da6bad92450a4c452b92f3",
     "/css/main.css": "/css/main.css?id=9463d6991c4ec9625b2f9e3f5dff6873",
-    "/js/vendor.js": "/js/vendor.js?id=6d48f880a8fea51f2ca08c90a5e0c68b"
+    "/js/vendor.js": "/js/vendor.js?id=0bc350d3f6aae04b01cf7b0f2e94229b"
 }

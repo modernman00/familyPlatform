@@ -251,12 +251,14 @@ if (window.location.pathname === '/register') {
 } else if (checkURL('organogram') || window.location.pathname.startsWith('/organogram')) {
   if (qSel('.familyTreeNav')) qSel('.familyTreeNav').style.display = 'none'; // navbar mgt
 
-  routePromise = import(
-    /* webpackChunkName: 'organogram' */
-    './components/familyTree/index.js'
-  )
-    .then((module) => module.default)
-    .catch((err) => showError(err));
+  if (!document.getElementById('organogram-root')) {
+    routePromise = import(
+      /* webpackChunkName: 'organogram' */
+      './components/familyTree/index.js'
+    )
+      .then((module) => module.default)
+      .catch((err) => showError(err));
+  }
 } else if (window.location.pathname === '/allMembers/getProfile') {
   qSel('.familyTreeNav').style.display = 'none'; // navbar mgt
   qSel('.notification_count').style.display = 'none'; // navbar mgt

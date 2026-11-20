@@ -199,11 +199,24 @@ final class ReelsController extends BaseController
             }
 
             $data = $this->membersData();
+            $vParam = strtolower(trim((string)($_GET['v'] ?? '')));
+            $envStudio = filter_var($_ENV['FEATURE_REACT_STUDIO'] ?? getenv('FEATURE_REACT_STUDIO') ?: false, FILTER_VALIDATE_BOOLEAN);
+            $useReactStudio = $vParam === 'react' || ($vParam !== 'legacy' && $envStudio);
+            $csrfToken = (string)($_SESSION['token'] ?? '');
+            $studioBootstrapJson = json_encode([
+                'userId' => $userId,
+                'famCode' => $famCode,
+                'csrfToken' => $csrfToken,
+                'initialMode' => 'nle',
+            ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?: '{}';
 
             view('member/family_studio', [
                 'data' => $data,
                 'userId' => $userId,
                 'famCode' => $famCode,
+                'useReactStudio' => $useReactStudio,
+                'csrfToken' => $csrfToken,
+                'studioBootstrapJson' => $studioBootstrapJson,
                 'pageTitle' => 'Family Living Archives Studio | 4K Reel Studio & Video Vault',
             ]);
         } catch (\Throwable $th) {

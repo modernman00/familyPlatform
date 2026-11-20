@@ -138,16 +138,142 @@
       <!-- 2. Standard Plain Text Post (when post_style is not set) -->
       <template x-if="!getPostStageMeta(post)">
         <div>
-          <template x-if="getMediaCaption(post)">
-            <p class="mb-0" style="white-space: pre-line; font-size: 1.05rem; color: var(--text-main); line-height: 1.55; font-family: var(--font-sans, -apple-system, system-ui, sans-serif);" x-html="renderHashtags(getMediaCaption(post), post.ar_emoji)"></p>
+          <!-- 2a. Bespoke Gift Wishlist Feed Announcement Card (auto-parses 🎁 New ... Gift Wishlist posts) -->
+          <template x-if="(post.postMessage || '').includes('Gift Wishlist:') && (post.postMessage || '').includes('/wishlists')">
+            <div class="fp-feed-wishlist-card rounded-4 overflow-hidden border shadow-xs my-1"
+                 style="border-color: rgba(245, 158, 11, 0.45) !important; background-color: var(--card-bg, #ffffff);"
+                 x-data="{
+                   get parsed() {
+                     const raw = String(post.postMessage || '');
+                     const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+                     let occasion = 'Christmas';
+                     let title = 'Family Gift Wishlist';
+                     let pinDays = '14 days';
+                     let targetUrl = '/wishlists';
+                     const items = [];
+
+                     lines.forEach(line => {
+                       const headerMatch = line.match(/New\s+(.+?)\s+Gift\s+Wishlist:\s*(.+)$/i);
+                       if (headerMatch) {
+                         occasion = headerMatch[1].trim();
+                         title = headerMatch[2].trim();
+                         return;
+                       }
+                       if (line.startsWith('•') || line.startsWith('*') || line.startsWith('-')) {
+                         const clean = line.replace(/^[•*\-]\s*/, '').trim();
+                         const priceMatch = clean.match(/^(.*?)\s*\(([£$€₦]|CAD|AUD|GBP|USD|EUR|NGN)([\d,.]+)\)$/);
+                         if (priceMatch) {
+                           items.push({ name: priceMatch[1].trim(), price: priceMatch[2] + priceMatch[3], isMore: false });
+                         } else {
+                           items.push({ name: clean, price: '', isMore: clean.startsWith('…and ') || clean.startsWith('...and ') });
+                         }
+                         return;
+                       }
+                       const pinMatch = line.match(/Pinned\s+for\s+(\d+\s+days?)/i);
+                       if (pinMatch) {
+                         pinDays = pinMatch[1];
+                       }
+                       const urlMatch = line.match(/(\/wishlists(?:#wishlist-\d+)?)/i);
+                       if (urlMatch) {
+                         targetUrl = urlMatch[1];
+                       }
+                     });
+                     return { occasion, title, pinDays, targetUrl, items };
+                   }
+                 }">
+              <!-- Header Ribbon -->
+              <div class="p-3 d-flex flex-wrap align-items-center justify-content-between gap-2 border-bottom"
+                   style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.14) 0%, rgba(163, 22, 33, 0.07) 100%); border-color: rgba(245, 158, 11, 0.25) !important;">
+                <div class="d-flex align-items-center gap-2.5 min-w-0">
+                  <div class="rounded-3 d-flex align-items-center justify-content-center shadow-2xs flex-shrink-0"
+                       style="width: 44px; height: 44px; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #0f172a; font-size: 1.3rem;">
+                    🎁
+                  </div>
+                  <div class="min-w-0">
+                    <div class="d-flex align-items-center gap-1.5 flex-wrap mb-1">
+                      <span class="badge rounded-pill"
+                            style="background-color: #fbbf24 !important; color: #0f172a !important; font-weight: 700; font-size: 0.74rem;"
+                            x-text="'🎄 ' + parsed.occasion + ' Wishlist'"></span>
+                      <span class="badge rounded-pill border"
+                            style="background-color: var(--card-bg, #ffffff) !important; color: var(--text-main, #0f172a) !important; border-color: rgba(148, 163, 184, 0.4) !important; font-weight: 600; font-size: 0.73rem;"
+                            x-text="'📌 Pinned for ' + parsed.pinDays"></span>
+                    </div>
+                    <h4 class="fw-bold mb-0 text-truncate"
+                        style="font-size: 1.08rem; color: var(--text-main, #0f172a); letter-spacing: -0.01em;"
+                        :title="parsed.title"
+                        x-text="parsed.title"></h4>
+                  </div>
+                </div>
+                <span class="badge rounded-pill px-2.5 py-1.5 fp-fw-badge-emerald"
+                      style="font-size: 0.75rem;"
+                      x-text="parsed.items.filter(i => !i.isMore).length + (parsed.items.filter(i => !i.isMore).length === 1 ? ' Gift Idea' : ' Gift Ideas')"></span>
+              </div>
+
+              <!-- Structured Gift Items List -->
+              <div class="p-3 d-grid gap-2">
+                <template x-for="(it, idx) in parsed.items" :key="idx">
+                  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 p-2.5 px-3 rounded-3 border"
+                       style="background-color: var(--surface-alt, rgba(148, 163, 184, 0.06)); border-color: var(--border-color, #e2e8f0) !important;">
+                    <div class="d-flex align-items-center gap-2.5 min-w-0">
+                      <span class="rounded-2 d-inline-flex align-items-center justify-content-center fw-bold flex-shrink-0 fp-fw-index-pill"
+                            style="width: 28px; height: 28px; font-size: 0.78rem;"
+                            x-text="it.isMore ? '+' : (idx + 1)"></span>
+                      <span class="fw-semibold text-truncate"
+                            style="color: var(--text-main, #0f172a); font-size: 0.92rem;"
+                            :title="it.name"
+                            x-text="it.name"></span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                      <template x-if="it.price">
+                        <span class="badge rounded-pill px-2.5 py-1 fp-fw-badge-emerald"
+                              style="font-weight: 800; font-size: 0.78rem;"
+                              x-text="it.price"></span>
+                      </template>
+                      <template x-if="!it.isMore">
+                        <a :href="parsed.targetUrl"
+                           class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-3"
+                           style="min-height: 44px; min-width: 44px; background-color: #fbbf24; color: #0f172a !important; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                          <i class="bi bi-gift-fill" aria-hidden="true"></i>
+                          <span>Claim</span>
+                        </a>
+                      </template>
+                    </div>
+                  </div>
+                </template>
+
+                <!-- Action Footer (No raw /wishlists#wishlist-1 URL text) -->
+                <div class="pt-2 mt-1 d-flex flex-wrap align-items-center justify-content-between gap-2 border-top"
+                     style="border-color: var(--border-color, #e2e8f0) !important;">
+                  <span class="small text-muted" style="font-size: 0.8rem;">
+                    <i class="bi bi-shield-check text-success me-1" aria-hidden="true"></i>Claim with your name or secretly so relatives avoid duplicate gifts.
+                  </span>
+                  <a :href="parsed.targetUrl"
+                     class="btn btn-sm text-white rounded-pill fw-bold d-inline-flex align-items-center gap-1.5 px-3 py-2 shadow-2xs"
+                     style="background: #a31621; min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                    <i class="bi bi-gift" aria-hidden="true"></i>
+                    <span>Open Wishlist &amp; Claim Gifts</span>
+                    <i class="bi bi-arrow-right-short" style="font-size: 1.15rem;" aria-hidden="true"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
           </template>
-          <template x-if="hasFamilyTreeCall(post)">
-            <div class="mt-2.5">
-              <a href="/organogram" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1.5 px-3 py-1.5 shadow-2xs" style="background: linear-gradient(135deg, #065f46 0%, #059669 100%); color: #ffffff !important; min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
-                <i class="bi bi-diagram-3-fill"></i>
-                <span>Add Your Branch to Family Tree</span>
-                <i class="bi bi-arrow-right-short"></i>
-              </a>
+
+          <!-- 2b. Regular Text Post -->
+          <template x-if="!((post.postMessage || '').includes('Gift Wishlist:') && (post.postMessage || '').includes('/wishlists'))">
+            <div>
+              <template x-if="getMediaCaption(post)">
+                <p class="mb-0" style="white-space: pre-line; font-size: 1.05rem; color: var(--text-main); line-height: 1.55; font-family: var(--font-sans, -apple-system, system-ui, sans-serif);" x-html="renderHashtags(getMediaCaption(post), post.ar_emoji)"></p>
+              </template>
+              <template x-if="hasFamilyTreeCall(post)">
+                <div class="mt-2.5">
+                  <a href="/organogram" class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1.5 px-3 py-1.5 shadow-2xs" style="background: linear-gradient(135deg, #065f46 0%, #059669 100%); color: #ffffff !important; min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                    <i class="bi bi-diagram-3-fill"></i>
+                    <span>Add Your Branch to Family Tree</span>
+                    <i class="bi bi-arrow-right-short"></i>
+                  </a>
+                </div>
+              </template>
             </div>
           </template>
         </div>

@@ -115,6 +115,33 @@
   html.dark-mode .wedding-anniversary-prompt-card .anniversary-dismiss-btn:hover {
     color: #f1f5f9 !important;
   }
+
+  /* Gift Wishlist Feed Card WCAG AA Light & Dark Contrast Tokens */
+  .fp-fw-badge-emerald {
+    background: rgba(16, 185, 129, 0.15);
+    color: #065f46;
+    font-weight: 700;
+  }
+  .fp-fw-index-pill {
+    background: rgba(245, 158, 11, 0.16);
+    color: #92400e;
+  }
+  body.dark-mode .fp-fw-badge-emerald,
+  body.dark-theme .fp-fw-badge-emerald,
+  [data-bs-theme="dark"] .fp-fw-badge-emerald,
+  html.dark .fp-fw-badge-emerald,
+  html.dark-mode .fp-fw-badge-emerald {
+    background: rgba(16, 185, 129, 0.22);
+    color: #6ee7b7;
+  }
+  body.dark-mode .fp-fw-index-pill,
+  body.dark-theme .fp-fw-index-pill,
+  [data-bs-theme="dark"] .fp-fw-index-pill,
+  html.dark .fp-fw-index-pill,
+  html.dark-mode .fp-fw-index-pill {
+    background: rgba(251, 191, 36, 0.22);
+    color: #fde68a;
+  }
 </style>
 <div class="feed-column">
   @if(!empty($isPendingApproval))

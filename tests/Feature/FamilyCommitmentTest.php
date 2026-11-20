@@ -41,6 +41,12 @@ final class FamilyCommitmentTest extends TestCase
         $this->outsiderId = 'test_outsider_' . $suffix;
         $this->famCode = 'FAMTEST_' . $suffix;
         $this->otherFamCode = 'FAMOTHER_' . $suffix;
+
+        $insPersonal = $this->pdo->prepare(
+            'INSERT INTO personal (id, firstName, lastName, famCode) VALUES (?, ?, ?, ?)'
+        );
+        $insPersonal->execute([$this->ownerId, 'Wale', 'Olaogun', $this->famCode]);
+        $insPersonal->execute([$this->partnerId, 'Ajibike', 'Olaogun', $this->famCode]);
     }
 
     protected function tearDown(): void
@@ -62,6 +68,9 @@ final class FamilyCommitmentTest extends TestCase
 
         $delNotif = $this->pdo->prepare('DELETE FROM notification WHERE sender_id = ? OR receiver_id IN (?, ?, ?)');
         $delNotif->execute([$this->ownerId, $this->ownerId, $this->partnerId, $this->outsiderId]);
+
+        $delPersonal = $this->pdo->prepare('DELETE FROM personal WHERE id IN (?, ?, ?)');
+        $delPersonal->execute([$this->ownerId, $this->partnerId, $this->outsiderId]);
 
         parent::tearDown();
     }
@@ -206,6 +215,7 @@ final class FamilyCommitmentTest extends TestCase
         ], $wednesdayAt19);
 
         self::assertSame(1, $res['commitment']['completed_this_period']);
+        self::assertSame('Wale Olaogun', $res['commitment']['recent_checkins'][0]['completed_by_name'] ?? '');
     }
 
     public function testAdversarialIdorProtectionBlocksUnauthorizedAccess(): void

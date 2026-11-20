@@ -1,0 +1,401 @@
+/* Isolated CSS Module for Creative Studio Island (Global Design Standards v2.1) */
+.shell {
+    --st-bg: var(--ds-canvas, #0b0f19);
+    --st-surface: var(--ds-surface, #141a29);
+    --st-surface-elevated: var(--ds-surface-2, #1e2538);
+    --st-ink: var(--ds-ink, #f8fafc);
+    --st-muted: #cbd5e1;
+    --st-border: rgba(148, 163, 184, 0.24);
+    --st-accent: #a31621;
+    --st-accent-ink: #ffffff;
+    --st-gold: #ffd700;
+    --st-gold-ink: #0b0f19;
+    --st-focus: #ffd700;
+
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--space-4, 16px);
+    color: var(--st-ink);
+    background: var(--st-bg);
+    border-radius: var(--radius-lg, 16px);
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+    overflow-x: clip;
+}
+
+.shell *,
+.shell *::before,
+.shell *::after {
+    box-sizing: border-box;
+}
+
+.header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3, 12px);
+    padding: var(--space-4, 16px);
+    background: linear-gradient(135deg, #1b050a 0%, #3e0711 100%);
+    color: #ffffff;
+    border: 1px solid rgba(255, 215, 0, 0.28);
+    border-radius: var(--radius-lg, 16px);
+    margin-bottom: var(--space-4, 16px);
+}
+
+.titleGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.eyebrow {
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--st-gold);
+}
+
+.title {
+    margin: 0;
+    font-size: var(--text-2xl, 1.5rem);
+    font-weight: 700;
+    line-height: 1.25;
+    color: #ffffff;
+}
+
+.modeTabs {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--space-2, 8px);
+    overflow-x: auto;
+    max-width: 100%;
+    padding-bottom: 2px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: var(--tap-min, 44px);
+    min-width: var(--tap-min, 44px);
+    padding: 0 16px;
+    border-radius: var(--radius-md, 12px);
+    font-size: var(--text-sm, 0.875rem);
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    flex-shrink: 0;
+    cursor: pointer;
+    border: 1px solid var(--st-border);
+    background: var(--st-surface-elevated);
+    color: var(--st-ink);
+    transition: transform 0.15s ease, filter 0.15s ease, background-color 0.15s ease;
+    text-decoration: none;
+}
+
+.btn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.btn:focus-visible {
+    outline: 2px solid var(--st-focus);
+    outline-offset: 2px;
+}
+
+.btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.btnPrimary {
+    background: linear-gradient(135deg, #a31621 0%, #7a0e16 100%);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btnGold {
+    background: linear-gradient(135deg, #ffd700 0%, #d4af37 100%);
+    color: #0b0f19;
+    border-color: rgba(255, 215, 0, 0.5);
+}
+
+.btnActive {
+    background: #ffd700;
+    color: #0b0f19;
+    border-color: #ffd700;
+}
+
+.workspaceGrid {
+    display: grid;
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr) minmax(260px, 320px);
+    gap: var(--space-4, 16px);
+    align-items: start;
+}
+
+@media (max-width: 1080px) {
+    .workspaceGrid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.panel {
+    background: var(--st-surface);
+    border: 1px solid var(--st-border);
+    border-radius: var(--radius-lg, 16px);
+    padding: var(--space-4, 16px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3, 12px);
+    min-width: 0;
+}
+
+.panelHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2, 8px);
+}
+
+.panelTitle {
+    margin: 0;
+    font-size: var(--text-lg, 1.125rem);
+    font-weight: 700;
+    color: var(--st-ink);
+}
+
+.assetList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: var(--space-3, 12px);
+}
+
+.assetCard {
+    background: var(--st-surface-elevated);
+    border: 1px solid var(--st-border);
+    border-radius: var(--radius-md, 12px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.assetThumbWrap {
+    position: relative;
+    width: 100%;
+    min-height: 120px;
+    background: #0f172a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.assetThumb {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    display: block;
+}
+
+.assetFallback {
+    width: 100%;
+    min-height: 120px;
+    padding: var(--space-2, 8px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-align: center;
+    color: var(--st-muted);
+    font-size: var(--text-xs, 0.75rem);
+    background: #111827;
+}
+
+.assetMeta {
+    padding: var(--space-2, 8px);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.assetName {
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 600;
+    color: var(--st-ink);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+}
+
+.stageFrame {
+    position: relative;
+    width: 100%;
+    min-height: 240px;
+    max-height: 540px;
+    background: #05070d;
+    border: 1px solid var(--st-border);
+    border-radius: var(--radius-md, 12px);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stageCanvas {
+    max-width: 100%;
+    max-height: 500px;
+    display: block;
+    background: #000000;
+}
+
+.captionPreview {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 18px;
+    text-align: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(11, 15, 25, 0.82);
+    color: #ffffff;
+    font-weight: 600;
+    font-size: var(--text-sm, 0.875rem);
+    pointer-events: none;
+}
+
+.toolbarRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2, 8px);
+}
+
+.timelineTrack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2, 8px);
+    padding: var(--space-3, 12px);
+    background: var(--st-surface-elevated);
+    border: 1px solid var(--st-border);
+    border-radius: var(--radius-md, 12px);
+}
+
+.clipRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2, 8px);
+    padding: var(--space-2, 8px);
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.clipRowSelected {
+    border-color: var(--st-gold);
+}
+
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.label {
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 600;
+    color: var(--st-muted);
+}
+
+.input,
+.select,
+.textarea {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--st-border);
+    background: #0b0f19;
+    color: #f8fafc;
+    font-size: var(--text-sm, 0.875rem);
+}
+
+.input:focus-visible,
+.select:focus-visible,
+.textarea:focus-visible {
+    outline: 2px solid var(--st-focus);
+    outline-offset: 1px;
+}
+
+.emptyState {
+    padding: var(--space-6, 24px);
+    text-align: center;
+    border: 1px dashed var(--st-border);
+    border-radius: var(--radius-md, 12px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3, 12px);
+    color: var(--st-muted);
+}
+
+.modalBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10050;
+    background: rgba(5, 7, 13, 0.78);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4, 16px);
+}
+
+.modalCard {
+    width: 100%;
+    max-width: 540px;
+    background: var(--st-surface);
+    color: var(--st-ink);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: var(--radius-lg, 16px);
+    padding: var(--space-5, 20px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4, 16px);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.progressBar {
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    background: #0b0f19;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #a31621 0%, #ffd700 100%);
+    transition: width 0.2s ease;
+}
+
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}

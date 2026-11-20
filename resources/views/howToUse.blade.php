@@ -635,7 +635,7 @@
 
             <div class="p-3 border rounded-3 bg-light">
               <h6 class="fw-bold text-dark mb-1"><i class="bi bi-calendar2-heart-fill me-1" style="color: #a31621;"></i> Family Commitments &amp; Targets</h6>
-              <p class="small text-muted mb-0">Open <strong>Family Commitments</strong> from your sidebar to set fixed day/time targets (e.g. calling Dad twice a week on Wednesday and Sunday at 19:00) or flexible weekly/monthly quotas (e.g. walking with the kids three times a week or dinner with your spouse). Choose Private, Specific People, or Whole Family visibility, view commitments directly on your Family Calendar, receive exact-time in-app reminders, and log each completion with a short reflection note.</p>
+              <p class="small text-muted mb-0">Open <strong>Family Commitments</strong> from your sidebar to set fixed day/time targets (e.g. calling Dad twice a week on Wednesday and Sunday at 19:00) or flexible weekly/monthly quotas (e.g. walking with the kids three times a week or dinner with your spouse). Each high-legibility commitment card displays active day-of-week schedule chips, tabular period progress bars, tiered visibility badges (Private, Specific People, or Whole Family), exact-time in-app reminders, and attributed reflection check-ins synced directly with your Family Calendar.</p>
             </div>
           </div>
         </div>

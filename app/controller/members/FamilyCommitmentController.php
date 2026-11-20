@@ -44,8 +44,18 @@ final class FamilyCommitmentController extends BaseController
         $data = $userData;
 
         $familyMembers = $this->fetchFamilyMembers($primaryFamCode, $userId);
-        $commitments = $this->service->listForUser($userId, $famCodes);
-        $dueReminders = $this->service->getDueInAppReminders($userId);
+        try {
+            $commitments = $this->service->listForUser($userId, $famCodes);
+        } catch (\Throwable $e) {
+            error_log('FamilyCommitmentController::index listForUser error: ' . $e->getMessage());
+            $commitments = [];
+        }
+        try {
+            $dueReminders = $this->service->getDueInAppReminders($userId);
+        } catch (\Throwable $e) {
+            error_log('FamilyCommitmentController::index getDueInAppReminders error: ' . $e->getMessage());
+            $dueReminders = [];
+        }
 
         view('member.commitments', [
             'data' => $data,
@@ -72,8 +82,14 @@ final class FamilyCommitmentController extends BaseController
         }
 
         $famCodes = $this->currentFamCodes($userId);
-        $commitments = $this->service->listForUser($userId, $famCodes);
-        $reminders = $this->service->getDueInAppReminders($userId);
+        try {
+            $commitments = $this->service->listForUser($userId, $famCodes);
+            $reminders = $this->service->getDueInAppReminders($userId);
+        } catch (\Throwable $e) {
+            error_log('FamilyCommitmentController::listApi error: ' . $e->getMessage());
+            $this->sendApiPayload(500, ['status' => 'error', 'message' => 'Unable to load commitments right now.']);
+            return;
+        }
 
         $this->sendApiPayload(200, [
             'status' => 'success',
@@ -112,6 +128,7 @@ final class FamilyCommitmentController extends BaseController
         } catch (ValidationException $e) {
             $this->sendApiPayload(422, ['status' => 'error', 'message' => $e->getMessage()]);
         } catch (\Throwable $e) {
+            error_log('FamilyCommitmentController::store error: ' . $e->getMessage());
             $this->sendApiPayload(500, ['status' => 'error', 'message' => 'Unable to save commitment right now.']);
         }
     }

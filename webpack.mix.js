@@ -6,6 +6,8 @@ const ImageminPlugin = require('imagemin-webpack-plugin').default;
 mix
   .setPublicPath('public')
   .js('resources/asset/js/index.js', 'js')
+  .js('resources/asset/js/apps/studio/index.jsx', 'js/studio-app.js')
+  .js('resources/asset/js/apps/organogram/index.jsx', 'js/organogram-app.js')
   .sass('resources/asset/scss/main.scss', 'css')
   .options({
     legacyNodePolyfills: true,
@@ -71,11 +73,14 @@ mix.webpackConfig((webpack, config) => {
     },
     resolve: {
       symlinks: false,
+      extensions: ['.js', '.jsx', '.json'],
       modules: [
         path.resolve(__dirname, "node_modules"),
         "node_modules"
       ],
       alias: {
+        "react": "preact/compat",
+        "react-dom": "preact/compat",
         "@": path.resolve(__dirname, "resources/asset/js"),
         "@scss": path.resolve(__dirname, "resources/asset/scss"),
         "@css": path.resolve(__dirname, "resources/asset/css"),
@@ -102,6 +107,10 @@ mix.babelConfig({
       targets: {
         browsers: ['> 1%', 'last 2 versions', 'not dead', 'safari >= 9']
       }
+    }],
+    ['@babel/preset-react', {
+      runtime: 'automatic',
+      importSource: 'preact'
     }]
   ],
   plugins: [

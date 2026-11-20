@@ -5,7 +5,10 @@
     <link rel="stylesheet" href="/public/css/organogram.css?v={{ time() }}">
 @endpush
 @section('content')
-
+@if(!empty($useReactTree))
+<div id="organogram-root"></div>
+<script type="application/json" id="organogram-bootstrap">{!! $organogramBootstrapJson ?? '{}' !!}</script>
+@else
 <div class="organogram-container-fluid">
     @php
         $currentViewMode = $_GET['mode'] ?? 'canvas';
@@ -6262,4 +6265,10 @@
 @include('member.modals.familyFlyerModal')
 @include('member.modals.timeCapsuleModal')
 @include('member.modals.inviteFamilyModal')
+@endif
 @endsection
+@if(!empty($useReactTree))
+@push('scripts')
+<script defer src="/public/js/organogram-app.js?v={{ assetVersion('js/organogram-app.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
+@endpush
+@endif

@@ -514,6 +514,11 @@
 @endpush
 
 @section('content')
+@if(!empty($useReactStudio))
+    @include('member.creativeStudioTabs', ['creativeTab' => 'archives'])
+    <div id="creative-studio-root"></div>
+    <script type="application/json" id="studio-bootstrap">{!! $studioBootstrapJson ?? '{}' !!}</script>
+@else
 <script src="/public/js/studio-pip.js?v={{ assetVersion('js/studio-pip.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
 <script nonce="{{ csp_nonce($nonce ?? null) }}">
 function videoStudioPip() {
@@ -965,11 +970,15 @@ function videoStudioPip() {
 <!-- Hidden Video Elements for Composition (offscreen, not display:none, so browsers decode video frames) -->
 <video id="fvsSourceVideo" playsinline preload="auto" style="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0.001;pointer-events:none;"></video>
 <audio id="fvsSourceAudio" preload="auto" style="display:none;"></audio>
+@endif
 @endsection
 
 @push('scripts')
-<script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignVideoStudioClient.js?v={{ time() }}"></script>
-<script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignNleEngine.js?v={{ time() }}"></script>
+<script defer nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignVideoStudioClient.js?v={{ assetVersion('js/SovereignVideoStudioClient.js') }}"></script>
+<script defer nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignNleEngine.js?v={{ assetVersion('js/SovereignNleEngine.js') }}"></script>
+@if(!empty($useReactStudio))
+<script defer src="/public/js/studio-app.js?v={{ assetVersion('js/studio-app.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
+@else
 <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignSpotlightTour.js?v={{ time() }}"></script>
 <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignHelpSearchEngine.js?v={{ time() }}"></script>
 <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignNleWorkspace.js?v={{ time() }}"></script>
@@ -1809,4 +1818,5 @@ function videoStudioPip() {
     renderFrame();
 })();
 </script>
+@endif
 @endpush

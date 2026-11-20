@@ -130,7 +130,7 @@ function authenticate(email, password, attempt = 1, maxAttempts = 3) {
     });
 }
 
-export function loginFully(email = DEFAULT_EMAIL, password = DEFAULT_PASSWORD) {
+export function loginFully(email = DEFAULT_EMAIL, password = DEFAULT_PASSWORD, { skipProfileVisit = false } = {}) {
     cy.session(
         [email, password],
         () => {
@@ -162,6 +162,10 @@ export function loginFully(email = DEFAULT_EMAIL, password = DEFAULT_PASSWORD) {
             },
         }
     );
+
+    if (skipProfileVisit) {
+        return;
+    }
 
     // The credential exchange above is pure `cy.request`, so the first `cy.visit`
     // is the run's cold page load — the profilePage webpack chunk, the Bootstrap

@@ -328,6 +328,19 @@ final class Organogram extends SingleCustomerData
                 array_values(array_filter(array_merge([$maternalFamCode, $wifeFamCode], $heldCodes)))
             );
 
+            $vParam = strtolower(trim((string)($_GET['v'] ?? '')));
+            $envTree = filter_var($_ENV['FEATURE_REACT_TREE'] ?? getenv('FEATURE_REACT_TREE') ?: false, FILTER_VALIDATE_BOOLEAN);
+            $useReactTree = $vParam === 'react' || ($vParam !== 'legacy' && $envTree);
+            $csrfToken = (string)($_SESSION['token'] ?? '');
+            $organogramBootstrapJson = json_encode([
+                'familyCode' => (string)$familyCode,
+                'primarySurname' => (string)($paternalSurname !== '' ? $paternalSurname : ($data['lastName'] ?? '')),
+                'treeTitle' => trim((string)(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? ''))) . "'s Family Tree",
+                'isReadOnly' => !empty($isReadOnly),
+                'csrfToken' => $csrfToken,
+                'graphData' => $graphData,
+            ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?: '{}';
+
             if (session_status() === PHP_SESSION_ACTIVE) {
                 session_write_close();
             }
@@ -360,7 +373,10 @@ final class Organogram extends SingleCustomerData
                 'rootUnions',
                 'pendingRelRequests',
                 'treeViewersData',
-                'treeAccessData'
+                'treeAccessData',
+                'useReactTree',
+                'csrfToken',
+                'organogramBootstrapJson'
             ));
         } catch (\Throwable $th) {
             showError($th);

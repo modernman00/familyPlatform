@@ -777,9 +777,9 @@ final class FamilyCommitmentService
     {
         $stmt = $this->pdo->prepare(
             'SELECT c.id, c.completed_by_user_id, c.period_key, c.slot_key, c.rating, c.reflection_note, c.completed_at,
-                    a.firstName, a.lastName
+                    per.firstName, per.lastName
              FROM commitment_checkins c
-             LEFT JOIN account a ON a.id = c.completed_by_user_id
+             LEFT JOIN personal per ON per.id = c.completed_by_user_id
              WHERE c.commitment_id = ? AND c.deleted_at IS NULL
              ORDER BY c.completed_at DESC
              LIMIT ?'
@@ -810,11 +810,11 @@ final class FamilyCommitmentService
     private function fetchParticipants(string $commitmentId): array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT p.user_id, p.role, a.firstName, a.lastName
+            'SELECT p.user_id, p.role, per.firstName, per.lastName
              FROM commitment_participants p
-             LEFT JOIN account a ON a.id = p.user_id
+             LEFT JOIN personal per ON per.id = p.user_id
              WHERE p.commitment_id = ?
-             ORDER BY p.role ASC, a.firstName ASC'
+             ORDER BY p.role ASC, per.firstName ASC'
         );
         $stmt->execute([$commitmentId]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
