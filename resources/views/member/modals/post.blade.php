@@ -162,24 +162,24 @@
                     <small id="editPostNotice" class="d-none text-muted d-block mb-2 px-1">Editing text only — images and polls can't be changed here.</small>
 
                     <!-- Live OpenGraph Link Preview in Composer (16:9 Full Graphics) -->
-                    <div id="composerLinkPreviewContainer" class="d-none mb-3 position-relative rounded-3 overflow-hidden border border-light-subtle shadow-sm" style="background-color: var(--bs-card-bg, #ffffff);">
-                        <button type="button" id="closeComposerLinkPreview" class="btn btn-sm btn-dark position-absolute top-0 end-0 m-2 rounded-circle shadow-sm" style="width: 28px; height: 28px; padding: 0; z-index: 10; opacity: 0.85;" aria-label="Dismiss link preview">
+                    <div id="composerLinkPreviewContainer" class="d-none mb-3 position-relative rounded-3 overflow-hidden shadow-sm link-preview-card">
+                        <button type="button" id="closeComposerLinkPreview" class="btn btn-sm btn-dark position-absolute top-0 end-0 m-2 rounded-circle shadow-sm" style="width: 32px; height: 32px; padding: 0; z-index: 10; opacity: 0.9;" aria-label="Dismiss link preview">
                             <i class="bi bi-x"></i>
                         </button>
                         <div id="composerLinkPreviewImageWrapper" class="position-relative w-100 overflow-hidden" style="aspect-ratio: 16 / 9; max-height: 240px; background-color: #0f172a;">
                             <img id="composerLinkPreviewImg" src="" alt="Link preview" class="w-100 h-100 object-fit-cover" style="display: block;">
                             <span id="composerLinkPreviewDomainBadge" class="badge rounded-pill bg-dark bg-opacity-75 text-white position-absolute top-0 start-0 m-2 px-2.5 py-1 small" style="font-size: 0.72rem; letter-spacing: 0.5px; backdrop-filter: blur(6px);"></span>
                         </div>
-                        <div class="p-3">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <small id="composerLinkPreviewSiteName" class="text-muted text-uppercase fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;"></small>
-                                <small class="text-primary fw-medium"><i class="bi bi-lightning-charge-fill me-1"></i> Rich Preview</small>
+                        <div class="p-3 link-preview-card__body">
+                            <div class="d-flex justify-content-between align-items-center mb-1 link-preview-card__eyebrow">
+                                <small id="composerLinkPreviewSiteName" class="text-uppercase fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;"></small>
+                                <small class="fw-medium link-preview-card__type"><i class="bi bi-lightning-charge-fill me-1"></i> Rich Preview</small>
                             </div>
-                            <h6 id="composerLinkPreviewTitle" class="fw-bold mb-1 text-dark" style="font-size: 0.95rem; line-height: 1.35;"></h6>
-                            <p id="composerLinkPreviewDesc" class="text-secondary small mb-2" style="font-size: 0.82rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"></p>
-                            <div class="pt-1 border-top d-flex justify-content-between align-items-center">
-                                <span id="composerLinkPreviewUrl" class="small text-muted text-truncate" style="font-size: 0.75rem; max-width: 65%;"></span>
-                                <span id="composerLinkPreviewCta" class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1" style="font-size: 0.75rem;"></span>
+                            <h6 id="composerLinkPreviewTitle" class="fw-bold mb-1 link-preview-card__title" style="font-size: 0.95rem;"></h6>
+                            <p id="composerLinkPreviewDesc" class="small mb-2 link-preview-card__desc" style="font-size: 0.82rem;"></p>
+                            <div class="pt-1.5 d-flex justify-content-between align-items-center link-preview-card__footer">
+                                <span id="composerLinkPreviewUrl" class="small text-truncate link-preview-card__url" style="font-size: 0.75rem; max-width: 65%;"></span>
+                                <span id="composerLinkPreviewCta" class="badge rounded-pill px-2.5 py-1 link-preview-card__cta" style="font-size: 0.75rem; min-height: 28px; display: inline-flex; align-items: center;"></span>
                             </div>
                         </div>
                     </div>

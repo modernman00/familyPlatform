@@ -961,15 +961,22 @@ final class LinkPreviewService
                     if ($trimmedPath !== '') {
                         $segments = explode('/', $trimmedPath);
                         $lastSegment = end($segments);
+                        $sitePrefix = self::resolveBrandSiteName($host, (string)($meta['site_name'] ?? ''));
+                        if ($sitePrefix !== '') {
+                            $meta['site_name'] = $sitePrefix;
+                        }
                         if (!empty($lastSegment)) {
-                            $cleanSlug = ucwords(str_replace(['-', '_'], ' ', $lastSegment));
-                            if (is_numeric($lastSegment)) {
-                                $sectionName = count($segments) > 1 ? ucfirst($segments[count($segments) - 2]) : 'Article';
-                                $cleanSlug = rtrim($sectionName, 's') . ' #' . $lastSegment;
-                            }
-                            $sitePrefix = (string)($meta['site_name'] ?? '');
-                            if (!empty($meta['title']) && !str_contains(strtolower((string)$meta['title']), strtolower($cleanSlug))) {
-                                $meta['title'] = $sitePrefix !== '' ? "{$sitePrefix} — {$cleanSlug}" : "{$cleanSlug} — " . ($meta['title']);
+                            if (self::isOpaqueShortCode($lastSegment)) {
+                                $meta['title'] = self::buildCleanPlatformTitle($url, $host, $sitePrefix);
+                            } else {
+                                $cleanSlug = preg_replace('/\s+/', ' ', ucwords(str_replace(['-', '_'], ' ', $lastSegment))) ?? $lastSegment;
+                                if (is_numeric($lastSegment)) {
+                                    $sectionName = count($segments) > 1 ? ucfirst($segments[count($segments) - 2]) : 'Article';
+                                    $cleanSlug = rtrim($sectionName, 's') . ' #' . $lastSegment;
+                                }
+                                if (!empty($meta['title']) && !str_contains(strtolower((string)$meta['title']), strtolower(trim((string)$cleanSlug)))) {
+                                    $meta['title'] = $sitePrefix !== '' ? "{$sitePrefix} — {$cleanSlug}" : "{$cleanSlug} — " . ($meta['title']);
+                                }
                             }
                         }
                     }
@@ -983,6 +990,102 @@ final class LinkPreviewService
     }
 
     /**
+     * Maps known short-link and social domains to clean human-readable brand names.
+     */
+    private static function resolveBrandSiteName(string $domain, string $fallback = ''): string
+    {
+        $lower = strtolower((string)preg_replace('/^www\./i', '', trim($domain)));
+        $map = [
+            'fb.watch' => 'Facebook',
+            'fb.com' => 'Facebook',
+            'facebook.com' => 'Facebook',
+            'm.facebook.com' => 'Facebook',
+            'l.facebook.com' => 'Facebook',
+            'youtu.be' => 'YouTube',
+            'youtube.com' => 'YouTube',
+            'm.youtube.com' => 'YouTube',
+            'instagr.am' => 'Instagram',
+            'instagram.com' => 'Instagram',
+            't.co' => 'X',
+            'x.com' => 'X',
+            'twitter.com' => 'X',
+            'vm.tiktok.com' => 'TikTok',
+            'vt.tiktok.com' => 'TikTok',
+            'tiktok.com' => 'TikTok',
+            'lnkd.in' => 'LinkedIn',
+            'linkedin.com' => 'LinkedIn',
+        ];
+        if (isset($map[$lower])) {
+            return $map[$lower];
+        }
+        if (strtolower(trim($fallback)) === 'fb') {
+            return 'Facebook';
+        }
+        return trim($fallback);
+    }
+
+    /**
+     * Detects opaque short-link hash segments (e.g. "K--PySTLPf", "dQw4w9WgXcQ")
+     * that should not be rendered as raw gibberish titles.
+     */
+    private static function isOpaqueShortCode(string $segment): bool
+    {
+        $s = trim($segment);
+        if ($s === '') {
+            return false;
+        }
+        if (str_contains($s, '--') || str_contains($s, '__')) {
+            return true;
+        }
+        // Short mixed-case or alphanumeric token without word separators (e.g. K--PySTLPf, 1a2B3c4D)
+        if (!str_contains($s, '-') && !str_contains($s, '_') && strlen($s) <= 18) {
+            $hasUpper = (bool)preg_match('/[A-Z]/', $s);
+            $hasLower = (bool)preg_match('/[a-z]/', $s);
+            $hasDigit = (bool)preg_match('/\d/', $s);
+            if (($hasUpper && $hasLower && $hasDigit) || ($hasUpper && $hasLower && strlen($s) >= 7)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Produces a clean, readable title for social/short links when metadata is unavailable.
+     */
+    private static function buildCleanPlatformTitle(string $url, string $domain, string $siteName): string
+    {
+        $lowerUrl = strtolower($url);
+        $lowerDomain = strtolower($domain);
+        $brand = self::resolveBrandSiteName($domain, $siteName);
+        if ($brand === '') {
+            $cleanHost = preg_replace('/^www\./i', '', $lowerDomain) ?: $lowerDomain;
+            $hostSegs = explode('.', $cleanHost);
+            $brand = ucfirst($hostSegs[0] !== '' ? $hostSegs[0] : 'Web');
+        }
+
+        if ($brand === 'Facebook') {
+            if (str_contains($lowerDomain, 'fb.watch') || str_contains($lowerUrl, '/videos/') || str_contains($lowerUrl, '/watch')) {
+                return 'Facebook Video';
+            }
+            if (str_contains($lowerUrl, '/reel/')) {
+                return 'Facebook Reel';
+            }
+            return 'Facebook Post';
+        }
+        if ($brand === 'YouTube') {
+            return str_contains($lowerUrl, '/shorts/') ? 'YouTube Short' : 'YouTube Video';
+        }
+        if ($brand === 'Instagram') {
+            return str_contains($lowerUrl, '/reel/') ? 'Instagram Reel' : 'Instagram Post';
+        }
+        if ($brand === 'TikTok') {
+            return 'TikTok Video';
+        }
+
+        return "Shared Link on {$brand}";
+    }
+
+    /**
      * Synthesizes a clean, structured fallback social card from the URL structure itself
      * when all remote HTTP probes fail, guaranteeing the user never sees a broken null void.
      *
@@ -993,7 +1096,7 @@ final class LinkPreviewService
         $domain = (string)parse_url($url, PHP_URL_HOST);
         $cleanDomain = preg_replace('/^www\./i', '', $domain) ?: $domain;
         $hostParts = explode('.', $cleanDomain);
-        $siteName = ucfirst($hostParts[0]);
+        $siteName = self::resolveBrandSiteName($cleanDomain, ucfirst($hostParts[0]));
 
         $path = trim((string)parse_url($url, PHP_URL_PATH), '/');
         $title = $siteName;
@@ -1001,12 +1104,14 @@ final class LinkPreviewService
             $segments = explode('/', $path);
             $last = end($segments);
             if (!empty($last)) {
-                if (is_numeric($last)) {
+                if (self::isOpaqueShortCode($last)) {
+                    $title = self::buildCleanPlatformTitle($url, $cleanDomain, $siteName);
+                } elseif (is_numeric($last)) {
                     $sec = count($segments) > 1 ? ucfirst($segments[count($segments) - 2]) : 'Item';
                     $title = $siteName . ' — ' . rtrim($sec, 's') . ' #' . $last;
                 } else {
-                    $cleanSlug = ucwords(str_replace(['-', '_'], ' ', $last));
-                    $title = $siteName . ' — ' . $cleanSlug;
+                    $cleanSlug = preg_replace('/\s+/', ' ', ucwords(str_replace(['-', '_'], ' ', $last))) ?? $last;
+                    $title = $siteName . ' — ' . trim((string)$cleanSlug);
                 }
             }
         } else {
@@ -1090,10 +1195,23 @@ final class LinkPreviewService
         $proxiedVideoUrl = $videoStreamUrl !== null ? self::getProxiedVideoUrl($videoStreamUrl) : null;
         $proxiedAlbumVideos = array_map(static fn(string $v): string => self::getProxiedVideoUrl($v), $albumVideos);
 
+        $resolvedSiteName = $isGooglePhoto ? 'Google Photos' : self::resolveBrandSiteName($domain, (string)($data['site_name'] ?? $domain));
+        $cleanTitle = preg_replace('/\s+/', ' ', trim($title)) ?? trim($title);
+        if ($cleanTitle === '' || preg_match('/^Fb\s*[—–-]\s*/i', $cleanTitle)) {
+            $cleanTitle = self::buildCleanPlatformTitle($url, $domain, $resolvedSiteName);
+        } elseif (str_contains($cleanTitle, ' — ')) {
+            $parts = explode(' — ', $cleanTitle, 2);
+            $suffix = trim($parts[1] ?? '');
+            $pathLast = basename((string)parse_url($url, PHP_URL_PATH));
+            if ($suffix !== '' && self::isOpaqueShortCode($pathLast)) {
+                $cleanTitle = self::buildCleanPlatformTitle($url, $domain, $resolvedSiteName);
+            }
+        }
+
         return [
             'url' => $url,
             'original_url' => $requestedUrl,
-            'title' => $title,
+            'title' => $cleanTitle,
             'description' => (string)($data['description'] ?? ''),
             'image' => $photoUrl !== '' ? $photoUrl : $rawImage,
             'photo_url' => $isPhotoLink ? ($photoUrl !== '' ? $photoUrl : $rawImage) : null,
@@ -1103,7 +1221,7 @@ final class LinkPreviewService
             'album_images' => $data['album_images'] ?? [],
             'album_videos' => $albumVideos,
             'proxied_album_videos' => $proxiedAlbumVideos,
-            'site_name' => $isGooglePhoto ? 'Google Photos' : (string)($data['site_name'] ?? $domain),
+            'site_name' => $resolvedSiteName !== '' ? $resolvedSiteName : $domain,
             'domain' => $domain,
             'card_type' => (string)($data['card_type'] ?? 'summary_large_image'),
             'is_party_event' => $isPartyEvent,
