@@ -282,6 +282,9 @@ runTest("Blade Invariant: post-card.blade.php contains author-clickable view tri
     if (!$content) {
         throw new \Exception("Failed to read post-card.blade.php");
     }
+    foreach (glob($rootDir . '/resources/views/components/feed/partials/*.blade.php') ?: [] as $partialFile) {
+        $content .= "\n" . (string) file_get_contents($partialFile);
+    }
 
     if (!str_contains($content, 'openPostViewersModal(post)')) {
         throw new \Exception("post-card.blade.php missing openPostViewersModal(post) trigger");

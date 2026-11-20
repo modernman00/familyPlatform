@@ -300,22 +300,9 @@ if [ -n "$STAGED_SECRETS" ]; then
 fi
 
 if [ -n "$(git status --porcelain)" ]; then
-    echo "📝 Uncommitted changes detected in workspace — staging and committing..."
+    echo "🛑 FATAL: Uncommitted changes detected in workspace. Commit or stash your changes before deploying:"
     git status -s
-    git add -A
-    STAGED_SECRETS=$(git diff --cached --name-only | grep -E "(\.env|\.pem|\.sql|\.key|\.crt|\.backup)" | grep -vE '^migrations/' || true)
-    if [ -n "$STAGED_SECRETS" ]; then
-        git reset -q
-        echo "🛑 SEC-OPS ALERT: Potential secret files would be committed:"
-        echo "$STAGED_SECRETS"
-        exit 1
-    fi
-    if ! git diff --cached --quiet; then
-        AUTO_COMMIT_MSG="${DEPLOY_COMMIT_MSG:-chore(deploy): auto-commit before ${APP_NAME} deployment (${RELEASE_ID})}"
-        git commit -m "$AUTO_COMMIT_MSG"
-        COMMIT=$(git rev-parse HEAD)
-        echo "✅ Changes committed successfully (${COMMIT:0:8})."
-    fi
+    exit 1
 fi
 
 echo "✅ Git workspace clean. No secret leaks detected."

@@ -78,9 +78,10 @@ export function getPostImageUrl(img) {
  * 
  * @param {string|null|undefined} img - Image filename or path
  * @param {'avif'|'webp'|'fallback'} variant - Target format variant
+ * @param {boolean|string[]|Record<string, string[]>|null} [verifiedVariants=null] - Verified variant manifest (pass false or post.image_variants to prevent blind 404 <source> emissions)
  * @returns {string} Fully qualified or root-relative URL for the requested variant, or empty string if not applicable
  */
-export function getPostImageVariantUrl(img, variant = 'fallback') {
+export function getPostImageVariantUrl(img, variant = 'fallback', verifiedVariants = null) {
     const fallbackUrl = getPostImageUrl(img);
     if (!fallbackUrl) {
         return '';
@@ -98,6 +99,21 @@ export function getPostImageVariantUrl(img, variant = 'fallback') {
     // Do not transform external URLs, blobs, or data URIs
     if (fallbackUrl.startsWith('http://') || fallbackUrl.startsWith('https://') || fallbackUrl.startsWith('blob:') || fallbackUrl.startsWith('data:')) {
         return '';
+    }
+
+    // When a verification manifest (or explicit false) is provided, never blindly emit
+    // speculative .avif/.webp <source> paths unless the source already is that format or verified.
+    if (verifiedVariants !== null) {
+        const lower = fallbackUrl.toLowerCase();
+        if (lower.endsWith('.' + variant) || lower.includes('.' + variant + '?')) {
+            return fallbackUrl;
+        }
+        const imgVariants = (verifiedVariants && typeof verifiedVariants === 'object')
+            ? (Array.isArray(verifiedVariants) ? verifiedVariants : verifiedVariants[img])
+            : null;
+        if (!Array.isArray(imgVariants) || !imgVariants.includes(variant)) {
+            return '';
+        }
     }
 
     const dotIndex = fallbackUrl.lastIndexOf('.');

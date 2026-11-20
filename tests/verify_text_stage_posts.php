@@ -119,6 +119,9 @@ assertStageTrue(
 
 // 5. Structural audit of views and controllers
 $postCardView = (string) file_get_contents(__DIR__ . '/../resources/views/components/feed/post-card.blade.php');
+foreach (glob(__DIR__ . '/../resources/views/components/feed/partials/*.blade.php') ?: [] as $partialFile) {
+    $postCardView .= "\n" . (string) file_get_contents($partialFile);
+}
 assertStageTrue(
     str_contains($postCardView, 'data-testid="feed-text-stage-card"') && str_contains($postCardView, 'data-testid="infeed-stage-converter"'),
     'post-card.blade.php contains 3D stage card and 1-tap retroactive in-feed converter'
@@ -147,6 +150,9 @@ assertStageTrue(
 );
 
 $feedCompJs = (string) file_get_contents(__DIR__ . '/../resources/asset/js/components/profilePage/feedComponent.js');
+foreach (glob(__DIR__ . '/../resources/asset/js/components/profilePage/feed/*.js') ?: [] as $feedModFile) {
+    $feedCompJs .= "\n" . (string) file_get_contents($feedModFile);
+}
 assertStageTrue(
     str_contains($feedCompJs, 'getPollArenaMeta(post)') && str_contains($feedCompJs, 'getPollCleanIntro(post)'),
     'feedComponent.js implements getPollArenaMeta() and getPollCleanIntro() for zero-duplication 3D Trivia/Poll arenas'

@@ -235,6 +235,9 @@ runTest("Blade Invariant: post-card.blade.php renders views_count and British En
     if ($content === false) {
         throw new \Exception("Could not read post-card.blade.php");
     }
+    foreach (glob(dirname(__DIR__) . '/resources/views/components/feed/partials/*.blade.php') ?: [] as $partialFile) {
+        $content .= "\n" . (string) file_get_contents($partialFile);
+    }
 
     if (!str_contains($content, 'post.views_count')) {
         throw new \Exception("post-card.blade.php does not bind post.views_count");

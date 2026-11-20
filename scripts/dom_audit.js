@@ -42,7 +42,7 @@
         }
         const srgb = colorStr.match(/color\(\s*srgb\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)(?:\s*\/\s*([\d.]+%?))?\s*\)/i);
         if (srgb) {
-            const clamp = (v) => Math.max(0, Math.min(255, Math.round(parseFloat(v) * 255)));
+            const clamp = function (v) { return Math.max(0, Math.min(255, Math.round(parseFloat(v) * 255))); };
             let a = 1;
             if (srgb[4] !== undefined) {
                 a = srgb[4].endsWith('%') ? parseFloat(srgb[4]) / 100 : parseFloat(srgb[4]);
@@ -87,24 +87,20 @@
         return parseRgb(m[0]);
     }
 
-    function isTextClipped(style) {
-        const clip = (style.backgroundClip || style.webkitBackgroundClip || '').toLowerCase();
-        return clip === 'text';
-    }
-
     function getEffectiveBackground(el) {
         let cur = el;
         while (cur && cur !== document.documentElement) {
-            const style = window.getComputedStyle(cur);
-            const parsed = parseRgb(style.backgroundColor);
+            const curStyle = window.getComputedStyle(cur);
+            const parsed = parseRgb(curStyle.backgroundColor);
             if (parsed && parsed.a >= 0.5) {
                 return parsed;
             }
-            if (!isTextClipped(style)) {
-                const grad = parseGradientFirstColor(style.backgroundImage);
-                if (grad && grad.a >= 0.5) {
-                    return grad;
+            if (curStyle.backgroundImage && curStyle.backgroundImage !== 'none' && curStyle.backgroundClip !== 'text' && curStyle.webkitBackgroundClip !== 'text') {
+                const gradColor = parseGradientFirstColor(curStyle.backgroundImage);
+                if (gradColor && gradColor.a >= 0.5) {
+                    return gradColor;
                 }
+                return null;
             }
             cur = cur.parentElement;
         }
@@ -162,17 +158,57 @@
             }
         });
 
-        // 3. Touch Target & Button Integrity Check (Primary Action Controls)
+        // 3. Touch Target, Button Label Integrity & Icon-Only Accessibility Check
+        const minTouchPx = winWidth <= 640 ? 44 : 36;
         const controls = Array.from(document.querySelectorAll('button, input[type="submit"], input[type="button"], [role="button"], .btn'));
         controls.forEach(function (ctrl) {
             if (!isVisible(ctrl)) return;
             const rect = ctrl.getBoundingClientRect();
-            if (rect.width < 36 || rect.height < 36) {
+            const ctrlStyle = window.getComputedStyle(ctrl);
+            const ctrlText = (ctrl.innerText || ctrl.value || '').trim();
+
+            if (rect.width < minTouchPx || rect.height < minTouchPx) {
                 warnings.push({
                     rule: 'TOUCH_TARGET_SMALL',
-                    message: 'Interactive control smaller than safe touch threshold (' + Math.round(rect.width) + 'x' + Math.round(rect.height) + 'px)',
+                    message: 'Interactive control smaller than safe touch threshold (' + Math.round(rect.width) + 'x' + Math.round(rect.height) + 'px < ' + minTouchPx + 'px)',
                     selector: getSelector(ctrl),
-                    text: (ctrl.innerText || '').trim().slice(0, 30)
+                    text: ctrlText.slice(0, 30)
+                });
+            }
+
+            // Button Label Integrity (prevent multi-line wrapping on action buttons/pills)
+            if (ctrlText.length > 0 && ctrlText.length <= 60) {
+                const fontSize = parseFloat(ctrlStyle.fontSize) || 14;
+                const rawLh = parseFloat(ctrlStyle.lineHeight);
+                const lineHeight = Number.isFinite(rawLh) ? rawLh : fontSize * 1.25;
+                if (rect.height > lineHeight * 2.2 && rect.height > 52) {
+                    warnings.push({
+                        rule: 'BUTTON_TEXT_WRAPPING',
+                        message: 'Button label appears to wrap across multiple lines (' + Math.round(rect.height) + 'px tall)',
+                        selector: getSelector(ctrl),
+                        text: ctrlText.slice(0, 40)
+                    });
+                }
+            }
+        });
+
+        // 3b. Unlabelled Icon-Only Interactive Controls (Hallmark Floor Gate)
+        const iconControls = Array.from(document.querySelectorAll('button, a[href], [role="button"], .btn'));
+        iconControls.slice(0, 300).forEach(function (ctrl) {
+            if (!isVisible(ctrl)) return;
+            const ctrlText = (ctrl.innerText || ctrl.value || '').trim();
+            if (ctrlText.length > 0) return;
+            const hasAria = Boolean(
+                (ctrl.getAttribute('aria-label') || '').trim() ||
+                (ctrl.getAttribute('aria-labelledby') || '').trim() ||
+                (ctrl.getAttribute('title') || '').trim()
+            );
+            const imgWithAlt = ctrl.querySelector('img[alt]:not([alt=""])');
+            if (!hasAria && !imgWithAlt) {
+                violations.push({
+                    rule: 'UNLABELLED_ICON_BUTTON',
+                    message: 'Icon-only interactive control is missing aria-label, aria-labelledby, or title',
+                    selector: getSelector(ctrl)
                 });
             }
         });
@@ -185,10 +221,10 @@
             if (!text) return;
 
             const style = window.getComputedStyle(el);
+            if (style.backgroundClip === 'text' || style.webkitBackgroundClip === 'text') return;
             const fg = parseRgb(style.color);
-            if (isTextClipped(style) && (!fg || fg.a < 0.2)) return;
             const bg = getEffectiveBackground(el);
-            if (!fg || !bg) return;
+            if (!fg || fg.a < 0.1 || !bg) return;
 
             if (isRedSurface(bg) && isDarkText(fg)) {
                 violations.push({
@@ -203,25 +239,106 @@
             if (ratio < 2.2) {
                 violations.push({
                     rule: 'GHOST_TYPOGRAPHY_CONTRAST',
-                    message: 'Severe low contrast (' + ratio.toFixed(2) + ':1) detected (Ghost Typography violation) [fg=' + style.color + ', bg=rgb(' + bg.r + ',' + bg.g + ',' + bg.b + ')]',
+                    message: 'Severe low contrast (' + ratio.toFixed(2) + ':1) detected (Ghost Typography violation)',
                     selector: getSelector(el),
                     text: text.slice(0, 40)
                 });
             }
         });
 
-        // 5. Broken Images Check
+        // 5. Broken Images & Missing Alt Check (including <picture> currentSrc)
         const images = Array.from(document.querySelectorAll('img'));
         images.forEach(function (img) {
             if (!isVisible(img)) return;
-            if (img.complete && img.naturalWidth === 0 && img.getAttribute('src')) {
+            const activeSrc = img.currentSrc || img.getAttribute('src') || '';
+            const rect = img.getBoundingClientRect();
+            if (img.complete && img.naturalWidth === 0 && activeSrc) {
                 violations.push({
                     rule: 'BROKEN_IMAGE',
-                    message: 'Image failed to load: ' + img.getAttribute('src'),
+                    message: 'Image failed to load: ' + activeSrc,
+                    selector: getSelector(img)
+                });
+            } else if (img.closest('.post-media-stage') && (rect.width === 0 || rect.height === 0)) {
+                violations.push({
+                    rule: 'BROKEN_IMAGE',
+                    message: 'Feed media image collapsed to zero dimensions (' + Math.round(rect.width) + 'x' + Math.round(rect.height) + ')',
+                    selector: getSelector(img)
+                });
+            }
+            if (!img.hasAttribute('alt')) {
+                warnings.push({
+                    rule: 'MISSING_IMG_ALT',
+                    message: 'Visible <img> is missing an alt attribute',
                     selector: getSelector(img)
                 });
             }
         });
+
+        // 5b. Collapsed Media Stage Check (.post-media-stage height < 120px)
+        const mediaStages = Array.from(document.querySelectorAll('.post-media-stage'));
+        mediaStages.forEach(function (stage) {
+            if (!isVisible(stage)) return;
+            const rect = stage.getBoundingClientRect();
+            if (rect.height < 120) {
+                violations.push({
+                    rule: 'COLLAPSED_MEDIA_STAGE',
+                    message: 'Media stage collapsed below 120px (' + Math.round(rect.height) + 'px)',
+                    selector: getSelector(stage)
+                });
+            }
+        });
+
+        // 5c. Pill Bar Horizontal Clipping Check (scrollWidth > clientWidth without wrap or scroll affordance)
+        const pillBars = Array.from(document.querySelectorAll('.fp-stage-converter__row, [data-pill-bar]'));
+        pillBars.forEach(function (bar) {
+            if (!isVisible(bar)) return;
+            const style = window.getComputedStyle(bar);
+            const wraps = style.flexWrap === 'wrap' || style.flexWrap === 'wrap-reverse';
+            const hasScrollAffordance = bar.dataset.scrollAffordance === 'true' || bar.classList.contains('has-scroll-affordance');
+            if (!wraps && !hasScrollAffordance && bar.scrollWidth > bar.clientWidth + 2) {
+                violations.push({
+                    rule: 'PILL_BAR_CLIPPED',
+                    message: 'Pill bar clips horizontally without wrapping or scroll affordance (' + bar.scrollWidth + 'px > ' + bar.clientWidth + 'px)',
+                    selector: getSelector(bar)
+                });
+            }
+        });
+
+        // 6. Anti-AI-Slop Typography & Eyebrow Gates (Hallmark-inspired)
+        const firstH1 = Array.from(document.querySelectorAll('h1')).find(isVisible);
+        const firstH2 = Array.from(document.querySelectorAll('h2')).find(isVisible);
+        if (firstH1 && firstH2) {
+            const h1Size = parseFloat(window.getComputedStyle(firstH1).fontSize) || 0;
+            const h2Size = parseFloat(window.getComputedStyle(firstH2).fontSize) || 0;
+            if (h1Size > 0 && h2Size > 0 && h1Size < h2Size) {
+                warnings.push({
+                    rule: 'HEADING_HIERARCHY_INVERSION',
+                    message: 'Primary <h1> (' + h1Size + 'px) is smaller than <h2> (' + h2Size + 'px)',
+                    selector: getSelector(firstH1)
+                });
+            }
+        }
+
+        let eyebrowCount = 0;
+        const eyebrowCandidates = Array.from(document.querySelectorAll('span, p, div, label'));
+        eyebrowCandidates.slice(0, 300).forEach(function (el) {
+            if (!isVisible(el) || el.children.length > 0) return;
+            const text = (el.innerText || '').trim();
+            if (!text || text.length > 45) return;
+            const style = window.getComputedStyle(el);
+            const fontSize = parseFloat(style.fontSize) || 14;
+            const tracking = parseFloat(style.letterSpacing) || 0;
+            if (style.textTransform === 'uppercase' && tracking >= 1 && fontSize <= 13) {
+                eyebrowCount += 1;
+            }
+        });
+        if (eyebrowCount > 4) {
+            warnings.push({
+                rule: 'AI_SLOP_EYEBROW_OVERUSE',
+                message: 'Detected ' + eyebrowCount + ' small tracked-uppercase eyebrow labels (classic AI template tell; keep <= 4)',
+                selector: 'document'
+            });
+        }
 
         return {
             passed: violations.length === 0,
@@ -230,7 +347,15 @@
             violationCount: violations.length,
             warningCount: warnings.length,
             violations: violations,
-            warnings: warnings.slice(0, 15)
+            warnings: warnings.slice(0, 20),
+            metrics: {
+                formsChecked: forms.length,
+                controlsChecked: controls.length,
+                imagesChecked: images.length,
+                mediaStagesChecked: mediaStages.length,
+                pillBarsChecked: pillBars.length,
+                eyebrowCount: eyebrowCount
+            }
         };
     }
 

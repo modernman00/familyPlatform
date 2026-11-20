@@ -141,6 +141,9 @@ $postCardFile = __DIR__ . '/../resources/views/components/feed/post-card.blade.p
 assertTest(file_exists($postCardFile), "post-card.blade.php exists", "post-card.blade.php missing", $errors);
 
 $postCardContent = file_get_contents($postCardFile);
+foreach (glob(__DIR__ . '/../resources/views/components/feed/partials/*.blade.php') ?: [] as $partialFile) {
+    $postCardContent .= "\n" . file_get_contents($partialFile);
+}
 
 assertTest(
     str_contains($postCardContent, '<template x-if="isGifMedia(post.images[0])">'),

@@ -6,6 +6,6 @@
         "Feat(content-engine): curated family video engine, admin UI and header-auth cron",
         "Feat(wishlist): add family gift wishlists with claim flow"
     ],
-    "released_at": "2026-11-18",
-    "commit": "b929b314"
+    "released_at": "2026-11-19",
+    "commit": "cfc5050e"
 }

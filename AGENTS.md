@@ -20,7 +20,7 @@ Inspired by the 7-component automated production pipeline—and hardened with 3 
 | **5** | **UI Animator (Frontend)** | *Hyperframes* | Crafts components using `global_design_standards.md` v2.1 tokens, Alpine.js (`x-data`, `x-collapse`, `x-trap.noscroll`, `x-cloak`), and the **6-State Standard** (Happy Path, Extreme 3/80 chars, Empty State, Submitting Spinner, Error/Offline, Skeleton). |
 | **6** | **Sensory & Brand Designer** | *Epidemic Sound* | Applies strict British English (`en-GB`), tactile press states (`active:scale-[0.98]`), `ScoreTenantSpinner` (`data-spin="true"`), `$toast()` alerts, and `$clipboard()` haptics. |
 | **7** | **Adversarial & Static Gate** | *[Sovereign Layer]* | Runs `bash scripts/autonomous_gate.sh` (incremental `php -l`, targeted PHPStan L8, `verify_engineering_must_haves.php`, targeted PHPUnit tests) plus adversarial 401/403/404 attack neutralization. |
-| **8** | **Screen Editor (Browser QA)** | *Tella MCP* | Opens `$_ENV['APP_URL']` on Desktop (`1440×900`), iPad Portrait (`768×1024`), iPad Landscape (`1024×768`), and Mobile (`390×844`), runs `scripts/dom_audit.js` (`window.runSovereignDomAudit()`) to verify ≥44px touch targets, 0 horizontal overflow, 0 black-on-red or ghost contrast flaws, and 0 console errors, and captures visual screenshots. |
+| **8** | **Screen Editor (Browser QA)** | *Tella MCP* | Opens `$_ENV['APP_URL']` on Desktop (`1440×900`) and Mobile (`390×844`), runs `scripts/dom_audit.js` (`window.runSovereignDomAudit()`) to verify ≥44px touch targets, 0 horizontal overflow, 0 black-on-red or ghost contrast flaws, and 0 console errors, and captures visual screenshots. |
 | **9** | **Self-Healing Finisher** | *FFmpeg* | **Circuit-Breaker Loop (Max 5 Cycles):** If any check in Stages 7 or 8 fails, the agent **does not stop or ask the user**. It diagnoses the root cause, patches the code, and re-runs Stages 7–8 autonomously (up to 5 times) until Exit Code 0 is achieved. |
 | **10**| **Playbook & Proof Capsule** | *[Sovereign Layer]* | Updates `/playbook` or `/how-to-use` in lockstep and outputs the final **Empirical Proof Capsule** so the user returns to a finished, verified product. |
 
@@ -46,7 +46,7 @@ Inspired by the 7-component automated production pipeline—and hardened with 3 
 | Tier | Scope | Required Autonomous Stages | Verification Gate |
 | :--- | :--- | :--- | :--- |
 | **🟢 Tier 1: Routine Velocity** | UI styling, copy fixes, self-contained bug fixes | Stages 1, 4–6, 7–9 (skips Research Brief & 4-Lens Matrix) | `bash scripts/autonomous_gate.sh` + Browser visual & `dom_audit.js` check |
-| **🟡 Tier 2: Strategic Features** | New UI flows, components, APIs, notification triggers | All Stages 1–10 (`🔬 Research Brief` + 4-Lens Matrix + Adversarial PoC) | `bash scripts/autonomous_gate.sh` + Browser Desktop/iPad/Mobile `dom_audit.js` (`preflight.sh` at deploy) |
+| **🟡 Tier 2: Strategic Features** | New UI flows, components, APIs, notification triggers | All Stages 1–10 (`🔬 Research Brief` + 4-Lens Matrix + Adversarial PoC) | `bash scripts/autonomous_gate.sh` + Browser Desktop/Mobile `dom_audit.js` (`preflight.sh` at deploy) |
 | **🔴 Tier 3: Core Architecture** | Schema migrations (`ALTER`/`CREATE`), Auth, Payments, `shared-lib`, `sw.js` | All Stages 1–10 + 1-Page RFC + Automated Rollback | Full `bash scripts/preflight.sh` (Exit 0) + TAT Executive Sign-Off |
 
 ---
@@ -79,7 +79,7 @@ No deliverable may be marked complete without providing the **Empirical Proof Ca
 1. **Research & Precedent Summary** *(Tier 2/3)*: The `🔬 5-Bullet Research Brief` confirming the feature was engineered against proven patterns.
 2. **Validation Terminal Output**: Verbatim output of `bash scripts/autonomous_gate.sh` (Exit Code 0) during iteration; full `bash scripts/preflight.sh` (Exit Code 0) run once at deployment.
 3. **Security Attack Neutralization**: Verbatim proof showing malicious payloads return `401 Unauthorized`, `403 Forbidden`, or `404 Not Found`.
-4. **Browser & DOM Audit Evidence**: Live browser inspection (`$_ENV['APP_URL']`) on Desktop (`1440×900`), iPad Portrait (`768×1024`), iPad Landscape (`1024×768`), and Mobile (`390×844`) with `window.runSovereignDomAudit()` reporting `passed: true` (`0` violations) and `0` console errors.
+4. **Browser & DOM Audit Evidence**: Live browser inspection (`$_ENV['APP_URL']`) on Desktop and Mobile with `window.runSovereignDomAudit()` reporting `passed: true` (`0` violations) and `0` console errors.
 5. **Living Guide Update**: Confirmation that `/playbook` or `/how-to-use` reflects the changes.
 
 ---
@@ -103,8 +103,10 @@ No deliverable may be marked complete without providing the **Empirical Proof Ca
     - Never run `autonomous_gate.sh`, `preflight.sh`, Playwright (`npx playwright test`), or Cypress concurrently across subagents, background tasks, or multiple windows (on an 8 GB host this triggers severe swap thrashing).
     - Before starting a gate or E2E run, check `pgrep -fl "autonomous_gate|preflight\.sh|playwright|chrome-headless-shell"`; wait for an active run you own or terminate stale/orphaned processes before starting a new one.
     - Keep E2E execution single-worker (`--workers=1` for Playwright) and ensure no orphaned `chrome-headless-shell`, `playwright`, or `autonomous_gate.sh` processes remain when your task finishes.
-
-14. **Open Graph / WhatsApp / Messages Rich Preview Invariant**: Every shareable route and standalone `<head>` view MUST serve static `og:title`, `og:description`, `og:image` (< 300 KB JPEG/PNG, 1200×630 or 1080×1080; use `@include('partials.og-meta')` and `og-share-card.jpg?v=3`), `og:url` (HTTPS, stripped of capability tokens like `token`/`vault_token`/`rsvp_code`), `og:type`, and `twitter:card="summary_large_image"`. WhatsApp (`api.whatsapp.com/send` / `wa.me`) and SMS (`sms:?&body=`) payloads must use absolute, non-duplicated URLs.
+14. **Mandatory Shared-Library Media & Graphics Audit (Video / Image / Audio / Canvas / Poster)**:
+    - Before designing, proposing, or implementing **any** video, image, photo, poster, canvas, audio, or media feature, the agent **MUST** inspect all existing capabilities in `shared-js-lib` (`SovereignNleEngine.js`, `SovereignNleWorkspace.js`, `SovereignVideoStudioClient.js`, `AtgUniversalPosterEngine.js`, `CardCanvasGenerator.js`, `HyperReality3DEngine.js`, `LivingHeirloomAnimator.js`, `WebRtcPhotoboothMesh.js`, `VisualSupremacyRuntime.js`, `data/studio_how_to_use.json`) and `shared-lib` (`src/Media/SovereignVideoJobHandler.php`, `src/Media/SovereignMediaEngine.php`, `src/Media/UniversalPosterStudioController.php`, `src/Media/UniversalPosterSynthesisService.php`, `src/Media/ShortsAndDubbingEngine.php`, `src/Media/R2StorageService.php`, `src/Explainer/SovereignVideoRenderer.php`).
+    - Reuse, extend, and surface existing shared-library primitives instead of duplicating media/canvas logic inside app-local Blade views or controllers, and sync updates across all consuming apps.
+    - Never use robotic browser `speechSynthesis` / `SpeechSynthesisUtterance` voiceovers; use on-screen captions paired with deterministic Web Audio motion SFX (`synthesiseMotionSfx()`).
 
 ### 🚨 Critical Defensive Traps & Fatal Patterns
 - **Trap A: PHP `readonly` Constructor Trap (PHP 8.1+)**:

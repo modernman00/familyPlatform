@@ -56,6 +56,9 @@ assertCondition(strpos($cssFile, "heirloom-milestone-aura") !== false, "standard
 // 5. Verify Blade Template Integration
 $postCardFile = file_get_contents(__DIR__ . '/../resources/views/components/feed/post-card.blade.php');
 assertCondition($postCardFile !== false, "post-card.blade.php exists");
+foreach (glob(__DIR__ . '/../resources/views/components/feed/partials/*.blade.php') ?: [] as $partialFile) {
+    $postCardFile .= "\n" . (string) file_get_contents($partialFile);
+}
 assertCondition(strpos($postCardFile, "heirloom-glass-dock") !== false, "post-card.blade.php integrates heirloom-glass-dock");
 assertCondition(strpos($postCardFile, "getHeirloomGlassSvg") !== false, "post-card.blade.php invokes getHeirloomGlassSvg");
 
@@ -92,6 +95,9 @@ assertCondition(strpos($reelModelFile, "'celebrate'") !== false, "Reel.php suppo
 assertCondition(strpos($commentController, "FROM user_families") !== false, "CommentReactionController checks user_families for secondary family membership");
 assertCondition(strpos($commentController, "FROM requestMgt") !== false, "CommentReactionController checks requestMgt for connected family feed posts");
 $feedCompFile = file_get_contents(__DIR__ . '/../resources/asset/js/components/profilePage/feedComponent.js');
+foreach (glob(__DIR__ . '/../resources/asset/js/components/profilePage/feed/*.js') ?: [] as $feedModFile) {
+    $feedCompFile .= "\n" . (string) file_get_contents($feedModFile);
+}
 assertCondition(strpos($feedCompFile, "comment.reactions = nextReactions;") !== false, "feedComponent.js reassigns comment.reactions reference for instant Alpine reactivity");
 
 // 10. Verify Mobile Touchscreen Parity (Zero Stale Emojis Invariant)
