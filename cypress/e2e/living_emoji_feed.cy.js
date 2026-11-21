@@ -6,6 +6,7 @@ describe('Living emojis in the feed & comments', () => {
 
     beforeEach(() => {
         loginFully();
+        cy.visit('/profilePage?v=legacy');
         cy.get('#openPostModalTrigger', { timeout: 10000 }).should('be.visible');
     });
 

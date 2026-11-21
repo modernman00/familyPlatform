@@ -11,7 +11,7 @@
     transform: translateX(-50%) translateY(130%);
     width: calc(100% - 32px);
     max-width: 440px;
-    z-index: 10000;
+    z-index: 1040;
     transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     pointer-events: none;
   }
@@ -224,7 +224,9 @@
     flex-shrink: 0;
   }
   body.modal-open #pwa-install-banner,
-  body.modal-open #pwa-ios-overlay {
+  body.modal-open #pwa-ios-overlay,
+  body.swal2-shown #pwa-install-banner,
+  body.swal2-shown #pwa-ios-overlay {
     display: none !important;
   }
   body.dark-mode #pwa-install-banner .pwa-banner-card,
