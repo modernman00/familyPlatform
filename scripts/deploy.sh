@@ -474,8 +474,8 @@ if [ -f "cypress.config.js" ] || [ -f "cypress.json" ] || [ -d "cypress" ]; then
                 if [ -n "$RESOLVED_SPECS" ]; then
                     E2E_SPEC_COUNT=$(printf '%s\n' "$RESOLVED_SPECS" | grep -c . || echo 0)
                     CYPRESS_SPEC_ARG=$(printf '%s\n' "$RESOLVED_SPECS" | paste -sd ',' -)
-                    CYPRESS_WATCHDOG=900
-                    echo "   ↳ Target reachable (HTTP ${TARGET_STATUS}). Executing SMART Smoke + Diff-Matched E2E (${E2E_SPEC_COUNT} specs, watchdog: 900s):"
+                    CYPRESS_WATCHDOG=1500
+                    echo "   ↳ Target reachable (HTTP ${TARGET_STATUS}). Executing SMART Smoke + Diff-Matched E2E (${E2E_SPEC_COUNT} specs, watchdog: 1500s):"
                     printf '%s\n' "$RESOLVED_SPECS" | sed 's/^/      • /'
                 else
                     echo "   ↳ No smoke or diff-matched specs resolved; falling back to FULL suite (watchdog: 3600s)..."
