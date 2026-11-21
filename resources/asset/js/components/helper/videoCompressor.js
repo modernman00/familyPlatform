@@ -16,6 +16,7 @@
  */
 
 const FAST_PASS_MAX_BYTES = 8 * 1024 * 1024; // 8 MB: clips under this upload in ~1s without re-encoding
+const MAX_CLIENT_TRANSCODE_DURATION_SEC = 45; // Bypass real-time MediaRecorder for >45s clips to prevent mobile browser stalls/OOM
 const TARGET_BITRATE_BPS = 2500000;          // 2.5 Mbps (Instagram 1080p sweet spot)
 const AUDIO_BITRATE_BPS = 128000;            // 128 kbps AAC/Opus stereo
 const MAX_DIMENSION_PX = 1280;               // 720p/1080p HD sweet spot for mobile & desktop
@@ -69,10 +70,15 @@ export function shouldOptimiseVideoOnDevice(file, opts = {}) {
 
     const {
         trimStart = 0,
-        trimEnd = 60,
+        trimEnd = 90,
         originalDuration = null,
         fastPassBytes = FAST_PASS_MAX_BYTES,
     } = opts;
+
+    // Bypass real-time MediaRecorder for long-form clips (> 45s) so mobile browsers do not stall or OOM
+    if ((originalDuration && originalDuration > MAX_CLIENT_TRANSCODE_DURATION_SEC) || ((trimEnd - trimStart) > MAX_CLIENT_TRANSCODE_DURATION_SEC)) {
+        return false;
+    }
 
     const needsTrim = trimStart > 0.2 || (originalDuration && originalDuration > (trimEnd + 0.5));
 
@@ -141,8 +147,8 @@ export async function compressVideoFile(file, options = {}) {
     }
 
     const safeStart = Math.max(0, parseFloat(trimStart) || 0);
-    const rawEnd = parseFloat(trimEnd) || (safeStart + 60);
-    const clipDuration = Math.min(60, Math.max(0.5, rawEnd - safeStart));
+    const rawEnd = parseFloat(trimEnd) || (safeStart + 90);
+    const clipDuration = Math.min(MAX_CLIENT_TRANSCODE_DURATION_SEC, Math.max(0.5, rawEnd - safeStart));
 
     // Mandatory Client Slicing: If video exceeds 30s or requires a custom trim window,
     // ALWAYS physically slice it client-side before network upload.

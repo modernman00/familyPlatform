@@ -673,24 +673,25 @@ window.__removeComposerVideo = removeComposerVideo;
 const syncTrimSlidersUI = (changedSlider = 'start') => {
     if (!videoTrimStartRange || !videoTrimEndRange) return;
     const maxDur = stagedTrimDuration && stagedTrimDuration > 0 ? stagedTrimDuration : 120;
+    const activeCap = (typeof stagedTrimOrientation !== 'undefined' && stagedTrimOrientation === 'landscape') ? 300 : 90;
     let start = parseFloat(videoTrimStartRange.value) || 0;
-    let end = parseFloat(videoTrimEndRange.value) || Math.min(60, maxDur);
+    let end = parseFloat(videoTrimEndRange.value) || Math.min(activeCap, maxDur);
 
     if (changedSlider === 'start') {
         if (start >= maxDur - 0.5) {
             start = Math.max(0, maxDur - 0.5);
         }
         if (end <= start) {
-            end = Math.min(maxDur, start + 60);
-        } else if ((end - start) > 60) {
-            end = Math.min(maxDur, start + 60);
+            end = Math.min(maxDur, start + activeCap);
+        } else if ((end - start) > activeCap) {
+            end = Math.min(maxDur, start + activeCap);
         }
     } else {
         if (end <= start + 0.5) {
             end = Math.min(maxDur, start + 0.5);
         }
-        if ((end - start) > 60) {
-            start = Math.max(0, end - 60);
+        if ((end - start) > activeCap) {
+            start = Math.max(0, end - activeCap);
         }
     }
 
@@ -703,7 +704,7 @@ const syncTrimSlidersUI = (changedSlider = 'start') => {
 
     if (videoTrimStartLabel) videoTrimStartLabel.textContent = `${start.toFixed(1)}s`;
     if (videoTrimEndLabel) videoTrimEndLabel.textContent = `${end.toFixed(1)}s`;
-    if (videoTrimDurationBadge) videoTrimDurationBadge.textContent = `Clip: ${clipLen.toFixed(1)}s / 60s max`;
+    if (videoTrimDurationBadge) videoTrimDurationBadge.textContent = `Clip: ${clipLen.toFixed(1)}s / ${activeCap}s max`;
     if (btnConfirmAutoTrimLabel) {
         btnConfirmAutoTrimLabel.textContent = `Auto-Trim (${start.toFixed(1)}s–${end.toFixed(1)}s) & Attach`;
     }
@@ -743,8 +744,9 @@ const openAutoTrimStudioForFile = (file, duration) => {
     }
 
     if (!videoAutoTrimStudio) return;
+    const activeCap = (typeof stagedTrimOrientation !== 'undefined' && stagedTrimOrientation === 'landscape') ? 300 : 90;
     const totalSec = Math.round(duration * 10) / 10;
-    const initialEnd = Math.min(60, totalSec);
+    const initialEnd = Math.min(activeCap, totalSec);
 
     if (videoTrimStartRange) {
         videoTrimStartRange.min = '0';
@@ -757,7 +759,7 @@ const openAutoTrimStudioForFile = (file, duration) => {
         videoTrimEndRange.value = String(initialEnd);
     }
     if (videoTrimMetaBadge) {
-        videoTrimMetaBadge.textContent = `Original: ${Math.round(totalSec)}s → Auto-Trim to 60s`;
+        videoTrimMetaBadge.textContent = `Original: ${Math.round(totalSec)}s → Auto-Trim to ${activeCap}s`;
     }
 
     stagedTrimBlobUrl = URL.createObjectURL(file);
@@ -928,17 +930,19 @@ const renderAttachedVideoPreview = (streamUrl, trimStart = null, trimEnd = null,
     }
 };
 
-const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 60, originalDuration = null, videoId = null) => {
+const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 90, originalDuration = null, videoId = null, orientation = null) => {
     const vidId = videoId || file?._stagedVidId || `vid_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    const resolvedOrientation = orientation || file?._detectedOrientation || (typeof stagedTrimOrientation !== 'undefined' ? stagedTrimOrientation : 'portrait');
+    const maxCapSec = resolvedOrientation === 'landscape' ? 300 : 90;
     const runUpload = async () => {
         if (!file) return null;
 
         const safeStart = Math.max(0, parseFloat(trimStart) || 0);
-        const rawEnd = parseFloat(trimEnd) || (safeStart + 60);
-        const safeEnd = Math.min(safeStart + 60, rawEnd > safeStart ? rawEnd : safeStart + 60);
+        const rawEnd = parseFloat(trimEnd) || (safeStart + maxCapSec);
+        const safeEnd = Math.min(safeStart + maxCapSec, rawEnd > safeStart ? rawEnd : safeStart + maxCapSec);
         const clipLen = Math.round((safeEnd - safeStart) * 10) / 10;
         const isLargeFile = file.size > 50 * 1024 * 1024;
-        const needsTrim = safeStart > 0 || (originalDuration && originalDuration > 60.5) || (originalDuration && safeEnd < originalDuration - 0.2) || isLargeFile;
+        const needsTrim = safeStart > 0 || (originalDuration && originalDuration > (maxCapSec + 0.5)) || (originalDuration && safeEnd < originalDuration - 0.2) || isLargeFile;
 
         if (videoUploadProgressWrapper) {
             videoUploadProgressWrapper.classList.remove('d-none');
@@ -1021,10 +1025,16 @@ const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 60, originalDura
                     const abortTimer = abortCtrl ? setTimeout(() => abortCtrl.abort(), 1200) : null;
                     const tokenRes = await fetch('/api/video/direct-upload', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
+                        },
                         signal: abortCtrl ? abortCtrl.signal : undefined,
                         body: JSON.stringify({
-                            maxDuration: 60,
+                            maxDuration: maxCapSec,
+                            orientation: resolvedOrientation,
+                            useTus: uploadFile.size > 20 * 1024 * 1024,
+                            uploadLength: uploadFile.size,
                             expirySeconds: expirySeconds
                         })
                     });
@@ -1099,15 +1109,44 @@ const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 60, originalDura
             let uploadResult;
             if (!useSovereignLocal) {
                 try {
-                    const cfFormData = new FormData();
-                    cfFormData.append('file', uploadFile);
-                    uploadResult = await sendSingleOrChunkRequest(cfFormData, (loaded, total) => {
-                        if (videoProgressBar && videoUploadPercent) {
-                            const percent = Math.max(12, Math.round((loaded / total) * 100));
-                            videoProgressBar.style.width = `${percent}%`;
-                            videoUploadPercent.textContent = `${percent}%`;
+                    if (cfTokenData && cfTokenData.tusSupported && targetUploadUrl) {
+                        // TUS 1.0.0 Resumable Chunked PATCH Upload
+                        const TUS_CHUNK = 5 * 1024 * 1024;
+                        let offset = 0;
+                        while (offset < uploadFile.size) {
+                            const slice = uploadFile.slice(offset, Math.min(uploadFile.size, offset + TUS_CHUNK));
+                            const tusRes = await fetch(targetUploadUrl, {
+                                method: 'PATCH',
+                                headers: {
+                                    'Tus-Resumable': '1.0.0',
+                                    'Upload-Offset': String(offset),
+                                    'Content-Type': 'application/offset+octet-stream'
+                                },
+                                body: slice
+                            });
+                            if (!tusRes.ok) {
+                                throw new Error(`TUS PATCH failed (${tusRes.status})`);
+                            }
+                            const nextOffsetHeader = tusRes.headers.get('Upload-Offset');
+                            offset = nextOffsetHeader ? parseInt(nextOffsetHeader, 10) : (offset + slice.size);
+                            if (videoProgressBar && videoUploadPercent) {
+                                const percent = Math.min(99, Math.max(12, Math.round((offset / uploadFile.size) * 100)));
+                                videoProgressBar.style.width = `${percent}%`;
+                                videoUploadPercent.textContent = `${percent}%`;
+                            }
                         }
-                    });
+                        uploadResult = { useSovereignLocal: false, parsedRes: {}, cfTokenData };
+                    } else {
+                        const cfFormData = new FormData();
+                        cfFormData.append('file', uploadFile);
+                        uploadResult = await sendSingleOrChunkRequest(cfFormData, (loaded, total) => {
+                            if (videoProgressBar && videoUploadPercent) {
+                                const percent = Math.max(12, Math.round((loaded / total) * 100));
+                                videoProgressBar.style.width = `${percent}%`;
+                                videoUploadPercent.textContent = `${percent}%`;
+                            }
+                        });
+                    }
                 } catch (cfUploadErr) {
                     console.warn('[VideoUpload] Direct cloud upload failed/blocked, falling back to Sovereign Local upload:', cfUploadErr);
                     window.__cfStreamFallbackLocal = true;
@@ -1133,6 +1172,7 @@ const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 60, originalDura
                         formData.append('total_chunks', String(totalChunks));
                         formData.append('trim_start', String(effectiveStart));
                         formData.append('trim_end', String(effectiveEnd));
+                        formData.append('orientation', resolvedOrientation);
                         if (effectiveOriginalDuration) {
                             formData.append('client_duration', String(effectiveOriginalDuration));
                         }
@@ -1156,6 +1196,7 @@ const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 60, originalDura
                     formData.append('video_file', uploadFile);
                     formData.append('trim_start', String(effectiveStart));
                     formData.append('trim_end', String(effectiveEnd));
+                    formData.append('orientation', resolvedOrientation);
                     if (effectiveOriginalDuration) {
                         formData.append('client_duration', String(effectiveOriginalDuration));
                     }
@@ -1182,6 +1223,29 @@ const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 60, originalDura
             if (!finalStreamUrl) {
                 throw new Error('Server did not return a playable video stream URL.');
             }
+
+            // Persist orientation, duration, and HLS manifest metadata into post_media_meta hidden input
+            try {
+                const postFormEl = document.getElementById('postForm') || document.querySelector('form[action*="post"]');
+                if (postFormEl) {
+                    let metaInput = postFormEl.querySelector('input[name="media_meta"]');
+                    if (!metaInput) {
+                        metaInput = document.createElement('input');
+                        metaInput.type = 'hidden';
+                        metaInput.name = 'media_meta';
+                        postFormEl.appendChild(metaInput);
+                    }
+                    const hlsUrl = (!uploadResult.useSovereignLocal && uploadResult.cfTokenData?.hlsUrl)
+                        ? uploadResult.cfTokenData.hlsUrl
+                        : (uploadResult.parsedRes?.hlsUrl || null);
+                    const metaPayload = {
+                        aspect_ratio: resolvedOrientation === 'landscape' ? '16 / 9' : '4 / 5',
+                        duration_sec: clipLen,
+                        ...(hlsUrl ? { hls_url: hlsUrl } : {})
+                    };
+                    metaInput.value = JSON.stringify(metaPayload);
+                }
+            } catch (_) {}
 
             if (videoUploadStatus) {
                 videoUploadStatus.textContent = needsTrim
@@ -1298,10 +1362,11 @@ const handleSelectedVideoFile = async (file) => {
         });
     }
 
-    // Inspect video duration via browser metadata with guaranteed timeout race
+    // Inspect video duration & orientation via browser metadata with guaranteed timeout race
     let clipDuration = null;
+    let detectedOrientation = 'portrait';
     try {
-        clipDuration = await new Promise((resolve) => {
+        const metaInfo = await new Promise((resolve) => {
             const tempVideo = document.createElement('video');
             tempVideo.preload = 'metadata';
             const blobUrl = URL.createObjectURL(file);
@@ -1309,34 +1374,46 @@ const handleSelectedVideoFile = async (file) => {
 
             const timer = setTimeout(() => {
                 URL.revokeObjectURL(blobUrl);
-                resolve(null);
+                resolve({ duration: null, orientation: 'portrait' });
             }, 1200);
 
             tempVideo.onloadedmetadata = () => {
                 clearTimeout(timer);
                 URL.revokeObjectURL(blobUrl);
-                resolve(Number.isFinite(tempVideo.duration) ? tempVideo.duration : null);
+                const vw = tempVideo.videoWidth || 0;
+                const vh = tempVideo.videoHeight || 0;
+                const orient = (vw > 0 && vh > 0 && vw > vh * 1.1) ? 'landscape' : 'portrait';
+                resolve({
+                    duration: Number.isFinite(tempVideo.duration) ? tempVideo.duration : null,
+                    orientation: orient
+                });
             };
 
             tempVideo.onerror = () => {
                 clearTimeout(timer);
                 URL.revokeObjectURL(blobUrl);
-                resolve(null);
+                resolve({ duration: null, orientation: 'portrait' });
             };
 
             try {
                 tempVideo.load();
             } catch (_) {}
         });
+        clipDuration = metaInfo.duration;
+        detectedOrientation = metaInfo.orientation;
     } catch (err) {
         console.warn('Video duration check skipped:', err);
     }
 
     stagedTrimDuration = clipDuration;
+    window.stagedTrimOrientation = detectedOrientation;
+    file._detectedOrientation = detectedOrientation;
+    const maxClipSec = detectedOrientation === 'landscape' ? 300 : 90;
+    const maxClipLabel = detectedOrientation === 'landscape' ? '5 minutes (300s)' : '90 seconds';
 
-    // If video exceeds 60 seconds (or is a large >80MB file whose duration metadata deferred), open the Auto-Trim Studio
-    if ((clipDuration && clipDuration > 60.5) || (!clipDuration && file.size > 80 * 1024 * 1024)) {
-        const effectiveDuration = clipDuration && clipDuration > 60.5 ? clipDuration : 120;
+    // If video exceeds orientation tier cap (90s portrait / 300s landscape) or is >80MB with unknown duration, open Auto-Trim Studio
+    if ((clipDuration && clipDuration > (maxClipSec + 0.5)) || (!clipDuration && file.size > 80 * 1024 * 1024)) {
+        const effectiveDuration = clipDuration && clipDuration > (maxClipSec + 0.5) ? clipDuration : (maxClipSec + 60);
         openAutoTrimStudioForFile(file, effectiveDuration);
 
         if (window.Swal) {
@@ -1345,27 +1422,27 @@ const handleSelectedVideoFile = async (file) => {
                 : `Your selected video is <strong>${(file.size / (1024 * 1024)).toFixed(1)} MB</strong>.`;
             const modalResult = await window.Swal.fire({
                 icon: 'info',
-                title: '✂️ Auto-Trim Video to 60 Seconds?',
+                title: `✂️ Auto-Trim Video to ${maxClipSec} Seconds?`,
                 html: `
                     <div style="text-align: left; font-size: 0.94rem;">
-                        <p class="mb-2">${durationSummary} Maximum post clip length is <strong>60 seconds (1 minute)</strong>.</p>
+                        <p class="mb-2">${durationSummary} Maximum ${detectedOrientation} post clip length is <strong>${maxClipLabel}</strong>.</p>
                         <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 14px; border-radius: 8px; margin: 12px 0;">
                             <span style="color: #166534; font-weight: 700;">✨ Smart Auto-Trim Ready:</span>
-                            <span style="color: #15803d;">We can automatically trim this video to 60 seconds for you right now, or let you slide to pick your favourite 60-second moment.</span>
+                            <span style="color: #15803d;">We can automatically trim this video to ${maxClipSec} seconds for you right now, or let you slide to pick your favourite moment.</span>
                         </div>
                     </div>
                 `,
                 showDenyButton: true,
                 showCancelButton: true,
-                confirmButtonText: '✂️ Auto-Trim First 60s Now',
-                denyButtonText: '🎚️ Customise 60s Window',
+                confirmButtonText: `✂️ Auto-Trim First ${maxClipSec}s Now`,
+                denyButtonText: `🎚️ Customise ${maxClipSec}s Window`,
                 cancelButtonText: 'Cancel',
                 confirmButtonColor: '#a31621',
                 denyButtonColor: '#0f172a'
             });
 
             if (modalResult.isConfirmed) {
-                await uploadVideoWithAutoTrim(file, 0, 60, effectiveDuration, vidId);
+                await uploadVideoWithAutoTrim(file, 0, maxClipSec, effectiveDuration, vidId, detectedOrientation);
             } else if (modalResult.isDenied) {
                 file._needsManualTrim = true;
                 if (typeof window.__onComposerVideoUpdated === 'function') {
@@ -1381,9 +1458,8 @@ const handleSelectedVideoFile = async (file) => {
                 cleanupTrimStudio();
                 if (videoDirectFileInput) videoDirectFileInput.value = '';
             }
-            // If isDenied ("Customise 60s Window"), the #videoAutoTrimStudio remains open for the user to adjust sliders!
         } else {
-            await uploadVideoWithAutoTrim(file, 0, 60, effectiveDuration, vidId);
+            await uploadVideoWithAutoTrim(file, 0, maxClipSec, effectiveDuration, vidId, detectedOrientation);
         }
         return;
     }

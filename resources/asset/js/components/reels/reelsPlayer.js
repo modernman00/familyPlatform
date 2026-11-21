@@ -2870,7 +2870,7 @@ class FamilyReelsPlayer {
                         ? previewVideo.duration
                         : null;
                     // Fast path: files up to 40 MB skip the slow real-time re-encode unless they need trimming.
-                    if (selectedFile && shouldOptimiseVideoOnDevice(selectedFile, { trimStart: 0, trimEnd: 30, originalDuration: detectedDur, fastPassBytes: 40 * 1024 * 1024 })) {
+                    if (selectedFile && shouldOptimiseVideoOnDevice(selectedFile, { trimStart: 0, trimEnd: 90, originalDuration: detectedDur, fastPassBytes: 40 * 1024 * 1024 })) {
                         if (statusText) {
                             statusText.innerHTML = '<i class="bi bi-stars text-warning"></i> Optimising video for 4K clarity & fast upload…';
                         }
@@ -2879,7 +2879,7 @@ class FamilyReelsPlayer {
                         }
                         const optResult = await compressVideoFile(selectedFile, {
                             trimStart: 0,
-                            trimEnd: 30,
+                            trimEnd: 90,
                             originalDuration: detectedDur,
                             onProgress: (pct) => {
                                 const mappedPct = Math.min(40, Math.max(5, Math.round(pct * 0.4)));

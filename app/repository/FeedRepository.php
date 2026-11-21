@@ -722,6 +722,21 @@ class FeedRepository
                     $post['video'] = $formattedVideos[0];
                 }
             }
+
+            // Merge persisted media_meta (focal_x, focal_y, aspect_ratio, duration_sec, hls_url) into hydrated video descriptors
+            $parsedMediaMeta = \App\classes\VideoParser::normaliseMediaMeta($post['media_meta'] ?? null);
+            if ($parsedMediaMeta !== null) {
+                $post['media_meta'] = $parsedMediaMeta;
+                if (!empty($post['videos']) && is_array($post['videos'])) {
+                    $post['videos'] = array_map(
+                        static fn($v) => is_array($v) ? \App\classes\VideoParser::mergeMediaMetaIntoDescriptor($v, $parsedMediaMeta) : $v,
+                        $post['videos']
+                    );
+                    $post['video'] = $post['videos'][0] ?? ($post['video'] ?? null);
+                } elseif (!empty($post['video']) && is_array($post['video'])) {
+                    $post['video'] = \App\classes\VideoParser::mergeMediaMetaIntoDescriptor($post['video'], $parsedMediaMeta);
+                }
+            }
         }
         unset($post);
     }

@@ -451,7 +451,7 @@ final class ProfilePage extends ProcessImg
                 'then_now', 'then_label', 'now_label', 'reply_to_post',
                 'comparison_mode', 'mystery_year', 'then_now_voice_base64',
                 'attached_ar_emoji', 'target_scope', 'target_fam_code', 'post_style',
-                'audience_choice', 'audience_choice_radio',
+                'audience_choice', 'audience_choice_radio', 'media_meta',
                 'submit', 'button',
                 'g-recaptcha-response', 'grecaptcharesponse', 'siteKey', 'action',
                 'website_hp', 'hp_username', 'hp_email', 'fax_number', 'phone_number_hp', 'company_website_trap'
@@ -465,11 +465,12 @@ final class ProfilePage extends ProcessImg
                 : null;
             $pollOptionsRaw = is_array($_POST['poll_options'] ?? null) ? $_POST['poll_options'] : [];
             $rawTaggedInput = $_POST['tagged_user_ids'] ?? [];
+            $mediaMeta = \App\classes\VideoParser::normaliseMediaMeta($_POST['media_meta'] ?? null);
             unset(
                 $_POST['poll_question'], $_POST['poll_options'], $_POST['tagged_user_ids'],
-                $_POST['shared_temp_images'], $_POST['attached_video_urls'],
+                $_POST['shared_temp_images'], $_POST['attached_video_urls'], $_POST['media_meta'],
                 $_REQUEST['poll_question'], $_REQUEST['poll_options'], $_REQUEST['tagged_user_ids'],
-                $_REQUEST['shared_temp_images'], $_REQUEST['attached_video_urls']
+                $_REQUEST['shared_temp_images'], $_REQUEST['attached_video_urls'], $_REQUEST['media_meta']
             );
 
            $result =  SubmitPostData::submitToOneTablenImage(
@@ -487,7 +488,7 @@ final class ProfilePage extends ProcessImg
                     'postFamCode', 'profileImg',
                     'then_now', 'then_label', 'now_label', 'reply_to_post',
                     'comparison_mode', 'mystery_year', 'then_now_voice_base64',
-                    'ar_emoji', 'attached_ar_emoji', 'post_style',
+                    'ar_emoji', 'attached_ar_emoji', 'post_style', 'media_meta',
                     'target_scope', 'target_fam_code', 'audience_choice', 'audience_choice_radio'
                 ]
             );
@@ -688,6 +689,15 @@ final class ProfilePage extends ProcessImg
                 
                 if (!empty($pollQuestion) && count($pollOptions) >= 2) {
                     \App\model\PollData::createPoll((int)$result, $pollQuestion, $pollOptions);
+                }
+
+                if ($mediaMeta !== null) {
+                    try {
+                        $mStmt = \Src\Db::connect2()->prepare('UPDATE post SET media_meta = ? WHERE post_no = ?');
+                        $mStmt->execute([json_encode($mediaMeta, JSON_UNESCAPED_SLASHES), (int)$result]);
+                    } catch (\Throwable $metaErr) {
+                        error_log('[ProfilePage::post media_meta] ' . $metaErr->getMessage());
+                    }
                 }
 
                 // Explicitly update the status to published first.

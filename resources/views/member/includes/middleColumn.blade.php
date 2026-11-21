@@ -948,16 +948,94 @@
             scheduleEvaluate();
           }, { threshold: [0.0, 0.15, 0.25, 0.5, 0.75] });
 
+          function attachHlsStream(videoEl, hlsUrl, fallbackUrl) {
+            if (!videoEl || !hlsUrl) return false;
+            if (videoEl._hlsAttachedUrl === hlsUrl && (videoEl._hlsInstance || videoEl.src === hlsUrl)) {
+              return true;
+            }
+            if (videoEl._hlsInstance) {
+              try { videoEl._hlsInstance.destroy(); } catch (_) {}
+              videoEl._hlsInstance = null;
+            }
+            if (videoEl.canPlayType && videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+              videoEl.src = hlsUrl;
+              videoEl._hlsAttachedUrl = hlsUrl;
+              return true;
+            }
+            if (window.Hls && window.Hls.isSupported()) {
+              const hls = new window.Hls({
+                maxBufferLength: 15,
+                maxMaxBufferLength: 30,
+                startLevel: -1,
+                enableWorker: true
+              });
+              hls.loadSource(hlsUrl);
+              hls.attachMedia(videoEl);
+              hls.on(window.Hls.Events.ERROR, (event, data) => {
+                if (data && data.fatal) {
+                  try { hls.destroy(); } catch (_) {}
+                  videoEl._hlsInstance = null;
+                  if (fallbackUrl && videoEl.src !== fallbackUrl) {
+                    videoEl.src = fallbackUrl;
+                    videoEl.load();
+                  }
+                }
+              });
+              videoEl._hlsInstance = hls;
+              videoEl._hlsAttachedUrl = hlsUrl;
+              return true;
+            }
+            if (fallbackUrl && videoEl.src !== fallbackUrl) {
+              videoEl.src = fallbackUrl;
+            }
+            return false;
+          }
+
+          function evictOffscreenBuffer(rec) {
+            const v = rec.getVideo ? rec.getVideo() : null;
+            if (!v || v.dataset.evicted === '1') return;
+            if (!v.paused) {
+              try { v.pause(); } catch (_) {}
+            }
+            const activeSrc = v._hlsAttachedUrl || v.currentSrc || v.getAttribute('src') || '';
+            if (activeSrc) {
+              v.dataset.evictedSrc = activeSrc;
+            }
+            if (v._hlsInstance) {
+              try { v._hlsInstance.destroy(); } catch (_) {}
+              v._hlsInstance = null;
+              v._hlsAttachedUrl = '';
+            }
+            v.dataset.evicted = '1';
+            v.removeAttribute('src');
+            try { v.load(); } catch (_) {}
+          }
+
+          function restoreEvictedBuffer(rec) {
+            const v = rec.getVideo ? rec.getVideo() : null;
+            if (!v || v.dataset.evicted !== '1') return;
+            const savedSrc = v.dataset.evictedSrc || v.dataset.hlsUrl || v.dataset.fallbackSrc || '';
+            v.dataset.evicted = '0';
+            if (!savedSrc) return;
+            if (/\.m3u8(?:\?|#|$)/i.test(savedSrc)) {
+              attachHlsStream(v, savedSrc, v.dataset.fallbackSrc || '');
+            } else {
+              v.src = savedSrc;
+              try { v.load(); } catch (_) {}
+            }
+          }
+
           const preloadObserver = new IntersectionObserver((obsEntries) => {
             if (isSaveData()) return;
             obsEntries.forEach((entry) => {
               if (!entry.isIntersecting) return;
               const rec = entries.get(entry.target);
               if (!rec) return;
+              restoreEvictedBuffer(rec);
               const v = rec.getVideo();
               if (v && v.preload !== 'auto') {
                 v.preload = 'auto';
-                if (v.networkState === 0 && !v.currentSrc) {
+                if (v.networkState === 0 && !v.currentSrc && !v._hlsInstance) {
                   try { v.load(); } catch (_) {}
                 }
               }
@@ -991,6 +1069,12 @@
               }
               const rect = el.getBoundingClientRect();
               if (rect.height <= 0) return;
+              // Off-screen decoder/buffer eviction (> 2 viewports away) to prevent mobile Safari/Chrome OOM
+              if (rect.bottom < (-vh * 2) || rect.top > (vh * 3)) {
+                evictOffscreenBuffer(rec);
+                return;
+              }
+              restoreEvictedBuffer(rec);
               const visibleTop = Math.max(0, rect.top);
               const visibleBottom = Math.min(vh, rect.bottom);
               const liveRatio = Math.max(0, visibleBottom - visibleTop) / rect.height;
@@ -1060,7 +1144,12 @@
             },
             notifyPlaying(el) {
               activeEl = el;
+              const rec = entries.get(el);
+              if (rec) restoreEvictedBuffer(rec);
               pauseAllExcept(el);
+            },
+            attachHls(videoEl, hlsUrl, fallbackUrl) {
+              return attachHlsStream(videoEl, hlsUrl, fallbackUrl);
             }
           };
         })();

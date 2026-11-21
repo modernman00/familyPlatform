@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(studio): bidirectional media sync & studio guide update",
+    "title": "Feat(feed): harden link preview service and feed/composer link preview cards",
     "notes": [
-        "Feat(studio): bidirectional media sync & studio guide update",
-        "Feat(content-engine): curated family video engine, admin UI and header-auth cron",
-        "Feat(wishlist): add family gift wishlists with claim flow"
+        "Feat(feed): harden link preview service and feed/composer link preview cards",
+        "Feat(islands): add isolated Preact islands for Creative Studio & Family Tree with Vitest/Cypress gates",
+        "Fix(feed): harden feed media stages, action pills, and DOM audit gates"
     ],
-    "released_at": "2026-11-19",
-    "commit": "cfc5050e"
+    "released_at": "2026-11-20",
+    "commit": "ad3bc6cf"
 }

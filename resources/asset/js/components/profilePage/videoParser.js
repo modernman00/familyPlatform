@@ -84,8 +84,8 @@ export function parseVideoUrl(url) {
   }
 
   // 3. Cloudflare Stream Matcher
-  // Matches: iframe.videodelivery.net/UID, watch.cloudflarestream.com/UID, customer-*.cloudflarestream.com/UID
-  const cfStreamRegex = /(?:https?:\/\/)?(?:iframe\.videodelivery\.net|watch\.cloudflarestream\.com|customer-[a-zA-Z0-9_-]+\.cloudflarestream\.com)\/([a-zA-Z0-9]{32})/;
+  // Matches: iframe.videodelivery.net/UID, videodelivery.net/UID, watch.cloudflarestream.com/UID, customer-*.cloudflarestream.com/UID
+  const cfStreamRegex = /(?:https?:\/\/)?(?:iframe\.videodelivery\.net|videodelivery\.net|watch\.cloudflarestream\.com|customer-[a-zA-Z0-9_-]+\.cloudflarestream\.com)\/([a-zA-Z0-9]{32})/;
   const cfMatch = trimmed.match(cfStreamRegex);
   if (cfMatch && cfMatch[1]) {
     return {
@@ -93,6 +93,7 @@ export function parseVideoUrl(url) {
       videoId: cfMatch[1],
       thumbnailUrl: `https://videodelivery.net/${cfMatch[1]}/thumbnails/thumbnail.jpg`,
       embedUrl: `https://iframe.videodelivery.net/${cfMatch[1]}`,
+      hlsUrl: `https://videodelivery.net/${cfMatch[1]}/manifest/video.m3u8`,
       originalUrl: trimmed
     };
   }
@@ -123,10 +124,11 @@ export function parseVideoUrl(url) {
     };
   }
 
-  // 4. Direct HTML5 Video (.mp4, .webm, .ogg, .mov, .m4v) — supports absolute http(s), sovereign /resources/videos/ or /public/uploads/, and bare filenames
-  const directVideoRegex = /^(?:https?:\/\/[^\s"'<>]+|\/(?:resources\/(?:videos|images)|public\/uploads)\/[^\s"'<>]+|[a-zA-Z0-9_-]+\.(?:mp4|webm|ogg|mov|m4v))(?:\.(mp4|webm|ogg|mov|m4v))?(?:\?[^\s"'<>#]*)?(?:#t=([0-9.]+)(?:,([0-9.]+))?)?$/i;
-  if (/\.(mp4|webm|ogg|mov|m4v)(?:\?[^\s"'<>#]*)?(?:#t=[0-9.]+(?:,[0-9.]+)?)?$/i.test(trimmed)) {
+  // 4. Direct HTML5 Video (.mp4, .webm, .ogg, .mov, .m4v, .m3u8) — supports absolute http(s), sovereign /resources/videos/ or /public/uploads/, and bare filenames
+  const directVideoRegex = /^(?:https?:\/\/[^\s"'<>]+|\/(?:resources\/(?:videos|images)|public\/uploads)\/[^\s"'<>]+|[a-zA-Z0-9_-]+\.(?:mp4|webm|ogg|mov|m4v|m3u8))(?:\.(mp4|webm|ogg|mov|m4v|m3u8))?(?:\?[^\s"'<>#]*)?(?:#t=([0-9.]+)(?:,([0-9.]+))?)?$/i;
+  if (/\.(mp4|webm|ogg|mov|m4v|m3u8)(?:\?[^\s"'<>#]*)?(?:#t=[0-9.]+(?:,[0-9.]+)?)?$/i.test(trimmed)) {
     const directMatch = trimmed.match(directVideoRegex);
+    const isHls = /\.m3u8(?:\?|#|$)/i.test(trimmed);
     const trimStart = directMatch && directMatch[2] !== undefined ? parseFloat(directMatch[2]) : null;
     const trimEnd = directMatch && directMatch[3] !== undefined ? parseFloat(directMatch[3]) : null;
     const resolvedEmbed = (trimmed.startsWith('/') || trimmed.startsWith('http'))
@@ -137,6 +139,7 @@ export function parseVideoUrl(url) {
       videoId: null,
       thumbnailUrl: null,
       embedUrl: resolvedEmbed,
+      hlsUrl: isHls ? resolvedEmbed : null,
       originalUrl: trimmed,
       trimStart: Number.isFinite(trimStart) ? trimStart : null,
       trimEnd: Number.isFinite(trimEnd) ? trimEnd : null,

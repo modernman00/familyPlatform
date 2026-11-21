@@ -18,6 +18,8 @@ use Src\Exceptions\ValidationException;
 final class VideoAutoTrimService
 {
     public const MAX_CLIP_DURATION = 30.0;
+    public const MAX_PORTRAIT_DURATION = 90.0;
+    public const MAX_LANDSCAPE_DURATION = 300.0;
     public const MAX_FILE_SIZE_BYTES = 1024 * 1024 * 1024; // 1GB (1024MB) pre-trim source cap
     public const MAX_CHUNKS = 100;
 
@@ -34,37 +36,43 @@ final class VideoAutoTrimService
     ];
 
     /**
-     * Normalise and clamp a requested [start, end] trim range to <= 30.0 seconds.
+     * Normalise and clamp a requested [start, end] trim range to <= $maxDuration (defaults to 30.0s, up to 300.0s for landscape).
      *
      * @param float|int|string|null $rawStart
      * @param float|int|string|null $rawEnd
      * @param float|null $detectedDuration
+     * @param float|null $maxDuration
      * @return array{start: float, end: float, duration: float, isTrimmed: bool}
      */
     public static function clampTrimWindow(
         float|int|string|null $rawStart,
         float|int|string|null $rawEnd,
-        ?float $detectedDuration = null
+        ?float $detectedDuration = null,
+        ?float $maxDuration = null
     ): array {
+        $cap = $maxDuration !== null
+            ? max(1.0, min($maxDuration, self::MAX_LANDSCAPE_DURATION))
+            : self::MAX_CLIP_DURATION;
+
         $start = is_numeric($rawStart) ? max(0.0, min((float)$rawStart, 36000.0)) : 0.0;
         $end = is_numeric($rawEnd) ? max(0.0, min((float)$rawEnd, 36000.0)) : 0.0;
 
         if ($detectedDuration !== null && $detectedDuration > 0.0) {
             if ($start >= $detectedDuration) {
-                $start = max(0.0, $detectedDuration - self::MAX_CLIP_DURATION);
+                $start = max(0.0, $detectedDuration - $cap);
             }
             if ($end <= $start || $end > $detectedDuration) {
-                $end = min($detectedDuration, $start + self::MAX_CLIP_DURATION);
+                $end = min($detectedDuration, $start + $cap);
             }
         } else {
             if ($end <= $start) {
-                $end = $start + self::MAX_CLIP_DURATION;
+                $end = $start + $cap;
             }
         }
 
-        // Enforce strict 30-second cap
-        if (($end - $start) > self::MAX_CLIP_DURATION) {
-            $end = $start + self::MAX_CLIP_DURATION;
+        // Enforce strict duration cap
+        if (($end - $start) > $cap) {
+            $end = $start + $cap;
         }
 
         $start = round($start, 2);
@@ -72,7 +80,7 @@ final class VideoAutoTrimService
         $duration = round(max(0.1, $end - $start), 2);
 
         $isTrimmed = ($start > 0.0)
-            || ($detectedDuration !== null && $detectedDuration > (self::MAX_CLIP_DURATION + 0.5))
+            || ($detectedDuration !== null && $detectedDuration > ($cap + 0.5))
             || ($detectedDuration !== null && ($end < ($detectedDuration - 0.2)));
 
         return [
@@ -112,7 +120,8 @@ final class VideoAutoTrimService
         float|int|string|null $trimStart = 0.0,
         float|int|string|null $trimEnd = 30.0,
         float|int|string|null $clientDuration = null,
-        bool $isAssembledChunk = false
+        bool $isAssembledChunk = false,
+        ?float $maxDuration = null
     ): array {
         $tmpName = isset($file['tmp_name']) && is_string($file['tmp_name']) ? $file['tmp_name'] : '';
         $error = isset($file['error']) ? (int)$file['error'] : UPLOAD_ERR_NO_FILE;
@@ -152,7 +161,10 @@ final class VideoAutoTrimService
         $parsedDuration = self::parseMp4Duration($tmpName);
         $originalDuration = $parsedDuration ?? (is_numeric($clientDuration) && (float)$clientDuration > 0 ? round((float)$clientDuration, 2) : null);
 
-        $window = self::clampTrimWindow($trimStart, $trimEnd, $originalDuration);
+        $cap = $maxDuration !== null
+            ? max(1.0, min($maxDuration, self::MAX_LANDSCAPE_DURATION))
+            : self::MAX_CLIP_DURATION;
+        $window = self::clampTrimWindow($trimStart, $trimEnd, $originalDuration, $cap);
 
         $targetDir = dirname(__DIR__, 2) . '/resources/videos/posts';
         if (!is_dir($targetDir) && !@mkdir($targetDir, 0755, true) && !is_dir($targetDir)) {
@@ -198,7 +210,7 @@ final class VideoAutoTrimService
         // feed player and browser native range requests enforce the exact 30s window.
         if ($physicallyTrimmed) {
             $streamUrl = $rawUrl . '#t=0,' . $window['duration'];
-        } elseif ($window['isTrimmed'] || $window['start'] > 0.0 || $window['duration'] <= self::MAX_CLIP_DURATION) {
+        } elseif ($window['isTrimmed'] || $window['start'] > 0.0 || $window['duration'] <= $cap) {
             $streamUrl = $rawUrl . '#t=' . $window['start'] . ',' . $window['end'];
         } else {
             $streamUrl = $rawUrl;
@@ -241,7 +253,8 @@ final class VideoAutoTrimService
         int $totalChunks,
         float|int|string|null $trimStart = 0.0,
         float|int|string|null $trimEnd = 30.0,
-        float|int|string|null $clientDuration = null
+        float|int|string|null $clientDuration = null,
+        ?float $maxDuration = null
     ): array {
         if (!preg_match('/^[a-zA-Z0-9_-]{8,64}$/', $uploadId)) {
             throw new ValidationException('Invalid chunk upload identifier.');
@@ -330,7 +343,8 @@ final class VideoAutoTrimService
                 trimStart: $trimStart,
                 trimEnd: $trimEnd,
                 clientDuration: $clientDuration,
-                isAssembledChunk: true
+                isAssembledChunk: true,
+                maxDuration: $maxDuration
             );
         } finally {
             if (is_file($stagingPath)) {

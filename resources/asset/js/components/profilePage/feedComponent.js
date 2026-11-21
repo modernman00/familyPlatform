@@ -2977,10 +2977,11 @@ export function profileFeed(opts = {}) {
 
         getVideoModalTrimBounds(vEl) {
             const activeVid = this.videoModalVideos ? this.videoModalVideos[this.videoModalIndex] : null;
+            const maxCap = this.videoModalIsPortrait ? 90 : 300;
             const rawStart = (activeVid && typeof activeVid.trimStart === 'number' && activeVid.trimStart > 0) ? activeVid.trimStart : 0;
-            const rawEnd = (activeVid && typeof activeVid.trimEnd === 'number' && activeVid.trimEnd > rawStart) ? activeVid.trimEnd : (rawStart + 60);
+            const rawEnd = (activeVid && typeof activeVid.trimEnd === 'number' && activeVid.trimEnd > rawStart) ? activeVid.trimEnd : (rawStart + maxCap);
             const rawDur = (vEl && vEl.duration && !isNaN(vEl.duration) && vEl.duration > 0) ? vEl.duration : rawEnd;
-            const end = Math.min(rawDur, rawEnd, rawStart + 60);
+            const end = Math.min(rawDur, rawEnd, rawStart + maxCap);
             const clipDur = Math.max(0.1, end - rawStart);
             return { start: rawStart, end, clipDur };
         },

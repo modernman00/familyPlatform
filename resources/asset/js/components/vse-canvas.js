@@ -463,10 +463,121 @@ class AtgMediaSupremacyEngine {
         const result = {
             aspectRatio,
             numericRatio: clampedRatio,
+            focalX,
+            focalY,
             focalPosition: `${focalX}% ${focalY}%`
         };
 
         if (srcKey) {
+            if (this.cache.size > 200) {
+                const firstKey = this.cache.keys().next().value;
+                this.cache.delete(firstKey);
+            }
+            this.cache.set(srcKey, result);
+        }
+
+        return result;
+    }
+
+    /**
+     * Sample a <video> keyframe to compute biometric focal_x / focal_y and aspect ratio,
+     * preventing blind centre-crop decapitation on portrait/landscape feed videos.
+     */
+    analyzeVideoFrame(videoEl) {
+        this.ensureSuperHdSvgFilter();
+
+        if (!videoEl || !videoEl.videoWidth || !videoEl.videoHeight) {
+            return {
+                aspectRatio: '4 / 5',
+                numericRatio: 0.8,
+                focalX: 50,
+                focalY: 28,
+                focalPosition: '50% 28%'
+            };
+        }
+
+        const srcKey = 'vid:' + (videoEl.currentSrc || videoEl.src || '');
+        if (srcKey !== 'vid:' && this.cache.has(srcKey)) {
+            return this.cache.get(srcKey);
+        }
+
+        const w = videoEl.videoWidth;
+        const h = videoEl.videoHeight;
+        const rawRatio = w / h;
+        const clampedRatio = Math.min(1.91, Math.max(0.80, rawRatio));
+        const aspectRatio = clampedRatio.toFixed(4) + ' / 1';
+
+        let focalX = 50;
+        let focalY = rawRatio < 0.92 ? 28 : (rawRatio > 1.2 ? 42 : 36);
+
+        try {
+            if (typeof document !== 'undefined' && videoEl.readyState >= 2) {
+                const S = 48;
+                if (!this.probeCanvas) {
+                    this.probeCanvas = document.createElement('canvas');
+                    this.probeCanvas.width = S;
+                    this.probeCanvas.height = S;
+                    this.probeCtx = this.probeCanvas.getContext('2d', { willReadFrequently: true });
+                }
+                if (this.probeCtx) {
+                    this.probeCtx.clearRect(0, 0, S, S);
+                    this.probeCtx.drawImage(videoEl, 0, 0, S, S);
+                    const data = this.probeCtx.getImageData(0, 0, S, S).data;
+
+                    let sumW = 0;
+                    let sumX = 0;
+                    let sumY = 0;
+
+                    for (let y = 2; y < S - 2; y++) {
+                        const normY = y / S;
+                        if (normY < 0.08 || normY > 0.85) continue;
+                        const verticalPrior = (normY >= 0.16 && normY <= 0.56) ? 1.65 : 0.75;
+
+                        for (let x = 2; x < S - 2; x++) {
+                            const idx = (y * S + x) * 4;
+                            const r = data[idx];
+                            const g = data[idx + 1];
+                            const b = data[idx + 2];
+                            const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+                            if (lum > 242 || lum < 12) continue;
+
+                            const idxRight = (y * S + (x + 1)) * 4;
+                            const idxDown = ((y + 1) * S + x) * 4;
+                            const edgeEnergy = (Math.abs(r - data[idxRight]) + Math.abs(g - data[idxRight + 1]) + Math.abs(r - data[idxDown]) + Math.abs(g - data[idxDown + 1])) * 0.5;
+
+                            const minGB = Math.min(g, b);
+                            const isSkinChrominance = (r > 55 && g > 32 && b > 18 && r > g && g >= b * 0.85 && (r - minGB) > 12 && (r - g) < 95);
+                            const skinBoost = isSkinChrominance ? 2.4 : 1.0;
+
+                            const weight = (edgeEnergy + 8) * skinBoost * verticalPrior;
+                            sumW += weight;
+                            sumX += (x / S) * 100 * weight;
+                            sumY += normY * 100 * weight;
+                        }
+                    }
+
+                    if (sumW > 0) {
+                        const detectedX = sumX / sumW;
+                        const detectedY = sumY / sumW;
+                        focalX = Math.round(Math.min(75, Math.max(25, detectedX)));
+                        const maxY = rawRatio < 0.95 ? 42 : 58;
+                        focalY = Math.round(Math.min(maxY, Math.max(18, detectedY)));
+                    }
+                }
+            }
+        } catch (_) {
+            // Cross-origin stream taint: retain biometric rule-of-thirds fallback
+        }
+
+        const result = {
+            aspectRatio,
+            numericRatio: clampedRatio,
+            focalX,
+            focalY,
+            focalPosition: `${focalX}% ${focalY}%`
+        };
+
+        if (srcKey !== 'vid:') {
             if (this.cache.size > 200) {
                 const firstKey = this.cache.keys().next().value;
                 this.cache.delete(firstKey);

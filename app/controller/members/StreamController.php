@@ -34,6 +34,9 @@ class StreamController
                 $userId = (string)$verifyJWT['id'];
             }
 
+            // Enforce CSRF token validation (Marcus SecOps Gate)
+            \Src\CheckToken::tokenCheck();
+
             // Fast-Response Session Unlock: Release PHP session file lock before DB queries and cURL
             if (session_status() === PHP_SESSION_ACTIVE) {
                 session_write_close();
@@ -55,8 +58,13 @@ class StreamController
 
             $rawInput = file_get_contents("php://input");
             $data = json_decode($rawInput !== false ? $rawInput : '', true);
-            $maxDuration = max(1, min((int) ($data['maxDuration'] ?? 30), 30));
+            $data = is_array($data) ? $data : [];
+            $orientation = isset($data['orientation']) && is_string($data['orientation']) ? $data['orientation'] : null;
+            $capSeconds = CloudflareStreamService::resolveMaxDurationSeconds($orientation);
+            $maxDuration = max(1, min((int) ($data['maxDuration'] ?? $capSeconds), $capSeconds));
             $requestedExpiry = isset($data['expirySeconds']) ? (int)$data['expirySeconds'] : 2592000;
+            $useTus = !empty($data['useTus']);
+            $uploadLength = isset($data['uploadLength']) && is_numeric($data['uploadLength']) ? (int)$data['uploadLength'] : 0;
 
             // Enforce Premium Tier: 1 Year (31536000s) and Permanent (0s) are restricted to Premium members
             if (!$isPremium && ($requestedExpiry === 0 || $requestedExpiry > 2592000)) {
@@ -68,7 +76,11 @@ class StreamController
                 return;
             }
 
-            $result = $this->streamService->createDirectUploadUrl($maxDuration, $requestedExpiry);
+            if ($useTus && $uploadLength > 0) {
+                $result = $this->streamService->createTusUploadUrl($uploadLength, $maxDuration, $requestedExpiry, $orientation);
+            } else {
+                $result = $this->streamService->createDirectUploadUrl($maxDuration, $requestedExpiry, $orientation);
+            }
 
             if (!empty($result['success'])) {
                 http_response_code(200);
@@ -79,10 +91,15 @@ class StreamController
                 echo json_encode([
                     'success' => true,
                     'fallbackLocal' => true,
+                    'tusSupported' => false,
+                    'maxDuration' => $capSeconds,
                     'uploadUrl' => '/api/video/upload-file',
                     'providerNote' => $result['error'] ?? 'Using sovereign local video stream.'
                 ]);
             }
+        } catch (\Src\Exceptions\UnauthorisedException $ue) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Invalid or missing security token. Please refresh the page and try again.']);
         } catch (\Throwable $e) {
             error_log('[StreamController] Error: ' . $e->getMessage());
             http_response_code(500);
@@ -148,8 +165,10 @@ class StreamController
                 return;
             }
 
+            $orientation = isset($_POST['orientation']) && is_string($_POST['orientation']) ? $_POST['orientation'] : null;
+            $capSeconds = (float)CloudflareStreamService::resolveMaxDurationSeconds($orientation);
             $trimStart = $_POST['trim_start'] ?? 0.0;
-            $trimEnd = $_POST['trim_end'] ?? 30.0;
+            $trimEnd = $_POST['trim_end'] ?? $capSeconds;
             $clientDuration = $_POST['client_duration'] ?? null;
             $uploadId = isset($_POST['upload_id']) && is_scalar($_POST['upload_id']) ? trim((string)$_POST['upload_id']) : '';
             $totalChunks = isset($_POST['total_chunks']) && is_numeric($_POST['total_chunks']) ? (int)$_POST['total_chunks'] : 1;
@@ -163,22 +182,27 @@ class StreamController
                     chunkIndex: $chunkIndex,
                     totalChunks: $totalChunks,
                     trimStart: is_scalar($trimStart) ? (float)$trimStart : 0.0,
-                    trimEnd: is_scalar($trimEnd) ? (float)$trimEnd : 30.0,
-                    clientDuration: is_scalar($clientDuration) ? (float)$clientDuration : null
+                    trimEnd: is_scalar($trimEnd) ? (float)$trimEnd : $capSeconds,
+                    clientDuration: is_scalar($clientDuration) ? (float)$clientDuration : null,
+                    maxDuration: $capSeconds
                 );
             } else {
                 $result = \App\services\VideoAutoTrimService::processUploadAndTrim(
                     file: $file,
                     userId: $userId,
                     trimStart: is_scalar($trimStart) ? (float)$trimStart : 0.0,
-                    trimEnd: is_scalar($trimEnd) ? (float)$trimEnd : 30.0,
-                    clientDuration: is_scalar($clientDuration) ? (float)$clientDuration : null
+                    trimEnd: is_scalar($trimEnd) ? (float)$trimEnd : $capSeconds,
+                    clientDuration: is_scalar($clientDuration) ? (float)$clientDuration : null,
+                    maxDuration: $capSeconds
                 );
             }
 
             http_response_code(200);
             // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
             echo json_encode($result, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        } catch (\Src\Exceptions\UnauthorisedException $ue) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Invalid or missing security token. Please refresh the page and try again.']);
         } catch (\Src\Exceptions\ValidationException $ve) {
             http_response_code(400);
             echo json_encode(['success' => false, 'error' => $ve->getMessage()]);

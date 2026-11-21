@@ -577,8 +577,8 @@
                     @click.stop="openVideoModal(post.videos, vIdx, isMuted, post)"
                     title="Play in full video mode"
                     aria-label="Play in full video mode"
-                    style="top: 8px; right: 46px; z-index: 6; width: 32px; height: 32px; min-width: 32px; min-height: 32px; border-radius: 9999px; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
-              <i class="bi bi-arrows-fullscreen" style="font-size: 0.75rem; color: #ffffff;"></i>
+                    style="top: 8px; right: 60px; z-index: 6; width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 9999px; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
+              <i class="bi bi-arrows-fullscreen" style="font-size: 0.85rem; color: #ffffff;"></i>
             </button>
 
             <!-- Mute/Unmute Pill Top-Right -->
@@ -587,8 +587,8 @@
                     @click.stop="toggleMute($el.closest('.multi-video-card').querySelector('video'))"
                     :title="isMuted ? 'Unmute video' : 'Mute video'"
                     :aria-label="isMuted ? 'Unmute video' : 'Mute video'"
-                    style="top: 8px; right: 8px; z-index: 6; width: 32px; height: 32px; min-width: 32px; min-height: 32px; border-radius: 9999px; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
-              <i class="bi" :class="isMuted ? 'bi-volume-mute-fill' : 'bi-volume-up-fill'" style="font-size: 0.8rem; color: #ffffff;"></i>
+                    style="top: 8px; right: 8px; z-index: 6; width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 9999px; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
+              <i class="bi" :class="isMuted ? 'bi-volume-mute-fill' : 'bi-volume-up-fill'" style="font-size: 0.9rem; color: #ffffff;"></i>
             </button>
 
             <!-- Video Player (Direct Stream or Embedded) -->
@@ -664,8 +664,8 @@
                         @click.stop="openVideoModal(post.videos, vIdx, false, post)"
                         title="Play in full video mode"
                         aria-label="Play in full video mode"
-                        style="top: 8px; right: 8px; z-index: 6; width: 32px; height: 32px; min-width: 32px; min-height: 32px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
-                  <i class="bi bi-arrows-fullscreen" style="font-size: 0.75rem; color: #ffffff;"></i>
+                        style="top: 8px; right: 8px; z-index: 6; width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
+                  <i class="bi bi-arrows-fullscreen" style="font-size: 0.85rem; color: #ffffff;"></i>
                 </button>
               </div>
             </template>
@@ -696,8 +696,8 @@
                 @click.stop="openVideoModal([post.video], 0, false, post)"
                 title="View Fullscreen in full video mode"
                 aria-label="View Fullscreen in full video mode"
-                style="top: 10px; right: 10px; z-index: 6; width: 34px; height: 34px; min-width: 34px; min-height: 34px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
-          <i class="bi bi-arrows-fullscreen" style="font-size: 0.82rem; color: #ffffff;"></i>
+                style="top: 10px; right: 10px; z-index: 6; width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
+          <i class="bi bi-arrows-fullscreen" style="font-size: 0.88rem; color: #ffffff;"></i>
         </button>
       </div>
     </div>
@@ -705,16 +705,20 @@
 
   <!-- Direct Video Stream (World-Class Instagram-Grade Adaptive Video Rendition) -->
   <template x-if="(!post.videos || post.videos.length <= 1) && post.video && post.video.type === 'direct'">
-    <div class="video-embed-container mb-3 px-1 position-relative" 
+    <div class="video-embed-container feed-video-breakout mb-3 position-relative"
+         :class="{ 'is-cinema-expanded': cinemaExpanded && !isPortrait }"
          x-data="{
            isVideoMuted: true,
            isPlaying: false,
            isBuffering: false,
            _isInView: false,
            videoOrientation: 'portrait',
-           videoRatio: '9 / 16',
-           videoMaxHeight: '580px',
+           videoRatio: (post.video && post.video.aspect_ratio) ? post.video.aspect_ratio : '4 / 5',
+           videoMaxHeight: '640px',
+           videoFocalPos: (post.video && typeof post.video.focal_x === 'number' && typeof post.video.focal_y === 'number') ? (post.video.focal_x + '% ' + post.video.focal_y + '%') : '50% 28%',
            isPortrait: true,
+           portraitExpanded: false,
+           cinemaExpanded: false,
            viewMode: 'cinema',
            showHookCard: true,
            hasMetadata: false,
@@ -744,6 +748,16 @@
            toggleViewMode() {
              this.viewMode = (this.viewMode === 'reel') ? 'cinema' : 'reel';
            },
+           togglePortraitExpand() {
+             this.portraitExpanded = !this.portraitExpanded;
+             if (this.isPortrait) {
+               this.videoRatio = this.portraitExpanded ? '9 / 16' : '4 / 5';
+               this.videoMaxHeight = this.portraitExpanded ? '760px' : '640px';
+             }
+           },
+           toggleCinemaExpand() {
+             this.cinemaExpanded = !this.cinemaExpanded;
+           },
            detectVideoDimensions(el) {
              if (!el || !el.videoWidth || !el.videoHeight) return;
              const w = el.videoWidth;
@@ -753,18 +767,26 @@
              if (ratio < 0.88) {
                this.isPortrait = true;
                this.videoOrientation = 'portrait';
-               this.videoRatio = (ratio <= 0.65) ? '9 / 16' : ((w / h).toFixed(4) + ' / 1');
-               this.videoMaxHeight = (ratio <= 0.65) ? '620px' : '560px';
+               this.videoRatio = this.portraitExpanded ? '9 / 16' : '4 / 5';
+               this.videoMaxHeight = this.portraitExpanded ? '760px' : '640px';
              } else if (ratio > 1.15) {
                this.isPortrait = false;
                this.videoOrientation = 'landscape';
                this.videoRatio = (w / h).toFixed(4) + ' / 1';
-               this.videoMaxHeight = '500px';
+               this.videoMaxHeight = this.cinemaExpanded ? '75vh' : '540px';
              } else {
                this.isPortrait = false;
                this.videoOrientation = 'square';
                this.videoRatio = '1 / 1';
-               this.videoMaxHeight = '480px';
+               this.videoMaxHeight = '520px';
+             }
+
+             if (!(post.video && typeof post.video.focal_x === 'number' && typeof post.video.focal_y === 'number')
+                 && window.AtgMediaSupremacy && typeof window.AtgMediaSupremacy.analyzeVideoFrame === 'function') {
+               const analysis = window.AtgMediaSupremacy.analyzeVideoFrame(el);
+               if (analysis && analysis.focalPosition) {
+                 this.videoFocalPos = analysis.focalPosition;
+               }
              }
            },
            togglePlayback(videoEl) {
@@ -796,10 +818,11 @@
              this.isVideoMuted = videoEl.muted;
            },
            getTrimBounds(videoEl) {
+             const maxCap = (this.videoOrientation === 'landscape') ? 300 : 90;
              const rawStart = (post.video && typeof post.video.trimStart === 'number' && post.video.trimStart > 0) ? post.video.trimStart : 0;
-             const rawEnd = (post.video && typeof post.video.trimEnd === 'number' && post.video.trimEnd > rawStart) ? post.video.trimEnd : (rawStart + 60);
+             const rawEnd = (post.video && typeof post.video.trimEnd === 'number' && post.video.trimEnd > rawStart) ? post.video.trimEnd : (rawStart + maxCap);
              const rawDur = (videoEl && videoEl.duration && !isNaN(videoEl.duration) && videoEl.duration > 0) ? videoEl.duration : rawEnd;
-             const end = Math.min(rawDur, rawEnd, rawStart + 60);
+             const end = Math.min(rawDur, rawEnd, rawStart + maxCap);
              const clipDur = Math.max(0.1, end - rawStart);
              return { start: rawStart, end, clipDur };
            },
@@ -826,7 +849,12 @@
            },
            initSingleVideoObserver() {
              const v = this.$el.querySelector('video');
-             if (v && v.videoWidth) this.detectVideoDimensions(v);
+             if (v) {
+               if (post.video && post.video.hlsUrl && window.__FPFeedVideoCoordinator && typeof window.__FPFeedVideoCoordinator.attachHls === 'function') {
+                 window.__FPFeedVideoCoordinator.attachHls(v, post.video.hlsUrl, post.video.embedUrl);
+               }
+               if (v.videoWidth) this.detectVideoDimensions(v);
+             }
              const playVideoInView = () => {
                const vidEl = this.$el.querySelector('video');
                if (!vidEl || vidEl._userManuallyPaused) return;
@@ -932,24 +960,31 @@
          }"
          x-init="$nextTick(() => initSingleVideoObserver())">
       
-      <!-- Outer Adaptive Container: Zero White/Black Space Guarantee -->
-      <div class="video-rendition-frame position-relative overflow-hidden mx-auto shadow-sm"
+      <!-- Outer Adaptive Container: Full-Width 4:5 Portrait & Flush Landscape -->
+      <div class="video-rendition-frame feed-media-aura-container position-relative overflow-hidden mx-auto shadow-sm"
            @mouseenter="showControlsOverlay = true"
            @mouseleave="showControlsOverlay = false"
-           :style="'aspect-ratio: ' + (viewMode === 'reel' ? (isPortrait ? videoRatio : '9 / 16') : videoRatio) + '; max-height: ' + (viewMode === 'reel' ? '580px' : videoMaxHeight) + '; width: 100%; max-width: ' + (isPortrait ? (videoRatio === '9 / 16' ? '380px' : '440px') : (viewMode === 'reel' ? '380px' : '100%')) + '; border-radius: 16px; background: #0b0f19; transition: aspect-ratio 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);'">
+           :style="'aspect-ratio: ' + (viewMode === 'reel' ? (isPortrait ? videoRatio : '9 / 16') : videoRatio) + '; max-height: ' + (viewMode === 'reel' ? '720px' : (cinemaExpanded && !isPortrait ? '75vh' : videoMaxHeight)) + '; width: 100%; max-width: ' + (viewMode === 'reel' && !isPortrait ? '420px' : '100%') + '; border-radius: 16px; background: ' + (isPortrait && portraitExpanded ? 'rgba(11, 15, 25, 0.55)' : '#0b0f19') + '; transition: aspect-ratio 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);'">
+
+        <!-- Ambient Edge-Bleed Aura Backdrop for 9:16 Uncropped Portrait Mode -->
+        <div class="feed-media-aura-backdrop" x-show="isPortrait && portraitExpanded && post.video && post.video.thumbnailUrl" x-cloak aria-hidden="true" style="z-index: 1; inset: 0;">
+          <img :src="post.video ? post.video.thumbnailUrl : ''" alt="" loading="lazy">
+        </div>
 
         <!-- High-Res Video Poster Overlay before stream frames decode (Guarantees zero white flash) -->
         <img x-show="!hasMetadata && post.video && post.video.thumbnailUrl"
              :src="post.video.thumbnailUrl"
              class="position-absolute top-0 start-0 w-100 h-100 pointer-events-none"
-             style="z-index: 3; border-radius: 16px; object-fit: cover !important;"
+             :style="'z-index: 3; border-radius: 16px; object-fit: cover !important; object-position: ' + videoFocalPos + ';'"
              loading="lazy"
              alt="Video preview thumbnail"
              x-on:error="$el.style.display = 'none'">
 
-        <!-- Main Video Element (Full-Bleed Cover: Zero White/Black Space) -->
+        <!-- Main Video Element (Full-Bleed Smart-Framed Cover) -->
         <video referrerpolicy="no-referrer" class="feed-post-video atg-4k-video-render w-100 h-100 position-relative"
-               :src="post.video.embedUrl"
+               :src="(post.video && post.video.hlsUrl) ? undefined : post.video.embedUrl"
+               :data-hls-url="post.video && post.video.hlsUrl ? post.video.hlsUrl : ''"
+               :data-fallback-src="post.video ? post.video.embedUrl : ''"
                :poster="(!hasMetadata && post.video && post.video.thumbnailUrl) ? post.video.thumbnailUrl : null"
                playsinline
                webkit-playsinline
@@ -986,7 +1021,7 @@
                @pause="isPlaying = false; isBuffering = false"
                @timeupdate="if (isBuffering && !$el.paused && $el.readyState >= 2) isBuffering = false; handleTimeUpdate($el)"
                @volumechange="isVideoMuted = $el.muted"
-               style="width: 100%; height: 100%; object-fit: cover !important; z-index: 2; border-radius: 16px; cursor: pointer; background: #0b0f19;"></video>
+               :style="'width: 100%; height: 100%; object-fit: ' + (isPortrait && portraitExpanded ? 'contain' : 'cover') + ' !important; object-position: ' + videoFocalPos + '; z-index: 2; border-radius: 16px; cursor: pointer; background: transparent;'"></video>
 
         <!-- Buffering Spinner Overlay -->
         <div x-show="isBuffering" x-cloak class="position-absolute top-50 start-50 translate-middle pointer-events-none" style="z-index: 5;">
@@ -995,18 +1030,29 @@
           </div>
         </div>
 
-        <!-- Format Badge & 1-Tap Reel/Cinema Switcher (Top-Left) -->
-        <div class="position-absolute d-inline-flex align-items-center gap-1.5 shadow-sm"
-             style="top: 14px; left: 14px; z-index: 6;">
+        <!-- Format Badge & 1-Tap Aspect / Theatre Switcher (Top-Left) -->
+        <div class="position-absolute d-inline-flex align-items-center gap-2 shadow-sm"
+             style="top: 12px; left: 12px; z-index: 6;">
           <template x-if="isPortrait">
-            <span class="badge rounded-pill px-2.5 py-1.5 d-inline-flex align-items-center gap-1 pointer-events-none"
-                  style="background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.22); color: #ffffff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;">
-              <i class="bi bi-phone-fill text-info" style="font-size: 0.75rem;"></i>
-              <span>PORTRAIT 4K</span>
-            </span>
+            <div class="d-inline-flex align-items-center gap-2">
+              <span class="badge rounded-pill px-2.5 py-1.5 d-inline-flex align-items-center gap-1 pointer-events-none"
+                    style="background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.22); color: #ffffff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;">
+                <i class="bi bi-phone-fill text-info" style="font-size: 0.75rem;"></i>
+                <span>PORTRAIT</span>
+              </span>
+              <button type="button"
+                      class="btn d-inline-flex align-items-center gap-1 px-3 rounded-pill shadow-sm"
+                      @click.stop="togglePortraitExpand()"
+                      :title="portraitExpanded ? 'Collapse to 4:5 feed frame' : 'Expand to 9:16 full frame'"
+                      :aria-label="portraitExpanded ? 'Collapse to 4:5 feed frame' : 'Expand to 9:16 full frame'"
+                      style="background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; font-size: 0.72rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; min-height: 44px; min-width: 44px;">
+                <i class="bi" :class="portraitExpanded ? 'bi-arrows-angle-contract text-warning' : 'bi-arrows-angle-expand text-info'"></i>
+                <span x-text="portraitExpanded ? '4:5' : '9:16'"></span>
+              </button>
+            </div>
           </template>
           <template x-if="!isPortrait && videoOrientation === 'landscape'">
-            <div class="d-inline-flex align-items-center gap-1">
+            <div class="d-inline-flex align-items-center gap-2">
               <span class="badge rounded-pill px-2.5 py-1.5 d-inline-flex align-items-center gap-1 pointer-events-none"
                     style="background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.22); color: #ffffff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;">
                 <i class="bi bi-badge-4k-fill text-warning" style="font-size: 0.75rem;"></i>
@@ -1014,13 +1060,23 @@
               </span>
               <!-- 1-Tap Reel / Cinema Mode Switcher -->
               <button type="button" 
-                      class="btn d-inline-flex align-items-center gap-1 px-2.5 py-1 rounded-pill shadow-sm"
+                      class="btn d-inline-flex align-items-center gap-1 px-3 rounded-pill shadow-sm"
                       @click.stop="toggleViewMode()"
                       :title="viewMode === 'reel' ? 'Switch to Cinema 16:9 view' : 'Switch to Immersive Reel 9:16 view'"
                       :aria-label="viewMode === 'reel' ? 'Switch to Cinema 16:9 view' : 'Switch to Immersive Reel 9:16 view'"
-                      style="background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; font-size: 0.7rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; min-height: 28px;">
+                      style="background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; font-size: 0.72rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; min-height: 44px; min-width: 44px;">
                 <i class="bi" :class="viewMode === 'reel' ? 'bi-aspect-ratio text-info' : 'bi-phone text-warning'"></i>
                 <span x-text="viewMode === 'reel' ? 'REEL' : 'CINEMA'"></span>
+              </button>
+              <!-- Desktop Theatre / Cinema Expand Toggle -->
+              <button type="button"
+                      class="btn d-none d-md-inline-flex align-items-center gap-1 px-3 rounded-pill shadow-sm"
+                      @click.stop="toggleCinemaExpand()"
+                      :title="cinemaExpanded ? 'Exit Theatre View' : 'Expand to Theatre View'"
+                      :aria-label="cinemaExpanded ? 'Exit Theatre View' : 'Expand to Theatre View'"
+                      style="background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; font-size: 0.72rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; min-height: 44px; min-width: 44px;">
+                <i class="bi" :class="cinemaExpanded ? 'bi-fullscreen-exit text-warning' : 'bi-display text-info'"></i>
+                <span x-text="cinemaExpanded ? 'EXIT THEATRE' : 'THEATRE'"></span>
               </button>
             </div>
           </template>
@@ -1033,24 +1089,24 @@
           </template>
         </div>
 
-        <!-- Full Video Mode Pill Top-Right -->
+        <!-- Full Video Mode Pill Top-Right (44x44px tap target, 8px separation from mute) -->
         <button type="button" 
                 class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
                 @click.stop="openVideoModal([post.video], 0, isVideoMuted, post)"
                 title="View Fullscreen in full video mode"
                 aria-label="View Fullscreen in full video mode"
-                style="top: 12px; right: 52px; z-index: 6; width: 34px; height: 34px; min-width: 34px; min-height: 34px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; transition: transform 0.15s ease, background 0.15s ease; white-space: nowrap; flex-shrink: 0;">
-          <i class="bi bi-arrows-fullscreen" style="font-size: 0.82rem; color: #ffffff;"></i>
+                style="top: 12px; right: 64px; z-index: 6; width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; transition: transform 0.15s ease, background 0.15s ease; white-space: nowrap; flex-shrink: 0;">
+          <i class="bi bi-arrows-fullscreen" style="font-size: 0.88rem; color: #ffffff;"></i>
         </button>
 
-        <!-- Instagram 1-Tap Sound Toggle Pill (Top-Right) -->
+        <!-- Instagram 1-Tap Sound Toggle Pill (Top-Right, 44x44px tap target) -->
         <button type="button" 
                 class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
                 @click.stop="toggleMute($el.closest('.video-rendition-frame').querySelector('video'))"
                 :title="isVideoMuted ? 'Unmute video' : 'Mute video'"
                 :aria-label="isVideoMuted ? 'Unmute video' : 'Mute video'"
-                style="top: 12px; right: 12px; z-index: 6; width: 34px; height: 34px; min-width: 34px; min-height: 34px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; transition: transform 0.15s ease, background 0.15s ease; white-space: nowrap; flex-shrink: 0;">
-          <i class="bi" :class="isVideoMuted ? 'bi-volume-mute-fill' : 'bi-volume-up-fill'" style="font-size: 0.88rem; color: #ffffff;"></i>
+                style="top: 12px; right: 12px; z-index: 6; width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 9999px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; cursor: pointer; transition: transform 0.15s ease, background 0.15s ease; white-space: nowrap; flex-shrink: 0;">
+          <i class="bi" :class="isVideoMuted ? 'bi-volume-mute-fill' : 'bi-volume-up-fill'" style="font-size: 0.92rem; color: #ffffff;"></i>
         </button>
 
         <!-- Instagram Bottom Overlay Controls & Progress Scrubber -->
@@ -1080,8 +1136,8 @@
                       @click.stop="openVideoModal([post.video], 0, isVideoMuted, post)"
                       title="Play in full video mode"
                       aria-label="Play in full video mode"
-                      style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; white-space: nowrap; flex-shrink: 0;">
-                <i class="bi bi-arrows-fullscreen" style="font-size: 0.85rem; color: #ffffff;"></i>
+                      style="width: 44px; height: 44px; min-width: 44px; min-height: 44px; white-space: nowrap; flex-shrink: 0;">
+                <i class="bi bi-arrows-fullscreen" style="font-size: 0.88rem; color: #ffffff;"></i>
               </button>
             </div>
           </div>

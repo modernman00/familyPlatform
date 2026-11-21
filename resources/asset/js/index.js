@@ -14,6 +14,7 @@ import { initDarkMode } from './components/darkMode';
 import { initBackToTop } from './components/backToTop';
 import { initVisualSupremacy } from './components/vse-canvas';
 import { initFamilyTooltip } from './components/familyTooltip';
+import Hls from 'hls.js';
 import './components/recommendModal';
 import './components/navbar';
 
@@ -23,6 +24,7 @@ import { profileSidebar, upcomingEvents } from './components/profilePage/sidebar
 initGlobalSwalAlerts();
 window.Swal = Swal;
 window.swal = Swal;
+window.Hls = Hls;
 window.swalToast = swalToast;
 window.swalSuccess = swalSuccess;
 window.swalError = swalError;

@@ -280,6 +280,21 @@ final class PostDto implements JsonSerializable
             }
         }
 
+        // Merge persisted media_meta (focal_x, focal_y, aspect_ratio, duration_sec, hls_url) into video descriptors
+        $parsedMediaMeta = \App\classes\VideoParser::normaliseMediaMeta($row['media_meta'] ?? null);
+        if ($parsedMediaMeta !== null) {
+            $row['media_meta'] = $parsedMediaMeta;
+            if (!empty($row['videos']) && is_array($row['videos'])) {
+                $row['videos'] = array_map(
+                    static fn($v) => is_array($v) ? \App\classes\VideoParser::mergeMediaMetaIntoDescriptor($v, $parsedMediaMeta) : $v,
+                    $row['videos']
+                );
+                $row['video'] = $row['videos'][0] ?? ($row['video'] ?? null);
+            } elseif (!empty($row['video']) && is_array($row['video'])) {
+                $row['video'] = \App\classes\VideoParser::mergeMediaMetaIntoDescriptor($row['video'], $parsedMediaMeta);
+            }
+        }
+
         // Hydrate images array from post_img0..5 slots if not already hydrated, filtering out video streams
         if (empty($row['images'])) {
             $slotImages = [];

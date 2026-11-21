@@ -9,7 +9,7 @@ final class VideoParser
      * Parse a single URL string for supported video providers (YouTube, Vimeo, Cloudflare, TikTok, Dropbox, Direct Video).
      *
      * @param string|null $url
-     * @return array{type: string, videoId: string|null, thumbnailUrl: string|null, embedUrl: string, originalUrl: string, trimStart?: float|null, trimEnd?: float|null}|null
+     * @return array{type: string, videoId: string|null, thumbnailUrl: string|null, embedUrl: string, originalUrl: string, hlsUrl?: string|null, trimStart?: float|null, trimEnd?: float|null}|null
      */
     public static function parseVideoUrl(?string $url): ?array
     {
@@ -51,15 +51,18 @@ final class VideoParser
             }
         }
 
-        // 3. Cloudflare Stream Matcher
-        $cfStreamRegex = '/(?:https?:\/\/)?(?:iframe\.videodelivery\.net|watch\.cloudflarestream\.com|customer-[a-zA-Z0-9_-]+\.cloudflarestream\.com)\/([a-zA-Z0-9]{32})/i';
+        // 3. Cloudflare Stream Matcher (supports iframe, watch, customer subdomain, or .m3u8 manifest)
+        $cfStreamRegex = '/(?:https?:\/\/)?(?:iframe\.videodelivery\.net|videodelivery\.net|watch\.cloudflarestream\.com|customer-[a-zA-Z0-9_-]+\.cloudflarestream\.com)\/([a-zA-Z0-9]{32})/i';
         if (preg_match($cfStreamRegex, $trimmed, $matches) === 1) {
             $cfUid = $matches[1];
+            $cfSubdomain = preg_replace('/[^a-zA-Z0-9.\-]/', '', (string)($_ENV['CLOUDFLARE_STREAM_SUBDOMAIN'] ?? getenv('CLOUDFLARE_STREAM_SUBDOMAIN') ?: '')) ?: '';
+            $hlsHost = $cfSubdomain !== '' ? $cfSubdomain : 'videodelivery.net';
             return [
                 'type' => 'cloudflare',
                 'videoId' => $cfUid,
-                'thumbnailUrl' => "https://videodelivery.net/{$cfUid}/thumbnails/thumbnail.jpg",
+                'thumbnailUrl' => "https://{$hlsHost}/{$cfUid}/thumbnails/thumbnail.jpg",
                 'embedUrl' => "https://iframe.videodelivery.net/{$cfUid}?preload=true&autoplay=true&muted=true&loop=true",
+                'hlsUrl' => "https://{$hlsHost}/{$cfUid}/manifest/video.m3u8",
                 'originalUrl' => $trimmed,
             ];
         }
@@ -111,9 +114,10 @@ final class VideoParser
             ];
         }
 
-        // 4. Direct HTML5 Video (.mp4, .webm, .ogg, .mov, .m4v) — supports absolute http(s), sovereign /resources/ or /public/uploads/ paths, or bare post_video filenames with optional #t=start,end
-        $directVideoRegex = '/^(?:https?:\/\/[^\s"\'<>]+|\/(?:resources\/(?:videos|images)|public\/uploads)\/[^\s"\'<>]+|[a-zA-Z0-9_\-]+)\.(mp4|webm|ogg|mov|m4v)(?:\?[^\s"\'<>#]*)?(?:#t=([0-9]+(?:\.[0-9]+)?)(?:,([0-9]+(?:\.[0-9]+)?))?)?$/i';
+        // 4. Direct HTML5 Video (.mp4, .webm, .ogg, .mov, .m4v, .m3u8) — supports absolute http(s), sovereign /resources/ or /public/uploads/ paths, or bare post_video filenames with optional #t=start,end
+        $directVideoRegex = '/^(?:https?:\/\/[^\s"\'<>]+|\/(?:resources\/(?:videos|images)|public\/uploads)\/[^\s"\'<>]+|[a-zA-Z0-9_\-]+)\.(mp4|webm|ogg|mov|m4v|m3u8)(?:\?[^\s"\'<>#]*)?(?:#t=([0-9]+(?:\.[0-9]+)?)(?:,([0-9]+(?:\.[0-9]+)?))?)?$/i';
         if (preg_match($directVideoRegex, $trimmed, $directMatches) === 1) {
+            $ext = strtolower($directMatches[1]);
             $trimStart = isset($directMatches[2]) && is_numeric($directMatches[2]) ? (float)$directMatches[2] : null;
             $trimEnd = isset($directMatches[3]) && is_numeric($directMatches[3]) ? (float)$directMatches[3] : null;
             $normalisedUrl = $trimmed;
@@ -125,6 +129,7 @@ final class VideoParser
                 'videoId' => null,
                 'thumbnailUrl' => null,
                 'embedUrl' => $normalisedUrl,
+                'hlsUrl' => $ext === 'm3u8' ? $normalisedUrl : null,
                 'originalUrl' => $normalisedUrl,
                 'trimStart' => $trimStart,
                 'trimEnd' => $trimEnd,
@@ -174,7 +179,7 @@ final class VideoParser
      *
      * @param string $url
      * @param string|null $hookText
-     * @return array{type: string, videoId: string|null, thumbnailUrl: string|null, embedUrl: string, originalUrl: string, trimStart: float|null, trimEnd: float|null, hook: string|null}
+     * @return array{type: string, videoId: string|null, thumbnailUrl: string|null, embedUrl: string, hlsUrl: string|null, originalUrl: string, trimStart: float|null, trimEnd: float|null, hook: string|null}
      */
     public static function formatVideoDescriptor(string $url, ?string $hookText = null): array
     {
@@ -218,6 +223,7 @@ final class VideoParser
                 'videoId' => $vidId,
                 'thumbnailUrl' => $thumb,
                 'embedUrl' => $embedUrl,
+                'hlsUrl' => $parsed['hlsUrl'] ?? null,
                 'originalUrl' => $origUrl,
                 'trimStart' => $trimStart,
                 'trimEnd' => $trimEnd,
@@ -242,6 +248,7 @@ final class VideoParser
             'videoId' => null,
             'thumbnailUrl' => $thumb,
             'embedUrl' => $embedUrl,
+            'hlsUrl' => null,
             'originalUrl' => $fallbackUrl,
             'trimStart' => null,
             'trimEnd' => null,
@@ -350,5 +357,85 @@ final class VideoParser
 
         $cleaned = str_replace($video['originalUrl'], '', $text);
         return trim($cleaned);
+    }
+
+    /**
+     * Validate and normalise client-submitted or DB-stored media_meta JSON payload.
+     *
+     * @param mixed $rawMeta
+     * @return array{focal_x?: float, focal_y?: float, aspect_ratio?: string, duration_sec?: float, hls_url?: string}|null
+     */
+    public static function normaliseMediaMeta(mixed $rawMeta): ?array
+    {
+        if (is_string($rawMeta)) {
+            $decoded = json_decode($rawMeta, true);
+            $rawMeta = is_array($decoded) ? $decoded : null;
+        }
+        if (!is_array($rawMeta) || empty($rawMeta)) {
+            return null;
+        }
+
+        $clean = [];
+        if (isset($rawMeta['focal_x']) && is_numeric($rawMeta['focal_x'])) {
+            $clean['focal_x'] = round(max(0.0, min(100.0, (float)$rawMeta['focal_x'])), 2);
+        }
+        if (isset($rawMeta['focal_y']) && is_numeric($rawMeta['focal_y'])) {
+            $clean['focal_y'] = round(max(0.0, min(100.0, (float)$rawMeta['focal_y'])), 2);
+        }
+        if (isset($rawMeta['aspect_ratio']) && is_string($rawMeta['aspect_ratio'])) {
+            $ar = trim($rawMeta['aspect_ratio']);
+            if (preg_match('/^\d+(?:\.\d+)?\s*\/\s*\d+(?:\.\d+)?$/', $ar) === 1) {
+                $clean['aspect_ratio'] = $ar;
+            }
+        }
+        if (isset($rawMeta['duration_sec']) && is_numeric($rawMeta['duration_sec'])) {
+            $dur = (float)$rawMeta['duration_sec'];
+            if ($dur > 0.0 && $dur <= 36000.0) {
+                $clean['duration_sec'] = round($dur, 2);
+            }
+        }
+        if (isset($rawMeta['hls_url']) && is_string($rawMeta['hls_url'])) {
+            $hls = trim($rawMeta['hls_url']);
+            if (
+                $hls !== ''
+                && (str_starts_with($hls, 'https://') || str_starts_with($hls, '/resources/videos/'))
+                && str_contains(strtolower($hls), '.m3u8')
+                && !preg_match('/[\s"\'<>]/', $hls)
+            ) {
+                $clean['hls_url'] = $hls;
+            }
+        }
+
+        return !empty($clean) ? $clean : null;
+    }
+
+    /**
+     * Merge persisted media_meta fields into a formatted video descriptor.
+     *
+     * @param array<string, mixed> $descriptor
+     * @param array<string, mixed>|null $mediaMeta
+     * @return array<string, mixed>
+     */
+    public static function mergeMediaMetaIntoDescriptor(array $descriptor, ?array $mediaMeta): array
+    {
+        if (empty($mediaMeta)) {
+            return $descriptor;
+        }
+        if (isset($mediaMeta['focal_x'])) {
+            $descriptor['focal_x'] = $mediaMeta['focal_x'];
+        }
+        if (isset($mediaMeta['focal_y'])) {
+            $descriptor['focal_y'] = $mediaMeta['focal_y'];
+        }
+        if (isset($mediaMeta['aspect_ratio'])) {
+            $descriptor['aspect_ratio'] = $mediaMeta['aspect_ratio'];
+        }
+        if (isset($mediaMeta['duration_sec'])) {
+            $descriptor['duration_sec'] = $mediaMeta['duration_sec'];
+        }
+        if (!empty($mediaMeta['hls_url']) && empty($descriptor['hlsUrl'])) {
+            $descriptor['hlsUrl'] = $mediaMeta['hls_url'];
+        }
+        return $descriptor;
     }
 }

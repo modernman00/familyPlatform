@@ -2451,6 +2451,38 @@ body.dark-theme .ig-story-count-badge {
     height: 100% !important;
     object-fit: cover !important;
   }
+
+  .feed-post-card .feed-video-breakout,
+  .feed-post-card .video-rendition-frame,
+  .feed-post-card .video-rendition-frame video {
+    border-radius: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .feed-post-card .feed-video-breakout {
+    margin-left: calc(var(--space-4, 1rem) * -1);
+    margin-right: calc(var(--space-4, 1rem) * -1);
+  }
+
+  .feed-post-card .feed-video-breakout .video-rendition-frame {
+    border-radius: var(--radius-md, 0.75rem) !important;
+  }
+
+  .feed-post-card .feed-video-breakout.is-cinema-expanded {
+    margin-left: calc(var(--space-6, 1.5rem) * -1);
+    margin-right: calc(var(--space-6, 1.5rem) * -1);
+    z-index: 15;
+  }
+
+  .feed-post-card .feed-video-breakout.is-cinema-expanded .video-rendition-frame {
+    max-height: 75vh !important;
+    box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.45) !important;
+  }
 }
 
 /* 4. Desktop Facebook Mirror Styling (>= 1200px; 768px–1199.98px uses Tablet 2-Column Grid) */

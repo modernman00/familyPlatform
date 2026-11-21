@@ -5,13 +5,45 @@ namespace App\services;
 
 class CloudflareStreamService
 {
+    public const MAX_PORTRAIT_DURATION = 90;
+    public const MAX_LANDSCAPE_DURATION = 300;
+
     private string $accountId;
     private string $apiToken;
+    private string $streamSubdomain;
 
     public function __construct()
     {
         $this->accountId = (string) ($_ENV['CLOUDFLARE_STREAM_ACCOUNT_ID'] ?? $_SERVER['CLOUDFLARE_STREAM_ACCOUNT_ID'] ?? getenv('CLOUDFLARE_STREAM_ACCOUNT_ID') ?: '');
         $this->apiToken = (string) ($_ENV['CLOUDFLARE_STREAM_API_TOKEN'] ?? $_SERVER['CLOUDFLARE_STREAM_API_TOKEN'] ?? getenv('CLOUDFLARE_STREAM_API_TOKEN') ?: '');
+        $rawSubdomain = (string) ($_ENV['CLOUDFLARE_STREAM_SUBDOMAIN'] ?? $_SERVER['CLOUDFLARE_STREAM_SUBDOMAIN'] ?? getenv('CLOUDFLARE_STREAM_SUBDOMAIN') ?: '');
+        $this->streamSubdomain = preg_replace('/[^a-zA-Z0-9.\-]/', '', $rawSubdomain) ?: '';
+    }
+
+    /**
+     * Resolve orientation-aware maximum video duration in seconds.
+     * Portrait / Reels: 90s | Landscape Cinema: 300s (5 mins)
+     */
+    public static function resolveMaxDurationSeconds(?string $orientation = null): int
+    {
+        $norm = strtolower(trim((string)$orientation));
+        if ($norm === 'landscape' || $norm === 'cinema') {
+            return self::MAX_LANDSCAPE_DURATION;
+        }
+        return self::MAX_PORTRAIT_DURATION;
+    }
+
+    /**
+     * Build HLS ABR manifest URL (.m3u8) for a Cloudflare Stream UID.
+     */
+    public function buildHlsUrl(string $uid): string
+    {
+        $cleanUid = preg_replace('/[^a-zA-Z0-9_-]/', '', $uid) ?: '';
+        if ($cleanUid === '') {
+            return '';
+        }
+        $host = $this->streamSubdomain !== '' ? $this->streamSubdomain : 'videodelivery.net';
+        return "https://{$host}/{$cleanUid}/manifest/video.m3u8";
     }
 
     /**
@@ -51,11 +83,12 @@ class CloudflareStreamService
     /**
      * Request a Direct Creator Upload URL from Cloudflare Stream
      *
-     * @param int $maxDurationSeconds Maximum allowed video length (default 30s)
+     * @param int $maxDurationSeconds Maximum allowed video length (90s portrait / 300s landscape)
      * @param int $expirySeconds Expiration in seconds from now (0 = permanent / never expire)
-     * @return array{success: bool, uploadUrl?: string, videoId?: string, streamUrl?: string, error?: string}
+     * @param string|null $orientation Optional orientation ('portrait' | 'landscape' | 'square')
+     * @return array{success: bool, uploadUrl?: string, videoId?: string, streamUrl?: string, hlsUrl?: string, maxDuration?: int, error?: string}
      */
-    public function createDirectUploadUrl(int $maxDurationSeconds = 30, int $expirySeconds = 0): array
+    public function createDirectUploadUrl(int $maxDurationSeconds = 90, int $expirySeconds = 0, ?string $orientation = null): array
     {
         if (!$this->isConfigured()) {
             return [
@@ -64,7 +97,8 @@ class CloudflareStreamService
             ];
         }
 
-        $maxDurationSeconds = max(1, min($maxDurationSeconds, 30));
+        $tierCap = self::resolveMaxDurationSeconds($orientation);
+        $maxDurationSeconds = max(1, min($maxDurationSeconds, $tierCap));
         $endpoint = "https://api.cloudflare.com/client/v4/accounts/{$this->accountId}/stream/direct_upload";
 
         $payloadData = [
@@ -117,7 +151,9 @@ class CloudflareStreamService
                 'success' => true,
                 'uploadUrl' => (string) $data['result']['uploadURL'],
                 'videoId' => $uid,
-                'streamUrl' => "https://iframe.videodelivery.net/{$uid}"
+                'streamUrl' => "https://iframe.videodelivery.net/{$uid}",
+                'hlsUrl' => $this->buildHlsUrl($uid),
+                'maxDuration' => $maxDurationSeconds,
             ];
         }
 
@@ -132,6 +168,96 @@ class CloudflareStreamService
         }
 
         return ['success' => false, 'error' => $errorMsg];
+    }
+
+    /**
+     * Request a TUS 1.0.0 Resumable Direct Creator Upload URL from Cloudflare Stream.
+     *
+     * @param int $uploadLength Total file size in bytes
+     * @param int $maxDurationSeconds Maximum allowed video length
+     * @param int $expirySeconds Expiration in seconds from now (0 = permanent)
+     * @param string|null $orientation Optional orientation ('portrait' | 'landscape' | 'square')
+     * @return array{success: bool, tusSupported?: bool, uploadUrl?: string, videoId?: string, streamUrl?: string, hlsUrl?: string, maxDuration?: int, error?: string}
+     */
+    public function createTusUploadUrl(int $uploadLength, int $maxDurationSeconds = 90, int $expirySeconds = 0, ?string $orientation = null): array
+    {
+        if (!$this->isConfigured()) {
+            return [
+                'success' => false,
+                'error' => 'Cloudflare Stream is not configured for TUS resumable uploads.'
+            ];
+        }
+
+        if ($uploadLength <= 0) {
+            return ['success' => false, 'error' => 'Invalid upload length for TUS session.'];
+        }
+
+        $tierCap = self::resolveMaxDurationSeconds($orientation);
+        $maxDurationSeconds = max(1, min($maxDurationSeconds, $tierCap));
+        $endpoint = "https://api.cloudflare.com/client/v4/accounts/{$this->accountId}/stream?direct_user=true";
+
+        $metaParts = [
+            'maxDurationSeconds ' . base64_encode((string)$maxDurationSeconds),
+        ];
+        if ($expirySeconds > 0) {
+            $metaParts[] = 'expiry ' . base64_encode(date('c', time() + $expirySeconds));
+        }
+
+        $ch = curl_init($endpoint);
+        if ($ch === false) {
+            return ['success' => false, 'error' => 'Unable to initialise cURL for TUS upload'];
+        }
+
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => true,
+            CURLOPT_TIMEOUT => 8, // David's Gate 3: 8s strict timeout
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer ' . $this->apiToken,
+                'Tus-Resumable: 1.0.0',
+                'Upload-Length: ' . $uploadLength,
+                'Upload-Metadata: ' . implode(',', $metaParts),
+            ]
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $headerSize = (int)curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $curlError = curl_error($ch);
+        if (\PHP_VERSION_ID < 80500) {
+            @curl_close($ch);
+        }
+
+        if ($response === false || !empty($curlError)) {
+            error_log("[CloudflareStream TUS] cURL Error: {$curlError}");
+            return ['success' => false, 'error' => 'Network error creating TUS upload session.'];
+        }
+
+        $rawHeaders = substr((string)$response, 0, $headerSize);
+        $location = '';
+        $uid = '';
+        foreach (preg_split("/\r\n|\n|\r/", $rawHeaders) ?: [] as $line) {
+            if (stripos($line, 'location:') === 0) {
+                $location = trim(substr($line, 9));
+            } elseif (stripos($line, 'stream-media-id:') === 0) {
+                $uid = trim(substr($line, 16));
+            }
+        }
+
+        if ($httpCode >= 200 && $httpCode < 300 && $location !== '') {
+            return [
+                'success' => true,
+                'tusSupported' => true,
+                'uploadUrl' => $location,
+                'videoId' => $uid,
+                'streamUrl' => $uid !== '' ? "https://iframe.videodelivery.net/{$uid}" : '',
+                'hlsUrl' => $uid !== '' ? $this->buildHlsUrl($uid) : '',
+                'maxDuration' => $maxDurationSeconds,
+            ];
+        }
+
+        return ['success' => false, 'error' => "Failed to create TUS upload session (HTTP {$httpCode})."];
     }
 
     /**
