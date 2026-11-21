@@ -695,13 +695,12 @@
 
   <!-- Embedded Video (YouTube, Vimeo, Cloud Stream, TikTok) -->
   <template x-if="(!post.videos || post.videos.length <= 1) && post.video && (post.video.type === 'youtube' || post.video.type === 'vimeo' || post.video.type === 'cloudflare' || post.video.type === 'tiktok')">
-    <div class="video-embed-container mb-3 px-1"
+    <div class="video-embed-container feed-video-breakout mb-3"
          x-data="{
            isShort: (post.video.type === 'tiktok' || (post.video.originalUrl && post.video.originalUrl.includes('/shorts/')))
          }">
-      <div class="rounded-3 overflow-hidden shadow-sm border border-light-subtle mx-auto position-relative"
-           :class="isShort ? 'ratio ratio-9x16' : 'ratio ratio-16x9'"
-           :style="isShort ? 'border-radius: 14px; max-height: 560px; max-width: 380px; background: #07090e;' : 'border-radius: 14px; max-height: 440px; background: #07090e;'">
+      <div class="video-rendition-frame overflow-hidden shadow-sm border border-light-subtle position-relative"
+           :style="isShort ? 'border-radius: 12px; width: 100%; max-width: 100%; aspect-ratio: 4 / 5; max-height: 880px; background: #07090e;' : 'border-radius: 12px; width: 100%; max-width: 100%; aspect-ratio: 16 / 10; max-height: min(680px, 75vh); background: #07090e;'">
         <iframe :src="post.video.embedUrl" 
                 title="Video Player" 
                 frameborder="0" 
@@ -731,12 +730,12 @@
            isBuffering: false,
            _isInView: false,
            videoOrientation: (post.video && post.video.aspect_ratio && (parseFloat(post.video.aspect_ratio.split('/')[0]) / (parseFloat(post.video.aspect_ratio.split('/')[1]) || 1)) > 1.15) ? 'landscape' : ((post.video && post.video.aspect_ratio && (parseFloat(post.video.aspect_ratio.split('/')[0]) / (parseFloat(post.video.aspect_ratio.split('/')[1]) || 1)) >= 0.88) ? 'square' : 'portrait'),
-           videoRatio: (post.video && post.video.aspect_ratio) ? post.video.aspect_ratio : '9 / 16',
+           videoRatio: (post.video && post.video.aspect_ratio) ? (((parseFloat(post.video.aspect_ratio.split('/')[0]) / (parseFloat(post.video.aspect_ratio.split('/')[1]) || 1)) < 0.88) ? '4 / 5' : (((parseFloat(post.video.aspect_ratio.split('/')[0]) / (parseFloat(post.video.aspect_ratio.split('/')[1]) || 1)) > 1.6) ? '16 / 10' : post.video.aspect_ratio)) : '4 / 5',
            naturalVideoRatio: (post.video && post.video.aspect_ratio) ? post.video.aspect_ratio : '9 / 16',
-           videoMaxHeight: 'min(760px, 76vh)',
-           videoFocalPos: (post.video && typeof post.video.focal_x === 'number' && typeof post.video.focal_y === 'number') ? (post.video.focal_x + '% ' + post.video.focal_y + '%') : '50% 50%',
+           videoMaxHeight: (post.video && post.video.aspect_ratio && (parseFloat(post.video.aspect_ratio.split('/')[0]) / (parseFloat(post.video.aspect_ratio.split('/')[1]) || 1)) >= 0.88) ? 'min(680px, 72vh)' : '880px',
+           videoFocalPos: (post.video && typeof post.video.focal_x === 'number' && typeof post.video.focal_y === 'number') ? (post.video.focal_x + '% ' + post.video.focal_y + '%') : '50% 28%',
            isPortrait: !(post.video && post.video.aspect_ratio && (parseFloat(post.video.aspect_ratio.split('/')[0]) / (parseFloat(post.video.aspect_ratio.split('/')[1]) || 1)) >= 0.88),
-           portraitExpanded: true,
+           portraitExpanded: false,
            cinemaExpanded: false,
            viewMode: 'cinema',
            showHookCard: true,
@@ -789,11 +788,17 @@
              this.portraitExpanded = !this.portraitExpanded;
              if (this.isPortrait) {
                this.videoRatio = this.portraitExpanded ? (this.naturalVideoRatio || '9 / 16') : '4 / 5';
-               this.videoMaxHeight = this.portraitExpanded ? 'min(760px, 76vh)' : '640px';
+               this.videoMaxHeight = this.portraitExpanded ? 'min(760px, 76vh)' : '880px';
              }
            },
            toggleCinemaExpand() {
              this.cinemaExpanded = !this.cinemaExpanded;
+             if (this.videoOrientation === 'landscape' && this.naturalVideoRatio) {
+               const parts = this.naturalVideoRatio.split('/');
+               const r = parseFloat(parts[0]) / (parseFloat(parts[1]) || 1);
+               this.videoRatio = (!this.cinemaExpanded && r > 1.6) ? '16 / 10' : this.naturalVideoRatio;
+               this.videoMaxHeight = this.cinemaExpanded ? '78vh' : 'min(680px, 72vh)';
+             }
            },
            detectVideoDimensions(el) {
              if (!el || !el.videoWidth || !el.videoHeight) return;
@@ -807,17 +812,17 @@
                this.isPortrait = true;
                this.videoOrientation = 'portrait';
                this.videoRatio = this.portraitExpanded ? exactRatio : '4 / 5';
-               this.videoMaxHeight = this.portraitExpanded ? 'min(760px, 76vh)' : '640px';
+               this.videoMaxHeight = this.portraitExpanded ? 'min(760px, 76vh)' : '880px';
              } else if (ratio > 1.15) {
                this.isPortrait = false;
                this.videoOrientation = 'landscape';
-               this.videoRatio = exactRatio;
-               this.videoMaxHeight = this.cinemaExpanded ? '75vh' : '540px';
+               this.videoRatio = (!this.cinemaExpanded && ratio > 1.6) ? '16 / 10' : exactRatio;
+               this.videoMaxHeight = this.cinemaExpanded ? '78vh' : 'min(680px, 72vh)';
              } else {
                this.isPortrait = false;
                this.videoOrientation = 'square';
                this.videoRatio = exactRatio;
-               this.videoMaxHeight = '620px';
+               this.videoMaxHeight = 'min(720px, 78vh)';
              }
 
              if (!(post.video && typeof post.video.focal_x === 'number' && typeof post.video.focal_y === 'number')
@@ -857,7 +862,7 @@
              this.isVideoMuted = videoEl.muted;
            },
            getTrimBounds(videoEl) {
-             const maxCap = (this.videoOrientation === 'landscape') ? 300 : 90;
+             const maxCap = (this.videoOrientation === 'landscape') ? 300 : 180;
              const rawStart = (post.video && typeof post.video.trimStart === 'number' && post.video.trimStart > 0) ? post.video.trimStart : 0;
              const rawEnd = (post.video && typeof post.video.trimEnd === 'number' && post.video.trimEnd > rawStart) ? post.video.trimEnd : (rawStart + maxCap);
              const rawDur = (videoEl && videoEl.duration && !isNaN(videoEl.duration) && videoEl.duration > 0) ? videoEl.duration : rawEnd;
@@ -1027,7 +1032,7 @@
         <img x-show="!hasMetadata && post.video && post.video.thumbnailUrl"
              :src="post.video.thumbnailUrl"
              class="position-absolute top-0 start-0 w-100 h-100 pointer-events-none"
-             :style="'z-index: 3; border-radius: 16px; object-fit: ' + (((viewMode === 'reel' && !isPortrait) || (isPortrait && !portraitExpanded)) ? 'cover' : 'contain') + ' !important; object-position: ' + videoFocalPos + ';'"
+             :style="'z-index: 3; border-radius: 16px; object-fit: ' + (((viewMode === 'reel' && !isPortrait) || (isPortrait && !portraitExpanded) || (!isPortrait && videoOrientation === 'landscape' && !cinemaExpanded)) ? 'cover' : 'contain') + ' !important; object-position: ' + videoFocalPos + ';'"
              loading="lazy"
              alt="Video preview thumbnail"
              x-on:error="$el.style.display = 'none'">
@@ -1074,7 +1079,7 @@
                @pause="isPlaying = false; isBuffering = false; revealControls(false)"
                @timeupdate="if (isBuffering && !$el.paused && $el.readyState >= 2) isBuffering = false; handleTimeUpdate($el)"
                @volumechange="isVideoMuted = $el.muted"
-               :style="'width: 100%; height: 100%; object-fit: ' + (((viewMode === 'reel' && !isPortrait) || (isPortrait && !portraitExpanded)) ? 'cover' : 'contain') + ' !important; object-position: ' + videoFocalPos + '; z-index: 2; border-radius: 16px; cursor: pointer; background: transparent;'"></video>
+               :style="'width: 100%; height: 100%; object-fit: ' + (((viewMode === 'reel' && !isPortrait) || (isPortrait && !portraitExpanded) || (!isPortrait && videoOrientation === 'landscape' && !cinemaExpanded)) ? 'cover' : 'contain') + ' !important; object-position: ' + videoFocalPos + '; z-index: 2; border-radius: 16px; cursor: pointer; background: transparent;'"></video>
 
         <!-- Buffering Spinner Overlay -->
         <div x-show="isBuffering" x-cloak class="position-absolute top-50 start-50 translate-middle pointer-events-none" style="z-index: 5;">

@@ -7,6 +7,16 @@ function safeAspectRatio(raw) {
     return /^\d+(?:\.\d+)?\s*\/\s*\d+(?:\.\d+)?$/.test(trimmed) ? trimmed : undefined;
 }
 
+function parseAspectRatioValue(raw) {
+    const safe = safeAspectRatio(raw);
+    if (!safe) return null;
+    const parts = safe.split('/');
+    const w = parseFloat(parts[0]);
+    const h = parseFloat(parts[1]);
+    if (!Number.isFinite(w) || !Number.isFinite(h) || h <= 0) return null;
+    return w / h;
+}
+
 function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
     const videoRef = useRef(null);
     const containerRef = useRef(null);
@@ -20,6 +30,32 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
     const fallbackOriginal = typeof vid === 'object' ? (vid?.originalUrl || '') : '';
     const thumbUrl = typeof vid === 'object' ? (vid?.thumbnailUrl || null) : null;
     const durationSec = typeof vid === 'object' && Number.isFinite(Number(vid?.duration_sec)) ? Math.round(Number(vid.duration_sec)) : 0;
+
+    const numericRatio = parseAspectRatioValue(detectedRatio);
+    const isShortHint = Boolean(
+        vid?.isShort || (typeof vid?.originalUrl === 'string' && vid.originalUrl.includes('/shorts/'))
+    );
+    const isPortrait = numericRatio !== null ? numericRatio < 0.88 : isShortHint;
+    const isLandscape = numericRatio !== null ? numericRatio > 1.15 : !isShortHint;
+
+    const feedAspectRatio = isPortrait
+        ? '4 / 5'
+        : (isLandscape
+            ? (numericRatio !== null && numericRatio <= 1.6 ? detectedRatio : '16 / 10')
+            : (detectedRatio || '1 / 1'));
+    const feedMaxHeight = isPortrait ? '880px' : (isLandscape ? 'min(680px, 75vh)' : 'min(720px, 78vh)');
+    const focalPos = (typeof vid?.focal_x === 'number' && typeof vid?.focal_y === 'number')
+        ? `${vid.focal_x}% ${vid.focal_y}%`
+        : (isPortrait ? '50% 28%' : '50% 50%');
+
+    const getTrimBounds = (el) => {
+        const maxCap = isLandscape ? 300 : 180;
+        const rawStart = (typeof vid?.trimStart === 'number' && vid.trimStart > 0) ? vid.trimStart : 0;
+        const rawEnd = (typeof vid?.trimEnd === 'number' && vid.trimEnd > rawStart) ? vid.trimEnd : (rawStart + maxCap);
+        const rawDur = (el && el.duration && !Number.isNaN(el.duration) && el.duration > 0) ? el.duration : rawEnd;
+        const end = Math.min(rawDur, rawEnd, rawStart + maxCap);
+        return { start: rawStart, end };
+    };
 
     useEffect(() => {
         const video = videoRef.current;
@@ -126,7 +162,7 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
     };
 
     return (
-        <div ref={containerRef} className="video-embed-container feed-video-breakout mb-3 px-1 position-relative">
+        <div ref={containerRef} className="video-embed-container feed-video-breakout mb-3 position-relative">
             {isDirect ? (
                 <div className="position-relative feed-media-aura-container">
                     {thumbUrl && (
@@ -135,12 +171,14 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
                         </div>
                     )}
                     <div
-                        className="position-relative overflow-hidden rounded-3 vse-skeleton-surface"
+                        className="video-rendition-frame position-relative overflow-hidden vse-skeleton-surface"
                         style={{
                             backgroundColor: '#0b0f19',
-                            maxHeight: '560px',
-                            aspectRatio: detectedRatio || undefined,
-                            margin: '0 auto',
+                            width: '100%',
+                            maxWidth: '100%',
+                            maxHeight: feedMaxHeight,
+                            aspectRatio: feedAspectRatio,
+                            borderRadius: '12px',
                             zIndex: 2,
                         }}
                     >
@@ -236,6 +274,17 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
                                 if (!detectedRatio && el.videoWidth > 0 && el.videoHeight > 0) {
                                     setDetectedRatio(`${(el.videoWidth / el.videoHeight).toFixed(4)} / 1`);
                                 }
+                                const bounds = getTrimBounds(el);
+                                if (bounds.start > 0 && el.currentTime < bounds.start) {
+                                    el.currentTime = bounds.start;
+                                }
+                            }}
+                            onTimeUpdate={(e) => {
+                                const el = e.currentTarget;
+                                const bounds = getTrimBounds(el);
+                                if (bounds.end > bounds.start && el.currentTime >= bounds.end) {
+                                    el.currentTime = bounds.start;
+                                }
                             }}
                             onWaiting={() => setIsBuffering(true)}
                             onCanPlay={() => setIsBuffering(false)}
@@ -250,12 +299,22 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
                             onError={handleSingleError}
                             onClick={togglePlay}
                             className="w-100 h-100 d-block atg-4k-video-render"
-                            style={{ maxHeight: '560px', objectFit: 'contain', backgroundColor: '#0b0f19', cursor: 'pointer' }}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: focalPos, backgroundColor: '#0b0f19', cursor: 'pointer' }}
                         />
                     </div>
                 </div>
             ) : (
-                <div className="position-relative rounded-3 overflow-hidden" style={{ backgroundColor: '#0b0f19' }}>
+                <div
+                    className="video-rendition-frame position-relative overflow-hidden"
+                    style={{
+                        backgroundColor: '#0b0f19',
+                        width: '100%',
+                        maxWidth: '100%',
+                        aspectRatio: isShortHint ? '4 / 5' : '16 / 10',
+                        maxHeight: isShortHint ? '880px' : 'min(680px, 75vh)',
+                        borderRadius: '12px',
+                    }}
+                >
                     <button
                         type="button"
                         className="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
@@ -288,7 +347,7 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
                         loading="lazy"
-                        style={{ width: '100%', height: '360px', border: 'none' }}
+                        style={{ width: '100%', height: '100%', border: 'none' }}
                     />
                 </div>
             )}

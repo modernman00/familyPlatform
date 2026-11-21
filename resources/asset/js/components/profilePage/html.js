@@ -15,8 +15,8 @@ const renderVideoPlayer = (postMessage) => {
 
   if (video.type === 'youtube' || video.type === 'vimeo' || video.type === 'cloudflare' || video.type === 'tiktok') {
     return `
-      <div class="video-embed-container mb-3" style="border-radius: 14px; overflow: hidden; max-height: ${isShort ? '560px' : '440px'}; max-width: ${isShort ? '380px' : '100%'}; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-        <div class="ratio ${isShort ? 'ratio-9x16' : 'ratio-16x9'}">
+      <div class="video-embed-container feed-video-breakout mb-3" style="border-radius: 14px; overflow: hidden; width: 100%; max-width: 100%; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <div class="video-rendition-frame" style="width: 100%; aspect-ratio: ${isShort ? '4 / 5' : '16 / 10'}; max-height: ${isShort ? '880px' : 'min(680px, 75vh)'};">
           <iframe src="${esc(video.embedUrl)}"
                   title="Video Player"
                   frameborder="0" 
@@ -29,10 +29,10 @@ const renderVideoPlayer = (postMessage) => {
     `;
   } else if (video.type === 'direct') {
     return `
-      <div class="video-embed-container mb-3 position-relative" style="border-radius: 14px; overflow: hidden; background: #07090e; box-shadow: 0 4px 14px rgba(0,0,0,0.12);">
-        <div class="video-rendition-frame position-relative mx-auto overflow-hidden" 
-             style="border-radius: 14px; background: radial-gradient(circle at center, rgba(30, 41, 59, 0.55) 0%, rgba(7, 9, 14, 0.98) 100%);">
-          <video referrerpolicy="no-referrer" class="feed-post-video w-100" 
+      <div class="video-embed-container feed-video-breakout mb-3 position-relative" style="border-radius: 14px; overflow: hidden; background: #07090e; box-shadow: 0 4px 14px rgba(0,0,0,0.12);">
+        <div class="video-rendition-frame position-relative overflow-hidden" 
+             style="width: 100%; max-width: 100%; aspect-ratio: 4 / 5; max-height: 880px; border-radius: 14px; background: radial-gradient(circle at center, rgba(30, 41, 59, 0.55) 0%, rgba(7, 9, 14, 0.98) 100%);">
+          <video referrerpolicy="no-referrer" class="feed-post-video w-100 h-100" 
                  src="${esc(video.embedUrl)}" 
                  controls 
                  playsinline 
@@ -43,16 +43,24 @@ const renderVideoPlayer = (postMessage) => {
                  onloadedmetadata="
                    if (this.videoWidth && this.videoHeight) {
                      const r = this.videoWidth / this.videoHeight;
+                     const frame = this.parentElement;
                      if (r < 0.88) {
-                       this.style.maxHeight = '580px';
-                       this.parentElement.style.maxWidth = r <= 0.65 ? '400px' : '460px';
+                       frame.style.aspectRatio = '4 / 5';
+                       frame.style.maxHeight = '880px';
+                       this.style.objectPosition = '50% 28%';
+                     } else if (r > 1.15) {
+                       frame.style.aspectRatio = r > 1.6 ? '16 / 10' : (r.toFixed(4) + ' / 1');
+                       frame.style.maxHeight = 'min(680px, 75vh)';
+                       this.style.objectPosition = '50% 50%';
                      } else {
-                       this.style.maxHeight = '440px';
-                       this.parentElement.style.maxWidth = '100%';
+                       frame.style.aspectRatio = r.toFixed(4) + ' / 1';
+                       frame.style.maxHeight = 'min(720px, 78vh)';
+                       this.style.objectPosition = '50% 50%';
                      }
+                     frame.style.maxWidth = '100%';
                    }
                  "
-                 style="width: 100%; max-height: 480px; object-fit: contain; background: transparent; border-radius: 14px; display: block; margin: 0 auto;"></video>
+                 style="width: 100%; height: 100%; object-fit: cover; background: transparent; border-radius: 14px; display: block;"></video>
         </div>
       </div>
     `;

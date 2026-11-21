@@ -18,7 +18,7 @@ use Src\Exceptions\ValidationException;
 final class VideoAutoTrimService
 {
     public const MAX_CLIP_DURATION = 30.0;
-    public const MAX_PORTRAIT_DURATION = 90.0;
+    public const MAX_PORTRAIT_DURATION = 180.0;
     public const MAX_LANDSCAPE_DURATION = 300.0;
     public const MAX_FILE_SIZE_BYTES = 1024 * 1024 * 1024; // 1GB (1024MB) pre-trim source cap
     public const MAX_CHUNKS = 100;

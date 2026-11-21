@@ -51,16 +51,19 @@ class FeedVideoAspectRatioTest extends TestCase
         $this->assertNull($malicious);
     }
 
-    public function testFeedPostCardDefaultsToTrueAspectContainForAllVideoTypes(): void
+    public function testFeedPostCardUsesInstagramPortraitAndImmersiveLandscapeFraming(): void
     {
         $bladePath = __DIR__ . '/../../resources/views/components/feed/post-card.blade.php';
         $this->assertFileExists($bladePath);
 
         $blade = (string)file_get_contents($bladePath);
 
-        // Single direct video defaults to uncropped portraitExpanded: true and object-fit: contain
-        $this->assertStringContainsString('portraitExpanded: true,', $blade);
+        // Single direct video defaults to 4 / 5 portrait feed preview (portraitExpanded: false) with cover
+        $this->assertStringContainsString('portraitExpanded: false,', $blade);
+        $this->assertStringContainsString("'4 / 5'", $blade);
+        $this->assertStringContainsString("'16 / 10'", $blade);
         $this->assertStringContainsString("? 'cover' : 'contain'", $blade);
+        $this->assertStringContainsString('const maxCap = (this.videoOrientation === \'landscape\') ? 300 : 180;', $blade);
 
         // Multi-video carousel uses object-fit: contain instead of cropping with cover
         $this->assertStringContainsString('object-fit: contain !important;', $blade);

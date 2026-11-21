@@ -13,10 +13,10 @@ final class MediaPipelinePhase1And2Test extends TestCase
 {
     public function testOrientationAwareDurationTiers(): void
     {
-        $this->assertSame(90, CloudflareStreamService::resolveMaxDurationSeconds('portrait'));
-        $this->assertSame(90, CloudflareStreamService::resolveMaxDurationSeconds('reel'));
-        $this->assertSame(90, CloudflareStreamService::resolveMaxDurationSeconds('square'));
-        $this->assertSame(90, CloudflareStreamService::resolveMaxDurationSeconds(null));
+        $this->assertSame(180, CloudflareStreamService::resolveMaxDurationSeconds('portrait'));
+        $this->assertSame(180, CloudflareStreamService::resolveMaxDurationSeconds('reel'));
+        $this->assertSame(180, CloudflareStreamService::resolveMaxDurationSeconds('square'));
+        $this->assertSame(180, CloudflareStreamService::resolveMaxDurationSeconds(null));
         $this->assertSame(300, CloudflareStreamService::resolveMaxDurationSeconds('landscape'));
         $this->assertSame(300, CloudflareStreamService::resolveMaxDurationSeconds('cinema'));
 
@@ -25,9 +25,9 @@ final class MediaPipelinePhase1And2Test extends TestCase
         $this->assertSame(30.0, $defaultWin['duration']);
         $this->assertTrue($defaultWin['isTrimmed']);
 
-        // Portrait 90s tier
-        $portraitWin = VideoAutoTrimService::clampTrimWindow(0.0, 120.0, 150.0, 90.0);
-        $this->assertSame(90.0, $portraitWin['duration']);
+        // Portrait 180s tier
+        $portraitWin = VideoAutoTrimService::clampTrimWindow(0.0, 210.0, 240.0, 180.0);
+        $this->assertSame(180.0, $portraitWin['duration']);
         $this->assertTrue($portraitWin['isTrimmed']);
 
         // Landscape 300s tier

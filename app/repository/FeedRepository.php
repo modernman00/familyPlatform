@@ -618,6 +618,10 @@ class FeedRepository
                     } else {
                         if (\App\classes\VideoParser::isVideoUrl($imgVal)) {
                             $existingExternalVideos[] = $imgVal;
+                        } elseif (\App\classes\VideoParser::isNonImageShareUrl($imgVal)) {
+                            if (empty($post['link_preview'])) {
+                                $post['link_preview'] = \App\services\LinkPreviewService::fetchPreview($imgVal);
+                            }
                         } else {
                             $existingExternalImages[] = $imgVal;
                         }

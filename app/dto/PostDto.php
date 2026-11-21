@@ -201,6 +201,10 @@ final class PostDto implements JsonSerializable
                 } else {
                     if (\App\classes\VideoParser::isVideoUrl($colVal)) {
                         $existingExternalVideos[] = $colVal;
+                    } elseif (\App\classes\VideoParser::isNonImageShareUrl($colVal)) {
+                        if ($linkPreview === null) {
+                            $linkPreview = \App\services\LinkPreviewService::fetchPreview($colVal);
+                        }
                     } else {
                         $existingExternalImages[] = $colVal;
                     }
@@ -301,7 +305,13 @@ final class PostDto implements JsonSerializable
             $slotImages = [];
             for ($i = 0; $i < 6; $i++) {
                 $colVal = trim((string)($row['post_img' . $i] ?? ''));
-                if ($colVal !== '' && $colVal !== 'null' && $colVal !== 'undefined' && !\App\classes\VideoParser::isVideoUrl($colVal)) {
+                if (
+                    $colVal !== ''
+                    && $colVal !== 'null'
+                    && $colVal !== 'undefined'
+                    && !\App\classes\VideoParser::isVideoUrl($colVal)
+                    && !\App\classes\VideoParser::isNonImageShareUrl($colVal)
+                ) {
                     $slotImages[] = $colVal;
                 }
             }

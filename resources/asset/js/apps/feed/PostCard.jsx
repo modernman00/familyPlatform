@@ -57,6 +57,7 @@ export function PostCard({
     });
     const [sliderPos, setSliderPos] = useState(50);
     const [brokenPreviewImgUrl, setBrokenPreviewImgUrl] = useState(null);
+    const [brokenPhotoUrls, setBrokenPhotoUrls] = useState({});
 
     const authorName = post.fullName || `${post.firstName || ''} ${post.lastName || ''}`.trim() || 'Family Member';
     const stageMeta = getPostStageMeta(post);
@@ -755,49 +756,61 @@ export function PostCard({
                 </div>
             )}
 
-            {/* Single Photo (Classic Aura Stage) */}
+            {/* Single Photo (Classic Aura Stage — uncropped full render) */}
             {images.length === 1 && !post.comparison && (
                 <div className="mb-3 px-1">
-                    <div className="position-relative feed-media-aura-container">
-                        <div className="feed-media-aura-backdrop" aria-hidden="true">
-                            <img src={images[0]} alt="" loading="lazy" />
+                    {brokenPhotoUrls[images[0]] ? (
+                        <div className="post-media-stage__fallback">
+                            <i className="bi bi-image fs-3" aria-hidden="true" />
+                            <span>Photo unavailable</span>
                         </div>
-                        <div
-                            className="position-relative overflow-hidden post-media-stage vse-skeleton-surface"
-                            style={{
-                                borderRadius: '12px',
-                                width: '100%',
-                                minHeight: '220px',
-                                maxHeight: '600px',
-                                background: 'rgba(0,0,0,0.03)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}
-                        >
-                            <button
-                                type="button"
-                                className="border-0 p-0 bg-transparent w-100 h-100 d-block"
-                                onClick={() => onOpenLightbox?.(images, 0, post)}
-                                onDblClick={() => onReactPost?.(post.post_no, 'love')}
-                                aria-label="View photo 1 of 1"
-                                style={{ borderRadius: '12px', overflow: 'hidden', cursor: 'pointer' }}
+                    ) : (
+                        <div className="position-relative feed-media-aura-container">
+                            <div className="feed-media-aura-backdrop" aria-hidden="true">
+                                <img src={images[0]} alt="" loading="lazy" referrerPolicy="no-referrer" />
+                            </div>
+                            <div
+                                className="position-relative overflow-hidden post-media-stage vse-skeleton-surface"
+                                style={{
+                                    borderRadius: '12px',
+                                    width: '100%',
+                                    aspectRatio: 'auto',
+                                    minHeight: '220px',
+                                    maxHeight: '640px',
+                                    background: 'rgba(0,0,0,0.03)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
                             >
-                                <img
-                                    src={images[0]}
-                                    alt="Post photo 1"
-                                    className="post-media-first-img w-100 h-100"
-                                    style={{
-                                        borderRadius: '12px',
-                                        width: '100%',
-                                        maxHeight: '600px',
-                                        objectFit: isGifMedia(images[0]) ? 'contain' : 'cover',
-                                    }}
-                                    loading="lazy"
-                                />
-                            </button>
+                                <button
+                                    type="button"
+                                    className="border-0 p-0 bg-transparent w-100 h-100 d-flex align-items-center justify-content-center"
+                                    onClick={() => onOpenLightbox?.(images, 0, post)}
+                                    onDblClick={() => onReactPost?.(post.post_no, 'love')}
+                                    aria-label="View photo 1 of 1"
+                                    style={{ borderRadius: '12px', overflow: 'hidden', cursor: 'pointer', minHeight: '44px' }}
+                                >
+                                    <img
+                                        src={images[0]}
+                                        alt="Post photo 1"
+                                        className="post-media-first-img"
+                                        referrerPolicy="no-referrer"
+                                        onError={() => setBrokenPhotoUrls((prev) => ({ ...prev, [images[0]]: true }))}
+                                        style={{
+                                            borderRadius: '12px',
+                                            width: '100%',
+                                            height: 'auto',
+                                            maxHeight: '640px',
+                                            objectFit: 'contain',
+                                            display: 'block',
+                                        }}
+                                        loading="lazy"
+                                    />
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             )}
 
@@ -826,12 +839,21 @@ export function PostCard({
                             onClick={() => onOpenLightbox?.(images, idx, post)}
                             aria-label={`View photo ${idx + 1} of ${images.length}`}
                         >
-                            <img
-                                src={src}
-                                alt={`Post photo ${idx + 1}`}
-                                className="w-100 h-100 object-fit-cover d-block"
-                                loading="lazy"
-                            />
+                            {brokenPhotoUrls[src] ? (
+                                <div className="post-media-stage__fallback" style={{ minHeight: '180px' }}>
+                                    <i className="bi bi-image fs-4" aria-hidden="true" />
+                                    <span>Photo unavailable</span>
+                                </div>
+                            ) : (
+                                <img
+                                    src={src}
+                                    alt={`Post photo ${idx + 1}`}
+                                    className="w-100 h-100 object-fit-cover d-block"
+                                    referrerPolicy="no-referrer"
+                                    onError={() => setBrokenPhotoUrls((prev) => ({ ...prev, [src]: true }))}
+                                    loading="lazy"
+                                />
+                            )}
                         </button>
                     ))}
                 </div>

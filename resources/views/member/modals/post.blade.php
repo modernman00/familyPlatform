@@ -228,7 +228,7 @@
                             <label for="videoDirectFileInput" class="video-builder__dropzone">
                                 <span class="video-builder__dropzone-icon"><i class="bi bi-cloud-arrow-up-fill"></i></span>
                                 <span class="video-builder__dropzone-title">Choose up to 3 videos</span>
-                                <span class="video-builder__dropzone-hint">MP4, MOV or WebM &middot; clips over 30s get trimmed to a highlight</span>
+                                <span class="video-builder__dropzone-hint">MP4, MOV or WebM &middot; up to 3m portrait or 5m landscape</span>
                             </label>
                             <input type="file" id="videoDirectFileInput" accept="video/mp4,video/quicktime,video/webm" multiple hidden>
                             <input type="url" id="postVideoInput" class="d-none" placeholder="" aria-hidden="true">
@@ -240,7 +240,7 @@
                                         <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background-color: #a31621; color: #ffffff; font-size: 0.72rem;">
                                             <i class="bi bi-scissors me-1"></i> Auto-Trim Studio
                                         </span>
-                                        <span id="videoTrimMetaBadge" class="small" style="color: #cbd5e1; font-size: 0.75rem;">Select 30s highlight window</span>
+                                        <span id="videoTrimMetaBadge" class="small" style="color: #cbd5e1; font-size: 0.75rem;">Select highlight window (up to 3m portrait / 5m landscape)</span>
                                     </div>
                                     <span id="videoTrimDurationBadge" class="badge rounded-pill bg-success text-white px-2.5 py-1" style="font-size: 0.72rem;">
                                         Clip: 30.0s
@@ -261,14 +261,14 @@
                                     <label for="videoTrimEndRange" class="visually-hidden">Trim End Time (seconds)</label>
                                     <input type="range" class="form-range" id="videoTrimEndRange" min="1" max="30" step="0.5" value="30">
                                     <div class="small" style="font-size: 0.72rem; color: #94a3b8;">
-                                        Drag sliders to customise your 30-second clip window, or tap Auto-Trim below.
+                                        Drag sliders to customise your clip window, or tap Auto-Trim below.
                                     </div>
                                 </div>
 
                                 <div class="d-flex align-items-center gap-2 flex-wrap mt-2 pt-2 border-top border-secondary border-opacity-25">
                                     <button type="button" id="btnConfirmAutoTrim" class="btn btn-sm fw-bold rounded-pill px-3 py-2 d-inline-flex align-items-center gap-1.5 shadow-sm" style="background-color: #a31621; color: #ffffff !important; border: none; min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;">
                                         <i class="bi bi-scissors"></i>
-                                        <span id="btnConfirmAutoTrimLabel">Auto-Trim to 30s &amp; Attach</span>
+                                        <span id="btnConfirmAutoTrimLabel">Auto-Trim &amp; Attach</span>
                                     </button>
                                     <button type="button" id="btnQuickTrimFirst30" class="btn btn-sm btn-outline-light rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1" style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0; font-size: 0.78rem;">
                                         <i class="bi bi-lightning-charge-fill text-warning"></i>
@@ -686,7 +686,7 @@
                                 <i class="bi bi-emoji-smile-fill"></i>
                             </button>
 
-                            <button type="button" class="btn-composer-action composer-tool action-video" id="addVideoBtn" title="Upload Video - Share family video clips with smart 30s auto-trim" aria-label="Upload video">
+                            <button type="button" class="btn-composer-action composer-tool action-video" id="addVideoBtn" title="Upload Video - Share family video clips (up to 3m portrait or 5m landscape)" aria-label="Upload video">
                                 <i class="bi bi-camera-video-fill"></i>
                             </button>
 

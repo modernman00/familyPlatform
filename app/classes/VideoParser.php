@@ -154,7 +154,9 @@ final class VideoParser
         }
 
         // 6. Facebook Video / Reel / Watch (in-platform iframe via official Facebook video plugin)
-        $fbVideoRegex = '/^https?:\/\/(?:www\.|m\.|web\.)?(?:facebook\.com\/(?:[^\/\s]+\/videos\/\d+|watch\/?\?v=\d+|reel\/\d+|share\/[vr]\/[^\s"\'<>]+|video\.php\?v=\d+)|fb\.watch\/[^\s"\'<>]+|fb\.com\/(?:watch|reel|[^\/\s]+\/videos)\/[^\s"\'<>]+)/i';
+        // Note: Opaque /share/r/ and /share/v/ links are excluded because Facebook's plugins/video.php
+        // cannot play share-redirect URLs and renders "Video unavailable"; they render via Rich Link Preview instead.
+        $fbVideoRegex = '/^https?:\/\/(?:www\.|m\.|web\.)?(?:facebook\.com\/(?:[^\/\s]+\/videos\/\d+|watch\/?\?v=\d+|reel\/\d+|video\.php\?v=\d+)|fb\.watch\/[^\s"\'<>]+|fb\.com\/(?:watch|reel|[^\/\s]+\/videos)\/[^\s"\'<>]+)/i';
         if (preg_match($fbVideoRegex, $trimmed) === 1) {
             return [
                 'type' => 'facebook',
@@ -362,6 +364,18 @@ final class VideoParser
             return true;
         }
         return self::parseVideoUrl($trimmed) !== null;
+    }
+
+    /**
+     * Check if a given URL is an opaque social share page URL (e.g. facebook.com/share/r/...)
+     * that must never be rendered as a raw <img> tag even if previously persisted in post_img0..5.
+     */
+    public static function isNonImageShareUrl(?string $url): bool
+    {
+        if ($url === null || trim($url) === '') {
+            return false;
+        }
+        return preg_match('/^https?:\/\/(?:www\.|m\.|web\.)?facebook\.com\/share\/[a-z]+\/[^\s"\'<>]+/i', trim($url)) === 1;
     }
 
     /**

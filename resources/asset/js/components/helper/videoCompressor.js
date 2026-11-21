@@ -70,7 +70,7 @@ export function shouldOptimiseVideoOnDevice(file, opts = {}) {
 
     const {
         trimStart = 0,
-        trimEnd = 90,
+        trimEnd = 180,
         originalDuration = null,
         fastPassBytes = FAST_PASS_MAX_BYTES,
     } = opts;
@@ -130,7 +130,7 @@ export async function compressVideoFile(file, options = {}) {
 
     const {
         trimStart = 0,
-        trimEnd = 60,
+        trimEnd = 180,
         originalDuration = null,
         maxDimension = MAX_DIMENSION_PX,
         videoBitsPerSecond = TARGET_BITRATE_BPS,
@@ -147,7 +147,7 @@ export async function compressVideoFile(file, options = {}) {
     }
 
     const safeStart = Math.max(0, parseFloat(trimStart) || 0);
-    const rawEnd = parseFloat(trimEnd) || (safeStart + 90);
+    const rawEnd = parseFloat(trimEnd) || (safeStart + 180);
     const clipDuration = Math.min(MAX_CLIENT_TRANSCODE_DURATION_SEC, Math.max(0.5, rawEnd - safeStart));
 
     // Mandatory Client Slicing: If video exceeds 30s or requires a custom trim window,

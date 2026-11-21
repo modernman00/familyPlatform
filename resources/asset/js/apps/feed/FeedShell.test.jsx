@@ -636,4 +636,50 @@ describe('Profile Feed Preact Island (Phases 1–4)', () => {
         expect(container.querySelector('.post-text-body')).toBeNull();
         expect(screen.queryByText('https://www.bbc.co.uk/news/articles/c6jreyqgw4e9o')).toBeNull();
     });
+
+    it('renders single portrait/poster photo uncropped with contain and falls back cleanly on image error', async () => {
+        const posterPost = {
+            post_no: '990',
+            id: 'u_1',
+            fullName: 'Wally Olaogun',
+            postMessage: '',
+            post_likes: 0,
+            comments: [],
+            images: ['/resources/images/posts/idecide-poster.jpg'],
+            videos: [],
+        };
+
+        globalThis.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({ status: 'success', tags: [] }),
+            })
+        );
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [posterPost],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        const stage = container.querySelector('.post-media-stage');
+        const img = container.querySelector('img.post-media-first-img');
+        expect(stage).toBeTruthy();
+        expect(stage.style.aspectRatio).toBe('auto');
+        expect(img).toBeTruthy();
+        expect(img.style.objectFit).toBe('contain');
+        expect(img.getAttribute('referrerpolicy') || img.referrerPolicy).toBe('no-referrer');
+
+        fireEvent.error(img);
+        await waitFor(() => {
+            expect(container.querySelector('.post-media-stage__fallback')).toBeTruthy();
+            expect(screen.getByText('Photo unavailable')).toBeTruthy();
+        });
+    });
 });

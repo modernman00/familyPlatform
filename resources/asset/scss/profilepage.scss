@@ -2698,11 +2698,16 @@ body.modal-open .pwa-bottom-nav { display: none !important; }
 
 @media (max-width: 767.98px) {
   .feed-post-card .feed-video-breakout,
+  .feed-post-card .video-embed-container,
   .feed-post-card .video-rendition-frame,
   .feed-post-card .video-rendition-frame video {
     border-radius: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 }
 
@@ -2710,6 +2715,10 @@ body.modal-open .pwa-bottom-nav { display: none !important; }
   .feed-post-card .feed-video-breakout {
     margin-left: -1rem;
     margin-right: -1rem;
+  }
+  .feed-post-card .feed-video-breakout .video-rendition-frame {
+    width: 100% !important;
+    max-width: 100% !important;
   }
   .feed-post-card .feed-video-breakout.is-cinema-expanded {
     margin-left: -1.5rem;

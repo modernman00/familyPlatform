@@ -5,7 +5,7 @@ namespace App\services;
 
 class CloudflareStreamService
 {
-    public const MAX_PORTRAIT_DURATION = 90;
+    public const MAX_PORTRAIT_DURATION = 180;
     public const MAX_LANDSCAPE_DURATION = 300;
 
     private string $accountId;
@@ -22,7 +22,7 @@ class CloudflareStreamService
 
     /**
      * Resolve orientation-aware maximum video duration in seconds.
-     * Portrait / Reels: 90s | Landscape Cinema: 300s (5 mins)
+     * Portrait / Reels: 180s (3 mins) | Landscape Cinema: 300s (5 mins)
      */
     public static function resolveMaxDurationSeconds(?string $orientation = null): int
     {
@@ -83,12 +83,12 @@ class CloudflareStreamService
     /**
      * Request a Direct Creator Upload URL from Cloudflare Stream
      *
-     * @param int $maxDurationSeconds Maximum allowed video length (90s portrait / 300s landscape)
+     * @param int $maxDurationSeconds Maximum allowed video length (180s portrait / 300s landscape)
      * @param int $expirySeconds Expiration in seconds from now (0 = permanent / never expire)
      * @param string|null $orientation Optional orientation ('portrait' | 'landscape' | 'square')
      * @return array{success: bool, uploadUrl?: string, videoId?: string, streamUrl?: string, hlsUrl?: string, maxDuration?: int, error?: string}
      */
-    public function createDirectUploadUrl(int $maxDurationSeconds = 90, int $expirySeconds = 0, ?string $orientation = null): array
+    public function createDirectUploadUrl(int $maxDurationSeconds = 180, int $expirySeconds = 0, ?string $orientation = null): array
     {
         if (!$this->isConfigured()) {
             return [

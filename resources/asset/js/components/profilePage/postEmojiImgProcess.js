@@ -677,7 +677,7 @@ window.__removeComposerVideo = removeComposerVideo;
 const syncTrimSlidersUI = (changedSlider = 'start') => {
     if (!videoTrimStartRange || !videoTrimEndRange) return;
     const maxDur = stagedTrimDuration && stagedTrimDuration > 0 ? stagedTrimDuration : 120;
-    const activeCap = (typeof stagedTrimOrientation !== 'undefined' && stagedTrimOrientation === 'landscape') ? 300 : 90;
+    const activeCap = (typeof stagedTrimOrientation !== 'undefined' && stagedTrimOrientation === 'landscape') ? 300 : 180;
     let start = parseFloat(videoTrimStartRange.value) || 0;
     let end = parseFloat(videoTrimEndRange.value) || Math.min(activeCap, maxDur);
 
@@ -748,7 +748,7 @@ const openAutoTrimStudioForFile = (file, duration) => {
     }
 
     if (!videoAutoTrimStudio) return;
-    const activeCap = (typeof stagedTrimOrientation !== 'undefined' && stagedTrimOrientation === 'landscape') ? 300 : 90;
+    const activeCap = (typeof stagedTrimOrientation !== 'undefined' && stagedTrimOrientation === 'landscape') ? 300 : 180;
     const totalSec = Math.round(duration * 10) / 10;
     const initialEnd = Math.min(activeCap, totalSec);
 
@@ -1392,10 +1392,10 @@ const handleSelectedVideoFile = async (file) => {
     stagedTrimDuration = clipDuration;
     window.stagedTrimOrientation = detectedOrientation;
     file._detectedOrientation = detectedOrientation;
-    const maxClipSec = detectedOrientation === 'landscape' ? 300 : 90;
-    const maxClipLabel = detectedOrientation === 'landscape' ? '5 minutes (300s)' : '90 seconds';
+    const maxClipSec = detectedOrientation === 'landscape' ? 300 : 180;
+    const maxClipLabel = detectedOrientation === 'landscape' ? '5 minutes (300s)' : '3 minutes (180s)';
 
-    // If video exceeds orientation tier cap (90s portrait / 300s landscape) or is >80MB with unknown duration, open Auto-Trim Studio
+    // If video exceeds orientation tier cap (180s portrait / 300s landscape) or is >80MB with unknown duration, open Auto-Trim Studio
     if ((clipDuration && clipDuration > (maxClipSec + 0.5)) || (!clipDuration && file.size > 80 * 1024 * 1024)) {
         const effectiveDuration = clipDuration && clipDuration > (maxClipSec + 0.5) ? clipDuration : (maxClipSec + 60);
         openAutoTrimStudioForFile(file, effectiveDuration);

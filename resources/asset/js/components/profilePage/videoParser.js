@@ -165,7 +165,8 @@ export function parseVideoUrl(url) {
   }
 
   // 6. Facebook Video / Reel / Watch (in-platform iframe via official Facebook video plugin)
-  const fbVideoRegex = /^https?:\/\/(?:www\.|m\.|web\.)?(?:facebook\.com\/(?:[^\/\s]+\/videos\/\d+|watch\/?\?v=\d+|reel\/\d+|share\/[vr]\/[^\s"'<>]+|video\.php\?v=\d+)|fb\.watch\/[^\s"'<>]+|fb\.com\/(?:watch|reel|[^\/\s]+\/videos)\/[^\s"'<>]+)/i;
+  // Note: /share/r/ and /share/v/ URLs are excluded so they render as Rich Link Previews rather than "Video unavailable"
+  const fbVideoRegex = /^https?:\/\/(?:www\.|m\.|web\.)?(?:facebook\.com\/(?:[^\/\s]+\/videos\/\d+|watch\/?\?v=\d+|reel\/\d+|video\.php\?v=\d+)|fb\.watch\/[^\s"'<>]+|fb\.com\/(?:watch|reel|[^\/\s]+\/videos)\/[^\s"'<>]+)/i;
   if (fbVideoRegex.test(trimmed)) {
     return {
       type: 'facebook',

@@ -40,6 +40,12 @@ final class ExternalMediaAndShareMetaTest extends TestCase
         $this->assertNotNull($fbReel);
         $this->assertSame('facebook', $fbReel['type']);
         $this->assertStringContainsString('plugins/video.php', $fbReel['embedUrl']);
+
+        // Opaque /share/r/ and /share/v/ links must NOT be sent to plugins/video.php (renders "Video unavailable")
+        $this->assertNull(VideoParser::parseVideoUrl('https://www.facebook.com/share/r/1AGvntUbdm/'));
+        $this->assertNull(VideoParser::parseVideoUrl('https://www.facebook.com/share/v/1FRX2SDq6t/'));
+        $this->assertTrue(VideoParser::isNonImageShareUrl('https://www.facebook.com/share/r/1AGvntUbdm/'));
+        $this->assertFalse(VideoParser::isNonImageShareUrl('https://example.com/photo.jpg'));
     }
 
     public function testOneDriveVideoNormalisesToEmbedUrl(): void
