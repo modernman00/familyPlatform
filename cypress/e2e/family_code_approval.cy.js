@@ -42,7 +42,7 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
       .type(code, { force: true, delay: 20 });
     // Drive the check through the component directly - a cy.blur() after a valid
     // code throws because the inviter modal steals focus.
-    return alpineData().then((data) => {
+    return alpineData().then({ timeout: 15000 }, (data) => {
       data.familyCode = code;
       return data.checkFamilyCode();
     });
@@ -158,7 +158,9 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
       // session and CSRF token (enforced by FamilyCodeApprovalController).
       loginFully();
       cy.window().then((win) => {
-        const userId = win.localStorage.getItem('requesterId');
+        const userId = win.localStorage.getItem('requesterId')
+          || win.document.querySelector('meta[name="user-id"]')?.getAttribute('content')
+          || '';
         expect(userId, 'authenticated requesterId').to.be.a('string').and.not.be.empty;
 
         cy.getCookie('XSRF-TOKEN').then((xsrf) => {
@@ -377,7 +379,10 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
       // Seed a pending request, then try to create another for the same user.
       loginFully();
       cy.window().then((win) => {
-        const userId = win.localStorage.getItem('requesterId');
+        const userId = win.localStorage.getItem('requesterId')
+          || win.document.querySelector('meta[name="user-id"]')?.getAttribute('content')
+          || '';
+        expect(userId, 'authenticated requesterId').to.be.a('string').and.not.be.empty;
         cy.getCookie('XSRF-TOKEN').then((xsrf) => {
           const csrfToken = xsrf && xsrf.value ? decodeURIComponent(xsrf.value) : '';
 

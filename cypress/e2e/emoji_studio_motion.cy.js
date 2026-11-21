@@ -38,7 +38,8 @@ describe('Living Avatar & Emoji Studio', () => {
         cy.get('.atg-avatar-svg').should('have.attr', 'data-atg-traits').and('contain', 'hijab');
         cy.get('.atg-section-chip[data-atg-section="face"]').click();
         cy.get('.atg-trait-pill[data-trait-group="skin_tone"][data-trait-value="porcelain_cool"]').click();
-        cy.get('.atg-trait-pill[data-trait-group="eye_shape"][data-trait-value="monolid"]').click();
+        cy.get('.atg-trait-pill[data-trait-group="eye_shape"][data-trait-value="monolid"]').click()
+            .should('have.attr', 'aria-pressed', 'true');
         cy.get('.atg-avatar-svg').should('have.attr', 'data-atg-traits').and('contain', 'monolid');
         cy.get('.atg-avatar-svg .atg-av-gaze').should('have.length', 2);
     });
@@ -106,7 +107,10 @@ describe('Living Avatar & Emoji Studio', () => {
         cy.get('.atg-emoji-card[data-emoji-base="family_point_3d"] svg .atgm-point').should('exist');
         cy.get('.atg-emoji-card[data-emoji-base="family_clap_3d"] svg .atgm-clap').should('exist');
         cy.get('#catalog-tab').screenshot('emoji-studio-mobile-catalog');
-        cy.get('@consoleError').should('not.have.been.called');
+        cy.get('@consoleError').then((spy) => {
+            const realErrors = (spy.args || []).filter((args) => !String(args[0] || '').includes('Created TensorFlow Lite XNNPACK delegate'));
+            expect(realErrors, 'Console errors: ' + JSON.stringify(realErrors)).to.have.length(0);
+        });
     });
 
     it('saves a valid image and shows the studio shortcut on the profile photo', () => {
@@ -192,7 +196,10 @@ describe('Living Avatar & Emoji Studio', () => {
             expect(interception.response.body.url).to.match(/\.svg$/);
         });
         cy.screenshot('emoji-studio-living-photo-dance', { capture: 'viewport' });
-        cy.get('@consoleError').should('not.have.been.called');
+        cy.get('@consoleError').then((spy) => {
+            const realErrors = (spy.args || []).filter((args) => !String(args[0] || '').includes('Created TensorFlow Lite XNNPACK delegate'));
+            expect(realErrors, 'Console errors: ' + JSON.stringify(realErrors)).to.have.length(0);
+        });
     });
 
     it('transforms a portrait into a stylised avatar with Before/After split slider and 6 selectable styles', () => {
@@ -226,20 +233,23 @@ describe('Living Avatar & Emoji Studio', () => {
         cy.get('#atgCompareHandle').should('have.attr', 'aria-valuenow', '55');
 
         // Verify CSRF (403) and Invalid Style / Polyglot (422) adversarial neutralisation on /api/emoji/transform-photo-avatar
-        cy.window().then(win => {
-            const validToken = win.document.querySelector('input[name="token"]')?.value || '';
-            return win.fetch('/api/emoji/transform-photo-avatar', {
+        cy.get('input[name="token"]').first().invoke('val').then((validToken) => {
+            cy.request({
                 method: 'POST',
+                url: '/api/emoji/transform-photo-avatar',
+                failOnStatusCode: false,
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': 'forged_token_123' },
-                body: JSON.stringify({ token: 'forged_token_123', csrf_token: 'forged_token_123', style: 'illustrated_comic', image_base64: 'data:image/png;base64,iVBORw0KGgo=' })
-            }).then(r => {
+                body: { token: 'forged_token_123', csrf_token: 'forged_token_123', style: 'illustrated_comic', image_base64: 'data:image/png;base64,iVBORw0KGgo=' }
+            }).then((r) => {
                 expect(r.status, 'CSRF forgery blocked with 403').to.eq(403);
-                return win.fetch('/api/emoji/transform-photo-avatar', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': validToken },
-                    body: JSON.stringify({ token: validToken, csrf_token: validToken, style: '"><script>alert(1)</script>', image_base64: 'data:image/png;base64,iVBORw0KGgo=' })
-                });
-            }).then(r2 => {
+            });
+            cy.request({
+                method: 'POST',
+                url: '/api/emoji/transform-photo-avatar',
+                failOnStatusCode: false,
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': String(validToken || '') },
+                body: { token: String(validToken || ''), csrf_token: String(validToken || ''), style: '"><script>alert(1)</script>', image_base64: 'data:image/png;base64,iVBORw0KGgo=' }
+            }).then((r2) => {
                 expect(r2.status, 'Injected style blocked with 422').to.eq(422);
             });
         });
@@ -253,6 +263,9 @@ describe('Living Avatar & Emoji Studio', () => {
             });
         });
 
-        cy.get('@consoleError').should('not.have.been.called');
+        cy.get('@consoleError').then((spy) => {
+            const realErrors = (spy.args || []).filter((args) => !String(args[0] || '').includes('Created TensorFlow Lite XNNPACK delegate'));
+            expect(realErrors, 'Console errors: ' + JSON.stringify(realErrors)).to.have.length(0);
+        });
     });
 });

@@ -93,7 +93,8 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+    background-color: #92400e;
+    background: linear-gradient(135deg, #b45309 0%, #78350f 100%);
     color: #ffffff;
     box-shadow: 0 2px 6px rgba(180, 83, 9, 0.3);
 }
@@ -805,6 +806,7 @@ button.atg-trait-pill {
     border-radius: 50%;
     border: 1px solid #e2e8f0;
     background: #f8fafc;
+    color: #0f172a;
     font-size: 1.3rem;
     line-height: 1;
     cursor: pointer;
