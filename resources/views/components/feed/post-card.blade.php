@@ -281,6 +281,7 @@
              }
              targetVid.defaultMuted = true;
              targetVid.muted = true;
+             targetVid.setAttribute('muted', '');
              targetVid.playsInline = true;
              targetVid.setAttribute('playsinline', '');
              targetVid.setAttribute('webkit-playsinline', '');
@@ -290,13 +291,24 @@
              const attemptPlay = () => {
                if ((!this._isInView && !force) || this.activeVidIdx !== idx || targetVid._userManuallyPaused) return;
                if (!targetVid.paused) return;
+               targetVid.muted = true;
+               targetVid.defaultMuted = true;
+               targetVid.setAttribute('muted', '');
                targetVid._autoPlaying = true;
                const p = targetVid.play();
                if (p !== undefined) {
-                 p.catch(() => {
+                 p.then(() => {
+                   this.isPlaying = true;
+                   this.setBuffering(false, targetVid);
+                 }).catch(() => {
+                   targetVid._autoPlaying = false;
                    targetVid.muted = true;
                    targetVid.defaultMuted = true;
-                   targetVid.play().catch(() => {
+                   targetVid.setAttribute('muted', '');
+                   targetVid.play().then(() => {
+                     this.isPlaying = true;
+                     this.setBuffering(false, targetVid);
+                   }).catch(() => {
                      if (targetVid.paused) {
                        targetVid.dispatchEvent(new CustomEvent('buffering-clear'));
                      }
@@ -517,15 +529,13 @@
                    requestAnimationFrame(() => {
                      if (!el.videoWidth || !el.videoHeight) return;
                      const r = el.videoWidth / el.videoHeight;
+                     const exactRatio = (el.videoWidth / el.videoHeight).toFixed(4) + ' / 1';
                      if (r > 1.15) {
                        this.isCardLandscape = true;
-                       this.cardAspect = (el.videoWidth / el.videoHeight).toFixed(4) + ' / 1';
-                     } else if (r < 0.88) {
-                       this.isCardLandscape = false;
-                       this.cardAspect = (r <= 0.65) ? '9 / 16' : (el.videoWidth / el.videoHeight).toFixed(4) + ' / 1';
+                       this.cardAspect = exactRatio;
                      } else {
                        this.isCardLandscape = false;
-                       this.cardAspect = '1 / 1';
+                       this.cardAspect = exactRatio;
                      }
                    });
                  },
@@ -570,7 +580,15 @@
                    }
                  }
                }"
-               x-init="$nextTick(() => { const v = $el.querySelector('video'); if (v && v.videoWidth) detectCardDimensions(v); })">
+               x-init="$nextTick(() => {
+                 const v = $el.querySelector('video');
+                 if (v) {
+                   if (vid && vid.hlsUrl && window.__FPFeedVideoCoordinator && typeof window.__FPFeedVideoCoordinator.attachHls === 'function') {
+                     window.__FPFeedVideoCoordinator.attachHls(v, vid.hlsUrl, vid.embedUrl);
+                   }
+                   if (v.videoWidth) detectCardDimensions(v);
+                 }
+               })">
             <!-- Full Video Mode Button Top-Right -->
             <button type="button"
                     class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
@@ -598,7 +616,7 @@
                 <img x-show="!hasCardMetadata && vid.thumbnailUrl"
                      :src="vid.thumbnailUrl"
                      class="position-absolute top-0 start-0 w-100 h-100 pointer-events-none"
-                     style="z-index: 3; object-fit: cover !important; width: 100%; height: 100%; position: absolute; inset: 0;"
+                     style="z-index: 3; object-fit: contain !important; width: 100%; height: 100%; position: absolute; inset: 0;"
                      loading="lazy"
                      alt="Video thumbnail preview"
                      x-on:error="$el.style.display = 'none'">
@@ -630,7 +648,7 @@
                        @pause="isPlaying = false; setBuffering(false, $el)"
                        @ended="setBuffering(false, $el); onVideoEnded(vIdx, $el)"
                        @timeupdate="if (isBuffering && !$el.paused && $el.readyState >= 2) setBuffering(false, $el); onTimeUpdate($el)"
-                       style="object-fit: cover !important; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 2; cursor: pointer; border-radius: 12px; background: #0b0f19;">
+                       style="object-fit: contain !important; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 2; cursor: pointer; border-radius: 12px; background: #0b0f19;">
                   <track kind="captions" srclang="en" label="English Captions">
                 </video>
 
@@ -712,12 +730,13 @@
            isPlaying: false,
            isBuffering: false,
            _isInView: false,
-           videoOrientation: 'portrait',
-           videoRatio: (post.video && post.video.aspect_ratio) ? post.video.aspect_ratio : '4 / 5',
-           videoMaxHeight: '640px',
-           videoFocalPos: (post.video && typeof post.video.focal_x === 'number' && typeof post.video.focal_y === 'number') ? (post.video.focal_x + '% ' + post.video.focal_y + '%') : '50% 28%',
-           isPortrait: true,
-           portraitExpanded: false,
+           videoOrientation: (post.video && post.video.aspect_ratio && (parseFloat(post.video.aspect_ratio.split('/')[0]) / (parseFloat(post.video.aspect_ratio.split('/')[1]) || 1)) > 1.15) ? 'landscape' : ((post.video && post.video.aspect_ratio && (parseFloat(post.video.aspect_ratio.split('/')[0]) / (parseFloat(post.video.aspect_ratio.split('/')[1]) || 1)) >= 0.88) ? 'square' : 'portrait'),
+           videoRatio: (post.video && post.video.aspect_ratio) ? post.video.aspect_ratio : '9 / 16',
+           naturalVideoRatio: (post.video && post.video.aspect_ratio) ? post.video.aspect_ratio : '9 / 16',
+           videoMaxHeight: 'min(760px, 76vh)',
+           videoFocalPos: (post.video && typeof post.video.focal_x === 'number' && typeof post.video.focal_y === 'number') ? (post.video.focal_x + '% ' + post.video.focal_y + '%') : '50% 50%',
+           isPortrait: !(post.video && post.video.aspect_ratio && (parseFloat(post.video.aspect_ratio.split('/')[0]) / (parseFloat(post.video.aspect_ratio.split('/')[1]) || 1)) >= 0.88),
+           portraitExpanded: true,
            cinemaExpanded: false,
            viewMode: 'cinema',
            showHookCard: true,
@@ -728,6 +747,24 @@
            showPulse: false,
            pulseIcon: 'bi-play-fill',
            showControlsOverlay: false,
+           controlsVisible: true,
+           _controlsHideTimer: null,
+           scheduleControlsHide() {
+             if (this._controlsHideTimer) clearTimeout(this._controlsHideTimer);
+             if (!this.isPlaying || this.showControlsOverlay) return;
+             this._controlsHideTimer = setTimeout(() => {
+               if (this.isPlaying && !this.showControlsOverlay) {
+                 this.controlsVisible = false;
+               }
+             }, 2500);
+           },
+           revealControls(autoHide = true) {
+             this.controlsVisible = true;
+             if (this._controlsHideTimer) clearTimeout(this._controlsHideTimer);
+             if (autoHide && this.isPlaying) {
+               this.scheduleControlsHide();
+             }
+           },
            formatTime(sec) {
              if (!sec || isNaN(sec)) return '0:00';
              const m = Math.floor(sec / 60);
@@ -751,8 +788,8 @@
            togglePortraitExpand() {
              this.portraitExpanded = !this.portraitExpanded;
              if (this.isPortrait) {
-               this.videoRatio = this.portraitExpanded ? '9 / 16' : '4 / 5';
-               this.videoMaxHeight = this.portraitExpanded ? '760px' : '640px';
+               this.videoRatio = this.portraitExpanded ? (this.naturalVideoRatio || '9 / 16') : '4 / 5';
+               this.videoMaxHeight = this.portraitExpanded ? 'min(760px, 76vh)' : '640px';
              }
            },
            toggleCinemaExpand() {
@@ -763,22 +800,24 @@
              const w = el.videoWidth;
              const h = el.videoHeight;
              const ratio = w / h;
+             const exactRatio = ratio.toFixed(4) + ' / 1';
+             this.naturalVideoRatio = exactRatio;
 
              if (ratio < 0.88) {
                this.isPortrait = true;
                this.videoOrientation = 'portrait';
-               this.videoRatio = this.portraitExpanded ? '9 / 16' : '4 / 5';
-               this.videoMaxHeight = this.portraitExpanded ? '760px' : '640px';
+               this.videoRatio = this.portraitExpanded ? exactRatio : '4 / 5';
+               this.videoMaxHeight = this.portraitExpanded ? 'min(760px, 76vh)' : '640px';
              } else if (ratio > 1.15) {
                this.isPortrait = false;
                this.videoOrientation = 'landscape';
-               this.videoRatio = (w / h).toFixed(4) + ' / 1';
+               this.videoRatio = exactRatio;
                this.videoMaxHeight = this.cinemaExpanded ? '75vh' : '540px';
              } else {
                this.isPortrait = false;
                this.videoOrientation = 'square';
-               this.videoRatio = '1 / 1';
-               this.videoMaxHeight = '520px';
+               this.videoRatio = exactRatio;
+               this.videoMaxHeight = '620px';
              }
 
              if (!(post.video && typeof post.video.focal_x === 'number' && typeof post.video.focal_y === 'number')
@@ -859,7 +898,8 @@
                const vidEl = this.$el.querySelector('video');
                if (!vidEl || vidEl._userManuallyPaused) return;
                vidEl.defaultMuted = true;
-               vidEl.muted = this.isVideoMuted;
+               vidEl.muted = true;
+               vidEl.setAttribute('muted', '');
                vidEl.playsInline = true;
                vidEl.setAttribute('playsinline', '');
                vidEl.setAttribute('webkit-playsinline', '');
@@ -868,21 +908,33 @@
                  if (!this._isInView || vidEl._userManuallyPaused) return;
                  if (!vidEl.paused) {
                    this.isPlaying = true;
+                   this.isBuffering = false;
                    return;
                  }
+                 vidEl.muted = true;
+                 vidEl.defaultMuted = true;
+                 vidEl.setAttribute('muted', '');
                  vidEl._autoPlaying = true;
                  const p = vidEl.play();
                  if (p !== undefined) {
-                   p.then(() => { this.isPlaying = true; }).catch((err) => {
+                   p.then(() => {
+                     this.isPlaying = true;
+                     this.isBuffering = false;
+                   }).catch((err) => {
+                     vidEl._autoPlaying = false;
                      if (!vidEl.muted) {
                        vidEl.muted = true;
                        vidEl.defaultMuted = true;
+                       vidEl.setAttribute('muted', '');
                        this.isVideoMuted = true;
-                       vidEl.play().then(() => { this.isPlaying = true; }).catch(() => {});
+                       vidEl.play().then(() => {
+                         this.isPlaying = true;
+                         this.isBuffering = false;
+                       }).catch(() => {});
                      } else if (err && err.name === 'AbortError' && this._isInView && !vidEl._userManuallyPaused) {
                        requestAnimationFrame(() => {
                          if (this._isInView && !vidEl._userManuallyPaused && vidEl.paused) {
-                           vidEl.play().then(() => { this.isPlaying = true; }).catch(() => {});
+                           tryPlay();
                          }
                        });
                      }
@@ -912,8 +964,8 @@
              const pauseVideoOutOfView = () => {
                const vidEl = this.$el.querySelector('video');
                if (!vidEl) return;
+               vidEl._autoPlaying = false;
                if (!vidEl.paused) {
-                 vidEl._autoPlaying = false;
                  vidEl.pause();
                  this.isPlaying = false;
                }
@@ -960,14 +1012,14 @@
          }"
          x-init="$nextTick(() => initSingleVideoObserver())">
       
-      <!-- Outer Adaptive Container: Full-Width 4:5 Portrait & Flush Landscape -->
+      <!-- Outer Adaptive Container: True-Aspect Uncropped Framing Across All Video Types -->
       <div class="video-rendition-frame feed-media-aura-container position-relative overflow-hidden mx-auto shadow-sm"
-           @mouseenter="showControlsOverlay = true"
-           @mouseleave="showControlsOverlay = false"
-           :style="'aspect-ratio: ' + (viewMode === 'reel' ? (isPortrait ? videoRatio : '9 / 16') : videoRatio) + '; max-height: ' + (viewMode === 'reel' ? '720px' : (cinemaExpanded && !isPortrait ? '75vh' : videoMaxHeight)) + '; width: 100%; max-width: ' + (viewMode === 'reel' && !isPortrait ? '420px' : '100%') + '; border-radius: 16px; background: ' + (isPortrait && portraitExpanded ? 'rgba(11, 15, 25, 0.55)' : '#0b0f19') + '; transition: aspect-ratio 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);'">
+           @mouseenter="showControlsOverlay = true; revealControls(false)"
+           @mouseleave="showControlsOverlay = false; if (isPlaying) scheduleControlsHide()"
+           :style="'aspect-ratio: ' + (viewMode === 'reel' ? (isPortrait ? videoRatio : '9 / 16') : videoRatio) + '; max-height: ' + (viewMode === 'reel' ? '720px' : (cinemaExpanded && !isPortrait ? '75vh' : videoMaxHeight)) + '; width: 100%; max-width: ' + (viewMode === 'reel' && !isPortrait ? '420px' : '100%') + '; border-radius: 16px; background: ' + (((viewMode === 'reel' && !isPortrait) || (isPortrait && !portraitExpanded)) ? '#0b0f19' : 'rgba(11, 15, 25, 0.72)') + '; transition: aspect-ratio 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);'">
 
-        <!-- Ambient Edge-Bleed Aura Backdrop for 9:16 Uncropped Portrait Mode -->
-        <div class="feed-media-aura-backdrop" x-show="isPortrait && portraitExpanded && post.video && post.video.thumbnailUrl" x-cloak aria-hidden="true" style="z-index: 1; inset: 0;">
+        <!-- Ambient Edge-Bleed Aura Backdrop for True-Aspect Contain Mode -->
+        <div class="feed-media-aura-backdrop" x-show="!((viewMode === 'reel' && !isPortrait) || (isPortrait && !portraitExpanded)) && post.video && post.video.thumbnailUrl" x-cloak aria-hidden="true" style="z-index: 1; inset: 0;">
           <img :src="post.video ? post.video.thumbnailUrl : ''" alt="" loading="lazy">
         </div>
 
@@ -975,12 +1027,12 @@
         <img x-show="!hasMetadata && post.video && post.video.thumbnailUrl"
              :src="post.video.thumbnailUrl"
              class="position-absolute top-0 start-0 w-100 h-100 pointer-events-none"
-             :style="'z-index: 3; border-radius: 16px; object-fit: cover !important; object-position: ' + videoFocalPos + ';'"
+             :style="'z-index: 3; border-radius: 16px; object-fit: ' + (((viewMode === 'reel' && !isPortrait) || (isPortrait && !portraitExpanded)) ? 'cover' : 'contain') + ' !important; object-position: ' + videoFocalPos + ';'"
              loading="lazy"
              alt="Video preview thumbnail"
              x-on:error="$el.style.display = 'none'">
 
-        <!-- Main Video Element (Full-Bleed Smart-Framed Cover) -->
+        <!-- Main Video Element (True-Aspect Uncropped Default for All Video Types) -->
         <video referrerpolicy="no-referrer" class="feed-post-video atg-4k-video-render w-100 h-100 position-relative"
                :src="(post.video && post.video.hlsUrl) ? undefined : post.video.embedUrl"
                :data-hls-url="post.video && post.video.hlsUrl ? post.video.hlsUrl : ''"
@@ -991,7 +1043,7 @@
                muted
                loop
                preload="metadata"
-               @click.stop="togglePlayback($el)"
+               @click.stop="togglePlayback($el); revealControls(true)"
                @dblclick.stop="openVideoModal([post.video], 0, isVideoMuted, post)"
                @loadedmetadata="
                  detectVideoDimensions($el);
@@ -1013,15 +1065,16 @@
                x-on:error="isBuffering = false; if (!$el.dataset.retried && post.video && post.video.originalUrl && $el.src !== post.video.originalUrl && post.video.originalUrl.startsWith('http')) { $el.dataset.retried = '1'; const shouldAutoResume = !!(isPlaying || $el._autoPlaying); $el.src = post.video.originalUrl; $el.load(); if (shouldAutoResume) { $el.addEventListener('canplay', () => { if (!$el._userManuallyPaused) { $el.muted = true; $el.play().catch(() => {}); } }, { once: true }); } }"
                @play="
                  isPlaying = true;
+                 scheduleControlsHide();
                  const b = getTrimBounds($el);
                  if ($el.currentTime < b.start || $el.currentTime >= b.end) { 
                    $el.currentTime = b.start; 
                  }
                "
-               @pause="isPlaying = false; isBuffering = false"
+               @pause="isPlaying = false; isBuffering = false; revealControls(false)"
                @timeupdate="if (isBuffering && !$el.paused && $el.readyState >= 2) isBuffering = false; handleTimeUpdate($el)"
                @volumechange="isVideoMuted = $el.muted"
-               :style="'width: 100%; height: 100%; object-fit: ' + (isPortrait && portraitExpanded ? 'contain' : 'cover') + ' !important; object-position: ' + videoFocalPos + '; z-index: 2; border-radius: 16px; cursor: pointer; background: transparent;'"></video>
+               :style="'width: 100%; height: 100%; object-fit: ' + (((viewMode === 'reel' && !isPortrait) || (isPortrait && !portraitExpanded)) ? 'cover' : 'contain') + ' !important; object-position: ' + videoFocalPos + '; z-index: 2; border-radius: 16px; cursor: pointer; background: transparent;'"></video>
 
         <!-- Buffering Spinner Overlay -->
         <div x-show="isBuffering" x-cloak class="position-absolute top-50 start-50 translate-middle pointer-events-none" style="z-index: 5;">
@@ -1030,9 +1083,10 @@
           </div>
         </div>
 
-        <!-- Format Badge & 1-Tap Aspect / Theatre Switcher (Top-Left) -->
+        <!-- Format Badge & 1-Tap Aspect / Theatre Switcher (Top-Left, auto-hides during playback) -->
         <div class="position-absolute d-inline-flex align-items-center gap-2 shadow-sm"
-             style="top: 12px; left: 12px; z-index: 6;">
+             :class="(controlsVisible || !isPlaying) ? 'opacity-100' : 'opacity-0 pointer-events-none'"
+             style="top: 12px; left: 12px; z-index: 6; transition: opacity 0.25s ease;">
           <template x-if="isPortrait">
             <div class="d-inline-flex align-items-center gap-2">
               <span class="badge rounded-pill px-2.5 py-1.5 d-inline-flex align-items-center gap-1 pointer-events-none"
@@ -1109,9 +1163,10 @@
           <i class="bi" :class="isVideoMuted ? 'bi-volume-mute-fill' : 'bi-volume-up-fill'" style="font-size: 0.92rem; color: #ffffff;"></i>
         </button>
 
-        <!-- Instagram Bottom Overlay Controls & Progress Scrubber -->
+        <!-- Instagram Bottom Overlay Controls & Progress Scrubber (auto-hides during playback) -->
         <div class="position-absolute bottom-0 start-0 w-100" 
-             style="z-index: 6; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.35) 60%, transparent 100%); padding: 24px 12px 10px 12px;">
+             :class="(controlsVisible || !isPlaying) ? 'opacity-100' : 'opacity-0 pointer-events-none'"
+             style="z-index: 6; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.35) 60%, transparent 100%); padding: 24px 12px 10px 12px; transition: opacity 0.25s ease;">
           
           <!-- Mini Control Strip: Play/Pause, Timestamps, Fullscreen -->
           <div class="d-flex align-items-center justify-content-between text-white mb-1.5" style="font-size: 0.75rem; font-weight: 600;">
@@ -1150,6 +1205,14 @@
                  :style="'width: ' + progressPercent + '%; background: #ffffff; border-radius: 9999px; box-shadow: 0 0 8px rgba(255, 255, 255, 0.85); transition: width 0.08s linear;'"></div>
           </div>
 
+        </div>
+
+        <!-- Minimal 3px Progress Hairline when Overlay Controls Auto-Hide -->
+        <div x-show="isPlaying && !controlsVisible"
+             x-cloak
+             class="position-absolute bottom-0 start-0 w-100 pointer-events-none"
+             style="height: 3px; background: rgba(255, 255, 255, 0.18); z-index: 5;">
+          <div class="h-100" :style="'width: ' + progressPercent + '%; background: #ffffff; transition: width 0.08s linear;'"></div>
         </div>
 
       </div>

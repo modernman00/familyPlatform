@@ -158,60 +158,131 @@
                 @endforeach
             </div>
 
-            <!-- TAB 2: Photo-to-Living Avatar (Identity-Preserving Realism Engine) -->
+            <!-- TAB 2: Photo-to-Living Avatar (OpenArt-Grade Hybrid Transformation Studio) -->
             <div id="photo-avatar-tab" class="atg-tab-content" style="display: none;">
+                @php
+                    $studioAvatarStyles = $avatarStyles ?? \App\services\AtgPhotoAvatarEngine::getStylesForUi();
+                @endphp
                 <div class="atg-photo-studio-card">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-                        <div>
-                            <span class="badge" style="background: rgba(163, 22, 33, 0.1); color: #a31621; font-weight: 700;">ATG Pod 1 &amp; Pod 3 Neural Pipeline</span>
-                            <h3 class="h5 fw-bold text-dark mt-1 mb-0">Transform Your Photo into a Lifelike Living Avatar</h3>
+                    <div class="atg-p2a-header">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                            <span class="atg-p2a-eyebrow">ATG Photo-to-Avatar Engine</span>
+                            <span class="atg-p2a-engine-pill" id="atgAvatarEngineBadge">⚡ Instant GPU Styliser Ready</span>
                         </div>
+                        <h3 class="atg-p2a-title">Transform Your Photo into a Stylised Living Avatar</h3>
+                        <p class="atg-p2a-subtitle">
+                            Upload a portrait, snap a webcam photo, or use your profile picture to redraw it into an identity-preserving illustrated, anime, 3D or oil-painted avatar — drag the Before / After slider to compare, then bring it to life.
+                        </p>
                     </div>
-                    <p class="text-sm text-slate-600 mb-3">
-                        Upload a portrait or take a snapshot to extract your exact complexion undertone, hair tone, and facial geometry while animating natural eye blinks, breathing depth, and 3D head-tracking parallax.
-                    </p>
 
-                    <!-- Upload & Live 2.5D Neural Portrait Stage -->
-                    <div class="row g-4 align-items-start mb-4">
-                        <div class="col-md-5 text-center">
-                            <div class="p-3 rounded-4 border bg-light position-relative overflow-hidden" id="atgPhotoStageCard">
-                                <div class="position-relative d-inline-block">
+                    <div class="atg-p2a-grid">
+                        <!-- Left Stage Column: Before/After Split Comparison + 2.5D Living Motion Canvas -->
+                        <div class="atg-p2a-stage-col">
+                            <div class="atg-p2a-stage-card" id="atgPhotoStageCard">
+                                <div class="atg-p2a-view-switch" role="group" aria-label="Portrait preview mode">
+                                    <button type="button" id="atgViewModeCompareBtn" class="atg-p2a-view-btn active" aria-pressed="true">
+                                        <span>🔀 Before / After</span>
+                                    </button>
+                                    <button type="button" id="atgViewModeLivingBtn" class="atg-p2a-view-btn" aria-pressed="false">
+                                        <span>✨ Living Motion</span>
+                                    </button>
+                                </div>
+
+                                <!-- Interactive Before/After Split Stage wrapping #atgPhotoLivingCanvas -->
+                                <div class="atg-compare-stage is-comparing" id="atgPhotoCompareStage" style="--atg-split: 50%;">
                                     <canvas id="atgPhotoLivingCanvas" width="240" height="270"
                                             data-profile-photo="{{ $currentProfilePhotoUrl ?? '/resources/images/profile/avatarM.png' }}"
-                                            style="width: 240px; height: 270px; border-radius: 16px; background: #1e1b18; box-shadow: 0 10px 24px rgba(15,23,42,0.16); touch-action: none; cursor: pointer;"
-                                            title="Tap your Living Photo to make it react · move cursor for 2.5D depth"
-                                            aria-label="Interactive 2.5D living portrait preview"></canvas>
+                                            class="atg-living-after-canvas"
+                                            title="Tap your Living Avatar to make it react · move cursor for 2.5D depth"
+                                            aria-label="Interactive stylised living avatar preview"></canvas>
+
+                                    <div class="atg-compare-before-layer" id="atgCompareBeforeLayer" aria-hidden="true">
+                                        <canvas id="atgPhotoBeforeCanvas" width="240" height="270" class="atg-before-raw-canvas"></canvas>
+                                    </div>
+
+                                    <span class="atg-compare-badge atg-compare-badge--before" id="atgCompareBadgeBefore">BEFORE</span>
+                                    <span class="atg-compare-badge atg-compare-badge--after" id="atgCompareBadgeAfter">AFTER</span>
+
+                                    <div class="atg-compare-divider" id="atgCompareDivider">
+                                        <button type="button" id="atgCompareHandle" class="atg-compare-handle"
+                                                role="slider" aria-label="Drag to compare original photo and stylised avatar"
+                                                aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+                                            <span aria-hidden="true">↔</span>
+                                        </button>
+                                    </div>
+
+                                    <div class="atg-p2a-loading-overlay" id="atgTransformLoadingOverlay" hidden>
+                                        <div class="atg-p2a-loading-spinner" aria-hidden="true"></div>
+                                        <div class="atg-p2a-loading-text" id="atgTransformLoadingText">Redrawing your portrait...</div>
+                                    </div>
+
                                     <div id="atgPhotoReactLayer" class="atg-react-layer" aria-hidden="true" style="pointer-events: none;"></div>
                                 </div>
-                                <div class="small text-muted mt-2" id="atgPhotoCanvasStatus">
-                                    Tap photo or choose an expression below · move cursor for 2.5D depth
+
+                                <div class="atg-p2a-status-line" id="atgPhotoCanvasStatus">
+                                    Drag the ↔ slider to compare Before &amp; After · or tap an expression below
+                                </div>
+
+                                <!-- Inline Webcam Snapshot Panel (Hidden until Camera is clicked) -->
+                                <div class="atg-camera-panel" id="atgCameraCapturePanel" hidden>
+                                    <video id="atgCameraVideo" class="atg-camera-video" autoplay playsinline muted></video>
+                                    <div class="d-flex flex-wrap justify-content-center gap-2 mt-2">
+                                        <button type="button" id="atgCaptureSnapBtn" class="atg-btn-primary">
+                                            <span>📸 Capture Portrait</span>
+                                        </button>
+                                        <button type="button" id="atgCancelCameraBtn" class="atg-btn-secondary">
+                                            <span>✕ Cancel</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Upload / Camera / Current Profile Photo Bar -->
+                                <div class="atg-p2a-upload-bar">
+                                    <label for="atgPhotoUploadInput" class="atg-btn-primary atg-p2a-upload-btn" style="cursor: pointer; margin: 0;">
+                                        <span>📷 Choose Photo</span>
+                                    </label>
+                                    <input type="file" id="atgPhotoUploadInput" accept="image/png,image/jpeg,image/webp" class="d-none">
+                                    <button type="button" id="atgOpenCameraBtn" class="atg-btn-secondary atg-p2a-upload-btn">
+                                        <span>📸 Camera</span>
+                                    </button>
+                                    <button type="button" id="atgUseCurrentProfilePhotoBtn"
+                                            data-profile-photo="{{ $currentProfilePhotoUrl ?? '/resources/images/profile/avatarM.png' }}"
+                                            class="atg-btn-secondary atg-p2a-upload-btn">
+                                        <span>🖼️ Use Profile Photo</span>
+                                    </button>
+                                </div>
+                                <div class="atg-p2a-drop-hint">
+                                    Or drag and drop a JPEG, PNG or WEBP portrait onto this card
                                 </div>
 
                                 <!-- Living Photo Expressions & Choreography Bar -->
-                                <div class="d-flex flex-wrap justify-content-center gap-2 mt-2" role="group" aria-label="Living photo expressions">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold atg-photo-react-btn" data-photo-action="smile" style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;">
-                                        😄 Smile
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold atg-photo-react-btn" data-photo-action="dance" style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;">
-                                        💃 Dance
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold atg-photo-react-btn" data-photo-action="wink" style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;">
-                                        😉 Wink
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold atg-photo-react-btn" data-photo-action="laugh" style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;">
-                                        😂 Laugh
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold atg-photo-react-btn" data-photo-action="nod" style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;">
-                                        👍 Nod
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold atg-photo-react-btn" data-photo-action="love" style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;">
-                                        ❤️ Love
-                                    </button>
+                                <div class="atg-p2a-expressions-wrap">
+                                    <div class="atg-p2a-sublabel">Animate Your Stylised Avatar</div>
+                                    <div class="d-flex flex-wrap justify-content-center gap-2" role="group" aria-label="Living photo expressions">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold atg-photo-react-btn" data-photo-action="smile" style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;">
+                                            😄 Smile
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold atg-photo-react-btn" data-photo-action="dance" style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;">
+                                            💃 Dance
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold atg-photo-react-btn" data-photo-action="wink" style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;">
+                                            😉 Wink
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold atg-photo-react-btn" data-photo-action="laugh" style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;">
+                                            😂 Laugh
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold atg-photo-react-btn" data-photo-action="nod" style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;">
+                                            👍 Nod
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold atg-photo-react-btn" data-photo-action="love" style="min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;">
+                                            ❤️ Love
+                                        </button>
+                                    </div>
                                 </div>
 
-                                <div class="mt-2 text-start">
-                                    <label for="atgPhotoChoreographySelect" class="small fw-semibold text-dark d-block mb-1">Saved Living Profile Motion:</label>
-                                    <select id="atgPhotoChoreographySelect" class="form-select form-select-sm" style="min-height: 44px;">
+                                <div class="atg-p2a-choreo-wrap text-start">
+                                    <label for="atgPhotoChoreographySelect" class="atg-p2a-field-label">Saved Living Profile Motion:</label>
+                                    <select id="atgPhotoChoreographySelect" class="form-select atg-p2a-select">
                                         <option value="smile" selected>😄 Warm Smile, Blink &amp; Breathe</option>
                                         <option value="dance">💃 Happy Dance &amp; Groove Loop</option>
                                         <option value="wink">😉 Cheeky Wink &amp; Head Sway</option>
@@ -219,34 +290,106 @@
                                         <option value="idle">😌 Natural Breathe &amp; Blink Only</option>
                                     </select>
                                 </div>
-
-                                <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
-                                    <label for="atgPhotoUploadInput" class="atg-btn-primary" style="cursor: pointer; margin: 0;">
-                                        <span>📷 Choose Portrait Photo</span>
-                                    </label>
-                                    <input type="file" id="atgPhotoUploadInput" accept="image/png,image/jpeg,image/webp" class="d-none">
-                                    <button type="button" id="atgUseCurrentProfilePhotoBtn"
-                                            data-profile-photo="{{ $currentProfilePhotoUrl ?? '/resources/images/profile/avatarM.png' }}"
-                                            class="atg-btn-secondary">
-                                        <span>🖼️ Use Profile Photo</span>
-                                    </button>
-                                </div>
                             </div>
                         </div>
 
-                        <!-- What to do with the photo (no fake "AI" tuning: the photo is used as it is) -->
-                        <div class="col-md-7">
-                            <div class="p-3 rounded-4 border bg-white">
-                                <p class="small text-muted mb-2">Your photo is used exactly as it is: nothing is redrawn. Choose what to do with it:</p>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <button type="button" id="atgSaveLivingPortraitBtn" class="atg-btn-primary btn-spin-on-click" data-spin="true">
-                                        <span>✨ Make it my blinking profile picture</span>
-                                    </button>
-                                    <button type="button" id="atgSyncPhotoToAvatarBtn" class="atg-btn-secondary btn-spin-on-click" data-spin="true">
-                                        <span>🎨 Colour my cartoon from this photo</span>
+                        <!-- Right Controls Column: Avatar Style Gallery, Neural AI HD Redraw, Fine-Tuning & Save -->
+                        <div class="atg-p2a-controls-col">
+                            <!-- 1. Avatar Art Style Picker -->
+                            <div class="atg-p2a-panel">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                                    <div class="atg-p2a-panel-title">1. Choose Avatar Art Style</div>
+                                    <button type="button" class="atg-style-reset-chip" id="atgStyleOriginalBtn" data-avatar-style="original" aria-pressed="false">
+                                        📷 Original Photo
                                     </button>
                                 </div>
-                                <div id="atgPhotoMatchSummary" class="small text-success fw-semibold mt-2" style="display: none;"></div>
+                                <div class="atg-style-grid" role="radiogroup" aria-label="Avatar transformation style">
+                                    @foreach ($studioAvatarStyles as $idx => $st)
+                                        <button type="button"
+                                                class="atg-style-card {{ $idx === 0 ? 'active' : '' }}"
+                                                data-avatar-style="{{ $st['key'] }}"
+                                                aria-pressed="{{ $idx === 0 ? 'true' : 'false' }}"
+                                                style="--style-accent: {{ $st['accent'] }};">
+                                            <div class="atg-style-card-top">
+                                                <span class="atg-style-icon" aria-hidden="true">{{ $st['icon'] }}</span>
+                                                <span class="atg-style-badge">{{ $st['badge'] }}</span>
+                                            </div>
+                                            <div class="atg-style-name">{{ $st['label'] }}</div>
+                                            <div class="atg-style-tagline">{{ $st['tagline'] }}</div>
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <!-- 2. Neural AI Deep Redraw & On-Device Fine-Tuning -->
+                            <div class="atg-p2a-panel">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                                    <div class="atg-p2a-panel-title">2. Synthesise &amp; Fine-Tune</div>
+                                    <span class="atg-identity-badge" id="atgIdentityScoreBadge">Identity Lock: 98.4%</span>
+                                </div>
+                                <p class="atg-p2a-helper">
+                                    Selecting a style above previews instantly on your device. For a deep studio illustration redraw that preserves your exact facial geometry, spectacles, hair and pose, run the Neural AI Studio pass:
+                                </p>
+                                <div class="d-grid gap-2">
+                                    <button type="button" id="atgTransformAvatarBtn" class="atg-btn-primary atg-btn-neural btn-spin-on-click" data-spin="true">
+                                        <span>✨ Generate Neural AI Avatar (HD)</span>
+                                    </button>
+                                </div>
+
+                                <!-- Progressive Disclosure Fine-Tuning Sliders -->
+                                <div class="atg-finetune-accordion mt-3">
+                                    <button type="button" id="atgToggleFineTuneBtn" class="atg-finetune-toggle" aria-expanded="false" aria-controls="atgFineTuneDrawer">
+                                        <span>🎛️ Fine-Tune Stylisation &amp; Linework</span>
+                                        <span class="atg-finetune-chevron" id="atgFineTuneChevron" aria-hidden="true">▾</span>
+                                    </button>
+                                    <div id="atgFineTuneDrawer" class="atg-finetune-drawer" hidden>
+                                        <div class="atg-slider-row">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <label for="atgStyleStrength" class="atg-slider-label">Stylisation Strength</label>
+                                                <span class="atg-slider-val" id="atgStyleStrengthVal">78%</span>
+                                            </div>
+                                            <input type="range" id="atgStyleStrength" class="form-range" min="0.25" max="1.00" step="0.01" value="0.78">
+                                        </div>
+                                        <div class="atg-slider-row">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <label for="atgStyleLineWeight" class="atg-slider-label">Ink Linework Crispness</label>
+                                                <span class="atg-slider-val" id="atgStyleLineWeightVal">68%</span>
+                                            </div>
+                                            <input type="range" id="atgStyleLineWeight" class="form-range" min="0.00" max="1.00" step="0.01" value="0.68">
+                                        </div>
+                                        <div class="atg-slider-row">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <label for="atgStyleDetailLock" class="atg-slider-label">Facial Detail Preservation</label>
+                                                <span class="atg-slider-val" id="atgStyleDetailLockVal">80%</span>
+                                            </div>
+                                            <input type="range" id="atgStyleDetailLock" class="form-range" min="0.30" max="0.95" step="0.01" value="0.80">
+                                        </div>
+                                        <div class="text-end mt-2">
+                                            <button type="button" id="atgResetStyleControlsBtn" class="atg-style-reset-chip">
+                                                ↺ Reset to Balanced Defaults
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. Save as Living Profile Picture, Download HD PNG, or Sync Cartoon Palette -->
+                            <div class="atg-p2a-panel">
+                                <div class="atg-p2a-panel-title mb-2">3. Apply or Export Your Avatar</div>
+                                <div class="d-grid gap-2">
+                                    <button type="button" id="atgSaveLivingPortraitBtn" class="atg-btn-primary btn-spin-on-click" data-spin="true">
+                                        <span>✨ Set Avatar as Living Profile Picture</span>
+                                    </button>
+                                    <div class="atg-p2a-secondary-actions">
+                                        <button type="button" id="atgDownloadAvatarBtn" class="atg-btn-secondary">
+                                            <span>⬇️ Download HD Avatar</span>
+                                        </button>
+                                        <button type="button" id="atgSyncPhotoToAvatarBtn" class="atg-btn-secondary btn-spin-on-click" data-spin="true">
+                                            <span>🎨 Colour My 3D Cartoon</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="atgPhotoMatchSummary" class="atg-p2a-match-summary" style="display: none;"></div>
                             </div>
                         </div>
                     </div>
@@ -469,4 +612,5 @@
         });
     })();
 </script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/atg-avatar-styliser.js?v={{ assetVersion('js/atg-avatar-styliser.js') }}" defer></script>
 @endsection

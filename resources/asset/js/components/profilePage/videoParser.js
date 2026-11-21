@@ -164,6 +164,45 @@ export function parseVideoUrl(url) {
     };
   }
 
+  // 6. Facebook Video / Reel / Watch (in-platform iframe via official Facebook video plugin)
+  const fbVideoRegex = /^https?:\/\/(?:www\.|m\.|web\.)?(?:facebook\.com\/(?:[^\/\s]+\/videos\/\d+|watch\/?\?v=\d+|reel\/\d+|share\/[vr]\/[^\s"'<>]+|video\.php\?v=\d+)|fb\.watch\/[^\s"'<>]+|fb\.com\/(?:watch|reel|[^\/\s]+\/videos)\/[^\s"'<>]+)/i;
+  if (fbVideoRegex.test(trimmed)) {
+    return {
+      type: 'facebook',
+      videoId: null,
+      thumbnailUrl: null,
+      embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(trimmed)}&show_text=false&autoplay=0`,
+      originalUrl: trimmed,
+    };
+  }
+
+  // 7. Google Drive Video (drive.google.com/file/d/{id}/... or drive.google.com/open?id={id})
+  const gdMatch = trimmed.match(/^https?:\/\/drive\.google\.com\/(?:file\/d\/([a-zA-Z0-9_-]{10,})|open\?id=([a-zA-Z0-9_-]{10,}))/i);
+  if (gdMatch && (gdMatch[1] || gdMatch[2])) {
+    const gdId = gdMatch[1] || gdMatch[2];
+    return {
+      type: 'googledrive',
+      videoId: gdId,
+      thumbnailUrl: null,
+      embedUrl: `https://drive.google.com/file/d/${gdId}/preview`,
+      originalUrl: trimmed,
+    };
+  }
+
+  // 8. OneDrive Video / Embed (onedrive.live.com/embed, onedrive.live.com/redir, 1drv.ms/v/)
+  if (/^https?:\/\/(?:onedrive\.live\.com\/(?:embed|redir|\?)|1drv\.ms\/v\/)[^\s"'<>]+/i.test(trimmed)) {
+    const odEmbed = /^https?:\/\/onedrive\.live\.com\/(?:redir|view\.aspx)?\?(.+)$/i.test(trimmed)
+      ? `https://onedrive.live.com/embed?${trimmed.replace(/^https?:\/\/onedrive\.live\.com\/(?:redir|view\.aspx)?\?/i, '')}`
+      : trimmed;
+    return {
+      type: 'onedrive',
+      videoId: null,
+      thumbnailUrl: null,
+      embedUrl: odEmbed,
+      originalUrl: trimmed,
+    };
+  }
+
   return null;
 }
 

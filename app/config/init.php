@@ -199,12 +199,33 @@ if (php_sapi_name() !== 'cli') {
                         1
                     ) ?? $value;
                 }
+                if (stripos($value, 'img-src') === false) {
+                    $value .= "; img-src 'self' data: blob: https:";
+                } elseif (!preg_match('/img-src[^;]*\bblob:/i', $value)) {
+                    $value = preg_replace(
+                        '/img-src([^;]*)/',
+                        'img-src$1 blob:',
+                        $value,
+                        1
+                    ) ?? $value;
+                }
                 if (stripos($value, 'media-src') === false) {
-                    $value .= "; media-src 'self' blob: https://*.r2.dev https://*.r2.cloudflarestorage.com";
-                } elseif (strpos($value, 'blob:') === false || strpos($value, 'r2.dev') === false) {
+                    $value .= "; media-src 'self' blob: https:";
+                } elseif (!preg_match('/media-src[^;]*\bhttps:/i', $value)) {
                     $value = preg_replace(
                         '/media-src([^;]*)/',
-                        'media-src$1 blob: https://*.r2.dev https://*.r2.cloudflarestorage.com',
+                        'media-src$1 blob: https:',
+                        $value,
+                        1
+                    ) ?? $value;
+                }
+                $trustedFrameHosts = 'https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://iframe.videodelivery.net https://www.tiktok.com https://www.facebook.com https://onedrive.live.com https://drive.google.com';
+                if (stripos($value, 'frame-src') === false) {
+                    $value .= "; frame-src 'self' https://www.google.com https://recaptcha.google.com " . $trustedFrameHosts;
+                } elseif (strpos($value, 'youtube-nocookie.com') === false) {
+                    $value = preg_replace(
+                        '/frame-src([^;]*)/',
+                        'frame-src$1 ' . $trustedFrameHosts,
                         $value,
                         1
                     ) ?? $value;
@@ -262,10 +283,10 @@ if (php_sapi_name() !== 'cli') {
                 . "script-src-attr 'unsafe-inline'; "
                 . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; "
                 . "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://ka-f.fontawesome.com; "
-                . "img-src 'self' data: https:; "
-                . "media-src 'self' blob: https://*.r2.dev https://*.r2.cloudflarestorage.com; "
+                . "img-src 'self' data: blob: https:; "
+                . "media-src 'self' blob: https:; "
                 . $connectSrc . "; "
-                . "frame-src 'self' https://www.google.com https://recaptcha.google.com; "
+                . "frame-src 'self' https://www.google.com https://recaptcha.google.com https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://iframe.videodelivery.net https://www.tiktok.com https://www.facebook.com https://onedrive.live.com https://drive.google.com; "
                 . "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'";
 
             header('Content-Security-Policy: ' . $defaultCsp, true);

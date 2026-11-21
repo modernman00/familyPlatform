@@ -58,6 +58,9 @@ final class HashtagController
     {
         try {
             $famCode = self::getAuthenticatedFamCode();
+            if (function_exists('releaseSessionLock')) {
+                \releaseSessionLock();
+            }
             $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 12;
 
             $tags = HashtagService::getTrendingHashtags($famCode, $limit);
@@ -105,6 +108,9 @@ final class HashtagController
     {
         try {
             $famCode = self::getAuthenticatedFamCode();
+            if (function_exists('releaseSessionLock')) {
+                \releaseSessionLock();
+            }
             $tag = isset($_GET['tag']) ? (string)$_GET['tag'] : '';
 
             if (trim($tag) === '') {

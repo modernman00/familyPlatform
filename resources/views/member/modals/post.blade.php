@@ -167,7 +167,7 @@
                             <i class="bi bi-x"></i>
                         </button>
                         <div id="composerLinkPreviewImageWrapper" class="position-relative w-100 overflow-hidden" style="aspect-ratio: 16 / 9; max-height: 240px; background-color: #0f172a;">
-                            <img id="composerLinkPreviewImg" src="" alt="Link preview" class="w-100 h-100 object-fit-cover" style="display: block;">
+                            <img id="composerLinkPreviewImg" src="" alt="Link preview" class="w-100 h-100 object-fit-cover" referrerpolicy="no-referrer" style="display: block;">
                             <span id="composerLinkPreviewDomainBadge" class="badge rounded-pill bg-dark bg-opacity-75 text-white position-absolute top-0 start-0 m-2 px-2.5 py-1 small" style="font-size: 0.72rem; letter-spacing: 0.5px; backdrop-filter: blur(6px);"></span>
                         </div>
                         <div class="p-3 link-preview-card__body">
@@ -951,8 +951,10 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
 // Live Link Preview unfurler for composer
 (function() {
     let previewDebounceTimer = null;
+    let activePreviewController = null;
     let dismissedUrl = null;
     let lastFetchedUrl = null;
+    let inFlightUrl = null;
 
     const textarea = document.getElementById('postMessage');
     const editor = document.getElementById('postMessageEditor');
@@ -967,58 +969,117 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
     const urlEl = document.getElementById('composerLinkPreviewUrl');
     const ctaEl = document.getElementById('composerLinkPreviewCta');
 
+    function hideAndClearPreview() {
+        if (container) container.classList.add('d-none');
+        if (imgEl) imgEl.removeAttribute('src');
+        if (imgWrapper) imgWrapper.classList.add('d-none');
+        if (titleEl) titleEl.textContent = '';
+        if (descEl) descEl.textContent = '';
+        if (domainBadge) domainBadge.textContent = '';
+        if (siteNameEl) siteNameEl.textContent = '';
+        if (urlEl) urlEl.textContent = '';
+        if (ctaEl) ctaEl.textContent = '';
+    }
+
+    function resetLinkPreview() {
+        if (previewDebounceTimer) {
+            clearTimeout(previewDebounceTimer);
+            previewDebounceTimer = null;
+        }
+        if (activePreviewController) {
+            try { activePreviewController.abort(); } catch (_) {}
+            activePreviewController = null;
+        }
+        dismissedUrl = null;
+        lastFetchedUrl = null;
+        inFlightUrl = null;
+        hideAndClearPreview();
+    }
+    window.__resetLinkPreview = resetLinkPreview;
+
     if (closeBtn && container) {
         closeBtn.addEventListener('click', function() {
-            container.classList.add('d-none');
-            dismissedUrl = lastFetchedUrl;
+            hideAndClearPreview();
+            dismissedUrl = lastFetchedUrl || inFlightUrl;
         });
     }
 
-    function checkAndUnfurlLink() {
+    const modalEl = document.getElementById('postModal');
+    if (modalEl) {
+        modalEl.addEventListener('hidden.bs.modal', resetLinkPreview);
+    }
+
+    function checkAndUnfurlLink(immediate = false) {
         const val = (editor ? editor.innerText : '') || (textarea ? textarea.value : '');
         const urlMatch = val.match(/(https?:\/\/[^\s<>"']+)/i);
         if (!urlMatch || !urlMatch[1]) {
-            if (container) container.classList.add('d-none');
+            if (previewDebounceTimer) clearTimeout(previewDebounceTimer);
+            if (activePreviewController) {
+                try { activePreviewController.abort(); } catch (_) {}
+                activePreviewController = null;
+            }
+            hideAndClearPreview();
             lastFetchedUrl = null;
+            inFlightUrl = null;
             return;
         }
 
         const url = urlMatch[1].replace(/:[a-z0-9_]+_3d:.*$/i, '').replace(/[.,;:!?)]+$/, '');
-        if (!url || url === dismissedUrl || url === lastFetchedUrl) {
+        if (!url || url === dismissedUrl || url === lastFetchedUrl || url === inFlightUrl) {
             return;
         }
 
+        // Immediately clear any stale previous preview while the new URL resolves
+        hideAndClearPreview();
+        lastFetchedUrl = null;
+
         if (previewDebounceTimer) clearTimeout(previewDebounceTimer);
-        previewDebounceTimer = setTimeout(async function() {
+        if (activePreviewController) {
+            try { activePreviewController.abort(); } catch (_) {}
+            activePreviewController = null;
+        }
+
+        const runFetch = async () => {
+            const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+            activePreviewController = controller;
+            inFlightUrl = url;
             try {
                 const response = await fetch('/api/link-preview?url=' + encodeURIComponent(url), {
-                    headers: { 'Accept': 'application/json' }
+                    headers: { 'Accept': 'application/json' },
+                    credentials: 'same-origin',
+                    signal: controller ? controller.signal : undefined
                 });
                 if (!response.ok) return;
                 const res = await response.json();
+                if (controller && controller.signal.aborted) return;
                 if (res?.status === 'success' && res?.data && (res.data.title || res.data.image || res.data.domain)) {
                     const d = res.data;
                     lastFetchedUrl = url;
                     if (d.is_photo_link || d.is_google_photo) {
-                        if (titleEl) titleEl.textContent = 'Linked Photo (Zero Storage)';
-                        if (descEl) descEl.textContent = 'This photo will appear natively on the family feed with zero storage used. The link will be automatically hidden from the caption.';
-                        if (urlEl) urlEl.textContent = d.original_url || d.url || url;
+                        const hasVideos = Array.isArray(d.album_videos) && d.album_videos.length > 0;
+                        if (titleEl) titleEl.textContent = hasVideos ? 'Linked Family Videos (Zero Storage)' : 'Linked Photo (Zero Storage)';
+                        if (descEl) descEl.textContent = hasVideos
+                            ? 'These videos will stream natively on the family feed with zero storage used. The link will be hidden from the caption.'
+                            : 'This photo will appear natively on the family feed with zero storage used. The link will be automatically hidden from the caption.';
+                        if (urlEl) urlEl.textContent = d.site_name || d.domain || 'Google Photos';
                         if (domainBadge) domainBadge.textContent = d.is_google_photo ? 'Google Photos' : 'Linked Photo';
                         if (siteNameEl) siteNameEl.textContent = d.site_name || 'Google Photos';
-                        if (ctaEl) ctaEl.textContent = 'Native Photo Card';
+                        if (ctaEl) ctaEl.textContent = hasVideos ? 'Native Video Album' : 'Native Photo Card';
                     } else {
                         if (titleEl) titleEl.textContent = d.title || d.domain || '';
                         if (descEl) descEl.textContent = d.description || '';
-                        if (urlEl) urlEl.textContent = d.url || url;
+                        if (urlEl) urlEl.textContent = d.site_name || d.domain || 'Web Link';
                         if (domainBadge) domainBadge.textContent = d.is_party_event ? 'PartyPlatform' : (d.domain || 'Link');
                         if (siteNameEl) siteNameEl.textContent = d.site_name || d.domain || '';
                         if (ctaEl) ctaEl.textContent = d.cta_label || 'View Event / RSVP →';
                     }
                     if (imgEl && imgWrapper) {
                         if (d.image) {
+                            imgEl.referrerPolicy = 'no-referrer';
                             imgEl.src = d.image;
                             imgWrapper.classList.remove('d-none');
                         } else {
+                            imgEl.removeAttribute('src');
                             imgWrapper.classList.add('d-none');
                         }
                     }
@@ -1033,20 +1094,29 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
                     }
                 }
             } catch (_) {
-                // Fail silently
+                // Fail silently on abort or network failure
+            } finally {
+                if (inFlightUrl === url) inFlightUrl = null;
+                if (activePreviewController === controller) activePreviewController = null;
             }
-        }, 350);
+        };
+
+        if (immediate) {
+            runFetch();
+        } else {
+            previewDebounceTimer = setTimeout(runFetch, 150);
+        }
     }
 
     window.__unfurlComposerLinkPreview = checkAndUnfurlLink;
 
     if (textarea) {
-        textarea.addEventListener('input', checkAndUnfurlLink);
+        textarea.addEventListener('input', () => checkAndUnfurlLink(false));
     }
     if (editor) {
-        editor.addEventListener('input', checkAndUnfurlLink);
-        editor.addEventListener('keyup', checkAndUnfurlLink);
-        editor.addEventListener('paste', () => setTimeout(checkAndUnfurlLink, 50));
+        editor.addEventListener('input', () => checkAndUnfurlLink(false));
+        editor.addEventListener('keyup', () => checkAndUnfurlLink(false));
+        editor.addEventListener('paste', () => setTimeout(() => checkAndUnfurlLink(true), 20));
     }
 })();
 
@@ -1134,9 +1204,9 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
     };
 
     // Sync Hidden Textarea -> Editor (turns :shortcode: into living 3D emoji spans)
-    window.syncTextareaToEditor = function() {
-        // While user is actively typing in the editor or during internal sync, never overwrite editor DOM!
-        if (!editor || !textarea || isInternalSync || document.activeElement === editor) return;
+    window.syncTextareaToEditor = function(force = false) {
+        // While user is actively typing in the editor or during internal sync, never overwrite editor DOM unless forced!
+        if (!editor || !textarea || isInternalSync || (!force && document.activeElement === editor)) return;
         let raw = textarea.value || '';
         const styleMatch = raw.match(/\[style:([a-z0-9_]+)\]/i);
         if (styleMatch && styleMatch[1]) {
@@ -1180,7 +1250,7 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
                 },
                 set: function(newVal) {
                     protoDesc.set.call(this, newVal);
-                    window.syncTextareaToEditor();
+                    window.syncTextareaToEditor(true);
                 }
             });
         }
@@ -1681,11 +1751,6 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
                 currentVal = currentVal ? `${currentVal}\n${link}` : link;
             }
 
-            // Pre-warm server link preview cache in parallel while the user finishes composing
-            if (link.startsWith('http://') || link.startsWith('https://')) {
-                fetch('/api/link-preview?url=' + encodeURIComponent(link), { credentials: 'same-origin' }).catch(() => {});
-            }
-
             // If a video link is entered, also render attached video embed preview if available
             if (typeof window.parseVideoUrl === 'function' && typeof window.renderAttachedVideoPreview === 'function') {
                 const parsedVid = window.parseVideoUrl(link);
@@ -1697,11 +1762,18 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
             }
         });
         textarea.value = currentVal;
+        const editorEl = document.getElementById('postMessageEditor');
+        if (editorEl) {
+            editorEl.innerText = currentVal;
+        }
 
         input.value = '';
         if (drawer) drawer.classList.add('d-none');
-        textarea.focus();
+        (editorEl || textarea).focus();
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        if (typeof window.__unfurlComposerLinkPreview === 'function') {
+            window.__unfurlComposerLinkPreview(true);
+        }
 
         if (window.Swal) {
             const Toast = Swal.mixin({
@@ -1929,21 +2001,63 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
         }
     });
 
+    window.__flushPostComposer = function() {
+        const editorEl = document.getElementById('postMessageEditor');
+        if (editorEl) editorEl.innerHTML = '';
+        const textareaEl = document.getElementById('postMessage');
+        if (textareaEl) textareaEl.value = '';
+        const gPhotoInput = document.getElementById('googlePhotoLinkInput');
+        if (gPhotoInput) gPhotoInput.value = '';
+        const gPhotoDrawer = document.getElementById('googlePhotoDrawer');
+        if (gPhotoDrawer) gPhotoDrawer.classList.add('d-none');
+
+        const vidUrlEl = document.getElementById('attachedVideoUrl');
+        if (vidUrlEl) vidUrlEl.value = '';
+        const vidUrlsEl = document.getElementById('attachedVideoUrls');
+        if (vidUrlsEl) vidUrlsEl.value = '';
+        const gifUrlEl = document.getElementById('attachedGifUrlInput');
+        if (gifUrlEl) gifUrlEl.value = '';
+        const legacyGifEl = document.getElementById('attachedGifUrl');
+        if (legacyGifEl) legacyGifEl.value = '';
+
+        const arPreview = document.getElementById('attachedArEmojiPreview');
+        if (arPreview) arPreview.classList.add('d-none');
+        const arInput = document.getElementById('attachedArEmojiInput');
+        if (arInput) arInput.value = '';
+
+        document.querySelectorAll('input[name="media_meta"], input[name="shared_temp_images[]"]').forEach(el => el.remove());
+
+        if (typeof window.__resetLinkPreview === 'function') window.__resetLinkPreview();
+        if (typeof window.__resetMediaPreviews === 'function') window.__resetMediaPreviews();
+        if (typeof window.__resetVideoBuilder === 'function') window.__resetVideoBuilder();
+        if (typeof window.__resetGifPicker === 'function') window.__resetGifPicker();
+        if (typeof window.__resetPollBuilder === 'function') window.__resetPollBuilder();
+        if (typeof window.__resetThenNow === 'function') window.__resetThenNow();
+        if (typeof window.__resetTagBuilder === 'function') window.__resetTagBuilder();
+        if (typeof window.__resetTextStageBuilder === 'function') window.__resetTextStageBuilder();
+        if (typeof window.closeAllComposerDrawers === 'function') window.closeAllComposerDrawers();
+
+        const step2 = document.getElementById('composerStep2');
+        if (step2) step2.setAttribute('data-confirmed', 'false');
+        if (typeof window.hideComposerAudienceStep === 'function') {
+            window.hideComposerAudienceStep();
+        }
+        const firstCard = document.querySelector('#composerStep2 .composer-audience-card');
+        if (firstCard && typeof window.selectPostAudienceCard === 'function') {
+            window.selectPostAudienceCard(firstCard, 'all', 'All Family Circles & Connected Kin', 'bi-people-fill text-primary', '');
+        }
+        const confirmBtn = document.getElementById('composerConfirmShareBtn');
+        if (confirmBtn) {
+            if (window.ScoreTenantSpinner) window.ScoreTenantSpinner.stop(confirmBtn);
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="bi bi-send-fill me-1.5"></i> Confirm &amp; Share Post';
+        }
+    };
+
     const modalEl = document.getElementById('postModal');
     if (modalEl) {
         modalEl.addEventListener('hidden.bs.modal', function() {
-            const step2 = document.getElementById('composerStep2');
-            if (step2) step2.setAttribute('data-confirmed', 'false');
-            window.hideComposerAudienceStep();
-            const firstCard = document.querySelector('#composerStep2 .composer-audience-card');
-            if (firstCard && typeof window.selectPostAudienceCard === 'function') {
-                window.selectPostAudienceCard(firstCard, 'all', 'All Family Circles & Connected Kin', 'bi-people-fill text-primary', '');
-            }
-            const confirmBtn = document.getElementById('composerConfirmShareBtn');
-            if (confirmBtn) {
-                confirmBtn.disabled = false;
-                confirmBtn.innerHTML = '<i class="bi bi-send-fill me-1.5"></i> Confirm &amp; Share Post';
-            }
+            window.__flushPostComposer();
         });
     }
 })();

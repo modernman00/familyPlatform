@@ -182,4 +182,38 @@ class ShareTargetControllerTest extends SocialFeedTestCase
             @unlink($tmpImage);
         }
     }
+
+    public function test_share_target_receives_video_and_accepts_octet_stream_fallback(): void
+    {
+        $tmpVideo = tempnam(sys_get_temp_dir(), 'test_pwa_vid_');
+        file_put_contents($tmpVideo, "\x00\x00\x00\x18ftypmp42\x00\x00\x00\x00mp42isom");
+
+        $_POST['text'] = 'Family dance video';
+        $_FILES['media'] = [
+            'name'     => 'family_dance.mp4',
+            'type'     => 'application/octet-stream',
+            'tmp_name' => $tmpVideo,
+            'error'    => UPLOAD_ERR_OK,
+            'size'     => (int) filesize($tmpVideo),
+        ];
+
+        ob_start();
+        (new ShareTargetController())->receive();
+        ob_get_clean();
+
+        $this->assertArrayHasKey('pwa_shared_target', $_SESSION);
+        $this->assertNotEmpty($_SESSION['pwa_shared_target']['files']);
+        $savedFileName = $_SESSION['pwa_shared_target']['files'][0];
+        $this->assertStringEndsWith('.mp4', $savedFileName);
+
+        $destPath = $this->tempDir . '/' . $savedFileName;
+        $this->assertFileExists($destPath);
+
+        if (file_exists($destPath)) {
+            @unlink($destPath);
+        }
+        if (file_exists($tmpVideo)) {
+            @unlink($tmpVideo);
+        }
+    }
 }

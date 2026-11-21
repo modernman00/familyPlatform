@@ -1139,8 +1139,8 @@ function posterStudio() {
         presets: PRESETS, themes: THEMES,
         // Bright Split suits pastel; Crystal Keepsake art is a baby teddy block, so only offer it for naming/baby posters
         get layouts() { return LAYOUTS.filter((l) => (l.id !== 'pool_tropical_split' || this.theme === 'family_pastel_baby') && (l.id !== 'acrylic_keepsake_block' || this.presetKey === 'naming')); },
-        ratios: [{ id: 'portrait', label: 'Portrait 4:5' }, { id: 'story', label: 'WhatsApp Status 9:16' }, { id: 'feed', label: 'Square 1:1' }, { id: 'poster_a4', label: 'A4 Print' }],
-        presetKey: 'reunion', theme: 'family_botanical', archetype: 'floral_chrome_overlap', ratio: 'portrait',
+        ratios: [{ id: 'story', label: '9:16 Vertical (Default)' }, { id: 'portrait', label: '4:5 Portrait' }, { id: 'widescreen', label: '16:9 Widescreen' }],
+        presetKey: 'reunion', theme: 'family_botanical', archetype: 'floral_chrome_overlap', ratio: 'story',
         d: { ...blank }, perks: '',
         photoSrc: null, photoUrl: '', cutoutUrl: null, cutting: false, cutout: true, ghost: true, scale: 1, offsetX: 0, offsetY: 0, hasBackdrop: false,
         busy: false, posted: false, restoredDraft: false, guideOpen: false,
@@ -1148,7 +1148,7 @@ function posterStudio() {
 
         async init() {
             const canvas = document.getElementById('psCanvas');
-            engine = new AtgUniversalPosterEngine({ canvas, aspectRatio: 'portrait', theme: this.theme, archetype: this.archetype, strictContent: true, data: { ...blank, showDefaultSubject: false } });
+            engine = new AtgUniversalPosterEngine({ canvas, aspectRatio: 'story', theme: this.theme, archetype: this.archetype, strictContent: true, data: { ...blank, showDefaultSubject: false } });
             window.fpPosterEngine = engine;
             const draft = this.loadDraft();
             if (draft) { Object.assign(this, draft); this.restoredDraft = true; }
@@ -1227,7 +1227,7 @@ function posterStudio() {
 
         renderThumbs() {
             const off = document.createElement('canvas');
-            const t = new AtgUniversalPosterEngine({ canvas: off, aspectRatio: 'portrait', theme: this.theme, archetype: this.archetype, strictContent: true, data: { ...blank, showDefaultSubject: false } });
+            const t = new AtgUniversalPosterEngine({ canvas: off, aspectRatio: 'story', theme: this.theme, archetype: this.archetype, strictContent: true, data: { ...blank, showDefaultSubject: false } });
             t.studioAssetCache = engine.studioAssetCache;
             t.backgroundImage = engine.backgroundImage;
             t.subjectImage = engine.subjectImage;
@@ -1251,6 +1251,7 @@ function posterStudio() {
             if (!file) return;
             try {
                 const out = await FPCards.preparePhoto(file, 1400);
+                if (this.photoUrl) URL.revokeObjectURL(this.photoUrl);
                 this.photoUrl = out.url;
                 this.photoSrc = out.url;
                 if (this.cutoutUrl) URL.revokeObjectURL(this.cutoutUrl);

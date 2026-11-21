@@ -82,8 +82,27 @@ async function handleSave(btn) {
             timerProgressBar: true,
         });
 
-        // Reload so the rest of the page picks up the new values.
-        setTimeout(() => window.location.assign('/profilePage'), 800);
+        const isPreactProfile = Boolean(
+            document.getElementById('feed-root') || document.getElementById('kin-requests-root')
+        );
+
+        if (isPreactProfile) {
+            const previewImg = document.getElementById('profilePreview');
+            const detail = {
+                firstName: String(formData.get('firstName') || '').trim() || undefined,
+                lastName: String(formData.get('lastName') || '').trim() || undefined,
+                country: formData.has('country') ? String(formData.get('country') || '').trim() : undefined,
+                avatar: previewImg && previewImg.getAttribute('src') ? previewImg.getAttribute('src') : undefined,
+            };
+            window.dispatchEvent(new CustomEvent('fp:profile-updated', { detail }));
+            const modalEl = document.getElementById('editProfileModal');
+            if (modalEl && window.bootstrap?.Modal) {
+                window.bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+            }
+        } else {
+            // Reload so the rest of the page picks up the new values.
+            setTimeout(() => window.location.assign('/profilePage'), 800);
+        }
     } catch (error) {
         console.error('Edit Profile Submit Error:', error);
 

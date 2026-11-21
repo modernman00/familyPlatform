@@ -1,5 +1,6 @@
 @php
   $composerId = $composerId ?? 'openPostModalTrigger';
+  $svgPrefix = preg_replace('/[^a-zA-Z0-9_-]/', '', (string) $composerId) ?: 'composer';
   $avatarSrc = str_starts_with($data['img'] ?? '', '/')
     ? $data['img']
     : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png');
@@ -12,7 +13,8 @@
     <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
       <div class="d-flex align-items-center gap-2 min-w-0">
         <span class="post-composer__badge flex-shrink-0" aria-hidden="true">
-          <i class="bi bi-chat-heart-fill"></i>
+          <span class="post-composer__badge-sheen" aria-hidden="true"></span>
+          @include('member.includes.composerActionIcon', ['type' => 'header', 'prefix' => $svgPrefix])
         </span>
         <div class="min-w-0">
           <div class="post-composer__title">{{ __('feed.share_moment_heading', 'Share a Moment') }}</div>
@@ -47,7 +49,9 @@
            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }"
            aria-label="{{ __('feed.share_prompt', 'Share a moment with your family...') }}">
         <span class="composer-prompt__text">{{ __('feed.share_prompt', 'Share a moment with your family...') }}</span>
-        <i class="bi bi-pencil-square composer-prompt__icon flex-shrink-0" aria-hidden="true"></i>
+        <span class="composer-prompt__icon flex-shrink-0" aria-hidden="true">
+          @include('member.includes.composerActionIcon', ['type' => 'prompt', 'prefix' => $svgPrefix])
+        </span>
       </div>
     </div>
 
@@ -59,7 +63,7 @@
               data-bs-target="#postModal"
               title="Upload Photos - Add memories from your device or camera"
               aria-label="{{ __('feed.photo', 'Add a photo to post') }}">
-        <i class="bi bi-camera-fill" aria-hidden="true"></i>
+        @include('member.includes.composerActionIcon', ['type' => 'photo', 'prefix' => $svgPrefix])
         <span>{{ __('feed.photo_label', 'Photo') }}</span>
       </button>
 
@@ -70,7 +74,7 @@
               onclick="setTimeout(function () { var vb = document.getElementById('addVideoBtn'); var vc = document.getElementById('videoEmbedContainer'); if (vc && vc.classList.contains('d-none') && vb) vb.click(); }, 120)"
               title="Upload Video - Embed or share family video clips"
               aria-label="{{ __('feed.video', 'Add a video to post') }}">
-        <i class="bi bi-play-btn-fill" aria-hidden="true"></i>
+        @include('member.includes.composerActionIcon', ['type' => 'video', 'prefix' => $svgPrefix])
         <span>{{ __('feed.video_label', 'Video') }}</span>
       </button>
 
@@ -81,7 +85,7 @@
               onclick="setTimeout(function () { if (window.__openThenNow) window.__openThenNow(''); }, 0)"
               title="Then &amp; Now - Compare milestone photos across years"
               aria-label="{{ __('feed.then_now', 'Then & Now photo comparison') }}">
-        <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+        @include('member.includes.composerActionIcon', ['type' => 'thennow', 'prefix' => $svgPrefix])
         <span>{{ __('feed.then_now_label', 'Then & Now') }}</span>
       </button>
 
@@ -91,7 +95,7 @@
               data-bs-target="#postModal"
               title="Family Poll - Gather opinions and vote on dates or plans"
               aria-label="{{ __('feed.poll', 'Create a poll') }}">
-        <i class="bi bi-bar-chart-fill" aria-hidden="true"></i>
+        @include('member.includes.composerActionIcon', ['type' => 'poll', 'prefix' => $svgPrefix])
         <span>{{ __('feed.poll_label', 'Poll') }}</span>
       </button>
 
@@ -101,7 +105,7 @@
               data-bs-target="#createAnnouncementModal"
               title="Family Announcement - Broadcast pinned notices to all relatives"
               aria-label="{{ __('feed.announcement', 'Broadcast family announcement') }}">
-        <i class="bi bi-megaphone-fill" aria-hidden="true"></i>
+        @include('member.includes.composerActionIcon', ['type' => 'announce', 'prefix' => $svgPrefix])
         <span>{{ __('feed.announce_label', 'Announce') }}</span>
       </button>
 
@@ -110,7 +114,7 @@
               onclick="window.location.href='/familyJournal/create'"
               title="Family Journal - Write memoirs, stories, and chronicles"
               aria-label="{{ __('feed.journal', 'Write family journal chronicle') }}">
-        <i class="bi bi-journal-bookmark-fill" aria-hidden="true"></i>
+        @include('member.includes.composerActionIcon', ['type' => 'journal', 'prefix' => $svgPrefix])
         <span>{{ __('feed.journal_label', 'Journal') }}</span>
       </button>
     </div>

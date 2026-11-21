@@ -31,6 +31,31 @@ final class ShareTargetController
     private const MAX_FILE_SIZE = 25 * 1024 * 1024;
 
     /**
+     * Resolves an allowed extension from detected MIME type or safe filename extension fallback
+     * when mobile OS shares report application/octet-stream.
+     */
+    private static function resolveAllowedExtension(string $tmpPath, string $originalName): ?string
+    {
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->file($tmpPath);
+        if (is_string($mime) && array_key_exists($mime, self::ALLOWED_MIME_TYPES)) {
+            return self::ALLOWED_MIME_TYPES[$mime];
+        }
+
+        if ($mime === 'application/octet-stream' || $mime === false) {
+            $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+            if ($ext === 'jpeg') {
+                $ext = 'jpg';
+            }
+            if (in_array($ext, array_values(self::ALLOWED_MIME_TYPES), true)) {
+                return $ext;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Receives direct OS Web Share Target POST (W3C Web Share Target API Level 2).
      * Bypasses internal CSRF because it originates from the native mobile OS share sheet.
      * Stashes validated media securely into session and redirects with HTTP 303 to /profilePage.
@@ -76,10 +101,8 @@ final class ShareTargetController
                 $count = min(10, count($filesPayload['name']));
                 for ($i = 0; $i < $count; $i++) {
                     if ($filesPayload['error'][$i] === UPLOAD_ERR_OK && $filesPayload['size'][$i] <= self::MAX_FILE_SIZE) {
-                        $finfo = new \finfo(FILEINFO_MIME_TYPE);
-                        $mime = $finfo->file($filesPayload['tmp_name'][$i]);
-                        if (is_string($mime) && array_key_exists($mime, self::ALLOWED_MIME_TYPES)) {
-                            $ext = self::ALLOWED_MIME_TYPES[$mime];
+                        $ext = self::resolveAllowedExtension((string)$filesPayload['tmp_name'][$i], (string)($filesPayload['name'][$i] ?? ''));
+                        if ($ext !== null) {
                             $safeName = 'pwa_share_' . time() . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
                             $dest = rtrim($tempDir, '/') . '/' . $safeName;
                             if (move_uploaded_file($filesPayload['tmp_name'][$i], $dest) || copy($filesPayload['tmp_name'][$i], $dest)) {
@@ -90,10 +113,8 @@ final class ShareTargetController
                 }
             } elseif ($filesPayload && !empty($filesPayload['tmp_name']) && $filesPayload['error'] === UPLOAD_ERR_OK) {
                 if ($filesPayload['size'] <= self::MAX_FILE_SIZE) {
-                    $finfo = new \finfo(FILEINFO_MIME_TYPE);
-                    $mime = $finfo->file($filesPayload['tmp_name']);
-                    if (is_string($mime) && array_key_exists($mime, self::ALLOWED_MIME_TYPES)) {
-                        $ext = self::ALLOWED_MIME_TYPES[$mime];
+                    $ext = self::resolveAllowedExtension((string)$filesPayload['tmp_name'], (string)($filesPayload['name'] ?? ''));
+                    if ($ext !== null) {
                         $safeName = 'pwa_share_' . time() . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
                         $dest = rtrim($tempDir, '/') . '/' . $safeName;
                         if (move_uploaded_file($filesPayload['tmp_name'], $dest) || copy($filesPayload['tmp_name'], $dest)) {
@@ -147,9 +168,20 @@ final class ShareTargetController
         }
 
         $userId = trim((string)($_SESSION['id'] ?? ''));
+        if ($userId === '' && class_exists('\Src\functionality\SignIn')) {
+            try {
+                $jwtUser = \Src\functionality\SignIn::verify();
+                if (!empty($jwtUser['id'])) {
+                    $userId = trim((string)$jwtUser['id']);
+                    $_SESSION['id'] = $userId;
+                }
+            } catch (\Throwable $e) {
+                // Ignore unverified cookie
+            }
+        }
         if ($userId === '') {
             http_response_code(401);
-            echo json_encode(['status' => 'error', 'message' => 'Unauthorized: Please sign in.']);
+            echo json_encode(['status' => 'error', 'message' => 'Unauthorised: Please sign in.']);
             return;
         }
 

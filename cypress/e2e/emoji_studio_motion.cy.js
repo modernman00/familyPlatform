@@ -194,4 +194,65 @@ describe('Living Avatar & Emoji Studio', () => {
         cy.screenshot('emoji-studio-living-photo-dance', { capture: 'viewport' });
         cy.get('@consoleError').should('not.have.been.called');
     });
+
+    it('transforms a portrait into a stylised avatar with Before/After split slider and 6 selectable styles', () => {
+        cy.get('.atg-tab-btn[data-atg-tab="photo-avatar-tab"]').click();
+        cy.get('#photo-avatar-tab').should('be.visible');
+
+        // Verify ATG Photo-to-Avatar Styliser engine, 6 style cards, and Before/After split slider exist
+        cy.window().its('AtgPhotoAvatarStyliser').should('be.an', 'object');
+        cy.get('.atg-style-card').should('have.length', 6);
+        cy.get('#atgPhotoCompareStage').should('have.class', 'is-comparing');
+        cy.get('#atgCompareHandle').should('be.visible').and('have.attr', 'role', 'slider');
+
+        // Switch styles and verify pixels on #atgPhotoLivingCanvas genuinely transform
+        cy.get('.atg-style-card[data-avatar-style="pop_art"]').click()
+            .should('have.attr', 'aria-pressed', 'true');
+
+        cy.window().then(win => {
+            const beforeC = win.document.getElementById('atgPhotoBeforeCanvas');
+            const afterC = win.document.getElementById('atgPhotoLivingCanvas');
+            const bData = beforeC.getContext('2d').getImageData(60, 60, 80, 80).data;
+            const aData = afterC.getContext('2d').getImageData(60, 60, 80, 80).data;
+            let diffSum = 0;
+            for (let i = 0; i < bData.length; i += 4) {
+                diffSum += Math.abs(bData[i] - aData[i]) + Math.abs(bData[i + 1] - aData[i + 1]) + Math.abs(bData[i + 2] - aData[i + 2]);
+            }
+            expect(diffSum, 'After stylised avatar pixels differ from Before raw photo').to.be.greaterThan(500);
+        });
+
+        // Keyboard-adjust the Before/After split slider
+        cy.get('#atgCompareHandle').focus().trigger('keydown', { key: 'ArrowRight' });
+        cy.get('#atgCompareHandle').should('have.attr', 'aria-valuenow', '55');
+
+        // Verify CSRF (403) and Invalid Style / Polyglot (422) adversarial neutralisation on /api/emoji/transform-photo-avatar
+        cy.window().then(win => {
+            const validToken = win.document.querySelector('input[name="token"]')?.value || '';
+            return win.fetch('/api/emoji/transform-photo-avatar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': 'forged_token_123' },
+                body: JSON.stringify({ token: 'forged_token_123', csrf_token: 'forged_token_123', style: 'illustrated_comic', image_base64: 'data:image/png;base64,iVBORw0KGgo=' })
+            }).then(r => {
+                expect(r.status, 'CSRF forgery blocked with 403').to.eq(403);
+                return win.fetch('/api/emoji/transform-photo-avatar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': validToken },
+                    body: JSON.stringify({ token: validToken, csrf_token: validToken, style: '"><script>alert(1)</script>', image_base64: 'data:image/png;base64,iVBORw0KGgo=' })
+                });
+            }).then(r2 => {
+                expect(r2.status, 'Injected style blocked with 422').to.eq(422);
+            });
+        });
+
+        // Run Sovereign DOM Audit on Living Photo Studio
+        cy.readFile('scripts/dom_audit.js').then(code => {
+            cy.window().then(win => {
+                win.eval(code);
+                const report = win.runSovereignDomAudit();
+                expect(report.passed, 'Sovereign DOM Audit passed: ' + JSON.stringify(report.violations)).to.eq(true);
+            });
+        });
+
+        cy.get('@consoleError').should('not.have.been.called');
+    });
 });

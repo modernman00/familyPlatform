@@ -211,6 +211,7 @@ final class PostDto implements JsonSerializable
         $rowVideos = isset($row['videos']) && is_array($row['videos']) ? $row['videos'] : [];
         $hasPreExtractedMedia = !empty($rowVideos) || !empty($row['images']) || !empty($existingExternalImages) || !empty($existingExternalVideos);
         $hasExternalLinkInMessage = !empty($message) && (str_contains($message, 'http://') || str_contains($message, 'https://'));
+        $hasLocalVideoInMessage = !empty($message) && str_contains($message, '/resources/videos/');
 
         if (!$hasLocalUpload && !$hasPreExtractedMedia && $hasExternalLinkInMessage) {
             $extractedAssets = \App\services\LinkPreviewService::extractPhotoAssetsFromText($message, 6);
@@ -255,9 +256,9 @@ final class PostDto implements JsonSerializable
                     array_merge($finalImages, $finalVideos)
                 );
             }
-        } elseif ((!empty($existingExternalVideos) || $hasExternalLinkInMessage) && empty($rowVideos)) {
+        } elseif ((!empty($existingExternalVideos) || $hasExternalLinkInMessage || $hasLocalVideoInMessage) && empty($rowVideos)) {
             $allVideoUrls = $existingExternalVideos;
-            if ($hasExternalLinkInMessage) {
+            if ($hasExternalLinkInMessage || $hasLocalVideoInMessage) {
                 foreach (\App\classes\VideoParser::extractAllVideosFromText($message, 6) as $parsedVid) {
                     if (!in_array($parsedVid['originalUrl'], $allVideoUrls, true) && count($allVideoUrls) < 6) {
                         $allVideoUrls[] = $parsedVid['originalUrl'];

@@ -76,7 +76,7 @@ final class NativeShareController
                 return;
             }
 
-            // Destination directory for family posts
+            // Destination directories for family posts (images vs videos)
             $destinationDir = realpath(__DIR__ . '/../../../resources/images/post');
             if ($destinationDir === false || !is_dir($destinationDir)) {
                 $destinationDir = __DIR__ . '/../../../resources/images/post';
@@ -85,7 +85,14 @@ final class NativeShareController
                 }
             }
 
-            $savedFiles = [];
+            $videoDir = __DIR__ . '/../../../resources/videos/posts';
+            if (!is_dir($videoDir)) {
+                @mkdir($videoDir, 0755, true);
+            }
+            $videoDirReal = realpath($videoDir) ?: $videoDir;
+
+            $savedImages = [];
+            $savedVideos = [];
             $finfo = new \finfo(FILEINFO_MIME_TYPE);
 
             foreach ($normalizedFiles as $file) {
@@ -98,20 +105,40 @@ final class NativeShareController
                 }
 
                 $mimeType = $finfo->file($file['tmp_name']);
-                if (!is_string($mimeType) || !array_key_exists($mimeType, self::ALLOWED_MIME_TYPES)) {
+                $extension = null;
+                if (is_string($mimeType) && array_key_exists($mimeType, self::ALLOWED_MIME_TYPES)) {
+                    $extension = self::ALLOWED_MIME_TYPES[$mimeType];
+                } elseif ($mimeType === 'application/octet-stream' || $mimeType === false) {
+                    $candidateExt = strtolower(pathinfo((string)$file['name'], PATHINFO_EXTENSION));
+                    if ($candidateExt === 'jpeg') {
+                        $candidateExt = 'jpg';
+                    }
+                    if (in_array($candidateExt, array_values(self::ALLOWED_MIME_TYPES), true)) {
+                        $extension = $candidateExt;
+                    }
+                }
+
+                if ($extension === null) {
                     continue; // Skip unsupported MIME types
                 }
 
-                $extension = self::ALLOWED_MIME_TYPES[$mimeType];
+                $isVideo = in_array($extension, ['mp4', 'webm', 'mov'], true);
                 $secureFileName = time() . '_' . bin2hex(random_bytes(8)) . '.' . $extension;
-                $targetPath = rtrim($destinationDir, '/') . '/' . $secureFileName;
+                $targetDir = $isVideo ? $videoDirReal : $destinationDir;
+                $targetPath = rtrim($targetDir, '/') . '/' . $secureFileName;
 
                 if (!$this->moveUploadedFileSafely($file['tmp_name'], $targetPath)) {
                     continue;
                 }
 
+                if ($isVideo) {
+                    $videoUrl = '/resources/videos/posts/' . $secureFileName;
+                    $savedVideos[] = $videoUrl;
+                    continue;
+                }
+
                 // If raster image, route through shared-lib FileUploader (auto-downscale >1920px, strip EXIF, optimize)
-                if (in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'heic'], true)) {
+                if (in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'], true)) {
                     try {
                         $targetPath = \Src\FileUploader::finaliseImage($targetPath, $extension);
                         $secureFileName = basename($targetPath);
@@ -120,26 +147,35 @@ final class NativeShareController
                     }
                 }
 
-                $savedFiles[] = $secureFileName;
+                $savedImages[] = $secureFileName;
             }
 
+            $savedFiles = array_merge($savedImages, $savedVideos);
             if (empty($savedFiles)) {
                 http_response_code(422);
                 echo json_encode([
                     'status'  => 'error',
-                    'message' => 'None of the submitted files met format requirements (JPEG, PNG, WebP, MP4, MOV up to 25MB).',
+                    'message' => 'None of the submitted files met format requirements (JPEG, PNG, WebP, HEIC, MP4, MOV up to 25MB).',
                 ], JSON_UNESCAPED_SLASHES);
                 return;
+            }
+
+            // Append local video URLs to postMessage so PostDto / VideoParser hydrates post.videos
+            foreach ($savedVideos as $vUrl) {
+                if (!str_contains($caption, $vUrl)) {
+                    $caption = $caption !== '' ? ($caption . "\n\n" . $vUrl) : $vUrl;
+                }
             }
 
             // 4. Create Post in Family Feed
             $db = Db::connect2();
             $profileImg = Post::getProfilePicsById($userId) ?: 'resources/images/avatar.png';
             $currentTime = (string) milliSeconds();
+            $primaryImg = $savedImages[0] ?? null;
 
             $insertStmt = $db->prepare(
-                "INSERT INTO post (id, fullName, profileImg, postMessage, postFamCode, post_time, post_status, post_img0) 
-                 VALUES (?, ?, ?, ?, ?, ?, 'published', ?)"
+                "INSERT INTO post (id, fullName, profileImg, postMessage, postFamCode, target_scope, post_time, post_status, post_img0, date_created) 
+                 VALUES (?, ?, ?, ?, ?, 'all', ?, 'published', ?, NOW())"
             );
             $insertStmt->execute([
                 $userId,
@@ -148,18 +184,25 @@ final class NativeShareController
                 $caption,
                 $famCode,
                 $currentTime,
-                $savedFiles[0],
+                $primaryImg,
             ]);
 
             $postNo = (int) $db->lastInsertId();
 
-            // If multiple files, update subsequent slots
-            if (count($savedFiles) > 1) {
-                $maxImages = min(count($savedFiles), 6);
+            // Assign Dual-Lineage audience targets so post appears identically to web composer posts
+            try {
+                (new \App\services\FamilyPostAudienceService())->assignPostTargets($postNo, (string)$userId, 'all', null);
+            } catch (\Throwable $audEx) {
+                error_log('[NativeShareController assignPostTargets] ' . $audEx->getMessage());
+            }
+
+            // If multiple images, update subsequent slots
+            if (count($savedImages) > 1) {
+                $maxImages = min(count($savedImages), 6);
                 for ($i = 1; $i < $maxImages; $i++) {
                     $col = 'post_img' . $i;
                     $upStmt = $db->prepare("UPDATE post SET {$col} = ? WHERE post_no = ?");
-                    $upStmt->execute([$savedFiles[$i], $postNo]);
+                    $upStmt->execute([$savedImages[$i], $postNo]);
                 }
             }
 

@@ -248,6 +248,7 @@
 
   @include('components.atgArViewerModal')
   @include('component.submitSpinner')
+  @include('partials.pwa-install')
   @include('partials.pwa-register')
   @stack('scripts')
 </body>

@@ -7,11 +7,17 @@ namespace App\controller\members;
 use App\controller\BaseController;
 use App\model\Post;
 use App\services\AtgEmojiService;
+use App\services\AtgPhotoAvatarEngine;
 use App\services\AvatarStickerService;
 use Exception;
+use InvalidArgumentException;
+use Src\ApiResponse;
+use Src\AuditLogger;
 use Src\Db;
 use Src\Exceptions\ForbiddenException;
+use Src\Exceptions\TooManyRequestsException;
 use Src\functionality\SignIn;
+use Src\Limiter;
 use Src\SelectFn;
 
 /**
@@ -85,6 +91,7 @@ final class AtgEmojiController extends BaseController
             'data'                   => $data,
             'userData'               => $userData,
             'catalog'                => $catalog,
+            'avatarStyles'           => AtgPhotoAvatarEngine::getStylesForUi(),
             'initialTraits'          => $initialTraits,
             'initialSvg'             => $this->service->renderProceduralAvatar($initialTraits, 256, true),
             'hasSavedLook'           => $savedTraits !== null,
@@ -402,13 +409,16 @@ final class AtgEmojiController extends BaseController
             $animated = !empty($input['animated']);
             $mode = isset($input['mode']) && is_string($input['mode']) ? $input['mode'] : 'procedural';
             $choreography = isset($input['choreography']) && is_string($input['choreography']) ? $input['choreography'] : 'smile';
+            $avatarStyle = isset($input['avatar_style']) && is_string($input['avatar_style'])
+                ? ($input['avatar_style'] === 'original' ? 'original' : AtgPhotoAvatarEngine::sanitiseStyle($input['avatar_style']))
+                : 'original';
             $sampleRgb = [
                 isset($input['sample_r']) ? max(0, min(255, (int)$input['sample_r'])) : 138,
                 isset($input['sample_g']) ? max(0, min(255, (int)$input['sample_g'])) : 84,
                 isset($input['sample_b']) ? max(0, min(255, (int)$input['sample_b'])) : 52,
             ];
 
-            $result = $this->service->saveAvatar($this->userId, $traits, $pngBase64, $animated, $mode, $choreography, $sampleRgb);
+            $result = $this->service->saveAvatar($this->userId, $traits, $pngBase64, $animated, $mode, $choreography, $sampleRgb, $avatarStyle);
 
             echo json_encode([
                 'success'  => true,
@@ -476,6 +486,117 @@ final class AtgEmojiController extends BaseController
                 'success' => false,
                 'error'   => $e->getMessage(),
             ]);
+        }
+    }
+
+    /**
+     * Transform a portrait photo into an OpenArt-grade identity-preserving stylised avatar
+     * across 6 curated art styles (Neural AI image-to-image with Sovereign Deterministic fallback).
+     * Route: POST /api/emoji/transform-photo-avatar
+     */
+    public function transformPhotoAvatar(): void
+    {
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: private, no-store');
+        header('X-Content-Type-Options: nosniff');
+
+        try {
+            if ($this->userId === '' || !AvatarStickerService::isValidUserId($this->userId)) {
+                http_response_code(401);
+                echo json_encode(array_merge(
+                    ApiResponse::toErrorEnvelope('Authentication required to transform your photo into an avatar.', 'AUTH_REQUIRED'),
+                    ['success' => false]
+                ), JSON_UNESCAPED_SLASHES);
+                return;
+            }
+
+            $rawInput = (string)file_get_contents('php://input');
+            $input = json_decode($rawInput, true);
+            $input = is_array($input) ? $input : [];
+
+            $clientToken = (string)($input['csrf_token'] ?? $input['token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $_SERVER['HTTP_X_XSRF_TOKEN'] ?? $_POST['token'] ?? '');
+            $sessionToken = (string)($_SESSION['token'] ?? '');
+
+            if ($sessionToken !== '' && !hash_equals($sessionToken, $clientToken)) {
+                http_response_code(403);
+                echo json_encode(array_merge(
+                    ApiResponse::toErrorEnvelope('Invalid security token. Please refresh the page and try again.', 'CSRF_MISMATCH'),
+                    ['success' => false]
+                ), JSON_UNESCAPED_SLASHES);
+                return;
+            }
+
+            try {
+                Limiter::limit('atg_photo_avatar:' . $this->userId, 'post');
+            } catch (TooManyRequestsException $rateEx) {
+                http_response_code(429);
+                echo json_encode(array_merge(
+                    ApiResponse::toErrorEnvelope($rateEx->getMessage(), 'RATE_LIMITED'),
+                    ['success' => false]
+                ), JSON_UNESCAPED_SLASHES);
+                return;
+            }
+
+            $imageBase64 = isset($input['image_base64']) && is_string($input['image_base64'])
+                ? trim($input['image_base64'])
+                : '';
+
+            if ($imageBase64 === '') {
+                http_response_code(422);
+                echo json_encode(array_merge(
+                    ApiResponse::toErrorEnvelope('Please upload or choose a portrait photo first.', 'IMAGE_REQUIRED'),
+                    ['success' => false]
+                ), JSON_UNESCAPED_SLASHES);
+                return;
+            }
+
+            $rawStyle = isset($input['style']) && is_string($input['style']) ? trim($input['style']) : 'illustrated_comic';
+            if ($rawStyle !== '' && !AtgPhotoAvatarEngine::isValidStyle($rawStyle)) {
+                http_response_code(422);
+                echo json_encode(array_merge(
+                    ApiResponse::toErrorEnvelope('Unsupported avatar style selected.', 'INVALID_STYLE'),
+                    ['success' => false]
+                ), JSON_UNESCAPED_SLASHES);
+                return;
+            }
+
+            $engine = new AtgPhotoAvatarEngine();
+            $result = $engine->transform($imageBase64, $rawStyle, [
+                'strength'        => $input['strength'] ?? 0.78,
+                'line_weight'     => $input['line_weight'] ?? 0.68,
+                'detail_lock'     => $input['detail_lock'] ?? 0.80,
+                'force_sovereign' => !empty($input['force_sovereign']),
+            ]);
+
+            try {
+                AuditLogger::log('atg_photo_avatar_transform', [
+                    'user_id'       => $this->userId,
+                    'style'         => $result['style'],
+                    'engine'        => $result['engine'],
+                    'fallback_used' => $result['fallback_used'],
+                    'processing_ms' => $result['processing_ms'],
+                ]);
+            } catch (\Throwable) {
+                // Non-blocking audit log
+            }
+
+            echo json_encode(array_merge(
+                ApiResponse::toSuccessEnvelope($result, 'Your portrait has been transformed into a stylised avatar.'),
+                ['success' => true]
+            ), JSON_UNESCAPED_SLASHES);
+        } catch (InvalidArgumentException $valEx) {
+            http_response_code(422);
+            echo json_encode(array_merge(
+                ApiResponse::toErrorEnvelope($valEx->getMessage(), 'VALIDATION_ERROR'),
+                ['success' => false]
+            ), JSON_UNESCAPED_SLASHES);
+        } catch (\Throwable $e) {
+            error_log('[AtgEmojiController::transformPhotoAvatar] ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(array_merge(
+                ApiResponse::toErrorEnvelope('Could not transform your portrait right now. Please try again.', 'SERVER_ERROR'),
+                ['success' => false]
+            ), JSON_UNESCAPED_SLASHES);
         }
     }
 }

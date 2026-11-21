@@ -254,6 +254,7 @@
   @yield('extra_js')
 
   @include('component.submitSpinner')
+  @include('partials.pwa-install')
   @include('partials.pwa-register')
   @include('partials.social-share')
 @if(($_ENV['APP_ENV'] ?? '') !== 'local')

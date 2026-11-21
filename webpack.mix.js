@@ -8,6 +8,8 @@ mix
   .js('resources/asset/js/index.js', 'js')
   .js('resources/asset/js/apps/studio/index.jsx', 'js/studio-app.js')
   .js('resources/asset/js/apps/organogram/index.jsx', 'js/organogram-app.js')
+  .js('resources/asset/js/apps/feed/index.jsx', 'js/feed-app.js')
+  .js('resources/asset/js/apps/profile/index.jsx', 'js/profile-app.js')
   .sass('resources/asset/scss/main.scss', 'css')
   .options({
     legacyNodePolyfills: true,

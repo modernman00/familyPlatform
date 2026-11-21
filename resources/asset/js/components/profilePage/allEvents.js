@@ -46,6 +46,27 @@ try {
         xsrfHeaderName: 'X-XSRF-TOKEN',
     }
 
+    const resetRichComposerFields = () => {
+        clearSelectedPostFiles();
+        if (typeof window.__flushPostComposer === 'function') {
+            window.__flushPostComposer();
+        } else {
+            const editorEl = document.getElementById('postMessageEditor');
+            if (editorEl) editorEl.innerHTML = '';
+            const textareaEl = document.getElementById('postMessage');
+            if (textareaEl) textareaEl.value = '';
+            const vidUrlEl = document.getElementById('attachedVideoUrl');
+            if (vidUrlEl) vidUrlEl.value = '';
+            const vidUrlsEl = document.getElementById('attachedVideoUrls');
+            if (vidUrlsEl) vidUrlsEl.value = '';
+            const gifUrlEl = document.getElementById('attachedGifUrlInput');
+            if (gifUrlEl) gifUrlEl.value = '';
+            if (typeof window.__resetLinkPreview === 'function') {
+                window.__resetLinkPreview();
+            }
+        }
+    };
+
     // Reset the modal out of "edit" mode however it closes (submit, cancel,
     // backdrop click, ESC) — editPost() in feedComponent.js is what puts it
     // into edit mode by setting these same three things.
@@ -58,6 +79,7 @@ try {
             if (editPostNo) editPostNo.value = '';
             if (notice) notice.classList.add('d-none');
             if (title) title.textContent = 'Create Post';
+            resetRichComposerFields();
             if (typeof window.__resetTagBuilder === 'function') {
                 window.__resetTagBuilder();
             }
@@ -171,7 +193,7 @@ try {
                     const attachedVidInput = document.getElementById('attachedVideoUrl')?.value || '';
                     const attachedVidsInput = document.getElementById('attachedVideoUrls')?.value || '';
                     const hasAttachedVideo = attachedVidInput !== '' || (attachedVidsInput !== '' && attachedVidsInput !== '[]');
-                    const hasGif = Boolean(document.getElementById('attachedGifUrl')?.value);
+                    const hasGif = Boolean(document.getElementById('attachedGifUrlInput')?.value || document.getElementById('attachedGifUrl')?.value);
 
                     if (!postMsgVal && !hasRawFiles && !hasThenNow && !hasPoll && !hasAttachedVideo && !hasGif) {
                         Swal.fire({
@@ -242,6 +264,7 @@ try {
 
                         closePostModal();
                         formExtra.reset();
+                        resetRichComposerFields();
                         if (typeof window.__resetTextStageBuilder === 'function') {
                             window.__resetTextStageBuilder();
                         }
@@ -267,6 +290,7 @@ try {
                     const postNo = newPostData?.post_no;
 
                     formExtra.reset();
+                    resetRichComposerFields();
                     clearSelectedPostFiles();
                     const closePreview = document.getElementById('closeImagePreview');
                     if (closePreview) closePreview.click();

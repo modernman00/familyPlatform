@@ -1,0 +1,10 @@
+# Critical-Path Smoke Suite for Risk-Based Deploy Gating
+# Run synchronously on every routine deploy (~2-4 mins).
+# Full 55-spec regression runs via: bash scripts/deploy.sh --full-e2e
+
+cypress/e2e/auth.cy.js
+cypress/e2e/register_v2.cy.js
+cypress/e2e/idor_sweep.cy.js
+cypress/e2e/preact_feed_island.cy.js
+cypress/e2e/family_code_approval.cy.js
+cypress/e2e/family_migration.cy.js

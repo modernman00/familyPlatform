@@ -808,7 +808,11 @@
   <!-- Pinned Family Gift Wishlists (Top of Feed) -->
   @includeIf('member.includes.pinnedWishlistsFeedCard')
 
-  <!-- Reactive Alpine.js Feed -->
+  @if(!empty($usePreactFeed) && ($_GET['v'] ?? '') !== 'legacy')
+    <div id="feed-root"></div>
+    <script type="application/json" id="feed-bootstrap">{!! $feedBootstrapJson ?? '{}' !!}</script>
+  @else
+  <!-- Reactive Alpine.js Feed (Legacy ?v=legacy Fallback) -->
   <div x-data="profileFeed({ famCode: '{{ $data['famCode'] ?? '' }}', userId: '{{ $data['id'] ?? '' }}', familyRoster: {{ json_encode($data['familyRoster'] ?? []) }} })" class="feed-posts-container">
     <!-- Error Alert if loading fails -->
     <template x-if="errorMessage">
@@ -1080,7 +1084,7 @@
               const liveRatio = Math.max(0, visibleBottom - visibleTop) / rect.height;
               rec.ratio = liveRatio;
               if (liveRatio < 0.15) {
-                const v = rec.getVideo();
+                const v = rec.getVideo ? rec.getVideo() : null;
                 if (v) v._userManuallyPaused = false;
                 return;
               }
@@ -1111,6 +1115,7 @@
           }
 
           window.addEventListener('scroll', scheduleEvaluate, { passive: true });
+          window.addEventListener('resize', scheduleEvaluate, { passive: true });
           document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
               pauseAllExcept(null);
@@ -1131,6 +1136,9 @@
               });
               viewObserver.observe(el);
               preloadObserver.observe(el);
+              scheduleEvaluate();
+              setTimeout(scheduleEvaluate, 100);
+              setTimeout(scheduleEvaluate, 350);
             },
             unregister(el) {
               if (!el || !entries.has(el)) return;
@@ -1150,6 +1158,12 @@
             },
             attachHls(videoEl, hlsUrl, fallbackUrl) {
               return attachHlsStream(videoEl, hlsUrl, fallbackUrl);
+            },
+            scheduleEvaluate() {
+              scheduleEvaluate();
+            },
+            evaluate() {
+              evaluate();
             }
           };
         })();
@@ -2243,6 +2257,7 @@
     <!-- Author-Only Rich Post Share Portal Modal (Inside profileFeed reactive scope) -->
     @include('member.modals.postSharePortalModal')
   </div>
+  @endif
 
   <!-- The Modal Structure (Hidden by default) for the post image modal -->
   @includeIf('member.modals.postImg')

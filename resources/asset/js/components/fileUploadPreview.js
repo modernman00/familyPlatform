@@ -1,13 +1,17 @@
-import { id } from '@shared';
+import { id, sniffFileMagicBytes } from '@shared';
 import Swal from 'sweetalert2';
 import { compressImageFile } from './helper/imageCompressor';
 import { scanImageSafety } from './helper/mediaSafetyScanner';
 
 let selectedFilesStore = [];
+let resetMediaPreviewCallback = null;
 
 export const getSelectedPostFiles = () => selectedFilesStore;
 export const clearSelectedPostFiles = () => {
   selectedFilesStore = [];
+  if (typeof resetMediaPreviewCallback === 'function') {
+    resetMediaPreviewCallback();
+  }
 };
 
 /**
@@ -52,6 +56,10 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
       previewContainer.classList.add('d-none');
       if (fileNamesDisplay) fileNamesDisplay.textContent = '';
       imageInput.value = ''; // Clear input if no files
+      try {
+        const emptyDt = new DataTransfer();
+        imageInput.files = emptyDt.files;
+      } catch (_) {}
       return;
     }
 
@@ -358,22 +366,29 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
 
     if (!validRawFiles.length) return;
 
-    // Client-Side Media Safety Pre-Screening (Option A: Explicit Adult Detection)
+    // Client-Side Media Safety Pre-Screening (Option A: Explicit Adult Detection + Shared-JS Magic-Byte Sniffer)
     // Run in parallel across selected images to keep multi-photo staging instantaneous!
-    const safetyResults = await Promise.all(
-      validRawFiles.map(async (file) => ({
-        file,
-        scanResult: await scanImageSafety(file)
-      }))
+      const safetyResults = await Promise.all(
+      validRawFiles.map(async (file) => {
+        const magicRes = typeof sniffFileMagicBytes === 'function'
+          ? await sniffFileMagicBytes(file)
+          : { valid: true };
+        const scanResult = magicRes.valid
+          ? await scanImageSafety(file)
+          : { isSafe: false, isMagicError: true, reason: magicRes.error };
+        return { file, scanResult };
+      })
     );
 
     const safeFiles = [];
     for (const { file, scanResult } of safetyResults) {
       if (!scanResult.isSafe) {
         Swal.fire({
-          icon: 'warning',
-          title: 'Family Safety Advisory',
-          text: `Photo "${file.name}" appears to contain sexually explicit content or excessive nudity. FamilyPlatform is dedicated to safe, family-friendly memories for all generations.`,
+          icon: scanResult.isMagicError ? 'error' : 'warning',
+          title: scanResult.isMagicError ? 'Invalid or Unsafe File' : 'Family Safety Advisory',
+          text: scanResult.isMagicError
+            ? (scanResult.reason || `File "${file.name}" could not be verified as a safe image.`)
+            : `Photo "${file.name}" appears to contain sexually explicit content or excessive nudity. FamilyPlatform is dedicated to safe, family-friendly memories for all generations.`,
           confirmButtonColor: '#a31621'
         });
       } else {
@@ -417,6 +432,18 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
     updatePreviews(finalFiles);
   });
 
+  const flushAllMediaPreviews = () => {
+    attachedVideos = [];
+    accumulatedFiles = [];
+    selectedFilesStore = [];
+    updatePreviews([]);
+  };
+
+  resetMediaPreviewCallback = flushAllMediaPreviews;
+  if (typeof window !== 'undefined') {
+    window.__resetMediaPreviews = flushAllMediaPreviews;
+  }
+
   if (closePreviewBtnId) {
     const closePreviewBtn = id(closePreviewBtnId); // Button to clear image previews
     if (closePreviewBtn) {
@@ -424,7 +451,7 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
         if (typeof window.__removeComposerVideo === 'function') {
           window.__removeComposerVideo();
         }
-        updatePreviews([]); // Clear all
+        flushAllMediaPreviews(); // Clear all
       });
     }
   }

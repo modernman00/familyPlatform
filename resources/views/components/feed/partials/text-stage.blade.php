@@ -101,7 +101,7 @@
                   </template>
 
                   <div class="pt-2 d-flex justify-content-between align-items-center" style="border-top: 1px solid rgba(255, 255, 255, 0.15);">
-                    <span class="small text-truncate" style="font-size: 0.78rem; max-width: 60%; color: rgba(203, 213, 225, 0.75);" x-text="post.link_preview.url"></span>
+                    <span class="small text-truncate" style="font-size: 0.78rem; max-width: 60%; color: rgba(203, 213, 225, 0.75);" x-text="post.link_preview.site_name || post.link_preview.domain || 'Web Link'"></span>
                     <span class="btn btn-sm btn-light rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm"
                           style="min-height: 38px; font-size: 0.82rem; white-space: nowrap; flex-shrink: 0; color: #0f172a !important;">
                       <span x-text="post.link_preview.cta_label || 'Open Link →'"></span>

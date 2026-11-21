@@ -136,7 +136,7 @@ body.dark-theme .pwa-tab-center-action .pwa-center-btn-bubble,
     </a>
 
     <!-- Notifications & Alerts -->
-    <a href="javascript:void(0)" role="button" aria-haspopup="true" class="pwa-tab-item position-relative" id="pwaNotifTab" data-tab="notifications" title="{{ __('nav.alerts', 'Alerts & Notifications') }} - View family notifications and invitations">
+    <a href="javascript:void(0)" role="button" aria-haspopup="true" class="pwa-tab-item position-relative" id="pwaNotifTab" data-tab="notifications" aria-label="{{ __('nav.alerts', 'Alerts & Notifications') }} - View family notifications and invitations">
         <div class="pwa-tab-icon-wrap position-relative">
             <i class="bi bi-bell pwa-tab-icon-outline"></i>
             <i class="bi bi-bell-fill pwa-tab-icon-filled"></i>

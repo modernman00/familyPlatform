@@ -181,7 +181,8 @@
 .fvs-viewport-wrap {
     position: relative;
     width: 100%;
-    aspect-ratio: 16/9;
+    aspect-ratio: 9/16;
+    max-width: 340px;
     max-height: 580px;
     background: #000000;
     border-radius: 16px;
@@ -193,6 +194,14 @@
     box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
     margin: 0 auto;
     transition: aspect-ratio 0.2s ease;
+}
+.fvs-viewport-wrap[data-aspect="16:9"] {
+    aspect-ratio: 16/9;
+    max-width: 100%;
+}
+.fvs-viewport-wrap[data-aspect="4:5"] {
+    aspect-ratio: 4/5;
+    max-width: 440px;
 }
 .fvs-viewport-wrap[data-aspect="1:1"] {
     aspect-ratio: 1/1;
@@ -573,15 +582,16 @@ function videoStudioPip() {
         <div class="fvs-card fvs-stage-card">
             <div class="fvs-card__header">
                 <h2 class="fvs-card__title" id="fvsViewportTitle">
-                    <i class="bi bi-film text-warning"></i> 16:9 Cinematic Canvas Viewport
+                    <i class="bi bi-film text-warning"></i> 9:16 Vertical Canvas Viewport
                 </h2>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <div class="btn-group" role="group" aria-label="Canvas aspect ratio">
-                        <button type="button" class="btn btn-sm btn-warning text-dark fw-semibold fvs-format-btn" data-fvs-aspect="16:9">16:9</button>
+                        <button type="button" class="btn btn-sm btn-warning text-dark fw-semibold fvs-format-btn" data-fvs-aspect="9:16">9:16</button>
+                        <button type="button" class="btn btn-sm btn-outline-light fvs-format-btn" data-fvs-aspect="4:5">4:5</button>
                         <button type="button" class="btn btn-sm btn-outline-light fvs-format-btn" data-fvs-aspect="1:1">1:1</button>
-                        <button type="button" class="btn btn-sm btn-outline-light fvs-format-btn" data-fvs-aspect="9:16">9:16</button>
+                        <button type="button" class="btn btn-sm btn-outline-light fvs-format-btn" data-fvs-aspect="16:9">16:9</button>
                     </div>
-                    <span class="badge bg-dark border border-secondary text-light d-none d-md-inline-block" id="fvsResolutionBadge">1920 &times; 1080 (16:9)</span>
+                    <span class="badge bg-dark border border-secondary text-light d-none d-md-inline-block" id="fvsResolutionBadge">1080 &times; 1920 (9:16)</span>
                     <button type="button" class="fvs-mobile-collapse-btn" @click="mobileCanvasCollapsed = !mobileCanvasCollapsed" :aria-expanded="!mobileCanvasCollapsed" title="Minimise or expand preview">
                         <i class="bi" :class="mobileCanvasCollapsed ? 'bi-chevron-down' : 'bi-chevron-up'"></i>
                         <span x-text="mobileCanvasCollapsed ? 'Show' : 'Hide'"></span>
@@ -594,12 +604,12 @@ function videoStudioPip() {
             </div>
 
             <!-- Viewport Screen -->
-            <div class="fvs-viewport-wrap" id="fvsViewportWrap" data-aspect="16:9" x-show="!mobileCanvasCollapsed" x-collapse>
+            <div class="fvs-viewport-wrap" id="fvsViewportWrap" data-aspect="9:16" x-show="!mobileCanvasCollapsed" x-collapse>
                 <div class="fvs-hud-badge">
                     <div class="fvs-rec-pulse"></div>
                     <span id="fvsHudStatusText">STANDBY &bull; 60 FPS</span>
                 </div>
-                <canvas id="fvsCanvas" class="fvs-canvas" width="1280" height="720"></canvas>
+                <canvas id="fvsCanvas" class="fvs-canvas" width="720" height="1280"></canvas>
             </div>
 
             <!-- Playback Timeline Scrub & Visualiser -->
@@ -974,8 +984,8 @@ function videoStudioPip() {
 @endsection
 
 @push('scripts')
-<script defer nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignVideoStudioClient.js?v={{ assetVersion('js/SovereignVideoStudioClient.js') }}"></script>
-<script defer nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignNleEngine.js?v={{ assetVersion('js/SovereignNleEngine.js') }}"></script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignVideoStudioClient.js?v={{ assetVersion('js/SovereignVideoStudioClient.js') }}"></script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignNleEngine.js?v={{ assetVersion('js/SovereignNleEngine.js') }}"></script>
 @if(!empty($useReactStudio))
 <script defer src="/public/js/studio-app.js?v={{ assetVersion('js/studio-app.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
 @else
@@ -994,21 +1004,22 @@ function videoStudioPip() {
         window.sovereignNleWorkspace = new window.SovereignNleWorkspace({
             root: '#sovereignNleRoot',
             appName: 'FamilyPlatform Living Archives',
-            aspectRatio: '16:9',
+            aspectRatio: '9:16',
             howToUseUrl: '/how-to-use',
             csrfToken: '{{ $_SESSION['token'] ?? '' }}'
         });
     }
 
     const aspectDimensions = {
-        '16:9': { w: 1280, h: 720, label: '1920 × 1080 (16:9)' },
-        '1:1':  { w: 720,  h: 720, label: '1080 × 1080 (1:1)' },
-        '9:16': { w: 720,  h: 1280, label: '1080 × 1920 (9:16)' }
+        '9:16': { w: 720,  h: 1280, label: '1080 × 1920 (9:16)' },
+        '4:5':  { w: 720,  h: 900,  label: '1080 × 1350 (4:5)' },
+        '1:1':  { w: 720,  h: 720,  label: '1080 × 1080 (1:1)' },
+        '16:9': { w: 1280, h: 720,  label: '1920 × 1080 (16:9)' }
     };
     document.querySelectorAll('[data-fvs-aspect]').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            const ratio = btn.getAttribute('data-fvs-aspect') || '16:9';
-            const spec = aspectDimensions[ratio] || aspectDimensions['16:9'];
+            const ratio = btn.getAttribute('data-fvs-aspect') || '9:16';
+            const spec = aspectDimensions[ratio] || aspectDimensions['9:16'];
             const wrap = document.getElementById('fvsViewportWrap');
             const canvasEl = document.getElementById('fvsCanvas');
             const badgeEl = document.getElementById('fvsResolutionBadge');

@@ -153,7 +153,58 @@ final class VideoParser
             ];
         }
 
+        // 6. Facebook Video / Reel / Watch (in-platform iframe via official Facebook video plugin)
+        $fbVideoRegex = '/^https?:\/\/(?:www\.|m\.|web\.)?(?:facebook\.com\/(?:[^\/\s]+\/videos\/\d+|watch\/?\?v=\d+|reel\/\d+|share\/[vr]\/[^\s"\'<>]+|video\.php\?v=\d+)|fb\.watch\/[^\s"\'<>]+|fb\.com\/(?:watch|reel|[^\/\s]+\/videos)\/[^\s"\'<>]+)/i';
+        if (preg_match($fbVideoRegex, $trimmed) === 1) {
+            return [
+                'type' => 'facebook',
+                'videoId' => null,
+                'thumbnailUrl' => null,
+                'embedUrl' => 'https://www.facebook.com/plugins/video.php?href=' . rawurlencode($trimmed) . '&show_text=false&autoplay=0',
+                'originalUrl' => $trimmed,
+            ];
+        }
+
+        // 7. Google Drive Video (drive.google.com/file/d/{id}/... or drive.google.com/open?id={id})
+        if (preg_match('/^https?:\/\/drive\.google\.com\/(?:file\/d\/([a-zA-Z0-9_-]{10,})|open\?id=([a-zA-Z0-9_-]{10,}))/i', $trimmed, $gdMatches) === 1) {
+            $gdId = $gdMatches[1] !== '' ? $gdMatches[1] : $gdMatches[2];
+            return [
+                'type' => 'googledrive',
+                'videoId' => $gdId,
+                'thumbnailUrl' => null,
+                'embedUrl' => 'https://drive.google.com/file/d/' . $gdId . '/preview',
+                'originalUrl' => $trimmed,
+            ];
+        }
+
+        // 8. OneDrive Video / Embed (onedrive.live.com/embed, onedrive.live.com/redir, 1drv.ms/v/)
+        if (preg_match('/^https?:\/\/(?:onedrive\.live\.com\/(?:embed|redir|\?)|1drv\.ms\/v\/)[^\s"\'<>]+/i', $trimmed) === 1) {
+            $odEmbed = self::normaliseOneDriveEmbedUrl($trimmed);
+            return [
+                'type' => 'onedrive',
+                'videoId' => null,
+                'thumbnailUrl' => null,
+                'embedUrl' => $odEmbed,
+                'originalUrl' => $trimmed,
+            ];
+        }
+
         return null;
+    }
+
+    /**
+     * Normalise OneDrive share URLs into an embeddable player URL where possible.
+     */
+    public static function normaliseOneDriveEmbedUrl(string $url): string
+    {
+        $trimmed = trim($url);
+        if (preg_match('#^https?://onedrive\.live\.com/embed\b#i', $trimmed) === 1) {
+            return $trimmed;
+        }
+        if (preg_match('#^https?://onedrive\.live\.com/(?:redir|view\.aspx)?\?(.+)$#i', $trimmed, $m) === 1) {
+            return 'https://onedrive.live.com/embed?' . $m[1];
+        }
+        return $trimmed;
     }
 
     /**
@@ -203,6 +254,8 @@ final class VideoParser
                 $embedUrl = "https://iframe.videodelivery.net/{$vidId}?preload=true&autoplay=true&muted=true&loop=true";
             } elseif ($type === 'tiktok' && $vidId !== null) {
                 $embedUrl = "https://www.tiktok.com/embed/v2/{$vidId}";
+            } elseif (in_array($type, ['facebook', 'googledrive', 'onedrive'], true)) {
+                $embedUrl = $parsed['embedUrl'];
             } else {
                 $isExternalGoogleStream = str_starts_with($origUrl, 'http')
                     && (stripos($origUrl, 'googleusercontent.com') !== false || stripos($origUrl, 'googlevideo.com') !== false);

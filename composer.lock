@@ -1558,7 +1558,7 @@
             "version": "v2.12.19",
             "source": {
                 "type": "git",
-                "url": "git@github.com:modernman00/shared-lib.git",
+                "url": "https://github.com/modernman00/shared-lib.git",
                 "reference": "0da0fee51bd447731393880b029cbe3fe1697653"
             },
             "dist": {
@@ -1625,6 +1625,10 @@
                 }
             ],
             "description": "Shared library for common functions and classes across projects",
+            "support": {
+                "source": "https://github.com/modernman00/shared-lib/tree/v2.12.19",
+                "issues": "https://github.com/modernman00/shared-lib/issues"
+            },
             "time": "2026-11-20T16:01:03+00:00"
         },
         {

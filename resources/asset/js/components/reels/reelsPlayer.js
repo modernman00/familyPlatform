@@ -690,6 +690,77 @@ class FamilyReelsPlayer {
             `;
         }
 
+        // TikTok Matcher
+        const ttMatch = trimmed.match(/^https?:\/\/(?:www\.|m\.)?tiktok\.com\/(?:@[\w.-]+\/video\/|embed\/v2\/|v\/)(\d{8,25})/i);
+        if (ttMatch && ttMatch[1]) {
+            return `
+            <div class="reel-iframe-wrapper">
+                <iframe
+                    id="reelActiveIframe"
+                    class="reel-video-element"
+                    src="https://www.tiktok.com/embed/v2/${ttMatch[1]}"
+                    frameborder="0"
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            </div>
+            `;
+        }
+
+        // Facebook Video / Reel / Watch Matcher
+        const fbRegex = /^https?:\/\/(?:www\.|m\.|web\.)?(?:facebook\.com\/(?:[^\/\n\s]+\/videos\/\d+|watch\/?\?v=\d+|reel\/\d+|share\/[vr]\/[^\s"'<>]+|video\.php\?v=\d+)|fb\.watch\/[^\s"'<>]+|fb\.com\/(?:watch|reel|[^\/\n\s]+\/videos)\/[^\s"'<>]+)/i;
+        if (fbRegex.test(trimmed)) {
+            return `
+            <div class="reel-iframe-wrapper">
+                <iframe
+                    id="reelActiveIframe"
+                    class="reel-video-element"
+                    src="https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(trimmed)}&show_text=false&autoplay=1"
+                    frameborder="0"
+                    allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                    allowfullscreen>
+                </iframe>
+            </div>
+            `;
+        }
+
+        // Google Drive Video Matcher
+        const gdMatch = trimmed.match(/^https?:\/\/drive\.google\.com\/(?:file\/d\/([a-zA-Z0-9_-]{10,})|open\?id=([a-zA-Z0-9_-]{10,}))/i);
+        if (gdMatch && (gdMatch[1] || gdMatch[2])) {
+            const gdId = gdMatch[1] || gdMatch[2];
+            return `
+            <div class="reel-iframe-wrapper">
+                <iframe
+                    id="reelActiveIframe"
+                    class="reel-video-element"
+                    src="https://drive.google.com/file/d/${gdId}/preview"
+                    frameborder="0"
+                    allow="autoplay; fullscreen"
+                    allowfullscreen>
+                </iframe>
+            </div>
+            `;
+        }
+
+        // OneDrive Video / Embed Matcher
+        if (/^https?:\/\/onedrive\.live\.com\/(?:embed|redir|\?)/i.test(trimmed)) {
+            const odEmbed = /^https?:\/\/onedrive\.live\.com\/(?:redir|view\.aspx)?\?(.+)$/i.test(trimmed)
+                ? `https://onedrive.live.com/embed?${trimmed.replace(/^https?:\/\/onedrive\.live\.com\/(?:redir|view\.aspx)?\?/i, '')}`
+                : trimmed;
+            return `
+            <div class="reel-iframe-wrapper">
+                <iframe
+                    id="reelActiveIframe"
+                    class="reel-video-element"
+                    src="${esc(odEmbed)}"
+                    frameborder="0"
+                    allow="autoplay; fullscreen"
+                    allowfullscreen>
+                </iframe>
+            </div>
+            `;
+        }
+
         const initialFitClass = (aspectRatio === '16:9' || aspectRatio === 'cinema') ? 'fit-cinema' : '';
 
         // Direct HTML5 Video File (MP4, WebM, MOV, server uploads) - no 'loop' attribute so 'ended' fires for continuous autoplay

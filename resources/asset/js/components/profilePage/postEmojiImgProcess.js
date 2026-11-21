@@ -2,6 +2,7 @@
 import { showEmojiPicker, initEmojiPickerUX } from '../emojiPicker.js';
 import { imagePreview } from '../fileUploadPreview';
 import { parseVideoUrl } from './videoParser';
+import { probeVideoMetadata } from '@shared';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { guessPhotoYear } from '../helper/photoDate';
@@ -620,6 +621,9 @@ const closeVideoBuilder = () => {
         videoLivePreview.classList.add('d-none');
     }
     syncAttachedVideoInputs();
+    document.querySelectorAll('input[name="media_meta"]').forEach((el) => {
+        el.value = '';
+    });
     if (postMessageArea) {
         postMessageArea.value = postMessageArea.value.replace(/(?:https?:\/\/[^\s"'<>]+|\/resources\/videos\/posts\/[^\s"'<>]+)\.(?:mp4|webm|ogg|mov)(?:#t=[0-9.,]+)?/gi, '').replace(/\n\s*\n\s*\n/g, '\n\n').trim();
     }
@@ -1238,8 +1242,11 @@ const uploadVideoWithAutoTrim = (file, trimStart = 0, trimEnd = 90, originalDura
                     const hlsUrl = (!uploadResult.useSovereignLocal && uploadResult.cfTokenData?.hlsUrl)
                         ? uploadResult.cfTokenData.hlsUrl
                         : (uploadResult.parsedRes?.hlsUrl || null);
+                    const resolvedAspectRatio = file?._detectedAspectRatio
+                        || (typeof window.stagedTrimAspectRatio === 'string' ? window.stagedTrimAspectRatio : null)
+                        || (resolvedOrientation === 'landscape' ? '16 / 9' : (resolvedOrientation === 'square' ? '1 / 1' : '9 / 16'));
                     const metaPayload = {
-                        aspect_ratio: resolvedOrientation === 'landscape' ? '16 / 9' : '4 / 5',
+                        aspect_ratio: resolvedAspectRatio,
                         duration_sec: clipLen,
                         ...(hlsUrl ? { hls_url: hlsUrl } : {})
                     };
@@ -1362,45 +1369,22 @@ const handleSelectedVideoFile = async (file) => {
         });
     }
 
-    // Inspect video duration & orientation via browser metadata with guaranteed timeout race
+    // Inspect video duration & orientation via shared-js-lib non-blocking metadata probe
     let clipDuration = null;
     let detectedOrientation = 'portrait';
     try {
-        const metaInfo = await new Promise((resolve) => {
-            const tempVideo = document.createElement('video');
-            tempVideo.preload = 'metadata';
-            const blobUrl = URL.createObjectURL(file);
-            tempVideo.src = blobUrl;
-
-            const timer = setTimeout(() => {
-                URL.revokeObjectURL(blobUrl);
-                resolve({ duration: null, orientation: 'portrait' });
-            }, 1200);
-
-            tempVideo.onloadedmetadata = () => {
-                clearTimeout(timer);
-                URL.revokeObjectURL(blobUrl);
-                const vw = tempVideo.videoWidth || 0;
-                const vh = tempVideo.videoHeight || 0;
-                const orient = (vw > 0 && vh > 0 && vw > vh * 1.1) ? 'landscape' : 'portrait';
-                resolve({
-                    duration: Number.isFinite(tempVideo.duration) ? tempVideo.duration : null,
-                    orientation: orient
-                });
-            };
-
-            tempVideo.onerror = () => {
-                clearTimeout(timer);
-                URL.revokeObjectURL(blobUrl);
-                resolve({ duration: null, orientation: 'portrait' });
-            };
-
-            try {
-                tempVideo.load();
-            } catch (_) {}
-        });
-        clipDuration = metaInfo.duration;
-        detectedOrientation = metaInfo.orientation;
+        const rawMeta = typeof probeVideoMetadata === 'function'
+            ? await probeVideoMetadata(file, 1200)
+            : { duration: null, width: null, height: null };
+        const vw = rawMeta.width || 0;
+        const vh = rawMeta.height || 0;
+        const r = (vw > 0 && vh > 0) ? (vw / vh) : 0;
+        const orient = r > 1.15 ? 'landscape' : (r >= 0.88 ? 'square' : 'portrait');
+        const aspectRatio = r > 0 ? `${r.toFixed(4)} / 1` : null;
+        clipDuration = Number.isFinite(rawMeta.duration) ? rawMeta.duration : null;
+        detectedOrientation = orient;
+        window.stagedTrimAspectRatio = aspectRatio;
+        file._detectedAspectRatio = aspectRatio;
     } catch (err) {
         console.warn('Video duration check skipped:', err);
     }

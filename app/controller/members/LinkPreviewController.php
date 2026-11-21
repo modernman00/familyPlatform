@@ -46,6 +46,9 @@ final class LinkPreviewController
     {
         try {
             self::authenticate();
+            if (function_exists('releaseSessionLock')) {
+                \releaseSessionLock();
+            }
 
             $rawUrl = (string)($_GET['url'] ?? '');
             if (trim($rawUrl) === '') {

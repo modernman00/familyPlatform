@@ -588,13 +588,23 @@ final class ReelsController extends BaseController
 
                 $videoPath = '/resources/videos/reels/' . $uniqueName;
             } elseif (!empty($videoUrlInput)) {
-                // Parse video URL (YouTube, Vimeo, Cloudflare Stream, or direct video)
+                // Parse video URL (YouTube, Vimeo, Cloudflare Stream, TikTok, Facebook, OneDrive, Google Drive, Dropbox, or direct video)
                 $videoData = VideoParser::parseVideoUrl($videoUrlInput);
-                if (!$videoData) {
-                    $videoPath = $videoUrlInput;
-                } else {
+                if ($videoData) {
                     $videoPath = $videoData['originalUrl'];
                     $thumbnailPath = $videoData['thumbnailUrl'];
+                } else {
+                    // Resolve Google Photos, OneDrive shortlinks, or generic og:video links via LinkPreviewService
+                    $preview = \App\services\LinkPreviewService::getPreviewForPostText($videoUrlInput, true);
+                    if (!empty($preview['video_url'])) {
+                        $videoPath = (string)$preview['video_url'];
+                        $thumbnailPath = !empty($preview['image']) ? (string)$preview['image'] : null;
+                    } elseif (!empty($preview['embed_url'])) {
+                        $videoPath = (string)($preview['url'] ?? $videoUrlInput);
+                        $thumbnailPath = !empty($preview['image']) ? (string)$preview['image'] : null;
+                    } else {
+                        $videoPath = $videoUrlInput;
+                    }
                 }
             } else {
                 throw new Exception('Please provide a video file or a supported video URL.', 400);

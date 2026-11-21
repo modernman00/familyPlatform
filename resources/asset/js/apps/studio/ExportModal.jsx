@@ -84,6 +84,19 @@ export function ExportModal({
             fd.append('clip_count', String(clips.length));
             if (nleEngineRef && nleEngineRef.current && typeof nleEngineRef.current.exportProjectJson === 'function') {
                 fd.append('nle_project_json', nleEngineRef.current.exportProjectJson());
+            } else {
+                fd.append('nle_project_json', JSON.stringify({
+                    schemaVersion: '2.0.0',
+                    aspectRatio,
+                    captionText: captionText || '',
+                    clips: clips.map((c) => ({
+                        id: c.id,
+                        track: c.track || 'video',
+                        title: c.name,
+                        src: c.url,
+                        durationSec: Number(c.durationSec) || 5,
+                    })),
+                }));
             }
             if (exportedBlob) {
                 fd.append('media', exportedBlob, 'family-archive.png');

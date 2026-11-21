@@ -111,10 +111,18 @@ USER_NAME=$(whoami)
 
 # CLI Flags
 SKIP_E2E=false
+FULL_E2E=false
+E2E_MODE="smart"
+E2E_SPEC_COUNT=0
 for arg in "$@"; do
     case "$arg" in
         --skip-e2e)
             SKIP_E2E=true
+            E2E_MODE="skipped"
+            ;;
+        --full-e2e)
+            FULL_E2E=true
+            E2E_MODE="full"
             ;;
     esac
 done
@@ -377,9 +385,63 @@ if [ -f "package.json" ] && grep -q '"test":' package.json 2>/dev/null; then
     echo "✅ Frontend unit tests passed."
 fi
 
-# Intelligent Cypress E2E Gating
+# Intelligent Cypress E2E Gating (Risk-Based: Smoke + Diff-Matched by default; --full-e2e for full sweep)
+_resolve_cypress_specs() {
+    local all_specs
+    all_specs=$(find cypress/e2e -type f \( -name "*.cy.js" -o -name "*.cy.jsx" -o -name "*.cy.ts" -o -name "*.cy.tsx" \) 2>/dev/null | sort || true)
+    [ -z "$all_specs" ] && return 0
+
+    local total_count
+    total_count=$(printf '%s\n' "$all_specs" | grep -c . || echo 0)
+
+    local selected=""
+
+    # 1. Load Smoke Suite from env or cypress/smoke.txt
+    if [ -n "${DEPLOY_CYPRESS_SMOKE_SPECS:-}" ]; then
+        selected=$(printf '%s\n' "$DEPLOY_CYPRESS_SMOKE_SPECS" | tr ',' '\n')
+    elif [ -f "cypress/smoke.txt" ]; then
+        selected=$(grep -vE '^[[:space:]]*(#|$)' cypress/smoke.txt || true)
+    elif [ "$total_count" -le 8 ]; then
+        # Small suites (<= 8 specs) run in full automatically
+        selected="$all_specs"
+    fi
+
+    # 2. Diff-Matched Specs (changed routes, controllers, views, JS, or specs themselves)
+    local changed_files=""
+    if git rev-parse --verify "origin/${BRANCH}" >/dev/null 2>&1; then
+        changed_files=$(git diff --name-only "origin/${BRANCH}..HEAD" 2>/dev/null || true)
+    elif git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+        changed_files=$(git diff --name-only HEAD~1..HEAD 2>/dev/null || true)
+    fi
+    changed_files=$(printf '%s\n%s\n%s\n' "$changed_files" "$(git diff --name-only 2>/dev/null || true)" "$(git diff --cached --name-only 2>/dev/null || true)")
+
+    local diff_specs=""
+    while IFS= read -r f; do
+        [ -z "$f" ] && continue
+        if [[ "$f" == cypress/e2e/*.cy.* ]]; then
+            diff_specs="${diff_specs}"$'\n'"$f"
+            continue
+        fi
+        local base token
+        base=$(basename "$f" | sed -E 's/\.(blade\.php|php|js|jsx|ts|tsx|css|scss)$//')
+        token=$(printf '%s' "$base" | tr '[:upper:]' '[:lower:]' | sed -E 's/(controller|service|model|repository|helper|middleware|migration|policy|request|provider|test)$//')
+        if [ "${#token}" -ge 4 ] && [[ ! "$token" =~ ^(index|app|main|home|base|layout|config|routes|utils|common|shared)$ ]]; then
+            local matched
+            matched=$(printf '%s\n' "$all_specs" | grep -iF "$token" || true)
+            if [ -n "$matched" ]; then
+                diff_specs="${diff_specs}"$'\n'"${matched}"
+            fi
+        fi
+    done <<< "$changed_files"
+
+    # 3. Filter to existing files, deduplicate, and format
+    printf '%s\n%s\n' "$selected" "$diff_specs" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | grep -v '^$' | while IFS= read -r spec; do
+        [ -f "$spec" ] && printf '%s\n' "$spec"
+    done | sort -u
+}
+
 if [ -f "cypress.config.js" ] || [ -f "cypress.json" ] || [ -d "cypress" ]; then
-    echo -e "\n🌐 [QA Automation] Checking Cypress E2E Test Suite..."
+    echo -e "\n🌐 [QA Automation] Checking Cypress E2E Test Suite (mode: ${E2E_MODE})..."
     if [ "$SKIP_E2E" = "true" ]; then
         echo "⚠️  Cypress E2E tests skipped via --skip-e2e flag."
     else
@@ -400,25 +462,57 @@ if [ -f "cypress.config.js" ] || [ -f "cypress.json" ] || [ -d "cypress" ]; then
         TARGET_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" --connect-timeout 3 "$E2E_TARGET" 2>/dev/null || echo "000")
 
         if [ "$TARGET_STATUS" != "000" ]; then
-            echo "   ↳ Target reachable (HTTP ${TARGET_STATUS}). Executing headless Cypress E2E tests (Watchdog limit: 3600s)..."
             CYPRESS_SUCCESS=false
+            CYPRESS_SPEC_ARG=""
+            CYPRESS_WATCHDOG=3600
+
+            if [ "$FULL_E2E" = "true" ]; then
+                E2E_SPEC_COUNT=$(find cypress/e2e -type f \( -name "*.cy.js" -o -name "*.cy.jsx" -o -name "*.cy.ts" -o -name "*.cy.tsx" \) 2>/dev/null | wc -l | tr -d ' ')
+                echo "   ↳ Target reachable (HTTP ${TARGET_STATUS}). Executing FULL headless Cypress E2E suite (${E2E_SPEC_COUNT} specs, watchdog: 3600s)..."
+            else
+                RESOLVED_SPECS=$(_resolve_cypress_specs)
+                if [ -n "$RESOLVED_SPECS" ]; then
+                    E2E_SPEC_COUNT=$(printf '%s\n' "$RESOLVED_SPECS" | grep -c . || echo 0)
+                    CYPRESS_SPEC_ARG=$(printf '%s\n' "$RESOLVED_SPECS" | paste -sd ',' -)
+                    CYPRESS_WATCHDOG=900
+                    echo "   ↳ Target reachable (HTTP ${TARGET_STATUS}). Executing SMART Smoke + Diff-Matched E2E (${E2E_SPEC_COUNT} specs, watchdog: 900s):"
+                    printf '%s\n' "$RESOLVED_SPECS" | sed 's/^/      • /'
+                else
+                    echo "   ↳ No smoke or diff-matched specs resolved; falling back to FULL suite (watchdog: 3600s)..."
+                    E2E_MODE="full-fallback"
+                fi
+            fi
+
             if grep -q '"test:e2e":' package.json 2>/dev/null; then
-                if run_with_watchdog 3600 npm run test:e2e -- --headless; then
-                    CYPRESS_SUCCESS=true
+                if [ -n "$CYPRESS_SPEC_ARG" ]; then
+                    if run_with_watchdog "$CYPRESS_WATCHDOG" npm run test:e2e -- --headless --spec "$CYPRESS_SPEC_ARG"; then
+                        CYPRESS_SUCCESS=true
+                    fi
+                else
+                    if run_with_watchdog "$CYPRESS_WATCHDOG" npm run test:e2e -- --headless; then
+                        CYPRESS_SUCCESS=true
+                    fi
                 fi
             elif command -v npx > /dev/null 2>&1; then
-                if run_with_watchdog 3600 npx cypress run --headless; then
-                    CYPRESS_SUCCESS=true
+                if [ -n "$CYPRESS_SPEC_ARG" ]; then
+                    if run_with_watchdog "$CYPRESS_WATCHDOG" npx cypress run --headless --spec "$CYPRESS_SPEC_ARG"; then
+                        CYPRESS_SUCCESS=true
+                    fi
+                else
+                    if run_with_watchdog "$CYPRESS_WATCHDOG" npx cypress run --headless; then
+                        CYPRESS_SUCCESS=true
+                    fi
                 fi
             fi
 
             if [ "$CYPRESS_SUCCESS" = "true" ]; then
-                echo "✅ Cypress E2E tests passed."
+                echo "✅ Cypress E2E tests passed (${E2E_MODE}, ${E2E_SPEC_COUNT} specs)."
             else
                 echo "🛑 FATAL: Cypress E2E regression tests failed or timed out! Aborting deployment."
                 exit 1
             fi
         else
+            E2E_MODE="offline"
             echo "⚠️  Notice: Local E2E target (${E2E_TARGET}) is offline (curl code: ${TARGET_STATUS})."
             echo "   To enforce E2E before deploy, start your local server or specify CYPRESS_BASE_URL."
             echo "   Bypassing E2E for this deploy run. (Use --skip-e2e to silence)."
@@ -691,7 +785,7 @@ OUTCOME="SUCCESS"
 ssh -p "$SSH_PORT" "${SSH_USER}@${SSH_HOST}" "bash -s" << EOF
 LOG_FILE="${REMOTE_ROOT}/deploy.log"
 REMOTE_TS=\$(date -u +%Y-%m-%dT%H:%M:%SZ)
-echo "{\"timestamp\":\"\${REMOTE_TS}\",\"app\":\"${APP_NAME}\",\"deployer\":\"${USER_NAME}\",\"branch\":\"${BRANCH}\",\"commit\":\"${COMMIT:0:8}\",\"duration_s\":${DURATION},\"outcome\":\"${OUTCOME}\"}" >> "\${LOG_FILE}"
+echo "{\"timestamp\":\"\${REMOTE_TS}\",\"app\":\"${APP_NAME}\",\"deployer\":\"${USER_NAME}\",\"branch\":\"${BRANCH}\",\"commit\":\"${COMMIT:0:8}\",\"duration_s\":${DURATION},\"e2e_mode\":\"${E2E_MODE}\",\"e2e_specs_count\":${E2E_SPEC_COUNT},\"outcome\":\"${OUTCOME}\"}" >> "\${LOG_FILE}"
 chmod 644 "\${LOG_FILE}" 2>/dev/null || true
 echo "📋 Deployment audit entry written to \${LOG_FILE}"
 EOF

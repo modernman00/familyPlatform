@@ -15,7 +15,7 @@
       <div class="row align-items-center">
         <div class="col-lg-6 mb-5 mb-lg-0 pe-lg-5">
           <div class="badge rounded-pill px-3 py-2 mb-3 fw-bold text-uppercase tracking-wider" style="background: rgba(184,32,44, 0.12); color: var(--brand-primary, #a31621); font-size: 0.8rem; letter-spacing: 0.05em;">
-            🛡️ 100% Private
+            🛡️ 100% Private 
           </div>
           <h1 class="hero-title">Private Family Social Network &amp; <br><span>Living Heritage Tree.</span></h1>
           <p class="hero-subtitle">Connect generations, preserve precious memories, and celebrate life milestones in a secure, private haven designed exclusively for your family.</p>

@@ -180,13 +180,16 @@ export function loginFully(email = DEFAULT_EMAIL, password = DEFAULT_PASSWORD, {
     const waitForMemberAreaReady = () => {
         cy.window({ timeout: 20000 }).should('have.property', 'bootstrap');
         cy.window({ timeout: 20000 }).should('have.property', 'Alpine');
-        cy.window({ timeout: 20000 }).should('have.property', 'profileFeed');
-        cy.window().then((win) => {
-            cy.get('.feed-posts-container', { timeout: 40000 }).should(($el) => {
-                const data = win.Alpine && win.Alpine.$data($el[0]);
-                expect(data, 'Alpine feed data bound').to.be.an('object');
-                expect(data.isLoading, 'Alpine feed finished its initial fetch').to.eq(false);
-            });
+        cy.get('#feed-root, .feed-posts-container', { timeout: 40000 }).then(($el) => {
+            if ($el.is('#feed-root')) {
+                cy.get('[data-testid="feed-island-shell"]', { timeout: 20000 }).should('exist');
+            } else {
+                cy.window().then((win) => {
+                    const data = win.Alpine && win.Alpine.$data($el[0]);
+                    expect(data, 'Alpine feed data bound').to.be.an('object');
+                    expect(data.isLoading, 'Alpine feed finished its initial fetch').to.eq(false);
+                });
+            }
         });
     };
 

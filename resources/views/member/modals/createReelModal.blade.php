@@ -96,8 +96,8 @@
 
                     <!-- Video URL Alternative (Optional) -->
                     <div class="mb-3">
-                        <label class="form-label fw-bold text-dark small mb-1">Or Paste Video Link (MP4, YouTube, Cloudflare)</label>
-                        <input type="url" class="form-control rounded-pill" id="reelVideoUrlInput" name="video_url" placeholder="https://example.com/family-video.mp4" style="font-size: 0.85rem; padding: 8px 16px;">
+                        <label class="form-label fw-bold text-dark small mb-1">Or Paste Video Link (YouTube, Google Photos, OneDrive, Facebook, TikTok, MP4)</label>
+                        <input type="url" class="form-control rounded-pill" id="reelVideoUrlInput" name="video_url" placeholder="https://youtube.com/watch?v=... or Google Photos / OneDrive / Facebook link" style="font-size: 0.85rem; padding: 8px 16px;">
                     </div>
 
                     <!-- Category / Milestone Tag -->

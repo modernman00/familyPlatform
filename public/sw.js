@@ -13,7 +13,7 @@
 
 'use strict';
 
-const SW_VERSION = 'v2.5.4'; // bumped for Kin Whispers distinct alerts & linked PWA manifest
+const SW_VERSION = 'v2.5.5'; // bumped for reliable Android/iOS share target media & video handling
 const STATIC_CACHE = `fp-static-${SW_VERSION}`;
 const DYNAMIC_CACHE = `fp-dynamic-${SW_VERSION}`;
 const IMAGE_CACHE = `fp-images-${SW_VERSION}`;
@@ -162,15 +162,32 @@ self.addEventListener('fetch', (event) => {
 
       try {
         const formData = await event.request.formData();
-        const mediaFiles = formData.getAll('media');
-        const title = formData.get('title') || '';
-        const text = formData.get('text') || '';
-        const shareUrl = formData.get('url') || '';
+        const rawMediaFiles = formData.getAll('media');
+        const mediaFiles = (rawMediaFiles || []).filter(
+          (f) => f && typeof f.arrayBuffer === 'function' && f.size > 0
+        );
+        const title = String(formData.get('title') || '');
+        const text = String(formData.get('text') || '');
+        const shareUrl = String(formData.get('url') || '');
 
-        // If files exist, store them in IndexedDB for the client app to retrieve
-        if (mediaFiles && mediaFiles.length > 0) {
+        const totalBytes = mediaFiles.reduce((sum, f) => sum + (Number(f.size) || 0), 0);
+        const MAX_IDB_BYTES = 25 * 1024 * 1024;
+
+        // Serialize File blobs to plain ArrayBuffer payloads so Android Chrome IndexedDB
+        // never drops content:// URI handles across Service Worker -> Window contexts.
+        if (mediaFiles.length > 0 && totalBytes <= MAX_IDB_BYTES) {
+          const serializedFiles = [];
+          for (const file of mediaFiles) {
+            const buffer = await file.arrayBuffer();
+            serializedFiles.push({
+              name: file.name || 'shared-memory',
+              type: file.type || '',
+              lastModified: file.lastModified || Date.now(),
+              buffer
+            });
+          }
           await saveSharedMediaToIndexedDB({
-            mediaFiles,
+            mediaFiles: serializedFiles,
             title,
             text,
             url: shareUrl,
@@ -179,7 +196,7 @@ self.addEventListener('fetch', (event) => {
           return Response.redirect('/profilePage?pwa_shared=1', 303);
         }
 
-        // Fallback to server processing with unconsumed stream
+        // Fallback to server processing (large videos, text-only shares, or empty files)
         return fetch(networkFallbackRequest);
       } catch (err) {
         console.warn('[SW] Web Share Target formData parsing failed, falling back to server network:', err);

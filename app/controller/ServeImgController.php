@@ -578,6 +578,8 @@ final class ServeImgController {
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
             CURLOPT_TIMEOUT => 120,
+            CURLOPT_CONNECTTIMEOUT => 4,
+            CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
             CURLOPT_HTTPHEADER => $headers,
             CURLOPT_HEADERFUNCTION => function ($ch, $headerLine) use (&$currentUpstreamStatus) {
                 $trimmed = trim($headerLine);

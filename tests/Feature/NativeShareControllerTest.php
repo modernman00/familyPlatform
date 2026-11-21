@@ -226,4 +226,57 @@ class NativeShareControllerTest extends SocialFeedTestCase
 
         unset($_GET['fam_code'], $_GET['format']);
     }
+
+    public function test_native_share_stores_video_in_videos_dir_and_hydrates_post_dto(): void
+    {
+        $tmpVideo = tempnam(sys_get_temp_dir(), 'test_fam_vid_');
+        // Minimal MP4 ftyp box so finfo detects video/mp4
+        file_put_contents($tmpVideo, "\x00\x00\x00\x18ftypmp42\x00\x00\x00\x00mp42isom");
+
+        $_SESSION['id'] = $this->authorId;
+        $_SESSION['famCode'] = $this->famCode;
+        $_POST['caption'] = 'Birthday video!';
+        $_FILES['photo'] = [
+            'name'     => 'birthday_clip.mp4',
+            'type'     => 'video/mp4',
+            'tmp_name' => $tmpVideo,
+            'error'    => UPLOAD_ERR_OK,
+            'size'     => (int) filesize($tmpVideo),
+        ];
+
+        ob_start();
+        (new NativeShareController())->share();
+        $output = ob_get_clean();
+
+        $this->assertIsString($output);
+        $data = json_decode($output, true);
+        $this->assertIsArray($data);
+        $this->assertSame('success', $data['status']);
+        $this->assertSame(200, http_response_code());
+        $this->assertNotEmpty($data['files']);
+        $this->assertStringStartsWith('/resources/videos/posts/', (string) $data['files'][0]);
+
+        // Verify post row has video URL in postMessage and post_img0 is NULL
+        $stmt = $this->pdo->prepare("SELECT * FROM post WHERE post_no = ?");
+        $stmt->execute([$data['post_no']]);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $this->assertNotEmpty($row);
+        $this->assertNull($row['post_img0']);
+        $this->assertStringContainsString('/resources/videos/posts/', (string) $row['postMessage']);
+
+        // Verify PostDto hydrates videos non-empty
+        $dto = \App\dto\PostDto::fromDatabaseRow($row, $this->authorId)->toArray();
+        $this->assertNotEmpty($dto['videos']);
+
+        // Clean up uploaded video file
+        $savedRel = ltrim((string) $data['files'][0], '/');
+        $savedAbs = __DIR__ . '/../../' . $savedRel;
+        if (file_exists($savedAbs)) {
+            @unlink($savedAbs);
+        }
+        unset($_POST['caption'], $_FILES['photo']);
+        if (file_exists($tmpVideo)) {
+            @unlink($tmpVideo);
+        }
+    }
 }

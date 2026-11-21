@@ -709,7 +709,8 @@ class AtgEmojiService
         bool $animated = false,
         string $mode = 'procedural',
         string $choreography = 'smile',
-        array $sampleRgb = [138, 84, 52]
+        array $sampleRgb = [138, 84, 52],
+        string $avatarStyle = 'original'
     ): array {
         $id = trim($userId);
         if ($id === '') {
@@ -752,7 +753,7 @@ class AtgEmojiService
 
         // Render clean server-side SVG (either Living Photo SVG wrapping the real portrait or procedural 3D SVG)
         if ($mode === 'living_photo' && $validPngDataUri !== null) {
-            $svgContent = $this->buildLivingPhotoSvg($validPngDataUri, $traits, $sampleRgb, $choreography, 384, $animated);
+            $svgContent = $this->buildLivingPhotoSvg($validPngDataUri, $traits, $sampleRgb, $choreography, 384, $animated, $avatarStyle);
         } else {
             $svgContent = $this->renderProceduralAvatar($traits, 384, $animated, true);
         }
@@ -821,7 +822,8 @@ class AtgEmojiService
         array $sampleRgb,
         string $choreography = 'smile',
         int $size = 384,
-        bool $animated = true
+        bool $animated = true,
+        string $avatarStyle = 'original'
     ): string {
         $r = max(0, min(255, (int)($sampleRgb[0] ?? 138)));
         $g = max(0, min(255, (int)($sampleRgb[1] ?? 84)));
@@ -836,6 +838,7 @@ class AtgEmojiService
         $safeChoreo = in_array($choreography, ['smile', 'dance', 'wink', 'laugh', 'love', 'idle'], true)
             ? $choreography
             : 'smile';
+        $safeStyle = preg_replace('/[^a-z0-9_]/', '', strtolower($avatarStyle)) ?: 'original';
 
         $stageAnim = match ($safeChoreo) {
             'dance' => 'atgLpDance 1.8s ease-in-out infinite',
@@ -864,7 +867,7 @@ class AtgEmojiService
         }
 
         return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" width="' . $size . '" height="' . $size . '" '
-            . 'class="atg-avatar-svg atg-living-photo-svg" data-atg-living-photo="1" data-atg-choreography="' . $safeChoreo . '" data-atg-traits="' . $traitAttr . '">'
+            . 'class="atg-avatar-svg atg-living-photo-svg" data-atg-living-photo="1" data-atg-avatar-style="' . $safeStyle . '" data-atg-choreography="' . $safeChoreo . '" data-atg-traits="' . $traitAttr . '">'
             . $style
             . '<defs>'
             . '<clipPath id="atgLpFrame"><rect x="0" y="0" width="384" height="384" rx="48"/></clipPath>'

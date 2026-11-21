@@ -1,4 +1,8 @@
+@if(empty($usePreactFeed) || ($_GET['v'] ?? '') === 'legacy')
 <div class="profile-column" x-data="profileSidebar({ id: '{{ $data['id'] }}', firstName: '{{ $data['firstName'] }}', lastName: '{{ $data['lastName'] }}', img: '{{ $data['img'] ?? $data['profilePics'] ?? '' }}', famCode: '{{ $data['famCode'] }}' })">
+@else
+<div class="profile-column">
+@endif
 
     <!-- Profile Overview Card -->
     <div class="card profile-card text-center border-0 shadow-sm" style="border-radius: 20px; overflow: hidden; background-color: var(--card-bg); color: var(--text-color);">
@@ -98,8 +102,8 @@
 
         <div class="card-body pt-5 mt-3 d-flex flex-column align-items-center">
 
-            <h4 class="card-title fw-bold mb-1" style="color: var(--text-color); font-size: 1.25rem; letter-spacing: -0.01em;">
-                {{ ucwords(strtolower($data['firstName'])) }} {{ ucwords(strtolower($data['lastName'])) }}
+            <h4 class="card-title fw-bold mb-1" id="leftColProfileName" style="color: var(--text-color); font-size: 1.25rem; letter-spacing: -0.01em;">
+                <span class="js-profile-name-text">{{ ucwords(strtolower($data['firstName'])) }} {{ ucwords(strtolower($data['lastName'])) }}</span>
                 @if(empty($isPendingApproval))
                 <i class="bi bi-patch-check-fill profile-verified-tick" title="{{ __('profile.verified', 'Verified') }}" aria-label="{{ __('profile.verified', 'Verified') }}"></i>
                 @endif
@@ -115,7 +119,7 @@
             @endphp
             <p class="card-text mb-3 d-inline-flex align-items-center justify-content-center gap-1" style="color: var(--text-muted); font-size: 0.85rem;">
                 <span style="font-size: 1.05rem;">{{ \App\classes\CountryCatalog::getFlag($leftUserCountry) }}</span>
-                <span>{{ $leftUserCountry !== '' ? $leftUserCountry : __('profile.global', 'Global') }}</span>
+                <span id="leftColProfileCountry">{{ $leftUserCountry !== '' ? $leftUserCountry : __('profile.global', 'Global') }}</span>
             </p>
 
             <!-- Family Code Headline & Tonal Pill(s) (Headline with Married - XXX and Birth - XXX badges) -->
@@ -761,6 +765,7 @@
         </div>
     </div>
 
+    @if(empty($usePreactFeed) || ($_GET['v'] ?? '') === 'legacy')
     <!-- Kin Requests Card (Only shown if there are pending requests) -->
     <div id="kinshipRequestSidebar"
          class="card border-0 shadow-sm mt-4 kinship-request-card" 
@@ -817,4 +822,8 @@
             </div>
         </div>
     </div>
+    @else
+    <div id="kin-requests-root"></div>
+    <script type="application/json" id="kin-requests-bootstrap">{!! json_encode(['id' => (string)($data['id'] ?? ''), 'firstName' => (string)($data['firstName'] ?? ''), 'lastName' => (string)($data['lastName'] ?? ''), 'img' => (string)($data['img'] ?? $data['profilePics'] ?? ''), 'famCode' => (string)($data['famCode'] ?? '')]) !!}</script>
+    @endif
 </div>

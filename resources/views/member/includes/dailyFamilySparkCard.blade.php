@@ -10,14 +10,6 @@
   .fp-spark-header {
     border-top-left-radius: 19px;
     border-top-right-radius: 19px;
-  }
-  body.dark-mode .fp-spark-card,
-  [data-bs-theme="dark"] .fp-spark-card {
-    background-color: var(--card-bg, #1e293b);
-    border-color: var(--border-color, #334155);
-    color: var(--text-color, #f8fafc);
-  }
-  .fp-spark-header {
     background: linear-gradient(135deg, #5c0a12 0%, #8a1019 100%);
     color: #ffffff;
   }
@@ -33,14 +25,37 @@
     background-color: rgba(254, 243, 199, 0.18);
     border: 1px solid rgba(252, 211, 77, 0.55);
     color: #fef3c7 !important;
-    font-size: 0.75rem;
+    font-size: var(--text-xs, 0.75rem);
     letter-spacing: 0.04em;
     white-space: nowrap;
     flex-shrink: 0;
   }
+  .fp-spark-byline {
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 600;
+    color: #fef3c7 !important;
+    opacity: 0.92;
+  }
+  .fp-spark-title {
+    font-size: var(--text-base, 1rem);
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: var(--text-main, #0f172a);
+    overflow-wrap: anywhere;
+  }
+  .fp-spark-prompt {
+    font-size: var(--text-sm, 0.875rem);
+    line-height: 1.5;
+    color: var(--text-muted-aa, #475569);
+    overflow-wrap: anywhere;
+  }
   .fp-spark-btn-action {
-    min-height: 44px;
-    min-width: 44px;
+    min-height: var(--tap-min, 44px);
+    min-width: var(--tap-min, 44px);
+    font-size: var(--text-sm, 0.875rem) !important;
+    font-weight: 600;
+    line-height: 1.25;
     white-space: nowrap;
     flex-shrink: 0;
     transition: transform 0.15s ease, filter 0.15s ease;
@@ -49,28 +64,31 @@
     transform: scale(0.98);
   }
   .fp-spark-option-btn {
-    min-height: 48px;
+    min-height: var(--tap-min, 44px);
     border-radius: 12px;
     border: 1.5px solid var(--border-color, #cbd5e1);
     background-color: var(--card-bg, #ffffff);
     color: var(--text-color, #0f172a);
+    font-size: var(--text-sm, 0.875rem);
+    line-height: 1.35;
     text-align: left;
     transition: border-color 0.15s ease, transform 0.15s ease;
   }
-  body.dark-mode .fp-spark-option-btn,
-  [data-bs-theme="dark"] .fp-spark-option-btn {
-    background-color: #0f172a;
-    border-color: #475569;
-    color: #f8fafc;
+  .fp-spark-option-pct {
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 700;
+    font-style: normal !important;
+    color: var(--text-muted-aa, #475569);
+  }
+  .fp-spark-meta {
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--text-muted-aa, #475569);
   }
   .fp-spark-option-btn.is-selected {
     border-color: #a31621;
     background-color: rgba(163, 22, 33, 0.06);
-  }
-  body.dark-mode .fp-spark-option-btn.is-selected,
-  [data-bs-theme="dark"] .fp-spark-option-btn.is-selected {
-    border-color: #f87171;
-    background-color: rgba(163, 22, 33, 0.22);
   }
   .fp-spark-option-btn:active {
     transform: scale(0.98);
@@ -82,30 +100,191 @@
     font-style: normal !important;
     border-radius: 14px;
   }
+  .fp-spark-empty-title {
+    font-size: var(--text-sm, 0.875rem);
+    font-weight: 600;
+    color: var(--text-main, #0f172a);
+  }
+  .fp-spark-empty-sub {
+    font-size: var(--text-xs, 0.75rem);
+    line-height: 1.45;
+    color: var(--text-muted-aa, #475569);
+  }
   .fp-spark-reply-author {
-    font-size: var(--text-sm, 0.9375rem);
+    font-size: var(--text-sm, 0.875rem);
     font-style: normal !important;
     color: #0f172a !important;
   }
+  .fp-spark-reply-edited {
+    font-size: var(--text-xs, 0.75rem);
+    font-style: normal !important;
+    color: var(--text-muted-aa, #475569);
+  }
   .fp-spark-reply-body {
-    font-size: var(--text-base, 1rem);
+    font-size: var(--text-sm, 0.875rem);
     line-height: 1.5;
     font-style: normal !important;
     color: #1e293b !important;
   }
+  .fp-spark-modal-title {
+    font-size: var(--text-lg, 1.25rem);
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .fp-spark-modal-label {
+    font-size: var(--text-sm, 0.875rem);
+    font-weight: 600;
+    font-style: normal !important;
+    color: var(--text-main, #0f172a);
+    margin-bottom: 6px;
+  }
+  /* Neutralise main.css/form.scss global uppercase placeholder, retina 16px lock, and tiny italic .small rules */
+  .fp-spark-card .small {
+    font-size: var(--text-xs, 0.75rem);
+    font-style: normal !important;
+  }
+  .fp-spark-card input[type="text"].form-control,
+  .fp-spark-card textarea.form-control {
+    font-size: var(--text-sm, 0.875rem) !important;
+    line-height: 1.4;
+  }
+  @media (max-width: 767.98px) and (pointer: coarse) {
+    .fp-spark-card input[type="text"].form-control,
+    .fp-spark-card textarea.form-control {
+      font-size: max(16px, 1rem) !important;
+    }
+  }
+  .fp-spark-card .form-control::-webkit-input-placeholder,
+  .fp-spark-card input::-webkit-input-placeholder,
+  .fp-spark-card textarea::-webkit-input-placeholder {
+    text-transform: none !important;
+    font-size: var(--text-sm, 0.875rem) !important;
+    font-style: normal !important;
+    letter-spacing: normal !important;
+    color: var(--text-muted-aa, #475569) !important;
+    opacity: 0.85;
+  }
+  .fp-spark-card .form-control::-moz-placeholder,
+  .fp-spark-card input::-moz-placeholder,
+  .fp-spark-card textarea::-moz-placeholder {
+    text-transform: none !important;
+    font-size: var(--text-sm, 0.875rem) !important;
+    font-style: normal !important;
+    letter-spacing: normal !important;
+    color: var(--text-muted-aa, #475569) !important;
+    opacity: 0.85;
+  }
+  .fp-spark-card .form-control::placeholder,
+  .fp-spark-card input::placeholder,
+  .fp-spark-card textarea::placeholder {
+    text-transform: none !important;
+    font-size: var(--text-sm, 0.875rem) !important;
+    font-style: normal !important;
+    letter-spacing: normal !important;
+    color: var(--text-muted-aa, #475569) !important;
+    opacity: 0.85;
+  }
+
+  /* 5-Selector Dark Mode Parity */
+  body.dark-mode .fp-spark-card,
+  body.dark-theme .fp-spark-card,
+  [data-bs-theme="dark"] .fp-spark-card,
+  html.dark .fp-spark-card,
+  html.dark-mode .fp-spark-card {
+    background-color: var(--card-bg, #1e293b);
+    border-color: var(--border-color, #334155);
+    color: var(--text-color, #f8fafc);
+  }
+  body.dark-mode .fp-spark-title,
+  body.dark-theme .fp-spark-title,
+  [data-bs-theme="dark"] .fp-spark-title,
+  html.dark .fp-spark-title,
+  html.dark-mode .fp-spark-title,
+  body.dark-mode .fp-spark-empty-title,
+  body.dark-theme .fp-spark-empty-title,
+  [data-bs-theme="dark"] .fp-spark-empty-title,
+  html.dark .fp-spark-empty-title,
+  html.dark-mode .fp-spark-empty-title,
+  body.dark-mode .fp-spark-modal-label,
+  body.dark-theme .fp-spark-modal-label,
+  [data-bs-theme="dark"] .fp-spark-modal-label,
+  html.dark .fp-spark-modal-label,
+  html.dark-mode .fp-spark-modal-label {
+    color: #f8fafc !important;
+  }
+  body.dark-mode .fp-spark-prompt,
+  body.dark-theme .fp-spark-prompt,
+  [data-bs-theme="dark"] .fp-spark-prompt,
+  html.dark .fp-spark-prompt,
+  html.dark-mode .fp-spark-prompt,
+  body.dark-mode .fp-spark-meta,
+  body.dark-theme .fp-spark-meta,
+  [data-bs-theme="dark"] .fp-spark-meta,
+  html.dark .fp-spark-meta,
+  html.dark-mode .fp-spark-meta,
+  body.dark-mode .fp-spark-option-pct,
+  body.dark-theme .fp-spark-option-pct,
+  [data-bs-theme="dark"] .fp-spark-option-pct,
+  html.dark .fp-spark-option-pct,
+  html.dark-mode .fp-spark-option-pct,
+  body.dark-mode .fp-spark-empty-sub,
+  body.dark-theme .fp-spark-empty-sub,
+  [data-bs-theme="dark"] .fp-spark-empty-sub,
+  html.dark .fp-spark-empty-sub,
+  html.dark-mode .fp-spark-empty-sub,
+  body.dark-mode .fp-spark-reply-edited,
+  body.dark-theme .fp-spark-reply-edited,
+  [data-bs-theme="dark"] .fp-spark-reply-edited,
+  html.dark .fp-spark-reply-edited,
+  html.dark-mode .fp-spark-reply-edited {
+    color: #cbd5e1 !important;
+  }
+  body.dark-mode .fp-spark-option-btn,
+  body.dark-theme .fp-spark-option-btn,
+  [data-bs-theme="dark"] .fp-spark-option-btn,
+  html.dark .fp-spark-option-btn,
+  html.dark-mode .fp-spark-option-btn {
+    background-color: #0f172a;
+    border-color: #475569;
+    color: #f8fafc;
+  }
+  body.dark-mode .fp-spark-option-btn.is-selected,
+  body.dark-theme .fp-spark-option-btn.is-selected,
+  [data-bs-theme="dark"] .fp-spark-option-btn.is-selected,
+  html.dark .fp-spark-option-btn.is-selected,
+  html.dark-mode .fp-spark-option-btn.is-selected {
+    border-color: #f87171;
+    background-color: rgba(163, 22, 33, 0.22);
+  }
   body.dark-mode .fp-spark-reply-bubble,
-  [data-bs-theme="dark"] .fp-spark-reply-bubble {
+  body.dark-theme .fp-spark-reply-bubble,
+  [data-bs-theme="dark"] .fp-spark-reply-bubble,
+  html.dark .fp-spark-reply-bubble,
+  html.dark-mode .fp-spark-reply-bubble {
     background-color: #0f172a;
     border-color: #334155;
     color: #f8fafc !important;
   }
   body.dark-mode .fp-spark-reply-author,
-  [data-bs-theme="dark"] .fp-spark-reply-author {
+  body.dark-theme .fp-spark-reply-author,
+  [data-bs-theme="dark"] .fp-spark-reply-author,
+  html.dark .fp-spark-reply-author,
+  html.dark-mode .fp-spark-reply-author {
     color: #f8fafc !important;
   }
   body.dark-mode .fp-spark-reply-body,
-  [data-bs-theme="dark"] .fp-spark-reply-body {
+  body.dark-theme .fp-spark-reply-body,
+  [data-bs-theme="dark"] .fp-spark-reply-body,
+  html.dark .fp-spark-reply-body,
+  html.dark-mode .fp-spark-reply-body {
     color: #e2e8f0 !important;
+  }
+  body.dark-mode .fp-spark-card .form-control::placeholder,
+  body.dark-theme .fp-spark-card .form-control::placeholder,
+  [data-bs-theme="dark"] .fp-spark-card .form-control::placeholder,
+  html.dark .fp-spark-card .form-control::placeholder,
+  html.dark-mode .fp-spark-card .form-control::placeholder {
+    color: #94a3b8 !important;
   }
   .fp-spark-skeleton {
     height: 16px;
@@ -133,14 +312,14 @@
     <div class="d-flex align-items-center gap-2 min-w-0">
       <span class="badge rounded-pill px-3 py-1 fw-bold fp-spark-badge"
             x-text="spark ? spark.badge_label : 'DAILY SPARK'"></span>
-      <span class="fw-semibold opacity-90" style="color: #fef3c7 !important; font-size: var(--text-sm, 0.875rem);"
+      <span class="fp-spark-byline"
             x-text="spark ? ('By ' + spark.created_by_name) : 'Loading today\'s spark...'"></span>
     </div>
 
     <div class="d-flex align-items-center gap-2">
       <button type="button"
               class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 fp-spark-btn-action d-inline-flex align-items-center gap-2"
-              @click="openCreateModal()">
+              @click.stop="openCreateModal()">
         <i class="bi bi-stars" aria-hidden="true"></i>
         <span>Spark a Question</span>
       </button>
@@ -166,7 +345,7 @@
     <!-- State 5: Error / Offline Banner with Retry -->
     <template x-if="errorMessage">
       <div class="alert alert-danger d-flex align-items-center justify-content-between gap-2 rounded-3 mb-3" role="alert">
-        <span class="small fw-semibold" x-text="errorMessage"></span>
+        <span class="fw-semibold" style="font-size: var(--text-sm, 0.875rem);" x-text="errorMessage"></span>
         <button type="button"
                 class="btn btn-sm btn-outline-danger fp-spark-btn-action px-3"
                 @click="loadSpark()">
@@ -180,9 +359,9 @@
       <div class="d-flex flex-column gap-3">
         <!-- Title & Prompt (Zero mid-word truncation) -->
         <div>
-          <h3 class="fw-bold mb-1" style="font-size: 1.2rem; line-height: 1.35; overflow-wrap: anywhere;"
+          <h3 class="fw-bold mb-1 fp-spark-title"
               x-text="spark.title"></h3>
-          <p class="mb-0" style="font-size: 0.96rem; line-height: 1.5; opacity: 0.9; overflow-wrap: anywhere;"
+          <p class="mb-0 fp-spark-prompt"
              x-text="spark.prompt_text"></p>
         </div>
 
@@ -218,12 +397,12 @@
                      aria-hidden="true"></i>
                   <span class="fw-semibold" style="overflow-wrap: anywhere; text-align: left;" x-text="opt.label"></span>
                 </div>
-                <span class="position-relative z-1 small fw-bold flex-shrink-0"
+                <span class="position-relative z-1 fp-spark-option-pct flex-shrink-0"
                       x-show="spark.total_votes > 0"
                       x-text="opt.percentage + '% (' + opt.votes + ')'"></span>
               </button>
             </template>
-            <div class="opacity-85 d-flex align-items-center justify-content-between flex-wrap gap-2" style="font-size: var(--text-sm, 0.875rem);">
+            <div class="fp-spark-meta d-flex align-items-center justify-content-between flex-wrap gap-2">
               <span x-text="spark.total_votes + (spark.total_votes === 1 ? ' family vote' : ' family votes')"></span>
               <span x-show="spark.user_vote_index !== null">Tap another option anytime to change your vote</span>
             </div>
@@ -256,8 +435,8 @@
             <!-- State 3: Empty Replies State -->
             <template x-if="!spark.replies || spark.replies.length === 0">
               <div class="p-3 rounded-3 text-center fp-spark-reply-bubble">
-                <p class="mb-1 fw-semibold fp-spark-reply-author">No family replies yet.</p>
-                <p class="mb-0 opacity-85" style="font-size: var(--text-sm, 0.875rem);">Start the conversation below—your reply stays inside this single Living Spark Card.</p>
+                <p class="mb-1 fp-spark-empty-title">No family replies yet.</p>
+                <p class="mb-0 fp-spark-empty-sub">Start the conversation below—your reply stays inside this single Living Spark Card.</p>
               </div>
             </template>
 
@@ -272,7 +451,7 @@
                   <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
                     <div class="d-flex align-items-center gap-2 min-w-0">
                       <span class="fw-bold fp-spark-reply-author" style="overflow-wrap: anywhere;" x-text="reply.author_name"></span>
-                      <span class="small opacity-75" x-show="reply.updated_at" style="font-size: 0.72rem;">(edited)</span>
+                      <span class="fp-spark-reply-edited" x-show="reply.updated_at">(edited)</span>
                     </div>
                     <template x-if="spark.current_user_id && String(reply.user_id) === String(spark.current_user_id)">
                       <div class="d-flex align-items-center gap-2 flex-shrink-0">
@@ -472,7 +651,7 @@
                        class="form-control rounded-pill px-3"
                        style="min-height: 44px;"
                        maxlength="500"
-                       placeholder="Add your answer or @tag someone..."
+                       placeholder="Reply or @tag someone..."
                        x-model="replyText"
                        @input="handleSparkReplyInput($event)"
                        @keydown="handleSparkReplyKeydown($event)"
@@ -513,7 +692,7 @@
        aria-labelledby="sparkCreateModalTitle">
     <div class="card shadow-lg w-100 fp-spark-card" style="max-width: 520px;" @click.outside="showCreateModal = false">
       <div class="fp-spark-header px-4 py-3 d-flex align-items-center justify-content-between gap-2">
-        <h3 id="sparkCreateModalTitle" class="mb-0 fw-bold" style="font-size: 1.1rem;">Spark a Family Question</h3>
+        <h3 id="sparkCreateModalTitle" class="mb-0 fp-spark-modal-title">Spark a Family Question</h3>
         <button type="button"
                 class="btn-close btn-close-white fp-spark-btn-action"
                 aria-label="Close modal"
@@ -522,10 +701,10 @@
       <form @submit.prevent="createSpark()" class="card-body p-4 d-flex flex-column gap-3">
         @include('csrf')
         <template x-if="createErrorMessage">
-          <div class="alert alert-danger py-2 px-3 mb-0 small fw-semibold rounded-3" role="alert" x-text="createErrorMessage"></div>
+          <div class="alert alert-danger py-2 px-3 mb-0 fw-semibold rounded-3" style="font-size: var(--text-sm, 0.875rem);" role="alert" x-text="createErrorMessage"></div>
         </template>
         <div>
-          <label for="sparkTitleInput" class="form-label fw-semibold small">Headline</label>
+          <label for="sparkTitleInput" class="form-label fp-spark-modal-label">Headline</label>
           <input id="sparkTitleInput"
                  type="text"
                  class="form-control"
@@ -536,7 +715,7 @@
                  x-model="newSparkTitle">
         </div>
         <div>
-          <label for="sparkPromptInput" class="form-label fw-semibold small">Your Question</label>
+          <label for="sparkPromptInput" class="form-label fp-spark-modal-label">Your Question</label>
           <textarea id="sparkPromptInput"
                     class="form-control"
                     rows="3"
@@ -546,7 +725,7 @@
                     x-model="newSparkPrompt"></textarea>
         </div>
         <div>
-          <label for="sparkOptionsInput" class="form-label fw-semibold small">Optional Quick Poll Choices (comma-separated, up to 4)</label>
+          <label for="sparkOptionsInput" class="form-label fp-spark-modal-label">Optional Quick Poll Choices (comma-separated, up to 4)</label>
           <input id="sparkOptionsInput"
                  type="text"
                  class="form-control"

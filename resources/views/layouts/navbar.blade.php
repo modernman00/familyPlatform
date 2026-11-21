@@ -146,6 +146,9 @@
                                 <span class="notif-header-badge" id="header_notif_count" x-data x-cloak x-show="$store.notifications.hasUnread" x-text="$store.notifications.display"></span>
                             </div>
                             <h5 class="mb-0 fw-bold notif-header-title">{{ __('nav.notifications', 'Notifications') }}</h5>
+                            <button type="button" id="closeNotifDropdownBtn" class="btn btn-sm btn-link text-muted ms-auto d-lg-none d-inline-flex align-items-center justify-content-center p-0" style="min-width: 44px; min-height: 44px; text-decoration: none;" aria-label="Close notifications" onclick="document.getElementById('notificationDropdown')?.classList.remove('show')">
+                                <i class="bi bi-x-lg" aria-hidden="true"></i>
+                            </button>
                         </div>
 
                         <!-- Content List -->

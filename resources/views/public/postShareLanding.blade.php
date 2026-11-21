@@ -8,7 +8,8 @@
     <meta name="description" content="{{ $ogDescription }}">
 
     <!-- Open Graph & Social Previews (WhatsApp, Facebook, LinkedIn, iMessage) -->
-    <meta property="og:site_name" content="FamilyPlatform">
+    <meta name="application-name" content="FamilyPlatform">
+    <meta property="og:site_name" content="FamilyPlatform — Private Family Network &amp; Living Archive">
     <meta property="og:locale" content="en_GB">
     <meta property="og:type" content="{{ $ogType ?? 'article' }}">
     <meta property="og:title" content="{{ $ogTitle }}">

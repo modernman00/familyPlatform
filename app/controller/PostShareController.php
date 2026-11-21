@@ -60,32 +60,31 @@ final class PostShareController
             $cleanCaption = strip_tags(html_entity_decode($cleanCaption, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
             $cleanCaption = trim(preg_replace('/\s+/', ' ', $cleanCaption));
 
-            // Detect media type
-            $hasVideo = (bool)preg_match('/(\/resources\/videos\/|\.webm|\.mp4|\.mov|post_vid_)/i', $rawMessage);
+            // Detect media type (including YouTube, Google Photos, OneDrive, Facebook, Vimeo, TikTok, and local uploads)
+            $hasVideo = (bool)preg_match('/(\/resources\/videos\/|\.webm|\.mp4|\.mov|post_vid_|youtube\.com|youtu\.be|vimeo\.com|tiktok\.com|fb\.watch|facebook\.com\/(?:watch|reel|[^\/]+\/videos)|onedrive\.live\.com|1drv\.ms|drive\.google\.com)/i', $rawMessage)
+                || \App\classes\VideoParser::extractVideoFromText($rawMessage) !== null;
             $hasPhoto = !empty($post['post_img0']);
             $hasVoice = !empty($post['voice_capsule_url']);
 
-            // Compose human headline & description
+            // Compose rich, app-promoting headline & description
             $mediaLabel = 'Family Memory';
-            if ($cleanCaption !== '') {
-                $snippet = mb_strlen($cleanCaption) > 65 ? mb_substr($cleanCaption, 0, 62) . '...' : $cleanCaption;
-                $ogTitle = "“{$snippet}” — {$authorName}";
-                $ogDescription = "{$authorName} shared a family moment on FamilyPlatform. Connect on FamilyPlatform to view, comment, and celebrate together.";
-            } elseif ($hasVideo) {
-                $ogTitle = "{$authorName} shared a family video memory";
-                $ogDescription = "Watch {$authorName}’s family video memory on FamilyPlatform. Connect with your family circle to cherish moments together.";
+            if ($hasVideo) {
                 $mediaLabel = 'Video Memory';
             } elseif ($hasPhoto) {
-                $ogTitle = "{$authorName} shared a family photo memory";
-                $ogDescription = "View {$authorName}’s family photo on FamilyPlatform. Connect with your family circle to cherish moments together.";
                 $mediaLabel = 'Photo Memory';
             } elseif ($hasVoice) {
-                $ogTitle = "{$authorName} shared a family voice capsule";
-                $ogDescription = "Listen to {$authorName}’s voice recording on FamilyPlatform.";
                 $mediaLabel = 'Voice Capsule';
+            }
+            $kind = $hasVideo ? 'family video memory' : ($hasPhoto ? 'photo memory' : ($hasVoice ? 'voice note' : 'family moment'));
+
+            if ($cleanCaption !== '') {
+                $snippet = mb_strlen($cleanCaption) > 65 ? mb_substr($cleanCaption, 0, 62) . '…' : $cleanCaption;
+                $longSnippet = mb_strlen($cleanCaption) > 120 ? rtrim(mb_substr($cleanCaption, 0, 117)) . '…' : $cleanCaption;
+                $ogTitle = "“{$snippet}” — {$authorName} on FamilyPlatform";
+                $ogDescription = "“{$longSnippet}” · Join {$authorName}’s private family circle on FamilyPlatform — your ad-free family network & living archive.";
             } else {
-                $ogTitle = "{$authorName} shared a family memory";
-                $ogDescription = "Cherish and preserve shared family memories on FamilyPlatform.";
+                $ogTitle = "{$authorName} shared a {$kind} on FamilyPlatform";
+                $ogDescription = "View {$authorName}’s {$kind} on FamilyPlatform — the private, ad-free family network & living archive for photos, videos, and milestones.";
             }
 
             // Resolve absolute preview image URL
@@ -107,11 +106,6 @@ final class PostShareController
             } else {
                 // Designed preview card (photo, words and author in FamilyPlatform's couture style)
                 $ogImage = $appUrl . '/post/' . $postNo . '/card.jpg?v=' . substr(md5($rawMessage . ($post['post_img0'] ?? '')), 0, 8);
-                $kind = $hasVideo ? 'video memory' : ($hasPhoto ? 'photo memory' : ($hasVoice ? 'voice note' : 'update'));
-                $ogTitle = "{$authorName} shared a family {$kind}";
-                if ($cleanCaption !== '') {
-                    $ogDescription = '“' . (mb_strlen($cleanCaption) > 150 ? rtrim(mb_substr($cleanCaption, 0, 147)) . '…' : $cleanCaption) . '”';
-                }
             }
 
             $canonicalUrl = $appUrl . '/post/' . $postNo;
@@ -342,7 +336,8 @@ final class PostShareController
             $raw = (string)($post['postMessage'] ?? '');
             $text = preg_replace('/https?:\/\/[^\s]+|\/resources\/(?:videos|images|profile)\/[^\s]+|post_vid_[^\s]+|\[style:[a-z0-9_]+\]/i', '', $raw) ?? '';
             $text = trim(preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8'))) ?? '');
-            $isVideo = (bool)preg_match('/(\/resources\/videos\/|\.webm|\.mp4|\.mov|post_vid_)/i', $raw);
+            $isVideo = (bool)preg_match('/(\/resources\/videos\/|\.webm|\.mp4|\.mov|post_vid_|youtube\.com|youtu\.be|vimeo\.com|tiktok\.com|fb\.watch|facebook\.com\/(?:watch|reel|[^\/]+\/videos)|onedrive\.live\.com|1drv\.ms|drive\.google\.com)/i', $raw)
+                || \App\classes\VideoParser::extractVideoFromText($raw) !== null;
 
             $img = trim((string)($post['post_img0'] ?? ''));
             $heroUrl = '';

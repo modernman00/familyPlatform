@@ -35,7 +35,11 @@ foreach(($eventData ?? []) as $event) {
 @endphp
 
 <!-- Right Column - Sidebar -->
+@if(empty($usePreactFeed) || ($_GET['v'] ?? '') === 'legacy')
 <div class="sidebar-column" x-data="upcomingEvents({{ json_encode($enrichedEvents) }})">
+@else
+<div class="sidebar-column">
+@endif
     @if(empty($isPendingApproval))
     <!-- Suggested Kin & In-Laws: Primary home is in the main feed carousel -->
     @if(!empty($suggestedKin))
@@ -44,6 +48,7 @@ foreach(($eventData ?? []) as $event) {
     </div>
     @endif
 
+    @if(empty($usePreactFeed) || ($_GET['v'] ?? '') === 'legacy')
     <!-- Events Card -->
     <div class="card border-0 shadow-sm mb-4" id="upcomingEventsSection" style="border-radius: 20px; background-color: var(--card-bg); scroll-margin-top: 80px;">
         <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4" id="eventHeader">
@@ -196,6 +201,10 @@ foreach(($eventData ?? []) as $event) {
             </template>
         </div>
     </div>
+    @else
+    <div id="upcoming-events-root"></div>
+    <script type="application/json" id="upcoming-events-bootstrap">{!! json_encode(['events' => $enrichedEvents, 'userId' => (string)($_SESSION['id'] ?? ''), 'famCode' => (string)($data['famCode'] ?? '')]) !!}</script>
+    @endif
 
     <!-- Then & Now timeline (own) -->
     @includeIf('member.includes.thenNowTimeline', ['memberId' => (string)($_SESSION['id'] ?? ''), 'memberName' => '', 'tnSuffix' => 'self'])

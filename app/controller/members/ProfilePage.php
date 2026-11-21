@@ -114,8 +114,25 @@ final class ProfilePage extends ProcessImg
                 $pinnedWishlists = [];
             }
 
+            $vParam = strtolower(trim((string)($_GET['v'] ?? '')));
+            $usePreactFeed = $vParam !== 'legacy';
+            $feedBootstrapJson = json_encode([
+                'famCode' => (string)($data['famCode'] ?? ''),
+                'userId' => (string)$this->id,
+                'firstName' => (string)($data['memberData']['firstName'] ?? ''),
+                'lastName' => (string)($data['memberData']['lastName'] ?? ''),
+                'avatar' => (string)($data['memberData']['img'] ?? $data['memberData']['profilePics'] ?? ''),
+                'csrfToken' => (string)($_SESSION['token'] ?? ''),
+                'familyRoster' => $data['familyRoster'] ?? [],
+                'postAudiences' => $postAudiences,
+                'pusherKey' => (string)($_ENV['MIX_PUSHER_APP_KEY'] ?? getenv('MIX_PUSHER_APP_KEY') ?: ''),
+                'pusherCluster' => (string)($_ENV['MIX_PUSHER_APP_CLUSTER'] ?? getenv('MIX_PUSHER_APP_CLUSTER') ?: 'eu'),
+            ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?: '{}';
+
             view('member/profilePage', [
                 'data' => $data['memberData'],
+                'usePreactFeed' => $usePreactFeed,
+                'feedBootstrapJson' => $feedBootstrapJson,
                 'primaryFamCode' => $data['primaryFamCode'] ?? ($data['famCode'] ?? ''),
                 'maternalFamCode' => $data['maternalFamCode'] ?? '',
                 'hasMaternalCode' => $data['hasMaternalCode'] ?? false,
@@ -527,31 +544,46 @@ final class ProfilePage extends ProcessImg
                             identifierAnswer: $result
                         );
                     }
-                } elseif (!$hasDirectImage && empty($sharedTempImages)) {
-                    // Promote linked Google Photos or direct photo/video URLs to native post media (Multi-Media Zero-Storage pipeline)
-                    // High-Performance Gate: Only run URL extractor if text actually contains link schemes
-                    if (str_contains($cleanMultiLineMessage, 'http://') || str_contains($cleanMultiLineMessage, 'https://')) {
-                        $extractedMedia = \App\services\LinkPreviewService::extractPhotoAssetsFromText($cleanMultiLineMessage, 6);
+                }
+
+                // Promote linked Google Photos or direct photo/video URLs to native post media (Multi-Media Zero-Storage pipeline)
+                // Works both for link-only posts and posts combining uploaded images/GIFs with media links
+                if (str_contains($cleanMultiLineMessage, 'http://') || str_contains($cleanMultiLineMessage, 'https://')) {
+                    $existingPostForLinks = ($hasDirectImage || !empty($sharedTempImages) || $attachedGif)
+                        ? (Post::postByNo($result) ?: [])
+                        : [];
+                    $availableSlots = [];
+                    for ($slotIdx = 0; $slotIdx < 6; $slotIdx++) {
+                        if (empty($existingPostForLinks['post_img' . $slotIdx])) {
+                            $availableSlots[] = 'post_img' . $slotIdx;
+                        }
+                    }
+
+                    if (!empty($availableSlots)) {
+                        $extractedMedia = \App\services\LinkPreviewService::extractPhotoAssetsFromText($cleanMultiLineMessage, count($availableSlots));
                         $mediaSlots = [];
                         foreach ($extractedMedia['images'] ?? [] as $imgAsset) {
-                            if (count($mediaSlots) < 6) {
+                            if (count($mediaSlots) < count($availableSlots)) {
                                 $mediaSlots[] = (string)$imgAsset;
                             }
                         }
                         foreach ($extractedMedia['videos'] ?? [] as $vidAsset) {
-                            if (count($mediaSlots) < 6) {
+                            if (count($mediaSlots) < count($availableSlots)) {
                                 $mediaSlots[] = (string)$vidAsset;
                             }
                         }
 
                         if (!empty($mediaSlots)) {
-                            foreach ($mediaSlots as $slotIdx => $mediaAsset) {
-                                (new \Src\Update('post'))->updateTable(
-                                    column: 'post_img' . $slotIdx,
-                                    columnAnswer: $mediaAsset,
-                                    identifier: 'post_no',
-                                    identifierAnswer: $result
-                                );
+                            foreach ($mediaSlots as $idx => $mediaAsset) {
+                                $targetCol = $availableSlots[$idx] ?? null;
+                                if ($targetCol !== null) {
+                                    (new \Src\Update('post'))->updateTable(
+                                        column: $targetCol,
+                                        columnAnswer: $mediaAsset,
+                                        identifier: 'post_no',
+                                        identifierAnswer: $result
+                                    );
+                                }
                             }
                             $cleanMultiLineMessage = $extractedMedia['cleaned_message'];
                         }
@@ -573,34 +605,67 @@ final class ProfilePage extends ProcessImg
                 if (!empty($sharedTempImages)) {
                     $tempBaseDir = realpath(__DIR__ . '/../../../resources/images/post') . '/temp';
                     $postBaseDir = realpath(__DIR__ . '/../../../resources/images/post');
+                    $videoBaseDir = __DIR__ . '/../../../resources/videos/posts';
+                    if (!is_dir($videoBaseDir)) {
+                        @mkdir($videoBaseDir, 0755, true);
+                    }
+                    $videoBaseReal = realpath($videoBaseDir) ?: $videoBaseDir;
+
                     $imgIndex = 0;
+                    $promotedVideoUrls = [];
                     foreach ($sharedTempImages as $tempFile) {
-                        if ($imgIndex >= 6) {
-                            break;
-                        }
                         $srcPath = rtrim($tempBaseDir, '/') . '/' . $tempFile;
-                        $destPath = rtrim($postBaseDir, '/') . '/' . $tempFile;
-                        if (file_exists($srcPath)) {
-                            if (rename($srcPath, $destPath) || copy($srcPath, $destPath)) {
+                        if (!file_exists($srcPath)) {
+                            continue;
+                        }
+                        $tempExt = strtolower(pathinfo($tempFile, PATHINFO_EXTENSION));
+                        if (in_array($tempExt, ['mp4', 'webm', 'mov', 'ogg'], true)) {
+                            $videoDest = rtrim($videoBaseReal, '/') . '/' . $tempFile;
+                            if (@rename($srcPath, $videoDest) || @copy($srcPath, $videoDest)) {
                                 @unlink($srcPath); // nosemgrep: php.lang.security.unlink-use.unlink-use
-                                $tempExt = strtolower(pathinfo($tempFile, PATHINFO_EXTENSION));
-                                if (in_array($tempExt, ['jpg', 'jpeg', 'png', 'webp', 'heic'], true)) {
-                                    try {
-                                        $finalDest = FileUploader::finaliseImage($destPath, $tempExt);
-                                        $tempFile = basename($finalDest);
-                                    } catch (\Throwable $finalEx) {
-                                        error_log('[ProfilePage PWA share] FileUploader finaliseImage fallback: ' . $finalEx->getMessage());
-                                    }
+                                $promotedVideoUrls[] = '/resources/videos/posts/' . $tempFile;
+                            }
+                            continue;
+                        }
+
+                        if ($imgIndex >= 6) {
+                            continue;
+                        }
+                        $destPath = rtrim($postBaseDir, '/') . '/' . $tempFile;
+                        if (rename($srcPath, $destPath) || copy($srcPath, $destPath)) {
+                            @unlink($srcPath); // nosemgrep: php.lang.security.unlink-use.unlink-use
+                            if (in_array($tempExt, ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'], true)) {
+                                try {
+                                    $finalDest = FileUploader::finaliseImage($destPath, $tempExt);
+                                    $tempFile = basename($finalDest);
+                                } catch (\Throwable $finalEx) {
+                                    error_log('[ProfilePage PWA share] FileUploader finaliseImage fallback: ' . $finalEx->getMessage());
                                 }
-                                (new \Src\Update('post'))->updateTable(
-                                    column: 'post_img' . $imgIndex,
-                                    columnAnswer: $tempFile,
-                                    identifier: 'post_no',
-                                    identifierAnswer: $result
-                                );
-                                $imgIndex++;
+                            }
+                            (new \Src\Update('post'))->updateTable(
+                                column: 'post_img' . $imgIndex,
+                                columnAnswer: $tempFile,
+                                identifier: 'post_no',
+                                identifierAnswer: $result
+                            );
+                            $imgIndex++;
+                        }
+                    }
+
+                    if (!empty($promotedVideoUrls)) {
+                        $existingRow = Post::postByNo($result);
+                        $currentMsg = trim((string)($existingRow['postMessage'] ?? $cleanMultiLineMessage));
+                        foreach ($promotedVideoUrls as $vUrl) {
+                            if (!str_contains($currentMsg, $vUrl)) {
+                                $currentMsg = $currentMsg !== '' ? ($currentMsg . "\n\n" . $vUrl) : $vUrl;
                             }
                         }
+                        (new \Src\Update('post'))->updateTable(
+                            column: 'postMessage',
+                            columnAnswer: $currentMsg,
+                            identifier: 'post_no',
+                            identifierAnswer: $result
+                        );
                     }
                     unset($_SESSION['pwa_shared_target']);
                 }

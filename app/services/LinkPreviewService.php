@@ -18,7 +18,7 @@ use Throwable;
 final class LinkPreviewService
 {
     private const CACHE_TTL_SECONDS = 604800; // 7 Days (with stale-cache resilience)
-    private const MAX_BODY_BYTES = 131072;    // 128 KB (Head section inspection)
+    private const MAX_BODY_BYTES = 262144;    // 256 KB (Head section inspection for large SSR headers)
     private const HTTP_TIMEOUT_SECS = 3;
     private const CONNECT_TIMEOUT_SECS = 2;
 
@@ -515,6 +515,9 @@ final class LinkPreviewService
         return $url;
     }
 
+    /** @var array<string, bool> In-memory memoized SSRF DNS safety cache per host */
+    private static array $safeHostCache = [];
+
     /**
      * SSRF Hardened Security Gate: Validate destination URL and resolve IP address.
      * Blocks loopback, private ranges, link-local, and cloud metadata endpoints.
@@ -548,23 +551,34 @@ final class LinkPreviewService
             return true;
         }
 
-        // Resolve DNS records to verify remote IP addresses
+        if (array_key_exists($host, self::$safeHostCache)) {
+            return self::$safeHostCache[$host];
+        }
+
+        // Fast-path IPv4 A-record resolution (avoids multi-second DNS_AAAA timeouts on IPv4-only networks)
+        $ipv4 = @gethostbyname($host);
+        if ($ipv4 !== $host && filter_var($ipv4, FILTER_VALIDATE_IP)) {
+            $isSafe = self::isPublicIp($ipv4);
+            self::$safeHostCache[$host] = $isSafe;
+            return $isSafe;
+        }
+
+        // Fallback to full A/AAAA DNS record inspection
         $records = @dns_get_record($host, DNS_A + DNS_AAAA);
         if (empty($records) || !is_array($records)) {
-            $ip = @gethostbyname($host);
-            if ($ip === $host || !filter_var($ip, FILTER_VALIDATE_IP)) {
-                return false;
-            }
-            return self::isPublicIp($ip);
+            self::$safeHostCache[$host] = false;
+            return false;
         }
 
         foreach ($records as $record) {
             $targetIp = $record['ip'] ?? $record['ipv6'] ?? null;
             if ($targetIp !== null && !self::isPublicIp((string)$targetIp)) {
+                self::$safeHostCache[$host] = false;
                 return false;
             }
         }
 
+        self::$safeHostCache[$host] = true;
         return true;
     }
 
@@ -603,6 +617,21 @@ final class LinkPreviewService
             $stmt->execute([$urlHash]);
             $cached = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($cached) {
+                // Self-heal any HTML-encoded &amp; query strings inside cached image_url or canonical_url
+                $cachedImg = (string)($cached['image_url'] ?? '');
+                $cachedCanon = (string)($cached['canonical_url'] ?? '');
+                if (str_contains($cachedImg, '&amp;') || str_contains($cachedCanon, '&amp;') || str_contains($cachedImg, '&#')) {
+                    $healedImg = self::decodeMetaUrl($cachedImg);
+                    $healedCanon = self::decodeMetaUrl($cachedCanon);
+                    $cached['image_url'] = $healedImg !== '' ? $healedImg : null;
+                    $cached['canonical_url'] = $healedCanon !== '' ? $healedCanon : $url;
+                    try {
+                        $healStmt = $db->prepare("UPDATE link_preview_cache SET image_url = ?, canonical_url = ? WHERE url_hash = ?");
+                        $healStmt->execute([$cached['image_url'], $cached['canonical_url'], $urlHash]);
+                    } catch (Throwable) {
+                    }
+                }
+
                 $isFresh = !empty($cached['expires_at']) && strtotime((string)$cached['expires_at']) > time();
                 $hasRichContent = !empty($cached['image_url']) || !empty($cached['extra_data']) || !empty($cached['title']);
                 if ($isFresh || $hasRichContent || !$allowNetworkFetch) {
@@ -749,6 +778,9 @@ final class LinkPreviewService
      */
     private static function fetchHtmlHead(string $url): ?string
     {
+        if ($url === '') {
+            return null;
+        }
         $ch = curl_init();
         if ($ch === false) {
             return null;
@@ -763,8 +795,10 @@ final class LinkPreviewService
             CURLOPT_RETURNTRANSFER => false,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
-            CURLOPT_TIMEOUT => 6,
-            CURLOPT_CONNECTTIMEOUT => 3,
+            CURLOPT_TIMEOUT => 5,
+            CURLOPT_CONNECTTIMEOUT => 2,
+            CURLOPT_ENCODING => '',
+            CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
             CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
             CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
             CURLOPT_USERAGENT => 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php) WhatsApp/2.23.20.0',
@@ -803,7 +837,70 @@ final class LinkPreviewService
     }
 
     /**
-     * Parses OpenGraph, Twitter, and HTML meta tags from HTML head string.
+     * Decode HTML entities (such as &amp; in Facebook/Instagram signed CDN query strings)
+     * and strip control characters from scraped URLs.
+     */
+    public static function decodeMetaUrl(?string $rawUrl): string
+    {
+        if ($rawUrl === null || trim($rawUrl) === '') {
+            return '';
+        }
+        $clean = trim($rawUrl);
+        // Decode up to twice in case an upstream page double-encoded &amp;amp;
+        for ($i = 0; $i < 2; $i++) {
+            $decoded = html_entity_decode($clean, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            if ($decoded === $clean) {
+                break;
+            }
+            $clean = $decoded;
+        }
+        $clean = (string)preg_replace('/[\x00-\x1F\x7F]/', '', trim($clean));
+        if ($clean !== '' && preg_match('/^(javascript|vbscript|data):/i', $clean)) {
+            return '';
+        }
+        return $clean;
+    }
+
+    /**
+     * Extract meta tag content regardless of attribute order (property/name/itemprop before or after content).
+     *
+     * @param array<int, string> $keys
+     */
+    private static function extractMetaContent(string $html, array $keys): ?string
+    {
+        foreach ($keys as $key) {
+            $qKey = preg_quote($key, '/');
+            // 1. property/name/itemprop before content (strictly within a single <meta> tag)
+            if (preg_match('/<meta\b[^>]*?\b(?:property|name|itemprop)\s*=\s*(["\'])' . $qKey . '\1[^>]*?\bcontent\s*=\s*(["\'])([^"\']*)\2[^>]*>/is', $html, $m)) {
+                $val = trim($m[3]);
+                if ($val !== '') {
+                    return $val;
+                }
+            }
+            // 2. content before property/name/itemprop (strictly within a single <meta> tag)
+            if (preg_match('/<meta\b[^>]*?\bcontent\s*=\s*(["\'])([^"\']*)\1[^>]*?\b(?:property|name|itemprop)\s*=\s*(["\'])' . $qKey . '\3[^>]*>/is', $html, $m)) {
+                $val = trim($m[2]);
+                if ($val !== '') {
+                    return $val;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Extract a 11-character YouTube video ID from any standard YouTube watch/short/embed/youtu.be URL.
+     */
+    public static function extractYoutubeVideoId(string $url): ?string
+    {
+        if (preg_match('#(?:youtube\.com/(?:watch\?(?:.*&)?v=|shorts/|embed/|live/|v/)|youtu\.be/)([a-zA-Z0-9_-]{11})#i', $url, $m)) {
+            return $m[1];
+        }
+        return null;
+    }
+
+    /**
+     * Parses OpenGraph, Twitter, JSON-LD, and HTML meta tags from HTML head string.
      *
      * @return array<string, mixed>
      */
@@ -816,7 +913,7 @@ final class LinkPreviewService
             'url' => $sourceUrl,
             'canonical_url' => $sourceUrl,
             'domain' => $cleanDomain,
-            'site_name' => ucfirst(explode('.', $cleanDomain)[0] ?? 'Website'),
+            'site_name' => self::resolveBrandSiteName($cleanDomain, ucfirst(explode('.', $cleanDomain)[0] ?? 'Website')),
             'title' => null,
             'description' => null,
             'image_url' => null,
@@ -824,33 +921,42 @@ final class LinkPreviewService
         ];
 
         // 1. og:title / twitter:title / <title>
-        if (preg_match('/<meta[^>]+property=["\']og:title["\'][^>]+content=["\'](.*?)["\']/is', $html, $m)) {
-            $data['title'] = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        } elseif (preg_match('/<meta[^>]+name=["\']twitter:title["\'][^>]+content=["\'](.*?)["\']/is', $html, $m)) {
-            $data['title'] = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $rawTitle = self::extractMetaContent($html, ['og:title', 'twitter:title', 'title']);
+        if ($rawTitle !== null) {
+            $data['title'] = html_entity_decode($rawTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         } elseif (preg_match('/<title[^>]*>(.*?)<\/title>/is', $html, $m)) {
             $data['title'] = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         }
 
         // 2. og:description / twitter:description / <meta name="description">
-        if (preg_match('/<meta[^>]+property=["\']og:description["\'][^>]+content=["\'](.*?)["\']/is', $html, $m)) {
-            $data['description'] = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        } elseif (preg_match('/<meta[^>]+name=["\']twitter:description["\'][^>]+content=["\'](.*?)["\']/is', $html, $m)) {
-            $data['description'] = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        } elseif (preg_match('/<meta[^>]+name=["\']description["\'][^>]+content=["\'](.*?)["\']/is', $html, $m)) {
-            $data['description'] = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $rawDesc = self::extractMetaContent($html, ['og:description', 'twitter:description', 'description']);
+        if ($rawDesc !== null) {
+            $data['description'] = html_entity_decode($rawDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         }
 
-        // 3. og:image / og:image:secure_url / twitter:image
-        if (preg_match('/<meta[^>]+property=["\']og:image(?::secure_url)?["\'][^>]+content=["\'](.*?)["\']/is', $html, $m)) {
-            $data['image_url'] = trim($m[1]);
-        } elseif (preg_match('/<meta[^>]+name=["\']twitter:image["\'][^>]+content=["\'](.*?)["\']/is', $html, $m)) {
-            $data['image_url'] = trim($m[1]);
+        // 3. og:image / og:image:secure_url / og:image:url / twitter:image:src / twitter:image / itemprop=image
+        $rawImage = self::extractMetaContent($html, [
+            'og:image:secure_url',
+            'og:image:url',
+            'og:image',
+            'twitter:image:src',
+            'twitter:image',
+            'image',
+        ]);
+        if ($rawImage === null && preg_match('/<link\b[^>]*?\brel\s*=\s*["\']image_src["\'][^>]*?\bhref\s*=\s*["\'](.*?)["\']/is', $html, $m)) {
+            $rawImage = trim($m[1]);
+        }
+        if ($rawImage === null && preg_match('/"thumbnailUrl"\s*:\s*"([^"]+)"/i', $html, $m)) {
+            $rawImage = stripcslashes(trim($m[1]));
+        }
+        if ($rawImage !== null && $rawImage !== '') {
+            $data['image_url'] = self::decodeMetaUrl($rawImage);
         }
 
-        // 3b. og:video / og:video:secure_url
-        if (preg_match('/<meta[^>]+property=["\']og:video(?::secure_url)?["\'][^>]+content=["\'](.*?)["\']/is', $html, $m)) {
-            $data['video_url'] = trim($m[1]);
+        // 3b. og:video / og:video:secure_url / og:video:url
+        $rawVideo = self::extractMetaContent($html, ['og:video:secure_url', 'og:video:url', 'og:video']);
+        if ($rawVideo !== null && $rawVideo !== '') {
+            $data['video_url'] = self::decodeMetaUrl($rawVideo);
         }
 
         // 3c. Extract multi-item Google Photos shared album contents (photos and videos)
@@ -865,15 +971,28 @@ final class LinkPreviewService
         }
 
         // 4. og:site_name
-        if (preg_match('/<meta[^>]+property=["\']og:site_name["\'][^>]+content=["\'](.*?)["\']/is', $html, $m)) {
-            $data['site_name'] = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $rawSite = self::extractMetaContent($html, ['og:site_name', 'application-name']);
+        if ($rawSite !== null) {
+            $data['site_name'] = html_entity_decode($rawSite, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         }
 
-        // 5. og:url (canonical)
-        if (preg_match('/<meta[^>]+property=["\']og:url["\'][^>]+content=["\'](.*?)["\']/is', $html, $m)) {
-            $canonical = trim($m[1]);
+        // 5. og:url / canonical link
+        $rawCanonical = self::extractMetaContent($html, ['og:url', 'twitter:url']);
+        if ($rawCanonical === null && preg_match('/<link\b[^>]*?\brel\s*=\s*["\']canonical["\'][^>]*?\bhref\s*=\s*["\'](.*?)["\']/is', $html, $m)) {
+            $rawCanonical = trim($m[1]);
+        }
+        if ($rawCanonical !== null) {
+            $canonical = self::decodeMetaUrl($rawCanonical);
             if (filter_var($canonical, FILTER_VALIDATE_URL)) {
                 $data['canonical_url'] = $canonical;
+            }
+        }
+
+        // 6. YouTube deterministic high-res thumbnail fallback if og:image was omitted
+        if (empty($data['image_url'])) {
+            $ytId = self::extractYoutubeVideoId((string)$data['canonical_url']) ?? self::extractYoutubeVideoId($sourceUrl);
+            if ($ytId !== null) {
+                $data['image_url'] = 'https://i.ytimg.com/vi/' . $ytId . '/hqdefault.jpg';
             }
         }
 
@@ -1014,6 +1133,10 @@ final class LinkPreviewService
             'tiktok.com' => 'TikTok',
             'lnkd.in' => 'LinkedIn',
             'linkedin.com' => 'LinkedIn',
+            '1drv.ms' => 'OneDrive',
+            'onedrive.live.com' => 'OneDrive',
+            'drive.google.com' => 'Google Drive',
+            'docs.google.com' => 'Google Drive',
         ];
         if (isset($map[$lower])) {
             return $map[$lower];
@@ -1139,12 +1262,22 @@ final class LinkPreviewService
      */
     private static function formatPreviewPayload(array $data, ?string $sourceRequestedUrl = null): array
     {
-        $url = (string)($data['canonical_url'] ?? $data['url'] ?? $sourceRequestedUrl ?? '');
-        $requestedUrl = $sourceRequestedUrl ?? (string)($data['url'] ?? $url);
+        $url = self::decodeMetaUrl((string)($data['canonical_url'] ?? $data['url'] ?? $sourceRequestedUrl ?? ''));
+        $requestedUrl = self::decodeMetaUrl($sourceRequestedUrl ?? (string)($data['url'] ?? $url));
+        if ($url === '') {
+            $url = $requestedUrl;
+        }
         $domain = (string)($data['domain'] ?? parse_url($url, PHP_URL_HOST) ?? '');
-        $isPartyEvent = str_contains(strtolower($domain), 'partyplatform') || str_contains($url, '/e/');
+        $cleanDomain = strtolower((string)preg_replace('/^www\./i', '', trim($domain)));
+        $isPartyEvent = str_contains($cleanDomain, 'partyplatform') || str_contains($url, '/e/');
 
-        $rawImage = (string)($data['image_url'] ?? $data['image'] ?? '');
+        $rawImage = self::decodeMetaUrl((string)($data['image_url'] ?? $data['image'] ?? ''));
+        if ($rawImage === '') {
+            $ytId = self::extractYoutubeVideoId($url) ?? self::extractYoutubeVideoId($requestedUrl);
+            if ($ytId !== null) {
+                $rawImage = 'https://i.ytimg.com/vi/' . $ytId . '/hqdefault.jpg';
+            }
+        }
         if (str_starts_with($rawImage, 'http://')) {
             $isHttpsCurrent = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
                 || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
@@ -1156,8 +1289,8 @@ final class LinkPreviewService
         }
 
         // Detect Google Photos albums/shares and direct image files (Zero-Storage Media Pipeline)
-        $isGooglePhoto = str_contains(strtolower($domain), 'photos.app.goo.gl')
-            || str_contains(strtolower($domain), 'photos.google.com')
+        $isGooglePhoto = str_contains($cleanDomain, 'photos.app.goo.gl')
+            || str_contains($cleanDomain, 'photos.google.com')
             || str_contains(strtolower($url), 'photos.app.goo.gl')
             || str_contains(strtolower($url), 'photos.google.com')
             || str_contains(strtolower($requestedUrl), 'photos.app.goo.gl')
@@ -1167,7 +1300,7 @@ final class LinkPreviewService
             || (bool)preg_match('/\.(jpe?g|png|webp|avif|gif)(\?.*)?$/i', $requestedUrl);
 
         $title = (string)($data['title'] ?? '');
-        $rawVideo = (string)($data['video_url'] ?? '');
+        $rawVideo = self::decodeMetaUrl((string)($data['video_url'] ?? ''));
         $hasAlbumVideos = !empty($data['album_videos']);
         $isGoogleVideo = $isGooglePhoto && (!empty($rawVideo) || $hasAlbumVideos || str_contains($title, '🎬') || str_starts_with(strtolower($title), 'new video'));
 
@@ -1189,7 +1322,12 @@ final class LinkPreviewService
             } else {
                 $videoStreamUrl = $baseForVideo;
             }
+        } elseif ($rawVideo !== '' && filter_var($rawVideo, FILTER_VALIDATE_URL)) {
+            $videoStreamUrl = $rawVideo;
         }
+
+        $parsedVideoEmbed = \App\classes\VideoParser::parseVideoUrl($url) ?? \App\classes\VideoParser::parseVideoUrl($requestedUrl);
+        $embedUrl = $parsedVideoEmbed['embedUrl'] ?? null;
 
         $albumVideos = is_array($data['album_videos'] ?? null) ? array_values($data['album_videos']) : [];
         $proxiedVideoUrl = $videoStreamUrl !== null ? self::getProxiedVideoUrl($videoStreamUrl) : null;
@@ -1197,7 +1335,7 @@ final class LinkPreviewService
 
         $resolvedSiteName = $isGooglePhoto ? 'Google Photos' : self::resolveBrandSiteName($domain, (string)($data['site_name'] ?? $domain));
         $cleanTitle = preg_replace('/\s+/', ' ', trim($title)) ?? trim($title);
-        if ($cleanTitle === '' || preg_match('/^Fb\s*[—–-]\s*/i', $cleanTitle)) {
+        if ($cleanTitle === '' || $cleanTitle === '- YouTube' || preg_match('/^Fb\s*[—–-]\s*/i', $cleanTitle)) {
             $cleanTitle = self::buildCleanPlatformTitle($url, $domain, $resolvedSiteName);
         } elseif (str_contains($cleanTitle, ' — ')) {
             $parts = explode(' — ', $cleanTitle, 2);
@@ -1208,16 +1346,53 @@ final class LinkPreviewService
             }
         }
 
+        $combinedUrlLower = strtolower($url . ' ' . $requestedUrl);
+        $isSocialVideo = $isGoogleVideo
+            || !empty($rawVideo)
+            || str_contains($combinedUrlLower, '/reel/')
+            || str_contains($combinedUrlLower, '/share/v/')
+            || str_contains($combinedUrlLower, '/share/r/')
+            || str_contains($combinedUrlLower, '/videos/')
+            || str_contains($combinedUrlLower, 'facebook.com/watch')
+            || str_contains($combinedUrlLower, 'fb.watch')
+            || str_contains($combinedUrlLower, 'tiktok.com/')
+            || str_contains($combinedUrlLower, 'youtube.com/')
+            || str_contains($combinedUrlLower, 'youtu.be/');
+
+        $description = trim((string)($data['description'] ?? ''));
+        if ($description === '' || filter_var($description, FILTER_VALIDATE_URL)) {
+            if ($resolvedSiteName === 'Facebook') {
+                $description = str_contains($combinedUrlLower, '/reel/') || str_contains($combinedUrlLower, '/share/r/')
+                    ? 'Watch this reel on Facebook'
+                    : ($isSocialVideo ? 'Watch this video on Facebook' : 'View this post on Facebook');
+            } elseif ($resolvedSiteName !== '') {
+                $description = $isSocialVideo ? "Watch this video on {$resolvedSiteName}" : "Explore on {$resolvedSiteName}";
+            }
+        }
+
+        $ctaLabel = 'Open Link →';
+        if ($isPartyEvent) {
+            $ctaLabel = 'View Event / RSVP →';
+        } elseif ($isPhotoLink) {
+            $ctaLabel = 'View Photo →';
+        } elseif ($isGoogleVideo) {
+            $ctaLabel = 'Play Video →';
+        } elseif ($isSocialVideo && $resolvedSiteName !== '') {
+            $ctaLabel = "Watch on {$resolvedSiteName} →";
+        }
+
         return [
             'url' => $url,
             'original_url' => $requestedUrl,
             'title' => $cleanTitle,
-            'description' => (string)($data['description'] ?? ''),
+            'description' => $description,
             'image' => $photoUrl !== '' ? $photoUrl : $rawImage,
             'photo_url' => $isPhotoLink ? ($photoUrl !== '' ? $photoUrl : $rawImage) : null,
             'video_url' => $videoStreamUrl,
+            'embed_url' => $embedUrl,
             'proxied_video_url' => $proxiedVideoUrl,
-            'is_video' => $isGoogleVideo || !empty($rawVideo),
+            'is_video' => $isGoogleVideo || !empty($rawVideo) || $embedUrl !== null,
+            'is_social_video' => $isSocialVideo,
             'album_images' => $data['album_images'] ?? [],
             'album_videos' => $albumVideos,
             'proxied_album_videos' => $proxiedAlbumVideos,
@@ -1227,7 +1402,7 @@ final class LinkPreviewService
             'is_party_event' => $isPartyEvent,
             'is_photo_link' => $isPhotoLink,
             'is_google_photo' => $isGooglePhoto,
-            'cta_label' => $isPartyEvent ? 'View Event / RSVP →' : ($isPhotoLink ? 'View Photo →' : ($isGoogleVideo ? 'Play Video →' : 'Open Link →')),
+            'cta_label' => $ctaLabel,
         ];
     }
 
@@ -1379,6 +1554,7 @@ final class LinkPreviewService
             CURLOPT_MAXREDIRS => 5,
             CURLOPT_TIMEOUT => 45,
             CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
             CURLOPT_USERAGENT => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             CURLOPT_HTTPHEADER => [
                 'Accept: video/mp4,video/*;q=0.9,*/*;q=0.5',
@@ -1447,6 +1623,9 @@ final class LinkPreviewService
         $cleaned = (string)preg_replace('#https?://(?:www\.|player\.)?vimeo\.com/(?:channels/(?:\w+/)?|groups/[^/]+/videos/|album/\d+/video/|video/|)\d+(?:[^\s<>"\'`]*)?#i', '', $cleaned);
         $cleaned = (string)preg_replace('#https?://(?:iframe\.videodelivery\.net|watch\.cloudflarestream\.com|customer-[a-zA-Z0-9_-]+\.cloudflarestream\.com)/[a-zA-Z0-9]{32}(?:[^\s<>"\'`]*)?#i', '', $cleaned);
         $cleaned = (string)preg_replace('#https?://(?:www\.|m\.)?tiktok\.com/(?:@[\w.-]+/video|embed/v2|v)/\d+(?:[^\s<>"\'`]*)?#i', '', $cleaned);
+        $cleaned = (string)preg_replace('#https?://(?:www\.|m\.|web\.)?(?:facebook\.com/(?:[^/\s]+/videos/\d+|watch/?\?v=\d+|reel/\d+|share/[vr]/[^\s<>"\'`]+|video\.php\?v=\d+)|fb\.watch/[^\s<>"\'`]+|fb\.com/(?:watch|reel|[^/\s]+/videos)/[^\s<>"\'`]+)#i', '', $cleaned);
+        $cleaned = (string)preg_replace('#https?://(?:onedrive\.live\.com/(?:embed|redir|\?)|1drv\.ms/v/)[^\s<>"\'`]+#i', '', $cleaned);
+        $cleaned = (string)preg_replace('#https?://drive\.google\.com/(?:file/d/|open\?id=)[^\s<>"\'`]+#i', '', $cleaned);
         $cleaned = (string)preg_replace('~(?:https?://[^\s<>"\'`]+|/resources/(?:videos|images)/[^\s<>"\'`]+)\.(?:mp4|webm|ogg|mov|m4v)(?:\?[^\s<>"\'`#]*)?(?:#t=[0-9.]+(?:,[0-9.]+)?)?~i', '', $cleaned);
 
         // Clean up redundant blank lines or multiple spaces while preserving intentional paragraphs

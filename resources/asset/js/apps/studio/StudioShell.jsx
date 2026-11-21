@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import SovereignNleEngine from '@shared/SovereignNleEngine';
 import { MediaBin } from './MediaBin';
 import { PreviewStage } from './PreviewStage';
 import { NleTimeline } from './NleTimeline';
@@ -29,9 +30,11 @@ export function StudioShell({ bootstrap = {} }) {
     const createdUrlsRef = useRef([]);
     const nleEngineRef = useRef(null);
 
-    const NleEngineCtor = typeof globalThis !== 'undefined' && typeof globalThis.SovereignNleEngine === 'function'
-        ? globalThis.SovereignNleEngine
-        : null;
+    const NleEngineCtor = typeof SovereignNleEngine === 'function'
+        ? SovereignNleEngine
+        : (typeof globalThis !== 'undefined' && typeof globalThis.SovereignNleEngine === 'function'
+            ? globalThis.SovereignNleEngine
+            : null);
 
     if (!nleEngineRef.current && NleEngineCtor) {
         nleEngineRef.current = new NleEngineCtor({ aspectRatio: '9:16' });

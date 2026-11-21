@@ -128,6 +128,7 @@
                  class="w-100 h-100 object-fit-cover"
                  :alt="post.link_preview.title || 'Link preview image'"
                  loading="lazy"
+                 referrerpolicy="no-referrer"
                  x-on:error="imgFailed = true">
 
             <!-- Platform Badge Pill -->
@@ -188,8 +189,8 @@
           <div class="pt-2 d-flex justify-content-between align-items-center link-preview-card__footer">
             <span class="small text-truncate link-preview-card__url"
                   style="max-width: 58%;"
-                  :title="post.link_preview.url"
-                  x-text="post.link_preview.url"></span>
+                  :title="post.link_preview.site_name || post.link_preview.domain || 'Web Link'"
+                  x-text="post.link_preview.site_name || post.link_preview.domain || 'Web Link'"></span>
             <span class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm link-preview-card__cta">
               <span x-text="post.link_preview.cta_label || 'Open Link →'"></span>
             </span>

@@ -448,7 +448,13 @@
         });
     }
 
+    function isAuthOrOnboardingRoute() {
+        const p = (window.location.pathname || '').toLowerCase();
+        return p.startsWith('/register') || p.startsWith('/login') || p.includes('/verify-email') || p.includes('/auth/') || p.includes('/manager_url');
+    }
+
     function initPushBanner() {
+        if (isAuthOrOnboardingRoute()) return;
         const banner = document.getElementById('push-notification-banner');
         const enableBtn = document.getElementById('enable-push-btn');
         const dismissBtn = document.getElementById('dismiss-push-btn');
@@ -534,32 +540,8 @@
         } else {
             // For standard browser visitors:
             if (isIos()) {
-                if (isDismissedWithinCooldown()) return;
-
-                const titleEl = banner.querySelector('.push-banner-title');
-                const textEl = banner.querySelector('.push-banner-text');
-                if (titleEl) titleEl.textContent = 'Instant Alerts Require App Installation';
-                if (textEl) textEl.textContent = 'To receive family milestone notifications on your iPhone, tap Share (box with arrow) below, then select "Add to Home Screen".';
-                
-                enableBtn.innerHTML = '<i class="bi bi-box-arrow-up me-1.5"></i> How to Install';
-                enableBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    dismissAction();
-                    if (window.Swal) {
-                        window.Swal.fire({
-                            icon: 'info',
-                            title: 'Install on Your iPhone',
-                            html: '<div class="text-start" style="font-size:0.95rem;"><p>Apple iOS requires FamilyPlatform on your Home Screen to deliver lockscreen notifications:</p><ol class="ps-3 mb-0"><li>Tap the <strong>Share</strong> button <i class="bi bi-box-arrow-up text-primary"></i> at the bottom of Safari.</li><li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li><li>Open FamilyPlatform from your Home Screen to enjoy instant alerts.</li></ol></div>',
-                            confirmButtonColor: '#a31621',
-                            confirmButtonText: 'Understood'
-                        });
-                    }
-                });
-
-                showBannerWhenIdle(function() {
-                    banner.style.display = 'block';
-                    banner.classList.add('show');
-                }, 2000);
+                // On non-standalone iOS Safari, pwaManager.js already displays the #pwa-ios-overlay tutorial;
+                // avoid showing two competing "Add to Home Screen" prompts at the same time.
                 return;
             }
 
@@ -612,17 +594,18 @@
                 enableBtn.innerHTML = '<i class="bi bi-bell-fill me-1.5"></i> Enable Notifications';
 
                 const errMsg = (err && err.message) ? String(err.message) : '';
-                const isPermissionIssue = (
-                    (typeof window.Notification !== 'undefined' && (Notification.permission === 'denied' || Notification.permission === 'default')) ||
-                    errMsg.includes('Permission') ||
-                    errMsg.includes('denied')
-                );
+                const isDenied = typeof window.Notification !== 'undefined' && Notification.permission === 'denied';
+                const isDismissed = typeof window.Notification !== 'undefined' && Notification.permission === 'default' && errMsg.includes('Permission');
 
-                if (isPermissionIssue) {
+                if (isDenied) {
                     dismissAction();
                     if (typeof window.showPushPermissionRecovery === 'function') {
                         window.showPushPermissionRecovery();
                     }
+                    return;
+                }
+                if (isDismissed) {
+                    dismissAction();
                     return;
                 }
 

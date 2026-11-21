@@ -613,19 +613,26 @@ export function profileFeed(opts = {}) {
                             // Autoplay video when in view during scrolling
                             if (!video._userManuallyPaused) {
                                 if (this._activePlayingFeedVideo && this._activePlayingFeedVideo !== video && !this._activePlayingFeedVideo.paused) {
+                                    this._activePlayingFeedVideo._autoPlaying = false;
                                     this._activePlayingFeedVideo.pause();
                                 }
                                 this._activePlayingFeedVideo = video;
 
-                                if (!video.muted) {
-                                    video.muted = true;
-                                }
+                                video.muted = true;
+                                video.defaultMuted = true;
+                                video.setAttribute('muted', '');
+                                video.playsInline = true;
+                                video.setAttribute('playsinline', '');
+                                video.setAttribute('webkit-playsinline', '');
                                 video._autoPlaying = true;
                                 const playPromise = video.play();
                                 if (playPromise !== undefined) {
                                     playPromise.catch(() => {
+                                        video._autoPlaying = false;
                                         if (!video.muted) {
                                             video.muted = true;
+                                            video.defaultMuted = true;
+                                            video.setAttribute('muted', '');
                                             video.play().catch(() => {});
                                         }
                                     });
@@ -763,6 +770,19 @@ export function profileFeed(opts = {}) {
             }
 
             setTimeout(() => {
+                // If master __FPFeedVideoCoordinator is active on the page, delegate feed video evaluation
+                // to it to prevent competing observer thrashing and duplicate play/pause races.
+                if (window.__FPFeedVideoCoordinator && typeof window.__FPFeedVideoCoordinator.scheduleEvaluate === 'function') {
+                    const videoEls = document.querySelectorAll('video.feed-post-video');
+                    videoEls.forEach(video => {
+                        video.playsInline = true;
+                        video.setAttribute('playsinline', '');
+                        video.setAttribute('webkit-playsinline', '');
+                    });
+                    window.__FPFeedVideoCoordinator.scheduleEvaluate();
+                    return;
+                }
+
                 // Observe multi-video containers for sequential autoplay & pre-buffering
                 const multiContainers = document.querySelectorAll('.multi-video-horizontal-container');
                 multiContainers.forEach(mc => {
@@ -781,17 +801,6 @@ export function profileFeed(opts = {}) {
                         video.playsInline = true;
                         video.setAttribute('playsinline', '');
                         video.setAttribute('webkit-playsinline', '');
-
-                        video.addEventListener('pause', () => {
-                            if (!video._autoPlaying) {
-                                video._userManuallyPaused = true;
-                            }
-                            video._autoPlaying = false;
-                        });
-
-                        video.addEventListener('play', () => {
-                            video._userManuallyPaused = false;
-                        });
 
                         this._feedVideoPreloadObserver.observe(video);
                         this._feedVideoObserver.observe(video);

@@ -877,12 +877,23 @@
         },
 
         /* -------------------------------------------------------------------------
-         * Photo-to-Living Avatar Studio (Identity Lock & 2.5D Neural Portrait Rig)
+         * Photo-to-Living Avatar Studio (OpenArt-Grade Hybrid Styliser & 2.5D Rig)
          * ------------------------------------------------------------------------- */
         photoRig: {
             canvas: null,
             ctx: null,
+            beforeCanvas: null,
+            beforeCtx: null,
+            rawImg: null,
+            stylisedHighRes: null,
             img: null,
+            style: 'illustrated_comic',
+            compareMode: true,
+            splitPct: 50,
+            neuralCache: {},
+            photoUid: 1,
+            isTransforming: false,
+            cameraStream: null,
             tiltX: 0,
             tiltY: 0,
             targetX: 0,
@@ -906,7 +917,16 @@
             const pr = this.photoRig;
             pr.canvas = canvas;
             pr.ctx = canvas.getContext('2d');
+            pr.beforeCanvas = document.getElementById('atgPhotoBeforeCanvas');
+            pr.beforeCtx = pr.beforeCanvas ? pr.beforeCanvas.getContext('2d') : null;
             pr.nextBlink = performance.now() + 2200;
+
+            // Re-apply styliser if it finishes loading after engine init
+            window.addEventListener('atg:styliser-ready', () => {
+                if (pr.rawImg) {
+                    self.applyInstantAvatarStyle(false);
+                }
+            });
 
             // Load default synthetic portrait immediately, then preload user's actual profile photo if available
             this.loadDefaultPhotoPortrait();
@@ -931,6 +951,89 @@
                 const next = actions[Math.floor(Math.random() * actions.length)];
                 self.playPhotoReaction(next);
             });
+
+            // Bind Before/After vs Living Motion view mode switcher & draggable split slider
+            this.bindPhotoCompareSlider();
+
+            // Bind Avatar Art Style Cards (6 styles + Original Photo reset chip)
+            document.querySelectorAll('[data-avatar-style]').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const chosen = this.getAttribute('data-avatar-style') || 'illustrated_comic';
+                    self.selectPhotoAvatarStyle(chosen);
+                });
+            });
+
+            // Bind Neural AI HD Redraw button
+            const transformBtn = document.getElementById('atgTransformAvatarBtn');
+            if (transformBtn) {
+                transformBtn.addEventListener('click', function () {
+                    self.generateNeuralAvatar(this);
+                });
+            }
+
+            // Bind Fine-Tune progressive disclosure toggle & live sliders
+            const ftToggle = document.getElementById('atgToggleFineTuneBtn');
+            const ftDrawer = document.getElementById('atgFineTuneDrawer');
+            const ftChevron = document.getElementById('atgFineTuneChevron');
+            if (ftToggle && ftDrawer) {
+                ftToggle.addEventListener('click', () => {
+                    const isHidden = ftDrawer.hasAttribute('hidden');
+                    if (isHidden) {
+                        ftDrawer.removeAttribute('hidden');
+                        ftToggle.setAttribute('aria-expanded', 'true');
+                        if (ftChevron) ftChevron.textContent = '▴';
+                    } else {
+                        ftDrawer.setAttribute('hidden', '');
+                        ftToggle.setAttribute('aria-expanded', 'false');
+                        if (ftChevron) ftChevron.textContent = '▾';
+                    }
+                });
+            }
+
+            const styleSliders = [
+                ['atgStyleStrength', 'atgStyleStrengthVal'],
+                ['atgStyleLineWeight', 'atgStyleLineWeightVal'],
+                ['atgStyleDetailLock', 'atgStyleDetailLockVal']
+            ];
+            styleSliders.forEach(([inputId, valId]) => {
+                const el = document.getElementById(inputId);
+                const valEl = document.getElementById(valId);
+                if (el && valEl) {
+                    el.addEventListener('input', () => {
+                        valEl.textContent = Math.round(parseFloat(el.value || '0.75') * 100) + '%';
+                        self.updateIdentityLockScore();
+                        self.applyInstantAvatarStyle(true);
+                    });
+                }
+            });
+
+            const resetStyleBtn = document.getElementById('atgResetStyleControlsBtn');
+            if (resetStyleBtn) {
+                resetStyleBtn.addEventListener('click', () => {
+                    const defs = {
+                        atgStyleStrength: ['0.78', '78%'],
+                        atgStyleLineWeight: ['0.68', '68%'],
+                        atgStyleDetailLock: ['0.80', '80%']
+                    };
+                    Object.keys(defs).forEach(k => {
+                        const input = document.getElementById(k);
+                        const label = document.getElementById(k + 'Val');
+                        if (input) input.value = defs[k][0];
+                        if (label) label.textContent = defs[k][1];
+                    });
+                    self.updateIdentityLockScore();
+                    self.applyInstantAvatarStyle(true);
+                });
+            }
+
+            // Bind Download HD Avatar button
+            const downloadBtn = document.getElementById('atgDownloadAvatarBtn');
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', () => self.downloadStylisedAvatar());
+            }
+
+            // Bind Webcam Snapshot capture & drag-and-drop upload
+            this.bindPhotoCameraAndDrop();
 
             // Bind Living Photo expression buttons (Smile, Dance, Wink, Laugh, Nod, Love)
             document.querySelectorAll('.atg-photo-react-btn').forEach(btn => {
@@ -957,22 +1060,7 @@
                 fileInput.addEventListener('change', e => {
                     const file = e.target.files && e.target.files[0];
                     if (!file) return;
-                    const reader = new FileReader();
-                    reader.onload = ev => {
-                        const rawImg = new Image();
-                        rawImg.onload = () => {
-                            self.setNormalizedPhotoImage(rawImg);
-                            self.extractPortraitPalette(pr.img);
-                            self.playPhotoReaction('smile');
-                            self.syncPhotoTo3dAvatar();
-                            const statusEl = document.getElementById('atgPhotoCanvasStatus');
-                            if (statusEl) {
-                                statusEl.textContent = 'Portrait loaded! Tap Smile, Dance, or Wink below.';
-                            }
-                        };
-                        rawImg.src = ev.target.result;
-                    };
-                    reader.readAsDataURL(file);
+                    self.handleUploadedPhotoFile(file);
                 });
             }
 
@@ -986,47 +1074,6 @@
                                 (profileEl ? profileEl.src : '') ||
                                 '/resources/images/profile/avatarM.png';
                     self.loadPhotoFromUrl(src, true);
-                });
-            }
-
-            // Bind realism & post-processing sliders
-            const sliders = [
-                ['atgParamDenoising', 'atgParamDenoisingVal'],
-                ['atgParamCfg', 'atgParamCfgVal'],
-                ['atgParamFaceRestore', 'atgParamFaceRestoreVal'],
-                ['atgParamSkinTexture', 'atgParamSkinTextureVal'],
-                ['atgParamSharpening', 'atgParamSharpeningVal'],
-                ['atgParamEyeRetouch', 'atgParamEyeRetouchVal']
-            ];
-            sliders.forEach(([inputId, valId]) => {
-                const el = document.getElementById(inputId);
-                const valEl = document.getElementById(valId);
-                if (el && valEl) {
-                    el.addEventListener('input', () => {
-                        valEl.textContent = el.value;
-                        self.updateIdentityLockScore();
-                    });
-                }
-            });
-
-            const resetBtn = document.getElementById('atgResetRealismParamsBtn');
-            if (resetBtn) {
-                resetBtn.addEventListener('click', () => {
-                    const defaults = {
-                        atgParamDenoising: '0.38',
-                        atgParamCfg: '6.5',
-                        atgParamFaceRestore: '0.65',
-                        atgParamSkinTexture: '0.72',
-                        atgParamSharpening: '0.45',
-                        atgParamEyeRetouch: '0.80'
-                    };
-                    Object.keys(defaults).forEach(k => {
-                        const input = document.getElementById(k);
-                        const label = document.getElementById(k + 'Val');
-                        if (input) input.value = defaults[k];
-                        if (label) label.textContent = defaults[k];
-                    });
-                    self.updateIdentityLockScore();
                 });
             }
 
@@ -1055,27 +1102,516 @@
         },
 
         /**
-         * Normalise any uploaded or profile image into a clean 240x270 centre-cropped canvas
-         * so 2.5D strip warping and high-res export never distort aspect ratios.
+         * Handle a File object from input or drag-and-drop.
+         */
+        handleUploadedPhotoFile: function (file) {
+            const self = this;
+            const pr = this.photoRig;
+            if (!file || !/^image\/(png|jpeg|jpg|webp)$/i.test(file.type || '')) {
+                this.motionToast('Please choose a valid PNG, JPEG or WEBP portrait photo.', 'warning');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const rawImg = new Image();
+                rawImg.onload = () => {
+                    self.setNormalizedPhotoImage(rawImg);
+                    self.extractPortraitPalette(pr.rawImg || pr.img);
+                    self.setPhotoCompareMode(true);
+                    self.setPhotoSplitPercent(50);
+                    self.playPhotoReaction('smile');
+                    self.syncPhotoTo3dAvatar();
+                    const statusEl = document.getElementById('atgPhotoCanvasStatus');
+                    if (statusEl) {
+                        statusEl.textContent = 'Portrait transformed! Drag ↔ to compare Before & After or tap Generate Neural AI Avatar.';
+                    }
+                };
+                rawImg.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        },
+
+        /**
+         * Bind Before/After split-comparison drag slider, keyboard accessibility, and view mode switcher.
+         */
+        bindPhotoCompareSlider: function () {
+            const self = this;
+            const stage = document.getElementById('atgPhotoCompareStage');
+            const handle = document.getElementById('atgCompareHandle');
+            const compareBtn = document.getElementById('atgViewModeCompareBtn');
+            const livingBtn = document.getElementById('atgViewModeLivingBtn');
+
+            if (compareBtn) {
+                compareBtn.addEventListener('click', () => {
+                    self.setPhotoCompareMode(true);
+                    if (self.photoRig.splitPct < 10 || self.photoRig.splitPct > 90) {
+                        self.setPhotoSplitPercent(50);
+                    }
+                });
+            }
+            if (livingBtn) {
+                livingBtn.addEventListener('click', () => {
+                    self.setPhotoCompareMode(false);
+                });
+            }
+
+            if (!stage || !handle) return;
+
+            let dragging = false;
+            const updateFromClientX = clientX => {
+                const rect = stage.getBoundingClientRect();
+                if (!rect.width) return;
+                const pct = ((clientX - rect.left) / rect.width) * 100;
+                self.setPhotoSplitPercent(pct);
+            };
+
+            handle.addEventListener('pointerdown', e => {
+                e.preventDefault();
+                e.stopPropagation();
+                dragging = true;
+                if (handle.setPointerCapture) {
+                    try { handle.setPointerCapture(e.pointerId); } catch (_) { /* noop */ }
+                }
+            });
+
+            window.addEventListener('pointermove', e => {
+                if (!dragging) return;
+                updateFromClientX(e.clientX);
+            }, { passive: true });
+
+            const stopDrag = () => { dragging = false; };
+            window.addEventListener('pointerup', stopDrag);
+            window.addEventListener('pointercancel', stopDrag);
+
+            // Touch fallback for older mobile webviews
+            handle.addEventListener('touchstart', e => {
+                if (e.touches && e.touches.length === 1) {
+                    dragging = true;
+                }
+            }, { passive: true });
+            window.addEventListener('touchmove', e => {
+                if (dragging && e.touches && e.touches.length === 1) {
+                    updateFromClientX(e.touches[0].clientX);
+                }
+            }, { passive: true });
+            window.addEventListener('touchend', stopDrag);
+
+            // Keyboard accessibility on the slider handle
+            handle.addEventListener('keydown', e => {
+                const step = e.shiftKey ? 10 : 5;
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    self.setPhotoSplitPercent(self.photoRig.splitPct - step);
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    self.setPhotoSplitPercent(self.photoRig.splitPct + step);
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    self.setPhotoSplitPercent(0);
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    self.setPhotoSplitPercent(100);
+                }
+            });
+        },
+
+        setPhotoCompareMode: function (enabled) {
+            const pr = this.photoRig;
+            pr.compareMode = !!enabled;
+            const stage = document.getElementById('atgPhotoCompareStage');
+            const compareBtn = document.getElementById('atgViewModeCompareBtn');
+            const livingBtn = document.getElementById('atgViewModeLivingBtn');
+            if (stage) {
+                stage.classList.toggle('is-comparing', pr.compareMode);
+            }
+            if (compareBtn) {
+                compareBtn.classList.toggle('active', pr.compareMode);
+                compareBtn.setAttribute('aria-pressed', pr.compareMode ? 'true' : 'false');
+            }
+            if (livingBtn) {
+                livingBtn.classList.toggle('active', !pr.compareMode);
+                livingBtn.setAttribute('aria-pressed', !pr.compareMode ? 'true' : 'false');
+            }
+        },
+
+        setPhotoSplitPercent: function (pct) {
+            const pr = this.photoRig;
+            const clamped = Math.max(0, Math.min(100, Math.round(pct)));
+            pr.splitPct = clamped;
+            const stage = document.getElementById('atgPhotoCompareStage');
+            const handle = document.getElementById('atgCompareHandle');
+            if (stage) {
+                stage.style.setProperty('--atg-split', clamped + '%');
+            }
+            if (handle) {
+                handle.setAttribute('aria-valuenow', String(clamped));
+            }
+        },
+
+        /**
+         * Select one of the 6 avatar styles (or 'original') and transform immediately.
+         */
+        selectPhotoAvatarStyle: function (styleKey) {
+            const pr = this.photoRig;
+            pr.style = styleKey || 'illustrated_comic';
+
+            document.querySelectorAll('[data-avatar-style]').forEach(btn => {
+                const active = btn.getAttribute('data-avatar-style') === pr.style;
+                btn.classList.toggle('active', active);
+                btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
+
+            if (pr.style === 'original') {
+                this.setPhotoCompareMode(false);
+            } else if (!pr.compareMode) {
+                this.setPhotoCompareMode(true);
+                if (pr.splitPct < 15 || pr.splitPct > 85) {
+                    this.setPhotoSplitPercent(50);
+                }
+            }
+
+            this.applyInstantAvatarStyle(false);
+        },
+
+        /**
+         * Run the instant on-device GPU WebGL2 / Canvas2D styliser (or restore cached Neural HD image).
+         */
+        applyInstantAvatarStyle: function (ignoreNeuralCache) {
+            const pr = this.photoRig;
+            if (!pr.rawImg) return;
+
+            // Update Before canvas with the untouched portrait
+            if (pr.beforeCanvas && pr.beforeCtx) {
+                pr.beforeCtx.clearRect(0, 0, 240, 270);
+                pr.beforeCtx.drawImage(pr.rawImg, 0, 0, 240, 270);
+            }
+
+            if (pr.style === 'original') {
+                pr.stylisedHighRes = pr.rawImg;
+                this.syncDownscaledStageImage(pr.rawImg);
+                this.updateEngineBadge('📷 Original Portrait');
+                return;
+            }
+
+            const cacheKey = pr.photoUid + ':' + pr.style;
+            if (!ignoreNeuralCache && pr.neuralCache[cacheKey]) {
+                pr.stylisedHighRes = pr.neuralCache[cacheKey];
+                this.syncDownscaledStageImage(pr.stylisedHighRes);
+                this.updateEngineBadge('✨ ATG Neural Studio HD');
+                return;
+            }
+
+            const strength = parseFloat((document.getElementById('atgStyleStrength') || {}).value || '0.78');
+            const lineWeight = parseFloat((document.getElementById('atgStyleLineWeight') || {}).value || '0.68');
+            const detailLock = parseFloat((document.getElementById('atgStyleDetailLock') || {}).value || '0.80');
+
+            if (window.AtgPhotoAvatarStyliser && typeof window.AtgPhotoAvatarStyliser.stylise === 'function') {
+                const res = window.AtgPhotoAvatarStyliser.stylise(pr.rawImg, pr.style, {
+                    strength: strength,
+                    lineWeight: lineWeight,
+                    detailLock: detailLock
+                });
+                pr.stylisedHighRes = res.canvas;
+                this.syncDownscaledStageImage(res.canvas);
+                const isGpu = res.engine === 'webgl2_anisotropic_kuwahara';
+                this.updateEngineBadge(isGpu ? `⚡ ATG GPU Styliser (${res.ms}ms)` : `🛡️ ATG Sovereign Styliser (${res.ms}ms)`);
+            } else {
+                pr.stylisedHighRes = pr.rawImg;
+                this.syncDownscaledStageImage(pr.rawImg);
+            }
+        },
+
+        syncDownscaledStageImage: function (sourceCanvas) {
+            const pr = this.photoRig;
+            const stageImg = document.createElement('canvas');
+            stageImg.width = 240;
+            stageImg.height = 270;
+            stageImg.getContext('2d').drawImage(sourceCanvas, 0, 0, 240, 270);
+            pr.img = stageImg;
+        },
+
+        updateEngineBadge: function (label) {
+            const badge = document.getElementById('atgAvatarEngineBadge');
+            if (badge && label) {
+                badge.textContent = label;
+            }
+        },
+
+        /**
+         * Call POST /api/emoji/transform-photo-avatar for a deep Neural AI HD Redraw
+         * (with automatic Sovereign fallback).
+         */
+        generateNeuralAvatar: function (btn) {
+            const self = this;
+            const pr = this.photoRig;
+            if (pr.isTransforming) return;
+            if (!pr.rawImg) {
+                this.loadDefaultPhotoPortrait();
+            }
+
+            if (pr.style === 'original') {
+                this.selectPhotoAvatarStyle('illustrated_comic');
+            }
+
+            pr.isTransforming = true;
+            if (window.ScoreTenantSpinner && btn) {
+                window.ScoreTenantSpinner.start(btn);
+            }
+
+            const overlay = document.getElementById('atgTransformLoadingOverlay');
+            const overlayText = document.getElementById('atgTransformLoadingText');
+            const activeCard = document.querySelector(`.atg-style-card[data-avatar-style="${pr.style}"] .atg-style-name`);
+            const styleTitle = activeCard ? activeCard.textContent : 'Illustrated Comic';
+            if (overlayText) {
+                overlayText.textContent = `Redrawing in ${styleTitle} style...`;
+            }
+            if (overlay) {
+                overlay.removeAttribute('hidden');
+            }
+
+            const stopLoading = () => {
+                pr.isTransforming = false;
+                if (overlay) overlay.setAttribute('hidden', '');
+                if (window.ScoreTenantSpinner && btn) window.ScoreTenantSpinner.stop(btn);
+                if (window.FamilyPlatformSpinner && btn) window.FamilyPlatformSpinner.stop(btn);
+            };
+
+            let jpegDataUrl = '';
+            try {
+                jpegDataUrl = pr.rawImg.toDataURL('image/jpeg', 0.92);
+            } catch (err) {
+                this.loadDefaultPhotoPortrait();
+                jpegDataUrl = pr.rawImg.toDataURL('image/jpeg', 0.92);
+            }
+
+            const csrfToken = document.querySelector('input[name="token"]')?.value ||
+                              document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            const strength = parseFloat((document.getElementById('atgStyleStrength') || {}).value || '0.78');
+            const lineWeight = parseFloat((document.getElementById('atgStyleLineWeight') || {}).value || '0.68');
+            const detailLock = parseFloat((document.getElementById('atgStyleDetailLock') || {}).value || '0.80');
+            const targetStyle = pr.style;
+            const targetPhotoUid = pr.photoUid;
+
+            fetch('/api/emoji/transform-photo-avatar', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    token: csrfToken,
+                    csrf_token: csrfToken,
+                    image_base64: jpegDataUrl,
+                    style: targetStyle,
+                    strength: strength,
+                    line_weight: lineWeight,
+                    detail_lock: detailLock
+                })
+            })
+            .then(res => res.json())
+            .then(payload => {
+                if (!payload || (!payload.success && !payload.ok) || !payload.data || !payload.data.avatar_data_uri) {
+                    throw new Error((payload && (payload.error || payload.message)) || 'Could not transform portrait.');
+                }
+
+                const data = payload.data;
+                const hasClientWebGL = window.AtgPhotoAvatarStyliser && window.AtgPhotoAvatarStyliser.isWebGL2Supported();
+
+                // If server fell back to GD while client WebGL2 GPU shader is active, retain the higher-craft GPU Anisotropic Kuwahara + XDoG canvas
+                if (data.fallback_used && hasClientWebGL) {
+                    stopLoading();
+                    self.applyInstantAvatarStyle(true);
+                    self.setPhotoCompareMode(true);
+                    self.setPhotoSplitPercent(50);
+                    self.updateEngineBadge('⚡ ATG Sovereign GPU HD');
+                    const statusEl = document.getElementById('atgPhotoCanvasStatus');
+                    if (statusEl) {
+                        statusEl.textContent = `✨ Transformed into ${data.style_label || styleTitle}! Drag ↔ to compare Before & After.`;
+                    }
+                    self.motionToast(`Transformed into ${data.style_label || styleTitle} avatar!`, 'success');
+                    return;
+                }
+
+                const genImg = new Image();
+                genImg.onload = () => {
+                    stopLoading();
+                    const hd = document.createElement('canvas');
+                    hd.width = 480;
+                    hd.height = 540;
+                    hd.getContext('2d').drawImage(genImg, 0, 0, 480, 540);
+                    const cacheKey = targetPhotoUid + ':' + targetStyle;
+                    pr.neuralCache[cacheKey] = hd;
+                    if (pr.photoUid === targetPhotoUid && pr.style === targetStyle) {
+                        pr.stylisedHighRes = hd;
+                        self.syncDownscaledStageImage(hd);
+                        self.setPhotoCompareMode(true);
+                        self.setPhotoSplitPercent(50);
+                        self.updateEngineBadge(data.fallback_used ? '🛡️ ATG Sovereign Engine' : '✨ ATG Neural Studio HD');
+                    }
+                    const idBadge = document.getElementById('atgIdentityScoreBadge');
+                    if (idBadge && data.identity_lock) {
+                        idBadge.textContent = `Identity Lock: ${data.identity_lock}%`;
+                    }
+                    const statusEl = document.getElementById('atgPhotoCanvasStatus');
+                    if (statusEl) {
+                        statusEl.textContent = `✨ Neural HD ${data.style_label || styleTitle} ready! Drag ↔ to compare Before & After.`;
+                    }
+                    self.motionToast(`Neural HD ${data.style_label || styleTitle} avatar ready!`, 'success');
+                };
+                genImg.onerror = () => {
+                    stopLoading();
+                    self.applyInstantAvatarStyle(true);
+                };
+                genImg.src = data.avatar_data_uri;
+            })
+            .catch(err => {
+                stopLoading();
+                self.motionToast((err && err.message) ? err.message : 'Using on-device sovereign styliser.', 'info');
+            });
+        },
+
+        /**
+         * Bind webcam snapshot capture and drag-and-drop portrait upload on #atgPhotoStageCard.
+         */
+        bindPhotoCameraAndDrop: function () {
+            const self = this;
+            const pr = this.photoRig;
+            const stageCard = document.getElementById('atgPhotoStageCard');
+            const openCamBtn = document.getElementById('atgOpenCameraBtn');
+            const camPanel = document.getElementById('atgCameraCapturePanel');
+            const camVideo = document.getElementById('atgCameraVideo');
+            const snapBtn = document.getElementById('atgCaptureSnapBtn');
+            const cancelCamBtn = document.getElementById('atgCancelCameraBtn');
+
+            const stopCam = () => {
+                if (pr.cameraStream) {
+                    try { pr.cameraStream.getTracks().forEach(t => t.stop()); } catch (_) { /* noop */ }
+                    pr.cameraStream = null;
+                }
+                if (camVideo) camVideo.srcObject = null;
+                if (camPanel) camPanel.setAttribute('hidden', '');
+            };
+
+            if (openCamBtn && camPanel && camVideo) {
+                openCamBtn.addEventListener('click', async () => {
+                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                        self.motionToast('Camera access is not supported in this browser.', 'warning');
+                        return;
+                    }
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({
+                            video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 720 } },
+                            audio: false
+                        });
+                        pr.cameraStream = stream;
+                        camVideo.srcObject = stream;
+                        camPanel.removeAttribute('hidden');
+                        await camVideo.play();
+                    } catch (err) {
+                        self.motionToast('Camera permission was declined or no camera was found.', 'warning');
+                    }
+                });
+            }
+
+            if (snapBtn && camVideo) {
+                snapBtn.addEventListener('click', () => {
+                    const vw = camVideo.videoWidth || 480;
+                    const vh = camVideo.videoHeight || 540;
+                    const snap = document.createElement('canvas');
+                    snap.width = vw;
+                    snap.height = vh;
+                    snap.getContext('2d').drawImage(camVideo, 0, 0, vw, vh);
+                    stopCam();
+                    self.setNormalizedPhotoImage(snap);
+                    self.extractPortraitPalette(pr.rawImg || pr.img);
+                    self.setPhotoCompareMode(true);
+                    self.setPhotoSplitPercent(50);
+                    self.playPhotoReaction('smile');
+                    self.syncPhotoTo3dAvatar();
+                    self.motionToast('Webcam portrait captured & transformed!', 'success');
+                });
+            }
+
+            if (cancelCamBtn) {
+                cancelCamBtn.addEventListener('click', stopCam);
+            }
+
+            window.addEventListener('pagehide', stopCam);
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) stopCam();
+            });
+
+            if (stageCard) {
+                stageCard.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    stageCard.classList.add('is-dragover');
+                });
+                stageCard.addEventListener('dragleave', () => {
+                    stageCard.classList.remove('is-dragover');
+                });
+                stageCard.addEventListener('drop', e => {
+                    e.preventDefault();
+                    stageCard.classList.remove('is-dragover');
+                    const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+                    if (file) {
+                        self.handleUploadedPhotoFile(file);
+                    }
+                });
+            }
+        },
+
+        /**
+         * Download the transformed stylised avatar as a crisp 512x576 HD PNG.
+         */
+        downloadStylisedAvatar: function () {
+            const pr = this.photoRig;
+            const src = pr.stylisedHighRes || pr.img;
+            if (!src) return;
+
+            const out = document.createElement('canvas');
+            out.width = 512;
+            out.height = 576;
+            out.getContext('2d').drawImage(src, 0, 0, 512, 576);
+
+            try {
+                const link = document.createElement('a');
+                link.download = `familyplatform-avatar-${pr.style || 'stylised'}.png`;
+                link.href = out.toDataURL('image/png');
+                link.click();
+                this.motionToast('Downloaded HD stylised avatar PNG!', 'success');
+            } catch (e) {
+                this.motionToast('Could not export PNG from this image.', 'warning');
+            }
+        },
+
+        /**
+         * Normalise any uploaded or profile image into a clean 480x540 high-res source canvas
+         * and immediately run the active ATG Photo-to-Avatar transformation style.
          */
         setNormalizedPhotoImage: function (rawImg) {
             const pr = this.photoRig;
             const norm = document.createElement('canvas');
-            norm.width = 240;
-            norm.height = 270;
+            norm.width = 480;
+            norm.height = 540;
             const c = norm.getContext('2d');
             c.fillStyle = '#1e1b18';
-            c.fillRect(0, 0, 240, 270);
+            c.fillRect(0, 0, 480, 540);
 
-            const iw = rawImg.naturalWidth || rawImg.width || 240;
-            const ih = rawImg.naturalHeight || rawImg.height || 270;
-            const scale = Math.max(240 / iw, 270 / ih);
+            const iw = rawImg.naturalWidth || rawImg.width || 480;
+            const ih = rawImg.naturalHeight || rawImg.height || 540;
+            const scale = Math.max(480 / iw, 540 / ih);
             const dw = iw * scale;
             const dh = ih * scale;
-            const dx = (240 - dw) / 2;
-            const dy = (270 - dh) / 2;
+            const dx = (480 - dw) / 2;
+            const dy = (540 - dh) / 2;
             c.drawImage(rawImg, dx, dy, dw, dh);
-            pr.img = norm;
+
+            pr.rawImg = norm;
+            pr.photoUid = (pr.photoUid || 0) + 1;
+            pr.neuralCache = {};
+            this.applyInstantAvatarStyle(false);
         },
 
         /**
@@ -1088,7 +1624,7 @@
             const img = new Image();
             img.onload = () => {
                 self.setNormalizedPhotoImage(img);
-                self.extractPortraitPalette(pr.img);
+                self.extractPortraitPalette(pr.rawImg || pr.img);
                 self.playPhotoReaction('smile');
                 if (notifyUser) {
                     self.syncPhotoTo3dAvatar();
@@ -1220,7 +1756,7 @@
             c.arc(120, 142, 14, 0.2, Math.PI - 0.2);
             c.stroke();
 
-            pr.img = off;
+            this.setNormalizedPhotoImage(off);
         },
 
         extractPortraitPalette: function (img) {
@@ -1260,11 +1796,9 @@
         },
 
         updateIdentityLockScore: function () {
-            const denoise = parseFloat((document.getElementById('atgParamDenoising') || {}).value || '0.38');
-            const cfg = parseFloat((document.getElementById('atgParamCfg') || {}).value || '6.5');
-            const restore = parseFloat((document.getElementById('atgParamFaceRestore') || {}).value || '0.65');
-            const penalty = Math.abs(denoise - 0.38) * 22 + Math.abs(cfg - 6.5) * 0.8 + Math.abs(restore - 0.65) * 8;
-            const score = Math.max(84.0, Math.min(99.6, 99.4 - penalty)).toFixed(1);
+            const strength = parseFloat((document.getElementById('atgStyleStrength') || {}).value || '0.78');
+            const detailLock = parseFloat((document.getElementById('atgStyleDetailLock') || {}).value || '0.80');
+            const score = Math.max(91.0, Math.min(99.6, 94.2 + detailLock * 5.2 - (strength - 0.5) * 1.8)).toFixed(1);
             const badge = document.getElementById('atgIdentityScoreBadge');
             if (badge) {
                 badge.textContent = `Identity Lock: ${score}%`;
@@ -1350,41 +1884,52 @@
             const skinTex = parseFloat((document.getElementById('atgParamSkinTexture') || {}).value || '0.72');
             const talkLevel = (this.motion && this.motion.talking) ? (this.motion.talkLevel || 0) : 0;
 
+            // In Before/After Compare mode (while not actively playing a tapped expression),
+            // lock geometric translation/scale to 1:1 so the Before and After halves align pixel-for-pixel across the split slider.
+            const lockCompareAlignment = pr.compareMode && !isReacting;
+
             ctx.clearRect(0, 0, w, h);
             ctx.save();
-            ctx.filter = `contrast(${(1 + (sharpen - 0.4) * 0.18).toFixed(2)}) saturate(${(1 + (skinTex - 0.5) * 0.15).toFixed(2)})`;
-            ctx.translate(w / 2 + danceDx, h / 2 + danceDy);
-            ctx.rotate(tx * 0.22 + danceRot);
-            ctx.scale(1.06, 1.06);
-            ctx.translate(-w / 2, -h / 2);
+            if (lockCompareAlignment) {
+                ctx.drawImage(pr.img, 0, 0, w, h);
+            } else {
+                ctx.filter = `contrast(${(1 + (sharpen - 0.4) * 0.18).toFixed(2)}) saturate(${(1 + (skinTex - 0.5) * 0.15).toFixed(2)})`;
+                ctx.translate(w / 2 + danceDx, h / 2 + danceDy);
+                ctx.rotate(tx * 0.22 + danceRot);
+                ctx.scale(1.06, 1.06);
+                ctx.translate(-w / 2, -h / 2);
 
-            const sx = tx * 14;
-            const sy = ty * 10 + breath;
+                const sx = tx * 14;
+                const sy = ty * 10 + breath;
 
-            // 2.5D Horizontal Strip Facial Warping (Cheek-lift Smile + Talk Jaw Motion)
-            const stripH = 6;
-            for (let y = 0; y < h; y += stripH) {
-                const ny = y / h;
-                let liftY = 0;
-                let expandX = 1.0;
+                // 2.5D Horizontal Strip Facial Warping (Cheek-lift Smile + Talk Jaw Motion)
+                const stripH = 6;
+                for (let y = 0; y < h; y += stripH) {
+                    const ny = y / h;
+                    let liftY = 0;
+                    let expandX = 1.0;
 
-                // Cheek & smile zone (46% to 74% vertical height)
-                if (smileFactor > 0.02 && ny >= 0.44 && ny <= 0.76) {
-                    const bell = Math.sin(((ny - 0.44) / 0.32) * Math.PI);
-                    liftY = -smileFactor * bell * 5.2;
-                    expandX = 1.0 + smileFactor * bell * 0.036;
+                    // Cheek & smile zone (46% to 74% vertical height)
+                    if (smileFactor > 0.02 && ny >= 0.44 && ny <= 0.76) {
+                        const bell = Math.sin(((ny - 0.44) / 0.32) * Math.PI);
+                        liftY = -smileFactor * bell * 5.2;
+                        expandX = 1.0 + smileFactor * bell * 0.036;
+                    }
+
+                    // Talk mode jaw motion (62% to 84% vertical height)
+                    if (talkLevel > 0.04 && ny >= 0.62 && ny <= 0.84) {
+                        const jawBell = Math.sin(((ny - 0.62) / 0.22) * Math.PI);
+                        liftY += talkLevel * jawBell * 6.5;
+                    }
+
+                    const destW = w * expandX;
+                    const destX = sx - (destW - w) / 2;
+                    ctx.drawImage(pr.img, 0, y, w, stripH, destX, y + sy + liftY, destW, stripH + 0.6);
                 }
-
-                // Talk mode jaw motion (62% to 84% vertical height)
-                if (talkLevel > 0.04 && ny >= 0.62 && ny <= 0.84) {
-                    const jawBell = Math.sin(((ny - 0.62) / 0.22) * Math.PI);
-                    liftY += talkLevel * jawBell * 6.5;
-                }
-
-                const destW = w * expandX;
-                const destX = sx - (destW - w) / 2;
-                ctx.drawImage(pr.img, 0, y, w, stripH, destX, y + sy + liftY, destW, stripH + 0.6);
             }
+
+            const sx = lockCompareAlignment ? 0 : (tx * 14);
+            const sy = lockCompareAlignment ? 0 : (ty * 10 + breath);
 
             // Warm rosy cheek glow during smile / love / dance / laugh
             if (rosyGlow > 0.02) {
@@ -1456,17 +2001,15 @@
             exportCanvas.height = 512;
             const ectx = exportCanvas.getContext('2d');
 
-            const sharpen = parseFloat((document.getElementById('atgParamSharpening') || {}).value || '0.45');
-            const skinTex = parseFloat((document.getElementById('atgParamSkinTexture') || {}).value || '0.72');
-            ectx.filter = `contrast(${(1 + (sharpen - 0.4) * 0.18).toFixed(2)}) saturate(${(1 + (skinTex - 0.5) * 0.15).toFixed(2)})`;
-            ectx.drawImage(pr.img, 0, 0, 512, 512);
+            const sourceForSave = pr.stylisedHighRes || pr.img;
+            ectx.drawImage(sourceForSave, 0, 0, 512, 512);
 
             let pngDataUrl = null;
             try {
                 pngDataUrl = exportCanvas.toDataURL('image/png');
             } catch (e) {
                 this.loadDefaultPhotoPortrait();
-                ectx.drawImage(pr.img, 0, 0, 512, 512);
+                ectx.drawImage(pr.stylisedHighRes || pr.img, 0, 0, 512, 512);
                 pngDataUrl = exportCanvas.toDataURL('image/png');
             }
 
@@ -1485,6 +2028,7 @@
                     token: csrfToken,
                     csrf_token: csrfToken,
                     mode: 'living_photo',
+                    avatar_style: pr.style || 'illustrated_comic',
                     choreography: choreo,
                     sample_r: pr.sampleRgb[0],
                     sample_g: pr.sampleRgb[1],

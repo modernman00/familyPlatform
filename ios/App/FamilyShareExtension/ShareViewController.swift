@@ -80,7 +80,9 @@ class ShareViewController: UIViewController {
                         defer { dispatchGroup.leave() }
                         if let url = item as? URL, let data = try? Data(contentsOf: url) {
                             let filename = url.lastPathComponent
-                            mediaItemsToUpload.append((data, filename, "video/mp4"))
+                            let ext = url.pathExtension.lowercased()
+                            let mime = (ext == "mov") ? "video/quicktime" : "video/mp4"
+                            mediaItemsToUpload.append((data, filename, mime))
                         }
                     }
                 }

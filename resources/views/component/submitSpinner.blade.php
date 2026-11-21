@@ -212,6 +212,7 @@
   document.addEventListener('submit', function(e) {
     var form = e.target;
     if (!form || form.tagName !== 'FORM') return;
+    if (form.closest && form.closest('#feed-root, #kin-requests-root, #upcoming-events-root')) return;
 
     // Check client-side HTML5 validation first
     if (typeof form.checkValidity === 'function' && !form.checkValidity()) {
@@ -232,6 +233,7 @@
     );
 
     if (!target) return;
+    if (target.closest && target.closest('#feed-root, #kin-requests-root, #upcoming-events-root')) return;
 
     var form = target.closest('form');
     // If it's a standard form submit button, the 'submit' event handles it upon valid dispatch
