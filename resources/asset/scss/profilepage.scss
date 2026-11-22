@@ -2217,6 +2217,7 @@ body.modal-open .pwa-bottom-nav { display: none !important; }
         flex-direction: column;
         flex: 1 1 auto;
         min-height: 0;
+        overflow: hidden;
         margin: 0;
     }
     .composer-sheet__body {
@@ -2592,8 +2593,8 @@ body.modal-open .pwa-bottom-nav { display: none !important; }
 
         .composer-sheet {
             border-radius: 24px 24px 0 0;
-            max-height: calc(100vh - env(safe-area-inset-top, 0px) - 12px);
-            max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 12px);
+            max-height: calc(100vh - env(safe-area-inset-top, 0px) - 24px);
+            max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 24px);
         }
         .composer-sheet__grab { display: block; }
         .composer-sheet__header { padding-top: 24px; }

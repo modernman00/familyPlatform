@@ -15,7 +15,7 @@ describe('Create Post composer: mobile bottom sheet', () => {
     });
 
     const assertPostButtonOnScreen = () => {
-        cy.get('#submitPost').should('be.visible').then(($btn) => {
+        cy.get('#submitPost').should('be.visible').should(($btn) => {
             const r = $btn[0].getBoundingClientRect();
             expect(r.bottom, 'Post button bottom edge').to.be.at.most($btn[0].ownerDocument.defaultView.innerHeight);
             expect(r.top, 'Post button top edge').to.be.at.least(0);
