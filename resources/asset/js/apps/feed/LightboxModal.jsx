@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import { HEIRLOOM_REACTIONS, getHeirloomGlassSvg } from '../../components/profilePage/heirloomGlassReactions';
 import { apiFetch } from '../shared/apiClient';
 import { getCsrfToken, notifyToast } from '../shared/bootstrap';
+import { Portal } from '../shared/Portal';
 import styles from './FeedShell.module.css';
 
 const QUICK_MEDIA_EMOJIS = ['❤️', '😂', '👏', '🙏', '🎉', '😍'];
@@ -102,8 +103,10 @@ export function LightboxModal({
     };
 
     return (
+        <Portal>
         <div
-            className={styles.modalBackdrop}
+            className={`${styles.modalBackdrop} lightbox-overlay`}
+            style={{ position: 'fixed', zIndex: 99999 }}
             role="dialog"
             aria-modal="true"
             aria-label="Photo lightbox"
@@ -121,6 +124,8 @@ export function LightboxModal({
                         className={styles.btnBase}
                         onClick={onClose}
                         aria-label="Close lightbox"
+                        data-testid="close-photo-view"
+                        title="Close photo view"
                     >
                         Close
                     </button>
@@ -235,5 +240,6 @@ export function LightboxModal({
                 </div>
             </div>
         </div>
+        </Portal>
     );
 }

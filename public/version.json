@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(arcade): launch Family Arcade 4-game suite, leagues, badges & live SSE race",
+    "title": "Feat(release): expand Family Arcade 7-game suite, feed media/emoji upgrades, and studio navigation",
     "notes": [
+        "Feat(release): expand Family Arcade 7-game suite, feed media/emoji upgrades, and studio navigation",
         "Feat(arcade): launch Family Arcade 4-game suite, leagues, badges & live SSE race",
-        "Fix(mobile-composer,e2e): constrain composer-form overflow and retry mobile bottom-sheet transition",
-        "Fix(e2e): target legacy feed and clear rate limits in social_feed.cy.js"
+        "Fix(mobile-composer,e2e): constrain composer-form overflow and retry mobile bottom-sheet transition"
     ],
     "released_at": "2026-11-22",
-    "commit": "5c607761"
+    "commit": "5b0a567b"
 }

@@ -10,6 +10,7 @@
     "watch": "npx mix watch",
     "prod": "npm run production",
     "production": "npx mix -p",
+    "test": "vitest run",
     "test:unit": "vitest run",
     "test:e2e": "unset ELECTRON_RUN_AS_NODE && bash scripts/run_locked.sh npx cypress run"
   },

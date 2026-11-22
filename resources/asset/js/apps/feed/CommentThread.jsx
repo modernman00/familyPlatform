@@ -156,6 +156,9 @@ export const CommentThread = memo(function CommentThread({
         const tempId = `temp_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
         const first = bootstrap?.firstName || 'You';
         const last = bootstrap?.lastName || '';
+        const rootParentId = replyingTo
+            ? String(replyingTo.parent_comment_no || replyingTo.comment_no)
+            : null;
         const optimisticComment = {
             comment_no: tempId,
             post_no: String(post.post_no),
@@ -166,7 +169,7 @@ export const CommentThread = memo(function CommentThread({
             profileImg: bootstrap?.avatar || '',
             comment: text,
             gif_url: selectedGifUrl || '',
-            parent_comment_no: replyingTo ? String(replyingTo.comment_no) : null,
+            parent_comment_no: rootParentId,
             reactions: [],
             user_reaction: null,
             date_created: new Date().toISOString(),
@@ -197,7 +200,7 @@ export const CommentThread = memo(function CommentThread({
             formData.append('post_no', String(post.post_no));
             formData.append('comment', text);
             if (replyTarget?.comment_no) {
-                formData.append('parent_comment_no', String(replyTarget.comment_no));
+                formData.append('parent_comment_no', String(replyTarget.parent_comment_no || replyTarget.comment_no));
             }
             if (fileToSend) {
                 formData.append('comment_media', fileToSend);
@@ -520,7 +523,7 @@ export const CommentThread = memo(function CommentThread({
                             )}
                             <button
                                 type="button"
-                                className={`btn btn-link btn-sm p-0 text-decoration-none fw-semibold d-inline-flex align-items-center gap-1 ${activeMeta ? '' : 'text-muted'}`}
+                                className={`btn btn-link btn-sm p-0 text-decoration-none fw-semibold d-inline-flex align-items-center gap-1 comment-meta-btn ${activeMeta ? '' : 'text-muted'}`}
                                 style={{
                                     fontSize: '0.78rem',
                                     minHeight: '44px',
@@ -539,19 +542,18 @@ export const CommentThread = memo(function CommentThread({
                             </button>
                         </div>
 
-                        {!isReplyItem && (
-                            <button
-                                type="button"
-                                className="btn btn-link btn-sm p-0 text-decoration-none fw-semibold text-muted"
-                                style={{ fontSize: '0.78rem', minHeight: '44px' }}
-                                onClick={() => {
-                                    setReplyingTo(comment);
-                                    inputRef.current?.focus();
-                                }}
-                            >
-                                Reply
-                            </button>
-                        )}
+                        <button
+                            type="button"
+                            data-testid="comment-reply-btn"
+                            className="btn btn-link btn-sm p-0 text-decoration-none fw-semibold text-muted"
+                            style={{ fontSize: '0.78rem', minHeight: '44px' }}
+                            onClick={() => {
+                                setReplyingTo(comment);
+                                inputRef.current?.focus();
+                            }}
+                        >
+                            Reply
+                        </button>
                         {canEditComment(comment, currentUserId) && !isEditing && (
                             <button
                                 type="button"
@@ -612,22 +614,28 @@ export const CommentThread = memo(function CommentThread({
         <div className="comments-section pt-2" style={{ overflow: 'visible' }}>
             {isExpanded && (
                 <div className="mb-3 position-relative" style={{ overflow: 'visible' }}>
-                    {replyingTo && (
-                        <div className="comment-reply-banner">
-                            <span>
-                                Replying to <strong>{replyingTo.fullName || `${replyingTo.firstName} ${replyingTo.lastName}`}</strong>
-                            </span>
-                            <button
-                                type="button"
-                                className="btn btn-link btn-sm text-muted p-0 text-decoration-none d-inline-flex align-items-center justify-content-center"
-                                style={{ minWidth: '44px', minHeight: '44px' }}
-                                onClick={() => setReplyingTo(null)}
-                                aria-label="Cancel reply"
-                            >
-                                ✕
-                            </button>
-                        </div>
-                    )}
+                    <div
+                        className={`comment-reply-banner ${replyingTo ? '' : 'd-none'}`}
+                        data-testid="comment-replying-to"
+                        style={replyingTo ? undefined : { display: 'none' }}
+                    >
+                        {replyingTo && (
+                            <>
+                                <span>
+                                    Replying to <strong>{replyingTo.fullName || `${replyingTo.firstName} ${replyingTo.lastName}`}</strong>
+                                </span>
+                                <button
+                                    type="button"
+                                    className="btn btn-link btn-sm text-muted p-0 text-decoration-none d-inline-flex align-items-center justify-content-center"
+                                    style={{ minWidth: '44px', minHeight: '44px' }}
+                                    onClick={() => setReplyingTo(null)}
+                                    aria-label="Cancel reply"
+                                >
+                                    ✕
+                                </button>
+                            </>
+                        )}
+                    </div>
 
                     {mentionMatches.length > 0 && (
                         <div className="mention-autocomplete shadow-md mb-2" role="listbox" aria-label="Mention family member">
@@ -752,6 +760,7 @@ export const CommentThread = memo(function CommentThread({
                                 <input
                                     ref={inputRef}
                                     type="text"
+                                    required={!hasSubmittableContent}
                                     className="comment-composer__input"
                                     placeholder={replyingTo ? `Reply to ${replyingTo.firstName || replyingTo.fullName || 'comment'}...` : 'Write a comment...'}
                                     aria-label="Write a comment"
@@ -817,23 +826,31 @@ export const CommentThread = memo(function CommentThread({
             <div className="d-flex flex-column gap-2">
                 {visibleRoots.map((root) => {
                     const replies = repliesFor(root.comment_no);
-                    const showReplies = Boolean(expandedThreads[root.comment_no]) || replies.length <= 2;
-                    const visibleReplies = showReplies ? replies : replies.slice(0, 1);
+                    const isThreadExpanded = Boolean(expandedThreads[root.comment_no]);
+                    const showReplies = isThreadExpanded || replies.length <= 2;
+                    const visibleReplies = showReplies ? replies : replies.slice(0, 2);
+                    const hiddenReplyCount = Math.max(0, replies.length - 2);
 
                     return (
                         <div key={root.comment_no} className="d-flex flex-column gap-2">
                             {renderSingleComment(root, false)}
                             {visibleReplies.map((rep) => renderSingleComment(rep, true))}
-                            {replies.length > 2 && !expandedThreads[root.comment_no] && (
+                            {replies.length > 2 && (
                                 <button
                                     type="button"
+                                    data-testid="thread-collapse-toggle"
                                     className="btn btn-link btn-sm text-primary text-start text-decoration-none fw-semibold"
                                     style={{ marginLeft: '2.25rem', minHeight: '44px', width: 'fit-content' }}
                                     onClick={() =>
-                                        setExpandedThreads((prev) => ({ ...prev, [root.comment_no]: true }))
+                                        setExpandedThreads((prev) => ({
+                                            ...prev,
+                                            [root.comment_no]: !isThreadExpanded,
+                                        }))
                                     }
                                 >
-                                    View {replies.length - 1} more replies
+                                    {isThreadExpanded
+                                        ? 'Collapse replies'
+                                        : `View ${hiddenReplyCount} more ${hiddenReplyCount === 1 ? 'reply' : 'replies'}`}
                                 </button>
                             )}
                         </div>

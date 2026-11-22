@@ -95,10 +95,11 @@ describe('Social Feed Interactions', () => {
         // Locate the created post card container
         cy.contains(postMarker).parents('.card').within(() => {
             // Assert initial unliked state (icon-only heart; no is-liked class)
-            cy.get('button[aria-label="Like this post"]').should('not.have.class', 'is-liked');
+            cy.get('button.heirloom-trigger-btn').should('not.have.class', 'is-liked');
 
-            // Click Like button
-            cy.get('button[aria-label="Like this post"]').click();
+            // Open reaction dock and click Love reaction
+            cy.get('button.heirloom-trigger-btn').click();
+            cy.get('button[aria-label="Love"]').click();
         });
 
         // Wait for backend persistence request
@@ -141,7 +142,7 @@ describe('Social Feed Interactions', () => {
                 .should('be.visible')
                 .type(commentContent)
                 .should('have.value', commentContent);
-            cy.get('button[aria-label="Post comment"]').click();
+            cy.get('button[title="Post comment"]').click();
         });
 
         // Wait for backend persistence confirmation
@@ -164,7 +165,7 @@ describe('Social Feed Interactions', () => {
                 .should('be.visible')
                 .type(commentContent)
                 .should('have.value', commentContent);
-            cy.get('button[aria-label="Post comment"]').click();
+            cy.get('button[title="Post comment"]').click();
         });
 
         cy.wait('@commentReq', { timeout: 15000 }).its('response.statusCode').should('eq', 200);
@@ -172,9 +173,10 @@ describe('Social Feed Interactions', () => {
 
         cy.intercept('POST', '**/api/reactions/add').as('commentReactionReq');
 
-        // Find the comment container and click the like button
+        // Find the comment container and click the reaction button -> Love
         cy.contains(commentContent).parents('.align-items-start').within(() => {
-            cy.contains('button.comment-meta-btn', 'Like').click();
+            cy.get('button.comment-meta-btn').click();
+            cy.get('.comment-reaction-float-bar button[aria-label="Love"]').click();
         });
 
         cy.wait('@commentReactionReq', { timeout: 15000 }).its('response.statusCode').should('eq', 200);
@@ -182,7 +184,7 @@ describe('Social Feed Interactions', () => {
         // Assert reaction badge preview appears with count
         cy.contains(commentContent).parents('.align-items-start').within(() => {
             cy.get('.reaction-count-pill', { timeout: 5000 }).should('be.visible').and('contain.text', '1');
-            cy.contains('button.comment-meta-btn', 'Like').should('have.class', 'fw-semibold');
+            cy.get('button.comment-meta-btn').should('have.class', 'fw-semibold');
         });
     });
 
@@ -218,10 +220,10 @@ describe('Social Feed Interactions', () => {
             .and('have.css', 'z-index', '99999');
 
         // Click the close button
-        cy.get('.lightbox-overlay button[aria-label="Close photo view"]').click();
+        cy.get('.lightbox-overlay button[data-testid="close-photo-view"], .lightbox-overlay button[aria-label="Close lightbox"]').first().click();
 
         // Lightbox must close
-        cy.get('.lightbox-overlay').should('not.be.visible');
+        cy.get('.lightbox-overlay').should('not.exist');
     });
 
     // ── Pusher private-channel authorisation (cross-family realtime leak) ──────

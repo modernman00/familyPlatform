@@ -366,13 +366,23 @@
               Every Sunday, FamilyPlatform automatically drops a lively, authentic family poll — rotating across hilarious Family Superlatives (voting on real relatives), Relative Spotlights, cultural debates, and WhatsApp group lore. Vote in the feed, see live results, and debate with the clan in the comments!
             </p>
 
-            <div class="p-3 rounded-3 bg-light border">
+            <div class="p-3 rounded-3 bg-light border mb-3">
               <div class="d-flex align-items-center gap-2 mb-1">
                 <i class="bi bi-stars text-warning fs-5"></i>
                 <span class="fw-bold text-dark">Custom "Guess Who" &amp; Banter Challenges</span>
               </div>
               <p class="small text-muted mb-0">
                 Any family member can also post their own throwback photo challenge or poll using the <strong>"👶 Guess Who"</strong> or <strong>"🧠 Family Lore"</strong> templates in the post composer to spark spirited multi-generational debates.
+              </p>
+            </div>
+
+            <div class="p-3 rounded-3 bg-light border">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-magic text-danger fs-5"></i>
+                <span class="fw-bold text-dark">1-Tap In-Feed 3D Stage Converter, Threaded Replies &amp; Living Expressions</span>
+              </div>
+              <p class="small text-muted mb-0">
+                Authors can transform any text memory right inside the feed with the <strong>✨ Convert to 3D Stage</strong> pill bar (Grand, Aurora, Heirloom, Dynasty, Roundtable, or Governance), or revert to plain text in one tap. Comment threads support multi-tab <strong>Standard Emojis</strong>, <strong>✨ Living 3D Emojis</strong>, <strong>🙋 Me-Stickers</strong>, and <strong>🎬 Family GIFs</strong>, automatic reply flattening with collapsible long discussions, and self-healing island isolation so every post card stays responsive.
               </p>
             </div>
           </div>

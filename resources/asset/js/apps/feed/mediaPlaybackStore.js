@@ -1,48 +1,24 @@
-import { useEffect, useState } from 'preact/hooks';
+import {
+    createSignal,
+    signal,
+    computed,
+    effect,
+    batch,
+    useSignal,
+    useComputed,
+    useSignalValue,
+} from '../shared/signals';
 
-/**
- * Lightweight Preact-compatible reactive signal primitive (zero external dependency).
- */
-export function createSignal(initialValue) {
-    let current = initialValue;
-    const listeners = new Set();
-
-    return {
-        get value() {
-            return current;
-        },
-        set value(next) {
-            if (Object.is(current, next)) return;
-            current = next;
-            listeners.forEach((fn) => {
-                try {
-                    fn(current);
-                } catch {
-                    // Isolate subscriber errors
-                }
-            });
-        },
-        peek() {
-            return current;
-        },
-        subscribe(fn) {
-            listeners.add(fn);
-            return () => listeners.delete(fn);
-        },
-    };
-}
-
-/**
- * Subscribe a Preact component to a signal.
- */
-export function useSignalValue(sig) {
-    const [val, setVal] = useState(() => sig.peek());
-    useEffect(() => {
-        setVal(sig.peek());
-        return sig.subscribe(setVal);
-    }, [sig]);
-    return val;
-}
+export {
+    createSignal,
+    signal,
+    computed,
+    effect,
+    batch,
+    useSignal,
+    useComputed,
+    useSignalValue,
+};
 
 export const activePostId = createSignal(null);
 export const isGlobalMuted = createSignal(true);

@@ -7,6 +7,7 @@ import { CommentThread } from './CommentThread';
 import { FeedVideoGallery } from './FeedVideoGallery';
 import { RichTextTokens } from './RichTextTokens';
 import {
+    TEXT_STAGE_CATALOG,
     formatRelativeTime,
     getAvatarUrl,
     getInitials,
@@ -61,6 +62,7 @@ export const PostCard = memo(function PostCard({
     const [sliderPos, setSliderPos] = useState(50);
     const [brokenPreviewImgUrl, setBrokenPreviewImgUrl] = useState(null);
     const [brokenPhotoUrls, setBrokenPhotoUrls] = useState({});
+    const [convertingStage, setConvertingStage] = useState(false);
     const reactionCloseTimerRef = useRef(null);
     const reactionLongPressTimerRef = useRef(null);
     const reactionWrapperRef = useRef(null);
@@ -267,6 +269,61 @@ export const PostCard = memo(function PostCard({
         } finally {
             setVotingPoll(false);
         }
+    };
+
+    const handleSetPostStage = async (styleSlug) => {
+        if (!post?.post_no || convertingStage) return;
+        const prevStyle = post.post_style || null;
+        const prevMsg = post.postMessage || '';
+        const prevDisplay = post.displayMessage;
+        const cleanSlug = !styleSlug || styleSlug === 'none' ? null : String(styleSlug).toLowerCase();
+        const stripped = stripStyleToken(prevMsg);
+        const nextMsg = cleanSlug ? `[style:${cleanSlug}] ${stripped}` : stripped;
+
+        setConvertingStage(true);
+        onUpdatePost?.(post.post_no, {
+            post_style: cleanSlug,
+            postMessage: nextMsg,
+            displayMessage: stripped,
+        });
+
+        try {
+            const res = await apiFetch(
+                `/post/${encodeURIComponent(post.post_no)}`,
+                {
+                    method: 'PUT',
+                    body: { post_style: cleanSlug || 'none' },
+                },
+                bootstrap
+            );
+            const payload = res?.message && typeof res.message === 'object' ? res.message : res;
+            if (payload && typeof payload === 'object' && (payload.post_style !== undefined || payload.postMessage)) {
+                onUpdatePost?.(post.post_no, {
+                    post_style: payload.post_style !== undefined ? (payload.post_style || null) : cleanSlug,
+                    postMessage: payload.postMessage || nextMsg,
+                });
+            }
+            const stageObj = TEXT_STAGE_CATALOG.find((s) => s.slug === cleanSlug);
+            notifyToast(stageObj ? `Converted to ${stageObj.label}` : 'Reverted to standard text post', 'success');
+        } catch (err) {
+            onUpdatePost?.(post.post_no, {
+                post_style: prevStyle,
+                postMessage: prevMsg,
+                displayMessage: prevDisplay,
+            });
+            notifyToast(err?.message || 'Unable to update post design right now.', 'error');
+        } finally {
+            setConvertingStage(false);
+        }
+    };
+
+    const handleCyclePostStage = () => {
+        if (!post?.post_no || convertingStage) return;
+        const order = TEXT_STAGE_CATALOG.map((s) => s.slug);
+        const current = post.post_style || null;
+        const idx = current ? order.indexOf(current) : -1;
+        const nextSlug = order[(idx + 1) % order.length];
+        handleSetPostStage(nextSlug);
     };
 
     const handleShare = async () => {
@@ -653,6 +710,56 @@ export const PostCard = memo(function PostCard({
                                 {renderTokens(captionText)}
                             </div>
                         )}
+
+                        {ownPost && (
+                            <div className="fp-stage-converter mt-2" data-testid="infeed-stage-converter">
+                                <div className="fp-stage-converter__row">
+                                    <button
+                                        type="button"
+                                        className="fp-stage-converter__trigger"
+                                        disabled={convertingStage}
+                                        onClick={handleCyclePostStage}
+                                        title="One-tap convert this post into a 3D futuristic stage"
+                                    >
+                                        {convertingStage ? (
+                                            <span
+                                                className="spinner-border spinner-border-sm"
+                                                role="status"
+                                                style={{ width: '13px', height: '13px', borderWidth: '2px' }}
+                                            />
+                                        ) : (
+                                            <i className="bi bi-magic" aria-hidden="true" />
+                                        )}
+                                        <span>{post.post_style ? '✨ Next 3D Stage' : '✨ Convert to 3D Stage'}</span>
+                                    </button>
+
+                                    {TEXT_STAGE_CATALOG.map((st) => (
+                                        <button
+                                            key={st.slug}
+                                            type="button"
+                                            className={`fp-stage-converter__chip ${post.post_style === st.slug ? 'is-active' : ''}`}
+                                            disabled={convertingStage}
+                                            onClick={() => handleSetPostStage(st.slug)}
+                                            title={`Convert post to ${st.label}`}
+                                        >
+                                            <span>{st.label}</span>
+                                        </button>
+                                    ))}
+
+                                    {post.post_style && (
+                                        <button
+                                            type="button"
+                                            className="fp-stage-converter__chip fp-stage-converter__chip--reset"
+                                            disabled={convertingStage}
+                                            onClick={() => handleSetPostStage('none')}
+                                            title="Revert to plain text"
+                                        >
+                                            <span>Plain</span>
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )
             )}
@@ -801,17 +908,20 @@ export const PostCard = memo(function PostCard({
             )}
 
             {/* Single Photo (Classic Aura Stage — uncropped full render) */}
-            {images.length === 1 && !post.comparison && (
+            {images.length === 1 && !post.comparison && (() => {
+                const singleImgUrl = getPostImageUrl(images[0]) || images[0];
+                const isSingleBroken = Boolean(brokenPhotoUrls[images[0]] || brokenPhotoUrls[singleImgUrl]);
+                return (
                 <div className="mb-3 px-1">
-                    {brokenPhotoUrls[images[0]] ? (
-                        <div className="post-media-stage__fallback">
+                    {isSingleBroken ? (
+                        <div className="post-media-stage__fallback" style={{ minHeight: '220px' }}>
                             <i className="bi bi-image fs-3" aria-hidden="true" />
                             <span>Photo unavailable</span>
                         </div>
                     ) : (
                         <div className="position-relative feed-media-aura-container">
                             <div className="feed-media-aura-backdrop" aria-hidden="true">
-                                <img src={images[0]} alt="" loading="lazy" referrerPolicy="no-referrer" />
+                                <img src={singleImgUrl} alt="" loading="lazy" referrerPolicy="no-referrer" />
                             </div>
                             <div
                                 className="position-relative overflow-hidden post-media-stage vse-skeleton-surface"
@@ -830,17 +940,17 @@ export const PostCard = memo(function PostCard({
                                 <button
                                     type="button"
                                     className="border-0 p-0 bg-transparent w-100 h-100 d-flex align-items-center justify-content-center"
-                                    onClick={() => onOpenLightbox?.(images, 0, post)}
+                                    onClick={() => onOpenLightbox?.([singleImgUrl], 0, post)}
                                     onDblClick={() => onReactPost?.(post.post_no, 'love')}
                                     aria-label="View photo 1 of 1"
                                     style={{ borderRadius: '12px', overflow: 'hidden', cursor: 'pointer', minHeight: '44px' }}
                                 >
                                     <img
-                                        src={images[0]}
+                                        src={singleImgUrl}
                                         alt="Post photo 1"
                                         className="post-media-first-img"
                                         referrerPolicy="no-referrer"
-                                        onError={() => setBrokenPhotoUrls((prev) => ({ ...prev, [images[0]]: true }))}
+                                        onError={() => setBrokenPhotoUrls((prev) => ({ ...prev, [images[0]]: true, [singleImgUrl]: true }))}
                                         style={{
                                             borderRadius: '12px',
                                             width: '100%',
@@ -856,7 +966,8 @@ export const PostCard = memo(function PostCard({
                         </div>
                     )}
                 </div>
-            )}
+                );
+            })()}
 
             {/* Multi-Photo Grid */}
             {images.length > 1 && !post.comparison && (
@@ -868,7 +979,10 @@ export const PostCard = memo(function PostCard({
                         gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
                     }}
                 >
-                    {images.map((src, idx) => (
+                    {images.map((src, idx) => {
+                        const resolvedSrc = getPostImageUrl(src) || src;
+                        const isBroken = Boolean(brokenPhotoUrls[src] || brokenPhotoUrls[resolvedSrc]);
+                        return (
                         <button
                             key={`${src}_${idx}`}
                             type="button"
@@ -880,26 +994,27 @@ export const PostCard = memo(function PostCard({
                                 backgroundColor: '#0f172a',
                                 cursor: 'pointer',
                             }}
-                            onClick={() => onOpenLightbox?.(images, idx, post)}
+                            onClick={() => onOpenLightbox?.(images.map((u) => getPostImageUrl(u) || u), idx, post)}
                             aria-label={`View photo ${idx + 1} of ${images.length}`}
                         >
-                            {brokenPhotoUrls[src] ? (
+                            {isBroken ? (
                                 <div className="post-media-stage__fallback" style={{ minHeight: '180px' }}>
                                     <i className="bi bi-image fs-4" aria-hidden="true" />
                                     <span>Photo unavailable</span>
                                 </div>
                             ) : (
                                 <img
-                                    src={src}
+                                    src={resolvedSrc}
                                     alt={`Post photo ${idx + 1}`}
                                     className="w-100 h-100 object-fit-cover d-block atg-4k-image-render"
                                     referrerPolicy="no-referrer"
-                                    onError={() => setBrokenPhotoUrls((prev) => ({ ...prev, [src]: true }))}
+                                    onError={() => setBrokenPhotoUrls((prev) => ({ ...prev, [src]: true, [resolvedSrc]: true }))}
                                     loading="lazy"
                                 />
                             )}
                         </button>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 

@@ -33,7 +33,7 @@ describe('Threaded comment replies', () => {
         post().within(() => {
             cy.get('button[aria-label="Comment on this post"]').click();
             cy.get('input.comment-composer__input').type(top);
-            cy.get('button[aria-label="Post comment"]').click();
+            cy.get('button[title="Post comment"]').click();
         });
         cy.wait('@commentReq', { timeout: 90000 }).its('response.statusCode').should('eq', 200);
 
@@ -43,7 +43,7 @@ describe('Threaded comment replies', () => {
         });
         post().find('[data-testid="comment-replying-to"]').should('be.visible');
         post().find('input.comment-composer__input').type(reply);
-        post().find('button[aria-label="Post comment"]').click();
+        post().find('button[title="Post comment"]').click();
         cy.wait('@commentReq', { timeout: 90000 }).its('response.statusCode').should('eq', 200);
         post().find('[data-testid="comment-replying-to"]').should('not.be.visible');
         post().contains('.comment-bubble-box', reply).closest('[data-reply]').should('have.attr', 'data-reply', 'true');
@@ -54,7 +54,7 @@ describe('Threaded comment replies', () => {
             cy.get('[data-testid="comment-reply-btn"]').click();
         });
         post().find('input.comment-composer__input').type(nested);
-        post().find('button[aria-label="Post comment"]').click();
+        post().find('button[title="Post comment"]').click();
         cy.wait('@commentReq', { timeout: 90000 }).its('response.statusCode').should('eq', 200);
         post().contains('.comment-bubble-box', nested).closest('[data-reply]').should('have.attr', 'data-reply', 'true');
 
@@ -82,7 +82,7 @@ describe('Threaded comment replies', () => {
         post().within(() => {
             cy.get('button[aria-label="Comment on this post"]').click();
             cy.get('input.comment-composer__input').type(top);
-            cy.get('button[aria-label="Post comment"]').click();
+            cy.get('button[title="Post comment"]').click();
         });
         cy.wait('@commentReq', { timeout: 90000 });
 
@@ -92,7 +92,7 @@ describe('Threaded comment replies', () => {
                 cy.get('[data-testid="comment-reply-btn"]').click();
             });
             post().find('input.comment-composer__input').clear().type(txt);
-            post().find('button[aria-label="Post comment"]').click();
+            post().find('button[title="Post comment"]').click();
             cy.wait('@commentReq', { timeout: 90000 });
         });
 

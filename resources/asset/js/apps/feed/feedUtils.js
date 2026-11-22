@@ -597,7 +597,13 @@ export function normalizeComment(raw) {
         profileImg,
         comment: normalizeEmojiText(decodeHtml(String(raw.comment ?? ''))),
         gif_url: raw.gif_url || '',
-        parent_comment_no: Number(raw.parent_comment_no) > 0 ? String(raw.parent_comment_no) : null,
+        parent_comment_no:
+            raw.parent_comment_no !== null
+            && raw.parent_comment_no !== undefined
+            && String(raw.parent_comment_no).trim() !== ''
+            && String(raw.parent_comment_no).trim() !== '0'
+                ? String(raw.parent_comment_no).trim()
+                : null,
         reactions: normalizedReactions,
         user_reaction: raw.user_reaction ?? raw.userReaction ?? null,
         date_created: raw.date_created ?? raw.created_at ?? '',
@@ -689,7 +695,9 @@ export function unwrapFeedResponse(res) {
 }
 
 export function isOwnPost(post, currentUserId) {
-    if (!post || !currentUserId) return false;
+    if (!post) return false;
+    if (post.is_own_post === true) return true;
+    if (!currentUserId) return false;
     return String(post.id) === String(currentUserId);
 }
 

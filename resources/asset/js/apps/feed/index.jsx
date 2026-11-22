@@ -1,5 +1,6 @@
 import { render } from 'preact';
 import { readIslandBootstrap } from '../shared/bootstrap';
+import { IslandErrorBoundary } from '../shared/IslandErrorBoundary';
 import { FeedShell } from './FeedShell';
 
 export function mountFeed() {
@@ -7,7 +8,12 @@ export function mountFeed() {
     const root = document.getElementById('feed-root');
     if (!root) return;
     const bootstrap = readIslandBootstrap('feed-bootstrap', {});
-    render(<FeedShell bootstrap={bootstrap} />, root);
+    render(
+        <IslandErrorBoundary name="FamilyFeed" fallbackTitle="Unable to load your family feed right now.">
+            <FeedShell bootstrap={bootstrap} />
+        </IslandErrorBoundary>,
+        root
+    );
 }
 
 if (typeof document !== 'undefined') {

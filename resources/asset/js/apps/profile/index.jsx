@@ -1,5 +1,6 @@
 import { render } from 'preact';
 import { readIslandBootstrap } from '../shared/bootstrap';
+import { IslandErrorBoundary } from '../shared/IslandErrorBoundary';
 import { KinRequestsIsland } from './KinRequestsIsland';
 import { UpcomingEventsIsland } from './UpcomingEventsIsland';
 
@@ -49,13 +50,23 @@ export function mountProfileSidebars() {
     const kinRoot = document.getElementById('kin-requests-root');
     if (kinRoot) {
         const kinBootstrap = readIslandBootstrap('kin-requests-bootstrap', {});
-        render(<KinRequestsIsland bootstrap={kinBootstrap} />, kinRoot);
+        render(
+            <IslandErrorBoundary name="KinRequests" fallbackTitle="Unable to load kinship requests." compact>
+                <KinRequestsIsland bootstrap={kinBootstrap} />
+            </IslandErrorBoundary>,
+            kinRoot
+        );
     }
 
     const eventsRoot = document.getElementById('upcoming-events-root');
     if (eventsRoot) {
         const eventsBootstrap = readIslandBootstrap('upcoming-events-bootstrap', {});
-        render(<UpcomingEventsIsland bootstrap={eventsBootstrap} />, eventsRoot);
+        render(
+            <IslandErrorBoundary name="UpcomingEvents" fallbackTitle="Unable to load upcoming events." compact>
+                <UpcomingEventsIsland bootstrap={eventsBootstrap} />
+            </IslandErrorBoundary>,
+            eventsRoot
+        );
     }
 
     if (!window.__fpProfileUpdatedListenerAttached) {

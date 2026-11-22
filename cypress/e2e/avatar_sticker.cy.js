@@ -137,7 +137,7 @@ describe('Me-stickers (avatar stickers in posts & comments)', () => {
             // The field shows the avatar, never the raw token.
             cy.get('[data-testid="comment-sticker-preview"] img', { timeout: 30000 }).should('be.visible').should(expectImageLoaded);
             cy.get('input.comment-composer__input').should('not.contain.value', ':me_');
-            cy.get('button[aria-label="Post comment"]').click();
+            cy.get('button[title="Post comment"]').click();
         });
         cy.wait('@commentReq', { timeout: 90000 }).its('response.statusCode').should('eq', 200);
         cy.contains(marker).parents('.card')

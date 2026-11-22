@@ -41,7 +41,7 @@ describe('GIFs in comments', () => {
             cy.get('[data-testid="comment-gif-preview"]').should('be.visible');
 
             // No text typed: the GIF alone satisfies the form
-            cy.get('button[aria-label="Post comment"]').click();
+            cy.get('button[title="Post comment"]').click();
         });
 
         cy.wait('@commentReq', { timeout: 90000 }).its('response.statusCode').should('eq', 200);
@@ -68,7 +68,7 @@ describe('GIFs in comments', () => {
                 .find('.comment-emoji-btn').first().click();
 
             cy.get('input.comment-composer__input').should('not.have.value', '');
-            cy.get('button[aria-label="Post comment"]').click();
+            cy.get('button[title="Post comment"]').click();
         });
 
         cy.wait('@commentReq', { timeout: 90000 }).its('response.statusCode').should('eq', 200);

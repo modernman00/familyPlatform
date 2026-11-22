@@ -53,7 +53,7 @@ describe('Feed Post Card 4-State & DOM Audit Regression', () => {
         }).as('missingImg');
 
         cy.window().then((win) => {
-            const feedEl = win.document.querySelector('[x-data*="profileFeed"]');
+            const feedEl = win.document.querySelector('[x-data*="profileFeed"], .feed-posts-container');
             const feedData = feedEl && win.Alpine ? win.Alpine.$data(feedEl) : null;
             expect(feedData, 'Alpine profileFeed data').to.exist;
 
@@ -96,7 +96,7 @@ describe('Feed Post Card 4-State & DOM Audit Regression', () => {
         cy.get('.feed-post-card', { timeout: 12000 }).should('have.length.greaterThan', 0);
 
         cy.window().then((win) => {
-            const feedEl = win.document.querySelector('[x-data*="profileFeed"]');
+            const feedEl = win.document.querySelector('[x-data*="profileFeed"], .feed-posts-container');
             const feedData = feedEl && win.Alpine ? win.Alpine.$data(feedEl) : null;
             expect(feedData, 'Alpine profileFeed data').to.exist;
 
@@ -136,7 +136,7 @@ describe('Feed Post Card 4-State & DOM Audit Regression', () => {
         cy.get('.feed-post-card', { timeout: 12000 }).should('have.length.greaterThan', 0);
 
         cy.window().then((win) => {
-            const feedEl = win.document.querySelector('[x-data*="profileFeed"]');
+            const feedEl = win.document.querySelector('[x-data*="profileFeed"], .feed-posts-container');
             const feedData = feedEl && win.Alpine ? win.Alpine.$data(feedEl) : null;
             expect(feedData, 'Alpine profileFeed data').to.exist;
 

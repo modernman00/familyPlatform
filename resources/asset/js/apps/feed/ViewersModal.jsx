@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'preact/hooks';
 import { apiFetch } from '../shared/apiClient';
+import { Portal } from '../shared/Portal';
 import { getAvatarUrl, getInitials, formatRelativeTime } from './feedUtils';
 import styles from './FeedShell.module.css';
 
@@ -71,6 +72,7 @@ export function ViewersModal({
     if (!isOpen) return null;
 
     return (
+        <Portal>
         <div
             className={styles.modalBackdrop}
             role="dialog"
@@ -156,5 +158,6 @@ export function ViewersModal({
                 </div>
             </div>
         </div>
+        </Portal>
     );
 }

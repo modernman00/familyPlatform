@@ -230,7 +230,7 @@ export function EmojiGifPicker({
 
             {/* Tab 1: Standard Emojis */}
             {activeTab === 'standard' && (
-                <div>
+                <div data-testid="comment-emoji-picker">
                     <input
                         type="search"
                         className="form-control form-control-sm mb-2"

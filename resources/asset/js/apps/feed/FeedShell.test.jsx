@@ -1319,4 +1319,100 @@ describe('Profile Feed Preact Island (Phases 1–4)', () => {
         expect(container.querySelector('[data-testid="comment-file-preview"]')).toBeNull();
         expect(sendBtn.disabled).toBe(true);
     });
+
+    it('BRATS Regression Guard: supports _x_dataStack programmatic bridge, In-Feed 3D Stage Converter, bare image URL resolution, and 2-reply thread collapsing', async () => {
+        globalThis.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: { get: () => 'application/json' },
+                json: () => Promise.resolve({ status: 'success', message: { post_style: 'aurora_prism' } }),
+            })
+        );
+
+        const initialPost = {
+            post_no: '3001',
+            id: 'u_owner',
+            firstName: 'Wally',
+            lastName: 'Olaogun',
+            postMessage: 'Family heritage text post',
+            images: [],
+            videos: [],
+            comments: [
+                { comment_no: 'c1', post_no: '3001', id: 'u_2', firstName: 'Ayo', comment: 'Root comment', parent_comment_no: null },
+                { comment_no: 'c2', post_no: '3001', id: 'u_3', firstName: 'Bisi', comment: 'Reply 1', parent_comment_no: 'c1' },
+                { comment_no: 'c3', post_no: '3001', id: 'u_4', firstName: 'Tunde', comment: 'Reply 2', parent_comment_no: 'c1' },
+                { comment_no: 'c4', post_no: '3001', id: 'u_5', firstName: 'Kemi', comment: 'Reply 3', parent_comment_no: 'c1' },
+            ],
+        };
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    userId: 'u_owner',
+                    firstName: 'Wally',
+                    lastName: 'Olaogun',
+                    csrfToken: 'csrf_brats',
+                    initialPosts: [initialPost],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        // 1. Own text post renders In-Feed 3D Stage Converter
+        const stageConverter = container.querySelector('#post3001 [data-testid="infeed-stage-converter"]');
+        expect(stageConverter).toBeTruthy();
+
+        // 2. Thread with 3 replies collapses to 2 visible replies + "View 1 more reply" toggle, then expands and collapses
+        expect(container.querySelectorAll('#post3001 [data-reply="true"]').length).toBe(2);
+        const toggleBtn = container.querySelector('#post3001 [data-testid="thread-collapse-toggle"]');
+        expect(toggleBtn).toBeTruthy();
+        expect(toggleBtn.textContent).toMatch(/View 1 more reply/);
+        fireEvent.click(toggleBtn);
+        expect(container.querySelectorAll('#post3001 [data-reply="true"]').length).toBe(3);
+        expect(toggleBtn.textContent).toBe('Collapse replies');
+
+        // 3. Programmatic _x_dataStack bridge supports posts.unshift (link-only + bare image filename) & openLightbox
+        const feedRootEl = container.querySelector('.feed-posts-container');
+        expect(feedRootEl._x_dataStack).toBeTruthy();
+        const bridge = feedRootEl._x_dataStack[0];
+
+        bridge.posts.unshift({
+            post_no: 9999992,
+            id: 'u_owner',
+            is_own_post: true,
+            fullName: 'E2E Link Tester',
+            postMessage: 'https://example.com/family-reunion',
+            displayMessage: 'https://example.com/family-reunion',
+            images: [],
+            videos: [],
+            link_preview: {
+                url: 'https://example.com/family-reunion',
+                original_url: 'https://example.com/family-reunion',
+                domain: 'example.com',
+                title: 'Annual Family Reunion 2026',
+            },
+        });
+
+        await waitFor(() => {
+            expect(container.querySelector('#post9999992 .link-preview-card')).toBeTruthy();
+        });
+        // Link-only post suppresses 3D stage converter
+        expect(container.querySelector('#post9999992 [data-testid="infeed-stage-converter"]')).toBeNull();
+
+        bridge.posts.unshift({
+            post_no: 9999991,
+            id: 'u_owner',
+            fullName: 'E2E Image Tester',
+            postMessage: 'Testing 404 image path',
+            images: ['missing-e2e-404-test.jpg'],
+            videos: [],
+        });
+
+        await waitFor(() => {
+            const img = container.querySelector('#post9999991 img.post-media-first-img');
+            expect(img).toBeTruthy();
+            expect(img.getAttribute('src')).toContain('/resources/images/post/missing-e2e-404-test.jpg');
+        });
+    });
 });

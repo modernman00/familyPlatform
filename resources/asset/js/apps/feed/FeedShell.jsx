@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'preact/hooks';
 import { apiFetch } from '../shared/apiClient';
 import { getCsrfToken, notifyToast } from '../shared/bootstrap';
+import { IslandErrorBoundary } from '../shared/IslandErrorBoundary';
 import { createHybridRealtimeClient } from '../../components/profilePage/sovereignRealtimeBridge';
 import { parseVideoUrl } from '../../components/profilePage/videoParser';
 import { PostCard } from './PostCard';
@@ -45,6 +46,7 @@ export function FeedShell({ bootstrap = {} }) {
     const [videoState, setVideoState] = useState({ isOpen: false, videos: [], index: 0 });
     const [viewersState, setViewersState] = useState({ isOpen: false, type: 'post', targetNo: null, initialCount: 0 });
 
+    const shellRef = useRef(null);
     const sentinelRef = useRef(null);
     const hydratedPreviewPostNosRef = useRef(new Set());
     const viewedPostNosRef = useRef(new Set());
@@ -639,12 +641,71 @@ export function FeedShell({ bootstrap = {} }) {
         [posts, currentUserId]
     );
 
+    // Programmatic bridge for E2E & legacy integrations querying Alpine.$data(.feed-posts-container)
+    useEffect(() => {
+        const el = shellRef.current;
+        if (!el) return undefined;
+        const postsProxy = {
+            get length() {
+                return postsRef.current.length;
+            },
+            unshift(...rawItems) {
+                const normalizedItems = rawItems
+                    .map((item) => {
+                        const norm = normalizePost(item);
+                        if (norm && item && item.is_own_post === true) {
+                            norm.is_own_post = true;
+                        }
+                        return norm;
+                    })
+                    .filter(Boolean);
+                if (normalizedItems.length > 0) {
+                    setPosts((prev) => [...normalizedItems, ...prev]);
+                }
+                return postsRef.current.length + normalizedItems.length;
+            },
+            push(...rawItems) {
+                const normalizedItems = rawItems
+                    .map((item) => {
+                        const norm = normalizePost(item);
+                        if (norm && item && item.is_own_post === true) {
+                            norm.is_own_post = true;
+                        }
+                        return norm;
+                    })
+                    .filter(Boolean);
+                if (normalizedItems.length > 0) {
+                    setPosts((prev) => [...prev, ...normalizedItems]);
+                }
+                return postsRef.current.length + normalizedItems.length;
+            },
+        };
+        const bridge = {
+            currentUserId,
+            loggedInUserId: currentUserId,
+            posts: postsProxy,
+            openLightbox: (images, index = 0, post = null) => {
+                handleOpenLightbox(images, index, post);
+            },
+        };
+        el._x_dataStack = [bridge];
+        if (typeof window !== 'undefined') {
+            window.__FP_FEED_CONTROLLER__ = bridge;
+        }
+        return () => {
+            delete el._x_dataStack;
+            if (typeof window !== 'undefined' && window.__FP_FEED_CONTROLLER__ === bridge) {
+                delete window.__FP_FEED_CONTROLLER__;
+            }
+        };
+    }, [currentUserId, handleOpenLightbox]);
+
     const activeLightboxPost = lightboxState.postNo
         ? posts.find((p) => String(p.post_no) === String(lightboxState.postNo)) || null
         : null;
 
     return (
-        <div id="postIt" className="feed-posts-container" data-testid="feed-island-shell">
+        <div ref={shellRef} id="postIt" className="feed-posts-container" data-testid="feed-island-shell">
             {/* Error Alert */}
             {errorMessage && (
                 <div className="alert alert-danger shadow-sm rounded-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2" role="alert">
@@ -895,22 +956,28 @@ export function FeedShell({ bootstrap = {} }) {
 
             {/* Posts List */}
             {!loading && posts.map((post) => (
-                <PostCard
+                <IslandErrorBoundary
                     key={post.post_no}
-                    post={post}
-                    bootstrap={profileBootstrap}
-                    isHighlighted={String(highlightedPostNo) === String(post.post_no)}
-                    onReactPost={handleReactPost}
-                    onVotePoll={handleVotePoll}
-                    onMutateComments={handleMutateComments}
-                    onUpdatePost={handleUpdatePost}
-                    onDeletePost={handleDeletePost}
-                    onSelectHashtag={handleSelectHashtag}
-                    onOpenLightbox={handleOpenLightbox}
-                    onOpenVideo={handleOpenVideo}
-                    onOpenPostViewers={handleOpenPostViewers}
-                    onOpenCommentViewers={handleOpenCommentViewers}
-                />
+                    name={`PostCard-${post.post_no}`}
+                    fallbackTitle="This family memory could not be displayed."
+                    compact
+                >
+                    <PostCard
+                        post={post}
+                        bootstrap={profileBootstrap}
+                        isHighlighted={String(highlightedPostNo) === String(post.post_no)}
+                        onReactPost={handleReactPost}
+                        onVotePoll={handleVotePoll}
+                        onMutateComments={handleMutateComments}
+                        onUpdatePost={handleUpdatePost}
+                        onDeletePost={handleDeletePost}
+                        onSelectHashtag={handleSelectHashtag}
+                        onOpenLightbox={handleOpenLightbox}
+                        onOpenVideo={handleOpenVideo}
+                        onOpenPostViewers={handleOpenPostViewers}
+                        onOpenCommentViewers={handleOpenCommentViewers}
+                    />
+                </IslandErrorBoundary>
             ))}
 
             {/* Pagination / Infinite Scroll Sentinel */}

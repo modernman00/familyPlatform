@@ -1,5 +1,6 @@
 import { render } from 'preact';
 import { readIslandBootstrap } from '../shared/bootstrap';
+import { IslandErrorBoundary } from '../shared/IslandErrorBoundary';
 import { ArcadeShell } from './ArcadeShell';
 
 export function mountFamilyArcade() {
@@ -7,7 +8,12 @@ export function mountFamilyArcade() {
     const root = document.getElementById('family-arcade-root');
     if (!root) return;
     const bootstrap = readIslandBootstrap('arcade-bootstrap', {});
-    render(<ArcadeShell bootstrap={bootstrap} />, root);
+    render(
+        <IslandErrorBoundary name="FamilyArcade" fallbackTitle="Unable to load Family Arcade right now.">
+            <ArcadeShell bootstrap={bootstrap} />
+        </IslandErrorBoundary>,
+        root
+    );
 }
 
 if (typeof document !== 'undefined') {

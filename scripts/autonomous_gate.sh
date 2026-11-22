@@ -167,8 +167,18 @@ if [ -f "scripts/verify_engineering_must_haves.php" ]; then
     fi
 fi
 
-# 4. Targeted PHPUnit Tests (if passed via CLI arguments)
+# 4. Targeted PHPUnit Tests (if passed via CLI arguments) & Preact Vitest Gate
 echo -e "${BOLD}${CYAN}[FINISHER 4/4] Targeted Feature/Regression Tests...${NC}"
+MODIFIED_PREACT=$(git status --porcelain 2>/dev/null | awk '{print $NF}' | grep -E '^resources/asset/js/apps/.*\.(js|jsx)$' || true)
+if [ -n "$MODIFIED_PREACT" ] && [ -f "vitest.config.mjs" ]; then
+    echo -e "${CYAN}  ↳ Modified Preact island files detected; running Vitest unit suite...${NC}"
+    if npx vitest run; then
+        echo -e "${GREEN}  ✅ Preact Vitest unit suite passed.${NC}"
+    else
+        echo -e "${RED}  ❌ Preact Vitest unit suite failed!${NC}"
+        FAILURES=$((FAILURES + 1))
+    fi
+fi
 if [ "$#" -gt 0 ] && [ -x "vendor/bin/phpunit" ]; then
     if vendor/bin/phpunit "$@"; then
         echo -e "${GREEN}  ✅ Targeted PHPUnit tests passed.${NC}"

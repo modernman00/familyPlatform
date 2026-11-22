@@ -1913,15 +1913,6 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
         const editPostNo = document.getElementById('editPostNo')?.value;
         if (editPostNo) return;
 
-        const step2 = document.getElementById('composerStep2');
-        if (!step2) return;
-
-        const isConfirmed = step2.getAttribute('data-confirmed') === 'true';
-        if (isConfirmed) return;
-
-        const canChoose = modal.getAttribute('data-can-choose') === '1';
-        if (!canChoose) return;
-
         // Ensure editor is synced before checking contents
         if (typeof window.syncEditorToTextarea === 'function') {
             window.syncEditorToTextarea();
@@ -1949,6 +1940,15 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
             }
             return;
         }
+
+        const step2 = document.getElementById('composerStep2');
+        if (!step2) return;
+
+        const isConfirmed = step2.getAttribute('data-confirmed') === 'true';
+        if (isConfirmed) return;
+
+        const canChoose = modal.getAttribute('data-can-choose') === '1';
+        if (!canChoose) return;
 
         // Intercept: transition to Step 2!
         e.preventDefault();

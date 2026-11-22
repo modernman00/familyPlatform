@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import gsap from 'gsap';
 import { playArcadeSfx, formatElapsedMs } from './arcadeEngine';
 import styles from './ArcadeShell.module.css';
 
@@ -102,12 +101,18 @@ export function KinWordGame({ puzzle, onProgress, onComplete, submitting }) {
             playArcadeSfx('connect', nextSolved.length * 4);
             setStatusNote(`Found "${match.title}"!`);
 
-            // GSAP spring reveal
-            if (solvedWrapRef.current && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            // Native Web Animations API spring reveal (zero-bundle overhead)
+            if (solvedWrapRef.current && !window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) {
                 window.requestAnimationFrame(() => {
                     const lastBanner = solvedWrapRef.current?.lastElementChild;
-                    if (lastBanner) {
-                        gsap.fromTo(lastBanner, { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(1.7)' });
+                    if (lastBanner && typeof lastBanner.animate === 'function') {
+                        lastBanner.animate(
+                            [
+                                { transform: 'scale(0.9)', opacity: 0 },
+                                { transform: 'scale(1)', opacity: 1 },
+                            ],
+                            { duration: 400, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
+                        );
                     }
                 });
             }
