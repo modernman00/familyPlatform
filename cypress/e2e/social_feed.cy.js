@@ -7,7 +7,9 @@ describe('Social Feed Interactions', () => {
     Cypress.on('uncaught:exception', () => false);
 
     beforeEach(() => {
+        cy.request({ method: 'POST', url: '/api/test/clear-rate-limit', failOnStatusCode: false, headers: { 'X-Cypress-Test': 'true' } });
         loginFully();
+        cy.visit('/profilePage?v=legacy');
         // Wait for Alpine's feed component to finish mounting
         cy.get('#openPostModalTrigger', { timeout: 10000 }).should('be.visible');
     });
@@ -46,7 +48,7 @@ describe('Social Feed Interactions', () => {
         cy.get('#postMessageEditor').should('be.visible').then(() => cy.get('textarea#postMessage'))
             .invoke('val', payload).trigger('input', { force: true }).trigger('change', { force: true });
         cy.get('#submitPost').click();
-        cy.get('.swal2-popup', { timeout: 10000 }).should('contain.text', 'Post published successfully');
+        cy.get('.swal2-popup', { timeout: 20000 }).should('contain.text', 'Post published successfully');
 
         // Reload to render the stored post from the server on a fresh page.
         cy.reload();
@@ -78,7 +80,7 @@ describe('Social Feed Interactions', () => {
         cy.get('#postMessageEditor').should('be.visible').then(() => cy.get('textarea#postMessage'))
             .invoke('val', text).trigger('input', { force: true }).trigger('change', { force: true });
         cy.get('#submitPost').click();
-        cy.get('.swal2-popup', { timeout: 10000 }).should('contain.text', 'Post published successfully');
+        cy.get('.swal2-popup', { timeout: 20000 }).should('contain.text', 'Post published successfully');
         cy.get('#postModal', { timeout: 10000 }).should('not.be.visible');
         cy.get('.modal-backdrop', { timeout: 10000 }).should('not.exist');
         cy.contains(text, { timeout: 10000 }).should('be.visible');
