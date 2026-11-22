@@ -13,7 +13,7 @@ export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
     const [hintCell, setHintCell] = useState(null);
     const [elapsedMs, setElapsedMs] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
-    const [statusNote, setStatusNote] = useState('Tap dot 1 or drag across the grid to connect every cell in order.');
+    const [statusNote, setStatusNote] = useState('Start at dot 1, then tap or drag through every square in order (1 → 2 → 3…) without crossing gold walls.');
 
     const startTimeRef = useRef(Date.now());
     const replayRef = useRef([]);
@@ -40,11 +40,23 @@ export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
         setHintsUsed(0);
         setHintCell(null);
         setElapsedMs(0);
-        setStatusNote('Tap dot 1 or drag across the grid to connect every cell in order.');
+        setStatusNote('Start at dot 1, then tap or drag through every square in order (1 → 2 → 3…) without crossing gold walls.');
         startTimeRef.current = Date.now();
         replayRef.current = [];
         completedRef.current = false;
     }, [puzzle?.seedKey, puzzle?.difficulty]);
+
+    // Ensure drag state clears even if pointer is released outside the grid
+    useEffect(() => {
+        if (!isDragging) return undefined;
+        const stopDrag = () => setIsDragging(false);
+        window.addEventListener('pointerup', stopDrag);
+        window.addEventListener('pointercancel', stopDrag);
+        return () => {
+            window.removeEventListener('pointerup', stopDrag);
+            window.removeEventListener('pointercancel', stopDrag);
+        };
+    }, [isDragging]);
 
     // Live timer
     useEffect(() => {
@@ -291,6 +303,13 @@ export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
                                 ].filter(Boolean).join(' ')}
                                 onPointerDown={(e) => {
                                     e.preventDefault();
+                                    if (gridRef.current?.setPointerCapture && e.pointerId !== undefined) {
+                                        try {
+                                            gridRef.current.setPointerCapture(e.pointerId);
+                                        } catch {
+                                            // Ignore unsupported capture (e.g. synthetic test events)
+                                        }
+                                    }
                                     setIsDragging(true);
                                     tryStepTo(r, c);
                                 }}

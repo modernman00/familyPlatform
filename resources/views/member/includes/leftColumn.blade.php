@@ -1,8 +1,4 @@
-@if(empty($usePreactFeed) || ($_GET['v'] ?? '') === 'legacy')
-<div class="profile-column" x-data="profileSidebar({ id: '{{ $data['id'] }}', firstName: '{{ $data['firstName'] }}', lastName: '{{ $data['lastName'] }}', img: '{{ $data['img'] ?? $data['profilePics'] ?? '' }}', famCode: '{{ $data['famCode'] }}' })">
-@else
 <div class="profile-column">
-@endif
 
     <!-- Profile Overview Card -->
     <div class="card profile-card text-center border-0 shadow-sm" style="border-radius: 20px; overflow: hidden; background-color: var(--card-bg); color: var(--text-color);">
@@ -201,7 +197,7 @@
                     <i class="bi bi-grid-fill me-1.5 text-warning"></i> {{ __('profile.family_hub', 'Family Hub') }}
                 </a>
 
-                <a href="/creative-studio" class="btn fw-bold flex-fill text-decoration-none text-center shadow-sm" style="background: linear-gradient(135deg, #b45309 0%, #d97706 55%, #f59e0b 100%); color: #ffffff !important; border: none; border-radius: 12px; padding: 10px 12px; font-size: 0.92rem; box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3); min-height: 44px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; flex-shrink: 0;" title="{{ __('profile.creative_studio', 'Creative Studio') }} - Tree Studio, flyers &amp; posters, festive cards and living archives">
+                <a href="/creative-studio" class="btn fw-bold flex-fill text-decoration-none text-center shadow-sm" style="background: linear-gradient(135deg, #b45309 0%, #d97706 55%, #f59e0b 100%); color: #ffffff !important; border: none; border-radius: 12px; padding: 10px 12px; font-size: 0.92rem; box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3); min-height: 44px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; flex-shrink: 0;" title="{{ __('profile.creative_studio', 'Creative Studio') }} - Tree Studio, flyers &amp; posters, festive cards, living archives and Family Arcade">
                     <i class="bi bi-brush-fill me-1.5"></i> {{ __('profile.creative_studio', 'Creative Studio') }}
                 </a>
 
@@ -764,66 +760,6 @@
 
         </div>
     </div>
-
-    @if(empty($usePreactFeed) || ($_GET['v'] ?? '') === 'legacy')
-    <!-- Kin Requests Card (Only shown if there are pending requests) -->
-    <div id="kinshipRequestSidebar"
-         class="card border-0 shadow-sm mt-4 kinship-request-card" 
-         x-show="!isLoadingRequests && friendRequests && friendRequests.length > 0" 
-         x-cloak 
-         x-transition
-         style="border-radius: 20px; background-color: var(--card-bg);">
-
-        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2 px-4">
-            <template x-if="friendRequests.length > 1">
-                <h5 class="mb-0 fw-bold" style="color: var(--text-color); font-size: 1.05rem;">
-                    <span x-text="friendRequests.length"></span> {{ __('profile.kin_requests', 'Kin Requests') }}
-                </h5>
-            </template>
-            <template x-if="friendRequests.length === 1">
-                <h5 class="mb-0 fw-bold" style="color: var(--text-color); font-size: 1.05rem;">{{ __('profile.kin_request', 'Kin Request') }}</h5>
-            </template>
-            <template x-if="friendRequests.length > 1">
-                <a href="/allMembers" class="text-decoration-none" style="color: var(--primary-color); font-weight: 600; font-size: 0.85rem;">{{ __('profile.see_all', 'See All') }} <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i></a>
-            </template>
-        </div>
-
-        <div class="card-body">
-            <!-- Dynamic Requests List -->
-            <div class="d-flex flex-column gap-3">
-                <template x-for="req in friendRequests" :key="req.id">
-                    <div class="d-flex flex-column align-items-center text-center p-3 border rounded-3" style="background-color: var(--hover-color); border-color: var(--border-color); border-radius: 14px;">
-                        <img :src="req.img ? (req.img.startsWith('/') ? req.img : '/resources/images/profile/' + req.img) : '/resources/images/profile/avatarM.png'" alt="Avatar" class="rounded-circle shadow-sm mb-2" style="width: 56px; height: 56px; object-fit: cover;">
-                        <span class="fw-semibold mb-1" style="font-size: 0.9rem;" x-text="req.firstName + ' ' + req.lastName"></span>
-                        
-                        <!-- Declared Relationship Badge -->
-                        <span class="badge rounded-pill bg-light text-dark border mb-2 px-2.5 py-1" x-show="req.relationship_role || req.relationship_category" style="font-size: 0.76rem;">
-                            <span class="fw-semibold text-primary" x-text="req.relationship_full_label || req.relationship_role || req.relationship_category_label || req.relationship_category"></span>
-                        </span>
-
-                        <!-- Personal Note (if provided) -->
-                        <p class="small text-muted fst-italic mb-2 px-2" x-show="req.relationship_note" x-text="'“' + req.relationship_note + '”'" style="font-size: 0.78rem; line-height: 1.4;"></p>
-
-                        <!-- Privacy & Control Reassurance -->
-                        <div class="small text-muted mb-2.5 px-1 text-center" style="font-size: 0.72rem; opacity: 0.85;">
-                            <i class="bi bi-shield-check text-success me-1"></i> Connected Kin: Your family tree stays 100% private
-                        </div>
-
-                        <div class="d-flex gap-2 w-100">
-                            <a :href="getAcceptUrl(req)" class="btn btn-primary btn-sm flex-grow-1 fw-bold rounded-pill" title="Accept as Connected Kin" style="text-decoration: none;">
-                                <i class="bi bi-check-lg"></i> Accept
-                            </a>
-                            <a :href="getDeclineUrl(req)" class="btn btn-outline-danger btn-sm flex-grow-1 fw-bold rounded-pill" title="Decline" style="text-decoration: none;">
-                                <i class="bi bi-x-lg"></i> Decline
-                            </a>
-                        </div>
-                    </div>
-                </template>
-            </div>
-        </div>
-    </div>
-    @else
     <div id="kin-requests-root"></div>
     <script type="application/json" id="kin-requests-bootstrap">{!! json_encode(['id' => (string)($data['id'] ?? ''), 'firstName' => (string)($data['firstName'] ?? ''), 'lastName' => (string)($data['lastName'] ?? ''), 'img' => (string)($data['img'] ?? $data['profilePics'] ?? ''), 'famCode' => (string)($data['famCode'] ?? '')]) !!}</script>
-    @endif
 </div>

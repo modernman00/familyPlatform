@@ -15,12 +15,53 @@
     border-color: #334155 !important;
     color: #f8fafc !important;
   }
+  .family-heritage-sidebar-widget .fhw-active-badge {
+    color: #0f5132;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .family-heritage-sidebar-widget .fhw-icon-crimson {
+    width: 36px;
+    height: 36px;
+    background: rgba(163, 22, 33, 0.12);
+    color: #a31621;
+  }
+  .family-heritage-sidebar-widget .fhw-icon-purple {
+    width: 36px;
+    height: 36px;
+    background: rgba(109, 40, 217, 0.14);
+    color: #6d28d9;
+  }
+  body.dark-mode .family-heritage-sidebar-widget .fhw-active-badge,
+  body.dark-theme .family-heritage-sidebar-widget .fhw-active-badge,
+  [data-bs-theme="dark"] .family-heritage-sidebar-widget .fhw-active-badge,
+  html.dark .family-heritage-sidebar-widget .fhw-active-badge,
+  html.dark-mode .family-heritage-sidebar-widget .fhw-active-badge {
+    color: #86efac !important;
+  }
+  body.dark-mode .family-heritage-sidebar-widget .fhw-icon-crimson,
+  body.dark-theme .family-heritage-sidebar-widget .fhw-icon-crimson,
+  [data-bs-theme="dark"] .family-heritage-sidebar-widget .fhw-icon-crimson,
+  html.dark .family-heritage-sidebar-widget .fhw-icon-crimson,
+  html.dark-mode .family-heritage-sidebar-widget .fhw-icon-crimson {
+    background: rgba(255, 77, 97, 0.18) !important;
+    color: #ff8fa3 !important;
+  }
+  body.dark-mode .family-heritage-sidebar-widget .fhw-icon-purple,
+  body.dark-theme .family-heritage-sidebar-widget .fhw-icon-purple,
+  [data-bs-theme="dark"] .family-heritage-sidebar-widget .fhw-icon-purple,
+  html.dark .family-heritage-sidebar-widget .fhw-icon-purple,
+  html.dark-mode .family-heritage-sidebar-widget .fhw-icon-purple {
+    background: rgba(167, 139, 250, 0.18) !important;
+    color: #c4b5fd !important;
+  }
 </style>
 <div class="card border-0 shadow-sm mb-4 family-heritage-sidebar-widget" id="familyHeritageSection" style="border-radius: 20px; background-color: var(--card-bg); scroll-margin-top: 80px;">
     <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4">
         <!-- Top Row: ACTIVE badge -->
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="badge rounded-pill bg-success-subtle text-success px-2.5 py-1 fw-bold d-inline-flex align-items-center gap-1.5" style="color: #0f5132 !important; font-size: 0.72rem; font-weight: 700; line-height: 1;">
+            <span class="badge rounded-pill bg-success-subtle text-success px-2.5 py-1 fw-bold d-inline-flex align-items-center gap-1.5 fhw-active-badge">
                 <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #059669; display: inline-block;"></span>
                 ACTIVE
             </span>
@@ -77,7 +118,7 @@
 
             <button type="button" onclick="openFamilyFlyerModal()" class="btn heritage-action-tile w-100 p-2.5 d-flex align-items-center justify-content-between text-start shadow-xs transition-all" style="min-height: 54px;" title="Clan Flyer - Generate and download family tree status flyer for WhatsApp">
                 <div class="d-flex align-items-center gap-2.5">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background: rgba(163, 22, 33, 0.12); color: #a31621;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fhw-icon-crimson">
                         <i class="bi bi-card-image" style="font-size: 0.95rem;"></i>
                     </div>
                     <div>
@@ -90,7 +131,7 @@
 
             <button type="button" onclick="openTimeCapsuleModal()" class="btn heritage-action-tile w-100 p-2.5 d-flex align-items-center justify-content-between text-start shadow-xs transition-all" style="min-height: 54px;" title="Time Capsule - Seal photos, voice notes, and messages for future delivery">
                 <div class="d-flex align-items-center gap-2.5">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background: rgba(109, 40, 217, 0.14); color: #6d28d9;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fhw-icon-purple">
                         <i class="bi bi-hourglass-split" style="font-size: 0.95rem;"></i>
                     </div>
                     <div>
@@ -103,7 +144,7 @@
 
             <a href="/kinship-calculator" class="btn heritage-action-tile w-100 p-2.5 d-flex align-items-center justify-content-between text-start text-decoration-none shadow-xs transition-all" style="min-height: 54px;" title="Kinship Calculator - Calculate exact relationship degrees and shared ancestry">
                 <div class="d-flex align-items-center gap-2.5">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background: rgba(163, 22, 33, 0.12); color: #a31621;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fhw-icon-crimson">
                         <i class="bi bi-calculator-fill" style="font-size: 0.95rem;"></i>
                     </div>
                     <div>

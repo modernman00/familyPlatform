@@ -144,12 +144,200 @@ describe('Preact Feed Island (Phases 1–4) Browser & DOM Audit', () => {
         });
     });
 
-    it('Fallback (?v=legacy): renders legacy Alpine profileFeed instead of #feed-root', () => {
+    it('Legacy path retired (?v=legacy): still renders Preact #feed-root instead of legacy profileFeed', () => {
         cy.viewport(1440, 900);
         loginFully(undefined, undefined, { skipProfileVisit: true });
         cy.visit('/member/ProfilePage?v=legacy', { timeout: 120000 });
 
-        cy.get('[x-data*="profileFeed"]', { timeout: 30000 }).should('exist');
-        cy.get('#feed-root').should('not.exist');
+        cy.get('#feed-root', { timeout: 30000 }).should('exist');
+        cy.get('[x-data*="profileFeed"]').should('not.exist');
+    });
+
+    it('Comment Composer Visual & Dark/Light Mode Audit (Mobile, iPad, Desktop): zero inner box, normal placeholder, 44px controls, and DOM audit pass', () => {
+        const criticalRules = [
+            'HORIZONTAL_OVERFLOW',
+            'MISSING_CSRF_DOM',
+            'BLACK_ON_RED_SURFACE',
+            'GHOST_TYPOGRAPHY_CONTRAST',
+            'UNLABELLED_ICON_BUTTON',
+        ];
+
+        const assertNoCriticalAuditViolations = (label) => {
+            runAuditOnPage((report) => {
+                const criticalViolations = (report.violations || []).filter((v) =>
+                    criticalRules.includes(v.rule)
+                );
+                expect(criticalViolations, `${label}: ${JSON.stringify(criticalViolations)}`).to.have.length(0);
+            });
+            cy.window().then((win) => {
+                expect(
+                    win.document.documentElement.scrollWidth,
+                    `${label}: zero horizontal overflow`
+                ).to.be.at.most(win.innerWidth + 2);
+            });
+        };
+
+        const assertComposerGeometry = (label, { dark, mobile }) => {
+            cy.get('#feed-root article.feed-post-card').first().within(() => {
+                cy.get('form.comment-composer').should('be.visible');
+                cy.get('.comment-composer__field').should(($field) => {
+                    const bg = getComputedStyle($field[0]).backgroundColor;
+                    expect(bg, `${label} field bg`).to.eq(dark ? 'rgb(31, 32, 36)' : 'rgb(243, 244, 246)');
+                });
+                cy.get('input.comment-composer__input').should(($inp) => {
+                    const el = $inp[0];
+                    const cs = getComputedStyle(el);
+                    const ph = getComputedStyle(el, '::placeholder');
+                    expect(cs.backgroundColor, `${label} input bg transparent`).to.eq('rgba(0, 0, 0, 0)');
+                    expect(cs.borderTopWidth, `${label} input border 0`).to.eq('0px');
+                    expect(ph.textTransform, `${label} placeholder text-transform none`).to.eq('none');
+                });
+                cy.get('.comment-composer__tools .comment-composer__tool').should(($tools) => {
+                    expect($tools.length, `${label} 3 tools`).to.eq(3);
+                    $tools.each((_, btn) => {
+                        const rect = btn.getBoundingClientRect();
+                        expect(rect.width, `${label} tool width >= 44`).to.be.at.least(44);
+                        expect(rect.height, `${label} tool height >= 44`).to.be.at.least(44);
+                    });
+                });
+                cy.get('button.comment-composer__send').should(($send) => {
+                    const rect = $send[0].getBoundingClientRect();
+                    expect(rect.width, `${label} send width >= 44`).to.be.at.least(44);
+                    expect(rect.height, `${label} send height >= 44`).to.be.at.least(44);
+                });
+                if (mobile) {
+                    cy.get('.comments-section').should(($sec) => {
+                        const cs = getComputedStyle($sec[0]);
+                        expect(cs.paddingLeft, `${label} mobile comments paddingLeft`).to.eq('12px');
+                        expect(cs.paddingRight, `${label} mobile comments paddingRight`).to.eq('12px');
+                    });
+                }
+            });
+        };
+
+        const setThemeMode = (dark) => {
+            cy.window().then((win) => {
+                try {
+                    win.localStorage.setItem('familyPlatform_theme', dark ? 'dark' : 'light');
+                } catch { /* ignore */ }
+                if (win.Alpine && typeof win.Alpine.store === 'function') {
+                    const themeStore = win.Alpine.store('theme');
+                    if (themeStore) {
+                        themeStore.isDark = Boolean(dark);
+                        if (typeof themeStore.apply === 'function') {
+                            themeStore.apply();
+                        }
+                    }
+                }
+                const doc = win.document;
+                if (dark) {
+                    doc.body.classList.add('dark-mode');
+                    doc.documentElement.classList.add('dark');
+                    doc.documentElement.setAttribute('data-bs-theme', 'dark');
+                } else {
+                    doc.body.classList.remove('dark-mode', 'dark-theme');
+                    doc.documentElement.classList.remove('dark', 'dark-mode');
+                    doc.documentElement.removeAttribute('data-bs-theme');
+                }
+            });
+        };
+
+        const centerFirstComposer = () => {
+            cy.get('#feed-root article.feed-post-card').first().find('form.comment-composer').then(($form) => {
+                $form[0].scrollIntoView({ block: 'center', behavior: 'instant' });
+            });
+            cy.wait(150);
+        };
+
+        cy.viewport(390, 844);
+        loginFully(undefined, undefined, { skipProfileVisit: true });
+        cy.visit('/profilePage', { timeout: 120000 });
+
+        cy.get('[data-testid="feed-island-shell"]', { timeout: 30000 }).should('be.visible');
+        cy.get('#feed-root article.feed-post-card', { timeout: 65000 }).should('have.length.greaterThan', 0);
+
+        cy.get('body').then(($body) => {
+            const acceptBtn = $body.find('button:contains("Accept all")');
+            if (acceptBtn.length > 0) {
+                cy.wrap(acceptBtn.first()).click({ force: true });
+            }
+            const pwaClose = $body.find('#pwa-install-banner .pwa-btn-close:visible');
+            if (pwaClose.length > 0) {
+                cy.wrap(pwaClose.first()).click({ force: true });
+            }
+        });
+
+        // 1. Mobile (390x844) Dark Mode
+        setThemeMode(true);
+
+        cy.get('#feed-root article.feed-post-card').first().within(() => {
+            cy.get('button[aria-label="Comment on this post"]').click({ force: true });
+            cy.get('form.comment-composer').should('be.visible');
+        });
+        centerFirstComposer();
+
+        assertComposerGeometry('Mobile Dark', { dark: true, mobile: true });
+        cy.screenshot('comment-box-mobile-dark', { capture: 'viewport' });
+
+        // Test 3-char and 80-char input -> active crimson Send button with white icon
+        cy.get('#feed-root article.feed-post-card').first().within(() => {
+            cy.get('input.comment-composer__input')
+                .type('Hi!', { force: true })
+                .clear({ force: true })
+                .type('This is a wonderful family memory that everyone will cherish for years to come!', { force: true });
+            cy.get('button.comment-composer__send')
+                .should('have.class', 'is-active')
+                .and('not.be.disabled')
+                .and(($send) => {
+                    expect(getComputedStyle($send[0]).color).to.eq('rgb(255, 255, 255)');
+                });
+        });
+        centerFirstComposer();
+        cy.screenshot('comment-box-mobile-dark-active', { capture: 'viewport' });
+
+        cy.get('#feed-root article.feed-post-card').first().within(() => {
+            cy.get('input.comment-composer__input').clear({ force: true });
+            cy.get('button[aria-label="Add emoji"]').click({ force: true });
+        });
+        cy.get('[data-testid="emoji-gif-picker"]', { timeout: 15000 }).should('be.visible');
+        cy.window().then((win) => {
+            expect(win.document.documentElement.scrollWidth).to.be.at.most(win.innerWidth + 2);
+        });
+        cy.get('[data-testid="emoji-gif-picker"] button[aria-label="Close picker"]').click({ force: true });
+        cy.get('[data-testid="emoji-gif-picker"]').should('not.exist');
+
+        cy.get('#feed-root').then(($root) => {
+            const $bubbles = $root.find('.comment-bubble-box:visible');
+            if ($bubbles.length > 0) {
+                expect(getComputedStyle($bubbles[0]).backgroundColor).to.eq('rgb(31, 32, 36)');
+            }
+        });
+        assertNoCriticalAuditViolations('Mobile Dark');
+
+        // 2. Mobile (390x844) Light Mode
+        setThemeMode(false);
+        centerFirstComposer();
+        assertComposerGeometry('Mobile Light', { dark: false, mobile: true });
+        cy.screenshot('comment-box-mobile-light', { capture: 'viewport' });
+        assertNoCriticalAuditViolations('Mobile Light');
+
+        // 3. iPad Portrait (768x1024), iPad Landscape (1024x768), and Desktop (1440x900) Dark Mode
+        setThemeMode(true);
+
+        cy.viewport(768, 1024);
+        centerFirstComposer();
+        assertComposerGeometry('iPad Portrait Dark', { dark: true, mobile: false });
+        assertNoCriticalAuditViolations('iPad Portrait Dark');
+
+        cy.viewport(1024, 768);
+        centerFirstComposer();
+        assertComposerGeometry('iPad Landscape Dark', { dark: true, mobile: false });
+        assertNoCriticalAuditViolations('iPad Landscape Dark');
+
+        cy.viewport(1440, 900);
+        centerFirstComposer();
+        assertComposerGeometry('Desktop Dark', { dark: true, mobile: false });
+        cy.screenshot('comment-box-desktop-dark', { capture: 'viewport' });
+        assertNoCriticalAuditViolations('Desktop Dark');
     });
 });

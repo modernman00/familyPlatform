@@ -1168,22 +1168,22 @@ body.dark-theme .fhub #familyAiContent .form-select option { background: #0f172a
         {{-- 🎮 TAB 5: FAMILY GAME SHOW & RITUALS --}}
         <div class="tab-pane fade" id="tab-trivia" role="tabpanel">
             {{-- Game Mode Subtabs Navigation --}}
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4 p-2 bg-white rounded-pill shadow-sm border">
-                <div class="nav nav-pills gap-1" id="gameModeSubTabs" role="tablist">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4 p-2 bg-white rounded-4 shadow-sm border">
+                <div class="nav nav-pills flex-wrap gap-2" id="gameModeSubTabs" role="tablist">
                     <button class="nav-link active rounded-pill fw-bold py-2 px-3 small d-inline-flex align-items-center gap-2" 
-                            id="subtab-twotruths-btn" data-bs-toggle="pill" data-bs-target="#subtab-twotruths" type="button" role="tab" style="min-height: 40px;">
-                        <i class="bi bi-mask text-danger"></i> 🎭 Two Truths &amp; a Lie (Weekly Challenge)
+                            id="subtab-twotruths-btn" data-bs-toggle="pill" data-bs-target="#subtab-twotruths" type="button" role="tab" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
+                        <i class="bi bi-mask text-danger"></i> 🎭 Two Truths &amp; a Lie
                     </button>
                     <button class="nav-link rounded-pill fw-bold py-2 px-3 small d-inline-flex align-items-center gap-2" 
-                            id="subtab-trivia-btn" data-bs-toggle="pill" data-bs-target="#subtab-trivia" type="button" role="tab" style="min-height: 40px;">
-                        <i class="bi bi-trophy text-warning"></i> 🏆 Live Family Game Show &amp; Trivia
+                            id="subtab-trivia-btn" data-bs-toggle="pill" data-bs-target="#subtab-trivia" type="button" role="tab" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
+                        <i class="bi bi-trophy text-warning"></i> 🏆 Live Game Show &amp; Trivia
                     </button>
                 </div>
-                <div class="px-2 d-none d-md-flex align-items-center gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-3 py-1 d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalCreateTwoTruths" style="min-height: 38px;">
+                <div class="px-1 d-flex flex-wrap align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-3 py-1 d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalCreateTwoTruths" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
                         <i class="bi bi-plus-circle"></i> Create Challenge
                     </button>
-                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1 fw-bold small">
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1 fw-bold small d-none d-md-inline-flex align-items-center">
                         <i class="bi bi-fire me-1"></i> Diaspora Ritual
                     </span>
                 </div>
@@ -1194,7 +1194,7 @@ body.dark-theme .fhub #familyAiContent .form-select option { background: #0f172a
                 <div class="tab-pane fade show active" id="subtab-twotruths" role="tabpanel">
                     <div class="row g-4 justify-content-center">
                         <div class="col-lg-8">
-                            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white" id="twoTruthsArenaCard">
+                            <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white" id="twoTruthsArenaCard">
                                 {{-- Top Status Banner --}}
                                 <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom flex-wrap gap-2">
                                     <div class="d-flex align-items-center gap-3">
@@ -1329,12 +1329,12 @@ body.dark-theme .fhub #familyAiContent .form-select option { background: #0f172a
                                                 <div class="fw-bold text-dark"><i class="bi bi-check-circle-fill text-success me-1"></i> Your Guess is Registered!</div>
                                                 <div class="small text-muted">The lie unmasks Sunday. Share this challenge with cousins on WhatsApp:</div>
                                             </div>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <button type="button" class="btn btn-success rounded-pill px-3 fw-bold d-inline-flex align-items-center gap-2" onclick="shareTwoTruthsToWhatsApp()" style="min-height: 44px; background: #25D366; border-color: #25D366;">
+                                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                                <button type="button" class="btn btn-success rounded-pill px-3 fw-bold d-inline-flex align-items-center gap-2" onclick="shareTwoTruthsToWhatsApp()" style="min-height: 44px; background: #25D366; border-color: #25D366; white-space: nowrap;">
                                                     <i class="bi bi-whatsapp"></i> WhatsApp Challenge
                                                 </button>
                                                 @if(($twoTruthsGame['author_id'] ?? '') === ($userData['id'] ?? ''))
-                                                    <button type="button" class="btn btn-outline-danger rounded-pill px-3 fw-bold d-inline-flex align-items-center gap-1" onclick="revealTwoTruthsGame(this, '{{ $twoTruthsGame['id'] ?? '' }}')" style="min-height: 44px;">
+                                                    <button type="button" class="btn btn-outline-danger rounded-pill px-3 fw-bold d-inline-flex align-items-center gap-1" onclick="revealTwoTruthsGame(this, '{{ $twoTruthsGame['id'] ?? '' }}')" style="min-height: 44px; white-space: nowrap;">
                                                         <i class="bi bi-unlock-fill"></i> Unmask Now
                                                     </button>
                                                 @endif
@@ -1353,11 +1353,11 @@ body.dark-theme .fhub #familyAiContent .form-select option { background: #0f172a
                                                 </div>
                                                 <div class="small text-muted">The verified truths have been permanently archived into our Family Journal.</div>
                                             </div>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <a href="/family/journal" class="btn btn-outline-dark rounded-pill px-3 fw-bold d-inline-flex align-items-center gap-1" style="min-height: 44px;">
+                                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                                <a href="/family/journal" class="btn btn-outline-dark rounded-pill px-3 fw-bold d-inline-flex align-items-center gap-1" style="min-height: 44px; white-space: nowrap;">
                                                     <i class="bi bi-book"></i> Read in Journal
                                                 </a>
-                                                <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalCreateTwoTruths" style="min-height: 44px;">
+                                                <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalCreateTwoTruths" style="min-height: 44px; white-space: nowrap;">
                                                     <i class="bi bi-plus-circle"></i> Create Next Challenge
                                                 </button>
                                             </div>
@@ -1373,7 +1373,7 @@ body.dark-theme .fhub #familyAiContent .form-select option { background: #0f172a
                 <div class="tab-pane fade" id="subtab-trivia" role="tabpanel">
                     <div class="row g-4">
                         <div class="col-lg-5">
-                            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                            <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white h-100">
                                 <h4 class="fw-bold mb-2"><i class="bi bi-trophy-fill text-danger me-2"></i> Family Game Show</h4>
                                 <p class="text-muted small mb-3">Host an affectionate family game show! Test how well relatives know family milestones, childhood stories, and funny memories.</p>
 
@@ -1452,9 +1452,9 @@ Maya won the school spelling bee with the word 'onomatopoeia'</textarea>
                         </div>
 
                         <div class="col-lg-7">
-                            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white text-center">
+                            <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white text-center">
                                 {{-- Posted to Feed Confirmation Banner --}}
-                                <div id="trivia-posted-alert" class="alert alert-success d-flex align-items-center justify-content-between rounded-4 p-3 mb-3 border-0 shadow-sm text-start" style="display:none;">
+                                <div id="trivia-posted-alert" class="alert alert-success d-flex flex-wrap align-items-center justify-content-between gap-2 rounded-4 p-3 mb-3 border-0 shadow-sm text-start" style="display:none;">
                                     <div class="d-flex align-items-center gap-2">
                                         <i class="bi bi-check-circle-fill text-success fs-5 flex-shrink-0"></i>
                                         <div>

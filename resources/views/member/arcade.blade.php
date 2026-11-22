@@ -1,10 +1,10 @@
 @extends('layouts.profileBase')
 
-@section('title', 'Family Arcade — KinZip, KinGrid, KinWord & KinPulse | FamilyPlatform')
+@section('title', 'Family Arcade — 7 Daily Brain Games & Family Cup | FamilyPlatform')
 @section('meta_description', 'Play daily family puzzles, race the algorithm or your relatives live, climb the Family Cup league table, and earn your family crown.')
 
 @section('content')
-<div class="container-fluid py-3 py-md-4" style="max-width: 1240px;">
+<div class="container-fluid px-2 px-md-3 py-2 py-md-4" style="max-width: 1240px;">
     @include('member.creativeStudioTabs', ['creativeTab' => 'arcade'])
 
     <script id="arcade-bootstrap" type="application/json" nonce="{{ csp_nonce($nonce ?? null) }}">

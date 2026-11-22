@@ -82,6 +82,8 @@ final class RouteDispatch
             'App\controller\RealtimeBroadcastingController', // Sovereign Realtime Broadcasting SSE & Auth for FamilyPlatform
             'App\controller\PostShareController', // Public Shareable Post Link & Guest-to-Register Engine
             'App\controller\SharePreviewController', // Public Crawler-Safe Rich OG Share Preview Engine
+            'App\controller\PublicArcadeController', // Public Facebook-Standard Guest Arcade Challenge & Engagement Tracking
+            'App\controller\PublicArcadeController', // Public Guest Challenge Mode & Engagement Funnel Tracker
             'App\controller\members\FestiveCardController', // RFC-0019 Omni-Occasion Festive Card & Living Envelope Engine
             'App\controller\members\AtgGifController', // ATG Sovereign Brand GIF Studio & Synthesizer
             'App\controller\members\ShareTargetController', // W3C Web Share Target API L2 (Android Native Gallery Share)
@@ -102,8 +104,9 @@ final class RouteDispatch
 
         $isVapidKeyRoute = ($controller === 'App\controller\NotificationController' && $method === 'vapidPublicKey')
             || (isset($_SERVER['REQUEST_URI']) && str_contains($_SERVER['REQUEST_URI'], 'vapid-public-key'));
+        $isStreamWebhookRoute = ($controller === 'App\controller\members\StreamController' && $method === 'handleWebhook');
 
-        if (!in_array($controller, $publicControllers, true) && !$isVapidKeyRoute) {
+        if (!in_array($controller, $publicControllers, true) && !$isVapidKeyRoute && !$isStreamWebhookRoute) {
             if (empty($_SESSION['id'])) {
                 $tokenName = $_ENV['COOKIE_TOKEN_LOGIN'] ?? 'familyCookie';
                 $isJsonRequest = (isset($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'))

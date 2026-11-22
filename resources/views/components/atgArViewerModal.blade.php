@@ -1,10 +1,10 @@
 {{-- ATG Augmented Reality (AR) & 3D Holographic Emoji Viewer Modal --}}
 <div class="modal fade atg-ar-modal" id="atgArEmojiModal" tabindex="-1" aria-labelledby="atgArEmojiModalTitle" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-2xl rounded-4 overflow-hidden" style="background: #ffffff; color: #0f172a; border: 1.5px solid rgba(245, 158, 11, 0.25) !important;">
+        <div class="modal-content border-0 shadow-2xl rounded-4 overflow-hidden">
             
             <!-- Modal Header -->
-            <div class="modal-header border-0 pb-0 px-4 pt-4 d-flex justify-content-between align-items-center bg-white">
+            <div class="modal-header border-0 pb-0 px-4 pt-4 d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge rounded-pill fw-bold text-uppercase px-2.5 py-1 text-white" style="background: linear-gradient(135deg, #f59e0b, #b45309); font-size: 0.72rem; letter-spacing: 0.05em;">
                         ✨ ATG Augmented Reality
@@ -17,10 +17,10 @@
             </div>
 
             <!-- Modal Body (3D Stage & AR Camera Viewport) -->
-            <div class="modal-body p-4 text-center bg-white">
+            <div class="modal-body p-4 text-center">
                 
                 <!-- The Main AR / 3D Canvas Stage -->
-                <div class="atg-ar-stage-container position-relative mx-auto rounded-4 overflow-hidden" id="atgArStageContainer" style="background: radial-gradient(circle at 50% 35%, #ffffff 0%, #fffbeb 55%, #fef3c7 100%) !important; border: 1.5px solid rgba(245, 158, 11, 0.3) !important;">
+                <div class="atg-ar-stage-container position-relative mx-auto rounded-4 overflow-hidden" id="atgArStageContainer">
                     
                     <!-- Live Camera Feed (Hidden by default, shown in AR Camera Mode) -->
                     <video id="atgArCameraFeed" class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover d-none" autoplay playsinline muted></video>
@@ -73,7 +73,7 @@
             </div>
 
             <!-- Modal Footer -->
-            <div class="modal-footer border-0 px-4 pb-4 pt-0 justify-content-between bg-white border-top border-slate-100">
+            <div class="modal-footer border-0 px-4 pb-4 pt-0 justify-content-between border-top">
                 <span class="text-xs text-secondary">
                     Sovereign WebGL &amp; WebXR Micro-Engine • Zero App Install Required
                 </span>

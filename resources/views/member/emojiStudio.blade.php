@@ -384,6 +384,9 @@
                                         <button type="button" id="atgDownloadAvatarBtn" class="atg-btn-secondary">
                                             <span>⬇️ Download HD Avatar</span>
                                         </button>
+                                        <button type="button" id="atgShareAvatarBtn" class="atg-btn-secondary">
+                                            <span>📤 Share Branded Avatar</span>
+                                        </button>
                                         <button type="button" id="atgSyncPhotoToAvatarBtn" class="atg-btn-secondary btn-spin-on-click" data-spin="true">
                                             <span>🎨 Colour My 3D Cartoon</span>
                                         </button>

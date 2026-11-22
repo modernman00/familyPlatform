@@ -2,6 +2,169 @@
     $modalToken = $_SESSION['token'] ?? '';
 @endphp
 
+<style>
+#allUpcomingEventsModal .ev-month-pill {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--text-color, #334155);
+    border: 1px solid transparent;
+    font-size: 0.72rem;
+    min-height: 32px;
+}
+#allUpcomingEventsModal .ev-month-pill.is-active {
+    background: #0f172a;
+    color: #ffffff;
+    border-color: #0f172a;
+}
+#allUpcomingEventsModal .ev-cat-badge--birthday {
+    background: rgba(236, 72, 153, 0.12);
+    color: #be185d;
+    font-size: 0.72rem;
+}
+#allUpcomingEventsModal .ev-cat-badge--anniversary {
+    background: rgba(168, 85, 247, 0.12);
+    color: #7e22ce;
+    font-size: 0.72rem;
+}
+#allUpcomingEventsModal .ev-cat-badge--reunion {
+    background: rgba(14, 165, 233, 0.12);
+    color: #0369a1;
+    font-size: 0.72rem;
+}
+#allUpcomingEventsModal .ev-cat-badge--party {
+    background: rgba(245, 158, 11, 0.15);
+    color: #b45309;
+    font-size: 0.72rem;
+}
+#allUpcomingEventsModal .ev-cat-badge--default {
+    background: rgba(100, 116, 139, 0.12);
+    color: #334155;
+    font-size: 0.72rem;
+}
+#allUpcomingEventsModal .ev-countdown-pill {
+    font-size: 0.74rem;
+}
+#allUpcomingEventsModal .ev-countdown-pill--today {
+    background: #dc2626;
+    color: #ffffff;
+}
+#allUpcomingEventsModal .ev-countdown-pill--tomorrow {
+    background: #c2410c;
+    color: #ffffff;
+}
+#allUpcomingEventsModal .ev-countdown-pill--upcoming {
+    background: var(--secondary-color, #fef2f2);
+    color: #8a1019;
+}
+#allUpcomingEventsModal .ev-sign-card-btn {
+    background-color: #ffffff !important;
+    color: #8a1019 !important;
+    border: 1px solid rgba(163, 22, 33, 0.25);
+    font-size: 0.76rem;
+    min-height: 38px;
+}
+#allUpcomingEventsModal .ev-enable-rsvp-btn {
+    background: linear-gradient(135deg, rgba(163, 22, 33, 0.09) 0%, rgba(245, 158, 11, 0.14) 100%);
+    color: #8a1019;
+    border: 1px solid rgba(163, 22, 33, 0.25);
+    font-size: 0.76rem;
+    min-height: 38px;
+}
+
+body.dark-mode #allUpcomingEventsModal .ev-month-pill:not(.is-active),
+body.dark-theme #allUpcomingEventsModal .ev-month-pill:not(.is-active),
+[data-bs-theme="dark"] #allUpcomingEventsModal .ev-month-pill:not(.is-active),
+html.dark #allUpcomingEventsModal .ev-month-pill:not(.is-active),
+html.dark-mode #allUpcomingEventsModal .ev-month-pill:not(.is-active) {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #cbd5e1 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+body.dark-mode #allUpcomingEventsModal .ev-month-pill.is-active,
+body.dark-theme #allUpcomingEventsModal .ev-month-pill.is-active,
+[data-bs-theme="dark"] #allUpcomingEventsModal .ev-month-pill.is-active,
+html.dark #allUpcomingEventsModal .ev-month-pill.is-active,
+html.dark-mode #allUpcomingEventsModal .ev-month-pill.is-active {
+    background: linear-gradient(135deg, #d91b38 0%, #b4142c 100%) !important;
+    color: #ffffff !important;
+    border-color: transparent !important;
+}
+body.dark-mode #allUpcomingEventsModal .ev-cat-badge--birthday,
+body.dark-theme #allUpcomingEventsModal .ev-cat-badge--birthday,
+[data-bs-theme="dark"] #allUpcomingEventsModal .ev-cat-badge--birthday,
+html.dark #allUpcomingEventsModal .ev-cat-badge--birthday,
+html.dark-mode #allUpcomingEventsModal .ev-cat-badge--birthday {
+    background: rgba(236, 72, 153, 0.22) !important;
+    color: #f9a8d4 !important;
+}
+body.dark-mode #allUpcomingEventsModal .ev-cat-badge--anniversary,
+body.dark-theme #allUpcomingEventsModal .ev-cat-badge--anniversary,
+[data-bs-theme="dark"] #allUpcomingEventsModal .ev-cat-badge--anniversary,
+html.dark #allUpcomingEventsModal .ev-cat-badge--anniversary,
+html.dark-mode #allUpcomingEventsModal .ev-cat-badge--anniversary {
+    background: rgba(168, 85, 247, 0.22) !important;
+    color: #d8b4fe !important;
+}
+body.dark-mode #allUpcomingEventsModal .ev-cat-badge--reunion,
+body.dark-theme #allUpcomingEventsModal .ev-cat-badge--reunion,
+[data-bs-theme="dark"] #allUpcomingEventsModal .ev-cat-badge--reunion,
+html.dark #allUpcomingEventsModal .ev-cat-badge--reunion,
+html.dark-mode #allUpcomingEventsModal .ev-cat-badge--reunion {
+    background: rgba(14, 165, 233, 0.22) !important;
+    color: #7dd3fc !important;
+}
+body.dark-mode #allUpcomingEventsModal .ev-cat-badge--party,
+body.dark-theme #allUpcomingEventsModal .ev-cat-badge--party,
+[data-bs-theme="dark"] #allUpcomingEventsModal .ev-cat-badge--party,
+html.dark #allUpcomingEventsModal .ev-cat-badge--party,
+html.dark-mode #allUpcomingEventsModal .ev-cat-badge--party {
+    background: rgba(245, 158, 11, 0.22) !important;
+    color: #fcd34d !important;
+}
+body.dark-mode #allUpcomingEventsModal .ev-cat-badge--default,
+body.dark-theme #allUpcomingEventsModal .ev-cat-badge--default,
+[data-bs-theme="dark"] #allUpcomingEventsModal .ev-cat-badge--default,
+html.dark #allUpcomingEventsModal .ev-cat-badge--default,
+html.dark-mode #allUpcomingEventsModal .ev-cat-badge--default {
+    background: rgba(148, 163, 184, 0.22) !important;
+    color: #e2e8f0 !important;
+}
+body.dark-mode #allUpcomingEventsModal .ev-countdown-pill--upcoming,
+body.dark-theme #allUpcomingEventsModal .ev-countdown-pill--upcoming,
+[data-bs-theme="dark"] #allUpcomingEventsModal .ev-countdown-pill--upcoming,
+html.dark #allUpcomingEventsModal .ev-countdown-pill--upcoming,
+html.dark-mode #allUpcomingEventsModal .ev-countdown-pill--upcoming {
+    background: rgba(255, 77, 97, 0.16) !important;
+    color: #fecdd3 !important;
+}
+body.dark-mode #allUpcomingEventsModal .ev-sign-card-btn,
+body.dark-theme #allUpcomingEventsModal .ev-sign-card-btn,
+[data-bs-theme="dark"] #allUpcomingEventsModal .ev-sign-card-btn,
+html.dark #allUpcomingEventsModal .ev-sign-card-btn,
+html.dark-mode #allUpcomingEventsModal .ev-sign-card-btn {
+    background-color: rgba(255, 77, 97, 0.14) !important;
+    color: #fecdd3 !important;
+    border-color: rgba(255, 77, 97, 0.38) !important;
+}
+body.dark-mode #allUpcomingEventsModal .ev-enable-rsvp-btn,
+body.dark-theme #allUpcomingEventsModal .ev-enable-rsvp-btn,
+[data-bs-theme="dark"] #allUpcomingEventsModal .ev-enable-rsvp-btn,
+html.dark #allUpcomingEventsModal .ev-enable-rsvp-btn,
+html.dark-mode #allUpcomingEventsModal .ev-enable-rsvp-btn {
+    background: rgba(255, 77, 97, 0.16) !important;
+    color: #fecdd3 !important;
+    border-color: rgba(255, 77, 97, 0.35) !important;
+}
+body.dark-mode #allUpcomingEventsModal .input-group .form-control,
+body.dark-theme #allUpcomingEventsModal .input-group .form-control,
+[data-bs-theme="dark"] #allUpcomingEventsModal .input-group .form-control,
+html.dark #allUpcomingEventsModal .input-group .form-control,
+html.dark-mode #allUpcomingEventsModal .input-group .form-control {
+    background-color: #0e1118 !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+</style>
+
 <!-- All Upcoming Family Events (Next 3 Months) Modal -->
 <div class="modal fade" id="allUpcomingEventsModal" tabindex="-1" aria-labelledby="allUpcomingEventsModalLabel" aria-hidden="true" x-data="allUpcomingEventsModal()">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" style="max-width: 860px;" x-trap="isOpen">
@@ -86,19 +249,15 @@
                         <i class="bi bi-funnel me-1"></i> Month:
                     </span>
                     <button type="button"
-                            class="btn btn-xs rounded-pill px-2.5 py-1 fw-bold text-nowrap flex-shrink-0"
-                            :style="selectedMonth === 'all'
-                                ? 'background: #0f172a; color: #ffffff; border: 1px solid #0f172a; font-size: 0.72rem; min-height: 32px;'
-                                : 'background: rgba(0,0,0,0.04); color: var(--text-color, #475569); border: 1px solid transparent; font-size: 0.72rem; min-height: 32px;'"
+                            class="btn btn-xs rounded-pill px-2.5 py-1 fw-bold text-nowrap flex-shrink-0 ev-month-pill"
+                            :class="{ 'is-active': selectedMonth === 'all' }"
                             @click="selectedMonth = 'all'">
                         All Months
                     </button>
                     <template x-for="m in availableMonths" :key="m.key">
                         <button type="button"
-                                class="btn btn-xs rounded-pill px-2.5 py-1 fw-bold text-nowrap flex-shrink-0"
-                                :style="selectedMonth === m.key
-                                    ? 'background: #0f172a; color: #ffffff; border: 1px solid #0f172a; font-size: 0.72rem; min-height: 32px;'
-                                    : 'background: rgba(0,0,0,0.04); color: var(--text-color, #475569); border: 1px solid transparent; font-size: 0.72rem; min-height: 32px;'"
+                                class="btn btn-xs rounded-pill px-2.5 py-1 fw-bold text-nowrap flex-shrink-0 ev-month-pill"
+                                :class="{ 'is-active': selectedMonth === m.key }"
                                 @click="selectedMonth = m.key">
                             <span x-text="m.label"></span>
                             <span class="badge rounded-pill ms-1 border" style="font-size: 0.65rem; background-color: var(--card-bg, #ffffff); color: var(--text-color, #0f172a);" x-text="m.count"></span>
@@ -191,7 +350,7 @@
                                         <div class="d-flex flex-column align-items-center justify-content-center text-center rounded-3 p-2 flex-shrink-0 shadow-sm"
                                              style="width: 68px; min-width: 68px; height: 68px; background: linear-gradient(135deg, rgba(163, 22, 33, 0.08) 0%, rgba(245, 158, 11, 0.12) 100%); border: 1px solid rgba(163, 22, 33, 0.2);">
                                             <span class="text-uppercase fw-bold" style="color: var(--primary-color, #a31621); font-size: 0.7rem; letter-spacing: 0.05em;" x-text="event.dayName"></span>
-                                            <span class="fw-bolder lh-1" style="font-size: 1.55rem; color: #0f172a;" x-text="event.dayOfMonth"></span>
+                                            <span class="fw-bolder lh-1" style="font-size: 1.55rem; color: var(--text-main, #0f172a);" x-text="event.dayOfMonth"></span>
                                             <span class="text-muted text-uppercase fw-semibold" style="font-size: 0.65rem;" x-text="(event.monthYear || '').split(' ')[0]"></span>
                                         </div>
 
@@ -204,17 +363,15 @@
                                                     
                                                     <!-- Event Type Badge -->
                                                     <span class="badge rounded-pill px-2.5 py-1 fw-bold" 
-                                                          :style="getCategoryBadgeStyle(event.eventType)"
+                                                          :class="getCategoryBadgeClass(event.eventType)"
                                                           x-text="getCategoryLabel(event.eventType)"></span>
                                                 </div>
 
                                                 <!-- Relative Countdown Pill -->
-                                                <span class="badge rounded-pill px-2.5 py-1 fw-bold flex-shrink-0" 
-                                                      :style="event.daysUntil === 0 
-                                                        ? 'background: #dc2626; color: #ffffff; font-size: 0.74rem;' 
-                                                        : (event.daysUntil === 1 
-                                                            ? 'background: #ea580c; color: #ffffff; font-size: 0.74rem;' 
-                                                            : 'background: var(--secondary-color, #fef2f2); color: #8a1019; font-size: 0.74rem;')"
+                                                <span class="badge rounded-pill px-2.5 py-1 fw-bold flex-shrink-0 ev-countdown-pill" 
+                                                      :class="event.daysUntil === 0 
+                                                        ? 'ev-countdown-pill--today' 
+                                                        : (event.daysUntil === 1 ? 'ev-countdown-pill--tomorrow' : 'ev-countdown-pill--upcoming')"
                                                       x-text="event.dateDifference"></span>
                                             </div>
 
@@ -252,7 +409,7 @@
                                                        target="_blank" 
                                                        rel="noopener noreferrer" 
                                                        class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-2xs" 
-                                                       style="font-size: 0.76rem; min-height: 38px; color: #1e293b;"
+                                                       style="font-size: 0.76rem; min-height: 38px;"
                                                        title="Add to Google Calendar">
                                                         <i class="bi bi-google text-danger"></i>
                                                         <span>Google Calendar</span>
@@ -261,7 +418,7 @@
                                                     <!-- Apple / Outlook .ics Export -->
                                                     <button type="button" 
                                                             class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-2xs" 
-                                                            style="font-size: 0.76rem; min-height: 38px; color: #1e293b;"
+                                                            style="font-size: 0.76rem; min-height: 38px;"
                                                             @click="downloadIcsSingle(event)"
                                                             title="Download .ics file for Apple Calendar or Outlook">
                                                         <i class="bi bi-calendar-plus text-primary"></i>
@@ -287,8 +444,7 @@
                                                                 <a :href="event.party_card_url" 
                                                                    target="_blank" 
                                                                    rel="noopener noreferrer"
-                                                                   class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm"
-                                                                   style="background-color: #ffffff !important; color: #8a1019 !important; border: 1px solid rgba(163, 22, 33, 0.25); font-size: 0.76rem; min-height: 38px;">
+                                                                   class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm ev-sign-card-btn">
                                                                     <i class="bi bi-envelope-paper-heart-fill"></i>
                                                                     <span>Sign Card</span>
                                                                 </a>
@@ -301,7 +457,7 @@
                                                                        target="_blank" 
                                                                        rel="noopener noreferrer"
                                                                        class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm"
-                                                                       style="background-color: #0f172a; color: #ffffff !important; font-size: 0.76rem; min-height: 38px;">
+                                                                       style="background-color: #0f172a; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.2); font-size: 0.76rem; min-height: 38px;">
                                                                         <i class="bi bi-stars text-warning"></i>
                                                                         <span>Manage Studio ↗</span>
                                                                     </a>
@@ -313,8 +469,7 @@
                                                     <!-- Upgrade to PartyPlatform if Own Event & Not Synced -->
                                                     <template x-if="!event.party_rsvp_url && event.isOwnEvent">
                                                         <button type="button" 
-                                                                class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5"
-                                                                style="background: linear-gradient(135deg, rgba(163, 22, 33, 0.09) 0%, rgba(245, 158, 11, 0.14) 100%); color: #8a1019; border: 1px solid rgba(163, 22, 33, 0.25); font-size: 0.76rem; min-height: 38px;"
+                                                                class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 ev-enable-rsvp-btn"
                                                                 :disabled="event.isUpgradingParty"
                                                                 @click="upgradeToParty(event, $event)">
                                                             <template x-if="!event.isUpgradingParty">
@@ -521,20 +676,20 @@ function allUpcomingEventsModal() {
             return map[type] || (type || 'Event');
         },
 
-        getCategoryBadgeStyle(type) {
+        getCategoryBadgeClass(type) {
             switch(type) {
                 case 'Birthday':
-                    return 'background: rgba(236, 72, 153, 0.12); color: #be185d; font-size: 0.72rem;';
+                    return 'ev-cat-badge--birthday';
                 case 'Anniversary':
                 case 'Wedding':
-                    return 'background: rgba(168, 85, 247, 0.12); color: #7e22ce; font-size: 0.72rem;';
+                    return 'ev-cat-badge--anniversary';
                 case 'Reunion':
                 case 'Gathering':
-                    return 'background: rgba(14, 165, 233, 0.12); color: #0369a1; font-size: 0.72rem;';
+                    return 'ev-cat-badge--reunion';
                 case 'Party':
-                    return 'background: rgba(245, 158, 11, 0.15); color: #b45309; font-size: 0.72rem;';
+                    return 'ev-cat-badge--party';
                 default:
-                    return 'background: rgba(100, 116, 139, 0.12); color: #334155; font-size: 0.72rem;';
+                    return 'ev-cat-badge--default';
             }
         },
 

@@ -40,15 +40,24 @@ export function VideoModal({
     const fallbackOriginal = typeof rawItem === 'object' ? (rawItem?.originalUrl || '') : '';
     const posterUrl = typeof rawItem === 'object' ? (rawItem?.thumbnailUrl || undefined) : undefined;
     const isDirect = isDirectVideoDescriptor(rawItem);
+    const parsedRatio = typeof rawItem?.aspect_ratio === 'string'
+        ? rawItem.aspect_ratio.match(/^\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)\s*$/)
+        : null;
+    const numericRatio = parsedRatio && parseFloat(parsedRatio[2]) > 0
+        ? parseFloat(parsedRatio[1]) / parseFloat(parsedRatio[2])
+        : null;
+    const isFacebookIframe = !isDirect && (
+        rawItem?.type === 'facebook'
+        || (typeof currentUrl === 'string' && currentUrl.includes('facebook.com/plugins/video.php'))
+    );
     const isPortraitIframe = !isDirect && Boolean(
         rawItem?.isShort
         || rawItem?.type === 'tiktok'
-        || (typeof rawItem?.originalUrl === 'string' && rawItem.originalUrl.includes('/shorts/'))
-        || (typeof rawItem?.aspect_ratio === 'string' && (() => {
-            const m = rawItem.aspect_ratio.match(/^\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)\s*$/);
-            return m && parseFloat(m[2]) > 0 && (parseFloat(m[1]) / parseFloat(m[2])) < 0.88;
-        })())
+        || (typeof rawItem?.originalUrl === 'string' && (rawItem.originalUrl.includes('/shorts/') || /\/reel\/\d+/i.test(rawItem.originalUrl)))
+        || (typeof currentUrl === 'string' && /\/reel(?:\/|%2F)\d+/i.test(currentUrl))
+        || (numericRatio !== null && numericRatio < 0.88)
     );
+    const useFramedStage = isPortraitIframe || (isFacebookIframe && (numericRatio === null || numericRatio <= 1.15));
 
     const togglePlay = () => {
         const el = videoRef.current;
@@ -158,15 +167,19 @@ export function VideoModal({
                         />
                     ) : (
                         <div
-                            className={isPortraitIframe ? 'w-100 mx-auto' : 'ratio ratio-16x9 w-100'}
-                            style={isPortraitIframe ? { aspectRatio: '9 / 16', maxWidth: 'min(420px, 100%)', maxHeight: '78vh' } : undefined}
+                            className={useFramedStage ? 'w-100 mx-auto' : 'ratio ratio-16x9 w-100'}
+                            style={useFramedStage ? {
+                                aspectRatio: isPortraitIframe ? '9 / 16' : (rawItem?.aspect_ratio || '4 / 5'),
+                                maxWidth: isPortraitIframe ? 'min(420px, 100%)' : 'min(520px, 100%)',
+                                maxHeight: '78vh',
+                            } : undefined}
                         >
                             <iframe
                                 src={currentUrl}
                                 title={`Video ${index + 1}`}
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                                 allowFullScreen
-                                style={isPortraitIframe ? { width: '100%', height: '100%', border: 'none', borderRadius: 10 } : undefined}
+                                style={useFramedStage ? { width: '100%', height: '100%', border: 'none', borderRadius: 10 } : undefined}
                             />
                         </div>
                     )}

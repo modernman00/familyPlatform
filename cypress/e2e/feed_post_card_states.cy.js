@@ -44,7 +44,7 @@ describe('Feed Post Card 4-State & DOM Audit Regression', () => {
     it('2. Simulated 404 Image Fallback: stage retains >= 220px height and shows fallback', () => {
         cy.viewport(1440, 900);
         loginFully();
-        cy.visit('/profilePage?v=legacy');
+        cy.visit('/profilePage');
         cy.get('.feed-post-card', { timeout: 12000 }).should('have.length.greaterThan', 0);
 
         cy.intercept('GET', '**/resources/images/post/missing-e2e-404-test.jpg*', {
@@ -92,7 +92,7 @@ describe('Feed Post Card 4-State & DOM Audit Regression', () => {
     it('3. Link-Only Post: suppresses 3D stage converter & orphaned translate option', () => {
         cy.viewport(1440, 900);
         loginFully();
-        cy.visit('/profilePage?v=legacy');
+        cy.visit('/profilePage');
         cy.get('.feed-post-card', { timeout: 12000 }).should('have.length.greaterThan', 0);
 
         cy.window().then((win) => {
@@ -132,7 +132,7 @@ describe('Feed Post Card 4-State & DOM Audit Regression', () => {
     it('4. Mobile 390x844: stage converter pills wrap cleanly without horizontal clipping', () => {
         cy.viewport(390, 844);
         loginFully();
-        cy.visit('/profilePage?v=legacy');
+        cy.visit('/profilePage');
         cy.get('.feed-post-card', { timeout: 12000 }).should('have.length.greaterThan', 0);
 
         cy.window().then((win) => {

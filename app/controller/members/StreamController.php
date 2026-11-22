@@ -215,4 +215,178 @@ class StreamController
             echo json_encode(['success' => false, 'error' => 'Unable to process and auto-trim video clip.']);
         }
     }
+
+    /**
+     * Verify Cloudflare Stream Webhook-Signature header (`time=<unix>,sig1=<hex_hmac_sha256>`).
+     * Enforces 5-minute replay window and constant-time comparison.
+     */
+    public static function verifyWebhookSignature(
+        string $rawBody,
+        string $signatureHeader,
+        ?string $secret = null,
+        ?int $now = null
+    ): bool {
+        $resolvedSecret = $secret ?? (string)($_ENV['CLOUDFLARE_STREAM_WEBHOOK_SECRET'] ?? $_SERVER['CLOUDFLARE_STREAM_WEBHOOK_SECRET'] ?? getenv('CLOUDFLARE_STREAM_WEBHOOK_SECRET') ?: '');
+        if ($resolvedSecret === '' || trim($signatureHeader) === '') {
+            return false;
+        }
+
+        $timestamp = null;
+        $sig1 = null;
+        foreach (explode(',', $signatureHeader) as $part) {
+            $kv = explode('=', trim($part), 2);
+            if (count($kv) !== 2) {
+                continue;
+            }
+            $k = strtolower(trim($kv[0]));
+            $v = trim($kv[1]);
+            if ($k === 'time') {
+                $timestamp = $v;
+            } elseif ($k === 'sig1') {
+                $sig1 = $v;
+            }
+        }
+
+        if ($timestamp === null || $sig1 === null || !ctype_digit($timestamp) || $sig1 === '') {
+            return false;
+        }
+
+        $currentTime = $now ?? time();
+        if (abs($currentTime - (int)$timestamp) > 300) {
+            return false;
+        }
+
+        $expectedSig = hash_hmac('sha256', $timestamp . '.' . $rawBody, $resolvedSecret);
+        return hash_equals($expectedSig, strtolower($sig1));
+    }
+
+    /**
+     * Cloudflare Stream Encoding Completion Webhook (POST /api/webhooks/stream).
+     * Verifies HMAC-SHA256 signature, persists final hls_url, duration_sec, aspect_ratio,
+     * and mirrored thumbnail.jpg?time=0s into post.media_meta.
+     */
+    public function handleWebhook(?string $rawInput = null, ?string $signatureHeader = null, ?\PDO $pdo = null): void
+    {
+        header('Content-Type: application/json');
+
+        $rawBody = $rawInput ?? (file_get_contents('php://input') ?: '');
+        $sigHeader = $signatureHeader ?? (string)($_SERVER['HTTP_WEBHOOK_SIGNATURE'] ?? '');
+
+        if (!self::verifyWebhookSignature($rawBody, $sigHeader)) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'error' => 'Invalid or missing webhook signature.']);
+            return;
+        }
+
+        $payload = json_decode($rawBody, true);
+        if (!is_array($payload) || empty($payload['uid']) || !is_string($payload['uid'])) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Invalid Stream webhook payload.']);
+            return;
+        }
+
+        $uid = preg_replace('/[^a-zA-Z0-9_-]/', '', $payload['uid']) ?: '';
+        if ($uid === '' || !preg_match('/^[a-zA-Z0-9_-]{16,64}$/', $uid)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Invalid Stream video UID.']);
+            return;
+        }
+
+        $statusState = strtolower((string)($payload['status']['state'] ?? ''));
+        $isReady = !empty($payload['readyToStream']) || $statusState === 'ready';
+        if (!$isReady) {
+            http_response_code(200);
+            echo json_encode(['success' => true, 'ignored' => true, 'state' => $statusState !== '' ? $statusState : 'pending']);
+            return;
+        }
+
+        $hlsUrl = '';
+        if (!empty($payload['playback']['hls']) && is_string($payload['playback']['hls'])) {
+            $hlsUrl = trim($payload['playback']['hls']);
+        }
+        if ($hlsUrl === '') {
+            $hlsUrl = $this->streamService->buildHlsUrl($uid);
+        }
+
+        $durationSec = isset($payload['duration']) && is_numeric($payload['duration']) && (float)$payload['duration'] > 0
+            ? round((float)$payload['duration'], 2)
+            : null;
+
+        $aspectRatio = null;
+        if (
+            isset($payload['input']['width'], $payload['input']['height'])
+            && is_numeric($payload['input']['width'])
+            && is_numeric($payload['input']['height'])
+        ) {
+            $aspectRatio = \App\classes\VideoParser::formatAspectRatio(
+                (int)$payload['input']['width'],
+                (int)$payload['input']['height']
+            );
+        }
+
+        $rawThumb = !empty($payload['thumbnail']) && is_string($payload['thumbnail'])
+            ? trim($payload['thumbnail'])
+            : '';
+        if ($rawThumb === '') {
+            $rawSubdomain = (string)($_ENV['CLOUDFLARE_STREAM_SUBDOMAIN'] ?? $_SERVER['CLOUDFLARE_STREAM_SUBDOMAIN'] ?? getenv('CLOUDFLARE_STREAM_SUBDOMAIN') ?: '');
+            $host = preg_replace('/[^a-zA-Z0-9.\-]/', '', $rawSubdomain) ?: 'videodelivery.net';
+            $rawThumb = "https://{$host}/{$uid}/thumbnails/thumbnail.jpg?time=0s";
+        } elseif (!str_contains($rawThumb, 'time=')) {
+            $rawThumb .= (str_contains($rawThumb, '?') ? '&' : '?') . 'time=0s';
+        }
+
+        $mirroredPoster = \App\services\LinkPreviewService::mirrorThumbnail($rawThumb);
+
+        $updatedPosts = 0;
+        try {
+            $db = $pdo ?? \Src\Db::connect2();
+            $likeUid = '%' . $uid . '%';
+            $stmt = $db->prepare(
+                'SELECT post_no, media_meta FROM post WHERE postMessage LIKE ? OR post_img0 LIKE ? OR post_img1 LIKE ? OR post_img2 LIKE ? OR post_img3 LIKE ? OR post_img4 LIKE ? OR post_img5 LIKE ? OR media_meta LIKE ?'
+            );
+            $stmt->execute([$likeUid, $likeUid, $likeUid, $likeUid, $likeUid, $likeUid, $likeUid, $likeUid]);
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $updateStmt = $db->prepare('UPDATE post SET media_meta = ? WHERE post_no = ?');
+            foreach ($rows as $row) {
+                $existingMeta = \App\classes\VideoParser::normaliseMediaMeta($row['media_meta'] ?? null) ?? [];
+                if ($hlsUrl !== '') {
+                    $existingMeta['hls_url'] = $hlsUrl;
+                }
+                if ($durationSec !== null) {
+                    $existingMeta['duration_sec'] = $durationSec;
+                }
+                if ($aspectRatio !== null) {
+                    $existingMeta['aspect_ratio'] = $aspectRatio;
+                }
+                if ($mirroredPoster !== null) {
+                    $existingMeta['poster_url'] = $mirroredPoster;
+                }
+                $normalised = \App\classes\VideoParser::normaliseMediaMeta($existingMeta);
+                if ($normalised !== null) {
+                    $encoded = json_encode($normalised, JSON_UNESCAPED_SLASHES);
+                    if ($encoded !== false) {
+                        $updateStmt->execute([$encoded, $row['post_no']]);
+                        $updatedPosts++;
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            error_log('[StreamController::handleWebhook] DB Error: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Failed to persist Stream webhook metadata.']);
+            return;
+        }
+
+        http_response_code(200);
+        echo json_encode([
+            'success' => true,
+            'uid' => $uid,
+            'updated_posts' => $updatedPosts,
+            'hls_url' => $hlsUrl,
+            'duration_sec' => $durationSec,
+            'aspect_ratio' => $aspectRatio,
+            'poster_url' => $mirroredPoster,
+        ], JSON_UNESCAPED_SLASHES);
+    }
 }

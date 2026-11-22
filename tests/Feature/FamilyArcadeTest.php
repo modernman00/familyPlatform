@@ -157,6 +157,46 @@ final class FamilyArcadeTest extends TestCase
             0
         );
         $this->assertTrue($okPulse['valid']);
+
+        // Wordie validation test
+        $wordiePuzzle = FamilyArcadeService::generatePuzzle('wordie', '2026-11-22', 'medium');
+        $this->assertSame('wordie', $wordiePuzzle['game']);
+        $this->assertSame(5, $wordiePuzzle['wordLength']);
+        $this->assertArrayNotHasKey('targetWord', $wordiePuzzle);
+
+        // Internal solve check
+        $wordieInternal = (new \ReflectionClass(FamilyArcadeService::class))
+            ->getMethod('generateWordiePuzzle')
+            ->invoke(null, '2026-11-22', 'medium', true);
+        $target = $wordieInternal['targetWord'];
+        $okWordie = FamilyArcadeService::validateAndScore('wordie', '2026-11-22', 'medium', ['guesses' => ['CRANE', $target]], 25000, 0, 0);
+        $this->assertTrue($okWordie['valid']);
+        $failWordie = FamilyArcadeService::validateAndScore('wordie', '2026-11-22', 'medium', ['guesses' => ['WRONG']], 25000, 0, 0);
+        $this->assertFalse($failWordie['valid']);
+
+        // Cheeseboard validation test
+        $cheeseInternal = (new \ReflectionClass(FamilyArcadeService::class))
+            ->getMethod('generateCheeseboardPuzzle')
+            ->invoke(null, '2026-11-22', 'easy', true);
+        $this->assertCount(6, $cheeseInternal['solutionQueens']);
+        $okCheese = FamilyArcadeService::validateAndScore('cheeseboard', '2026-11-22', 'easy', ['queens' => $cheeseInternal['solutionQueens']], 30000, 0, 0);
+        $this->assertTrue($okCheese['valid']);
+
+        // Minesweeper validation test
+        $mineInternal = (new \ReflectionClass(FamilyArcadeService::class))
+            ->getMethod('generateMinesweeperPuzzle')
+            ->invoke(null, '2026-11-22', 'medium', true);
+        $safeCells = [];
+        for ($r = 0; $r < 8; $r++) {
+            for ($c = 0; $c < 8; $c++) {
+                if (!isset($mineInternal['mineSet']["{$r},{$c}"])) {
+                    $safeCells[] = ['r' => $r, 'c' => $c];
+                }
+            }
+        }
+        $this->assertSame(54, count($safeCells));
+        $okMine = FamilyArcadeService::validateAndScore('minesweeper', '2026-11-22', 'medium', ['uncovered' => $safeCells], 40000, 0, 0);
+        $this->assertTrue($okMine['valid']);
     }
 
     public function testLeagueTablesBadgesAndOvertakeAlert(): void

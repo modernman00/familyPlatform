@@ -682,4 +682,641 @@ describe('Profile Feed Preact Island (Phases 1–4)', () => {
             expect(screen.getByText('Photo unavailable')).toBeTruthy();
         });
     });
+
+    it('renders 3D Living Family Emojis (:id_3d: & ar_emoji) and Me-Stickers (:me_reaction@uid:) interactively without raw token text', async () => {
+        const tapLive = vi.fn();
+        const tapSticker = vi.fn();
+        window.AtgEmojiEngine = { tapLive, tapSticker };
+        window.ATG_LIVING_EMOJIS = {
+            catalog: [{ id: 'family_roots_3d', title: 'Family Roots' }],
+            toneable: [],
+            tones: [],
+        };
+
+        const emojiPost = {
+            post_no: '991',
+            id: 'u_1',
+            fullName: 'Wally Olaogun',
+            postMessage: ':family_roots_3d: :me_love@u_1:',
+            ar_emoji: 'family_roots_3d',
+            post_likes: 0,
+            comments: [
+                {
+                    comment_no: 'c_991',
+                    post_no: '991',
+                    id: 'u_2',
+                    fullName: 'Bisi Olaogun',
+                    comment: 'Sending love :family_roots_3d:',
+                    reactions: [{ label: 'love', count: 2 }],
+                    user_reaction: null,
+                    date_created: '2026-11-22T12:00:00Z',
+                },
+            ],
+            images: [],
+            videos: [],
+        };
+
+        globalThis.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({ status: 'success', tags: [] }),
+            })
+        );
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [emojiPost],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        const liveEmoji = container.querySelector('.atg-live-emoji--jumbo');
+        const meSticker = container.querySelector('[data-testid="me-sticker"].atg-me-sticker--jumbo');
+        expect(liveEmoji).toBeTruthy();
+        expect(meSticker).toBeTruthy();
+        expect(screen.queryByText(/:family_roots_3d:/)).toBeNull();
+
+        fireEvent.click(liveEmoji);
+        fireEvent.click(meSticker);
+        expect(tapLive).toHaveBeenCalledWith(liveEmoji, 'family_roots_3d');
+        expect(tapSticker).toHaveBeenCalledWith(meSticker, 'love');
+
+        delete window.AtgEmojiEngine;
+        delete window.ATG_LIVING_EMOJIS;
+    });
+
+    it('keeps PostCard reaction dock open across hover-gap grace window and renders 34px comment reactions + summary pill', async () => {
+        const postWithComment = {
+            post_no: '992',
+            id: 'u_1',
+            fullName: 'Wally Olaogun',
+            postMessage: 'Sunday dinner',
+            post_likes: 1,
+            user_reaction: null,
+            comments: [
+                {
+                    comment_no: 'c_992',
+                    post_no: '992',
+                    id: 'u_2',
+                    fullName: 'Bisi Olaogun',
+                    comment: 'Delicious!',
+                    reactions: [{ label: 'love', count: 3 }],
+                    user_reaction: null,
+                    date_created: '2026-11-22T12:00:00Z',
+                },
+            ],
+            images: [],
+            videos: [],
+        };
+
+        globalThis.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({ status: 'success', tags: [] }),
+            })
+        );
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [postWithComment],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        // Hover post reaction button, trigger mouseLeave (simulating 8px gap) and verify dock stays open during 180ms grace
+        const reactTrigger = screen.getByRole('button', { name: 'React to this post' });
+        fireEvent.mouseEnter(reactTrigger);
+        fireEvent.mouseLeave(reactTrigger.parentElement);
+        const lovePostBtn = screen.getByRole('button', { name: 'Love' });
+        expect(lovePostBtn).toBeTruthy();
+        fireEvent.click(lovePostBtn);
+        expect(globalThis.fetch).toHaveBeenCalledWith(
+            expect.stringContaining('/profileCard/postLikes?postNo=992&reaction=love'),
+            expect.any(Object)
+        );
+
+        // Comment reaction summary pill shows 20px SVG + count 3
+        const summaryPill = container.querySelector('[data-testid="comment-reaction-summary"]');
+        expect(summaryPill).toBeTruthy();
+        expect(summaryPill.textContent).toContain('3');
+
+        // Open comment reaction dock -> verify 34px SVG + optimistic count bump to 4
+        const commentReactBtn = screen.getByRole('button', { name: 'React' });
+        fireEvent.click(commentReactBtn);
+        const commentDock = container.querySelector('.comment-reaction-float-bar');
+        expect(commentDock).toBeTruthy();
+        const svg34 = commentDock.querySelector('svg[width="34"][height="34"]');
+        expect(svg34).toBeTruthy();
+        const commentLoveBtn = commentDock.querySelector('button[aria-label="Love"]');
+        fireEvent.click(commentLoveBtn);
+
+        await waitFor(() => {
+            expect(container.querySelector('[data-testid="comment-reaction-summary"]').textContent).toContain('4');
+        });
+    });
+
+    it('restores Family GIF picker and multi-tab Emoji picker in CommentThread and submits gif_url', async () => {
+        const postForGif = {
+            post_no: '993',
+            id: 'u_1',
+            fullName: 'Wally Olaogun',
+            postMessage: 'Family reunion!',
+            post_likes: 0,
+            comments: [],
+            images: [],
+            videos: [],
+        };
+
+        globalThis.fetch = vi.fn((url) => {
+            if (String(url).includes('/postCommentProfile')) {
+                return Promise.resolve({
+                    ok: true,
+                    status: 200,
+                    headers: new Headers({ 'content-type': 'application/json' }),
+                    json: async () => ({
+                        status: 'success',
+                        message: {
+                            comment_no: 'c_new_993',
+                            post_no: '993',
+                            comment: 'So excited!',
+                            gif_url: '/images/brand/gifs/atg_heritage_tree_bloom.gif',
+                        },
+                    }),
+                });
+            }
+            return Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({ status: 'success', tags: [] }),
+            });
+        });
+
+        render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [postForGif],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        // Expand comments
+        fireEvent.click(screen.getByRole('button', { name: 'Comment on this post' }));
+
+        // Open GIF picker (lazy-loaded)
+        const gifBtn = screen.getByTestId('comment-gif-btn');
+        fireEvent.click(gifBtn);
+
+        await waitFor(() => {
+            expect(screen.getByTestId('emoji-gif-picker')).toBeTruthy();
+            expect(screen.getByTestId('comment-gif-picker')).toBeTruthy();
+        });
+
+        // Verify Standard, Living, Me, and GIFs tabs exist
+        expect(screen.getByTestId('comment-emoji-tab-standard')).toBeTruthy();
+        expect(screen.getByTestId('comment-emoji-tab-living')).toBeTruthy();
+        expect(screen.getByTestId('comment-emoji-tab-me')).toBeTruthy();
+        expect(screen.getByTestId('comment-emoji-tab-gif')).toBeTruthy();
+
+        // Pick first Family GIF
+        const firstGifBtn = screen.getByRole('button', { name: /Select GIF: Heritage Tree/i });
+        fireEvent.click(firstGifBtn);
+
+        expect(screen.getByTestId('comment-gif-preview')).toBeTruthy();
+
+        // Submit comment with GIF
+        const input = screen.getByLabelText('Write a comment');
+        fireEvent.input(input, { target: { value: 'So excited!' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Send' }));
+
+        await waitFor(() => {
+            expect(globalThis.fetch).toHaveBeenCalledWith(
+                '/postCommentProfile',
+                expect.objectContaining({ method: 'POST' })
+            );
+            expect(screen.getByTestId('comment-gif')).toBeTruthy();
+        });
+    });
+
+    it('renders post and comment view counts and opens ViewersModal when author clicks views', async () => {
+        const postWithViews = {
+            post_no: '994',
+            id: 'u_1',
+            fullName: 'Wally Olaogun',
+            postMessage: 'Family milestone!',
+            post_likes: 0,
+            views_count: 9,
+            comments: [
+                {
+                    comment_no: 'c_994',
+                    post_no: '994',
+                    id: 'u_1',
+                    fullName: 'Wally Olaogun',
+                    comment: 'Thanks everyone!',
+                    views_count: 7,
+                    reactions: [],
+                    date_created: '2026-11-22T12:00:00Z',
+                },
+            ],
+            images: [],
+            videos: [],
+        };
+
+        globalThis.fetch = vi.fn((url) => {
+            if (String(url).includes('/api/posts/994/viewers')) {
+                return Promise.resolve({
+                    ok: true,
+                    status: 200,
+                    headers: new Headers({ 'content-type': 'application/json' }),
+                    json: async () => ({
+                        status: 'success',
+                        views_count: 9,
+                        viewers: [{ id: 'u_2', firstName: 'Bisi', lastName: 'Olaogun' }],
+                    }),
+                });
+            }
+            return Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({ status: 'success', tags: [] }),
+            });
+        });
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [postWithViews],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        const postViewsBtn = container.querySelector('button.post-views-count');
+        expect(postViewsBtn).toBeTruthy();
+        expect(postViewsBtn.textContent).toContain('9 views');
+
+        const commentViewsBtn = container.querySelector('button.comment-views-count');
+        expect(commentViewsBtn).toBeTruthy();
+        expect(commentViewsBtn.textContent).toContain('7 views');
+
+        fireEvent.click(postViewsBtn);
+        await waitFor(() => {
+            expect(screen.getByTestId('viewers-modal')).toBeTruthy();
+            expect(screen.getByText('Bisi Olaogun')).toBeTruthy();
+        });
+    });
+
+    it('renders :family_crest_3d: as Generational Crest living emoji alongside Facebook link_preview without literal shortcode text', async () => {
+        window.ATG_LIVING_EMOJIS = {
+            catalog: [{ id: 'family_crest_3d', title: 'Generational Crest' }],
+            toneable: [],
+            tones: [],
+        };
+
+        const fbEmojiPost = {
+            post_no: '995',
+            id: 'u_1',
+            fullName: 'Wally Olaogun',
+            postFamCode: 'OLA001',
+            target_scope: 'birth',
+            postMessage: ':family_crest_3d:\nhttps://www.facebook.com/share/v/123456/',
+            link_preview: {
+                url: 'https://www.facebook.com/share/v/123456/',
+                original_url: 'https://www.facebook.com/share/v/123456/',
+                domain: 'facebook.com',
+                site_name: 'Facebook',
+                title: 'Damiloju Celebration',
+                image: 'https://example.com/fb-thumb.jpg',
+                is_social_video: true,
+                frame_blocked: true,
+            },
+            post_likes: 0,
+            comments: [],
+            images: [],
+            videos: [],
+        };
+
+        globalThis.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({ status: 'success', tags: [] }),
+            })
+        );
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [fbEmojiPost],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        try {
+            const img = container.querySelector('.atg-live-emoji--jumbo img.atg-3d-emoji');
+            expect(img).toBeTruthy();
+            expect(img.getAttribute('src')).toBe('/public/img/emoji/family_crest_3d.svg?v=20261107a');
+            expect(img.getAttribute('alt')).toBe('Generational Crest');
+            expect(screen.queryByText(/:family_crest_3d:/)).toBeNull();
+            expect(container.querySelector('.link-preview-card')).toBeTruthy();
+        } finally {
+            delete window.ATG_LIVING_EMOJIS;
+        }
+    });
+
+    it('renders attached ar_emoji on link-preview and photo posts even when caption text is empty', async () => {
+        window.ATG_LIVING_EMOJIS = {
+            catalog: [{ id: 'family_crest_3d', title: 'Generational Crest' }],
+            toneable: [],
+            tones: [],
+        };
+
+        const linkOnlyArPost = {
+            post_no: '996',
+            id: 'u_1',
+            fullName: 'Wally Olaogun',
+            postMessage: 'https://www.facebook.com/share/v/999/',
+            ar_emoji: 'family_crest_3d',
+            link_preview: {
+                url: 'https://www.facebook.com/share/v/999/',
+                domain: 'facebook.com',
+                site_name: 'Facebook',
+                title: 'Family Reunion Clip',
+                image: 'https://example.com/fb-999.jpg',
+                is_social_video: true,
+            },
+            post_likes: 0,
+            comments: [],
+            images: [],
+            videos: [],
+        };
+
+        const photoOnlyArPost = {
+            post_no: '997',
+            id: 'u_1',
+            fullName: 'Wally Olaogun',
+            postMessage: '',
+            ar_emoji: 'family_crest_3d',
+            post_likes: 0,
+            comments: [],
+            images: ['/img/sample1.jpg'],
+            videos: [],
+        };
+
+        globalThis.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({ status: 'success', tags: [] }),
+            })
+        );
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [linkOnlyArPost, photoOnlyArPost],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        try {
+            const imgs = container.querySelectorAll('.atg-live-emoji--jumbo img.atg-3d-emoji[alt="Generational Crest"]');
+            expect(imgs.length).toBe(2);
+            expect(screen.queryByText(/:family_crest_3d:/)).toBeNull();
+        } finally {
+            delete window.ATG_LIVING_EMOJIS;
+        }
+    });
+
+    it('renders :family_crest_3d: as an image when window.ATG_LIVING_EMOJIS.catalog is empty', async () => {
+        window.ATG_LIVING_EMOJIS = {
+            catalog: [],
+            toneable: [],
+            tones: [],
+        };
+
+        const emptyCatalogPost = {
+            post_no: '998',
+            id: 'u_1',
+            fullName: 'Wally Olaogun',
+            postMessage: 'Heritage pride :family_crest_3d:',
+            post_likes: 0,
+            comments: [],
+            images: [],
+            videos: [],
+        };
+
+        globalThis.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({ status: 'success', tags: [] }),
+            })
+        );
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [emptyCatalogPost],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        try {
+            const img = container.querySelector('.atg-live-emoji img.atg-3d-emoji');
+            expect(img).toBeTruthy();
+            expect(img.getAttribute('src')).toBe('/public/img/emoji/family_crest_3d.svg?v=20261107a');
+            expect(img.getAttribute('alt')).toBe('Family Crest');
+            expect(screen.queryByText(/:family_crest_3d:/)).toBeNull();
+        } finally {
+            delete window.ATG_LIVING_EMOJIS;
+        }
+    });
+
+    it('preserves visual 3D emoji spans in #postMessageEditor via syncTextareaToEditor when editing a post', async () => {
+        const editableEmojiPost = {
+            post_no: '999',
+            id: 'u_1',
+            fullName: 'Wally Olaogun',
+            postMessage: 'Checking in :family_crest_3d:',
+            post_likes: 0,
+            comments: [],
+            images: [],
+            videos: [],
+        };
+
+        const editPostNo = document.createElement('input');
+        editPostNo.id = 'editPostNo';
+        const textarea = document.createElement('textarea');
+        textarea.id = 'postMessage';
+        const editor = document.createElement('div');
+        editor.id = 'postMessageEditor';
+        const modalEl = document.createElement('div');
+        modalEl.id = 'postModal';
+        const notice = document.createElement('div');
+        notice.id = 'editPostNotice';
+        notice.classList.add('d-none');
+        document.body.append(editPostNo, textarea, editor, modalEl, notice);
+
+        const showSpy = vi.fn();
+        window.bootstrap = {
+            Modal: {
+                getOrCreateInstance: vi.fn(() => ({ show: showSpy })),
+            },
+        };
+        window.syncTextareaToEditor = vi.fn(() => {
+            editor.innerHTML = 'Checking in <span class="atg-emoji-container atg-live-emoji" data-emoji-id="family_crest_3d"><img src="/img/emoji/family_crest_3d.svg"></span>';
+        });
+
+        globalThis.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({ status: 'success', tags: [] }),
+            })
+        );
+
+        render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [editableEmojiPost],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        try {
+            fireEvent.click(screen.getByRole('button', { name: 'Post options' }));
+            fireEvent.click(screen.getByRole('button', { name: 'Edit Post' }));
+
+            expect(window.syncTextareaToEditor).toHaveBeenCalledWith(true);
+            expect(textarea.value).toBe('Checking in :family_crest_3d:');
+            expect(editor.querySelector('[data-emoji-id="family_crest_3d"]')).toBeTruthy();
+            expect(editor.textContent).not.toContain(':family_crest_3d:');
+            expect(showSpy).toHaveBeenCalled();
+        } finally {
+            editPostNo.remove();
+            textarea.remove();
+            editor.remove();
+            modalEl.remove();
+            notice.remove();
+            delete window.bootstrap;
+            delete window.syncTextareaToEditor;
+        }
+    });
+
+    it('renders cohesive CommentThread composer tools, themeable comment bubbles, active send state, and file attachment chip', async () => {
+        const postWithExistingComment = {
+            post_no: '1000',
+            id: 'u_1',
+            fullName: 'Wally Olaogun',
+            postMessage: 'Typical day creating value for the world',
+            post_likes: 0,
+            comments: [
+                {
+                    comment_no: 'c_1000',
+                    post_no: '1000',
+                    id: 'u_2',
+                    firstName: 'Kemi',
+                    lastName: 'Olaogun',
+                    fullName: 'Kemi Olaogun',
+                    comment: 'Love this!',
+                    reactions: [],
+                    date_created: '2026-11-22T12:00:00Z',
+                },
+            ],
+            images: [],
+            videos: [],
+        };
+
+        globalThis.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({ status: 'success', tags: [] }),
+            })
+        );
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [postWithExistingComment],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        // Themeable comment bubble with no hardcoded inline light background
+        const bubble = container.querySelector('.comment-bubble-box');
+        expect(bubble).toBeTruthy();
+        expect(bubble.style.backgroundColor).toBe('');
+        const authorEl = bubble.querySelector('.comment-bubble-author');
+        expect(authorEl).toBeTruthy();
+        expect(authorEl.textContent).toBe('Kemi Olaogun');
+
+        // Expand composer
+        fireEvent.click(screen.getByRole('button', { name: 'Comment on this post' }));
+
+        const toolsWrap = container.querySelector('.comment-composer__tools');
+        expect(toolsWrap).toBeTruthy();
+        const emojiBtn = toolsWrap.querySelector('button[aria-label="Add emoji"]');
+        const gifBtn = toolsWrap.querySelector('[data-testid="comment-gif-btn"]');
+        expect(emojiBtn).toBeTruthy();
+        expect(gifBtn).toBeTruthy();
+        expect(gifBtn.previousElementSibling).toBe(emojiBtn);
+
+        const sendBtn = screen.getByRole('button', { name: 'Send' });
+        expect(sendBtn.disabled).toBe(true);
+        expect(sendBtn.classList.contains('is-active')).toBe(false);
+
+        const input = screen.getByLabelText('Write a comment');
+        fireEvent.input(input, { target: { value: 'So inspiring!' } });
+        expect(sendBtn.disabled).toBe(false);
+        expect(sendBtn.classList.contains('is-active')).toBe(true);
+
+        // Attach a file inside .comment-composer__field and remove it cleanly
+        fireEvent.input(input, { target: { value: '' } });
+        expect(sendBtn.disabled).toBe(true);
+
+        const fileInput = toolsWrap.querySelector('input[type="file"]');
+        const mockFile = new File(['hello'], 'family-note.pdf', { type: 'application/pdf' });
+        fireEvent.change(fileInput, { target: { files: [mockFile] } });
+
+        const previewChip = container.querySelector('.comment-composer__field [data-testid="comment-file-preview"]');
+        expect(previewChip).toBeTruthy();
+        expect(previewChip.textContent).toContain('family-note.pdf');
+        expect(sendBtn.disabled).toBe(false);
+        expect(sendBtn.classList.contains('is-active')).toBe(true);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Remove attachment' }));
+        expect(container.querySelector('[data-testid="comment-file-preview"]')).toBeNull();
+        expect(sendBtn.disabled).toBe(true);
+    });
 });

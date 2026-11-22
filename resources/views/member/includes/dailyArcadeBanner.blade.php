@@ -6,6 +6,9 @@
         'kingrid' => 'KinGrid',
         'kinword' => 'KinWord',
         'kinpulse' => 'KinPulse',
+        'wordie' => 'Wordie',
+        'cheeseboard' => 'Cheeseboard',
+        'minesweeper' => 'Minesweeper',
         default => 'KinZip',
     };
 @endphp

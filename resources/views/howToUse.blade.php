@@ -391,7 +391,7 @@
               </div>
             </div>
             <p class="lead text-secondary">
-              Compete daily across four engaging puzzles — <strong>KinZip</strong> (connect numbered dots in order while filling every cell around walls), <strong>KinGrid</strong> (number deduction with inequality clues), <strong>KinWord</strong> (4&times;4 family &amp; wordplay quartets), and <strong>KinPulse</strong> (3D-tilted harmonic memory sequences).
+              Compete daily across seven mobile-optimised puzzles — <strong>KinZip</strong> (connect numbered dots in order while filling every cell around walls), <strong>KinGrid</strong> (number deduction with inequality clues), <strong>KinWord</strong> (4&times;4 family &amp; wordplay quartets), <strong>KinPulse</strong> (3D-tilted harmonic memory sequences), <strong>Wordie</strong> (5-letter daily word deduction with an adaptive virtual keyboard), <strong>Cheeseboard</strong> (LinkedIn &ldquo;Queens&rdquo;-style territorial crown placement), and <strong>Minesweeper</strong> (tactical 8&times;8 gem hunting &amp; safe pathfinding) — built with responsive boards and touch-first controls across phones, tablets, and desktops.
             </p>
             <div class="p-3 rounded-3 bg-light border">
               <div class="d-flex align-items-center gap-2 mb-1">
@@ -399,7 +399,7 @@
                 <span class="fw-bold text-dark">Bragging Rights, Ghost Races &amp; 3D Trophies</span>
               </div>
               <p class="small text-muted mb-0">
-                Race the ATG Algorithm Bot or a relative’s ghost, climb the Weekly &amp; All-Time <strong>Family Cup</strong> league tables, earn dynamic <em>“Best of the Family”</em> crown badges on the Family Tree, Profile, and Feed, and share automated victory replay cards on WhatsApp, Messages, or the Family Feed.
+                Not sure how a puzzle works? Tap <strong>How to Play</strong> or <strong>Watch Platform Play</strong> inside any game to watch the platform solve a miniature board step by step with live narration. Then race the ATG Algorithm Bot or a relative’s ghost, climb the Weekly &amp; All-Time <strong>Family Cup</strong> league tables, earn dynamic <em>“Best of the Family”</em> crown badges on the Family Tree, Profile, and Feed, and share <strong>Beat My Score</strong> challenge cards on WhatsApp, Messages, or social media — friends outside your family can play your exact puzzle straight away without signing in, and you can track their opens, plays, completions, and sign-up clicks right inside Family Arcade.
               </p>
             </div>
           </div>
@@ -765,21 +765,28 @@
               Stay connected to family milestones, birthdays, and new memories without notification fatigue.
             </p>
             <div class="row g-3">
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <div class="p-3 border rounded-3 bg-light h-100">
                   <span class="badge text-white mb-2" style="background: #a31621;">1-Tap Activation</span>
                   <h6 class="fw-bold text-dark">Instant Lockscreen Alerts</h6>
                   <p class="small text-muted mb-0">Tap <strong>Enable Notifications</strong> on the prompt banner or inside Account Settings to receive real-time updates on your phone or desktop.</p>
                 </div>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge text-white mb-2" style="background: #b45309;">Milestone Countdown</span>
+                  <h6 class="fw-bold text-dark">7-Day, 1-Day &amp; Day-of Reminders</h6>
+                  <p class="small text-muted mb-0">Receive advance reminders for upcoming birthdays, anniversaries, and family events at 7 days ahead (to plan gifts and cards), 1 day ahead, and on the day itself.</p>
+                </div>
+              </div>
+              <div class="col-md-3">
                 <div class="p-3 border rounded-3 bg-light h-100">
                   <span class="badge text-white mb-2" style="background: #0f766e;">3-Minute Smart Bundling</span>
                   <h6 class="fw-bold text-dark">Calm, Grouped Updates</h6>
                   <p class="small text-muted mb-0">When several relatives comment on the same family photo within minutes, alerts are automatically bundled into a single summary card so your phone does not buzz repeatedly.</p>
                 </div>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <div class="p-3 border rounded-3 bg-light h-100">
                   <span class="badge text-white mb-2" style="background: #334155;">3-Day Gentle Reminder</span>
                   <h6 class="fw-bold text-dark">Flexible Opt-In</h6>
@@ -1004,6 +1011,7 @@
                     <li><strong>Distinct FamChat Alerts &amp; Calling:</strong> Incoming FamChat messages play a soft harmonic chime, display a bespoke crimson-and-gold FamChat banner when you are elsewhere in the app, use a two-pulse chat vibration pattern, and support in-app WebRTC voice and video calls with your kin.</li>
                     <li><strong>Family Emojis &amp; Disappearing Messages:</strong> 3D heritage emoji reactions (plus quick double-tap heart reactions), timed auto-disappearing messages, and one-click WhatsApp preview generation.</li>
                     <li><strong>Customisable Chat Backgrounds &amp; Prominent Last Seen:</strong> Personalise each conversation with curated high-contrast themes (such as <em>Instagram Vibe</em>, <em>Heritage Crimson</em>, <em>Midnight Velvet</em>, or <em>Sage Garden</em>) and see clear <em>Active now</em> or <em>Last seen</em> status pills across both the inbox and chat header.</li>
+                    <li><strong>Quick-Action Floating Toolbar:</strong> Hover or tap any message to reveal comfortable, tactile Lucide action controls for quoted replies, starring important whispers, instant emoji and 3D heritage reactions, 15-minute edits, and granular delete options.</li>
                     <li><strong>Sender-Only Message Deletion:</strong> Delete your own text or voice messages permanently for everyone in the thread at any time (with an explicit confirmation prompt and instant audio purge).</li>
                   </ul>
                 </div>
@@ -1181,7 +1189,7 @@
     </div>
     <div class="card bg-dark text-light border-secondary rounded-4 p-4" id="playbook-living-heirloom">
         <h2 class="h4 text-warning mb-2">Living Heirloom, Age Progression &amp; Ancestral Reverse Computation</h2>
-        <p class="small text-secondary mb-3">Available from <strong>Heirloom AI</strong> in the top navigation bar (<code>/family/living-heirloom</code>):</p>
+        <p class="small text-secondary mb-3">Available from <strong>Creative Studio &rarr; Heirloom AI</strong> in the top navigation bar and Creative Studio Hub (<code>/family/living-heirloom</code>):</p>
         <ul class="small mb-0">
             <li><strong>Living Motion &amp; Talking Portraits:</strong> Bring cherished portraits of deceased grandparents and relatives to life with natural breathing, blinking, re-emotion expressions (<em>Warm Smile</em>, <em>Nostalgic Nod</em>, <em>Joyful Laugh</em>), and real-time lip-sync driven by recorded family voice notes or tribute captions.</li>
             <li><strong>Future Age Progression (+10 / +20 / +30 / +40 Years):</strong> Forecast how you or a relative will look decades from now while preserving facial bone structure and identity.</li>

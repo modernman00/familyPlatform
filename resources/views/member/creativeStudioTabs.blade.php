@@ -1,7 +1,7 @@
-{{-- Creative Studio tab strip: shared by the hub, Tree Studio, Flyers & Posters, Festive Cards, and Living Archives Studio. $creativeTab = hub|tree|flyers|cards|archives --}}
+{{-- Creative Studio tab strip: shared by the hub, Tree Studio, Heirloom AI, Flyers & Posters, Festive Cards, Living Archives Studio, and Family Arcade. $creativeTab = hub|tree|heirloom|flyers|cards|archives|arcade --}}
 @php $creativeTab = $creativeTab ?? 'hub'; @endphp
 <nav class="d-flex flex-nowrap gap-2 overflow-x-auto mb-3 mb-md-4 pb-1" aria-label="Creative Studio sections" style="overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;">
-    <a href="/creative-studio" class="btn {{ $creativeTab === 'hub' ? 'btn-dark' : 'btn-outline-secondary' }} fw-bold d-inline-flex align-items-center gap-2" style="white-space:nowrap;flex-shrink:0;min-height:44px;border-radius:12px;" title="Creative Studio — Tree Studio, Flyers &amp; Posters, and Festive Greeting Cards" @if($creativeTab === 'hub') aria-current="page" @endif>
+    <a href="/creative-studio" class="btn {{ $creativeTab === 'hub' ? 'btn-dark' : 'btn-outline-secondary' }} fw-bold d-inline-flex align-items-center gap-2" style="white-space:nowrap;flex-shrink:0;min-height:44px;border-radius:12px;" title="Creative Studio — Tree Studio, Heirloom AI, Flyers &amp; Posters, and Festive Greeting Cards" @if($creativeTab === 'hub') aria-current="page" @endif>
         <span class="creative-3d-icon-wrap" aria-hidden="true">
             <span class="creative-3d-gem">
                 <span class="creative-3d-sheen"></span>
@@ -16,6 +16,9 @@
     </a>
     <a href="/familyStudio" class="btn {{ $creativeTab === 'tree' ? 'btn-primary' : 'btn-outline-primary' }} fw-bold d-inline-flex align-items-center" style="white-space:nowrap;flex-shrink:0;min-height:44px;border-radius:12px;" title="Tree Studio — Build &amp; curate your family lineage, unions and generations" @if($creativeTab === 'tree') aria-current="page" @endif>
         <i class="bi bi-diagram-3-fill me-2"></i>Tree Studio
+    </a>
+    <a href="/family/living-heirloom" class="btn {{ $creativeTab === 'heirloom' ? 'btn-warning text-dark' : 'btn-outline-warning' }} fw-bold d-inline-flex align-items-center" style="white-space:nowrap;flex-shrink:0;min-height:44px;border-radius:12px;" title="Heirloom AI — Living portraits, age progression &amp; ancestral synthesis" @if($creativeTab === 'heirloom') aria-current="page" @endif>
+        <i class="bi bi-person-bounding-box me-2"></i>Heirloom AI
     </a>
     <a href="/poster-studio" class="btn {{ $creativeTab === 'flyers' ? 'btn-warning text-dark' : 'btn-outline-warning' }} fw-bold d-inline-flex align-items-center" style="white-space:nowrap;flex-shrink:0;min-height:44px;border-radius:12px;" title="Flyer Studio — Design reunion, jubilee &amp; milestone posters" @if($creativeTab === 'flyers') aria-current="page" @endif>
         <i class="bi bi-easel2-fill me-2"></i>Flyers &amp; Posters

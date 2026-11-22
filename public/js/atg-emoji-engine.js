@@ -1040,6 +1040,12 @@
                 downloadBtn.addEventListener('click', () => self.downloadStylisedAvatar());
             }
 
+            // Bind Share Branded Avatar button
+            const shareBtn = document.getElementById('atgShareAvatarBtn');
+            if (shareBtn) {
+                shareBtn.addEventListener('click', () => self.shareStylisedAvatar());
+            }
+
             // Bind Webcam Snapshot capture & drag-and-drop upload
             this.bindPhotoCameraAndDrop();
 
@@ -1613,6 +1619,87 @@
                 this.motionToast('Downloaded HD stylised avatar PNG!', 'success');
             } catch (e) {
                 this.motionToast('Could not export PNG from this image.', 'warning');
+            }
+        },
+
+        /**
+         * Share a branded FamilyPlatform Living Avatar advert card via Web Share API
+         * (with clipboard + PNG download fallback on desktop browsers).
+         */
+        shareStylisedAvatar: async function () {
+            const pr = this.photoRig;
+            const src = pr.stylisedHighRes || pr.img;
+            if (!src) {
+                this.motionToast('Please upload or choose a photo first.', 'warning');
+                return;
+            }
+
+            const styleKey = pr.style || 'stylised';
+            const styleLabel = (this.photoStyleLabels && this.photoStyleLabels[styleKey]) || 'Living Avatar';
+            const host = window.location.host || 'familyplatform.co.uk';
+            const shareUrl = window.location.origin + '/';
+
+            const card = document.createElement('canvas');
+            card.width = 512;
+            card.height = 640;
+            const ctx = card.getContext('2d');
+            if (!ctx) return;
+
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, 512, 640);
+            ctx.drawImage(src, 0, 0, 512, 576);
+
+            // Subtle branded advert footer bar
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 576, 512, 64);
+            ctx.fillStyle = '#a31621';
+            ctx.fillRect(0, 576, 512, 3);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 16px system-ui, -apple-system, sans-serif';
+            ctx.fillText('✨ FamilyPlatform · Living Avatar Studio', 16, 603);
+
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = '600 13px system-ui, -apple-system, sans-serif';
+            ctx.fillText(`${styleLabel}  ·  Create yours at ${host}`, 16, 625);
+
+            try {
+                const blob = await new Promise(resolve => card.toBlob(resolve, 'image/png'));
+                if (!blob) {
+                    this.motionToast('Could not prepare shareable avatar image.', 'warning');
+                    return;
+                }
+
+                const file = new File([blob], `familyplatform-avatar-${styleKey}.png`, { type: 'image/png' });
+                const shareText = `I just transformed my photo into a ${styleLabel} on FamilyPlatform! Create yours: ${shareUrl}`;
+
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: 'My Living Avatar on FamilyPlatform',
+                        text: shareText,
+                        files: [file],
+                    });
+                    this.motionToast('Shared your branded Living Avatar!', 'success');
+                    return;
+                }
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    try {
+                        await navigator.clipboard.writeText(shareText);
+                    } catch (_) {
+                        // Ignore clipboard permission errors on non-HTTPS contexts
+                    }
+                }
+
+                const link = document.createElement('a');
+                link.download = `familyplatform-avatar-share-${styleKey}.png`;
+                link.href = URL.createObjectURL(blob);
+                link.click();
+                setTimeout(() => URL.revokeObjectURL(link.href), 4000);
+                this.motionToast('Branded avatar card downloaded & invite link copied — ready to share!', 'success');
+            } catch (err) {
+                if (err && err.name === 'AbortError') return;
+                this.motionToast('Could not share avatar image.', 'warning');
             }
         },
 

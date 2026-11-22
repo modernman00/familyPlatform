@@ -239,15 +239,124 @@ export function normalizeComparison(c) {
 export function isDirectVideoDescriptor(vDesc) {
     if (!vDesc) return false;
     if (typeof vDesc === 'string') return isVideoPath(vDesc);
+    if (vDesc.renderMode === 'native_video') return true;
+    if (vDesc.renderMode === 'inline_iframe') return false;
     if (vDesc.type === 'direct' || Boolean(vDesc.isDirect)) return true;
-    const url = vDesc.embedUrl || vDesc.originalUrl || '';
+    const url = vDesc.videoSrc || vDesc.embedUrl || vDesc.originalUrl || '';
     return isVideoPath(url);
 }
 
 export function resolveVideoPlaybackSrc(vDesc) {
     if (!vDesc) return '';
     if (typeof vDesc === 'string') return vDesc;
-    return String(vDesc.embedUrl || vDesc.originalUrl || '');
+    return String(vDesc.videoSrc || vDesc.embedUrl || vDesc.embedSrc || vDesc.originalUrl || '');
+}
+
+const VALID_RENDER_MODES = new Set(['image', 'native_video', 'inline_iframe', 'external_card']);
+
+export function normalizeMediaItem(item, fallbackId = 'media-0') {
+    if (!item || typeof item !== 'object') return null;
+    const renderMode = VALID_RENDER_MODES.has(item.renderMode) ? item.renderMode : 'external_card';
+    return {
+        id: String(item.id || fallbackId),
+        provider: String(item.provider || 'external'),
+        renderMode,
+        aspectRatio: typeof item.aspectRatio === 'string' && item.aspectRatio.trim() ? item.aspectRatio.trim() : null,
+        posterUrl: typeof item.posterUrl === 'string' && item.posterUrl.trim() ? item.posterUrl.trim() : null,
+        videoSrc: typeof item.videoSrc === 'string' && item.videoSrc.trim() ? item.videoSrc.trim() : null,
+        hlsUrl: typeof item.hlsUrl === 'string' && item.hlsUrl.trim() ? item.hlsUrl.trim() : null,
+        embedSrc: typeof item.embedSrc === 'string' && item.embedSrc.trim() ? item.embedSrc.trim() : null,
+        originalUrl: typeof item.originalUrl === 'string' && item.originalUrl.trim() ? item.originalUrl.trim() : null,
+        title: typeof item.title === 'string' && item.title.trim() ? item.title.trim() : null,
+        durationSec: typeof item.durationSec === 'number' && Number.isFinite(item.durationSec) ? item.durationSec : null,
+        focalX: typeof item.focalX === 'number' && Number.isFinite(item.focalX) ? item.focalX : null,
+        focalY: typeof item.focalY === 'number' && Number.isFinite(item.focalY) ? item.focalY : null,
+        isShort: Boolean(item.isShort),
+    };
+}
+
+export function buildNormalizedMedia(raw, media = { images: [], videos: [] }, linkPreview = null) {
+    if (Array.isArray(raw?.normalized_media) && raw.normalized_media.length > 0) {
+        return raw.normalized_media
+            .map((item, idx) => normalizeMediaItem(item, `post-${raw?.post_no ?? '0'}-media-${idx}`))
+            .filter(Boolean);
+    }
+
+    const postKey = String(raw?.post_no ?? '0');
+    const items = [];
+
+    (media.images || []).forEach((imgUrl, idx) => {
+        if (!imgUrl) return;
+        items.push({
+            id: `post-${postKey}-img-${idx}`,
+            provider: 'image',
+            renderMode: 'image',
+            aspectRatio: null,
+            posterUrl: imgUrl,
+            videoSrc: null,
+            hlsUrl: null,
+            embedSrc: null,
+            originalUrl: imgUrl,
+            title: null,
+            durationSec: null,
+            focalX: null,
+            focalY: null,
+            isShort: false,
+        });
+    });
+
+    (media.videos || []).forEach((vid, idx) => {
+        if (!vid || typeof vid !== 'object') return;
+        const provider = String(vid.type || 'direct');
+        const isNative = isDirectVideoDescriptor(vid);
+        const embedUrl = typeof vid.embedUrl === 'string' ? vid.embedUrl : null;
+        const origUrl = typeof vid.originalUrl === 'string' ? vid.originalUrl : null;
+        const renderMode = isNative
+            ? 'native_video'
+            : (embedUrl ? 'inline_iframe' : 'external_card');
+
+        items.push({
+            id: String(vid.videoId || `post-${postKey}-vid-${idx}`),
+            provider,
+            renderMode,
+            aspectRatio: typeof vid.aspect_ratio === 'string' ? vid.aspect_ratio : null,
+            posterUrl: typeof vid.thumbnailUrl === 'string' ? vid.thumbnailUrl : null,
+            videoSrc: isNative ? (embedUrl || origUrl) : null,
+            hlsUrl: typeof vid.hlsUrl === 'string' ? vid.hlsUrl : null,
+            embedSrc: renderMode === 'inline_iframe' ? embedUrl : null,
+            originalUrl: origUrl || embedUrl,
+            title: typeof vid.hook === 'string' ? vid.hook : null,
+            durationSec: Number.isFinite(Number(vid.duration_sec)) ? Number(vid.duration_sec) : null,
+            focalX: typeof vid.focal_x === 'number' ? vid.focal_x : null,
+            focalY: typeof vid.focal_y === 'number' ? vid.focal_y : null,
+            isShort: Boolean(vid.isShort),
+        });
+    });
+
+    if (items.length === 0 && linkPreview && (linkPreview.url || linkPreview.image || linkPreview.title)) {
+        const frameBlocked = Boolean(linkPreview.frame_blocked);
+        const lpEmbed = !frameBlocked && typeof linkPreview.embed_url === 'string' && linkPreview.embed_url.trim()
+            ? linkPreview.embed_url.trim()
+            : null;
+        items.push({
+            id: `post-${postKey}-lp-0`,
+            provider: String(linkPreview.site_name || linkPreview.domain || 'external').toLowerCase(),
+            renderMode: lpEmbed ? 'inline_iframe' : 'external_card',
+            aspectRatio: typeof linkPreview.aspect_ratio === 'string' ? linkPreview.aspect_ratio : null,
+            posterUrl: typeof linkPreview.image === 'string' ? linkPreview.image : null,
+            videoSrc: null,
+            hlsUrl: null,
+            embedSrc: lpEmbed,
+            originalUrl: typeof linkPreview.url === 'string' ? linkPreview.url : null,
+            title: typeof linkPreview.title === 'string' ? linkPreview.title : null,
+            durationSec: null,
+            focalX: null,
+            focalY: null,
+            isShort: false,
+        });
+    }
+
+    return items;
 }
 
 export function extractRawMedia(raw, cleanMsg = '') {
@@ -526,6 +635,7 @@ export function normalizePost(raw) {
         images: media.images,
         videos: media.videos,
         video: media.videos[0] || null,
+        normalized_media: buildNormalizedMedia(raw, media, raw.link_preview || null),
         comparison: normalizeComparison(raw.comparison),
         comments,
         post_tags: Array.isArray(raw.post_tags) ? raw.post_tags : [],
@@ -594,12 +704,29 @@ export function canModerateComment(post, comment, currentUserId) {
 }
 
 /**
- * Tokenizes post/comment text into plain text, markdown/relative links, #hashtags, @mentions, and URLs for safe JSX rendering.
+ * Checks whether a text string consists exclusively of living 3D emojis and/or Me-stickers.
  */
-export function tokenizeRichText(text) {
-    const clean = stripStyleToken(text || '');
+export function isEmojiOnlyMessage(text, arEmoji = null) {
+    let msg = stripStyleToken(text || '');
+    if (arEmoji && /^[a-z0-9_]+_3d$/i.test(arEmoji) && !msg.includes(`:${arEmoji}:`)) {
+        msg = (msg ? `${msg} ` : '') + `:${arEmoji}:`;
+    }
+    if (!msg) return false;
+    const stickerRe = /:(?:[a-z0-9_]+_3d|me_[a-z]+@[A-Za-z0-9_-]{1,64}):/gi;
+    return stickerRe.test(msg) && msg.replace(stickerRe, '').trim() === '';
+}
+
+/**
+ * Tokenizes post/comment text into plain text, markdown/relative links, #hashtags, @mentions,
+ * 3D living family emojis (:id_3d:), Me-stickers (:me_reaction@uid:), and URLs for safe JSX rendering.
+ */
+export function tokenizeRichText(text, arEmoji = null) {
+    let clean = stripStyleToken(text || '');
+    if (arEmoji && /^[a-z0-9_]+_3d$/i.test(arEmoji) && !clean.includes(`:${arEmoji}:`)) {
+        clean = (clean ? `${clean} ` : '') + `:${arEmoji}:`;
+    }
     if (!clean) return [];
-    const regex = /(\[[^\]\n]+\]\((?:https?:\/\/|\/)[^\s)]+\)|https?:\/\/[^\s<>"']+|(?:^|\s)\/[A-Za-z0-9_/?=&#.-]+|#[A-Za-z0-9_]+|@[A-Za-z0-9_.-]+(?:\s+[A-Za-z0-9_.-]+)?)/g;
+    const regex = /(:me_(?:hello|laugh|wow|love|nod|dance|point|clap)@[A-Za-z0-9_-]{1,64}:|:[a-z0-9_]+_3d:|\[[^\]\n]+\]\((?:https?:\/\/|\/)[^\s)]+\)|https?:\/\/[^\s<>"']+|(?:^|\s)\/[A-Za-z0-9_/?=&#.-]+|#[A-Za-z0-9_]+|@[A-Za-z0-9_.-]+(?:\s+[A-Za-z0-9_.-]+)?)/gi;
     const tokens = [];
     let lastIndex = 0;
     let match;
@@ -608,7 +735,22 @@ export function tokenizeRichText(text) {
             tokens.push({ type: 'text', value: clean.slice(lastIndex, match.index) });
         }
         const token = match[0];
-        if (token.startsWith('[')) {
+        const meMatch = token.match(/^:me_(hello|laugh|wow|love|nod|dance|point|clap)@([A-Za-z0-9_-]{1,64}):$/i);
+        const livingMatch = token.match(/^:([a-z0-9_]+_3d):$/i);
+        if (meMatch) {
+            tokens.push({
+                type: 'me_sticker',
+                reaction: meMatch[1].toLowerCase(),
+                uid: meMatch[2],
+                value: token,
+            });
+        } else if (livingMatch) {
+            tokens.push({
+                type: 'living_emoji',
+                emojiId: livingMatch[1].toLowerCase(),
+                value: token,
+            });
+        } else if (token.startsWith('[')) {
             const md = token.match(/^\[([^\]\n]+)\]\(((?:https?:\/\/|\/)[^\s)]+)\)$/);
             if (md) {
                 tokens.push({ type: 'link', label: md[1], value: md[2] });

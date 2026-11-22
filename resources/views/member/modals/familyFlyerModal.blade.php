@@ -86,7 +86,7 @@
                     <button type="button" class="btn btn-primary btn-sm px-3 py-2 fw-bold rounded-3 shadow-sm" onclick="downloadFlyerImage()">
                         <i class="bi bi-download me-1"></i> Download PNG
                     </button>
-                    <button type="button" class="btn btn-success btn-sm px-4 py-2 fw-bold text-white rounded-3 shadow-sm" style="background: #25D366; border-color: #25D366;" onclick="shareFlyerToWhatsApp()">
+                    <button type="button" class="btn btn-success btn-sm px-4 py-2 fw-bold text-white rounded-3 shadow-sm" style="background: #15803d; border-color: #15803d;" onclick="shareFlyerToWhatsApp()">
                         <i class="bi bi-whatsapp me-1"></i> Share to WhatsApp
                     </button>
                 </div>

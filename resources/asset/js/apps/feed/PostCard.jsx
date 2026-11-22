@@ -1,9 +1,11 @@
-import { useState } from 'preact/hooks';
+import { useState, useEffect, useRef } from 'preact/hooks';
+import { memo } from 'preact/compat';
 import { apiFetch } from '../shared/apiClient';
 import { notifyToast } from '../shared/bootstrap';
 import { HEIRLOOM_REACTIONS, getHeirloomGlassSvg } from '../../components/profilePage/heirloomGlassReactions';
 import { CommentThread } from './CommentThread';
 import { FeedVideoGallery } from './FeedVideoGallery';
+import { RichTextTokens } from './RichTextTokens';
 import {
     formatRelativeTime,
     getAvatarUrl,
@@ -17,12 +19,11 @@ import {
     isGifMedia,
     isOwnPost,
     stripStyleToken,
-    tokenizeRichText,
 } from './feedUtils';
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
-export function PostCard({
+export const PostCard = memo(function PostCard({
     post,
     bootstrap,
     isHighlighted = false,
@@ -34,6 +35,8 @@ export function PostCard({
     onSelectHashtag,
     onOpenLightbox,
     onOpenVideo,
+    onOpenPostViewers,
+    onOpenCommentViewers,
 }) {
     const currentUserId = String(bootstrap?.userId || '');
     const ownPost = isOwnPost(post, currentUserId);
@@ -58,6 +61,50 @@ export function PostCard({
     const [sliderPos, setSliderPos] = useState(50);
     const [brokenPreviewImgUrl, setBrokenPreviewImgUrl] = useState(null);
     const [brokenPhotoUrls, setBrokenPhotoUrls] = useState({});
+    const reactionCloseTimerRef = useRef(null);
+    const reactionLongPressTimerRef = useRef(null);
+    const reactionWrapperRef = useRef(null);
+    const longPressedRef = useRef(false);
+
+    const openReactionPicker = () => {
+        if (reactionCloseTimerRef.current) {
+            clearTimeout(reactionCloseTimerRef.current);
+            reactionCloseTimerRef.current = null;
+        }
+        setShowReactionPicker(true);
+    };
+
+    const scheduleCloseReactionPicker = () => {
+        if (reactionCloseTimerRef.current) {
+            clearTimeout(reactionCloseTimerRef.current);
+        }
+        reactionCloseTimerRef.current = setTimeout(() => {
+            setShowReactionPicker(false);
+        }, 180);
+    };
+
+    useEffect(() => {
+        if (!showReactionPicker) return undefined;
+        const onDocClick = (e) => {
+            if (reactionWrapperRef.current && !reactionWrapperRef.current.contains(e.target)) {
+                setShowReactionPicker(false);
+            }
+        };
+        const onKey = (e) => {
+            if (e.key === 'Escape') setShowReactionPicker(false);
+        };
+        document.addEventListener('pointerdown', onDocClick);
+        document.addEventListener('keydown', onKey);
+        return () => {
+            document.removeEventListener('pointerdown', onDocClick);
+            document.removeEventListener('keydown', onKey);
+        };
+    }, [showReactionPicker]);
+
+    useEffect(() => () => {
+        if (reactionCloseTimerRef.current) clearTimeout(reactionCloseTimerRef.current);
+        if (reactionLongPressTimerRef.current) clearTimeout(reactionLongPressTimerRef.current);
+    }, []);
 
     const authorName = post.fullName || `${post.firstName || ''} ${post.lastName || ''}`.trim() || 'Family Member';
     const stageMeta = getPostStageMeta(post);
@@ -78,6 +125,8 @@ export function PostCard({
         post.link_preview && (post.link_preview.image || post.link_preview.title || post.link_preview.url)
     );
     const captionText = getMediaCaption(post) || (hasMedia || hasLinkPreview ? '' : stripStyleToken(post.postMessage || ''));
+    const hasLivingArEmoji = Boolean(post.ar_emoji && /^[a-z0-9_]+_3d$/i.test(String(post.ar_emoji).trim()));
+    const hasRichBody = Boolean(captionText || hasLivingArEmoji);
 
     const cardAccentStyle = {
         borderRadius: isOfficial || isHistorian || isTaggedSelf ? '12px' : '8px',
@@ -91,41 +140,14 @@ export function PostCard({
                     : {}),
     };
 
-    const renderTokens = (rawText) =>
-        tokenizeRichText(rawText).map((tok, i) => {
-            if (tok.type === 'hashtag') {
-                return (
-                    <button
-                        key={i}
-                        type="button"
-                        className="btn btn-link p-0 border-0 align-baseline fw-semibold text-decoration-underline"
-                        style={{ color: stageMeta ? '#fde68a' : '#a31621' }}
-                        onClick={() => onSelectHashtag?.(tok.tag)}
-                    >
-                        {tok.value}
-                    </button>
-                );
-            }
-            if (tok.type === 'url' || tok.type === 'link') {
-                const isExternal = tok.value.startsWith('http://') || tok.value.startsWith('https://');
-                return (
-                    <a
-                        key={i}
-                        href={tok.value}
-                        target={isExternal ? '_blank' : undefined}
-                        rel={isExternal ? 'noopener noreferrer' : undefined}
-                        className="fw-semibold text-decoration-underline"
-                        style={{ color: stageMeta ? '#93c5fd' : '#a31621' }}
-                    >
-                        {tok.label || tok.value}
-                    </a>
-                );
-            }
-            if (tok.type === 'mention') {
-                return <strong key={i}>{tok.value}</strong>;
-            }
-            return <span key={i}>{tok.value}</span>;
-        });
+    const renderTokens = (rawText) => (
+        <RichTextTokens
+            text={rawText}
+            arEmoji={post.ar_emoji || null}
+            onSelectHashtag={onSelectHashtag}
+            isStage={Boolean(stageMeta)}
+        />
+    );
 
     const handleEditClick = () => {
         const postNoInput = document.getElementById('editPostNo');
@@ -145,7 +167,9 @@ export function PostCard({
                 }
                 postNoInput.value = String(post.post_no);
                 textarea.value = cleanText;
-                if (editor) {
+                if (typeof window.syncTextareaToEditor === 'function') {
+                    window.syncTextareaToEditor(true);
+                } else if (editor) {
                     editor.textContent = cleanText;
                     editor.dispatchEvent(new Event('input', { bubbles: true }));
                 }
@@ -591,7 +615,7 @@ export function PostCard({
                     </div>
                 </div>
             ) : (
-                !hasMedia && !pollMeta && captionText && (
+                !hasMedia && !pollMeta && hasRichBody && (
                     <div className="post-content px-1 mb-3">
                         {stageMeta ? (
                             <div
@@ -670,7 +694,10 @@ export function PostCard({
                                             : 'bi-globe2';
 
                 return (
-                    <div className="link-preview-container mb-3 px-1">
+                    <div
+                        className="link-preview-container mb-3 px-1"
+                        data-render-mode={lp.render_mode || (lp.frame_blocked ? 'external_card' : 'external_card')}
+                    >
                         <a
                             href={lp.url}
                             target="_blank"
@@ -878,7 +905,12 @@ export function PostCard({
 
             {/* Videos (Classic Horizontal Multi-Video Carousel or Single Video Aura Stage) */}
             {videos.length > 0 && (
-                <FeedVideoGallery videos={videos} onOpenVideo={onOpenVideo} />
+                <FeedVideoGallery
+                    videos={videos}
+                    postNo={post.post_no}
+                    normalizedMedia={post.normalized_media}
+                    onOpenVideo={onOpenVideo}
+                />
             )}
 
             {/* Classic 3D Poll Arena */}
@@ -945,44 +977,54 @@ export function PostCard({
             <div className="d-flex align-items-center justify-content-between pt-2 pb-1 mb-1 feed-actions-row">
                 <div className="d-flex align-items-center gap-2">
                     <div
+                        ref={reactionWrapperRef}
                         className="position-relative"
-                        onMouseLeave={() => setShowReactionPicker(false)}
+                        onMouseEnter={openReactionPicker}
+                        onMouseLeave={scheduleCloseReactionPicker}
                     >
                         {showReactionPicker && (
                             <div
-                                className="reaction-bar-float heirloom-glass-dock"
                                 style={{
                                     position: 'absolute',
-                                    bottom: 'calc(100% + 8px)',
+                                    bottom: '100%',
                                     left: 0,
-                                    display: 'flex',
-                                    gap: '6px',
+                                    paddingBottom: '8px',
                                     zIndex: 100,
-                                    whiteSpace: 'nowrap',
                                 }}
-                                role="group"
-                                aria-label="Choose a reaction"
+                                onMouseEnter={openReactionPicker}
+                                onMouseLeave={scheduleCloseReactionPicker}
                             >
-                                {reactionList.map((r) => (
-                                    <button
-                                        key={r.key}
-                                        type="button"
-                                        title={r.label}
-                                        aria-label={r.label}
-                                        className={`heirloom-reaction-btn ${post.user_reaction === r.key ? 'active' : ''}`}
-                                        style={{ minWidth: '44px', minHeight: '44px' }}
-                                        onClick={() => {
-                                            setShowReactionPicker(false);
-                                            onReactPost?.(post.post_no, r.key);
-                                        }}
-                                    >
-                                        <span
-                                            className="heirloom-glass-glyph d-inline-flex align-items-center justify-content-center"
-                                            dangerouslySetInnerHTML={{ __html: getHeirloomGlassSvg(r.key, 30) }}
-                                        />
-                                        <span className="heirloom-tooltip-pill">{r.label}</span>
-                                    </button>
-                                ))}
+                                <div
+                                    className="reaction-bar-float heirloom-glass-dock"
+                                    style={{
+                                        display: 'flex',
+                                        gap: '6px',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                    role="group"
+                                    aria-label="Choose a reaction"
+                                >
+                                    {reactionList.map((r) => (
+                                        <button
+                                            key={r.key}
+                                            type="button"
+                                            title={r.label}
+                                            aria-label={r.label}
+                                            className={`heirloom-reaction-btn ${post.user_reaction === r.key ? 'active' : ''}`}
+                                            style={{ minWidth: '44px', minHeight: '44px' }}
+                                            onClick={() => {
+                                                setShowReactionPicker(false);
+                                                onReactPost?.(post.post_no, r.key);
+                                            }}
+                                        >
+                                            <span
+                                                className="heirloom-glass-glyph d-inline-flex align-items-center justify-content-center"
+                                                dangerouslySetInnerHTML={{ __html: getHeirloomGlassSvg(r.key, 32) }}
+                                            />
+                                            <span className="heirloom-tooltip-pill">{r.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         )}
 
@@ -993,8 +1035,34 @@ export function PostCard({
                             aria-expanded={showReactionPicker}
                             aria-label={activeReactionMeta ? `Reacted ${activeReactionMeta.label}` : 'React to this post'}
                             title={activeReactionMeta ? `Reacted: ${activeReactionMeta.label}` : 'React with heirloom glass love and appreciation'}
-                            onMouseEnter={() => setShowReactionPicker(true)}
-                            onClick={() => setShowReactionPicker((v) => !v)}
+                            onMouseEnter={openReactionPicker}
+                            onTouchStart={() => {
+                                longPressedRef.current = false;
+                                if (reactionLongPressTimerRef.current) clearTimeout(reactionLongPressTimerRef.current);
+                                reactionLongPressTimerRef.current = setTimeout(() => {
+                                    longPressedRef.current = true;
+                                    openReactionPicker();
+                                }, 400);
+                            }}
+                            onTouchMove={() => {
+                                if (reactionLongPressTimerRef.current) {
+                                    clearTimeout(reactionLongPressTimerRef.current);
+                                    reactionLongPressTimerRef.current = null;
+                                }
+                            }}
+                            onTouchEnd={() => {
+                                if (reactionLongPressTimerRef.current) {
+                                    clearTimeout(reactionLongPressTimerRef.current);
+                                    reactionLongPressTimerRef.current = null;
+                                }
+                            }}
+                            onClick={() => {
+                                if (longPressedRef.current) {
+                                    longPressedRef.current = false;
+                                    return;
+                                }
+                                setShowReactionPicker((v) => !v);
+                            }}
                         >
                             {activeReactionMeta ? (
                                 <span
@@ -1064,41 +1132,52 @@ export function PostCard({
             </div>
 
             {/* Social Proof & Engagement Meta */}
-            {(post.post_likes > 0 || viewCount > 0 || commentCount > 0) && (
-                <div className="d-flex justify-content-between align-items-center px-1 pb-1 pt-1" style={{ fontSize: '0.85rem' }}>
-                    <div>
-                        {post.post_likes > 0 && (
-                            <span className="d-inline-flex align-items-center gap-1 fw-bold" style={{ fontSize: '0.88rem', color: 'var(--text-main, #0f172a)' }}>
-                                <span
-                                    className="d-inline-flex align-items-center justify-content-center"
-                                    style={{ lineHeight: 1 }}
-                                    dangerouslySetInnerHTML={{ __html: getHeirloomGlassSvg(post.user_reaction || 'love', 18) }}
-                                />
-                                <span>{post.post_likes}</span>
-                            </span>
-                        )}
-                    </div>
-                    <div className="d-flex align-items-center gap-2 text-muted" style={{ fontSize: '0.825rem' }}>
-                        <span className="d-inline-flex align-items-center gap-1 post-views-count">
+            <div className="d-flex justify-content-between align-items-center px-1 pb-1 pt-1" style={{ fontSize: '0.85rem' }}>
+                <div>
+                    {post.post_likes > 0 && (
+                        <span className="d-inline-flex align-items-center gap-1 fw-bold" style={{ fontSize: '0.88rem', color: 'var(--text-main, #0f172a)' }}>
+                            <span
+                                className="d-inline-flex align-items-center justify-content-center"
+                                style={{ lineHeight: 1 }}
+                                dangerouslySetInnerHTML={{ __html: getHeirloomGlassSvg(post.user_reaction || 'love', 18) }}
+                            />
+                            <span>{post.post_likes}</span>
+                        </span>
+                    )}
+                </div>
+                <div className="d-flex align-items-center gap-2 text-muted" style={{ fontSize: '0.825rem' }}>
+                    {ownPost ? (
+                        <button
+                            type="button"
+                            className="btn btn-link btn-sm p-0 text-muted text-decoration-none d-inline-flex align-items-center gap-1 post-views-count"
+                            style={{ fontSize: '0.825rem', minHeight: '44px' }}
+                            title="Click to see who viewed your post"
+                            onClick={() => onOpenPostViewers?.(post)}
+                        >
+                            <i className="bi bi-eye text-primary" aria-hidden="true" />
+                            <span>{viewCount} {viewCount === 1 ? 'view' : 'views'}</span>
+                        </button>
+                    ) : (
+                        <span className="d-inline-flex align-items-center gap-1 post-views-count" title={`${viewCount} family views`}>
                             <i className="bi bi-eye text-secondary" aria-hidden="true" />
                             <span>{viewCount} {viewCount === 1 ? 'view' : 'views'}</span>
                         </span>
-                        {commentCount > 0 && (
-                            <button
-                                type="button"
-                                className="btn btn-link btn-sm p-0 text-muted text-decoration-none"
-                                style={{ fontSize: '0.825rem', minHeight: '44px' }}
-                                onClick={() => setCommentsExpanded((v) => !v)}
-                            >
-                                • {commentCount} {commentCount === 1 ? 'comment' : 'comments'}
-                            </button>
-                        )}
-                    </div>
+                    )}
+                    {commentCount > 0 && (
+                        <button
+                            type="button"
+                            className="btn btn-link btn-sm p-0 text-muted text-decoration-none"
+                            style={{ fontSize: '0.825rem', minHeight: '44px' }}
+                            onClick={() => setCommentsExpanded((v) => !v)}
+                        >
+                            • {commentCount} {commentCount === 1 ? 'comment' : 'comments'}
+                        </button>
+                    )}
                 </div>
-            )}
+            </div>
 
             {/* Instagram Inline Caption (for media posts without poll arena) */}
-            {hasMedia && !pollMeta && captionText && (
+            {hasMedia && !pollMeta && hasRichBody && (
                 <div className="post-caption-block px-1 mb-2 pt-1" style={{ fontSize: '0.95rem', lineHeight: 1.5 }}>
                     <a
                         href={`/member/profilePage?id=${encodeURIComponent(post.id || '')}`}
@@ -1120,7 +1199,8 @@ export function PostCard({
                 isExpanded={commentsExpanded}
                 onMutateComments={onMutateComments}
                 onSelectHashtag={onSelectHashtag}
+                onOpenCommentViewers={onOpenCommentViewers}
             />
         </article>
     );
-}
+});

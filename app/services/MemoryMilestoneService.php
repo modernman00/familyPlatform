@@ -26,6 +26,29 @@ class MemoryMilestoneService
     public function __construct(?PDO $db = null)
     {
         $this->db = $db ?? Db::connect2();
+        self::ensureTablesExist($this->db);
+    }
+
+    /**
+     * Ensures support tables for milestone feed tracking exist.
+     */
+    public static function ensureTablesExist(PDO $db): void
+    {
+        $db->exec(
+            "CREATE TABLE IF NOT EXISTS `family_milestone_feed_runs` (
+                `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+                `family_code` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+                `milestone_type` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
+                `target_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+                `interval_days` int NOT NULL,
+                `event_date` date NOT NULL,
+                `post_no` int DEFAULT NULL,
+                `created_at` datetime NOT NULL,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uniq_fam_milestone_run` (`family_code`, `milestone_type`, `target_id`, `interval_days`, `event_date`),
+                INDEX `idx_fam_date` (`family_code`, `created_at`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        );
     }
 
     /**
@@ -452,42 +475,80 @@ class MemoryMilestoneService
                 }
             }
 
-            // 2. Process Milestones Occurring Today (Birthdays, Anniversaries, Events)
-            $milestones = $this->getUpcomingMilestones($userId, $cleanedCodes, 0);
+            // 2. Process Milestones (Birthdays, Anniversaries, Events)
+            // Dispatches advance notice at 7 days ahead (or within 7-5 days catch-up window),
+            // 1 day ahead (or 2-1 days), and on the day itself (0 days).
+            $milestones = $this->getUpcomingMilestones($userId, $cleanedCodes, 7);
             foreach ($milestones as $ms) {
-                if ((int)($ms['days_remaining'] ?? -1) !== 0) {
+                $daysRemaining = (int)($ms['days_remaining'] ?? -1);
+                if ($daysRemaining < 0 || $daysRemaining > 7) {
                     continue;
                 }
 
+                // Map to canonical interval buckets: 0d (today), 1d (tomorrow/within 2d), 7d (advance notice 3-7d)
+                $intervalLabel = match (true) {
+                    $daysRemaining === 0 => '0d',
+                    $daysRemaining <= 2 => '1d',
+                    default => '7d',
+                };
+
                 $msType = (string)($ms['type'] ?? 'milestone');
                 $targetId = (string)($ms['user_id'] ?? 'item');
-                $milestoneTag = 'milestone-' . $msType . '-' . $targetId . '-' . $todayDate;
+                $targetDateStr = (string)($ms['target_date'] ?? $todayDate);
+                $targetTime = strtotime($targetDateStr);
+                $eventDateIso = ($targetTime !== false) ? date('Y-m-d', $targetTime) : $todayDate;
+                $milestoneTag = 'milestone-' . $msType . '-' . $targetId . '-' . $intervalLabel . '-' . $eventDateIso;
 
                 $stmt = $this->db->prepare("
                     SELECT 1 FROM notification_orchestration 
-                    WHERE user_id = ? AND tag = ? AND DATE(created_at) = CURDATE()
+                    WHERE user_id = ? AND tag = ?
                     LIMIT 1
                 ");
                 $stmt->execute([$userId, $milestoneTag]);
                 $alreadyDispatched = (bool)$stmt->fetchColumn();
 
                 if (!$alreadyDispatched) {
-                    $title = match ($msType) {
-                        'birthday' => '🎂 ' . (string)($ms['title'] ?? 'Birthday Milestone'),
-                        'anniversary' => '💍 ' . (string)($ms['title'] ?? 'Anniversary Milestone'),
-                        default => '🎉 ' . (string)($ms['title'] ?? 'Family Milestone'),
+                    $subtitle = !empty($ms['subtitle']) ? (string)$ms['subtitle'] : 'Celebration';
+                    $msTitle = (string)($ms['title'] ?? 'Special Occasion');
+
+                    $title = match ($daysRemaining) {
+                        0 => match ($msType) {
+                            'birthday' => '🎂 ' . $msTitle,
+                            'anniversary' => '💍 ' . $msTitle,
+                            default => '🎉 ' . $msTitle,
+                        },
+                        1 => match ($msType) {
+                            'birthday' => '🎂 Tomorrow: ' . $msTitle,
+                            'anniversary' => '💍 Tomorrow: ' . $msTitle,
+                            default => '🎉 Tomorrow: ' . $msTitle,
+                        },
+                        default => match ($msType) {
+                            'birthday' => '🎂 In ' . $daysRemaining . ' Days: ' . $msTitle,
+                            'anniversary' => '💍 In ' . $daysRemaining . ' Days: ' . $msTitle,
+                            default => '🎉 In ' . $daysRemaining . ' Days: ' . $msTitle,
+                        },
                     };
 
-                    $subtitle = !empty($ms['subtitle']) ? (string)$ms['subtitle'] : 'Celebration';
-                    $msTitle = (string)($ms['title'] ?? 'Wedding Anniversary');
                     $cardCreateUrl = $msType === 'anniversary'
                         ? $this->buildAnniversaryCardCreateUrl($msTitle, $subtitle)
                         : null;
 
-                    $body = match ($msType) {
-                        'birthday' => "Today is " . (string)($ms['title'] ?? 'Family Birthday') . " ({$subtitle})! Celebrate this milestone.",
-                        'anniversary' => "Happy Anniversary! {$msTitle} is today ({$subtitle}). Create a celebratory card or tap to view memories.",
-                        default => "Family event milestone today: " . (string)($ms['title'] ?? 'Special Event') . ". Tap to view.",
+                    $body = match ($daysRemaining) {
+                        0 => match ($msType) {
+                            'birthday' => "Today is {$msTitle} ({$subtitle})! Celebrate this cherished milestone with our family.",
+                            'anniversary' => "Happy Anniversary! {$msTitle} is today ({$subtitle}). Create a celebratory card or share a warm memory.",
+                            default => "Family event milestone today: {$msTitle}. Tap to view event details.",
+                        },
+                        1 => match ($msType) {
+                            'birthday' => "Tomorrow is {$msTitle} ({$subtitle})! Get ready to celebrate and send your warmest wishes.",
+                            'anniversary' => "Tomorrow is {$msTitle} ({$subtitle}). Send your congratulations and celebrate their enduring bond.",
+                            default => "Upcoming event tomorrow: {$msTitle}. Don't forget to get ready!",
+                        },
+                        default => match ($msType) {
+                            'birthday' => "Upcoming birthday in {$daysRemaining} days ({$ms['target_date']}): {$msTitle} ({$subtitle})! Time to prepare a card, gift, or celebration.",
+                            'anniversary' => "Upcoming anniversary in {$daysRemaining} days ({$ms['target_date']}): {$msTitle} ({$subtitle}). Mark your calendar!",
+                            default => "Upcoming family event in {$daysRemaining} days: {$msTitle}. Tap to view event details.",
+                        },
                     };
 
                     $actionUrl = '/profilePage#memoriesCard';
@@ -496,6 +557,8 @@ class MemoryMilestoneService
                     $metadata = [
                         'type' => 'milestones',
                         'milestone_type' => $msType,
+                        'interval_days' => $daysRemaining,
+                        'target_date' => $eventDateIso,
                         'sender_id' => 'system',
                         'sender_name' => 'Family Milestones',
                     ];
@@ -529,39 +592,410 @@ class MemoryMilestoneService
     }
 
     /**
-     * Scans for daily milestone memories & anniversaries across all families
-     * and dispatches native PWA push notifications and in-app notifications.
+     * Publishes automated milestone timeline posts into the family feed
+     * for birthdays, wedding anniversaries, and calendar events at key intervals (7 days, 1 day, 0 days).
      *
-     * @return array{processed_families: int, notifications_sent: int}
+     * @param string $famCode
+     * @param int $daysAhead
+     * @return array{published_count: int, posts: array<int, array<string, mixed>>}
+     */
+    public function dispatchMilestoneFeedPostsForFamily(string $famCode, int $daysAhead = 7): array
+    {
+        $normCode = strtoupper(ltrim(trim($famCode), '#'));
+        if ($normCode === '') {
+            return ['published_count' => 0, 'posts' => []];
+        }
+
+        self::ensureTablesExist($this->db);
+
+        $publishedCount = 0;
+        $publishedPosts = [];
+        $today = new \DateTimeImmutable('today');
+        $milestones = $this->getUpcomingMilestones('system', [$normCode], $daysAhead);
+
+        foreach ($milestones as $ms) {
+            $daysRemaining = (int)($ms['days_remaining'] ?? -1);
+            if ($daysRemaining < 0 || $daysRemaining > 7) {
+                continue;
+            }
+
+            // Map to canonical interval buckets: 0d (today), 1d (tomorrow/within 2d), 7d (advance notice 3-7d)
+            $intervalLabel = match (true) {
+                $daysRemaining === 0 => '0d',
+                $daysRemaining <= 2 => '1d',
+                default => '7d',
+            };
+            $canonicalIntervalDays = match ($intervalLabel) {
+                '0d' => 0,
+                '1d' => 1,
+                default => 7,
+            };
+
+            $msType = (string)($ms['type'] ?? 'milestone');
+            $targetId = (string)($ms['user_id'] ?? 'event');
+            $targetDateStr = (string)($ms['target_date'] ?? $today->format('Y-m-d'));
+            $targetTime = strtotime($targetDateStr);
+            $eventDateIso = ($targetTime !== false) ? date('Y-m-d', $targetTime) : $today->format('Y-m-d');
+            $title = (string)($ms['title'] ?? 'Family Milestone');
+            $subtitle = !empty($ms['subtitle']) ? (string)$ms['subtitle'] : 'Celebration';
+
+            // Check if already published for this family, milestone, target, interval, and date
+            $chkStmt = $this->db->prepare(
+                "SELECT 1 FROM family_milestone_feed_runs
+                 WHERE family_code = ? AND milestone_type = ? AND target_id = ? AND interval_days = ? AND event_date = ?
+                 LIMIT 1"
+            );
+            $chkStmt->execute([$normCode, $msType, $targetId, $canonicalIntervalDays, $eventDateIso]);
+            if ($chkStmt->fetchColumn() !== false) {
+                continue;
+            }
+
+            $message = match ($daysRemaining) {
+                0 => match ($msType) {
+                    'birthday' => "🎂 Happy Birthday! Today we celebrate {$title} ({$subtitle})!\n\nJoin the whole family in showering love, warm memories, and best wishes in the comments below! ✨",
+                    'anniversary' => "💍 Happy Wedding Anniversary! Today we honour {$title} ({$subtitle})!\n\nMay your love and companionship continue to shine as an inspiration for our whole family dynasty. Leave your congratulations below! 🥂",
+                    default => "🎉 Family Gathering Today: {$title} ({$subtitle})!\n\nLooking forward to creating wonderful memories together today. See you all there!",
+                },
+                1 => match ($msType) {
+                    'birthday' => "🎂 Tomorrow: {$title} ({$subtitle})!\n\nOur family is getting ready to celebrate tomorrow. Get your birthday wishes and celebration messages ready!",
+                    'anniversary' => "💍 Tomorrow: {$title} ({$subtitle})!\n\nHonouring another wonderful year of unity and love in our family tree.",
+                    default => "🎉 Upcoming Tomorrow: {$title} ({$subtitle})!\n\nOur family gathering is just 1 day away. We can't wait to see everyone!",
+                },
+                default => match ($msType) {
+                    'birthday' => "🎂 Upcoming Birthday in {$daysRemaining} Days ({$ms['target_date']}): {$title} ({$subtitle})!\n\nMark your calendar as we count down to this special family milestone. Share your favourite memories and warm wishes!",
+                    'anniversary' => "💍 Upcoming Anniversary in {$daysRemaining} Days ({$ms['target_date']}): {$title} ({$subtitle})!\n\nCounting down to another cherished milestone in our family tree. Save the date!",
+                    default => "🎉 Upcoming Family Event in {$daysRemaining} Days ({$ms['target_date']}): {$title} ({$subtitle})!\n\nSave the date as we look forward to coming together as a family.",
+                },
+            };
+
+            // Synthesise high-prestige milestone celebration card with celebrant avatar
+            $avatarFilename = $this->resolveMemberAvatar($ms, $normCode);
+            $cardTitle = $this->formatMilestoneCardTitle($ms, $normCode);
+            $isBirthdayEvent = $msType === 'birthday'
+                || stripos($subtitle, 'birthday') !== false
+                || stripos($title, 'birthday') !== false;
+            $cardMeaningfulMessage = ($msType === 'event' && $isBirthdayEvent)
+                ? $this->getBirthdayMeaningfulMessage(null, $cardTitle)
+                : (string)($ms['meaningful_message'] ?? 'Honouring this cherished milestone in our family.');
+
+            $cardData = [
+                'title' => $cardTitle,
+                'subtitle' => $subtitle,
+                'days_remaining' => $daysRemaining,
+                'target_date' => (string)($ms['target_date'] ?? $targetDateStr),
+                'avatar' => $avatarFilename,
+                'meaningful_message' => $cardMeaningfulMessage,
+            ];
+            $periodKey = $eventDateIso . '_' . $intervalLabel . '_' . substr(hash('sha256', $targetId . $title . '_v2'), 0, 8);
+            $cardImage = FamilyHistorianCardRenderer::renderAndSave('milestone_spotlight', $cardData, $normCode, $periodKey);
+
+            try {
+                $this->db->beginTransaction();
+
+                $timeMs = function_exists('milliSeconds') ? \milliSeconds() : (string)(int)(microtime(true) * 1000);
+                $insPost = $this->db->prepare(
+                    "INSERT INTO post (id, fullName, profileImg, postMessage, postFamCode, post_img0, target_scope, post_time, post_status, date_created)
+                     VALUES (?, ?, ?, ?, ?, ?, 'all', ?, 'published', NOW())"
+                );
+                $insPost->execute([
+                    \App\services\FamilyHistorianService::HISTORIAN_ID,
+                    \App\services\FamilyHistorianService::HISTORIAN_NAME,
+                    \App\services\FamilyHistorianService::HISTORIAN_AVATAR,
+                    $message,
+                    $normCode,
+                    $cardImage,
+                    $timeMs,
+                ]);
+                $postNo = (int)$this->db->lastInsertId();
+
+                $insRun = $this->db->prepare(
+                    "INSERT INTO family_milestone_feed_runs (family_code, milestone_type, target_id, interval_days, event_date, post_no, created_at)
+                     VALUES (?, ?, ?, ?, ?, ?, NOW())"
+                );
+                $insRun->execute([
+                    $normCode,
+                    $msType,
+                    $targetId,
+                    $canonicalIntervalDays,
+                    $eventDateIso,
+                    $postNo,
+                ]);
+
+                $this->db->commit();
+
+                // Broadcast Pusher update
+                try {
+                    Pusher::broadcastToFamily($normCode, 'new-post', [[
+                        'post_no' => $postNo,
+                        'id' => \App\services\FamilyHistorianService::HISTORIAN_ID,
+                        'fullName' => \App\services\FamilyHistorianService::HISTORIAN_NAME,
+                        'profileImg' => \App\services\FamilyHistorianService::HISTORIAN_AVATAR,
+                        'postMessage' => $message,
+                        'postFamCode' => $normCode,
+                        'post_img0' => $cardImage,
+                        'date_created' => date('Y-m-d H:i:s'),
+                    ]]);
+                } catch (\Throwable $pe) {
+                    \error_log('[dispatchMilestoneFeedPostsForFamily] Pusher broadcast: ' . $pe->getMessage());
+                }
+
+                $publishedCount++;
+                $publishedPosts[] = [
+                    'post_no' => $postNo,
+                    'milestone_type' => $msType,
+                    'title' => $title,
+                    'interval_days' => $daysRemaining,
+                    'post_img0' => $cardImage,
+                ];
+            } catch (\Throwable $e) {
+                if ($this->db->inTransaction()) {
+                    $this->db->rollBack();
+                }
+                \error_log('[dispatchMilestoneFeedPostsForFamily] ' . $e->getMessage());
+            }
+        }
+
+        return [
+            'published_count' => $publishedCount,
+            'posts' => $publishedPosts,
+        ];
+    }
+
+    /**
+     * Resolves an avatar image filename for a milestone celebrant.
+     * Checks:
+     * 1. Direct profile_img on milestone data if raster (JPG, PNG, WEBP) or sister PNG if SVG.
+     * 2. For calendar events, matches celebrant name in family_nodes first before falling back to event creator user_id.
+     * 3. User profilePics table entry by target user_id.
+     * 4. Fallback empty string (renderer will draw monogram crest).
+     *
+     * @param array<string, mixed> $ms
+     * @param string $famCode
+     * @return string
+     */
+    public function resolveMemberAvatar(array $ms, string $famCode): string
+    {
+        $root = dirname(__DIR__, 2);
+        $msType = (string)($ms['type'] ?? '');
+
+        // 1. Direct profile_img from milestone
+        $rawAvatar = (string)($ms['profile_img'] ?? '');
+        if ($rawAvatar !== '') {
+            $resolved = $this->sanitizeAndCheckAvatarFile($rawAvatar, $root);
+            if ($resolved !== '') {
+                return $resolved;
+            }
+        }
+
+        // Helper closure to match celebrant name in family_nodes
+        $lookupNodeByTitle = function () use ($ms, $famCode, $root): string {
+            $title = (string)($ms['title'] ?? '');
+            $words = preg_split('/[\s\-_]+/', trim($title)) ?: [];
+            $searchTerms = [];
+            foreach ($words as $word) {
+                $w = trim($word, " \t\n\r\0\x0B'’");
+                if (mb_strlen($w) >= 3 && !in_array(strtolower($w), ['birthday', 'anniversary', 'wedding', 'celebration', 'party', 'gathering', 'event', 'advance', 'test'], true)) {
+                    $searchTerms[] = $w;
+                }
+            }
+
+            if (!empty($searchTerms)) {
+                $firstName = $searchTerms[0];
+                $nodeStmt = $this->db->prepare("
+                    SELECT avatar_url FROM family_nodes
+                    WHERE family_code = ?
+                      AND CHAR_LENGTH(TRIM(first_name)) >= 3
+                      AND (first_name LIKE ? OR ? LIKE CONCAT('%', TRIM(first_name), '%'))
+                    ORDER BY (avatar_url IS NOT NULL AND avatar_url != '') DESC, CHAR_LENGTH(first_name) DESC
+                    LIMIT 1
+                ");
+                $nodeStmt->execute([$famCode, '%' . $firstName . '%', $firstName]);
+                $nodeAvatar = (string)$nodeStmt->fetchColumn();
+                if ($nodeAvatar !== '') {
+                    $resolved = $this->sanitizeAndCheckAvatarFile($nodeAvatar, $root);
+                    if ($resolved !== '') {
+                        return $resolved;
+                    }
+                }
+            }
+            return '';
+        };
+
+        // For calendar events, user_id is the event creator—check the celebrant name in family_nodes first
+        if ($msType === 'event') {
+            $fromNode = $lookupNodeByTitle();
+            if ($fromNode !== '') {
+                return $fromNode;
+            }
+        }
+
+        // Check profilePics by target user_id
+        $userId = (string)($ms['user_id'] ?? '');
+        if ($userId !== '') {
+            $stmt = $this->db->prepare("SELECT img FROM profilePics WHERE id = ? LIMIT 1");
+            $stmt->execute([$userId]);
+            $userPic = (string)$stmt->fetchColumn();
+            if ($userPic !== '') {
+                $resolved = $this->sanitizeAndCheckAvatarFile($userPic, $root);
+                if ($resolved !== '') {
+                    return $resolved;
+                }
+            }
+        }
+
+        return $lookupNodeByTitle();
+    }
+
+    /**
+     * Formats a clean, high-prestige display headline for the milestone card.
+     * E.g. "Temitope birthday" in #MODERNMAN resolves surname from family_nodes -> "Temitope Olaogun".
+     *
+     * @param array<string, mixed> $ms
+     * @param string $famCode
+     * @return string
+     */
+    private function formatMilestoneCardTitle(array $ms, string $famCode): string
+    {
+        $rawTitle = trim((string)($ms['title'] ?? 'Family Milestone'));
+        if ($rawTitle === '') {
+            return 'Family Milestone';
+        }
+
+        // If title ends with " birthday" (e.g. "Temitope birthday"), extract the given name
+        if (preg_match('/^([a-zA-Z\-’\']+)\s+birthday$/i', $rawTitle, $m)) {
+            $givenName = ucfirst(strtolower(trim($m[1])));
+            $nodeStmt = $this->db->prepare("
+                SELECT last_name FROM family_nodes
+                WHERE family_code = ?
+                  AND CHAR_LENGTH(TRIM(first_name)) >= 3
+                  AND (first_name LIKE ? OR ? LIKE CONCAT('%', TRIM(first_name), '%'))
+                  AND last_name IS NOT NULL AND TRIM(last_name) != ''
+                LIMIT 1
+            ");
+            $nodeStmt->execute([$famCode, '%' . $givenName . '%', $givenName]);
+            $lastName = trim((string)$nodeStmt->fetchColumn());
+            if ($lastName !== '') {
+                return $givenName . ' ' . ucwords(strtolower($lastName));
+            }
+            return $givenName . "'s Birthday";
+        }
+
+        return ucwords($rawTitle);
+    }
+
+    /**
+     * Sanitizes and checks if an avatar file exists in profile images or uploads.
+     */
+    private function sanitizeAndCheckAvatarFile(string $filename, string $root): string
+    {
+        $clean = basename(trim($filename));
+        if ($clean === '') {
+            return '';
+        }
+
+        // If SVG, check for corresponding PNG raster fallback
+        if (str_ends_with(strtolower($clean), '.svg')) {
+            $pngCandidate = substr($clean, 0, -4) . '.png';
+            if (is_file($root . '/resources/images/profile/' . $pngCandidate)) {
+                return $pngCandidate;
+            }
+            if (is_file($root . '/public/uploads/' . $pngCandidate)) {
+                return $pngCandidate;
+            }
+            return '';
+        }
+
+        // Check in resources/images/profile/
+        if (is_file($root . '/resources/images/profile/' . $clean)) {
+            return $clean;
+        }
+
+        // Check in public/uploads/
+        if (is_file($root . '/public/uploads/' . $clean)) {
+            return $clean;
+        }
+
+        return '';
+    }
+
+    /**
+     * Scans for daily milestone memories & anniversaries across all families
+     * and dispatches native PWA push notifications and in-app notifications,
+     * plus family timeline feed posts.
+     *
+     * @return array{processed_families: int, notifications_sent: int, feed_posts_created: int}
      */
     public function dispatchDailyMilestonePushNotifications(): array
     {
         $processedFamilies = 0;
         $notificationsSent = 0;
+        $feedPostsCreated = 0;
 
         try {
-            // Find all distinct active family codes
-            $stmt = $this->db->query("SELECT DISTINCT famCode FROM personal WHERE famCode IS NOT NULL AND famCode != ''");
-            $famCodes = $stmt ? $stmt->fetchAll(PDO::FETCH_COLUMN) : [];
+            self::ensureTablesExist($this->db);
 
-            foreach ($famCodes as $code) {
+            // 1. Dispatch timeline announcement feed posts for active family codes that have upcoming milestones
+            $stmtFeedCodes = $this->db->query("
+                SELECT DISTINCT UPPER(REPLACE(code, '#', '')) as clean_code FROM (
+                    SELECT eventCode as code FROM events 
+                    WHERE deleted_at IS NULL 
+                      AND eventDate >= CURDATE() 
+                      AND eventDate <= DATE_ADD(CURDATE(), INTERVAL 7 DAY) 
+                      AND eventCode IS NOT NULL AND eventCode != ''
+                    UNION
+                    SELECT famCode as code FROM personal 
+                    WHERE deleted_at IS NULL 
+                      AND day IS NOT NULL 
+                      AND month IS NOT NULL 
+                      AND famCode IS NOT NULL AND famCode != ''
+                    UNION
+                    SELECT family_code as code FROM family_unions 
+                    WHERE is_current = 1 
+                      AND family_code IS NOT NULL AND family_code != ''
+                ) t WHERE code != ''
+            ");
+            $feedTargetCodes = $stmtFeedCodes ? $stmtFeedCodes->fetchAll(PDO::FETCH_COLUMN) : [];
+
+            foreach ($feedTargetCodes as $code) {
                 $codeStr = trim((string)$code);
                 if ($codeStr === '') {
                     continue;
                 }
                 $processedFamilies++;
+                $feedRes = $this->dispatchMilestoneFeedPostsForFamily($codeStr, 7);
+                $feedPostsCreated += $feedRes['published_count'];
+            }
 
-                // Get members of this family
-                $membersStmt = $this->db->prepare("SELECT id FROM personal WHERE famCode = ?");
-                $membersStmt->execute([$codeStr]);
-                $members = $membersStmt->fetchAll(PDO::FETCH_ASSOC);
+            // 2. Dispatch notifications per active user across all their associated family codes
+            $userStmt = $this->db->query("
+                SELECT p.id,
+                       GROUP_CONCAT(DISTINCT fc.code SEPARATOR ',') as codes
+                FROM personal p
+                LEFT JOIN account a ON a.id = p.id
+                JOIN (
+                    SELECT id, UPPER(REPLACE(famCode, '#', '')) as code FROM personal WHERE famCode IS NOT NULL AND famCode != '' AND deleted_at IS NULL
+                    UNION
+                    SELECT id, UPPER(REPLACE(familyCode2, '#', '')) as code FROM personal WHERE familyCode2 IS NOT NULL AND familyCode2 != '' AND deleted_at IS NULL
+                    UNION
+                    SELECT user_id as id, UPPER(REPLACE(family_code, '#', '')) as code FROM user_families WHERE status = 'approved' AND family_code IS NOT NULL AND family_code != ''
+                ) fc ON fc.id = p.id
+                WHERE p.deleted_at IS NULL
+                  AND (a.id IS NULL OR a.deleted_at IS NULL)
+                  AND p.id NOT IN ('FAMILY_PLATFORM_OFFICIAL', 'FAMILY_HISTORIAN')
+                GROUP BY p.id
+            ");
+            $users = $userStmt ? $userStmt->fetchAll(PDO::FETCH_ASSOC) : [];
 
-                foreach ($members as $m) {
-                    $uid = (string)($m['id'] ?? '');
-                    if ($uid !== '') {
-                        $res = $this->dispatchDailyMemoriesAndMilestonesForUser($uid, [$codeStr]);
-                        $notificationsSent += ($res['memories_dispatched'] + $res['milestones_dispatched']);
-                    }
+            foreach ($users as $u) {
+                $uid = (string)($u['id'] ?? '');
+                $rawCodes = (string)($u['codes'] ?? '');
+                if ($uid === '' || $rawCodes === '') {
+                    continue;
+                }
+                $userCodes = array_values(array_filter(explode(',', $rawCodes)));
+                if (!empty($userCodes)) {
+                    $res = $this->dispatchDailyMemoriesAndMilestonesForUser($uid, $userCodes);
+                    $notificationsSent += ($res['memories_dispatched'] + $res['milestones_dispatched']);
                 }
             }
         } catch (\Throwable $e) {
@@ -571,6 +1005,7 @@ class MemoryMilestoneService
         return [
             'processed_families' => $processedFamilies,
             'notifications_sent' => $notificationsSent,
+            'feed_posts_created' => $feedPostsCreated,
         ];
     }
 
@@ -588,16 +1023,39 @@ class MemoryMilestoneService
                 return [];
             }
 
-            $inQuery = implode(',', array_fill(0, count($cleanedCodes), '?'));
-            $query = "SELECT p.id, p.firstName, p.lastName, p.day, p.month, p.year, p.famCode, pp.img as profile_img
+            $inClauses = [];
+            $params = [];
+            foreach ($cleanedCodes as $code) {
+                $norm = strtoupper(str_replace('#', '', trim((string)$code)));
+                $inClauses[] = "(
+                    UPPER(REPLACE(COALESCE(p.famCode, ''), '#', '')) = ?
+                    OR UPPER(REPLACE(COALESCE(p.familyCode2, ''), '#', '')) = ?
+                    OR EXISTS (
+                        SELECT 1 FROM user_families uf
+                        WHERE uf.user_id = p.id
+                          AND uf.status = 'approved'
+                          AND UPPER(REPLACE(uf.family_code, '#', '')) = ?
+                    )
+                )";
+                $params[] = $norm;
+                $params[] = $norm;
+                $params[] = $norm;
+            }
+
+            $whereClause = implode(' OR ', $inClauses);
+            $sqlTemplate = "SELECT DISTINCT p.id, p.firstName, p.lastName, p.day, p.month, p.year, p.famCode, pp.img as profile_img
                       FROM personal p
                       LEFT JOIN profilePics pp ON p.id = pp.id
-                      WHERE p.famCode IN ($inQuery)
+                      LEFT JOIN account a ON a.id = p.id
+                      WHERE (%s)
+                        AND p.deleted_at IS NULL
+                        AND (a.id IS NULL OR a.deleted_at IS NULL)
+                        AND p.id NOT IN ('FAMILY_PLATFORM_OFFICIAL', 'FAMILY_HISTORIAN')
                         AND p.day IS NOT NULL 
                         AND p.month IS NOT NULL";
 
-            $stmt = $this->db->prepare($query);
-            $stmt->execute($cleanedCodes);
+            $stmt = $this->db->prepare(sprintf($sqlTemplate, $whereClause));
+            $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
         } catch (PDOException $e) {
             \error_log('[fetchPersonalBirthdays] ' . $e->getMessage());
@@ -619,8 +1077,35 @@ class MemoryMilestoneService
                 return [];
             }
 
-            $inQuery = implode(',', array_fill(0, count($cleanedCodes), '?'));
-            $query = "SELECT fu.*, 
+            $inClauses = [];
+            $params = [];
+            foreach ($cleanedCodes as $code) {
+                $norm = strtoupper(str_replace('#', '', trim((string)$code)));
+                $inClauses[] = "(
+                    UPPER(REPLACE(COALESCE(fu.family_code, ''), '#', '')) = ?
+                    OR EXISTS (
+                        SELECT 1 FROM family_nodes fn1_sub
+                        WHERE fn1_sub.id = fu.partner_1_id
+                          AND (
+                              UPPER(REPLACE(COALESCE(fn1_sub.family_code, ''), '#', '')) = ?
+                              OR fn1_sub.user_id IN (
+                                  SELECT p.id FROM personal p
+                                  WHERE UPPER(REPLACE(COALESCE(p.famCode, ''), '#', '')) = ?
+                                     OR UPPER(REPLACE(COALESCE(p.familyCode2, ''), '#', '')) = ?
+                                     OR EXISTS (SELECT 1 FROM user_families uf WHERE uf.user_id = p.id AND uf.status = 'approved' AND UPPER(REPLACE(uf.family_code, '#', '')) = ?)
+                              )
+                          )
+                    )
+                )";
+                $params[] = $norm;
+                $params[] = $norm;
+                $params[] = $norm;
+                $params[] = $norm;
+                $params[] = $norm;
+            }
+
+            $whereClause = implode(' OR ', $inClauses);
+            $sqlTemplate = "SELECT fu.*, 
                              CONCAT(COALESCE(fn1.first_name, ''), ' ', COALESCE(fn1.last_name, '')) as p1_name,
                              CONCAT(COALESCE(fn2.first_name, ''), ' ', COALESCE(fn2.last_name, '')) as p2_name,
                              COALESCE(pp1.img, fn1.avatar_url, '') as p1_img,
@@ -630,11 +1115,11 @@ class MemoryMilestoneService
                       LEFT JOIN family_nodes fn2 ON fu.partner_2_id = fn2.id
                       LEFT JOIN profilePics pp1 ON fn1.user_id = pp1.id
                       LEFT JOIN profilePics pp2 ON fn2.user_id = pp2.id
-                      WHERE fu.family_code IN ($inQuery)
+                      WHERE (%s)
                         AND fu.is_current = 1";
 
-            $stmt = $this->db->prepare($query);
-            $stmt->execute($cleanedCodes);
+            $stmt = $this->db->prepare(sprintf($sqlTemplate, $whereClause));
+            $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
         } catch (PDOException $e) {
             \error_log('[fetchFamilyUnions] ' . $e->getMessage());
@@ -657,18 +1142,43 @@ class MemoryMilestoneService
                 return [];
             }
 
-            $inQuery = implode(',', array_fill(0, count($cleanedCodes), '?'));
-            $query = "SELECT e.* 
+            $inClauses = [];
+            $params = [];
+            foreach ($cleanedCodes as $code) {
+                $norm = strtoupper(str_replace('#', '', trim((string)$code)));
+                $inClauses[] = "(
+                    UPPER(REPLACE(COALESCE(e.eventCode, ''), '#', '')) = ?
+                    OR e.id IN (
+                        SELECT p.id FROM personal p
+                        WHERE (
+                            UPPER(REPLACE(COALESCE(p.famCode, ''), '#', '')) = ?
+                            OR UPPER(REPLACE(COALESCE(p.familyCode2, ''), '#', '')) = ?
+                            OR EXISTS (
+                                SELECT 1 FROM user_families uf
+                                WHERE uf.user_id = p.id
+                                  AND uf.status = 'approved'
+                                  AND UPPER(REPLACE(uf.family_code, '#', '')) = ?
+                            )
+                        )
+                    )
+                )";
+                $params[] = $norm;
+                $params[] = $norm;
+                $params[] = $norm;
+                $params[] = $norm;
+            }
+
+            $whereClause = implode(' OR ', $inClauses);
+            $sqlTemplate = "SELECT e.* 
                       FROM events e
-                      WHERE (e.eventCode IN ($inQuery) OR e.id IN (
-                          SELECT id FROM personal WHERE famCode IN ($inQuery)
-                      ))
-                      AND e.eventDate >= CURDATE()
-                      AND e.eventDate <= DATE_ADD(CURDATE(), INTERVAL ? DAY)
+                      WHERE (%s)
+                        AND (e.deleted_at IS NULL)
+                        AND e.eventDate >= CURDATE()
+                        AND e.eventDate <= DATE_ADD(CURDATE(), INTERVAL ? DAY)
                       ORDER BY e.eventDate ASC";
 
-            $stmt = $this->db->prepare($query);
-            $bindParams = array_merge($cleanedCodes, $cleanedCodes, [$daysAhead]);
+            $stmt = $this->db->prepare(sprintf($sqlTemplate, $whereClause));
+            $bindParams = array_merge($params, [$daysAhead]);
             $stmt->execute($bindParams);
             return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
         } catch (PDOException $e) {

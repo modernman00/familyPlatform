@@ -6,6 +6,7 @@ import { parseVideoUrl } from '../../components/profilePage/videoParser';
 import { PostCard } from './PostCard';
 import { LightboxModal } from './LightboxModal';
 import { VideoModal } from './VideoModal';
+import { ViewersModal } from './ViewersModal';
 import {
     normalizeComment,
     normalizePost,
@@ -42,9 +43,12 @@ export function FeedShell({ bootstrap = {} }) {
 
     const [lightboxState, setLightboxState] = useState({ isOpen: false, images: [], index: 0, postNo: null });
     const [videoState, setVideoState] = useState({ isOpen: false, videos: [], index: 0 });
+    const [viewersState, setViewersState] = useState({ isOpen: false, type: 'post', targetNo: null, initialCount: 0 });
 
     const sentinelRef = useRef(null);
     const hydratedPreviewPostNosRef = useRef(new Set());
+    const viewedPostNosRef = useRef(new Set());
+    const viewedCommentNosRef = useRef(new Set());
     const postsRef = useRef(posts);
     postsRef.current = posts;
 
@@ -113,6 +117,7 @@ export function FeedShell({ bootstrap = {} }) {
                     postMessage: detail.postMessage !== undefined ? detail.postMessage : p.postMessage,
                     displayMessage: undefined,
                     post_style: detail.post_style !== undefined ? detail.post_style : p.post_style,
+                    ar_emoji: detail.ar_emoji !== undefined ? detail.ar_emoji : p.ar_emoji,
                 });
             }));
         };
@@ -372,6 +377,7 @@ export function FeedShell({ bootstrap = {} }) {
                             postMessage: data.postMessage ?? p.postMessage,
                             displayMessage: undefined,
                             post_style: data.post_style ?? p.post_style,
+                            ar_emoji: data.ar_emoji !== undefined ? data.ar_emoji : p.ar_emoji,
                         })
                         : p
                 )
@@ -417,12 +423,12 @@ export function FeedShell({ bootstrap = {} }) {
         fetchFeed({ nextPage: 1, append: false, filter: nextFilter, tag: '' });
     };
 
-    const handleSelectHashtag = (tag) => {
+    const handleSelectHashtag = useCallback((tag) => {
         const clean = String(tag || '').replace(/^#/, '').trim();
         if (!clean) return;
         setHashtagFilter(clean);
         fetchFeed({ nextPage: 1, append: false, filter: streamFilter, tag: clean });
-    };
+    }, [fetchFeed, streamFilter]);
 
     const handleClearHashtag = () => {
         setHashtagFilter('');
@@ -430,7 +436,7 @@ export function FeedShell({ bootstrap = {} }) {
         loadTrendingHashtags();
     };
 
-    const handleReactPost = async (postNo, reactionType) => {
+    const handleReactPost = useCallback(async (postNo, reactionType) => {
         let snapshot = null;
         setPosts((prev) =>
             prev.map((p) => {
@@ -459,9 +465,9 @@ export function FeedShell({ bootstrap = {} }) {
             }
             notifyToast(err?.message || 'Could not save reaction.', 'error');
         }
-    };
+    }, [bootstrap]);
 
-    const handleVotePoll = async (postNo, optionId) => {
+    const handleVotePoll = useCallback(async (postNo, optionId) => {
         let snapshot = null;
         setPosts((prev) =>
             prev.map((p) => {
@@ -509,23 +515,123 @@ export function FeedShell({ bootstrap = {} }) {
             }
             notifyToast(err?.message || 'Could not record your vote.', 'error');
         }
-    };
+    }, [bootstrap]);
 
-    const handleMutateComments = (postNo, nextComments) => {
+    const handleMutateComments = useCallback((postNo, nextComments) => {
         setPosts((prev) =>
             prev.map((p) => (String(p.post_no) === String(postNo) ? { ...p, comments: nextComments } : p))
         );
-    };
+    }, []);
 
-    const handleUpdatePost = (postNo, patch) => {
+    const handleUpdatePost = useCallback((postNo, patch) => {
         setPosts((prev) =>
             prev.map((p) => (String(p.post_no) === String(postNo) ? { ...p, ...patch } : p))
         );
-    };
+    }, []);
 
-    const handleDeletePost = (postNo) => {
+    const handleDeletePost = useCallback((postNo) => {
         setPosts((prev) => prev.filter((p) => String(p.post_no) !== String(postNo)));
-    };
+    }, []);
+
+    const handleOpenLightbox = useCallback((images, index, p) => {
+        setLightboxState({ isOpen: true, images, index, postNo: p.post_no });
+    }, []);
+
+    const handleOpenVideo = useCallback((videos, index) => {
+        setVideoState({ isOpen: true, videos, index });
+    }, []);
+
+    const handleOpenPostViewers = useCallback((post) => {
+        if (!post?.post_no) return;
+        setViewersState({
+            isOpen: true,
+            type: 'post',
+            targetNo: post.post_no,
+            initialCount: Number(post.views_count ?? post.view_count ?? 0),
+        });
+    }, []);
+
+    const handleOpenCommentViewers = useCallback((comment) => {
+        if (!comment?.comment_no) return;
+        setViewersState({
+            isOpen: true,
+            type: 'comment',
+            targetNo: comment.comment_no,
+            initialCount: Number(comment.views_count ?? comment.view_count ?? 0),
+        });
+    }, []);
+
+    // Record post & comment views when cards/comments scroll into view
+    useEffect(() => {
+        if (loading || typeof IntersectionObserver === 'undefined') return undefined;
+
+        const postObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                const postNo = entry.target.getAttribute('data-post-no');
+                postObserver.unobserve(entry.target);
+                if (!postNo || viewedPostNosRef.current.has(postNo)) return;
+                viewedPostNosRef.current.add(postNo);
+                apiFetch('/api/posts/view', { method: 'POST', body: { post_no: Number(postNo) || postNo } }, bootstrap)
+                    .then((res) => {
+                        if (typeof res?.views_count === 'number') {
+                            setPosts((prev) =>
+                                prev.map((p) => (String(p.post_no) === String(postNo) ? { ...p, views_count: res.views_count, view_count: res.views_count } : p))
+                            );
+                        }
+                    })
+                    .catch(() => {});
+            });
+        }, { threshold: 0.35 });
+
+        const commentObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                const commentNo = entry.target.getAttribute('data-comment-no');
+                commentObserver.unobserve(entry.target);
+                if (!commentNo || String(commentNo).startsWith('temp_') || viewedCommentNosRef.current.has(commentNo)) return;
+                viewedCommentNosRef.current.add(commentNo);
+                apiFetch('/api/comments/view', { method: 'POST', body: { comment_no: Number(commentNo) || commentNo } }, bootstrap)
+                    .then((res) => {
+                        if (typeof res?.views_count === 'number') {
+                            setPosts((prev) =>
+                                prev.map((p) => {
+                                    if (!Array.isArray(p.comments) || !p.comments.some((c) => String(c.comment_no) === String(commentNo))) {
+                                        return p;
+                                    }
+                                    return {
+                                        ...p,
+                                        comments: p.comments.map((c) => (
+                                            String(c.comment_no) === String(commentNo)
+                                                ? { ...c, views_count: res.views_count, view_count: res.views_count }
+                                                : c
+                                        )),
+                                    };
+                                })
+                            );
+                        }
+                    })
+                    .catch(() => {});
+            });
+        }, { threshold: 0.3 });
+
+        const postEls = document.querySelectorAll('.feed-post-card[data-post-no]');
+        postEls.forEach((el) => {
+            const postNo = el.getAttribute('data-post-no');
+            if (postNo && !viewedPostNosRef.current.has(postNo)) postObserver.observe(el);
+        });
+
+        const commentEls = document.querySelectorAll('.feed-comment-item[data-comment-no]');
+        commentEls.forEach((el) => {
+            const cNo = el.getAttribute('data-comment-no');
+            if (cNo && !viewedCommentNosRef.current.has(cNo)) commentObserver.observe(el);
+        });
+
+        return () => {
+            postObserver.disconnect();
+            commentObserver.disconnect();
+        };
+    }, [loading, posts.length, bootstrap]);
 
     const currentUserId = String(profileBootstrap?.userId || '');
     const taggedPostsCount = useMemo(
@@ -800,12 +906,10 @@ export function FeedShell({ bootstrap = {} }) {
                     onUpdatePost={handleUpdatePost}
                     onDeletePost={handleDeletePost}
                     onSelectHashtag={handleSelectHashtag}
-                    onOpenLightbox={(images, index, p) =>
-                        setLightboxState({ isOpen: true, images, index, postNo: p.post_no })
-                    }
-                    onOpenVideo={(videos, index) =>
-                        setVideoState({ isOpen: true, videos, index })
-                    }
+                    onOpenLightbox={handleOpenLightbox}
+                    onOpenVideo={handleOpenVideo}
+                    onOpenPostViewers={handleOpenPostViewers}
+                    onOpenCommentViewers={handleOpenCommentViewers}
                 />
             ))}
 
@@ -841,6 +945,15 @@ export function FeedShell({ bootstrap = {} }) {
                 videos={videoState.videos}
                 initialIndex={videoState.index}
                 onClose={() => setVideoState({ isOpen: false, videos: [], index: 0 })}
+            />
+
+            <ViewersModal
+                isOpen={viewersState.isOpen}
+                type={viewersState.type}
+                targetNo={viewersState.targetNo}
+                initialCount={viewersState.initialCount}
+                bootstrap={profileBootstrap}
+                onClose={() => setViewersState({ isOpen: false, type: 'post', targetNo: null, initialCount: 0 })}
             />
         </div>
     );

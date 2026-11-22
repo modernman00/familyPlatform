@@ -8,6 +8,9 @@ const TABS = [
     { key: 'kingrid', label: 'KinGrid' },
     { key: 'kinword', label: 'KinWord' },
     { key: 'kinpulse', label: 'KinPulse' },
+    { key: 'wordie', label: 'Wordie' },
+    { key: 'cheeseboard', label: 'Cheeseboard' },
+    { key: 'minesweeper', label: 'Minesweeper' },
 ];
 
 export function LeagueTablesPanel({
@@ -72,7 +75,7 @@ export function LeagueTablesPanel({
                 </div>
             )}
 
-            <div className={styles.leagueTabs} role="tablist" aria-label="Game leaderboards">
+            <div className={styles.leagueTabs} data-scroll-affordance="true" role="tablist" aria-label="Game leaderboards">
                 {TABS.map((t) => (
                     <button
                         key={t.key}

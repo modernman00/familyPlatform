@@ -22,6 +22,11 @@
     --kw-line: #ece4da;
     --kw-mine: #a31621;
     --kw-theirs: #ffffff;
+    --kw-action-pill-bg: rgba(255, 255, 255, 0.95);
+    --kw-action-pill-border: rgba(236, 228, 218, 0.95);
+    --kw-action-pill-shadow: 0 10px 25px -3px rgba(28, 20, 18, 0.14), 0 4px 10px -2px rgba(28, 20, 18, 0.08);
+    --kw-action-btn-hover: rgba(163, 22, 33, 0.08);
+    --kw-action-btn-active: rgba(163, 22, 33, 0.16);
     max-width: 1400px;
     margin: 0 auto;
     padding: 0;
@@ -36,6 +41,11 @@
     --kw-muted: #cbd5e1;
     --kw-line: #1e293b;
     --kw-theirs: #1e293b;
+    --kw-action-pill-bg: rgba(20, 26, 41, 0.95);
+    --kw-action-pill-border: rgba(255, 255, 255, 0.14);
+    --kw-action-pill-shadow: 0 14px 34px -4px rgba(0, 0, 0, 0.65), 0 4px 12px -2px rgba(0, 0, 0, 0.45);
+    --kw-action-btn-hover: rgba(255, 255, 255, 0.10);
+    --kw-action-btn-active: rgba(255, 255, 255, 0.20);
 }
 [x-cloak] { display: none !important; }
 
@@ -315,37 +325,68 @@
 .kw-details__privacy-card i { color: var(--kw-primary); font-size: 0.95rem; margin-top: 1px; flex-shrink: 0; }
 .kw-details__privacy-card strong { color: var(--kw-ink); font-weight: 700; }
 
-/* Message Reactions & Actions */
+/* Message Reactions & Actions Toolbar Pill */
 .kw-bubble__actions {
-    position: absolute; top: -12px; opacity: 0; pointer-events: none;
-    transform: translateY(2px);
-    transition: opacity .15s ease, transform .15s ease;
-    display: inline-flex; align-items: center; gap: 2px; z-index: 20;
-    background: var(--kw-card); border: 1px solid var(--kw-line);
-    border-radius: 999px; padding: 2px 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    position: absolute; top: -20px; opacity: 0; pointer-events: none;
+    transform: translateY(3px) scale(0.96);
+    transition: opacity .18s cubic-bezier(0.16, 1, 0.3, 1), transform .18s cubic-bezier(0.16, 1, 0.3, 1);
+    display: inline-flex; align-items: center; gap: 4px; z-index: 25;
+    background: var(--kw-action-pill-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--kw-action-pill-border);
+    border-radius: 999px; padding: 4px 6px;
+    box-shadow: var(--kw-action-pill-shadow);
 }
-.kw-row.is-mine .kw-bubble__actions { right: 6px; left: auto; }
-.kw-row:not(.is-mine) .kw-bubble__actions { left: 6px; right: auto; }
+.kw-row.is-mine .kw-bubble__actions { right: 8px; left: auto; }
+.kw-row:not(.is-mine) .kw-bubble__actions { left: 8px; right: auto; }
 @media (hover: hover) {
-    .kw-bubble__container:hover .kw-bubble__actions { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .kw-bubble__container:hover .kw-bubble__actions { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
 }
 .kw-bubble__container:focus-within .kw-bubble__actions,
-.kw-bubble__actions.is-open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.kw-bubble__actions.is-open { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
 
 .kw-react-trigger {
     background: transparent; border: 0; border-radius: 999px;
-    width: 24px; height: 24px; min-width: 24px; min-height: 24px; padding: 0;
+    width: 34px; height: 34px; min-width: 34px; min-height: 34px; padding: 0;
     display: inline-flex; align-items: center; justify-content: center;
-    font-size: .72rem; color: var(--kw-muted);
-    cursor: pointer; position: relative;
-    transition: transform .12s ease, color .12s ease, background-color .12s ease;
+    color: var(--kw-muted); cursor: pointer; position: relative;
+    transition: transform .14s cubic-bezier(0.16, 1, 0.3, 1), color .14s ease, background-color .14s ease, box-shadow .14s ease;
 }
+/* Touch target expansion for Fitts's law */
 .kw-react-trigger::after {
-    content: ''; position: absolute; inset: -4px;
+    content: ''; position: absolute; inset: -5px; border-radius: 999px;
 }
-.kw-react-trigger:hover { transform: scale(1.08); color: var(--kw-primary); background: var(--kw-soft); }
-.kw-react-trigger--danger:hover { color: #dc2626; background: #fef2f2; }
+.kw-react-trigger:hover {
+    transform: scale(1.12); color: var(--kw-ink); background: var(--kw-action-btn-hover);
+}
+.kw-react-trigger:active {
+    transform: scale(0.92); background: var(--kw-action-btn-active);
+}
+.kw-react-trigger:focus-visible {
+    outline: 2px solid var(--kw-primary); outline-offset: 1px;
+}
+.kw-action-icon {
+    width: 18px; height: 18px; stroke-width: 2; display: block; flex-shrink: 0; pointer-events: none;
+    transition: transform .14s ease, stroke .14s ease, fill .14s ease;
+}
+
+/* Individual Action Tactile Accents on Hover */
+.kw-react-trigger--reply:hover { color: #2563eb; background: rgba(37, 99, 235, 0.12); }
+.kw-react-trigger--star:hover { color: #d97706; background: rgba(217, 119, 6, 0.12); }
+.kw-react-trigger--star.is-starred { color: #f59e0b; }
+.kw-react-trigger--star.is-starred:hover { color: #d97706; background: rgba(245, 158, 11, 0.16); }
+.kw-react-trigger--react:hover { color: #d97706; background: rgba(217, 119, 6, 0.12); }
+.kw-react-trigger--edit:hover { color: #059669; background: rgba(5, 150, 105, 0.12); }
+.kw-react-trigger--danger:hover { color: #dc2626; background: rgba(220, 38, 38, 0.12); }
+
+.dark-mode .kw-react-trigger--reply:hover { color: #60a5fa; background: rgba(96, 165, 250, 0.18); }
+.dark-mode .kw-react-trigger--star:hover { color: #fbbf24; background: rgba(251, 191, 36, 0.18); }
+.dark-mode .kw-react-trigger--star.is-starred { color: #fbbf24; }
+.dark-mode .kw-react-trigger--star.is-starred:hover { color: #f59e0b; background: rgba(251, 191, 36, 0.22); }
+.dark-mode .kw-react-trigger--react:hover { color: #fbbf24; background: rgba(251, 191, 36, 0.18); }
+.dark-mode .kw-react-trigger--edit:hover { color: #34d399; background: rgba(52, 211, 153, 0.18); }
+.dark-mode .kw-react-trigger--danger:hover { color: #f87171; background: rgba(248, 113, 113, 0.18); }
 
 .kw-react-popover {
     position: absolute; bottom: calc(100% + 8px); top: auto;
@@ -867,8 +908,9 @@
     }
     .kw-bubble__container { max-width: 88%; }
     .kw-bubble { max-width: 100%; }
-    .kw-bubble__actions { top: -10px; padding: 1px 3px; gap: 1px; }
-    .kw-react-trigger { width: 22px; height: 22px; min-width: 22px; min-height: 22px; font-size: .68rem; }
+    .kw-bubble__actions { top: -18px; padding: 3px 5px; gap: 3px; }
+    .kw-react-trigger { width: 32px; height: 32px; min-width: 32px; min-height: 32px; }
+    .kw-action-icon { width: 16px; height: 16px; }
 }
 /* WhatsApp Parity Enhancements */
 
@@ -1734,22 +1776,41 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                 </template>
                 <div class="kw-bubble__container" @click.outside="if (activeActionMsgId === msg.id) activeActionMsgId = null">
                   <div class="kw-bubble__actions" :class="{'is-open': activeReactionMsgId === msg.id || activeActionMsgId === msg.id}">
-                    <button type="button" class="kw-react-trigger" @click.stop="setReplyTo(msg); activeActionMsgId = null" aria-label="Reply" title="Quote & reply">
-                      <i class="bi bi-reply-fill"></i>
+                    <button type="button" class="kw-react-trigger kw-react-trigger--reply" @click.stop="setReplyTo(msg); activeActionMsgId = null" aria-label="Reply" title="Quote & reply">
+                      <svg class="kw-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="9 17 4 12 9 7"></polyline>
+                        <path d="M20 18v-2a4 4 0 0 0-4-4H4"></path>
+                      </svg>
                     </button>
-                    <button type="button" class="kw-react-trigger" @click.stop="toggleStar(msg); activeActionMsgId = null" :title="isMessageStarred(msg) ? 'Unstar whisper' : 'Star whisper'" :style="isMessageStarred(msg) ? 'color:var(--kw-gold-bright)' : ''">
-                      <i class="bi" :class="isMessageStarred(msg) ? 'bi-star-fill' : 'bi-star'"></i>
+                    <button type="button" class="kw-react-trigger kw-react-trigger--star" :class="{'is-starred': isMessageStarred(msg)}" @click.stop="toggleStar(msg); activeActionMsgId = null" :title="isMessageStarred(msg) ? 'Unstar whisper' : 'Star whisper'" :aria-label="isMessageStarred(msg) ? 'Unstar whisper' : 'Star whisper'">
+                      <svg class="kw-action-icon kw-action-icon--star" viewBox="0 0 24 24" :fill="isMessageStarred(msg) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                      </svg>
                     </button>
-                    <button type="button" class="kw-react-trigger" @click.stop="openReactionPopover(msg.id, $event)" aria-label="Add reaction" title="Add reaction">
-                      <i class="bi bi-emoji-smile"></i>
+                    <button type="button" class="kw-react-trigger kw-react-trigger--react" @click.stop="openReactionPopover(msg.id, $event)" aria-label="Add reaction" title="Add reaction">
+                      <svg class="kw-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M8 14s1.5 2 4 2 4-2"></path>
+                        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                      </svg>
                     </button>
                     <template x-if="msg.sender_id === currentUserId && canEditMessage(msg)">
-                      <button type="button" class="kw-react-trigger" @click.stop="openEditModal(msg); activeActionMsgId = null" title="Edit whisper (within 15 minutes)" aria-label="Edit whisper">
-                        <i class="bi bi-pencil-fill"></i>
+                      <button type="button" class="kw-react-trigger kw-react-trigger--edit" @click.stop="openEditModal(msg); activeActionMsgId = null" title="Edit whisper (within 15 minutes)" aria-label="Edit whisper">
+                        <svg class="kw-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+                          <path d="m15 5 4 4"></path>
+                        </svg>
                       </button>
                     </template>
-                    <button type="button" class="kw-react-trigger kw-react-trigger--danger" @click.stop="openDeleteChoice(msg); activeActionMsgId = null" aria-label="Delete message" title="Delete whisper">
-                      <i class="bi bi-trash3"></i>
+                    <button type="button" class="kw-react-trigger kw-react-trigger--danger" @click.stop="openDeleteChoice(msg); activeActionMsgId = null" aria-label="Delete whisper" title="Delete whisper">
+                      <svg class="kw-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                      </svg>
                     </button>
                     <div class="kw-react-popover" :class="{'is-below': reactionPopoverPosition === 'below'}" x-show="activeReactionMsgId === msg.id" @click.outside="activeReactionMsgId = null" x-cloak>
                       {{-- Standard Family Reactions --}}

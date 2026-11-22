@@ -1,3 +1,96 @@
+<style>
+#timeCapsuleModal .tc-header-icon {
+    width: 48px;
+    height: 48px;
+    background: #f0abfc;
+    color: #0f172a;
+    font-size: 1.4rem;
+}
+#timeCapsuleModal .tc-tab-btn {
+    min-height: 44px;
+    background: #f8fafc;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+    font-weight: 600;
+}
+#timeCapsuleModal .tc-tab-btn.is-active {
+    background: #1e293b;
+    color: #ffffff;
+    border-color: #1e293b;
+    font-weight: 700;
+}
+#timeCapsuleModal .tc-empty-icon {
+    background: #fdf4ff;
+    color: #a31621;
+}
+#timeCapsuleModal .tc-capsule-card {
+    border-radius: 16px;
+}
+#timeCapsuleModal .tc-capsule-card--unlocked {
+    background: #f0fdf4;
+    border-left: 5px solid #10b981 !important;
+}
+#timeCapsuleModal .tc-capsule-card--sealed {
+    background: #fbefef;
+    border-left: 5px solid #ef6b73 !important;
+}
+
+body.dark-mode #timeCapsuleModal .tc-header-icon,
+body.dark-theme #timeCapsuleModal .tc-header-icon,
+[data-bs-theme="dark"] #timeCapsuleModal .tc-header-icon,
+html.dark #timeCapsuleModal .tc-header-icon,
+html.dark-mode #timeCapsuleModal .tc-header-icon {
+    background: rgba(217, 70, 239, 0.22) !important;
+    color: #f0abfc !important;
+}
+body.dark-mode #timeCapsuleModal .tc-tab-btn:not(.is-active),
+body.dark-theme #timeCapsuleModal .tc-tab-btn:not(.is-active),
+[data-bs-theme="dark"] #timeCapsuleModal .tc-tab-btn:not(.is-active),
+html.dark #timeCapsuleModal .tc-tab-btn:not(.is-active),
+html.dark-mode #timeCapsuleModal .tc-tab-btn:not(.is-active) {
+    background: #1e293b !important;
+    color: #cbd5e1 !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+}
+body.dark-mode #timeCapsuleModal .tc-tab-btn.is-active,
+body.dark-theme #timeCapsuleModal .tc-tab-btn.is-active,
+[data-bs-theme="dark"] #timeCapsuleModal .tc-tab-btn.is-active,
+html.dark #timeCapsuleModal .tc-tab-btn.is-active,
+html.dark-mode #timeCapsuleModal .tc-tab-btn.is-active {
+    background: linear-gradient(135deg, #d91b38 0%, #b4142c 100%) !important;
+    color: #ffffff !important;
+    border-color: transparent !important;
+}
+body.dark-mode #timeCapsuleModal .tc-empty-icon,
+body.dark-theme #timeCapsuleModal .tc-empty-icon,
+[data-bs-theme="dark"] #timeCapsuleModal .tc-empty-icon,
+html.dark #timeCapsuleModal .tc-empty-icon,
+html.dark-mode #timeCapsuleModal .tc-empty-icon {
+    background: rgba(217, 70, 239, 0.16) !important;
+    color: #f0abfc !important;
+}
+body.dark-mode #timeCapsuleModal .tc-capsule-card--unlocked,
+body.dark-theme #timeCapsuleModal .tc-capsule-card--unlocked,
+[data-bs-theme="dark"] #timeCapsuleModal .tc-capsule-card--unlocked,
+html.dark #timeCapsuleModal .tc-capsule-card--unlocked,
+html.dark-mode #timeCapsuleModal .tc-capsule-card--unlocked {
+    background: rgba(16, 185, 129, 0.12) !important;
+    border: 1px solid rgba(16, 185, 129, 0.28) !important;
+    border-left: 5px solid #10b981 !important;
+    color: #f8fafc !important;
+}
+body.dark-mode #timeCapsuleModal .tc-capsule-card--sealed,
+body.dark-theme #timeCapsuleModal .tc-capsule-card--sealed,
+[data-bs-theme="dark"] #timeCapsuleModal .tc-capsule-card--sealed,
+html.dark #timeCapsuleModal .tc-capsule-card--sealed,
+html.dark-mode #timeCapsuleModal .tc-capsule-card--sealed {
+    background: rgba(255, 77, 97, 0.12) !important;
+    border: 1px solid rgba(255, 77, 97, 0.28) !important;
+    border-left: 5px solid #ff4d61 !important;
+    color: #f8fafc !important;
+}
+</style>
+
 <div class="modal fade" id="timeCapsuleModal" tabindex="-1" aria-labelledby="timeCapsuleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; max-height: calc(100vh - 3.5rem);">
@@ -5,8 +98,8 @@
             <!-- Modal Header -->
             <div class="modal-header border-0 px-4 pt-4 pb-2 flex-shrink-0" style="background: linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%); border-bottom: 1px solid rgba(217, 70, 239, 0.15) !important;">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center text-primary shadow-sm" style="width: 48px; height: 48px; background: #f0abfc; font-size: 1.4rem;">
-                        <i class="bi bi-hourglass-split text-dark"></i>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm tc-header-icon">
+                        <i class="bi bi-hourglass-split"></i>
                     </div>
                     <div>
                         <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -22,10 +115,10 @@
 
             <!-- Vault Mode Nav (Pills) -->
             <div class="px-4 pt-3 pb-2 border-bottom d-flex gap-2 flex-shrink-0">
-                <button type="button" class="btn btn-sm px-3 py-1.5 fw-bold rounded-pill" id="tabBtnViewVault" style="background: #1e293b; color: #ffffff;" onclick="switchCapsuleTab('view')">
+                <button type="button" class="btn btn-sm px-3 py-1.5 rounded-pill tc-tab-btn is-active" id="tabBtnViewVault" onclick="switchCapsuleTab('view')">
                     <i class="bi bi-safe2 me-1"></i> Family Vault
                 </button>
-                <button type="button" class="btn btn-sm btn-light border px-3 py-1.5 fw-semibold rounded-pill text-dark" id="tabBtnCreateVault" onclick="switchCapsuleTab('create')">
+                <button type="button" class="btn btn-sm px-3 py-1.5 rounded-pill tc-tab-btn" id="tabBtnCreateVault" onclick="switchCapsuleTab('create')">
                     <i class="bi bi-plus-circle me-1"></i> Seal New Capsule
                 </button>
             </div>
@@ -141,22 +234,22 @@
             if (createTab) createTab.classList.remove('d-none');
             if (btnView) {
                 btnView.style.background = '';
-                btnView.className = 'btn btn-sm btn-light border px-3 py-1.5 fw-semibold rounded-pill text-dark';
+                btnView.className = 'btn btn-sm px-3 py-1.5 rounded-pill tc-tab-btn';
             }
             if (btnCreate) {
-                btnCreate.className = 'btn btn-sm px-3 py-1.5 fw-bold rounded-pill text-white';
-                btnCreate.style.background = '#1e293b';
+                btnCreate.style.background = '';
+                btnCreate.className = 'btn btn-sm px-3 py-1.5 rounded-pill tc-tab-btn is-active';
             }
         } else {
             if (createTab) createTab.classList.add('d-none');
             if (viewTab) viewTab.classList.remove('d-none');
             if (btnCreate) {
                 btnCreate.style.background = '';
-                btnCreate.className = 'btn btn-sm btn-light border px-3 py-1.5 fw-semibold rounded-pill text-dark';
+                btnCreate.className = 'btn btn-sm px-3 py-1.5 rounded-pill tc-tab-btn';
             }
             if (btnView) {
-                btnView.className = 'btn btn-sm px-3 py-1.5 fw-bold rounded-pill text-white';
-                btnView.style.background = '#1e293b';
+                btnView.style.background = '';
+                btnView.className = 'btn btn-sm px-3 py-1.5 rounded-pill tc-tab-btn is-active';
             }
         }
     };
@@ -195,7 +288,7 @@
         if (capsules.length === 0) {
             container.innerHTML = `
                 <div class="text-center py-5">
-                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-2" style="background: #fdf4ff; color: #ef6b73;">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-2 tc-empty-icon">
                         <i class="bi bi-safe2 fs-2"></i>
                     </div>
                     <h6 class="fw-bold mb-1 text-dark">The Family Vault is Empty</h6>
@@ -210,10 +303,7 @@
 
         capsules.forEach(capsule => {
             const card = document.createElement('div');
-            card.className = 'card border-0 shadow-sm p-3';
-            card.style.borderRadius = '16px';
-            card.style.background = capsule.is_unlocked ? '#f0fdf4' : '#fbefef';
-            card.style.borderLeft = capsule.is_unlocked ? '5px solid #10b981 !important' : '5px solid #ef6b73 !important';
+            card.className = 'card border-0 shadow-sm p-3 tc-capsule-card ' + (capsule.is_unlocked ? 'tc-capsule-card--unlocked' : 'tc-capsule-card--sealed');
 
             const badgeText = capsule.is_unlocked ? 'UNLOCKED' : `SEALED (${capsule.days_remaining}d remaining)`;
             const badgeClass = capsule.is_unlocked ? 'bg-success text-white' : 'bg-dark text-white';

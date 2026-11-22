@@ -12,6 +12,13 @@ $router->map('POST', '/api/arcade/race/create', 'App\controller\members\FamilyAr
 $router->map('POST', '/api/arcade/race/progress', 'App\controller\members\FamilyArcadeController@updateRaceProgress', 'api_arcade_race_progress');
 $router->map('POST', '/api/arcade/share-to-feed', 'App\controller\members\FamilyArcadeController@shareToFeed', 'api_arcade_share_to_feed');
 
-// Public Open Graph "Beat My Score" Share Previews (Crawler-Safe)
+// Public Open Graph "Beat My Score" Share Previews (Crawler-Safe) & Guest Challenge Mode
 $router->map('GET|HEAD', '/arcade/share/[:token]', 'App\controller\SharePreviewController@handleArcadeShareLink', 'arcade_share_view');
 $router->map('GET|HEAD', '/arcade/card/[:token].jpg', 'App\controller\SharePreviewController@arcadeCardImage', 'arcade_share_card');
+
+// Public Facebook-Standard Guest Challenge Mode & Engagement Tracking
+$router->map('GET', '/arcade/challenge/[:token]', 'App\controller\PublicArcadeController@challenge', 'arcade_public_challenge');
+$router->map('GET', '/play', 'App\controller\PublicArcadeController@play', 'arcade_public_play_default');
+$router->map('GET', '/play/[:game]', 'App\controller\PublicArcadeController@play', 'arcade_public_play');
+$router->map('POST', '/api/arcade/public/track', 'App\controller\PublicArcadeController@trackEngagement', 'api_arcade_public_track');
+$router->map('GET', '/api/arcade/engagements', 'App\controller\members\FamilyArcadeController@getEngagements', 'api_arcade_engagements');

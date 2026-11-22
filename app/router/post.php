@@ -73,6 +73,13 @@ $router->map(
   name: 'sovereign_video_upload_trim'
 );
 
+$router->map(
+  method: 'POST',
+  route: '/api/webhooks/stream',
+  target: 'App\controller\members\StreamController@handleWebhook',
+  name: 'cloudflare_stream_webhook'
+);
+
 // FAMILY HASHTAGS & MEMORY PILLS API
 $router->map(
   method: 'GET',

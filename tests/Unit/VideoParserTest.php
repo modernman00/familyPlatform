@@ -132,4 +132,27 @@ final class VideoParserTest extends TestCase
         $this->assertNotNull($reParsed);
         $this->assertSame($result['embedUrl'], $reParsed['embedUrl']);
     }
+
+    public function test_parses_facebook_reel_as_portrait_short(): void
+    {
+        $url = 'https://www.facebook.com/reel/1659146825685560/';
+        $result = VideoParser::parseVideoUrl($url);
+
+        $this->assertNotNull($result);
+        $this->assertSame('facebook', $result['type']);
+        $this->assertTrue($result['isShort'] ?? false);
+        $this->assertSame('9 / 16', $result['aspect_ratio'] ?? null);
+    }
+
+    public function test_extracts_opengraph_video_and_image_aspect_ratios(): void
+    {
+        $landscapeHtml = '<meta property="og:video:width" content="1280"><meta property="og:video:height" content="720">';
+        $this->assertSame('16 / 9', \App\services\LinkPreviewService::extractAspectRatioFromHtml($landscapeHtml));
+
+        $portraitFallbackHtml = '<meta property="og:image:width" content="1080"><meta property="og:image:height" content="1350">';
+        $this->assertSame('4 / 5', \App\services\LinkPreviewService::extractAspectRatioFromHtml($portraitFallbackHtml));
+
+        $invalidHtml = '<meta property="og:video:width" content="0"><meta property="og:video:height" content="720">';
+        $this->assertNull(\App\services\LinkPreviewService::extractAspectRatioFromHtml($invalidHtml));
+    }
 }

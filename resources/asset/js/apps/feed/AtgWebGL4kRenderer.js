@@ -47,8 +47,6 @@ void main() {
     vec3 rcpWeight = 1.0 / (1.0 + 4.0 * weight);
 
     vec3 sharpened = clamp((c + weight * (n + s + w + e)) * rcpWeight, 0.0, 1.0);
-    // Subtle perceptual micro-contrast (1.02)
-    sharpened = clamp((sharpened - 0.5) * 1.02 + 0.5, 0.0, 1.0);
     outColor = vec4(sharpened, 1.0);
 }`;
 
@@ -160,10 +158,14 @@ export function attachWebGL4kCas(video, canvas, opts = {}) {
         const vh = video.videoHeight || 0;
         if (vw <= 0 || vh <= 0) return;
 
-        // Upscale backing buffer up to 2x (max 3840x2160) for crisp sub-pixel CAS
-        const scaleUp = Math.min(vw, vh) < 1080 ? 1.5 : 1.0;
-        const targetW = Math.min(3840, Math.round(vw * scaleUp));
-        const targetH = Math.min(2160, Math.round(vh * scaleUp));
+        // Orientation-aware 4K UHD upscaling (3840x2160 landscape, 2160x3840 portrait)
+        const shortEdge = Math.min(vw, vh);
+        const scaleUp = shortEdge < 1080 ? 2.0 : (shortEdge < 1800 ? 1.5 : 1.0);
+        const maxW = vw >= vh ? 3840 : 2160;
+        const maxH = vw >= vh ? 2160 : 3840;
+        const fitFactor = Math.min(1.0, maxW / (vw * scaleUp), maxH / (vh * scaleUp));
+        const targetW = Math.max(2, Math.round(vw * scaleUp * fitFactor));
+        const targetH = Math.max(2, Math.round(vh * scaleUp * fitFactor));
         if (canvas.width !== targetW || canvas.height !== targetH) {
             canvas.width = targetW;
             canvas.height = targetH;
@@ -179,7 +181,8 @@ export function attachWebGL4kCas(video, canvas, opts = {}) {
             return;
         }
 
-        const sharpness = Math.min(vw, vh) < 1080 ? 0.72 : 0.42;
+        // Gentle FidelityFX CAS to sharpen edges without amplifying H.264 blocks or fabric Moiré
+        const sharpness = shortEdge < 1080 ? 0.28 : 0.18;
         gl.uniform2f(uTexelSize, 1.0 / canvas.width, 1.0 / canvas.height);
         gl.uniform1f(uSharpness, sharpness);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);

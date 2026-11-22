@@ -2,6 +2,8 @@
 
 @section('content')
 <div class="container py-4" id="livingHeirloomStudioRoot">
+    @include('member.creativeStudioTabs', ['creativeTab' => 'heirloom'])
+
     <div class="mb-4 text-center">
         <span style="display:inline-block; font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#b45309; background:rgba(217,119,6,0.1); border:1px solid rgba(217,119,6,0.25); padding:4px 14px; border-radius:999px;">
             🏛️ Sovereign Heritage &amp; Portrait Studio

@@ -114,8 +114,7 @@ final class ProfilePage extends ProcessImg
                 $pinnedWishlists = [];
             }
 
-            $vParam = strtolower(trim((string)($_GET['v'] ?? '')));
-            $usePreactFeed = $vParam !== 'legacy';
+            $usePreactFeed = true;
             $feedBootstrapJson = json_encode([
                 'famCode' => (string)($data['famCode'] ?? ''),
                 'userId' => (string)$this->id,
@@ -754,6 +753,32 @@ final class ProfilePage extends ProcessImg
                 
                 if (!empty($pollQuestion) && count($pollOptions) >= 2) {
                     \App\model\PollData::createPoll((int)$result, $pollQuestion, $pollOptions);
+                }
+
+                if (empty($mediaMeta['aspect_ratio'])) {
+                    try {
+                        $fbCandidates = is_array($mediaSlots ?? null) ? $mediaSlots : [];
+                        if ($cleanMultiLineMessage !== '') {
+                            foreach (\App\classes\VideoParser::extractAllVideosFromText($cleanMultiLineMessage, 3) as $parsedVid) {
+                                if (!empty($parsedVid['originalUrl'])) {
+                                    $fbCandidates[] = (string)$parsedVid['originalUrl'];
+                                }
+                            }
+                        }
+                        foreach ($fbCandidates as $candUrl) {
+                            $parsedCand = \App\classes\VideoParser::parseVideoUrl((string)$candUrl);
+                            if ($parsedCand && $parsedCand['type'] === 'facebook' && !isset($parsedCand['aspect_ratio'])) {
+                                $resolvedRatio = \App\services\LinkPreviewService::resolveFacebookVideoAspectRatio((string)$candUrl);
+                                if ($resolvedRatio !== null) {
+                                    $mediaMeta = is_array($mediaMeta) ? $mediaMeta : [];
+                                    $mediaMeta['aspect_ratio'] = $resolvedRatio;
+                                    break;
+                                }
+                            }
+                        }
+                    } catch (\Throwable $fbRatioErr) {
+                        error_log('[ProfilePage::post fb_aspect_ratio] ' . $fbRatioErr->getMessage());
+                    }
                 }
 
                 if ($mediaMeta !== null) {

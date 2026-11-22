@@ -11,15 +11,51 @@
 @endphp
 
 @if($hasPendingReel)
+<style>
+#weeklyReelApprovalCard.weekly-reel-card {
+    border-radius: 20px;
+    overflow: hidden;
+    background: linear-gradient(145deg, #ffffff 0%, #fdfbf7 100%);
+    border: 1.5px solid #e2e8f0;
+}
+#weeklyReelApprovalCard .weekly-reel-header {
+    background: rgba(248, 250, 252, 0.85);
+}
+body.dark-mode #weeklyReelApprovalCard.weekly-reel-card,
+body.dark-theme #weeklyReelApprovalCard.weekly-reel-card,
+[data-bs-theme="dark"] #weeklyReelApprovalCard.weekly-reel-card,
+html.dark #weeklyReelApprovalCard.weekly-reel-card,
+html.dark-mode #weeklyReelApprovalCard.weekly-reel-card {
+    background: #141418 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #f8fafc !important;
+}
+body.dark-mode #weeklyReelApprovalCard .weekly-reel-header,
+body.dark-theme #weeklyReelApprovalCard .weekly-reel-header,
+[data-bs-theme="dark"] #weeklyReelApprovalCard .weekly-reel-header,
+html.dark #weeklyReelApprovalCard .weekly-reel-header,
+html.dark-mode #weeklyReelApprovalCard .weekly-reel-header {
+    background: #18181f !important;
+    border-bottom-color: rgba(255, 255, 255, 0.09) !important;
+}
+body.dark-mode #weeklyReelApprovalCard .badge-light,
+body.dark-theme #weeklyReelApprovalCard .badge-light,
+[data-bs-theme="dark"] #weeklyReelApprovalCard .badge-light,
+html.dark #weeklyReelApprovalCard .badge-light,
+html.dark-mode #weeklyReelApprovalCard .badge-light {
+    background: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+}
+</style>
 <div id="weeklyReelApprovalCard" 
      x-data="weeklyReelPlayer({{ (int)$reelId }}, {{ json_encode($scenes, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) }}, '{{ addslashes((string)$audioUrl) }}')" 
      x-show="visible" 
      x-cloak
-     class="card mb-4 shadow-sm border-0 weekly-reel-card"
-     style="border-radius: 20px; overflow: hidden; background: linear-gradient(145deg, #ffffff 0%, #fdfbf7 100%); border: 1.5px solid #e2e8f0;">
+     class="card mb-4 shadow-sm border-0 weekly-reel-card">
     
     <!-- Header Banner -->
-    <div class="px-4 pt-3 pb-2 d-flex align-items-center justify-content-between flex-wrap gap-2 border-bottom" style="background: rgba(248, 250, 252, 0.85);">
+    <div class="px-4 pt-3 pb-2 d-flex align-items-center justify-content-between flex-wrap gap-2 border-bottom weekly-reel-header">
         <div class="d-flex align-items-center gap-2">
             <span class="badge rounded-pill px-3 py-2 text-white font-weight-bold" 
                   style="background: linear-gradient(135deg, #b8202c 0%, #8b131d 100%); font-size: 0.78rem; letter-spacing: 0.04em;">

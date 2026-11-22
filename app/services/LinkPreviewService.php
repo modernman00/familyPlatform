@@ -394,7 +394,9 @@ final class LinkPreviewService
             $html = $buffers[$idx] ?? '';
             $u = $uncached[$idx];
             curl_multi_remove_handle($mh, $ch);
-            curl_close($ch);
+            if (\PHP_VERSION_ID < 80500) {
+                @curl_close($ch);
+            }
 
             if ($html !== '') {
                 $ogData = self::parseMetadata($html, $u);
@@ -675,8 +677,11 @@ final class LinkPreviewService
             return null;
         }
 
-        // 3. Outbound fetch with WhatsApp/FamilyPlatform bot User-Agent
-        $html = self::fetchHtmlHead($url);
+        // 3. Outbound fetch with WhatsApp/FamilyPlatform bot User-Agent (capturing X-Frame-Options & CSP)
+        $headResult = self::fetchHtmlHeadWithHeaders($url);
+        $html = $headResult['html'];
+        $responseHeaders = $headResult['headers'];
+        $frameBlocked = self::isFramingBlocked($responseHeaders);
         if ($html === null || trim($html) === '') {
             if (($_ENV['APP_ENV'] ?? '') === 'testing' && str_contains($url, 'afrobeats-and-amapiano-halloween-night')) {
                 $html = '<head><meta property="og:title" content="Afrobeats and Amapiano Halloween Night"><meta property="og:description" content="Official PartyPlatform Event"><meta property="og:image" content="https://mypartyplatform.com/api/og/event/CYRGVPP"><meta property="og:site_name" content="PartyPlatform"></head>';
@@ -694,6 +699,16 @@ final class LinkPreviewService
                 $ogData = self::synthesizeFallbackMetadata($url);
             }
         }
+        $ogData['frame_blocked'] = $frameBlocked;
+
+        // 4b. Mirror discovered external og:image thumbnail locally (or to R2 when configured)
+        if (!empty($ogData['image_url']) && is_string($ogData['image_url'])) {
+            $mirroredThumb = self::mirrorThumbnail($ogData['image_url']);
+            if ($mirroredThumb !== null) {
+                $ogData['original_image_url'] = $ogData['image_url'];
+                $ogData['image_url'] = $mirroredThumb;
+            }
+        }
 
         // 5. Store into cache
         try {
@@ -709,6 +724,12 @@ final class LinkPreviewService
             }
             if (!empty($ogData['album_videos'])) {
                 $extraDataArr['album_videos'] = $ogData['album_videos'];
+            }
+            if ($frameBlocked) {
+                $extraDataArr['frame_blocked'] = true;
+            }
+            if (!empty($ogData['original_image_url'])) {
+                $extraDataArr['original_image_url'] = $ogData['original_image_url'];
             }
             $extraJson = !empty($extraDataArr) ? json_encode($extraDataArr, JSON_UNESCAPED_SLASHES) : null;
 
@@ -778,59 +799,400 @@ final class LinkPreviewService
      */
     private static function fetchHtmlHead(string $url): ?string
     {
+        return self::fetchHtmlHeadWithHeaders($url)['html'];
+    }
+
+    /**
+     * Resolve a relative or absolute HTTP Location header against the current request URL.
+     */
+    private static function resolveRedirectUrl(string $baseUrl, string $location): ?string
+    {
+        $loc = trim($location);
+        if ($loc === '') {
+            return null;
+        }
+        if (preg_match('#^https?://#i', $loc) === 1) {
+            return $loc;
+        }
+        $base = parse_url($baseUrl);
+        if (!$base || empty($base['scheme']) || empty($base['host'])) {
+            return null;
+        }
+        $port = isset($base['port']) ? ':' . $base['port'] : '';
+        $origin = $base['scheme'] . '://' . $base['host'] . $port;
+        if (str_starts_with($loc, '//')) {
+            return $base['scheme'] . ':' . $loc;
+        }
+        if (str_starts_with($loc, '/')) {
+            return $origin . $loc;
+        }
+        $basePath = $base['path'] ?? '/';
+        $dir = substr($basePath, 0, (int)strrpos($basePath, '/') + 1);
+        return $origin . $dir . $loc;
+    }
+
+    /**
+     * Performs a resilient HTTP GET fetching only the HTML <head> section and response security headers
+     * (X-Frame-Options, Content-Security-Policy) for iframe embeddability verification.
+     * Follows redirects manually so every hop is SSRF-validated via isSafeUrl().
+     *
+     * @return array{html: ?string, headers: array<string, string>}
+     */
+    private static function fetchHtmlHeadWithHeaders(string $url): array
+    {
         if ($url === '') {
-            return null;
-        }
-        $ch = curl_init();
-        if ($ch === false) {
-            return null;
+            return ['html' => null, 'headers' => []];
         }
 
-        $responseBuffer = '';
-        $isGooglePhoto = str_contains($url, 'photos.app.goo.gl') || str_contains($url, 'photos.google.com');
-        $effectiveMax = $isGooglePhoto ? 350000 : self::MAX_BODY_BYTES;
+        $currentUrl = $url;
+        $maxRedirects = 5;
 
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => false,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 5,
-            CURLOPT_TIMEOUT => 5,
-            CURLOPT_CONNECTTIMEOUT => 2,
-            CURLOPT_ENCODING => '',
-            CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
-            CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
-            CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
-            CURLOPT_USERAGENT => 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php) WhatsApp/2.23.20.0',
-            CURLOPT_SSL_VERIFYPEER => true,
-            CURLOPT_SSL_VERIFYHOST => 2,
-            CURLOPT_WRITEFUNCTION => function ($chInstance, string $chunk) use (&$responseBuffer, $effectiveMax, $isGooglePhoto): int {
-                $responseBuffer .= $chunk;
-                if ($isGooglePhoto) {
-                    $posKeyDs1 = false;
-                    if (preg_match('/key\s*:\s*[\'"]ds:1[\'"]/', $responseBuffer, $m, PREG_OFFSET_CAPTURE)) {
-                        $posKeyDs1 = $m[0][1];
+        for ($hop = 0; $hop <= $maxRedirects; $hop++) {
+            if ($currentUrl === '' || !self::isSafeUrl($currentUrl)) {
+                return ['html' => null, 'headers' => []];
+            }
+
+            $ch = curl_init();
+            if ($ch === false) {
+                return ['html' => null, 'headers' => []];
+            }
+
+            $responseBuffer = '';
+            /** @var array<string, string> $capturedHeaders */
+            $capturedHeaders = [];
+            $redirectLocation = null;
+            $isGooglePhoto = str_contains($currentUrl, 'photos.app.goo.gl') || str_contains($currentUrl, 'photos.google.com');
+            $effectiveMax = $isGooglePhoto ? 350000 : self::MAX_BODY_BYTES;
+
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $currentUrl,
+                CURLOPT_RETURNTRANSFER => false,
+                CURLOPT_FOLLOWLOCATION => false,
+                CURLOPT_TIMEOUT => 5,
+                CURLOPT_CONNECTTIMEOUT => 2,
+                CURLOPT_ENCODING => '',
+                CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+                CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+                CURLOPT_USERAGENT => 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php) WhatsApp/2.23.20.0',
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_HEADERFUNCTION => function ($chInstance, string $headerLine) use (&$capturedHeaders, &$redirectLocation): int {
+                    $len = strlen($headerLine);
+                    $parts = explode(':', $headerLine, 2);
+                    if (count($parts) === 2) {
+                        $name = strtolower(trim($parts[0]));
+                        $val = trim($parts[1]);
+                        if ($name === 'location') {
+                            $redirectLocation = $val;
+                        } elseif ($name === 'x-frame-options' || $name === 'content-security-policy') {
+                            $capturedHeaders[$name] = isset($capturedHeaders[$name])
+                                ? $capturedHeaders[$name] . '; ' . $val
+                                : $val;
+                        }
                     }
-                    if (($posKeyDs1 !== false && strpos($responseBuffer, 'sideChannel', $posKeyDs1) !== false)
-                        || strlen($responseBuffer) >= $effectiveMax
-                    ) {
-                        return 0; // Abort transfer once full ds:1 album payload is captured or threshold reached
+                    return $len;
+                },
+                CURLOPT_WRITEFUNCTION => function ($chInstance, string $chunk) use (&$responseBuffer, $effectiveMax, $isGooglePhoto): int {
+                    $responseBuffer .= $chunk;
+                    if ($isGooglePhoto) {
+                        $posKeyDs1 = false;
+                        if (preg_match('/key\s*:\s*[\'"]ds:1[\'"]/', $responseBuffer, $m, PREG_OFFSET_CAPTURE)) {
+                            $posKeyDs1 = $m[0][1];
+                        }
+                        if (($posKeyDs1 !== false && strpos($responseBuffer, 'sideChannel', $posKeyDs1) !== false)
+                            || strlen($responseBuffer) >= $effectiveMax
+                        ) {
+                            return 0; // Abort transfer once full ds:1 album payload is captured or threshold reached
+                        }
+                    } else {
+                        if (strlen($responseBuffer) >= $effectiveMax || stripos($responseBuffer, '</head>') !== false) {
+                            return 0; // Abort transfer once </head> or size limit reached
+                        }
                     }
-                } else {
-                    if (strlen($responseBuffer) >= $effectiveMax || stripos($responseBuffer, '</head>') !== false) {
-                        return 0; // Abort transfer once </head> or size limit reached
+                    return strlen($chunk);
+                },
+            ]);
+
+            $execResult = curl_exec($ch);
+            $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            if (\PHP_VERSION_ID < 80500) {
+                @curl_close($ch);
+            }
+
+            if ($httpCode >= 300 && $httpCode < 400 && $redirectLocation !== null && $hop < $maxRedirects) {
+                $nextUrl = self::resolveRedirectUrl($currentUrl, $redirectLocation);
+                if ($nextUrl === null) {
+                    return ['html' => null, 'headers' => $capturedHeaders];
+                }
+                $currentUrl = $nextUrl;
+                continue;
+            }
+
+            // Code 200 or 206 (or abort from write function returning 0 when head captured)
+            if (($execResult === true || $responseBuffer !== '') && ($httpCode === 200 || $httpCode === 206 || $httpCode === 0)) {
+                return ['html' => $responseBuffer, 'headers' => $capturedHeaders];
+            }
+
+            return ['html' => null, 'headers' => $capturedHeaders];
+        }
+
+        return ['html' => null, 'headers' => []];
+    }
+
+    /**
+     * Check whether a single CSP frame-ancestors source token permits embedding by $originHost.
+     */
+    private static function isAllowedFrameAncestorSource(string $sourceToken, string $originHost): bool
+    {
+        $s = strtolower(trim($sourceToken, " \t\n\r\0\x0B'\""));
+        $rawLower = strtolower(trim($sourceToken));
+        if ($rawLower === '' || $rawLower === "'none'" || $rawLower === "'self'") {
+            return false;
+        }
+        if ($rawLower === '*' || $rawLower === 'https:' || $rawLower === 'http:') {
+            return true;
+        }
+        if ($originHost === '') {
+            return false;
+        }
+        $hostCandidate = (string)preg_replace('#^https?://#i', '', $s);
+        $hostCandidate = (string)preg_replace('#[:/].*$#', '', $hostCandidate);
+        if ($hostCandidate === '') {
+            return false;
+        }
+        if ($hostCandidate === $originHost) {
+            return true;
+        }
+        if (str_starts_with($hostCandidate, '*.')) {
+            $suffix = substr($hostCandidate, 1);
+            return str_ends_with($originHost, $suffix);
+        }
+        return false;
+    }
+
+    /**
+     * Inspect response headers for X-Frame-Options (DENY/SAMEORIGIN) or restrictive CSP frame-ancestors
+     * so blocked external embeds are downgraded to an external_card instead of rendering a broken iframe.
+     *
+     * @param array<string, string> $headers Lowercase header map
+     * @param string|null $appOrigin Optional app origin host (defaults to APP_URL host)
+     */
+    public static function isFramingBlocked(array $headers, ?string $appOrigin = null): bool
+    {
+        $normalised = [];
+        foreach ($headers as $k => $v) {
+            $normalised[strtolower(trim((string)$k))] = trim((string)$v);
+        }
+
+        $originHost = strtolower($appOrigin ?? (string)(parse_url((string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com'), PHP_URL_HOST) ?: ''));
+
+        // 1. Check X-Frame-Options
+        if (isset($normalised['x-frame-options']) && $normalised['x-frame-options'] !== '') {
+            $xfo = strtoupper($normalised['x-frame-options']);
+            if (str_contains($xfo, 'DENY') || str_contains($xfo, 'SAMEORIGIN')) {
+                return true;
+            }
+            if (preg_match('/ALLOW-FROM\s+(\S+)/i', $normalised['x-frame-options'], $xfoMatch)) {
+                $allowHost = strtolower((string)(parse_url(trim($xfoMatch[1]), PHP_URL_HOST) ?: trim($xfoMatch[1])));
+                if ($originHost === '' || $allowHost !== $originHost) {
+                    return true;
+                }
+            }
+        }
+
+        // 2. Check ALL Content-Security-Policy: frame-ancestors directives (intersection semantics)
+        if (isset($normalised['content-security-policy']) && $normalised['content-security-policy'] !== '') {
+            $csp = $normalised['content-security-policy'];
+            if (preg_match_all('/frame-ancestors\s+([^;]+)/i', $csp, $allMatches) > 0) {
+                foreach ($allMatches[1] as $sourcesRaw) {
+                    $sources = preg_split('/\s+/', trim($sourcesRaw)) ?: [];
+                    $allowsExternalOrUs = false;
+                    foreach ($sources as $src) {
+                        if (self::isAllowedFrameAncestorSource($src, $originHost)) {
+                            $allowsExternalOrUs = true;
+                            break;
+                        }
+                    }
+                    if (!$allowsExternalOrUs) {
+                        return true;
                     }
                 }
-                return strlen($chunk);
-            },
-        ]);
+            }
+        }
 
-        $execResult = curl_exec($ch);
-        $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        return false;
+    }
 
-        // Code 200 or 206 (or abort from write function returning 0 when head captured)
-        if (($execResult === true || $responseBuffer !== '') && ($httpCode === 200 || $httpCode === 206 || $httpCode === 0)) {
-            return $responseBuffer;
+    /**
+     * Mirror a discovered external og:image thumbnail locally (or to Cloudflare R2 when configured)
+     * so expiring external CDN URLs do not break over time.
+     *
+     * @param string $imageUrl
+     * @return string|null Local/R2 mirrored URL or null if mirroring fails or is unnecessary
+     */
+    public static function mirrorThumbnail(string $imageUrl): ?string
+    {
+        $trimmed = trim($imageUrl);
+        if ($trimmed === '') {
+            return null;
+        }
+
+        // Already local or already hosted on our R2 public domain
+        if (str_starts_with($trimmed, '/public/uploads/') || str_starts_with($trimmed, '/resources/')) {
+            return $trimmed;
+        }
+        $r2Domain = rtrim((string)($_ENV['R2_PUBLIC_DOMAIN'] ?? getenv('R2_PUBLIC_DOMAIN') ?: ''), '/');
+        if ($r2Domain !== '' && str_starts_with($trimmed, $r2Domain . '/')) {
+            return $trimmed;
+        }
+
+        if (!self::isSafeUrl($trimmed)) {
+            return null;
+        }
+
+        $urlHash = hash('sha256', $trimmed);
+        $localDir = __DIR__ . '/../../public/uploads/link_previews';
+        if (!is_dir($localDir)) {
+            @mkdir($localDir, 0755, true);
+        }
+
+        // Return existing mirrored local file if already cached
+        foreach (['jpg', 'png', 'webp', 'gif', 'avif'] as $knownExt) {
+            $existingFile = $localDir . '/' . $urlHash . '.' . $knownExt;
+            if (is_file($existingFile) && filesize($existingFile) > 256) {
+                return '/public/uploads/link_previews/' . $urlHash . '.' . $knownExt;
+            }
+        }
+
+        $maxBytes = 5 * 1024 * 1024; // 5 MB safety cap
+        $currentImgUrl = $trimmed;
+        $maxRedirects = 4;
+        $imgBuffer = '';
+        $ok = false;
+        $status = 0;
+        $contentType = '';
+
+        for ($hop = 0; $hop <= $maxRedirects; $hop++) {
+            if (!self::isSafeUrl($currentImgUrl)) {
+                return null;
+            }
+            $ch = curl_init($currentImgUrl);
+            if ($ch === false) {
+                return null;
+            }
+
+            $imgBuffer = '';
+            $redirectLocation = null;
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => false,
+                CURLOPT_FOLLOWLOCATION => false,
+                CURLOPT_TIMEOUT => 4,
+                CURLOPT_CONNECTTIMEOUT => 2,
+                CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+                CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_USERAGENT => 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php) WhatsApp/2.23.20.0',
+                CURLOPT_HEADERFUNCTION => function ($chInstance, string $headerLine) use (&$redirectLocation): int {
+                    $parts = explode(':', $headerLine, 2);
+                    if (count($parts) === 2 && strtolower(trim($parts[0])) === 'location') {
+                        $redirectLocation = trim($parts[1]);
+                    }
+                    return strlen($headerLine);
+                },
+                CURLOPT_WRITEFUNCTION => function ($chInstance, string $chunk) use (&$imgBuffer, $maxBytes): int {
+                    if (strlen($imgBuffer) + strlen($chunk) > $maxBytes) {
+                        return 0;
+                    }
+                    $imgBuffer .= $chunk;
+                    return strlen($chunk);
+                },
+            ]);
+
+            $ok = curl_exec($ch);
+            $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $contentType = strtolower(trim(explode(';', (string)curl_getinfo($ch, CURLINFO_CONTENT_TYPE))[0]));
+            if (\PHP_VERSION_ID < 80500) {
+                @curl_close($ch);
+            }
+
+            if ($status >= 300 && $status < 400 && $redirectLocation !== null && $hop < $maxRedirects) {
+                $nextUrl = self::resolveRedirectUrl($currentImgUrl, $redirectLocation);
+                if ($nextUrl === null) {
+                    return null;
+                }
+                $currentImgUrl = $nextUrl;
+                continue;
+            }
+            break;
+        }
+
+        if (!$ok || $status < 200 || $status >= 300 || strlen($imgBuffer) < 256) {
+            return null;
+        }
+
+        $mimeToExt = [
+            'image/jpeg' => 'jpg',
+            'image/jpg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            'image/avif' => 'avif',
+        ];
+        $ext = $mimeToExt[$contentType] ?? null;
+        if ($ext === null) {
+            $imgInfo = @getimagesizefromstring($imgBuffer);
+            if (!is_array($imgInfo) || empty($imgInfo['mime']) || !isset($mimeToExt[$imgInfo['mime']])) {
+                return null;
+            }
+            $contentType = (string)$imgInfo['mime'];
+            $ext = $mimeToExt[$contentType];
+        }
+
+        $filename = $urlHash . '.' . $ext;
+
+        // Prefer Cloudflare R2 when configured
+        if (class_exists(\Src\Media\R2StorageService::class) && \Src\Media\R2StorageService::isConfigured()) {
+            try {
+                $objectKey = 'link_previews/' . $filename;
+                $ticket = \Src\Media\R2StorageService::generatePresignedUploadUrl($objectKey, $contentType, 300);
+                if (!empty($ticket['is_cloud']) && !empty($ticket['upload_url'])) {
+                    $putCh = curl_init((string)$ticket['upload_url']);
+                    if ($putCh !== false) {
+                        curl_setopt_array($putCh, [
+                            CURLOPT_CUSTOMREQUEST => 'PUT',
+                            CURLOPT_POSTFIELDS => $imgBuffer,
+                            CURLOPT_RETURNTRANSFER => true,
+                            CURLOPT_TIMEOUT => 5,
+                            CURLOPT_CONNECTTIMEOUT => 2,
+                            CURLOPT_HTTPHEADER => [
+                                'Content-Type: ' . $contentType,
+                                'Content-Length: ' . strlen($imgBuffer),
+                            ],
+                        ]);
+                        curl_exec($putCh);
+                        $putCode = (int)curl_getinfo($putCh, CURLINFO_HTTP_CODE);
+                        if (\PHP_VERSION_ID < 80500) {
+                            @curl_close($putCh);
+                        }
+                        if ($putCode >= 200 && $putCode < 300 && !empty($ticket['public_url'])) {
+                            return (string)$ticket['public_url'];
+                        }
+                    }
+                }
+            } catch (Throwable $e) {
+                error_log('[LinkPreviewService::mirrorThumbnail R2 fallback] ' . $e->getMessage());
+            }
+        }
+
+        // Local atomic fallback in public/uploads/link_previews/
+        $finalPath = $localDir . '/' . $filename;
+        $tmpPath = $finalPath . '.tmp.' . getmypid();
+        if (@file_put_contents($tmpPath, $imgBuffer, LOCK_EX) !== false) {
+            if (@rename($tmpPath, $finalPath)) {
+                return '/public/uploads/link_previews/' . $filename;
+            }
+            @unlink($tmpPath);
         }
 
         return null;
@@ -959,6 +1321,11 @@ final class LinkPreviewService
             $data['video_url'] = self::decodeMetaUrl($rawVideo);
         }
 
+        $ogAspectRatio = self::extractAspectRatioFromHtml($html);
+        if ($ogAspectRatio !== null) {
+            $data['aspect_ratio'] = $ogAspectRatio;
+        }
+
         // 3c. Extract multi-item Google Photos shared album contents (photos and videos)
         if (str_contains($sourceUrl, 'photos.app.goo.gl') || str_contains($sourceUrl, 'photos.google.com')) {
             $albumMedia = self::extractGooglePhotosAlbumMedia($html);
@@ -1002,6 +1369,82 @@ final class LinkPreviewService
         }
 
         return $data;
+    }
+
+    /**
+     * Extract a canonical "W / H" aspect ratio string from OpenGraph video or image dimensions.
+     */
+    public static function extractAspectRatioFromHtml(string $html): ?string
+    {
+        if ($html === '') {
+            return null;
+        }
+
+        $pairs = [
+            ['og:video:width', 'og:video:height'],
+            ['twitter:player:width', 'twitter:player:height'],
+            ['og:image:width', 'og:image:height'],
+        ];
+
+        foreach ($pairs as [$wKey, $hKey]) {
+            $rawW = self::extractMetaContent($html, [$wKey]);
+            $rawH = self::extractMetaContent($html, [$hKey]);
+            if ($rawW !== null && $rawH !== null && is_numeric($rawW) && is_numeric($rawH)) {
+                $formatted = self::formatAspectRatio((int)$rawW, (int)$rawH);
+                if ($formatted !== null) {
+                    return $formatted;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Format positive pixel dimensions into a simplified "W / H" aspect ratio string.
+     */
+    public static function formatAspectRatio(int $width, int $height): ?string
+    {
+        if ($width < 64 || $height < 64 || $width > 10000 || $height > 10000) {
+            return null;
+        }
+
+        $a = $width;
+        $b = $height;
+        while ($b !== 0) {
+            $t = $a % $b;
+            $a = $b;
+            $b = $t;
+        }
+        $gcd = max(1, $a);
+        return intdiv($width, $gcd) . ' / ' . intdiv($height, $gcd);
+    }
+
+    /**
+     * Resolve the aspect ratio of a Facebook video URL via cached/live OpenGraph metadata.
+     */
+    public static function resolveFacebookVideoAspectRatio(string $url, bool $allowNetworkFetch = true): ?string
+    {
+        $trimmed = trim($url);
+        if ($trimmed === '') {
+            return null;
+        }
+        $parsed = \App\classes\VideoParser::parseVideoUrl($trimmed);
+        if (!$parsed || $parsed['type'] !== 'facebook') {
+            return null;
+        }
+        if (isset($parsed['aspect_ratio']) && $parsed['aspect_ratio'] !== '') {
+            return $parsed['aspect_ratio'];
+        }
+
+        $preview = self::fetchPreview($trimmed, $allowNetworkFetch);
+        $rawRatio = is_array($preview) ? ($preview['aspect_ratio'] ?? null) : null;
+        if (!is_string($rawRatio) || $rawRatio === '') {
+            return null;
+        }
+
+        $normalised = \App\classes\VideoParser::normaliseMediaMeta(['aspect_ratio' => $rawRatio]);
+        return $normalised['aspect_ratio'] ?? null;
     }
 
     /**
@@ -1327,7 +1770,11 @@ final class LinkPreviewService
         }
 
         $parsedVideoEmbed = \App\classes\VideoParser::parseVideoUrl($url) ?? \App\classes\VideoParser::parseVideoUrl($requestedUrl);
-        $embedUrl = $parsedVideoEmbed['embedUrl'] ?? null;
+        $frameBlocked = !empty($data['frame_blocked']);
+        $rawEmbedUrl = $parsedVideoEmbed['embedUrl'] ?? null;
+        $embedUrl = $frameBlocked ? null : $rawEmbedUrl;
+        $canEmbed = $embedUrl !== null;
+        $renderMode = $canEmbed ? 'inline_iframe' : 'external_card';
 
         $albumVideos = is_array($data['album_videos'] ?? null) ? array_values($data['album_videos']) : [];
         $proxiedVideoUrl = $videoStreamUrl !== null ? self::getProxiedVideoUrl($videoStreamUrl) : null;
@@ -1390,6 +1837,9 @@ final class LinkPreviewService
             'photo_url' => $isPhotoLink ? ($photoUrl !== '' ? $photoUrl : $rawImage) : null,
             'video_url' => $videoStreamUrl,
             'embed_url' => $embedUrl,
+            'frame_blocked' => $frameBlocked,
+            'can_embed' => $canEmbed,
+            'render_mode' => $renderMode,
             'proxied_video_url' => $proxiedVideoUrl,
             'is_video' => $isGoogleVideo || !empty($rawVideo) || $embedUrl !== null,
             'is_social_video' => $isSocialVideo,

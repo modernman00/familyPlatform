@@ -9,7 +9,7 @@ describe('Social Feed Interactions', () => {
     beforeEach(() => {
         cy.request({ method: 'POST', url: '/api/test/clear-rate-limit', failOnStatusCode: false, headers: { 'X-Cypress-Test': 'true' } });
         loginFully();
-        cy.visit('/profilePage?v=legacy');
+        cy.visit('/profilePage');
         // Wait for Alpine's feed component to finish mounting
         cy.get('#openPostModalTrigger', { timeout: 10000 }).should('be.visible');
     });

@@ -93,6 +93,7 @@ final class PostDto implements JsonSerializable
      * @param array<string, mixed>|null $linkPreview
      * @param array<int, mixed> $postTags
      * @param array<string, mixed> $rawAttributes
+     * @param list<array<string, mixed>> $normalizedMedia
      */
     public function __construct(
         public readonly int $postNo,
@@ -124,7 +125,8 @@ final class PostDto implements JsonSerializable
         public readonly ?array $video = null,
         public readonly string $targetScope = 'all',
         public readonly ?string $postStyle = null,
-        public readonly bool $isHistorianPost = false
+        public readonly bool $isHistorianPost = false,
+        public readonly array $normalizedMedia = []
     ) {}
 
     /**
@@ -342,6 +344,10 @@ final class PostDto implements JsonSerializable
             $profileImg = \App\services\FamilyHistorianService::HISTORIAN_AVATAR;
         }
 
+        /** @var list<string> $slotImagesForNorm */
+        $slotImagesForNorm = isset($row['images']) && is_array($row['images']) ? array_values(array_filter($row['images'], 'is_string')) : [];
+        $normalizedMedia = self::buildNormalizedMedia($postNo, $slotImagesForNorm, $rowVideos, $linkPreview);
+
         return new self(
             postNo: $postNo,
             id: $id,
@@ -372,8 +378,108 @@ final class PostDto implements JsonSerializable
             video: $rowVideos[0] ?? null,
             targetScope: (string)($row['target_scope'] ?? 'all'),
             postStyle: $postStyle,
-            isHistorianPost: $isHistorianPost
+            isHistorianPost: $isHistorianPost,
+            normalizedMedia: $normalizedMedia
         );
+    }
+
+    /**
+     * Build unified NormalizedMedia contract items for images, videos, and link previews.
+     *
+     * @param int $postNo
+     * @param list<string> $images
+     * @param array<int, mixed> $videos
+     * @param array<string, mixed>|null $linkPreview
+     * @return list<array<string, mixed>>
+     */
+    public static function buildNormalizedMedia(int $postNo, array $images, array $videos, ?array $linkPreview): array
+    {
+        $items = [];
+
+        foreach ($images as $idx => $imgUrl) {
+            $cleanUrl = trim($imgUrl);
+            if ($cleanUrl === '') {
+                continue;
+            }
+            $items[] = [
+                'id' => "post-{$postNo}-img-{$idx}",
+                'provider' => 'image',
+                'renderMode' => 'image',
+                'aspectRatio' => null,
+                'posterUrl' => $cleanUrl,
+                'videoSrc' => null,
+                'hlsUrl' => null,
+                'embedSrc' => null,
+                'originalUrl' => $cleanUrl,
+                'title' => null,
+                'durationSec' => null,
+                'focalX' => null,
+                'focalY' => null,
+                'isShort' => false,
+            ];
+        }
+
+        foreach ($videos as $idx => $vid) {
+            if (!is_array($vid)) {
+                continue;
+            }
+            $provider = (string)($vid['type'] ?? 'direct');
+            $embedUrl = isset($vid['embedUrl']) && is_string($vid['embedUrl']) ? $vid['embedUrl'] : null;
+            $origUrl = isset($vid['originalUrl']) && is_string($vid['originalUrl']) ? $vid['originalUrl'] : null;
+            $hlsUrl = isset($vid['hlsUrl']) && is_string($vid['hlsUrl']) ? $vid['hlsUrl'] : null;
+            $isNative = $provider === 'direct'
+                || (!empty($vid['isDirect']))
+                || ($embedUrl !== null && (str_contains($embedUrl, '/resources/videos/') || (bool)preg_match('/\.(mp4|webm|mov|m4v|ogg)(\?|#|$)/i', $embedUrl)));
+
+            $renderMode = $isNative
+                ? 'native_video'
+                : ($embedUrl !== null && $embedUrl !== '' ? 'inline_iframe' : 'external_card');
+
+            $items[] = [
+                'id' => (string)($vid['videoId'] ?? "post-{$postNo}-vid-{$idx}"),
+                'provider' => $provider,
+                'renderMode' => $renderMode,
+                'aspectRatio' => isset($vid['aspect_ratio']) && is_string($vid['aspect_ratio']) ? $vid['aspect_ratio'] : null,
+                'posterUrl' => isset($vid['thumbnailUrl']) && is_string($vid['thumbnailUrl']) ? $vid['thumbnailUrl'] : null,
+                'videoSrc' => $isNative ? ($embedUrl ?: $origUrl) : null,
+                'hlsUrl' => $hlsUrl,
+                'embedSrc' => $renderMode === 'inline_iframe' ? $embedUrl : null,
+                'originalUrl' => $origUrl ?: $embedUrl,
+                'title' => isset($vid['hook']) && is_string($vid['hook']) ? $vid['hook'] : null,
+                'durationSec' => isset($vid['duration_sec']) && is_numeric($vid['duration_sec']) ? (float)$vid['duration_sec'] : null,
+                'focalX' => isset($vid['focal_x']) && is_numeric($vid['focal_x']) ? (float)$vid['focal_x'] : null,
+                'focalY' => isset($vid['focal_y']) && is_numeric($vid['focal_y']) ? (float)$vid['focal_y'] : null,
+                'isShort' => !empty($vid['isShort']),
+            ];
+        }
+
+        if (empty($items) && is_array($linkPreview) && (!empty($linkPreview['url']) || !empty($linkPreview['image']) || !empty($linkPreview['title']))) {
+            $frameBlocked = !empty($linkPreview['frame_blocked']);
+            $lpEmbed = !$frameBlocked && !empty($linkPreview['embed_url']) && is_string($linkPreview['embed_url'])
+                ? $linkPreview['embed_url']
+                : null;
+            $renderMode = $lpEmbed !== null ? 'inline_iframe' : 'external_card';
+            $lpUrl = isset($linkPreview['url']) && is_string($linkPreview['url']) ? $linkPreview['url'] : null;
+
+            $items[] = [
+                'id' => "post-{$postNo}-lp-0",
+                'provider' => strtolower((string)($linkPreview['site_name'] ?? $linkPreview['domain'] ?? 'external')),
+                'renderMode' => $renderMode,
+                'aspectRatio' => isset($linkPreview['aspect_ratio']) && is_string($linkPreview['aspect_ratio']) ? $linkPreview['aspect_ratio'] : null,
+                'posterUrl' => isset($linkPreview['image']) && is_string($linkPreview['image']) ? $linkPreview['image'] : null,
+                'videoSrc' => null,
+                'hlsUrl' => null,
+                'embedSrc' => $lpEmbed,
+                'originalUrl' => $lpUrl,
+                'title' => isset($linkPreview['title']) && is_string($linkPreview['title']) ? $linkPreview['title'] : null,
+                'durationSec' => null,
+                'focalX' => null,
+                'focalY' => null,
+                'isShort' => false,
+            ];
+        }
+
+        return $items;
     }
 
     /**
@@ -415,6 +521,7 @@ final class PostDto implements JsonSerializable
         $arr['post_style'] = $this->postStyle;
         $arr['videos'] = $this->videos;
         $arr['video'] = $this->video;
+        $arr['normalized_media'] = $this->normalizedMedia;
 
         if (isset($this->rawAttributes['images'])) {
             $arr['images'] = $this->rawAttributes['images'];

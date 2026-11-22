@@ -20,7 +20,7 @@
      x-transition:leave-end="opacity-0">
 
     <div class="card border-0 shadow-2xl rounded-4 w-100 overflow-hidden"
-         style="max-width: 520px; background: var(--card-bg, #ffffff); color: var(--text-main, #0f172a); border: 1px solid rgba(226, 232, 240, 0.8) !important;"
+         style="max-width: 520px; background: var(--card-bg, #ffffff); color: var(--text-main, #0f172a); border: 1px solid var(--border-subtle, rgba(226, 232, 240, 0.8)) !important;"
          @click.stop
          x-transition:enter="transition ease-out duration-250"
          x-transition:enter-start="opacity-0 scale-95 translate-y-3"
@@ -51,7 +51,7 @@
         <div class="p-4 pt-2">
             <!-- 1. Rich Inset Preview Card -->
             <div class="p-3 mb-3.5 rounded-3 d-flex gap-3 align-items-center border"
-                 style="background: var(--surface-secondary, #f8fafc); border-color: rgba(226, 232, 240, 0.9) !important;">
+                 style="background: var(--surface-secondary, #f8fafc); border-color: var(--border-subtle, rgba(226, 232, 240, 0.9)) !important;">
                 <img :src="sharePortalImg" 
                      alt="Memory Preview" 
                      class="rounded-3 flex-shrink-0" 
@@ -89,7 +89,7 @@
                        target="_blank" 
                        rel="noopener noreferrer" 
                        class="btn w-100 p-0 rounded-3 d-flex align-items-center justify-content-center text-white text-decoration-none shadow-xs" 
-                       style="background: #25d366; height: 48px; min-width: 44px; min-height: 44px; transition: transform 0.15s ease;"
+                       style="background: #15803d; height: 48px; min-width: 44px; min-height: 44px; transition: transform 0.15s ease;"
                        title="WhatsApp"
                        aria-label="Share on WhatsApp">
                         <i class="bi bi-whatsapp" style="font-size: 1.35rem;"></i>
@@ -102,7 +102,7 @@
                        target="_blank" 
                        rel="noopener noreferrer" 
                        class="btn w-100 p-0 rounded-3 d-flex align-items-center justify-content-center text-white text-decoration-none shadow-xs" 
-                       style="background: #000000; height: 48px; min-width: 44px; min-height: 44px; transition: transform 0.15s ease;"
+                       style="background: #000000; border: 1px solid rgba(255, 255, 255, 0.18); height: 48px; min-width: 44px; min-height: 44px; transition: transform 0.15s ease;"
                        title="X / Twitter"
                        aria-label="Share on X / Twitter">
                         <svg viewBox="0 0 24 24" style="width: 1.15rem; height: 1.15rem; fill: #ffffff; display: inline-block;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -168,7 +168,7 @@
                        readonly 
                        :value="sharePortalUrl" 
                        aria-label="Memory share URL"
-                       style="font-size: 0.88rem; color: #334155;">
+                       style="font-size: 0.88rem; color: var(--text-main, #334155);">
                 <button class="btn btn-outline-secondary btn-sm fw-bold d-inline-flex align-items-center gap-1 px-3" 
                         type="button" 
                         style="min-height: 44px; min-width: 72px;"

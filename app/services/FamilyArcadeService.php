@@ -19,7 +19,7 @@ use Throwable;
  */
 final class FamilyArcadeService
 {
-    public const VALID_GAMES = ['kinzip', 'kingrid', 'kinword', 'kinpulse'];
+    public const VALID_GAMES = ['kinzip', 'kingrid', 'kinword', 'kinpulse', 'wordie', 'cheeseboard', 'minesweeper'];
     public const VALID_DIFFICULTIES = ['easy', 'medium', 'hard'];
     public const VALID_MODES = ['daily', 'practice', 'ghost', 'live_race'];
 
@@ -44,6 +44,21 @@ final class FamilyArcadeService
             'key' => 'kinpulse_champion',
             'title' => 'KinPulse Maestro',
             'icon' => 'bi-lightning-charge-fill',
+        ],
+        'wordie' => [
+            'key' => 'wordie_champion',
+            'title' => 'KinWordie Wordsmith',
+            'icon' => 'bi-alphabet-uppercase',
+        ],
+        'cheeseboard' => [
+            'key' => 'cheeseboard_champion',
+            'title' => 'Cheeseboard Sovereign',
+            'icon' => 'bi-shield-shaded',
+        ],
+        'minesweeper' => [
+            'key' => 'minesweeper_champion',
+            'title' => 'KinSweeper Pathfinder',
+            'icon' => 'bi-gem',
         ],
         'family_cup' => [
             'key' => 'family_cup_champion',
@@ -131,6 +146,9 @@ final class FamilyArcadeService
             'kingrid' => self::generateKinGridPuzzle($seedKey, $diff, false),
             'kinword' => self::generateKinWordPuzzle($seedKey, $diff, false),
             'kinpulse' => self::generateKinPulsePuzzle($seedKey, $diff),
+            'wordie' => self::generateWordiePuzzle($seedKey, $diff, false),
+            'cheeseboard' => self::generateCheeseboardPuzzle($seedKey, $diff, false),
+            'minesweeper' => self::generateMinesweeperPuzzle($seedKey, $diff, false),
             default => self::generateKinZipPuzzle($seedKey, $diff, false),
         };
     }
@@ -545,6 +563,285 @@ final class FamilyArcadeService
     }
 
     /**
+     * Curated British-English 5-letter word bank for Wordie.
+     *
+     * @return list<string>
+     */
+    private static function getWordieWordBank(): array
+    {
+        return [
+            'HEART', 'SMILE', 'SHARE', 'SWEET', 'PARTY', 'FAITH', 'HONOR', 'CROWN',
+            'GRACE', 'BLOOM', 'LAUGH', 'STORY', 'KINDS', 'BONDS', 'ROOTS', 'ELDER',
+            'YOUTH', 'HOUSE', 'CHILD', 'GRAND', 'AUNTY', 'UNCLE', 'TABLE', 'GUEST',
+            'FEAST', 'DANCE', 'MUSIC', 'CARDS', 'LIGHT', 'SHINE', 'PEACE', 'TRUST',
+            'VALOR', 'UNITY', 'CLANS', 'TRIBE', 'PRIDE', 'HABIT', 'PHOTO', 'FRAME',
+            'ALBUM', 'TRACE', 'DREAM', 'HOPE', 'EARTH', 'WATER', 'STONE', 'CEDAR',
+            'GROVE', 'BRAVE', 'CLEAN', 'FRESH', 'CHEER', 'MERRY', 'BLISS', 'CHARM',
+            'GLORY', 'NOBLE', 'ROYAL', 'PEARL', 'MAGIC', 'ANGEL', 'SAINT', 'HAVEN',
+            'HONEY', 'BREAD', 'MANOR', 'LODGE', 'GREEN', 'AMBER', 'GOLDEN', 'SUNNY',
+            'RIVER', 'OCEAN', 'COAST', 'BEACH', 'ISLES', 'VALES', 'SHIRE', 'FLAME',
+            'SPARK', 'CREST', 'JEWEL', 'TIARA', 'FAVOR', 'HOMES', 'PLACE', 'CRAFT',
+            'PEACH', 'BERRY', 'MANGO', 'LEMON', 'PLUMS', 'VINES', 'CEDAR', 'MANOR',
+        ];
+    }
+
+    /**
+     * Generate a daily 5-letter Wordie puzzle.
+     *
+     * @return array<string, mixed>
+     */
+    private static function generateWordiePuzzle(string $seedKey, string $difficulty, bool $includeSolution): array
+    {
+        $words = self::getWordieWordBank();
+        $rng = self::createRng("wordie:{$seedKey}:{$difficulty}");
+        $targetIndex = (int) floor($rng() * count($words));
+        $targetWord = $words[$targetIndex];
+
+        $payload = [
+            'game' => 'wordie',
+            'seedKey' => $seedKey,
+            'difficulty' => $difficulty,
+            'wordLength' => 5,
+            'maxGuesses' => 6,
+            'targetWordHash' => base64_encode(strtoupper($targetWord)),
+            'parMs' => match ($difficulty) {
+                'easy' => 60000,
+                'hard' => 120000,
+                default => 90000,
+            },
+        ];
+
+        if ($includeSolution) {
+            $payload['targetWord'] = $targetWord;
+        }
+
+        return $payload;
+    }
+
+    /**
+     * Generate a Cheeseboard (LinkedIn Queens-style) territory deduction puzzle.
+     *
+     * @return array<string, mixed>
+     */
+    private static function generateCheeseboardPuzzle(string $seedKey, string $difficulty, bool $includeSolution): array
+    {
+        $size = match ($difficulty) {
+            'easy' => 6,
+            'hard' => 8,
+            default => 7,
+        };
+
+        $rng = self::createRng("cheeseboard:{$seedKey}:{$difficulty}");
+
+        // Deterministic search for N queens where no two touch even diagonally
+        $shuffledCols = [];
+        for ($r = 0; $r < $size; $r++) {
+            $cList = range(0, $size - 1);
+            for ($i = count($cList) - 1; $i > 0; $i--) {
+                $j = (int) floor($rng() * ($i + 1));
+                $tmp = $cList[$i];
+                $cList[$i] = $cList[$j];
+                $cList[$j] = $tmp;
+            }
+            $shuffledCols[$r] = $cList;
+        }
+
+        $placed = [];
+        $usedCols = [];
+        $findQueens = function (int $r) use (&$findQueens, &$placed, &$usedCols, $size, $shuffledCols): bool {
+            if ($r === $size) {
+                return true;
+            }
+            foreach ($shuffledCols[$r] as $c) {
+                if (isset($usedCols[$c])) {
+                    continue;
+                }
+                if ($r > 0 && abs($placed[$r - 1] - $c) <= 1) {
+                    continue;
+                }
+                $placed[$r] = $c;
+                $usedCols[$c] = true;
+                if ($findQueens($r + 1)) {
+                    return true;
+                }
+                unset($usedCols[$c], $placed[$r]);
+            }
+            return false;
+        };
+
+        $findQueens(0);
+
+        if (count($placed) !== $size) {
+            $placed = [];
+            for ($r = 0; $r < $size; $r++) {
+                $placed[$r] = ($r * 2 + 1) % $size;
+            }
+        }
+
+        // Seeded BFS flood-fill to grow contiguous regions around each queen
+        $regionGrid = array_fill(0, $size, array_fill(0, $size, -1));
+        $queues = [];
+        for ($r = 0; $r < $size; $r++) {
+            $c = $placed[$r];
+            $regionGrid[$r][$c] = $r;
+            $queues[$r] = [[$r, $c]];
+        }
+
+        $dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+        $unassigned = ($size * $size) - $size;
+
+        while ($unassigned > 0) {
+            $progress = false;
+            for ($r = 0; $r < $size; $r++) {
+                if (empty($queues[$r])) {
+                    continue;
+                }
+                $popIdx = (int) floor($rng() * count($queues[$r]));
+                $cell = $queues[$r][$popIdx];
+                $neighbors = [];
+                foreach ($dirs as $d) {
+                    $nr = $cell[0] + $d[0];
+                    $nc = $cell[1] + $d[1];
+                    if ($nr >= 0 && $nr < $size && $nc >= 0 && $nc < $size && $regionGrid[$nr][$nc] === -1) {
+                        $neighbors[] = [$nr, $nc];
+                    }
+                }
+                if (!empty($neighbors)) {
+                    $chosen = $neighbors[(int) floor($rng() * count($neighbors))];
+                    $regionGrid[$chosen[0]][$chosen[1]] = $r;
+                    $queues[$r][] = $chosen;
+                    $unassigned--;
+                    $progress = true;
+                } else {
+                    array_splice($queues[$r], $popIdx, 1);
+                }
+            }
+            if (!$progress) {
+                break;
+            }
+        }
+
+        for ($r = 0; $r < $size; $r++) {
+            for ($c = 0; $c < $size; $c++) {
+                if ($regionGrid[$r][$c] === -1) {
+                    foreach ($dirs as $d) {
+                        $nr = $r + $d[0];
+                        $nc = $c + $d[1];
+                        if ($nr >= 0 && $nr < $size && $nc >= 0 && $nc < $size && $regionGrid[$nr][$nc] !== -1) {
+                            $regionGrid[$r][$c] = $regionGrid[$nr][$nc];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        $payload = [
+            'game' => 'cheeseboard',
+            'seedKey' => $seedKey,
+            'difficulty' => $difficulty,
+            'size' => $size,
+            'regions' => $regionGrid,
+            'targetQueens' => $size,
+            'parMs' => match ($difficulty) {
+                'easy' => 45000,
+                'hard' => 110000,
+                default => 75000,
+            },
+        ];
+
+        if ($includeSolution) {
+            $solutionQueens = [];
+            foreach ($placed as $r => $c) {
+                $solutionQueens[] = ['r' => $r, 'c' => $c];
+            }
+            $payload['solutionQueens'] = $solutionQueens;
+        }
+
+        return $payload;
+    }
+
+    /**
+     * Generate an 8x8 Minesweeper (Family Gem Hunter) puzzle.
+     *
+     * @return array<string, mixed>
+     */
+    private static function generateMinesweeperPuzzle(string $seedKey, string $difficulty, bool $includeSolution): array
+    {
+        $rows = 8;
+        $cols = 8;
+        $totalMines = match ($difficulty) {
+            'easy' => 8,
+            'hard' => 12,
+            default => 10,
+        };
+
+        $rng = self::createRng("minesweeper:{$seedKey}:{$difficulty}");
+
+        $allIndices = range(0, ($rows * $cols) - 1);
+        for ($i = count($allIndices) - 1; $i > 0; $i--) {
+            $j = (int) floor($rng() * ($i + 1));
+            $tmp = $allIndices[$i];
+            $allIndices[$i] = $allIndices[$j];
+            $allIndices[$j] = $tmp;
+        }
+
+        $mineSet = [];
+        for ($m = 0; $m < $totalMines; $m++) {
+            $idx = $allIndices[$m];
+            $mr = (int) floor($idx / $cols);
+            $mc = $idx % $cols;
+            $mineSet["{$mr},{$mc}"] = true;
+        }
+
+        $grid = array_fill(0, $rows, array_fill(0, $cols, 0));
+        for ($r = 0; $r < $rows; $r++) {
+            for ($c = 0; $c < $cols; $c++) {
+                if (isset($mineSet["{$r},{$c}"])) {
+                    $grid[$r][$c] = -1;
+                    continue;
+                }
+                $count = 0;
+                for ($dr = -1; $dr <= 1; $dr++) {
+                    for ($dc = -1; $dc <= 1; $dc++) {
+                        if ($dr === 0 && $dc === 0) {
+                            continue;
+                        }
+                        $nr = $r + $dr;
+                        $nc = $c + $dc;
+                        if ($nr >= 0 && $nr < $rows && $nc >= 0 && $nc < $cols && isset($mineSet["{$nr},{$nc}"])) {
+                            $count++;
+                        }
+                    }
+                }
+                $grid[$r][$c] = $count;
+            }
+        }
+
+        $payload = [
+            'game' => 'minesweeper',
+            'seedKey' => $seedKey,
+            'difficulty' => $difficulty,
+            'rows' => $rows,
+            'cols' => $cols,
+            'totalMines' => $totalMines,
+            'safeCellsCount' => ($rows * $cols) - $totalMines,
+            'grid' => $grid,
+            'parMs' => match ($difficulty) {
+                'easy' => 45000,
+                'hard' => 100000,
+                default => 70000,
+            },
+        ];
+
+        if ($includeSolution) {
+            $payload['mineSet'] = $mineSet;
+        }
+
+        return $payload;
+    }
+
+    /**
      * Server-authoritative validation & scoring for any submitted game solution.
      *
      * @param array<string, mixed> $submission
@@ -728,6 +1025,97 @@ final class FamilyArcadeService
             $bonusRounds = $roundsCleared;
             $valid = true;
             $reason = 'Verified KinPulse sequence.';
+        } elseif ($game === 'wordie') {
+            $puzzle = self::generateWordiePuzzle($seedKey, $diff, true);
+            $guesses = $submission['guesses'] ?? null;
+            $targetWord = (string) $puzzle['targetWord'];
+            if (!is_array($guesses) || empty($guesses) || count($guesses) > 6) {
+                return ['valid' => false, 'reason' => 'Invalid Wordie guess count.', 'score' => 0];
+            }
+            $lastGuess = strtoupper(trim((string) end($guesses)));
+            if ($lastGuess !== $targetWord) {
+                return ['valid' => false, 'reason' => 'Target word not matched.', 'score' => 0];
+            }
+            $bonusRounds = max(0, 7 - count($guesses));
+            $valid = true;
+            $reason = 'Verified Wordie solution in ' . count($guesses) . ' guesses.';
+        } elseif ($game === 'cheeseboard') {
+            $puzzle = self::generateCheeseboardPuzzle($seedKey, $diff, true);
+            $size = (int) $puzzle['size'];
+            $queens = $submission['queens'] ?? null;
+            if (!is_array($queens) || count($queens) !== $size) {
+                return ['valid' => false, 'reason' => 'Must place exactly ' . $size . ' queens.', 'score' => 0];
+            }
+            $usedRows = [];
+            $usedCols = [];
+            $usedRegions = [];
+            $coords = [];
+            $regionGrid = $puzzle['regions'];
+
+            foreach ($queens as $q) {
+                $r = (int) ($q['r'] ?? -1);
+                $c = (int) ($q['c'] ?? -1);
+                if ($r < 0 || $r >= $size || $c < 0 || $c >= $size) {
+                    return ['valid' => false, 'reason' => 'Queen out of bounds.', 'score' => 0];
+                }
+                if (isset($usedRows[$r])) {
+                    return ['valid' => false, 'reason' => 'Multiple queens in row ' . ($r + 1) . '.', 'score' => 0];
+                }
+                if (isset($usedCols[$c])) {
+                    return ['valid' => false, 'reason' => 'Multiple queens in col ' . ($c + 1) . '.', 'score' => 0];
+                }
+                $reg = (int) $regionGrid[$r][$c];
+                if (isset($usedRegions[$reg])) {
+                    return ['valid' => false, 'reason' => 'Multiple queens in coloured region.', 'score' => 0];
+                }
+                $usedRows[$r] = true;
+                $usedCols[$c] = true;
+                $usedRegions[$reg] = true;
+                $coords[] = [$r, $c];
+            }
+
+            $count = count($coords);
+            for ($i = 0; $i < $count; $i++) {
+                for ($j = $i + 1; $j < $count; $j++) {
+                    if (abs($coords[$i][0] - $coords[$j][0]) <= 1 && abs($coords[$i][1] - $coords[$j][1]) <= 1) {
+                        return ['valid' => false, 'reason' => 'Queens cannot touch even diagonally.', 'score' => 0];
+                    }
+                }
+            }
+
+            $bonusRounds = $size;
+            $valid = true;
+            $reason = 'Verified Cheeseboard queens placement.';
+        } elseif ($game === 'minesweeper') {
+            $puzzle = self::generateMinesweeperPuzzle($seedKey, $diff, true);
+            $uncovered = $submission['uncovered'] ?? null;
+            $safeTarget = (int) $puzzle['safeCellsCount'];
+            $mineSet = $puzzle['mineSet'];
+
+            if (!is_array($uncovered) || count($uncovered) !== $safeTarget) {
+                return ['valid' => false, 'reason' => 'All safe cells must be uncovered to win.', 'score' => 0];
+            }
+
+            $seen = [];
+            foreach ($uncovered as $cell) {
+                $r = (int) ($cell['r'] ?? -1);
+                $c = (int) ($cell['c'] ?? -1);
+                if ($r < 0 || $r >= 8 || $c < 0 || $c >= 8) {
+                    return ['valid' => false, 'reason' => 'Cell out of bounds.', 'score' => 0];
+                }
+                $key = "{$r},{$c}";
+                if (isset($mineSet[$key])) {
+                    return ['valid' => false, 'reason' => 'Mine detonated!', 'score' => 0];
+                }
+                if (isset($seen[$key])) {
+                    return ['valid' => false, 'reason' => 'Duplicate cell uncovered.', 'score' => 0];
+                }
+                $seen[$key] = true;
+            }
+
+            $bonusRounds = (int) $puzzle['totalMines'];
+            $valid = true;
+            $reason = 'Verified KinSweeper minefield navigation.';
         }
 
         $score = self::computeAuthoritativeScore($diff, $elapsedMs, $hintsUsed, $mistakesCount, $bonusRounds);

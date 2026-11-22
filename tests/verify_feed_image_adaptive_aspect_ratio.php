@@ -14,6 +14,8 @@ declare(strict_types=1);
  */
 
 $postCardPath = __DIR__ . '/../resources/views/components/feed/post-card.blade.php';
+$mediaSinglePath = __DIR__ . '/../resources/views/components/feed/partials/media-single.blade.php';
+$mediaCarouselPath = __DIR__ . '/../resources/views/components/feed/partials/media-carousel.blade.php';
 $standardsCssPath = __DIR__ . '/../public/css/standards-v21.css';
 $globalScssPath = __DIR__ . '/../resources/asset/scss/global.scss';
 
@@ -22,7 +24,9 @@ if (!file_exists($postCardPath)) {
     exit(1);
 }
 
-$postCardContent = file_get_contents($postCardPath);
+$postCardContent = file_get_contents($postCardPath)
+    . (file_exists($mediaSinglePath) ? "\n" . file_get_contents($mediaSinglePath) : '')
+    . (file_exists($mediaCarouselPath) ? "\n" . file_get_contents($mediaCarouselPath) : '');
 $standardsCssContent = file_get_contents($standardsCssPath);
 $globalScssContent = file_get_contents($globalScssPath);
 
@@ -83,10 +87,12 @@ if (!str_contains($postCardContent, 'slideAspects') || !str_contains($postCardCo
     $errors[] = "post-card.blade.php is missing ATG Fluid Per-Slide Aspect Morphing (slideAspects / slideFocals / AtgMediaSupremacy)!";
 }
 
-// Check 12: ATG Server-Side C-Level Unsharp Mask in VisualSupremacyService.php
+// Check 12: ATG Server-Side C-Level Unsharp Mask in VisualSupremacyService.php -> SovereignMediaEngine.php (shared-lib)
 $vseServiceContent = file_get_contents(__DIR__ . '/../app/services/VisualSupremacyService.php');
-if (!str_contains($vseServiceContent, 'applySuperHdUnsharpMask') || !str_contains($vseServiceContent, 'imageconvolution')) {
-    $errors[] = "VisualSupremacyService.php is missing ATG applySuperHdUnsharpMask C-level convolution!";
+$sharedMediaEnginePath = __DIR__ . '/../vendor/modernman00/shared-lib/src/Media/SovereignMediaEngine.php';
+$sharedMediaEngineContent = file_exists($sharedMediaEnginePath) ? file_get_contents($sharedMediaEnginePath) : '';
+if (!str_contains($vseServiceContent, 'applySuperHdUnsharpMask') || !str_contains($sharedMediaEngineContent, 'imageconvolution')) {
+    $errors[] = "VisualSupremacyService.php / SovereignMediaEngine.php is missing ATG applySuperHdUnsharpMask C-level convolution!";
 }
 
 if (!empty($errors)) {

@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { isDirectVideoDescriptor, resolveVideoPlaybackSrc } from './feedUtils';
 import { attachWebGL4kCas } from './AtgWebGL4kRenderer';
+import {
+    activePostId,
+    isGlobalMuted,
+    registerMediaPlayer,
+    requestActivePlayer,
+    toggleGlobalMute,
+    useSignalValue,
+} from './mediaPlaybackStore';
 
 function safeAspectRatio(raw) {
     if (typeof raw !== 'string') return undefined;
@@ -18,25 +26,105 @@ function parseAspectRatioValue(raw) {
     return w / h;
 }
 
-function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
+function IframePosterFacade({ vid, providerLabel, onActivate }) {
+    const thumb = vid?.posterUrl || vid?.thumbnailUrl || null;
+    return (
+        <div
+            data-testid="iframe-poster-facade"
+            className="w-100 h-100 position-relative d-flex align-items-center justify-content-center overflow-hidden"
+            style={{
+                background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+                minHeight: '220px',
+            }}
+        >
+            {thumb && (
+                <img
+                    src={thumb}
+                    alt={vid?.title || vid?.hook || `${providerLabel} video preview`}
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
+                    className="position-absolute top-0 start-0 w-100 h-100"
+                    style={{ objectFit: 'cover', opacity: 0.72 }}
+                />
+            )}
+            <span
+                className="badge rounded-pill position-absolute"
+                style={{
+                    top: '12px',
+                    left: '12px',
+                    zIndex: 2,
+                    background: 'rgba(15, 23, 42, 0.82)',
+                    color: '#ffffff',
+                    fontSize: '0.75rem',
+                    padding: '6px 10px',
+                }}
+            >
+                {providerLabel}
+            </span>
+            <button
+                type="button"
+                onClick={onActivate}
+                aria-label={`Play ${providerLabel} video`}
+                className="btn position-relative d-inline-flex align-items-center justify-content-center rounded-circle shadow"
+                style={{
+                    zIndex: 3,
+                    width: '56px',
+                    height: '56px',
+                    minWidth: '44px',
+                    minHeight: '44px',
+                    background: 'rgba(163, 22, 33, 0.92)',
+                    border: '2px solid rgba(255, 255, 255, 0.85)',
+                    color: '#ffffff',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                }}
+            >
+                <i className="bi bi-play-fill" style={{ fontSize: '1.5rem', marginLeft: '2px' }} aria-hidden="true" />
+            </button>
+        </div>
+    );
+}
+
+function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const containerRef = useRef(null);
     const [webglActive, setWebglActive] = useState(true);
-    const [isMuted, setIsMuted] = useState(true);
+    const globalMuted = useSignalValue(isGlobalMuted);
+    const currentActiveId = useSignalValue(activePostId);
+    const [userActivatedIframe, setUserActivatedIframe] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isBuffering, setIsBuffering] = useState(false);
-    const [detectedRatio, setDetectedRatio] = useState(() => safeAspectRatio(vid?.aspect_ratio));
+    const [detectedRatio, setDetectedRatio] = useState(() => safeAspectRatio(vid?.aspectRatio || vid?.aspect_ratio));
 
     const isDirect = isDirectVideoDescriptor(vid);
     const playSrc = resolveVideoPlaybackSrc(vid);
     const fallbackOriginal = typeof vid === 'object' ? (vid?.originalUrl || '') : '';
-    const thumbUrl = typeof vid === 'object' ? (vid?.thumbnailUrl || null) : null;
-    const durationSec = typeof vid === 'object' && Number.isFinite(Number(vid?.duration_sec)) ? Math.round(Number(vid.duration_sec)) : 0;
+    const thumbUrl = typeof vid === 'object' ? (vid?.posterUrl || vid?.thumbnailUrl || null) : null;
+    const durationSec = typeof vid === 'object' && Number.isFinite(Number(vid?.durationSec ?? vid?.duration_sec))
+        ? Math.round(Number(vid.durationSec ?? vid.duration_sec))
+        : 0;
+    const providerRaw = String(vid?.provider || vid?.type || 'video').toLowerCase();
+    const providerLabel = providerRaw === 'youtube' ? 'YouTube'
+        : providerRaw === 'facebook' ? 'Facebook'
+        : providerRaw === 'vimeo' ? 'Vimeo'
+        : providerRaw === 'cloudflare' ? 'Cloudflare Stream'
+        : providerRaw === 'tiktok' ? 'TikTok'
+        : 'Video';
+    const hasObserver = typeof IntersectionObserver !== 'undefined';
+    const isPlayerActive = currentActiveId === playerId;
+    const isIframeMounted = !hasObserver || isPlayerActive || userActivatedIframe;
 
     const numericRatio = parseAspectRatioValue(detectedRatio);
     const isShortHint = Boolean(
-        vid?.isShort || (typeof vid?.originalUrl === 'string' && vid.originalUrl.includes('/shorts/'))
+        vid?.isShort
+        || (typeof vid?.originalUrl === 'string' && (vid.originalUrl.includes('/shorts/') || /\/reel\/\d+/i.test(vid.originalUrl)))
+        || (typeof vid?.embedUrl === 'string' && /\/reel(?:\/|%2F)\d+/i.test(vid.embedUrl))
+    );
+    const isFacebookEmbed = !isDirect && (
+        vid?.type === 'facebook'
+        || (typeof playSrc === 'string' && playSrc.includes('facebook.com/plugins/video.php'))
     );
     const isPortrait = numericRatio !== null ? numericRatio < 0.88 : isShortHint;
     const isLandscape = numericRatio !== null ? numericRatio > 1.15 : !isShortHint;
@@ -47,8 +135,10 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
             ? (numericRatio !== null && numericRatio <= 1.6 ? detectedRatio : '16 / 10')
             : (detectedRatio || '1 / 1'));
     const feedMaxHeight = isPortrait ? '880px' : (isLandscape ? 'min(680px, 75vh)' : 'min(720px, 78vh)');
-    const focalPos = (typeof vid?.focal_x === 'number' && typeof vid?.focal_y === 'number')
-        ? `${vid.focal_x}% ${vid.focal_y}%`
+    const rawFocalX = vid?.focalX ?? vid?.focal_x;
+    const rawFocalY = vid?.focalY ?? vid?.focal_y;
+    const focalPos = (typeof rawFocalX === 'number' && typeof rawFocalY === 'number')
+        ? `${rawFocalX}% ${rawFocalY}%`
         : (isPortrait ? '50% 28%' : '50% 50%');
 
     const getTrimBounds = (el) => {
@@ -61,77 +151,91 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
     };
 
     useEffect(() => {
+        const v = videoRef.current;
+        if (v) {
+            v.muted = globalMuted;
+            v.defaultMuted = globalMuted;
+            if (globalMuted) {
+                v.setAttribute('muted', '');
+            } else {
+                v.removeAttribute('muted');
+            }
+        }
+    }, [globalMuted]);
+
+    useEffect(() => {
+        if (!isPlayerActive && userActivatedIframe) {
+            setUserActivatedIframe(false);
+        }
+    }, [isPlayerActive, userActivatedIframe]);
+
+    useEffect(() => {
         const video = videoRef.current;
         const container = containerRef.current;
-        if (!video || !container) return;
+        if (!container) return;
 
-        video.muted = true;
-        video.defaultMuted = true;
-        video.playsInline = true;
-        video.setAttribute('muted', '');
-        video.setAttribute('playsinline', '');
-        video.setAttribute('webkit-playsinline', '');
+        if (video) {
+            video.muted = isGlobalMuted.peek();
+            video.defaultMuted = isGlobalMuted.peek();
+            video.playsInline = true;
+            if (video.muted) {
+                video.setAttribute('muted', '');
+            }
+            video.setAttribute('playsinline', '');
+            video.setAttribute('webkit-playsinline', '');
 
-        if (vid?.hlsUrl && window.__FPFeedVideoCoordinator && typeof window.__FPFeedVideoCoordinator.attachHls === 'function') {
-            window.__FPFeedVideoCoordinator.attachHls(video, vid.hlsUrl, vid.embedUrl);
+            if (vid?.hlsUrl && window.__FPFeedVideoCoordinator && typeof window.__FPFeedVideoCoordinator.attachHls === 'function') {
+                window.__FPFeedVideoCoordinator.attachHls(video, vid.hlsUrl, vid.embedUrl);
+            }
         }
 
-        let unregister = null;
-        if (window.__FPFeedVideoCoordinator && typeof window.__FPFeedVideoCoordinator.register === 'function') {
-            unregister = window.__FPFeedVideoCoordinator.register(container, {
-                getVideo: () => videoRef.current,
-                play: () => {
-                    const v = videoRef.current;
-                    if (!v || v._userManuallyPaused) return;
-                    v.muted = true;
-                    v.defaultMuted = true;
-                    v.setAttribute('muted', '');
-                    v._autoPlaying = true;
-                    v.play().then(() => {
-                        setIsPlaying(true);
-                    }).catch(() => {
-                        v._autoPlaying = false;
-                    });
-                },
-                pause: () => {
-                    const v = videoRef.current;
-                    if (v && !v.paused) {
-                        v._autoPlaying = false;
-                        v.pause();
-                        setIsPlaying(false);
-                    }
-                }
-            });
-        } else if ('IntersectionObserver' in window) {
-            const obs = new IntersectionObserver((entries) => {
-                entries.forEach((entry) => {
-                    const v = videoRef.current;
-                    if (!v) return;
-                    if (entry.isIntersecting && entry.intersectionRatio >= 0.3) {
-                        if (!v._userManuallyPaused && v.paused) {
-                            v.muted = true;
-                            v.defaultMuted = true;
-                            v.setAttribute('muted', '');
-                            v._autoPlaying = true;
-                            v.play().then(() => setIsPlaying(true)).catch(() => { v._autoPlaying = false; });
-                        }
-                    } else if (entry.intersectionRatio < 0.15) {
-                        if (!v.paused) {
-                            v._autoPlaying = false;
-                            v.pause();
-                            setIsPlaying(false);
-                        }
-                    }
+        const activatePlayer = () => {
+            const v = videoRef.current;
+            if (!v || v._userManuallyPaused) return;
+            const mutedNow = isGlobalMuted.peek();
+            v.muted = mutedNow;
+            v.defaultMuted = mutedNow;
+            if (mutedNow) v.setAttribute('muted', '');
+            v._autoPlaying = true;
+            const playPromise = v.play();
+            if (playPromise && typeof playPromise.then === 'function') {
+                playPromise.then(() => {
+                    setIsPlaying(true);
+                }).catch(() => {
+                    v._autoPlaying = false;
                 });
-            }, { threshold: [0, 0.15, 0.3, 0.6] });
-            obs.observe(container);
-            unregister = () => obs.disconnect();
+            }
+        };
+
+        const deactivatePlayer = () => {
+            const v = videoRef.current;
+            if (v && !v.paused) {
+                v._autoPlaying = false;
+                // Pause only — preserve buffered media in <video> element
+                v.pause();
+                setIsPlaying(false);
+            }
+        };
+
+        const unregisterStore = registerMediaPlayer(playerId, container, {
+            onActivate: activatePlayer,
+            onDeactivate: deactivatePlayer,
+        });
+
+        let unregisterLegacy = null;
+        if (window.__FPFeedVideoCoordinator && typeof window.__FPFeedVideoCoordinator.register === 'function') {
+            unregisterLegacy = window.__FPFeedVideoCoordinator.register(container, {
+                getVideo: () => videoRef.current,
+                play: activatePlayer,
+                pause: deactivatePlayer,
+            });
         }
 
         return () => {
-            if (typeof unregister === 'function') unregister();
+            unregisterStore();
+            if (typeof unregisterLegacy === 'function') unregisterLegacy();
         };
-    }, [playSrc, vid?.hlsUrl]);
+    }, [playSrc, vid?.hlsUrl, playerId]);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -162,7 +266,15 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
         if (!el) return;
         if (el.paused) {
             el._userManuallyPaused = false;
-            el.play().then(() => setIsPlaying(true)).catch(() => {});
+            if (activePostId.peek() !== playerId) {
+                requestActivePlayer(playerId);
+            }
+            const p = el.play();
+            if (p && typeof p.then === 'function') {
+                p.then(() => setIsPlaying(true)).catch(() => {});
+            } else {
+                setIsPlaying(true);
+            }
         } else {
             el._userManuallyPaused = true;
             el._autoPlaying = false;
@@ -173,10 +285,11 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
 
     const toggleMute = (e) => {
         e.stopPropagation();
+        const nextMuted = toggleGlobalMute();
         const el = videoRef.current;
-        if (!el) return;
-        el.muted = !el.muted;
-        setIsMuted(el.muted);
+        if (el) {
+            el.muted = nextMuted;
+        }
     };
 
     return (
@@ -256,8 +369,8 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
                             type="button"
                             className="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
                             onClick={toggleMute}
-                            title={isMuted ? 'Unmute video' : 'Mute video'}
-                            aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+                            title={globalMuted ? 'Unmute video' : 'Mute video'}
+                            aria-label={globalMuted ? 'Unmute video' : 'Mute video'}
                             style={{
                                 top: '10px',
                                 right: '10px',
@@ -276,7 +389,7 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
                                 flexShrink: 0,
                             }}
                         >
-                            <i className={`bi ${isMuted ? 'bi-volume-mute-fill' : 'bi-volume-up-fill'}`} style={{ fontSize: '0.9rem', color: '#ffffff' }} aria-hidden="true" />
+                            <i className={`bi ${globalMuted ? 'bi-volume-mute-fill' : 'bi-volume-up-fill'}`} style={{ fontSize: '0.9rem', color: '#ffffff' }} aria-hidden="true" />
                         </button>
                         <video
                             ref={videoRef}
@@ -285,7 +398,7 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
                             poster={thumbUrl || undefined}
                             controls
                             playsInline
-                            muted={isMuted}
+                            muted={globalMuted}
                             preload="metadata"
                             onLoadedMetadata={(e) => {
                                 const el = e.currentTarget;
@@ -309,6 +422,9 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
                             onPlaying={() => {
                                 setIsBuffering(false);
                                 setIsPlaying(true);
+                                if (activePostId.peek() !== playerId) {
+                                    requestActivePlayer(playerId);
+                                }
                             }}
                             onPause={() => {
                                 setIsBuffering(false);
@@ -328,7 +444,79 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
                                     objectPosition: focalPos,
                                     pointerEvents: 'none',
                                     zIndex: 2,
-                                    clipPath: 'inset(0 0 48px 0)',
+                                    clipPath: 'inset(0 0 84px 0)',
+                                }}
+                            />
+                        )}
+                    </div>
+                </div>
+            ) : isFacebookEmbed ? (
+                <div
+                    className="video-rendition-frame position-relative overflow-hidden d-flex align-items-center justify-content-center"
+                    style={{
+                        backgroundColor: '#0b0f19',
+                        width: '100%',
+                        maxWidth: '100%',
+                        borderRadius: '12px',
+                    }}
+                >
+                    <button
+                        type="button"
+                        className="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
+                        onClick={() => onOpenVideo?.(allVideos, 0)}
+                        title="Play in full video mode"
+                        aria-label="Play in full video mode"
+                        style={{
+                            top: '10px',
+                            right: '10px',
+                            zIndex: 6,
+                            width: '44px',
+                            height: '44px',
+                            minWidth: '44px',
+                            minHeight: '44px',
+                            borderRadius: '9999px',
+                            background: 'rgba(15, 23, 42, 0.78)',
+                            backdropFilter: 'blur(8px)',
+                            border: '1px solid rgba(255, 255, 255, 0.25)',
+                            color: '#ffffff',
+                            cursor: 'pointer',
+                            whiteSpace: 'nowrap',
+                            flexShrink: 0,
+                        }}
+                    >
+                        <i className="bi bi-arrows-fullscreen" style={{ fontSize: '0.9rem' }} aria-hidden="true" />
+                    </button>
+                    <div
+                        className="facebook-embed-stage w-100"
+                        style={{
+                            maxWidth: (isShortHint || (numericRatio !== null && numericRatio < 0.88))
+                                ? 'min(420px, 100%)'
+                                : (numericRatio !== null && numericRatio > 1.15 ? '100%' : 'min(520px, 100%)'),
+                            aspectRatio: (isShortHint || (numericRatio !== null && numericRatio < 0.88))
+                                ? (detectedRatio || '9 / 16')
+                                : (detectedRatio || '4 / 5'),
+                            maxHeight: (isShortHint || (numericRatio !== null && numericRatio < 0.88))
+                                ? 'min(740px, 80vh)'
+                                : 'min(680px, 78vh)',
+                            margin: '0 auto',
+                        }}
+                    >
+                        {isIframeMounted ? (
+                            <iframe
+                                src={playSrc}
+                                title={vid?.title || 'Family video'}
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowFullScreen
+                                loading="lazy"
+                                style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                            />
+                        ) : (
+                            <IframePosterFacade
+                                vid={vid}
+                                providerLabel={providerLabel}
+                                onActivate={() => {
+                                    setUserActivatedIframe(true);
+                                    requestActivePlayer(playerId);
                                 }}
                             />
                         )}
@@ -341,7 +529,7 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
                         backgroundColor: '#0b0f19',
                         width: '100%',
                         maxWidth: '100%',
-                        aspectRatio: isShortHint ? '4 / 5' : '16 / 10',
+                        aspectRatio: isShortHint ? '4 / 5' : (detectedRatio || '16 / 10'),
                         maxHeight: isShortHint ? '880px' : 'min(680px, 75vh)',
                         borderRadius: '12px',
                     }}
@@ -372,14 +560,25 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
                     >
                         <i className="bi bi-arrows-fullscreen" style={{ fontSize: '0.9rem' }} aria-hidden="true" />
                     </button>
-                    <iframe
-                        src={playSrc}
-                        title={vid?.title || 'Family video'}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                        loading="lazy"
-                        style={{ width: '100%', height: '100%', border: 'none' }}
-                    />
+                    {isIframeMounted ? (
+                        <iframe
+                            src={playSrc}
+                            title={vid?.title || 'Family video'}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                            loading="lazy"
+                            style={{ width: '100%', height: '100%', border: 'none' }}
+                        />
+                    ) : (
+                        <IframePosterFacade
+                            vid={vid}
+                            providerLabel={providerLabel}
+                            onActivate={() => {
+                                setUserActivatedIframe(true);
+                                requestActivePlayer(playerId);
+                            }}
+                        />
+                    )}
                 </div>
             )}
         </div>
@@ -393,19 +592,56 @@ function MultiVideoCard({
     onOpenVideo,
     allVideos,
     trackRef,
+    playerId,
 }) {
     const videoRef = useRef(null);
     const [hasFrame, setHasFrame] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isBuffering, setIsBuffering] = useState(false);
-    const [isMuted, setIsMuted] = useState(true);
+    const globalMuted = useSignalValue(isGlobalMuted);
+    const currentActiveId = useSignalValue(activePostId);
+    const [userActivatedIframe, setUserActivatedIframe] = useState(false);
     const [progressPct, setProgressPct] = useState(0);
-    const [isLandscape, setIsLandscape] = useState(vid?.type && vid.type !== 'direct');
+    const isPortraitHint = Boolean(
+        vid?.isShort
+        || (typeof vid?.originalUrl === 'string' && (vid.originalUrl.includes('/shorts/') || /\/reel\/\d+/i.test(vid.originalUrl)))
+        || (parseAspectRatioValue(vid?.aspectRatio || vid?.aspect_ratio) !== null && parseAspectRatioValue(vid?.aspectRatio || vid?.aspect_ratio) < 0.88)
+    );
+    const [isLandscape, setIsLandscape] = useState(vid?.type && vid.type !== 'direct' && !isPortraitHint && vid?.type !== 'facebook');
 
     const isDirect = isDirectVideoDescriptor(vid);
     const playSrc = resolveVideoPlaybackSrc(vid);
     const fallbackOriginal = typeof vid === 'object' ? (vid?.originalUrl || '') : '';
-    const thumbUrl = typeof vid === 'object' ? (vid?.thumbnailUrl || null) : null;
+    const thumbUrl = typeof vid === 'object' ? (vid?.posterUrl || vid?.thumbnailUrl || null) : null;
+    const hasObserver = typeof IntersectionObserver !== 'undefined';
+    const isPlayerActive = currentActiveId === playerId;
+    const isIframeMounted = !hasObserver || isPlayerActive || userActivatedIframe;
+    const providerRaw = String(vid?.provider || vid?.type || 'video').toLowerCase();
+    const providerLabel = providerRaw === 'youtube' ? 'YouTube'
+        : providerRaw === 'facebook' ? 'Facebook'
+        : providerRaw === 'vimeo' ? 'Vimeo'
+        : providerRaw === 'cloudflare' ? 'Cloudflare Stream'
+        : providerRaw === 'tiktok' ? 'TikTok'
+        : 'Video';
+
+    useEffect(() => {
+        const v = videoRef.current;
+        if (v) {
+            v.muted = globalMuted;
+            v.defaultMuted = globalMuted;
+            if (globalMuted) {
+                v.setAttribute('muted', '');
+            } else {
+                v.removeAttribute('muted');
+            }
+        }
+    }, [globalMuted]);
+
+    useEffect(() => {
+        if (!isPlayerActive && userActivatedIframe) {
+            setUserActivatedIframe(false);
+        }
+    }, [isPlayerActive, userActivatedIframe]);
 
     const cardWidth = isLandscape
         ? 'clamp(300px, 82%, 520px)'
@@ -436,12 +672,18 @@ function MultiVideoCard({
                     if (other !== el && !other.paused) other.pause();
                 });
             }
-            el.play().then(() => {
+            const p = el.play();
+            if (p && typeof p.then === 'function') {
+                p.then(() => {
+                    setIsPlaying(true);
+                    setIsBuffering(false);
+                }).catch(() => {
+                    setIsBuffering(false);
+                });
+            } else {
                 setIsPlaying(true);
                 setIsBuffering(false);
-            }).catch(() => {
-                setIsBuffering(false);
-            });
+            }
         } else {
             el.pause();
             setIsPlaying(false);
@@ -451,10 +693,11 @@ function MultiVideoCard({
 
     const toggleMute = (e) => {
         e.stopPropagation();
+        const nextMuted = toggleGlobalMute();
         const el = videoRef.current;
-        if (!el) return;
-        el.muted = !el.muted;
-        setIsMuted(el.muted);
+        if (el) {
+            el.muted = nextMuted;
+        }
     };
 
     const handleTimeUpdate = () => {
@@ -512,8 +755,8 @@ function MultiVideoCard({
                         type="button"
                         className="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
                         onClick={toggleMute}
-                        title={isMuted ? 'Unmute video' : 'Mute video'}
-                        aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+                        title={globalMuted ? 'Unmute video' : 'Mute video'}
+                        aria-label={globalMuted ? 'Unmute video' : 'Mute video'}
                         style={{
                             top: '8px',
                             right: '8px',
@@ -533,7 +776,7 @@ function MultiVideoCard({
                         }}
                     >
                         <i
-                            className={`bi ${isMuted ? 'bi-volume-mute-fill' : 'bi-volume-up-fill'}`}
+                            className={`bi ${globalMuted ? 'bi-volume-mute-fill' : 'bi-volume-up-fill'}`}
                             style={{ fontSize: '0.9rem', color: '#ffffff' }}
                             aria-hidden="true"
                         />
@@ -567,7 +810,7 @@ function MultiVideoCard({
                             src={playSrc}
                             poster={thumbUrl || undefined}
                             playsInline
-                            muted={isMuted}
+                            muted={globalMuted}
                             preload="metadata"
                             onLoadedMetadata={(e) => handleDetectDimensions(e.currentTarget)}
                             onLoadedData={(e) => {
@@ -642,37 +885,70 @@ function MultiVideoCard({
                 </>
             ) : (
                 <div className="w-100 h-100 position-relative flex-grow-1" style={{ background: '#0b0f19' }}>
-                    <iframe
-                        src={playSrc}
-                        title={vid?.title || `Family video ${idx + 1}`}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                        loading="lazy"
-                        style={{ width: '100%', height: '100%', border: 'none' }}
-                    />
+                    {isIframeMounted ? (
+                        <iframe
+                            src={playSrc}
+                            title={vid?.title || `Family video ${idx + 1}`}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                            loading="lazy"
+                            style={{ width: '100%', height: '100%', border: 'none' }}
+                        />
+                    ) : (
+                        <IframePosterFacade
+                            vid={vid}
+                            providerLabel={providerLabel}
+                            onActivate={() => {
+                                setUserActivatedIframe(true);
+                                requestActivePlayer(playerId);
+                            }}
+                        />
+                    )}
                 </div>
             )}
         </div>
     );
 }
 
-export function FeedVideoGallery({ videos = [], onOpenVideo }) {
+function MultiVideoGallery({ effectiveVideos, playerId, onOpenVideo }) {
     const trackRef = useRef(null);
-    const [activeIdx, setActiveIdx] = useState(0);
-
-    if (!Array.isArray(videos) || videos.length === 0) {
-        return null;
-    }
-
-    if (videos.length === 1) {
-        return <SingleDirectVideo vid={videos[0]} allVideos={videos} onOpenVideo={onOpenVideo} />;
-    }
-
     const galleryContainerRef = useRef(null);
+    const [activeIdx, setActiveIdx] = useState(0);
 
     useEffect(() => {
         const container = galleryContainerRef.current;
         if (!container) return;
+
+        const activateGallery = () => {
+            const cards = trackRef.current?.querySelectorAll('.multi-video-card');
+            const v = cards?.[activeIdx]?.querySelector('video');
+            if (!v || v._userManuallyPaused) return;
+            const mutedNow = isGlobalMuted.peek();
+            v.muted = mutedNow;
+            v.defaultMuted = mutedNow;
+            if (mutedNow) v.setAttribute('muted', '');
+            v._autoPlaying = true;
+            const p = v.play();
+            if (p && typeof p.catch === 'function') {
+                p.catch(() => { v._autoPlaying = false; });
+            }
+        };
+
+        const deactivateGallery = () => {
+            const cards = trackRef.current?.querySelectorAll('.multi-video-card');
+            cards?.forEach((c) => {
+                const v = c.querySelector('video');
+                if (v && !v.paused) {
+                    v._autoPlaying = false;
+                    v.pause();
+                }
+            });
+        };
+
+        const unregisterStore = registerMediaPlayer(playerId, container, {
+            onActivate: activateGallery,
+            onDeactivate: deactivateGallery,
+        });
 
         let unregister = null;
         if (window.__FPFeedVideoCoordinator && typeof window.__FPFeedVideoCoordinator.register === 'function') {
@@ -681,35 +957,18 @@ export function FeedVideoGallery({ videos = [], onOpenVideo }) {
                     const cards = trackRef.current?.querySelectorAll('.multi-video-card');
                     return cards?.[activeIdx]?.querySelector('video') || null;
                 },
-                play: () => {
-                    const cards = trackRef.current?.querySelectorAll('.multi-video-card');
-                    const v = cards?.[activeIdx]?.querySelector('video');
-                    if (!v || v._userManuallyPaused) return;
-                    v.muted = true;
-                    v.defaultMuted = true;
-                    v.setAttribute('muted', '');
-                    v._autoPlaying = true;
-                    v.play().catch(() => { v._autoPlaying = false; });
-                },
-                pause: () => {
-                    const cards = trackRef.current?.querySelectorAll('.multi-video-card');
-                    cards?.forEach(c => {
-                        const v = c.querySelector('video');
-                        if (v && !v.paused) {
-                            v._autoPlaying = false;
-                            v.pause();
-                        }
-                    });
-                }
+                play: activateGallery,
+                pause: deactivateGallery,
             });
         }
         return () => {
+            unregisterStore();
             if (typeof unregister === 'function') unregister();
         };
-    }, [activeIdx]);
+    }, [activeIdx, playerId]);
 
     const scrollToCard = (targetIdx) => {
-        const bounded = Math.max(0, Math.min(videos.length - 1, targetIdx));
+        const bounded = Math.max(0, Math.min(effectiveVideos.length - 1, targetIdx));
         setActiveIdx(bounded);
         const track = trackRef.current;
         if (!track) return;
@@ -740,7 +999,7 @@ export function FeedVideoGallery({ videos = [], onOpenVideo }) {
             {/* Subtle Pagination Dots */}
             <div className="d-flex align-items-center justify-content-end mb-1 px-1">
                 <div className="d-flex align-items-center gap-1">
-                    {videos.map((_, vIdx) => (
+                    {effectiveVideos.map((_, vIdx) => (
                         <span
                             key={`dot-${vIdx}`}
                             onClick={() => scrollToCard(vIdx)}
@@ -776,7 +1035,7 @@ export function FeedVideoGallery({ videos = [], onOpenVideo }) {
                 </button>
             )}
 
-            {activeIdx < videos.length - 1 && (
+            {activeIdx < effectiveVideos.length - 1 && (
                 <button
                     type="button"
                     className="btn position-absolute end-0 top-50 translate-middle-y shadow d-inline-flex align-items-center justify-content-center p-0 rounded-circle"
@@ -812,18 +1071,38 @@ export function FeedVideoGallery({ videos = [], onOpenVideo }) {
                     maxWidth: '100%',
                 }}
             >
-                {videos.map((vid, vIdx) => (
+                {effectiveVideos.map((vid, vIdx) => (
                     <MultiVideoCard
                         key={`${resolveVideoPlaybackSrc(vid)}_${vIdx}`}
                         vid={vid}
                         idx={vIdx}
-                        totalCount={videos.length}
+                        totalCount={effectiveVideos.length}
                         onOpenVideo={onOpenVideo}
-                        allVideos={videos}
+                        allVideos={effectiveVideos}
                         trackRef={trackRef}
+                        playerId={playerId}
                     />
                 ))}
             </div>
         </div>
     );
+}
+
+export function FeedVideoGallery({ videos = [], postNo = null, normalizedMedia = null, onOpenVideo }) {
+    const mediaVideos = Array.isArray(normalizedMedia)
+        ? normalizedMedia.filter((m) => m && (m.renderMode === 'native_video' || m.renderMode === 'inline_iframe'))
+        : [];
+    const effectiveVideos = Array.isArray(videos) && videos.length > 0 ? videos : mediaVideos;
+
+    if (!Array.isArray(effectiveVideos) || effectiveVideos.length === 0) {
+        return null;
+    }
+
+    const playerId = postNo ? `post-${postNo}` : `vid-${resolveVideoPlaybackSrc(effectiveVideos[0])}`;
+
+    if (effectiveVideos.length === 1) {
+        return <SingleDirectVideo vid={effectiveVideos[0]} allVideos={effectiveVideos} onOpenVideo={onOpenVideo} playerId={playerId} />;
+    }
+
+    return <MultiVideoGallery effectiveVideos={effectiveVideos} playerId={playerId} onOpenVideo={onOpenVideo} />;
 }

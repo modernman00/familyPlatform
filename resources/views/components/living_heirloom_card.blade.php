@@ -1,19 +1,184 @@
 {{-- Living Heirloom 2.5D Facial Depth, Talking Lip-Sync & Re-Emotion Studio --}}
 {{-- Engineered by the Advanced Technology Group (ATG) --}}
-<div class="card p-4 p-md-5 mb-4 shadow-sm" style="background:var(--card, #ffffff); border:1px solid var(--border, #e2e8f0); border-radius:20px;">
+<style>
+.lh-card {
+    background: var(--card, #ffffff);
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 20px;
+}
+.lh-state-badge {
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    background: #f1f5f9;
+    padding: 4px 12px;
+    border-radius: 999px;
+}
+.lh-title {
+    color: #0f172a;
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin: 0 0 6px 0;
+}
+.lh-subtitle {
+    color: #475569;
+    font-size: 14px;
+    margin: 0 0 18px 0;
+    line-height: 1.5;
+}
+.lh-hint {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 8px;
+}
+.lh-panel {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+.lh-panel-label {
+    font-size: 13px;
+    color: #0f172a;
+}
+.lh-btn-secondary {
+    min-height: 44px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    color: #334155;
+    white-space: nowrap;
+}
+.lh-btn-export {
+    min-height: 46px;
+    min-width: 44px;
+    padding: 0 16px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.lh-btn-dark {
+    min-height: 44px;
+    background: #0f172a;
+    color: #ffffff;
+    border: 0;
+    border-radius: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.lh-action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #f1f5f9;
+}
+
+body.dark-mode .lh-card,
+body.dark-theme .lh-card,
+[data-bs-theme="dark"] .lh-card,
+html.dark .lh-card,
+html.dark-mode .lh-card {
+    background: #141418 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #f8fafc !important;
+}
+body.dark-mode .lh-state-badge,
+body.dark-theme .lh-state-badge,
+[data-bs-theme="dark"] .lh-state-badge,
+html.dark .lh-state-badge,
+html.dark-mode .lh-state-badge {
+    background: #1e293b !important;
+    color: #cbd5e1 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+body.dark-mode .lh-title,
+body.dark-mode .lh-panel-label,
+body.dark-theme .lh-title,
+body.dark-theme .lh-panel-label,
+[data-bs-theme="dark"] .lh-title,
+[data-bs-theme="dark"] .lh-panel-label,
+html.dark .lh-title,
+html.dark .lh-panel-label,
+html.dark-mode .lh-title,
+html.dark-mode .lh-panel-label {
+    color: #f8fafc !important;
+}
+body.dark-mode .lh-subtitle,
+body.dark-mode .lh-hint,
+body.dark-theme .lh-subtitle,
+body.dark-theme .lh-hint,
+[data-bs-theme="dark"] .lh-subtitle,
+[data-bs-theme="dark"] .lh-hint,
+html.dark .lh-subtitle,
+html.dark .lh-hint,
+html.dark-mode .lh-subtitle,
+html.dark-mode .lh-hint {
+    color: #cbd5e1 !important;
+}
+body.dark-mode .lh-panel,
+body.dark-theme .lh-panel,
+[data-bs-theme="dark"] .lh-panel,
+html.dark .lh-panel,
+html.dark-mode .lh-panel {
+    background: #1a2030 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #f8fafc !important;
+}
+body.dark-mode .lh-btn-secondary,
+body.dark-mode .lh-btn-export,
+body.dark-theme .lh-btn-secondary,
+body.dark-theme .lh-btn-export,
+[data-bs-theme="dark"] .lh-btn-secondary,
+[data-bs-theme="dark"] .lh-btn-export,
+html.dark .lh-btn-secondary,
+html.dark .lh-btn-export,
+html.dark-mode .lh-btn-secondary,
+html.dark-mode .lh-btn-export {
+    background: #232c40 !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    color: #f8fafc !important;
+}
+body.dark-mode .lh-btn-dark,
+body.dark-theme .lh-btn-dark,
+[data-bs-theme="dark"] .lh-btn-dark,
+html.dark .lh-btn-dark,
+html.dark-mode .lh-btn-dark {
+    background: #2563eb !important;
+    color: #ffffff !important;
+}
+body.dark-mode .lh-action-bar,
+body.dark-theme .lh-action-bar,
+[data-bs-theme="dark"] .lh-action-bar,
+html.dark .lh-action-bar,
+html.dark-mode .lh-action-bar {
+    border-top-color: rgba(255, 255, 255, 0.1) !important;
+}
+</style>
+<div class="card p-4 p-md-5 mb-4 shadow-sm lh-card">
     <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
-        <span style="font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#b45309; background:rgba(217,119,6,0.1); border:1px solid rgba(217,119,6,0.25); padding:4px 12px; border-radius:999px;">
+        <span style="font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#d97706; background:rgba(217,119,6,0.12); border:1px solid rgba(217,119,6,0.3); padding:4px 12px; border-radius:999px;">
             ✨ Living Heirloom Animator v2
         </span>
-        <span id="heirloomStateBadge" style="font-size:12px; font-weight:700; color:#475569; background:#f1f5f9; padding:4px 12px; border-radius:999px;">
+        <span id="heirloomStateBadge" class="lh-state-badge">
             Mode: Ready to Animate
         </span>
     </div>
 
-    <h2 style="color:#0f172a; font-size:1.3rem; font-weight:800; margin:0 0 6px 0;">
+    <h2 class="lh-title">
         Bring Loved Ones &amp; Deceased Grandparents to Life
     </h2>
-    <p style="color:#475569; font-size:14px; margin:0 0 18px 0; line-height:1.5;">
+    <p class="lh-subtitle">
         Upload a portrait or select a relative from your Family Tree. Apply natural breathing, eye-blinking, re-emotion expressions, and real-time voice lip-sync.
     </p>
 
@@ -24,15 +189,15 @@
                 <canvas id="heirloomCanvas" width="280" height="320" style="background:#1e1b18; border-radius:18px; box-shadow:0 8px 24px rgba(0,0,0,0.15); border:1px solid rgba(217,119,6,0.25); touch-action:none; max-width:100%; height:auto;"></canvas>
                 <div id="heirloomCaptionOverlay" class="d-none" style="position:absolute; left:12px; right:12px; bottom:14px; background:rgba(15,23,42,0.86); color:#ffffff; padding:8px 12px; border-radius:10px; font-size:12.5px; font-weight:600; line-height:1.35;"></div>
             </div>
-            <div style="font-size:12px; color:#64748b; margin-top:8px;">Move pointer or tilt phone for 2.5D parallax</div>
+            <div class="lh-hint">Move pointer or tilt phone for 2.5D parallax</div>
 
             <audio id="heirloomVoiceAudio" class="w-100 mt-2 d-none" controls></audio>
         </div>
 
         <!-- Right: Controls -->
         <div class="col-md-7">
-            <div class="p-3 rounded-4 mb-3" style="background:#f8fafc; border:1px solid #e2e8f0;">
-                <label for="heirloomUploadInput" class="form-label fw-bold" style="font-size:13px; color:#0f172a;">1. Portrait Source</label>
+            <div class="p-3 rounded-4 mb-3 lh-panel">
+                <label for="heirloomUploadInput" class="form-label fw-bold lh-panel-label">1. Portrait Source</label>
                 <input type="file" id="heirloomUploadInput" accept="image/jpeg,image/png,image/webp" class="form-control mb-2" style="min-height:44px;">
 
                 @if(!empty($treeInventory['photographed']))
@@ -44,14 +209,14 @@
                 </select>
                 @endif
 
-                <button type="button" id="loadSampleAncestorBtn" class="btn btn-sm fw-bold" style="min-height:44px; background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; color:#334155; white-space:nowrap;">
+                <button type="button" id="loadSampleAncestorBtn" class="btn btn-sm fw-bold lh-btn-secondary">
                     Load Vintage Sample Portrait 👵
                 </button>
             </div>
 
             <!-- Expression & Re-Emotion -->
-            <div class="p-3 rounded-4 mb-3" style="background:#f8fafc; border:1px solid #e2e8f0;">
-                <label for="heirloomEmotionSelect" class="form-label fw-bold" style="font-size:13px; color:#0f172a;">2. Expression &amp; Re-Emotion</label>
+            <div class="p-3 rounded-4 mb-3 lh-panel">
+                <label for="heirloomEmotionSelect" class="form-label fw-bold lh-panel-label">2. Expression &amp; Re-Emotion</label>
                 <div class="d-flex flex-wrap gap-2">
                     <select id="heirloomEmotionSelect" class="form-select" style="min-height:44px; flex:1 1 180px;">
                         <option value="serene">Serene Breathing &amp; Blink</option>
@@ -67,8 +232,8 @@
             </div>
 
             <!-- Voice Lip-Sync & Tribute -->
-            <div class="p-3 rounded-4 mb-3" style="background:#f8fafc; border:1px solid #e2e8f0;">
-                <label for="heirloomTributeInput" class="form-label fw-bold" style="font-size:13px; color:#0f172a;">3. Make Portrait Talk (Voice Capsule or Tribute Caption)</label>
+            <div class="p-3 rounded-4 mb-3 lh-panel">
+                <label for="heirloomTributeInput" class="form-label fw-bold lh-panel-label">3. Make Portrait Talk (Voice Capsule or Tribute Caption)</label>
                 <div class="d-flex flex-wrap gap-2 mb-2">
                     <input type="file" id="heirloomAudioUpload" accept="audio/*" class="form-control" style="min-height:44px; flex:1 1 200px;" aria-label="Upload recorded voice note">
                     <button type="button" id="recordVoiceBtn" class="btn fw-bold"
@@ -78,8 +243,7 @@
                 </div>
                 <div class="d-flex flex-wrap gap-2">
                     <input type="text" id="heirloomTributeInput" class="form-control" placeholder="e.g. Always remember where you come from..." style="min-height:44px; flex:1 1 200px;">
-                    <button type="button" id="speakTributeBtn" class="btn fw-bold"
-                        style="min-height:44px; background:#0f172a; color:#ffffff; border:0; border-radius:10px; white-space:nowrap; flex-shrink:0;">
+                    <button type="button" id="speakTributeBtn" class="btn fw-bold lh-btn-dark">
                         Animate Speech 💬
                     </button>
                 </div>
@@ -88,13 +252,13 @@
     </div>
 
     <!-- Primary Action Bar -->
-    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid #f1f5f9;">
+    <div class="lh-action-bar">
         <div style="display:flex; flex-wrap:wrap; gap:8px;">
             <button type="button" id="startHeirloomAnimBtn" style="min-height:46px; min-width:44px; padding:0 20px; background:linear-gradient(135deg,#d97706,#b45309); border:0; border-radius:12px; color:#ffffff; font-weight:800; font-size:14px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; white-space:nowrap; flex-shrink:0;">
                 <span>Start Living Motion</span>
                 <span aria-hidden="true">✨</span>
             </button>
-            <button type="button" id="exportHeirloomClipBtn" data-spin="true" style="min-height:46px; min-width:44px; padding:0 16px; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; color:#0f172a; font-weight:700; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0;">
+            <button type="button" id="exportHeirloomClipBtn" data-spin="true" class="lh-btn-export">
                 <span>Export Video Clip 🎬</span>
             </button>
             <button type="button" id="saveHeirloomBtn" data-spin="true" style="min-height:46px; min-width:44px; padding:0 16px; background:linear-gradient(135deg,#059669,#10b981); border:0; border-radius:12px; color:#ffffff; font-weight:800; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0;">
@@ -147,10 +311,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function loadSourceIntoAnimator(src, label) {
-        activePortraitDataUrl = src;
-        if (label) activePortraitLabel = label;
-        animator.loadImage(src).then(function() {
+        var cleanSrc = typeof src === 'string' ? src.trim() : '';
+        if (!cleanSrc) return;
+        if (!/^(?:https?:|data:|blob:|\/)/i.test(cleanSrc)) {
+            cleanSrc = '/' + cleanSrc;
+        }
+        activePortraitDataUrl = cleanSrc;
+        if (label) activePortraitLabel = label.trim();
+        if (badge) badge.textContent = 'Mode: Loading ' + activePortraitLabel + '…';
+        animator.loadImage(cleanSrc).then(function() {
             if (badge) badge.textContent = 'Mode: ' + activePortraitLabel + ' Loaded';
+        }).catch(function() {
+            if (badge) badge.textContent = 'Mode: Unable to load portrait';
         });
     }
 

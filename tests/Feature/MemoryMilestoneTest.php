@@ -145,10 +145,10 @@ final class MemoryMilestoneTest extends SocialFeedTestCase
         $stmt->execute([$newPostNo]);
         $newPost = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $this->assertNotEmpty($newPost);
-        $this->assertStringContainsString('Memory Flashback', (string)$newPost['postMessage']);
-        $this->assertStringContainsString('Can not believe how fast time flies!', (string)$newPost['postMessage']);
-        $this->assertStringContainsString('Original memory caption from our picnic', (string)$newPost['postMessage']);
+        $this->assertIsArray($newPost);
+        $this->assertStringContainsString('Memory Flashback', (string)($newPost['postMessage'] ?? ''));
+        $this->assertStringContainsString('Can not believe how fast time flies!', (string)($newPost['postMessage'] ?? ''));
+        $this->assertStringContainsString('Original memory caption from our picnic', (string)($newPost['postMessage'] ?? ''));
 
         // Cleanup
         $this->pdo->prepare("DELETE FROM post WHERE post_no = ?")->execute([$newPostNo]);
@@ -230,5 +230,68 @@ final class MemoryMilestoneTest extends SocialFeedTestCase
 
         // Cleanup
         $this->pdo->prepare("DELETE FROM festive_cards WHERE share_token IN (?, ?)")->execute([$tokenOwn, $tokenOther]);
+    }
+
+    public function testAdvanceMilestoneNotificationsAndFeedPostsDispatched(): void
+    {
+        // Seed an upcoming family event in 6 days
+        $targetDate = date('Y-m-d', strtotime('+6 days'));
+        $stmtEvent = $this->pdo->prepare(
+            "INSERT INTO events (id, eventName, eventDate, eventType, eventFrequency, eventCode)
+             VALUES (?, ?, ?, 'Birthday', 'Annually', ?)"
+        );
+        $stmtEvent->execute([$this->authorId, 'Advance Test Birthday', $targetDate, $this->famCode]);
+        $eventId = (int)$this->pdo->lastInsertId();
+
+        // 1. Dispatch notifications for author
+        $res = $this->service->dispatchDailyMemoriesAndMilestonesForUser($this->authorId, [$this->famCode]);
+        $this->assertGreaterThanOrEqual(1, $res['milestones_dispatched']);
+
+        // Verify notification in orchestration table with canonical 7d tag
+        $stmtNotif = $this->pdo->prepare(
+            "SELECT * FROM notification_orchestration WHERE user_id = ? AND tag LIKE 'milestone-event-%-7d-%'"
+        );
+        $stmtNotif->execute([$this->authorId]);
+        $notifRow = $stmtNotif->fetch(PDO::FETCH_ASSOC);
+        $this->assertIsArray($notifRow);
+        $this->assertStringContainsString('Advance Test Birthday', (string)($notifRow['title'] ?? ''));
+
+        // 2. Dispatch feed announcement for family
+        $feedRes = $this->service->dispatchMilestoneFeedPostsForFamily($this->famCode, 7);
+        $this->assertGreaterThanOrEqual(1, $feedRes['published_count']);
+
+        // Verify timeline feed post created
+        $stmtPost = $this->pdo->prepare(
+            "SELECT * FROM post WHERE postFamCode = ? AND id = 'FAMILY_HISTORIAN' AND postMessage LIKE '%Advance Test Birthday%'"
+        );
+        $stmtPost->execute([$this->famCode]);
+        $postRow = $stmtPost->fetch(PDO::FETCH_ASSOC);
+        $this->assertIsArray($postRow);
+        $this->assertNotEmpty($postRow);
+
+        if (extension_loaded('gd') && function_exists('imagettftext')) {
+            $this->assertNotEmpty($postRow['post_img0']);
+            $this->assertStringStartsWith('historian_milestone_spotlight_', (string)$postRow['post_img0']);
+        }
+
+        // 3. Verify Idempotency - second run must not duplicate
+        $resRerun = $this->service->dispatchDailyMemoriesAndMilestonesForUser($this->authorId, [$this->famCode]);
+        $this->assertSame(0, $resRerun['milestones_dispatched']);
+
+        $feedResRerun = $this->service->dispatchMilestoneFeedPostsForFamily($this->famCode, 7);
+        $this->assertSame(0, $feedResRerun['published_count']);
+
+        // Cleanup
+        $cleanEventStmt = $this->pdo->prepare("DELETE FROM events WHERE no = ?");
+        $cleanEventStmt->execute([$eventId]);
+
+        if (!empty($postRow['post_no'])) {
+            $cleanPostNo = (int)$postRow['post_no'];
+            $cleanPostStmt = $this->pdo->prepare("DELETE FROM post WHERE post_no = ?");
+            $cleanPostStmt->execute([$cleanPostNo]);
+        }
+
+        $cleanRunStmt = $this->pdo->prepare("DELETE FROM family_milestone_feed_runs WHERE family_code = ?");
+        $cleanRunStmt->execute([$this->famCode]);
     }
 }

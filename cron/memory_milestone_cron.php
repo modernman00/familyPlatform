@@ -37,6 +37,7 @@ try {
     echo "Completed.\n";
     echo "Families Scanned: " . (int)$result['processed_families'] . "\n";
     echo "Push Notifications Sent: " . (int)$result['notifications_sent'] . "\n";
+    echo "Feed Milestone Posts Created: " . (int)$result['feed_posts_created'] . "\n";
 } catch (\Throwable $th) {
     echo "Error executing memory milestone cron: " . $th->getMessage() . "\n";
     error_log("[memory_milestone_cron.php] " . $th->getMessage());

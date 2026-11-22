@@ -1,12 +1,68 @@
 @php
     $reelsExpDays = \App\model\Reel::getExpirationDays();
 @endphp
+<style>
+#createReelModal .crm-icon-badge {
+    width: 44px;
+    height: 44px;
+    background: #f5dede;
+    font-size: 1.3rem;
+}
+#createReelModal .crm-icon-badge--sm {
+    width: 36px;
+    height: 36px;
+    background: #fee2e2;
+}
+#createReelModal .crm-dropzone {
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1 !important;
+    cursor: pointer;
+}
+#createReelModal .crm-dropzone--white {
+    background: #ffffff;
+}
+#createReelModal .crm-progress {
+    height: 10px;
+    border-radius: 9999px;
+    background-color: #e2e8f0;
+    overflow: hidden;
+}
+body.dark-mode #createReelModal .crm-icon-badge,
+body.dark-theme #createReelModal .crm-icon-badge,
+[data-bs-theme="dark"] #createReelModal .crm-icon-badge,
+html.dark #createReelModal .crm-icon-badge,
+html.dark-mode #createReelModal .crm-icon-badge,
+body.dark-mode #createReelModal .crm-icon-badge--sm,
+body.dark-theme #createReelModal .crm-icon-badge--sm,
+[data-bs-theme="dark"] #createReelModal .crm-icon-badge--sm,
+html.dark #createReelModal .crm-icon-badge--sm,
+html.dark-mode #createReelModal .crm-icon-badge--sm {
+    background: rgba(255, 77, 97, 0.16) !important;
+    color: #ff8fa3 !important;
+}
+body.dark-mode #createReelModal .crm-dropzone,
+body.dark-theme #createReelModal .crm-dropzone,
+[data-bs-theme="dark"] #createReelModal .crm-dropzone,
+html.dark #createReelModal .crm-dropzone,
+html.dark-mode #createReelModal .crm-dropzone {
+    background: #182030 !important;
+    border-color: rgba(255, 255, 255, 0.22) !important;
+    color: #f8fafc !important;
+}
+body.dark-mode #createReelModal .crm-progress,
+body.dark-theme #createReelModal .crm-progress,
+[data-bs-theme="dark"] #createReelModal .crm-progress,
+html.dark #createReelModal .crm-progress,
+html.dark-mode #createReelModal .crm-progress {
+    background-color: rgba(255, 255, 255, 0.14) !important;
+}
+</style>
 <div class="modal fade" id="createReelModal" tabindex="-1" aria-labelledby="createReelModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff; max-height: calc(100vh - 3.5rem);">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; max-height: calc(100vh - 3.5rem);">
             <div class="modal-header border-0 bg-light px-4 pt-4 pb-2 flex-shrink-0">
                 <div class="d-flex align-items-center gap-2">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center text-primary" style="width: 44px; height: 44px; background: #f5dede; font-size: 1.3rem;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center text-primary crm-icon-badge">
                         <i class="bi bi-camera-reels-fill"></i>
                     </div>
                     <div>
@@ -26,7 +82,7 @@
                     <!-- Drag and Drop Video Dropzone -->
                     <div class="mb-3">
                         <label class="form-label fw-bold text-dark small mb-1">Select Video</label>
-                        <div class="border rounded-4 p-3 text-center position-relative" id="reelDropzone" style="background: #f8fafc; border: 2px dashed #cbd5e1 !important; cursor: pointer;">
+                        <div class="border rounded-4 p-3 text-center position-relative crm-dropzone" id="reelDropzone">
                             <input type="file" class="position-absolute opacity-0 w-100 h-100 top-0 start-0" id="reelVideoFileInput" name="video_file" accept="video/mp4,video/webm,video/quicktime" style="cursor: pointer;">
                             <div id="dropzonePrompt">
                                 <i class="bi bi-cloud-arrow-up-fill fs-2 text-primary"></i>
@@ -154,7 +210,7 @@
 
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <div class="d-flex align-items-center gap-2">
-                                <div class="rounded-circle d-flex align-items-center justify-content-center text-primary" style="width: 36px; height: 36px; background: #fee2e2;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-primary crm-icon-badge--sm">
                                     <i class="bi bi-music-note-beamed fs-6"></i>
                                 </div>
                                 <div>
@@ -194,7 +250,7 @@
 
                             <!-- Custom Audio Uploader Panel -->
                             <div id="customAudioPanel" class="d-none mb-3">
-                                <div class="border rounded-4 p-3 text-center position-relative" style="background: #ffffff; border: 2px dashed #cbd5e1 !important; cursor: pointer;" id="customAudioDropzone">
+                                <div class="border rounded-4 p-3 text-center position-relative crm-dropzone crm-dropzone--white" id="customAudioDropzone">
                                     <input type="file" class="position-absolute opacity-0 w-100 h-100 top-0 start-0" id="reelCustomAudioInput" name="audio_file" accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/mp4,audio/x-m4a,audio/aac" style="cursor: pointer;">
                                     <div id="customAudioPrompt">
                                         <i class="bi bi-file-earmark-music-fill fs-2 text-primary"></i>
@@ -298,7 +354,7 @@
                             </span>
                             <span class="fw-bold text-primary" id="reelUploadPercentText">0%</span>
                         </div>
-                        <div class="progress" style="height: 10px; border-radius: 9999px; background-color: #e2e8f0; overflow: hidden;">
+                        <div class="progress crm-progress">
                             <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" id="reelUploadProgressBar" role="progressbar" style="width: 0%; transition: width 0.2s ease;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mt-1.5 text-muted" style="font-size: 0.72rem;">

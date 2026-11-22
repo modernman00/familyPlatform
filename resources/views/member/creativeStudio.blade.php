@@ -526,12 +526,20 @@
                         <span class="cs-marquee-tile__sub d-block">4K Reel Studio</span>
                     </span>
                 </a>
+                <a href="/family/living-heirloom" class="cs-marquee-tile">
+                    <span class="cs-marquee-tile__icon" style="background:rgba(217,119,6,0.25);color:#fde68a;"><i class="bi bi-person-bounding-box"></i></span>
+                    <span>
+                        <span class="cs-marquee-tile__title d-block">Heirloom AI</span>
+                        <span class="cs-marquee-tile__sub d-block">Portraits &amp; Ageing</span>
+                    </span>
+                </a>
             </div>
         </div>
     </header>
 
     <div class="cs-spark-strip" aria-label="Quick creative ideas">
         <span class="cs-spark-label"><i class="bi bi-stars text-warning me-1"></i>Try now:</span>
+        <a href="/family/living-heirloom" class="cs-spark-pill">🧬 Living Heirloom &amp; Age Progression</a>
         <a href="/poster-studio" class="cs-spark-pill">🎉 Family Reunion Flyer</a>
         <a href="/world-studio" class="cs-spark-pill">🎞️ Multi-Track Video &amp; Photo Lab</a>
         <a href="/member/festive-cards" class="cs-spark-pill">💌 3D Birthday Wax Card</a>
@@ -881,6 +889,38 @@
                 </div>
                 <span class="btn btn-danger text-white cs-card__cta">
                     <span>Enter Family Arcade</span>
+                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </span>
+            </div>
+        </a>
+
+        <!-- 6. Heirloom AI Studio -->
+        <a href="/family/living-heirloom" class="cs-card" aria-label="Open Heirloom AI Studio">
+            <div class="cs-stage" style="background: radial-gradient(circle at 75% 25%, rgba(245, 158, 11, 0.35), transparent 50%), linear-gradient(135deg, #0b0f19 0%, #1f1206 50%, #0f172a 100%);">
+                <span class="cs-stage__tag">
+                    <span class="cs-stage__dot" style="background:#f59e0b;"></span>
+                    Ancestral AI Studio
+                </span>
+                <div class="d-flex flex-column align-items-center justify-content-center h-100 text-warning" style="gap: 8px;">
+                    <div style="width: 72px; height: 72px; border-radius: 20px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(251, 191, 36, 0.4); display: flex; align-items: center; justify-content: center; font-size: 2.2rem; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.25);">
+                        <i class="bi bi-person-bounding-box" aria-hidden="true"></i>
+                    </div>
+                    <span style="font-size: 0.74rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #fde68a;">Photo Animation &bull; Ageing &bull; Synthesis</span>
+                </div>
+            </div>
+            <div class="cs-card__body">
+                <h2 class="cs-card__title">
+                    <i class="bi bi-person-bounding-box text-warning" aria-hidden="true"></i>
+                    <span>Heirloom AI Studio</span>
+                </h2>
+                <p class="cs-card__desc">Bring cherished portraits to life with natural motion and voice synthesis, forecast future facial ageing across decades, and reverse-compute lost ancestors calibrated to your tree.</p>
+                <div class="cs-card__chips">
+                    <span class="cs-chip">Living Motion &amp; Talk</span>
+                    <span class="cs-chip">Age Progression</span>
+                    <span class="cs-chip">Tree-Calibrated</span>
+                </div>
+                <span class="btn btn-warning text-dark cs-card__cta fw-bold">
+                    <span>Launch Heirloom AI</span>
                     <i class="bi bi-arrow-right" aria-hidden="true"></i>
                 </span>
             </div>

@@ -632,6 +632,9 @@ final class FamilyArcadeController extends BaseController
                 'kingrid' => 'KinGrid',
                 'kinword' => 'KinWord',
                 'kinpulse' => 'KinPulse',
+                'wordie' => 'Wordie',
+                'cheeseboard' => 'Cheeseboard',
+                'minesweeper' => 'Minesweeper',
                 default => 'KinZip',
             };
             $secs = round(((int) $scoreRow['elapsed_ms']) / 1000, 1);
@@ -663,6 +666,87 @@ final class FamilyArcadeController extends BaseController
         } catch (Throwable $e) {
             http_response_code(500);
             echo json_encode(['status' => 'error', 'message' => 'Failed to share to feed.']);
+        }
+    }
+
+    /**
+     * GET /api/arcade/engagements
+     * Returns outsider engagement funnel metrics for the signed-in member's shared challenges
+     * and overall family-shared arcade links.
+     */
+    public function getEngagements(): void
+    {
+        CorsHandler::setHeaders();
+        header('Content-Type: application/json');
+
+        try {
+            $userId = (string) ($_SESSION['id'] ?? '');
+            if ($userId === '') {
+                http_response_code(401);
+                echo json_encode(['status' => 'error', 'message' => 'Authentication required.']);
+                return;
+            }
+
+            $famCode = (string) ($_SESSION['famCode'] ?? '');
+            if ($famCode === '' || !BaseController::sessionSharesFamily($famCode)) {
+                http_response_code(403);
+                echo json_encode(['status' => 'error', 'message' => 'Access denied to this family network.']);
+                return;
+            }
+
+            \releaseSessionLock();
+            $db = Db::connect2();
+
+            $stmt = $db->prepare(
+                'SELECT e.event_type, COUNT(*) AS cnt, SUM(e.beat_challenger) AS beaten
+                 FROM family_arcade_engagements e
+                 INNER JOIN family_arcade_scores s ON s.challenge_token = e.challenge_token
+                 WHERE s.user_id = ? AND s.fam_code = ?
+                 GROUP BY e.event_type'
+            );
+            $stmt->execute([$userId, $famCode]);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+            $funnel = [
+                'views' => 0,
+                'starts' => 0,
+                'howToPlay' => 0,
+                'completions' => 0,
+                'beatChallenger' => 0,
+                'signupClicks' => 0,
+            ];
+
+            foreach ($rows as $row) {
+                $cnt = (int) ($row['cnt'] ?? 0);
+                switch ((string) ($row['event_type'] ?? '')) {
+                    case 'view':
+                        $funnel['views'] = $cnt;
+                        break;
+                    case 'start':
+                        $funnel['starts'] = $cnt;
+                        break;
+                    case 'how_to_play':
+                        $funnel['howToPlay'] = $cnt;
+                        break;
+                    case 'complete':
+                        $funnel['completions'] = $cnt;
+                        $funnel['beatChallenger'] = (int) ($row['beaten'] ?? 0);
+                        break;
+                    case 'signup_click':
+                        $funnel['signupClicks'] = $cnt;
+                        break;
+                }
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'data' => [
+                    'funnel' => $funnel,
+                ],
+            ]);
+        } catch (Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Could not load engagement stats.']);
         }
     }
 }

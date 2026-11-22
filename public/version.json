@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(mobile-composer,e2e): constrain composer-form overflow and retry mobile bottom-sheet transition",
+    "title": "Feat(arcade): launch Family Arcade 4-game suite, leagues, badges & live SSE race",
     "notes": [
+        "Feat(arcade): launch Family Arcade 4-game suite, leagues, badges & live SSE race",
         "Fix(mobile-composer,e2e): constrain composer-form overflow and retry mobile bottom-sheet transition",
-        "Fix(e2e): target legacy feed and clear rate limits in social_feed.cy.js",
-        "Fix(pwa,e2e): lower pwa-install z-index below SweetAlert2 and target legacy feed in legacy Cypress specs"
+        "Fix(e2e): target legacy feed and clear rate limits in social_feed.cy.js"
     ],
     "released_at": "2026-11-22",
-    "commit": "56bbcae9"
+    "commit": "5c607761"
 }

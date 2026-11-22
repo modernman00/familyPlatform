@@ -233,7 +233,7 @@ a:hover {
 
 /* Mobile-First Sleek Button Ergonomics */
 @media (max-width: 768px) {
-    .btn, .button, button[type="submit"], input[type="submit"], .stitch-submit, .btn-action, .btn-tonal-action, .btn-sanctuary-primary {
+    .btn, .button, button[type="submit"]:not(.comment-composer__send), input[type="submit"], .stitch-submit, .btn-action, .btn-tonal-action, .btn-sanctuary-primary {
         min-height: 44px;
         max-height: 48px;
         padding: 0.44rem 0.95rem;
@@ -629,7 +629,7 @@ body.dark-mode {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
     }
 
-    .form-control, .form-select, .inputComment, textarea, input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"] {
+    .form-control, .form-select, .inputComment, textarea, input[type="text"]:not(.comment-composer__input), input[type="password"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"] {
         background-color: #0f172a !important;
         color: #f8fafc !important;
         border-color: #334155 !important;

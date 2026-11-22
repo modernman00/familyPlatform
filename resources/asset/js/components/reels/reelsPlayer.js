@@ -925,12 +925,19 @@ class FamilyReelsPlayer {
                     <span class="reel-action-count">Share</span>
                 </div>
 
+                <!-- Reel Views Counter (Always visible in action rail) -->
+                <div class="d-flex flex-column align-items-center" title="Family views">
+                    <span class="reel-action-btn d-inline-flex align-items-center justify-content-center" aria-hidden="true" style="pointer-events:none;">
+                        <i class="bi bi-eye"></i>
+                    </span>
+                    <span class="reel-action-count" id="reelActionViewCount">${reel.views_count || 0}</span>
+                </div>
+
                 <!-- More Options Popover Trigger (...) -->
                 <div class="d-flex flex-column align-items-center position-relative">
                     <button type="button" class="reel-action-btn" id="btnReelMore" title="More Reel Options (${posLabel})">
                         <i class="bi bi-three-dots"></i>
                     </button>
-                    <span class="reel-action-count d-none" id="reelActionViewCount">${reel.views_count || 0}</span>
                     <div class="reel-more-popover d-none" id="reelMorePopover">
                         <button type="button" class="reel-more-item" id="btnToggleFitMode">
                             <i class="bi bi-aspect-ratio"></i> <span>Cinema / 9:16 Fit</span>
@@ -1518,7 +1525,11 @@ class FamilyReelsPlayer {
         if (!reelId || this.viewedReelIds.has(reelId)) return;
         this.viewedReelIds.add(reelId);
         try {
-            const res = await axios.post('/api/reels/view', { reel_id: reelId });
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                || document.querySelector('input[name="token"]')?.value
+                || '';
+            const headers = csrfToken ? { 'X-CSRF-TOKEN': csrfToken, 'X-XSRF-TOKEN': csrfToken } : {};
+            const res = await axios.post('/api/reels/view', { reel_id: reelId }, { headers });
             if (res.data?.status === 'success' && typeof res.data.views_count === 'number') {
                 const reel = this.reels.find(r => r.id == reelId);
                 if (reel) reel.views_count = res.data.views_count;

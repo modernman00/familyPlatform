@@ -116,7 +116,7 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                         <!-- Meaningful Memory Quote Text -->
                         <div class="mb-2">
                             <p class="mb-0 fw-medium fst-italic" style="color: var(--text-color, #1f2937); font-size: 0.88rem; line-height: 1.5;">
-                                &ldquo;<span x-text="memories[0].postMessage"></span>&rdquo;
+                                &ldquo;<span x-html="formatMemoryMessage(memories[0].postMessage)"></span>&rdquo;
                             </p>
                         </div>
 
@@ -345,6 +345,47 @@ if (typeof window.memoriesMilestonesWidget !== 'function') {
 
             initWidget() {
                 this.loadData();
+            },
+
+            formatMemoryMessage(raw) {
+                const text = String(raw || '').replace(/\[style:[a-z0-9_]+\]\s*/gi, '').trim();
+                if (!text) return '';
+                const esc = (s) => String(s)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+                const cfg = window.ATG_LIVING_EMOJIS;
+                let knownIds = null;
+                if (cfg && Array.isArray(cfg.catalog) && cfg.catalog.length > 0) {
+                    knownIds = new Set();
+                    const toneable = new Set(cfg.toneable || []);
+                    cfg.catalog.forEach((e) => {
+                        knownIds.add(e.id);
+                        if (toneable.has(e.id)) {
+                            (cfg.tones || []).forEach((t) => knownIds.add(e.id.replace(/_3d$/, '_' + t + '_3d')));
+                        }
+                    });
+                }
+                const titleFor = (id) => {
+                    const base = id.replace(/_(medium_light|medium_dark|light|medium|dark)_3d$/i, '_3d');
+                    if (cfg && Array.isArray(cfg.catalog)) {
+                        const hit = cfg.catalog.find((e) => e.id === base || e.id === id);
+                        if (hit && hit.title) return esc(hit.title);
+                    }
+                    return esc(base.replace(/_3d$/i, '').split('_').filter(Boolean).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || id);
+                };
+                return esc(text)
+                    .replace(/:me_(hello|laugh|wow|love|nod|dance|point|clap)@([A-Za-z0-9_-]{1,64}):/gi, (_, reaction, uid) => {
+                        const r = String(reaction).toLowerCase();
+                        return '<img src="/api/emoji/avatar-sticker/' + encodeURIComponent(uid) + '/' + encodeURIComponent(r) + '?v=live2" alt="Avatar sticker: ' + esc(r) + '" width="24" height="24" class="atg-3d-emoji" style="vertical-align:middle;margin:0 2px;">';
+                    })
+                    .replace(/:([a-z0-9_]+_3d):/gi, (full, rawId) => {
+                        const id = String(rawId).toLowerCase();
+                        if (knownIds && !knownIds.has(id)) return full;
+                        return '<img src="/public/img/emoji/' + id + '.svg?v=20261107a" onerror="if(!this.dataset.fb){this.dataset.fb=\'1\';this.src=\'/img/emoji/' + id + '.svg?v=20261107a\';}" alt="' + titleFor(id) + '" width="20" height="20" class="atg-3d-emoji" style="vertical-align:middle;margin:0 2px;">';
+                    });
             },
 
             async loadData() {

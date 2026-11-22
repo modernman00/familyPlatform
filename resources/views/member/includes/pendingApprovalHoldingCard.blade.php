@@ -1,18 +1,110 @@
 {{-- Awaiting Family Approval Holding Experience --}}
 {{-- Rendered when a user logs in with a pending family code request. Private family posts are locked until approved. --}}
 
+<style>
+.pending-approval-holding-container .pending-hero-card {
+    border-radius: 20px;
+    background: linear-gradient(135deg, #ffffff 0%, #fff7f7 100%);
+    border: 1.5px solid #fecdd3 !important;
+    overflow: hidden;
+}
+.pending-approval-holding-container .pending-icon-circle {
+    width: 72px;
+    height: 72px;
+    background: rgba(163, 22, 33, 0.1);
+    color: #a31621;
+    font-size: 2.2rem;
+    border: 2px solid rgba(163, 22, 33, 0.2);
+}
+.pending-approval-holding-container .pending-fam-badge {
+    background: rgba(163, 22, 33, 0.1);
+    color: #a31621;
+    font-size: 0.92rem;
+    border: 1px solid rgba(163, 22, 33, 0.25);
+}
+.pending-approval-holding-container .pending-status-banner {
+    border-radius: 14px;
+}
+.pending-approval-holding-container .pending-status-banner--initial {
+    background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+    border: 1.5px solid #bfdbfe !important;
+}
+.pending-approval-holding-container .pending-status-banner--broadcasted {
+    background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+    border: 1.5px solid #f59e0b !important;
+}
+.pending-approval-holding-container .pending-status-title--initial { color: #1e3a8a; }
+.pending-approval-holding-container .pending-status-title--broadcasted { color: #92400e; }
+
+body.dark-mode .pending-approval-holding-container .card,
+body.dark-theme .pending-approval-holding-container .card,
+[data-bs-theme="dark"] .pending-approval-holding-container .card,
+html.dark .pending-approval-holding-container .card,
+html.dark-mode .pending-approval-holding-container .card {
+    background: #141418 !important;
+    border-color: rgba(255, 77, 97, 0.32) !important;
+    color: #f8fafc !important;
+}
+body.dark-mode .pending-approval-holding-container .pending-icon-circle,
+body.dark-theme .pending-approval-holding-container .pending-icon-circle,
+[data-bs-theme="dark"] .pending-approval-holding-container .pending-icon-circle,
+html.dark .pending-approval-holding-container .pending-icon-circle,
+html.dark-mode .pending-approval-holding-container .pending-icon-circle {
+    background: rgba(255, 77, 97, 0.16) !important;
+    color: #ff8fa3 !important;
+    border-color: rgba(255, 77, 97, 0.35) !important;
+}
+body.dark-mode .pending-approval-holding-container .pending-fam-badge,
+body.dark-theme .pending-approval-holding-container .pending-fam-badge,
+[data-bs-theme="dark"] .pending-approval-holding-container .pending-fam-badge,
+html.dark .pending-approval-holding-container .pending-fam-badge,
+html.dark-mode .pending-approval-holding-container .pending-fam-badge {
+    background: rgba(255, 77, 97, 0.16) !important;
+    color: #fecdd3 !important;
+    border-color: rgba(255, 77, 97, 0.35) !important;
+}
+body.dark-mode .pending-approval-holding-container .pending-status-banner--initial,
+body.dark-theme .pending-approval-holding-container .pending-status-banner--initial,
+[data-bs-theme="dark"] .pending-approval-holding-container .pending-status-banner--initial,
+html.dark .pending-approval-holding-container .pending-status-banner--initial,
+html.dark-mode .pending-approval-holding-container .pending-status-banner--initial {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.16) 0%, #1a2234 100%) !important;
+    border-color: rgba(96, 165, 250, 0.38) !important;
+}
+body.dark-mode .pending-approval-holding-container .pending-status-banner--broadcasted,
+body.dark-theme .pending-approval-holding-container .pending-status-banner--broadcasted,
+[data-bs-theme="dark"] .pending-approval-holding-container .pending-status-banner--broadcasted,
+html.dark .pending-approval-holding-container .pending-status-banner--broadcasted,
+html.dark-mode .pending-approval-holding-container .pending-status-banner--broadcasted {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, #261e12 100%) !important;
+    border-color: rgba(251, 191, 36, 0.45) !important;
+}
+body.dark-mode .pending-approval-holding-container .pending-status-title--initial,
+body.dark-theme .pending-approval-holding-container .pending-status-title--initial,
+[data-bs-theme="dark"] .pending-approval-holding-container .pending-status-title--initial,
+html.dark .pending-approval-holding-container .pending-status-title--initial,
+html.dark-mode .pending-approval-holding-container .pending-status-title--initial {
+    color: #93c5fd !important;
+}
+body.dark-mode .pending-approval-holding-container .pending-status-title--broadcasted,
+body.dark-theme .pending-approval-holding-container .pending-status-title--broadcasted,
+[data-bs-theme="dark"] .pending-approval-holding-container .pending-status-title--broadcasted,
+html.dark .pending-approval-holding-container .pending-status-title--broadcasted,
+html.dark-mode .pending-approval-holding-container .pending-status-title--broadcasted {
+    color: #fde68a !important;
+}
+</style>
+
 <div x-data="pendingApprovalWidget({{ json_encode($pendingApprovalData ?? []) }})" class="pending-approval-holding-container mb-4">
     <!-- Main Status Card -->
-    <div class="card border-0 shadow-sm mb-4" 
-         style="border-radius: 20px; background: linear-gradient(135deg, #ffffff 0%, #fff7f7 100%); border: 1.5px solid #fecdd3 !important; overflow: hidden;">
+    <div class="card border-0 shadow-sm mb-4 pending-hero-card">
         
         <!-- Top Accent Bar -->
         <div style="height: 6px; background: linear-gradient(90deg, #a31621 0%, #dc2626 50%, #f59e0b 100%);"></div>
 
         <div class="card-body p-4 p-md-5">
             <div class="text-center mb-4">
-                <div class="rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm mb-3" 
-                     style="width: 72px; height: 72px; background: rgba(163, 22, 33, 0.1); color: #a31621; font-size: 2.2rem; border: 2px solid rgba(163, 22, 33, 0.2);">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm mb-3 pending-icon-circle">
                     <i class="bi bi-shield-lock-fill"></i>
                 </div>
                 <h3 class="fw-bold mb-1 text-dark" style="font-size: 1.6rem; letter-spacing: -0.02em;">
@@ -22,16 +114,15 @@
                     Welcome to FamilyPlatform, <strong>{{ htmlspecialchars($data['firstName'] ?? 'Family Member') }}</strong>!
                 </p>
                 <div class="mt-2">
-                    <span class="badge px-3 py-2 rounded-pill fw-bold" 
-                          style="background: rgba(163, 22, 33, 0.1); color: #a31621; font-size: 0.92rem; border: 1px solid rgba(163, 22, 33, 0.25);">
+                    <span class="badge px-3 py-2 rounded-pill fw-bold pending-fam-badge">
                         <i class="bi bi-people-fill me-1"></i> Family Network: #<span x-text="familyCode"></span>
                     </span>
                 </div>
             </div>
 
             <!-- Escalation & Status Banner -->
-            <div class="card border-0 mb-4 p-3.5" 
-                 :style="isBroadcasted ? 'background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%); border: 1.5px solid #f59e0b !important; border-radius: 14px;' : 'background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%); border: 1.5px solid #bfdbfe !important; border-radius: 14px;'">
+            <div class="card border-0 mb-4 p-3.5 pending-status-banner" 
+                 :class="isBroadcasted ? 'pending-status-banner--broadcasted' : 'pending-status-banner--initial'">
                 
                 <div class="d-flex align-items-start gap-3">
                     <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 mt-0.5" 
@@ -40,7 +131,7 @@
                     </div>
                     <div class="flex-grow-1">
                         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
-                            <h6 class="fw-bold mb-0" :style="isBroadcasted ? 'color: #92400e;' : 'color: #1e3a8a;'" style="font-size: 1.02rem;">
+                            <h6 class="fw-bold mb-0" :class="isBroadcasted ? 'pending-status-title--broadcasted' : 'pending-status-title--initial'" style="font-size: 1.02rem;">
                                 <span x-show="!isBroadcasted">Pending Inviter Review</span>
                                 <span x-show="isBroadcasted">Escalated to Entire Family</span>
                             </h6>
@@ -103,7 +194,7 @@
     </div>
 
     <!-- What You Can Do While Waiting Card -->
-    <div class="card border-0 shadow-sm" style="border-radius: 16px; background-color: #ffffff;">
+    <div class="card border-0 shadow-sm" style="border-radius: 16px;">
         <div class="card-body p-4">
             <h5 class="fw-bold mb-3 text-dark d-flex align-items-center gap-2" style="font-size: 1.1rem;">
                 <i class="bi bi-palette2 text-primary"></i> Personalise Your Profile While You Wait
@@ -123,7 +214,7 @@
                 <div class="col-sm-6">
                     <a href="#profilePicModal" data-bs-toggle="modal" data-bs-target="#profilePicModal" 
                        class="btn btn-outline-primary w-100 py-2.5 rounded-3 fw-semibold d-inline-flex align-items-center justify-content-center gap-2"
-                       style="min-height: 44px; color: #a31621; border-color: #a31621;">
+                       style="min-height: 44px;">
                         <i class="bi bi-camera-fill"></i> Update Profile Photo
                     </a>
                 </div>

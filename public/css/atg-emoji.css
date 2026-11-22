@@ -506,6 +506,66 @@
     box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
 }
 
+body.dark-mode .atg-ar-modal .modal-content,
+body.dark-theme .atg-ar-modal .modal-content,
+[data-bs-theme="dark"] .atg-ar-modal .modal-content,
+html.dark .atg-ar-modal .modal-content,
+html.dark-mode .atg-ar-modal .modal-content {
+    background: #141418 !important;
+    border-color: rgba(251, 191, 36, 0.3) !important;
+    color: #f8fafc !important;
+}
+body.dark-mode .atg-ar-stage-container,
+body.dark-theme .atg-ar-stage-container,
+[data-bs-theme="dark"] .atg-ar-stage-container,
+html.dark .atg-ar-stage-container,
+html.dark-mode .atg-ar-stage-container {
+    background: radial-gradient(circle at 50% 35%, #241f15 0%, #17151a 60%, #101116 100%) !important;
+    border-color: rgba(251, 191, 36, 0.3) !important;
+    box-shadow: inset 0 2px 14px rgba(0, 0, 0, 0.45) !important;
+}
+body.dark-mode .ar-mode-badge,
+body.dark-theme .ar-mode-badge,
+[data-bs-theme="dark"] .ar-mode-badge,
+html.dark .ar-mode-badge,
+html.dark-mode .ar-mode-badge,
+body.dark-mode .ar-reticle-instruction,
+body.dark-theme .ar-reticle-instruction,
+[data-bs-theme="dark"] .ar-reticle-instruction,
+html.dark .ar-reticle-instruction,
+html.dark-mode .ar-reticle-instruction {
+    background: rgba(20, 20, 26, 0.88) !important;
+    color: #fde68a !important;
+    border-color: rgba(251, 191, 36, 0.35) !important;
+}
+body.dark-mode .atg-ar-ctrl-btn,
+body.dark-theme .atg-ar-ctrl-btn,
+[data-bs-theme="dark"] .atg-ar-ctrl-btn,
+html.dark .atg-ar-ctrl-btn,
+html.dark-mode .atg-ar-ctrl-btn {
+    background: #1e293b !important;
+    color: #e2e8f0 !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+}
+body.dark-mode .atg-ar-ctrl-btn:hover,
+body.dark-theme .atg-ar-ctrl-btn:hover,
+[data-bs-theme="dark"] .atg-ar-ctrl-btn:hover,
+html.dark .atg-ar-ctrl-btn:hover,
+html.dark-mode .atg-ar-ctrl-btn:hover {
+    background: #273449 !important;
+    color: #ffffff !important;
+    border-color: #fbbf24 !important;
+}
+body.dark-mode .atg-ar-ctrl-btn.active,
+body.dark-theme .atg-ar-ctrl-btn.active,
+[data-bs-theme="dark"] .atg-ar-ctrl-btn.active,
+html.dark .atg-ar-ctrl-btn.active,
+html.dark-mode .atg-ar-ctrl-btn.active {
+    background: rgba(245, 158, 11, 0.22) !important;
+    border-color: #fbbf24 !important;
+    color: #fde68a !important;
+}
+
 /* -------------------------------------------------------------------------
  * Integrated Feed Header 3D AR Pill (Same-Line Luxury Social Integration)
  * ------------------------------------------------------------------------- */
@@ -1691,13 +1751,24 @@ select.atg-p2a-select::picker-icon,
 
 .atg-style-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+    gap: var(--space-3, 12px);
 }
 
-@media (max-width: 680px) {
+@media (max-width: 640px) {
+    .atg-p2a-panel {
+        padding: var(--space-3, 14px);
+    }
+
     .atg-style-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-2, 8px);
+    }
+}
+
+@media (max-width: 359px) {
+    .atg-style-grid {
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 
@@ -1706,7 +1777,10 @@ select.atg-p2a-select::picker-icon,
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
     text-align: left;
     min-height: 88px;
     padding: 12px;
@@ -1718,14 +1792,21 @@ select.atg-p2a-select::picker-icon,
     transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
-.atg-style-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--style-accent, #a31621);
-    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+@media (hover: hover) {
+    .atg-style-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--style-accent, #a31621);
+        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+    }
 }
 
 .atg-style-card:active {
     transform: scale(0.98);
+}
+
+.atg-style-card:focus-visible {
+    outline: 2px solid var(--style-accent, #a31621);
+    outline-offset: 2px;
 }
 
 .atg-style-card.active {
@@ -1738,24 +1819,32 @@ select.atg-p2a-select::picker-icon,
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
     width: 100%;
+    min-width: 0;
     gap: 6px;
-    margin-bottom: 6px;
+    margin-bottom: 2px;
 }
 
 .atg-style-icon {
     font-size: 1.25rem;
     line-height: 1;
+    flex-shrink: 0;
 }
 
 .atg-style-badge {
-    font-size: 0.66rem;
+    display: inline-block;
+    max-width: 100%;
+    font-size: 0.68rem;
     font-weight: 700;
-    padding: 2px 7px;
+    line-height: 1.25;
+    padding: 3px 8px;
     border-radius: 9999px;
     background: rgba(15, 23, 42, 0.07);
     color: var(--atg-p2a-muted);
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: break-word;
+    text-align: left;
 }
 
 .atg-style-card.active .atg-style-badge {
@@ -1764,17 +1853,20 @@ select.atg-p2a-select::picker-icon,
 }
 
 .atg-style-name {
+    width: 100%;
     font-size: var(--text-sm, 0.88rem);
     font-weight: 800;
     color: var(--atg-p2a-ink);
     line-height: 1.25;
+    overflow-wrap: break-word;
 }
 
 .atg-style-tagline {
+    width: 100%;
     font-size: 0.74rem;
     color: var(--atg-p2a-muted);
-    line-height: 1.3;
-    margin-top: 3px;
+    line-height: 1.35;
+    overflow-wrap: break-word;
 }
 
 .atg-style-reset-chip {
@@ -1857,7 +1949,7 @@ select.atg-p2a-select::picker-icon,
 
 .atg-p2a-secondary-actions {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
     gap: 10px;
 }
 

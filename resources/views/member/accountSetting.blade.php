@@ -397,12 +397,41 @@
     }
 
     body.dark-mode .custom-switch,
+    body.dark-theme .custom-switch,
+    [data-bs-theme="dark"] .custom-switch,
     body.dark-mode .setting-subcard,
+    body.dark-theme .setting-subcard,
+    [data-bs-theme="dark"] .setting-subcard,
+    body.dark-mode #pwaAccountSettingCard,
+    body.dark-theme #pwaAccountSettingCard,
+    [data-bs-theme="dark"] #pwaAccountSettingCard,
     body.dark-mode .restriction-member-card,
-    body.dark-mode .content-card [style*="background-color: #f8fafc"] {
+    body.dark-theme .restriction-member-card,
+    [data-bs-theme="dark"] .restriction-member-card,
+    body.dark-mode .content-card [style*="background-color: #f8fafc"],
+    body.dark-theme .content-card [style*="background-color: #f8fafc"],
+    [data-bs-theme="dark"] .content-card [style*="background-color: #f8fafc"] {
       background-color: #0f172a !important;
       border-color: #334155 !important;
       color: #f8fafc !important;
+    }
+
+    body.dark-mode #pwaAccountSettingCard .text-dark,
+    body.dark-theme #pwaAccountSettingCard .text-dark,
+    [data-bs-theme="dark"] #pwaAccountSettingCard .text-dark,
+    body.dark-mode .setting-subcard .text-dark,
+    body.dark-theme .setting-subcard .text-dark,
+    [data-bs-theme="dark"] .setting-subcard .text-dark {
+      color: #f8fafc !important;
+    }
+
+    body.dark-mode #pwaAccountSettingCard .text-muted,
+    body.dark-theme #pwaAccountSettingCard .text-muted,
+    [data-bs-theme="dark"] #pwaAccountSettingCard .text-muted,
+    body.dark-mode .setting-subcard .text-muted,
+    body.dark-theme .setting-subcard .text-muted,
+    [data-bs-theme="dark"] .setting-subcard .text-muted {
+      color: #cbd5e1 !important;
     }
 
     body.dark-mode .restriction-member-card.is-restricted {
@@ -478,6 +507,130 @@
 
     body.dark-mode .legacy-settings-header {
       border-top-color: #334155;
+    }
+
+    .as-fam-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+    }
+    .as-fam-icon-crimson {
+      width: 48px;
+      height: 48px;
+      background: #fbefef;
+      color: #b8202c;
+    }
+    .as-fam-icon-solo {
+      width: 48px;
+      height: 48px;
+      background: #fdf5f5;
+      color: #a31621;
+    }
+    .as-fam-icon-green {
+      width: 48px;
+      height: 48px;
+      background: #ecfdf5;
+      color: #10b981;
+    }
+    .as-fam-badge-crimson {
+      background-color: #fbefef;
+      color: #8a1019;
+      font-size: 0.75rem;
+    }
+    .as-fam-code-box {
+      background-color: #fbefef;
+      border: 1px solid #fbefef;
+    }
+    .as-fam-code-value {
+      color: #8a1019;
+      letter-spacing: 1px;
+    }
+    .as-fam-pending-box {
+      background-color: #fffbeb;
+      border: 1px solid #fef3c7;
+      color: #92400e;
+    }
+    .as-fam-status--active { background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .as-fam-status--pending { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .as-fam-status--unverified { background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .as-fam-status--none { background-color: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+    .as-fam-panel { border: 1px solid #e2e8f0; }
+
+    body.dark-mode .as-fam-card,
+    body.dark-theme .as-fam-card,
+    [data-bs-theme="dark"] .as-fam-card,
+    html.dark .as-fam-card,
+    html.dark-mode .as-fam-card {
+      background: #0f172a !important;
+      border-color: #334155 !important;
+      color: #f8fafc !important;
+    }
+    body.dark-mode .as-fam-icon-crimson,
+    body.dark-mode .as-fam-icon-solo,
+    body.dark-theme .as-fam-icon-crimson,
+    body.dark-theme .as-fam-icon-solo,
+    [data-bs-theme="dark"] .as-fam-icon-crimson,
+    [data-bs-theme="dark"] .as-fam-icon-solo {
+      background: rgba(255, 77, 97, 0.18) !important;
+      color: #ff8fa3 !important;
+    }
+    body.dark-mode .as-fam-icon-green,
+    body.dark-theme .as-fam-icon-green,
+    [data-bs-theme="dark"] .as-fam-icon-green {
+      background: rgba(16, 185, 129, 0.18) !important;
+      color: #6ee7b7 !important;
+    }
+    body.dark-mode .as-fam-badge-crimson,
+    body.dark-theme .as-fam-badge-crimson,
+    [data-bs-theme="dark"] .as-fam-badge-crimson {
+      background-color: rgba(255, 77, 97, 0.18) !important;
+      color: #fecdd3 !important;
+    }
+    body.dark-mode .as-fam-code-box,
+    body.dark-theme .as-fam-code-box,
+    [data-bs-theme="dark"] .as-fam-code-box {
+      background-color: rgba(255, 77, 97, 0.12) !important;
+      border-color: rgba(255, 77, 97, 0.28) !important;
+    }
+    body.dark-mode .as-fam-code-value,
+    body.dark-theme .as-fam-code-value,
+    [data-bs-theme="dark"] .as-fam-code-value {
+      color: #fecdd3 !important;
+    }
+    body.dark-mode .as-fam-pending-box,
+    body.dark-theme .as-fam-pending-box,
+    [data-bs-theme="dark"] .as-fam-pending-box {
+      background-color: rgba(245, 158, 11, 0.14) !important;
+      border-color: rgba(251, 191, 36, 0.35) !important;
+      color: #fde68a !important;
+    }
+    body.dark-mode .as-fam-status--active,
+    [data-bs-theme="dark"] .as-fam-status--active {
+      background-color: rgba(16, 185, 129, 0.18) !important;
+      color: #6ee7b7 !important;
+      border-color: rgba(16, 185, 129, 0.35) !important;
+    }
+    body.dark-mode .as-fam-status--pending,
+    [data-bs-theme="dark"] .as-fam-status--pending {
+      background-color: rgba(245, 158, 11, 0.18) !important;
+      color: #fde68a !important;
+      border-color: rgba(245, 158, 11, 0.35) !important;
+    }
+    body.dark-mode .as-fam-status--unverified,
+    [data-bs-theme="dark"] .as-fam-status--unverified {
+      background-color: rgba(239, 68, 68, 0.18) !important;
+      color: #fca5a5 !important;
+      border-color: rgba(239, 68, 68, 0.35) !important;
+    }
+    body.dark-mode .as-fam-status--none,
+    [data-bs-theme="dark"] .as-fam-status--none {
+      background-color: #1e293b !important;
+      color: #cbd5e1 !important;
+      border-color: #334155 !important;
+    }
+    body.dark-mode .as-fam-panel,
+    [data-bs-theme="dark"] .as-fam-panel {
+      background-color: rgba(15, 23, 42, 0.6) !important;
+      border-color: #334155 !important;
     }
 
   </style>
@@ -708,7 +861,7 @@
                 <input type="hidden" id="famCode_id" value="{{ $accountData['famCode'] ?? '' }}">
 
                 <!-- Father's Card -->
-                <div class="p-4 rounded-3 mb-4" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                <div class="p-4 rounded-3 mb-4 setting-subcard">
                   <h6 class="fw-bold mb-3 text-dark text-uppercase" style="letter-spacing: 0.5px; font-size: 0.9rem;">
                     <i class="bi bi-person-fill text-primary me-1"></i> Father's Details
                   </h6>
@@ -733,7 +886,7 @@
                 </div>
 
                 <!-- Mother's Card -->
-                <div class="p-4 rounded-3 mb-4" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                <div class="p-4 rounded-3 mb-4 setting-subcard">
                   <h6 class="fw-bold mb-3 text-dark text-uppercase" style="letter-spacing: 0.5px; font-size: 0.9rem;">
                     <i class="bi bi-person-fill text-danger me-1"></i> Mother's Details
                   </h6>
@@ -904,7 +1057,7 @@
                 </div>
 
                 <!-- Dynamic Spouse Section -->
-                <div id="spouse" style="display: none;" class="p-4 rounded-3 mb-4" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                <div id="spouse" style="display: none;" class="p-4 rounded-3 mb-4 setting-subcard">
                   <h6 class="fw-bold mb-3 text-dark text-uppercase" style="letter-spacing: 0.5px; font-size: 0.9rem;">
                     <i class="bi bi-heart-fill text-danger me-1"></i> Spouse Details
                   </h6>
@@ -1050,7 +1203,7 @@
                 </div>
 
                 <!-- Self-Serve Notification Diagnostics & Device Test Card -->
-                <div class="p-3 mt-3 rounded-3 border" style="background-color: #f8fafc; border-color: #e2e8f0 !important;">
+                <div class="p-3 mt-3 rounded-3 border setting-subcard" id="pushDiagnosticsCard">
                   <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
                     <span class="fw-bold text-dark" style="font-size: 0.9rem;">
                       <i class="bi bi-shield-check text-success me-1"></i> Device Delivery &amp; Push Diagnostics
@@ -1074,7 +1227,7 @@
                 </div>
 
                 <!-- Ambient Progressive Web App Installation Card -->
-                <div class="p-3 mt-3 rounded-3 border" id="pwaAccountSettingCard" style="background-color: #f8fafc; border-color: #e2e8f0 !important; display: none;">
+                <div class="p-3 mt-3 rounded-3 border setting-subcard" id="pwaAccountSettingCard" style="display: none;">
                   <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
                     <span class="fw-bold text-dark" style="font-size: 0.9rem;">
                       <i class="bi bi-phone text-primary me-1"></i> FamilyPlatform App Experience
@@ -1425,7 +1578,7 @@
               @endif
 
               <!-- Current Family Code Card -->
-              <div class="card border-0 shadow-sm rounded-3 mb-4" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #e2e8f0;">
+              <div class="card border-0 shadow-sm rounded-3 mb-4 setting-subcard">
                 <div class="card-body p-4">
                   <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
@@ -1435,7 +1588,7 @@
                       </h3>
                       @if(!empty($pendingFamilyRequest) && ($pendingFamilyRequest['purpose'] ?? 'join') !== 'birth_link')
                         <div class="mt-2 mb-2" id="currentFamCodePendingContainer">
-                          <span class="badge rounded-pill px-3 py-1.5 fw-semibold" style="background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a;">
+                          <span class="badge rounded-pill px-3 py-1.5 fw-semibold as-fam-status--pending">
                             <i class="bi bi-hourglass-split me-1"></i> Transfer to <strong>#{{ $pendingFamilyRequest['family_code'] }}</strong> pending approval
                           </span>
                         </div>
@@ -1458,7 +1611,7 @@
                 $cr = $codeRename ?? ['is_creator' => false, 'can_propose' => false, 'code' => '', 'open' => null, 'cooldown' => false];
                 $crOpen = $cr['open'] ?? null;
               @endphp
-              <div class="card border-0 shadow-sm rounded-3 mb-4" id="codeRenameCard" style="background: #ffffff; border: 1px solid #e2e8f0;">
+              <div class="card border-0 shadow-sm rounded-3 mb-4 as-fam-card" id="codeRenameCard">
                 <div class="card-body p-4">
                   <div class="d-flex align-items-center gap-2 mb-1">
                     <i class="bi bi-ui-checks-grid fs-4 text-primary"></i>
@@ -1468,7 +1621,7 @@
                   <div id="codeRenameAlert" class="alert alert-danger small py-2 mb-3" style="display:none;" role="alert"></div>
 
                   @if($crOpen)
-                    <div class="p-3 rounded-3 mb-3" style="background:#f8fafc; border:1px solid #e2e8f0;" id="codeRenameOpen">
+                    <div class="p-3 rounded-3 mb-3 setting-subcard" id="codeRenameOpen">
                       <div class="fw-semibold mb-1">Vote open: #{{ $crOpen['old_code'] }} &rarr; #{{ $crOpen['new_code'] }}</div>
                       <div class="small text-muted mb-2">
                         So far {{ (int)($crOpen['yes'] ?? 0) }} yes and {{ (int)($crOpen['no'] ?? 0) }} no from {{ (int)($crOpen['eligible'] ?? 0) }} members.
@@ -1507,34 +1660,34 @@
                 $bfState = (string)($bf['state'] ?? 'none');
                 $maidenPrefill = (string)($accountData['maiden_name'] ?? $accountData['mother_maiden'] ?? '');
               @endphp
-              <div class="card border-0 shadow-sm rounded-3 mb-4" id="birthFamilyCard" data-state="{{ $bfState }}" style="background: #ffffff; border: 1px solid #e2e8f0;">
+              <div class="card border-0 shadow-sm rounded-3 mb-4 as-fam-card" id="birthFamilyCard" data-state="{{ $bfState }}">
                 <div class="card-body p-4">
                   <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: #fbefef; color: #b8202c;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center as-fam-icon-crimson">
                       <i class="bi bi-diagram-3-fill fs-4"></i>
                     </div>
                     <div class="flex-grow-1">
                       <div class="d-flex align-items-center gap-2 flex-wrap">
                         <h5 class="fw-bold mb-0">Birth / Maiden Family Code</h5>
-                        <span class="badge rounded-pill px-2.5 py-1" style="background-color: #fbefef; color: #8a1019; font-size: 0.75rem;">Dual Lineage</span>
+                        <span class="badge rounded-pill px-2.5 py-1 as-fam-badge-crimson">Dual Lineage</span>
                       </div>
                       <span class="text-muted small">Keep your birth family connected without changing your household code.</span>
                     </div>
                     <div>
                       @if($bfState === 'active')
-                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;" id="birthCodeStatusBadge">
+                        <span class="badge rounded-pill px-3 py-2 fw-semibold as-fam-status--active" id="birthCodeStatusBadge">
                           <i class="bi bi-check2-circle me-1"></i> {{ ($bf['origin'] ?? '') === 'created' ? 'Created by you' : 'Linked &amp; approved' }}
                         </span>
                       @elseif($bfState === 'pending')
-                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a;" id="birthCodeStatusBadge">
+                        <span class="badge rounded-pill px-3 py-2 fw-semibold as-fam-status--pending" id="birthCodeStatusBadge">
                           <i class="bi bi-hourglass-split me-1"></i> Awaiting approval
                         </span>
                       @elseif($bfState === 'unverified')
-                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;" id="birthCodeStatusBadge">
+                        <span class="badge rounded-pill px-3 py-2 fw-semibold as-fam-status--unverified" id="birthCodeStatusBadge">
                           <i class="bi bi-exclamation-triangle me-1"></i> Unverified
                         </span>
                       @else
-                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background-color: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0;" id="birthCodeStatusBadge">
+                        <span class="badge rounded-pill px-3 py-2 fw-semibold as-fam-status--none" id="birthCodeStatusBadge">
                           <i class="bi bi-dash-circle me-1"></i> Not set up
                         </span>
                       @endif
@@ -1544,10 +1697,10 @@
                   <div id="birthFamilyAlert" class="alert alert-danger small py-2 mb-3" style="display:none;" role="alert"></div>
 
                   @if($bfState === 'active')
-                    <div class="p-3 rounded-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background-color: #fbefef; border: 1px solid #fbefef;">
+                    <div class="p-3 rounded-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-3 as-fam-code-box">
                       <div>
                         <span class="text-uppercase text-muted fw-bold small" style="letter-spacing: 0.05em;">Your birth family code</span>
-                        <h3 class="fw-bolder mb-0 mt-1" style="color:#8a1019; letter-spacing:1px;">#<span id="birthCodeValue">{{ $bf['code'] }}</span></h3>
+                        <h3 class="fw-bolder mb-0 mt-1 as-fam-code-value">#<span id="birthCodeValue">{{ $bf['code'] }}</span></h3>
                       </div>
                       <div class="d-flex gap-2 flex-wrap">
                         <button type="button" id="btnCopyBirthCode" class="btn btn-outline-primary rounded-pill px-4 fw-semibold" style="min-height:44px;" data-code="{{ $bf['code'] }}">
@@ -1568,7 +1721,7 @@
                       @endif
                     </p>
                   @elseif($bfState === 'pending')
-                    <div class="p-3 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2" style="background-color: #fffbeb; border: 1px solid #fef3c7; color: #92400e;">
+                    <div class="p-3 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2 as-fam-pending-box">
                       <p class="small mb-0">
                         You asked to link to <strong>#{{ $bf['code'] }}</strong>. Waiting for
                         <strong>{{ $bf['pending']['inviter_first_name'] ?? '' }} {{ $bf['pending']['inviter_last_name'] ?? '' }}</strong> to confirm.
@@ -1588,7 +1741,7 @@
 
                     <div class="row g-4">
                       <div class="col-md-6">
-                        <div class="h-100 p-3 rounded-3" style="border: 1px solid #e2e8f0;">
+                        <div class="h-100 p-3 rounded-3 as-fam-panel">
                           <h6 class="fw-bold mb-1"><i class="bi bi-stars me-1 text-primary"></i> My birth family isn't on yet</h6>
                           <p class="text-muted small">We'll create a new family code from your maiden name. Your parents and siblings can join with it.</p>
                           <form id="createBirthCodeForm" onsubmit="return false;">
@@ -1602,7 +1755,7 @@
                         </div>
                       </div>
                       <div class="col-md-6">
-                        <div class="h-100 p-3 rounded-3" style="border: 1px solid #e2e8f0;">
+                        <div class="h-100 p-3 rounded-3 as-fam-panel">
                           <h6 class="fw-bold mb-1"><i class="bi bi-link-45deg me-1 text-success"></i> My family is already here</h6>
                           <p class="text-muted small">Enter their code and a family member who can confirm you. Your household code won't change.</p>
                           <form id="linkBirthCodeForm" onsubmit="return false;">
@@ -1632,10 +1785,10 @@
                 
                 <!-- 1. Branch Out Solo -->
                 <div class="col-md-6">
-                  <div class="card h-100 border-0 shadow-sm rounded-3" style="background: #ffffff; border: 1px solid #e2e8f0;">
+                  <div class="card h-100 border-0 shadow-sm rounded-3 as-fam-card">
                     <div class="card-body p-4 d-flex flex-column">
                       <div class="d-flex align-items-center gap-3 mb-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: #fdf5f5; color: #a31621;">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center as-fam-icon-solo">
                           <i class="bi bi-tree-fill fs-4"></i>
                         </div>
                         <div>
@@ -1666,10 +1819,10 @@
 
                 <!-- 2. Transfer / Join Existing Family -->
                 <div class="col-md-6">
-                  <div class="card h-100 border-0 shadow-sm rounded-3" style="background: #ffffff; border: 1px solid #e2e8f0;">
+                  <div class="card h-100 border-0 shadow-sm rounded-3 as-fam-card">
                     <div class="card-body p-4 d-flex flex-column">
                       <div class="d-flex align-items-center gap-3 mb-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: #ecfdf5; color: #10b981;">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center as-fam-icon-green">
                           <i class="bi bi-people-fill fs-4"></i>
                         </div>
                         <div>

@@ -332,7 +332,7 @@
 
                                 <!-- Dynamic Wedding Anniversary Date Section -->
                                 <div class="col-12 mt-2" id="weddingDateContainer" style="{{ ($data['marital_status'] ?? '') === 'Married' ? 'display: block;' : 'display: none;' }}">
-                                    <div class="p-3 rounded-3" style="background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%); border: 1px solid #fde68a;">
+                                    <div class="modal-sub-card-amber p-3 rounded-3">
                                         <label for="wedding_date" class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-1">
                                             <span>💍 Wedding Date / Anniversary</span>
                                             <span class="badge bg-warning text-dark px-2 py-0.5 rounded-pill" style="font-size: 0.7rem; letter-spacing: 0.02em;">Anniversary Alerts</span>

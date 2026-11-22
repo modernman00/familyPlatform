@@ -23,7 +23,7 @@ export function KinWordGame({ puzzle, onProgress, onComplete, submitting }) {
     const [mistakes, setMistakes] = useState(0);
     const [hintsUsed, setHintsUsed] = useState(0);
     const [elapsedMs, setElapsedMs] = useState(0);
-    const [statusNote, setStatusNote] = useState('Group 16 words into 4 family & wordplay themes.');
+    const [statusNote, setStatusNote] = useState('Pick 4 words that go together (like 4 foods or 4 places), then tap Submit.');
 
     const startTimeRef = useRef(Date.now());
     const replayRef = useRef([]);
@@ -40,7 +40,7 @@ export function KinWordGame({ puzzle, onProgress, onComplete, submitting }) {
         startTimeRef.current = Date.now();
         replayRef.current = [];
         completedRef.current = false;
-        setStatusNote('Group 16 words into 4 family & wordplay themes.');
+        setStatusNote('Pick 4 words that go together (like 4 foods or 4 places), then tap Submit.');
     }, [puzzle?.seedKey, puzzle?.difficulty]);
 
     useEffect(() => {
@@ -130,17 +130,34 @@ export function KinWordGame({ puzzle, onProgress, onComplete, submitting }) {
                 }
             }
         } else {
+            // Check if 3 of the 4 selected words belong to a valid group ("one away")
+            const selUpper = selected.map((w) => String(w).toUpperCase());
+            const others = remainingTiles.filter((w) => !selected.includes(w));
+            let isOneAway = false;
+            for (let skip = 0; skip < 4 && !isOneAway; skip++) {
+                const three = selUpper.filter((_, idx) => idx !== skip);
+                for (const cand of others) {
+                    const testSet = [...three, String(cand).toUpperCase()].sort();
+                    if (manifest[fnv1aHex(`${seedKey}:${testSet.join('|')}`)]) {
+                        isOneAway = true;
+                        break;
+                    }
+                }
+            }
+
             const nextMistakes = mistakes + 1;
             setMistakes(nextMistakes);
             playArcadeSfx('error');
             if (nextMistakes >= maxMistakes) {
-                setStatusNote('Out of hearts! Resetting board to try again.');
+                setStatusNote('Out of hearts! Board reset so you can try again.');
                 setRemainingTiles(Array.isArray(puzzle?.tiles) ? [...puzzle.tiles] : []);
                 setSolvedGroups([]);
                 setSelected([]);
                 setMistakes(0);
+            } else if (isOneAway) {
+                setStatusNote(`So close! 3 of those 4 words go together — swap 1 word! (${maxMistakes - nextMistakes} hearts left)`);
             } else {
-                setStatusNote(`Not quite a matching quartet — ${maxMistakes - nextMistakes} hearts left.`);
+                setStatusNote(`Those 4 don't share the same theme — ${maxMistakes - nextMistakes} hearts left.`);
             }
         }
     };
@@ -207,11 +224,13 @@ export function KinWordGame({ puzzle, onProgress, onComplete, submitting }) {
             <div className={styles.wordGrid} role="group" aria-label="KinWord 4 by 4 tiles">
                 {remainingTiles.map((word) => {
                     const isSel = selected.includes(word);
+                    const isLong = String(word).length >= 9;
                     return (
                         <button
                             key={word}
                             type="button"
-                            className={`${styles.wordTile} ${isSel ? styles.wordTileSelected : ''}`}
+                            title={word}
+                            className={`${styles.wordTile} ${isLong ? styles.wordTileLong : ''} ${isSel ? styles.wordTileSelected : ''}`}
                             onClick={() => toggleTile(word)}
                             aria-pressed={isSel}
                         >

@@ -4,6 +4,8 @@ import { apiFetch } from '../shared/apiClient';
 import { getCsrfToken, notifyToast } from '../shared/bootstrap';
 import styles from './FeedShell.module.css';
 
+const QUICK_MEDIA_EMOJIS = ['❤️', '😂', '👏', '🙏', '🎉', '😍'];
+
 export function LightboxModal({
     isOpen,
     images = [],
@@ -168,17 +170,43 @@ export function LightboxModal({
 
                     {post && (
                         <div className="w-100 d-flex flex-column gap-2 mt-2" style={{ maxWidth: 680 }}>
-                            <div className="d-flex align-items-center flex-wrap gap-2" role="group" aria-label="Media reactions">
-                                {reactionList.map((r) => (
+                            <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div className="d-flex align-items-center flex-wrap gap-2" role="group" aria-label="Media reactions">
+                                    {reactionList.map((r) => (
+                                        <button
+                                            key={r.key}
+                                            type="button"
+                                            className={`${styles.reactionChip} ${post.user_reaction === r.key ? styles.reactionChipActive : ''}`}
+                                            style={{ background: '#1e293b', color: '#f8fafc', borderColor: post.user_reaction === r.key ? '#f43f5e' : '#334155', minHeight: '44px' }}
+                                            onClick={() => onReactPost?.(post.post_no, r.key)}
+                                        >
+                                            <span dangerouslySetInnerHTML={{ __html: getHeirloomGlassSvg(r.key, 24) }} />
+                                            <span>{r.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                                <a
+                                    href={`/member/emojiStudio?tab=photo-avatar&photo_url=${encodeURIComponent(currentSrc)}`}
+                                    className="btn btn-sm btn-outline-light rounded-pill d-inline-flex align-items-center gap-1"
+                                    style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                                    title="Transform this photo into a Stylised Living Avatar"
+                                >
+                                    <span aria-hidden="true">✨</span>
+                                    <span>Living Avatar</span>
+                                </a>
+                            </div>
+
+                            <div className="d-flex align-items-center flex-wrap gap-1" aria-label="Quick emojis">
+                                {QUICK_MEDIA_EMOJIS.map((em) => (
                                     <button
-                                        key={r.key}
+                                        key={em}
                                         type="button"
-                                        className={`${styles.reactionChip} ${post.user_reaction === r.key ? styles.reactionChipActive : ''}`}
-                                        style={{ background: '#1e293b', color: '#f8fafc', borderColor: post.user_reaction === r.key ? '#f43f5e' : '#334155' }}
-                                        onClick={() => onReactPost?.(post.post_no, r.key)}
+                                        className="btn btn-sm btn-dark border-secondary rounded-pill"
+                                        style={{ minWidth: '44px', minHeight: '44px', fontSize: '1.2rem' }}
+                                        aria-label={`Insert ${em}`}
+                                        onClick={() => setCommentDraft((prev) => `${prev}${em}`)}
                                     >
-                                        <span dangerouslySetInnerHTML={{ __html: getHeirloomGlassSvg(r.key, 22) }} />
-                                        <span>{r.label}</span>
+                                        {em}
                                     </button>
                                 ))}
                             </div>
@@ -187,7 +215,7 @@ export function LightboxModal({
                                 <input type="hidden" name="token" value={getCsrfToken(bootstrap)} />
                                 <input
                                     type="text"
-                                    className="form-control flex-grow-1"
+                                    className="form-control rounded-pill px-3 flex-grow-1"
                                     style={{ minHeight: 44 }}
                                     placeholder="Comment on this photo…"
                                     value={commentDraft}

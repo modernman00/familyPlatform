@@ -1359,6 +1359,8 @@ body[data-page-id="organogram"] #mainNavbar .navbar-toggler-icon {
 }
 
 body[data-page-id="organogram"] .organogram-header {
+    position: relative;
+    z-index: 1010;
     background: rgba(15, 23, 42, 0.88) !important;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
@@ -2472,6 +2474,7 @@ body[data-page-id="organogram"] .tree-hero .member-search-input {
 .tree-btn--icon { width: 44px; padding: 0; font-size: 1.15rem; }
 
 .tree-menu {
+    z-index: 1015;
     min-width: 240px;
     padding: 6px;
     border-radius: 14px;

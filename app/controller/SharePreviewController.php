@@ -241,7 +241,13 @@ final class SharePreviewController
             return;
         }
 
-        redirect('/arcade?challenge=' . rawurlencode($cleanToken));
+        $sessionUserId = isset($_SESSION['id']) ? (string) $_SESSION['id'] : '';
+        if ($sessionUserId !== '') {
+            redirect('/arcade?challenge=' . rawurlencode($cleanToken));
+            return;
+        }
+
+        redirect('/arcade/challenge/' . rawurlencode($cleanToken));
     }
 
     /**
@@ -249,12 +255,21 @@ final class SharePreviewController
      */
     public function arcadeCardImage(string $token = ''): void
     {
-        $cleanToken = preg_replace('/[^a-fA-F0-9]/', '', trim($token)) ?? '';
+        $rawToken = strtolower(trim($token));
+        $cleanToken = preg_replace('/[^a-f0-9]/', '', $rawToken) ?? '';
         $gameLabel = 'FAMILY ARCADE';
         $scoreLine = 'BEAT MY SCORE';
         $subLine = 'KinZip • KinGrid • KinWord • KinPulse';
 
-        if ($cleanToken !== '') {
+        if (str_starts_with($rawToken, 'game-')) {
+            $slug = substr($rawToken, 5);
+            [$gameLabel, $scoreLine, $subLine] = match ($slug) {
+                'kingrid' => ['KINGRID • NUMBER PUZZLE', 'FILL EVERY ROW & COLUMN', 'Tap to play today\'s KinGrid puzzle free!'],
+                'kinword' => ['KINWORD • WORD GROUPS', 'FIND 4 MATCHING GROUPS OF 4', 'Tap to play today\'s KinWord puzzle free!'],
+                'kinpulse' => ['KINPULSE • MEMORY PATTERN', 'WATCH, LISTEN & COPY', 'Tap to play today\'s KinPulse puzzle free!'],
+                default => ['KINZIP • CONNECT THE DOTS', 'DRAW ONE PATH THROUGH ALL CELLS', 'Tap to play today\'s KinZip puzzle free!'],
+            };
+        } elseif ($cleanToken !== '') {
             try {
                 $db = Db::connect2();
                 $stmt = $db->prepare(

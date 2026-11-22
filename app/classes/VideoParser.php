@@ -9,7 +9,7 @@ final class VideoParser
      * Parse a single URL string for supported video providers (YouTube, Vimeo, Cloudflare, TikTok, Dropbox, Direct Video).
      *
      * @param string|null $url
-     * @return array{type: string, videoId: string|null, thumbnailUrl: string|null, embedUrl: string, originalUrl: string, hlsUrl?: string|null, trimStart?: float|null, trimEnd?: float|null}|null
+     * @return array{type: string, videoId: string|null, thumbnailUrl: string|null, embedUrl: string, originalUrl: string, hlsUrl?: string|null, trimStart?: float|null, trimEnd?: float|null, isShort?: bool, aspect_ratio?: string}|null
      */
     public static function parseVideoUrl(?string $url): ?array
     {
@@ -158,13 +158,19 @@ final class VideoParser
         // cannot play share-redirect URLs and renders "Video unavailable"; they render via Rich Link Preview instead.
         $fbVideoRegex = '/^https?:\/\/(?:www\.|m\.|web\.)?(?:facebook\.com\/(?:[^\/\s]+\/videos\/\d+|watch\/?\?v=\d+|reel\/\d+|video\.php\?v=\d+)|fb\.watch\/[^\s"\'<>]+|fb\.com\/(?:watch|reel|[^\/\s]+\/videos)\/[^\s"\'<>]+)/i';
         if (preg_match($fbVideoRegex, $trimmed) === 1) {
-            return [
+            $isFbReel = preg_match('/(?:facebook\.com|fb\.com)\/reel\/\d+/i', $trimmed) === 1;
+            $desc = [
                 'type' => 'facebook',
                 'videoId' => null,
                 'thumbnailUrl' => null,
                 'embedUrl' => 'https://www.facebook.com/plugins/video.php?href=' . rawurlencode($trimmed) . '&show_text=false&autoplay=0',
                 'originalUrl' => $trimmed,
             ];
+            if ($isFbReel) {
+                $desc['isShort'] = true;
+                $desc['aspect_ratio'] = '9 / 16';
+            }
+            return $desc;
         }
 
         // 7. Google Drive Video (drive.google.com/file/d/{id}/... or drive.google.com/open?id={id})
@@ -472,8 +478,37 @@ final class VideoParser
                 $clean['hls_url'] = $hls;
             }
         }
+        if (isset($rawMeta['poster_url']) && is_string($rawMeta['poster_url'])) {
+            $poster = trim($rawMeta['poster_url']);
+            if (
+                $poster !== ''
+                && (str_starts_with($poster, 'https://') || str_starts_with($poster, '/public/uploads/') || str_starts_with($poster, '/resources/'))
+                && !preg_match('/[\s"\'<>]/', $poster)
+            ) {
+                $clean['poster_url'] = $poster;
+            }
+        }
 
         return !empty($clean) ? $clean : null;
+    }
+
+    /**
+     * Format pixel dimensions into a simplified "W / H" aspect ratio string.
+     */
+    public static function formatAspectRatio(int $width, int $height): ?string
+    {
+        if ($width <= 0 || $height <= 0) {
+            return null;
+        }
+        $a = $width;
+        $b = $height;
+        while ($b !== 0) {
+            $t = $a % $b;
+            $a = $b;
+            $b = $t;
+        }
+        $gcd = max(1, $a);
+        return (int)($width / $gcd) . ' / ' . (int)($height / $gcd);
     }
 
     /**
@@ -500,8 +535,11 @@ final class VideoParser
         if (isset($mediaMeta['duration_sec'])) {
             $descriptor['duration_sec'] = $mediaMeta['duration_sec'];
         }
-        if (!empty($mediaMeta['hls_url']) && empty($descriptor['hlsUrl'])) {
+        if (!empty($mediaMeta['hls_url'])) {
             $descriptor['hlsUrl'] = $mediaMeta['hls_url'];
+        }
+        if (!empty($mediaMeta['poster_url'])) {
+            $descriptor['thumbnailUrl'] = $mediaMeta['poster_url'];
         }
         return $descriptor;
     }

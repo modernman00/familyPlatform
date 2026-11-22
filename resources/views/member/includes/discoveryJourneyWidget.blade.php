@@ -1,5 +1,119 @@
 <!-- 60-Day Omnichannel Feature Discovery & Activation Hub Widget -->
 <!-- Governed by TAT / Sovereign Sector Board: Social Media, Lifestyle & Platform Growth -->
+<style>
+#discoveryJourneyWidget .dj-studio-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+#discoveryJourneyWidget .dj-studio-card--completed {
+    background: #f0fdf4;
+    border: 1.5px solid #86efac;
+}
+#discoveryJourneyWidget .dj-studio-card--current {
+    background: #fff1f2;
+    border: 1.5px solid #f43f5e;
+}
+#discoveryJourneyWidget .dj-day-badge {
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 0.68rem;
+}
+#discoveryJourneyWidget .dj-day-badge--completed {
+    background: #22c55e;
+    color: #ffffff;
+    font-size: 0.68rem;
+}
+#discoveryJourneyWidget .dj-cat-badge {
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 0.68rem;
+}
+#discoveryJourneyWidget .dj-cat-badge--completed {
+    background: #dcfce7;
+    color: #166534;
+    font-size: 0.68rem;
+}
+#discoveryJourneyWidget .dj-status-text {
+    color: #64748b;
+    font-size: 0.75rem;
+}
+#discoveryJourneyWidget .dj-status-text--completed {
+    color: #166534;
+    font-size: 0.75rem;
+}
+
+body.dark-mode #discoveryJourneyWidget .dj-studio-card,
+body.dark-theme #discoveryJourneyWidget .dj-studio-card,
+[data-bs-theme="dark"] #discoveryJourneyWidget .dj-studio-card,
+html.dark #discoveryJourneyWidget .dj-studio-card,
+html.dark-mode #discoveryJourneyWidget .dj-studio-card {
+    background: #1a2030 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #f8fafc !important;
+}
+body.dark-mode #discoveryJourneyWidget .dj-studio-card--completed,
+body.dark-theme #discoveryJourneyWidget .dj-studio-card--completed,
+[data-bs-theme="dark"] #discoveryJourneyWidget .dj-studio-card--completed,
+html.dark #discoveryJourneyWidget .dj-studio-card--completed,
+html.dark-mode #discoveryJourneyWidget .dj-studio-card--completed {
+    background: rgba(16, 185, 129, 0.12) !important;
+    border-color: rgba(52, 211, 153, 0.45) !important;
+}
+body.dark-mode #discoveryJourneyWidget .dj-studio-card--current,
+body.dark-theme #discoveryJourneyWidget .dj-studio-card--current,
+[data-bs-theme="dark"] #discoveryJourneyWidget .dj-studio-card--current,
+html.dark #discoveryJourneyWidget .dj-studio-card--current,
+html.dark-mode #discoveryJourneyWidget .dj-studio-card--current {
+    background: rgba(255, 77, 97, 0.14) !important;
+    border-color: #ff4d61 !important;
+}
+body.dark-mode #discoveryJourneyWidget .dj-day-badge,
+body.dark-theme #discoveryJourneyWidget .dj-day-badge,
+[data-bs-theme="dark"] #discoveryJourneyWidget .dj-day-badge,
+html.dark #discoveryJourneyWidget .dj-day-badge,
+html.dark-mode #discoveryJourneyWidget .dj-day-badge {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #e2e8f0 !important;
+}
+body.dark-mode #discoveryJourneyWidget .dj-day-badge--completed,
+body.dark-theme #discoveryJourneyWidget .dj-day-badge--completed,
+[data-bs-theme="dark"] #discoveryJourneyWidget .dj-day-badge--completed,
+html.dark #discoveryJourneyWidget .dj-day-badge--completed,
+html.dark-mode #discoveryJourneyWidget .dj-day-badge--completed {
+    background: #059669 !important;
+    color: #ffffff !important;
+}
+body.dark-mode #discoveryJourneyWidget .dj-cat-badge,
+body.dark-theme #discoveryJourneyWidget .dj-cat-badge,
+[data-bs-theme="dark"] #discoveryJourneyWidget .dj-cat-badge,
+html.dark #discoveryJourneyWidget .dj-cat-badge,
+html.dark-mode #discoveryJourneyWidget .dj-cat-badge {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #cbd5e1 !important;
+}
+body.dark-mode #discoveryJourneyWidget .dj-cat-badge--completed,
+body.dark-theme #discoveryJourneyWidget .dj-cat-badge--completed,
+[data-bs-theme="dark"] #discoveryJourneyWidget .dj-cat-badge--completed,
+html.dark #discoveryJourneyWidget .dj-cat-badge--completed,
+html.dark-mode #discoveryJourneyWidget .dj-cat-badge--completed {
+    background: rgba(16, 185, 129, 0.22) !important;
+    color: #86efac !important;
+}
+body.dark-mode #discoveryJourneyWidget .dj-status-text,
+body.dark-theme #discoveryJourneyWidget .dj-status-text,
+[data-bs-theme="dark"] #discoveryJourneyWidget .dj-status-text,
+html.dark #discoveryJourneyWidget .dj-status-text,
+html.dark-mode #discoveryJourneyWidget .dj-status-text {
+    color: #cbd5e1 !important;
+}
+body.dark-mode #discoveryJourneyWidget .dj-status-text--completed,
+body.dark-theme #discoveryJourneyWidget .dj-status-text--completed,
+[data-bs-theme="dark"] #discoveryJourneyWidget .dj-status-text--completed,
+html.dark #discoveryJourneyWidget .dj-status-text--completed,
+html.dark-mode #discoveryJourneyWidget .dj-status-text--completed {
+    color: #6ee7b7 !important;
+}
+</style>
 <div class="card border-0 shadow-sm mb-4 overflow-hidden discovery-journey-card"
      id="discoveryJourneyWidget"
      style="border-radius: 20px; background: linear-gradient(135deg, #1e1114 0%, #2a0a0d 45%, #6a0d15 100%); color: #ffffff; border: 1.5px solid rgba(244, 63, 94, 0.35); position: relative;"
@@ -107,7 +221,7 @@
          style="background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(8px); z-index: 1060;"
          :style="showAllStudiosModal ? 'display: block !important;' : 'display: none !important;'">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; background: #ffffff; color: #1e293b;">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
                 <div class="modal-header border-bottom px-4 py-3" style="background: linear-gradient(135deg, #2a0a0d 0%, #6a0d15 100%); color: #ffffff;">
                     <div class="d-flex align-items-center gap-2.5">
                         <div class="rounded-circle d-flex align-items-center justify-content-center"
@@ -134,17 +248,15 @@
                     <div class="row g-3">
                         <template x-for="m in milestones" :key="m.key">
                             <div class="col-12 col-md-6">
-                                <div class="p-3 rounded-3 h-100 d-flex flex-column justify-content-between"
-                                     :style="m.completed ? 'background: #f0fdf4; border: 1.5px solid #86efac;' : (m.is_current ? 'background: #fff1f2; border: 1.5px solid #f43f5e;' : 'background: #f8fafc; border: 1px solid #e2e8f0;')">
+                                <div class="p-3 rounded-3 h-100 d-flex flex-column justify-content-between dj-studio-card"
+                                     :class="m.completed ? 'dj-studio-card--completed' : (m.is_current ? 'dj-studio-card--current' : '')">
                                     <div>
                                         <div class="d-flex align-items-center justify-content-between mb-1.5">
                                             <span class="badge rounded-pill px-2 py-0.5 fw-bold"
-                                                  :style="m.completed ? 'background: #22c55e; color: #ffffff;' : 'background: #e2e8f0; color: #475569;'"
-                                                  style="font-size: 0.68rem;"
+                                                  :class="m.completed ? 'dj-day-badge--completed' : 'dj-day-badge'"
                                                   x-text="`Day ${m.day}`"></span>
                                             <span class="badge rounded-pill px-2 py-0.5 fw-semibold"
-                                                  :style="m.completed ? 'background: #dcfce7; color: #166534;' : 'background: #f1f5f9; color: #64748b;'"
-                                                  style="font-size: 0.68rem;"
+                                                  :class="m.completed ? 'dj-cat-badge--completed' : 'dj-cat-badge'"
                                                   x-text="m.badge"></span>
                                         </div>
                                         <h6 class="fw-bold text-dark mb-1 d-flex align-items-center gap-1.5" style="font-size: 0.95rem;">
@@ -160,8 +272,7 @@
 
                                     <div class="pt-2 border-top d-flex align-items-center justify-content-between">
                                         <span class="small fw-semibold" 
-                                              :style="m.completed ? 'color: #166534;' : 'color: #64748b;'"
-                                              style="font-size: 0.75rem;"
+                                              :class="m.completed ? 'dj-status-text--completed' : 'dj-status-text'"
                                               x-text="m.completed ? '✓ Mastered' : 'Available Now'"></span>
                                         <a :href="m.action_url" 
                                            @click="launchStudio(m)"

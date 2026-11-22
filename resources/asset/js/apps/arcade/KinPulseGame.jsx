@@ -3,9 +3,9 @@ import { playArcadeSfx, formatElapsedMs } from './arcadeEngine';
 import styles from './ArcadeShell.module.css';
 
 const PAD_COLOURS = [
-    '#ef4444', '#f59e0b', '#10b981',
-    '#3b82f6', '#8b5cf6', '#ec4899',
-    '#14b8a6', '#f97316', '#eab308',
+    '#dc2626', '#b45309', '#059669',
+    '#2563eb', '#7c3aed', '#db2777',
+    '#0d9488', '#c2410c', '#854d0e',
 ];
 
 export function KinPulseGame({ puzzle, onProgress, onComplete, submitting }) {
@@ -19,7 +19,7 @@ export function KinPulseGame({ puzzle, onProgress, onComplete, submitting }) {
     const [mistakes, setMistakes] = useState(0);
     const [elapsedMs, setElapsedMs] = useState(0);
     const [tilt, setTilt] = useState({ rx: 8, ry: 0 });
-    const [statusNote, setStatusNote] = useState('Press Start Sequence to watch and echo the 3D harmonic pattern.');
+    const [statusNote, setStatusNote] = useState('Tap Start Sequence, watch the coloured squares light up, then tap them back in the exact same order!');
 
     const startTimeRef = useRef(Date.now());
     const replayRef = useRef([]);
@@ -42,7 +42,7 @@ export function KinPulseGame({ puzzle, onProgress, onComplete, submitting }) {
         startTimeRef.current = Date.now();
         replayRef.current = [];
         completedRef.current = false;
-        setStatusNote('Press Start Sequence to watch and echo the 3D harmonic pattern.');
+        setStatusNote('Tap Start Sequence, watch the coloured squares light up, then tap them back in the exact same order!');
         return clearTimers;
     }, [puzzle?.seedKey, puzzle?.difficulty]);
 
@@ -71,17 +71,17 @@ export function KinPulseGame({ puzzle, onProgress, onComplete, submitting }) {
             const tOn = window.setTimeout(() => {
                 setActivePad(padIdx);
                 playArcadeSfx('pulse', padIdx);
-            }, 350 + i * 520);
+            }, 350 + i * 540);
             const tOff = window.setTimeout(() => {
                 setActivePad(-1);
-            }, 350 + i * 520 + 320);
+            }, 350 + i * 540 + 340);
             timersRef.current.push(tOn, tOff);
         });
 
         const tReady = window.setTimeout(() => {
             setPhase('input');
             setStatusNote(`Your turn! Repeat ${targetRound} ${targetRound === 1 ? 'note' : 'notes'}.`);
-        }, 350 + slice.length * 520 + 120);
+        }, 350 + slice.length * 540 + 130);
         timersRef.current.push(tReady);
     };
 
@@ -91,10 +91,14 @@ export function KinPulseGame({ puzzle, onProgress, onComplete, submitting }) {
     };
 
     const handlePadTap = (idx) => {
+        if (phase === 'idle' && !submitting) {
+            handleStart();
+            return;
+        }
         if (phase !== 'input' || completedRef.current || submitting) return;
 
         setActivePad(idx);
-        window.setTimeout(() => setActivePad(-1), 220);
+        window.setTimeout(() => setActivePad(-1), 280);
 
         const expected = sequence[userStep];
         if (idx === expected) {
@@ -137,7 +141,12 @@ export function KinPulseGame({ puzzle, onProgress, onComplete, submitting }) {
         }
     };
 
+    const prefersReducedMotion = typeof window !== 'undefined'
+        && window.matchMedia
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     const handleBoardMove = (e) => {
+        if (prefersReducedMotion || (e.pointerType && e.pointerType !== 'mouse')) return;
         const rect = e.currentTarget.getBoundingClientRect();
         const x = (e.clientX - rect.left) / rect.width - 0.5;
         const y = (e.clientY - rect.top) / rect.height - 0.5;
@@ -169,7 +178,9 @@ export function KinPulseGame({ puzzle, onProgress, onComplete, submitting }) {
                 <div
                     className={styles.pulseGrid}
                     style={{
-                        transform: `perspective(900px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`,
+                        transform: prefersReducedMotion
+                            ? 'none'
+                            : `perspective(900px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`,
                     }}
                     role="group"
                     aria-label="KinPulse 3D kinetic memory pads"
@@ -183,9 +194,10 @@ export function KinPulseGame({ puzzle, onProgress, onComplete, submitting }) {
                                 className={`${styles.pulsePad} ${isLit ? styles.pulsePadActive : ''}`}
                                 style={{
                                     '--pad-colour': colour,
+                                    '--pad-index': idx,
                                 }}
                                 onClick={() => handlePadTap(idx)}
-                                disabled={phase !== 'input' || submitting}
+                                disabled={(phase !== 'input' && phase !== 'idle') || submitting}
                                 aria-label={`Kinetic Pad ${idx + 1}`}
                             >
                                 <span className={styles.pulsePadNum}>{idx + 1}</span>

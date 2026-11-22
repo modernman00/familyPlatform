@@ -26,10 +26,118 @@ function getAudioContext() {
 
 const PENTATONIC_FREQS = [261.63, 293.66, 329.63, 392.0, 440.0, 523.25, 587.33, 659.25, 783.99];
 
+export function triggerArcadeHaptics(pattern = 15) {
+    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+        try {
+            navigator.vibrate(pattern);
+        } catch {
+            // Non-blocking fallback
+        }
+    }
+}
+
+export function triggerArcadeConfetti() {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    let canvas = document.getElementById('arcadeConfettiCanvas');
+    if (!canvas) {
+        canvas = document.createElement('canvas');
+        canvas.id = 'arcadeConfettiCanvas';
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100vw';
+        canvas.style.height = '100vh';
+        canvas.style.pointerEvents = 'none';
+        canvas.style.zIndex = '99999';
+        document.body.appendChild(canvas);
+    }
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const colours = ['#fbbf24', '#f59e0b', '#ef4444', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
+    const particles = [];
+    const particleCount = 75;
+
+    for (let i = 0; i < particleCount; i++) {
+        particles.push({
+            x: canvas.width * 0.5 + (Math.random() - 0.5) * 200,
+            y: canvas.height * 0.35 + (Math.random() - 0.5) * 80,
+            vx: (Math.random() - 0.5) * 16,
+            vy: (Math.random() - 0.75) * 18,
+            size: Math.random() * 8 + 6,
+            colour: colours[Math.floor(Math.random() * colours.length)],
+            rotation: Math.random() * 360,
+            vRot: (Math.random() - 0.5) * 12,
+            opacity: 1,
+            gravity: 0.42,
+        });
+    }
+
+    let frame = 0;
+    const animate = () => {
+        frame++;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let alive = 0;
+
+        for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            if (p.opacity <= 0.01) continue;
+
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += p.gravity;
+            p.vx *= 0.98;
+            p.rotation += p.vRot;
+            p.opacity = Math.max(0, p.opacity - 0.016);
+            alive++;
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rotation * Math.PI) / 180);
+            ctx.fillStyle = p.colour;
+            ctx.globalAlpha = p.opacity;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+            ctx.restore();
+        }
+
+        if (alive > 0 && frame < 90) {
+            requestAnimationFrame(animate);
+        } else {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (canvas.parentNode) {
+                canvas.parentNode.removeChild(canvas);
+            }
+        }
+    };
+
+    requestAnimationFrame(animate);
+}
+
 export function playArcadeSfx(type, index = 0) {
     if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         // Still allow gentle audio unless muted, or keep minimal
     }
+
+    // Trigger subtle tactile haptics matched to audio cue
+    if (type === 'tick') {
+        triggerArcadeHaptics(10);
+    } else if (type === 'pulse') {
+        triggerArcadeHaptics(22);
+    } else if (type === 'connect') {
+        triggerArcadeHaptics(28);
+    } else if (type === 'error') {
+        triggerArcadeHaptics([40, 50, 40]);
+    } else if (type === 'complete') {
+        triggerArcadeHaptics([30, 40, 50, 50, 120]);
+        triggerArcadeConfetti();
+    }
+
     const ctx = getAudioContext();
     if (!ctx) return;
 
@@ -41,12 +149,14 @@ export function playArcadeSfx(type, index = 0) {
 
     if (type === 'pulse') {
         const freq = PENTATONIC_FREQS[Math.abs(index) % PENTATONIC_FREQS.length];
-        osc.type = 'sine';
+        osc.type = 'triangle';
         osc.frequency.setValueAtTime(freq, now);
-        gain.gain.setValueAtTime(0.14, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.018, now + 0.035);
+        osc.frequency.exponentialRampToValueAtTime(freq, now + 0.12);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
         osc.start(now);
-        osc.stop(now + 0.3);
+        osc.stop(now + 0.34);
         return;
     }
 

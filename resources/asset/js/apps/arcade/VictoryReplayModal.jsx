@@ -189,6 +189,15 @@ export function VictoryReplayModal({
                         <i className="bi bi-whatsapp" aria-hidden="true" />
                         <span>WhatsApp</span>
                     </a>
+                    <a
+                        href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.ctrlBtn}
+                    >
+                        <i className="bi bi-facebook" aria-hidden="true" />
+                        <span>Facebook</span>
+                    </a>
                     <a href={smsHref} className={styles.ctrlBtn}>
                         <i className="bi bi-chat-dots-fill" aria-hidden="true" />
                         <span>Messages</span>

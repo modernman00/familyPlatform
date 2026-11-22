@@ -834,34 +834,37 @@ final class VideoAutoTrimService
         $shortEdge = min($srcW, $srcH);
         $bitrateBps = $probe['bitrate'];
 
-        // Skip re-encoding if already crisp >=1080p, reasonable bitrate (<= 4.5 Mbps), and no trim needed
-        if (!$applyTrim && $shortEdge >= 1080 && $bitrateBps > 0 && $bitrateBps <= 4_500_000) {
+        // Skip re-encoding if already crisp >=1080p, reasonable bitrate (<= 8 Mbps), and no trim needed
+        if (!$applyTrim && $shortEdge >= 1080 && $bitrateBps > 0 && $bitrateBps <= 8_000_000) {
             return false;
         }
 
-        // Compute target dimensions (even-aligned for yuv420p), never exceeding 4K UHD (3840x2160)
+        // Compute target dimensions (even-aligned for yuv420p), orientation-aware 4K UHD bounds
+        $maxW = $srcW >= $srcH ? 3840 : 2160;
+        $maxH = $srcW >= $srcH ? 2160 : 3840;
         $vfParts = [];
         if ($shortEdge < 1080) {
             $targetShort = $shortEdge >= 720 ? 1440 : 1080;
             $scaleRatio = $targetShort / $shortEdge;
             $dstW = (int)(round(($srcW * $scaleRatio) / 2) * 2);
             $dstH = (int)(round(($srcH * $scaleRatio) / 2) * 2);
-            if ($dstW > 3840 || $dstH > 2160) {
-                $capRatio = min(3840 / max(1, $srcW), 2160 / max(1, $srcH));
+            if ($dstW > $maxW || $dstH > $maxH) {
+                $capRatio = min($maxW / max(1, $srcW), $maxH / max(1, $srcH));
                 $dstW = (int)(round(($srcW * $capRatio) / 2) * 2);
                 $dstH = (int)(round(($srcH * $capRatio) / 2) * 2);
             }
             $vfParts[] = "scale={$dstW}:{$dstH}:flags=lanczos";
-            $vfParts[] = 'hqdn3d=1.0:1.0:3:3';
-            $vfParts[] = 'cas=strength=0.55';
+            $vfParts[] = 'hqdn3d=0.6:0.6:2:2';
+            $vfParts[] = 'cas=strength=0.15';
         } else {
-            $vfParts[] = 'cas=strength=0.30';
+            $vfParts[] = 'cas=strength=0.10';
         }
 
         $vf = implode(',', $vfParts);
+        // Never starve upscaled pixels of bitrate: allow sufficient headroom for 1080p/1440p/4K detail
         $maxRateKbps = $bitrateBps > 0
-            ? max(1200, min(6500, (int)round(($bitrateBps * 0.92) / 1000)))
-            : 4500;
+            ? max(4500, min(12000, (int)round(($bitrateBps * 1.5) / 1000)))
+            : 6500;
         $bufSizeKbps = $maxRateKbps * 2;
 
         $outExt = ($ext === 'webm') ? 'webm' : 'mp4';
@@ -897,7 +900,7 @@ final class VideoAutoTrimService
                 '-level:v', '4.2',
                 '-preset', 'medium',
                 '-tune', 'film',
-                '-crf', $shortEdge < 1080 ? '21' : '22',
+                '-crf', $shortEdge < 1080 ? '18' : '19',
                 '-maxrate', $maxRateKbps . 'k',
                 '-bufsize', $bufSizeKbps . 'k',
                 '-pix_fmt', 'yuv420p',

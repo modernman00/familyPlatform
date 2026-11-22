@@ -48,13 +48,8 @@
                         <i class="bi bi-diagram-3-fill"></i>{{ __('nav.tree', 'Tree') }}
                     </a>
                 </li>
-                <li class="nav-item livingHeirloomNav">
-                    <a class="nav-link stitch-nav-link" href="/family/living-heirloom" title="Living Heirloom Studio — Animate ancestors, predict future ageing, and reverse-compute lost family portraits">
-                        <i class="bi bi-person-bounding-box"></i>Heirloom AI
-                    </a>
-                </li>
-                <li class="nav-item creativeStudioNav">
-                    <a class="nav-link stitch-nav-link" href="/creative-studio" title="Creative Studio — Tree Studio, Flyers &amp; Posters, Festive Cards, and Living Archives" data-tooltip="Creative Studio — Tree Studio, Flyers &amp; Posters, Festive Cards, and Living Archives" aria-describedby="creativeStudioTooltipCard">
+                <li class="nav-item creativeStudioNav dropdown" id="creativeStudioNavItem">
+                    <a class="nav-link stitch-nav-link" href="/creative-studio" id="creativeStudioNavTrigger" aria-label="Creative Studio" aria-haspopup="true" aria-expanded="false" data-no-family-tooltip="true">
                         <span class="creative-3d-icon-wrap" aria-hidden="true">
                             <span class="creative-3d-gem">
                                 <span class="creative-3d-sheen"></span>
@@ -67,28 +62,72 @@
                         </span>
                         <span>Creative Studio</span>
                     </a>
-                    <div class="creative-studio-rich-tooltip" id="creativeStudioTooltipCard" role="tooltip">
+                    <div class="creative-studio-rich-tooltip shadow-lg" id="creativeStudioTooltipCard" role="menu" aria-label="Creative Studio tools">
                         <div class="cs-tooltip-header">
                             <i class="bi bi-stars"></i> Inside Creative Studio
                         </div>
                         <ul class="cs-tooltip-list">
-                            <li class="cs-tooltip-item">
-                                <i class="bi bi-diagram-3-fill text-info"></i>
-                                <span><strong>Tree Studio</strong> — Build &amp; curate your family lineage</span>
+                            <li>
+                                <a href="/familyStudio" class="cs-dropdown-link" role="menuitem">
+                                    <span class="cs-dropdown-icon cs-dropdown-icon--tree"><i class="bi bi-diagram-3-fill"></i></span>
+                                    <span class="cs-dropdown-text">
+                                        <span class="cs-dropdown-title">Tree Studio</span>
+                                        <span class="cs-dropdown-desc">Build &amp; curate your family lineage</span>
+                                    </span>
+                                </a>
                             </li>
-                            <li class="cs-tooltip-item">
-                                <i class="bi bi-easel2-fill text-warning"></i>
-                                <span><strong>Flyer Studio</strong> — Reunion, jubilee &amp; milestone posters</span>
+                            <li>
+                                <a href="/family/living-heirloom" class="cs-dropdown-link" role="menuitem">
+                                    <span class="cs-dropdown-icon cs-dropdown-icon--heirloom"><i class="bi bi-person-bounding-box"></i></span>
+                                    <span class="cs-dropdown-text">
+                                        <span class="cs-dropdown-title">Heirloom AI</span>
+                                        <span class="cs-dropdown-desc">Living portraits, ageing &amp; synthesis</span>
+                                    </span>
+                                </a>
                             </li>
-                            <li class="cs-tooltip-item">
-                                <i class="bi bi-envelope-heart-fill text-danger"></i>
-                                <span><strong>Festive Cards</strong> — Living 3D greeting envelopes</span>
+                            <li>
+                                <a href="/poster-studio" class="cs-dropdown-link" role="menuitem">
+                                    <span class="cs-dropdown-icon cs-dropdown-icon--flyer"><i class="bi bi-easel2-fill"></i></span>
+                                    <span class="cs-dropdown-text">
+                                        <span class="cs-dropdown-title">Flyer Studio</span>
+                                        <span class="cs-dropdown-desc">Reunion, jubilee &amp; milestone posters</span>
+                                    </span>
+                                </a>
                             </li>
-                            <li class="cs-tooltip-item">
-                                <i class="bi bi-film text-light"></i>
-                                <span><strong>Living Archives</strong> — 4K Reel Studio &amp; Video Vault</span>
+                            <li>
+                                <a href="/member/festive-cards" class="cs-dropdown-link" role="menuitem">
+                                    <span class="cs-dropdown-icon cs-dropdown-icon--cards"><i class="bi bi-envelope-heart-fill"></i></span>
+                                    <span class="cs-dropdown-text">
+                                        <span class="cs-dropdown-title">Festive Cards</span>
+                                        <span class="cs-dropdown-desc">Living 3D greeting envelopes</span>
+                                    </span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/family-studio" class="cs-dropdown-link" role="menuitem">
+                                    <span class="cs-dropdown-icon cs-dropdown-icon--archives"><i class="bi bi-film"></i></span>
+                                    <span class="cs-dropdown-text">
+                                        <span class="cs-dropdown-title">Living Archives</span>
+                                        <span class="cs-dropdown-desc">4K Reel Studio &amp; Video Vault</span>
+                                    </span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/arcade" class="cs-dropdown-link" role="menuitem">
+                                    <span class="cs-dropdown-icon cs-dropdown-icon--arcade"><i class="bi bi-trophy-fill"></i></span>
+                                    <span class="cs-dropdown-text">
+                                        <span class="cs-dropdown-title">Family Arcade</span>
+                                        <span class="cs-dropdown-desc">Daily puzzles, live races &amp; Family Cup</span>
+                                    </span>
+                                </a>
                             </li>
                         </ul>
+                        <div class="cs-dropdown-footer">
+                            <a href="/creative-studio" class="cs-dropdown-hub-link" role="menuitem">
+                                <span>Open Creative Studio Hub</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
                     </div>
                 </li>
                 <li class="nav-item galleryNav">
@@ -222,7 +261,7 @@
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item py-2 px-3 fw-medium d-flex align-items-center gap-2" href="/creative-studio" title="Creative Studio — Tree Studio, Flyers &amp; Posters, Festive Cards, and Living Archives">
+                            <a class="dropdown-item py-2 px-3 fw-medium d-flex align-items-center gap-2" href="/creative-studio" title="Creative Studio — Tree Studio, Flyers &amp; Posters, Festive Cards, Living Archives, and Family Arcade">
                                 <span class="creative-3d-icon-wrap" aria-hidden="true">
                                     <span class="creative-3d-gem">
                                         <span class="creative-3d-sheen"></span>
@@ -234,6 +273,11 @@
                                     <span class="creative-3d-spark creative-3d-spark--2"></span>
                                 </span>
                                 <span>Creative Studio</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2 px-3 fw-medium" href="/arcade" title="Family Arcade — KinZip, KinGrid, KinWord &amp; KinPulse Daily Puzzles &amp; Leagues">
+                                <i class="bi bi-trophy-fill me-2 text-warning"></i> Family Arcade
                             </a>
                         </li>
                         <li>
@@ -275,3 +319,93 @@
         </div>
     </div>
 </nav>
+
+<script>
+(function() {
+    'use strict';
+    var navItem = document.getElementById('creativeStudioNavItem');
+    var trigger = document.getElementById('creativeStudioNavTrigger');
+    var menu = document.getElementById('creativeStudioTooltipCard');
+    if (!navItem || !trigger || !menu) return;
+
+    var closeTimer = null;
+
+    function openMenu() {
+        if (closeTimer) {
+            clearTimeout(closeTimer);
+            closeTimer = null;
+        }
+        navItem.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+    }
+
+    function scheduleCloseMenu() {
+        if (closeTimer) clearTimeout(closeTimer);
+        closeTimer = setTimeout(function() {
+            navItem.classList.remove('is-open');
+            trigger.setAttribute('aria-expanded', 'false');
+            closeTimer = null;
+        }, 220);
+    }
+
+    function immediateCloseMenu() {
+        if (closeTimer) {
+            clearTimeout(closeTimer);
+            closeTimer = null;
+        }
+        navItem.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+    }
+
+    // Pointer events with debounce
+    navItem.addEventListener('mouseenter', openMenu);
+    navItem.addEventListener('mouseleave', scheduleCloseMenu);
+
+    // Focus management for keyboard accessibility
+    navItem.addEventListener('focusin', openMenu);
+    navItem.addEventListener('focusout', function(e) {
+        if (!navItem.contains(e.relatedTarget)) {
+            immediateCloseMenu();
+        }
+    });
+
+    // Touch & Click toggle for mobile/tablet & deliberate clicks
+    trigger.addEventListener('click', function(e) {
+        var isMobile = window.innerWidth < 992;
+        if (isMobile) {
+            if (!navItem.classList.contains('is-open')) {
+                e.preventDefault();
+                openMenu();
+            }
+        } else {
+            // On desktop, clicking while open allows navigation to hub, or clicking while closed opens dropdown
+            if (!navItem.classList.contains('is-open')) {
+                openMenu();
+            }
+        }
+    });
+
+    // Close on outside click
+    document.addEventListener('click', function(e) {
+        if (!navItem.contains(e.target)) {
+            immediateCloseMenu();
+        }
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && navItem.classList.contains('is-open')) {
+            immediateCloseMenu();
+            trigger.focus();
+        }
+    });
+
+    // Close when any sub-link is clicked
+    var subLinks = menu.querySelectorAll('a');
+    for (var i = 0; i < subLinks.length; i++) {
+        subLinks[i].addEventListener('click', function() {
+            immediateCloseMenu();
+        });
+    }
+})();
+</script>

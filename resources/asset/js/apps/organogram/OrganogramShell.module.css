@@ -24,7 +24,11 @@
 }
 
 :global([data-theme="dark"]) .shell,
-:global(.dark) .shell {
+:global(.dark) .shell,
+:global(body.dark-mode) .shell,
+:global(body.dark-theme) .shell,
+:global(html.dark-mode) .shell,
+:global([data-bs-theme="dark"]) .shell {
     --og-bg: #0b0f19;
     --og-surface: #141a29;
     --og-surface-2: #1e2538;

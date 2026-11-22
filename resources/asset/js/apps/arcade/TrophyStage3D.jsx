@@ -17,8 +17,8 @@ export function TrophyStage3D({ champions = [] }) {
         let renderer;
         let animId = 0;
         try {
-            const width = container.clientWidth || 260;
-            const height = 170;
+            const width = container.clientWidth || 110;
+            const height = container.clientHeight || width;
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 100);
             camera.position.set(0, 1.1, 4.2);
@@ -131,7 +131,7 @@ export function TrophyStage3D({ champions = [] }) {
                 <p className={styles.trophySub}>
                     {cupChamp
                         ? `${cupChamp.badgeTitle} • ${cupChamp.score.toLocaleString()} pts`
-                        : 'Top the leaderboard across all 4 games to earn the Family Cup Trophy.'}
+                        : 'Top the leaderboard across all 7 games to earn the Family Cup Trophy.'}
                 </p>
             </div>
         </div>

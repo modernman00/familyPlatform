@@ -13,7 +13,7 @@ define('THEN_NOW_COMPARISON_MODAL_RENDERED', true);
             <div class="modal-header border-0 px-4 pt-4 pb-2 d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="modal-title fw-bold d-flex align-items-center gap-2 mb-1" id="thenNowComparisonModalLabel" style="font-size: 1.25rem;">
-                        <i class="bi bi-hourglass-split" style="color: #b8202c;"></i>
+                        <i class="bi bi-hourglass-split" style="color: var(--brand-primary, #b8202c);"></i>
                         <span>{{ __('profile.then_and_now_comparison', 'Then & Now Comparison') }}</span>
                     </h5>
                     <p class="text-muted small mb-0" id="thenNowModalMeta" style="font-size: 0.85rem; color: var(--text-muted-aa, #475569);"></p>
@@ -118,14 +118,14 @@ define('THEN_NOW_COMPARISON_MODAL_RENDERED', true);
                 <!-- Voice Reflection Bar inside Modal -->
                 <div id="tnModalVoiceBox" class="p-2.5 rounded-3 mt-2 d-none align-items-center justify-content-between gap-2" style="background: rgba(163, 22, 33, 0.06); border: 1px solid rgba(163, 22, 33, 0.16);">
                     <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-mic-fill" style="color: #a31621;"></i>
+                        <i class="bi bi-mic-fill" style="color: var(--brand-primary, #a31621);"></i>
                         <span class="small fw-semibold text-dark">15s Family Voice Story</span>
                     </div>
                     <audio id="tnModalVoiceAudio" controls preload="metadata" style="height: 32px; max-width: 240px;"></audio>
                 </div>
 
                 <!-- Caption / Story Box -->
-                <div id="tnStoryBox" class="p-3 rounded-3 mt-3 d-none" style="background: var(--surface-bg, #f8fafc); border: 1px solid rgba(0,0,0,0.06);">
+                <div id="tnStoryBox" class="p-3 rounded-3 mt-3 d-none" style="background: var(--surface-bg, #f8fafc); border: 1px solid var(--border-subtle, rgba(0,0,0,0.06));">
                     <div class="d-flex align-items-start gap-2">
                         <i class="bi bi-chat-quote-fill text-muted mt-1" style="font-size: 1.1rem;"></i>
                         <div>
@@ -146,7 +146,7 @@ define('THEN_NOW_COMPARISON_MODAL_RENDERED', true);
                     <button type="button" id="tnSaveKeepsakeBtn" class="btn btn-sm btn-light border rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-1.5"
                             style="min-height: 44px; white-space: nowrap; flex-shrink: 0;"
                             onclick="window.__downloadThenNowKeepsake()">
-                        <i class="bi bi-download" style="color: #a31621;"></i>
+                        <i class="bi bi-download" style="color: var(--brand-primary, #a31621);"></i>
                         <span>Save Heirloom Card</span>
                     </button>
                 </div>
@@ -184,6 +184,21 @@ define('THEN_NOW_COMPARISON_MODAL_RENDERED', true);
 #thenNowComparisonModal .then-now__range {
     cursor: ew-resize !important;
     touch-action: none !important;
+}
+body.dark-mode #thenNowComparisonModal .btn-group.bg-light .btn.active,
+body.dark-theme #thenNowComparisonModal .btn-group.bg-light .btn.active,
+[data-bs-theme="dark"] #thenNowComparisonModal .btn-group.bg-light .btn.active,
+html.dark #thenNowComparisonModal .btn-group.bg-light .btn.active,
+html.dark-mode #thenNowComparisonModal .btn-group.bg-light .btn.active {
+    background: rgba(255, 255, 255, 0.14) !important;
+    color: #ffffff !important;
+}
+body.dark-mode #thenNowComparisonModal .btn-group.bg-light .btn:not(.active),
+body.dark-theme #thenNowComparisonModal .btn-group.bg-light .btn:not(.active),
+[data-bs-theme="dark"] #thenNowComparisonModal .btn-group.bg-light .btn:not(.active),
+html.dark #thenNowComparisonModal .btn-group.bg-light .btn:not(.active),
+html.dark-mode #thenNowComparisonModal .btn-group.bg-light .btn:not(.active) {
+    color: #cbd5e1 !important;
 }
 </style>
 

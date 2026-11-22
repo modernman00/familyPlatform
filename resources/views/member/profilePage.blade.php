@@ -99,9 +99,7 @@
     </script>
     <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignSpotlightTour.js?v={{ assetVersion('js/SovereignSpotlightTour.js') }}" defer></script>
     <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/profileTour.js?v={{ assetVersion('js/profileTour.js') }}" defer></script>
-    @if(!empty($usePreactFeed) && ($_GET['v'] ?? '') !== 'legacy')
-        <script defer src="/public/js/feed-app.js?v={{ assetVersion('js/feed-app.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
-        <script defer src="/public/js/profile-app.js?v={{ assetVersion('js/profile-app.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
-    @endif
+    <script defer src="/public/js/feed-app.js?v={{ assetVersion('js/feed-app.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
+    <script defer src="/public/js/profile-app.js?v={{ assetVersion('js/profile-app.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
 
 @endpush
