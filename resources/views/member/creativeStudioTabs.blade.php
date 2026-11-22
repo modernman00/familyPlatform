@@ -26,4 +26,7 @@
     <a href="/family-studio" class="btn {{ $creativeTab === 'archives' ? 'btn-dark' : 'btn-outline-dark' }} fw-bold d-inline-flex align-items-center" style="white-space:nowrap;flex-shrink:0;min-height:44px;border-radius:12px;" title="Living Archives Studio — 4K Reel Studio &amp; Video Vault" @if($creativeTab === 'archives') aria-current="page" @endif>
         <i class="bi bi-film me-2"></i>Living Archives
     </a>
+    <a href="/arcade" class="btn {{ $creativeTab === 'arcade' ? 'btn-danger' : 'btn-outline-danger' }} fw-bold d-inline-flex align-items-center" style="white-space:nowrap;flex-shrink:0;min-height:44px;border-radius:12px;" title="Family Arcade — KinZip, KinGrid, KinWord &amp; KinPulse Daily Puzzles &amp; Leagues" @if($creativeTab === 'arcade') aria-current="page" @endif>
+        <i class="bi bi-trophy-fill me-2"></i>Family Arcade
+    </a>
 </nav>

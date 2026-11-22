@@ -357,6 +357,23 @@ export function PostCard({
                                         <span>Do You Know?</span>
                                     </span>
                                 )}
+                                {(() => {
+                                    const badges = Array.isArray(post.arcadeBadges)
+                                        ? post.arcadeBadges
+                                        : (typeof window !== 'undefined' && window.__FP_ARCADE_BADGES__?.[String(post.id)]) || [];
+                                    return badges.slice(0, 1).map((title) => (
+                                        <a
+                                            key={title}
+                                            href="/arcade"
+                                            className="badge rounded-pill text-white ms-1 px-2 py-1 d-inline-flex align-items-center gap-1 text-decoration-none"
+                                            style={{ background: 'linear-gradient(135deg, #78350f 0%, #b45309 100%)', color: '#ffffff', fontSize: '0.72rem', fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0 }}
+                                            title={`Family Arcade Title: ${title}`}
+                                        >
+                                            <i className="bi bi-trophy-fill" style={{ color: '#fde68a', fontSize: '0.72rem' }} aria-hidden="true" />
+                                            <span>{title}</span>
+                                        </a>
+                                    ));
+                                })()}
                                 {Array.isArray(post.post_tags) && post.post_tags.length > 0 && (
                                     <span className="text-secondary small fw-normal ms-1">
                                         is with{' '}

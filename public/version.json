@@ -7,5 +7,5 @@
         "Fix(pwa,e2e): lower pwa-install z-index below SweetAlert2 and target legacy feed in legacy Cypress specs"
     ],
     "released_at": "2026-11-22",
-    "commit": "bb34b52e"
+    "commit": "56bbcae9"
 }

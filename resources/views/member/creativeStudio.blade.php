@@ -856,6 +856,35 @@
                 </span>
             </div>
         </a>
+
+        <!-- 5. Family Arcade -->
+        <a href="/arcade" class="cs-card" aria-label="Open Family Arcade">
+            <div class="cs-stage" style="background: linear-gradient(135deg, #0f172a 0%, #450a0a 58%, #1e1b4b 100%);">
+                <span class="cs-stage__tag">
+                    <span class="cs-stage__dot" style="background:#fbbf24;"></span>
+                    DAILY &bull; LIVE RACE
+                </span>
+                <div class="d-flex align-items-center justify-content-center h-100 text-warning" style="font-size: 3.4rem;">
+                    <i class="bi bi-trophy-fill" aria-hidden="true"></i>
+                </div>
+            </div>
+            <div class="cs-card__body">
+                <h2 class="cs-card__title">
+                    <i class="bi bi-controller text-danger" aria-hidden="true"></i>
+                    <span>Family Arcade</span>
+                </h2>
+                <p class="cs-card__desc">Play KinZip, KinGrid, KinWord &amp; KinPulse, race the algorithm or relatives live, and claim the Family Cup crown.</p>
+                <div class="cs-card__chips">
+                    <span class="cs-chip">4 Games</span>
+                    <span class="cs-chip">Family Cup</span>
+                    <span class="cs-chip">3D Trophies</span>
+                </div>
+                <span class="btn btn-danger text-white cs-card__cta">
+                    <span>Enter Family Arcade</span>
+                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </span>
+            </div>
+        </a>
     </div>
 </div>
 @endsection

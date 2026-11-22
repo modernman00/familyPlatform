@@ -378,6 +378,33 @@
           </div>
         </div>
 
+        <!-- Pillar 6b: Family Arcade (KinZip, KinGrid, KinWord & KinPulse) -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(245, 158, 11, 0.16); color: #b45309;">
+                <i class="bi bi-trophy-fill fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">6b. Family Arcade — Daily Puzzles, Live Races &amp; Family Cup</h3>
+                <span class="badge bg-danger text-white">Creative Studio &rarr; Family Arcade</span>
+              </div>
+            </div>
+            <p class="lead text-secondary">
+              Compete daily across four engaging puzzles — <strong>KinZip</strong> (connect numbered dots in order while filling every cell around walls), <strong>KinGrid</strong> (number deduction with inequality clues), <strong>KinWord</strong> (4&times;4 family &amp; wordplay quartets), and <strong>KinPulse</strong> (3D-tilted harmonic memory sequences).
+            </p>
+            <div class="p-3 rounded-3 bg-light border">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-award-fill text-warning fs-5"></i>
+                <span class="fw-bold text-dark">Bragging Rights, Ghost Races &amp; 3D Trophies</span>
+              </div>
+              <p class="small text-muted mb-0">
+                Race the ATG Algorithm Bot or a relative’s ghost, climb the Weekly &amp; All-Time <strong>Family Cup</strong> league tables, earn dynamic <em>“Best of the Family”</em> crown badges on the Family Tree, Profile, and Feed, and share automated victory replay cards on WhatsApp, Messages, or the Family Feed.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- Pillar 7: Dynamic WhatsApp Family Status Flyer -->
         <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
           <div class="card-body p-4 p-md-5">

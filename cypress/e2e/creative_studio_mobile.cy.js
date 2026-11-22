@@ -22,16 +22,17 @@ describe('Creative Studio & Sub-Studios Mobile CapCut Ergonomics', () => {
         loginFully();
     });
 
-    it('renders engaging bespoke graphics for all 4 sub-containers on Creative Studio hub', () => {
+    it('renders engaging bespoke graphics for all 5 sub-containers on Creative Studio hub', () => {
         cy.viewport(390, 844);
         cy.visit('/creative-studio');
 
         cy.get('.cs-hero').should('be.visible');
-        cy.get('.cs-card').should('have.length', 4);
+        cy.get('.cs-card').should('have.length', 5);
         cy.get('.cs-stage--tree svg').should('be.visible');
         cy.get('.cs-stage--flyers svg').should('be.visible');
         cy.get('.cs-stage--cards svg').should('be.visible');
         cy.get('.cs-stage--archives svg').should('be.visible');
+        cy.get('.cs-card[href="/arcade"]').should('be.visible');
 
         cy.get('.cs-card__cta').each(($cta) => {
             expect($cta[0].getBoundingClientRect().height).to.be.gte(44);

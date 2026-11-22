@@ -298,6 +298,7 @@ final class Organogram extends SingleCustomerData
                 $wifeFamCode = strtoupper(trim(str_replace('#', '', (string)$ofRow['otherFamCode'])));
             }
             $graphData['wifeFamCode'] = $wifeFamCode;
+            $graphData = $this->attachArcadeBadgesToGraph($graphData, $familyCode);
 
             $orgData = [
                 'spouse' => $spouse[0] ?? null,
@@ -733,6 +734,7 @@ final class Organogram extends SingleCustomerData
                 $wifeFamCode = strtoupper(trim(str_replace('#', '', (string)$ofRow['otherFamCode'])));
             }
             $graphData['wifeFamCode'] = $wifeFamCode;
+            $graphData = $this->attachArcadeBadgesToGraph($graphData, $familyCode);
 
             $studioData = $this->prepareStudioData($graphData, $idStr, $isSelf);
             $generations = $studioData['generations'];
@@ -924,6 +926,7 @@ final class Organogram extends SingleCustomerData
             }
             $graphData['hideParentFirstName'] = $hideParentFirst;
             $graphData['isReadOnly'] = !BaseController::sessionSharesFamily($familyCode);
+            $graphData = $this->attachArcadeBadgesToGraph($graphData, $familyCode);
 
             msgSuccess(200, $graphData);
         } catch (\Throwable $th) {
@@ -2369,5 +2372,54 @@ final class Organogram extends SingleCustomerData
             http_response_code(422);
         }
         echo json_encode($result);
+    }
+
+    /**
+     * Hydrate Family Arcade champion crown badges onto graph nodes.
+     * @param array<string, mixed> $graphData
+     * @return array<string, mixed>
+     */
+    private function attachArcadeBadgesToGraph(array $graphData, string $familyCode): array
+    {
+        $nodes = $graphData['nodes'] ?? null;
+        if (!is_array($nodes) || empty($nodes) || trim($familyCode) === '') {
+            return $graphData;
+        }
+
+        try {
+            $userIds = [];
+            foreach ($nodes as $node) {
+                if (is_array($node) && !empty($node['user_id'])) {
+                    $userIds[] = (string)$node['user_id'];
+                }
+            }
+            if (empty($userIds)) {
+                return $graphData;
+            }
+
+            $badgeMap = \App\services\FamilyArcadeService::getFamilyBadgesForUsers(
+                Db::connect2(),
+                $familyCode,
+                $userIds
+            );
+            if (empty($badgeMap)) {
+                return $graphData;
+            }
+
+            foreach ($nodes as &$node) {
+                if (is_array($node) && !empty($node['user_id'])) {
+                    $uid = (string)$node['user_id'];
+                    if (isset($badgeMap[$uid])) {
+                        $node['arcadeBadges'] = $badgeMap[$uid];
+                    }
+                }
+            }
+            unset($node);
+            $graphData['nodes'] = $nodes;
+        } catch (\Throwable) {
+            // Non-critical decoration
+        }
+
+        return $graphData;
     }
 }

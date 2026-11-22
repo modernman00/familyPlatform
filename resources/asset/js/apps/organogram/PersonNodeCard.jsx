@@ -44,6 +44,16 @@ export function PersonNodeCard({
                         {fullName}
                     </div>
                     <div className={styles.nodeRole}>{roleLabel}</div>
+                    {Array.isArray(node.arcadeBadges) && node.arcadeBadges.length > 0 && (
+                        <div
+                            className="badge rounded-pill mt-1 d-inline-flex align-items-center gap-1"
+                            style={{ background: 'linear-gradient(135deg, #78350f, #b45309)', color: '#ffffff', fontSize: '0.68rem', fontWeight: 700 }}
+                            title={`Family Arcade Crown: ${node.arcadeBadges[0].badgeTitle || node.arcadeBadges[0]}`}
+                        >
+                            <i className="bi bi-trophy-fill" style={{ color: '#fde68a' }} aria-hidden="true" />
+                            <span>{node.arcadeBadges[0].badgeTitle || node.arcadeBadges[0]}</span>
+                        </div>
+                    )}
                 </div>
             </div>
 

@@ -10,6 +10,7 @@ mix
   .js('resources/asset/js/apps/organogram/index.jsx', 'js/organogram-app.js')
   .js('resources/asset/js/apps/feed/index.jsx', 'js/feed-app.js')
   .js('resources/asset/js/apps/profile/index.jsx', 'js/profile-app.js')
+  .js('resources/asset/js/apps/arcade/index.jsx', 'js/arcade-app.js')
   .sass('resources/asset/scss/main.scss', 'css')
   .options({
     legacyNodePolyfills: true,

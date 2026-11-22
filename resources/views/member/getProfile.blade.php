@@ -108,6 +108,20 @@
                         <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
                             <h1 class="profile-name mb-0">{{ $data['fullName'] }}</h1>
                             <span class="sp-relation-chip">{{ $relationshipChipLabel }}</span>
+                            @php
+                                $profileArcadeBadges = [];
+                                $viewerFam = (string)($_SESSION['famCode'] ?? '');
+                                if ($viewerFam !== '' && !empty($targetMemberId)) {
+                                    $badgeMap = \App\services\FamilyArcadeService::getFamilyBadgesForUsers(\Src\Db::connect2(), $viewerFam, [(string)$targetMemberId]);
+                                    $profileArcadeBadges = $badgeMap[(string)$targetMemberId] ?? [];
+                                }
+                            @endphp
+                            @foreach($profileArcadeBadges as $ab)
+                                <a href="/arcade" class="badge rounded-pill text-decoration-none d-inline-flex align-items-center gap-1 px-2 py-1" style="background: linear-gradient(135deg, #78350f 0%, #b45309 100%); color: #ffffff !important; font-size: 0.75rem; font-weight: 700; white-space: nowrap; flex-shrink: 0;" title="Family Arcade Champion">
+                                    <i class="bi bi-trophy-fill" style="color: #fde68a;" aria-hidden="true"></i>
+                                    <span>{{ $ab['badgeTitle'] }}</span>
+                                </a>
+                            @endforeach
                         </div>
                         <div class="profile-meta flex-wrap">
                             <div class="meta-item">

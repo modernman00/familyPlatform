@@ -175,6 +175,151 @@ final class SharePreviewController
      *   type: string
      * }
      */
+    /**
+     * GET|HEAD /arcade/share/{token}
+     */
+    public function handleArcadeShareLink(string $token = ''): void
+    {
+        $cleanToken = preg_replace('/[^a-fA-F0-9]/', '', trim($token)) ?? '';
+        if ($cleanToken === '') {
+            redirect('/arcade');
+            return;
+        }
+
+        $baseUrl = ShareMetadataProtocol::baseUrl();
+        $shareUrl = $baseUrl . '/arcade/share/' . rawurlencode($cleanToken);
+        $cardImg = $baseUrl . '/arcade/card/' . rawurlencode($cleanToken) . '.jpg?v=1';
+
+        $badge = 'FAMILY ARCADE CHALLENGE';
+        $title = 'Can You Beat My Family Arcade Score? — FamilyPlatform';
+        $description = 'A family member just set a new score in the Family Arcade! Tap to accept the challenge and race their ghost.';
+
+        try {
+            $db = Db::connect2();
+            $stmt = $db->prepare(
+                'SELECT game_slug, score, elapsed_ms, difficulty FROM family_arcade_scores WHERE challenge_token = ? LIMIT 1'
+            );
+            $stmt->execute([$cleanToken]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (is_array($row)) {
+                $gameName = match ((string) $row['game_slug']) {
+                    'kingrid' => 'KinGrid',
+                    'kinword' => 'KinWord',
+                    'kinpulse' => 'KinPulse',
+                    default => 'KinZip',
+                };
+                $secs = round(((int) $row['elapsed_ms']) / 1000, 1);
+                $badge = strtoupper($gameName) . ' CHALLENGE';
+                $title = "Beat {$row['score']} pts in {$gameName} ({$secs}s)! — FamilyPlatform";
+                $description = "I scored {$row['score']} pts in {$gameName} on FamilyPlatform. Think you can beat my time? Tap to play the exact same puzzle!";
+            }
+        } catch (\Throwable $e) {
+            // Fall back to safe generic copy
+        }
+
+        $meta = ShareMetadataProtocol::buildMeta([
+            'badge' => $badge,
+            'title' => $title,
+            'card_title' => $title,
+            'description' => $description,
+            'image' => $cardImg,
+            'url' => $shareUrl,
+            'type' => 'website',
+        ]);
+
+        $isCrawler = ShareMetadataProtocol::isSocialCrawler()
+            || isset($_GET['crawler'])
+            || isset($_GET['preview']);
+
+        if ($isCrawler) {
+            view('public/sparkShareLanding', [
+                'meta' => $meta,
+                'badgeLabel' => $badge,
+                'shouldRedirect' => false,
+                'targetRedirectUrl' => '/arcade?challenge=' . rawurlencode($cleanToken),
+            ]);
+            return;
+        }
+
+        redirect('/arcade?challenge=' . rawurlencode($cleanToken));
+    }
+
+    /**
+     * GET|HEAD /arcade/card/{token}.jpg
+     */
+    public function arcadeCardImage(string $token = ''): void
+    {
+        $cleanToken = preg_replace('/[^a-fA-F0-9]/', '', trim($token)) ?? '';
+        $gameLabel = 'FAMILY ARCADE';
+        $scoreLine = 'BEAT MY SCORE';
+        $subLine = 'KinZip • KinGrid • KinWord • KinPulse';
+
+        if ($cleanToken !== '') {
+            try {
+                $db = Db::connect2();
+                $stmt = $db->prepare(
+                    'SELECT game_slug, score, elapsed_ms FROM family_arcade_scores WHERE challenge_token = ? LIMIT 1'
+                );
+                $stmt->execute([$cleanToken]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if (is_array($row)) {
+                    $gameLabel = match ((string) $row['game_slug']) {
+                        'kingrid' => 'KINGRID CHALLENGE',
+                        'kinword' => 'KINWORD CHALLENGE',
+                        'kinpulse' => 'KINPULSE CHALLENGE',
+                        default => 'KINZIP CHALLENGE',
+                    };
+                    $secs = round(((int) $row['elapsed_ms']) / 1000, 1);
+                    $scoreLine = $row['score'] . ' PTS IN ' . $secs . 'S';
+                    $subLine = 'Tap to race my ghost on FamilyPlatform';
+                }
+            } catch (\Throwable $e) {
+                // Use default copy
+            }
+        }
+
+        $w = 1200;
+        $h = 630;
+        $im = imagecreatetruecolor($w, $h);
+        if ($im === false) {
+            http_response_code(500);
+            return;
+        }
+
+        $bg1 = (int) imagecolorallocate($im, 15, 23, 42);
+        $bg2 = (int) imagecolorallocate($im, 127, 29, 29);
+        $gold = (int) imagecolorallocate($im, 251, 191, 36);
+        $white = (int) imagecolorallocate($im, 255, 255, 255);
+        $cream = (int) imagecolorallocate($im, 254, 243, 199);
+
+        imagefilledrectangle($im, 0, 0, $w, $h, $bg1);
+        imagefilledrectangle($im, 0, 0, $w, 16, $gold);
+        imagefilledrectangle($im, 0, $h - 16, $w, $h, $gold);
+        imagefilledrectangle($im, 60, 72, $w - 60, $h - 72, $bg2);
+        imagerectangle($im, 60, 72, $w - 60, $h - 72, $gold);
+
+        imagestring($im, 5, 110, 130, $gameLabel, $gold);
+        imagestring($im, 5, 110, 240, $scoreLine, $white);
+        imagestring($im, 4, 110, 340, $subLine, $cream);
+        imagestring($im, 3, 110, 470, 'FamilyPlatform • Family Arcade', $gold);
+
+        header('Content-Type: image/jpeg');
+        header('Cache-Control: public, max-age=3600');
+        imagejpeg($im, null, 85);
+        imagedestroy($im);
+    }
+
+    /**
+     * @return array{
+     *   badge: string,
+     *   title: string,
+     *   card_title: string,
+     *   description: string,
+     *   image: string,
+     *   url: string,
+     *   type: string
+     * }
+     */
     private function defaultSparkMeta(string $sparkId): array
     {
         $baseUrl = ShareMetadataProtocol::baseUrl();

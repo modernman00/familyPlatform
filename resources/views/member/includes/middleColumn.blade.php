@@ -775,6 +775,9 @@
   <!-- Unified Daily Family Spark (Living Spark Card) -->
   @includeIf('member.includes.dailyFamilySparkCard')
 
+  <!-- Daily Family Arcade Banner -->
+  @includeIf('member.includes.dailyArcadeBanner')
+
   <!-- Family Reels & Stories Tray -->
   @includeIf('member.includes.reelsTray')
 

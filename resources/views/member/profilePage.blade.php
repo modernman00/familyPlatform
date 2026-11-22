@@ -84,6 +84,18 @@
             dismissed: @json((bool)($profileTourDismissed ?? false)),
             isPendingApproval: @json((bool)($isPendingApproval ?? false))
         };
+        @php
+            $arcadeChampionsMap = [];
+            if (!empty($_SESSION['famCode'])) {
+                foreach (\App\services\FamilyArcadeService::getFamilyChampions(\Src\Db::connect2(), (string)$_SESSION['famCode']) as $champ) {
+                    $uid = (string)($champ['userId'] ?? '');
+                    if ($uid !== '') {
+                        $arcadeChampionsMap[$uid][] = $champ['badgeTitle'];
+                    }
+                }
+            }
+        @endphp
+        window.__FP_ARCADE_BADGES__ = @json($arcadeChampionsMap);
     </script>
     <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignSpotlightTour.js?v={{ assetVersion('js/SovereignSpotlightTour.js') }}" defer></script>
     <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/profileTour.js?v={{ assetVersion('js/profileTour.js') }}" defer></script>

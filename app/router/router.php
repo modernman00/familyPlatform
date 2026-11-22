@@ -79,4 +79,5 @@ $router->map('GET|POST', '/api/poster-studio/render', function () {
     (new \Src\Media\UniversalPosterStudioController())->renderApiPoster();
 }, 'api_atg_poster_studio_render');
 
+include_once __DIR__ . "/arcadeRoute.php";
 include_once __DIR__ . "/cron.php";

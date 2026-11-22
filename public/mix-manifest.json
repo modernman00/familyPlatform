@@ -1,10 +1,11 @@
 {
     "/js/index.js": "/js/index.js?id=a3ab1f58e4eafb0f6de23e2f8cf649e9",
     "/js/studio-app.js": "/js/studio-app.js?id=35cf166346da6a1afc2c660bdc086ce4",
-    "/js/organogram-app.js": "/js/organogram-app.js?id=1c00c10242825890074d656e4f807d9e",
-    "/js/feed-app.js": "/js/feed-app.js?id=1d6517e5b510127661eaa1de60c20663",
+    "/js/organogram-app.js": "/js/organogram-app.js?id=22902a039d46c66fc75df1efe8c818e2",
+    "/js/feed-app.js": "/js/feed-app.js?id=f4373e10dd21e6e2c20e984bbb45afb2",
     "/js/profile-app.js": "/js/profile-app.js?id=875ddb6ba38c09ab83406a1f9212976a",
-    "/js/manifest.js": "/js/manifest.js?id=a9924d7b9f9bb0041613d59f23118b31",
+    "/js/arcade-app.js": "/js/arcade-app.js?id=29f82fafbeb067a621d34135fb2206e8",
+    "/js/manifest.js": "/js/manifest.js?id=8f185e669c65105775ff5c88cce87225",
     "/js/register.js?v=00d3a5b4": "/js/register.js?v=00d3a5b4?id=1d7e7f969a8f76702b5f620596918af8",
     "/js/all_members.js?v=f38643a4": "/js/all_members.js?v=f38643a4?id=09a49614e59638b6cd521db3753829f6",
     "/js/reels.js?v=32d0a11c": "/js/reels.js?v=32d0a11c?id=5170613ca8e3af6eb8136a38a0f94878",
@@ -20,5 +21,5 @@
     "/js/accountSetting.js?v=5b070e46": "/js/accountSetting.js?v=5b070e46?id=82099f632e188d9c4741e4f550a0547f",
     "/js/organogram.js?v=942f076a": "/js/organogram.js?v=942f076a?id=d77a2578e135b8a7cb4173a933a52c0c",
     "/css/main.css": "/css/main.css?id=665f4ea520cd09053d5d106f5eac6d27",
-    "/js/vendor.js": "/js/vendor.js?id=26c42415a2f9f7fbc9b35706cac84a7c"
+    "/js/vendor.js": "/js/vendor.js?id=3affaa404425623d8de3758e10422a62"
 }
