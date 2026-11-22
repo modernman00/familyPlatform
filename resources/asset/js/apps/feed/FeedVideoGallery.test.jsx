@@ -87,4 +87,25 @@ describe('FeedVideoGallery & VideoModal Aspect Ratio & Framing', () => {
         expect(iframe.parentElement.style.aspectRatio).toBe('9 / 16');
         expect(iframe.parentElement.classList.contains('ratio-16x9')).toBe(false);
     });
+
+    it('does not pause native <video controls> playback when clicked on iOS/mobile', () => {
+        const { container } = render(
+            <FeedVideoGallery
+                videos={[{
+                    type: 'direct',
+                    embedUrl: '/resources/videos/sample.mp4',
+                    aspect_ratio: '9 / 16',
+                }]}
+            />
+        );
+
+        const video = container.querySelector('video');
+        expect(video).toBeTruthy();
+        let pauseCalls = 0;
+        Object.defineProperty(video, 'paused', { value: false, configurable: true });
+        video.pause = () => { pauseCalls += 1; };
+
+        video.click();
+        expect(pauseCalls).toBe(0);
+    });
 });

@@ -175,12 +175,12 @@ final class LinkPreviewService
                     $isVideo = str_contains($itemStr, '76647426') || (isset($item[9]) && is_array($item[9]) && isset($item[9]['76647426']));
 
                     if ($isVideo) {
-                        $videoStream = preg_replace('/=.*$/i', '', $baseUrl) . '=m22';
+                        $videoStream = preg_replace('/=.*$/i', '', $baseUrl) . '=dv';
                         if (!in_array($videoStream, $videos, true)) {
                             $videos[] = $videoStream;
                         }
                     } else {
-                        $photoAsset = preg_replace('/=.*$/i', '', $baseUrl) . '=s1600';
+                        $photoAsset = preg_replace('/=.*$/i', '', $baseUrl) . '=s3840';
                         if (!in_array($photoAsset, $images, true)) {
                             $images[] = $photoAsset;
                         }
@@ -1306,11 +1306,11 @@ final class LinkPreviewService
 
         $isPhotoLink = ($isGooglePhoto || $isDirectImage) && !empty($rawImage) && !$isGoogleVideo;
 
-        // High resolution Google CDN asset elevation (Silas & Marcus Standard: =s1600 retina quality; -no strips Google's baked play icon on videos)
+        // High resolution Google CDN asset elevation (ATG 4K Standard: =s3840 4K retina quality; -no strips Google's baked play icon on videos)
         $photoUrl = $rawImage;
         if ($isGooglePhoto && !empty($rawImage)) {
             if (preg_match('#^https://(?:lh[3-6]\.googleusercontent\.com|[^/]+\.ggpht\.com)/#i', $rawImage)) {
-                $photoUrl = preg_replace('/=.*$/i', $isGoogleVideo ? '=s1600-no' : '=s1600', $rawImage);
+                $photoUrl = preg_replace('/=.*$/i', $isGoogleVideo ? '=s3840-no' : '=s3840', $rawImage);
             }
         }
 
@@ -1318,7 +1318,7 @@ final class LinkPreviewService
         if ($isGoogleVideo) {
             $baseForVideo = !empty($rawVideo) ? $rawVideo : (!empty($data['album_videos'][0]) ? $data['album_videos'][0] : $rawImage);
             if (preg_match('#^https://(?:lh[3-6]\.googleusercontent\.com|[^/]+\.ggpht\.com)/#i', $baseForVideo)) {
-                $videoStreamUrl = preg_replace('/=.*$/i', '=m22', $baseForVideo);
+                $videoStreamUrl = preg_replace('/=.*$/i', '=dv', $baseForVideo);
             } else {
                 $videoStreamUrl = $baseForVideo;
             }

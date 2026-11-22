@@ -15,11 +15,11 @@
  *   it cleanly falls back to the original file so uploads never stall.
  */
 
-const FAST_PASS_MAX_BYTES = 8 * 1024 * 1024; // 8 MB: clips under this upload in ~1s without re-encoding
+const FAST_PASS_MAX_BYTES = 24 * 1024 * 1024; // 24 MB: crisp hardware-encoded 1080p/4K clips upload untouched
 const MAX_CLIENT_TRANSCODE_DURATION_SEC = 45; // Bypass real-time MediaRecorder for >45s clips to prevent mobile browser stalls/OOM
-const TARGET_BITRATE_BPS = 2500000;          // 2.5 Mbps (Instagram 1080p sweet spot)
-const AUDIO_BITRATE_BPS = 128000;            // 128 kbps AAC/Opus stereo
-const MAX_DIMENSION_PX = 1280;               // 720p/1080p HD sweet spot for mobile & desktop
+const TARGET_BITRATE_BPS = 6000000;          // 6.0 Mbps (4K/1080p High-Profile target when trim/compression is required)
+const AUDIO_BITRATE_BPS = 160000;            // 160 kbps AAC/Opus stereo
+const MAX_DIMENSION_PX = 2160;               // Preserve up to 4K UHD (2160p short-edge / 3840p long-edge)
 
 /**
  * Detect the best hardware-accelerated MIME type supported by the browser's MediaRecorder.
@@ -32,10 +32,13 @@ export function resolveSupportedVideoCodec() {
     }
 
     const candidates = [
-        { mimeType: 'video/mp4;codecs=avc1.42E01E,mp4a.40.2', ext: 'mp4' },
+        { mimeType: 'video/mp4;codecs=hvc1.1.6.L120.90,mp4a.40.2', ext: 'mp4' },
+        { mimeType: 'video/mp4;codecs=avc1.640033,mp4a.40.2', ext: 'mp4' },
+        { mimeType: 'video/mp4;codecs=avc1.640028,mp4a.40.2', ext: 'mp4' },
+        { mimeType: 'video/mp4;codecs=avc1.4D4028,mp4a.40.2', ext: 'mp4' },
+        { mimeType: 'video/webm;codecs=vp9,opus', ext: 'webm' },
         { mimeType: 'video/mp4;codecs=avc1', ext: 'mp4' },
         { mimeType: 'video/mp4', ext: 'mp4' },
-        { mimeType: 'video/webm;codecs=vp9,opus', ext: 'webm' },
         { mimeType: 'video/webm;codecs=vp8,opus', ext: 'webm' },
         { mimeType: 'video/webm;codecs=h264', ext: 'webm' },
         { mimeType: 'video/webm', ext: 'webm' },
@@ -87,10 +90,10 @@ export function shouldOptimiseVideoOnDevice(file, opts = {}) {
         return false;
     }
 
-    // If the bitrate is already very low (<= 2.6 Mbps) and no trim is needed, skip re-encoding
+    // If the bitrate is already clean (<= 6.5 Mbps) and no trim is needed, skip re-encoding to preserve native sharpness
     if (!needsTrim && originalDuration && originalDuration > 0) {
         const currentBitrateBps = (file.size * 8) / originalDuration;
-        if (currentBitrateBps <= 2600000 && file.size <= 14 * 1024 * 1024) {
+        if (currentBitrateBps <= 6500000 && file.size <= 28 * 1024 * 1024) {
             return false;
         }
     }
@@ -246,10 +249,9 @@ export async function compressVideoFile(file, options = {}) {
 
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
-                    if (typeof ctx.filter === 'string') {
-                        // ATG Perceptual 4K Cinema LUT: +4% micro-contrast & +5% colour vibrancy before compression
-                        ctx.filter = 'contrast(1.04) saturate(1.05)';
-                    }
+
+                    const adaptiveBitrate = options.videoBitsPerSecond
+                        || (Math.max(dstW, dstH) >= 1920 ? 6500000 : (Math.max(dstW, dstH) >= 1080 ? 4500000 : 3000000));
 
                     const canvasStream = canvas.captureStream(30);
 
@@ -273,7 +275,7 @@ export async function compressVideoFile(file, options = {}) {
                     const chunks = [];
                     recorder = new window.MediaRecorder(canvasStream, {
                         mimeType: codec.mimeType,
-                        videoBitsPerSecond,
+                        videoBitsPerSecond: adaptiveBitrate,
                         audioBitsPerSecond: AUDIO_BITRATE_BPS,
                     });
 

@@ -53,7 +53,7 @@ final class AtgPhotoAvatarEngine
             'badge'          => 'OpenArt Signature',
             'icon'           => '🎨',
             'accent'         => '#a31621',
-            'prompt'         => 'Transform this exact portrait photograph into a high-craft editorial illustrated graphic-novel avatar (OpenArt signature cel-shaded style). Use crisp, delicate dark ink outlines around facial contours, eyes, eyelashes, glasses, hair strands, and collar, paired with warm, smooth flat-shaded cel colour planes and subtle rim lighting against a clean modern studio backdrop.',
+            'prompt'         => 'Reimagine and redraw this person as a stunning, flagship Arcane / Spider-Verse / OpenArt editorial graphic-novel character portrait. COMPLETELY REMOVE AND REPLACE the original background (no chairs, rooms, or real-world clutter) with a dramatic, atmospheric dark-crimson and charcoal illustrated studio backdrop with glowing rim light. Render bold, expressive hand-inked linework, sculpted painterly cel-shading planes, luminous rim highlights on hair and shoulders, and rich graphic-novel stylisation — it must look 100% like hand-crafted comic art, NOT a filtered photograph.',
             'cel_levels'     => 6,
             'ink_strength'   => 0.78,
             'smooth_passes'  => 3,
@@ -68,7 +68,7 @@ final class AtgPhotoAvatarEngine
             'badge'          => 'Anime Studio',
             'icon'           => '✨',
             'accent'         => '#7c3aed',
-            'prompt'         => 'Transform this exact portrait photograph into a high-craft modern anime feature-film portrait avatar. Render luminous cel-shaded skin tones, expressive eyes with crisp specular catchlights, clean fine anime ink linework, and defined hair locks with glossy highlight ribbons against a soft atmospheric studio gradient backdrop.',
+            'prompt'         => 'Completely redraw this person from scratch as a 2D hand-drawn Japanese anime feature-film character portrait (Makoto Shinkai / Ufotable / Studio Ghibli quality). Do NOT leave any photographic skin pores or photo texture — every surface (face, skin, eyes, braids/hair, blazer, shirt) MUST be rendered as clean 2D anime cel-shaded illustration with crisp dark ink outlines, flat two-tone cel shadows, large luminous anime eyes with bright white catchlights, and sharp anime highlight ribbons in the hair. COMPLETELY REMOVE AND REPLACE the original background with a luminous twilight-indigo and violet anime sky bokeh backdrop.',
             'cel_levels'     => 5,
             'ink_strength'   => 0.85,
             'smooth_passes'  => 3,
@@ -83,7 +83,7 @@ final class AtgPhotoAvatarEngine
             'badge'          => '3D Cinema',
             'icon'           => '🧊',
             'accent'         => '#0284c7',
-            'prompt'         => 'Transform this exact portrait photograph into a high-craft stylised 3D animated cinema character portrait. Render smooth subsurface-scattered skin, softly sculpted volumetric hair, expressive glossy eyes, warm key lighting, and a subtle cool studio rim highlight without harsh black ink outlines.',
+            'prompt'         => 'Reimagine and render this person as a flagship 3D animated cinema character portrait (Pixar / Disney / OpenArt 3D Avatar quality). COMPLETELY REMOVE AND REPLACE the original background (no chairs, walls, or real-world clutter) with a lush, cinematic sapphire-blue 3D studio backdrop with soft volumetric bokeh. Sculpt the face and body into true 3D CG character geometry with smooth subsurface-scattered skin, slightly larger expressive 3D animated eyes with softbox catchlights, individually sculpted volumetric 3D hair/braids, dramatic warm key light, and a crisp cool rim light — it must look 100% like a frame from a 3D animated film, NOT a photograph.',
             'cel_levels'     => 10,
             'ink_strength'   => 0.14,
             'smooth_passes'  => 4,
@@ -98,7 +98,7 @@ final class AtgPhotoAvatarEngine
             'badge'          => 'Heritage Canvas',
             'icon'           => '🖼️',
             'accent'         => '#b45309',
-            'prompt'         => 'Transform this exact portrait photograph into a museum-grade royal heirloom oil painting avatar. Render directional painterly brushwork, warm golden Rembrandt chiaroscuro lighting, rich dimensional fabric and hair texture, and a refined classical gallery backdrop.',
+            'prompt'         => 'Reimagine and paint this person as a museum-grade royal heirloom oil painting on linen canvas (Rembrandt / Kehinde Wiley / OpenArt Fine-Art quality). COMPLETELY REMOVE AND REPLACE the original background with a timeless, richly textured dark-amber and umber classical gallery backdrop. Render visible, expressive directional oil brushwork, tactile impasto highlights, warm golden chiaroscuro lighting, and rich painterly depth — 100% authentic oil painting, NOT a filtered photograph.',
             'cel_levels'     => 8,
             'ink_strength'   => 0.32,
             'smooth_passes'  => 3,
@@ -113,7 +113,7 @@ final class AtgPhotoAvatarEngine
             'badge'          => 'Graphic Pop',
             'icon'           => '💥',
             'accent'         => '#db2777',
-            'prompt'         => 'Transform this exact portrait photograph into a vibrant retro pop-art graphic novel portrait avatar. Use bold comic ink outlines, punchy posterised colour blocks, high-energy warm highlights, and a crisp geometric pop-art studio backdrop.',
+            'prompt'         => 'Reimagine and illustrate this person as a bold, gallery-grade modern pop-art comic poster portrait (OpenArt Pop-Art Studio quality). COMPLETELY REMOVE AND REPLACE the original background with a vibrant geometric pop-art studio backdrop with Ben-Day halftone dots and starbursts. Render bold black comic ink outlines, punchy high-contrast colour blocks, and crisp graphic shading — 100% pop-art illustration, NOT a filtered photo.',
             'cel_levels'     => 4,
             'ink_strength'   => 0.92,
             'smooth_passes'  => 2,
@@ -128,7 +128,7 @@ final class AtgPhotoAvatarEngine
             'badge'          => 'Executive Polish',
             'icon'           => '💼',
             'accent'         => '#059669',
-            'prompt'         => 'Transform this exact portrait photograph into a polished executive studio portrait avatar with balanced key and rim lighting, refined skin texture clarity, bright eye catchlights, and a clean softly graded editorial studio backdrop while remaining natural and photorealistic.',
+            'prompt'         => 'Transform this portrait into a luxury editorial executive studio portrait (Hasselblad medium-format / OpenArt Pro Headshot quality). COMPLETELY REMOVE AND REPLACE any cluttered room, chair, or background with a clean, softly graded dark-slate and warm-taupe seamless studio backdrop with natural shallow depth of field. Apply sculpted studio key lighting, subtle hair rim light, refined skin clarity, and crisp eye catchlights.',
             'cel_levels'     => 14,
             'ink_strength'   => 0.10,
             'smooth_passes'  => 2,
@@ -245,6 +245,22 @@ final class AtgPhotoAvatarEngine
         $srcIm = @imagecreatefromstring($rawBytes);
         if (!$srcIm instanceof GdImage) {
             throw new InvalidArgumentException('Failed to decode portrait bitmap.');
+        }
+
+        // Honour EXIF orientation on JPEG selfies so portraits are never sent sideways
+        if ($detectedMime === 'image/jpeg' && function_exists('exif_read_data')) {
+            $exif = @exif_read_data('data://image/jpeg;base64,' . base64_encode($rawBytes));
+            $orientation = is_array($exif) ? (int)($exif['Orientation'] ?? 1) : 1;
+            $rotated = match ($orientation) {
+                3 => @imagerotate($srcIm, 180, 0),
+                6 => @imagerotate($srcIm, -90, 0),
+                8 => @imagerotate($srcIm, 90, 0),
+                default => false,
+            };
+            if ($rotated instanceof GdImage) {
+                imagedestroy($srcIm);
+                $srcIm = $rotated;
+            }
         }
 
         // Centre-crop and resample to 512x576 (8:9 aspect ratio matching the 240x270 studio stage)
@@ -384,9 +400,10 @@ final class AtgPhotoAvatarEngine
         return $meta['prompt']
             . ' Style intensity: ' . $intensityDesc
             . ', linework: ' . $lineDesc
-            . ', identity lock: ' . $detailDesc . '. '
-            . 'CRITICAL INVARIANTS: Strictly preserve the exact person in the reference photo — their exact facial geometry, ethnicity, skin complexion and undertone, age, gender presentation, eye shape, gaze direction, nose, lips, expression, hairstyle, headwear, eyeglasses/spectacles, jewellery, head tilt, shoulder pose, and clothing. '
-            . 'Keep the exact same camera framing, head position, and crop scale as the input image so that a vertical Before/After split-slider aligns pixel-for-pixel across the face. '
+            . ', likeness: ' . $detailDesc . '. '
+            . 'IDENTITY & FRAMING: Keep the person immediately recognisable — preserve their ethnicity, rich natural skin tone, facial structure, hairstyle, expression, pose, and outfit colours. '
+            . 'Only include eyewear, headwear, or jewellery if visibly worn in the reference photo — NEVER invent or add any. '
+            . 'Keep the subject centred in the same bust-up portrait framing, while boldly transforming the artistic medium, lighting, shading, and studio background into a true OpenArt-grade avatar. '
             . 'Do NOT add any text, letters, watermarks, signatures, or picture frames.';
     }
 

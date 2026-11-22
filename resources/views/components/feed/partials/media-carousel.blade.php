@@ -290,6 +290,19 @@
               </div>
             </div>
           </template>
+          <!-- ATG Super Avatar Quick-Launch Pill (Active Slide) -->
+          <template x-if="!slideErrors[currentIdx] && !isGifMedia(post.images[currentIdx] || post.images[0]) && (getPostImageUrl(post.images[currentIdx] || post.images[0]) || '').startsWith('/')">
+            <a :href="'/member/emojiStudio?tab=photo-avatar&photo_url=' + encodeURIComponent(getPostImageUrl(post.images[currentIdx] || post.images[0]))"
+               @click.stop
+               class="position-absolute bottom-0 end-0 m-2 d-inline-flex align-items-center gap-1 px-3 rounded-pill text-white text-decoration-none shadow-sm"
+               title="Transform this photo into an OpenArt-grade Living Avatar"
+               aria-label="Transform this photo into a Living Avatar"
+               style="z-index: 4; min-height: 44px; min-width: 44px; background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.24); font-size: 0.78rem; font-weight: 600; white-space: nowrap; flex-shrink: 0;">
+              <span aria-hidden="true">✨</span>
+              <span>Living Avatar</span>
+            </a>
+          </template>
+
         </div>
       </div>
 

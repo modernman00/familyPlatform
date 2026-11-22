@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { isDirectVideoDescriptor, resolveVideoPlaybackSrc } from './feedUtils';
+import { attachWebGL4kCas } from './AtgWebGL4kRenderer';
 
 function safeAspectRatio(raw) {
     if (typeof raw !== 'string') return undefined;
@@ -19,7 +20,9 @@ function parseAspectRatioValue(raw) {
 
 function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
     const videoRef = useRef(null);
+    const canvasRef = useRef(null);
     const containerRef = useRef(null);
+    const [webglActive, setWebglActive] = useState(true);
     const [isMuted, setIsMuted] = useState(true);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isBuffering, setIsBuffering] = useState(false);
@@ -64,6 +67,7 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
 
         video.muted = true;
         video.defaultMuted = true;
+        video.playsInline = true;
         video.setAttribute('muted', '');
         video.setAttribute('playsinline', '');
         video.setAttribute('webkit-playsinline', '');
@@ -128,6 +132,20 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
             if (typeof unregister === 'function') unregister();
         };
     }, [playSrc, vid?.hlsUrl]);
+
+    useEffect(() => {
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        if (!isDirect || !video || !canvas || !webglActive) return undefined;
+        const detach = attachWebGL4kCas(video, canvas, {
+            onFallback: () => setWebglActive(false),
+        });
+        if (!detach) {
+            setWebglActive(false);
+            return undefined;
+        }
+        return () => detach();
+    }, [isDirect, playSrc, webglActive]);
 
     const handleSingleError = (e) => {
         const el = e?.currentTarget;
@@ -297,10 +315,23 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo }) {
                                 setIsPlaying(false);
                             }}
                             onError={handleSingleError}
-                            onClick={togglePlay}
                             className="w-100 h-100 d-block atg-4k-video-render"
                             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: focalPos, backgroundColor: '#0b0f19', cursor: 'pointer' }}
                         />
+                        {webglActive && (
+                            <canvas
+                                ref={canvasRef}
+                                aria-hidden="true"
+                                className="position-absolute top-0 start-0 w-100 h-100"
+                                style={{
+                                    objectFit: 'cover',
+                                    objectPosition: focalPos,
+                                    pointerEvents: 'none',
+                                    zIndex: 2,
+                                    clipPath: 'inset(0 0 48px 0)',
+                                }}
+                            />
+                        )}
                     </div>
                 </div>
             ) : (

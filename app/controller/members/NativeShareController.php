@@ -132,6 +132,8 @@ final class NativeShareController
                 }
 
                 if ($isVideo) {
+                    \App\services\VideoAutoTrimService::enhanceVideoStorageNeutral($targetPath, $extension);
+                    \App\services\VideoAutoTrimService::optimiseMp4FastStart($targetPath);
                     $videoUrl = '/resources/videos/posts/' . $secureFileName;
                     $savedVideos[] = $videoUrl;
                     continue;

@@ -535,6 +535,41 @@ final class ServeImgController {
             $this->StreamPostVideo($cacheFileName);
         }
 
+        // 3c. Google CDN Resolution Cascade (=dv 4K -> =m37 1080p -> =m22 720p)
+        $effectiveTargetUrl = $targetUrl;
+        if (preg_match('/=(?:dv|m37)$/i', $targetUrl) === 1) {
+            $candidates = str_ends_with(strtolower($targetUrl), '=dv')
+                ? [$targetUrl, preg_replace('/=dv$/i', '=m37', $targetUrl), preg_replace('/=dv$/i', '=m22', $targetUrl)]
+                : [$targetUrl, preg_replace('/=m37$/i', '=m22', $targetUrl)];
+
+            foreach ($candidates as $candidateUrl) {
+                if (!is_string($candidateUrl)) {
+                    continue;
+                }
+                $probe = curl_init();
+                if ($probe === false) {
+                    continue;
+                }
+                curl_setopt_array($probe, [
+                    CURLOPT_URL            => $candidateUrl,
+                    CURLOPT_NOBODY         => true,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_MAXREDIRS      => 5,
+                    CURLOPT_TIMEOUT        => 2,
+                    CURLOPT_CONNECTTIMEOUT => 2,
+                    CURLOPT_IPRESOLVE      => CURL_IPRESOLVE_V4,
+                    CURLOPT_HTTPHEADER     => ['User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'],
+                ]);
+                curl_exec($probe);
+                $probeCode = (int)curl_getinfo($probe, CURLINFO_HTTP_CODE);
+                curl_close($probe);
+                if ($probeCode >= 200 && $probeCode < 400) {
+                    $effectiveTargetUrl = $candidateUrl;
+                    break;
+                }
+            }
+        }
+
         // 4. Clean all output buffers and disable compression before binary streaming
         if (function_exists('apache_setenv')) {
             @apache_setenv('no-gzip', '1');
@@ -574,7 +609,7 @@ final class ServeImgController {
         $currentUpstreamStatus = 200;
 
         curl_setopt_array($ch, [
-            CURLOPT_URL => $targetUrl,
+            CURLOPT_URL => $effectiveTargetUrl,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
             CURLOPT_TIMEOUT => 120,

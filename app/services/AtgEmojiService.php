@@ -879,13 +879,7 @@ class AtgEmojiService
             . '<image href="' . $pngDataUri . '" x="-8" y="-8" width="400" height="400" preserveAspectRatio="xMidYMid slice"/>'
             . '<g class="atg-lp-smile" clip-path="url(#atgLpSmileZone)">'
             . '<image href="' . $pngDataUri . '" x="-8" y="-8" width="400" height="400" preserveAspectRatio="xMidYMid slice"/>'
-            . '<ellipse cx="136" cy="216" rx="22" ry="11" fill="#fb7185" opacity="0.16"/>'
-            . '<ellipse cx="248" cy="216" rx="22" ry="11" fill="#fb7185" opacity="0.16"/>'
             . '</g>'
-            . '<ellipse class="atg-lp-lid-l" cx="160" cy="164" rx="18" ry="9" fill="' . $skinFill . '" opacity="0"/>'
-            . '<ellipse class="atg-lp-lid-r" cx="224" cy="164" rx="18" ry="9" fill="' . $skinFill . '" opacity="0"/>'
-            . '<circle class="atg-lp-glint" cx="163" cy="161" r="2.4" fill="#ffffff" opacity="0.75"/>'
-            . '<circle class="atg-lp-glint" cx="227" cy="161" r="2.4" fill="#ffffff" opacity="0.75"/>'
             . '</g>'
             . '</g>'
             . '</svg>';

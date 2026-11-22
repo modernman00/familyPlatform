@@ -132,4 +132,56 @@ final class MediaPipelinePhase1And2Test extends TestCase
         unset($_SESSION['id'], $_SESSION['token'], $_SERVER['HTTP_X_CSRF_TOKEN']);
         http_response_code(200);
     }
+
+    public function testGooglePhotosStreamAndImageElevation(): void
+    {
+        $mockHtml = '<script>AF_initDataCallback({key: \'ds:1\', data: [null, [["item1", ["https://lh3.googleusercontent.com/pw/abc123=w100-h100"], null, null, null, null, null, null, null, {"76647426": [15000]}], ["item2", ["https://lh3.googleusercontent.com/pw/xyz789=w100-h100"]]]], sideChannel: {}});</script>';
+        $media = \App\services\LinkPreviewService::extractGooglePhotosAlbumMedia($mockHtml);
+
+        $this->assertSame(['https://lh3.googleusercontent.com/pw/abc123=dv'], $media['videos']);
+        $this->assertSame(['https://lh3.googleusercontent.com/pw/xyz789=s3840'], $media['images']);
+    }
+
+    public function testStorageNeutralVideoEnhancementUpscalesLowRes(): void
+    {
+        $ffmpeg = is_executable('/opt/homebrew/bin/ffmpeg') ? '/opt/homebrew/bin/ffmpeg'
+            : (is_executable('/usr/bin/ffmpeg') ? '/usr/bin/ffmpeg' : null);
+        $ffprobe = is_executable('/opt/homebrew/bin/ffprobe') ? '/opt/homebrew/bin/ffprobe'
+            : (is_executable('/usr/bin/ffprobe') ? '/usr/bin/ffprobe' : null);
+
+        if ($ffmpeg === null || $ffprobe === null) {
+            $this->markTestSkipped('ffmpeg/ffprobe not installed on this host.');
+        }
+
+        $tmpFile = sys_get_temp_dir() . '/fp_4k_test_' . bin2hex(random_bytes(4)) . '.mp4';
+        try {
+            // Generate a 1-second 480x854 (low-res) test video
+            $genCmd = sprintf(
+                '%s -y -f lavfi -i testsrc=duration=1:size=480x854:rate=24 -c:v libx264 -pix_fmt yuv420p %s 2>/dev/null',
+                escapeshellarg($ffmpeg),
+                escapeshellarg($tmpFile)
+            );
+            exec($genCmd, $out, $rc);
+            $this->assertSame(0, $rc);
+            $this->assertFileExists($tmpFile);
+
+            $enhanced = VideoAutoTrimService::enhanceVideoStorageNeutral($tmpFile, 'mp4');
+            $this->assertTrue($enhanced);
+
+            $probeOut = shell_exec(sprintf(
+                '%s -v quiet -print_format json -show_streams -select_streams v:0 %s',
+                escapeshellarg($ffprobe),
+                escapeshellarg($tmpFile)
+            ));
+            $info = json_decode((string)$probeOut, true);
+            $width = (int)($info['streams'][0]['width'] ?? 0);
+            $height = (int)($info['streams'][0]['height'] ?? 0);
+            $this->assertSame(1080, $width);
+            $this->assertGreaterThanOrEqual(1920, $height);
+        } finally {
+            if (is_file($tmpFile)) {
+                @unlink($tmpFile);
+            }
+        }
+    }
 }

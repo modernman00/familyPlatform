@@ -1615,6 +1615,19 @@
                             </a>
                         </template>
 
+                        <!-- Transform into OpenArt-Grade Living Avatar -->
+                        <template x-if="lightboxImages.length && (getPostImageUrl(lightboxImages[lightboxIndex]) || '').startsWith('/')">
+                            <a :href="'/member/emojiStudio?tab=photo-avatar&photo_url=' + encodeURIComponent(getPostImageUrl(lightboxImages[lightboxIndex]))"
+                               @click.stop
+                               class="btn d-inline-flex align-items-center gap-1.5 px-3 rounded-pill text-white"
+                               title="Transform this photo into a Stylised Living Avatar"
+                               aria-label="Transform this photo into a Stylised Living Avatar"
+                               style="min-height: 44px; min-width: 44px; background: linear-gradient(135deg, #a31621, #d97706); border: 1px solid rgba(255,255,255,0.28); font-size: 0.82rem; font-weight: 600; white-space: nowrap; flex-shrink: 0; text-decoration: none;">
+                                <span aria-hidden="true">✨</span>
+                                <span>Living Avatar</span>
+                            </a>
+                        </template>
+
                         <!-- Share Link Pill (Author Only - Swift Glider) -->
                         <template x-if="isOwnPost(lightboxPost)">
                             <button type="button"

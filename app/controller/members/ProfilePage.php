@@ -1304,6 +1304,7 @@ final class ProfilePage extends ProcessImg
             $safeVideoName = 'comment_video_' . time() . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
             $destVideoPath = $videoDir . $safeVideoName;
             if (@move_uploaded_file($tmpPath, $destVideoPath) || @copy($tmpPath, $destVideoPath)) {
+                \App\services\VideoAutoTrimService::enhanceVideoStorageNeutral($destVideoPath, $ext);
                 \App\services\VideoAutoTrimService::optimiseMp4FastStart($destVideoPath);
                 return '/resources/videos/posts/' . $safeVideoName;
             }

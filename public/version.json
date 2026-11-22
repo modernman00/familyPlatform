@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(feed): harden link preview service and feed/composer link preview cards",
+    "title": "Fix(mobile-composer,e2e): constrain composer-form overflow and retry mobile bottom-sheet transition",
     "notes": [
-        "Feat(feed): harden link preview service and feed/composer link preview cards",
-        "Feat(islands): add isolated Preact islands for Creative Studio & Family Tree with Vitest/Cypress gates",
-        "Fix(feed): harden feed media stages, action pills, and DOM audit gates"
+        "Fix(mobile-composer,e2e): constrain composer-form overflow and retry mobile bottom-sheet transition",
+        "Fix(e2e): target legacy feed and clear rate limits in social_feed.cy.js",
+        "Fix(pwa,e2e): lower pwa-install z-index below SweetAlert2 and target legacy feed in legacy Cypress specs"
     ],
-    "released_at": "2026-11-20",
-    "commit": "ad3bc6cf"
+    "released_at": "2026-11-22",
+    "commit": "bb34b52e"
 }

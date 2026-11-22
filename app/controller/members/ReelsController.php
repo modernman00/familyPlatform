@@ -581,7 +581,8 @@ final class ReelsController extends BaseController
                     throw new Exception('Failed to save uploaded video on server.', 500);
                 }
 
-                // Host-Portable Pure-PHP FastStart: Relocate `moov` atom ahead of `mdat` so Reel streaming starts in <100ms on Namecheap or any host
+                // ATG Storage-Neutral 4K/QHD Video Enhancement + Pure-PHP FastStart
+                \App\services\VideoAutoTrimService::enhanceVideoStorageNeutral($targetPath, $ext);
                 if ($ext === 'mp4' || $ext === 'mov') {
                     \App\services\VideoAutoTrimService::optimiseMp4FastStart($targetPath);
                 }

@@ -182,19 +182,30 @@
 
 <body data-page-id="@yield('data-page-id')" data-spy="scroll">
   {{-- ATG Sovereign 4K Perceptual Cinema GPU Filter (Contrast-Adaptive Sharpening + Luma Micro-Contrast) --}}
+  <svg aria-hidden="true" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;">
+    <defs>
+      <filter id="atg-cas-4k-sharpen" color-interpolation-filters="sRGB">
+        <feConvolveMatrix order="3" kernelMatrix="0 -0.18 0 -0.18 1.72 -0.18 0 -0.18 0" preserveAlpha="true"/>
+      </filter>
+    </defs>
+  </svg>
   <style nonce="{{ csp_nonce($nonce ?? null) }}">
     video.atg-4k-video-render,
     .feed-post-video,
     .reel-video-element {
-      filter: contrast(1.02) saturate(1.03);
+      filter: url(#atg-cas-4k-sharpen) contrast(1.03) saturate(1.04);
       transform: translateZ(0);
       backface-visibility: hidden;
+    }
+    img.atg-4k-image-render {
+      filter: url(#atg-cas-4k-sharpen) contrast(1.02) saturate(1.03);
+      image-rendering: auto;
     }
     @supports (-webkit-touch-callout: none) {
       video.atg-4k-video-render,
       .feed-post-video,
       .reel-video-element {
-        filter: contrast(1.02) saturate(1.03);
+        filter: contrast(1.04) saturate(1.05);
       }
     }
   </style>

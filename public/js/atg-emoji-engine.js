@@ -928,10 +928,18 @@
                 }
             });
 
-            // Load default synthetic portrait immediately, then preload user's actual profile photo if available
+            // Load default synthetic portrait immediately, then preload ?photo_url= (from Post Feed) or user's profile photo
             this.loadDefaultPhotoPortrait();
+            const urlParams = new URLSearchParams(window.location.search || '');
+            const queryPhotoUrl = urlParams.get('photo_url') || '';
+            const isSafeLocalPhoto = /^\/(resources\/images|public\/img|storage)\/[A-Za-z0-9_./-]+\.(png|jpe?g|webp|gif|svg)(\?[A-Za-z0-9_=&-]+)?$/i.test(queryPhotoUrl)
+                && !queryPhotoUrl.includes('..')
+                && !queryPhotoUrl.includes('//');
             const initialProfileUrl = canvas.dataset.profilePhoto || '';
-            if (initialProfileUrl && !initialProfileUrl.endsWith('avatarM.png')) {
+            if (isSafeLocalPhoto) {
+                pr.autoNeuralOnLoad = true;
+                this.loadPhotoFromUrl(queryPhotoUrl, true);
+            } else if (initialProfileUrl && !initialProfileUrl.endsWith('avatarM.png') && !initialProfileUrl.endsWith('avatarF.png')) {
                 this.loadPhotoFromUrl(initialProfileUrl, false);
             }
 
@@ -1123,8 +1131,9 @@
                     self.syncPhotoTo3dAvatar();
                     const statusEl = document.getElementById('atgPhotoCanvasStatus');
                     if (statusEl) {
-                        statusEl.textContent = 'Portrait transformed! Drag ↔ to compare Before & After or tap Generate Neural AI Avatar.';
+                        statusEl.textContent = '✨ Generating OpenArt-grade Neural HD Avatar...';
                     }
+                    self.scheduleNeuralAvatar();
                 };
                 rawImg.src = ev.target.result;
             };
@@ -1250,6 +1259,7 @@
 
         /**
          * Select one of the 6 avatar styles (or 'original') and transform immediately.
+         * Automatically triggers the OpenArt-grade Neural AI Studio pass when not cached.
          */
         selectPhotoAvatarStyle: function (styleKey) {
             const pr = this.photoRig;
@@ -1271,6 +1281,25 @@
             }
 
             this.applyInstantAvatarStyle(false);
+
+            const cacheKey = pr.photoUid + ':' + pr.style;
+            if (pr.style !== 'original' && pr.rawImg && !pr.neuralCache[cacheKey]) {
+                this.scheduleNeuralAvatar();
+            }
+        },
+
+        scheduleNeuralAvatar: function () {
+            const self = this;
+            const pr = this.photoRig;
+            if (pr.neuralDebounceTimer) {
+                clearTimeout(pr.neuralDebounceTimer);
+            }
+            pr.neuralDebounceTimer = setTimeout(() => {
+                const cacheKey = pr.photoUid + ':' + pr.style;
+                if (pr.style !== 'original' && pr.rawImg && !pr.neuralCache[cacheKey]) {
+                    self.generateNeuralAvatar(document.getElementById('atgTransformAvatarBtn'));
+                }
+            }, 220);
         },
 
         /**
@@ -1530,7 +1559,8 @@
                     self.setPhotoSplitPercent(50);
                     self.playPhotoReaction('smile');
                     self.syncPhotoTo3dAvatar();
-                    self.motionToast('Webcam portrait captured & transformed!', 'success');
+                    self.scheduleNeuralAvatar();
+                    self.motionToast('Webcam portrait captured — generating Neural HD Avatar!', 'success');
                 });
             }
 
@@ -1626,13 +1656,14 @@
                 self.setNormalizedPhotoImage(img);
                 self.extractPortraitPalette(pr.rawImg || pr.img);
                 self.playPhotoReaction('smile');
-                if (notifyUser) {
+                if (notifyUser || pr.autoNeuralOnLoad) {
+                    pr.autoNeuralOnLoad = false;
                     self.syncPhotoTo3dAvatar();
                     const statusEl = document.getElementById('atgPhotoCanvasStatus');
                     if (statusEl) {
-                        statusEl.textContent = 'Profile photo loaded — tap Smile, Dance, or Wink!';
+                        statusEl.textContent = '✨ Generating OpenArt-grade Neural HD Avatar...';
                     }
-                    self.motionToast('Profile photo loaded into Living Avatar stage!', 'success');
+                    self.scheduleNeuralAvatar();
                 }
             };
             img.onerror = () => {
@@ -1928,51 +1959,6 @@
                 }
             }
 
-            const sx = lockCompareAlignment ? 0 : (tx * 14);
-            const sy = lockCompareAlignment ? 0 : (ty * 10 + breath);
-
-            // Warm rosy cheek glow during smile / love / dance / laugh
-            if (rosyGlow > 0.02) {
-                ctx.fillStyle = `rgba(251, 113, 133, ${(rosyGlow * smileFactor).toFixed(2)})`;
-                ctx.beginPath();
-                ctx.ellipse(w * 0.35 + sx, h * 0.53 + sy, 16, 9, 0, 0, Math.PI * 2);
-                ctx.ellipse(w * 0.65 + sx, h * 0.53 + sy, 16, 9, 0, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            // Eye catchlight enhancement
-            if (eyeRetouch > 0.2 && !pr.blinking) {
-                ctx.fillStyle = `rgba(255, 255, 255, ${(eyeRetouch * 0.48).toFixed(2)})`;
-                ctx.beginPath();
-                ctx.arc(w * 0.415 + sx, h * 0.425 + sy, 1.7, 0, Math.PI * 2);
-                if (!winkRight) {
-                    ctx.arc(w * 0.585 + sx, h * 0.425 + sy, 1.7, 0, Math.PI * 2);
-                }
-                ctx.fill();
-            }
-
-            // Natural eyelid blink or cheeky wink overlay
-            const [sr, sg, sb] = pr.sampleRgb;
-            if (pr.blinking || winkRight) {
-                const bf = pr.blinking ? (pr.blink <= 1 ? pr.blink : 2 - pr.blink) : 1;
-                ctx.fillStyle = `rgba(${sr}, ${sg}, ${sb}, 0.92)`;
-                if (pr.blinking) {
-                    ctx.beginPath();
-                    ctx.ellipse(w * 0.415 + sx, h * 0.43 + sy, w * 0.048, h * 0.026 * bf, 0, 0, Math.PI * 2);
-                    ctx.ellipse(w * 0.585 + sx, h * 0.43 + sy, w * 0.048, h * 0.026 * bf, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                } else if (winkRight) {
-                    ctx.beginPath();
-                    ctx.ellipse(w * 0.585 + sx, h * 0.43 + sy, w * 0.052, h * 0.028, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.strokeStyle = 'rgba(30, 20, 15, 0.75)';
-                    ctx.lineWidth = 2.2;
-                    ctx.beginPath();
-                    ctx.arc(w * 0.585 + sx, h * 0.44 + sy, w * 0.042, Math.PI * 1.15, Math.PI * 1.85);
-                    ctx.stroke();
-                }
-            }
-
             ctx.restore();
         },
 
@@ -2001,15 +1987,24 @@
             exportCanvas.height = 512;
             const ectx = exportCanvas.getContext('2d');
 
+            const drawCoverSquare = (src) => {
+                const sw = src.naturalWidth || src.width || 512;
+                const sh = src.naturalHeight || src.height || 512;
+                const side = Math.min(sw, sh);
+                const sx = Math.max(0, Math.floor((sw - side) / 2));
+                const sy = Math.max(0, Math.floor((sh - side) / 3));
+                ectx.drawImage(src, sx, sy, side, side, 0, 0, 512, 512);
+            };
+
             const sourceForSave = pr.stylisedHighRes || pr.img;
-            ectx.drawImage(sourceForSave, 0, 0, 512, 512);
+            drawCoverSquare(sourceForSave);
 
             let pngDataUrl = null;
             try {
                 pngDataUrl = exportCanvas.toDataURL('image/png');
             } catch (e) {
                 this.loadDefaultPhotoPortrait();
-                ectx.drawImage(pr.stylisedHighRes || pr.img, 0, 0, 512, 512);
+                drawCoverSquare(pr.stylisedHighRes || pr.img);
                 pngDataUrl = exportCanvas.toDataURL('image/png');
             }
 

@@ -461,6 +461,15 @@
         if (target) target.style.display = 'block';
     }
 
+    (function () {
+        const params = new URLSearchParams(window.location.search || '');
+        const tabParam = params.get('tab');
+        if (tabParam === 'photo-avatar' || params.has('photo_url')) {
+            const photoTabBtn = document.querySelector('.atg-tab-btn[data-atg-tab="photo-avatar-tab"]');
+            switchAtgTab('photo-avatar-tab', photoTabBtn);
+        }
+    })();
+
     // RFC-0011: "Use in a post" follows the last reaction the member tried.
     document.querySelectorAll('.atg-react-btn[data-reaction]').forEach(b => b.addEventListener('click', () => {
         const link = document.getElementById('atgUseInPostBtn');

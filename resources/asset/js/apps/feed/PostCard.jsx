@@ -848,7 +848,7 @@ export function PostCard({
                                 <img
                                     src={src}
                                     alt={`Post photo ${idx + 1}`}
-                                    className="w-100 h-100 object-fit-cover d-block"
+                                    className="w-100 h-100 object-fit-cover d-block atg-4k-image-render"
                                     referrerPolicy="no-referrer"
                                     onError={() => setBrokenPhotoUrls((prev) => ({ ...prev, [src]: true }))}
                                     loading="lazy"

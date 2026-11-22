@@ -48,6 +48,11 @@
                         <i class="bi bi-diagram-3-fill"></i>{{ __('nav.tree', 'Tree') }}
                     </a>
                 </li>
+                <li class="nav-item livingHeirloomNav">
+                    <a class="nav-link stitch-nav-link" href="/family/living-heirloom" title="Living Heirloom Studio — Animate ancestors, predict future ageing, and reverse-compute lost family portraits">
+                        <i class="bi bi-person-bounding-box"></i>Heirloom AI
+                    </a>
+                </li>
                 <li class="nav-item creativeStudioNav">
                     <a class="nav-link stitch-nav-link" href="/creative-studio" title="Creative Studio — Tree Studio, Flyers &amp; Posters, Festive Cards, and Living Archives" data-tooltip="Creative Studio — Tree Studio, Flyers &amp; Posters, Festive Cards, and Living Archives" aria-describedby="creativeStudioTooltipCard">
                         <span class="creative-3d-icon-wrap" aria-hidden="true">

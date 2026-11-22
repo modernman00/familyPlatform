@@ -56,9 +56,15 @@ $router->map('GET', '/api/roundtable/dispute/[*:id]', 'App\controller\members\Fa
 $router->map('POST', '/api/roundtable/arbitrate-instant', 'App\controller\members\FamilyRoundTableController@arbitrateInstant', 'api_roundtable_arbitrate_instant');
 $router->map('POST', '/api/roundtable/record-chore-points', 'App\controller\members\FamilyRoundTableController@recordChorePoints', 'api_roundtable_record_chore_points');
 
-// Living Heirloom 2.5D Facial Depth & Parallax Photo Animator (ATG Flagship)
+// Living Heirloom 2.5D Facial Depth, Talking/Re-Emotion, Age Progression & Ancestral Reverse Studio (ATG Flagship)
 $router->map('GET', '/family/living-heirloom', 'App\controller\members\LivingHeirloomController@index', 'family_living_heirloom');
 $router->map('POST', '/api/heirloom/save-portrait', 'App\controller\members\LivingHeirloomController@savePortrait', 'api_heirloom_save_portrait');
+$router->map('POST', '/api/heirloom/re-emotion', 'App\controller\members\LivingHeirloomController@reEmotion', 'api_heirloom_re_emotion');
+$router->map('POST', '/api/heirloom/age-progression', 'App\controller\members\LivingHeirloomController@ageProgression', 'api_heirloom_age_progression');
+$router->map('GET', '/api/heirloom/tree-ancestors', 'App\controller\members\LivingHeirloomController@treeAncestors', 'api_heirloom_tree_ancestors');
+$router->map('POST', '/api/heirloom/calibrate-tree', 'App\controller\members\LivingHeirloomController@calibrateTree', 'api_heirloom_calibrate_tree');
+$router->map('POST', '/api/heirloom/reverse-ancestor', 'App\controller\members\LivingHeirloomController@reverseAncestor', 'api_heirloom_reverse_ancestor');
+$router->map('POST', '/api/heirloom/publish-to-feed', 'App\controller\members\LivingHeirloomController@publishToFeed', 'api_heirloom_publish_to_feed');
 
 // Backward-compatible aliases for tribunal endpoints
 $router->map('POST', '/api/fun-place/file-dispute', 'App\controller\members\FamilyRoundTableController@fileDispute', 'alias_fun_place_file_dispute');
