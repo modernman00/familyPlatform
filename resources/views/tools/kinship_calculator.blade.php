@@ -55,7 +55,7 @@
         </section>
 
         <!-- Interactive Kinship Calculator Card -->
-        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden bg-white">
           <div class="card-body p-4 p-md-5">
             <h3 class="fw-bold text-dark mb-4 d-flex align-items-center gap-2">
               <i class="bi bi-diagram-3 text-danger"></i> Calculate Your Relationship

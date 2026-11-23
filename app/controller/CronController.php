@@ -305,4 +305,61 @@ class CronController
             fclose($lockHandle);
         }
     }
+
+    /**
+     * Endpoint to deliver daily dynamic intelligent mobile push notifications for Family Arcade.
+     * Enforces CRON_SECRET auth and non-blocking process lock.
+     */
+    public function arcadeDailyNudge(): void
+    {
+        header('Content-Type: application/json');
+
+        $providedSecret = (string) ($_REQUEST['secret'] ?? ($_SERVER['HTTP_X_CRON_SECRET'] ?? ''));
+        $expectedSecret = (string) ($_ENV['CRON_SECRET'] ?? (getenv('CRON_SECRET') ?: ''));
+
+        if (empty($expectedSecret) || !hash_equals($expectedSecret, $providedSecret)) {
+            http_response_code(403);
+            echo json_encode([
+                'status'  => 'error',
+                'message' => 'Unauthorized. Invalid or missing secret.',
+            ]);
+            return;
+        }
+
+        $lockPath = sys_get_temp_dir() . '/familyplatform-arcade-daily-cron.lock';
+        $lockHandle = fopen($lockPath, 'c');
+        if ($lockHandle === false || !flock($lockHandle, LOCK_EX | LOCK_NB)) {
+            if (is_resource($lockHandle)) {
+                fclose($lockHandle);
+            }
+            http_response_code(409);
+            echo json_encode([
+                'status'  => 'error',
+                'message' => 'Arcade daily engagement cron is currently running on another process.',
+            ]);
+            return;
+        }
+
+        try {
+            $dryRun = filter_var($_REQUEST['dry_run'] ?? false, FILTER_VALIDATE_BOOLEAN);
+            $limit = isset($_REQUEST['limit']) ? (int) $_REQUEST['limit'] : 500;
+            $service = new \App\services\ArcadeDailyEngagementService(Db::connect2());
+            $stats = $service->dispatchDailyNudges($dryRun, $limit);
+
+            http_response_code(200);
+            echo json_encode([
+                'status' => 'success',
+                'data'   => $stats,
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode([
+                'status'  => 'error',
+                'message' => 'Failed to run arcade daily engagement cron: ' . $e->getMessage(),
+            ]);
+        } finally {
+            flock($lockHandle, LOCK_UN);
+            fclose($lockHandle);
+        }
+    }
 }

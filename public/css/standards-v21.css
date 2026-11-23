@@ -573,6 +573,7 @@ body.dark-theme[data-surface="light"],
 }
 
 /* Explicit Form Label & Input Contrast on Light Surfaces / Auth Containers */
+body:is(.public-layout, [data-surface="light"], .surface-light) :is(.form-label, .col-form-label, label),
 body.dark-mode :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-label, .col-form-label, label),
 body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-label, .col-form-label, label),
 [data-bs-theme="dark"] :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-label, .col-form-label, label),
@@ -581,6 +582,7 @@ body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .sti
   color: #374151 !important;
 }
 
+body:is(.public-layout, [data-surface="light"], .surface-light) :is(.form-control, .form-select, select, input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]), textarea),
 body.dark-mode :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-control, .form-select, input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]), textarea),
 body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-control, .form-select, input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]), textarea),
 [data-bs-theme="dark"] :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-control, .form-select, input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]), textarea),
@@ -591,16 +593,18 @@ body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .sti
   border-color: #d1d5db !important;
 }
 
+body:is(.public-layout, [data-surface="light"], .surface-light) :is(.form-control, input, textarea)::placeholder,
 body.dark-mode :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-control, input, textarea)::placeholder,
 body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-control, input, textarea)::placeholder,
 [data-bs-theme="dark"] :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container) :is(.form-control, input, textarea)::placeholder,
 .public-layout :is(.form-control, input, textarea)::placeholder,
 .stitch-auth-container :is(.form-control, input, textarea)::placeholder {
-  color: #94a3b8 !important;
+  color: #64748b !important;
   opacity: 1 !important;
 }
 
 /* Typography Headings & Body on Light Surfaces */
+body:is(.public-layout, [data-surface="light"], .surface-light) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .feature-title, .stitch-title),
 body.dark-mode :is(.public-layout, [data-surface="light"], .surface-light) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .feature-title, .stitch-title),
 body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .feature-title, .stitch-title),
 [data-bs-theme="dark"] :is(.public-layout, [data-surface="light"], .surface-light) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .feature-title, .stitch-title),
@@ -608,6 +612,7 @@ body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light) :is(
   color: #0f172a !important;
 }
 
+body:is(.public-layout, [data-surface="light"], .surface-light) :is(.text-muted, .text-secondary, .stitch-subtitle, .stitch-divider, .stitch-checkbox-group),
 body.dark-mode :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container, .feature-card) :is(.text-muted, .text-secondary, .stitch-subtitle, .stitch-divider, .stitch-checkbox-group),
 body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container, .feature-card) :is(.text-muted, .text-secondary, .stitch-subtitle, .stitch-divider, .stitch-checkbox-group),
 [data-bs-theme="dark"] :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container, .feature-card) :is(.text-muted, .text-secondary, .stitch-subtitle, .stitch-divider, .stitch-checkbox-group),
@@ -616,11 +621,59 @@ body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .sti
   color: #475569 !important;
 }
 
+body:is(.public-layout, [data-surface="light"], .surface-light) .text-dark,
 body.dark-mode :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container, .feature-card) .text-dark,
 body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container, .feature-card) .text-dark,
 [data-bs-theme="dark"] :is(.public-layout, [data-surface="light"], .surface-light, .stitch-auth-container, .feature-card) .text-dark,
 .public-layout .text-dark {
   color: #0f172a !important;
+}
+
+/* Semantic Status Text & Buttons on Light Surfaces */
+body:is(.public-layout, [data-surface="light"], .surface-light) .text-danger:not(.btn):not(.bg-danger) {
+  color: #a31621 !important;
+}
+
+body:is(.public-layout, [data-surface="light"], .surface-light) .text-success:not(.btn):not(.bg-success) {
+  color: #15803d !important;
+}
+
+body:is(.public-layout, [data-surface="light"], .surface-light) .text-primary:not(.btn):not(.bg-primary) {
+  color: #1d4ed8 !important;
+}
+
+body:is(.public-layout, [data-surface="light"], .surface-light) .btn-light {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+body:is(.public-layout, [data-surface="light"], .surface-light) .btn-light:hover {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+body:is(.public-layout, [data-surface="light"], .surface-light) .btn-outline-secondary {
+  background-color: transparent !important;
+  color: #334155 !important;
+  border-color: #64748b !important;
+}
+
+body:is(.public-layout, [data-surface="light"], .surface-light) .btn-outline-secondary:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #475569 !important;
+}
+
+body:is(.public-layout, [data-surface="light"], .surface-light) .btn-brand-outline {
+  background-color: transparent !important;
+  color: #a31621 !important;
+  border-color: #a31621 !important;
+}
+
+body:is(.public-layout, [data-surface="light"], .surface-light) .btn-brand-outline:hover {
+  background-color: #a31621 !important;
+  color: #ffffff !important;
 }
 
 /* 🛡️ Inviolable Contrast Safeguard: Prevent strong & b elements from rendering white/ghost on light surfaces */

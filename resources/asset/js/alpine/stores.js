@@ -68,9 +68,9 @@ export function initAlpineStores(Alpine) {
                                 document.body?.getAttribute('data-surface') === 'light' ||
                                 document.querySelector('meta[name="page-scope"]')?.getAttribute('content') === 'public';
 
-        // On public landing & auth pages, default to light mode unless explicitly saved as dark by user
+        // On public landing & auth pages (data-surface="light" / .public-layout), always enforce light mode
         if (isPublicSurface) {
-          this.isDark = savedTheme === 'dark';
+          this.isDark = false;
         } else {
           this.isDark = savedTheme === 'dark' || (savedTheme === null && prefersDark);
         }
@@ -119,6 +119,14 @@ export function initAlpineStores(Alpine) {
           themeBadge.textContent = 'Light';
           themeBadge.className = 'badge bg-secondary-subtle text-secondary';
         }
+      }
+      const themeIcon = document.getElementById('themeToggleIcon');
+      if (themeIcon) {
+        themeIcon.className = this.isDark ? 'bi bi-sun-fill text-warning' : 'bi bi-moon-stars-fill';
+      }
+      const toggleBtn = document.getElementById('darkModeToggle');
+      if (toggleBtn) {
+        toggleBtn.setAttribute('aria-pressed', this.isDark ? 'true' : 'false');
       }
     }
   });

@@ -34,8 +34,8 @@ describe('Living Photo & Living Heirloom Picture-in-Picture (PiP)', () => {
         cy.get('.spip-dock').should('be.visible');
         cy.get('.spip-dock__title').should('contain.text', 'Living photo preview');
         cy.get('.spip-dock__canvas').should(($c) => {
-            expect($c[0].width).to.be.greaterThan(0);
-            expect($c[0].height).to.be.greaterThan(0);
+            expect($c[0].width).to.be.at.least(960);
+            expect($c[0].height).to.be.at.least(1080);
         });
 
         // Expand modal
@@ -105,6 +105,10 @@ describe('Living Photo & Living Heirloom Picture-in-Picture (PiP)', () => {
         cy.get('.lh-card .spip-trigger[aria-pressed]').should('be.visible').and('contain.text', 'Pop out').click();
         cy.get('.spip-dock').should('be.visible');
         cy.get('.spip-dock__title').should('contain.text', 'Living heirloom preview');
+        cy.get('.spip-dock__canvas').should(($c) => {
+            expect($c[0].width).to.be.at.least(1120);
+            expect($c[0].height).to.be.at.least(1280);
+        });
 
         // Expand & close
         cy.get('.spip-dock button[aria-label="Expand preview"]').click();

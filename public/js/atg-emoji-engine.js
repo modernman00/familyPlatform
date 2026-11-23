@@ -1330,8 +1330,12 @@
 
             // Update Before canvas with the untouched portrait
             if (pr.beforeCanvas && pr.beforeCtx) {
-                pr.beforeCtx.clearRect(0, 0, 240, 270);
-                pr.beforeCtx.drawImage(pr.rawImg, 0, 0, 240, 270);
+                const bw = pr.beforeCanvas.width || 960;
+                const bh = pr.beforeCanvas.height || 1080;
+                pr.beforeCtx.clearRect(0, 0, bw, bh);
+                pr.beforeCtx.imageSmoothingEnabled = true;
+                pr.beforeCtx.imageSmoothingQuality = 'high';
+                pr.beforeCtx.drawImage(pr.rawImg, 0, 0, bw, bh);
             }
 
             if (pr.style === 'original') {
@@ -1371,10 +1375,15 @@
 
         syncDownscaledStageImage: function (sourceCanvas) {
             const pr = this.photoRig;
+            const targetW = (pr.canvas && pr.canvas.width) || 960;
+            const targetH = (pr.canvas && pr.canvas.height) || 1080;
             const stageImg = document.createElement('canvas');
-            stageImg.width = 240;
-            stageImg.height = 270;
-            stageImg.getContext('2d').drawImage(sourceCanvas, 0, 0, 240, 270);
+            stageImg.width = targetW;
+            stageImg.height = targetH;
+            const sctx = stageImg.getContext('2d');
+            sctx.imageSmoothingEnabled = true;
+            sctx.imageSmoothingQuality = 'high';
+            sctx.drawImage(sourceCanvas, 0, 0, targetW, targetH);
             pr.img = stageImg;
         },
 
@@ -1620,9 +1629,12 @@
             if (!src) return;
 
             const out = document.createElement('canvas');
-            out.width = 512;
-            out.height = 576;
-            out.getContext('2d').drawImage(src, 0, 0, 512, 576);
+            out.width = 1024;
+            out.height = 1152;
+            const octx = out.getContext('2d');
+            octx.imageSmoothingEnabled = true;
+            octx.imageSmoothingQuality = 'high';
+            octx.drawImage(src, 0, 0, 1024, 1152);
 
             try {
                 const link = document.createElement('a');
@@ -1653,10 +1665,13 @@
             const shareUrl = window.location.origin + '/';
 
             const card = document.createElement('canvas');
-            card.width = 512;
-            card.height = 640;
+            card.width = 1024;
+            card.height = 1280;
             const ctx = card.getContext('2d');
             if (!ctx) return;
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.scale(2, 2);
 
             ctx.fillStyle = '#0f172a';
             ctx.fillRect(0, 0, 512, 640);
@@ -1834,9 +1849,10 @@
         loadDefaultPhotoPortrait: function () {
             const pr = this.photoRig;
             const off = document.createElement('canvas');
-            off.width = 240;
-            off.height = 270;
+            off.width = 960;
+            off.height = 1080;
             const c = off.getContext('2d');
+            c.scale(4, 4);
 
             const bg = c.createRadialGradient(120, 120, 30, 120, 135, 160);
             bg.addColorStop(0, '#475569');
@@ -1944,6 +1960,7 @@
             const ctx = pr.ctx;
             const w = pr.canvas.width;
             const h = pr.canvas.height;
+            const scale = w / 240;
 
             pr.tiltX += (pr.targetX - pr.tiltX) * 0.12;
             pr.tiltY += (pr.targetY - pr.tiltY) * 0.12;
@@ -2022,21 +2039,25 @@
             const lockCompareAlignment = pr.compareMode && !isReacting;
 
             ctx.clearRect(0, 0, w, h);
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
             ctx.save();
             if (lockCompareAlignment) {
                 ctx.drawImage(pr.img, 0, 0, w, h);
             } else {
                 ctx.filter = `contrast(${(1 + (sharpen - 0.4) * 0.18).toFixed(2)}) saturate(${(1 + (skinTex - 0.5) * 0.15).toFixed(2)})`;
-                ctx.translate(w / 2 + danceDx, h / 2 + danceDy);
+                ctx.translate(w / 2 + danceDx * scale, h / 2 + danceDy * scale);
                 ctx.rotate(tx * 0.22 + danceRot);
                 ctx.scale(1.06, 1.06);
                 ctx.translate(-w / 2, -h / 2);
 
-                const sx = tx * 14;
-                const sy = ty * 10 + breath;
+                const sx = tx * 14 * scale;
+                const sy = (ty * 10 + breath) * scale;
 
                 // 2.5D Horizontal Strip Facial Warping (Cheek-lift Smile + Talk Jaw Motion)
-                const stripH = 6;
+                const stripH = Math.max(6, Math.round(6 * scale));
+                const imgW = pr.img.width || w;
+                const imgH = pr.img.height || h;
                 for (let y = 0; y < h; y += stripH) {
                     const ny = y / h;
                     let liftY = 0;
@@ -2045,19 +2066,23 @@
                     // Cheek & smile zone (46% to 74% vertical height)
                     if (smileFactor > 0.02 && ny >= 0.44 && ny <= 0.76) {
                         const bell = Math.sin(((ny - 0.44) / 0.32) * Math.PI);
-                        liftY = -smileFactor * bell * 5.2;
+                        liftY = -smileFactor * bell * 5.2 * scale;
                         expandX = 1.0 + smileFactor * bell * 0.036;
                     }
 
                     // Talk mode jaw motion (62% to 84% vertical height)
                     if (talkLevel > 0.04 && ny >= 0.62 && ny <= 0.84) {
                         const jawBell = Math.sin(((ny - 0.62) / 0.22) * Math.PI);
-                        liftY += talkLevel * jawBell * 6.5;
+                        liftY += talkLevel * jawBell * 6.5 * scale;
                     }
 
                     const destW = w * expandX;
                     const destX = sx - (destW - w) / 2;
-                    ctx.drawImage(pr.img, 0, y, w, stripH, destX, y + sy + liftY, destW, stripH + 0.6);
+                    const srcY = (y / h) * imgH;
+                    const srcStripH = Math.min((stripH / h) * imgH, imgH - srcY);
+                    if (srcStripH > 0) {
+                        ctx.drawImage(pr.img, 0, srcY, imgW, srcStripH, destX, y + sy + liftY, destW, stripH + (0.6 * scale));
+                    }
                 }
             }
 
@@ -2085,17 +2110,19 @@
             };
 
             const exportCanvas = document.createElement('canvas');
-            exportCanvas.width = 512;
-            exportCanvas.height = 512;
+            exportCanvas.width = 1024;
+            exportCanvas.height = 1024;
             const ectx = exportCanvas.getContext('2d');
+            ectx.imageSmoothingEnabled = true;
+            ectx.imageSmoothingQuality = 'high';
 
             const drawCoverSquare = (src) => {
-                const sw = src.naturalWidth || src.width || 512;
-                const sh = src.naturalHeight || src.height || 512;
+                const sw = src.naturalWidth || src.width || 1024;
+                const sh = src.naturalHeight || src.height || 1024;
                 const side = Math.min(sw, sh);
                 const sx = Math.max(0, Math.floor((sw - side) / 2));
                 const sy = Math.max(0, Math.floor((sh - side) / 3));
-                ectx.drawImage(src, sx, sy, side, side, 0, 0, 512, 512);
+                ectx.drawImage(src, sx, sy, side, side, 0, 0, 1024, 1024);
             };
 
             const sourceForSave = pr.stylisedHighRes || pr.img;
@@ -2197,17 +2224,19 @@
             }
 
             const exportCanvas = document.createElement('canvas');
-            exportCanvas.width = 512;
-            exportCanvas.height = 576;
+            exportCanvas.width = 1024;
+            exportCanvas.height = 1152;
             const ectx = exportCanvas.getContext('2d');
-            ectx.drawImage(sourceForPost, 0, 0, 512, 576);
+            ectx.imageSmoothingEnabled = true;
+            ectx.imageSmoothingQuality = 'high';
+            ectx.drawImage(sourceForPost, 0, 0, 1024, 1152);
 
             let previewDataUrl = '';
             try {
                 previewDataUrl = exportCanvas.toDataURL('image/png');
             } catch (e) {
                 this.loadDefaultPhotoPortrait();
-                ectx.drawImage(pr.stylisedHighRes || pr.img, 0, 0, 512, 576);
+                ectx.drawImage(pr.stylisedHighRes || pr.img, 0, 0, 1024, 1152);
                 previewDataUrl = exportCanvas.toDataURL('image/png');
             }
 

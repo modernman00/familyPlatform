@@ -87,7 +87,9 @@ $navContent = file_get_contents($navbarPath) ?: '';
 assertCondition(str_contains($navContent, 'title="Search activities, memories, and family members"'), 'Navbar mobile search has explanatory tooltip', $failures, $checks);
 assertCondition(str_contains($navContent, 'title="{{ __(\'nav.my_page\', \'My Page\') }} - View and manage your family profile"'), 'Navbar My Page has explanatory tooltip', $failures, $checks);
 assertCondition(str_contains($navContent, 'View alerts and family notifications'), 'Navbar notification bell has explanatory tooltip', $failures, $checks);
-assertCondition(str_contains($navContent, 'stitch-user-dropdown') && str_contains($navContent, 'dropdown-menu-lg-end'), 'Navbar user menu uses dropdown-menu-lg-end for responsive left/right alignment', $failures, $checks);
+assertCondition(str_contains($navContent, 'href="/accountSetting"') && str_contains($navContent, 'id="userMenu"') && !str_contains($navContent, 'stitch-user-dropdown'), 'Navbar user avatar links directly to Settings without a dropdown menu', $failures, $checks);
+assertCondition(str_contains($navContent, 'id="darkModeToggle"') && str_contains($navContent, 'id="navbarLogoutBtn"'), 'Navbar provides standalone Theme Mode and Log Out icon controls', $failures, $checks);
+assertCondition(str_contains($navContent, 'dropdown-menu-lg-end'), 'Navbar language menu uses dropdown-menu-lg-end for responsive alignment', $failures, $checks);
 
 $navbarCssPath = $root . '/public/css/navbar.css';
 $navCssContent = file_get_contents($navbarCssPath) ?: '';

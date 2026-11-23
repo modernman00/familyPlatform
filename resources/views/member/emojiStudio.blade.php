@@ -198,14 +198,14 @@
 
                                 <!-- Interactive Before/After Split Stage wrapping #atgPhotoLivingCanvas -->
                                 <div class="atg-compare-stage is-comparing" id="atgPhotoCompareStage" style="--atg-split: 50%;">
-                                    <canvas id="atgPhotoLivingCanvas" width="240" height="270"
+                                    <canvas id="atgPhotoLivingCanvas" width="960" height="1080"
                                             data-profile-photo="{{ $currentProfilePhotoUrl ?? '/resources/images/profile/avatarM.png' }}"
                                             class="atg-living-after-canvas"
                                             title="Tap your Living Avatar to make it react · move cursor for 2.5D depth"
                                             aria-label="Interactive stylised living avatar preview"></canvas>
 
                                     <div class="atg-compare-before-layer" id="atgCompareBeforeLayer" aria-hidden="true">
-                                        <canvas id="atgPhotoBeforeCanvas" width="240" height="270" class="atg-before-raw-canvas"></canvas>
+                                        <canvas id="atgPhotoBeforeCanvas" width="960" height="1080" class="atg-before-raw-canvas"></canvas>
                                     </div>
 
                                     <span class="atg-compare-badge atg-compare-badge--before" id="atgCompareBadgeBefore">BEFORE</span>

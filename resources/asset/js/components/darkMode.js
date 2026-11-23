@@ -13,10 +13,11 @@ export function initDarkMode() {
   const savedTheme = localStorage.getItem('familyPlatform_theme');
   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   
-  // On public landing & auth pages, default to light mode unless explicitly saved by the user
-  const isDark = isPublicSurface ? (savedTheme === 'dark') : (savedTheme === 'dark' || (savedTheme === null && prefersDark));
+  // On public landing & auth pages (data-surface="light" / .public-layout), always enforce light mode
+  const isDark = isPublicSurface ? false : (savedTheme === 'dark' || (savedTheme === null && prefersDark));
 
   const themeBadge = document.getElementById('themeStatusBadge');
+  const themeIcon = document.getElementById('themeToggleIcon');
 
   const applyTheme = (dark) => {
     if (dark) {
@@ -26,12 +27,24 @@ export function initDarkMode() {
         themeBadge.textContent = 'Dark';
         themeBadge.className = 'badge bg-warning text-dark';
       }
+      if (themeIcon) {
+        themeIcon.className = 'bi bi-sun-fill text-warning';
+      }
+      if (toggleBtn) {
+        toggleBtn.setAttribute('aria-pressed', 'true');
+      }
     } else {
       document.body.classList.remove('dark-mode', 'dark-theme');
       document.documentElement.classList.remove('dark', 'dark-mode');
       if (themeBadge) {
         themeBadge.textContent = 'Light';
         themeBadge.className = 'badge bg-secondary-subtle text-secondary';
+      }
+      if (themeIcon) {
+        themeIcon.className = 'bi bi-moon-stars-fill';
+      }
+      if (toggleBtn) {
+        toggleBtn.setAttribute('aria-pressed', 'false');
       }
     }
     if (window.Alpine && typeof window.Alpine.store === 'function') {

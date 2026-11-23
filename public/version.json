@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(release): expand Family Arcade 7-game suite, feed media/emoji upgrades, and studio navigation",
+    "title": "Test(auth): isolate CSRF session state in FamilyCodeApprovalFlowTest",
     "notes": [
-        "Feat(release): expand Family Arcade 7-game suite, feed media/emoji upgrades, and studio navigation",
-        "Feat(arcade): launch Family Arcade 4-game suite, leagues, badges & live SSE race",
-        "Fix(mobile-composer,e2e): constrain composer-form overflow and retry mobile bottom-sheet transition"
+        "Test(auth): isolate CSRF session state in FamilyCodeApprovalFlowTest",
+        "Feat(studio): implement Floating PiP for Living Photo and Living Heirloom",
+        "Feat(islands): add IslandErrorBoundary, Portal, reactive signals, and sync production bundles"
     ],
-    "released_at": "2026-11-22",
-    "commit": "5b0a567b"
+    "released_at": "2026-11-23",
+    "commit": "b108d203"
 }

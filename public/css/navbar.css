@@ -1588,8 +1588,8 @@ body.dark-mode .btn-raised-nav { color: #e2e8f0; background: linear-gradient(180
 .notification-wrapper:has(.notification-badge:not(:empty):not([style*="display: none"])) #notificationBtn .bi-bell-fill { animation-duration: 8s; }
 .notification-wrapper .notification-badge { animation-duration: 3.6s; }
 
-/* Compact profile button: photo (preferred) or two initials, name in tooltip/aria */
-.btn-user-compact { padding: 4px 10px 4px 4px !important; gap: 4px; min-width: 44px; }
+/* Compact profile/settings link button: photo (preferred) or two initials, name in tooltip/aria */
+.btn-user-compact { padding: 3px !important; gap: 0; width: 44px; height: 44px; min-width: 44px; min-height: 44px; justify-content: center; }
 .btn-user-compact .user-avatar-photo {
   width: 36px; height: 36px; border-radius: 50%; object-fit: cover; aspect-ratio: 1 / 1;
   border: 2px solid #fff; box-shadow: 0 2px 0 #cbd5e1, 0 3px 8px rgba(15, 23, 42, 0.18);
@@ -1599,6 +1599,47 @@ body.dark-mode .btn-raised-nav { color: #e2e8f0; background: linear-gradient(180
   border: 2px solid #fff; box-shadow: 0 2px 0 #6b0f18, 0 3px 8px rgba(163, 22, 33, 0.35);
 }
 .btn-user-compact:focus-visible { outline: 2px solid var(--brand-primary, #b8202c); outline-offset: 2px; }
+.user-settings-gear-badge {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.22);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  line-height: 1;
+  pointer-events: none;
+}
+body.dark-mode .user-settings-gear-badge {
+  background: #1e293b;
+  color: #f8fafc;
+  border-color: #475569;
+}
+
+/* Standalone Log Out Icon Button */
+.btn-logout-stitch {
+  color: #b91c1c !important;
+}
+.btn-logout-stitch:hover {
+  background: #fef2f2 !important;
+  color: #991b1b !important;
+  border-color: #fecaca !important;
+}
+body.dark-mode .btn-logout-stitch {
+  color: #f87171 !important;
+}
+body.dark-mode .btn-logout-stitch:hover {
+  background: rgba(239, 68, 68, 0.16) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+}
 
 /* Responsive desktop navbar fit guard: keep OmniSearch & action controls inside 1024px–1520px viewports */
 @media (min-width: 992px) {
@@ -1633,7 +1674,7 @@ body.dark-mode .btn-raised-nav { color: #e2e8f0; background: linear-gradient(180
     gap: 0.25rem;
   }
   #mainNavbar .navbar-actions-group {
-    gap: 0.35rem !important;
+    gap: 0.5rem !important;
   }
   #mainNavbar .btn-omni-search-trigger {
     flex: 0 1 156px;

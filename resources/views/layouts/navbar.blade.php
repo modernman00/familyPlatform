@@ -163,8 +163,8 @@
                     <span class="d-inline d-xl-none">{{ __('nav.invite', 'Invite') }}</span>
                 </button>
 
-                <!-- FamChat Direct Action Button with Bell & Unread Counter -->
-                <div class="whisper-nav-wrapper position-relative">
+                <!-- FamChat Direct Action Button with Bell & Unread Counter (desktop; mobile uses top bar icon) -->
+                <div class="whisper-nav-wrapper position-relative d-none d-lg-block">
                     <a href="/kin-whispers" class="btn btn-icon-stitch text-decoration-none d-inline-flex align-items-center justify-content-center position-relative" id="navbarWhispersBtn" title="{{ __('nav.whisper', 'FamChat — Private family messages, artifact reflections & voice dedications') }}" aria-label="FamChat">
                         <i class="bi bi-chat-dots-fill" style="color: #a31621; font-size: 1.15rem;"></i>
                         <i class="bi bi-bell-fill text-warning whisper-bell-indicator position-absolute {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.65rem; top: 4px; right: 4px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));" title="Unread FamChat messages"></i>
@@ -232,89 +232,33 @@
                     </ul>
                 </div>
 
-                <!-- User Profile Dropdown (Refined Capsule with Avatar Monogram) -->
-                <div class="dropdown">
-                    @php
-                        $navFullName = trim((string)($_SESSION['fullName'] ?? 'Account'));
-                        $navNameParts = preg_split('/\s+/', $navFullName, -1, PREG_SPLIT_NO_EMPTY) ?: ['A'];
-                        $navInitials = mb_strtoupper(mb_substr($navNameParts[0], 0, 1) . (count($navNameParts) > 1 ? mb_substr(end($navNameParts), 0, 1) : ''));
-                        $navRawImg = trim((string)($_SESSION['img'] ?? ($_SESSION['profilePics'] ?? '')));
-                        $navHasPhoto = $navRawImg !== '' && !str_contains($navRawImg, 'avatarM.png') && !str_contains($navRawImg, 'avatarF.png') && !str_contains($navRawImg, 'default-avatar.');
-                        $navImgSrc = $navHasPhoto ? (str_starts_with($navRawImg, '/') ? $navRawImg : '/resources/images/profile/' . rawurlencode($navRawImg)) : '';
-                    @endphp
-                    <button class="btn btn-user-stitch btn-user-compact dropdown-toggle d-flex align-items-center" type="button" id="userMenu" data-bs-toggle="dropdown" data-bs-display="dynamic" aria-expanded="false" aria-label="{{ $navFullName }} — account menu" title="{{ $navFullName }} — account profile and preferences">
-                        @if ($navHasPhoto)
-                            <img src="{{ $navImgSrc }}" alt="" class="user-avatar-photo flex-shrink-0" width="36" height="36" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'user-avatar-initials flex-shrink-0',textContent:'{{ $navInitials }}'}))">
-                        @else
-                            <span class="user-avatar-initials flex-shrink-0" aria-hidden="true">{{ $navInitials }}</span>
-                        @endif
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-lg-end shadow-lg border-0 py-2 stitch-user-dropdown" aria-labelledby="userMenu" style="border-radius: 16px; min-width: 200px;">
-                        <li>
-                            <button type="button" class="dropdown-item d-lg-none py-2 px-3 fw-medium text-primary text-start w-100 border-0 bg-transparent" data-bs-toggle="modal" data-bs-target="#inviteFamilyModal" title="Invite family relatives and friends to join your family network">
-                                <i class="bi bi-person-plus-fill me-2 text-warning"></i> {{ __('nav.invite_others', 'Invite Others') }}
-                            </button>
-                        </li>
-                        <li class="profileNav">
-                            <a class="dropdown-item py-2 px-3 fw-medium" href="/profile" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Edit your personal profile information">
-                                <i class="bi bi-pencil-square me-2 text-primary"></i> {{ __('nav.edit_profile', 'Edit Profile') }}
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item py-2 px-3 fw-medium d-flex align-items-center gap-2" href="/creative-studio" title="Creative Studio — Tree Studio, Flyers &amp; Posters, Festive Cards, Living Archives, and Family Arcade">
-                                <span class="creative-3d-icon-wrap" aria-hidden="true">
-                                    <span class="creative-3d-gem">
-                                        <span class="creative-3d-sheen"></span>
-                                        <svg class="creative-3d-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M12 2.5L14.4 7.8L20.1 8.5L15.8 12.4L17 18.1L12 15.2L7 18.1L8.2 12.4L3.9 8.5L9.6 7.8L12 2.5Z" fill="#fef08a" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round"/>
-                                        </svg>
-                                    </span>
-                                    <span class="creative-3d-spark creative-3d-spark--1"></span>
-                                    <span class="creative-3d-spark creative-3d-spark--2"></span>
-                                </span>
-                                <span>Creative Studio</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item py-2 px-3 fw-medium" href="/arcade" title="Family Arcade — KinZip, KinGrid, KinWord &amp; KinPulse Daily Puzzles &amp; Leagues">
-                                <i class="bi bi-trophy-fill me-2 text-warning"></i> Family Arcade
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item py-2 px-3 fw-medium" href="/familyStudio" title="{{ __('nav.studio', 'Tree Studio') }} — Curate your family lineage and generations">
-                                <i class="bi bi-diagram-3-fill me-2 text-primary"></i> {{ __('nav.studio', 'Tree Studio') }}
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item py-2 px-3 fw-medium" href="/kinship-calculator" title="Calculate genealogical relationship degrees and shared DNA">
-                                <i class="bi bi-calculator me-2 text-danger"></i> Kinship Calculator
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item py-2 px-3 fw-medium" href="/accountSetting" title="Manage account settings and security preferences">
-                                <i class="bi bi-gear-fill me-2 text-secondary"></i> {{ __('nav.settings', 'Settings') }}
-                            </a>
-                        </li>
-                        <li id="pwaAmbientInstallLi" style="display: none;">
-                            <button type="button" class="dropdown-item py-2 px-3 fw-medium text-success d-flex align-items-center justify-content-between pwa-ambient-install-trigger text-start w-100 border-0 bg-transparent" id="pwaAmbientInstallBtn" title="Install FamilyPlatform app on your device for fast access & alerts">
-                                <span><i class="bi bi-download me-2 text-success"></i> Install App</span>
-                                <span class="badge bg-success-subtle text-success" style="font-size: 0.72rem;">Native App</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" class="dropdown-item py-2 px-3 fw-medium d-flex align-items-center justify-content-between text-start w-100 border-0 bg-transparent" id="darkModeToggle" title="Toggle between dark and light appearance modes">
-                                <span><i class="bi bi-moon-stars-fill me-2 text-warning"></i> {{ __('nav.theme_mode', 'Theme Mode') }}</span>
-                                <span class="badge bg-secondary-subtle text-secondary" id="themeStatusBadge" style="font-size: 0.72rem;">Toggle</span>
-                            </button>
-                        </li>
-                        <li><hr class="dropdown-divider my-1"></li>
-                        <li>
-                            <a class="dropdown-item py-2 px-3 fw-medium text-danger" href="/signout" title="Sign out safely from your family account">
-                                <i class="bi bi-box-arrow-right me-2"></i> {{ __('nav.logout', 'Logout') }}
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <!-- Theme Mode Toggle Icon -->
+                <button type="button" class="btn btn-icon-stitch" id="darkModeToggle" aria-label="{{ __('nav.theme_mode', 'Theme Mode') }}" aria-pressed="false" title="{{ __('nav.theme_mode', 'Toggle dark/light theme') }}">
+                    <i class="bi bi-moon-stars-fill" id="themeToggleIcon" aria-hidden="true"></i>
+                </button>
+
+                <!-- Account Settings Direct Link (Avatar Capsule) -->
+                @php
+                    $navFullName = trim((string)($_SESSION['fullName'] ?? 'Account'));
+                    $navNameParts = preg_split('/\s+/', $navFullName, -1, PREG_SPLIT_NO_EMPTY) ?: ['A'];
+                    $navInitials = mb_strtoupper(mb_substr($navNameParts[0], 0, 1) . (count($navNameParts) > 1 ? mb_substr(end($navNameParts), 0, 1) : ''));
+                    $navRawImg = trim((string)($_SESSION['img'] ?? ($_SESSION['profilePics'] ?? '')));
+                    $navHasPhoto = $navRawImg !== '' && !str_contains($navRawImg, 'avatarM.png') && !str_contains($navRawImg, 'avatarF.png') && !str_contains($navRawImg, 'default-avatar.');
+                    $navImgSrc = $navHasPhoto ? (str_starts_with($navRawImg, '/') ? $navRawImg : '/resources/images/profile/' . rawurlencode($navRawImg)) : '';
+                @endphp
+                <a href="/accountSetting" class="btn btn-user-stitch btn-user-compact d-inline-flex align-items-center justify-content-center position-relative text-decoration-none" id="userMenu" aria-label="{{ $navFullName }} — {{ __('nav.settings', 'Settings') }}" title="{{ $navFullName }} — {{ __('nav.settings', 'Account Settings & Preferences') }}">
+                    @if ($navHasPhoto)
+                        <img src="{{ $navImgSrc }}" alt="" class="user-avatar-photo flex-shrink-0" width="36" height="36" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'user-avatar-initials flex-shrink-0',textContent:'{{ $navInitials }}'}))">
+                    @else
+                        <span class="user-avatar-initials flex-shrink-0" aria-hidden="true">{{ $navInitials }}</span>
+                    @endif
+                    <span class="user-settings-gear-badge" aria-hidden="true"><i class="bi bi-gear-fill"></i></span>
+                </a>
+
+                <!-- Log Out Standalone Icon -->
+                <a href="/signout" class="btn btn-icon-stitch btn-logout-stitch text-decoration-none d-inline-flex align-items-center justify-content-center" id="navbarLogoutBtn" aria-label="{{ __('nav.logout', 'Log Out') }}" title="{{ __('nav.logout', 'Log Out') }}">
+                    <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+                </a>
             </div>
         </div>
     </div>
@@ -407,5 +351,36 @@
             immediateCloseMenu();
         });
     }
+})();
+
+(function() {
+    'use strict';
+    var mainNavbar = document.getElementById('mainNavbar');
+    var navCollapse = document.getElementById('navbarContent');
+    if (!mainNavbar || !navCollapse) return;
+
+    function closeMobileNav() {
+        if (!navCollapse.classList.contains('show')) return;
+        if (window.bootstrap && window.bootstrap.Collapse) {
+            window.bootstrap.Collapse.getOrCreateInstance(navCollapse, { toggle: false }).hide();
+        } else {
+            navCollapse.classList.remove('show');
+            var toggler = mainNavbar.querySelector('.navbar-toggler');
+            if (toggler) toggler.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        if (window.innerWidth >= 992) return;
+        if (navCollapse.classList.contains('show') && !mainNavbar.contains(e.target)) {
+            closeMobileNav();
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && navCollapse.classList.contains('show')) {
+            closeMobileNav();
+        }
+    });
 })();
 </script>

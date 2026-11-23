@@ -195,7 +195,7 @@ html.dark-mode .lh-action-bar {
         <!-- Left: Portrait Canvas + Live Tribute Caption -->
         <div class="col-md-5 text-center">
             <div id="heirloomStageWrap" style="position:relative; display:inline-block;">
-                <canvas id="heirloomCanvas" width="280" height="320" style="background:#1e1b18; border-radius:18px; box-shadow:0 8px 24px rgba(0,0,0,0.15); border:1px solid rgba(217,119,6,0.25); touch-action:none; max-width:100%; height:auto;"></canvas>
+                <canvas id="heirloomCanvas" width="1120" height="1280" style="width:280px; max-width:100%; height:auto; background:#1e1b18; border-radius:18px; box-shadow:0 8px 24px rgba(0,0,0,0.15); border:1px solid rgba(217,119,6,0.25); touch-action:none;"></canvas>
                 <div id="heirloomCaptionOverlay" class="d-none" style="position:absolute; left:12px; right:12px; bottom:14px; background:rgba(15,23,42,0.86); color:#ffffff; padding:8px 12px; border-radius:10px; font-size:12.5px; font-weight:600; line-height:1.35;"></div>
             </div>
             <div class="lh-hint">Move pointer or tilt phone for 2.5D parallax</div>
