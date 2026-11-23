@@ -255,6 +255,16 @@
                                     Or drag and drop a JPEG, PNG or WEBP portrait onto this card
                                 </div>
 
+                                <!-- Quick Apply & Publish Bar (Directly Under Stage for One-Tap Profile & Feed Use) -->
+                                <div class="d-grid gap-2 mt-2 pt-2 border-top" style="border-color: var(--atg-p2a-border, rgba(148,163,184,0.2)) !important;">
+                                    <button type="button" id="atgSaveLivingPortraitQuickBtn" class="atg-btn-primary btn-spin-on-click w-100" data-spin="true" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
+                                        <span>✨ Use as Profile Picture</span>
+                                    </button>
+                                    <button type="button" id="atgPostLivingPortraitQuickBtn" class="atg-btn-secondary btn-spin-on-click w-100" data-spin="true" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
+                                        <span>📣 Post to Family Feed</span>
+                                    </button>
+                                </div>
+
                                 <!-- Living Photo Expressions & Choreography Bar -->
                                 <div class="atg-p2a-expressions-wrap">
                                     <div class="atg-p2a-sublabel">Animate Your Stylised Avatar</div>
@@ -373,12 +383,15 @@
                                 </div>
                             </div>
 
-                            <!-- 3. Save as Living Profile Picture, Download HD PNG, or Sync Cartoon Palette -->
+                            <!-- 3. Save as Living Profile Picture, Post to Family Feed, Download HD PNG, or Sync Cartoon Palette -->
                             <div class="atg-p2a-panel">
-                                <div class="atg-p2a-panel-title mb-2">3. Apply or Export Your Avatar</div>
+                                <div class="atg-p2a-panel-title mb-2">3. Apply, Publish or Export Your Avatar</div>
                                 <div class="d-grid gap-2">
-                                    <button type="button" id="atgSaveLivingPortraitBtn" class="atg-btn-primary btn-spin-on-click" data-spin="true">
+                                    <button type="button" id="atgSaveLivingPortraitBtn" class="atg-btn-primary btn-spin-on-click" data-spin="true" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
                                         <span>✨ Set Avatar as Living Profile Picture</span>
+                                    </button>
+                                    <button type="button" id="atgPostLivingPortraitBtn" class="atg-btn-secondary btn-spin-on-click w-100" data-spin="true" style="min-height: 44px; white-space: nowrap; flex-shrink: 0; font-weight: 700;">
+                                        <span>📣 Post Living Photo to Family Feed</span>
                                     </button>
                                     <div class="atg-p2a-secondary-actions">
                                         <button type="button" id="atgDownloadAvatarBtn" class="atg-btn-secondary">

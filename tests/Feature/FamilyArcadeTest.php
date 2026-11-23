@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\services\FamilyArcadeCardRenderer;
 use App\services\FamilyArcadeService;
 use PDO;
 use PHPUnit\Framework\TestCase;
@@ -98,6 +99,20 @@ final class FamilyArcadeTest extends TestCase
             0
         );
         $this->assertFalse($badReversed['valid']);
+
+        // Medium KinZip board avoids corridor railroading (<= 4 walls and Dot 1 has >= 2 open exits)
+        /** @var array<string, mixed> $mediumPuzzle */
+        $mediumPuzzle = $ref->invoke(null, '2026-11-22', 'medium', true);
+        $this->assertLessThanOrEqual(4, count($mediumPuzzle['walls']));
+        $dot1 = $mediumPuzzle['checkpoints'][0];
+        $dot1Walls = 0;
+        foreach ($mediumPuzzle['walls'] as $w) {
+            if (($w[0] === $dot1['r'] && $w[1] === $dot1['c']) || ($w[2] === $dot1['r'] && $w[3] === $dot1['c'])) {
+                $dot1Walls++;
+            }
+        }
+        $dot1Borders = ($dot1['r'] === 0 ? 1 : 0) + ($dot1['r'] === 5 ? 1 : 0) + ($dot1['c'] === 0 ? 1 : 0) + ($dot1['c'] === 5 ? 1 : 0);
+        $this->assertLessThanOrEqual(2, $dot1Walls + $dot1Borders, 'Dot 1 must never be boxed into a 3-walled cup.');
     }
 
     public function testKinGridServerAuthoritativeValidation(): void
@@ -182,6 +197,14 @@ final class FamilyArcadeTest extends TestCase
         $okCheese = FamilyArcadeService::validateAndScore('cheeseboard', '2026-11-22', 'easy', ['queens' => $cheeseInternal['solutionQueens']], 30000, 0, 0);
         $this->assertTrue($okCheese['valid']);
 
+        // Chess validation test
+        $okChess = FamilyArcadeService::validateAndScore('chess', '2026-11-23', 'medium', ['winner' => 'w', 'movesCount' => 12], 90000, 0, 0);
+        $this->assertTrue($okChess['valid']);
+
+        // Ayo Olopon validation test
+        $okAyo = FamilyArcadeService::validateAndScore('ayo', '2026-11-23', 'medium', ['capturedSouth' => 26, 'capturedNorth' => 22], 85000, 0, 0);
+        $this->assertTrue($okAyo['valid']);
+
         // Minesweeper validation test
         $mineInternal = (new \ReflectionClass(FamilyArcadeService::class))
             ->getMethod('generateMinesweeperPuzzle')
@@ -231,5 +254,44 @@ final class FamilyArcadeTest extends TestCase
         $titles = array_column($badgeMap[$this->userB], 'badgeTitle');
         $this->assertContains('KinZip Grandmaster', $titles);
         $this->assertContains('Family Cup Champion', $titles);
+    }
+
+    public function testFamilyArcadeCardRendererGeneratesCrisp7GamePreviewCardsUnder300Kb(): void
+    {
+        $fontPath = FamilyArcadeCardRenderer::font('sans_bold');
+        $this->assertFileExists($fontPath, 'Bundled TrueType font must resolve for FreeType anti-aliased rendering.');
+
+        foreach (FamilyArcadeService::VALID_GAMES as $game) {
+            $profile = FamilyArcadeCardRenderer::gameProfile($game);
+            $this->assertSame($game, $profile['slug']);
+
+            $jpeg = FamilyArcadeCardRenderer::renderCardJpeg([
+                'game' => $game,
+                'difficulty' => 'medium',
+            ]);
+            $this->assertNotEmpty($jpeg, "Preview card for {$game} must not be empty.");
+            $this->assertLessThan(307200, strlen($jpeg), "Preview card for {$game} must be under WhatsApp 300 KB limit.");
+
+            $info = getimagesizefromstring($jpeg);
+            $this->assertIsArray($info);
+            $this->assertSame(1200, $info[0]);
+            $this->assertSame(630, $info[1]);
+            $this->assertSame('image/jpeg', $info['mime']);
+        }
+
+        // Verify score challenge card rendering and adversarial input fallback
+        $challengeJpeg = FamilyArcadeCardRenderer::renderCardJpeg([
+            'game' => '../../evil_path',
+            'difficulty' => 'DROP TABLE;--',
+            'score' => 1420,
+            'elapsedMs' => 34200,
+            'challengerName' => 'Wale',
+        ]);
+        $this->assertNotEmpty($challengeJpeg);
+        $this->assertLessThan(307200, strlen($challengeJpeg));
+        $info = getimagesizefromstring($challengeJpeg);
+        $this->assertIsArray($info);
+        $this->assertSame(1200, $info[0]);
+        $this->assertSame(630, $info[1]);
     }
 }

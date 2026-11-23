@@ -114,12 +114,21 @@ assertTest(
     "Route /seeProfile/[a:id] missing from app/router/allMembersRoute.php"
 );
 
-// 6. Verify accountSetting.blade.php contains show_birth_year toggle
-$accountSettingContent = file_get_contents($rootDir . '/resources/views/member/accountSetting.blade.php');
+// 6. Verify Account Settings contains show_birth_year toggle
+$accountSettingContent = (string) file_get_contents($rootDir . '/resources/views/member/accountSetting.blade.php');
+$preactDir = $rootDir . '/resources/asset/js/apps/account-settings';
+if (is_dir($preactDir)) {
+    $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($preactDir, FilesystemIterator::SKIP_DOTS));
+    foreach ($it as $file) {
+        if ($file->isFile() && preg_match('/\.(jsx?|css)$/', $file->getFilename())) {
+            $accountSettingContent .= "\n" . (string) file_get_contents($file->getPathname());
+        }
+    }
+}
 assertTest(
-    "accountSetting.blade.php has show_birth_year toggle",
+    "Account Settings has show_birth_year toggle",
     str_contains($accountSettingContent, 'name="show_birth_year"'),
-    "name=\"show_birth_year\" toggle not found in accountSetting.blade.php"
+    "name=\"show_birth_year\" toggle not found in Account Settings"
 );
 
 echo "\n-----------------------------------------------------------------\n";

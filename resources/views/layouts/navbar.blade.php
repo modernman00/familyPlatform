@@ -320,7 +320,7 @@
     </div>
 </nav>
 
-<script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
     'use strict';
     var navItem = document.getElementById('creativeStudioNavItem');

@@ -55,6 +55,14 @@ export const CommentThread = memo(function CommentThread({
 
     const [draft, setDraft] = useState('');
     const [replyingTo, setReplyingTo] = useState(null);
+    const [replyDraft, setReplyDraft] = useState('');
+    const [replySubmitting, setReplySubmitting] = useState(false);
+    const [replyAttachedFile, setReplyAttachedFile] = useState(null);
+    const [replyAttachedPreviewUrl, setReplyAttachedPreviewUrl] = useState('');
+    const [replySelectedGifUrl, setReplySelectedGifUrl] = useState('');
+    const [replySelectedSticker, setReplySelectedSticker] = useState(null);
+    const [replySelectedLivingEmojis, setReplySelectedLivingEmojis] = useState([]);
+    const [replyPickerTab, setReplyPickerTab] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [editText, setEditText] = useState('');
@@ -65,11 +73,13 @@ export const CommentThread = memo(function CommentThread({
     const [attachedPreviewUrl, setAttachedPreviewUrl] = useState('');
     const [selectedGifUrl, setSelectedGifUrl] = useState('');
     const [selectedSticker, setSelectedSticker] = useState(null);
+    const [selectedLivingEmojis, setSelectedLivingEmojis] = useState([]);
     const [pickerTab, setPickerTab] = useState(null); // null | 'standard' | 'living' | 'me' | 'gif'
     const [mentionQuery, setMentionQuery] = useState('');
     const [mentionIndex, setMentionIndex] = useState(0);
     const [brokenAvatars, setBrokenAvatars] = useState({});
     const inputRef = useRef(null);
+    const replyInputRef = useRef(null);
     const reactCloseTimerRef = useRef(null);
 
     useEffect(() => () => {
@@ -94,13 +104,40 @@ export const CommentThread = memo(function CommentThread({
         };
     }, [attachedFile]);
 
+    useEffect(() => {
+        if (!replyAttachedFile || typeof URL === 'undefined' || typeof URL.createObjectURL !== 'function') {
+            setReplyAttachedPreviewUrl('');
+            return undefined;
+        }
+        if (!String(replyAttachedFile.type || '').startsWith('image/')) {
+            setReplyAttachedPreviewUrl('');
+            return undefined;
+        }
+        const objectUrl = URL.createObjectURL(replyAttachedFile);
+        setReplyAttachedPreviewUrl(objectUrl);
+        return () => {
+            if (typeof URL.revokeObjectURL === 'function') {
+                URL.revokeObjectURL(objectUrl);
+            }
+        };
+    }, [replyAttachedFile]);
+
     const rootComments = comments.filter((c) => !c.parent_comment_no);
     const repliesFor = (rootNo) =>
         comments.filter((c) => String(c.parent_comment_no) === String(rootNo));
 
     const handleDraftChange = (value) => {
-        setDraft(value);
-        const match = value.match(/@([A-Za-z0-9_.-]{1,24})$/);
+        const extracted = [];
+        const cleaned = String(value || '').replace(/:([a-z0-9_]+_3d):/gi, (_, id) => {
+            extracted.push(id.toLowerCase());
+            return '';
+        });
+        if (extracted.length > 0) {
+            setSelectedLivingEmojis((prev) => [...prev, ...extracted]);
+        }
+        const nextVal = extracted.length > 0 ? cleaned.replace(/^\s+/, '') : value;
+        setDraft(nextVal);
+        const match = nextVal.match(/@([A-Za-z0-9_.-]{1,24})$/);
         setMentionQuery(match ? match[1].toLowerCase() : '');
         setMentionIndex(0);
     };
@@ -140,8 +177,147 @@ export const CommentThread = memo(function CommentThread({
         }
     };
 
+    const hasSubmittableReplyContent = Boolean(
+        replyDraft.trim() || replyAttachedFile || replySelectedGifUrl || replySelectedSticker || replySelectedLivingEmojis.length > 0
+    );
+
+    const handleReplyDraftChange = (value) => {
+        const extracted = [];
+        const cleaned = String(value || '').replace(/:([a-z0-9_]+_3d):/gi, (_, id) => {
+            extracted.push(id.toLowerCase());
+            return '';
+        });
+        if (extracted.length > 0) {
+            setReplySelectedLivingEmojis((prev) => [...prev, ...extracted]);
+        }
+        setReplyDraft(extracted.length > 0 ? cleaned.replace(/^\s+/, '') : value);
+    };
+
+    const handleOpenInlineReply = (targetComment) => {
+        setReplyingTo(targetComment);
+        setReplyDraft('');
+        setReplyAttachedFile(null);
+        setReplySelectedGifUrl('');
+        setReplySelectedSticker(null);
+        setReplySelectedLivingEmojis([]);
+        setReplyPickerTab(null);
+        setTimeout(() => replyInputRef.current?.focus(), 20);
+    };
+
+    const handleCancelInlineReply = () => {
+        setReplyingTo(null);
+        setReplyDraft('');
+        setReplyAttachedFile(null);
+        setReplySelectedGifUrl('');
+        setReplySelectedSticker(null);
+        setReplySelectedLivingEmojis([]);
+        setReplyPickerTab(null);
+    };
+
+    const handleInlineReplySubmit = async (e) => {
+        e.preventDefault();
+        if (!replyingTo || !hasSubmittableReplyContent || replySubmitting) return;
+
+        let text = replyDraft.trim();
+        if (replySelectedLivingEmojis.length > 0) {
+            const livingTokens = replySelectedLivingEmojis.map((id) => `:${id}:`).join(' ');
+            text = text ? `${text} ${livingTokens}` : livingTokens;
+        }
+        if (replySelectedSticker?.token) {
+            text = text ? `${text} ${replySelectedSticker.token}` : replySelectedSticker.token;
+        }
+
+        const tempId = `temp_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+        const first = bootstrap?.firstName || 'You';
+        const last = bootstrap?.lastName || '';
+        const rootParentId = String(replyingTo.parent_comment_no || replyingTo.comment_no);
+        const optimisticComment = {
+            comment_no: tempId,
+            post_no: String(post.post_no),
+            id: currentUserId,
+            firstName: first,
+            lastName: last,
+            fullName: `${first} ${last}`.trim(),
+            profileImg: bootstrap?.avatar || '',
+            comment: text,
+            gif_url: replySelectedGifUrl || '',
+            parent_comment_no: rootParentId,
+            reactions: [],
+            user_reaction: null,
+            date_created: new Date().toISOString(),
+            _optimistic: true,
+            _clientKey: tempId,
+        };
+
+        const previousComments = [...comments];
+        onMutateComments(post.post_no, [...previousComments, optimisticComment]);
+        setExpandedThreads((prev) => ({ ...prev, [rootParentId]: true }));
+
+        const prevDraft = replyDraft;
+        const replyTarget = replyingTo;
+        const fileToSend = replyAttachedFile;
+        const gifToSend = replySelectedGifUrl;
+        const stickerToSend = replySelectedSticker;
+        const livingToSend = [...replySelectedLivingEmojis];
+
+        setReplyDraft('');
+        setReplyAttachedFile(null);
+        setReplySelectedGifUrl('');
+        setReplySelectedSticker(null);
+        setReplySelectedLivingEmojis([]);
+        setReplyPickerTab(null);
+        setReplyingTo(null);
+        setReplySubmitting(true);
+
+        try {
+            const formData = new FormData();
+            formData.append('post_no', String(post.post_no));
+            formData.append('comment', text);
+            formData.append('parent_comment_no', rootParentId);
+            if (fileToSend) {
+                formData.append('comment_media', fileToSend);
+            }
+            if (gifToSend && isAllowedGifUrl(gifToSend)) {
+                formData.append('gif_url', gifToSend);
+            }
+
+            const res = await apiFetch('/postCommentProfile', {
+                method: 'POST',
+                body: formData,
+                timeoutMs: 45000,
+            }, bootstrap);
+
+            const serverComment = res?.message && typeof res.message === 'object' ? res.message : null;
+            if (serverComment) {
+                onMutateComments(
+                    post.post_no,
+                    [
+                        ...previousComments,
+                        {
+                            ...optimisticComment,
+                            ...serverComment,
+                            gif_url: serverComment.gif_url || gifToSend || '',
+                            comment_no: String(serverComment.comment_no || tempId),
+                            _optimistic: false,
+                        },
+                    ]
+                );
+            }
+        } catch (err) {
+            onMutateComments(post.post_no, previousComments);
+            setReplyingTo(replyTarget);
+            setReplyDraft(prevDraft);
+            setReplySelectedGifUrl(gifToSend);
+            setReplySelectedSticker(stickerToSend);
+            setReplySelectedLivingEmojis(livingToSend);
+            notifyToast(err?.message || 'Could not post reply. Please try again.', 'error');
+        } finally {
+            setReplySubmitting(false);
+        }
+    };
+
     const hasSubmittableContent = Boolean(
-        draft.trim() || attachedFile || selectedGifUrl || selectedSticker
+        draft.trim() || attachedFile || selectedGifUrl || selectedSticker || selectedLivingEmojis.length > 0
     );
 
     const handleSubmit = async (e) => {
@@ -149,6 +325,10 @@ export const CommentThread = memo(function CommentThread({
         if (!hasSubmittableContent || submitting) return;
 
         let text = draft.trim();
+        if (selectedLivingEmojis.length > 0) {
+            const livingTokens = selectedLivingEmojis.map((id) => `:${id}:`).join(' ');
+            text = text ? `${text} ${livingTokens}` : livingTokens;
+        }
         if (selectedSticker?.token) {
             text = text ? `${text} ${selectedSticker.token}` : selectedSticker.token;
         }
@@ -185,6 +365,7 @@ export const CommentThread = memo(function CommentThread({
         const fileToSend = attachedFile;
         const gifToSend = selectedGifUrl;
         const stickerToSend = selectedSticker;
+        const livingToSend = [...selectedLivingEmojis];
 
         setDraft('');
         setMentionQuery('');
@@ -192,6 +373,7 @@ export const CommentThread = memo(function CommentThread({
         setAttachedFile(null);
         setSelectedGifUrl('');
         setSelectedSticker(null);
+        setSelectedLivingEmojis([]);
         setPickerTab(null);
         setSubmitting(true);
 
@@ -237,6 +419,7 @@ export const CommentThread = memo(function CommentThread({
             setReplyingTo(replyTarget);
             setSelectedGifUrl(gifToSend);
             setSelectedSticker(stickerToSend);
+            setSelectedLivingEmojis(livingToSend);
             notifyToast(err?.message || 'Could not post comment. Please try again.', 'error');
         } finally {
             setSubmitting(false);
@@ -547,10 +730,7 @@ export const CommentThread = memo(function CommentThread({
                             data-testid="comment-reply-btn"
                             className="btn btn-link btn-sm p-0 text-decoration-none fw-semibold text-muted"
                             style={{ fontSize: '0.78rem', minHeight: '44px' }}
-                            onClick={() => {
-                                setReplyingTo(comment);
-                                inputRef.current?.focus();
-                            }}
+                            onClick={() => handleOpenInlineReply(comment)}
                         >
                             Reply
                         </button>
@@ -599,6 +779,193 @@ export const CommentThread = memo(function CommentThread({
                             );
                         })()}
                     </div>
+
+                    {/* Inline Reply Composer directly below the comment being replied to */}
+                    {String(replyingTo?.comment_no || '') === String(comment.comment_no) && (
+                        <div className="mt-2 position-relative" data-testid="inline-reply-composer">
+                            <div className="d-flex align-items-center justify-content-between mb-1 ps-1">
+                                <span className="small text-muted" data-testid="comment-replying-to">
+                                    Replying to <strong>{comment.fullName || `${comment.firstName} ${comment.lastName}`}</strong>
+                                </span>
+                                <button
+                                    type="button"
+                                    className="btn btn-link btn-sm text-muted p-0 text-decoration-none fw-semibold"
+                                    style={{ minHeight: '44px', fontSize: '0.78rem' }}
+                                    onClick={handleCancelInlineReply}
+                                    aria-label="Cancel reply"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+
+                            {replyPickerTab && (
+                                <EmojiGifPicker
+                                    initialTab={replyPickerTab}
+                                    onSelectEmoji={(em) => {
+                                        setReplyDraft((prev) => `${prev}${em}`);
+                                        replyInputRef.current?.focus();
+                                    }}
+                                    onSelectLivingEmoji={(emojiId) => {
+                                        if (emojiId && /^[a-z0-9_]+_3d$/i.test(emojiId)) {
+                                            setReplySelectedLivingEmojis((prev) => [...prev, emojiId]);
+                                        }
+                                        setReplyPickerTab(null);
+                                        replyInputRef.current?.focus();
+                                    }}
+                                    onSelectMeSticker={(st) => {
+                                        setReplySelectedSticker(st);
+                                        setReplyPickerTab(null);
+                                        replyInputRef.current?.focus();
+                                    }}
+                                    onSelectGif={(url) => {
+                                        if (isAllowedGifUrl(url)) {
+                                            setReplySelectedGifUrl(url);
+                                            setReplyPickerTab(null);
+                                        }
+                                    }}
+                                    onClose={() => setReplyPickerTab(null)}
+                                />
+                            )}
+
+                            <form onSubmit={handleInlineReplySubmit} className="comment-composer">
+                                <input type="hidden" name="token" value={getCsrfToken(bootstrap)} />
+                                <div className="comment-composer__field">
+                                    {(replySelectedGifUrl || replySelectedSticker || replySelectedLivingEmojis.length > 0 || replyAttachedFile) && (
+                                        <div className="comment-composer__attachments">
+                                            {replySelectedLivingEmojis.map((emojiId, idx) => (
+                                                <div key={`${emojiId}_${idx}`} className="comment-composer__preview-chip comment-composer__sticker">
+                                                    <img
+                                                        src={`/public/img/emoji/${emojiId}.svg?v=20261107a`}
+                                                        alt={`Living emoji: ${emojiId.replace(/_3d$/i, '').replace(/_/g, ' ')}`}
+                                                        width="48"
+                                                        height="48"
+                                                        style={{ display: 'block', width: '48px', height: '48px', borderRadius: '10px', objectFit: 'contain' }}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="comment-composer__preview-remove"
+                                                        aria-label="Remove living emoji"
+                                                        onClick={() => setReplySelectedLivingEmojis((prev) => prev.filter((_, i) => i !== idx))}
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            {replySelectedGifUrl && (
+                                                <div className="comment-composer__preview-chip">
+                                                    <img src={replySelectedGifUrl} alt="Selected GIF" className="comment-composer__preview-media" />
+                                                    <button
+                                                        type="button"
+                                                        className="comment-composer__preview-remove"
+                                                        aria-label="Remove GIF"
+                                                        onClick={() => setReplySelectedGifUrl('')}
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            )}
+                                            {replySelectedSticker && (
+                                                <div className="comment-composer__preview-chip comment-composer__sticker">
+                                                    <img
+                                                        src={replySelectedSticker.url}
+                                                        alt={`My avatar: ${replySelectedSticker.label}`}
+                                                        width="56"
+                                                        height="56"
+                                                        style={{ display: 'block', width: '56px', height: '56px', borderRadius: '10px', objectFit: 'contain' }}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="comment-composer__preview-remove"
+                                                        aria-label="Remove sticker"
+                                                        onClick={() => setReplySelectedSticker(null)}
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            )}
+                                            {replyAttachedFile && (
+                                                <div className="comment-composer__preview-chip">
+                                                    {replyAttachedPreviewUrl ? (
+                                                        <img src={replyAttachedPreviewUrl} alt={replyAttachedFile.name || 'Attached image'} className="comment-composer__preview-media" />
+                                                    ) : (
+                                                        <span className="comment-composer__preview-name">
+                                                            <i className="bi bi-paperclip me-1" aria-hidden="true" />
+                                                            {replyAttachedFile.name}
+                                                        </span>
+                                                    )}
+                                                    <button
+                                                        type="button"
+                                                        className="comment-composer__preview-remove"
+                                                        aria-label="Remove attachment"
+                                                        onClick={() => setReplyAttachedFile(null)}
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    <div className="comment-composer__row">
+                                        <input
+                                            ref={replyInputRef}
+                                            type="text"
+                                            required={!hasSubmittableReplyContent}
+                                            className="comment-composer__input"
+                                            placeholder={`Reply to ${comment.firstName || comment.fullName || 'comment'}...`}
+                                            aria-label="Write a reply"
+                                            value={replyDraft}
+                                            onInput={(e) => handleReplyDraftChange(e.target.value)}
+                                        />
+                                        <div className="comment-composer__tools">
+                                            <label className="comment-composer__tool mb-0" title="Attach Photo or Video" aria-label="Attach photo or video to reply">
+                                                <i className="bi bi-camera" aria-hidden="true" />
+                                                <input
+                                                    type="file"
+                                                    accept="image/*,video/*"
+                                                    style={{ display: 'none' }}
+                                                    onChange={(e) => setReplyAttachedFile(e.target.files?.[0] || null)}
+                                                />
+                                            </label>
+                                            <button
+                                                type="button"
+                                                className="comment-composer__tool"
+                                                aria-label="Add emoji to reply"
+                                                aria-expanded={replyPickerTab === 'standard' || replyPickerTab === 'living' || replyPickerTab === 'me'}
+                                                title="Add Emoji"
+                                                onClick={() => setReplyPickerTab((t) => (t && t !== 'gif' ? null : 'standard'))}
+                                            >
+                                                <i className="bi bi-emoji-smile" aria-hidden="true" />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="comment-composer__tool"
+                                                aria-label="Add GIF to reply"
+                                                aria-expanded={replyPickerTab === 'gif'}
+                                                title="Add Family GIF"
+                                                onClick={() => setReplyPickerTab((t) => (t === 'gif' ? null : 'gif'))}
+                                            >
+                                                <i className="bi bi-filetype-gif" aria-hidden="true" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button
+                                    type="submit"
+                                    className={`comment-composer__send ${hasSubmittableReplyContent ? 'is-active' : ''}`}
+                                    aria-label="Send reply"
+                                    title="Post reply"
+                                    disabled={replySubmitting || !hasSubmittableReplyContent}
+                                >
+                                    {replySubmitting ? (
+                                        <span className="st-spinner-border" role="status" aria-hidden="true" />
+                                    ) : (
+                                        <i className="bi bi-send-fill" aria-hidden="true" />
+                                    )}
+                                </button>
+                            </form>
+                        </div>
+                    )}
                 </div>
             </div>
         );
@@ -614,29 +981,6 @@ export const CommentThread = memo(function CommentThread({
         <div className="comments-section pt-2" style={{ overflow: 'visible' }}>
             {isExpanded && (
                 <div className="mb-3 position-relative" style={{ overflow: 'visible' }}>
-                    <div
-                        className={`comment-reply-banner ${replyingTo ? '' : 'd-none'}`}
-                        data-testid="comment-replying-to"
-                        style={replyingTo ? undefined : { display: 'none' }}
-                    >
-                        {replyingTo && (
-                            <>
-                                <span>
-                                    Replying to <strong>{replyingTo.fullName || `${replyingTo.firstName} ${replyingTo.lastName}`}</strong>
-                                </span>
-                                <button
-                                    type="button"
-                                    className="btn btn-link btn-sm text-muted p-0 text-decoration-none d-inline-flex align-items-center justify-content-center"
-                                    style={{ minWidth: '44px', minHeight: '44px' }}
-                                    onClick={() => setReplyingTo(null)}
-                                    aria-label="Cancel reply"
-                                >
-                                    ✕
-                                </button>
-                            </>
-                        )}
-                    </div>
-
                     {mentionMatches.length > 0 && (
                         <div className="mention-autocomplete shadow-md mb-2" role="listbox" aria-label="Mention family member">
                             <div className="mention-autocomplete__list">
@@ -664,10 +1008,9 @@ export const CommentThread = memo(function CommentThread({
                                 inputRef.current?.focus();
                             }}
                             onSelectLivingEmoji={(emojiId) => {
-                                setDraft((prev) => {
-                                    const sep = prev && !/\s$/.test(prev) ? ' ' : '';
-                                    return `${prev}${sep}:${emojiId}: `;
-                                });
+                                if (emojiId && /^[a-z0-9_]+_3d$/i.test(emojiId)) {
+                                    setSelectedLivingEmojis((prev) => [...prev, emojiId]);
+                                }
                                 setPickerTab(null);
                                 inputRef.current?.focus();
                             }}
@@ -689,8 +1032,38 @@ export const CommentThread = memo(function CommentThread({
                     <form onSubmit={handleSubmit} className="comment-composer">
                         <input type="hidden" name="token" value={getCsrfToken(bootstrap)} />
                         <div className="comment-composer__field">
-                            {(selectedGifUrl || selectedSticker || attachedFile) && (
+                            {(selectedGifUrl || selectedSticker || selectedLivingEmojis.length > 0 || attachedFile) && (
                                 <div className="comment-composer__attachments">
+                                    {selectedLivingEmojis.map((emojiId, idx) => (
+                                        <div
+                                            key={`${emojiId}_${idx}`}
+                                            className="comment-composer__preview-chip comment-composer__sticker"
+                                            data-testid="comment-living-emoji-preview"
+                                        >
+                                            <img
+                                                src={`/public/img/emoji/${emojiId}.svg?v=20261107a`}
+                                                onError={(e) => {
+                                                    if (!e.currentTarget.dataset.fb) {
+                                                        e.currentTarget.dataset.fb = '1';
+                                                        e.currentTarget.src = `/img/emoji/${emojiId}.svg?v=20261107a`;
+                                                    }
+                                                }}
+                                                alt={`Living emoji: ${emojiId.replace(/_3d$/i, '').replace(/_/g, ' ')}`}
+                                                width="52"
+                                                height="52"
+                                                style={{ display: 'block', width: '52px', height: '52px', borderRadius: '10px', objectFit: 'contain' }}
+                                            />
+                                            <button
+                                                type="button"
+                                                className="comment-composer__preview-remove"
+                                                aria-label="Remove living emoji"
+                                                onClick={() => setSelectedLivingEmojis((prev) => prev.filter((_, i) => i !== idx))}
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ))}
+
                                     {selectedGifUrl && (
                                         <div className="comment-composer__preview-chip" data-testid="comment-gif-preview">
                                             <img
@@ -762,7 +1135,7 @@ export const CommentThread = memo(function CommentThread({
                                     type="text"
                                     required={!hasSubmittableContent}
                                     className="comment-composer__input"
-                                    placeholder={replyingTo ? `Reply to ${replyingTo.firstName || replyingTo.fullName || 'comment'}...` : 'Write a comment...'}
+                                    placeholder="Write a comment..."
                                     aria-label="Write a comment"
                                     value={draft}
                                     onInput={(e) => handleDraftChange(e.target.value)}

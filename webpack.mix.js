@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const mix = require('laravel-mix');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -10,14 +11,27 @@ mix
   .js('resources/asset/js/apps/organogram/index.jsx', 'js/organogram-app.js')
   .js('resources/asset/js/apps/feed/index.jsx', 'js/feed-app.js')
   .js('resources/asset/js/apps/profile/index.jsx', 'js/profile-app.js')
-  .js('resources/asset/js/apps/arcade/index.jsx', 'js/arcade-app.js')
+  .js('resources/asset/js/apps/arcade/index.jsx', 'js/arcade-app.js');
+
+if (fs.existsSync(path.resolve(__dirname, 'resources/asset/js/apps/account-settings/index.jsx'))) {
+  mix.js('resources/asset/js/apps/account-settings/index.jsx', 'js/account-settings-app.js');
+}
+
+mix
   .sass('resources/asset/scss/main.scss', 'css')
   .options({
     legacyNodePolyfills: true,
     processCssUrls: false,
     progress: false
   })
-  .extract();
+  .extract((module) => {
+    const name = module.nameForCondition && module.nameForCondition();
+    if (!name || !/[\\/]node_modules[\\/]/.test(name)) return false;
+    if (/[\\/]node_modules[\\/](three|hls\.js|gsap|emojibase-data)[\\/]/.test(name)) {
+      return false;
+    }
+    return true;
+  });
 
 const devtool = mix.inProduction()
   ? false
@@ -55,10 +69,6 @@ mix.webpackConfig((webpack, config) => {
         maxInitialRequests: 30,
         enforceSizeThreshold: 50000,
         cacheGroups: {
-          defaultVendors: {
-            test: /[\\/]node_modules[\\/]/,
-            priority: -10,
-          },
           default: {
             minChunks: 2,
             priority: -20,
@@ -145,4 +155,14 @@ mix.override((config) => {
     plugin.constructor.name !== 'ProgressPlugin' && 
     plugin.constructor.name !== 'WebpackBarPlugin'
   );
+  // Only extract synchronously-imported node_modules into the global vendor.js chunk.
+  // Dynamically imported heavy engines (three, hls.js, emojibase-data) stay in on-demand async chunks.
+  const cacheGroups = config.optimization?.splitChunks?.cacheGroups;
+  if (cacheGroups) {
+    Object.keys(cacheGroups).forEach((key) => {
+      if (key.startsWith('vendor') || key === 'defaultVendors') {
+        cacheGroups[key].chunks = 'initial';
+      }
+    });
+  }
 });

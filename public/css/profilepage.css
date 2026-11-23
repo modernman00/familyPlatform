@@ -3527,6 +3527,10 @@ video.feed-post-video::-webkit-media-controls-play-button,
   border-radius: var(--radius-lg, 22px);
   padding: var(--space-5, 22px) var(--space-4, 20px) var(--space-4, 18px);
   color: #ffffff;
+  background:
+    radial-gradient(circle at 16% 20%, rgba(56, 189, 248, 0.38) 0%, transparent 50%),
+    radial-gradient(circle at 84% 82%, rgba(99, 102, 241, 0.36) 0%, transparent 54%),
+    linear-gradient(135deg, #0f172a 0%, #1e1b4b 52%, #082f49 100%);
   translate: 0px;
   rotate: 0deg;
   scale: 1;
@@ -3579,7 +3583,8 @@ video.feed-post-video::-webkit-media-controls-play-button,
 }
 
 /* 5. Standard Live 3D Family Poll (Sapphire & Cyan Holographic Stage) */
-.fp-poll-arena--cyber_poll {
+.fp-poll-arena--cyber_poll,
+.fp-poll-arena--default_poll {
   background:
     radial-gradient(circle at 16% 20%, rgba(56, 189, 248, 0.38) 0%, transparent 50%),
     radial-gradient(circle at 84% 82%, rgba(99, 102, 241, 0.36) 0%, transparent 54%),

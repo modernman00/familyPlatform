@@ -7,28 +7,71 @@
 <script nonce="{{ csp_nonce($nonce ?? null) }}" src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
   .swal2-popup.swal2-toast {
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
-    border: 1px solid rgba(229, 231, 235, 0.8) !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.14), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid rgba(226, 232, 240, 0.95) !important;
     border-radius: 1rem !important;
     font-family: inherit !important;
   }
   .swal2-popup.swal2-modal {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
     border-radius: 1.25rem !important;
     padding: 1.75rem !important;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
     border: 1px solid rgba(229, 231, 235, 0.9) !important;
     font-family: inherit !important;
   }
-  .dark .swal2-popup.swal2-modal {
-    background-color: #1e1e1e !important;
-    color: #f3f4f6 !important;
-    border-color: #333333 !important;
+  .swal2-popup.swal2-toast .swal2-title,
+  .swal2-popup.swal2-modal .swal2-title {
+    color: #0f172a !important;
+    display: block !important;
+    opacity: 1 !important;
   }
-  .dark .swal2-title {
+  .swal2-popup.swal2-toast .swal2-html-container,
+  .swal2-popup.swal2-modal .swal2-html-container {
+    color: #475569 !important;
+  }
+  .dark .swal2-popup.swal2-modal,
+  .dark .swal2-popup.swal2-toast,
+  html.dark .swal2-popup.swal2-modal,
+  html.dark .swal2-popup.swal2-toast,
+  html.dark-mode .swal2-popup.swal2-modal,
+  html.dark-mode .swal2-popup.swal2-toast,
+  body.dark-mode .swal2-popup.swal2-modal,
+  body.dark-mode .swal2-popup.swal2-toast,
+  body.dark-theme .swal2-popup.swal2-modal,
+  body.dark-theme .swal2-popup.swal2-toast,
+  [data-bs-theme="dark"] .swal2-popup.swal2-modal,
+  [data-bs-theme="dark"] .swal2-popup.swal2-toast {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+  }
+  .dark .swal2-popup .swal2-title,
+  html.dark .swal2-popup .swal2-title,
+  html.dark-mode .swal2-popup .swal2-title,
+  body.dark-mode .swal2-popup .swal2-title,
+  body.dark-theme .swal2-popup .swal2-title,
+  [data-bs-theme="dark"] .swal2-popup .swal2-title {
     color: #ffffff !important;
   }
-  .dark .swal2-html-container {
-    color: #9ca3af !important;
+  .dark .swal2-popup .swal2-html-container,
+  html.dark .swal2-popup .swal2-html-container,
+  html.dark-mode .swal2-popup .swal2-html-container,
+  body.dark-mode .swal2-popup .swal2-html-container,
+  body.dark-theme .swal2-popup .swal2-html-container,
+  [data-bs-theme="dark"] .swal2-popup .swal2-html-container {
+    color: #cbd5e1 !important;
+  }
+  .dark .swal2-popup .swal2-timer-progress-bar,
+  html.dark .swal2-popup .swal2-timer-progress-bar,
+  html.dark-mode .swal2-popup .swal2-timer-progress-bar,
+  body.dark-mode .swal2-popup .swal2-timer-progress-bar,
+  body.dark-theme .swal2-popup .swal2-timer-progress-bar,
+  [data-bs-theme="dark"] .swal2-popup .swal2-timer-progress-bar {
+    background: rgba(248, 250, 252, 0.45) !important;
   }
   .swal2-actions button {
     min-height: 44px !important;

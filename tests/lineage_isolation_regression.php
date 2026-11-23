@@ -156,9 +156,18 @@ try {
 // ─────────────────────────────────────────────────────────────
 echo "\nGATE 5 — Blade template lineage picker\n";
 
-$bladeSrc = file_get_contents(
+$bladeSrc = (string) file_get_contents(
     __DIR__ . '/../resources/views/member/accountSetting.blade.php'
 );
+$preactDir = __DIR__ . '/../resources/asset/js/apps/account-settings';
+if (is_dir($preactDir)) {
+    $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($preactDir, FilesystemIterator::SKIP_DOTS));
+    foreach ($it as $file) {
+        if ($file->isFile() && preg_match('/\.(jsx?|css)$/', $file->getFilename())) {
+            $bladeSrc .= "\n" . (string) file_get_contents($file->getPathname());
+        }
+    }
+}
 
 $bladeChecks = [
     'hasMaternalCode variable set'           => str_contains($bladeSrc, 'hasMaternalCode'),

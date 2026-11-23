@@ -136,7 +136,7 @@ export function getPollArenaMeta(post) {
         };
     }
     return {
-        theme: 'default_poll',
+        theme: 'cyber_poll',
         badge: '📊 FAMILY POLL',
         subtitle: 'Cast your vote to see live family results.',
     };

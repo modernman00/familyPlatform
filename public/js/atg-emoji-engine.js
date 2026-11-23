@@ -475,7 +475,9 @@
                     this.classList.remove('atg-emoji-pop');
                     void this.offsetWidth;
                     this.classList.add('atg-emoji-pop');
-                    if (navigator.vibrate) navigator.vibrate(12);
+                    if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) {
+                try { navigator.vibrate(12); } catch (_) { /* unsupported */ }
+            }
                     const emojiTitle = this.dataset.emojiTitle || emojiId;
 
                     // Copy shortcode to clipboard
@@ -1098,12 +1100,23 @@
                 });
             }
 
-            const saveLivingBtn = document.getElementById('atgSaveLivingPortraitBtn');
-            if (saveLivingBtn) {
-                saveLivingBtn.addEventListener('click', function () {
-                    self.saveLivingPhotoAvatar(this);
-                });
-            }
+            ['atgSaveLivingPortraitBtn', 'atgSaveLivingPortraitQuickBtn'].forEach(id => {
+                const saveLivingBtn = document.getElementById(id);
+                if (saveLivingBtn) {
+                    saveLivingBtn.addEventListener('click', function () {
+                        self.saveLivingPhotoAvatar(this);
+                    });
+                }
+            });
+
+            ['atgPostLivingPortraitBtn', 'atgPostLivingPortraitQuickBtn'].forEach(id => {
+                const postLivingBtn = document.getElementById(id);
+                if (postLivingBtn) {
+                    postLivingBtn.addEventListener('click', function () {
+                        self.postLivingPhotoToFeed(this);
+                    });
+                }
+            });
 
             if (!pr.raf) {
                 const startT = performance.now();
@@ -1798,7 +1811,9 @@
                 statusEl.textContent = statusLabels[key];
             }
 
-            if (navigator.vibrate) navigator.vibrate(12);
+            if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) {
+                try { navigator.vibrate(12); } catch (_) { /* unsupported */ }
+            }
 
             const layer = document.getElementById('atgPhotoReactLayer');
             if (!layer) return;
@@ -2163,6 +2178,152 @@
                     alert('Error: ' + err.message);
                 }
             });
+        },
+
+        /**
+         * Publish the current stylised Living Photo portrait directly to the Family Feed
+         * (with an editable caption and high-resolution 512x576 PNG attachment).
+         */
+        postLivingPhotoToFeed: async function (btn) {
+            const pr = this.photoRig;
+            if (!pr.img) {
+                this.loadDefaultPhotoPortrait();
+            }
+
+            const sourceForPost = pr.stylisedHighRes || pr.img;
+            if (!sourceForPost) {
+                this.motionToast('Please choose or capture a photo first.', 'warning');
+                return;
+            }
+
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = 512;
+            exportCanvas.height = 576;
+            const ectx = exportCanvas.getContext('2d');
+            ectx.drawImage(sourceForPost, 0, 0, 512, 576);
+
+            let previewDataUrl = '';
+            try {
+                previewDataUrl = exportCanvas.toDataURL('image/png');
+            } catch (e) {
+                this.loadDefaultPhotoPortrait();
+                ectx.drawImage(pr.stylisedHighRes || pr.img, 0, 0, 512, 576);
+                previewDataUrl = exportCanvas.toDataURL('image/png');
+            }
+
+            const styleKey = pr.style || 'illustrated_comic';
+            const activeCard = document.querySelector(`.atg-style-card[data-avatar-style="${styleKey}"] .atg-style-name`);
+            const styleLabel = activeCard
+                ? activeCard.textContent.trim()
+                : ((this.photoStyleLabels && this.photoStyleLabels[styleKey]) || 'Living Avatar');
+
+            let caption = `✨ Just created my new ${styleLabel} Living Photo in the FamilyPlatform Avatar Studio! #LivingAvatar`;
+
+            if (window.Swal && typeof window.Swal.fire === 'function') {
+                const promptRes = await window.Swal.fire({
+                    title: 'Post Living Photo to Family Feed',
+                    html: `
+                        <div class="text-start">
+                            <div class="d-flex justify-content-center mb-3">
+                                <img src="${previewDataUrl}" alt="Living Photo preview" style="width: 148px; height: 166px; object-fit: cover; border-radius: 14px; border: 2px solid #a31621; box-shadow: 0 8px 20px rgba(15,23,42,0.18);">
+                            </div>
+                            <label for="atgLivingPhotoPostCaption" class="form-label fw-bold small mb-1">Add a caption for your family:</label>
+                            <textarea id="atgLivingPhotoPostCaption" class="form-control" rows="3" maxlength="500" style="border-radius: 12px; font-size: 0.9rem;">${caption}</textarea>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonColor: '#a31621',
+                    confirmButtonText: '📣 Publish to Family Feed',
+                    cancelButtonText: 'Cancel',
+                    preConfirm: () => {
+                        const el = document.getElementById('atgLivingPhotoPostCaption');
+                        return el ? el.value.trim() : caption;
+                    }
+                });
+                if (!promptRes.isConfirmed) {
+                    return;
+                }
+                if (typeof promptRes.value === 'string' && promptRes.value.trim() !== '') {
+                    caption = promptRes.value.trim();
+                }
+            }
+
+            if (window.ScoreTenantSpinner && btn) {
+                window.ScoreTenantSpinner.start(btn);
+            }
+            const stopSpinner = () => {
+                if (window.ScoreTenantSpinner && btn) window.ScoreTenantSpinner.stop(btn);
+                if (window.FamilyPlatformSpinner && btn) window.FamilyPlatformSpinner.stop(btn);
+            };
+
+            try {
+                const blob = await new Promise(resolve => exportCanvas.toBlob(resolve, 'image/png'));
+                if (!blob) {
+                    throw new Error('Could not prepare Living Photo image file.');
+                }
+
+                const csrfToken = document.querySelector('input[name="token"]')?.value ||
+                                  document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const file = new File([blob], `living-photo-${styleKey}-${Date.now()}.png`, { type: 'image/png' });
+
+                const formData = new FormData();
+                formData.append('postMessage', caption);
+                formData.append('post_img[]', file);
+                if (csrfToken) {
+                    formData.append('token', csrfToken);
+                    formData.append('csrf_token', csrfToken);
+                }
+
+                const resp = await fetch('/member/profilePage/post', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
+                    },
+                    body: formData
+                });
+
+                const payload = await resp.json().catch(() => ({}));
+                stopSpinner();
+
+                if (!resp.ok || payload.status === 'error') {
+                    throw new Error(payload.message || payload.error || 'Could not publish Living Photo to feed.');
+                }
+
+                const postObj = (payload.message && typeof payload.message === 'object') ? payload.message : payload;
+                const postNo = postObj && (postObj.post_no || postObj.postNo) ? (postObj.post_no || postObj.postNo) : '';
+                const feedUrl = '/member/profilePage' + (postNo ? '#post' + postNo : '');
+
+                if (window.Swal && typeof window.Swal.fire === 'function') {
+                    const navRes = await window.Swal.fire({
+                        icon: 'success',
+                        title: 'Published to Family Feed!',
+                        text: 'Your stylised Living Photo has been shared with your family.',
+                        showCancelButton: true,
+                        confirmButtonColor: '#a31621',
+                        confirmButtonText: 'View in Family Feed →',
+                        cancelButtonText: 'Stay in Studio'
+                    });
+                    if (navRes.isConfirmed) {
+                        window.location.href = feedUrl;
+                    }
+                } else {
+                    window.location.href = feedUrl;
+                }
+            } catch (err) {
+                stopSpinner();
+                if (window.Swal && typeof window.Swal.fire === 'function') {
+                    window.Swal.fire({
+                        icon: 'error',
+                        title: 'Could Not Publish Post',
+                        text: (err && err.message) ? err.message : 'An unexpected error occurred.',
+                        confirmButtonColor: '#a31621'
+                    });
+                } else {
+                    alert('Error: ' + ((err && err.message) ? err.message : 'Could not publish post.'));
+                }
+            }
         },
 
         syncPhotoTo3dAvatar: function (btn) {
@@ -2678,16 +2839,18 @@
 
         /** Signed-in member's Me-stickers (RFC-0011), fetched once per page. */
         getMeStickers: function (force) {
-            if (!this._meStickers || force) {
-                this._meStickers = fetch('/api/emoji/me-stickers', { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+            const self = (this && typeof this === 'object' && this !== window) ? this : AtgEmojiEngine;
+            if (!self._meStickers || force) {
+                self._meStickers = fetch('/api/emoji/me-stickers', { credentials: 'same-origin', headers: { Accept: 'application/json' } })
                     .then(r => r.json())
-                    .catch(err => { this._meStickers = null; throw err; });
+                    .catch(err => { self._meStickers = null; throw err; });
             }
-            return this._meStickers;
+            return self._meStickers;
         },
 
         /** Feed tap on a Me-sticker: replay its pop + burst (no AR viewer for avatars). */
         tapSticker: function (el, reaction) {
+            const self = (this && typeof this === 'object' && this !== window) ? this : AtgEmojiEngine;
             if (!el) return;
             el.classList.remove('atg-live-emoji--play');
             void el.offsetWidth;
@@ -2695,7 +2858,7 @@
             setTimeout(() => el.classList.remove('atg-live-emoji--play'), 900);
             const map = { hello: 'family_wave_3d', laugh: 'laugh_tears_3d', wow: 'star_struck_3d', love: 'family_hug_3d', nod: 'kinship_pride_3d', dance: 'family_celebrate_3d', point: 'family_point_3d', clap: 'family_clap_3d' };
             const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            if (!reduce) this.burstParticles(el, map[reaction] || '');
+            if (!reduce) self.burstParticles(el, map[reaction] || '');
             if (navigator.vibrate) { try { navigator.vibrate(12); } catch (_) { /* unsupported */ } }
         },
 

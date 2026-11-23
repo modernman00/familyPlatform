@@ -38,6 +38,7 @@ export const PostCard = memo(function PostCard({
     onOpenVideo,
     onOpenPostViewers,
     onOpenCommentViewers,
+    onOpenSharePortal,
 }) {
     const currentUserId = String(bootstrap?.userId || '');
     const ownPost = isOwnPost(post, currentUserId);
@@ -62,6 +63,11 @@ export const PostCard = memo(function PostCard({
     const [sliderPos, setSliderPos] = useState(50);
     const [brokenPreviewImgUrl, setBrokenPreviewImgUrl] = useState(null);
     const [brokenPhotoUrls, setBrokenPhotoUrls] = useState({});
+    const [carouselIdx, setCarouselIdx] = useState(0);
+    const [carouselAspect, setCarouselAspect] = useState('4 / 3');
+    const [slideAspects, setSlideAspects] = useState({});
+    const [slideFocals, setSlideFocals] = useState({});
+    const carouselTrackRef = useRef(null);
     const [convertingStage, setConvertingStage] = useState(false);
     const reactionCloseTimerRef = useRef(null);
     const reactionLongPressTimerRef = useRef(null);
@@ -327,16 +333,11 @@ export const PostCard = memo(function PostCard({
     };
 
     const handleShare = async () => {
-        const shareUrl = `${window.location.origin}/member/profilePage#post-${post.post_no}`;
-        const shareText = stripStyleToken(post.postMessage || '').slice(0, 140);
-        if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-            try {
-                await navigator.share({ title: `${authorName} on FamilyPlatform`, text: shareText, url: shareUrl });
-                return;
-            } catch {
-                // Fall back to clipboard
-            }
+        if (typeof onOpenSharePortal === 'function') {
+            onOpenSharePortal(post);
+            return;
         }
+        const shareUrl = `${window.location.origin}/post/${encodeURIComponent(post.post_no)}`;
         if (typeof window !== 'undefined' && typeof window.$clipboard === 'function') {
             window.$clipboard(shareUrl, 'Post link copied!');
         } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
@@ -618,7 +619,7 @@ export const PostCard = memo(function PostCard({
                     className="p-3 mb-3 rounded-3 border d-flex align-items-center justify-content-between flex-wrap gap-2"
                     style={{ background: '#fff1f2', borderColor: '#fecdd3', color: '#881337' }}
                 >
-                    <span className="fw-semibold">Delete this family memory?</span>
+                    <span className="fw-semibold">Delete this post?</span>
                     <div className="d-flex gap-2">
                         <button
                             type="button"
@@ -969,54 +970,293 @@ export const PostCard = memo(function PostCard({
                 );
             })()}
 
-            {/* Multi-Photo Grid */}
-            {images.length > 1 && !post.comparison && (
-                <div
-                    className="mb-3 px-1"
-                    style={{
-                        display: 'grid',
-                        gap: '0.5rem',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-                    }}
-                >
-                    {images.map((src, idx) => {
-                        const resolvedSrc = getPostImageUrl(src) || src;
-                        const isBroken = Boolean(brokenPhotoUrls[src] || brokenPhotoUrls[resolvedSrc]);
-                        return (
-                        <button
-                            key={`${src}_${idx}`}
-                            type="button"
-                            className="border-0 p-0 position-relative overflow-hidden"
-                            style={{
-                                borderRadius: '12px',
-                                minHeight: '180px',
-                                maxHeight: '340px',
-                                backgroundColor: '#0f172a',
-                                cursor: 'pointer',
-                            }}
-                            onClick={() => onOpenLightbox?.(images.map((u) => getPostImageUrl(u) || u), idx, post)}
-                            aria-label={`View photo ${idx + 1} of ${images.length}`}
-                        >
-                            {isBroken ? (
-                                <div className="post-media-stage__fallback" style={{ minHeight: '180px' }}>
-                                    <i className="bi bi-image fs-4" aria-hidden="true" />
-                                    <span>Photo unavailable</span>
+            {/* Multi-Photo Hero Carousel & Quick-Select Filmstrip (> 1 images) */}
+            {images.length > 1 && !post.comparison && (() => {
+                const resolvedImages = images.map((u) => getPostImageUrl(u) || u);
+                const safeIdx = Math.min(Math.max(0, carouselIdx), images.length - 1);
+                const activeResolvedSrc = resolvedImages[safeIdx] || resolvedImages[0];
+                const activeRawSrc = images[safeIdx] || images[0];
+                const isActiveBroken = Boolean(brokenPhotoUrls[activeRawSrc] || brokenPhotoUrls[activeResolvedSrc]);
+                const activeAspect = slideAspects[safeIdx] || carouselAspect || '4 / 3';
+
+                const handleCarouselImageLoad = (el, idx) => {
+                    if (!el) return;
+                    if (typeof window !== 'undefined' && window.AtgMediaSupremacy && typeof window.AtgMediaSupremacy.analyzeImage === 'function') {
+                        const info = window.AtgMediaSupremacy.analyzeImage(el);
+                        if (info?.aspectRatio) {
+                            setSlideAspects((prev) => ({ ...prev, [idx]: info.aspectRatio }));
+                            if (idx === 0 || idx === safeIdx) setCarouselAspect(info.aspectRatio);
+                        }
+                        if (info?.focalPosition) {
+                            setSlideFocals((prev) => ({ ...prev, [idx]: info.focalPosition }));
+                        }
+                    } else if (el.naturalWidth && el.naturalHeight) {
+                        const r = el.naturalWidth / el.naturalHeight;
+                        const clamped = Math.min(1.91, Math.max(0.80, r));
+                        const aspectStr = `${clamped.toFixed(4)} / 1`;
+                        const focalStr = r < 0.92 ? '50% 28%' : '50% 38%';
+                        setSlideAspects((prev) => ({ ...prev, [idx]: aspectStr }));
+                        setSlideFocals((prev) => ({ ...prev, [idx]: focalStr }));
+                        if (idx === 0 || idx === safeIdx) setCarouselAspect(aspectStr);
+                    }
+                };
+
+                const goToSlide = (targetIdx) => {
+                    const bounded = Math.max(0, Math.min(images.length - 1, targetIdx));
+                    setCarouselIdx(bounded);
+                    if (slideAspects[bounded]) {
+                        setCarouselAspect(slideAspects[bounded]);
+                    }
+                    const track = carouselTrackRef.current;
+                    if (track && typeof track.scrollTo === 'function') {
+                        track.scrollTo({ left: bounded * (track.clientWidth || 1), behavior: 'smooth' });
+                    }
+                };
+
+                const handleTrackScroll = (e) => {
+                    const track = e.currentTarget;
+                    if (!track || !track.clientWidth) return;
+                    const nextIdx = Math.max(0, Math.min(images.length - 1, Math.round(track.scrollLeft / track.clientWidth)));
+                    if (nextIdx !== safeIdx) {
+                        setCarouselIdx(nextIdx);
+                        if (slideAspects[nextIdx]) {
+                            setCarouselAspect(slideAspects[nextIdx]);
+                        }
+                    }
+                };
+
+                return (
+                    <div className="mb-3 px-1 post-carousel-wrapper" data-testid="feed-multi-photo-carousel">
+                        <div className="position-relative feed-media-aura-container">
+                            {/* Ambient Dynamic Backlight Glow for Carousel (Synchronised to Active Slide) */}
+                            {!isActiveBroken && (
+                                <div className="feed-media-aura-backdrop" aria-hidden="true">
+                                    <img
+                                        src={activeResolvedSrc}
+                                        alt=""
+                                        loading="lazy"
+                                        decoding="async"
+                                        referrerPolicy="no-referrer"
+                                        aria-hidden="true"
+                                    />
                                 </div>
-                            ) : (
-                                <img
-                                    src={resolvedSrc}
-                                    alt={`Post photo ${idx + 1}`}
-                                    className="w-100 h-100 object-fit-cover d-block atg-4k-image-render"
-                                    referrerPolicy="no-referrer"
-                                    onError={() => setBrokenPhotoUrls((prev) => ({ ...prev, [src]: true, [resolvedSrc]: true }))}
-                                    loading="lazy"
-                                />
                             )}
-                        </button>
-                        );
-                    })}
-                </div>
-            )}
+
+                            <div
+                                className="position-relative overflow-hidden post-media-stage vse-skeleton-surface"
+                                style={{
+                                    borderRadius: '12px',
+                                    aspectRatio: activeAspect,
+                                    minHeight: '340px',
+                                    maxHeight: '640px',
+                                    width: '100%',
+                                    background: '#0b0f19',
+                                    transition: 'aspect-ratio 0.38s cubic-bezier(0.16, 1, 0.3, 1)',
+                                }}
+                            >
+                                {/* Fanciful Multi-Photo 3-Layer Luxury Stacked Badge */}
+                                <div
+                                    className="position-absolute top-0 end-0 m-3 carousel-fanciful-badge"
+                                    title="Multiple photos in carousel — swipe or tap arrows to view all"
+                                    aria-label="Multiple photos in post"
+                                >
+                                    <svg className="carousel-cards-icon" viewBox="0 0 26 26" width="18" height="18" fill="none" aria-hidden="true">
+                                        <rect x="9" y="2" width="14" height="14" rx="3.2" fill="rgba(255, 215, 0, 0.22)" stroke="#ffd700" strokeWidth="1.3" opacity="0.85" />
+                                        <rect x="5.5" y="5.5" width="14" height="14" rx="3.2" fill="rgba(30, 41, 59, 0.9)" stroke="#fde047" strokeWidth="1.4" />
+                                        <rect x="2" y="9" width="14.5" height="14.5" rx="3.4" fill="#0f172a" stroke="#ffffff" strokeWidth="1.7" />
+                                        <circle cx="6.8" cy="13.8" r="1.6" fill="#ffd700" />
+                                        <path d="M3.6 20.8l3.8-4.6 2.7 3.1 2.2-2.3 2.8 3.8H3.6z" fill="#ffffff" opacity="0.95" />
+                                    </svg>
+                                    <span className="carousel-badge-dot" aria-hidden="true" />
+                                    <span className="carousel-counter-text">{`${safeIdx + 1} / ${images.length}`}</span>
+                                </div>
+
+                                {/* Desktop / Touch Navigation Chevrons (44x44px hit targets) */}
+                                {safeIdx > 0 && (
+                                    <button
+                                        type="button"
+                                        className="carousel-nav-btn carousel-nav-prev"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            goToSlide(safeIdx - 1);
+                                        }}
+                                        aria-label="Previous photo in carousel"
+                                    >
+                                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                            <polyline points="15 18 9 12 15 6" />
+                                        </svg>
+                                    </button>
+                                )}
+
+                                {safeIdx < images.length - 1 && (
+                                    <button
+                                        type="button"
+                                        className="carousel-nav-btn carousel-nav-next"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            goToSlide(safeIdx + 1);
+                                        }}
+                                        aria-label="Next photo in carousel"
+                                    >
+                                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                            <polyline points="9 18 15 12 9 6" />
+                                        </svg>
+                                    </button>
+                                )}
+
+                                {/* Full-Width Snap-Scroll Hero Track */}
+                                <div
+                                    ref={carouselTrackRef}
+                                    className="d-flex overflow-auto post-carousel-track"
+                                    style={{
+                                        scrollSnapType: 'x mandatory',
+                                        scrollbarWidth: 'none',
+                                        WebkitOverflowScrolling: 'touch',
+                                        height: '100%',
+                                        width: '100%',
+                                    }}
+                                    onScroll={handleTrackScroll}
+                                >
+                                    {images.map((src, idx) => {
+                                        const resolvedSrc = resolvedImages[idx];
+                                        const isBroken = Boolean(brokenPhotoUrls[src] || brokenPhotoUrls[resolvedSrc]);
+                                        const isGif = isGifMedia(src) || isGifMedia(resolvedSrc);
+                                        return (
+                                            <div
+                                                key={`${src}_${idx}`}
+                                                className={`flex-shrink-0 w-100 position-relative carousel-slide-item ${safeIdx === idx ? 'is-slide-active' : ''}`}
+                                                style={{
+                                                    scrollSnapAlign: 'start',
+                                                    minWidth: '100%',
+                                                    height: '100%',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                }}
+                                            >
+                                                <button
+                                                    type="button"
+                                                    className="border-0 p-0 bg-transparent w-100 h-100 d-flex align-items-center justify-content-center"
+                                                    style={{
+                                                        borderRadius: '12px',
+                                                        overflow: 'hidden',
+                                                        position: 'relative',
+                                                        cursor: 'pointer',
+                                                        minHeight: '340px',
+                                                    }}
+                                                    onClick={() => onOpenLightbox?.(resolvedImages, idx, post)}
+                                                    onDblClick={() => onReactPost?.(post.post_no, 'love')}
+                                                    aria-label={`View photo ${idx + 1} of ${images.length}`}
+                                                >
+                                                    {isBroken ? (
+                                                        <div className="post-media-stage__fallback" style={{ minHeight: '340px' }}>
+                                                            <i className="bi bi-image fs-3" aria-hidden="true" />
+                                                            <span>Photo unavailable</span>
+                                                        </div>
+                                                    ) : (
+                                                        <img
+                                                            src={resolvedSrc}
+                                                            alt={`Post photo ${idx + 1}`}
+                                                            className="post-media-first-img living-canvas-img w-100 h-100 d-block atg-4k-image-render"
+                                                            style={{
+                                                                borderRadius: '12px',
+                                                                width: '100%',
+                                                                height: '100%',
+                                                                maxHeight: '640px',
+                                                                objectFit: isGif ? 'contain' : 'cover',
+                                                                objectPosition: slideFocals[idx] || '50% 34%',
+                                                                cursor: 'pointer',
+                                                                imageRendering: 'auto',
+                                                            }}
+                                                            referrerPolicy="no-referrer"
+                                                            onLoad={(e) => handleCarouselImageLoad(e.currentTarget, idx)}
+                                                            onError={() => setBrokenPhotoUrls((prev) => ({ ...prev, [src]: true, [resolvedSrc]: true }))}
+                                                            loading="lazy"
+                                                            decoding="async"
+                                                        />
+                                                    )}
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Holographic Dynasty Specular Foil Shimmer Sheen */}
+                                <div className="vse-holo-foil-glint" aria-hidden="true" />
+                            </div>
+                        </div>
+
+                        {/* Interactive Pagination Dots & Filmstrip Thumbnails */}
+                        <div className="d-flex flex-column align-items-center gap-2 mt-2">
+                            <div
+                                className="d-flex justify-content-center align-items-center gap-2 post-carousel-dots"
+                                aria-label="Photo carousel pagination"
+                            >
+                                {images.map((_, dIdx) => (
+                                    <button
+                                        key={`dot_${dIdx}`}
+                                        type="button"
+                                        className={`carousel-dot border-0 p-0 ${safeIdx === dIdx ? 'is-active' : ''}`}
+                                        onClick={() => goToSlide(dIdx)}
+                                        aria-label={`Go to photo ${dIdx + 1}`}
+                                        style={{ cursor: 'pointer', minWidth: '44px', minHeight: '44px', width: '44px', height: '44px' }}
+                                    />
+                                ))}
+                            </div>
+
+                            <div
+                                className="d-flex align-items-center justify-content-center gap-2 overflow-x-auto w-100 py-1 post-carousel-filmstrip"
+                                data-testid="feed-multi-photo-filmstrip"
+                                style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
+                            >
+                                {images.map((thumbSrc, tIdx) => {
+                                    const resolvedThumb = resolvedImages[tIdx];
+                                    const isThumbBroken = Boolean(brokenPhotoUrls[thumbSrc] || brokenPhotoUrls[resolvedThumb]);
+                                    const isThumbActive = safeIdx === tIdx;
+                                    return (
+                                        <button
+                                            key={`thumb_${thumbSrc}_${tIdx}`}
+                                            type="button"
+                                            onClick={() => goToSlide(tIdx)}
+                                            aria-label={`Select photo ${tIdx + 1} of ${images.length}`}
+                                            aria-pressed={isThumbActive}
+                                            className="p-0 position-relative overflow-hidden flex-shrink-0"
+                                            style={{
+                                                width: '56px',
+                                                height: '56px',
+                                                minWidth: '44px',
+                                                minHeight: '44px',
+                                                borderRadius: '10px',
+                                                border: isThumbActive ? '2px solid #a31621' : '1.5px solid rgba(148, 163, 184, 0.35)',
+                                                opacity: isThumbActive ? 1 : 0.68,
+                                                transform: isThumbActive ? 'scale(1.04)' : 'scale(1)',
+                                                transition: 'transform 0.2s ease, opacity 0.2s ease, border-color 0.2s ease',
+                                                background: '#0f172a',
+                                                cursor: 'pointer',
+                                            }}
+                                        >
+                                            {isThumbBroken ? (
+                                                <span className="d-flex align-items-center justify-content-center w-100 h-100 text-secondary">
+                                                    <i className="bi bi-image" aria-hidden="true" />
+                                                </span>
+                                            ) : (
+                                                <img
+                                                    src={resolvedThumb}
+                                                    alt=""
+                                                    aria-hidden="true"
+                                                    className="w-100 h-100 object-fit-cover d-block"
+                                                    referrerPolicy="no-referrer"
+                                                    loading="lazy"
+                                                />
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                );
+            })()}
 
             {/* Videos (Classic Horizontal Multi-Video Carousel or Single Video Aura Stage) */}
             {videos.length > 0 && (

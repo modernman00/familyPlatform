@@ -120,7 +120,9 @@ final class PublicArcadeController
             'kinword' => 'KinWord',
             'kinpulse' => 'KinPulse',
             'wordie' => 'Wordie',
-            'cheeseboard' => 'Cheeseboard',
+            'cheeseboard' => 'Cheeseboard (Queens)',
+            'chess' => 'Family Chess',
+            'ayo' => 'Ayò Olópon',
             'minesweeper' => 'Minesweeper',
             default => 'KinZip',
         };
@@ -128,10 +130,10 @@ final class PublicArcadeController
         $baseUrl = ShareMetadataProtocol::baseUrl();
         $shareUrl = $cleanToken !== ''
             ? ($baseUrl . '/arcade/challenge/' . rawurlencode($cleanToken))
-            : ($baseUrl . '/play/' . rawurlencode($gameSlug));
+            : ($baseUrl . '/play/' . rawurlencode($gameSlug) . '?difficulty=' . rawurlencode($difficulty));
         $cardImg = $cleanToken !== ''
-            ? ($baseUrl . '/arcade/card/' . rawurlencode($cleanToken) . '.jpg?v=1')
-            : ($baseUrl . '/arcade/card/game-' . rawurlencode($gameSlug) . '.jpg?v=1');
+            ? ($baseUrl . '/arcade/card/' . rawurlencode($cleanToken) . '.jpg?v=3')
+            : ($baseUrl . '/arcade/card/game-' . rawurlencode($gameSlug) . '.jpg?v=3&difficulty=' . rawurlencode($difficulty));
 
         $title = $challenger
             ? "Beat {$challenger['firstName']}'s {$challenger['score']} pts in {$gameName}! — Family Arcade"

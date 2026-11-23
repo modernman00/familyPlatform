@@ -19,7 +19,7 @@ use Throwable;
  */
 final class FamilyArcadeService
 {
-    public const VALID_GAMES = ['kinzip', 'kingrid', 'kinword', 'kinpulse', 'wordie', 'cheeseboard', 'minesweeper'];
+    public const VALID_GAMES = ['kinzip', 'kingrid', 'kinword', 'kinpulse', 'wordie', 'cheeseboard', 'chess', 'ayo', 'minesweeper'];
     public const VALID_DIFFICULTIES = ['easy', 'medium', 'hard'];
     public const VALID_MODES = ['daily', 'practice', 'ghost', 'live_race'];
 
@@ -54,6 +54,16 @@ final class FamilyArcadeService
             'key' => 'cheeseboard_champion',
             'title' => 'Cheeseboard Sovereign',
             'icon' => 'bi-shield-shaded',
+        ],
+        'chess' => [
+            'key' => 'chess_champion',
+            'title' => 'Family Chess Grandmaster',
+            'icon' => 'bi-suit-club-fill',
+        ],
+        'ayo' => [
+            'key' => 'ayo_champion',
+            'title' => 'Ayò Olópon Grandmaster',
+            'icon' => 'bi-circle-square',
         ],
         'minesweeper' => [
             'key' => 'minesweeper_champion',
@@ -148,6 +158,27 @@ final class FamilyArcadeService
             'kinpulse' => self::generateKinPulsePuzzle($seedKey, $diff),
             'wordie' => self::generateWordiePuzzle($seedKey, $diff, false),
             'cheeseboard' => self::generateCheeseboardPuzzle($seedKey, $diff, false),
+            'chess' => [
+                'game' => 'chess',
+                'seedKey' => $seedKey,
+                'difficulty' => $diff,
+                'parMs' => match ($diff) {
+                    'easy' => 60000,
+                    'hard' => 180000,
+                    default => 120000,
+                },
+            ],
+            'ayo' => [
+                'game' => 'ayo',
+                'seedKey' => $seedKey,
+                'difficulty' => $diff,
+                'totalSeeds' => 48,
+                'parMs' => match ($diff) {
+                    'easy' => 60000,
+                    'hard' => 150000,
+                    default => 90000,
+                },
+            ],
             'minesweeper' => self::generateMinesweeperPuzzle($seedKey, $diff, false),
             default => self::generateKinZipPuzzle($seedKey, $diff, false),
         };
@@ -173,99 +204,179 @@ final class FamilyArcadeService
 
         $rng = self::createRng("kinzip:{$seedKey}:{$difficulty}");
 
-        // 1. Build a base serpentine Hamiltonian path on size x size
-        $path = [];
-        for ($r = 0; $r < $size; $r++) {
-            if ($r % 2 === 0) {
-                for ($c = 0; $c < $size; $c++) {
-                    $path[] = [$r, $c];
-                }
-            } else {
-                for ($c = $size - 1; $c >= 0; $c--) {
-                    $path[] = [$r, $c];
-                }
-            }
-        }
-
-        // 2. Apply deterministic geometric symmetries (rotate / flip / reverse) for variety
-        $transform = (int) floor($rng() * 8);
-        $path = array_map(static function (array $cell) use ($size, $transform): array {
-            [$r, $c] = $cell;
-            if (($transform & 1) !== 0) {
-                $r = $size - 1 - $r;
-            }
-            if (($transform & 2) !== 0) {
-                $c = $size - 1 - $c;
-            }
-            if (($transform & 4) !== 0) {
-                return [$c, $r];
-            }
-            return [$r, $c];
-        }, $path);
-
-        if ($rng() > 0.5) {
-            $path = array_reverse($path);
-        }
-
-        // 3. Apply backbite-style local path mutations (preserves Hamiltonian property!)
-        // Check if endpoints can connect to an internal neighbour to reverse a sub-segment
+        // 1. Multi-trial turn-maximising Hamiltonian path search via deep backbite mixing
         $total = $size * $size;
-        for ($step = 0; $step < 40; $step++) {
-            $useEnd = $rng() > 0.5;
-            if ($useEnd) {
-                $end = $path[$total - 1];
-                $candidates = [];
-                for ($idx = 0; $idx < $total - 2; $idx++) {
-                    if (abs($path[$idx][0] - $end[0]) + abs($path[$idx][1] - $end[1]) === 1) {
-                        $candidates[] = $idx;
+        $bestPath = [];
+        $bestScore = -1;
+
+        for ($trial = 0; $trial < 4; $trial++) {
+            $candidate = [];
+            for ($r = 0; $r < $size; $r++) {
+                if ($r % 2 === 0) {
+                    for ($c = 0; $c < $size; $c++) {
+                        $candidate[] = [$r, $c];
+                    }
+                } else {
+                    for ($c = $size - 1; $c >= 0; $c--) {
+                        $candidate[] = [$r, $c];
                     }
                 }
-                if (!empty($candidates)) {
-                    $pick = $candidates[(int) floor($rng() * count($candidates))];
-                    $prefix = array_slice($path, 0, $pick + 1);
-                    $suffix = array_reverse(array_slice($path, $pick + 1));
-                    $path = array_merge($prefix, $suffix);
+            }
+
+            // Apply deterministic geometric symmetries (rotate / flip / reverse)
+            $transform = (int) floor($rng() * 8);
+            $candidate = array_map(static function (array $cell) use ($size, $transform): array {
+                [$r, $c] = $cell;
+                if (($transform & 1) !== 0) {
+                    $r = $size - 1 - $r;
                 }
-            } else {
-                $start = $path[0];
-                $candidates = [];
-                for ($idx = 2; $idx < $total; $idx++) {
-                    if (abs($path[$idx][0] - $start[0]) + abs($path[$idx][1] - $start[1]) === 1) {
-                        $candidates[] = $idx;
+                if (($transform & 2) !== 0) {
+                    $c = $size - 1 - $c;
+                }
+                if (($transform & 4) !== 0) {
+                    return [$c, $r];
+                }
+                return [$r, $c];
+            }, $candidate);
+
+            if ($rng() > 0.5) {
+                $candidate = array_reverse($candidate);
+            }
+
+            // Deep backbite MCMC mutations (260 steps) so interior folds lose all serpentine structure
+            $backbiteSteps = 260;
+            for ($step = 0; $step < $backbiteSteps; $step++) {
+                $useEnd = $rng() > 0.5;
+                if ($useEnd) {
+                    $end = $candidate[$total - 1];
+                    $prevIdx = $total - 2;
+                    $neighbours = [];
+                    for ($idx = 0; $idx < $total - 2; $idx++) {
+                        if ($idx !== $prevIdx && abs($candidate[$idx][0] - $end[0]) + abs($candidate[$idx][1] - $end[1]) === 1) {
+                            $neighbours[] = $idx;
+                        }
+                    }
+                    if (!empty($neighbours)) {
+                        $pick = $neighbours[(int) floor($rng() * count($neighbours))];
+                        $prefix = array_slice($candidate, 0, $pick + 1);
+                        $suffix = array_reverse(array_slice($candidate, $pick + 1));
+                        $candidate = array_merge($prefix, $suffix);
+                    }
+                } else {
+                    $start = $candidate[0];
+                    $neighbours = [];
+                    for ($idx = 2; $idx < $total; $idx++) {
+                        if (abs($candidate[$idx][0] - $start[0]) + abs($candidate[$idx][1] - $start[1]) === 1) {
+                            $neighbours[] = $idx;
+                        }
+                    }
+                    if (!empty($neighbours)) {
+                        $pick = $neighbours[(int) floor($rng() * count($neighbours))];
+                        $prefix = array_reverse(array_slice($candidate, 0, $pick));
+                        $suffix = array_slice($candidate, $pick);
+                        $candidate = array_merge($prefix, $suffix);
                     }
                 }
-                if (!empty($candidates)) {
-                    $pick = $candidates[(int) floor($rng() * count($candidates))];
-                    $prefix = array_reverse(array_slice($path, 0, $pick));
-                    $suffix = array_slice($path, $pick);
-                    $path = array_merge($prefix, $suffix);
+            }
+
+            // Score candidate by turn tortuosity and non-corner start/end variety
+            $turns = 0;
+            $longStraightPenalty = 0;
+            $runLen = 1;
+            for ($i = 1; $i < $total - 1; $i++) {
+                $dr1 = $candidate[$i][0] - $candidate[$i - 1][0];
+                $dc1 = $candidate[$i][1] - $candidate[$i - 1][1];
+                $dr2 = $candidate[$i + 1][0] - $candidate[$i][0];
+                $dc2 = $candidate[$i + 1][1] - $candidate[$i][1];
+                if ($dr1 !== $dr2 || $dc1 !== $dc2) {
+                    $turns++;
+                    $runLen = 1;
+                } else {
+                    $runLen++;
+                    if ($runLen >= $size - 1) {
+                        $longStraightPenalty += 2;
+                    }
                 }
+            }
+            $startCell = $candidate[0];
+            $isInteriorStart = ($startCell[0] > 0 && $startCell[0] < $size - 1 && $startCell[1] > 0 && $startCell[1] < $size - 1) ? 3 : 0;
+            $score = ($turns * 3) + $isInteriorStart - $longStraightPenalty;
+
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $bestPath = $candidate;
             }
         }
 
-        // 4. Mark edges used by the Hamiltonian path so we never block them with walls
+        $path = $bestPath;
+
+        // 4. Mark edges and cell indices used by the Hamiltonian path
         $pathEdges = [];
-        for ($i = 0; $i < $total - 1; $i++) {
-            $a = $path[$i];
-            $b = $path[$i + 1];
-            $key = self::edgeKey($a[0], $a[1], $b[0], $b[1]);
-            $pathEdges[$key] = true;
+        $cellPathIndex = [];
+        for ($i = 0; $i < $total; $i++) {
+            $cellPathIndex["{$path[$i][0]},{$path[$i][1]}"] = $i;
+            if ($i < $total - 1) {
+                $a = $path[$i];
+                $b = $path[$i + 1];
+                $key = self::edgeKey($a[0], $a[1], $b[0], $b[1]);
+                $pathEdges[$key] = true;
+            }
         }
 
-        // 5. Place checkpoints 1..K along the path (1 at start, K at end, rest spaced)
+        // 5. Place checkpoints 1..K with non-uniform, deceptive segment lengths
+        // Avoid uniform spacing and avoid placing consecutive checkpoints on adjacent cells
+        $checkpointIndices = [0];
+        $avgStep = ($total - 1) / ($checkpointCount - 1);
+        for ($k = 1; $k < $checkpointCount - 1; $k++) {
+            $baseIdx = (int) round($k * $avgStep);
+            $prevIdx = $checkpointIndices[$k - 1];
+            $minIdx = max($prevIdx + 3, $baseIdx - 3);
+            $maxIdx = min($total - 1 - (($checkpointCount - 1 - $k) * 3), $baseIdx + 3);
+
+            $bestIdx = $baseIdx;
+            $bestCpScore = -999;
+            for ($candIdx = $minIdx; $candIdx <= $maxIdx; $candIdx++) {
+                $candCell = $path[$candIdx];
+                $prevCell = $path[$prevIdx];
+                $manhattan = abs($candCell[0] - $prevCell[0]) + abs($candCell[1] - $prevCell[1]);
+                // Penalise consecutive checkpoints that sit right next to each other (gives away loops)
+                $adjPenalty = ($manhattan <= 1) ? -8 : 0;
+                // Reward alternating segment lengths (long detour vs shorter anchor)
+                $spanDiff = abs(($candIdx - $prevIdx) - (int) round($avgStep));
+                $jitter = (int) floor($rng() * 4);
+                $cpScore = ($manhattan * 2) + ($spanDiff * 3) + $adjPenalty + $jitter;
+                if ($cpScore > $bestCpScore) {
+                    $bestCpScore = $cpScore;
+                    $bestIdx = $candIdx;
+                }
+            }
+            $checkpointIndices[] = $bestIdx;
+        }
+        $checkpointIndices[] = $total - 1;
+
         $checkpoints = [];
-        for ($k = 0; $k < $checkpointCount; $k++) {
-            $idx = ($k === $checkpointCount - 1)
-                ? $total - 1
-                : (int) round(($k * ($total - 1)) / ($checkpointCount - 1));
+        $checkpointCells = [];
+        foreach ($checkpointIndices as $k => $idx) {
+            $r = $path[$idx][0];
+            $c = $path[$idx][1];
             $checkpoints[] = [
                 'num' => $k + 1,
-                'r' => $path[$idx][0],
-                'c' => $path[$idx][1],
+                'r' => $r,
+                'c' => $c,
             ];
+            $checkpointCells["{$r},{$c}"] = $k + 1;
         }
 
-        // 6. Place strategic walls on non-path edges
+        // 6. Place sparse, anti-corridor walls on deceptive shortcut edges only
+        // Count initial blocked sides per cell (board perimeter counts as 1 per outer edge)
+        $blockedSides = [];
+        for ($r = 0; $r < $size; $r++) {
+            for ($c = 0; $c < $size; $c++) {
+                $borders = ($r === 0 ? 1 : 0) + ($r === $size - 1 ? 1 : 0) + ($c === 0 ? 1 : 0) + ($c === $size - 1 ? 1 : 0);
+                $blockedSides["{$r},{$c}"] = $borders;
+            }
+        }
+
         $candidateWalls = [];
         for ($r = 0; $r < $size; $r++) {
             for ($c = 0; $c < $size; $c++) {
@@ -285,12 +396,49 @@ final class FamilyArcadeService
         }
 
         $candidateWalls = self::seededShuffle($candidateWalls, $rng);
+        // Sort candidate walls to prefer blocking deceptive long-jump shortcuts rather than tight local bends
+        usort($candidateWalls, static function (array $w1, array $w2) use ($cellPathIndex): int {
+            $jump1 = abs(($cellPathIndex["{$w1[0]},{$w1[1]}"] ?? 0) - ($cellPathIndex["{$w1[2]},{$w1[3]}"] ?? 0));
+            $jump2 = abs(($cellPathIndex["{$w2[0]},{$w2[1]}"] ?? 0) - ($cellPathIndex["{$w2[2]},{$w2[3]}"] ?? 0));
+            return $jump2 <=> $jump1;
+        });
+
+        // Keep wall count sparse so players face open intersections rather than 1-way corridors
         $wallTarget = match ($difficulty) {
-            'easy' => min(6, count($candidateWalls)),
-            'hard' => min(14, count($candidateWalls)),
-            default => min(10, count($candidateWalls)),
+            'easy' => 3,
+            'hard' => 6,
+            default => 4,
         };
-        $walls = array_slice($candidateWalls, 0, $wallTarget);
+
+        $walls = [];
+        $startKey = "{$path[0][0]},{$path[0][1]}";
+        $endKey = "{$path[$total - 1][0]},{$path[$total - 1][1]}";
+
+        foreach ($candidateWalls as $wall) {
+            if (count($walls) >= $wallTarget) {
+                break;
+            }
+            [$r1, $c1, $r2, $c2] = $wall;
+            $k1 = "{$r1},{$c1}";
+            $k2 = "{$r2},{$c2}";
+
+            // Never place walls touching Dot 1 or the final Dot if it would reduce their open exits below 3
+            if (($k1 === $startKey || $k1 === $endKey) && $blockedSides[$k1] >= 1) {
+                continue;
+            }
+            if (($k2 === $startKey || $k2 === $endKey) && $blockedSides[$k2] >= 1) {
+                continue;
+            }
+
+            // Never box any cell into a 3-walled dead-end U-cup or narrow 1-way chute (max 1 wall+border blocked side before adding)
+            if ($blockedSides[$k1] >= 2 || $blockedSides[$k2] >= 2) {
+                continue;
+            }
+
+            $walls[] = $wall;
+            $blockedSides[$k1]++;
+            $blockedSides[$k2]++;
+        }
 
         $payload = [
             'game' => 'kinzip',
@@ -1086,6 +1234,24 @@ final class FamilyArcadeService
             $bonusRounds = $size;
             $valid = true;
             $reason = 'Verified Cheeseboard queens placement.';
+        } elseif ($game === 'chess') {
+            $winner = (string) ($submission['winner'] ?? '');
+            $movesCount = (int) ($submission['movesCount'] ?? 0);
+            if ($winner === 'w' && $movesCount >= 2) {
+                $valid = true;
+                $reason = 'Verified Family Chess checkmate victory.';
+            } else {
+                return ['valid' => false, 'reason' => 'Incomplete or unverified chess match.', 'score' => 0];
+            }
+        } elseif ($game === 'ayo') {
+            $capturedSouth = (int) ($submission['capturedSouth'] ?? 0);
+            $capturedNorth = (int) ($submission['capturedNorth'] ?? 0);
+            if ($capturedSouth > $capturedNorth && $capturedSouth >= 12) {
+                $valid = true;
+                $reason = 'Verified Ayò Olópon victory.';
+            } else {
+                return ['valid' => false, 'reason' => 'Incomplete or unverified Ayò Olópon match.', 'score' => 0];
+            }
         } elseif ($game === 'minesweeper') {
             $puzzle = self::generateMinesweeperPuzzle($seedKey, $diff, true);
             $uncovered = $submission['uncovered'] ?? null;

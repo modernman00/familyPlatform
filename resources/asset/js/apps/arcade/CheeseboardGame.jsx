@@ -15,7 +15,7 @@ export function CheeseboardGame({ puzzle, onProgress, onComplete, submitting }) 
     // cellStates: 'empty' | 'cross' | 'queen'
     const [cellStates, setCellStates] = useState(() => Array.from({ length: size }, () => Array(size).fill('empty')));
     const [elapsedMs, setElapsedMs] = useState(0);
-    const [statusNote, setStatusNote] = useState('Place 1 Crown in every row, column, and colour region. Crowns cannot touch even diagonally!');
+    const [statusNote, setStatusNote] = useState('Territory Deduction (Queens puzzle — not Chess): Place 1 Crown in every row, column, and colour region. Crowns cannot touch even diagonally!');
 
     const startTimeRef = useRef(Date.now());
     const completedRef = useRef(false);
@@ -27,7 +27,7 @@ export function CheeseboardGame({ puzzle, onProgress, onComplete, submitting }) 
         startTimeRef.current = Date.now();
         completedRef.current = false;
         replayRef.current = [];
-        setStatusNote('Place 1 Crown in every row, column, and colour region. Crowns cannot touch even diagonally!');
+        setStatusNote('Territory Deduction (Queens puzzle — not Chess): Place 1 Crown in every row, column, and colour region. Crowns cannot touch even diagonally!');
     }, [puzzle?.seedKey, puzzle?.difficulty, size]);
 
     useEffect(() => {

@@ -633,7 +633,9 @@ final class FamilyArcadeController extends BaseController
                 'kinword' => 'KinWord',
                 'kinpulse' => 'KinPulse',
                 'wordie' => 'Wordie',
-                'cheeseboard' => 'Cheeseboard',
+                'cheeseboard' => 'Cheeseboard (Queens)',
+                'chess' => 'Family Chess',
+                'ayo' => 'Ayò Olópon',
                 'minesweeper' => 'Minesweeper',
                 default => 'KinZip',
             };

@@ -77,15 +77,38 @@ export function EmojiGifPicker({
     // Load Me-stickers on demand when Me tab is opened
     useEffect(() => {
         if (activeTab !== 'me' || meStickers !== null) return;
-        const loader = window.AtgEmojiEngine?.getMeStickers;
-        if (typeof loader !== 'function') {
-            setMeStickers({ available: false, stickers: [] });
-            return;
-        }
+        let cancelled = false;
         setMeError(false);
-        loader()
-            .then((res) => setMeStickers(res || { available: false, stickers: [] }))
-            .catch(() => setMeError(true));
+
+        Promise.resolve()
+            .then(() => {
+                const engine = typeof window !== 'undefined' ? window.AtgEmojiEngine : null;
+                if (engine && typeof engine.getMeStickers === 'function') {
+                    return engine.getMeStickers();
+                }
+                if (typeof fetch === 'function') {
+                    return fetch('/api/emoji/me-stickers', {
+                        credentials: 'same-origin',
+                        headers: { Accept: 'application/json' },
+                    }).then((r) => (r.ok ? r.json() : { available: false, stickers: [] }));
+                }
+                return { available: false, stickers: [] };
+            })
+            .then((res) => {
+                if (!cancelled) {
+                    setMeStickers(res && typeof res === 'object' ? res : { available: false, stickers: [] });
+                }
+            })
+            .catch(() => {
+                if (!cancelled) {
+                    setMeError(true);
+                    setMeStickers({ available: false, stickers: [] });
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
     }, [activeTab, meStickers]);
 
     const handleSetSkinTone = (tone) => {
@@ -139,21 +162,30 @@ export function EmojiGifPicker({
     return (
         <div
             className="comment-picker p-2 rounded-3 border shadow-sm mb-2"
+            style={{ width: 'min(100%, 420px)' }}
             role="dialog"
             aria-label="Emoji and GIF picker"
             data-testid="emoji-gif-picker"
             onClick={(e) => e.stopPropagation()}
         >
             {/* Header Tabs + Close */}
-            <div className="d-flex align-items-center justify-content-between gap-2 pb-2 mb-2 border-bottom flex-wrap">
-                <div className="comment-emoji-tabs d-flex flex-wrap gap-1" role="tablist" aria-label="Expression type">
+            <div
+                className="d-flex align-items-center justify-content-between pb-2 mb-2 border-bottom"
+                style={{ gap: '6px', flexWrap: 'nowrap' }}
+            >
+                <div
+                    className="comment-emoji-tabs d-flex flex-grow-1"
+                    role="tablist"
+                    aria-label="Expression type"
+                    style={{ gap: '4px', flexWrap: 'nowrap', minWidth: 0 }}
+                >
                     <button
                         type="button"
                         role="tab"
                         aria-selected={activeTab === 'standard'}
                         data-testid="comment-emoji-tab-standard"
-                        className={`comment-emoji-tab btn btn-sm rounded-pill ${activeTab === 'standard' ? 'active btn-dark text-white' : 'btn-light'}`}
-                        style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                        className={`comment-emoji-tab btn btn-sm rounded-pill px-2 ${activeTab === 'standard' ? 'active btn-dark text-white' : 'btn-light'}`}
+                        style={{ minHeight: '44px', minWidth: '44px', whiteSpace: 'nowrap', flex: '1 1 0', fontSize: '0.78rem', padding: '4px 8px' }}
                         onClick={() => setActiveTab('standard')}
                     >
                         😀 Standard
@@ -163,8 +195,8 @@ export function EmojiGifPicker({
                         role="tab"
                         aria-selected={activeTab === 'living'}
                         data-testid="comment-emoji-tab-living"
-                        className={`comment-emoji-tab btn btn-sm rounded-pill ${activeTab === 'living' ? 'active btn-dark text-white' : 'btn-light'}`}
-                        style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                        className={`comment-emoji-tab btn btn-sm rounded-pill px-2 ${activeTab === 'living' ? 'active btn-dark text-white' : 'btn-light'}`}
+                        style={{ minHeight: '44px', minWidth: '44px', whiteSpace: 'nowrap', flex: '1 1 0', fontSize: '0.78rem', padding: '4px 8px' }}
                         onClick={() => setActiveTab('living')}
                     >
                         ✨ Living
@@ -174,8 +206,8 @@ export function EmojiGifPicker({
                         role="tab"
                         aria-selected={activeTab === 'me'}
                         data-testid="comment-emoji-tab-me"
-                        className={`comment-emoji-tab btn btn-sm rounded-pill ${activeTab === 'me' ? 'active btn-dark text-white' : 'btn-light'}`}
-                        style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                        className={`comment-emoji-tab btn btn-sm rounded-pill px-2 ${activeTab === 'me' ? 'active btn-dark text-white' : 'btn-light'}`}
+                        style={{ minHeight: '44px', minWidth: '44px', whiteSpace: 'nowrap', flex: '0.85 1 0', fontSize: '0.78rem', padding: '4px 8px' }}
                         onClick={() => setActiveTab('me')}
                     >
                         🙋 Me
@@ -185,8 +217,8 @@ export function EmojiGifPicker({
                         role="tab"
                         aria-selected={activeTab === 'gif'}
                         data-testid="comment-emoji-tab-gif"
-                        className={`comment-emoji-tab btn btn-sm rounded-pill ${activeTab === 'gif' ? 'active btn-dark text-white' : 'btn-light'}`}
-                        style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                        className={`comment-emoji-tab btn btn-sm rounded-pill px-2 ${activeTab === 'gif' ? 'active btn-dark text-white' : 'btn-light'}`}
+                        style={{ minHeight: '44px', minWidth: '44px', whiteSpace: 'nowrap', flex: '0.95 1 0', fontSize: '0.78rem', padding: '4px 8px' }}
                         onClick={() => setActiveTab('gif')}
                     >
                         🎬 GIFs
@@ -196,8 +228,8 @@ export function EmojiGifPicker({
                 {onClose && (
                     <button
                         type="button"
-                        className="btn btn-sm btn-light rounded-circle"
-                        style={{ minWidth: '44px', minHeight: '44px' }}
+                        className="btn btn-sm btn-light rounded-circle flex-shrink-0"
+                        style={{ minWidth: '44px', minHeight: '44px', width: '44px', height: '44px', padding: 0 }}
                         aria-label="Close picker"
                         onClick={onClose}
                     >
@@ -259,9 +291,20 @@ export function EmojiGifPicker({
 
             {/* Tab 2: ✨ Living 3D Family Emojis */}
             {activeTab === 'living' && (
-                <div className="comment-living-grid d-flex flex-wrap gap-2 overflow-y-auto" style={{ maxHeight: '220px' }} data-testid="comment-living-grid">
+                <div
+                    className="comment-living-grid overflow-y-auto"
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+                        gap: '8px',
+                        width: '100%',
+                        maxHeight: '220px',
+                        padding: '2px',
+                    }}
+                    data-testid="comment-living-grid"
+                >
                     {livingCatalog.length === 0 ? (
-                        <div className="text-muted small p-2">
+                        <div className="text-muted small p-2" style={{ gridColumn: '1 / -1' }}>
                             Living 3D Family Emojis are loading or unavailable. Visit <a href="/member/emojiStudio">Emoji Studio</a> to explore them.
                         </div>
                     ) : (
@@ -269,7 +312,7 @@ export function EmojiGifPicker({
                             <button
                                 key={le.id}
                                 type="button"
-                                className="comment-living-btn btn btn-light border rounded-3 d-inline-flex flex-column align-items-center justify-content-center p-1"
+                                className="comment-living-btn btn btn-light border rounded-3 d-flex flex-column align-items-center justify-content-center p-1 w-100"
                                 style={{ minWidth: '56px', minHeight: '56px' }}
                                 data-emoji-id={le.id}
                                 title={le.title}
@@ -298,32 +341,67 @@ export function EmojiGifPicker({
 
             {/* Tab 3: 🙋 Me-Stickers */}
             {activeTab === 'me' && (
-                <div className="me-sticker-grid me-sticker-grid--comment" data-testid="comment-me-grid">
-                    {meError && <span className="text-muted small">Could not load your avatar stickers.</span>}
-                    {!meError && meStickers === null && <span className="text-muted small">Loading your avatar…</span>}
+                <div
+                    className="me-sticker-grid me-sticker-grid--comment"
+                    data-testid="comment-me-grid"
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+                        gap: '8px',
+                        width: '100%',
+                        maxHeight: '240px',
+                        overflowY: 'auto',
+                        padding: '4px 2px',
+                    }}
+                >
+                    {meError && (
+                        <span className="text-muted small" style={{ gridColumn: '1 / -1' }}>
+                            Could not load your avatar stickers.
+                        </span>
+                    )}
+                    {!meError && meStickers === null && (
+                        <span className="text-muted small" style={{ gridColumn: '1 / -1' }}>
+                            Loading your avatar…
+                        </span>
+                    )}
                     {!meError && meStickers && !meStickers.available && (
-                        <a href="/member/emojiStudio" className="btn btn-sm btn-warning rounded-pill fw-semibold" style={{ minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}>
+                        <a
+                            href="/member/emojiStudio"
+                            className="btn btn-sm btn-warning rounded-pill fw-semibold"
+                            style={{ minHeight: '44px', display: 'inline-flex', alignItems: 'center', gridColumn: '1 / -1' }}
+                        >
                             🎨 Design your avatar in Emoji Studio to unlock Me-stickers
                         </a>
                     )}
-                    {!meError && meStickers?.available && Array.isArray(meStickers.stickers) && (
-                        <div className="d-flex flex-wrap gap-2">
-                            {meStickers.stickers.map((st) => (
-                                <button
-                                    key={st.reaction}
-                                    type="button"
-                                    className="me-sticker-btn btn btn-light border rounded-3 d-inline-flex flex-column align-items-center p-2"
-                                    style={{ minWidth: '68px', minHeight: '68px' }}
-                                    title={st.label}
-                                    aria-label={`Add my avatar: ${st.label}`}
-                                    onClick={() => onSelectMeSticker?.(st)}
+                    {!meError &&
+                        meStickers?.available &&
+                        Array.isArray(meStickers.stickers) &&
+                        meStickers.stickers.map((st) => (
+                            <button
+                                key={st.reaction}
+                                type="button"
+                                className="me-sticker-btn btn btn-light border rounded-3 d-flex flex-column align-items-center justify-content-center p-2 w-100"
+                                style={{ minWidth: '64px', minHeight: '88px' }}
+                                title={st.label}
+                                aria-label={`Add my avatar: ${st.label}`}
+                                onClick={() => onSelectMeSticker?.(st)}
+                            >
+                                <img
+                                    src={st.url}
+                                    width="56"
+                                    height="56"
+                                    alt={st.label}
+                                    loading="lazy"
+                                    style={{ width: '56px', height: '56px', objectFit: 'contain', display: 'block' }}
+                                />
+                                <span
+                                    className="small mt-1 fw-semibold text-truncate w-100 text-center"
+                                    style={{ fontSize: '0.74rem' }}
                                 >
-                                    <img src={st.url} width="52" height="52" alt={st.label} loading="lazy" />
-                                    <span className="small mt-1">{st.label}</span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
+                                    {st.label}
+                                </span>
+                            </button>
+                        ))}
                 </div>
             )}
 
@@ -352,15 +430,26 @@ export function EmojiGifPicker({
                         value={gifSearch}
                         onInput={(e) => setGifSearch(e.target.value)}
                     />
-                    <div className="d-flex flex-wrap gap-2 overflow-y-auto" style={{ maxHeight: '210px' }}>
+                    <div
+                        className="overflow-y-auto"
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                            gap: '8px',
+                            width: '100%',
+                            maxHeight: '210px',
+                        }}
+                    >
                         {filteredGifs.length === 0 ? (
-                            <div className="text-muted small p-2">No matching Family GIFs found.</div>
+                            <div className="text-muted small p-2" style={{ gridColumn: '1 / -1' }}>
+                                No matching Family GIFs found.
+                            </div>
                         ) : (
                             filteredGifs.map((g) => (
                                 <button
                                     key={g.id}
                                     type="button"
-                                    className="gif-item-card btn p-1 border rounded-3 bg-light"
+                                    className="gif-item-card btn p-1 border rounded-3 bg-light w-100"
                                     style={{ minWidth: '88px', minHeight: '72px' }}
                                     title={g.title}
                                     aria-label={`Select GIF: ${g.title}`}
@@ -370,7 +459,7 @@ export function EmojiGifPicker({
                                         src={g.url}
                                         alt={g.title}
                                         loading="lazy"
-                                        style={{ width: '80px', height: '64px', objectFit: 'cover', borderRadius: '6px', display: 'block' }}
+                                        style={{ width: '100%', height: '68px', objectFit: 'cover', borderRadius: '6px', display: 'block' }}
                                     />
                                 </button>
                             ))

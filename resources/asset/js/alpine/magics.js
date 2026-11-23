@@ -15,7 +15,7 @@ export function initAlpineMagics(Alpine) {
         try { navigator.vibrate(30); } catch (e) {}
       }
       if (typeof window !== 'undefined' && typeof window.swalToast === 'function') {
-        window.swalToast({ icon: 'success', title: successMsg });
+        window.swalToast(successMsg, 'success');
       }
     };
 
@@ -46,7 +46,7 @@ export function initAlpineMagics(Alpine) {
   // 4. $toast: Universal tactile toast notification shortcut
   Alpine.magic('toast', () => (title, icon = 'info') => {
     if (typeof window !== 'undefined' && typeof window.swalToast === 'function') {
-      window.swalToast({ icon, title });
+      window.swalToast(title, icon);
     } else if (typeof window !== 'undefined' && typeof window.swal === 'function') {
       window.swal.fire({
         toast: true,

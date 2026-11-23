@@ -1,6 +1,7 @@
 <?php
 
 $router->map('GET', '/accountSetting', 'App\controller\members\SettingController@index', 'accountSetting');
+$router->map('GET', '/api/account-settings/state', 'App\controller\members\SettingController@state', 'api_account_settings_state');
 
 // Defensive redirect: map legacy /member/settings requests to /accountSetting#v-pills-familycode
 $router->map('GET', '/member/settings', function() {

@@ -199,9 +199,18 @@ runTest('Frontend views include Omni-Search trigger button, modal, and deep-link
     }
 
     // 4. Check accountSetting deep-link focus
-    $accountSettingContent = file_get_contents($rootDir . '/resources/views/member/accountSetting.blade.php');
+    $accountSettingContent = (string) file_get_contents($rootDir . '/resources/views/member/accountSetting.blade.php');
+    $preactDir = $rootDir . '/resources/asset/js/apps/account-settings';
+    if (is_dir($preactDir)) {
+        $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($preactDir, FilesystemIterator::SKIP_DOTS));
+        foreach ($it as $file) {
+            if ($file->isFile() && preg_match('/\.(jsx?|css)$/', $file->getFilename())) {
+                $accountSettingContent .= "\n" . (string) file_get_contents($file->getPathname());
+            }
+        }
+    }
     if (!str_contains($accountSettingContent, 'handleDeepLinkTarget') || !str_contains($accountSettingContent, 'pulse-highlight-target')) {
-        throw new RuntimeException('accountSetting.blade.php missing handleDeepLinkTarget or pulse highlight handler');
+        throw new RuntimeException('Account Settings missing handleDeepLinkTarget or pulse highlight handler');
     }
 });
 

@@ -111,10 +111,19 @@ assertCondition(str_contains($cardContent, 'title="Write or view family comments
 // 5. Account Settings Tooltip Management
 $accPath = $root . '/resources/views/member/accountSetting.blade.php';
 $accContent = file_get_contents($accPath) ?: '';
-assertCondition(str_contains($accContent, 'id="tooltipModeSelect"'), 'accountSetting.blade.php contains #tooltipModeSelect dropdown', $failures, $checks);
-assertCondition(str_contains($accContent, 'id="resetTooltipMasteryBtn"'), 'accountSetting.blade.php contains #resetTooltipMasteryBtn button', $failures, $checks);
-assertCondition(str_contains($accContent, 'window.FamilyTooltip.setMode'), 'accountSetting.blade.php wires up setMode() handler', $failures, $checks);
-assertCondition(str_contains($accContent, 'window.FamilyTooltip.resetMastery'), 'accountSetting.blade.php wires up resetMastery() handler', $failures, $checks);
+$preactDir = $root . '/resources/asset/js/apps/account-settings';
+if (is_dir($preactDir)) {
+    $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($preactDir, FilesystemIterator::SKIP_DOTS));
+    foreach ($it as $file) {
+        if ($file->isFile() && preg_match('/\.(jsx?|css)$/', $file->getFilename())) {
+            $accContent .= "\n" . (file_get_contents($file->getPathname()) ?: '');
+        }
+    }
+}
+assertCondition(str_contains($accContent, 'id="tooltipModeSelect"'), 'Account Settings contains #tooltipModeSelect dropdown', $failures, $checks);
+assertCondition(str_contains($accContent, 'id="resetTooltipMasteryBtn"'), 'Account Settings contains #resetTooltipMasteryBtn button', $failures, $checks);
+assertCondition(str_contains($accContent, 'window.FamilyTooltip.setMode'), 'Account Settings wires up setMode() handler', $failures, $checks);
+assertCondition(str_contains($accContent, 'window.FamilyTooltip.resetMastery'), 'Account Settings wires up resetMastery() handler', $failures, $checks);
 
 // 6. Check PHP syntax across modified PHP/Blade files
 $phpFilesToCheck = [

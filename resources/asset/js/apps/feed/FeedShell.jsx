@@ -8,6 +8,7 @@ import { PostCard } from './PostCard';
 import { LightboxModal } from './LightboxModal';
 import { VideoModal } from './VideoModal';
 import { ViewersModal } from './ViewersModal';
+import { SharePortalModal } from './SharePortalModal';
 import {
     normalizeComment,
     normalizePost,
@@ -45,6 +46,7 @@ export function FeedShell({ bootstrap = {} }) {
     const [lightboxState, setLightboxState] = useState({ isOpen: false, images: [], index: 0, postNo: null });
     const [videoState, setVideoState] = useState({ isOpen: false, videos: [], index: 0 });
     const [viewersState, setViewersState] = useState({ isOpen: false, type: 'post', targetNo: null, initialCount: 0 });
+    const [sharePortalPost, setSharePortalPost] = useState(null);
 
     const shellRef = useRef(null);
     const sentinelRef = useRef(null);
@@ -563,6 +565,11 @@ export function FeedShell({ bootstrap = {} }) {
         });
     }, []);
 
+    const handleOpenSharePortal = useCallback((post) => {
+        if (!post?.post_no) return;
+        setSharePortalPost(post);
+    }, []);
+
     // Record post & comment views when cards/comments scroll into view
     useEffect(() => {
         if (loading || typeof IntersectionObserver === 'undefined') return undefined;
@@ -686,6 +693,9 @@ export function FeedShell({ bootstrap = {} }) {
             posts: postsProxy,
             openLightbox: (images, index = 0, post = null) => {
                 handleOpenLightbox(images, index, post);
+            },
+            openSharePortal: (post) => {
+                handleOpenSharePortal(post);
             },
         };
         el._x_dataStack = [bridge];
@@ -976,6 +986,7 @@ export function FeedShell({ bootstrap = {} }) {
                         onOpenVideo={handleOpenVideo}
                         onOpenPostViewers={handleOpenPostViewers}
                         onOpenCommentViewers={handleOpenCommentViewers}
+                        onOpenSharePortal={handleOpenSharePortal}
                     />
                 </IslandErrorBoundary>
             ))}
@@ -1021,6 +1032,12 @@ export function FeedShell({ bootstrap = {} }) {
                 initialCount={viewersState.initialCount}
                 bootstrap={profileBootstrap}
                 onClose={() => setViewersState({ isOpen: false, type: 'post', targetNo: null, initialCount: 0 })}
+            />
+
+            <SharePortalModal
+                isOpen={Boolean(sharePortalPost)}
+                post={sharePortalPost}
+                onClose={() => setSharePortalPost(null)}
             />
         </div>
     );

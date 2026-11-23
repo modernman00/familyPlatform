@@ -397,7 +397,7 @@ export function KinGridGame({ puzzle, onProgress, onComplete, submitting }) {
                                 {rightIneq && <span className={styles.ineqRight} aria-hidden="true">{rightIneq}</span>}
                                 {downIneq && (
                                     <span className={styles.ineqDown} aria-hidden="true">
-                                        {downIneq === '>' ? '▾' : '▴'}
+                                        {downIneq}
                                     </span>
                                 )}
                             </div>

@@ -21,15 +21,23 @@ export function initDarkMode() {
   const applyTheme = (dark) => {
     if (dark) {
       document.body.classList.add('dark-mode');
+      document.documentElement.classList.add('dark', 'dark-mode');
       if (themeBadge) {
         themeBadge.textContent = 'Dark';
         themeBadge.className = 'badge bg-warning text-dark';
       }
     } else {
-      document.body.classList.remove('dark-mode');
+      document.body.classList.remove('dark-mode', 'dark-theme');
+      document.documentElement.classList.remove('dark', 'dark-mode');
       if (themeBadge) {
         themeBadge.textContent = 'Light';
         themeBadge.className = 'badge bg-secondary-subtle text-secondary';
+      }
+    }
+    if (window.Alpine && typeof window.Alpine.store === 'function') {
+      const themeStore = window.Alpine.store('theme');
+      if (themeStore && themeStore.isDark !== dark) {
+        themeStore.isDark = dark;
       }
     }
   };

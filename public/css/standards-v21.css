@@ -3642,12 +3642,14 @@ body.dark-theme .post-carousel-dots,
 }
 
 .carousel-dot {
-  /* Hit area: 24px wide x 44px tall (WCAG 2.2 / 44px rule). Negative block margin keeps the
+  /* Hit area: 44px wide x 44px tall (WCAG 2.2 / 44px rule). Negative block margin keeps the
      pill the same visual height; the visible dot is drawn by ::before. */
   position: relative;
-  width: 24px;
+  width: 44px;
+  min-width: 44px;
   height: 44px;
-  margin: -19px 0;
+  min-height: 44px;
+  margin: -19px -6px;
   background: transparent;
   display: inline-block;
   cursor: pointer;

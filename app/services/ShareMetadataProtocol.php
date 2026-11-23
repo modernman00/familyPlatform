@@ -297,18 +297,19 @@ final class ShareMetadataProtocol
                 imagettftext($im, 17, 0, 72, $h - 68, $gold, $fontBold, $footer);
             }
         } else {
-            // Built-in GD font fallback
+            // Built-in GD font fallback (transliterate UTF-8 punctuation to prevent Latin-2 mojibake)
+            $toAscii = static fn (string $s): string => str_replace(['•', '—', '–', '…'], ['-', '--', '-', '...'], $s);
             if ($cream !== false) {
-                imagestring($im, 5, 72, 85, $badgeText, $cream);
+                imagestring($im, 5, 72, 85, $toAscii($badgeText), $cream);
             }
             if ($white !== false) {
-                imagestring($im, 5, 72, 180, mb_substr($cleanTitle, 0, 60), $white);
+                imagestring($im, 5, 72, 180, mb_substr($toAscii($cleanTitle), 0, 60), $white);
             }
             if ($muted !== false) {
-                imagestring($im, 4, 72, 240, mb_substr($cleanSub, 0, 80), $muted);
+                imagestring($im, 4, 72, 240, mb_substr($toAscii($cleanSub), 0, 80), $muted);
             }
             if ($gold !== false) {
-                imagestring($im, 4, 72, $h - 80, $footer, $gold);
+                imagestring($im, 4, 72, $h - 80, $toAscii($footer), $gold);
             }
         }
 
@@ -322,13 +323,25 @@ final class ShareMetadataProtocol
 
     private static function resolveFontPath(bool $bold): ?string
     {
+        $root = dirname(__DIR__, 2);
+        $mpdf = $root . '/vendor/mpdf/mpdf/ttfonts/';
+        $dompdf = $root . '/vendor/dompdf/dompdf/lib/fonts/';
+        $festive = $root . '/resources/fonts/festive/';
+
         $candidates = $bold
             ? [
+                $mpdf . 'DejaVuSans-Bold.ttf',
+                $dompdf . 'DejaVuSans-Bold.ttf',
+                $mpdf . 'FreeSansBold.ttf',
                 '/System/Library/Fonts/Supplemental/Arial Bold.ttf',
                 '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
                 '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
             ]
             : [
+                $mpdf . 'DejaVuSans.ttf',
+                $dompdf . 'DejaVuSans.ttf',
+                $festive . 'Montserrat.ttf',
+                $mpdf . 'FreeSans.ttf',
                 '/System/Library/Fonts/Supplemental/Arial.ttf',
                 '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
                 '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',

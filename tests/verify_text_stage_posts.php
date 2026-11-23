@@ -197,6 +197,16 @@ assertStageTrue(
     'LinkPreviewService resiliently extracts metadata for idecideapp blog post even when deep route fails'
 );
 
+// 8. Phase 4: Verify Poll Arena Theme Parity Across Preact & Alpine + Light/Dark Contrast Safeguard
+$profilePageCss = (string) file_get_contents(__DIR__ . '/../public/css/profilepage.css');
+$feedUtilsJs = (string) file_get_contents(__DIR__ . '/../resources/asset/js/apps/feed/feedUtils.js');
+assertStageTrue(
+    str_contains($profilePageCss, '.fp-poll-arena--cyber_poll')
+    && str_contains($profilePageCss, '.fp-poll-arena--default_poll')
+    && str_contains($feedUtilsJs, "theme: 'cyber_poll'"),
+    'Poll Arena CSS defines explicit dark stage background on base .fp-poll-arena, .fp-poll-arena--cyber_poll, and .fp-poll-arena--default_poll to prevent white-on-white ghost text in light mode'
+);
+
 if ($failures > 0) {
     echo "\nFAILED with {$failures} error(s).\n";
     exit(1);

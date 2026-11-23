@@ -11,6 +11,20 @@ declare(strict_types=1);
 $rootDir = dirname(__DIR__);
 $swalAlertPath = $rootDir . '/resources/views/component/swalAlert.blade.php';
 $accountSettingPath = $rootDir . '/resources/views/member/accountSetting.blade.php';
+$preactDir = $rootDir . '/resources/asset/js/apps/account-settings';
+
+$readAccountSettingBundle = static function () use ($accountSettingPath, $preactDir): string {
+    $combined = file_exists($accountSettingPath) ? ((string) file_get_contents($accountSettingPath)) : '';
+    if (is_dir($preactDir)) {
+        $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($preactDir, FilesystemIterator::SKIP_DOTS));
+        foreach ($it as $file) {
+            if ($file->isFile() && preg_match('/\.(jsx?|css)$/', $file->getFilename())) {
+                $combined .= "\n" . (string) file_get_contents($file->getPathname());
+            }
+        }
+    }
+    return $combined;
+};
 
 $errors = [];
 
@@ -18,12 +32,12 @@ echo "=================================================================\n";
 echo "🔍 ACCOUNT SETTING SWAL ALERT REGRESSION SUITE\n";
 echo "=================================================================\n\n";
 
-// 1. Verify accountSetting.blade.php does not hardcode alert-danger on notification containers
-echo "[1/4] Checking notification containers in accountSetting.blade.php...\n";
+// 1. Verify accountSetting.blade.php and Preact shell do not hardcode alert-danger on notification containers
+echo "[1/4] Checking notification containers in Account Settings...\n";
 if (!file_exists($accountSettingPath)) {
     $errors[] = "File not found: {$accountSettingPath}";
 } else {
-    $content = file_get_contents($accountSettingPath);
+    $content = $readAccountSettingBundle();
     $containers = [
         'profileForm_notification',
         'parentsForm_notification',
@@ -38,7 +52,7 @@ if (!file_exists($accountSettingPath)) {
             continue;
         }
 
-        // Must not contain alert-danger on the line declaring id="{$c}"
+        // Must not contain alert-danger on the tag declaring id="{$c}"
         if (preg_match('/<div[^>]*alert-danger[^>]*id="' . preg_quote($c, '/') . '"/i', $content) ||
             preg_match('/<div[^>]*id="' . preg_quote($c, '/') . '"[^>]*alert-danger/i', $content)) {
             $errors[] = "Container '{$c}' has hardcoded alert-danger class!";
@@ -46,7 +60,7 @@ if (!file_exists($accountSettingPath)) {
     }
 
     if (empty($errors)) {
-        echo "  ✅ All 5 notification containers in accountSetting.blade.php use non-danger classes.\n";
+        echo "  ✅ All 5 notification containers in Account Settings use non-danger classes.\n";
     }
 }
 

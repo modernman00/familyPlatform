@@ -249,12 +249,14 @@ if (window.location.pathname === '/register') {
   qSel('.login').style.display = 'none'; // navbar mgt
   qSel('.signUp').style.display = 'none'; // navbar mgt
 } else if (checkURL('accountSetting')) {
-  routePromise = import(
-    /* webpackChunkName: 'accountSetting' */
-    './components/accountSetting'
-  )
-    .then((module) => module.default)
-    .catch((err) => showError(err));
+  if (!document.getElementById('account-settings-root')) {
+    routePromise = import(
+      /* webpackChunkName: 'accountSetting' */
+      './components/accountSetting'
+    )
+      .then((module) => module.default)
+      .catch((err) => showError(err));
+  }
 } else if (checkURL('organogram') || window.location.pathname.startsWith('/organogram')) {
   if (qSel('.familyTreeNav')) qSel('.familyTreeNav').style.display = 'none'; // navbar mgt
 

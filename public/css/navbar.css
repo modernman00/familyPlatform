@@ -1599,3 +1599,89 @@ body.dark-mode .btn-raised-nav { color: #e2e8f0; background: linear-gradient(180
   border: 2px solid #fff; box-shadow: 0 2px 0 #6b0f18, 0 3px 8px rgba(163, 22, 33, 0.35);
 }
 .btn-user-compact:focus-visible { outline: 2px solid var(--brand-primary, #b8202c); outline-offset: 2px; }
+
+/* Responsive desktop navbar fit guard: keep OmniSearch & action controls inside 1024px–1520px viewports */
+@media (min-width: 992px) {
+  #mainNavbar .navbar-collapse {
+    min-width: 0;
+    gap: 0.45rem;
+  }
+  #mainNavbar .navbar-nav {
+    flex-shrink: 0;
+  }
+  #mainNavbar .navbar-actions-group {
+    min-width: 0;
+    flex: 1 1 0%;
+    justify-content: flex-end;
+  }
+  #mainNavbar .btn-omni-search-trigger {
+    min-width: 44px;
+    flex: 0 1 200px;
+    max-width: clamp(104px, 12vw, 200px);
+  }
+}
+
+@media (min-width: 1366px) and (max-width: 1519.98px) {
+  #mainNavbar .brand-text-container,
+  #mainNavbar .brand-name-family,
+  #mainNavbar .brand-name-platform {
+    font-size: 1.12rem;
+  }
+  #mainNavbar .stitch-nav-link {
+    font-size: 0.82rem;
+    padding: 0.34rem 0.46rem !important;
+    gap: 0.25rem;
+  }
+  #mainNavbar .navbar-actions-group {
+    gap: 0.35rem !important;
+  }
+  #mainNavbar .btn-omni-search-trigger {
+    flex: 0 1 156px;
+    max-width: 156px;
+    padding: 0.28rem 0.5rem 0.28rem 0.4rem;
+  }
+  #mainNavbar .btn-omni-search-trigger .omni-trigger-kbd {
+    display: none !important;
+  }
+  #mainNavbar .invite-3d-btn {
+    padding: 0.32rem 0.72rem !important;
+    font-size: 0.82rem;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1365.98px) {
+  #mainNavbar .brand-text-container {
+    font-size: 1.05rem;
+  }
+  #mainNavbar .brand-name-family,
+  #mainNavbar .brand-name-platform {
+    font-size: 1.05rem;
+  }
+  #mainNavbar .stitch-nav-link {
+    font-size: 0.75rem;
+    padding: 0.28rem 0.36rem !important;
+    gap: 0.18rem;
+  }
+  #mainNavbar .navbar-nav .nav-item:not(.creativeStudioNav) > .stitch-nav-link > .bi {
+    display: none;
+  }
+  #mainNavbar .navbar-actions-group {
+    gap: 0.25rem !important;
+  }
+  #mainNavbar .btn-omni-search-trigger {
+    flex: 0 1 108px;
+    max-width: 108px;
+    padding: 0.25rem 0.45rem 0.25rem 0.35rem;
+  }
+  #mainNavbar .btn-omni-search-trigger .omni-trigger-kbd {
+    display: none !important;
+  }
+  #mainNavbar .invite-3d-btn {
+    padding: 0.28rem 0.55rem !important;
+    font-size: 0.75rem;
+  }
+  #mainNavbar .lang-btn {
+    padding-left: 0.45rem !important;
+    padding-right: 0.45rem !important;
+  }
+}

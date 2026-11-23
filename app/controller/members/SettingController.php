@@ -11,53 +11,306 @@ final class SettingController extends BaseController
 {
     public function index(): void
     {
-          
-  
         try {
             // This is a protected route — enforce auth here explicitly
             parent::__construct();
+            $bundle = $this->loadSettingsBundle();
 
-            try {
-                $accountData = parent::membersData();
-            } catch (\Src\Exceptions\NotFoundException $e) {
-                $uid = (string) ($_SESSION['id'] ?? '');
-                $setData = new \App\model\SingleCustomerData();
-                $rawMember = $setData->getCustomerData($uid, ['personal', 'contact', 'otherFamily', 'post', 'profilePics', 'work']);
-                if (!is_array($rawMember) || empty($rawMember['firstName']) || empty($rawMember['lastName'])) {
-                    throw $e;
-                }
-                $rawMember['id'] = $uid;
-                $rawMember['famCode'] = (string) ($rawMember['famCode'] ?? '');
-                $accountData = parent::formatPerson($rawMember);
-            }
-
-            $approvalService = new \App\service\FamilyCodeApprovalService(\Src\Db::connect2());
-            $pendingFamilyRequest = $approvalService->getPendingRequestForUser((string)$accountData['id']);
-            $birthFamily = (new \App\services\BirthFamilyCodeService(\Src\Db::connect2(), $approvalService))->status((string)$accountData['id']);
-            $codeRename = (new \App\services\FamilyCodeRenameService(\Src\Db::connect2()))->statusFor((string)$accountData['id']);
-
-            $passkeys = (new \Src\Select())->selectFn1(
-                "SELECT id, credential_id, device_name, created_at, last_used_at FROM user_passkeys WHERE user_id = ? ORDER BY created_at DESC",
-                [(string)$accountData['id']]
-            );
-
-            $restrictionDirectory = \App\services\MemberRestrictionService::getRestrictionDirectoryForOwner(
-                \Src\Db::connect2(),
-                (string)$accountData['id']
-            );
+            $jsonFlags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE;
+            $bootstrapJson = json_encode($bundle['bootstrap'], $jsonFlags) ?: '{}';
+            $restrictionDirectoryJson = json_encode($bundle['restrictionDirectory'], $jsonFlags) ?: '[]';
 
             Utility::view('/member/accountSetting', [
-                'accountData' => $accountData,
-                'pendingFamilyRequest' => $pendingFamilyRequest,
-                'birthFamily' => $birthFamily,
-                'codeRename' => $codeRename,
-                'passkeys' => $passkeys,
-                'restrictionDirectory' => $restrictionDirectory
+                'accountData' => $bundle['accountData'],
+                'pendingFamilyRequest' => $bundle['pendingFamilyRequest'],
+                'birthFamily' => $bundle['birthFamily'],
+                'codeRename' => $bundle['codeRename'],
+                'passkeys' => $bundle['passkeys'],
+                'restrictionDirectory' => $bundle['restrictionDirectory'],
+                'accountSettingsBootstrapJson' => $bootstrapJson,
+                'restrictionDirectoryJson' => $restrictionDirectoryJson,
             ]);
-
         } catch (\Throwable $th) {
             Utility::showError($th);
         }
+    }
+
+    /**
+     * GET /api/account-settings/state
+     * Returns the allowlisted, authenticated member account settings bundle for live Preact refresh.
+     */
+    public function state(): void
+    {
+        try {
+            $uid = (string) ($_SESSION['id'] ?? '');
+            if ($uid === '') {
+                try {
+                    parent::__construct();
+                    $uid = (string) ($_SESSION['id'] ?? '');
+                } catch (\Throwable) {
+                    $uid = '';
+                }
+            }
+
+            if ($uid === '') {
+                \Src\ApiResponse::error('Unauthorised: Please sign in to access account settings.', 401);
+                return;
+            }
+
+            $bundle = $this->loadSettingsBundle();
+            \Src\ApiResponse::success($bundle['bootstrap']);
+        } catch (\Throwable $th) {
+            error_log('[SettingController::state] Error: ' . $th->getMessage());
+            \Src\ApiResponse::error('Unable to load account settings right now.', 500);
+        }
+    }
+
+    /**
+     * @return array{
+     *   accountData: array<string, mixed>,
+     *   pendingFamilyRequest: ?array<string, mixed>,
+     *   birthFamily: array<string, mixed>,
+     *   codeRename: array<string, mixed>,
+     *   passkeys: list<array<string, mixed>>,
+     *   restrictionDirectory: list<array<string, mixed>>,
+     *   bootstrap: array<string, mixed>
+     * }
+     */
+    private function loadSettingsBundle(): array
+    {
+        try {
+            $accountData = parent::membersData();
+        } catch (\Src\Exceptions\NotFoundException $e) {
+            $uid = (string) ($_SESSION['id'] ?? '');
+            $setData = new \App\model\SingleCustomerData();
+            $rawMember = $setData->getCustomerData($uid, ['personal', 'contact', 'otherFamily', 'post', 'profilePics', 'work']);
+            if (!is_array($rawMember) || empty($rawMember['firstName']) || empty($rawMember['lastName'])) {
+                throw $e;
+            }
+            $rawMember['id'] = $uid;
+            $rawMember['famCode'] = (string) ($rawMember['famCode'] ?? '');
+            $accountData = parent::formatPerson($rawMember);
+        }
+
+        $pdo = \Src\Db::connect2();
+        $userId = (string) ($accountData['id'] ?? '');
+        $approvalService = new \App\service\FamilyCodeApprovalService($pdo);
+        $pendingFamilyRequest = $approvalService->getPendingRequestForUser($userId);
+        $birthFamily = (new \App\services\BirthFamilyCodeService($pdo, $approvalService))->status($userId);
+        $codeRename = (new \App\services\FamilyCodeRenameService($pdo))->statusFor($userId);
+
+        $rawPasskeys = (new \Src\Select())->selectFn1(
+            'SELECT id, credential_id, device_name, created_at, last_used_at FROM user_passkeys WHERE user_id = ? ORDER BY created_at DESC',
+            [$userId]
+        );
+        /** @var list<array<string, mixed>> $passkeys */
+        $passkeys = array_values(array_filter($rawPasskeys, 'is_array'));
+
+        /** @var list<array<string, mixed>> $restrictionDirectory */
+        $restrictionDirectory = \App\services\MemberRestrictionService::getRestrictionDirectoryForOwner(
+            $pdo,
+            $userId
+        );
+
+        $bootstrap = self::buildSafeBootstrap(
+            $accountData,
+            is_array($pendingFamilyRequest) ? $pendingFamilyRequest : null,
+            $birthFamily,
+            $codeRename,
+            $passkeys,
+            $restrictionDirectory,
+            (string) ($_SESSION['fullName'] ?? ''),
+            (string) ($_SESSION['token'] ?? ''),
+            (string) ($_GET['notice'] ?? '')
+        );
+
+        return [
+            'accountData' => $accountData,
+            'pendingFamilyRequest' => is_array($pendingFamilyRequest) ? $pendingFamilyRequest : null,
+            'birthFamily' => $birthFamily,
+            'codeRename' => $codeRename,
+            'passkeys' => $passkeys,
+            'restrictionDirectory' => $restrictionDirectory,
+            'bootstrap' => $bootstrap,
+        ];
+    }
+
+    /**
+     * Build an allowlisted, XSS-safe bootstrap payload for the Account Settings Preact shell.
+     * Strips sensitive fields such as approval_token, password hashes, and internal secrets.
+     *
+     * @param array<string, mixed> $accountData
+     * @param array<string, mixed>|null $pendingFamilyRequest
+     * @param array<string, mixed> $birthFamily
+     * @param array<string, mixed> $codeRename
+     * @param list<array<string, mixed>> $passkeys
+     * @param list<array<string, mixed>> $restrictionDirectory
+     * @return array<string, mixed>
+     */
+    public static function buildSafeBootstrap(
+        array $accountData,
+        ?array $pendingFamilyRequest,
+        array $birthFamily,
+        array $codeRename,
+        array $passkeys,
+        array $restrictionDirectory,
+        string $fullNameFallback = '',
+        string $csrfToken = '',
+        string $notice = ''
+    ): array {
+        $nameParts = explode(' ', trim($fullNameFallback), 2);
+        $firstName = (string) ($accountData['firstName'] ?? $nameParts[0]);
+        $lastName = (string) ($accountData['lastName'] ?? ($nameParts[1] ?? ''));
+        $fullName = trim((string) ($accountData['fullName'] ?? ($firstName . ' ' . $lastName)));
+
+        $bfState = (string) ($birthFamily['state'] ?? 'none');
+        $otherFamCode = (string) ($accountData['otherFamCode'] ?? '');
+        $hasMaternalCode = isset($accountData['hasMaternalCode'])
+            ? (bool) $accountData['hasMaternalCode']
+            : ($bfState === 'active' && $otherFamCode !== '');
+
+        $safeAccountData = [
+            'id' => (string) ($accountData['id'] ?? ''),
+            'firstName' => $firstName,
+            'lastName' => $lastName,
+            'fullName' => $fullName,
+            'email' => (string) ($accountData['email'] ?? ''),
+            'mobile' => (string) ($accountData['mobile'] ?? ''),
+            'country' => (string) ($accountData['country'] ?? ''),
+            'employmentStatus' => (string) ($accountData['employmentStatus'] ?? ''),
+            'occupation' => (string) ($accountData['occupation'] ?? ''),
+            'famCode' => (string) ($accountData['famCode'] ?? ''),
+            'otherFamCode' => $otherFamCode,
+            'hasMaternalCode' => $hasMaternalCode,
+            'maternalFamCode' => (string) ($accountData['maternalFamCode'] ?? ''),
+            'father_first_name' => (string) ($accountData['father_first_name'] ?? ''),
+            'father_last_name' => (string) ($accountData['father_last_name'] ?? ''),
+            'father_email' => (string) ($accountData['father_email'] ?? ''),
+            'father_mobile' => (string) ($accountData['father_mobile'] ?? ''),
+            'mother_first_name' => (string) ($accountData['mother_first_name'] ?? ''),
+            'mother_last_name' => (string) ($accountData['mother_last_name'] ?? ''),
+            'maiden_name' => (string) ($accountData['maiden_name'] ?? ($accountData['mother_maiden'] ?? '')),
+            'mother_maiden' => (string) ($accountData['mother_maiden'] ?? ($accountData['maiden_name'] ?? '')),
+            'mother_email' => (string) ($accountData['mother_email'] ?? ''),
+            'mother_mobile' => (string) ($accountData['mother_mobile'] ?? ''),
+            'parents_status' => (string) ($accountData['parents_status'] ?? ''),
+            'maritalStatus' => (string) ($accountData['maritalStatus'] ?? ''),
+            'spouse_name' => (string) ($accountData['spouse_name'] ?? ''),
+            'spouse_email' => (string) ($accountData['spouse_email'] ?? ''),
+            'spouse_mobile' => (string) ($accountData['spouse_mobile'] ?? ''),
+            'spouse_gender' => (string) ($accountData['spouse_gender'] ?? ''),
+            'wedding_date' => (string) ($accountData['wedding_date'] ?? ($accountData['marriage_date'] ?? '')),
+            'marriage_date' => (string) ($accountData['marriage_date'] ?? ($accountData['wedding_date'] ?? '')),
+            'email_notifications' => (string) ($accountData['email_notifications'] ?? 'on'),
+            'post_email_notifications' => (string) ($accountData['post_email_notifications'] ?? 'off'),
+            'sms_notifications' => (string) ($accountData['sms_notifications'] ?? 'on'),
+            'two_factor_auth' => (string) ($accountData['two_factor_auth'] ?? 'off'),
+            'profile_visibility' => (string) ($accountData['profile_visibility'] ?? 'Public'),
+            'show_my_profile' => (string) ($accountData['show_my_profile'] ?? 'on'),
+            'show_birth_year' => (string) ($accountData['show_birth_year'] ?? 'off'),
+            'img' => (string) ($accountData['img'] ?? ''),
+        ];
+
+        $safePendingRequest = null;
+        if (is_array($pendingFamilyRequest)) {
+            $safePendingRequest = [
+                'family_code' => (string) ($pendingFamilyRequest['family_code'] ?? ''),
+                'inviter_first_name' => (string) ($pendingFamilyRequest['inviter_first_name'] ?? ''),
+                'inviter_last_name' => (string) ($pendingFamilyRequest['inviter_last_name'] ?? ''),
+                'purpose' => (string) ($pendingFamilyRequest['purpose'] ?? 'join'),
+                'created_at' => (string) ($pendingFamilyRequest['created_at'] ?? ''),
+            ];
+        }
+
+        $safeBirthPending = null;
+        if (isset($birthFamily['pending']) && is_array($birthFamily['pending'])) {
+            $bp = $birthFamily['pending'];
+            $safeBirthPending = [
+                'family_code' => (string) ($bp['family_code'] ?? ''),
+                'inviter_first_name' => (string) ($bp['inviter_first_name'] ?? ''),
+                'inviter_last_name' => (string) ($bp['inviter_last_name'] ?? ''),
+                'purpose' => (string) ($bp['purpose'] ?? 'birth_link'),
+            ];
+        }
+
+        $safeBirthFamily = [
+            'state' => $bfState,
+            'code' => (string) ($birthFamily['code'] ?? ''),
+            'origin' => isset($birthFamily['origin']) ? (string) $birthFamily['origin'] : null,
+            'pending' => $safeBirthPending,
+        ];
+
+        $safeCrOpen = null;
+        if (isset($codeRename['open']) && is_array($codeRename['open'])) {
+            $crOpen = $codeRename['open'];
+            $expiresAt = (string) ($crOpen['expires_at'] ?? '');
+            $expiresTs = $expiresAt !== '' ? strtotime($expiresAt) : false;
+            $safeCrOpen = [
+                'old_code' => (string) ($crOpen['old_code'] ?? ''),
+                'new_code' => (string) ($crOpen['new_code'] ?? ''),
+                'yes' => (int) ($crOpen['yes'] ?? 0),
+                'no' => (int) ($crOpen['no'] ?? 0),
+                'eligible' => (int) ($crOpen['eligible'] ?? 0),
+                'expires_at' => $expiresAt,
+                'expires_formatted' => $expiresTs !== false ? date('j M Y', $expiresTs) : '',
+                'post_no' => (int) ($crOpen['post_no'] ?? 0),
+                'requested_by' => (string) ($crOpen['requested_by'] ?? ''),
+            ];
+        }
+
+        $safeCodeRename = [
+            'is_creator' => (bool) ($codeRename['is_creator'] ?? false),
+            'can_propose' => (bool) ($codeRename['can_propose'] ?? false),
+            'code' => (string) ($codeRename['code'] ?? ''),
+            'cooldown' => (bool) ($codeRename['cooldown'] ?? false),
+            'open' => $safeCrOpen,
+        ];
+
+        $safePasskeys = [];
+        foreach ($passkeys as $pk) {
+            $createdAt = (string) ($pk['created_at'] ?? '');
+            $createdTs = $createdAt !== '' ? strtotime($createdAt) : false;
+            $safePasskeys[] = [
+                'id' => (string) ($pk['id'] ?? ''),
+                'credential_id' => (string) ($pk['credential_id'] ?? ''),
+                'device_name' => (string) ($pk['device_name'] ?? ''),
+                'created_at' => $createdAt,
+                'created_formatted' => $createdTs !== false ? date('M j, Y', $createdTs) : '',
+                'last_used_at' => (string) ($pk['last_used_at'] ?? ''),
+            ];
+        }
+
+        $safeRestrictions = [];
+        foreach ($restrictionDirectory as $member) {
+            $safeRestrictions[] = [
+                'id' => (string) ($member['id'] ?? ''),
+                'fullName' => (string) ($member['fullName'] ?? ''),
+                'famCode' => (string) ($member['famCode'] ?? ''),
+                'avatar' => (string) ($member['avatar'] ?? ''),
+                'is_restricted' => (bool) ($member['is_restricted'] ?? false),
+                'restrict_posts' => (bool) ($member['restrict_posts'] ?? false),
+                'restrict_comments' => (bool) ($member['restrict_comments'] ?? false),
+                'restrict_reels' => (bool) ($member['restrict_reels'] ?? false),
+                'restrict_events' => (bool) ($member['restrict_events'] ?? false),
+                'restrict_journals' => (bool) ($member['restrict_journals'] ?? false),
+                'restrict_announcements' => (bool) ($member['restrict_announcements'] ?? false),
+                'restrict_capsules' => (bool) ($member['restrict_capsules'] ?? false),
+                'restrict_profile' => (bool) ($member['restrict_profile'] ?? false),
+                'note' => (string) ($member['note'] ?? ''),
+            ];
+        }
+
+        return [
+            'accountData' => $safeAccountData,
+            'pendingFamilyRequest' => $safePendingRequest,
+            'birthFamily' => $safeBirthFamily,
+            'codeRename' => $safeCodeRename,
+            'passkeys' => $safePasskeys,
+            'restrictionDirectory' => $safeRestrictions,
+            'csrfToken' => $csrfToken,
+            'notice' => $notice === 'email_required_for_party_studio' ? 'email_required_for_party_studio' : '',
+            'maxWeddingDate' => date('Y-m-d', strtotime('+1 year')),
+        ];
     }
 
 

@@ -11,6 +11,8 @@ import { KinGridGame } from './KinGridGame';
 import { KinWordGame } from './KinWordGame';
 import { WordieGame } from './WordieGame';
 import { CheeseboardGame } from './CheeseboardGame';
+import { AyoGame } from './AyoGame';
+import { FamilyChessGame } from './FamilyChessGame';
 import { MinesweeperGame } from './MinesweeperGame';
 import { ArcadeShell } from './ArcadeShell';
 import { LeagueTablesPanel } from './LeagueTablesPanel';
@@ -46,7 +48,7 @@ describe('Family Arcade Engine & Components', () => {
         expect(next).toEqual([0, 1]);
     });
 
-    it('renders KinZipGame board and handles dot 1 click + undo', () => {
+    it('renders KinZipGame board, handles dot 1 click + undo, and caps hints at 3', () => {
         const puzzle = {
             seedKey: '2026-11-22',
             difficulty: 'easy',
@@ -61,11 +63,23 @@ describe('Family Arcade Engine & Components', () => {
             <KinZipGame puzzle={puzzle} onProgress={() => {}} onComplete={() => {}} submitting={false} />
         );
         expect(getByRole('grid')).toBeTruthy();
+        expect(getByText(/Hint \(3\)/i)).toBeTruthy();
+
         const firstCell = getByRole('button', { name: /Row 1 Column 1, Dot 1/i });
         fireEvent.pointerDown(firstCell);
         expect(getByText(/1\/25 cells/i)).toBeTruthy();
         fireEvent.click(getByRole('button', { name: /Undo/i }));
         expect(getByText(/0\/25 cells/i)).toBeTruthy();
+
+        // Use 3 hints
+        const hintBtn = getByRole('button', { name: /Hint/i });
+        fireEvent.click(hintBtn);
+        expect(getByText(/Hint \(2\)/i)).toBeTruthy();
+        fireEvent.click(hintBtn);
+        expect(getByText(/Hint \(1\)/i)).toBeTruthy();
+        fireEvent.click(hintBtn);
+        expect(getByText(/Hint \(0\)/i)).toBeTruthy();
+        expect(hintBtn.hasAttribute('disabled')).toBe(true);
     });
 
     it('renders LeagueTablesPanel with Family Cup and game tabs', () => {
@@ -212,6 +226,38 @@ describe('Family Arcade Engine & Components', () => {
         expect(cell.textContent).toContain('👑');
     });
 
+    it('renders AyoGame with 12 hollows and 2 iles', () => {
+        const puzzle = {
+            game: 'ayo',
+            seedKey: '2026-11-23',
+            difficulty: 'medium',
+        };
+        const { getByRole, getAllByRole } = render(
+            <AyoGame puzzle={puzzle} onProgress={() => {}} onComplete={() => {}} submitting={false} />
+        );
+        expect(getByRole('region', { name: /Yoruba Ayò Olópon Board/i })).toBeTruthy();
+        const southPits = getAllByRole('button', { name: /South/i });
+        expect(southPits.length).toBe(6);
+        expect(southPits[0].textContent).toContain('4');
+    });
+
+    it('renders FamilyChessGame and selects pieces with legal destinations', () => {
+        const puzzle = {
+            game: 'chess',
+            seedKey: '2026-11-23',
+            difficulty: 'medium',
+        };
+        const { getByRole, getAllByRole } = render(
+            <FamilyChessGame puzzle={puzzle} onProgress={() => {}} onComplete={() => {}} submitting={false} />
+        );
+        expect(getByRole('region', { name: /Family Chess Board/i })).toBeTruthy();
+        const pawnE2 = getByRole('button', { name: /Square e2: White Pawn/i });
+        fireEvent.click(pawnE2);
+        // Destination e3 or e4 should be highlighted
+        const destSquares = getAllByRole('button', { name: /Legal Destination/i });
+        expect(destSquares.length).toBeGreaterThanOrEqual(1);
+    });
+
     it('renders MinesweeperGame and reveals safe cells', () => {
         const puzzle = {
             game: 'minesweeper',
@@ -295,5 +341,30 @@ describe('Family Arcade Engine & Components', () => {
         const span7 = cell7.querySelector('span');
         expect(span7).toBeTruthy();
         expect(span7.className).toContain('mineNum7');
+    });
+
+    it('opens the Share Game modal with difficulty-aware v=3 preview card image', () => {
+        const { getByRole, getByAltText } = render(
+            <ArcadeShell
+                bootstrap={{
+                    guestMode: true,
+                    initialGame: 'kinzip',
+                    initialDifficulty: 'medium',
+                    initialPuzzle: {
+                        seedKey: '2026-11-22',
+                        difficulty: 'medium',
+                        size: 5,
+                        checkpoints: [{ num: 1, r: 0, c: 0 }, { num: 2, r: 4, c: 4 }],
+                        walls: [],
+                    },
+                }}
+            />
+        );
+        const shareBtn = getByRole('button', { name: /Share KinZip/i });
+        fireEvent.click(shareBtn);
+
+        const previewImg = getByAltText(/KinZip \(Connect the Dots\) — medium difficulty share card preview/i);
+        expect(previewImg).toBeTruthy();
+        expect(previewImg.getAttribute('src')).toContain('/arcade/card/game-kinzip.jpg?v=3&difficulty=medium');
     });
 });

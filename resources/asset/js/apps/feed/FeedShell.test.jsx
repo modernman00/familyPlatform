@@ -332,6 +332,7 @@ describe('Profile Feed Preact Island (Phases 1–4)', () => {
 
         // Delete with confirmation
         fireEvent.click(screen.getByRole('button', { name: 'Delete Post' }));
+        expect(screen.getByText('Delete this post?')).toBeTruthy();
         fireEvent.click(screen.getByRole('button', { name: 'Confirm Delete' }));
 
         await waitFor(() => {
@@ -890,15 +891,42 @@ describe('Profile Feed Preact Island (Phases 1–4)', () => {
         expect(screen.getByTestId('comment-emoji-tab-me')).toBeTruthy();
         expect(screen.getByTestId('comment-emoji-tab-gif')).toBeTruthy();
 
-        // Pick first Family GIF
+        // Regression test: clicking "🙋 Me" tab when AtgEmojiEngine.getMeStickers uses `this._meStickers`
+        // must NOT crash IslandErrorBoundary or unmount the comment box
+        window.AtgEmojiEngine = {
+            _meStickers: null,
+            getMeStickers: function () {
+                if (!this._meStickers) {
+                    this._meStickers = Promise.resolve({
+                        available: true,
+                        stickers: [
+                            { reaction: 'hello', label: 'Wave Hello', url: '/api/emoji/avatar-sticker/u_1/hello', token: ':me_hello@u_1:' },
+                        ],
+                    });
+                }
+                return this._meStickers;
+            },
+        };
+        fireEvent.click(screen.getByTestId('comment-emoji-tab-me'));
+        await waitFor(() => {
+            expect(screen.getByTestId('comment-me-grid')).toBeTruthy();
+            expect(screen.getByRole('button', { name: /Add my avatar: Wave Hello/i })).toBeTruthy();
+            expect(screen.getByLabelText('Write a comment')).toBeTruthy();
+        });
+        delete window.AtgEmojiEngine;
+
+        // Switch back to GIFs tab and pick first Family GIF
+        fireEvent.click(screen.getByTestId('comment-emoji-tab-gif'));
         const firstGifBtn = screen.getByRole('button', { name: /Select GIF: Heritage Tree/i });
         fireEvent.click(firstGifBtn);
 
         expect(screen.getByTestId('comment-gif-preview')).toBeTruthy();
 
-        // Submit comment with GIF
+        // Submit comment with GIF and visual Living 3D Emoji chip (no raw :family_hearth_3d: in input)
         const input = screen.getByLabelText('Write a comment');
-        fireEvent.input(input, { target: { value: 'So excited!' } });
+        fireEvent.input(input, { target: { value: 'So excited! :family_hearth_3d:' } });
+        expect(input.value).toBe('So excited! ');
+        expect(screen.getByTestId('comment-living-emoji-preview')).toBeTruthy();
         fireEvent.click(screen.getByRole('button', { name: 'Send' }));
 
         await waitFor(() => {
@@ -908,6 +936,21 @@ describe('Profile Feed Preact Island (Phases 1–4)', () => {
             );
             expect(screen.getByTestId('comment-gif')).toBeTruthy();
         });
+
+        // Clicking Share on own post opens SharePortalModal with WhatsApp and Social Media channels
+        fireEvent.click(screen.getByRole('button', { name: 'Share this memory' }));
+        await waitFor(() => {
+            expect(screen.getByTestId('share-portal-modal')).toBeTruthy();
+        });
+        const waCta = screen.getByTestId('share-portal-whatsapp-cta');
+        expect(waCta.getAttribute('href')).toContain('https://api.whatsapp.com/send?text=');
+        expect(decodeURIComponent(waCta.getAttribute('href'))).toContain('/post/993');
+        expect(screen.getByTestId('share-channel-facebook').getAttribute('href')).toContain('facebook.com/sharer/sharer.php');
+        expect(screen.getByTestId('share-channel-x').getAttribute('href')).toContain('twitter.com/intent/tweet');
+        expect(screen.getByTestId('share-channel-linkedin').getAttribute('href')).toContain('linkedin.com/sharing/share-offsite');
+        expect(screen.getByTestId('share-channel-telegram').getAttribute('href')).toContain('t.me/share/url');
+        fireEvent.click(screen.getByTestId('close-share-portal'));
+        expect(screen.queryByTestId('share-portal-modal')).toBeNull();
     });
 
     it('renders post and comment view counts and opens ViewersModal when author clicks views', async () => {
@@ -1414,5 +1457,127 @@ describe('Profile Feed Preact Island (Phases 1–4)', () => {
             expect(img).toBeTruthy();
             expect(img.getAttribute('src')).toContain('/resources/images/post/missing-e2e-404-test.jpg');
         });
+    });
+
+    it('renders Multi-Photo Posts in full-bleed Hero Carousel with 1 / N badge, next/prev chevrons, pagination dots, and quick-select filmstrip instead of tiny thumbnails', async () => {
+        globalThis.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({ status: 'success', tags: [] }),
+            })
+        );
+
+        const threePhotoPost = {
+            post_no: '4001',
+            id: 'u_1',
+            fullName: 'Ajibike Olaogun',
+            postFamCode: 'OLA001',
+            target_scope: 'married',
+            postMessage: 'Birthday celebration with the family!',
+            post_likes: 3,
+            comments: [],
+            images: ['/img/bday1.jpg', '/img/bday2.jpg', '/img/bday3.jpg'],
+            videos: [],
+        };
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [threePhotoPost],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        const carousel = container.querySelector('#post4001 [data-testid="feed-multi-photo-carousel"]');
+        expect(carousel).toBeTruthy();
+
+        const stage = carousel.querySelector('.post-media-stage');
+        expect(stage).toBeTruthy();
+        expect(stage.style.minHeight).toBe('340px');
+        expect(stage.style.maxHeight).toBe('640px');
+
+        const counter = carousel.querySelector('.carousel-counter-text');
+        expect(counter).toBeTruthy();
+        expect(counter.textContent).toBe('1 / 3');
+
+        // Initially at slide 0 -> prev button hidden, next button visible
+        expect(carousel.querySelector('.carousel-nav-prev')).toBeNull();
+        const nextBtn = carousel.querySelector('.carousel-nav-next');
+        expect(nextBtn).toBeTruthy();
+
+        fireEvent.click(nextBtn);
+        expect(counter.textContent).toBe('2 / 3');
+        expect(carousel.querySelector('.carousel-nav-prev')).toBeTruthy();
+
+        // Filmstrip thumbnails allow jumping directly to slide 3
+        const filmstrip = carousel.querySelector('[data-testid="feed-multi-photo-filmstrip"]');
+        expect(filmstrip).toBeTruthy();
+        const thumb3 = screen.getByRole('button', { name: 'Select photo 3 of 3' });
+        fireEvent.click(thumb3);
+        expect(counter.textContent).toBe('3 / 3');
+        expect(thumb3.getAttribute('aria-pressed')).toBe('true');
+
+        // Pagination dot 1 jumps back to slide 1
+        fireEvent.click(screen.getByRole('button', { name: 'Go to photo 1' }));
+        expect(counter.textContent).toBe('1 / 3');
+    });
+
+    it('renders inline reply composer directly below the comment being replied to and submits parent_comment_no', async () => {
+        globalThis.fetch = vi.fn((url) => {
+            if (String(url).includes('/postCommentProfile')) {
+                return Promise.resolve({
+                    ok: true,
+                    status: 200,
+                    headers: new Headers({ 'content-type': 'application/json' }),
+                    json: async () => ({
+                        status: 'success',
+                        message: { comment_no: '9002', comment: 'Inline reply worked!', parent_comment_no: '501' },
+                    }),
+                });
+            }
+            return Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({ status: 'success', tags: [] }),
+            });
+        });
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [samplePost],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        const targetComment = container.querySelector('#comment501');
+        expect(targetComment).toBeTruthy();
+
+        fireEvent.click(screen.getByTestId('comment-reply-btn'));
+
+        // Inline reply composer appears directly inside #comment501 (not at the top composer)
+        const inlineReplyBox = targetComment.querySelector('[data-testid="inline-reply-composer"]');
+        expect(inlineReplyBox).toBeTruthy();
+        expect(inlineReplyBox.textContent).toContain('Replying to Kemi Olaogun');
+
+        const replyInput = screen.getByLabelText('Write a reply');
+        fireEvent.input(replyInput, { target: { value: 'Inline reply worked!' } });
+        fireEvent.click(screen.getByLabelText('Send reply'));
+
+        await waitFor(() => {
+            expect(globalThis.fetch).toHaveBeenCalledWith(
+                '/postCommentProfile',
+                expect.objectContaining({ method: 'POST' })
+            );
+            expect(screen.getByText('Inline reply worked!')).toBeTruthy();
+        });
+        expect(targetComment.querySelector('[data-testid="inline-reply-composer"]')).toBeNull();
     });
 });

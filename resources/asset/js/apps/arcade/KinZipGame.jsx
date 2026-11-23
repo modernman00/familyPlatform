@@ -192,6 +192,8 @@ export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
         playArcadeSfx('tick');
     };
 
+    const maxHints = 3;
+
     const handleReset = () => {
         if (completedRef.current) return;
         setPath([]);
@@ -202,11 +204,23 @@ export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
 
     const handleHint = () => {
         if (completedRef.current) return;
+        if (hintsUsed >= maxHints) {
+            setStatusNote(`Maximum ${maxHints} hints used for this puzzle. You can do this!`);
+            playArcadeSfx('error');
+            return;
+        }
         const nextStep = findKinZipHintStep(puzzle, path);
         if (nextStep) {
-            setHintsUsed((h) => h + 1);
+            const nextCount = hintsUsed + 1;
+            setHintsUsed(nextCount);
             setHintCell(`${nextStep[0]},${nextStep[1]}`);
             tryStepTo(nextStep[0], nextStep[1]);
+            const remaining = maxHints - nextCount;
+            if (remaining > 0) {
+                setStatusNote(`Hint applied (${remaining} hint${remaining === 1 ? '' : 's'} remaining).`);
+            } else {
+                setStatusNote('Hint applied (0 hints remaining).');
+            }
         } else {
             setStatusNote('Try undoing a few steps — a dot or corner may be blocked.');
             playArcadeSfx('error');
@@ -331,9 +345,15 @@ export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
                     <i className="bi bi-arrow-counterclockwise" aria-hidden="true" />
                     <span>Undo</span>
                 </button>
-                <button type="button" className={styles.ctrlBtn} onClick={handleHint} disabled={submitting}>
+                <button
+                    type="button"
+                    className={styles.ctrlBtn}
+                    onClick={handleHint}
+                    disabled={submitting || hintsUsed >= maxHints}
+                    title={hintsUsed >= maxHints ? 'Maximum 3 hints reached' : `${maxHints - hintsUsed} hints remaining`}
+                >
                     <i className="bi bi-lightbulb-fill" aria-hidden="true" />
-                    <span>Hint ({hintsUsed})</span>
+                    <span>Hint ({maxHints - hintsUsed})</span>
                 </button>
                 <button type="button" className={styles.ctrlBtn} onClick={handleReset} disabled={path.length === 0 || submitting}>
                     <i className="bi bi-arrow-repeat" aria-hidden="true" />

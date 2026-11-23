@@ -24,6 +24,5 @@ export default defineConfig({
         include: ['resources/asset/js/apps/**/*.test.{js,jsx}'],
         globals: true,
         fileParallelism: false,
-        isolate: false,
     },
 });

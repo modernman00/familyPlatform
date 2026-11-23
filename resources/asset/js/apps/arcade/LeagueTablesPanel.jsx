@@ -10,6 +10,8 @@ const TABS = [
     { key: 'kinpulse', label: 'KinPulse' },
     { key: 'wordie', label: 'Wordie' },
     { key: 'cheeseboard', label: 'Cheeseboard' },
+    { key: 'chess', label: 'Family Chess' },
+    { key: 'ayo', label: 'Ayò Olópon' },
     { key: 'minesweeper', label: 'Minesweeper' },
 ];
 

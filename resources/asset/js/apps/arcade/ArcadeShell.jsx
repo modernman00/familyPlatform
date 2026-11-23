@@ -8,6 +8,8 @@ import { KinWordGame } from './KinWordGame';
 import { KinPulseGame } from './KinPulseGame';
 import { WordieGame } from './WordieGame';
 import { CheeseboardGame } from './CheeseboardGame';
+import { AyoGame } from './AyoGame';
+import { FamilyChessGame } from './FamilyChessGame';
 import { MinesweeperGame } from './MinesweeperGame';
 import { TrophyStage3D } from './TrophyStage3D';
 import { LeagueTablesPanel } from './LeagueTablesPanel';
@@ -21,7 +23,9 @@ const GAMES = [
     { slug: 'kinword', name: 'KinWord', tag: 'Word Groups', icon: 'bi-fonts' },
     { slug: 'kinpulse', name: 'KinPulse', tag: 'Memory Pattern', icon: 'bi-lightning-charge-fill' },
     { slug: 'wordie', name: 'Wordie', tag: '5-Letter Word', icon: 'bi-alphabet-uppercase' },
-    { slug: 'cheeseboard', name: 'Cheeseboard', tag: 'Crown Deduction', icon: 'bi-shield-shaded' },
+    { slug: 'cheeseboard', name: 'Cheeseboard', tag: 'Queens Territory (Not Chess)', icon: 'bi-grid-fill' },
+    { slug: 'chess', name: 'Family Chess', tag: 'Classic 8x8 Strategy', icon: 'bi-suit-club-fill' },
+    { slug: 'ayo', name: 'Ayò Olópon', tag: 'Yorùbá Board of Kings', icon: 'bi-circle-square' },
     { slug: 'minesweeper', name: 'Minesweeper', tag: 'Safe Path', icon: 'bi-gem' },
 ];
 
@@ -336,8 +340,8 @@ export function ArcadeShell({ bootstrap = {} }) {
             ? `/arcade/share/${encodeURIComponent(token)}`
             : `/play/${encodeURIComponent(activeGame)}?difficulty=${encodeURIComponent(difficulty)}`;
         const cardPath = token
-            ? `/arcade/card/${encodeURIComponent(token)}.jpg?v=1`
-            : `/arcade/card/game-${encodeURIComponent(activeGame)}.jpg?v=1`;
+            ? `/arcade/card/${encodeURIComponent(token)}.jpg?v=3&difficulty=${encodeURIComponent(difficulty)}`
+            : `/arcade/card/game-${encodeURIComponent(activeGame)}.jpg?v=3&difficulty=${encodeURIComponent(difficulty)}`;
         const shareUrl = `${origin}${path}`;
         const cardUrl = `${origin}${cardPath}`;
         const shareTitle = `Play ${activeGameMeta.name} (${activeGameMeta.tag}) — FamilyPlatform Arcade`;
@@ -602,6 +606,12 @@ export function ArcadeShell({ bootstrap = {} }) {
                             {activeGame === 'cheeseboard' && (
                                 <CheeseboardGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} />
                             )}
+                            {activeGame === 'chess' && (
+                                <FamilyChessGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} />
+                            )}
+                            {activeGame === 'ayo' && (
+                                <AyoGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} />
+                            )}
                             {activeGame === 'minesweeper' && (
                                 <MinesweeperGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} />
                             )}
@@ -762,7 +772,7 @@ export function ArcadeShell({ bootstrap = {} }) {
 
             {showShareModal && (() => {
                 const { shareUrl, cardUrl, shareText } = getShareMeta();
-                const whatsappHref = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
+                const whatsappHref = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`;
                 const facebookHref = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
                 const smsHref = `sms:?&body=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
                 const xHref = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
@@ -773,7 +783,7 @@ export function ArcadeShell({ bootstrap = {} }) {
                         <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
                             <div className={styles.modalHeader}>
                                 <div>
-                                    <span className={styles.heroEyebrow} style={{ color: '#047857' }}>SHARE {activeGameMeta.name.toUpperCase()}</span>
+                                    <span className={`${styles.heroEyebrow} ${styles.shareModalEyebrow}`}>SHARE {activeGameMeta.name.toUpperCase()}</span>
                                     <h2 id="share-game-title" className={styles.modalTitle}>Invite Friends &amp; Family to Play {activeGameMeta.name}</h2>
                                 </div>
                                 <button type="button" className={styles.closeBtn} onClick={() => setShowShareModal(false)} aria-label="Close share dialog">
@@ -784,9 +794,8 @@ export function ArcadeShell({ bootstrap = {} }) {
                             <div className={styles.sharePreviewBox}>
                                 <img
                                     src={cardUrl}
-                                    alt={`${activeGameMeta.name} share card preview`}
+                                    alt={`${activeGameMeta.name} (${activeGameMeta.tag}) — ${difficulty} difficulty share card preview`}
                                     className={styles.sharePreviewImg}
-                                    loading="lazy"
                                 />
                                 <div className={styles.shareUrlRow}>
                                     <span className={styles.shareUrlText} title={shareUrl}>{shareUrl}</span>
@@ -816,17 +825,17 @@ export function ArcadeShell({ bootstrap = {} }) {
                                 </a>
                             </div>
 
-                            {hasNativeShare && (
-                                <div className={styles.modalActions} style={{ marginTop: '12px', justifyContent: 'space-between' }}>
+                            <div className={styles.modalActions} style={{ marginTop: '12px', justifyContent: hasNativeShare ? 'space-between' : 'flex-end' }}>
+                                {hasNativeShare && (
                                     <button type="button" className={styles.ctrlBtn} onClick={handleNativeShare}>
                                         <i className="bi bi-box-arrow-up" aria-hidden="true" />
                                         <span>More Apps…</span>
                                     </button>
-                                    <button type="button" className={styles.ctrlBtn} onClick={() => setShowShareModal(false)}>
-                                        <span>Done</span>
-                                    </button>
-                                </div>
-                            )}
+                                )}
+                                <button type="button" className={styles.ctrlBtn} onClick={() => setShowShareModal(false)}>
+                                    <span>Done</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 );

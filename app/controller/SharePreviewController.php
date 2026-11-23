@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\controller;
 
+use App\services\FamilyArcadeCardRenderer;
+use App\services\FamilyArcadeService;
 use App\services\ShareMetadataProtocol;
 use PDO;
 use Src\Db;
@@ -188,7 +190,7 @@ final class SharePreviewController
 
         $baseUrl = ShareMetadataProtocol::baseUrl();
         $shareUrl = $baseUrl . '/arcade/share/' . rawurlencode($cleanToken);
-        $cardImg = $baseUrl . '/arcade/card/' . rawurlencode($cleanToken) . '.jpg?v=1';
+        $cardImg = $baseUrl . '/arcade/card/' . rawurlencode($cleanToken) . '.jpg?v=3';
 
         $badge = 'FAMILY ARCADE CHALLENGE';
         $title = 'Can You Beat My Family Arcade Score? — FamilyPlatform';
@@ -202,12 +204,8 @@ final class SharePreviewController
             $stmt->execute([$cleanToken]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             if (is_array($row)) {
-                $gameName = match ((string) $row['game_slug']) {
-                    'kingrid' => 'KinGrid',
-                    'kinword' => 'KinWord',
-                    'kinpulse' => 'KinPulse',
-                    default => 'KinZip',
-                };
+                $profile = FamilyArcadeCardRenderer::gameProfile((string) $row['game_slug']);
+                $gameName = $profile['name'];
                 $secs = round(((int) $row['elapsed_ms']) / 1000, 1);
                 $badge = strtoupper($gameName) . ' CHALLENGE';
                 $title = "Beat {$row['score']} pts in {$gameName} ({$secs}s)! — FamilyPlatform";
@@ -257,71 +255,58 @@ final class SharePreviewController
     {
         $rawToken = strtolower(trim($token));
         $cleanToken = preg_replace('/[^a-f0-9]/', '', $rawToken) ?? '';
-        $gameLabel = 'FAMILY ARCADE';
-        $scoreLine = 'BEAT MY SCORE';
-        $subLine = 'KinZip • KinGrid • KinWord • KinPulse';
+        $requestedDifficulty = isset($_GET['difficulty'])
+            ? FamilyArcadeService::normaliseDifficulty((string) $_GET['difficulty'])
+            : 'medium';
+
+        $context = [
+            'game' => 'kinzip',
+            'difficulty' => $requestedDifficulty,
+            'score' => null,
+            'elapsedMs' => null,
+            'challengerName' => null,
+        ];
 
         if (str_starts_with($rawToken, 'game-')) {
             $slug = substr($rawToken, 5);
-            [$gameLabel, $scoreLine, $subLine] = match ($slug) {
-                'kingrid' => ['KINGRID • NUMBER PUZZLE', 'FILL EVERY ROW & COLUMN', 'Tap to play today\'s KinGrid puzzle free!'],
-                'kinword' => ['KINWORD • WORD GROUPS', 'FIND 4 MATCHING GROUPS OF 4', 'Tap to play today\'s KinWord puzzle free!'],
-                'kinpulse' => ['KINPULSE • MEMORY PATTERN', 'WATCH, LISTEN & COPY', 'Tap to play today\'s KinPulse puzzle free!'],
-                default => ['KINZIP • CONNECT THE DOTS', 'DRAW ONE PATH THROUGH ALL CELLS', 'Tap to play today\'s KinZip puzzle free!'],
-            };
+            $context['game'] = FamilyArcadeService::normaliseGame($slug);
         } elseif ($cleanToken !== '') {
             try {
                 $db = Db::connect2();
                 $stmt = $db->prepare(
-                    'SELECT game_slug, score, elapsed_ms FROM family_arcade_scores WHERE challenge_token = ? LIMIT 1'
+                    'SELECT s.game_slug, s.difficulty, s.score, s.elapsed_ms, p.firstName
+                     FROM family_arcade_scores s
+                     LEFT JOIN personal p ON p.id = s.user_id
+                     WHERE s.challenge_token = ?
+                     LIMIT 1'
                 );
                 $stmt->execute([$cleanToken]);
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
                 if (is_array($row)) {
-                    $gameLabel = match ((string) $row['game_slug']) {
-                        'kingrid' => 'KINGRID CHALLENGE',
-                        'kinword' => 'KINWORD CHALLENGE',
-                        'kinpulse' => 'KINPULSE CHALLENGE',
-                        default => 'KINZIP CHALLENGE',
-                    };
-                    $secs = round(((int) $row['elapsed_ms']) / 1000, 1);
-                    $scoreLine = $row['score'] . ' PTS IN ' . $secs . 'S';
-                    $subLine = 'Tap to race my ghost on FamilyPlatform';
+                    $context['game'] = FamilyArcadeService::normaliseGame((string) ($row['game_slug'] ?? 'kinzip'));
+                    $context['difficulty'] = FamilyArcadeService::normaliseDifficulty((string) ($row['difficulty'] ?? $requestedDifficulty));
+                    $context['score'] = (int) ($row['score'] ?? 0);
+                    $context['elapsedMs'] = (int) ($row['elapsed_ms'] ?? 0);
+                    $firstName = trim((string) ($row['firstName'] ?? ''));
+                    if ($firstName !== '') {
+                        $context['challengerName'] = $firstName;
+                    }
                 }
             } catch (\Throwable $e) {
-                // Use default copy
+                // Fall back to default KinZip card
             }
         }
 
-        $w = 1200;
-        $h = 630;
-        $im = imagecreatetruecolor($w, $h);
-        if ($im === false) {
+        $jpeg = FamilyArcadeCardRenderer::renderCardJpeg($context);
+        if ($jpeg === '') {
             http_response_code(500);
             return;
         }
 
-        $bg1 = (int) imagecolorallocate($im, 15, 23, 42);
-        $bg2 = (int) imagecolorallocate($im, 127, 29, 29);
-        $gold = (int) imagecolorallocate($im, 251, 191, 36);
-        $white = (int) imagecolorallocate($im, 255, 255, 255);
-        $cream = (int) imagecolorallocate($im, 254, 243, 199);
-
-        imagefilledrectangle($im, 0, 0, $w, $h, $bg1);
-        imagefilledrectangle($im, 0, 0, $w, 16, $gold);
-        imagefilledrectangle($im, 0, $h - 16, $w, $h, $gold);
-        imagefilledrectangle($im, 60, 72, $w - 60, $h - 72, $bg2);
-        imagerectangle($im, 60, 72, $w - 60, $h - 72, $gold);
-
-        imagestring($im, 5, 110, 130, $gameLabel, $gold);
-        imagestring($im, 5, 110, 240, $scoreLine, $white);
-        imagestring($im, 4, 110, 340, $subLine, $cream);
-        imagestring($im, 3, 110, 470, 'FamilyPlatform • Family Arcade', $gold);
-
         header('Content-Type: image/jpeg');
+        header('Content-Length: ' . strlen($jpeg));
         header('Cache-Control: public, max-age=3600');
-        imagejpeg($im, null, 85);
-        imagedestroy($im);
+        echo $jpeg;
     }
 
     /**
