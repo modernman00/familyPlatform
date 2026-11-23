@@ -43,6 +43,9 @@ final class FamilyArcadeTest extends TestCase
 
         $s4 = $this->db->prepare("DELETE FROM notification WHERE sender_id IN (?, ?) AND notification_type = 'arcade_overtake'");
         $s4->execute([$this->userA, $this->userB]);
+
+        $s5 = $this->db->prepare('DELETE FROM post WHERE postFamCode = ?');
+        $s5->execute([$this->testFamCode]);
     }
 
     public function testDeterministicPuzzleGenerationAcrossAllFourGames(): void
@@ -293,5 +296,64 @@ final class FamilyArcadeTest extends TestCase
         $this->assertIsArray($info);
         $this->assertSame(1200, $info[0]);
         $this->assertSame(630, $info[1]);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testShareToFeedCreatesPublishedPostVisibleInFeed(): void
+    {
+        $challengeToken = 'aabbccddeeff00112233445566778899';
+        $insScore = $this->db->prepare(
+            'INSERT INTO family_arcade_scores
+             (user_id, fam_code, game_slug, mode, puzzle_date, seed_key, difficulty, score, elapsed_ms, moves_count, hints_used, mistakes_count, replay_json, challenge_token)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        );
+        $insScore->execute([
+            $this->userA,
+            $this->testFamCode,
+            'kinword',
+            'daily',
+            '2026-11-23',
+            '2026-11-23',
+            'medium',
+            1132,
+            67100,
+            12,
+            0,
+            0,
+            '[]',
+            $challengeToken,
+        ]);
+
+        $_SESSION['id'] = $this->userA;
+        $_SESSION['famCode'] = $this->testFamCode;
+        $_SESSION['firstName'] = 'Test';
+        $_SESSION['lastName'] = 'Player';
+        $_SESSION['token'] = 'test_csrf_token_123';
+        $_POST = [
+            '_token' => 'test_csrf_token_123',
+            'challengeToken' => $challengeToken,
+        ];
+
+        ob_start();
+        (new \App\controller\members\FamilyArcadeController())->shareToFeed();
+        $raw = (string) ob_get_clean();
+
+        $json = json_decode($raw, true);
+        $this->assertIsArray($json);
+        $this->assertSame('success', $json['status'] ?? null);
+        $postNo = (int) ($json['postNo'] ?? 0);
+        $this->assertGreaterThan(0, $postNo);
+
+        $stmt = $this->db->prepare('SELECT post_no, id, postFamCode, post_status, post_time, date_deleted, postMessage FROM post WHERE post_no = ? LIMIT 1');
+        $stmt->execute([$postNo]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $this->assertIsArray($row);
+        $this->assertSame('published', $row['post_status']);
+        $this->assertNull($row['date_deleted']);
+        $this->assertSame($this->testFamCode, $row['postFamCode']);
+        $this->assertStringContainsString('1132 pts in KinWord', (string) $row['postMessage']);
     }
 }

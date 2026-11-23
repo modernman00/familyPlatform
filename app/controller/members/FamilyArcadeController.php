@@ -646,9 +646,10 @@ final class FamilyArcadeController extends BaseController
 
             $message = "🏆 I just scored {$scoreRow['score']} pts in {$gameLabel} ({$secs}s)! Think you can beat my time? Accept my Family Arcade challenge: {$shareUrl}";
 
+            $postTime = (string) (function_exists('milliSeconds') ? milliSeconds() : time());
             $ins = $db->prepare(
-                "INSERT INTO post (id, fullName, postMessage, postFamCode, target_scope, profileImg, post_time, post_status)
-                 VALUES (?, ?, ?, ?, 'all', ?, ?, 'new')"
+                "INSERT INTO post (id, fullName, postMessage, postFamCode, target_scope, profileImg, post_time, post_status, date_created)
+                 VALUES (?, ?, ?, ?, 'all', ?, ?, 'published', NOW())"
             );
             $ins->execute([
                 $userId,
@@ -656,7 +657,7 @@ final class FamilyArcadeController extends BaseController
                 $message,
                 $famCode,
                 $profileImg,
-                date('Y-m-d H:i:s'),
+                $postTime,
             ]);
 
             http_response_code(200);

@@ -4,10 +4,11 @@
 
 @push('styles')
 <link rel="stylesheet" href="/public/css/atg-emoji.css?v={{ time() }}">
+<link rel="stylesheet" href="/public/css/studio-pip.css?v={{ assetVersion('css/studio-pip.css') }}">
 @endpush
 
 @section('content')
-<div class="atg-studio-wrapper">
+<div class="atg-studio-wrapper" x-data="livingPhotoPip()" x-init="initLivingPhotoPip()">
     @include('csrf')
     @include('component.submitSpinner')
 
@@ -179,6 +180,13 @@
                         <!-- Left Stage Column: Before/After Split Comparison + 2.5D Living Motion Canvas -->
                         <div class="atg-p2a-stage-col">
                             <div class="atg-p2a-stage-card" id="atgPhotoStageCard">
+                                <div class="spip-stage-bar">
+                                    <span class="small fw-semibold" style="color: var(--atg-p2a-muted, #64748b);">Live Portrait Stage</span>
+                                    <button type="button" class="spip-trigger" @click="togglePipPopout()" :aria-pressed="pipForced && !pipMinimised" title="Pop out preview while editing">
+                                        <i class="bi bi-pip" aria-hidden="true"></i>
+                                        <span x-text="(pipForced && !pipMinimised) ? 'Docked' : 'Pop out'"></span>
+                                    </button>
+                                </div>
                                 <div class="atg-p2a-view-switch" role="group" aria-label="Portrait preview mode">
                                     <button type="button" id="atgViewModeCompareBtn" class="atg-p2a-view-btn active" aria-pressed="true">
                                         <span>🔀 Before / After</span>
@@ -466,15 +474,70 @@
 
         </div>
     </div>
+
+    {{-- Floating PiP & Expandable Preview for Living Photo --}}
+    @include('member.includes.studioPip', [
+        'mode' => 'canvas',
+        'title' => 'Living photo preview',
+        'blockedExpr' => '!livingPhotoTabActive',
+        'hasVideoControls' => false,
+    ])
 </div>
 
+<script src="/public/js/studio-pip.js?v={{ assetVersion('js/studio-pip.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
 <script nonce="{{ csp_nonce($nonce ?? null) }}">
+    function livingPhotoPip() {
+        const base = window.FPStudioPip ? window.FPStudioPip.create({
+            stageSelector: '#atgPhotoStageCard',
+            canvasSelector: '#atgPhotoLivingCanvas',
+            storageKey: 'fp_pip_living_photo',
+            fps: 12,
+        }) : {
+            stageVisible: true,
+            pipForced: false,
+            pipMinimised: false,
+            pipExpanded: false,
+            pipBottom: false,
+            initPip: function () {},
+            isPipDockVisible: function () { return false; },
+            isPipPillVisible: function () { return false; },
+            togglePipPopout: function () {},
+            minimisePip: function () {},
+            restorePip: function () {},
+            expandPip: function () {},
+            closeExpandedPip: function () {},
+            toggleCorner: function () {},
+        };
+
+        return Object.assign({}, base, {
+            livingPhotoTabActive: false,
+            initLivingPhotoPip: function () {
+                const self = this;
+                if (typeof this.initPip === 'function') {
+                    this.initPip();
+                }
+                const syncTab = function (tabId) {
+                    self.livingPhotoTabActive = (tabId === 'photo-avatar-tab');
+                    if (!self.livingPhotoTabActive) {
+                        self.pipExpanded = false;
+                    }
+                };
+                const activeTab = document.querySelector('.atg-tab-btn.active');
+                syncTab(activeTab ? activeTab.getAttribute('data-atg-tab') : '');
+                window.addEventListener('atg:tab-changed', function (e) {
+                    syncTab(e && e.detail ? e.detail.tabId : '');
+                });
+            },
+        });
+    }
+
     function switchAtgTab(tabId, btn) {
         document.querySelectorAll('.atg-tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.atg-tab-content').forEach(c => c.style.display = 'none');
         if (btn) btn.classList.add('active');
         const target = document.getElementById(tabId);
         if (target) target.style.display = 'block';
+        window.dispatchEvent(new CustomEvent('atg:tab-changed', { detail: { tabId: tabId } }));
     }
 
     (function () {

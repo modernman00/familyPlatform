@@ -8,10 +8,10 @@
         <span style="display:inline-block; font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#b45309; background:rgba(217,119,6,0.1); border:1px solid rgba(217,119,6,0.25); padding:4px 14px; border-radius:999px;">
             🏛️ Sovereign Heritage &amp; Portrait Studio
         </span>
-        <h1 style="font-size:2rem; font-weight:800; color:#0f172a; margin-top:10px; letter-spacing:-0.02em;">
+        <h1 class="lh-title" style="font-size:2rem; font-weight:800; margin-top:10px; letter-spacing:-0.02em;">
             Living Heirloom, Age Progression &amp; Ancestral Synthesis
         </h1>
-        <p style="color:#475569; font-size:15px; max-width:720px; margin:8px auto 0; line-height:1.55;">
+        <p class="lh-subtitle" style="font-size:15px; max-width:720px; margin:8px auto 0; line-height:1.55;">
             Bring cherished portraits to life with natural motion and voice lip-sync, forecast future facial ageing across decades, and reverse-compute portraits of lost ancestors calibrated against your Family Tree.
         </p>
     </div>
@@ -304,6 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 panels[k].classList.toggle('d-none', k !== tabKey);
             }
         });
+        window.dispatchEvent(new CustomEvent('heirloom:tab-changed', { detail: { tabKey: tabKey } }));
     }
 
     tabButtons.forEach(function(btn) {

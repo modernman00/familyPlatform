@@ -1,5 +1,8 @@
 {{-- Living Heirloom 2.5D Facial Depth, Talking Lip-Sync & Re-Emotion Studio --}}
 {{-- Engineered by the Advanced Technology Group (ATG) --}}
+@push('styles')
+<link rel="stylesheet" href="/public/css/studio-pip.css?v={{ assetVersion('css/studio-pip.css') }}">
+@endpush
 <style>
 .lh-card {
     background: var(--card, #ffffff);
@@ -165,14 +168,20 @@ html.dark-mode .lh-action-bar {
     border-top-color: rgba(255, 255, 255, 0.1) !important;
 }
 </style>
-<div class="card p-4 p-md-5 mb-4 shadow-sm lh-card">
+<div class="card p-4 p-md-5 mb-4 shadow-sm lh-card" x-data="livingHeirloomPip()" x-init="initHeirloomPip()">
     <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
         <span style="font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#d97706; background:rgba(217,119,6,0.12); border:1px solid rgba(217,119,6,0.3); padding:4px 12px; border-radius:999px;">
             ✨ Living Heirloom Animator v2
         </span>
-        <span id="heirloomStateBadge" class="lh-state-badge">
-            Mode: Ready to Animate
-        </span>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span id="heirloomStateBadge" class="lh-state-badge">
+                Mode: Ready to Animate
+            </span>
+            <button type="button" class="spip-trigger" @click="togglePipPopout()" :aria-pressed="pipForced && !pipMinimised" title="Pop out preview while editing">
+                <i class="bi bi-pip" aria-hidden="true"></i>
+                <span x-text="(pipForced && !pipMinimised) ? 'Docked' : 'Pop out'"></span>
+            </button>
+        </div>
     </div>
 
     <h2 class="lh-title">
@@ -185,7 +194,7 @@ html.dark-mode .lh-action-bar {
     <div class="row g-4 align-items-start">
         <!-- Left: Portrait Canvas + Live Tribute Caption -->
         <div class="col-md-5 text-center">
-            <div style="position:relative; display:inline-block;">
+            <div id="heirloomStageWrap" style="position:relative; display:inline-block;">
                 <canvas id="heirloomCanvas" width="280" height="320" style="background:#1e1b18; border-radius:18px; box-shadow:0 8px 24px rgba(0,0,0,0.15); border:1px solid rgba(217,119,6,0.25); touch-action:none; max-width:100%; height:auto;"></canvas>
                 <div id="heirloomCaptionOverlay" class="d-none" style="position:absolute; left:12px; right:12px; bottom:14px; background:rgba(15,23,42,0.86); color:#ffffff; padding:8px 12px; border-radius:10px; font-size:12.5px; font-weight:600; line-height:1.35;"></div>
             </div>
@@ -272,8 +281,61 @@ html.dark-mode .lh-action-bar {
             Saved to Family Vault!
         </div>
     </div>
+
+    {{-- Floating PiP & Expandable Preview for Living Heirloom --}}
+    @include('member.includes.studioPip', [
+        'mode' => 'canvas',
+        'title' => 'Living heirloom preview',
+        'blockedExpr' => '!heirloomMotionTabActive',
+        'hasVideoControls' => false,
+    ])
 </div>
 
+<script src="/public/js/studio-pip.js?v={{ assetVersion('js/studio-pip.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
+function livingHeirloomPip() {
+    var base = window.FPStudioPip ? window.FPStudioPip.create({
+        stageSelector: '#heirloomStageWrap',
+        canvasSelector: '#heirloomCanvas',
+        storageKey: 'fp_pip_living_heirloom',
+        fps: 12,
+    }) : {
+        stageVisible: true,
+        pipForced: false,
+        pipMinimised: false,
+        pipExpanded: false,
+        pipBottom: false,
+        initPip: function () {},
+        isPipDockVisible: function () { return false; },
+        isPipPillVisible: function () { return false; },
+        togglePipPopout: function () {},
+        minimisePip: function () {},
+        restorePip: function () {},
+        expandPip: function () {},
+        closeExpandedPip: function () {},
+        toggleCorner: function () {},
+    };
+
+    return Object.assign({}, base, {
+        heirloomMotionTabActive: true,
+        initHeirloomPip: function () {
+            var self = this;
+            if (typeof this.initPip === 'function') {
+                this.initPip();
+            }
+            var panel = document.getElementById('tabPanelMotion');
+            self.heirloomMotionTabActive = !panel || !panel.classList.contains('d-none');
+            window.addEventListener('heirloom:tab-changed', function (e) {
+                var key = e && e.detail ? e.detail.tabKey : 'motion';
+                self.heirloomMotionTabActive = (key === 'motion');
+                if (!self.heirloomMotionTabActive) {
+                    self.pipExpanded = false;
+                }
+            });
+        },
+    });
+}
+</script>
 <script src="/public/js/heirloom-animator.js"></script>
 <script nonce="{{ csp_nonce($nonce ?? null) }}">
 document.addEventListener('DOMContentLoaded', function() {
