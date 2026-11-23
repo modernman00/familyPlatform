@@ -859,6 +859,10 @@ class FamilyCodeApprovalFlowTest extends TestCase
      */
     public function testRegistrationWithEmptyAuxiliaryFieldsDoesNotThrowRequiredValidation(): void
     {
+        $prevSessionToken = $_SESSION['token'] ?? null;
+        $prevHeaderToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
+        unset($_SESSION['token'], $_SERVER['HTTP_X_CSRF_TOKEN']);
+
         $payload = [
             'id' => 'PU_TEST_' . bin2hex(random_bytes(4)),
             'firstName' => 'Olusola',
@@ -901,12 +905,21 @@ class FamilyCodeApprovalFlowTest extends TestCase
             ]
         ];
 
-        $cleanData = \Src\LoginUtility::getSanitisedInputData($payload, $dataToCheck, $optionalFields);
-        $this->assertIsArray($cleanData);
-        $this->assertSame('Olusola', $cleanData['firstName']);
-        $this->assertSame('Olaogun', $cleanData['lastName']);
-        $this->assertSame('', $cleanData['familySurname']);
-        $this->assertSame('', $cleanData['inviter_first_name']);
+        try {
+            $cleanData = \Src\LoginUtility::getSanitisedInputData($payload, $dataToCheck, $optionalFields);
+            $this->assertIsArray($cleanData);
+            $this->assertSame('Olusola', $cleanData['firstName']);
+            $this->assertSame('Olaogun', $cleanData['lastName']);
+            $this->assertSame('', $cleanData['familySurname']);
+            $this->assertSame('', $cleanData['inviter_first_name']);
+        } finally {
+            if ($prevSessionToken !== null) {
+                $_SESSION['token'] = $prevSessionToken;
+            }
+            if ($prevHeaderToken !== null) {
+                $_SERVER['HTTP_X_CSRF_TOKEN'] = $prevHeaderToken;
+            }
+        }
     }
 
     /**
