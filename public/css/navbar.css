@@ -879,30 +879,49 @@
   }
 }
 
-/* Ghost Dismiss Button */
+/* Always-Visible Accessible Delete / Dismiss Button */
 .notif-dismiss-btn {
   border: none;
   background: transparent;
-  color: #cbd5e1;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
+  color: #64748b;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.72rem;
+  font-size: 0.95rem;
   cursor: pointer;
-  opacity: 0;
-  transition: all 0.2s ease;
+  opacity: 0.82;
+  transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease, transform 0.12s ease;
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: -4px;
+  margin-right: -8px;
 }
 .notif-card-stitch:hover .notif-dismiss-btn {
   opacity: 1;
 }
 .notif-dismiss-btn:hover {
   background: #fee2e2;
-  color: #ef4444;
+  color: #b91c1c;
+  opacity: 1;
+}
+.notif-dismiss-btn:active {
+  transform: scale(0.95);
+}
+.notif-dismiss-btn:focus-visible {
+  outline: 2px solid #a31621;
+  outline-offset: 2px;
+  opacity: 1;
+}
+body.dark-mode .notif-dismiss-btn {
+  color: #94a3b8;
+}
+body.dark-mode .notif-dismiss-btn:hover {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
 }
 
 /* Footer with Google Stitch Full-Width Button */

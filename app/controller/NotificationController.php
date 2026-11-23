@@ -290,7 +290,7 @@ final class NotificationController extends Select
      */
     public static function resolveNotificationActionUrl(array $notif, string $userId = ''): string
     {
-        // 1. If action_url is already present and non-empty, normalize and return
+        // 1. If action_url is already present and non-empty (and more specific than bare / or /profilePage), normalize and return
         if (!empty($notif['action_url']) && is_string($notif['action_url'])) {
             $raw = trim($notif['action_url']);
             if (stripos($raw, 'familyStudio') !== false) {
@@ -300,7 +300,12 @@ final class NotificationController extends Select
             $path = $parsed['path'] ?? '/profilePage';
             $query = isset($parsed['query']) && $parsed['query'] !== '' ? '?' . $parsed['query'] : '';
             $fragment = isset($parsed['fragment']) && $parsed['fragment'] !== '' ? '#' . $parsed['fragment'] : '';
-            return ($path !== '' ? $path : '/profilePage') . $query . $fragment;
+            $isGenericFeedOnly = ($path === '' || $path === '/' || strcasecmp($path, '/profilePage') === 0)
+                && $query === ''
+                && $fragment === '';
+            if (!$isGenericFeedOnly) {
+                return ($path !== '' ? $path : '/profilePage') . $query . $fragment;
+            }
         }
 
         $type = (string)($notif['notification_type'] ?? '');
@@ -359,6 +364,27 @@ final class NotificationController extends Select
             || (stripos($name, 'Milestone') !== false && stripos($name, 'Event') === false)
             || stripos($content, 'flashback') !== false || stripos($content, 'cherished family memory') !== false || stripos($content, 'memory from') !== false) {
             return '/profilePage#memoriesCard';
+        }
+
+        // 3b. Weekly Family Trivia Challenges
+        if (strcasecmp($type, 'Trivia') === 0
+            || stripos($name, 'Trivia') !== false
+            || stripos($content, 'trivia') !== false
+            || stripos($content, 'Elder Wisdom') !== false) {
+            try {
+                $db = \Src\Db::connect2();
+                $famCode = is_string($_SESSION['famCode'] ?? null) ? trim($_SESSION['famCode']) : '';
+                if ($famCode !== '') {
+                    $stmt = $db->prepare("SELECT post_no FROM post WHERE famCode = ? AND (postMessage LIKE '%Weekly Family Trivia%' OR postMessage LIKE '%Sunday Family Ritual%') ORDER BY post_no DESC LIMIT 1");
+                    $stmt->execute([$famCode]);
+                    $triviaPostNo = $stmt->fetchColumn();
+                    if ($triviaPostNo) {
+                        $pNo = (int)$triviaPostNo;
+                        return "/profilePage?post_no={$pNo}#post{$pNo}";
+                    }
+                }
+            } catch (\Throwable) {}
+            return '/member/trivia';
         }
 
         // 4. Events: Party, Birthday, Wedding, Anniversary, House Warming, Meeting, Reunion, etc.

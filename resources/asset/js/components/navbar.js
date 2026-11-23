@@ -59,6 +59,65 @@ function updateNotificationBadge(count) {
     }
 }
 
+const getCsrfHeaders = () => {
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    return token ? { 'X-CSRF-TOKEN': token, 'X-XSRF-TOKEN': token } : {};
+};
+
+const renderEmptyNotificationState = (tab) => {
+    if (!tab) return;
+    tab.innerHTML = `
+    <div class="p-4 text-center text-muted">
+        <i class="bi bi-bell-slash fs-3 d-block mb-2 text-secondary opacity-50"></i>
+        <span class="small fw-medium">All caught up! No notifications</span>
+    </div>`;
+};
+
+const decrementNotificationUnreadCount = () => {
+    const currentCount = parseInt(sessionStorage.getItem('notificationCount') || '1', 10) - 1;
+    const newValues = currentCount > 0 ? currentCount : 0;
+    sessionStorage.setItem('notificationCount', String(newValues));
+    localStorage.setItem('notification_sync_trigger', Date.now().toString());
+    updateNotificationBadge(newValues);
+};
+
+const removeNotificationCardFromDom = (card, tab) => {
+    if (!card) return;
+    if (card.dataset.removing === '1') return;
+    card.dataset.removing = '1';
+    if (card.classList.contains('unread')) {
+        card.classList.remove('unread');
+    }
+    decrementNotificationUnreadCount();
+    card.style.opacity = '0';
+    card.style.transform = 'translateX(10px)';
+    setTimeout(() => {
+        card.remove();
+        if (tab && !tab.querySelectorAll('.notif-card-stitch').length) {
+            renderEmptyNotificationState(tab);
+        }
+    }, 180);
+};
+
+const persistNotificationDismissal = (no, { keepalive = false } = {}) => {
+    if (!no) return Promise.resolve();
+    const url = `/removeNotification/${encodeURIComponent(no)}`;
+    const headers = {
+        ...getCsrfHeaders(),
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+    };
+    if (keepalive && typeof fetch === 'function') {
+        return fetch(url, {
+            method: 'PUT',
+            headers,
+            credentials: 'same-origin',
+            keepalive: true,
+        }).catch(() => {});
+    }
+    return axios.put(url, {}, { headers });
+};
+
 const escapeAttr = (str = '') => String(str)
     .replace(/&/g, '&amp;')
     .replace(/"/g, '&quot;')
@@ -163,9 +222,10 @@ const notificationHTML = (data) => {
                 data-no="${escapeAttr(no)}"
                 data-is="${escapeAttr(sender_id)}"
                 type="button"
-                id="deleteNotification${sender_id}${randomNumber}"
-                title="Dismiss">
-            <i class="bi bi-x-lg" style="pointer-events: none;"></i>
+                id="deleteNotification${escapeAttr(sender_id)}${randomNumber}"
+                aria-label="Delete notification"
+                title="Delete notification">
+            <i class="bi bi-trash3" style="pointer-events: none;" aria-hidden="true"></i>
         </button>
     </div>
     `;
@@ -328,17 +388,21 @@ const initNavbarControls = () => {
 
     if (markAllReadBtn) {
         markAllReadBtn.addEventListener('click', function () {
+            const tab = document.getElementById('notification_tab');
             const unreadItems = document.querySelectorAll('.notif-card-stitch.unread');
             unreadItems.forEach(item => {
                 item.classList.remove('unread');
             });
+            if (tab) {
+                renderEmptyNotificationState(tab);
+            }
 
             sessionStorage.setItem('notificationCount', '0');
             localStorage.setItem('notification_sync_trigger', Date.now().toString());
             updateNotificationBadge(0);
 
             // Persist to backend API so all pages and devices synchronize
-            axios.put('/member/notifications/read-all').catch(err => {
+            axios.put('/member/notifications/read-all', {}, { headers: getCsrfHeaders() }).catch(err => {
                 console.warn('[navbar] mark-all-read backend sync error:', err);
             });
         });
@@ -483,20 +547,48 @@ const initDeleteOnce = () => {
         if (celebrationCta) {
             const no = celebrationCta.getAttribute('data-no');
             if (no) {
-                axios.put(`/removeNotification/${encodeURIComponent(no)}`).catch(() => {});
+                persistNotificationDismissal(no, { keepalive: true });
             }
             const card = celebrationCta.closest('.notif-card-stitch');
-            if (card && card.classList.contains('unread')) {
-                card.classList.remove('unread');
-                const currentCount = parseInt(sessionStorage.getItem('notificationCount') || '1', 10) - 1;
-                const newValues = currentCount > 0 ? currentCount : 0;
-                sessionStorage.setItem('notificationCount', newValues);
-                updateNotificationBadge(newValues);
+            if (card) {
+                removeNotificationCardFromDom(card, tab);
             }
             const dropdown = document.getElementById('notificationDropdown');
             if (dropdown) {
                 dropdown.classList.remove('show');
             }
+            return;
+        }
+
+        // Handle clicking the delete / dismiss button
+        const btn = e.target.closest('.notif-dismiss-btn, button[id*="deleteNotification"]');
+        if (btn) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (btn.disabled) return;
+
+            const no = btn.getAttribute('data-no');
+            if (!no) return;
+
+            const card = btn.closest('.notif-card-stitch') || document.getElementById(btn.id.replace('deleteNotification', 'notificationBar'));
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
+            persistNotificationDismissal(no, { keepalive: false })
+                .then(response => {
+                    if (response?.status === 200 || response?.data?.message === 'Notification marked as read') {
+                        removeNotificationCardFromDom(card, tab);
+                    } else {
+                        btn.disabled = false;
+                        btn.innerHTML = originalHtml;
+                    }
+                })
+                .catch(err => {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                    showError(err);
+                });
             return;
         }
 
@@ -506,19 +598,15 @@ const initDeleteOnce = () => {
             const no = link.getAttribute('data-no');
             const targetUrl = link.getAttribute('data-action-url') || link.getAttribute('href') || '/profilePage';
 
-            // Mark as read asynchronously in background
+            // Persist read/dismissal with keepalive so cross-page navigation never aborts it
             if (no) {
-                axios.put(`/removeNotification/${encodeURIComponent(no)}`).catch(() => {});
+                persistNotificationDismissal(no, { keepalive: true });
             }
 
-            // Visual update: remove unread styling & decrement badge count
+            // Immediately remove from unread tray & decrement badge count
             const card = link.closest('.notif-card-stitch');
-            if (card && card.classList.contains('unread')) {
-                card.classList.remove('unread');
-                const currentCount = parseInt(sessionStorage.getItem('notificationCount') || '1') - 1;
-                const newValues = currentCount > 0 ? currentCount : 0;
-                sessionStorage.setItem('notificationCount', newValues);
-                updateNotificationBadge(newValues);
+            if (card) {
+                removeNotificationCardFromDom(card, tab);
             }
 
             // Auto-close notification dropdown
@@ -528,44 +616,7 @@ const initDeleteOnce = () => {
             }
 
             handleNotificationClickNavigation(targetUrl, e);
-            return;
         }
-
-        // Handle clicking the dismiss button
-        const btn = e.target.closest('button[id*="deleteNotification"]');
-        if (!btn) return;
-
-        e.stopPropagation();
-        const bannerId = btn.id.replace('deleteNotification', 'notificationBar');
-        const no = btn.getAttribute('data-no');
-        const url = `/removeNotification/${no}`;
-
-        axios.put(url)
-            .then(response => {
-                if (response.data.message === 'Notification marked as read') {
-                    const item = document.getElementById(bannerId);
-                    if (item) {
-                        item.style.opacity = '0';
-                        item.style.transform = 'translateX(10px)';
-                        setTimeout(() => {
-                            item.remove();
-                            if (!tab.querySelectorAll('.notif-card-stitch').length) {
-                                tab.innerHTML = `
-                                <div class="p-4 text-center text-muted">
-                                    <i class="bi bi-bell-slash fs-3 d-block mb-2 text-secondary opacity-50"></i>
-                                    <span class="small fw-medium">All caught up! No notifications</span>
-                                </div>`;
-                            }
-                        }, 200);
-                    }
-
-                    const currentCount = parseInt(sessionStorage.getItem('notificationCount') || '1') - 1;
-                    const newValues = currentCount > 0 ? currentCount : 0;
-                    sessionStorage.setItem('notificationCount', newValues);
-                    updateNotificationBadge(newValues);
-                }
-            })
-            .catch(showError);
     });
 };
 

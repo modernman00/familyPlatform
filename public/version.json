@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Test(auth): isolate CSRF session state in FamilyCodeApprovalFlowTest",
+    "title": "Feat(studio,ui): Super-HD Living Photo & PiP, white theme & navbar polish, and arcade engagement cron",
     "notes": [
+        "Feat(studio,ui): Super-HD Living Photo & PiP, white theme & navbar polish, and arcade engagement cron",
         "Test(auth): isolate CSRF session state in FamilyCodeApprovalFlowTest",
-        "Feat(studio): implement Floating PiP for Living Photo and Living Heirloom",
-        "Feat(islands): add IslandErrorBoundary, Portal, reactive signals, and sync production bundles"
+        "Feat(studio): implement Floating PiP for Living Photo and Living Heirloom"
     ],
     "released_at": "2026-11-23",
-    "commit": "b108d203"
+    "commit": "fb61ed5e"
 }

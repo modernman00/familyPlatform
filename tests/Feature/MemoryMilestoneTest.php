@@ -294,4 +294,62 @@ final class MemoryMilestoneTest extends SocialFeedTestCase
         $cleanRunStmt = $this->pdo->prepare("DELETE FROM family_milestone_feed_runs WHERE family_code = ?");
         $cleanRunStmt->execute([$this->famCode]);
     }
+
+    public function testBirthdayMilestoneFeedPostOmitsAge(): void
+    {
+        $targetDate = new \DateTimeImmutable('+5 days');
+        $birthYear = (int)$targetDate->format('Y') - 44;
+        $bdayUserId = 'bday_no_age_' . bin2hex(random_bytes(4));
+
+        $stmt = $this->pdo->prepare(
+            "INSERT INTO personal (id, firstName, lastName, famCode, day, month, year) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        );
+        $stmt->execute([
+            $bdayUserId,
+            'Temitope',
+            'Olaogun',
+            $this->famCode,
+            (int)$targetDate->format('j'),
+            $targetDate->format('F'),
+            $birthYear,
+        ]);
+
+        $milestones = $this->service->getUpcomingMilestones($this->authorId, [$this->famCode], 7);
+        $matched = null;
+        foreach ($milestones as $m) {
+            if (($m['user_id'] ?? '') === $bdayUserId && ($m['type'] ?? '') === 'birthday') {
+                $matched = $m;
+                break;
+            }
+        }
+        $this->assertNotNull($matched);
+        $this->assertSame('Birthday Celebration', $matched['subtitle']);
+        $this->assertStringNotContainsString('Turning 44', (string)$matched['subtitle']);
+
+        $feedRes = $this->service->dispatchMilestoneFeedPostsForFamily($this->famCode, 7);
+        $this->assertGreaterThanOrEqual(1, $feedRes['published_count']);
+
+        $stmtPost = $this->pdo->prepare(
+            "SELECT post_no, postMessage FROM post WHERE postFamCode = ? AND id = 'FAMILY_HISTORIAN' AND postMessage LIKE '%Temitope Olaogun%' ORDER BY post_no DESC LIMIT 1"
+        );
+        $stmtPost->execute([$this->famCode]);
+        $postRow = $stmtPost->fetch(PDO::FETCH_ASSOC);
+
+        $this->assertIsArray($postRow);
+        $postMessage = (string)($postRow['postMessage'] ?? '');
+        $this->assertStringContainsString("Temitope Olaogun's Birthday!", $postMessage);
+        $this->assertStringNotContainsString('Turning 44', $postMessage);
+        $this->assertStringNotContainsString('44', $postMessage);
+
+        // Cleanup
+        $cleanPersonalStmt = $this->pdo->prepare("DELETE FROM personal WHERE id = ?");
+        $cleanPersonalStmt->execute([$bdayUserId]);
+        if (!empty($postRow['post_no'])) {
+            $cleanPostNo = (int)$postRow['post_no'];
+            $cleanPostStmt = $this->pdo->prepare("DELETE FROM post WHERE post_no = ?");
+            $cleanPostStmt->execute([$cleanPostNo]);
+        }
+        $cleanRunStmt = $this->pdo->prepare("DELETE FROM family_milestone_feed_runs WHERE family_code = ?");
+        $cleanRunStmt->execute([$this->famCode]);
+    }
 }

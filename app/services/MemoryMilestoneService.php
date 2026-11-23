@@ -182,7 +182,7 @@ class MemoryMilestoneService
                 $milestones[] = [
                     'type' => 'birthday',
                     'title' => $name !== '' ? "{$name}'s Birthday" : "Family Birthday",
-                    'subtitle' => $milestoneTag ?: ($age ? "Turning {$age}" : 'Birthday Celebration'),
+                    'subtitle' => $milestoneTag ?: 'Birthday Celebration',
                     'first_name' => (string)($bday['firstName'] ?? ''),
                     'full_name' => $name,
                     'age' => $age,
@@ -652,17 +652,17 @@ class MemoryMilestoneService
 
             $message = match ($daysRemaining) {
                 0 => match ($msType) {
-                    'birthday' => "🎂 Happy Birthday! Today we celebrate {$title} ({$subtitle})!\n\nJoin the whole family in showering love, warm memories, and best wishes in the comments below! ✨",
+                    'birthday' => "🎂 Happy Birthday! Today we celebrate {$title}!\n\nJoin the whole family in showering love, warm memories, and best wishes in the comments below! ✨",
                     'anniversary' => "💍 Happy Wedding Anniversary! Today we honour {$title} ({$subtitle})!\n\nMay your love and companionship continue to shine as an inspiration for our whole family dynasty. Leave your congratulations below! 🥂",
                     default => "🎉 Family Gathering Today: {$title} ({$subtitle})!\n\nLooking forward to creating wonderful memories together today. See you all there!",
                 },
                 1 => match ($msType) {
-                    'birthday' => "🎂 Tomorrow: {$title} ({$subtitle})!\n\nOur family is getting ready to celebrate tomorrow. Get your birthday wishes and celebration messages ready!",
+                    'birthday' => "🎂 Tomorrow: {$title}!\n\nOur family is getting ready to celebrate tomorrow. Get your birthday wishes and celebration messages ready!",
                     'anniversary' => "💍 Tomorrow: {$title} ({$subtitle})!\n\nHonouring another wonderful year of unity and love in our family tree.",
                     default => "🎉 Upcoming Tomorrow: {$title} ({$subtitle})!\n\nOur family gathering is just 1 day away. We can't wait to see everyone!",
                 },
                 default => match ($msType) {
-                    'birthday' => "🎂 Upcoming Birthday in {$daysRemaining} Days ({$ms['target_date']}): {$title} ({$subtitle})!\n\nMark your calendar as we count down to this special family milestone. Share your favourite memories and warm wishes!",
+                    'birthday' => "🎂 Upcoming Birthday in {$daysRemaining} Days ({$ms['target_date']}): {$title}!\n\nMark your calendar as we count down to this special family milestone. Share your favourite memories and warm wishes!",
                     'anniversary' => "💍 Upcoming Anniversary in {$daysRemaining} Days ({$ms['target_date']}): {$title} ({$subtitle})!\n\nCounting down to another cherished milestone in our family tree. Save the date!",
                     default => "🎉 Upcoming Family Event in {$daysRemaining} Days ({$ms['target_date']}): {$title} ({$subtitle})!\n\nSave the date as we look forward to coming together as a family.",
                 },
@@ -1290,7 +1290,7 @@ class MemoryMilestoneService
             80 => '80th Oak Milestone 🌳',
             90 => '90th Longevity Milestone 🌿',
             100 => '100th Centenary Milestone 🏆',
-            default => "Turning {$age}",
+            default => '',
         };
     }
 

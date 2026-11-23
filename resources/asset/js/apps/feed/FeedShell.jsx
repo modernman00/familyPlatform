@@ -21,7 +21,7 @@ function getDeepLinkPostNo() {
     const hashMatch = window.location.hash.match(/^#post-?(\d+)$/);
     if (hashMatch) return hashMatch[1];
     const params = new URLSearchParams(window.location.search);
-    const qPost = params.get('post');
+    const qPost = params.get('post_no') || params.get('post');
     return qPost && /^\d+$/.test(qPost) ? qPost : null;
 }
 
@@ -272,41 +272,55 @@ export function FeedShell({ bootstrap = {} }) {
         });
     }, [posts, loading, bootstrap]);
 
-    // Deep-link post scrolling & highlighting
+    // Deep-link post scrolling & highlighting (initial load + live notification clicks)
     useEffect(() => {
-        const targetNo = getDeepLinkPostNo();
-        if (!targetNo || loading) return;
+        if (loading) return;
+        let cancelled = false;
+        let fetchTimer = null;
 
-        const scrollAndPulse = () => {
-            const el = document.getElementById(`post${targetNo}`) || document.getElementById(`post-${targetNo}`);
-            if (el) {
-                el.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
-                setHighlightedPostNo(String(targetNo));
-                setTimeout(() => setHighlightedPostNo(null), 2600);
-                return true;
-            }
-            return false;
+        const runDeepLinkScroll = () => {
+            const targetNo = getDeepLinkPostNo();
+            if (!targetNo) return;
+
+            const scrollAndPulse = () => {
+                const el = document.getElementById(`post${targetNo}`) || document.getElementById(`post-${targetNo}`);
+                if (el) {
+                    el.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+                    setHighlightedPostNo(String(targetNo));
+                    setTimeout(() => setHighlightedPostNo(null), 2600);
+                    return true;
+                }
+                return false;
+            };
+
+            if (scrollAndPulse()) return;
+
+            apiFetch(`/api/posts/${encodeURIComponent(targetNo)}`, { method: 'GET' }, bootstrap)
+                .then((res) => {
+                    if (cancelled) return;
+                    const rawItem = res?.message?.post || res?.message || res?.post;
+                    const item = rawItem && typeof rawItem === 'object' ? normalizePost(rawItem) : null;
+                    if (item && item.post_no) {
+                        setPosts((prev) => {
+                            if (prev.some((p) => String(p.post_no) === String(item.post_no))) return prev;
+                            return [item, ...prev];
+                        });
+                        fetchTimer = setTimeout(scrollAndPulse, 60);
+                    }
+                })
+                .catch(() => {});
         };
 
-        if (scrollAndPulse()) return;
+        runDeepLinkScroll();
+        window.addEventListener('feed:scroll-to-target', runDeepLinkScroll);
+        window.addEventListener('hashchange', runDeepLinkScroll);
 
-        let cancelled = false;
-        apiFetch(`/api/posts/${encodeURIComponent(targetNo)}`, { method: 'GET' }, bootstrap)
-            .then((res) => {
-                if (cancelled) return;
-                const rawItem = res?.message?.post || res?.message || res?.post;
-                const item = rawItem && typeof rawItem === 'object' ? normalizePost(rawItem) : null;
-                if (item && item.post_no) {
-                    setPosts((prev) => {
-                        if (prev.some((p) => String(p.post_no) === String(item.post_no))) return prev;
-                        return [item, ...prev];
-                    });
-                    setTimeout(scrollAndPulse, 60);
-                }
-            })
-            .catch(() => {});
-
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+            if (fetchTimer) clearTimeout(fetchTimer);
+            window.removeEventListener('feed:scroll-to-target', runDeepLinkScroll);
+            window.removeEventListener('hashchange', runDeepLinkScroll);
+        };
     }, [loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Infinite scroll sentinel
