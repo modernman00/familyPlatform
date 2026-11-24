@@ -151,6 +151,7 @@ final class AuthLoginSecurityTest extends TestCase
         $_SESSION['auth'] = [
             'identifyCust' => $this->userId,
             'type' => 'super_admin',
+            '2fa_passed' => true,
         ];
         $GLOBALS['__testRedirect'] = null;
 
